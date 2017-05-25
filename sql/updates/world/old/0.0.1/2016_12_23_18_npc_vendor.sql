@@ -1,0 +1,1 @@
+UPDATE `npc_vendor` SET `incrtime` = 900 WHERE `item` = 25846;

@@ -1,0 +1,1 @@
+UPDATE `gameobject_loot_template` SET `item` = '40753' WHERE `gameobject_loot_template`.`entry` = 26097 AND `gameobject_loot_template`.`item` = 40752;

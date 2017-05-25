@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `mechanic_immune_mask` = '650854271' WHERE `creature_template`.`entry` = 30258;

@@ -1,0 +1,1 @@
+DELETE FROM `disables` WHERE `disables`.`sourceType` = 2 AND `disables`.`entry` = 532;

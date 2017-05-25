@@ -1,0 +1,13 @@
+UPDATE `creature_template` SET `ScriptName`='npc_archmage_timear' WHERE `entry` = 31439;
+UPDATE `creature` SET `spawndist` = '0' WHERE `creature`.`guid` = 105491;
+DELETE FROM `skinning_loot_template` WHERE `skinning_loot_template`.`entry` = 80102;
+DELETE FROM `creature_addon` WHERE `creature_addon`.`guid` = 246915;
+DELETE FROM `creature_addon` WHERE `creature_addon`.`guid` = 246905;
+DELETE FROM `creature_addon` WHERE `creature_addon`.`guid` = 246904;
+DELETE FROM `creature_addon` WHERE `creature_addon`.`guid` = 246916;
+DELETE FROM `creature_formations` WHERE `creature_formations`.`leaderGUID` = 246905;
+DELETE FROM `creature_formations` WHERE `creature_formations`.`leaderGUID` = 246915;
+DELETE FROM `smart_scripts` WHERE `smart_scripts`.`entryorguid` = -246904;
+DELETE FROM `smart_scripts` WHERE `smart_scripts`.`entryorguid` = -246915;
+DELETE FROM `spell_script_names` WHERE `spell_script_names`.`spell_id` = 34719;
+DELETE FROM `conditions` WHERE `conditions`.`SourceGroup` = 15550;

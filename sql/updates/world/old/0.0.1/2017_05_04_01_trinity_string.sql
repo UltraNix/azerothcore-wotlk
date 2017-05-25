@@ -1,0 +1,3 @@
+DELETE FROM `trinity_string` WHERE `entry`= 10501;
+INSERT INTO `trinity_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES 
+(10501, '|cff00ff00Possible item cheater|r|cffff00ff %s |r|cff00ff00has cast spell:|r|cffff00ff %u. |r|cff00ff00Cast count: |r|cffff00ff%u.|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);

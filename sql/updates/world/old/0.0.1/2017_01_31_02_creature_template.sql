@@ -1,0 +1,3 @@
+UPDATE `creature_template` SET `unit_flags` = '33554432', `spell1` = '53219', `ScriptName` = 'trigger_periodic' WHERE `creature_template`.`entry` =29125;
+UPDATE `creature_template` SET `unit_flags` = '33554432', `spell1` = '53229', `ScriptName` = 'trigger_periodic' WHERE `creature_template`.`entry` =29126;
+UPDATE `creature_template` SET `unit_flags` = '33554432', `spell1` = '53235', `ScriptName` = 'trigger_periodic' WHERE `creature_template`.`entry` =29127;

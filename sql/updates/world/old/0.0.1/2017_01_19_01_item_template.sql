@@ -1,0 +1,2 @@
+ALTER TABLE item_template
+ADD `allowed_to_add` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0'

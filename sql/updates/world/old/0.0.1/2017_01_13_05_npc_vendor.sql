@@ -1,0 +1,1 @@
+UPDATE npc_vendor SET incrtime = 1800 WHERE item = 22907;

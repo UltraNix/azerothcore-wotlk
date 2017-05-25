@@ -1,0 +1,1 @@
+ALTER TABLE characters ADD COLUMN arenaAnnounce TINYINT(3) unsigned NOT NULL default '1' AFTER blizzlikeMode;

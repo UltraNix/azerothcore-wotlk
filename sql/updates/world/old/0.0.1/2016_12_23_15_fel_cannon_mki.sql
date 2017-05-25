@@ -1,0 +1,2 @@
+DELETE FROM `smart_scripts` WHERE `smart_scripts`.`entryorguid` = 22461;
+UPDATE `creature_template` SET `spell1` = '0', `AIName` = '', `ScriptName` = 'npc_fel_cannon_mki' WHERE `creature_template`.`entry` = 22461;

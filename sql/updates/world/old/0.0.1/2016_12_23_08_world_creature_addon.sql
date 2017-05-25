@@ -1,0 +1,1 @@
+UPDATE `creature_addon` SET `auras` = '48154' WHERE `guid` IN (SELECT `guid` FROM `creature` WHERE `id` = 27202);

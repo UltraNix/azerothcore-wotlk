@@ -1,0 +1,1 @@
+UPDATE `waypoints` SET `position_z` = '9.25865' WHERE `waypoints`.`entry` = 4484 AND `waypoints`.`pointid` = 29;

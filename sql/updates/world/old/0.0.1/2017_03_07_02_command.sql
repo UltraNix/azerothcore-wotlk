@@ -1,0 +1,1 @@
+DELETE FROM `command` WHERE `command`.`name` = 'flusharenapoints';

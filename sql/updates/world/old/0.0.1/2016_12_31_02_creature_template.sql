@@ -1,0 +1,2 @@
+UPDATE `creature_template` SET `mechanic_immune_mask` = '33' WHERE `creature_template`.`entry` = 16286;
+UPDATE `creature_template` SET `mechanic_immune_mask` = '33' WHERE `creature_template`.`entry` = 30068;

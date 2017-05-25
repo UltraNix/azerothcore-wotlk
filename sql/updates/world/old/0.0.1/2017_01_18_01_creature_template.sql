@@ -1,0 +1,2 @@
+UPDATE `creature_template` SET `dynamicflags` = '0', `InhabitType` = '4', `movementId` = '106', `RegenHealth` = '1', `mechanic_immune_mask` = '0', `flags_extra` = '0' WHERE `creature_template`.`entry` = 30084;
+UPDATE `creature_template` SET `dynamicflags` = '0', `InhabitType` = '4', `movementId` = '106', `RegenHealth` = '1', `mechanic_immune_mask` = '0', `flags_extra` = '0' WHERE `creature_template`.`entry` = 32187;

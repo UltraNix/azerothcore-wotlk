@@ -1,0 +1,1 @@
+UPDATE `command` SET `name` = 'gmunstuck' WHERE `command`.`name` = 'unstuck';

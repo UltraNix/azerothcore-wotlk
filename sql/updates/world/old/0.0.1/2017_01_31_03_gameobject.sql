@@ -1,0 +1,1 @@
+update gameobject set position_x=-19.6, position_y=-935.304, position_z=58.0971 where guid=17154;
