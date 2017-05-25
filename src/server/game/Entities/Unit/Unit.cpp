@@ -1583,7 +1583,6 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
 		Unit::DealDamage(victim, this, largestDamage, 0, SPELL_DIRECT_DAMAGE, largestDamageShield->GetSchoolMask(), largestDamageShield, true);
         }
-    }
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
