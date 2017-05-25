@@ -352,18 +352,30 @@ public:
                     HandleGameObject(GO_ErekemLeftGuardCellGUID, true);
                     pBoss = instance->GetCreature(NPC_ErekemGUID);
                     if (pBoss)
-                        pBoss->GetMotionMaster()->MovePoint(0, BossStartMove2);
-                    if (Creature* pGuard1 = instance->GetCreature(NPC_ErekemGuardGUID[0]))
                     {
-                        pGuard1->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                        pGuard1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
-                        pGuard1->GetMotionMaster()->MovePoint(0, BossStartMove21);
+                        pBoss->AI()->Talk(3);
+                        pBoss->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(ErekemPath[i].GetPositionX(), ErekemPath[i].GetPositionY(), ErekemPath[i].GetPositionZ()));
+
+                        pBoss->GetMotionMaster()->MoveSplinePath(&path);
                     }
-                    if (Creature* pGuard2 = instance->GetCreature(NPC_ErekemGuardGUID[1]))
+                    if (Creature* guard = instance->GetCreature(NPC_ErekemGuardGUID[0]))
                     {
-                        pGuard2->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                        pGuard2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
-                        pGuard2->GetMotionMaster()->MovePoint(0, BossStartMove22);
+                        guard->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(ErekemGuardLeftPath[i].GetPositionX(), ErekemGuardLeftPath[i].GetPositionY(), ErekemGuardLeftPath[i].GetPositionZ()));
+                        guard->GetMotionMaster()->MoveSplinePath(&path);
+                    }
+                    if (Creature* guard = instance->GetCreature(NPC_ErekemGuardGUID[1]))
+                    {
+                        guard->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(ErekemGuardRightPath[i].GetPositionX(), ErekemGuardLeftPath[i].GetPositionY(), ErekemGuardLeftPath[i].GetPositionZ()));
+                        guard->GetMotionMaster()->MoveSplinePath(&path);
                     }
                     break;
                 case BOSS_ICHORON:
@@ -395,7 +407,8 @@ public:
             if (pBoss)
             {
                 pBoss->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                if(pBoss != instance->GetCreature(NPC_ErekemGUID))
+                    pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                 pBoss->SetReactState(REACT_AGGRESSIVE);
                 if (WaveCount == 6 && m_auiEncounter[0] == DONE || WaveCount == 12 && m_auiEncounter[1] == DONE)
                     pBoss->SetLootMode(0);
