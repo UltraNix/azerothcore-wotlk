@@ -517,8 +517,10 @@ public:
                     me->GetMotionMaster()->MoveFall(me->GetEntry());
                 }
                 else
-                    Talk(2);
-
+                {
+                    if (Player* player = GetValidPlayer())
+                        Talk(2, player);
+                }
             }
         }
 
@@ -579,7 +581,7 @@ public:
                     if (me->HealthBelowPct(25))
                         if (Player* player = GetValidPlayer())
                         {
-                            Talk(3);
+                            Talk(3, player);
                             switching = true;
                             me->RemoveAllAuras();
                             me->CastSpell(me, SPELL_JAWS_OF_DEATH, true);
@@ -624,7 +626,8 @@ public:
             if (announceAttackTimer >= 7000)
             {
                 announceAttackTimer = urand(0, 3000);
-                Talk(0);
+                if(Player* player = GetValidPlayer())
+                    Talk(0, player);
                 attackTimer = 1;
             }
             if (attackTimer)
@@ -635,7 +638,7 @@ public:
                     attackTimer = 0;
                     Player* player = ObjectAccessor::GetPlayer(*me, playerGUID);
                     if (player && player->HasAura(SPELL_DODGE_CLAWS))
-                        Talk(1);
+                        Talk(1, player);
                     else if (player)
                         me->AttackerStateUpdate(player);
                     else
