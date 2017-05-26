@@ -43,49 +43,38 @@ EndContentData */
 // Ours
 enum songOfWindandWater
 {
+    SPELL_DEVOUR_WIND                    = 52862,
+    SPELL_DEVOUR_WATER                   = 52864,
+
     NPC_SOWAW_WATER_ELEMENTAL            = 28999,
-    NPC_SOWAW_WIND_ELEMENTAL            = 28985,
-    NPC_SOWAW_WIND_MODEL                = 14516,
-    NPC_SOWAW_WATER_MODEL                = 20076,
+    NPC_SOWAW_WIND_ELEMENTAL             = 28985,
 };
 
-class spell_q12726_song_of_wind_and_water : public SpellScriptLoader
+class npc_haiphoon : public CreatureScript
 {
-    public:
-        spell_q12726_song_of_wind_and_water() : SpellScriptLoader("spell_q12726_song_of_wind_and_water") { }
+public:
+    npc_haiphoon() : CreatureScript("npc_haiphoon") { }
 
-        class spell_q12726_song_of_wind_and_water_SpellScript : public SpellScript
+    struct npc_haiphoonAI : public VehicleAI
+    {
+        npc_haiphoonAI(Creature* creature) : VehicleAI(creature) { }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
-            PrepareSpellScript(spell_q12726_song_of_wind_and_water_SpellScript);
+            if (target == me)
+                return;
 
-            void HandleHealPct(SpellEffIndex /*effIndex*/)
-            {
-                if (Creature* cr = GetHitCreature())
-                {
-                    //cr->UpdateEntry((cr->GetEntry() == NPC_SOWAW_WATER_ELEMENTAL ? NPC_SOWAW_WIND_ELEMENTAL : NPC_SOWAW_WATER_ELEMENTAL));
-                    cr->SetDisplayId(cr->GetDisplayId() == NPC_SOWAW_WATER_MODEL ? NPC_SOWAW_WIND_MODEL : NPC_SOWAW_WATER_MODEL);
-                    if (Player* player = cr->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    {
-                        player->KilledMonsterCredit(cr->GetDisplayId() == NPC_SOWAW_WATER_MODEL ? 29008 : 29009, 0);
-                        CreatureTemplate const* ct = sObjectMgr->GetCreatureTemplate(cr->GetDisplayId() == NPC_SOWAW_WIND_MODEL ? NPC_SOWAW_WIND_ELEMENTAL : NPC_SOWAW_WATER_ELEMENTAL);
-                        for (uint8 i=0; i < CREATURE_MAX_SPELLS; ++i)
-                            cr->m_spells[i] = ct->spells[i];
-
-                        player->VehicleSpellInitialize();
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_q12726_song_of_wind_and_water_SpellScript::HandleHealPct, EFFECT_2, SPELL_EFFECT_HEAL_PCT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_q12726_song_of_wind_and_water_SpellScript();
+            if (spell->Id == SPELL_DEVOUR_WIND && me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                me->UpdateEntry(NPC_SOWAW_WIND_ELEMENTAL);
+            else if (spell->Id == SPELL_DEVOUR_WATER && me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                me->UpdateEntry(NPC_SOWAW_WATER_ELEMENTAL);
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_haiphoonAI(creature);
+    }
 };
 
 enum AHerosBurden
@@ -1506,7 +1495,7 @@ public:
 void AddSC_sholazar_basin()
 {
     // Ours
-    new spell_q12726_song_of_wind_and_water();
+    new npc_haiphoon();
     new npc_artruis_the_hearthless();
     new npc_still_at_it_trigger();
     new npc_mcmanus();
