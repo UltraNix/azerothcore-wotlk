@@ -5349,10 +5349,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     switch (m_spellInfo->Id)
     {
-         // Hand of Protection - Disable usage in stuns
+         // Hand of Protection - Disable usage in stuns (only castable on yourself)
          case 10278:
-             if (m_caster->isStuned()) 
-                return SPELL_FAILED_STUNNED;
+			 if (m_targets.GetUnitTarget() != m_caster && m_caster->isStuned())
+				 return SPELL_FAILED_STUNNED;
              break;
          // Blink
          case 1953:
