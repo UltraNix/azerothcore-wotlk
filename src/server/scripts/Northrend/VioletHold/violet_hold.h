@@ -160,9 +160,14 @@ const Position ErekemGuardRightPath[3] =
     { 1885.639f, 859.0245f, 43.3335f },
     { 1882.432f, 852.2423f, 43.3335f }
 };
-const Position BossStartMove21 = {1858.854614f, 855.071411f, 43.333565f, 0.0f};
-const Position BossStartMove22 = {1891.926636f, 863.388977f, 43.333565f, 0.0f};
-const Position BossStartMove3  = {1916.138062f, 778.152222f, 35.772308f, 0.0f};
+const Position IchoronPath[5]  = 
+{
+    { 1942.041f, 749.5228f, 30.95229f },
+    { 1930.571f, 762.9065f, 31.98814f },
+    { 1923.657f, 770.6718f, 34.07256f },
+    { 1910.631f, 784.4096f, 37.09015f },
+    { 1906.595f, 788.3828f, 37.99429f }
+};
 const Position LavanthorPath[3] = 
 {
     { 1844.557f, 748.7083f, 38.74205f },

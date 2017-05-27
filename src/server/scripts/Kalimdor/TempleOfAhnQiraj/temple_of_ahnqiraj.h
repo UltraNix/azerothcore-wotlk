@@ -35,7 +35,8 @@ enum DataTypes
     DATA_BUG_TRIO_DEATH     = 14,
     DATA_CTHUN_PHASE        = 20,
     DATA_VISCIDUS           = 21,
-    DATA_FANKRISS           = 22
+    DATA_FANKRISS           = 22,
+    DATA_OURO               = 23
 };
 
 enum Creatures

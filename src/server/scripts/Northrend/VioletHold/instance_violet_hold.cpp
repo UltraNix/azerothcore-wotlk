@@ -382,7 +382,15 @@ public:
                     HandleGameObject(GO_IchoronCellGUID, true);
                     pBoss = instance->GetCreature(NPC_IchoronGUID);
                     if (pBoss)
-                        pBoss->GetMotionMaster()->MovePoint(0, BossStartMove3);
+                    {
+                        pBoss->AI()->Talk(3);
+                        pBoss->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 5; ++i)
+                            path.push_back(G3D::Vector3(IchoronPath[i].GetPositionX(), IchoronPath[i].GetPositionY(), IchoronPath[i].GetPositionZ()));
+
+                        pBoss->GetMotionMaster()->MoveSplinePath(&path);
+                    }
                     break;
                 case BOSS_LAVANTHOR:
                     HandleGameObject(GO_LavanthorCellGUID, true);
@@ -413,7 +421,7 @@ public:
             if (pBoss)
             {
                 pBoss->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                if(pBoss != instance->GetCreature(NPC_ErekemGUID) && pBoss != instance->GetCreature(NPC_LavanthorGUID))
+                if(pBoss != instance->GetCreature(NPC_ErekemGUID) && pBoss != instance->GetCreature(NPC_LavanthorGUID) && pBoss != instance->GetCreature(NPC_IchoronGUID))
                     pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                 pBoss->SetReactState(REACT_AGGRESSIVE);
                 if (WaveCount == 6 && m_auiEncounter[0] == DONE || WaveCount == 12 && m_auiEncounter[1] == DONE)

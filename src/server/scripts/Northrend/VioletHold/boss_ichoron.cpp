@@ -97,6 +97,17 @@ public:
             me->SetDisplayId(me->GetNativeDisplayId());
         }
 
+        void MovementInform(uint32 /*type*/, uint32 /*id*/) override
+        {
+            if (me->movespline->Finalized())
+            {
+                me->SetWalk(false);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                if (Player* target = SelectTargetFromPlayerList(100.0f))
+                    AttackStart(target);
+            }
+        }
+
         void DoAction(int32 param)
         {
             if (!me->IsAlive())
