@@ -36,20 +36,27 @@ enum Texts
 enum Spells
 {
     // Golemagg
-    SPELL_MAGMASPLASH       = 13879,
+    SPELL_MAGMA_SPLASH      = 13879,
     SPELL_PYROBLAST         = 20228,
     SPELL_EARTHQUAKE        = 19798,
     SPELL_ENRAGE            = 19953,
     SPELL_GOLEMAGG_TRUST    = 20553,
+    SPELL_DOUBLE_ATTACK     = 18943,
 
     // Core Rager
+    SPELL_THRASH            = 12787,
     SPELL_MANGLE            = 19820
 };
 
 enum Events
 {
-    EVENT_PYROBLAST     = 1,
-    EVENT_EARTHQUAKE    = 2,
+    // Golemagg
+    EVENT_PYROBLAST         = 1,
+    EVENT_EARTHQUAKE,
+
+    // Core Rager
+    EVENT_MANGLE            = 1,
+    EVENT_TRUST
 };
 
 class boss_golemagg : public CreatureScript
@@ -59,20 +66,36 @@ class boss_golemagg : public CreatureScript
 
         struct boss_golemaggAI : public BossAI
         {
-            boss_golemaggAI(Creature* creature) : BossAI(creature, BOSS_GOLEMAGG_THE_INCINERATOR)
-            {
-            }
+            boss_golemaggAI(Creature* creature) : BossAI(creature, BOSS_GOLEMAGG_THE_INCINERATOR) { }
 
             void Reset()
             {
-                BossAI::Reset();
-                DoCast(me, SPELL_MAGMASPLASH, true);
+                _Reset();
+                DoCast(me, SPELL_MAGMA_SPLASH, true);
             }
 
-            void EnterCombat(Unit* victim)
+            void EnterCombat(Unit* /*victim*/)
             {
-                BossAI::EnterCombat(victim);
+                _EnterCombat();
+                me->CallForHelp(15.0f);
                 events.ScheduleEvent(EVENT_PYROBLAST, 7000);
+            }
+
+            void EnterEvadeMode() override
+            {
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList, 11672, 100.0f);
+                if (!addList.empty())
+                {
+                    for (auto itr : addList)
+                    {
+                        if (!itr->IsAlive())
+                            itr->Respawn();
+                        if (itr->IsAIEnabled)
+                            itr->AI()->EnterEvadeMode();
+                    }
+                }
+                CreatureAI::EnterEvadeMode();
             }
 
             void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
@@ -84,35 +107,22 @@ class boss_golemagg : public CreatureScript
                 events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
             }
 
-            void UpdateAI(uint32 diff)
+            void ExecuteEvent(uint32 eventId) override
             {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                switch (eventId)
                 {
-                    switch (eventId)
-                    {
-                        case EVENT_PYROBLAST:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                DoCast(target, SPELL_PYROBLAST);
-                            events.ScheduleEvent(EVENT_PYROBLAST, 7000);
-                            break;
-                        case EVENT_EARTHQUAKE:
-                            DoCastVictim(SPELL_EARTHQUAKE);
-                            events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
-                            break;
-                        default:
-                            break;
-                    }
+                    case EVENT_PYROBLAST:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                            DoCast(target, SPELL_PYROBLAST);
+                        events.ScheduleEvent(EVENT_PYROBLAST, 7000);
+                        break;
+                    case EVENT_EARTHQUAKE:
+                        DoCastVictim(SPELL_EARTHQUAKE);
+                        events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
+                        break;
+                    default:
+                        break;
                 }
-
-                DoMeleeAttackIfReady();
             }
         };
 
@@ -129,14 +139,12 @@ class npc_core_rager : public CreatureScript
 
         struct npc_core_ragerAI : public ScriptedAI
         {
-            npc_core_ragerAI(Creature* creature) : ScriptedAI(creature)
-            {
-                instance = creature->GetInstanceScript();
-            }
+            npc_core_ragerAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()) { }
 
-            void Reset()
+            void EnterCombat(Unit* victim)
             {
-                mangleTimer = 7*IN_MILLISECONDS;                 // These times are probably wrong
+                CreatureAI::EnterCombat(victim);
+                _events.ScheduleEvent(EVENT_TRUST, 2000);
             }
 
             void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
@@ -148,10 +156,11 @@ class npc_core_rager : public CreatureScript
                 {
                     if (pGolemagg->IsAlive())
                     {
-                        me->AddAura(SPELL_GOLEMAGG_TRUST, me);
                         Talk(EMOTE_LOWHP);
                         me->SetFullHealth();
                     }
+                    else
+                        me->DespawnOrUnsummon();
                 }
             }
 
@@ -160,21 +169,32 @@ class npc_core_rager : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                // Mangle
-                if (mangleTimer <= diff)
+                _events.Update(diff);
+
+                while (uint32 eventId = _events.GetEvent())
                 {
-                    DoCastVictim(SPELL_MANGLE);
-                    mangleTimer = 10*IN_MILLISECONDS;
+                    switch (eventId)
+                    {
+                        case EVENT_MANGLE:
+                            DoCastVictim(SPELL_MANGLE);
+                            _events.RepeatEvent(10000);
+                            break;
+                        case EVENT_TRUST:
+                            if (Creature* hound = me->FindNearestCreature(11672, 30.0f, true))
+                                me->AddAura(SPELL_GOLEMAGG_TRUST, me);
+                            _events.RepeatEvent(2000);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                else
-                    mangleTimer -= diff;
 
                 DoMeleeAttackIfReady();
             }
 
         private:
             InstanceScript* instance;
-            uint32 mangleTimer;
+            EventMap _events;
         };
 
         CreatureAI* GetAI(Creature* creature) const
