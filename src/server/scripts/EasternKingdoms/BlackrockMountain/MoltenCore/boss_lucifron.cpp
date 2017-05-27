@@ -1,28 +1,3 @@
-/*
- * Copyright (C) 
- * Copyright (C) 
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Boss_Lucifron
-SD%Complete: 100
-SDComment:
-SDCategory: Molten Core
-EndScriptData */
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -49,50 +24,52 @@ class boss_lucifron : public CreatureScript
 
         struct boss_lucifronAI : public BossAI
         {
-            boss_lucifronAI(Creature* creature) : BossAI(creature, BOSS_LUCIFRON)
-            {
-            }
+            boss_lucifronAI(Creature* creature) : BossAI(creature, BOSS_LUCIFRON) { }
 
-            void EnterCombat(Unit* victim)
+            void EnterCombat(Unit* /*victim*/)
             {
-                BossAI::EnterCombat(victim);
+                _EnterCombat();
                 events.ScheduleEvent(EVENT_IMPENDING_DOOM, 10000);
                 events.ScheduleEvent(EVENT_LUCIFRON_CURSE, 20000);
                 events.ScheduleEvent(EVENT_SHADOW_SHOCK, 6000);
             }
 
-            void UpdateAI(uint32 diff)
+            void EnterEvadeMode() override
             {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList, 12119, 100.0f);
+                if (!addList.empty())
                 {
-                    switch (eventId)
+                    for (auto itr : addList)
                     {
-                        case EVENT_IMPENDING_DOOM:
-                            DoCastVictim(SPELL_IMPENDING_DOOM);
-                            events.ScheduleEvent(EVENT_IMPENDING_DOOM, 20000);
-                            break;
-                        case EVENT_LUCIFRON_CURSE:
-                            DoCastVictim(SPELL_LUCIFRON_CURSE);
-                            events.ScheduleEvent(EVENT_LUCIFRON_CURSE, 15000);
-                            break;
-                        case EVENT_SHADOW_SHOCK:
-                            DoCastVictim(SPELL_SHADOW_SHOCK);
-                            events.ScheduleEvent(EVENT_SHADOW_SHOCK, 6000);
-                            break;
-                        default:
-                            break;
+                        if (!itr->IsAlive())
+                            itr->Respawn();
+                        if (itr->IsAIEnabled)
+                            itr->AI()->EnterEvadeMode();
                     }
                 }
+                CreatureAI::EnterEvadeMode();
+            }
 
-                DoMeleeAttackIfReady();
+            void ExecuteEvent(uint32 eventId) override
+            {
+                switch (eventId)
+                {
+                    case EVENT_IMPENDING_DOOM:
+                        DoCastVictim(SPELL_IMPENDING_DOOM);
+                        events.ScheduleEvent(EVENT_IMPENDING_DOOM, 20000);
+                        break;
+                    case EVENT_LUCIFRON_CURSE:
+                        DoCastVictim(SPELL_LUCIFRON_CURSE);
+                        events.ScheduleEvent(EVENT_LUCIFRON_CURSE, 15000);
+                        break;
+                    case EVENT_SHADOW_SHOCK:
+                        DoCastVictim(SPELL_SHADOW_SHOCK);
+                        events.ScheduleEvent(EVENT_SHADOW_SHOCK, 6000);
+                        break;
+                    default:
+                        break;
+                }
             }
         };
 
