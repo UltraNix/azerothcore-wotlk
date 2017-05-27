@@ -3777,6 +3777,12 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx &= ~SPELL_ATTR1_DISMISS_PET;
             spellInfo->RecoveryTime = 8*60*IN_MILLISECONDS; // prev 600000
             break;
+		case 14308://Freezing Trap Effect #1
+			spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+			break;
+		case 14309://Freezing Trap Effect #2
+			spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+			break;
 
 
 
