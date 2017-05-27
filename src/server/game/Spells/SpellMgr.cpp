@@ -3061,6 +3061,7 @@ void SpellMgr::LoadSpellCustomAttr()
             case 29107: // Disrupting Shout 
             case 55543: // Disrupting Shout 
             case 55550: // Jagged Knife
+            case 48642: // Launch Harpoon
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)

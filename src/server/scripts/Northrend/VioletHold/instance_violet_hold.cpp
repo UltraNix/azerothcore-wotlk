@@ -388,7 +388,13 @@ public:
                     HandleGameObject(GO_LavanthorCellGUID, true);
                     pBoss = instance->GetCreature(NPC_LavanthorGUID);
                     if (pBoss)
-                        pBoss->GetMotionMaster()->MovePoint(0, BossStartMove4);
+                    {
+                        pBoss->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(LavanthorPath[i].GetPositionX(), LavanthorPath[i].GetPositionY(), LavanthorPath[i].GetPositionZ()));
+                        pBoss->GetMotionMaster()->MoveSplinePath(&path);
+                    }
                     break;
                 case BOSS_XEVOZZ:
                     HandleGameObject(GO_XevozzCellGUID, true);
@@ -407,7 +413,7 @@ public:
             if (pBoss)
             {
                 pBoss->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                if(pBoss != instance->GetCreature(NPC_ErekemGUID))
+                if(pBoss != instance->GetCreature(NPC_ErekemGUID) && pBoss != instance->GetCreature(NPC_LavanthorGUID))
                     pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                 pBoss->SetReactState(REACT_AGGRESSIVE);
                 if (WaveCount == 6 && m_auiEncounter[0] == DONE || WaveCount == 12 && m_auiEncounter[1] == DONE)
