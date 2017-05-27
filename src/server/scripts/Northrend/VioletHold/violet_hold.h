@@ -142,7 +142,24 @@ const Position sinclariOutsidePosition = {1817.315674f, 804.060608f, 44.363998f,
 const Position MiddleRoomPortalSaboLocation = {1896.622925f, 804.854126f, 38.504772f, 3.139621f};
 
 const Position BossStartMove1  = {1894.684448f, 739.390503f, 47.668003f, 0.0f};
-const Position BossStartMove2  = {1875.173950f, 860.832703f, 43.333565f, 0.0f};
+const Position ErekemPath[3] = 
+{
+    { 1871.456f, 871.0361f, 43.41524f },
+    { 1874.948f, 859.5452f, 43.33349f },
+    { 1877.245f, 851.967f,  43.3335f }
+};
+const Position ErekemGuardLeftPath[3] = 
+{
+    { 1853.752f, 862.4528f, 43.41614f },
+    { 1866.931f, 854.577f,  43.3335f },
+    { 1872.973f, 850.7875f, 43.3335f }
+};
+const Position ErekemGuardRightPath[3] = 
+{
+    { 1892.418f, 872.2831f, 43.41563f },
+    { 1885.639f, 859.0245f, 43.3335f },
+    { 1882.432f, 852.2423f, 43.3335f }
+};
 const Position BossStartMove21 = {1858.854614f, 855.071411f, 43.333565f, 0.0f};
 const Position BossStartMove22 = {1891.926636f, 863.388977f, 43.333565f, 0.0f};
 const Position BossStartMove3  = {1916.138062f, 778.152222f, 35.772308f, 0.0f};
