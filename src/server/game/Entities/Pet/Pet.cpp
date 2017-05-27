@@ -686,11 +686,11 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, lowAmt*lowAmt*lowAmt);
                     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, highAmt*highAmt*highAmt);
 
-                    // xinef: Glyph of Felguard, so ugly im crying... no appropriate spell
+                    /*// xinef: Glyph of Felguard, so ugly im crying... no appropriate spell
                     if (AuraEffect* aurEff = m_owner->GetAuraEffectDummy(SPELL_GLYPH_OF_FELGUARD))
-                        SetModifierValue(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, 1.0f + float(aurEff->GetAmount() / 100.0f));
+                        SetModifierValue(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, float(aurEff->GetAmount()));
 
-                    break;
+                    break;*/
                 }
                 case NPC_WATER_ELEMENTAL_PERM:
                 {
