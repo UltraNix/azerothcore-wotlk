@@ -10066,9 +10066,9 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             else
                 getScript = (GetQuestStatus(12500) == QUEST_STATUS_REWARDED && GetQuestStatus(13267) != QUEST_STATUS_REWARDED);
 
-            //if (getScript || IsGameMaster())
-            //    if (WorldZoneScript* zoneScript = sObjectMgr->GetWorldZoneScript(85))
-            //        zoneScript->FillInitialWorldStates(data, this);
+            if (getScript || IsGameMaster())
+                if (WorldZoneScript* zoneScript = sObjectMgr->GetWorldZoneScript(85))
+                    zoneScript->FillInitialWorldStates(data, this);
             break;
         }
             // No break here, intended.
