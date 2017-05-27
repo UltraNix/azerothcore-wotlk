@@ -42,6 +42,7 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                  = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST   = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC        = 59628,
+	SPELL_ROUGE_VANISH							= 1856,
 };
 
 // Ours
@@ -820,6 +821,18 @@ class spell_rog_vanish : public SpellScriptLoader
         class spell_rog_vanish_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_rog_vanish_SpellScript);
+
+			bool Load()
+			{
+				return GetCaster()->GetTypeId() == TYPEID_PLAYER;
+			}
+
+			bool Validate(SpellInfo const* /*spellInfo*/)
+			{
+				if (!sSpellMgr->GetSpellInfo(SPELL_ROUGE_VANISH))
+					return false;
+				return true;
+			}
 
             void HandleAfterCast()
             {
