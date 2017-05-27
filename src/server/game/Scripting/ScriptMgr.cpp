@@ -199,6 +199,7 @@ void ScriptMgr::Unload()
     SCR_CLEAR(WorldScript);
     SCR_CLEAR(FormulaScript);
     SCR_CLEAR(WorldMapScript);
+    SCR_CLEAR(WorldMapZoneScript);
     SCR_CLEAR(InstanceMapScript);
     SCR_CLEAR(BattlegroundMapScript);
     SCR_CLEAR(ItemScript);
@@ -1444,6 +1445,7 @@ template class ScriptRegistry<ServerScript>;
 template class ScriptRegistry<WorldScript>;
 template class ScriptRegistry<FormulaScript>;
 template class ScriptRegistry<WorldMapScript>;
+template class ScriptRegistry<WorldMapZoneScript>;
 template class ScriptRegistry<InstanceMapScript>;
 template class ScriptRegistry<BattlegroundMapScript>;
 template class ScriptRegistry<ItemScript>;

@@ -1809,6 +1809,10 @@ void World::SetInitialWorldSettings()
 
     sTicketMgr->Initialize();
 
+    //- Initialize World Zone Scripts
+    sLog->outString("Starting WorldZoneScripts");
+    sObjectMgr->LoadWorldZoneScripts();
+
     ///- Initialize Battlegrounds
     sLog->outString("Starting Battleground System");
     sBattlegroundMgr->CreateInitialBattlegrounds();

@@ -2157,6 +2157,8 @@ void WorldObject::SetZoneScript()
             uint32 zoneId = GetZoneId(true);
             if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(zoneId))
                 m_zoneScript = bf;
+            else if (WorldZoneScript* zoneScript = sObjectMgr->GetWorldZoneScript(GetZoneId()))
+                m_zoneScript = zoneScript;
             else
                 m_zoneScript = sOutdoorPvPMgr->GetZoneScript(zoneId);
         }
