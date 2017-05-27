@@ -1,28 +1,3 @@
-/*
- * Copyright (C) 
- * Copyright (C) 
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Boss_Sulfuron_Harbringer
-SD%Complete: 80
-SDComment: Adds NYI
-SDCategory: Molten Core
-EndScriptData */
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -63,67 +38,73 @@ class boss_sulfuron : public CreatureScript
 
         struct boss_sulfuronAI : public BossAI
         {
-            boss_sulfuronAI(Creature* creature) : BossAI(creature, BOSS_SULFURON_HARBINGER)
-            {
-            }
+            boss_sulfuronAI(Creature* creature) : BossAI(creature, BOSS_SULFURON_HARBINGER) { }
 
             void EnterCombat(Unit* victim)
             {
-                BossAI::EnterCombat(victim);
+                _EnterCombat();
                 events.ScheduleEvent(EVENT_DARK_STRIKE, 10000);
                 events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, 15000);
-                events.ScheduleEvent(EVENT_INSPIRE, 13000);
+                events.ScheduleEvent(EVENT_INSPIRE, 3000);
                 events.ScheduleEvent(EVENT_KNOCKDOWN, 6000);
                 events.ScheduleEvent(EVENT_FLAMESPEAR, 2000);
             }
 
-            void UpdateAI(uint32 diff)
+            void EnterEvadeMode() override
             {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList, 11662, 100.0f);
+                if (!addList.empty())
                 {
-                    switch (eventId)
+                    for (auto itr : addList)
                     {
-                        case EVENT_DARK_STRIKE:
-                            DoCast(me, SPELL_DARK_STRIKE);
-                            events.ScheduleEvent(EVENT_DARK_STRIKE, urand(15000, 18000));
-                            break;
-                        case EVENT_DEMORALIZING_SHOUT:
-                            DoCastVictim(SPELL_DEMORALIZING_SHOUT);
-                            events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, urand(15000, 20000));
-                            break;
-                        case EVENT_INSPIRE:
-                        {
-                            std::list<Creature*> healers = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
-                            if (!healers.empty())
-                                DoCast(Trinity::Containers::SelectRandomContainerElement(healers), SPELL_INSPIRE);
-
-                            DoCast(me, SPELL_INSPIRE);
-                            events.ScheduleEvent(EVENT_INSPIRE, urand(20000, 26000));
-                            break;
-                        }
-                        case EVENT_KNOCKDOWN:
-                            DoCastVictim(SPELL_KNOCKDOWN);
-                            events.ScheduleEvent(EVENT_KNOCKDOWN, urand(12000, 15000));
-                            break;
-                        case EVENT_FLAMESPEAR:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                DoCast(target, SPELL_FLAMESPEAR);
-                            events.ScheduleEvent(EVENT_FLAMESPEAR, urand(12000, 16000));
-                            break;
-                        default:
-                            break;
+                        if (!itr->IsAlive())
+                            itr->Respawn();
+                        if (itr->IsAIEnabled)
+                            itr->AI()->EnterEvadeMode();
                     }
                 }
+                CreatureAI::EnterEvadeMode();
+            }
 
-                DoMeleeAttackIfReady();
+            void ExecuteEvent(uint32 eventId) override
+            {
+                switch (eventId)
+                {
+                    case EVENT_DARK_STRIKE:
+                        DoCast(me, SPELL_DARK_STRIKE);
+                        events.ScheduleEvent(EVENT_DARK_STRIKE, urand(15000, 18000));
+                        break;
+                    case EVENT_DEMORALIZING_SHOUT:
+                        DoCastVictim(SPELL_DEMORALIZING_SHOUT);
+                        events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, urand(15000, 20000));
+                        break;
+                    case EVENT_INSPIRE:
+                    {
+                        std::list<Creature*> healers = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
+                        healers.remove_if([&](Creature* healer) -> bool
+                        {
+                            return healer->GetEntry() != NPC_FLAMEWAKER_HEALER;
+                        });
+                        if (!healers.empty())
+                            DoCast(Trinity::Containers::SelectRandomContainerElement(healers), SPELL_INSPIRE);
+
+                        DoCast(me, SPELL_INSPIRE);
+                        events.ScheduleEvent(EVENT_INSPIRE, urand(20000, 26000));
+                        break;
+                    }
+                    case EVENT_KNOCKDOWN:
+                        DoCastVictim(SPELL_KNOCKDOWN);
+                        events.ScheduleEvent(EVENT_KNOCKDOWN, urand(12000, 15000));
+                        break;
+                    case EVENT_FLAMESPEAR:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                            DoCast(target, SPELL_FLAMESPEAR);
+                        events.ScheduleEvent(EVENT_FLAMESPEAR, urand(12000, 16000));
+                        break;
+                    default:
+                        break;
+                }
             }
         };
 
@@ -140,9 +121,7 @@ class npc_flamewaker_priest : public CreatureScript
 
         struct npc_flamewaker_priestAI : public ScriptedAI
         {
-            npc_flamewaker_priestAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
+            npc_flamewaker_priestAI(Creature* creature) : ScriptedAI(creature) { }
 
             void Reset()
             {
@@ -172,7 +151,7 @@ class npc_flamewaker_priest : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                while (uint32 eventId = events.ExecuteEvent())
+                while (uint32 eventId = events.GetEvent())
                 {
                     switch (eventId)
                     {
