@@ -626,6 +626,7 @@ void CheckIfScriptsInDatabaseExist()
                 !ScriptRegistry<WorldScript>::GetScriptById(sid) &&
                 !ScriptRegistry<FormulaScript>::GetScriptById(sid) &&
                 !ScriptRegistry<WorldMapScript>::GetScriptById(sid) &&
+                !ScriptRegistry<WorldMapZoneScript>::GetScriptById(sid) &&
                 !ScriptRegistry<InstanceMapScript>::GetScriptById(sid) &&
                 !ScriptRegistry<BattlegroundMapScript>::GetScriptById(sid) &&
                 !ScriptRegistry<ItemScript>::GetScriptById(sid) &&
