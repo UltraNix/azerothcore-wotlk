@@ -6,116 +6,100 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "ScriptedCreature.h"
 #include "violet_hold.h"
 
-enum eSpells
+enum LavanthorSpells
 {
-  SPELL_CAUTERIZING_FLAMES                    = 59466,
-  SPELL_FIREBOLT_N                            = 54235,
-  SPELL_FIREBOLT_H                            = 59468,
-  SPELL_FLAME_BREATH_N                        = 54282,
-  SPELL_FLAME_BREATH_H                        = 59469,
-  SPELL_LAVA_BURN_N                            = 54249,
-  SPELL_LAVA_BURN_H                            = 59594,
+    SPELL_CAUTERIZING_FLAMES        = 59466,
+    SPELL_FIREBOLT                  = 54235,
+    SPELL_FLAME_BREATH              = 54282,
+    SPELL_LAVA_BURN                 = 54249
+
 };
 
-#define SPELL_FIREBOLT                        DUNGEON_MODE(SPELL_FIREBOLT_N, SPELL_FIREBOLT_H)
-#define SPELL_FLAME_BREATH                    DUNGEON_MODE(SPELL_FLAME_BREATH_N, SPELL_FLAME_BREATH_H)
-#define SPELL_LAVA_BURN                        DUNGEON_MODE(SPELL_LAVA_BURN_N, SPELL_LAVA_BURN_H)
-
-enum eEvents
+enum LavanthorEvents
 {
-    EVENT_SPELL_FIREBOLT = 1,
-    EVENT_SPELL_FLAME_BREATH,
-    EVENT_SPELL_LAVA_BURN,
-    EVENT_SPELL_CAUTERIZING_FLAMES,
+    EVENT_FIREBOLT                  = 1,
+    EVENT_FLAME_BREATH,
+    EVENT_LAVA_BURN,
+    EVENT_CAUTERIZING_FLAMES,
 };
 
 class boss_lavanthor : public CreatureScript
 {
-public:
-    boss_lavanthor() : CreatureScript("boss_lavanthor") { }
+    public:
+        boss_lavanthor() : CreatureScript("boss_lavanthor") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new boss_lavanthorAI (pCreature);
-    }
-
-    struct boss_lavanthorAI : public ScriptedAI
-    {
-        boss_lavanthorAI(Creature *c) : ScriptedAI(c)
+        struct boss_lavanthorAI : public BossAI
         {
-            pInstance = c->GetInstanceScript();
-        }
+            boss_lavanthorAI(Creature* creature) : BossAI(creature, BOSS_LAVANTHOR) { }
 
-        InstanceScript* pInstance;
-        EventMap events;
-
-        void Reset()
-        {
-            events.Reset();
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            DoZoneInCombat();
-            events.Reset();
-            events.RescheduleEvent(EVENT_SPELL_FIREBOLT, 1000);
-            events.RescheduleEvent(EVENT_SPELL_FLAME_BREATH, 5000);
-            events.RescheduleEvent(EVENT_SPELL_LAVA_BURN, 10000);
-            if (IsHeroic())
-                events.RescheduleEvent(EVENT_SPELL_CAUTERIZING_FLAMES, 3000);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch(events.GetEvent())
+            void EnterCombat(Unit* /*who*/) override
             {
-                case 0:
-                    break;
-                case EVENT_SPELL_FIREBOLT:
-                    me->CastSpell(me->GetVictim(), SPELL_FIREBOLT, false);
-                    events.RepeatEvent(urand(5000,13000));
-                    break;
-                case EVENT_SPELL_FLAME_BREATH:
-                    me->CastSpell(me->GetVictim(), SPELL_FLAME_BREATH, false);
-                    events.RepeatEvent(urand(10000,15000));
-                    break;
-                case EVENT_SPELL_LAVA_BURN:
-                    me->CastSpell(me->GetVictim(), SPELL_LAVA_BURN, false);
-                    events.RepeatEvent(urand(14000,20000));
-                    break;
-                case EVENT_SPELL_CAUTERIZING_FLAMES:
-                    me->CastSpell((Unit*)NULL, SPELL_FLAME_BREATH, false);
-                    events.RepeatEvent(urand(10000,16000));
-                    break;
+                _EnterCombat();
+                events.ScheduleEvent(EVENT_FIREBOLT, 1000);
+                events.ScheduleEvent(EVENT_FLAME_BREATH, 5000);
+                events.ScheduleEvent(EVENT_LAVA_BURN, 10000);
+                if (IsHeroic())
+                    events.ScheduleEvent(EVENT_CAUTERIZING_FLAMES, 3000);
             }
 
-            DoMeleeAttackIfReady();
-        }
+            void MovementInform(uint32 /*type*/, uint32 /*id*/) override
+            {
+                if (me->movespline->Finalized())
+                {
+                    me->SetWalk(false);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                    if (Player* target = SelectTargetFromPlayerList(100.0f))
+                        AttackStart(target);
+                }
+            }
 
-        void JustDied(Unit* /*killer*/)
+            void ExecuteEvent(uint32 eventId) override
+            {
+                switch (eventId)
+                {
+                    case EVENT_FIREBOLT:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                            DoCast(target, SPELL_FIREBOLT);
+                        events.RepeatEvent(urand(5000, 13000));
+                        break;
+                    case EVENT_FLAME_BREATH:
+                        DoCastVictim(SPELL_FLAME_BREATH);
+                        events.RepeatEvent(urand(10000, 15000));
+                        break;
+                    case EVENT_LAVA_BURN:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f))
+                            DoCast(target, SPELL_LAVA_BURN);
+                        events.RepeatEvent(urand(15000, 23000));
+                        break;
+                    case EVENT_CAUTERIZING_FLAMES:
+                        DoCastAOE(SPELL_CAUTERIZING_FLAMES);
+                        events.RepeatEvent(urand(10000, 16000));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            void JustDied(Unit* /*killer*/) override
+            {
+                _JustDied();
+                instance->SetData(DATA_BOSS_DIED, 0);
+            }
+
+            void MoveInLineOfSight(Unit* /*who*/) override { } 
+
+            void EnterEvadeMode() override
+            {
+                _EnterEvadeMode();
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                instance->SetData(DATA_FAILED, 1);
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
         {
-            if (pInstance)
-                pInstance->SetData(DATA_BOSS_DIED, 0);
+            return new boss_lavanthorAI(creature);
         }
-
-        void MoveInLineOfSight(Unit* /*who*/) {}
-
-        void EnterEvadeMode()
-        {
-            ScriptedAI::EnterEvadeMode();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            if (pInstance)
-                pInstance->SetData(DATA_FAILED, 1);
-        }
-    };
 };
 
 void AddSC_boss_lavanthor()
