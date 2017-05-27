@@ -582,7 +582,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 Talk(0);
                                 if (Creature* WaveTrigger = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_WAVES_TRIGGER)))
                                     if (WaveTrigger->IsAlive())
-                                        WaveTrigger->Kill(WaveTrigger, false);
+                                        WaveTrigger->Kill(WaveTrigger, WaveTrigger);
                                 DoUpdateWorldState(WORLDSTATE_MANHUNT_TIMER_STATE, 1);
                                 DoUpdateWorldState(WORLDSTATE_MANHUNT_TIMER, EventRepeatCount);
                                 UpdateWorldState = true;
