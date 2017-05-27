@@ -1256,12 +1256,21 @@ void AddBattlegroundScripts()
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
 
+    // Battle for the Undercity
+    void AddSC_battle_for_undercity_alliance();
+    void AddSC_battle_for_undercity_horde();
+    void AddSC_battle_for_undercity();
+    void AddSC_worldzone_trisfal_glades();
 #endif
 
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
     /* This is where custom scripts should be added. */
-
+    // Battle for the Undercity
+    AddSC_battle_for_undercity_alliance();
+    AddSC_battle_for_undercity_horde();
+    AddSC_battle_for_undercity();
+    AddSC_worldzone_trisfal_glades();
 #endif
 }

@@ -63,6 +63,7 @@ class Vehicle;
 class WorldPacket;
 class WorldSocket;
 class WorldObject;
+class WorldZoneScript;
 
 struct AchievementCriteriaData;
 struct AuctionEntry;
@@ -338,6 +339,19 @@ class WorldMapScript : public ScriptObject, public MapScript<Map>
     protected:
 
         WorldMapScript(const char* name, uint32 mapId);
+};
+
+class WorldMapZoneScript : public ScriptObject
+{
+    protected:
+
+        WorldMapZoneScript(const char* name);
+
+    public:
+
+        bool IsDatabaseBound() const final { return true; }
+
+        virtual WorldZoneScript* GetWorldZoneScript() const { return NULL; }
 };
 
 class InstanceMapScript : public ScriptObject, public MapScript<InstanceMap>
@@ -856,6 +870,10 @@ class ScriptMgr
     public: /* InstanceMapScript */
 
         InstanceScript* CreateInstanceScript(InstanceMap* map);
+
+    public: /* WorldMapZoneScript */
+
+        WorldZoneScript* CreateWorldZoneScript(uint32 scriptId);
 
     public: /* ItemScript */
 

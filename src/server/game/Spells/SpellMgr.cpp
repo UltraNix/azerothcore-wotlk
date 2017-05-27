@@ -6493,6 +6493,28 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetA[EFFECT_2] = TARGET_UNIT_TARGET_ANY;
             break;
+
+        case 59456: // Putress Tesla Aura
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;;
+            break;
+        case 60511: // Deep Freeze
+        case 61224: // Deep Freeze
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            break;
+        case 59464: // Hurl Boulder
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_CASTER;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_DEST_AREA_ENTRY;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_100_YARDS;
+            spellInfo->Effect[EFFECT_1] = 0;
+            break;
+        case 59534: // Heroic Vanguard Effect
+        case 60967: // Heroic Vanguard Effect
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_SRC_AREA_ENEMY;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_100_YARDS;
+            break;
+        case 60094: // Demonic Blast
+            spellInfo->MaxAffectedTargets = 1;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
@@ -6508,6 +6530,7 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->SpellFamilyFlags[0] |= 0x40;
                 break;
         }
+
     }
 
     // Xinef: The Veiled Sea area in outlands (Draenei zone), client blocks casting flying mounts

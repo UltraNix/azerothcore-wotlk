@@ -10,6 +10,11 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  Custom/BattleForUndercity/battle_for_undercity_alliance.cpp
+  Custom/BattleForUndercity/battle_for_undercity_horde.cpp
+  Custom/BattleForUndercity/battle_for_undercity.cpp
+  Custom/BattleForUndercity/worldzone_trisfal_glades.cpp
+  Custom/BattleForUndercity/battle_for_undercity.h
 )
 
 message("  -> Prepared: Custom")

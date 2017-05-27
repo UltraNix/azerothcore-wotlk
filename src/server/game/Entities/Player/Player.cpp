@@ -10057,6 +10057,20 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                 bf->FillInitialWorldStates(data);
                 break;
             }
+        case 85:    // Trisfal Glades
+        case 1497:  // Undercity
+        {
+            bool getScript = false;
+            if (GetTeamId() == TEAM_ALLIANCE)
+                getScript = (GetQuestStatus(12499) == QUEST_STATUS_REWARDED && GetQuestStatus(13377) != QUEST_STATUS_REWARDED);
+            else
+                getScript = (GetQuestStatus(12500) == QUEST_STATUS_REWARDED && GetQuestStatus(13267) != QUEST_STATUS_REWARDED);
+
+            //if (getScript || IsGameMaster())
+            //    if (WorldZoneScript* zoneScript = sObjectMgr->GetWorldZoneScript(85))
+            //        zoneScript->FillInitialWorldStates(data, this);
+            break;
+        }
             // No break here, intended.
         default:
             data << uint32(0x914) << uint32(0x0);           // 7

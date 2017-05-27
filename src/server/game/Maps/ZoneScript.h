@@ -51,4 +51,17 @@ class ZoneScript
         virtual void ProcessEvent(WorldObject* /*obj*/, uint32 /*eventId*/) {}
 };
 
+class WorldZoneScript : public ZoneScript
+{
+public:
+
+    WorldZoneScript() { }
+
+    virtual ~WorldZoneScript() { }
+
+    virtual void Initialize() { }
+
+    virtual void FillInitialWorldStates(WorldPacket& /*data*/, Player* /*player*/) { }
+};
+
 #endif

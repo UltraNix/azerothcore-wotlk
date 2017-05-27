@@ -620,6 +620,12 @@ InstanceScript* ScriptMgr::CreateInstanceScript(InstanceMap* map)
     return tmpscript->GetInstanceScript(map);
 }
 
+WorldZoneScript* ScriptMgr::CreateWorldZoneScript(uint32 scriptId)
+{
+    GET_SCRIPT_RET(WorldMapZoneScript, scriptId, tmpscript, NULL);
+    return tmpscript->GetWorldZoneScript();
+}
+
 bool ScriptMgr::OnQuestAccept(Player* player, Item* item, Quest const* quest)
 {
     ASSERT(player);
@@ -1300,6 +1306,12 @@ WorldMapScript::WorldMapScript(const char* name, uint32 mapId)
         sLog->outError("WorldMapScript for map %u is invalid.", mapId);
 
     ScriptRegistry<WorldMapScript>::AddScript(this);
+}
+
+WorldMapZoneScript::WorldMapZoneScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<WorldMapZoneScript>::AddScript(this);
 }
 
 InstanceMapScript::InstanceMapScript(const char* name, uint32 mapId)
