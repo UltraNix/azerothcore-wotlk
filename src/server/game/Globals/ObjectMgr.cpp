@@ -8661,7 +8661,9 @@ void ObjectMgr::LoadScriptNames()
       "UNION "
       "SELECT DISTINCT(ScriptName) FROM outdoorpvp_template WHERE ScriptName <> '' "
       "UNION "
-      "SELECT DISTINCT(script) FROM instance_template WHERE script <> ''");
+      "SELECT DISTINCT(script) FROM instance_template WHERE script <> '' "
+      "UNION "
+      "SELECT DISTINCT(ScriptName) FROM world_zone_scripts WHERE ScriptName <> '' ");
 
     if (!result)
     {
@@ -9133,4 +9135,53 @@ PlayerInfo const* ObjectMgr::GetPlayerInfo(uint32 race, uint32 class_) const
     if (!info)
         return NULL;
     return info;
+}
+
+void ObjectMgr::LoadWorldZoneScripts()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _worldZoneScriptStore.clear();                            // need for reload case
+    QueryResult result = WorldDatabase.Query("SELECT zone_entry, ScriptName FROM world_zone_scripts");
+
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outErrorDb(">> Loaded 0 wold zone scripts. DB table `world_zone_scripts` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        ++count;
+
+        Field* fields = result->Fetch();
+
+        uint32 zoneId = fields[0].GetUInt32();
+        const char* scriptName = fields[1].GetCString();
+
+        uint32 scriptId = GetScriptId(scriptName);
+
+        WorldZoneScript* _worldZoneScript = sScriptMgr->CreateWorldZoneScript(scriptId);
+        if (!_worldZoneScript)
+            continue;
+
+        _worldZoneScriptStore[zoneId] = _worldZoneScript;
+
+        _worldZoneScript->Initialize();
+
+    } while (result->NextRow());
+
+
+    //TC_LOG_INFO("server.loading", ">> Loaded %u world zone scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+WorldZoneScript* ObjectMgr::GetWorldZoneScript(uint32 zoneId)
+{
+    WorldZoneScriptContainer::const_iterator i = _worldZoneScriptStore.find(zoneId);
+    if (i != _worldZoneScriptStore.end())
+        return i->second;
+    return NULL;
 }

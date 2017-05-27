@@ -42,6 +42,7 @@
 #include <limits>
 #include "ConditionMgr.h"
 #include <functional>
+#include "ZoneScript.h"
 
 class Item;
 struct AccessRequirement;
@@ -1180,6 +1181,10 @@ class ObjectMgr
         void LoadFactionChangeSpells();
         void LoadFactionChangeTitles();
 
+        typedef std::unordered_map<uint32, WorldZoneScript*> WorldZoneScriptContainer;
+        void LoadWorldZoneScripts();
+        WorldZoneScript* GetWorldZoneScript(uint32 zoneId);
+
     private:
         // first free id for selected id type
         uint32 _auctionId; // pussywizard: accessed by a single thread
@@ -1249,6 +1254,8 @@ class ObjectMgr
 
         PageTextContainer _pageTextStore;
         InstanceTemplateContainer _instanceTemplateStore;
+
+        WorldZoneScriptContainer _worldZoneScriptStore;
 
     private:
         void LoadScripts(ScriptsType type);
