@@ -345,10 +345,10 @@ UPDATE `creature_template` SET `ScriptName`='npc_tidal_wave' WHERE `entry` IN (@
 DELETE FROM `gossip_menu` WHERE `entry`=10195;
 INSERT INTO `gossip_menu` VALUES
 (10195,14050);
-
 DELETE FROM `gossip_menu_option` WHERE `menu_id`=10195;
+
 INSERT INTO `gossip_menu_option` (`menu_id`, `id`, `option_icon`, `option_text`, `option_id`, `npc_option_npcflag`) VALUES
-(10195, 0, 0, 'I am ready, Warchief!', 1, 1);
+(10195, 1, 0, 'I am ready, Warchief!', 1, 1);
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15 AND `SourceGroup`=10195;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
