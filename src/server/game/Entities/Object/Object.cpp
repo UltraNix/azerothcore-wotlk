@@ -2665,7 +2665,6 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
         UpdateAllowedPositionZ(destx, desty, destz);
 
     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+selfAddition, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
-
     // collision occured
     if (col)
     {
@@ -2714,22 +2713,21 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     Trinity::NormalizeMapCoord(desty);
     UpdateAllowedPositionZ(destx, desty, destz);
 
+    // Crackaw: check if last z updates did not move z too far away from target and move him a bit closer
+    newDist = pos.GetExactDist(destx, desty, destz);
+    float ratio = newDist / dist;
+    if (ratio > 0.3f)
+    {
+        ratio = (1 / ratio) + (0.6f / ratio);
+        destx -= cos(angle) * ratio;
+        desty -= sin(angle) * ratio;
+    }
+
     float ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
     float floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, destz, true);
     ground = fabs(ground - destz) <= fabs(floor - pos.m_positionZ) ? ground : floor;
     if (destz < ground)
-        destz = ground;
-
-    // Xinef: check if last z updates did not move z too far away
-    //newDist = pos.GetExactDist(destx, desty, destz);
-    //float ratio = newDist / dist;
-    //if (ratio > 1.3f)
-    //{
-    //    ratio = (1 / ratio) + (0.3f / ratio);
-    //    destx = pos.GetPositionX() + (fabs(destx - pos.GetPositionX()) * cos(angle) * ratio);
-    //    desty = pos.GetPositionY() + (fabs(desty - pos.GetPositionY()) * sin(angle) * ratio);
-    //    destz = pos.GetPositionZ() + (fabs(destz - pos.GetPositionZ()) * ratio * (destz < pos.GetPositionZ() ? -1.0f : 1.0f));
-    //}
+        destz = ground;    
 
     pos.Relocate(destx, desty, destz);
     pos.m_orientation = m_orientation;
