@@ -82,7 +82,7 @@ class spell_magmadar_lava_bomb_SpellScript : public SpellScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        ValidateSpellInfo({ SPELL_LAVA_BOMB, SPELL_SUMMON_FLAME });
+        return ValidateSpellInfo({ SPELL_LAVA_BOMB, SPELL_SUMMON_FLAME });
     }
 
     void HandleScript(SpellEffIndex /*effIndex*/)
