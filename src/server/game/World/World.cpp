@@ -1282,8 +1282,8 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_SAVE_LOOT_SYSTEM] = sConfigMgr->GetBoolDefault("SaveLootSystem.Enable", false);
     m_bool_configs[CONFIG_EXTRA_CHANCE_EVENT] = sConfigMgr->GetBoolDefault("ExtraChanceEvent.Enable", false);
     m_bool_configs[CONFIG_CROSSFACTION_MAIL] = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
-    
-    
+    m_bool_configs[CONFIG_PTR_REALM] = sConfigMgr->GetBoolDefault("PTR.Realm", false);
+        
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

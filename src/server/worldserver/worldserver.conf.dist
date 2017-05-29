@@ -3265,4 +3265,12 @@ ExtraChanceEvent.Enable = 0
 CrossFactionMail.Enable = 0
 
 #
+#     PTR.Realm
+#        Description: New created players have level 80 and allow them speak without any played time.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+PTR.Realm = 0
+
+#
 ###################################################################################################
