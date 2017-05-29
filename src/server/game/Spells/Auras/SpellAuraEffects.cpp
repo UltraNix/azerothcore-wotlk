@@ -6553,9 +6553,10 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
     }
 
     target->AddThreat(caster, float(gainedAmount) * 0.5f, GetSpellInfo()->GetSchoolMask(), GetSpellInfo());
-    
+
     // remove CC auras
-    target->RemoveAurasWithInterruptFlags(0x480000);//Fear AuraInterruptFlags (TODO: Enum using)
+    target->RemoveAurasByType(SPELL_AURA_MOD_CONFUSE);
+    target->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
 
     // Drain Mana
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK
