@@ -1129,4 +1129,81 @@ class ScriptRegistry
         static uint32 _scriptIdCounter;
 };
 
+template <class _SpellScript>
+class SpellScriptLoaderEx : public SpellScriptLoader
+{
+    public:
+        SpellScriptLoaderEx(char const* name) : SpellScriptLoader(name) { }
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new _SpellScript();
+        }
+};
+
+template <class _AuraScript>
+class AuraScriptLoaderEx : public SpellScriptLoader
+{
+    public:
+        AuraScriptLoaderEx(char const* name) : SpellScriptLoader(name) { }
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new _AuraScript();
+        }
+};
+
+template <class _SpellScript, class _AuraScript>
+class SpellAuraScriptLoaderEx : public SpellScriptLoader
+{
+    public:
+        SpellAuraScriptLoaderEx(char const* name) : SpellScriptLoader(name) { }
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new _SpellScript();
+        }
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new _AuraScript();
+        }
+};
+
+template <class _CreatureAI>
+class CreatureAILoader : public CreatureScript
+{
+    public:
+        CreatureAILoader(char const* name) : CreatureScript(name) { }
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return new _CreatureAI(creature);
+        }
+};
+
+template <class _InstanceAI>
+class InstanceMapScriptLoader : public InstanceMapScript
+{
+    public:
+        InstanceMapScriptLoader(char const* name, uint32 mapId) : InstanceMapScript(name, mapId) { }
+
+        InstanceScript* GetInstanceScript(InstanceMap* map) const override
+        {
+            return new _InstanceAI(map);
+        }
+};
+
+template <class _GameObjectAI>
+class GameObjectAILoader : public GameObjectScript
+{
+    public:
+        GameObjectAILoader(char const* name) : GameObjectScript(name) { }
+
+        GameObjectAI* GetAI(GameObject* go) const override
+        {
+            return new _GameObjectAI(go);
+        }
+};
+
 #endif

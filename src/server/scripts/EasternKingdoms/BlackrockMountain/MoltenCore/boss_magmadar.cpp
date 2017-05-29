@@ -24,106 +24,81 @@ enum Events
     EVENT_LAVA_BOMB
 };
 
-class boss_magmadar : public CreatureScript
+struct boss_magmadarAI : public BossAI
 {
-    public:
-        boss_magmadar() : CreatureScript("boss_magmadar") { }
+    boss_magmadarAI(Creature* creature) : BossAI(creature, BOSS_MAGMADAR) { }
 
-        struct boss_magmadarAI : public BossAI
+    void Reset() override
+    {
+        _Reset();
+        DoCast(me, SPELL_MAGMA_SPIT, true);
+    }
+
+    void EnterCombat(Unit* /*victim*/) override
+    {
+        _EnterCombat();
+        events.ScheduleEvent(EVENT_FRENZY, 30000);
+        events.ScheduleEvent(EVENT_PANIC, 7000);
+        events.ScheduleEvent(EVENT_LAVA_BOMB, 12000);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        while (uint32 eventId = events.GetEvent())
         {
-            boss_magmadarAI(Creature* creature) : BossAI(creature, BOSS_MAGMADAR) { }
-
-            void Reset() override
+            switch (eventId)
             {
-                _Reset();
-                DoCast(me, SPELL_MAGMA_SPIT, true);
+                case EVENT_FRENZY:
+                    Talk(EMOTE_FRENZY);
+                    DoCast(me, SPELL_FRENZY);
+                    events.RepeatEvent(urand(15000, 20000));
+                    break;
+                case EVENT_PANIC:
+                    DoCastVictim(SPELL_PANIC);
+                    events.RepeatEvent(urand(30000, 40000));
+                    break;
+                case EVENT_LAVA_BOMB:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                        DoCast(target, SPELL_LAVA_BOMB);
+                    events.RepeatEvent(urand(12000, 15000));
+                    break;
+                default:
+                    break;
             }
-
-            void EnterCombat(Unit* /*victim*/) override
-            {
-                _EnterCombat();
-                events.ScheduleEvent(EVENT_FRENZY, 30000);
-                events.ScheduleEvent(EVENT_PANIC, 7000);
-                events.ScheduleEvent(EVENT_LAVA_BOMB, 12000);
-            }
-
-            void UpdateAI(uint32 diff) override
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.GetEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_FRENZY:
-                            Talk(EMOTE_FRENZY);
-                            DoCast(me, SPELL_FRENZY);
-                            events.RepeatEvent(urand(15000, 20000));
-                            break;
-                        case EVENT_PANIC:
-                            DoCastVictim(SPELL_PANIC);
-                            events.RepeatEvent(urand(30000, 40000));
-                            break;
-                        case EVENT_LAVA_BOMB:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                DoCast(target, SPELL_LAVA_BOMB);
-                            events.RepeatEvent(urand(12000, 15000));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
-        {
-            return new boss_magmadarAI(creature);
         }
+
+        DoMeleeAttackIfReady();
+    }
 };
 
-class spell_magmadar_lava_bomb : public SpellScriptLoader
+class spell_magmadar_lava_bomb_SpellScript : public SpellScript
 {
-    public:
-        spell_magmadar_lava_bomb() : SpellScriptLoader("spell_magmadar_lava_bomb") { }
+    PrepareSpellScript(spell_magmadar_lava_bomb_SpellScript);
 
-        class spell_magmadar_lava_bomb_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_magmadar_lava_bomb_SpellScript);
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_LAVA_BOMB, SPELL_SUMMON_FLAME });
+    }
 
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_LAVA_BOMB) || !sSpellMgr->GetSpellInfo(SPELL_SUMMON_FLAME))
-                    return false;
-                return true;
-            }
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        if (Unit* target = GetHitUnit())
+            target->CastSpell(target, SPELL_SUMMON_FLAME, true);
+    }
 
-            void HandleScript(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* target = GetHitUnit())
-                    target->CastSpell(target, SPELL_SUMMON_FLAME, true);
-            }
-
-            void Register() override
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_magmadar_lava_bomb_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_magmadar_lava_bomb_SpellScript();
-        }
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_magmadar_lava_bomb_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
 };
-
 
 void AddSC_boss_magmadar()
 {
-    new boss_magmadar();
-    new spell_magmadar_lava_bomb();
+    new CreatureAILoader<boss_magmadarAI>("boss_magmadar");
+    new SpellScriptLoaderEx<spell_magmadar_lava_bomb_SpellScript>("spell_magmadar_lava_bomb");
 }

@@ -564,7 +564,7 @@ class EventMap
     typedef std::multimap<uint32, uint32> EventStore;
 
     public:
-        EventMap() : _time(0), _phase(0) { }
+        EventMap() : _time(0), _phase(0), _lastEvent(0) { }
 
         /**
         * @name Reset
@@ -706,6 +706,16 @@ class EventMap
         }
 
         /**
+        * @name RepeatEvent
+        * @brief Repeats the mostly recently executed event.
+        * @param time Time until the event occurs.
+        */
+        void Repeat(uint32 time)
+        {
+            _eventMap.insert(EventStore::value_type(_time + time, _lastEvent));
+        }
+
+        /**
         * @name PopEvent
         * @brief Remove the first event in the map.
         */
@@ -733,6 +743,7 @@ class EventMap
                 else
                 {
                     uint32 eventId = (itr->second & 0x0000FFFF);
+                    _lastEvent = itr->second; // include phase/group
                     _eventMap.erase(itr);
                     return eventId;
                 }
@@ -844,14 +855,10 @@ class EventMap
             if (!group || group > 8 || Empty())
                 return;
 
-            uint32 groupMask = (1 << (group + 15));
             for (EventStore::iterator itr = _eventMap.begin(); itr != _eventMap.end();)
             {
-                if (itr->second & groupMask)
-                {
-                    _eventMap.erase(itr);
-                    itr = _eventMap.begin();
-                }
+                if (itr->second & (1 << (group + 15)))
+                    _eventMap.erase(itr++);
                 else
                     ++itr;
             }
@@ -895,9 +902,19 @@ class EventMap
             return phase <= 8 && (!phase || _phase & (1 << (phase - 1)));
         }
 
+        uint32 GetTimeUntilEvent(uint32 eventId) const
+        {
+            for (EventStore::const_iterator itr = _eventMap.begin(); itr != _eventMap.end(); ++itr)
+                if (eventId == (itr->second & 0x0000FFFF))
+                    return itr->first - _time;
+
+            return std::numeric_limits<uint32>::max();
+        }
+
     private:
         uint32 _time;
         uint32 _phase;
+        uint32 _lastEvent;
 
         EventStore _eventMap;
 };
