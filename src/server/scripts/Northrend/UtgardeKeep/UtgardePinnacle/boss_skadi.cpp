@@ -127,10 +127,7 @@ public:
             events.Reset();
             summons.DespawnAll();
             if (Creature* grauf = me->SummonCreature(NPC_GRAUF, 341.741f, -516.955f, 104.669f, 3.12414f))
-            {
                 GraufGUID = grauf->GetGUID();
-                summons.Summon(grauf);
-            }
             SecondPhase = false;
             EventStarted = false;
 
@@ -146,6 +143,11 @@ public:
                 instance->SetData(SKADI_IN_RANGE, 0);
                 instance->SetData(DATA_SKADI_ACHIEVEMENT, false);
             }
+        }
+
+        void JustSummoned(Creature* summon) override
+        {
+            summons.Summon(summon);
         }
 
         void SpawnFirstWave()
