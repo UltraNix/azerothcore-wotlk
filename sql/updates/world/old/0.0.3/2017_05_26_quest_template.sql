@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `RequestItemsText`="You can hear a low-pitched hum emanating from the totem." WHERE `ID`=9538;

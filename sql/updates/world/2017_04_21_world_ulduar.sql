@@ -1,1 +1,0 @@
-UPDATE `creature_model_info` SET `combat_reach` = '20' WHERE `creature_model_info`.`modelid` = 28817;

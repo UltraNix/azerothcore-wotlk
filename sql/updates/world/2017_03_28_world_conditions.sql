@@ -1,2 +1,0 @@
-UPDATE `conditions` SET `ConditionValue1` = '13064' WHERE `SourceTypeOrReferenceId` = '19' AND `SourceEntry` = '12956' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '12915';
-UPDATE `conditions` SET `ConditionValue1` = '13064' WHERE `SourceTypeOrReferenceId` = '20' AND `SourceEntry` = '12956' AND `ConditionTypeOrReference` = '8' AND `ConditionValue1` = '12915';
