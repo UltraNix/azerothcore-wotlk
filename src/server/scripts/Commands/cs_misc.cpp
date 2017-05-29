@@ -131,7 +131,6 @@ public:
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
             { "blizzlike",          SEC_PLAYER,             false, HandleBlizzlikeCommand,              "" },
             { "arenainfo",          SEC_PLAYER,             false, HandleArenaInfoCommand,              "" },
-            { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
         };
         return commandTable;
     }
@@ -3531,86 +3530,6 @@ public:
 
         return true;
     }
- 
-    static bool HandleEventGoCommand(ChatHandler* handler, char const* args)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-
-        if (!player)
-            return false;
-
-        if (player->GetMap()->IsBattlegroundOrArena())
-            return false;
-
-        if (player->IsAlive() && player->IsInCombat())
-            return false;
-
-        if (!*args)
-            return false;
-
-        char* loc = strtok((char*)args, " ");
-        if (!loc || !atoi(loc) && loc != "0")
-            return false;
-
-        switch (atoi(loc))
-        {
-            case 1: 
-                player->TeleportTo(37, 279.194f, 784.134f, 260.275f, player->GetOrientation());
-                break;
-            case 2:
-                if (player->HasItemCount(85001))
-                    player->TeleportTo(0, 4313.801f, -2858.031f, 4.283f, player->GetOrientation());
-                else
-                {
-                    handler->PSendSysMessage("You can't do that right now.");
-                    handler->SetSentErrorMessage(true);
-                }
-                break;
-            case 3:
-                if (player->HasItemCount(85002))
-                    player->TeleportTo(1, 5440.668f, -2815.511f, 1464.347f, player->GetOrientation());
-                else
-                {
-                    handler->PSendSysMessage("You can't do that right now.");
-                    handler->SetSentErrorMessage(true);
-                }
-                break;
-            case 4:
-                if (player->HasItemCount(85003))
-                    player->TeleportTo(0, 3468.920f, -2790.761f, 87.631f, player->GetOrientation());
-                else
-                {
-                    handler->PSendSysMessage("You can't do that right now.");
-                    handler->SetSentErrorMessage(true);
-                }
-                break;
-            case 5:
-                if (player->HasItemCount(85004))
-                    player->TeleportTo(1, 5464.369f, -3512.380f, 1557.335f, player->GetOrientation());
-                else
-                {
-                    handler->PSendSysMessage("You can't do that right now.");
-                    handler->SetSentErrorMessage(true);
-                }
-                break;
-            case 6:
-                if (player->HasItemCount(85005))
-                    player->TeleportTo(37, -39.892f, -172.452f, 369.233f, player->GetOrientation());
-                else
-                {
-                    handler->PSendSysMessage("You can't do that right now.");
-                    handler->SetSentErrorMessage(true);
-                }
-                break;
-            default:
-                handler->PSendSysMessage("Wrong location.");
-                handler->SetSentErrorMessage(true);
-                break;
-        }
-
-        return true;
-    }
-
 };
 
 void AddSC_misc_commandscript()
