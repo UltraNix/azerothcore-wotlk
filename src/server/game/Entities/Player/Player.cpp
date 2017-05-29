@@ -1088,6 +1088,10 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
             start_level = gm_level;
     }
 
+    // @ptr
+    if (sWorld->getBoolConfig(CONFIG_PTR_REALM))
+        start_level = 80;
+
     SetUInt32Value(UNIT_FIELD_LEVEL, start_level);
 
     InitRunes();

@@ -270,7 +270,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                     me->SetStandState(UNIT_STAND_STATE_STAND);
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
-                    if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                    if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                         Sylvanas->SearchFormation();
                 }
             }
@@ -282,7 +282,7 @@ class npc_thrall_battle_undercity : public CreatureScript
 
                 if (!action)
                 {
-                    if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                    if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                     {
                         Sylvanas->RemoveAllAuras();
                         float homeX, homeY, homeZ, homeOrient;
@@ -323,7 +323,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                         SetEscortPaused(true);
                         SetRun(false);
                         me->Dismount();
-                        if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                        if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                             Sylvanas->Dismount();
                         JumpToNextStep(2000);
                         break;
@@ -610,7 +610,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                 _summons.DoAction(0, pred);
                 _summons.DespawnAll();
 
-                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                 {
                     Sylvanas->RemoveAllAuras();
                     float homeX, homeY, homeZ, homeOrient;
@@ -698,7 +698,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 me->NearTeleportTo(homeX, homeY, homeZ, homeOrient);
                                 JustRespawned();
                                 me->Mount(me->GetCreatureAddon()->mount);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                 {
                                     Sylvanas->RemoveAllAuras();
                                     float homeX, homeY, homeZ, homeOrient;
@@ -744,7 +744,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 break;
                             case 4:
                                 me->SetSheath(SHEATH_STATE_MELEE);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->SetSheath(SHEATH_STATE_RANGED);
                                 Talk(8);
                                 JumpToNextStep(3000);
@@ -834,7 +834,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 DoUpdateWorldState(WORLDSTATE_BATTLING_COURTYARD, 1);
                                 if (Creature* TidalWave = ObjectAccessor::GetCreature(*me, TidalWaveGUID))
                                     TidalWave->DespawnOrUnsummon();
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->m_CombatDistance = 50.0f;
                                 for (uint8 i = 0; i < 5; ++i)
                                 {
@@ -852,7 +852,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 JumpToNextStep(10000);
                                 break;
                             case 17:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                 {
                                     Sylvanas->CastSpell(Sylvanas, SPELL_SONG_OF_SYLVANAS, true);
                                     DoPlaySoundToSet(Sylvanas, SOUND_LAMENT);
@@ -880,7 +880,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 JumpToNextStep(4000);
                                 break;
                             case 21:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->AI())
                                         Sylvanas->AI()->Talk(1);
                                 JumpToNextStep(5000);
@@ -912,7 +912,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 break;
                             case 25:
                                 me->GetMotionMaster()->MoveJump(1547.29f, 248.38f, -19.62f, 10.0f, 20.0f, 1);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                 {
                                     if (Sylvanas->GetFormation())
                                         Sylvanas->GetFormation()->RemoveMember(Sylvanas);
@@ -922,7 +922,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 break;
                             case 26:
                                 me->GetMotionMaster()->MoveJump(1537.12f, 240.63f, -41.36f, 10.0f, 20.0f, 2);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->GetMotionMaster()->MoveJump(1537.12f, 240.63f, -41.36f, 10.0f, 10.0f, 2);
                                 JumpToNextStep(10000);
                                 break;
@@ -937,7 +937,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                     }
                                     else
                                         player->RemoveAurasDueToSpell(SPELL_CYCLONE_FALL);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->SearchFormation();
                                 SetEscortPaused(false);
                                 TalkEvent = false;
@@ -949,18 +949,18 @@ class npc_thrall_battle_undercity : public CreatureScript
                             case 29:
                                 DespawnCreatures(NPC_WHIRLWIND);
                                 me->SetFacingTo(0.133856f);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->SetFacingTo(0.133856f);
                                 JumpToNextStep(1500);
                                 break;
                             case 30:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->AI())
                                         Sylvanas->AI()->Talk(2);
                                 JumpToNextStep(6500);
                                 break;
                             case 31:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->AI())
                                         Sylvanas->AI()->Talk(3);
                                 JumpToNextStep(8500);
@@ -970,7 +970,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 JumpToNextStep(8000);
                                 break;
                             case 33:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->AI())
                                         Sylvanas->AI()->Talk(4);
                                 JumpToNextStep(1100);
@@ -981,7 +981,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 break;
                             case 35:
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                 {
                                     Sylvanas->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                                     if (Sylvanas->AI())
@@ -1020,7 +1020,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                             case 39:
                                 if (Creature* Varimathras = ObjectAccessor::GetCreature(*me, VarimathrasGUID))
                                     Varimathras->DespawnOrUnsummon();
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                                 DespawnCreatures(NPC_WAVES_TRIGGER);
@@ -1041,7 +1041,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 TalkEvent = false;
                                 break;
                             case 43:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->AI())
                                         Sylvanas->AI()->Talk(6);
                                 JumpToNextStep(4000);
@@ -1067,7 +1067,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 break;
                             case 46:
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                                 JumpToNextStep(3000);
                                 break;
@@ -1082,7 +1082,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 break;
                             case 49:
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                                 DoUpdateWorldState(WORLDSTATE_BATTLING_ROYAL_QUARTER, 1);
                                 if (GameObject* Passage = ObjectAccessor::GetGameObject(*me, PassageGUID))
@@ -1123,7 +1123,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 JumpToNextStep(6000);
                                 break;
                             case 56:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->GetFormation())
                                         Sylvanas->GetFormation()->RemoveMember(Sylvanas);
                                 SetRun(true);
@@ -1131,7 +1131,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 TalkEvent = false;
                                 break;
                             case 57:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     me->SetFacingToObject(Sylvanas);
                                 JumpToNextStep(1500);
                                 break;
@@ -1140,18 +1140,18 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 JumpToNextStep(4000);
                                 break;
                             case 59:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     Sylvanas->CastSpell(Sylvanas, SPELL_LEAP_TO_PLATFORM, true);
                                 JumpToNextStep(6000);
                                 break;
                             case 60:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     if (Sylvanas->AI())
                                         Sylvanas->AI()->Talk(7);
                                 JumpToNextStep(500);
                                 break;
                             case 61:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                     me->SetFacingToObject(Sylvanas);
                                 JumpToNextStep(8000);
                                 break;
@@ -1162,7 +1162,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 JumpToNextStep(5000);
                                 break;
                             case 63:
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                 {
                                     Sylvanas->SetWalk(true);
                                     Sylvanas->GetMotionMaster()->MovePoint(2, 1300.53f, 341.01f, -60.08f);
@@ -1191,7 +1191,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 Position pos;
                                 me->GetNearPosition(pos, 5.0f, 0.0f);
                                 me->GetMotionMaster()->MoveJump(pos, 10.0f, 10.0f);
-                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_SYLVANAS)))
+                                if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                                 {
                                     Sylvanas->GetNearPosition(pos, 5.0f, 0.0f);
                                     Sylvanas->GetMotionMaster()->MoveJump(pos, 10.0f, 10.0f);

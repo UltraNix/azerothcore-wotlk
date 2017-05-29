@@ -89,6 +89,4 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_INS_DISABLES, "INSERT INTO disables (entry, sourceType, flags, comment) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(WORLD_SEL_DISABLES, "SELECT entry FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_DEL_DISABLES, "DELETE FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_ASYNC);
-    PrepareStatement(WORLD_SEL_LORE_EVENT, "SELECT done FROM custom_events WHERE id = ?", CONNECTION_SYNCH);
-    PrepareStatement(WORLD_UPD_LORE_EVENT, "UPDATE custom_events SET done = 1 WHERE id = ?", CONNECTION_ASYNC);
 }

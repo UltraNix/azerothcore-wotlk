@@ -41,7 +41,11 @@ enum Mobs
 enum Data
 {
     DATA_GET_ENEMY                      = 0,
-    DATA_DREADLORD_COUNT                = 1
+    DATA_DREADLORD_COUNT                = 1,
+
+    DATA_JAINA                          = 100,
+    DATA_SYLVANAS                       = 200,
+    DATA_WAVES_TRIGGER                  = 300
 };
 
 enum Worldstates
