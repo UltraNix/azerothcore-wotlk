@@ -632,7 +632,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 stmt->setUInt32(18 + i, 0);
 
-            stmt->setUInt32(36, getMSTime());
+            stmt->setUInt32(37, getMSTime());
             break;
         }
         case AUCTION_SELL_MONEY:

@@ -1267,7 +1267,7 @@ public:
                 data = "Offspec: " + auctionList;
                 break;
             case 13:
-                data = "Average Item Level: " + auctionList + "Click to view items";
+                data = "Average Item Level: " + auctionList + " [show items]";
                 break;
             default:
                 data = "Unknown";
