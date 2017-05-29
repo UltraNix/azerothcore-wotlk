@@ -5,7 +5,7 @@
 
 enum Emotes
 {
-    EMOTE_FRENZY                = 1,
+    EMOTE_FRENZY                = 0,
     EMOTE_SHIMMER
 };
 

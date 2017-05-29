@@ -106,7 +106,7 @@ public:
             return false;
         }
 
-        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_PREMIUM, 0, 0, 0, ""))
+        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_PREMIUM, 0, 0))
             sBazaarMgr->TakeRequiredAmount(player, dpAmount, AUCTION_SELL_PREMIUM);
         else
         {
@@ -176,7 +176,7 @@ public:
             return false;
         }
 
-        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_MONEY, 0, 0, 0, ""))
+        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_MONEY, 0, 0))
             sBazaarMgr->TakeRequiredAmount(player, moneyAmount, AUCTION_SELL_MONEY);
         else
         {
@@ -376,23 +376,11 @@ public:
         if (!offSpecStr || !atoi(offSpecStr) && offSpecStr != "0")
             return false;
 
-        // Gear Score 
-        char* gearScoreStr = strtok(nullptr, " ");
-        if (!gearScoreStr || !atoi(gearScoreStr) && gearScoreStr != "0")
-            return false;
-
-        // Description
-        char* descriptionStr = strtok(nullptr, "");
-        if (!descriptionStr)
-            return false;
-
         uint32 accId = player->GetSession()->GetAccountId();
 
         uint32 dpAmount = atoi(ppStr);
         uint8  mainSpec = atoi(mainSpecStr);
-        uint8  offSpec = atoi(offSpecStr);
-        uint16 gearscore = atoi(gearScoreStr);
-        std::string description = descriptionStr;
+        uint8  offSpec  = atoi(offSpecStr);
 
         uint32 auctionCount = sBazaarMgr->GetAuctionCount(accId, AUCTION_SELL_CHARACTER);
 
@@ -406,20 +394,6 @@ public:
         if (offSpec > 4)
         {
             handler->PSendSysMessage("Wrong off spec.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (gearscore > 7000)
-        {
-            handler->PSendSysMessage("GearScore too high.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (description.length() > 125)
-        {
-            handler->PSendSysMessage("Description too long, max 125 characters.");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -445,7 +419,7 @@ public:
             return false;
         }
 
-        if (sBazaarMgr->CreateBazaarAuction(player, 0, dpAmount, AUCTION_SELL_CHARACTER, mainSpec, offSpec, gearscore, description))
+        if (sBazaarMgr->CreateBazaarAuction(player, 0, dpAmount, AUCTION_SELL_CHARACTER, mainSpec, offSpec))
             sBazaarMgr->LogoutCharacterAfterAuction(player);
         else
         {
@@ -674,7 +648,8 @@ enum NpcSlaveActions
     NPC_SLAVE_ACTION_RETURN_MAIN             = 3000001,
     NPC_SLAVE_ACTION_CLOSE                   = 3000002,
     NPC_SLAVE_OUTPUT_ARMORY_LINK             = 3000003,
-    NPC_SLAVE_ACTION_CONFIRM_OFFER           = 3000004,
+    NPC_SLAVE_ACTION_SEND_ITEM_LIST          = 3000004,
+    NPC_SLAVE_ACTION_CONFIRM_OFFER           = 3000005,
 };
 
 class npc_slave : public CreatureScript
@@ -812,13 +787,35 @@ public:
         {
             if (sendArmoryLink(player, player->GetSelectedAuction()))
             {
-                for (uint8 i = 0; i < 15; i++)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_OUTPUT_ARMORY_LINK);
+                for (uint8 i = 0; i < 14; i++)
+                    if (i == 13)
+                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_SEND_ITEM_LIST);
+                    else
+                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_OUTPUT_ARMORY_LINK);
 
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Buy This Character.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_ACCEPT_OFFER);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             }
+        }
+        else if (action == NPC_SLAVE_ACTION_SEND_ITEM_LIST)
+        {
+            if (sendCharacterInfo(player, player->GetSelectedAuction()))
+            {
+                for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+                    sendItemList(player, player->GetSelectedAuction(), i);
+
+                for (uint8 i = 0; i < 14; i++)
+                    if (i == 13)
+                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_SEND_ITEM_LIST);
+                    else
+                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_OUTPUT_ARMORY_LINK);
+
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Buy This Character.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_ACCEPT_OFFER);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
+                player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            }
+
         }
         else if (action == NPC_SLAVE_ACTION_CONFIRM_OFFER)
         {
@@ -831,8 +828,11 @@ public:
             selectedAuctionId = action - NPC_SLAVE_ACTION_SELECTED_AUCTION; type = 0;
             player->SetSelectedAuction(selectedAuctionId);
 
-            for (uint8 i = 0; i < 15; i++)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_OUTPUT_ARMORY_LINK);
+            for (uint8 i = 0; i < 14; i++)
+                if (i == 13)
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_SEND_ITEM_LIST);
+                else
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_OUTPUT_ARMORY_LINK);
 
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Buy This Character.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_CONFIRM_OFFER);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
@@ -918,6 +918,203 @@ public:
         return true;
     }
 
+    bool sendCharacterInfo(Player* player, uint32 auctionId)
+    {
+        if (!player)
+            return false;
+
+        if (!auctionId)
+            return false;
+
+        QueryResult result = CharacterDatabase.PQuery("SELECT owner_name, slave_avgitemlevel FROM bazar_auction WHERE auctionId = %u", auctionId);
+
+        if (!result)
+            return false;
+
+        std::string name = "";
+        uint32 avg = 0;
+
+        if (result)
+        {
+            Field *fields = result->Fetch();
+            name = fields[0].GetString();
+            avg = fields[1].GetUInt32();
+        }
+
+        ChatHandler handler(player->GetSession());
+        handler.PSendSysMessage("Player: %s Average Item Level: %u", name.c_str(), avg);
+        return true;
+    }
+
+    void sendItemList(Player* player, uint32 auctionId, uint8 slot)
+    {
+        if (!player)
+            return;
+
+        if (!auctionId)
+            return;
+
+        QueryResult result = CharacterDatabase.PQuery("SELECT slave_level_slot1, slave_level_slot2, slave_level_slot3, slave_level_slot4, slave_level_slot5, slave_level_slot6, slave_level_slot7, slave_level_slot8, slave_level_slot9, slave_level_slot10, slave_level_slot11, slave_level_slot12, slave_level_slot13, slave_level_slot14, slave_level_slot15, slave_level_slot16, slave_level_slot17, slave_level_slot18, slave_level_slot19 FROM bazar_auction WHERE auctionId = %u", auctionId);
+
+        if (!result)
+            return;
+
+        uint32 itemId = 0;
+        uint8 quality = 0;
+
+        std::string itemName = "";
+        std::string color[6];
+
+        // Grey
+        color[0] = "|cff9d9d9d";
+        // White
+        color[1] = "|cffffffff";
+        // Green
+        color[2] = "|cff1eff00";
+        // Rare
+        color[3] = "|cff0070dd";
+        // Epic
+        color[4] = "|cffa335ee";
+        // Legendary
+        color[5] = "|cffff8000";
+
+        if (result)
+        {
+            Field *fields = result->Fetch();
+            itemId = fields[slot].GetUInt32();
+        }
+
+        ChatHandler handler(player->GetSession());
+
+        QueryResult result1 = WorldDatabase.PQuery("SELECT name, Quality FROM item_template WHERE entry = %u", itemId);
+
+        if (!result1)
+        {
+            switch (slot)
+            {
+                case EQUIPMENT_SLOT_HEAD:
+                    handler.PSendSysMessage("[HEAD]: -");
+                    break;
+                case EQUIPMENT_SLOT_NECK:
+                    handler.PSendSysMessage("[NECK]: -");
+                    break;
+                case EQUIPMENT_SLOT_SHOULDERS:
+                    handler.PSendSysMessage("[SHOULDERS]: -");
+                    break;
+                case EQUIPMENT_SLOT_BODY:
+                    handler.PSendSysMessage("[BODY]: -");
+                    break;
+                case EQUIPMENT_SLOT_CHEST:
+                    handler.PSendSysMessage("[CHEST]: -");
+                    break;
+                case EQUIPMENT_SLOT_WAIST:
+                    handler.PSendSysMessage("[WAIST]: -");
+                    break;
+                case EQUIPMENT_SLOT_LEGS:
+                    handler.PSendSysMessage("[LEGS]: -");
+                    break;
+                case EQUIPMENT_SLOT_FEET:
+                    handler.PSendSysMessage("[FEET]: -");
+                    break;
+                case EQUIPMENT_SLOT_WRISTS:
+                    handler.PSendSysMessage("[WRISTS]: -");
+                    break;
+                case EQUIPMENT_SLOT_HANDS:
+                    handler.PSendSysMessage("[HANDS]: -");
+                    break;
+                case EQUIPMENT_SLOT_FINGER1:
+                    handler.PSendSysMessage("[FINGER1]: -");
+                    break;
+                case EQUIPMENT_SLOT_FINGER2:
+                    handler.PSendSysMessage("[FINGER2]: -");
+                    break;
+                case EQUIPMENT_SLOT_TRINKET1:
+                    handler.PSendSysMessage("[TRINKET1]: -");
+                    break;
+                case EQUIPMENT_SLOT_TRINKET2:
+                    handler.PSendSysMessage("[TRINKET2]: -");
+                    break;
+                case EQUIPMENT_SLOT_MAINHAND:
+                    handler.PSendSysMessage("[MAINHAND]: -");
+                    break;
+                case EQUIPMENT_SLOT_OFFHAND:
+                    handler.PSendSysMessage("[OFFHAND]: -");
+                    break;
+                case EQUIPMENT_SLOT_RANGED:
+                    handler.PSendSysMessage("[RANGED]: -");
+                    break;
+                case EQUIPMENT_SLOT_TABARD:
+                    handler.PSendSysMessage("[TABARD]: -");
+                    break;
+            }
+        }
+
+        if (result1)
+        {
+            Field *fields = result1->Fetch();
+            itemName = fields[0].GetString();
+            quality  = fields[1].GetUInt8();
+ 
+            switch (slot)
+            {
+                case EQUIPMENT_SLOT_HEAD:
+                    handler.PSendSysMessage("[HEAD] - %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_NECK:
+                    handler.PSendSysMessage("[NECK]: - %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_SHOULDERS:
+                    handler.PSendSysMessage("[SHOULDERS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_BODY:
+                    handler.PSendSysMessage("[BODY]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_CHEST:
+                    handler.PSendSysMessage("[CHEST]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_WAIST:
+                    handler.PSendSysMessage("[WAIST]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_LEGS:
+                    handler.PSendSysMessage("[LEGS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_FEET:
+                    handler.PSendSysMessage("[FEET]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_WRISTS:
+                    handler.PSendSysMessage("[WRISTS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_HANDS:
+                    handler.PSendSysMessage("[HANDS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_FINGER1:
+                    handler.PSendSysMessage("[FINGER1]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_FINGER2:
+                    handler.PSendSysMessage("[FINGER2]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_TRINKET1:
+                    handler.PSendSysMessage("[TRINKET1]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_TRINKET2:
+                    handler.PSendSysMessage("[TRINKET2]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_MAINHAND:
+                    handler.PSendSysMessage("[MAINHAND]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_OFFHAND:
+                    handler.PSendSysMessage("[OFFHAND]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_RANGED:
+                    handler.PSendSysMessage("[RANGED]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+                case EQUIPMENT_SLOT_TABARD:
+                    handler.PSendSysMessage("[TABARD]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                    break;
+            }
+        }
+    }
+
     std::string GetAuctionAcceptStringData(uint32 auctionId, uint8 info_return)
     {
         if (!auctionId)
@@ -926,7 +1123,7 @@ public:
             return data;
         }
 
-        QueryResult result = CharacterDatabase.PQuery("SELECT char_guid, dp_amount, owner_name, slave_race, slave_class, slave_gender, slave_level, slave_money, slave_arena, slave_honor, slave_riding, slave_mainspec, slave_offspec, slave_gearscore, slave_description FROM bazar_auction WHERE auctionId = %u", auctionId);
+        QueryResult result = CharacterDatabase.PQuery("SELECT char_guid, dp_amount, owner_name, slave_race, slave_class, slave_gender, slave_level, slave_money, slave_arena, slave_honor, slave_riding, slave_mainspec, slave_offspec, slave_avgitemlevel FROM bazar_auction WHERE auctionId = %u", auctionId);
 
         if (!result)
         {
@@ -1070,10 +1267,7 @@ public:
                 data = "Offspec: " + auctionList;
                 break;
             case 13:
-                data = "GearScore: " + auctionList;
-                break;
-            case 14:
-                data = "Desc: " + auctionList;
+                data = "Average Item Level: " + auctionList + " [show items]";
                 break;
             default:
                 data = "Unknown";

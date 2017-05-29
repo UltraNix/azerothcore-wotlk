@@ -2636,6 +2636,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetNextSave() const { return m_nextSave; }
         SpellModList const& GetSpellModList(uint32 type) const { return m_spellMods[type]; }
 
+        uint32 GetItemIdForSlaveMarket(uint8 slot);
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;

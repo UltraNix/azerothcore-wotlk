@@ -27309,3 +27309,13 @@ void Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     AsynchPetSummon* asynchPetInfo = new AsynchPetSummon(entry, pos, petType, duration, createdBySpell, casterGUID);
     Pet::LoadPetFromDB(this, asynchLoadType, entry, 0, false, asynchPetInfo);
 }
+
+uint32 Player::GetItemIdForSlaveMarket(uint8 slot)
+{
+    uint32 id = 0;
+
+    if (m_items[slot] && m_items[slot]->GetTemplate())
+        id = m_items[slot]->GetTemplate()->ItemId;
+
+    return id;
+}
