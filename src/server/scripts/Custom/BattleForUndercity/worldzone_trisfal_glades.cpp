@@ -31,7 +31,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
 
             std::list<uint64> AllianceSpawns;
 
-            void Initialize() override
+            void Initialize() 
             {
                 for (uint8 i = 0; i < MAX_BATTLING_AREAS; ++i)
                 {
@@ -47,17 +47,17 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                     BattleTimer[i] = 0;
                 }
 
-                ResetBattle = false;
-                ResetTimer = 0;
+                ResetBattle     = false;
+                ResetTimer      = 0;
 
-                JainaGUID = 0;
-                SylvanasGUID = 0;
+                JainaGUID       = 0;
+                SylvanasGUID    = 0;
                 WaveTriggerGUID = 0;
 
                 AllianceSpawns.clear();
             }
 
-            void OnCreatureCreate(Creature* creature) override
+            void OnCreatureCreate(Creature* creature) 
             {
                 switch (creature->GetEntry())
                 {
@@ -81,7 +81,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                 }
             }
 
-            void OnUnitDeath(Unit* unit) override
+            void OnUnitDeath(Unit* unit) 
             {
                 if (unit->GetTypeId() != TYPEID_UNIT)
                     return;
@@ -126,7 +126,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                     }
             }
 
-            void SetData(uint32 type, uint32 data) override
+            void SetData(uint32 type, uint32 data) 
             {
                 switch (type)
                 {
@@ -196,15 +196,15 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                 }
             }
 
-            uint64 GetData64(uint32 data) const override
+            uint64 GetData64(uint32 data) const
             {
                 switch (data)
                 {
-                    case NPC_JAINA_PROUDMORE:
+                    case DATA_JAINA:
                         return JainaGUID;
-                    case NPC_SYLVANAS:
+                    case DATA_SYLVANAS:
                         return SylvanasGUID;
-                    case NPC_WAVES_TRIGGER:
+                    case DATA_WAVES_TRIGGER:
                         return WaveTriggerGUID;
                     case DATA_GET_ENEMY:
                         return Trinity::Containers::SelectRandomContainerElement(AllianceSpawns);

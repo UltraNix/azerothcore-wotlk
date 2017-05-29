@@ -194,7 +194,7 @@ class npc_varian_battle_undercity : public CreatureScript
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
-                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                         Jaina->SearchFormation();
                 }
             }
@@ -206,7 +206,7 @@ class npc_varian_battle_undercity : public CreatureScript
 
                 if (!action)
                 {
-                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                     {
                         Jaina->RemoveAllAuras();
                         float homeX, homeY, homeZ, homeOrient;
@@ -292,7 +292,7 @@ class npc_varian_battle_undercity : public CreatureScript
                             if (Putress->GetAI())
                                 Putress->GetAI()->SetData(0, 1);
                         }
-                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                         {
                             if (Jaina->GetFormation())
                                 Jaina->GetFormation()->RemoveMember(Jaina);
@@ -309,7 +309,7 @@ class npc_varian_battle_undercity : public CreatureScript
                         SetEscortPaused(true);
                         Talk(16);
                         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                             Jaina->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                         JumpToNextStep(6000);
                         break;
@@ -419,7 +419,7 @@ class npc_varian_battle_undercity : public CreatureScript
                     me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_LOOT);
                     JumpToNextStep(4000);
 
-                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                         Jaina->GetMotionMaster()->MovePoint(104, 1421.32f, 419.45f, -84.96f);
                 }
             }
@@ -446,7 +446,7 @@ class npc_varian_battle_undercity : public CreatureScript
                         break;
                     case 3:
                         Talk(17);
-                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                         {
                             Jaina->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                             if (Jaina->GetFormation())
@@ -508,7 +508,7 @@ class npc_varian_battle_undercity : public CreatureScript
                 _summons.DoAction(0, pred);
                 _summons.DespawnAll();
 
-                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                 {
                     Jaina->RemoveAllAuras();
                     float homeX, homeY, homeZ, homeOrient;
@@ -580,7 +580,7 @@ class npc_varian_battle_undercity : public CreatureScript
                             case 1:
                                 me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
                                 Talk(0);
-                                if (Creature* WaveTrigger = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_WAVES_TRIGGER)))
+                                if (Creature* WaveTrigger = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_WAVES_TRIGGER)))
                                     if (WaveTrigger->IsAlive())
                                         WaveTrigger->Kill(WaveTrigger, WaveTrigger);
                                 DoUpdateWorldState(WORLDSTATE_MANHUNT_TIMER_STATE, 1);
@@ -607,13 +607,13 @@ class npc_varian_battle_undercity : public CreatureScript
                                 JumpToNextStep(9000);
                                 break;
                             case 5:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     if (Jaina->AI())
                                         Jaina->AI()->Talk(0);
                                 JumpToNextStep(3000);
                                 break;
                             case 6:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->CastSpell(Jaina, SPELL_BRILLIANCE_AURA, false);
                                 SetEscortPaused(false);
                                 SummonTrigger(0);
@@ -643,7 +643,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 DespawnCreatures(NPC_STORMWIND_ELITE_A);
                                 DespawnCreatures(NPC_WAVES_TRIGGER);
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                 {
                                     Jaina->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY2H);
                                     if (Jaina->AI())
@@ -653,7 +653,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 break;
                             case 12:
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                                 SetEscortPaused(false);
                                 TalkEvent = false;
@@ -679,7 +679,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                     Putress->SetVisible(false);
                                 }
                                 me->SetStandState(UNIT_STAND_STATE_STAND);
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                                 SetRun(true);
                                 SetEscortPaused(false);
@@ -703,7 +703,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 JumpToNextStep(4000);
                                 break;
                             case 20:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->SearchFormation();
                                 if (Creature* Putress = ObjectAccessor::GetCreature(*me, PutressGUID))
                                     if (Putress->GetAI())
@@ -716,7 +716,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 break;
                             case 21:
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                                 if (Creature* Putress = ObjectAccessor::GetCreature(*me, PutressGUID))
                                     me->GetMotionMaster()->MovePoint(103, *Putress);
@@ -771,7 +771,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 JumpToNextStep(4000);
                                 break;
                             case 31:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                 {
                                     Jaina->SetFacingToObject(me);
                                     if (Jaina->AI())
@@ -819,7 +819,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 JumpToNextStep(10000);
                                 break;
                             case 39:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                 {
                                     Jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_15);
                                     Jaina->NearTeleportTo(1305.02f, 370.15f, -67.29f, 4.33f);
@@ -827,23 +827,23 @@ class npc_varian_battle_undercity : public CreatureScript
                                 JumpToNextStep(1000);
                                 break;
                             case 40:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     if (Jaina->AI())
                                         Jaina->AI()->Talk(3);
                                 JumpToNextStep(8000);
                                 break;
                             case 41:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->GetMotionMaster()->MovePoint(105, 1299.30f, 348.18f, -65.02f);
                                 JumpToNextStep(10000);
                                 break;
                             case 42:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                     Jaina->CastSpell(Jaina, SPELL_DEEP_FREEZE, false);
                                 TalkEvent = false;
                                 break;
                             case 43:
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                 {
                                     if (Jaina->AI())
                                         Jaina->AI()->Talk(4);
@@ -862,7 +862,7 @@ class npc_varian_battle_undercity : public CreatureScript
                                 DoUpdateWorldState(WORLDSTATE_SECURED_SEWERS, 0);
                                 DoUpdateWorldState(WORLDSTATE_SECURED_APOTHECARIUM, 0);
                                 DoUpdateWorldState(WORLDSTATE_UNDERCITY_CONTROLLED_A, 1);
-                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(NPC_JAINA_PROUDMORE)))
+                                if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
                                 {
                                     Jaina->RemoveAllAuras();
                                     float homeX, homeY, homeZ, homeOrient;
