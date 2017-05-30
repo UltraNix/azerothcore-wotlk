@@ -4104,6 +4104,34 @@ void SpellMgr::LoadDbcDataCorrections()
         case 11129:
             spellInfo->Dispel = DISPEL_NONE;
             break;
+        //Arcane Missile mana cost (Master of Elements)
+        case 7268:
+        case 7269:
+        case 7270:
+        case 8419:
+        case 8418:
+        case 10273:
+        case 10274:
+        case 25346:
+        case 27076:
+        case 38700:
+        case 38703:
+        case 42844:
+        case 42845:
+            spellInfo->ManaCostPercentage = 6;
+            break;
+        //Blizzard mana cost (Master of Elements)
+        case 42208:
+        case 42209:
+        case 42210:
+        case 42211:
+        case 42212:
+        case 42213:
+        case 42198:
+        case 42937:
+        case 42938:
+            spellInfo->ManaCostPercentage = 9;
+            break;
         // Magic Absorption (nigga stole my code)
         case 29441:
         case 29444:
@@ -4115,6 +4143,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 55362:
             spellInfo->AttributesEx3 |=  SPELL_ATTR3_NO_INITIAL_AGGRO;
             spellInfo->AttributesEx4 |= SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS;
+            spellInfo->ManaCostPercentage = 22; //Living Bomb mana cost (Master of Elements)
             break;
         // Evocation
         case 12051:
