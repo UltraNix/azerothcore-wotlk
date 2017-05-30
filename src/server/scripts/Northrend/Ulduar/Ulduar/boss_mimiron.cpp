@@ -1068,8 +1068,8 @@ public:
                             AttackStart(target);
                         DoZoneInCombat();
                         events.Reset();
-                        events.ScheduleEvent(EVENT_SPELL_NAPALM_SHELL, 3000);
-                        events.ScheduleEvent(EVENT_SPELL_PLASMA_BLAST, 10000);
+                        events.ScheduleEvent(EVENT_SPELL_NAPALM_SHELL, 6000);
+                        events.ScheduleEvent(EVENT_SPELL_PLASMA_BLAST, 15000);
                         events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 20000);
                         events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
                         if (Creature* c = GetMimiron())
@@ -1378,7 +1378,7 @@ public:
                         events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
                         events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
                         events.ScheduleEvent(EVENT_HAND_PULSE, 1);
-                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
+                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 45000);
                         if (Creature* c = GetMimiron())
                             if (c->AI()->GetData(1))
                                 events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
