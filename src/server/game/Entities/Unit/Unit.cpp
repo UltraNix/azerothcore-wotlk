@@ -2718,8 +2718,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     // @todo: move this out of this function
     switch (spell->Id)
     {
-        case 1090:  // Magic Dust - @todo: move this out of this function
-        case 23605: // Spell Vulnerability - Nightfall
+        case 1090:  // Magic Dust
         {
             if (victim->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_MISS_MISS;
