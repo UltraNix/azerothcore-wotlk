@@ -958,7 +958,7 @@ class spell_mage_master_of_elements : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-
+                if (GetTarget()->HasAura(12536)) return; //Clearcasting check
                 int32 mana = int32(eventInfo.GetDamageInfo()->GetSpellInfo()->CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo()->GetSchoolMask()));
                 mana = CalculatePct(mana, aurEff->GetAmount());
 

@@ -5541,6 +5541,11 @@ SpellCastResult Spell::CheckCast(bool strict)
 			 if (m_targets.GetUnitTarget() != m_caster && m_caster->isStuned())
 				 return SPELL_FAILED_STUNNED;
              break;
+         //Disengage
+         case 781:
+             if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED | MOVEMENTFLAG_ONTRANSPORT))
+                 return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+             break;
          // Blink
          case 1953:
          // Shadowstep
