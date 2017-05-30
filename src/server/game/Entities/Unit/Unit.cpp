@@ -2715,18 +2715,25 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (spell->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
         return SPELL_MISS_NONE;
 
-    // Magic Dust - @todo: move this out of this function
-    if (spell->Id == 1090)
+    // @todo: move this out of this function
+    switch (spell->Id)
     {
-        if (victim->GetTypeId() == TYPEID_PLAYER)
-            return SPELL_MISS_MISS;
-        else
+        case 1090:  // Magic Dust - @todo: move this out of this function
+        case 23605: // Spell Vulnerability - Nightfall
         {
-            uint8 chance = urand(0, 100);
-
-            if (chance != 100) // Let's say 1 of 100 casts can hit unit.
+            if (victim->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_MISS_MISS;
-        }
+            else
+            {
+                if (victim->ToCreature()->isWorldBoss())
+                    return SPELL_MISS_MISS;
+
+                uint8 chance = urand(0, 100);
+
+                if (chance != 100) // Let's say 1 of 100 casts can hit unit.
+                    return SPELL_MISS_MISS;
+            }
+        } break;
     }
 
     SpellSchoolMask schoolMask = spell->GetSchoolMask();
