@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -263,7 +263,7 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
 DiminishingLevels GetDiminishingReturnsMaxLevel(DiminishingGroup group)
 {
     // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
-    // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all. 
+    // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
     // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
     /*
     switch (group)
@@ -338,7 +338,7 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
     switch (group)
     {
         // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
-        // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all. 
+        // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
         // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
         case DIMINISHING_TAUNT:
         case DIMINISHING_BANISH:
@@ -765,7 +765,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, Spell
     }
 
     if (procFlags & PROC_FLAG_TAKEN_PERIODIC)
-    {            
+    {
         if (procExtra & PROC_EX_INTERNAL_HOT)
         {
             /// No aura that only has PROC_FLAG_TAKEN_PERIODIC can proc from a HOT.
@@ -1162,7 +1162,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 
             // team that controls the workshop in the specified area
             uint32 team = bf->GetData(newArea);
-            
+
             if (team == TEAM_HORDE)
                 return spellId == 56618;
             else if (team == TEAM_ALLIANCE)
@@ -3058,8 +3058,8 @@ void SpellMgr::LoadSpellCustomAttr()
             case 72449: // Rune of Blood (Deathbringer Saurfang)
             case 49882: // Leviroth Self-Impale
             case 62775: // Ulduar: XT-002 Tympanic Tamparum
-            case 29107: // Disrupting Shout 
-            case 55543: // Disrupting Shout 
+            case 29107: // Disrupting Shout
+            case 55543: // Disrupting Shout
             case 55550: // Jagged Knife
             case 48642: // Launch Harpoon
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
@@ -3155,9 +3155,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->RecoveryTime = 1500;
                 spellInfo->_requireCooldownInfo = true;
                 break;
-            case 56001: // Ebonweave					
-            case 56002: // Moonshroud					
-            case 56003: // Spellweave	
+            case 56001: // Ebonweave
+            case 56002: // Moonshroud
+            case 56003: // Spellweave
             case 55208: // Smelt Titansteel
                 if (!sWorld->PatchNotes(PATCH_330))
                 {
@@ -3274,7 +3274,7 @@ void SpellMgr::LoadDbcDataCorrections()
             case 63137: // Force Cast (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                 spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_DB;
                 break;
-            case 53096: // Quetz'lun's Judgment            
+            case 53096: // Quetz'lun's Judgment
             case 70743: // AoD Special
             case 70614: // AoD Special - Vegard
                 spellInfo->MaxAffectedTargets = 1;
@@ -3537,13 +3537,13 @@ void SpellMgr::LoadDbcDataCorrections()
         case 24314: // Threatening Gaze
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_JUMP;
             break;
-        case 58689: // Rock Shards - Archavon the Stone Watcher 
-        case 58692: // Rock Shards - Archavon the Stone Watcher 
+        case 58689: // Rock Shards - Archavon the Stone Watcher
+        case 58692: // Rock Shards - Archavon the Stone Watcher
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_DEST_AREA_ENEMY;
             break;
-        case 58941: // Rock Shards - Archavon the Stone Watcher 
-        case 58695: // Rock Shards - Archavon the Stone Watcher 
-        case 60883: // Rock Shards - Archavon the Stone Watcher 
+        case 58941: // Rock Shards - Archavon the Stone Watcher
+        case 58695: // Rock Shards - Archavon the Stone Watcher
+        case 60883: // Rock Shards - Archavon the Stone Watcher
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             break;
 
@@ -3616,7 +3616,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 53408:
             spellInfo->FacingCasterFlags |= SPELL_FACING_FLAG_INFRONT;
             break;
-        */ 
+        */
         // Seal of Light trigger
         case 20167:
             spellInfo->spellLevel = 0;
@@ -3741,7 +3741,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         // Cobra Strikes
-        case 53257: 
+        case 53257:
             spellInfo->procCharges = 2;
             spellInfo->StackAmount = 0;
             break;
@@ -4419,7 +4419,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[EFFECT_2] = 99;
             break;
-        
+
         // Ram - siege
         case 62345:
             spellInfo->EffectRadiusIndex[EFFECT_0] = 13; // 10yd
@@ -4643,7 +4643,7 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// Gundrak
         //////////////////////////////////////////
-        // Moorabi - Transformation 
+        // Moorabi - Transformation
         case 55098:
             spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
             break;
@@ -4658,7 +4658,7 @@ void SpellMgr::LoadDbcDataCorrections()
 
         //////////////////////////////////////////
         ////////// AHN'KAHET: THE OLD KINGDOM
-        ////////////////////////////////////////// 
+        //////////////////////////////////////////
         // Vanish
         case 55964:
             spellInfo->Effect[1] = 0;
@@ -4667,7 +4667,7 @@ void SpellMgr::LoadDbcDataCorrections()
 
         //////////////////////////////////////////
         ////////// DRAK'THARON KEEP
-        ////////////////////////////////////////// 
+        //////////////////////////////////////////
         // Trollgore - Summon Drakkari Invader
         case 49456:
         case 49457:
@@ -4677,7 +4677,7 @@ void SpellMgr::LoadDbcDataCorrections()
 
         //////////////////////////////////////////
         ////////// UTGARDE PINNACLE
-        ////////////////////////////////////////// 
+        //////////////////////////////////////////
         // Paralyse
         case 48278:
         // Awaken subboss
@@ -4692,7 +4692,7 @@ void SpellMgr::LoadDbcDataCorrections()
 
         //////////////////////////////////////////
         ////////// UTGARDE KEEP
-        ////////////////////////////////////////// 
+        //////////////////////////////////////////
         // Skarvald, Charge
         case 43651:
             spellInfo->rangeIndex = 13; // 0-50000yd
@@ -4729,7 +4729,7 @@ void SpellMgr::LoadDbcDataCorrections()
 
         //////////////////////////////////////////
         ////////// AZJOL'NERUB
-        ////////////////////////////////////////// 
+        //////////////////////////////////////////
 
         // Krik'thir - Mind Flay
         case 52586:
@@ -4756,7 +4756,7 @@ void SpellMgr::LoadDbcDataCorrections()
         ////////// OBSIDIAN SANCTUM
         //////////////////////////////////////////
         // Lava Strike damage
-        case 57697: 
+        case 57697:
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
             break;
         // Lava Strike trigger
@@ -4864,7 +4864,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
-     
+
         //////////////////////////////////////////
         ////////// ULDUAR
         //////////////////////////////////////////,
@@ -4925,7 +4925,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Battering Ram
         case 62376:
             spellInfo->rangeIndex = 3;
-            break; 
+            break;
         // Hurl Pyrite
         case 62490:
             spellInfo->Effect[EFFECT_1] = 0;
@@ -5149,7 +5149,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Cosmic Smash (Algalon the Observer)
         case 62311:
-        case 64596: 
+        case 64596:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->EffectRadiusIndex[0] = 12; // 100yd
             spellInfo->rangeIndex = 13;  // 50000yd
@@ -6543,6 +6543,12 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 60094: // Demonic Blast
             spellInfo->MaxAffectedTargets = 1;
+            break;
+        case 66490: // P3Wx2 Laser Barrage
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+            break;
+        case 63274: // Mimiron - P3Wx2 Laser Barrage
+            spellInfo->AttributesEx &= ~(SPELL_ATTR1_CHANNELED_1 | SPELL_ATTR1_CHANNEL_TRACK_TARGET);
             break;
         }
 

@@ -358,6 +358,9 @@ void FlightPathMovementGenerator::DoReset(Player* player)
 
 bool FlightPathMovementGenerator::DoUpdate(Player* player, uint32 /*diff*/)
 {
+    if (player->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+        return true;
+
     // xinef: map was switched
     if (_mapSwitch)
     {

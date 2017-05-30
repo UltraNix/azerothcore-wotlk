@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #include "IdleMovementGenerator.h"
 #include "CreatureAI.h"
 #include "Creature.h"
+#include "MoveSplineInit.h"
 
 IdleMovementGenerator si_idleMovement;
 
@@ -50,6 +51,9 @@ void RotateMovementGenerator::Initialize(Unit* owner)
 
 bool RotateMovementGenerator::Update(Unit* owner, uint32 diff)
 {
+    if (owner->HasUnitState(UNIT_STATE_STUNNED))
+        return true;
+
     float angle = owner->GetOrientation();
     if (m_direction == ROTATE_DIRECTION_LEFT)
     {
@@ -62,7 +66,10 @@ bool RotateMovementGenerator::Update(Unit* owner, uint32 diff)
         while (angle < 0) angle += static_cast<float>(M_PI * 2);
     }
 
-    owner->SetFacingTo(angle);
+    Movement::MoveSplineInit init(owner);
+    init.MoveTo(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), false);
+    init.SetFacing(angle);
+    init.Launch();
 
     if (m_duration > diff)
         m_duration -= diff;
@@ -91,6 +98,9 @@ void DistractMovementGenerator::Finalize(Unit* owner)
 
 bool DistractMovementGenerator::Update(Unit* owner, uint32 time_diff)
 {
+    if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+        return false;
+
     if (owner->IsInCombat() || time_diff > m_timer)
         return false;
 

@@ -74,6 +74,9 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature* owner)
 
 bool HomeMovementGenerator<Creature>::DoUpdate(Creature* owner, const uint32 /*time_diff*/)
 {
+    if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+        return true;
+
     arrived = owner->movespline->Finalized();
     if (arrived)
         return false;

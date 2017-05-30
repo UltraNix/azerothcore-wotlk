@@ -37,6 +37,7 @@ enum SpellData
     SPELL_ROCKET_STRIKE_AURA                         = 64064,
     NPC_ROCKET_VISUAL                                = 34050,
     NPC_ROCKET_STRIKE_N                              = 34047,
+    NPC_MIMIRON_DB_TARGET                            = 33576,
 
     SPELL_RAPID_BURST                                = 63382,
     SPELL_RAPID_BURST_DAMAGE_25_1                    = 64531,
@@ -46,6 +47,7 @@ enum SpellData
     SPELL_SUMMON_BURST_TARGET                        = 64840,
 
     SPELL_SPINNING_UP                                = 63414,
+    SPELL_P3WX2_BOLTS                                = 63274,
 
     // PHASE 3:
     SPELL_PLASMA_BALL_25                             = 64535,
@@ -103,6 +105,7 @@ enum HardMode
 {
     SPELL_EMERGENCY_MODE                             = 64582,
     SPELL_SELF_DESTRUCT                              = 64610,
+    SPELL_SELF_DESTRUCT_VISUAL                       = 64613,
 
     SPELL_SUMMON_FLAMES_INITIAL                      = 64563,
     NPC_FLAMES_INITIAL                               = 34363,
@@ -227,6 +230,7 @@ enum SOUNDS
     SOUND_TANK_HARD_INTRO                            = 15629,
 };
 
+#define DATA_SPINNING_TARGET 1
 
 #define SPELL_NAPALM_SHELL                           RAID_MODE(SPELL_NAPALM_SHELL_10, SPELL_NAPALM_SHELL_25)
 #define SPELL_PLASMA_BLAST                           RAID_MODE(SPELL_PLASMA_BLAST_10, SPELL_PLASMA_BLAST_25)
@@ -481,8 +485,8 @@ public:
                     berserk = true;
                     me->MonsterYell(TEXT_BERSERK, LANG_UNIVERSAL, 0);
                     me->PlayDirectSound(SOUND_BERSERK);
-                    if( hardmode )
-                        me->SummonCreature(33576, 2744.78f, 2569.47f, 364.32f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+                    if (hardmode)
+                        me->SummonCreature(NPC_MIMIRON_DB_TARGET, 2744.78f, 2569.47f, 364.32f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
                     events.PopEvent();
                     events.ScheduleEvent(EVENT_BERSERK_2, 0);
                     break;
@@ -699,8 +703,8 @@ public:
                         }
 
                         VX001->SendMeleeAttackStop();
-                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_CUSTOM_SPELL_02);
                         VX001->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_02);
+                        VX001->EnterVehicle(LMK2, 7);
                         events.PopEvent();
                         events.ScheduleEvent(EVENT_LEVIATHAN_RIDE_MIDDLE, 4800);
                     }
@@ -716,11 +720,7 @@ public:
                         }
 
                         LMK2->GetMotionMaster()->MoveCharge(2744.65f, 2569.46f, 364.31f, 21.0f);
-                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                        VX001->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
-                        VX001->EnterVehicle(LMK2, 3);
-                        LMK2->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                        LMK2->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
+                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                         events.PopEvent();
                         events.ScheduleEvent(EVENT_JOIN_TOGETHER, 3000);
                     }
@@ -757,12 +757,12 @@ public:
                         LMK2->AI()->SetData(1, 4);
                         VX001->AI()->SetData(1, 4);
                         ACU->AI()->SetData(1, 4);
-                        LMK2->CastSpell(LMK2, SPELL_SELF_REPAIR, true); 
                         LMK2->SetHealth( LMK2->GetMaxHealth()/2 );
-                        VX001->CastSpell(VX001, SPELL_SELF_REPAIR, true); 
+                        LMK2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         VX001->SetHealth( VX001->GetMaxHealth()/2 );
-                        ACU->CastSpell(ACU, SPELL_SELF_REPAIR, true);
+                        VX001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         ACU->SetHealth( ACU->GetMaxHealth()/2 );
+                        ACU->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         if( hardmode )
                         {
                             LMK2->CastSpell(LMK2, SPELL_EMERGENCY_MODE, true);
@@ -778,7 +778,7 @@ public:
                         Creature* LMK2 = GetLMK2();
                         Creature* VX001 = GetVX001();
                         Creature* ACU = GetACU();
-                        
+
                         if (!VX001 || !LMK2 || !ACU)
                             return;
 
@@ -793,7 +793,6 @@ public:
                         VX001->AttackStop();
                         VX001->AI()->SetData(1, 0);
                         VX001->DespawnOrUnsummon(7000);
-                        VX001->SetReactState(REACT_PASSIVE);
                         ACU->InterruptNonMeleeSpells(false);
                         ACU->AttackStop();
                         ACU->AI()->SetData(1, 0);
@@ -808,7 +807,7 @@ public:
                         me->GetMotionMaster()->Clear();
                         summons.DoAction(1337); // despawn summons of summons
                         summons.DespawnEntry(NPC_FLAMES_INITIAL);
-                        summons.DespawnEntry(33576);
+                        summons.DespawnEntry(NPC_MIMIRON_DB_TARGET);
 
                         float angle = VX001->GetOrientation();
                         float v_x = me->GetPositionX()+cos(angle)*10.0f;
@@ -1116,7 +1115,7 @@ public:
                             cannon->ExitVehicle();
                         me->GetMotionMaster()->MoveCharge(2795.076f, 2598.616f, 364.32f, 21.0f);
                         if (Creature* c = GetMimiron())
-                            c->AI()->SetData(0, 1); 
+                            c->AI()->SetData(0, 1);
                     }
                 }
                 else if (Phase == 4)
@@ -1147,11 +1146,8 @@ public:
 
             events.Update(diff);
 
-            if (!me->HasUnitState(UNIT_STATE_CASTING))
-                DoMeleeAttackIfReady();
-
             Unit* cannon = GetS3();
-            if (!cannon || cannon->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_CASTING) || me->HasAuraType(SPELL_AURA_MOD_SILENCE))
+            if (!cannon || cannon->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             switch (events.GetEvent())
@@ -1173,7 +1169,7 @@ public:
                         else
                             pTarget = (Player*)SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
 
-                        if( pTarget )
+                        if (pTarget)
                             cannon->CastSpell(pTarget, SPELL_NAPALM_SHELL, false);
 
                         events.RepeatEvent(urand(5000,10000));
@@ -1217,6 +1213,8 @@ public:
                     events.PopEvent();
                     break;
             }
+
+            DoMeleeAttackIfReady();
         }
 
         void MoveInLineOfSight(Unit* /*mover*/) {}
@@ -1284,9 +1282,10 @@ public:
         {
             if (Vehicle* vk = me->GetVehicleKit())
                 if (Unit* cannon = vk->GetPassenger(3))
-                    return cannon;
+                    if (cannon->GetEntry() == NPC_LEVIATHAN_MKII_CANNON)
+                        return cannon;
 
-            return 0;
+            return nullptr;
         }
 
         void SpellHit(Unit* caster, const SpellInfo *spell)
@@ -1325,17 +1324,17 @@ public:
         uint8 Phase;
         bool fighting;
         bool leftarm;
-        uint32 spinningUpOrientation;
-        uint16 spinningUpTimer;
+        uint64 targetSpinning;
 
         void Reset()
         {
             Phase = 0;
             fighting = false;
             leftarm = false;
-            spinningUpTimer = 0;
             me->SetRegeneratingHealth(false);
             events.Reset();
+            targetSpinning = 0;
+            me->SetReactState(REACT_PASSIVE);
         }
 
         void AttackStart(Unit* /*who*/) {}
@@ -1387,16 +1386,6 @@ public:
             }
         }
 
-        uint32 GetData(uint32 id) const
-        {
-            switch (id)
-            {
-               case 1: return spinningUpOrientation;
-               case 2: return Phase;
-            }
-            return 0;
-        }
-
         void DoAction(int32 action)
         {
             if (action == 1337)
@@ -1412,9 +1401,6 @@ public:
             if (damage >= me->GetHealth() || me->GetHealth() < 15000)
             {
                 damage = 0;
-                if (me->GetReactState() == REACT_PASSIVE)
-                    return;
-                me->SetReactState(REACT_PASSIVE);
                 if (Phase == 2)
                 {
                     if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
@@ -1451,38 +1437,20 @@ public:
             }
         }
 
+        uint64 GetGUID(int32 data) const override
+        {
+            if (data == DATA_SPINNING_TARGET)
+                return targetSpinning;
+
+            return 0;
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!fighting)
                 return;
 
             events.Update(diff);
-
-            if (spinningUpTimer) // executed about a second after starting casting to ensure players can see the correct direction
-            {
-                if (spinningUpTimer <= diff)
-                {
-                    if (Phase == 4)
-                    {
-                        float angle = (spinningUpOrientation * 2 * M_PI) / 100.0f;
-
-                        if (Unit* vb = me->GetVehicleBase())
-                        {
-                            vb->SetOrientation(angle);
-                            vb->SetFacingTo(angle);
-                        }
-                    }
-                    else
-                    {
-                        me->SetOrientation(spinningUpOrientation);
-                        me->SetFacingTo(spinningUpOrientation);
-                    }
-
-                    spinningUpTimer = 0;
-                }
-                else
-                    spinningUpTimer -= diff;
-            }
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -1492,7 +1460,7 @@ public:
                 case 0:
                     break;
                 case EVENT_SPELL_HEAT_WAVE:
-                    me->CastSpell(me, SPELL_HEAT_WAVE, true);
+                    DoCast(SPELL_HEAT_WAVE);
                     events.RepeatEvent(30000);
                     break;
                 case EVENT_SPELL_ROCKET_STRIKE:
@@ -1535,31 +1503,19 @@ public:
                 case EVENT_SPELL_RAPID_BURST:
                     if (Player* p = SelectTargetFromPlayerList(80.0f))
                     {
-                        me->CastSpell(p, SPELL_RAPID_BURST, true);
                         me->SetFacingToObject(p);
+                        DoCast(me, SPELL_RAPID_BURST);
                     }
                     events.RepeatEvent(3200);
                     break;
                 case EVENT_HAND_PULSE:
                     if (Player* p = SelectTargetFromPlayerList(80.0f))
                     {
-                        me->SetOrientation(me->GetAngle(p));
-                        me->SetFacingTo(me->GetAngle(p));
-                        if (Unit* vb = me->GetVehicleBase())
-                        {
-                            vb->SendMeleeAttackStop();
-                            vb->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                            if( !leftarm )
-                            {
-                                vb->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_03);
-                                me->CastSpell(p, SPELL_HAND_PULSE_R, false);
-                            }
-                            else
-                            {
-                                vb->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_04);
-                                me->CastSpell(p, SPELL_HAND_PULSE_L, false);
-                            }
-                        }
+                        me->SetFacingToObject(p);
+                        if( !leftarm )
+                            me->CastSpell(p, SPELL_HAND_PULSE_R, false);
+                        else
+                            me->CastSpell(p, SPELL_HAND_PULSE_L, false);
 
                         leftarm = !leftarm;
                     }
@@ -1568,30 +1524,20 @@ public:
                 case EVENT_SPELL_SPINNING_UP:
                     events.RepeatEvent(45000);
                     {
-                        float o = (Phase == 4 ? (me->GetAngle(me->GetPositionX(), me->GetPositionY())) : (frand(0.0f, 2.f * M_PI)));
-                        spinningUpOrientation = (Phase == 4 ? (uint32)((o*100.0f)/(2*M_PI)) : o);
-                        spinningUpTimer = 1500;
+                        if (Player* target = SelectTargetFromPlayerList(100.0f))
+                        {
+                            targetSpinning = target->GetGUID();
 
-                        if (Phase == 4)
-                        {
-                            if (Unit* vb = me->GetVehicleBase())
-                            {
-                                vb->SetOrientation(o);
-                                vb->SetFacingTo(o);
-                            }
-                        }
-                        else
-                        {
-                            me->SetOrientation(o);
-                            me->SetFacingTo(o);
+                            me->SetFacingToObject(target);
+
+                            DoCast(SPELL_SPINNING_UP);
                         }
 
-                        me->CastSpell((Unit*)nullptr, SPELL_SPINNING_UP, true);
                         events.RescheduleEvent((Phase == 2 ? EVENT_SPELL_RAPID_BURST : EVENT_HAND_PULSE), 14500);
                     }
                     break;
                 case EVENT_FLAME_SUPPRESSION_10:
-                    me->CastSpell(me, SPELL_FLAME_SUPPRESSANT_10yd, false);
+                    DoCast(SPELL_FLAME_SUPPRESSANT_10yd);
                     events.RepeatEvent(urand(5000, 15000));
                     break;
                 case EVENT_FROST_BOMB:
@@ -1665,7 +1611,6 @@ public:
             {
                 me->SetHealth(me->GetMaxHealth() / 2);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_AGGRESSIVE);
             }
         }
     };
@@ -1788,7 +1733,7 @@ public:
                         me->UpdatePosition(2744.65f, 2569.46f, 381.34f, M_PI, false);
 
                         if (Creature* c = GetMimiron())
-                            c->AI()->SetData(0, 3); 
+                            c->AI()->SetData(0, 3);
                     }
                 }
                 else if (Phase == 4)
@@ -1999,7 +1944,6 @@ public:
             {
                 me->SetHealth(me->GetMaxHealth() / 2);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_AGGRESSIVE);
             }
         }
     };
@@ -2201,7 +2145,7 @@ public:
                     me->CastSpell(me, SPELL_BEAM_BLUE, true);
                     option = 3;
                     break;
-            }            
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -2227,36 +2171,6 @@ public:
                 timer -= diff;
         }
     };
-};
-
-class spell_mimiron_rapid_burst : public SpellScriptLoader
-{
-public:
-    spell_mimiron_rapid_burst() : SpellScriptLoader("spell_mimiron_rapid_burst") { }
-
-    class spell_mimiron_rapid_burst_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mimiron_rapid_burst_AuraScript)
-
-        void HandleEffectPeriodic(AuraEffect const * aurEff)
-        {
-            if (Unit* c = GetCaster())
-            {
-                uint32 id = ( c->GetMap()->Is25ManRaid() ? ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_25_2 : SPELL_RAPID_BURST_DAMAGE_25_1) : ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_10_2 : SPELL_RAPID_BURST_DAMAGE_10_1) );
-                c->CastSpell((Unit*)NULL, id, true);
-            }
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mimiron_rapid_burst_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
-        }
-    };
-
-    AuraScript *GetAuraScript() const
-    {
-        return new spell_mimiron_rapid_burst_AuraScript();
-    }
 };
 
 class TargetNotInFront
@@ -2300,70 +2214,110 @@ public:
     }
 };
 
-class spell_mimiron_p3wx2_laser_barrage : public SpellScriptLoader
+class spell_mimiron_rapid_burst : public SpellScriptLoader
 {
 public:
-    spell_mimiron_p3wx2_laser_barrage() : SpellScriptLoader("spell_mimiron_p3wx2_laser_barrage") { }
+    spell_mimiron_rapid_burst() : SpellScriptLoader("spell_mimiron_rapid_burst") { }
 
-    class spell_mimiron_p3wx2_laser_barrage_AuraScript : public AuraScript
+    class spell_mimiron_rapid_burst_AuraScript : public AuraScript
     {
-        PrepareAuraScript(spell_mimiron_p3wx2_laser_barrage_AuraScript)
-
-        uint32 lastMSTime;
-        float lastOrientation;
-
-        bool Load()
-        {
-            lastMSTime = World::GetGameTimeMS();
-            lastOrientation = -1.0f;
-            return true;
-        }
+        PrepareAuraScript(spell_mimiron_rapid_burst_AuraScript)
 
         void HandleEffectPeriodic(AuraEffect const * aurEff)
         {
-            if (Unit* c = GetCaster())
+            if (Unit* caster = GetCaster())
             {
-                if (c->GetTypeId() != TYPEID_UNIT)
-                    return;
-
-                uint32 diff = getMSTimeDiff(lastMSTime, World::GetGameTimeMS());
-
-                if (lastOrientation == -1.0f)
-                {
-                    if (c->ToCreature()->AI()->GetData(2) == 4)
-                    {
-                        lastOrientation = (c->ToCreature()->AI()->GetData(1) * 2 * M_PI) / 100.0f;
-                        diff = 0;
-                    } else
-                        lastOrientation = c->ToCreature()->AI()->GetData(1);
-                }
-
-                float new_o = (c->ToCreature()->AI()->GetData(2) == 4 ? (Position::NormalizeOrientation(lastOrientation - (M_PI / 60)*(diff / 250.0f))) : lastOrientation - (M_PI / 60)*(diff / 250.0f));
-                lastMSTime = World::GetGameTimeMS();
-                lastOrientation = new_o;
-                c->SetOrientation(new_o);
-                c->SetFacingTo(new_o);
-                c->CastSpell((Unit*)NULL, 63297, true);
-                c->CastSpell((Unit*)NULL, 64042, true);
+                uint32 id = (caster->GetMap()->Is25ManRaid() ? ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_25_2 : SPELL_RAPID_BURST_DAMAGE_25_1) : ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_10_2 : SPELL_RAPID_BURST_DAMAGE_10_1) );
+                caster->CastSpell(caster, id, true);
             }
         }
 
         void Register()
         {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mimiron_p3wx2_laser_barrage_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mimiron_rapid_burst_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
     AuraScript *GetAuraScript() const
     {
-        return new spell_mimiron_p3wx2_laser_barrage_AuraScript();
+        return new spell_mimiron_rapid_burst_AuraScript();
     }
 };
 
+class spell_lasser_barrage_aura : public SpellScriptLoader
+{
+public:
+    spell_lasser_barrage_aura() : SpellScriptLoader("spell_lasser_barrage_aura") { }
+
+    class spell_lasser_barrage_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_lasser_barrage_aura_AuraScript);
+
+        bool HasInSide(Unit* caster, bool side, Position const* obj) const
+        {
+            float angle = caster->GetAngle(obj);
+            angle -= caster->GetOrientation();
+
+            // move angle to range -pi ... +pi
+            angle = Position::NormalizeOrientation(angle);
+            if (angle > M_PI)
+                angle -= 2.0f * M_PI;
+
+            if (side)
+                return (angle > 0 && angle <= M_PI);
+            else
+                return (angle < 0 && angle >= -M_PI);
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+            if (!target || target->GetEntry() != NPC_VX001)
+                return;
+
+            Creature* vx001 = target->ToCreature();
+
+            uint64 targetGUID = 0;
+            if (vx001->AI())
+                targetGUID = vx001->AI()->GetGUID(DATA_SPINNING_TARGET);
+
+            if (Player* player = ObjectAccessor::GetPlayer(*target, targetGUID))
+            {
+                uint8 direction = 0;
+                if (HasInSide(target, true, player))
+                    direction = 1;
+
+                vx001->GetMotionMaster()->MoveRotate(30000, direction ? ROTATE_DIRECTION_RIGHT : ROTATE_DIRECTION_LEFT);
+            }
+        }
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+            if (!target || target->GetEntry() != NPC_VX001)
+                return;
+
+            target->GetMotionMaster()->Clear();
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_lasser_barrage_aura_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_lasser_barrage_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
+    {
+        return new spell_lasser_barrage_aura_AuraScript();
+    }
+};
+
+
 class go_ulduar_do_not_push_this_button : public GameObjectScript
-{ 
-public: 
-    go_ulduar_do_not_push_this_button() : GameObjectScript("go_ulduar_do_not_push_this_button") { } 
+{
+public:
+    go_ulduar_do_not_push_this_button() : GameObjectScript("go_ulduar_do_not_push_this_button") { }
 
     bool OnGossipHello(Player* Player, GameObject* GO)
     {
@@ -2686,6 +2640,32 @@ public:
     }
 };
 
+class spell_lasser_barrage_targeting : public SpellScriptLoader
+{
+public:
+    spell_lasser_barrage_targeting() : SpellScriptLoader("spell_lasser_barrage_targeting") { }
+
+    class spell_lasser_barrage_targeting_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_lasser_barrage_targeting_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            unitList.remove_if(TargetNotInFront(GetCaster(), static_cast<float>(M_PI / 6)));
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lasser_barrage_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_lasser_barrage_targeting_SpellScript();
+    }
+};
+
 void AddSC_boss_mimiron()
 {
     new boss_mimiron();
@@ -2699,7 +2679,6 @@ void AddSC_boss_mimiron()
     new npc_ulduar_bot_summon_trigger();
     new spell_mimiron_rapid_burst();
     new spell_rapid_burst_targeting();
-    new spell_mimiron_p3wx2_laser_barrage();
     new go_ulduar_do_not_push_this_button();
     new npc_ulduar_flames_initial();
     new npc_ulduar_flames_spread();
@@ -2710,4 +2689,7 @@ void AddSC_boss_mimiron()
     new achievement_mimiron_set_up_us_the_bomb_11();
     new achievement_mimiron_set_up_us_the_bomb_12();
     new achievement_mimiron_set_up_us_the_bomb_13();
+
+    new spell_lasser_barrage_aura();
+    new spell_lasser_barrage_targeting();
 }

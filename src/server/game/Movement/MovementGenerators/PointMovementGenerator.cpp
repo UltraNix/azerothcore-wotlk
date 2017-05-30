@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -167,6 +167,9 @@ void AssistanceMovementGenerator::Finalize(Unit* unit)
 
 bool EffectMovementGenerator::Update(Unit* unit, uint32)
 {
+    if (unit->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+        return true;
+
     return !unit->movespline->Finalized();
 }
 
