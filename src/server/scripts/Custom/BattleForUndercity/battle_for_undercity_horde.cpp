@@ -178,7 +178,7 @@ class npc_thrall_battle_undercity : public CreatureScript
     public:
         npc_thrall_battle_undercity() : CreatureScript("npc_thrall_battle_undercity") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* player, Creature* creature) 
         {
             if (creature->IsQuestGiver())
                 player->PrepareQuestMenu(creature->GetGUID());
@@ -237,7 +237,7 @@ class npc_thrall_battle_undercity : public CreatureScript
             bool TalkEvent;
             bool UpdateWorldState;
 
-            void Reset() override
+            void Reset() 
             {
                 if (!HasEscortState(STATE_ESCORT_ESCORTING))
                 {
@@ -275,7 +275,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                 }
             }
 
-            void sGossipSelect(Player* player, uint32 sender, uint32 action) override
+            void sGossipSelect(Player* player, uint32 sender, uint32 action) 
             {
                 player->PlayerTalkClass->ClearMenus();
                 player->CLOSE_GOSSIP_MENU();
@@ -315,7 +315,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                 PlayerGUID = player->GetGUID();
             }
 
-            void WaypointReached(uint32 waypointId) override
+            void WaypointReached(uint32 waypointId) 
             {
                 switch (waypointId)
                 {
@@ -477,12 +477,12 @@ class npc_thrall_battle_undercity : public CreatureScript
                         WaveTrigger->GetAI()->SetData(0, pos + 12);
             }
 
-            void JustSummoned(Creature* summon) override
+            void JustSummoned(Creature* summon) 
             {
                 _summons.Summon(summon);
             }
 
-            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) 
             {
                 _summons.Despawn(summon);
 
@@ -515,7 +515,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                 }
             }
 
-            void SetData(uint32 /*type*/, uint32 data) override
+            void SetData(uint32 /*type*/, uint32 data) 
             {
                 switch (data)
                 {
@@ -559,7 +559,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                 }
             }
 
-            void DoAction(int32 /*action*/) override
+            void DoAction(int32 /*action*/) 
             {
                 ++DreadLordCount;
                 if (DreadLordCount >= 10)
@@ -574,17 +574,17 @@ class npc_thrall_battle_undercity : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* /*victim*/) override
+            void EnterCombat(Unit* /*victim*/) 
             {
                 DoCast(SPELL_HEROIC_VANGUARD);
             }
 
-            bool CanAIAttack(Unit const* victim) const override
+            bool CanAIAttack(Unit const* victim) const 
             {
                 return victim->GetEntry() != NPC_DOOMGUARD_PILLARGER;
             }
 
-            void EnterEvadeMode() override
+            void EnterEvadeMode() 
             {
                 me->DeleteThreatList();
                 me->CombatStop(true);
@@ -604,7 +604,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* killer) override
+            void JustDied(Unit* killer) 
             {
                 npc_escortAI::JustDied(killer);
 
@@ -627,7 +627,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                     DoUpdateWorldState(HordeWorldStates[i], i == 0 ? 1: 0);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) 
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -1406,7 +1406,7 @@ class npc_thrall_battle_undercity : public CreatureScript
 
         };
     
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const 
         {
             return new npc_thrall_battle_undercityAI(creature);
         }
@@ -1421,12 +1421,12 @@ class npc_tidal_wave : public CreatureScript
         {
             npc_tidal_waveAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void Reset() override
+            void Reset() 
             {
                 DoCast(SPELL_WATER_REVENANT_ENTRANCE);
             }
 
-            void SpellHitTarget(Unit* target, SpellInfo const* spellInfo) override
+            void SpellHitTarget(Unit* target, SpellInfo const* spellInfo) 
             {
                 if (spellInfo->Id != SPELL_TIDAY_FURY_EFFECT)
                     return;
@@ -1436,7 +1436,7 @@ class npc_tidal_wave : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const 
         {
             return new npc_tidal_waveAI(creature);
         }
@@ -1469,7 +1469,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
             uint32 DrainLifeTimer;
             uint32 ShadowBoltVolleyTimer;
 
-            void Reset() override
+            void Reset() 
             {
                 _summons.DespawnAll();
                 Portals.clear();
@@ -1485,7 +1485,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
                 ShadowBoltVolleyTimer = urand(5000, 10000);
             }
 
-            void JustSummoned(Creature* summon) override
+            void JustSummoned(Creature* summon) 
             {
                 _summons.Summon(summon);
 
@@ -1493,12 +1493,12 @@ class npc_varimathras_battle_undercity : public CreatureScript
                     Portals.push_back(summon);
             }
 
-            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) 
             {
                 _summons.Despawn(summon);
             }
 
-            void SummonedCreatureDespawn(Creature* summon) override
+            void SummonedCreatureDespawn(Creature* summon) 
             {
                 _summons.Despawn(summon);
 
@@ -1506,17 +1506,17 @@ class npc_varimathras_battle_undercity : public CreatureScript
                     Portals.remove(summon);
             }
 
-            void IsSummonedBy(Unit* summoner) override
+            void IsSummonedBy(Unit* summoner) 
             {
                 ThrallGUID = summoner->GetGUID();
             }
 
-            void EnterCombat(Unit* target) override
+            void EnterCombat(Unit* target) 
             {
                 DoCast(SPELL_MIGHT_OF_VARIMATHRAS);
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) 
             {
                 Talk(15);
                 _summons.DespawnAll();
@@ -1525,7 +1525,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
                         Thrall->GetAI()->SetData(0, 2);
             }
 
-            void SetData(uint32 type, uint32 data) override
+            void SetData(uint32 type, uint32 data) 
             {
                 switch (data)
                 {
@@ -1540,7 +1540,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
                 }
             }
 
-            void DoAction(int32 /*action*/) override
+            void DoAction(int32 /*action*/) 
             {
                 switch (++EventPhase)
                 {
@@ -1620,7 +1620,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
                         }
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) 
             {
                 if (StartEvent)
                 {
@@ -1696,7 +1696,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const 
         {
             return new npc_varimathras_battle_undercityAI(creature);
         }
@@ -1725,7 +1725,7 @@ class spell_hurl_boulder : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() 
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hurl_boulder_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENTRY);
             }
@@ -1735,7 +1735,7 @@ class spell_hurl_boulder : public SpellScriptLoader
 
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const 
         {
             return new spell_hurl_boulder_SpellScript();
         }
@@ -1764,7 +1764,7 @@ class spell_blight_barrel : public SpellScriptLoader
                 }
             }
 
-            void Register() override
+            void Register() 
             {
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_blight_barrel_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENTRY);
             }
@@ -1774,7 +1774,7 @@ class spell_blight_barrel : public SpellScriptLoader
 
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const 
         {
             return new spell_blight_barrel_SpellScript();
         }
@@ -1803,13 +1803,13 @@ class spell_portal_collapse : public SpellScriptLoader
                     }
             }
 
-            void Register() override
+            void Register() 
             {
                 AfterCast += SpellCastFn(spell_portal_collapse_SpellScript::HandleAfterCast);
             }
         };
 
-        SpellScript* GetSpellScript() const override
+        SpellScript* GetSpellScript() const 
         {
             return new spell_portal_collapse_SpellScript();
         }

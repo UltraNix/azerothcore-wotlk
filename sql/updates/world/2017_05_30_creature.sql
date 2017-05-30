@@ -1,0 +1,1 @@
+UPDATE `world`.`creature` SET `phaseMask` = '128' WHERE `creature`.`guid` = 302165;

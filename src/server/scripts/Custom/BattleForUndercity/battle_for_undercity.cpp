@@ -16,22 +16,27 @@
 
 enum ThrallBattleForUndercity
 {
+    // Quests
     QUEST_FATE_UP_AGAINST_YOUR_WILL = 13369,
-    QUEST_HERALD_OF_WAR = 13257,
+    QUEST_HERALD_OF_WAR             = 13257,
 
-    NPC_THRALL_ALLY = 32363,
-    NPC_THRALL_HORDE = 31412,
-    NPC_JAINA_ALLY = 32364,
-    NPC_JAINA_HORDE = 31418,
-    NPC_PORTAL = 31640,
-    NPC_GUARD_ALLY = 32367,
-    NPC_GUARD_HORDE = 31417,
+    // Creatures
+    NPC_THRALL_ALLY                 = 32363,
+    NPC_THRALL_HORDE                = 31412,
+    NPC_JAINA_ALLY                  = 32364,
+    NPC_JAINA_HORDE                 = 31418,
+    NPC_PORTAL                      = 31640,
+    NPC_GUARD_ALLY                  = 32367,
+    NPC_GUARD_HORDE                 = 31417,
 
-    GO_PORTAL = 193948,
+    // Objects
+    GO_PORTAL                       = 193948,
 
-    AREATRIGGER_ALLY = 5311,
+    // Triggers
+    AREATRIGGER_ALLY                = 5311,
 
-    DATA_IS_ALREADY_BUSY = 0
+    // Data
+    DATA_IS_ALREADY_BUSY            = 0
 };
 
 class npc_thrall_pre_battle_undercity : public CreatureScript
@@ -59,43 +64,43 @@ public:
         uint32 JainaEntry;
         uint32 GuardsEntry;
 
-        void Reset() override
+        void Reset() 
         {
-            RunScript = false;
+            RunScript   = false;
             ScriptTimer = 3000;
             ScriptPhase = 0;
 
-            JainaGUID = 0;
+            JainaGUID  = 0;
             PortalGUID = 0;
 
             GuardList.clear();
         }
 
-        void SetData(uint32 type, uint32 data) override
+        void SetData(uint32 type, uint32 data) 
         {
             switch (data)
             {
-            case 1:
-                Talk(0);
-                ScriptPhase = 1;
-                break;
-            case 2:
-                Talk(7);
-                ScriptPhase = 2;
-                break;
-            case 3:
-                RunScript = true;
-                me->GetMotionMaster()->MovePoint(1, 1920.57f, -4136.53f, 40.5368f);
-                break;
+                case 1:
+                    Talk(0);
+                    ScriptPhase = 1;
+                    break;
+                case 2:
+                    Talk(7);
+                    ScriptPhase = 2;
+                    break;
+                case 3:
+                    RunScript = true;
+                    me->GetMotionMaster()->MovePoint(1, 1920.57f, -4136.53f, 40.5368f);
+                    break;
             }
         }
 
-        uint32 GetData(uint32 data) const override
+        uint32 GetData(uint32 data) const 
         {
             return uint32(RunScript);
         }
 
-        void MovementInform(uint32 type, uint32 pointId) override
+        void MovementInform(uint32 type, uint32 pointId) 
         {
             if (type != POINT_MOTION_TYPE)
                 return;
@@ -116,15 +121,15 @@ public:
 
             if (GuardList.empty())
                 me->GetCreatureListWithEntryInGrid(GuardList, GuardsEntry, 20.0f);
+
             if (!GuardList.empty())
                 for (std::list<Creature*>::iterator itr = GuardList.begin(); itr != GuardList.end(); ++itr)
                     if (Creature* Guard = (*itr))
                         if (Guard->AI())
                             Guard->AI()->SetData(0, 1);
-
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) 
         {
             if (!ScriptPhase)
                 return;
@@ -133,24 +138,24 @@ public:
             {
                 switch (ScriptPhase)
                 {
-                case 1:
-                    ScriptTimer = 15000;
-                    ScriptPhase = 0;
+                    case 1:
+                        ScriptTimer = 15000;
+                        ScriptPhase = 0;
 
-                    Talk(1);
+                        Talk(1);
 
-                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, JainaGUID))
-                        if (Jaina->AI())
-                            Jaina->AI()->SetData(0, 2);
+                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, JainaGUID))
+                            if (Jaina->AI())
+                                Jaina->AI()->SetData(0, 2);
 
-                    if (!GuardList.empty())
-                        for (std::list<Creature*>::iterator itr = GuardList.begin(); itr != GuardList.end(); ++itr)
-                            if (Creature* Guard = (*itr))
-                                Guard->GetMotionMaster()->MoveTargetedHome();
-                    break;
-                case 2:
-                    EnterEvadeMode();
-                    break;
+                        if (!GuardList.empty())
+                            for (std::list<Creature*>::iterator itr = GuardList.begin(); itr != GuardList.end(); ++itr)
+                                if (Creature* Guard = (*itr))
+                                    Guard->GetMotionMaster()->MoveTargetedHome();
+                        break;
+                    case 2:
+                        Reset();
+                        break;
                 }
             }
             else
@@ -158,7 +163,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const 
     {
         return new npc_thrall_pre_battle_undercityAI(creature);
     }
@@ -182,7 +187,7 @@ public:
 
         std::list<Unit*> MerchantList;
 
-        void Reset() override
+        void Reset() 
         {
             StartScene = false;
             SceneTimer = 1000;
@@ -192,7 +197,7 @@ public:
                 PrepareMerchantsList();
         }
 
-        void MoveInLineOfSight(Unit* who) override
+        void MoveInLineOfSight(Unit* who) 
         {
             if (who->GetTypeId() != TYPEID_PLAYER || !me->IsWithinDist(who, 50.0f))
                 return;
@@ -224,7 +229,7 @@ public:
             SceneTimer = timer;
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) 
         {
             if (!StartScene)
                 return;
@@ -269,7 +274,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const 
     {
         return new npc_runthak_pre_battle_undercityAI(creature);
     }
@@ -289,7 +294,7 @@ public:
         }
     };
 
-    GameObjectAI* GetAI(GameObject* go) const override
+    GameObjectAI* GetAI(GameObject* go) const 
     {
         return new go_battle_for_undercity_portalsAI(go);
     }
@@ -300,7 +305,7 @@ class AreaTrigger_at_orgrimmar : public AreaTriggerScript
 public:
     AreaTrigger_at_orgrimmar() : AreaTriggerScript("AreaTrigger_at_orgrimmar") { }
 
-    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) override
+    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) 
     {
         if (!player || !player->IsAlive())
             return false;
@@ -308,8 +313,7 @@ public:
         uint32 QuestId = trigger->id == AREATRIGGER_ALLY ? QUEST_FATE_UP_AGAINST_YOUR_WILL : QUEST_HERALD_OF_WAR;
         uint32 ThrallEntry = trigger->id == AREATRIGGER_ALLY ? NPC_THRALL_ALLY : NPC_THRALL_HORDE;
 
-        if (player->GetQuestStatus(QuestId) == QUEST_STATUS_COMPLETE &&
-            player->GetQuestStatus(QuestId) != QUEST_STATUS_REWARDED)
+        if (player->GetQuestStatus(QuestId) == QUEST_STATUS_REWARDED)
         {
             if (Creature* Thrall = player->FindNearestCreature(ThrallEntry, 20.0f))
                 if (Thrall->GetAI() && !Thrall->GetAI()->GetData(DATA_IS_ALREADY_BUSY))
@@ -408,7 +412,7 @@ public:
         bool IsPermament;
         bool DoAttackSummoner;
 
-        void Reset() override
+        void Reset() 
         {
             PhaseTimer = 5000;
             Phase = 0;
@@ -421,14 +425,14 @@ public:
             DefineWaves();
         }
 
-        void IsSummonedBy(Unit* summoner) override
+        void IsSummonedBy(Unit* summoner) 
         {
             IsPermament = false;
 
             SummonerGUID = summoner->GetGUID();
         }
 
-        void JustSummoned(Creature* creature) override
+        void JustSummoned(Creature* creature) 
         {
             _summons.Summon(creature);
             if (creature->GetEntry() == NPC_DOOMGUARD_PILLARGER)
@@ -439,7 +443,7 @@ public:
             }
         }
 
-        void SummonedCreatureDies(Creature* creature, Unit* /*killer*/) override
+        void SummonedCreatureDies(Creature* creature, Unit* /*killer*/) 
         {
             _summons.Despawn(creature);
 
@@ -476,12 +480,12 @@ public:
                         Summoner->GetAI()->SetData(0, 0);
         }
 
-        void DoAction(int32 /*action*/) override
+        void DoAction(int32 /*action*/) 
         {
             _summons.DespawnAll();
         }
 
-        void SetData(uint32 /*type*/, uint32 data) override
+        void SetData(uint32 /*type*/, uint32 data) 
         {
             switch (data)
             {
@@ -847,7 +851,7 @@ public:
         }
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
+    CreatureAI* GetAI(Creature* creature) const 
     {
         return new npc_wave_trigger_battle_undercityAI(creature);
     }
