@@ -271,7 +271,10 @@ class npc_thrall_battle_undercity : public CreatureScript
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
                     if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
+                    {
                         Sylvanas->SearchFormation();
+                        Sylvanas->Mount(10719);
+                    }
                 }
             }
 
