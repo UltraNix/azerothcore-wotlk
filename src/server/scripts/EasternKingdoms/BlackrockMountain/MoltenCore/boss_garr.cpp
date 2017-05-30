@@ -105,12 +105,12 @@ class npc_firesworn : public CreatureScript
 
                 _events.Update(diff);
 
-                if (_events.GetEvent() == EVENT_CHECK_RANGE)
+                if (_events.ExecuteEvent() == EVENT_CHECK_RANGE)
                 {
                     if (Creature* garr = me->FindNearestCreature(NPC_GARR, 200.0f, true))
                         if (!garr->IsInRange(me, 0.0f, 50.0f) && garr->IsAlive())
                             DoCast(me, SPELL_SEPARATION_ANXIETY_EFFECT, true);
-                    _events.ScheduleEvent(EVENT_CHECK_RANGE, 5000);
+                    _events.Repeat(5000);
                 }
 
                 DoMeleeAttackIfReady();
