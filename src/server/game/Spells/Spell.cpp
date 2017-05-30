@@ -5543,7 +5543,7 @@ SpellCastResult Spell::CheckCast(bool strict)
              break;
          //Disengage
          case 781:
-             if (m_caster->HasUnitState(UNIT_STATE_LOST_CONTROL))                 
+             if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED | MOVEMENTFLAG_ONTRANSPORT))
                  return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
              break;
          // Blink
