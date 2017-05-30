@@ -57,7 +57,7 @@ class BazaarMgr
         void RemoveOutdatedAuctions(Player* player, uint32 auctionId);
 
         void TakeRequiredAmount(Player* player, int32 amount, uint8 type);
-        bool CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 dpAmount, uint8 type, uint8 mainSpec, uint8 offSpec);
+        bool CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 dpAmount, uint8 type, uint8 mainSpec, uint8 offSpec, std::string description);
         void DeleteBazaarAuction(uint32 auctionId);
         void PremiumAmount(Player* player);
         bool AuctionTime(Player* player);

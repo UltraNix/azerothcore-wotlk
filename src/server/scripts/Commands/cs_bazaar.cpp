@@ -106,7 +106,7 @@ public:
             return false;
         }
 
-        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_PREMIUM, 0, 0))
+        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_PREMIUM, 0, 0, ""))
             sBazaarMgr->TakeRequiredAmount(player, dpAmount, AUCTION_SELL_PREMIUM);
         else
         {
@@ -176,7 +176,7 @@ public:
             return false;
         }
 
-        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_MONEY, 0, 0))
+        if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_MONEY, 0, 0, ""))
             sBazaarMgr->TakeRequiredAmount(player, moneyAmount, AUCTION_SELL_MONEY);
         else
         {
@@ -376,11 +376,17 @@ public:
         if (!offSpecStr || !atoi(offSpecStr) && offSpecStr != "0")
             return false;
 
+        // Description
+        char* descriptionStr = strtok(nullptr, "");
+        if (!descriptionStr)
+	        return false;
+		 
         uint32 accId = player->GetSession()->GetAccountId();
 
         uint32 dpAmount = atoi(ppStr);
         uint8  mainSpec = atoi(mainSpecStr);
         uint8  offSpec  = atoi(offSpecStr);
+        std::string description = descriptionStr;
 
         uint32 auctionCount = sBazaarMgr->GetAuctionCount(accId, AUCTION_SELL_CHARACTER);
 
@@ -394,6 +400,13 @@ public:
         if (offSpec > 4)
         {
             handler->PSendSysMessage("Wrong off spec.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (description.length() > 125)
+        {
+            handler->PSendSysMessage("Description too long, max 125 characters.");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -419,7 +432,7 @@ public:
             return false;
         }
 
-        if (sBazaarMgr->CreateBazaarAuction(player, 0, dpAmount, AUCTION_SELL_CHARACTER, mainSpec, offSpec))
+        if (sBazaarMgr->CreateBazaarAuction(player, 0, dpAmount, AUCTION_SELL_CHARACTER, mainSpec, offSpec, description))
             sBazaarMgr->LogoutCharacterAfterAuction(player);
         else
         {
@@ -787,7 +800,7 @@ public:
         {
             if (sendArmoryLink(player, player->GetSelectedAuction()))
             {
-                for (uint8 i = 0; i < 14; i++)
+                for (uint8 i = 0; i < 15; i++)
                     if (i == 13)
                         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_SEND_ITEM_LIST);
                     else
@@ -805,7 +818,7 @@ public:
                 for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
                     sendItemList(player, player->GetSelectedAuction(), i);
 
-                for (uint8 i = 0; i < 14; i++)
+                for (uint8 i = 0; i < 15; i++)
                     if (i == 13)
                         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_SEND_ITEM_LIST);
                     else
@@ -828,7 +841,7 @@ public:
             selectedAuctionId = action - NPC_SLAVE_ACTION_SELECTED_AUCTION; type = 0;
             player->SetSelectedAuction(selectedAuctionId);
 
-            for (uint8 i = 0; i < 14; i++)
+            for (uint8 i = 0; i < 15; i++)
                 if (i == 13)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GetAuctionAcceptStringData(player->GetSelectedAuction(), i), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_SEND_ITEM_LIST);
                 else
@@ -1123,7 +1136,7 @@ public:
             return data;
         }
 
-        QueryResult result = CharacterDatabase.PQuery("SELECT char_guid, dp_amount, owner_name, slave_race, slave_class, slave_gender, slave_level, slave_money, slave_arena, slave_honor, slave_riding, slave_mainspec, slave_offspec, slave_avgitemlevel FROM bazar_auction WHERE auctionId = %u", auctionId);
+        QueryResult result = CharacterDatabase.PQuery("SELECT char_guid, dp_amount, owner_name, slave_race, slave_class, slave_gender, slave_level, slave_money, slave_arena, slave_honor, slave_riding, slave_mainspec, slave_offspec, slave_avgitemlevel, slave_description FROM bazar_auction WHERE auctionId = %u", auctionId);
 
         if (!result)
         {
@@ -1268,6 +1281,9 @@ public:
                 break;
             case 13:
                 data = "Average Item Level: " + auctionList + " [show items]";
+                break;
+            case 14:
+                data = "Desc: " + auctionList;
                 break;
             default:
                 data = "Unknown";

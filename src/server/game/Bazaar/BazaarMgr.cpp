@@ -374,7 +374,7 @@ void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type)
     }
 }
 
-bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 dpAmount, uint8 type, uint8 mainSpec, uint8 offSpec)
+bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 dpAmount, uint8 type, uint8 mainSpec, uint8 offSpec, std::string description)
 {
     if (!player)
         return false;
@@ -632,7 +632,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 stmt->setUInt32(18 + i, 0);
 
-            stmt->setUInt32(37, getMSTime());
+            stmt->setString(37, description);
+            stmt->setUInt32(38, getMSTime());
             break;
         }
         case AUCTION_SELL_MONEY:
@@ -660,7 +661,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 stmt->setUInt32(18 + i, 0);
 
-            stmt->setUInt32(37, getMSTime());
+            stmt->setString(37, description);
+            stmt->setUInt32(38, getMSTime());
             break;
         }
         case AUCTION_SELL_CHARACTER:
@@ -691,7 +693,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 else
                     stmt->setUInt32(18 + i, 0);
 
-            stmt->setUInt32(37, getMSTime());
+            stmt->setString(37, description);
+            stmt->setUInt32(38, getMSTime());
             break;
         }
     }
@@ -704,8 +707,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
         stmt->setUInt32(0, 1);
         stmt->setUInt32(1, guidLow);
         CharacterDatabase.Execute(stmt);
-        sLog->outSlave("Auction Id: %u created by Player: %s GUID: %u, premium amount: %u, type: [AUCTION_SELL_CHARACTER]", auctionId, player->GetName().c_str(), player->GetGUIDLow(), dpAmount);
-//        sLog->outSlave("[DETAILS] Id: %u, Player: %s, Armory Link: http://sunwell.pl/character/1/%u, GearScore: %u, Description: [%s]", auctionId, player->GetName().c_str(), guidLow, gearScore, description.c_str());
+        sLog->outSlave("[DETAILS] Id: %u, Player: %s (ACC ID: %u), Description: [%s]", auctionId, player->GetName().c_str(), player->GetSession()->GetAccountId(), description.c_str());
     }
     else
     {
