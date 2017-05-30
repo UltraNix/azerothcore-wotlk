@@ -154,7 +154,7 @@ public:
                                     Guard->GetMotionMaster()->MoveTargetedHome();
                         break;
                     case 2:
-                        Reset();
+                        EnterEvadeMode();
                         break;
                 }
             }
