@@ -122,7 +122,7 @@ class npc_varian_battle_undercity : public CreatureScript
     public:
         npc_varian_battle_undercity() : CreatureScript("npc_varian_battle_undercity") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override 
+        bool OnGossipHello(Player* player, Creature* creature)  
         {
             float x, y, z;
             creature->GetRespawnPosition(x, y, z);
@@ -170,7 +170,7 @@ class npc_varian_battle_undercity : public CreatureScript
             bool TalkEvent;
             bool UpdateWorldState;
 
-            void Reset() override
+            void Reset() 
             {
                 if (!HasEscortState(STATE_ESCORT_ESCORTING))
                 {
@@ -199,7 +199,7 @@ class npc_varian_battle_undercity : public CreatureScript
                 }
             }
 
-            void sGossipSelect(Player* player, uint32 sender, uint32 action) override
+            void sGossipSelect(Player* player, uint32 sender, uint32 action) 
             {
                 player->PlayerTalkClass->ClearMenus();
                 player->CLOSE_GOSSIP_MENU();
@@ -239,7 +239,7 @@ class npc_varian_battle_undercity : public CreatureScript
                 PlayerGUID = player->GetGUID();
             }
 
-            void WaypointReached(uint32 waypointId) override
+            void WaypointReached(uint32 waypointId) 
             {
                 switch (waypointId)
                 {
@@ -390,17 +390,17 @@ class npc_varian_battle_undercity : public CreatureScript
                         WaveTrigger->GetAI()->SetData(0, pos);
             }
 
-            void JustSummoned(Creature* summon) override
+            void JustSummoned(Creature* summon) 
             {
                 _summons.Summon(summon);
             }
 
-            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+            void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) 
             {
                 _summons.Despawn(summon);
             }
 
-            void SpellHit(Unit* /*caster */, SpellInfo const* spellInfo) override
+            void SpellHit(Unit* /*caster */, SpellInfo const* spellInfo) 
             {
                 switch(spellInfo->Id)
                 {
@@ -410,7 +410,7 @@ class npc_varian_battle_undercity : public CreatureScript
                 }
             }
 
-            void MovementInform(uint32 type, uint32 pointId) override
+            void MovementInform(uint32 type, uint32 pointId) 
             {
                 npc_escortAI::MovementInform(type, pointId);
 
@@ -424,7 +424,7 @@ class npc_varian_battle_undercity : public CreatureScript
                 }
             }
 
-            void SetData(uint32 /*type*/, uint32 data) override
+            void SetData(uint32 /*type*/, uint32 data) 
             {
                 switch (data)
                 {
@@ -475,12 +475,12 @@ class npc_varian_battle_undercity : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit* /*victim*/) override
+            void EnterCombat(Unit* /*victim*/) 
             {
                 DoCast(SPELL_HEROIC_VANGUARD);
             }
 
-            void EnterEvadeMode() override
+            void EnterEvadeMode() 
             {
                 me->DeleteThreatList();
                 me->CombatStop(true);
@@ -500,7 +500,7 @@ class npc_varian_battle_undercity : public CreatureScript
                 }
             }
 
-            void JustDied(Unit* killer) override
+            void JustDied(Unit* killer) 
             {
                 npc_escortAI::JustDied(killer);
 
@@ -523,7 +523,7 @@ class npc_varian_battle_undercity : public CreatureScript
                     DoUpdateWorldState(AllianceWorldStates[i], i == 0 ? 1: 0);
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) 
             {
                 npc_escortAI::UpdateAI(diff);
 
@@ -898,7 +898,7 @@ class npc_varian_battle_undercity : public CreatureScript
 
         };
     
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const 
         {
             return new npc_varian_battle_undercityAI(creature);
         }
@@ -929,7 +929,7 @@ class npc_putress_battle_undercity : public CreatureScript
             bool Encountered;
             bool StartBattle;
 
-            void Reset() override
+            void Reset() 
             {
                 VarianGUID = 0;
                 PlayerGUID = 0;
@@ -946,7 +946,7 @@ class npc_putress_battle_undercity : public CreatureScript
                 BarrelTimer = urand(10 * IN_MILLISECONDS, 12 * IN_MILLISECONDS);
             }
 
-            void IsSummonedBy(Unit* summoner) override
+            void IsSummonedBy(Unit* summoner) 
             {
                 if (summoner->GetEntry() != NPC_VARIAN)
                     return;
@@ -954,12 +954,12 @@ class npc_putress_battle_undercity : public CreatureScript
                 VarianGUID = summoner->GetGUID();
             }
 
-            void JustSummoned(Creature* creature) override
+            void JustSummoned(Creature* creature) 
             {
                 _summons.Summon(creature);
             }
 
-            void SummonedCreatureDies(Creature* creature, Unit* /*killer*/) override
+            void SummonedCreatureDies(Creature* creature, Unit* /*killer*/) 
             {
                 _summons.Despawn(creature);
 
@@ -974,7 +974,7 @@ class npc_putress_battle_undercity : public CreatureScript
                 }
             }
 
-            void SetData(uint32 /*type*/, uint32 data) override
+            void SetData(uint32 /*type*/, uint32 data) 
             {
                 switch (data)
                 {
@@ -995,19 +995,19 @@ class npc_putress_battle_undercity : public CreatureScript
                 }
             }
 
-            void SpellHitTarget(Unit* target, SpellInfo const* spellInfo) override
+            void SpellHitTarget(Unit* target, SpellInfo const* spellInfo) 
             {
                 if (spellInfo->Id == SPELL_PUTRESS_TESLA_AURA_EFFECT)
                     if (!target->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                         target->CastSpell(me, SPELL_BLIGHT_EMPOWEREMENT, false, NULL, NULL, me->GetGUID());
             }
 
-            void SetGUID(uint64 guid, int32 /*id*/) override
+            void SetGUID(uint64 guid, int32 /*id*/) 
             {
                 PlayerGUID = guid;
             }
 
-            void JustDied(Unit* /*killer*/) override
+            void JustDied(Unit* /*killer*/) 
             {
                 _summons.DespawnAll();
 
@@ -1037,7 +1037,7 @@ class npc_putress_battle_undercity : public CreatureScript
                 ++Phase;
             }
 
-            void UpdateAI(uint32 diff) override
+            void UpdateAI(uint32 diff) 
             {
                 if (!Encountered)
                     return;
@@ -1108,7 +1108,7 @@ class npc_putress_battle_undercity : public CreatureScript
             }
         };
     
-        CreatureAI* GetAI(Creature* creature) const override
+        CreatureAI* GetAI(Creature* creature) const 
         {
             return new npc_putress_battle_undercityAI(creature);
         }
