@@ -197,7 +197,7 @@ public:
                     break;
                 case EVENT_SUMMON_ZOMBIE:
                     {
-                        uint8 rand = urand(0, 2);
+                        uint8 rand = me->GetMap()->Is25ManRaid() ? urand(0, 2) : 0;
                         for (int32 i = 0; i < RAID_MODE(1, 2); ++i)
                         {
                             me->SummonCreature(NPC_ZOMBIE_CHOW, zombiePos[rand]);
