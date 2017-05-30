@@ -392,11 +392,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 63009: // 25 man
                         damage = 20000;
                         break;
-                    // Rapid Burst
-                    case 64531:
-                    case 64532:
-                        damage = damage + 1000;
-                        break;
                     // Flames
                     case 64566:
                         damage = damage + 5000;

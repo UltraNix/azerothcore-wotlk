@@ -638,7 +638,7 @@ public:
             }
             case 22:
                 DoAttackSummoner = false;
-                SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000);
+                SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
                 Phase = 22;
                 IsPermament = true;
                 break;
@@ -652,10 +652,10 @@ public:
                 GetWaveMobEntryByName[i] = IsAlly ? (NPC_TREACHEROUS_GUARDIAN_A + i) : HordeMobs[i];
         }
 
-        void SummonMobs(uint32 entry, uint8 num, uint32 timer = 0, bool Jump = false)
+        void SummonMobs(uint32 entry, uint8 num, uint32 timer = 0, bool Jump = false, bool forceDespawn = false)
         {
             for (uint8 i = 0; i < num; ++i)
-                if (Creature* summon = DoSpawnCreature(entry, 0.0f, 0.0f, 1.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
+                if (Creature* summon = DoSpawnCreature(entry, 0.0f, 0.0f, 1.0f, 0.0f, (forceDespawn ? TEMPSUMMON_TIMED_DESPAWN : TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT), 60000))
                 {
                     Creature* Summoner = ObjectAccessor::GetCreature(*me, SummonerGUID);
 

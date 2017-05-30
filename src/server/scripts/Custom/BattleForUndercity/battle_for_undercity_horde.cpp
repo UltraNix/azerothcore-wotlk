@@ -412,6 +412,8 @@ class npc_thrall_battle_undercity : public CreatureScript
                             VarimathrasGUID = Varimathras->GetGUID();
                             if (Varimathras->GetAI())
                                 Varimathras->GetAI()->SetData(0, 1);
+
+                            Varimathras->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             Varimathras->CastSpell(Varimathras, SPELL_AURA_OF_VARIMATHRAS, true);
                         }
                         JumpToNextStep(1500);
