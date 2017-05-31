@@ -12,6 +12,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "SpellAuraEffects.h"
 #include "PassiveAI.h"
 #include "Player.h"
+#include "MoveSplineInit.h"
 
 enum SpellData
 {
@@ -1514,8 +1515,13 @@ public:
                     {
                         if (Player* target = SelectTargetFromPlayerList(100.0f))
                         {
-                            me->SetOrientation(me->GetAngle(target));
-                            me->SetFacingToObject(target);
+                            float angle = me->GetAngle(target);
+                            me->SetOrientation(angle);
+
+                            Movement::MoveSplineInit init(me);
+                            init.MoveTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), false);
+                            init.SetFacing(angle);
+                            init.Launch();
 
                             DoCast(SPELL_SPINNING_UP);
                         }

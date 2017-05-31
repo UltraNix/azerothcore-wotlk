@@ -6546,6 +6546,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 66490: // P3Wx2 Laser Barrage
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
+            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
         case 63274: // Mimiron - P3Wx2 Laser Barrage
             spellInfo->AttributesEx &= ~(SPELL_ATTR1_CHANNELED_1 | SPELL_ATTR1_CHANNEL_TRACK_TARGET);
