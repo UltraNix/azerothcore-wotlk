@@ -215,8 +215,6 @@ struct boss_thekalAI : public BossAI
                     DoCast(me, SPELL_RESURRECT, true);
                     break;
                 case EVENT_TRANSFORM:
-                    //cancel the event, otherwise thekal will cast resurrect after 10 seconds anyways 
-                    events.CancelEvent(EVENT_CHECK_TIMER);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     me->SetFullHealth();
                     _died = false;
@@ -228,10 +226,6 @@ struct boss_thekalAI : public BossAI
                     events.ScheduleEvent(EVENT_FORCEPUNCH, 4000, 2, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_CHARGE, 12000, 2, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SUMMONTIGERS, 25000, 2, PHASE_TWO);
-                    if (Unit* lorkhan = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_LORKHAN)))
-                        lorkhan->GetAI()->DoAction(ACTION_P2_LORKHAN);
-                    if (Unit* zath = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_ZATH)))
-                        zath->GetAI()->DoAction(ACTION_P2_ZATH);
                     break;
                 default:
                     break;
@@ -243,6 +237,12 @@ struct boss_thekalAI : public BossAI
 
         if (instance->GetBossState(DATA_LORKHAN) == SPECIAL && instance->GetBossState(DATA_ZATH) == SPECIAL && instance->GetBossState(DATA_THEKAL) == SPECIAL && events.IsInPhase(PHASE_ONE))
         {
+            //cancel the event, otherwise thekal will cast resurrect after 10 seconds anyways 
+            events.CancelEvent(EVENT_CHECK_TIMER);
+            if (Unit* lorkhan = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_LORKHAN)))
+                lorkhan->GetAI()->DoAction(ACTION_P2_LORKHAN);
+            if (Unit* zath = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_ZATH)))
+                zath->GetAI()->DoAction(ACTION_P2_ZATH);
             me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
             //override the animation
             me->SetStandState(UNIT_STAND_STATE_STAND);
