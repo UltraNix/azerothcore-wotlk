@@ -1520,6 +1520,9 @@ public:
 
                             Movement::MoveSplineInit init(me);
                             init.MoveTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), false);
+                            if (me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && me->GetTransGUID())
+                                init.DisableTransportPathTransformations();
+
                             init.SetFacing(angle);
                             init.Launch();
 
