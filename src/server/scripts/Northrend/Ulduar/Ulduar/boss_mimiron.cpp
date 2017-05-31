@@ -38,7 +38,6 @@ enum SpellData
     SPELL_ROCKET_STRIKE_AURA                         = 64064,
     NPC_ROCKET_VISUAL                                = 34050,
     NPC_ROCKET_STRIKE_N                              = 34047,
-    NPC_MIMIRON_DB_TARGET                            = 33576,
 
     SPELL_RAPID_BURST                                = 63382,
     SPELL_RAPID_BURST_DAMAGE_25_1                    = 64531,
@@ -181,6 +180,7 @@ enum EVENTS
     EVENT_SPELL_RAPID_BURST_INTERVAL                 = 19,
     EVENT_SPELL_SPINNING_UP                          = 20,
     EVENT_HAND_PULSE                                 = 37,
+    EVENT_RESTART_DB_TARGET                          = 71,
 
     // ACU:
     EVENT_SPELL_PLASMA_BALL                          = 27,
@@ -277,12 +277,12 @@ enum ComputerTalks
     TALK_COMPUTER_ZERO           = 12,
 };
 
-
-
 #define GetMimiron() ObjectAccessor::GetCreature(*me, pInstance->GetData64(TYPE_MIMIRON))
 #define GetLMK2() ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_LEVIATHAN_MKII))
 #define GetVX001() ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_VX001))
 #define GetACU() ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_ACU))
+
+Position const LeviathanCenter = { 2744.854736f, 2569.270020f, 364.343629f, 0.0f };
 
 class boss_mimiron : public CreatureScript
 {
@@ -334,8 +334,14 @@ public:
             summons.DespawnAll();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-            if (pInstance && pInstance->GetData(TYPE_MIMIRON) != DONE)
-                pInstance->SetData(TYPE_MIMIRON, NOT_STARTED);
+            if (pInstance)
+            {
+                if (pInstance->GetData(TYPE_MIMIRON) != DONE)
+                    pInstance->SetData(TYPE_MIMIRON, NOT_STARTED);
+
+                if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                    dbTarget->StopMoving();
+            }
         }
 
         void AttackStart(Unit* who)
@@ -404,8 +410,14 @@ public:
                 LMK2->StopMovingOnCurrentPos();
             }
 
-            if (pInstance && pInstance->GetData(TYPE_MIMIRON) != DONE)
-                pInstance->SetData(TYPE_MIMIRON, IN_PROGRESS);
+            if (pInstance)
+            {
+                if (pInstance->GetData(TYPE_MIMIRON) != DONE)
+                    pInstance->SetData(TYPE_MIMIRON, IN_PROGRESS);
+
+                if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                    dbTarget->AI()->DoAction(1);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -485,7 +497,10 @@ public:
                     me->MonsterYell(TEXT_BERSERK, LANG_UNIVERSAL, 0);
                     me->PlayDirectSound(SOUND_BERSERK);
                     if (hardmode)
-                        me->SummonCreature(NPC_MIMIRON_DB_TARGET, 2744.78f, 2569.47f, 364.32f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
+                    {
+                        DoCast(me, SPELL_SELF_DESTRUCT, true);
+                        DoCast(me, SPELL_SELF_DESTRUCT_VISUAL, true);
+                    }
                     events.PopEvent();
                     events.ScheduleEvent(EVENT_BERSERK_2, 0);
                     break;
@@ -702,6 +717,7 @@ public:
                         }
 
                         VX001->SendMeleeAttackStop();
+                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_CUSTOM_SPELL_02);
                         VX001->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_02);
                         VX001->EnterVehicle(LMK2, 7);
                         events.PopEvent();
@@ -718,8 +734,9 @@ public:
                             return;
                         }
 
+                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
+                        VX001->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
                         LMK2->GetMotionMaster()->MoveCharge(2744.65f, 2569.46f, 364.31f, 21.0f);
-                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                         events.PopEvent();
                         events.ScheduleEvent(EVENT_JOIN_TOGETHER, 3000);
                     }
@@ -806,7 +823,6 @@ public:
                         me->GetMotionMaster()->Clear();
                         summons.DoAction(1337); // despawn summons of summons
                         summons.DespawnEntry(NPC_FLAMES_INITIAL);
-                        summons.DespawnEntry(NPC_MIMIRON_DB_TARGET);
 
                         float angle = VX001->GetOrientation();
                         float v_x = me->GetPositionX()+cos(angle)*10.0f;
@@ -1442,7 +1458,18 @@ public:
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
+            {
+                // Its here to force VX_001 to face mimiron db target during spinning cast
+                // because in phase 4 if tank turns leviathan MK II around
+                // VX will turn around as well, and then when laser barrage begins to cast
+                // he will change direction to where trigger is
+                if (Spell* spell = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                    if (spell->GetSpellInfo()->Id == SPELL_SPINNING_UP)
+                        if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                            me->SetFacingToObject(dbTarget);
+
                 return;
+            }
 
             switch (events.GetEvent())
             {
@@ -1513,15 +1540,12 @@ public:
                 case EVENT_SPELL_SPINNING_UP:
                     events.RepeatEvent(45000);
                     {
-                        if (Player* target = SelectTargetFromPlayerList(100.0f))
+                        me->RemoveAurasDueToSpell(SPELL_RAPID_BURST);
+
+                        if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
                         {
-                            float angle = me->GetAngle(target);
-                            if (Unit* vehicle = me->GetVehicleBase())
-                                angle -= vehicle->GetOrientation();
-
-                            me->SetOrientation(angle);
-                            me->SetFacingTo(angle);
-
+                            me->SetFacingToObject(dbTarget);
+                            dbTarget->StopMoving();
                             DoCast(SPELL_SPINNING_UP);
                         }
 
@@ -2236,47 +2260,6 @@ public:
     }
 };
 
-class spell_lasser_barrage_aura : public SpellScriptLoader
-{
-public:
-    spell_lasser_barrage_aura() : SpellScriptLoader("spell_lasser_barrage_aura") { }
-
-    class spell_lasser_barrage_aura_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_lasser_barrage_aura_AuraScript);
-
-        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-            if (!target || target->GetEntry() != NPC_VX001)
-                return;
-
-            target->GetMotionMaster()->MoveRotate(30000, ROTATE_DIRECTION_RIGHT);
-        }
-
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-            if (!target || target->GetEntry() != NPC_VX001)
-                return;
-
-            target->GetMotionMaster()->Clear();
-        }
-
-        void Register()
-        {
-            OnEffectApply += AuraEffectApplyFn(spell_lasser_barrage_aura_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            OnEffectRemove += AuraEffectRemoveFn(spell_lasser_barrage_aura_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript *GetAuraScript() const
-    {
-        return new spell_lasser_barrage_aura_AuraScript();
-    }
-};
-
-
 class go_ulduar_do_not_push_this_button : public GameObjectScript
 {
 public:
@@ -2559,6 +2542,82 @@ public:
     };
 };
 
+class npc_db_target_mimiron : public CreatureScript
+{
+public:
+    npc_db_target_mimiron() : CreatureScript("npc_db_target_mimiron") { }
+
+    struct npc_db_target_mimironAI : public ScriptedAI
+    {
+        npc_db_target_mimironAI(Creature * creature) : ScriptedAI(creature)
+        {
+            me->SetSpeed(MOVE_RUN, 4.0f);
+            me->SetSpeed(MOVE_WALK, 4.0f);
+            me->SetSpeed(MOVE_FLIGHT, 4.0f);
+        }
+
+        void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path)
+        {
+            float step = -M_PI / 8.0f;
+            float angle = centerPos.GetAngle(me->GetPositionX(), me->GetPositionY());
+
+            for (uint8 i = 0; i < 16; angle += step, ++i)
+            {
+                G3D::Vector3 point;
+                point.x = centerPos.GetPositionX() + radius * cosf(angle);
+                point.y = centerPos.GetPositionY() + radius * sinf(angle);
+                point.z = z;
+                path.push_back(point);
+            }
+        }
+
+        void MoveCyclicPath()
+        {
+            Movement::MoveSplineInit init(me);
+            FillCirclePath(LeviathanCenter, homePos.GetExactDist2d(LeviathanCenter.GetPositionX(), LeviathanCenter.GetPositionY()), me->GetPositionZ(), init.Path());
+            init.SetWalk(false);
+            init.SetSmooth();
+            init.SetCyclic();
+            init.Launch();
+        }
+
+        void Reset() override
+        {
+            homePos = me->GetHomePosition();
+            events.Reset();
+        }
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
+        {
+            if (spell->Id == SPELL_P3WX2_BOLTS)
+                events.ScheduleEvent(EVENT_RESTART_DB_TARGET, 100);
+        }
+
+        void DoAction(int32 param) override
+        {
+            if (param == 1)
+                events.ScheduleEvent(EVENT_RESTART_DB_TARGET, 100);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_RESTART_DB_TARGET)
+                MoveCyclicPath();
+        }
+
+    private:
+        EventMap events;
+        Position homePos;
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_db_target_mimironAI(pCreature);
+    }
+};
+
 class achievement_mimiron_firefighter : public AchievementCriteriaScript
 {
 public:
@@ -2603,6 +2662,103 @@ public:
     }
 };
 
+class spell_lasser_barrage_rotating : public SpellScriptLoader
+{
+public:
+    spell_lasser_barrage_rotating() : SpellScriptLoader("spell_lasser_barrage_rotating") { }
+
+    class spell_lasser_barrage_rotating_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_lasser_barrage_rotating_AuraScript);
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
+        {
+            if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                if (Creature* dbTarget = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                    GetCaster()->SetFacingToObject(dbTarget);
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_lasser_barrage_rotating_AuraScript::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_lasser_barrage_rotating_AuraScript();
+    }
+
+    // I know this is bad, but cant be done any other way currently
+    // This spell and the one below, both hit two targets and when that happens it sets CHANNEL_OBJECT guid
+    // to self instead of proper target and unit is trying to track itself
+    class spell_lasser_barrage_rotating_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_lasser_barrage_rotating_SpellScript);
+
+        void OnEffectHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, GetHitUnit()->GetGUID());
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_lasser_barrage_rotating_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_lasser_barrage_rotating_SpellScript();
+    }
+};
+
+// spell spinning up 63414
+// explanation of why this is here in spellscript above
+class spell_spinning_up_mimiron : public SpellScriptLoader
+{
+public:
+    spell_spinning_up_mimiron() : SpellScriptLoader("spell_spinning_up_mimiron") { }
+
+    class spell_spinning_up_mimiron_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_spinning_up_mimiron_SpellScript);
+
+        void OnEffectHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (GetHitUnit() != caster)
+                    caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, GetHitUnit()->GetGUID());
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_spinning_up_mimiron_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_spinning_up_mimiron_SpellScript();
+    }
+};
+
+class targetNotInBetween
+{
+    public:
+        targetNotInBetween(WorldObject* obj, WorldObject* target) : _obj(obj), _target(target) { }
+
+        bool operator() (WorldObject* unit)
+        {
+            return !unit->IsInBetween(_obj, _target, 7.0f);
+        }
+
+    private:
+        WorldObject* _obj;
+        WorldObject* _target;
+};
+
 class spell_lasser_barrage_targeting : public SpellScriptLoader
 {
 public:
@@ -2614,7 +2770,10 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& unitList)
         {
-            unitList.remove_if(TargetNotInFront(GetCaster(), static_cast<float>(M_PI / 6)));
+            if (Unit* caster = GetCaster())
+                if (InstanceScript* instance = caster->GetInstanceScript())
+                    if (Unit* target = ObjectAccessor::GetUnit(*caster, instance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                        unitList.remove_if(targetNotInBetween(GetCaster(), target));
         }
 
         void Register() override
@@ -2647,12 +2806,14 @@ void AddSC_boss_mimiron()
     new npc_ulduar_flames_spread();
     new npc_ulduar_emergency_fire_bot();
     new npc_ulduar_rocket_strike_trigger();
+    new npc_db_target_mimiron();
 
     new achievement_mimiron_firefighter();
     new achievement_mimiron_set_up_us_the_bomb_11();
     new achievement_mimiron_set_up_us_the_bomb_12();
     new achievement_mimiron_set_up_us_the_bomb_13();
 
-    new spell_lasser_barrage_aura();
     new spell_lasser_barrage_targeting();
+    new spell_lasser_barrage_rotating();
+    new spell_spinning_up_mimiron();
 }
