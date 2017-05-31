@@ -40,8 +40,26 @@ enum Actions
     ACTION_START_RAGNAROS_ALT   = 1,
 };
 
-Position const RagnarosTelePos   = {829.159f, -815.773f, -228.972f, 5.30500f};
-Position const RagnarosSummonPos = {838.510f, -829.840f, -232.000f, 2.00000f};
+Position const RagnarosSummonPos = { 838.510f, -829.840f, -232.000f, 2.00000f };
+Position const MajordomoDefeatPos = { 758.089f, -1176.71f, -118.640f };
+Position const SummonPositions[10] =
+{
+    { 758.089f, -1176.71f, -118.640f, 3.12414f },
+    { 737.945f, -1156.48f, -118.945f, 4.46804f },
+    { 752.520f, -1191.02f, -118.218f, 2.49582f },
+    { 752.953f, -1163.94f, -118.869f, 3.70010f },
+    { 738.814f, -1197.40f, -118.018f, 1.83260f },
+    { 746.939f, -1194.87f, -118.016f, 2.21657f },
+    { 747.132f, -1158.87f, -118.897f, 4.03171f },
+    { 757.116f, -1170.12f, -118.793f, 3.40339f },
+    { 755.910f, -1184.46f, -118.449f, 2.80998f }
+};
+Position const MajordomoPath[4] = 
+{
+    { 838.790771f, -810.536194f, -229.509171f },
+    { 834.175598f, -811.452026f, -228.992126f },
+    { 831.079590f, -816.023193f, -229.023270f }
+};
 
 enum Creatures
 {
@@ -57,11 +75,14 @@ enum Creatures
     NPC_RAGNAROS                    = 11502,
     NPC_FLAMEWAKER_HEALER           = 11663,
     NPC_FLAMEWAKER_ELITE            = 11664,
+    NPC_SON_OF_FLAME                = 12143,                  
+    NPC_FLAME_OF_RAGNAROS           = 13148,
 };
 
 enum GameObjects
 {
     GO_CACHE_OF_THE_FIRELORD        = 179703,
+    GO_LAVA_STEAM                   = 178107,
 };
 
 enum Data

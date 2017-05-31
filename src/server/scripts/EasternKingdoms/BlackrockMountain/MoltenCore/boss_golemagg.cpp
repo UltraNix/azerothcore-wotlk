@@ -1,28 +1,3 @@
-/*
- * Copyright (C) 
- * Copyright (C) 
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Boss_Golemagg
-SD%Complete: 90
-SDComment: Timers need to be confirmed, Golemagg's Trust need to be checked
-SDCategory: Molten Core
-EndScriptData */
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -98,6 +73,16 @@ class boss_golemagg : public CreatureScript
                 CreatureAI::EnterEvadeMode();
             }
 
+            void JustDied(Unit* /*killer*/) override
+            {
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList, 11672, 100.0f);
+                if (!addList.empty())
+                    for (auto itr : addList)
+                        itr->DespawnOrUnsummon();
+                _JustDied();
+            }
+
             void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
             {
                 if (!HealthBelowPct(10) || me->HasAura(SPELL_ENRAGE))
@@ -149,19 +134,11 @@ class npc_core_rager : public CreatureScript
 
             void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
             {
-                if (HealthAbovePct(50) || !instance)
+                if (HealthAbovePct(50))
                     return;
 
-                if (Creature* pGolemagg = instance->instance->GetCreature(instance->GetData64(BOSS_GOLEMAGG_THE_INCINERATOR)))
-                {
-                    if (pGolemagg->IsAlive())
-                    {
-                        Talk(EMOTE_LOWHP);
-                        me->SetFullHealth();
-                    }
-                    else
-                        me->DespawnOrUnsummon();
-                }
+                Talk(EMOTE_LOWHP);
+                me->SetFullHealth();
             }
 
             void UpdateAI(uint32 diff)
@@ -171,18 +148,18 @@ class npc_core_rager : public CreatureScript
 
                 _events.Update(diff);
 
-                while (uint32 eventId = _events.GetEvent())
+                while (uint32 eventId = _events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
                         case EVENT_MANGLE:
                             DoCastVictim(SPELL_MANGLE);
-                            _events.RepeatEvent(10000);
+                            _events.Repeat(10000);
                             break;
                         case EVENT_TRUST:
                             if (Creature* hound = me->FindNearestCreature(11672, 30.0f, true))
                                 me->AddAura(SPELL_GOLEMAGG_TRUST, me);
-                            _events.RepeatEvent(2000);
+                            _events.Repeat(2000);
                             break;
                         default:
                             break;

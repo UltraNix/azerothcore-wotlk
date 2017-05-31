@@ -43,6 +43,23 @@ class boss_garr : public CreatureScript
                 events.ScheduleEvent(EVENT_MAGMA_SHACKLES, 15000);
             }
 
+            void EnterEvadeMode() override
+            {
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList, 12099, 100.0f);
+                if (!addList.empty())
+                {
+                    for (auto itr : addList)
+                    {
+                        if (!itr->IsAlive())
+                            itr->Respawn();
+                        if (itr->IsAIEnabled)
+                            itr->AI()->EnterEvadeMode();
+                    }
+                }
+                CreatureAI::EnterEvadeMode();
+            }
+
             void ExecuteEvent(uint32 eventId) override
             {
                 switch (eventId)
@@ -92,8 +109,10 @@ class npc_firesworn : public CreatureScript
             {
                 if (me->HealthBelowPctDamaged(10, damage))
                 {
+                    if (Creature* garr = me->FindNearestCreature(NPC_GARR, 200.0f, true))
+                        garr->AddAura(SPELL_ENRAGE, garr);
                     damage = me->GetHealth() - 1;
-                    DoCastVictim(SPELL_ERUPTION);
+                    DoCastAOE(SPELL_ERUPTION);
                     me->DespawnOrUnsummon();
                 }
             }

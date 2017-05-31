@@ -49,23 +49,23 @@ struct boss_magmadarAI : public BossAI
 
         events.Update(diff);
 
-        while (uint32 eventId = events.GetEvent())
+        while (uint32 eventId = events.ExecuteEvent())
         {
             switch (eventId)
             {
                 case EVENT_FRENZY:
                     Talk(EMOTE_FRENZY);
                     DoCast(me, SPELL_FRENZY);
-                    events.RepeatEvent(urand(15000, 20000));
+                    events.Repeat(urand(15000, 20000));
                     break;
                 case EVENT_PANIC:
                     DoCastVictim(SPELL_PANIC);
-                    events.RepeatEvent(urand(30000, 40000));
+                    events.Repeat(urand(30000, 40000));
                     break;
                 case EVENT_LAVA_BOMB:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         DoCast(target, SPELL_LAVA_BOMB);
-                    events.RepeatEvent(urand(12000, 15000));
+                    events.Repeat(urand(12000, 15000));
                     break;
                 default:
                     break;

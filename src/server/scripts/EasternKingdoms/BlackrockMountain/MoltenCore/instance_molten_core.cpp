@@ -30,20 +30,6 @@ EndScriptData */
 #include "molten_core.h"
 #include "TemporarySummon.h"
 
-Position const SummonPositions[10] =
-{
-    {737.850f, -1145.35f, -120.288f, 4.71368f},
-    {744.162f, -1151.63f, -119.726f, 4.58204f},
-    {751.247f, -1152.82f, -119.744f, 4.49673f},
-    {759.206f, -1155.09f, -120.051f, 4.30104f},
-    {755.973f, -1152.33f, -120.029f, 4.25588f},
-    {731.712f, -1147.56f, -120.195f, 4.95955f},
-    {726.499f, -1149.80f, -120.156f, 5.24055f},
-    {722.408f, -1152.41f, -120.029f, 5.33087f},
-    {718.994f, -1156.36f, -119.805f, 5.75738f},
-    {838.510f, -829.840f, -232.000f, 2.00000f},
-};
-
 class instance_molten_core : public InstanceMapScript
 {
     public:
@@ -88,6 +74,9 @@ class instance_molten_core : public InstanceMapScript
                         break;
                     case NPC_MAJORDOMO_EXECUTUS:
                         _majordomoExecutusGUID = creature->GetGUID();
+                        break;
+                    case NPC_RAGNAROS:
+                        _ragnarosGUID = creature->GetGUID();
                         break;
                     default:
                         break;
@@ -136,6 +125,8 @@ class instance_molten_core : public InstanceMapScript
                         return _golemaggTheIncineratorGUID;
                     case BOSS_MAJORDOMO_EXECUTUS:
                         return _majordomoExecutusGUID;
+                    case BOSS_RAGNAROS:
+                        return _ragnarosGUID;
                 }
 
                 return 0;
@@ -169,18 +160,18 @@ class instance_molten_core : public InstanceMapScript
                 _summonedExecutus = true;
                 if (!done)
                 {
-                    instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, SummonPositions[0]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[1]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[2]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[3]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[4]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[5]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[6]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[7]);
-                    instance->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[8]);
+                    if (Creature* majordomo = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, SummonPositions[0]))
+                    {
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[1]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[2]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[3]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[4]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[5]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[6]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[7]);
+                        majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[8]);
+                    }
                 }
-                else if (TempSummon* summon = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, RagnarosTelePos))
-                        summon->AI()->DoAction(ACTION_START_RAGNAROS_ALT);
             }
 
             std::string GetSaveData()
@@ -244,6 +235,7 @@ class instance_molten_core : public InstanceMapScript
         private:
             uint64 _golemaggTheIncineratorGUID;
             uint64 _majordomoExecutusGUID;
+            uint64 _ragnarosGUID;
             uint64 _cacheOfTheFirelordGUID;
             bool* _executusSchedule;
             uint8 _deadBossCount;

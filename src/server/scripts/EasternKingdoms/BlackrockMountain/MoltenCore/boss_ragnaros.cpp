@@ -1,354 +1,284 @@
-/*
- * Copyright (C) 
- * Copyright (C) 
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Boss_Ragnaros
-SD%Complete: 95
-SDComment: some spells doesnt work correctly
-SDCategory: Molten Core
-EndScriptData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "molten_core.h"
 
 enum Texts
 {
-    SAY_SUMMON_MAJ              = 0,
-    SAY_ARRIVAL1_RAG            = 1,
-    SAY_ARRIVAL2_MAJ            = 2,
-    SAY_ARRIVAL3_RAG            = 3,
-    SAY_ARRIVAL5_RAG            = 4,
-    SAY_REINFORCEMENTS1         = 5,
-    SAY_REINFORCEMENTS2         = 6,
-    SAY_HAND                    = 7,
-    SAY_WRATH                   = 8,
-    SAY_KILL                    = 9,
-    SAY_MAGMABURST              = 10
+    SAY_SUMMON_RAG_3            = 2,
+    SAY_REINFORCEMENTS_1,
+    SAY_REINFORCEMENTS_2,
+    SAY_HAMMER,
+    SAY_WRATH,
+    SAY_KILL,
+    SAY_MAGMA_BURST
 };
 
 enum Spells
 {
-    SPELL_HAND_OF_RAGNAROS      = 19780,
     SPELL_WRATH_OF_RAGNAROS     = 20566,
-    SPELL_LAVA_BURST            = 21158,
-    SPELL_MAGMA_BLAST           = 20565,                   // Ranged attack
-    SPELL_SONS_OF_FLAME_DUMMY   = 21108,                   // Server side effect
-    SPELL_RAGSUBMERGE           = 21107,                   // Stealth aura
-    SPELL_RAGEMERGE             = 20568,
-    SPELL_MELT_WEAPON           = 21388,
-    SPELL_ELEMENTAL_FIRE        = 20564,
-    SPELL_ERRUPTION             = 17731
+    SPELL_ELEMENTAL_FIRE        = 20563,                    // Aura, proc spell 20564 when doing melee damage
+    SPELL_MAGMA_BLAST           = 20565,                    // Ranged attack if nobody is in melee range
+    SPELL_MELT_WEAPON           = 21387,
+    SPELL_RAGNA_SUBMERGE        = 21107,                    // Stealth aura
+    SPELL_RAGNA_EMERGE          = 20568,                    // Emerge from lava
+    SPELL_SUBMERGE_EFFECT       = 21859,                    // Make Ragnaros immune and passive while submerged
+    SPELL_ELEMENTAL_FIRE_KILL   = 19773,
+    SPELL_MIGHT_OF_RAGNAROS     = 21154,
+    SPELL_INTENSE_HEAT          = 21155,
+    SPELL_LAVA_BURST            = 21908,                    // Randomly trigger one of spells 21886, 21900 - 21907 which summons Go 178088
+    SPELL_LAVA_SHIELD           = 21857                     // Son of Flame mana drain aura
 };
 
 enum Events
 {
-    EVENT_ERUPTION              = 1,
-    EVENT_WRATH_OF_RAGNAROS     = 2,
-    EVENT_HAND_OF_RAGNAROS      = 3,
-    EVENT_LAVA_BURST            = 4,
-    EVENT_ELEMENTAL_FIRE        = 5,
-    EVENT_MAGMA_BLAST           = 6,
-    EVENT_SUBMERGE              = 7,
-
-    EVENT_INTRO_1               = 8,
-    EVENT_INTRO_2               = 9,
-    EVENT_INTRO_3               = 10,
-    EVENT_INTRO_4               = 11,
-    EVENT_INTRO_5               = 12
+    EVENT_RAG_SUMMON_9          = 1,
+    EVENT_AGGRO,
+    EVENT_WRATH_OF_RAGNAROS,
+    EVENT_LAVA_BURST,
+    EVENT_HAMMER_OF_RAGNAROS,
+    EVENT_SUBMERGE,
+    EVENT_EMERGE
 };
 
-class boss_ragnaros : public CreatureScript
+enum Phases
 {
-    public:
-        boss_ragnaros() : CreatureScript("boss_ragnaros") { }
+    PHASE_FIGHT                 = 1,
+    PHASE_SUBMERGE,
+};
 
-        struct boss_ragnarosAI : public BossAI
+enum Misc
+{
+    ACTION_START                = 1
+};
+
+struct boss_ragnarosAI : public BossAI
+{
+    boss_ragnarosAI(Creature* creature) : BossAI(creature, BOSS_RAGNAROS)
+    {
+        Initialize();
+        _introDone = false;
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        SetCombatMovement(false);
+    }
+
+    void Initialize()
+    {
+        _addCount = 0;
+        _submergedOnce = false;
+        _yelled = false;
+    }
+
+    void Reset() override
+    {
+        summons.DespawnAll();
+        events.SetPhase(PHASE_FIGHT);
+        me->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE);
+        me->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        Initialize();
+        _Reset();
+    }
+
+    void EnterCombat(Unit* /*victim*/) override
+    {
+        _EnterCombat();
+        DoCast(me, SPELL_MELT_WEAPON);
+        DoCast(me, SPELL_ELEMENTAL_FIRE);
+        events.SetPhase(PHASE_FIGHT);
+        events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 30000, 0, PHASE_FIGHT);
+        events.ScheduleEvent(EVENT_HAMMER_OF_RAGNAROS, 11000, 0, PHASE_FIGHT);
+        events.ScheduleEvent(EVENT_SUBMERGE, 180000, 0, PHASE_FIGHT);
+    }
+
+    void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+    {
+        if (summon->GetEntry() == NPC_SON_OF_FLAME)
         {
-            boss_ragnarosAI(Creature* creature) : BossAI(creature, BOSS_RAGNAROS)
-            {
-                _introState = 0;
-                me->SetReactState(REACT_PASSIVE);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
+            summon->DespawnOrUnsummon();
+            if (--_addCount == 0)
+                events.RescheduleEvent(EVENT_EMERGE, std::min(1000U, events.GetTimeUntilEvent(EVENT_EMERGE)), 0, PHASE_SUBMERGE);
+        }
+    }
 
-            void Reset()
-            {
-                BossAI::Reset();
-                _emergeTimer = 90000;
-                _hasYelledMagmaBurst = false;
-                _hasSubmergedOnce = false;
-                _isBanished = false;
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-            }
+    void JustSummoned(Creature* summon) override
+    {
+        summons.Summon(summon);
+        if (summon->GetEntry() == NPC_SON_OF_FLAME)
+        {
+            summon->CastSpell(summon, SPELL_LAVA_SHIELD, true);
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                summon->AI()->AttackStart(target);
+        }
+        if (summon->GetEntry() == NPC_FLAME_OF_RAGNAROS)
+        {
+            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            summon->CastSpell(summon, SPELL_INTENSE_HEAT, true, nullptr, nullptr, me->GetGUID());
+        }
+    }
 
-            void EnterCombat(Unit* victim)
-            {
-                BossAI::EnterCombat(victim);
-                events.ScheduleEvent(EVENT_ERUPTION, 15000);
-                events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 30000);
-                events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 25000);
-                events.ScheduleEvent(EVENT_LAVA_BURST, 10000);
-                events.ScheduleEvent(EVENT_ELEMENTAL_FIRE, 3000);
-                events.ScheduleEvent(EVENT_MAGMA_BLAST, 2000);
-                events.ScheduleEvent(EVENT_SUBMERGE, 180000);
-            }
+    void DoAction(int32 actionId) override
+    {
+        if (actionId == ACTION_START)
+            events.ScheduleEvent(EVENT_RAG_SUMMON_9, 10000);
+    }
 
-            void KilledUnit(Unit* /*victim*/)
-            {
-                if (urand(0, 99) < 25)
-                    Talk(SAY_KILL);
-            }
+    void KilledUnit(Unit* victim) override
+    {
+        if (victim->GetTypeId() == TYPEID_PLAYER && roll_chance_i(75))
+            Talk(SAY_KILL);
+    }
 
-            void AttackStart(Unit* target)
-            {
-                if (target && me->Attack(target, true))
-                    DoStartNoMovement(target);
-            }
+    void UpdateAI(uint32 diff) override
+    {
+        if (instance->GetBossState(BOSS_RAGNAROS) != IN_PROGRESS && !_introDone)
+        {
+            events.Update(diff);
 
-            void UpdateAI(uint32 diff)
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (_introState != 2)
+                switch (eventId)
                 {
-                    if (!_introState)
+                    case EVENT_RAG_SUMMON_9:
+                        Talk(SAY_SUMMON_RAG_3);
+                        events.ScheduleEvent(EVENT_AGGRO, 3000);
+                        break;
+                    case EVENT_AGGRO:
                     {
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        events.ScheduleEvent(EVENT_INTRO_1, 4000);
-                        events.ScheduleEvent(EVENT_INTRO_2, 23000);
-                        events.ScheduleEvent(EVENT_INTRO_3, 42000);
-                        events.ScheduleEvent(EVENT_INTRO_4, 43000);
-                        events.ScheduleEvent(EVENT_INTRO_5, 53000);
-                        _introState = 1;
-                    }
-
-                    events.Update(diff);
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
-                        {
-                        case EVENT_INTRO_1:
-                            Talk(SAY_ARRIVAL1_RAG);
-                            break;
-                        case EVENT_INTRO_2:
-                            Talk(SAY_ARRIVAL3_RAG);
-                            break;
-                        case EVENT_INTRO_3:
-                            me->HandleEmoteCommand(EMOTE_ONESHOT_ATTACK1H);
-                            break;
-                        case EVENT_INTRO_4:
-                            Talk(SAY_ARRIVAL5_RAG);
-                            if (Creature* executus = ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_MAJORDOMO_EXECUTUS)))
-                                Unit::Kill(me, executus);
-                            break;
-                        case EVENT_INTRO_5:
-                            me->SetReactState(REACT_AGGRESSIVE);
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            _introState = 2;
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    if (_isBanished && ((_emergeTimer <= diff) || (instance->GetData(DATA_RAGNAROS_ADDS)) > 8))
-                    {
-                        //Become unbanished again
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->setFaction(14);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            AttackStart(target);
-                        instance->SetData(DATA_RAGNAROS_ADDS, 0);
-
-                        //DoCast(me, SPELL_RAGEMERGE); //"phase spells" didnt worked correctly so Ive commented them and wrote solution witch doesnt need core support
-                        _isBanished = false;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                        _introDone = true;
+                        if (Player* player = SelectTargetFromPlayerList(100.0f, 0, true))
+                            AttackStart(player);
+                        break;
                     }
-                    else if (_isBanished)
-                    {
-                        _emergeTimer -= diff;
-                        //Do nothing while banished
-                        return;
-                    }
+                    default:
+                        break;
+                }
+            }
+        }
+        else
+        {
+            if (!UpdateVictim() && !events.IsInPhase(PHASE_SUBMERGE))
+                return;
 
-                    //Return since we have no target
-                    if (!UpdateVictim())
-                        return;
+            events.Update(diff);
 
-                    events.Update(diff);
-
-                    while (uint32 eventId = events.ExecuteEvent())
-                    {
-                        switch (eventId)
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_WRATH_OF_RAGNAROS:
+                        Talk(SAY_WRATH);
+                        DoCastAOE(SPELL_WRATH_OF_RAGNAROS);
+                        events.Repeat(25000);
+                        break;
+                    case EVENT_LAVA_BURST:
+                        DoCastAOE(SPELL_LAVA_BURST);
+                        events.Repeat(urand(5000, 25000));
+                        break;
+                    case EVENT_HAMMER_OF_RAGNAROS:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                         {
-                            case EVENT_ERUPTION:
-                                DoCastVictim(SPELL_ERRUPTION);
-                                events.ScheduleEvent(EVENT_ERUPTION, urand(20000, 45000));
-                                break;
-                            case EVENT_WRATH_OF_RAGNAROS:
-                                DoCastVictim(SPELL_WRATH_OF_RAGNAROS);
-                                if (urand(0, 1))
-                                    Talk(SAY_WRATH);
-                                events.ScheduleEvent(EVENT_WRATH_OF_RAGNAROS, 25000);
-                                break;
-                            case EVENT_HAND_OF_RAGNAROS:
-                                DoCast(me, SPELL_HAND_OF_RAGNAROS);
-                                if (urand(0, 1))
-                                    Talk(SAY_HAND);
-                                events.ScheduleEvent(EVENT_HAND_OF_RAGNAROS, 20000);
-                                break;
-                            case EVENT_LAVA_BURST:
-                                DoCastVictim(SPELL_LAVA_BURST);
-                                events.ScheduleEvent(EVENT_LAVA_BURST, 10000);
-                                break;
-                            case EVENT_ELEMENTAL_FIRE:
-                                DoCastVictim(SPELL_ELEMENTAL_FIRE);
-                                events.ScheduleEvent(EVENT_ELEMENTAL_FIRE, urand(10000, 14000));
-                                break;
-                            case EVENT_MAGMA_BLAST:
-                                if (me->IsWithinMeleeRange(me->GetVictim()))
-                                {
-                                    DoCastVictim(SPELL_MAGMA_BLAST);
-                                    if (!_hasYelledMagmaBurst)
-                                    {
-                                        //Say our dialog
-                                        Talk(SAY_MAGMABURST);
-                                        _hasYelledMagmaBurst = true;
-                                    }
-                                }
-                                events.ScheduleEvent(EVENT_MAGMA_BLAST, 2500);
-                                break;
-                            case EVENT_SUBMERGE:
-                            {
-                                if (!_isBanished)
-                                {
-                                    //Creature spawning and ragnaros becomming unattackable
-                                    //is not very well supported in the core //no it really isnt
-                                    //so added normaly spawning and banish workaround and attack again after 90 secs.
-                                    me->AttackStop();
-                                    DoResetThreat();
-                                    me->SetReactState(REACT_PASSIVE);
-                                    me->InterruptNonMeleeSpells(false);
-                                    //Root self
-                                    //DoCast(me, 23973);
-                                    me->setFaction(35);
-                                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);
-                                    me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
-                                    instance->SetData(DATA_RAGNAROS_ADDS, 0);
-
-                                    if (!_hasSubmergedOnce)
-                                    {
-                                        Talk(SAY_REINFORCEMENTS1);
-
-                                        // summon 8 elementals
-                                        for (uint8 i = 0; i < 8; ++i)
-                                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                                if (Creature* summoned = me->SummonCreature(12143, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 900000))
-                                                    summoned->AI()->AttackStart(target);
-
-                                        _hasSubmergedOnce = true;
-                                        _isBanished = true;
-                                        //DoCast(me, SPELL_RAGSUBMERGE);
-                                        _emergeTimer = 90000;
-
-                                    }
-                                    else
-                                    {
-                                        Talk(SAY_REINFORCEMENTS2);
-
-                                        for (uint8 i = 0; i < 8; ++i)
-                                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                                if (Creature* summoned = me->SummonCreature(12143, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 900000))
-                                                    summoned->AI()->AttackStart(target);
-
-                                        _isBanished = true;
-                                        //DoCast(me, SPELL_RAGSUBMERGE);
-                                        _emergeTimer = 90000;
-                                    }
-                                }
-                                events.ScheduleEvent(EVENT_SUBMERGE, 180000);
-                                break;
-                            }
-                            default:
-                                break;
+                            DoCast(target, SPELL_MIGHT_OF_RAGNAROS);
+                            Talk(SAY_HAMMER);
                         }
-                    }
-
-                    DoMeleeAttackIfReady();
+                        events.Repeat(urand(11000, 33000));
+                        break;
+                    case EVENT_SUBMERGE:
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_SUBMERGE);
+                        events.SetPhase(PHASE_SUBMERGE);
+                        for (auto itr : _sonSpawnPositions) // should be handled by spell
+                        {
+                            if (Creature* summon = me->SummonCreature(NPC_SON_OF_FLAME, *me))
+                                summon->GetMotionMaster()->MoveJump(itr, 25.f, 25.f);
+                        }
+                        DoCast(me, SPELL_RAGNA_SUBMERGE, true);
+                        DoCast(me, SPELL_SUBMERGE_EFFECT, true);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        Talk(_submergedOnce ? SAY_REINFORCEMENTS_2 : SAY_REINFORCEMENTS_1);
+                        if(!_submergedOnce)
+                            _submergedOnce = true;
+                        _addCount = 8;
+                        events.ScheduleEvent(EVENT_EMERGE, 90000, 0, PHASE_SUBMERGE); 
+                        break;
+                    case EVENT_EMERGE:
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                        events.SetPhase(PHASE_FIGHT);
+                        me->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE);
+                        me->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        events.ScheduleEvent(EVENT_SUBMERGE, 180000, 0, PHASE_FIGHT);
+                        break;
+                    default:
+                        break;
                 }
             }
 
-        private:
-            uint32 _emergeTimer;
-            uint8 _introState;
-            bool _hasYelledMagmaBurst;
-            bool _hasSubmergedOnce;
-            bool _isBanished;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<boss_ragnarosAI>(creature);
+            _DoMeleeAttackIfReady();
         }
-};
+    }
 
-class npc_son_of_flame : public CreatureScript
-{
-    public:
-        npc_son_of_flame() : CreatureScript("npc_SonOfFlame") { }
+private:
+    bool _introDone;
+    bool _submergedOnce;
+    bool _yelled;
+    uint8 _addCount;
+    Position const _sonSpawnPositions[8] = 
+    {
+        { 829.505f, -815.090f, -228.959f },
+        { 844.504f, -814.744f, -229.959f },
+        { 852.855f, -824.128f, -229.223f },
+        { 855.441f, -835.294f, -228.813f },
+        { 854.456f, -844.900f, -228.524f },
+        { 846.322f, -850.209f, -229.208f },
+        { 838.246f, -850.036f, -229.100f },
+        { 824.968f, -844.214f, -229.661f }
+    };
+    void _DoMeleeAttackIfReady()
+    {
+        if (!me->isAttackReady() || events.IsInPhase(PHASE_SUBMERGE))
+            return;
 
-        struct npc_son_of_flameAI : public ScriptedAI //didnt work correctly in EAI for me...
+        Unit* victim = me->GetVictim();
+        if (!victim)
+            return;
+
+        if (!me->IsWithinMeleeRange(victim) || !me->IsWithinLOSInMap(victim))
         {
-            npc_son_of_flameAI(Creature* creature) : ScriptedAI(creature)
+            std::vector<Player*> playersAtMelee;
+            Map::PlayerList const &players = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                if (Player* player = itr->GetSource())
+                    if (player->IsWithinMeleeRange(me) && player->IsWithinLOSInMap(me))
+                        playersAtMelee.push_back(player);
+            if (playersAtMelee.empty())
             {
-                instance = me->GetInstanceScript();
+                if (!_yelled)
+                {
+                    Talk(SAY_MAGMA_BURST);
+                    _yelled = true;
+                }
+                DoCastVictim(SPELL_MAGMA_BLAST);
             }
-
-            void JustDied(Unit* /*killer*/)
+            else
             {
-                instance->SetData(DATA_RAGNAROS_ADDS, 1);
+                _yelled = false;
+                Unit* target = Trinity::Containers::SelectRandomContainerElement(playersAtMelee);
+                AttackStart(target);
+                me->AttackerStateUpdate(target);
             }
-
-            void UpdateAI(uint32 /*diff*/)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                DoMeleeAttackIfReady();
-            }
-
-        private:
-            InstanceScript* instance;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<npc_son_of_flameAI>(creature);
         }
+        else
+        {
+            _yelled = false;
+            me->AttackerStateUpdate(victim);
+        }
+
+        me->resetAttackTimer();
+    }
 };
 
 void AddSC_boss_ragnaros()
 {
-    new boss_ragnaros();
-    new npc_son_of_flame();
+    new CreatureAILoader<boss_ragnarosAI>("boss_ragnaros");
 }
