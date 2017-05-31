@@ -1,0 +1,1 @@
+DELETE FROM `conditions` WHERE `sourceEntry`= 63414;
