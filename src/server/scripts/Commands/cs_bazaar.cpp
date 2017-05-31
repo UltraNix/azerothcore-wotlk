@@ -976,7 +976,7 @@ public:
         uint8 quality = 0;
 
         std::string itemName = "";
-        std::string color[6];
+        std::string color[8];
 
         // Grey
         color[0] = "|cff9d9d9d";
@@ -990,6 +990,10 @@ public:
         color[4] = "|cffa335ee";
         // Legendary
         color[5] = "|cffff8000";
+        // Artifact
+        color[6] = "|cffe6cc80";
+        // Bind to Account
+        color[7] = "|cffe6cc80";
 
         if (result)
         {
@@ -1060,6 +1064,8 @@ public:
                     handler.PSendSysMessage("[TABARD]: -");
                     break;
             }
+
+            return;
         }
 
         if (result1)
