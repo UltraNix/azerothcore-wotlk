@@ -230,8 +230,6 @@ enum SOUNDS
     SOUND_TANK_HARD_INTRO                            = 15629,
 };
 
-#define DATA_SPINNING_TARGET 1
-
 #define SPELL_NAPALM_SHELL                           RAID_MODE(SPELL_NAPALM_SHELL_10, SPELL_NAPALM_SHELL_25)
 #define SPELL_PLASMA_BLAST                           RAID_MODE(SPELL_PLASMA_BLAST_10, SPELL_PLASMA_BLAST_25)
 #define SPELL_MINE_EXPLOSION                         RAID_MODE(SPELL_MINE_EXPLOSION_10, SPELL_MINE_EXPLOSION_25)
@@ -1147,7 +1145,7 @@ public:
             events.Update(diff);
 
             Unit* cannon = GetS3();
-            if (!cannon || cannon->HasUnitState(UNIT_STATE_CASTING) || me->HasUnitState(UNIT_STATE_CASTING))
+            if ((cannon && cannon->HasUnitState(UNIT_STATE_CASTING)) || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             switch (events.GetEvent())
@@ -1324,7 +1322,6 @@ public:
         uint8 Phase;
         bool fighting;
         bool leftarm;
-        uint64 targetSpinning;
 
         void Reset()
         {
@@ -1333,7 +1330,6 @@ public:
             leftarm = false;
             me->SetRegeneratingHealth(false);
             events.Reset();
-            targetSpinning = 0;
             me->SetReactState(REACT_PASSIVE);
         }
 
@@ -1437,14 +1433,6 @@ public:
             }
         }
 
-        uint64 GetGUID(int32 data) const override
-        {
-            if (data == DATA_SPINNING_TARGET)
-                return targetSpinning;
-
-            return 0;
-        }
-
         void UpdateAI(uint32 diff)
         {
             if (!fighting)
@@ -1526,8 +1514,7 @@ public:
                     {
                         if (Player* target = SelectTargetFromPlayerList(100.0f))
                         {
-                            targetSpinning = target->GetGUID();
-
+                            me->SetOrientation(me->GetAngle(target));
                             me->SetFacingToObject(target);
 
                             DoCast(SPELL_SPINNING_UP);
@@ -2253,42 +2240,13 @@ public:
     {
         PrepareAuraScript(spell_lasser_barrage_aura_AuraScript);
 
-        bool HasInSide(Unit* caster, bool side, Position const* obj) const
-        {
-            float angle = caster->GetAngle(obj);
-            angle -= caster->GetOrientation();
-
-            // move angle to range -pi ... +pi
-            angle = Position::NormalizeOrientation(angle);
-            if (angle > M_PI)
-                angle -= 2.0f * M_PI;
-
-            if (side)
-                return (angle > 0 && angle <= M_PI);
-            else
-                return (angle < 0 && angle >= -M_PI);
-        }
-
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             Unit* target = GetTarget();
             if (!target || target->GetEntry() != NPC_VX001)
                 return;
 
-            Creature* vx001 = target->ToCreature();
-
-            uint64 targetGUID = 0;
-            if (vx001->AI())
-                targetGUID = vx001->AI()->GetGUID(DATA_SPINNING_TARGET);
-
-            if (Player* player = ObjectAccessor::GetPlayer(*target, targetGUID))
-            {
-                uint8 direction = 0;
-                if (HasInSide(target, true, player))
-                    direction = 1;
-
-                vx001->GetMotionMaster()->MoveRotate(30000, direction ? ROTATE_DIRECTION_RIGHT : ROTATE_DIRECTION_LEFT);
-            }
+            target->GetMotionMaster()->MoveRotate(30000, ROTATE_DIRECTION_RIGHT);
         }
 
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
