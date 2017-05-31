@@ -1516,15 +1516,11 @@ public:
                         if (Player* target = SelectTargetFromPlayerList(100.0f))
                         {
                             float angle = me->GetAngle(target);
+                            if (Unit* vehicle = me->GetVehicleBase())
+                                angle -= vehicle->GetOrientation();
+
                             me->SetOrientation(angle);
-
-                            Movement::MoveSplineInit init(me);
-                            init.MoveTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), false);
-                            if (me->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && me->GetTransGUID())
-                                init.DisableTransportPathTransformations();
-
-                            init.SetFacing(angle);
-                            init.Launch();
+                            me->SetFacingTo(angle);
 
                             DoCast(SPELL_SPINNING_UP);
                         }

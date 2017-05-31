@@ -6548,6 +6548,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
             spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
             break;
+        case 63414: // Mimiron - Spinning Up
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_CASTER;
+            spellInfo->Effect[EFFECT_1] = 0;
+            // no break
         case 63274: // Mimiron - P3Wx2 Laser Barrage
             spellInfo->AttributesEx &= ~(SPELL_ATTR1_CHANNELED_1 | SPELL_ATTR1_CHANNEL_TRACK_TARGET);
             break;
