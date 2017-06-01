@@ -269,11 +269,12 @@ class npc_thrall_battle_undercity : public CreatureScript
 
                     me->SetStandState(UNIT_STAND_STATE_STAND);
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
+                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                     if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                     {
                         Sylvanas->SearchFormation();
                         Sylvanas->Mount(10719);
+                        Sylvanas->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                     }
                 }
             }
@@ -416,7 +417,6 @@ class npc_thrall_battle_undercity : public CreatureScript
                             if (Varimathras->GetAI())
                                 Varimathras->GetAI()->SetData(0, 1);
 
-                            Varimathras->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             Varimathras->CastSpell(Varimathras, SPELL_AURA_OF_VARIMATHRAS, true);
                         }
                         JumpToNextStep(1500);
@@ -1649,7 +1649,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
                             case 6:
                                 StartEvent = false;
                                 me->RemoveAllAuras();
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_NPC);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                                 if (Creature* Thrall = ObjectAccessor::GetCreature(*me, ThrallGUID))
                                     AttackStart(Thrall);
                                 EventTimer = 60000;
