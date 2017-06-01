@@ -68,6 +68,7 @@ UPDATE `gameobject_loot_template` SET `item` = '45624' WHERE `gameobject_loot_te
 
 -- Thorim
 UPDATE `gameobject_loot_template` SET `item` = '45624' WHERE `gameobject_loot_template`.`entry` = 26955 AND `gameobject_loot_template`.`item` = 40753;
+UPDATE `gameobject_loot_template` SET `item` = '45624' WHERE `gameobject_loot_template`.`entry` = 26956 AND `gameobject_loot_template`.`item` = 40753;
 
 -- Freya
 UPDATE `gameobject_loot_template` SET `item` = '45624' WHERE `gameobject_loot_template`.`entry` =26962 AND `gameobject_loot_template`.`item` =40753;
