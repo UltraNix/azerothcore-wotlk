@@ -3557,9 +3557,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 8983:  // Druid - Bash  - R3
             spellInfo->AttributesEx7 |= SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER;
             break;
-        case 62078: // Druid - Swipe (Cat)
-            spellInfo->rangeIndex = 137; // 8yd
-            break;
         /////////////////////////////////
         ///// PALADIN
         /////////////////////////////////
