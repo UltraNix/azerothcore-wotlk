@@ -734,21 +734,21 @@ public:
                         IsPermament = false;
                         break;
                     case 2:
-                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], urand(1, 3), 0, true);
-                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], urand(1, 3), 0, true);
-                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], urand(1, 3), 10000, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], 1, 0, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1, 0, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 1, 10000, true);
                         break;
                     case 3:
-                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], urand(1, 3));
-                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], urand(1, 3));
-                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], urand(1, 3), 10000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], 1);
+                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1);
+                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 1, 10000);
                         break;
                     case 4:
-                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 2, 10000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 1, 10000);
                         Phase = 5;
                         break;
                     case 5:
-                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 3, 10000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 1, 10000);
                         Phase = 6;
                         break;
                     case 6:
@@ -758,7 +758,7 @@ public:
                     case 7:
                         SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], 1);
                         SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1);
-                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 2, 20000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 1, 20000);
                         break;
                     case 8:
                         ++PhaseCount;
@@ -783,11 +783,11 @@ public:
                             SummonMobs(GetWaveMobEntryByName[NPC_DREADLORD], 1, 1000);
                         break;
                     case 10:
-                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 2, 10000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 1, 10000);
                         Phase = 11;
                         break;
                     case 11:
-                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 3, 10000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 1, 10000);
                         Phase = 12;
                         break;
                     case 12:
@@ -795,19 +795,19 @@ public:
                         Phase = 10;
                         break;
                     case 13:
-                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], urand(1, 3), 0, true);
-                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], urand(1, 3), 0, true);
-                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], urand(1, 3), 5000, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], 1, 0, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1, 0, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 1, 5000, true);
                         break;
                     case 14:
-                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], urand(3, 5), 0, true);
-                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], urand(3, 5), 0, true);
-                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], urand(3, 5), 5000, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_COLLABORATOR], 1, 0, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1, 0, true);
+                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 1, 5000, true);
                         break;
                     case 15:
                         SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1);
                         SummonMobs(GetWaveMobEntryByName[NPC_CHEMIST], 1);
-                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 2, 5000);
+                        SummonMobs(GetWaveMobEntryByName[NPC_DOCTOR], 1, 5000);
                         Phase = 0;
                         PhaseTimer = 0;
                         IsPermament = false;
@@ -830,7 +830,7 @@ public:
                         SetData(0, 21);
                         break;
                     case 22:
-                        SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000);
+                        SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
                         break;
                     }
                 }

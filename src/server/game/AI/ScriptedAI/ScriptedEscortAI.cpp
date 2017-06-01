@@ -13,6 +13,7 @@ EndScriptData */
 #include "ScriptedEscortAI.h"
 #include "Group.h"
 #include "Player.h"
+#include "CreatureGroups.h"
 
 enum ePoints
 {
@@ -230,6 +231,9 @@ void npc_escortAI::UpdateAI(uint32 diff)
 
                 WaypointStart(CurrentWP->id);
                 m_uiWPWaitTimer = 0;
+
+                if (me->GetFormation() && me->GetFormation()->getLeader() == me)
+                    me->GetFormation()->LeaderMoveTo(CurrentWP->x, CurrentWP->y, CurrentWP->z, m_bIsRunning);
             }
         }
         else
@@ -317,6 +321,8 @@ void npc_escortAI::MovementInform(uint32 moveType, uint32 pointId)
                 me->StopMovingOnCurrentPos();
                 me->GetMotionMaster()->MoveIdle();
             }
+            else if (me->GetFormation() && me->GetFormation()->getLeader() == me)
+                me->GetFormation()->LeaderMoveTo(CurrentWP->x, CurrentWP->y, CurrentWP->z, m_bIsRunning);
         }
     }
 }
