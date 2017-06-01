@@ -3280,9 +3280,6 @@ bool Spell::UpdateChanneledTargetList()
                                 unit->RemoveAura(aurApp);
                                 continue;
                             }
-                            // Xinef: Update Orientation server side (non players wont sent appropriate packets)
-                            else if (m_spellInfo->HasAttribute(SPELL_ATTR1_CHANNEL_TRACK_TARGET))
-                                m_caster->UpdateOrientation(m_caster->GetAngle(unit));
                         }
                     }
                     else // aura is dispelled

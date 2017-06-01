@@ -54,7 +54,7 @@ Position const SummonPositions[10] =
     { 757.116f, -1170.12f, -118.793f, 3.40339f },
     { 755.910f, -1184.46f, -118.449f, 2.80998f }
 };
-Position const MajordomoPath[4] = 
+Position const MajordomoPath[3] = 
 {
     { 838.790771f, -810.536194f, -229.509171f },
     { 834.175598f, -811.452026f, -228.992126f },

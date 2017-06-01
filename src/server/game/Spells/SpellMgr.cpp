@@ -6544,17 +6544,24 @@ void SpellMgr::LoadDbcDataCorrections()
         case 60094: // Demonic Blast
             spellInfo->MaxAffectedTargets = 1;
             break;
-        case 66490: // P3Wx2 Laser Barrage
-            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_DUMMY;
-            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
-            break;
         case 63414: // Mimiron - Spinning Up
-            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_CASTER;
             spellInfo->Effect[EFFECT_1] = 0;
-            // no break
-        case 63274: // Mimiron - P3Wx2 Laser Barrage
-            spellInfo->AttributesEx &= ~(SPELL_ATTR1_CHANNELED_1 | SPELL_ATTR1_CHANNEL_TRACK_TARGET);
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_CASTER;
+            spellInfo->ChannelInterruptFlags = 0;
+            spellInfo->InterruptFlags = 0;
+            spellInfo->AuraInterruptFlags = 0;
             break;
+        case 63274: // Lasser barrage (Mimiron)
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_500_YARDS;
+            spellInfo->ChannelInterruptFlags = 0;
+            spellInfo->InterruptFlags = 0;
+            spellInfo->AuraInterruptFlags = 0;
+            break;
+        case 63297: // Lasser barrage left missile (Mimiron)
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_DEST_NEARBY_ENTRY;
+            break;
+        case 64042: // Lasser barrage right missile (Mimiron)
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_DEST_NEARBY_ENTRY;
         }
 
         switch (spellInfo->SpellFamilyName)

@@ -71,6 +71,7 @@ public:
         uint64 m_MimironLeviathanMKIIguid;
         uint64 m_MimironVX001guid;
         uint64 m_MimironACUguid;
+        uint64 m_MimironDBTargetguid;
 
         // Freya
         uint64 m_FreyaElder[3];
@@ -88,15 +89,15 @@ public:
         uint64 m_algalonTrapdoorGUID;
         uint64 m_brannBronzebeardAlgGUID;
         uint32 m_algalonTimer;
-        
+
         // Shared
         EventMap _events;
         bool m_mimironTramUsed;
         uint64 m_mimironTramGUID;
         uint64 m_keepersgateGUID;
         uint64 m_keepersGossipGUID[4];
-        
-        
+
+
         void Initialize()
         {
             // Bosses
@@ -144,6 +145,7 @@ public:
             m_MimironLeviathanMKIIguid = 0;
             m_MimironVX001guid = 0;
             m_MimironACUguid = 0;
+            m_MimironDBTargetguid = 0;
 
             // Freya
             memset(&m_FreyaElder, 0, sizeof(m_FreyaElder));
@@ -161,7 +163,7 @@ public:
             m_algalonTrapdoorGUID    = 0;
             m_brannBronzebeardAlgGUID    = 0;
             m_algalonTimer            = 0;
-            
+
             // Shared
             _events.Reset();
             memset(&m_keepersGossipGUID, 0, sizeof(m_keepersGossipGUID));
@@ -305,6 +307,9 @@ public:
                     break;
                 case NPC_MIMIRON_ACU:
                     m_MimironACUguid = creature->GetGUID();
+                    break;
+                case NPC_MIMIRON_DB_TARGET:
+                    m_MimironDBTargetguid = creature->GetGUID();
                     break;
                 case NPC_FREYA_GOSSIP:
                     m_keepersGossipGUID[TYPE_FREYA-TYPE_FREYA] = creature->GetGUID();
@@ -703,7 +708,7 @@ public:
                     freya->GetGameObjectListWithEntryInGrid(goList, 190171 /*Lichbloom*/, 333.0f);
                     freya->GetGameObjectListWithEntryInGrid(goList, 190170 /*Talandra's Rose*/, 333.0f);
                     freya->GetGameObjectListWithEntryInGrid(goList, 189973 /*Goldclover*/, 333.0f);
-                    
+
                     for (std::list<GameObject*>::const_iterator itr = goList.begin(); itr != goList.end(); ++itr)
                         (*itr)->SetRespawnTime(7*DAY);
                 }
@@ -808,6 +813,8 @@ public:
                 case DATA_GO_MIMIRON_DOOR_2:
                 case DATA_GO_MIMIRON_DOOR_3:
                     return m_MimironDoor[data-311];
+                case DATA_MIMIRON_DB_TARGET:
+                    return m_MimironDBTargetguid;
 
                 // Yogg-Saron
                 case GO_YOGG_SARON_DOORS:
@@ -952,7 +959,7 @@ public:
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 {
                     loadStream >> m_auiEncounter[i];
-                    
+
                     if (m_auiEncounter[i] == IN_PROGRESS && i != TYPE_WATCHERS)
                         m_auiEncounter[i] = NOT_STARTED;
                 }
@@ -1061,7 +1068,7 @@ public:
     };
 };
 
-const Position vehiclePositions[30] = 
+const Position vehiclePositions[30] =
 {
     // Start Positions
     // Siege

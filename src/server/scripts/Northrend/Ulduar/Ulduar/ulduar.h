@@ -43,9 +43,10 @@ enum UlduarData
     DATA_HARPOON_FIRE_STATE_4                = 203,
 
     // Mimiron's first vehicle (spawned by default)
-    DATA_MIMIRON_LEVIATHAN_MKII             = 301,
+    DATA_MIMIRON_LEVIATHAN_MKII              = 301,
     DATA_MIMIRON_VX001                        = 302,
     DATA_MIMIRON_ACU                        = 303,
+    DATA_MIMIRON_DB_TARGET                    = 304,
 
     // Mimiron's Doors
     DATA_GO_MIMIRON_DOOR_1                    = 311,
@@ -105,6 +106,7 @@ enum UlduarNPCs
     NPC_MIMIRON_LEVIATHAN_MKII                = 33432,
     NPC_MIMIRON_VX001                        = 33651,
     NPC_MIMIRON_ACU                            = 33670,
+    NPC_MIMIRON_DB_TARGET                    = 33576,
 
     // Freya
     NPC_ELDER_BRIGHTLEAF                    = 32915,
@@ -128,7 +130,7 @@ enum UlduarNPCs
     NPC_SALVAGED_DEMOLISHER                    = 33109,
     NPC_SALVAGED_DEMOLISHER_TURRET            = 33167,
 
-    
+
     // Algalon the Observer
     NPC_BRANN_BRONZBEARD_ALG                = 34064,
     NPC_AZEROTH                                = 34246,
