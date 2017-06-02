@@ -7,6 +7,7 @@ UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'distance';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'freeze';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'gm chat';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'gmnameannounce';
+UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'nameannounce';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'go creature';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'gobject activate';
 UPDATE `command` SET `security` = '3' WHERE `command`.`name` = 'gobject delete';
@@ -94,7 +95,6 @@ UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'instance';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'list';
 UPDATE `command` SET `security` = '2' WHERE `command`.`name` = 'playall';
 UPDATE `command` SET `security` = '3' WHERE `command`.`name` = 'possess';
-UPDATE `command` SET `security` = '3' WHERE `command`.`name` = 'quest complete';
 UPDATE `command` SET `security` = '3' WHERE `command`.`name` = 'quest remove';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'recall';
 UPDATE `command` SET `security` = '2' WHERE `command`.`name` = 'respawn';
@@ -111,8 +111,10 @@ UPDATE `command` SET `security` = '2' WHERE `command`.`name` = 'gobject add temp
 UPDATE `command` SET `security` = '2' WHERE `command`.`name` = 'quest add';
 UPDATE `command` SET `security` = '2' WHERE `command`.`name` = 'quest complete';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'character reputation';
+UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'lookup object';
+
 
 REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response', '1', NULL);
 REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response append', '1', NULL);
 REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response appendln', '1', NULL);
-REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response complete', '1', NULL);
+REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket complete', '1', NULL);
