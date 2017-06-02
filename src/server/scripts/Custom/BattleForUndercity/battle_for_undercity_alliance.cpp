@@ -195,7 +195,10 @@ class npc_varian_battle_undercity : public CreatureScript
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
                     if (Creature* Jaina = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_JAINA)))
+                    {
                         Jaina->SearchFormation();
+                        Jaina->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    }
                 }
             }
 

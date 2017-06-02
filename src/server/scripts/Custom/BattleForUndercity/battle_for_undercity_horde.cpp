@@ -269,7 +269,7 @@ class npc_thrall_battle_undercity : public CreatureScript
 
                     me->SetStandState(UNIT_STAND_STATE_STAND);
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+
                     if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
                     {
                         Sylvanas->SearchFormation();
@@ -326,9 +326,16 @@ class npc_thrall_battle_undercity : public CreatureScript
                     case 1:
                         SetEscortPaused(true);
                         SetRun(false);
+
                         me->Dismount();
+                        me->LoadEquipment(1, true);
+
                         if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
+                        {
                             Sylvanas->Dismount();
+                            Sylvanas->LoadEquipment(1, true);
+                        }
+
                         JumpToNextStep(2000);
                         break;
                     case 6:
@@ -1251,7 +1258,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 if (Creature* Jaina = me->SummonCreature(NPC_JAINA_PROUDMORE, 1305.02f, 370.15f, -67.29f, 4.33f))
                                 {
                                     JainaGUID = Jaina->GetGUID();
-                                    Jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_15 | UNIT_FLAG_PACIFIED);
+                                    Jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_15 | UNIT_FLAG_PACIFIED);
                                 }
                                 JumpToNextStep(1000);
                                 break;
