@@ -713,9 +713,16 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         {
             if (!spellProto->HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS))
                 victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto->Id);
+            if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL]) {
+                if (spell->GetSpellInfo()->Id == 21651) spell->cancel();//Hack for interrupt banner capturing during absorb
+            }
         }
-        else
+        else {
             victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
+            if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL]) {
+                if (spell->GetSpellInfo()->Id == 21651) spell->cancel();//Hack for interrupt banner capturing during absorb
+            }
+        }
 
         // We're going to call functions which can modify content of the list during iteration over it's elements
         // Let's copy the list so we can prevent iterator invalidation
@@ -928,7 +935,7 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
                     if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
                         if (spell->getState() == SPELL_STATE_PREPARING)
                         {
-                            uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;
+                            uint32 interruptFlags = spell->m_spellInfo->InterruptFlags;                            
                             if (interruptFlags & SPELL_INTERRUPT_FLAG_ABORT_ON_DMG)
                                 victim->InterruptNonMeleeSpells(false);
                             else if (interruptFlags & SPELL_INTERRUPT_FLAG_PUSH_BACK)
