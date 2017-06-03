@@ -274,6 +274,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                     {
                         Sylvanas->SearchFormation();
                         Sylvanas->Mount(10719);
+                        Sylvanas->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                     }
                 }
             }
@@ -325,9 +326,16 @@ class npc_thrall_battle_undercity : public CreatureScript
                     case 1:
                         SetEscortPaused(true);
                         SetRun(false);
+
                         me->Dismount();
+                        me->LoadEquipment(1, true);
+
                         if (Creature* Sylvanas = ObjectAccessor::GetCreature(*me, zoneScript->GetData64(DATA_SYLVANAS)))
+                        {
                             Sylvanas->Dismount();
+                            Sylvanas->LoadEquipment(1, true);
+                        }
+
                         JumpToNextStep(2000);
                         break;
                     case 6:
@@ -416,7 +424,6 @@ class npc_thrall_battle_undercity : public CreatureScript
                             if (Varimathras->GetAI())
                                 Varimathras->GetAI()->SetData(0, 1);
 
-                            Varimathras->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             Varimathras->CastSpell(Varimathras, SPELL_AURA_OF_VARIMATHRAS, true);
                         }
                         JumpToNextStep(1500);
@@ -1251,7 +1258,7 @@ class npc_thrall_battle_undercity : public CreatureScript
                                 if (Creature* Jaina = me->SummonCreature(NPC_JAINA_PROUDMORE, 1305.02f, 370.15f, -67.29f, 4.33f))
                                 {
                                     JainaGUID = Jaina->GetGUID();
-                                    Jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_15 | UNIT_FLAG_PACIFIED);
+                                    Jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_UNK_15 | UNIT_FLAG_PACIFIED);
                                 }
                                 JumpToNextStep(1000);
                                 break;
@@ -1649,7 +1656,7 @@ class npc_varimathras_battle_undercity : public CreatureScript
                             case 6:
                                 StartEvent = false;
                                 me->RemoveAllAuras();
-                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_NPC);
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                                 if (Creature* Thrall = ObjectAccessor::GetCreature(*me, ThrallGUID))
                                     AttackStart(Thrall);
                                 EventTimer = 60000;

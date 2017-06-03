@@ -5,7 +5,7 @@ INSERT INTO `conditions` VALUES
 (13, 2, 64042, 0, 0, 31, 0, 3, 33576, 0, 0, 0, 0, '', 'P3Wx2 Laser Barrage EFFECT_0 can only hit Mimiron DB Target'),
 (13, 2, 63297, 0, 0, 31, 0, 3, 33576, 0, 0, 0, 0, '', 'P3Wx2 Laser Barrage EFFECT_0 can only hit Mimiron DB Target');
 
-UPDATE `creature_template` SET `InhabitType` = 4, `flags_extra` = 128, `AiName`="", `ScriptName` = "npc_db_target_mimiron" WHERE `entry` = 33576;
+UPDATE `creature_template` SET `InhabitType` = 4, `flags_extra` = 130, `AiName`="", `ScriptName` = "npc_db_target_mimiron" WHERE `entry` = 33576;
 
 SET @GUID := 137631;
 DELETE FROM `creature` WHERE `id`=33576;

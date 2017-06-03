@@ -496,11 +496,8 @@ public:
                     berserk = true;
                     me->MonsterYell(TEXT_BERSERK, LANG_UNIVERSAL, 0);
                     me->PlayDirectSound(SOUND_BERSERK);
-                    if (hardmode)
-                    {
-                        DoCast(me, SPELL_SELF_DESTRUCT, true);
-                        DoCast(me, SPELL_SELF_DESTRUCT_VISUAL, true);
-                    }
+                    DoCast(me, SPELL_SELF_DESTRUCT, true);
+                    DoCast(me, SPELL_SELF_DESTRUCT_VISUAL, true);
                     events.PopEvent();
                     events.ScheduleEvent(EVENT_BERSERK_2, 0);
                     break;
