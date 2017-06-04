@@ -3794,6 +3794,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 2836:
             spellInfo->EffectBasePoints[0] = 139;
             break;
+        //Stealth
+        case 1784:
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_DIRECT_DAMAGE | AURA_INTERRUPT_FLAG_HITBYSPELL;
+            break;
         // Master of Subtlety
         case 31221:
         case 31222:
@@ -3848,6 +3852,12 @@ void SpellMgr::LoadDbcDataCorrections()
         // Chains of Ice
         case 45524:
             spellInfo->Effect[EFFECT_2] = 0;
+            break;
+        case 43265:
+        case 49936:
+        case 49937:
+        case 49938:
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
             break;
         // Impurity
         case 49220:
