@@ -3964,6 +3964,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->RecoveryTime = 0;
             spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
             break;
+        //Elemental Focus
+        case 16164:
+            spellInfo->procFlags = 0x00011150;
+            break;
         // Improved Earth Shield
         case 51560:
         case 51561:
