@@ -4316,6 +4316,13 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->spellLevel = 0;
             spellInfo->SpellFamilyFlags = flag96(0, 0x10, 0);
             break;
+        ////Prowl
+        case 5215:
+            spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_DIRECT_DAMAGE |
+                                            AURA_INTERRUPT_FLAG_SPELL_ATTACK | AURA_INTERRUPT_FLAG_MELEE_ATTACK |
+                                            AURA_INTERRUPT_FLAG_TALK | AURA_INTERRUPT_FLAG_USE |
+                                            AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_CAST;
+            break;
         // Clearcasting
         case 16870:
             spellInfo->DurationIndex = 31; // 8 secs

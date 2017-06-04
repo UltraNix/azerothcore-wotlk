@@ -25298,6 +25298,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
                 if (damage > GetMaxHealth())
                     damage = GetMaxHealth();
 
+                if (HasAura(5215))RemoveAura(5215);
                 // Gust of Wind
                 if (HasAura(43621))
                     damage = GetMaxHealth()/2;
