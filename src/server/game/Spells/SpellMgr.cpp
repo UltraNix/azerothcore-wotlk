@@ -5088,6 +5088,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63985:
             spellInfo->Effect[1] = 0;
             break;
+        // Overhead smash.
+        case 63356:
+        case 64003:
+            spellInfo->Attributes |= SPELL_ATTR0_ON_NEXT_SWING;
+            break;
 
         // AURIAYA
         // Sentinel Blast
