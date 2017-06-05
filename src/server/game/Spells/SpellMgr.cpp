@@ -3853,12 +3853,12 @@ void SpellMgr::LoadDbcDataCorrections()
         case 45524:
             spellInfo->Effect[EFFECT_2] = 0;
             break;
-        case 43265:
+        /*case 43265:
         case 49936:
         case 49937:
         case 49938:
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
-            break;
+            break;*/
         // Impurity
         case 49220:
         case 49633:
