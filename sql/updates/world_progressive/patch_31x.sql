@@ -441,3 +441,6 @@ DELETE FROM `npc_vendor` WHERE `npc_vendor`.`entry` = 33964 AND `npc_vendor`.`it
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`,`ExtendedCost`) VALUES
 ('33963', '0', '45087', '0', '0', '2604'),
 ('33964', '0', '45087', '0', '0', '2604');
+
+-- Remove Epic gems from vendor
+DELETE FROM npc_vendor WHERE entry IN (33680, 33637) AND item != 20815 AND item != 20824;
