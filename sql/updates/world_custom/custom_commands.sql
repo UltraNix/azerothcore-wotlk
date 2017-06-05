@@ -113,7 +113,6 @@ UPDATE `command` SET `security` = '2' WHERE `command`.`name` = 'quest complete';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'character reputation';
 UPDATE `command` SET `security` = '1' WHERE `command`.`name` = 'lookup object';
 
-
 REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response', '1', NULL);
 REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response append', '1', NULL);
 REPLACE `command` (`name`, `security`, `help`) VALUES ('ticket response appendln', '1', NULL);
