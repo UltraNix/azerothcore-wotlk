@@ -642,7 +642,7 @@ public:
             }
             case 22:
                 DoAttackSummoner = false;
-                SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
+                //SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
                 Phase = 22;
                 IsPermament = true;
                 break;
@@ -830,7 +830,7 @@ public:
                         SetData(0, 21);
                         break;
                     case 22:
-                        SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
+                        //SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
                         break;
                     }
                 }
