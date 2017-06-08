@@ -3229,6 +3229,29 @@ void SpellMgr::LoadSpellCustomAttr()
     sLog->outString();
 }
 
+#define PARTIAL_CORRECTION_SPELL 18  
+uint32 partialCorretion[PARTIAL_CORRECTION_SPELL] =
+{
+    1120,   // Drain Soul r1
+    8288,   // Drain Soul r2
+    8289,   // Drain Soul r3
+    11675,  // Drain Soul r4
+    27217,  // Drain Soul r5
+    47855,  // Drain Soul r6
+    49184,  // Howling Blast r1
+    51409,  // Howling Blast r2
+    51410,  // Howling Blast r3
+    51411,  // Howling Blast r4
+    5570,   // Insect Swarm r1
+    24974,  // Insect Swarm r2
+    24975,  // Insect Swarm r3
+    24976,  // Insect Swarm r4
+    24977,  // Insect Swarm r5
+    27013,  // Insect Swarm r6
+    47528,  // Mind Freeze r1
+    57994   // Wind Shear  r1
+};
+
 void SpellMgr::LoadDbcDataCorrections()
 {
     uint32 oldMSTime = getMSTime();
@@ -3267,6 +3290,10 @@ void SpellMgr::LoadDbcDataCorrections()
 
         if (spellInfo->activeIconID == 2158)  // flight
             spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
+
+        for (uint8 i = 0; i < PARTIAL_CORRECTION_SPELL; i++)
+            if (spellInfo->Id == partialCorretion[i])
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
         switch (spellInfo->Id)
         {
