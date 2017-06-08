@@ -3229,7 +3229,7 @@ void SpellMgr::LoadSpellCustomAttr()
     sLog->outString();
 }
 
-#define PARTIAL_CORRECTION_SPELL 18  
+#define PARTIAL_CORRECTION_SPELL 25  
 uint32 partialCorretion[PARTIAL_CORRECTION_SPELL] =
 {
     1120,   // Drain Soul r1
@@ -3248,6 +3248,13 @@ uint32 partialCorretion[PARTIAL_CORRECTION_SPELL] =
     24976,  // Insect Swarm r4
     24977,  // Insect Swarm r5
     27013,  // Insect Swarm r6
+    48468,  // Insect Swarm r7
+    20733,  // Black Arrow r1
+    63668,  // Black Arrow r2
+    63669,  // Black Arrow r3
+    63670,  // Black Arrow r4
+    63671,  // Black Arrow r5
+    63672,  // Black Arrow r6
     47528,  // Mind Freeze r1
     57994   // Wind Shear  r1
 };
