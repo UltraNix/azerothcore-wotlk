@@ -3229,7 +3229,7 @@ void SpellMgr::LoadSpellCustomAttr()
     sLog->outString();
 }
 
-#define PARTIAL_CORRECTION_SPELL 25  
+#define PARTIAL_CORRECTION_SPELL 40  
 uint32 partialCorretion[PARTIAL_CORRECTION_SPELL] =
 {
     1120,   // Drain Soul r1
@@ -3256,7 +3256,22 @@ uint32 partialCorretion[PARTIAL_CORRECTION_SPELL] =
     63671,  // Black Arrow r5
     63672,  // Black Arrow r6
     47528,  // Mind Freeze r1
-    57994   // Wind Shear  r1
+    57994,  // Wind Shear  r1
+    60103,  // Lava Lash r1
+    8042,   // Earth Shock r1
+    8044,   // Earth Shock r2
+    8045,   // Earth Shock r3
+    8046,   // Earth Shock r4
+    10412,  // Earth Shock r5
+    10413,  // Earth Shock r6
+    10414,  // Earth Shock r7
+    25454,  // Earth Shock r8
+    49230,  // Earth Shock r9
+    49231,  // Earth Shock r10
+    32645,  // Envenom r1
+    32684,  // Envenom r2
+    57992,  // Envenom r3
+    57993,  // Envenom r4
 };
 
 void SpellMgr::LoadDbcDataCorrections()
