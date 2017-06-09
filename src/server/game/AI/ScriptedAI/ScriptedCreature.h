@@ -84,6 +84,11 @@ public:
         storage_.clear();
     }
 
+    Creature* GetSummon(uint64 guid)
+    {
+        return ObjectAccessor::GetCreature(*me, guid);
+    }
+
     void Summon(Creature const* summon) { storage_.push_back(summon->GetGUID()); }
     void Despawn(Creature const* summon) { storage_.remove(summon->GetGUID()); }
     void DespawnEntry(uint32 entry);

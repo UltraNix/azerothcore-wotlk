@@ -141,7 +141,12 @@ const Position playerTeleportPosition = {1830.531006f, 803.939758f, 44.340508f, 
 const Position sinclariOutsidePosition = {1817.315674f, 804.060608f, 44.363998f, 0.0f};
 const Position MiddleRoomPortalSaboLocation = {1896.622925f, 804.854126f, 38.504772f, 3.139621f};
 
-const Position BossStartMove1  = {1894.684448f, 739.390503f, 47.668003f, 0.0f};
+const Position MoraggPath[3] = 
+{
+    { 1893.895f, 728.1261f, 47.75016f },
+    { 1892.997f, 738.4987f, 47.66684f },
+    { 1889.76f,  758.1089f, 47.66684f }
+};
 const Position ErekemPath[3] = 
 {
     { 1871.456f, 871.0361f, 43.41524f },
@@ -174,8 +179,19 @@ const Position LavanthorPath[3] =
     { 1854.618f, 761.5295f, 38.65631f },
     { 1862.17f,  773.2255f, 38.74879f }
 };
-const Position BossStartMove5  = {1906.683960f, 842.348022f, 38.637459f, 0.0f};
-const Position BossStartMove6  = {1928.207031f, 852.864441f, 47.200813f, 0.0f};
+const Position XevozzPath[3] = 
+{
+    { 1908.417f, 845.8502f, 38.71947f },
+    { 1905.557f, 841.3157f, 38.65529f },
+    { 1899.453f, 832.533f,  38.70752f }
+};
+
+const Position ZuramatPath[3] = 
+{
+    { 1934.151f, 860.9463f, 47.29499f },
+    { 1927.085f, 852.1342f, 47.19214f },
+    { 1923.226f, 847.3297f, 47.15541f }
+};
 
 const Position CyanigosasSpawnLocation = {1930.281250f, 804.407715f, 52.410946f, 3.139621f};
 const Position MiddleRoomLocation = {1892.291260f, 805.696838f, 38.438862f, 3.139621f};
