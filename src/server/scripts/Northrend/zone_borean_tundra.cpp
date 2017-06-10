@@ -1278,6 +1278,61 @@ public:
 
 };
 
+struct npc_nedarAI : public ScriptedAI
+{
+    npc_nedarAI(Creature* creature) : ScriptedAI(creature) 
+    {
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (Creature* lunchbox = me->FindNearestCreature(25968, 100.f, false))
+            lunchbox->DespawnOrUnsummon();
+        me->DespawnOrUnsummon();
+    }
+
+    void EnterCombat(Unit* victim) override
+    {
+        Talk(0);
+        if (Creature* lunchbox = me->FindNearestCreature(25968, 100.f, true))
+            if (lunchbox->IsAIEnabled)
+                lunchbox->AI()->AttackStart(victim);
+    }
+
+    void UpdateAI(uint32 diff) override 
+    {
+        if (!UpdateVictim())
+            return;
+
+        if (Unit* victim = me->GetVictim())
+        {
+            if (me->GetDistance(victim) > 5.f)
+                DoSpellAttackIfReady(41440);
+            else
+                DoMeleeAttackIfReady();
+        }
+    }
+};
+
+struct npc_lunchboxAI : public ScriptedAI
+{
+    npc_lunchboxAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void JustDied(Unit* killer) override
+    {
+        if (Creature* nedar = me->FindNearestCreature(25801, 10.f, true))
+        {
+            float x, y, z;
+            nedar->GetPosition(x, y, z);
+            nedar->SetHomePosition(x, y, z, 0.0f);
+            nedar->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            if(nedar->IsAIEnabled)
+                nedar->AI()->AttackStart(killer);
+        }
+    }
+};
+
 void AddSC_borean_tundra()
 {
     // Ours
@@ -1297,4 +1352,6 @@ void AddSC_borean_tundra()
     new npc_valiance_keep_cannoneer();
     new npc_warmage_coldarra();
     new npc_hidden_cultist();
+    new CreatureAILoader<npc_nedarAI>("npc_nedar");
+    new CreatureAILoader<npc_lunchboxAI>("npc_lunchbox");
 }
