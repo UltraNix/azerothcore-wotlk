@@ -4372,6 +4372,14 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->spellLevel = 0;
             spellInfo->SpellFamilyFlags = flag96(0, 0x10, 0);
             break;
+        // Pounce Bleed
+        case 9007: 
+        case 9824:
+        case 9826:
+        case 27007:
+        case 49804:
+            spellInfo->SpellFamilyName = SPELLFAMILY_DRUID;
+            break;
         ////Prowl
         case 5215:
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_DIRECT_DAMAGE |
