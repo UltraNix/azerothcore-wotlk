@@ -3606,6 +3606,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 8983:  // Druid - Bash  - R3
             spellInfo->AttributesEx7 |= SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER;
             break;
+        case 28730: // Arcane Torrent
+            spellInfo->Attributes |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
         /////////////////////////////////
         ///// PALADIN
         /////////////////////////////////
@@ -4368,6 +4371,14 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
             spellInfo->spellLevel = 0;
             spellInfo->SpellFamilyFlags = flag96(0, 0x10, 0);
+            break;
+        // Pounce Bleed
+        case 9007: 
+        case 9824:
+        case 9826:
+        case 27007:
+        case 49804:
+            spellInfo->SpellFamilyName = SPELLFAMILY_DRUID;
             break;
         ////Prowl
         case 5215:

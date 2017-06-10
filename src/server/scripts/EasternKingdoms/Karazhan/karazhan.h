@@ -62,7 +62,8 @@ enum KarazhanNPCs
     NPC_ROKAD_THE_RAVAGER                = 16181,
 
     NPC_ATTUMEN_THE_HUNTSMAN            = 15550,
-    NPC_ATTUMEN_THE_HUNTSMAN_MOUNTED    = 16152
+    NPC_ATTUMEN_THE_HUNTSMAN_MOUNTED    = 16152,
+    NPC_NIGHTBANE                       = 17225
 };
 
 enum KarazhanSpells

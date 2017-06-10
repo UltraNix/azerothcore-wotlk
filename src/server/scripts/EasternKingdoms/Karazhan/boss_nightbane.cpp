@@ -1,437 +1,478 @@
-/*
- * Copyright (C) 
- * Copyright (C) 
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-
-/* ScriptData
-SDName: Boss_Nightbane
-SD%Complete: 80
-SDComment: SDComment: Timers may incorrect
-SDCategory: Karazhan
-EndScriptData */
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "GameObject.h"
+#include "GameObjectAI.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "karazhan.h"
-#include "Player.h"
-#include "Creature.h"
+#include "CreatureTextMgr.h"
+#include "SpellScript.h"
 
-enum Spells
+enum NightbaneSpells
 {
-    // phase 1
-    SPELL_BELLOWING_ROAR        = 39427,
-    SPELL_CHARRED_EARTH         = 30129,
-    SPELL_DISTRACTING_ASH       = 30130,
-    SPELL_SMOLDERING_BREATH     = 30210,
-    SPELL_TAIL_SWEEP            = 25653,
-    // phase 2
-    SPELL_RAIN_OF_BONES         = 37098,
-    SPELL_SMOKING_BLAST         = 37057,
-    SPELL_FIREBALL_BARRAGE      = 30282,
-    SPELL_SEARING_CINDERS       = 30127,
-    SPELL_SUMMON_SKELETON       = 30170
+    SPELL_BELLOWING_ROAR    = 36922,
+    SPELL_CHARRED_EARTH     = 30129,
+    SPELL_CLEAVE            = 30131,
+    SPELL_DISTRACTING_ASH   = 30130,
+    SPELL_RAIN_OF_BONES     = 37098,
+    SPELL_SMOKING_BLAST     = 30128,
+    SPELL_SMOKING_BLAST_T   = 37057,
+    SPELL_SMOLDERING_BREATH = 30210,
+    SPELL_SUMMON_SKELETON   = 30170,
+    SPELL_TAIL_SWEEP        = 25653
 };
 
 enum Says
 {
-    EMOTE_SUMMON                = 0, // Not used in script
-    YELL_AGGRO                  = 1,
-    YELL_FLY_PHASE              = 2,
-    YELL_LAND_PHASE             = 3,
-    EMOTE_BREATH                = 4
+    EMOTE_SUMMON            = 0,
+    YELL_AGGRO,
+    YELL_FLY_PHASE,
+    YELL_LAND_PHASE,
+    EMOTE_BREATH
 };
 
-float IntroWay[8][3] =
+enum NightbanePoints
 {
-    {-11053.37f, -1794.48f, 149.00f},
-    {-11141.07f, -1841.40f, 125.00f},
-    {-11187.28f, -1890.23f, 125.00f},
-    {-11189.20f, -1931.25f, 125.00f},
-    {-11153.76f, -1948.93f, 125.00f},
-    {-11128.73f, -1929.75f, 125.00f},
-    {-11140.00f, -1915.00f, 122.00f},
-    {-11163.00f, -1903.00f, 91.473f}
+    POINT_INTRO_START       = 0,
+    POINT_INTRO_END,
+    POINT_INTRO_LANDING,
+    POINT_PHASE_TWO_FLY,
+    POINT_PHASE_TWO_PRE_FLY,
+    POINT_PHASE_TWO_LANDING,
+    POINT_PHASE_TWO_END
 };
 
-class boss_nightbane : public CreatureScript
+enum NightbanePaths
 {
-public:
-    boss_nightbane() : CreatureScript("boss_nightbane") { }
+    PATH_INTRO_START        = 10,
+    PATH_INTRO_END,
+    PATH_INTRO_LANDING,
+    PATH_SECOND_LANDING,
+    PATH_PHASE_TWO
+};
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_nightbaneAI (creature);
+enum NightbaneEvents
+{
+    EVENT_BELLOWING_ROAR    = 1,
+    EVENT_CHARRED_EARTH,
+    EVENT_CLEAVE,
+    EVENT_DISTRACTING_ASH,
+    EVENT_EMOTE_BREATH,
+    EVENT_END_INTRO,
+    EVENT_END_PHASE_TWO,
+    EVENT_INTRO_LANDING,
+    EVENT_LAND,
+    EVENT_LANDED,
+    EVENT_PRE_FLY_END,
+    EVENT_PRE_LAND,
+    EVENT_RAIN_OF_BONES,
+    EVENT_SMOLDERING_BREATH,
+    EVENT_SMOKING_BLAST,
+    EVENT_SMOKING_BLAST_T,
+    EVENT_START_INTRO_PATH,
+    EVENT_TAIL_SWEEP
+};
+
+enum NightbanePhases
+{
+    PHASE_INTRO             = 0,
+    PHASE_GROUND,
+    PHASE_FLY
+};
+
+enum NightbaneGroups
+{
+    GROUP_GROUND            = 1,
+    GROUP_FLY
+};
+
+enum NightbaneMisc
+{
+    ACTION_SUMMON           = 1,
+    GO_URN                  = 194092,
+    GO_DOOR                 = 184280,
+    GO_DOOR2                = 184274
+};
+
+Position const FlyPosition = { -11160.13f, -1870.683f, 97.73876f, 0.0f };
+Position const FlyPositionLeft = { -11094.42f, -1866.992f, 107.8375f, 0.0f };
+Position const FlyPositionRight = { -11193.77f, -1921.983f, 107.9845f, 0.0f };
+Position const NightbanePath1[] =
+{
+    { -11003.710f, -1760.1940f, 140.25340f },
+    { -11018.860f, -1797.2690f, 172.85250f }
+};
+Position const NightbanePath2[] =
+{
+    { -11018.860f, -1797.2690f, 172.85250f },
+    { -11105.760f, -1875.9000f, 158.97800f },
+    { -11175.100f, -1857.2240f, 101.00590f },
+    { -11296.930f, -1764.5310f, 101.00590f },
+    { -11258.900f, -1722.3720f, 101.00590f },
+    { -11176.760f, -1809.5990f, 101.00590f },
+    { -11191.110f, -1889.3960f, 107.89480f },
+    { -11152.180f, -1863.3180f, 101.00590f }
+};
+Position const NightbanePath3[] =
+{
+    { -11110.670f, -1878.7710f, 107.89690f },
+    { -11142.710f, -1891.1930f, 92.250380f }
+};
+Position const NightbanePath4[] =
+{
+    { -11162.230f, -1900.3290f, 94.727470f },
+    { -11162.230f, -1900.3290f, 91.472650f }
+};
+Position const NightbanePath5[] =
+{
+    { -11160.130f, -1870.6830f, 97.738760f },
+    { -11117.730f, -1941.2610f, 127.17200f },
+    { -11123.780f, -1968.2430f, 125.92200f },
+    { -11148.340f, -1972.9800f, 116.69970f },
+    { -11161.620f, -1945.7250f, 103.08860f },
+    { -11168.010f, -1922.9050f, 97.394150f },
+    { -11162.230f, -1900.3290f, 94.727470f }
+};
+
+struct boss_nightbaneAI : public BossAI
+{
+    boss_nightbaneAI(Creature* creature) : BossAI(creature, DATA_NIGHTBANE), _flyCount(0) 
+    { 
+        me->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
     }
 
-    struct boss_nightbaneAI : public ScriptedAI
+    void MoveByPath(uint8 id)
     {
-        boss_nightbaneAI(Creature* creature) : ScriptedAI(creature)
+        if (id < PATH_INTRO_START || id > PATH_PHASE_TWO)
+            return;
+
+        me->SetWalk(true);
+
+        Movement::PointsArray path;
+        switch (id)
         {
-            instance = creature->GetInstanceScript();
-            Intro = true;
+            case PATH_INTRO_START:
+                for (uint8 i = 0; i < 2; ++i)
+                    path.push_back(G3D::Vector3(NightbanePath1[i].GetPositionX(), NightbanePath1[i].GetPositionY(), NightbanePath1[i].GetPositionZ()));
+                break;
+            case PATH_INTRO_END:
+                for (uint8 i = 0; i < 8; ++i)
+                    path.push_back(G3D::Vector3(NightbanePath2[i].GetPositionX(), NightbanePath2[i].GetPositionY(), NightbanePath2[i].GetPositionZ()));
+                break;
+            case PATH_INTRO_LANDING:
+                for (uint8 i = 0; i < 2; ++i)
+                    path.push_back(G3D::Vector3(NightbanePath3[i].GetPositionX(), NightbanePath3[i].GetPositionY(), NightbanePath3[i].GetPositionZ()));
+                break;
+            case PATH_SECOND_LANDING:
+                for (uint8 i = 0; i < 2; ++i)
+                    path.push_back(G3D::Vector3(NightbanePath4[i].GetPositionX(), NightbanePath4[i].GetPositionY(), NightbanePath4[i].GetPositionZ()));
+                break;
+            case PATH_PHASE_TWO:
+                for (uint8 i = 0; i < 7; ++i)
+                    path.push_back(G3D::Vector3(NightbanePath5[i].GetPositionX(), NightbanePath5[i].GetPositionY(), NightbanePath5[i].GetPositionZ()));
+                break;
         }
 
-        InstanceScript* instance;
+        me->GetMotionMaster()->MoveSplinePath(&path);
+    }
 
-        uint32 Phase;
+    void Reset() override
+    {
+        _Reset();
+        me->SetStandState(UNIT_STAND_STATE_DEAD);
+        _flyCount = 0;
+        me->SetDisableGravity(true);
+        if (GameObject* urn = me->FindNearestGameObject(GO_URN, 500.0f))
+            urn->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    }
 
-        bool RainBones;
-        bool Skeletons;
+    void EnterEvadeMode() override
+    {
+        events.Reset();
+        HandleTerraceDoors(true);
+        _EnterEvadeMode();
+        me->GetMotionMaster()->MoveTargetedHome();
+        me->SetDisableGravity(true);
+    }
 
-        uint32 BellowingRoarTimer;
-        uint32 CharredEarthTimer;
-        uint32 DistractingAshTimer;
-        uint32 SmolderingBreathTimer;
-        uint32 TailSweepTimer;
-        uint32 RainofBonesTimer;
-        uint32 SmokingBlastTimer;
-        uint32 FireballBarrageTimer;
-        uint32 SearingCindersTimer;
+    void JustDied(Unit* /*killer*/) override
+    {
+        _JustDied();
+        HandleTerraceDoors(true);
+    }
 
-        uint32 FlyCount;
-        uint32 FlyTimer;
-
-        bool Intro;
-        bool Flying;
-        bool Movement;
-
-        uint32 MovePhase;
-
-        void Reset()
+    void DoAction(int32 action) override
+    {
+        if (action == ACTION_SUMMON)
         {
-            BellowingRoarTimer = 30000;
-            CharredEarthTimer = 15000;
-            DistractingAshTimer = 20000;
-            SmolderingBreathTimer = 10000;
-            TailSweepTimer = 12000;
-            RainofBonesTimer = 10000;
-            SmokingBlastTimer = 20000;
-            FireballBarrageTimer = 13000;
-            SearingCindersTimer = 14000;
-
-            Phase = 1;
-            FlyCount = 0;
-            MovePhase = 0;
-
-            me->SetSpeed(MOVE_RUN, 2.0f);
-            me->SetDisableGravity(Intro);
-            me->SetWalk(false);
+            me->SetStandState(UNIT_STAND_STATE_STAND);
+            sCreatureTextMgr->SendChat(me, EMOTE_SUMMON, nullptr, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_ZONE);
+            events.SetPhase(PHASE_INTRO);
             me->setActive(true);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-            if (instance)
-            {
-                if (instance->GetData(TYPE_NIGHTBANE) == DONE)
-                    me->DisappearAndDie();
-                else
-                    instance->SetData(TYPE_NIGHTBANE, NOT_STARTED);
-            }
-
-            HandleTerraceDoors(true);
-
-            Flying = false;
-            Movement = false;
-
-            if (!Intro)
-            {
-                me->SetHomePosition(IntroWay[7][0], IntroWay[7][1], IntroWay[7][2], 0);
-                me->GetMotionMaster()->MoveTargetedHome();
-            }
-        }
-
-        void HandleTerraceDoors(bool open)
-        {
-            if (instance)
-            {
-                instance->HandleGameObject(instance->GetData64(DATA_MASTERS_TERRACE_DOOR_1), open);
-                instance->HandleGameObject(instance->GetData64(DATA_MASTERS_TERRACE_DOOR_2), open);
-            }
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            if (instance)
-                instance->SetData(TYPE_NIGHTBANE, IN_PROGRESS);
-
+            MoveByPath(PATH_INTRO_START);
             HandleTerraceDoors(false);
-           Talk(YELL_AGGRO);
+        }
+    }
+
+    void SetupGroundPhase()
+    {
+        events.SetPhase(PHASE_GROUND);
+        events.ScheduleEvent(EVENT_CLEAVE, urand(0, 15000), GROUP_GROUND);
+        events.ScheduleEvent(EVENT_TAIL_SWEEP, urand(4, 23000), GROUP_GROUND);
+        events.ScheduleEvent(EVENT_BELLOWING_ROAR, 48000, GROUP_GROUND);
+        events.ScheduleEvent(EVENT_CHARRED_EARTH, urand(12000, 18000), GROUP_GROUND);
+        events.ScheduleEvent(EVENT_SMOLDERING_BREATH, urand(26000, 30000), GROUP_GROUND);
+        events.ScheduleEvent(EVENT_DISTRACTING_ASH, 82000, GROUP_GROUND);
+    }
+
+    void HandleTerraceDoors(bool open)
+    {
+        if(GameObject* door = me->FindNearestGameObject(GO_DOOR, 500.f))
+            instance->HandleGameObject(door->GetGUID(), open);
+        if (GameObject* door = me->FindNearestGameObject(GO_DOOR2, 500.f))
+            instance->HandleGameObject(door->GetGUID(), open);
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        _EnterCombat();
+        Talk(YELL_AGGRO);
+        SetupGroundPhase();
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damagetype*/, SpellSchoolMask /*spellschoolmask*/) override
+    {
+        if (events.IsInPhase(PHASE_FLY))
+        {
+            if (damage >= me->GetHealth())
+                damage = me->GetHealth() - 1;
+            return;
         }
 
-        void AttackStart(Unit* who)
+        if ((_flyCount == 0 && HealthBelowPct(75)) || (_flyCount == 1 && HealthBelowPct(50)) || (_flyCount == 2 && HealthBelowPct(25)))
         {
-            if (!Intro && !Flying)
-                ScriptedAI::AttackStart(who);
+            events.SetPhase(PHASE_FLY);
+            StartPhaseFly();
         }
+    }
 
-        void JustDied(Unit* /*killer*/)
+    void MovementInform(uint32 type, uint32 pointId) override
+    {
+        me->SetWalk(false);
+
+        if (me->movespline->Finalized() && me->movespline->CurrentDestination() == G3D::Vector3(NightbanePath1[1].GetPositionX(), NightbanePath1[1].GetPositionY(), NightbanePath1[1].GetPositionZ()))
+            events.ScheduleEvent(EVENT_START_INTRO_PATH, 1);
+        if (me->movespline->Finalized() && me->movespline->CurrentDestination() == G3D::Vector3(NightbanePath2[7].GetPositionX(), NightbanePath2[7].GetPositionY(), NightbanePath2[7].GetPositionZ()))
+            events.ScheduleEvent(EVENT_END_INTRO, 2000);
+        if (me->movespline->Finalized() && me->movespline->CurrentDestination() == G3D::Vector3(NightbanePath3[1].GetPositionX(), NightbanePath3[1].GetPositionY(), NightbanePath3[1].GetPositionZ()))
         {
-            if (instance)
-                instance->SetData(TYPE_NIGHTBANE, DONE);
-
-            HandleTerraceDoors(true);
+            me->SetDisableGravity(false);
+            me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
+            events.ScheduleEvent(EVENT_INTRO_LANDING, 3000);
         }
-
-        void MoveInLineOfSight(Unit* who)
+        if (me->movespline->Finalized() && me->movespline->CurrentDestination() == G3D::Vector3(NightbanePath4[1].GetPositionX(), NightbanePath4[1].GetPositionY(), NightbanePath4[1].GetPositionZ()))
         {
-            if (!Intro && !Flying)
-                ScriptedAI::MoveInLineOfSight(who);
+            events.SetPhase(PHASE_GROUND);
+            me->SetDisableGravity(false);
+            me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
+            events.ScheduleEvent(EVENT_LANDED, 3000);
         }
+        if (me->movespline->Finalized() && me->movespline->CurrentDestination() == G3D::Vector3(NightbanePath5[6].GetPositionX(), NightbanePath5[6].GetPositionY(), NightbanePath5[6].GetPositionZ()))
+            events.ScheduleEvent(EVENT_END_PHASE_TWO, 1);
 
-        void MovementInform(uint32 type, uint32 id)
+        if (type == POINT_MOTION_TYPE)
         {
-            if (type != POINT_MOTION_TYPE)
-                return;
-
-            if (Intro)
+            if (pointId == POINT_PHASE_TWO_FLY)
             {
-                if (id >= 8)
-                {
-                    Intro = false;
-                    me->SetHomePosition(IntroWay[7][0], IntroWay[7][1], IntroWay[7][2], 0);
-                    return;
-                }
-
-                MovePhase = id+1;
-                return;
+                events.ScheduleEvent(EVENT_PRE_LAND, 33000, GROUP_FLY);
+                events.ScheduleEvent(EVENT_EMOTE_BREATH, 2000, GROUP_FLY);
+                events.ScheduleEvent(EVENT_SMOKING_BLAST_T, 21000, GROUP_FLY);
+                events.ScheduleEvent(EVENT_SMOKING_BLAST, 17000, GROUP_FLY);
             }
-
-            if (Flying)
-            {
-                if (id == 0)
-                {
-                    Talk(EMOTE_BREATH);
-                    Flying = false;
-                    Phase = 2;
-                    return;
-                }
-
-                if (id < 8)
-                    MovePhase = id+1;
-                else
-                {
-                    Phase = 1;
-                    Flying = false;
-                    Movement = true;
-                    return;
-                }
-            }
+            else if (pointId == POINT_PHASE_TWO_PRE_FLY)
+                events.ScheduleEvent(EVENT_PRE_FLY_END, 1);
         }
+    }
 
-        void JustSummoned(Creature* summoned)
+    void StartPhaseFly()
+    {
+        ++_flyCount;
+        Talk(YELL_FLY_PHASE);
+        events.CancelEventGroup(GROUP_GROUND);
+        me->InterruptNonMeleeSpells(false);
+        me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
+        me->SetDisableGravity(true);
+        me->SetReactState(REACT_PASSIVE);
+        me->AttackStop();
+
+        if (me->GetDistance(FlyPositionLeft) < me->GetDistance(FlyPosition))
+            me->GetMotionMaster()->MovePoint(POINT_PHASE_TWO_PRE_FLY, FlyPositionLeft, true);
+        else if (me->GetDistance(FlyPositionRight) < me->GetDistance(FlyPosition))
+            me->GetMotionMaster()->MovePoint(POINT_PHASE_TWO_PRE_FLY, FlyPositionRight, true);
+        else
+            me->GetMotionMaster()->MovePoint(POINT_PHASE_TWO_FLY, FlyPosition, true);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim() && !events.IsInPhase(PHASE_INTRO))
+            return;
+
+        if (!me->IsInCombat() && !events.IsInPhase(PHASE_INTRO) && me->GetDistance(me->GetHomePosition()) > 50.0f)
+            EnterEvadeMode();
+
+        events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = events.ExecuteEvent())
         {
-            summoned->AI()->AttackStart(me->GetVictim());
-        }
-
-        void TakeOff()
-        {
-            Talk(YELL_FLY_PHASE);
-
-            me->InterruptSpell(CURRENT_GENERIC_SPELL);
-            me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
-            me->SetDisableGravity(true);
-            me->GetMotionMaster()->Clear(false);
-            me->GetMotionMaster()->MovePoint(0, IntroWay[2][0], IntroWay[2][1], IntroWay[2][2]);
-
-            Flying = true;
-
-            FlyTimer = urand(45000, 60000); //timer wrong between 45 and 60 seconds
-            ++FlyCount;
-
-            RainofBonesTimer = 5000; //timer wrong (maybe)
-            RainBones = false;
-            Skeletons = false;
-         }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (Intro)
+            switch (eventId)
             {
-                if (MovePhase)
-                {
-                    if (MovePhase >= 7)
-                    {
-                        me->SetDisableGravity(false);
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
-                        me->GetMotionMaster()->MovePoint(8, IntroWay[7][0], IntroWay[7][1], IntroWay[7][2]);
-                    }
-                    else
-                    {
-                        me->GetMotionMaster()->MovePoint(MovePhase, IntroWay[MovePhase][0], IntroWay[MovePhase][1], IntroWay[MovePhase][2]);
-                    }
-                    MovePhase = 0;
-                }
-                return;
-            }
-
-            if (Flying && MovePhase)
-            {
-                if (MovePhase >= 7)
-                {
-                    me->SetDisableGravity(false);
-                    me->HandleEmoteCommand(EMOTE_ONESHOT_LAND);
-                    me->GetMotionMaster()->MovePoint(8, IntroWay[7][0], IntroWay[7][1], IntroWay[7][2]);
-                }
-                else
-                    me->GetMotionMaster()->MovePoint(MovePhase, IntroWay[MovePhase][0], IntroWay[MovePhase][1], IntroWay[MovePhase][2]);
-                    
-                MovePhase = 0;
-            }
-
-            if (!UpdateVictim())
-                return;
-
-            if (Flying)
-                return;
-
-            //  Phase 1 "GROUND FIGHT"
-            if (Phase == 1)
-            {
-                if (Movement)
-                {
-                    DoStartMovement(me->GetVictim());
-                    Movement = false;
-                }
-
-                if (BellowingRoarTimer <= diff)
-                {
-                    DoCastVictim(SPELL_BELLOWING_ROAR);
-                    BellowingRoarTimer = urand(30000, 40000);
-                } else BellowingRoarTimer -= diff;
-
-                if (SmolderingBreathTimer <= diff)
-                {
-                    DoCastVictim(SPELL_SMOLDERING_BREATH);
-                    SmolderingBreathTimer = 20000;
-                } else SmolderingBreathTimer -= diff;
-
-                if (CharredEarthTimer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                case EVENT_BELLOWING_ROAR:
+                    DoCastAOE(SPELL_BELLOWING_ROAR);
+                    break;
+                case EVENT_CHARRED_EARTH:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         DoCast(target, SPELL_CHARRED_EARTH);
-                    CharredEarthTimer = 20000;
-                } else CharredEarthTimer -= diff;
-
-                if (TailSweepTimer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        if (!me->HasInArc(M_PI, target))
-                            DoCast(target, SPELL_TAIL_SWEEP);
-                    TailSweepTimer = 15000;
-                } else TailSweepTimer -= diff;
-
-                if (SearingCindersTimer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                        DoCast(target, SPELL_SEARING_CINDERS);
-                    SearingCindersTimer = 10000;
-                } else SearingCindersTimer -= diff;
-
-                uint32 Prozent = uint32(me->GetHealthPct());
-
-                if (Prozent < 75 && FlyCount == 0) // first take off 75%
-                    TakeOff();
-
-                if (Prozent < 50 && FlyCount == 1) // secound take off 50%
-                    TakeOff();
-
-                if (Prozent < 25 && FlyCount == 2) // third take off 25%
-                    TakeOff();
-
-                DoMeleeAttackIfReady();
-            }
-
-            //Phase 2 "FLYING FIGHT"
-            if (Phase == 2)
-            {
-                if (!RainBones)
-                {
-                    if (!Skeletons)
-                    {
-                        for (uint8 i = 0; i <= 3; ++i)
-                        {
-                            DoCastVictim(SPELL_SUMMON_SKELETON);
-                            Skeletons = true;
-                        }
-                    }
-
-                    if (RainofBonesTimer < diff && !RainBones) // only once at the beginning of phase 2
-                    {
-                        DoCastVictim(SPELL_RAIN_OF_BONES);
-                        RainBones = true;
-                        SmokingBlastTimer = 20000;
-                    } else RainofBonesTimer -= diff;
-
-                    if (DistractingAshTimer <= diff)
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                            DoCast(target, SPELL_DISTRACTING_ASH);
-                        DistractingAshTimer = 2000; //timer wrong
-                    } else DistractingAshTimer -= diff;
-                }
-
-                if (RainBones)
-                {
-                    if (SmokingBlastTimer <= diff)
-                     {
-                        DoCastVictim(SPELL_SMOKING_BLAST);
-                        SmokingBlastTimer = 1500; //timer wrong
-                     } else SmokingBlastTimer -= diff;
-                }
-
-                if (FireballBarrageTimer <= diff)
-                {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0))
-                        DoCast(target, SPELL_FIREBALL_BARRAGE);
-                    FireballBarrageTimer = 20000;
-                } else FireballBarrageTimer -= diff;
-
-                if (FlyTimer <= diff) //landing
-                {
+                    events.Repeat(urand(18000, 21000));
+                    break;
+                case EVENT_CLEAVE:
+                    DoCastVictim(SPELL_CLEAVE);
+                    events.Repeat(urand(6000, 15000));
+                    break;
+                case EVENT_DISTRACTING_ASH:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                        DoCast(target, SPELL_DISTRACTING_ASH);
+                    break;
+                case EVENT_EMOTE_BREATH:
+                    Talk(EMOTE_BREATH);
+                    events.ScheduleEvent(EVENT_RAIN_OF_BONES, 3000, GROUP_FLY);
+                    break;
+                case EVENT_END_INTRO:
+                    MoveByPath(PATH_INTRO_LANDING);
+                    break;
+                case EVENT_END_PHASE_TWO:
+                    MoveByPath(PATH_SECOND_LANDING);
+                    break;
+                case EVENT_INTRO_LANDING:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    me->SetInCombatWithZone();
+                    break;
+                case EVENT_LAND:
                     Talk(YELL_LAND_PHASE);
-
-                    me->GetMotionMaster()->Clear(false);
-                    me->GetMotionMaster()->MovePoint(3, IntroWay[3][0], IntroWay[3][1], IntroWay[3][2]);
-
-                    Flying = true;
-                } else FlyTimer -= diff;
+                    me->SetDisableGravity(true);
+                    MoveByPath(PATH_PHASE_TWO);
+                    break;
+                case EVENT_LANDED:
+                    SetupGroundPhase();
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    break;
+                case EVENT_PRE_FLY_END:
+                    me->GetMotionMaster()->MovePoint(POINT_PHASE_TWO_FLY, FlyPosition, true);
+                    break;
+                case EVENT_PRE_LAND:
+                    events.CancelEventGroup(GROUP_FLY);
+                    events.ScheduleEvent(EVENT_LAND, 2000, GROUP_GROUND);
+                    break;
+                case EVENT_START_INTRO_PATH:
+                    MoveByPath(PATH_INTRO_END);
+                    break;
+                case EVENT_RAIN_OF_BONES:
+                    DoResetThreat();
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                    {
+                        me->SetFacingToObject(target);
+                        DoCast(target, SPELL_RAIN_OF_BONES);
+                    }
+                    break;
+                case EVENT_SMOLDERING_BREATH:
+                    DoCastVictim(SPELL_SMOLDERING_BREATH);
+                    events.Repeat(urand(28000, 40000));
+                    break;
+                case EVENT_SMOKING_BLAST:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                        DoCast(target, SPELL_SMOKING_BLAST);
+                    events.Repeat(1400);
+                    break;
+                case EVENT_SMOKING_BLAST_T:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                        DoCast(target, SPELL_SMOKING_BLAST_T);
+                    events.Repeat(urand(5000, 7000));
+                    break;
+                case EVENT_TAIL_SWEEP:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                        if (!me->HasInArc(float(M_PI), target))
+                            DoCast(target, SPELL_TAIL_SWEEP);
+                    events.Repeat(urand(20000, 30000));
+                    break;
+                default:
+                    break;
             }
-        }
-    };
 
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    uint8 _flyCount;
+};
+
+// 37098 - Rain of Bones
+class spell_rain_of_bones_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_rain_of_bones_AuraScript);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_SUMMON_SKELETON });
+    }
+
+    void OnTrigger(AuraEffect const* aurEff)
+    {
+        if (aurEff->GetTickNumber() % 5 == 0)
+            GetCaster()->CastSpell(GetTarget(), SPELL_SUMMON_SKELETON, true);
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_rain_of_bones_AuraScript::OnTrigger, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
 };
 
 class go_blackened_urn : public GameObjectScript
 {
-public:
-    go_blackened_urn() : GameObjectScript("go_blackened_urn") { }
+    public:
+        go_blackened_urn() : GameObjectScript("go_blackened_urn") { }
 
-    bool OnGossipHello(Player* pPlayer, GameObject *pGo)
-    {
-        if (InstanceScript* pInstance = pGo->GetInstanceScript())
+        bool OnGossipHello(Player* player, GameObject *go)
         {
-            if (pInstance->GetData(TYPE_NIGHTBANE) != DONE && !pGo->FindNearestCreature(17225, 40.0f))
-                if (Creature *cr = ObjectAccessor::GetCreature(*pPlayer, pInstance->GetData64(DATA_NIGHTBANE)))
-                    cr->GetMotionMaster()->MovePoint(0, IntroWay[0][0], IntroWay[0][1], IntroWay[0][2]);
-        }        
-        return false;
-    }
+            if (go->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE))
+                return false;
+
+            if (InstanceScript* instance = go->GetInstanceScript())
+            {
+                if (Creature* nightbane = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_NIGHTBANE)))
+                {
+                    if (nightbane->GetDistance(nightbane->GetHomePosition()) < 10.0f)
+                    {
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                        nightbane->AI()->DoAction(ACTION_SUMMON);
+                    }
+                }
+            }
+            return false;
+        }
 };
 
 void AddSC_boss_nightbane()
 {
-    new boss_nightbane();
+    new CreatureAILoader<boss_nightbaneAI>("boss_nightbane");
+    new AuraScriptLoaderEx<spell_rain_of_bones_AuraScript>("spell_rain_of_bones");
     new go_blackened_urn();
 }
