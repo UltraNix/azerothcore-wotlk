@@ -344,7 +344,14 @@ public:
                     HandleGameObject(GO_MoraggCellGUID, true);
                     pBoss = instance->GetCreature(NPC_MoraggGUID);
                     if (pBoss)
-                        pBoss->GetMotionMaster()->MovePoint(0, BossStartMove1);
+                    {
+                        pBoss->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(MoraggPath[i].GetPositionX(), MoraggPath[i].GetPositionY(), MoraggPath[i].GetPositionZ()));
+
+                        pBoss->GetMotionMaster()->MoveSplinePath(&path);
+                    }
                     break;
                 case BOSS_EREKEM:
                     HandleGameObject(GO_ErekemCellGUID, true);
@@ -408,21 +415,32 @@ public:
                     HandleGameObject(GO_XevozzCellGUID, true);
                     pBoss = instance->GetCreature(NPC_XevozzGUID);
                     if (pBoss)
-                        pBoss->GetMotionMaster()->MovePoint(0, BossStartMove5);
+                    {
+                        pBoss->AI()->Talk(3);
+                        pBoss->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(XevozzPath[i].GetPositionX(), XevozzPath[i].GetPositionY(), XevozzPath[i].GetPositionZ()));
+                        pBoss->GetMotionMaster()->MoveSplinePath(&path);
+                    }
                     break;
                 case BOSS_ZURAMAT:
                     HandleGameObject(GO_ZuramatCellGUID, true);
                     pBoss = instance->GetCreature(NPC_ZuramatGUID);
                     if (pBoss)
-                        pBoss->GetMotionMaster()->MovePoint(0, BossStartMove6);
+                    {
+                        pBoss->AI()->Talk(3);
+                        pBoss->SetWalk(true);
+                        Movement::PointsArray path;
+                        for (uint8 i = 0; i < 3; ++i)
+                            path.push_back(G3D::Vector3(ZuramatPath[i].GetPositionX(), ZuramatPath[i].GetPositionY(), ZuramatPath[i].GetPositionZ()));
+                        pBoss->GetMotionMaster()->MoveSplinePath(&path);
+                    }
                     break;
             }
 
             if (pBoss)
             {
-                pBoss->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                if(pBoss != instance->GetCreature(NPC_ErekemGUID) && pBoss != instance->GetCreature(NPC_LavanthorGUID) && pBoss != instance->GetCreature(NPC_IchoronGUID))
-                    pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
                 pBoss->SetReactState(REACT_AGGRESSIVE);
                 if (WaveCount == 6 && m_auiEncounter[0] == DONE || WaveCount == 12 && m_auiEncounter[1] == DONE)
                     pBoss->SetLootMode(0);

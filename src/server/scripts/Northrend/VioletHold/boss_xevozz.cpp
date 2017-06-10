@@ -45,160 +45,134 @@ enum eEvents
     EVENT_CHECK_DISTANCE,
 };
 
-class boss_xevozz : public CreatureScript
+struct boss_xevozzAI : public BossAI
 {
-public:
-    boss_xevozz() : CreatureScript("boss_xevozz") { }
+    boss_xevozzAI(Creature* creature) : BossAI(creature, BOSS_XEVOZZ) { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    void EnterCombat(Unit* /*who*/) override
     {
-        return new boss_xevozzAI (pCreature);
+        Talk(SAY_AGGRO);
+        _EnterCombat();
+        events.ScheduleEvent(EVENT_SPELL_ARCANE_BARRAGE_VOLLEY, urand(16000,20000));
+        events.ScheduleEvent(EVENT_SUMMON_SPHERES, 10000);
     }
 
-    struct boss_xevozzAI : public ScriptedAI
+    void MovementInform(uint32 /*type*/, uint32 /*id*/) override
     {
-        boss_xevozzAI(Creature *c) : ScriptedAI(c), spheres(me)
+        if (me->movespline->Finalized())
         {
-            pInstance = c->GetInstanceScript();
+            me->SetWalk(false);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            if (Player* target = SelectTargetFromPlayerList(100.0f))
+                AttackStart(target);
         }
+    }
 
-        InstanceScript* pInstance;
-        EventMap events;
-        SummonList spheres;
-
-        void Reset()
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
         {
-            events.Reset();
-            spheres.DespawnAll();
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            Talk(SAY_AGGRO);
-            DoZoneInCombat();
-            events.Reset();
-            events.RescheduleEvent(EVENT_SPELL_ARCANE_BARRAGE_VOLLEY, urand(16000,20000));
-            events.RescheduleEvent(EVENT_SUMMON_SPHERES, 10000);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch(events.GetEvent())
+            case EVENT_SPELL_ARCANE_BARRAGE_VOLLEY:
+                me->CastSpell((Unit*)NULL, SPELL_ARCANE_BARRAGE_VOLLEY, false);
+                events.Repeat(20000);
+                break;
+            case EVENT_SPELL_ARCANE_BUFFET:
+                me->CastSpell(me->GetVictim(), SPELL_ARCANE_BUFFET, false);
+                break;
+            case EVENT_SUMMON_SPHERES:
             {
-                case 0:
-                    break;
-                case EVENT_SPELL_ARCANE_BARRAGE_VOLLEY:
-                    me->CastSpell((Unit*)NULL, SPELL_ARCANE_BARRAGE_VOLLEY, false);
-                    events.RepeatEvent(20000);
-                    break;
-                case EVENT_SPELL_ARCANE_BUFFET:
-                    me->CastSpell(me->GetVictim(), SPELL_ARCANE_BUFFET, false);
-                    events.PopEvent();
-                    break;
-                case EVENT_SUMMON_SPHERES:
+                Talk(SAY_SUMMON_ENERGY);
+                summons.DespawnAll();
+                uint32 entry1 = RAND(SPELL_SUMMON_ETHEREAL_SPHERE_1, SPELL_SUMMON_ETHEREAL_SPHERE_2, SPELL_SUMMON_ETHEREAL_SPHERE_3);
+                me->CastSpell((Unit*)NULL, entry1, true);
+                if (IsHeroic())
+                {
+                    uint32 entry2;
+                    do { entry2 = RAND(SPELL_SUMMON_ETHEREAL_SPHERE_1, SPELL_SUMMON_ETHEREAL_SPHERE_2, SPELL_SUMMON_ETHEREAL_SPHERE_3); } while (entry1 == entry2);
+                    me->CastSpell((Unit*)NULL, entry2, true);
+                }
+                events.Repeat(45000);
+                events.RescheduleEvent(EVENT_SPELL_ARCANE_BUFFET, 5000);
+                events.RescheduleEvent(EVENT_CHECK_DISTANCE, 6000);
+            }
+            break;
+            case EVENT_CHECK_DISTANCE:
+            {
+                bool found = false;
+                std::for_each(summons.begin(), summons.end(), [&](uint64 guid) 
+                {
+                    if (Creature* summon = summons.GetSummon(guid))
                     {
-                        Talk(SAY_SUMMON_ENERGY);
-                        spheres.DespawnAll();
-                        uint32 entry1 = RAND(SPELL_SUMMON_ETHEREAL_SPHERE_1, SPELL_SUMMON_ETHEREAL_SPHERE_2, SPELL_SUMMON_ETHEREAL_SPHERE_3);
-                        me->CastSpell((Unit*)NULL, entry1, true);
-                        if (IsHeroic())
+                        if (me->GetDistance(summon) < 3.0f)
                         {
-                            uint32 entry2;
-                            do { entry2 = RAND(SPELL_SUMMON_ETHEREAL_SPHERE_1, SPELL_SUMMON_ETHEREAL_SPHERE_2, SPELL_SUMMON_ETHEREAL_SPHERE_3); } while (entry1 == entry2);
-                            me->CastSpell((Unit*)NULL, entry2, true);
+                            summon->CastSpell(me, SPELL_ARCANE_POWER, false);
+                            summon->DespawnOrUnsummon();
+                            found = true;
                         }
-                        events.RepeatEvent(45000);
-                        events.RescheduleEvent(EVENT_SPELL_ARCANE_BUFFET, 5000);
-                        events.RescheduleEvent(EVENT_CHECK_DISTANCE, 6000);
                     }
-                    break;
-                case EVENT_CHECK_DISTANCE:
-                    {
-                        bool found = false;
-                        if (pInstance)
-                            for (std::list<uint64>::iterator itr = spheres.begin(); itr != spheres.end(); ++itr)
-                                if (Creature* c = pInstance->instance->GetCreature(*itr))
-                                    if (me->GetDistance(c) < 3.0f)
-                                    {
-                                        c->CastSpell(me, SPELL_ARCANE_POWER, false);
-                                        c->DespawnOrUnsummon(8000);
-                                        found = true;
-                                    }
-                        if (found)
-                        {
-                            Talk(SAY_CHARGED);
-                            events.RepeatEvent(9000);
-                            events.RescheduleEvent(EVENT_SUMMON_SPHERES, 10000);
-                        }
-                        else
-                            events.RepeatEvent(2000);
-                    }
-                    break;
+                });
+                if (found)
+                {
+                    Talk(SAY_CHARGED);
+                    events.Repeat(9000);
+                    events.RescheduleEvent(EVENT_SUMMON_SPHERES, 10000);
+                }
+                else
+                    events.Repeat(2000);
             }
-
-            DoMeleeAttackIfReady();
+            break;
+            default:
+                break;
         }
+    }
 
-        void JustSummoned(Creature* pSummoned)
+    void JustSummoned(Creature* pSummoned) override
+    {
+        if (pSummoned)
         {
-            if (pSummoned)
-            {
-                pSummoned->GetMotionMaster()->MoveFollow(me, 0.0f, 0.0f);
-                pSummoned->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                spheres.Summon(pSummoned);
-                if (pInstance)
-                    pInstance->SetData64(DATA_ADD_TRASH_MOB, pSummoned->GetGUID());
-            }
+            pSummoned->GetMotionMaster()->MoveFollow(me, 0.0f, 0.0f);
+            pSummoned->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            summons.Summon(pSummoned);
+            instance->SetData64(DATA_ADD_TRASH_MOB, pSummoned->GetGUID());
         }
+    }
 
-        void SummonedCreatureDespawn(Creature *pSummoned)
+    void SummonedCreatureDespawn(Creature *pSummoned) override
+    {
+        if (pSummoned)
         {
-            if (pSummoned)
-            {
-                spheres.Despawn(pSummoned);
-                if (pInstance)
-                    pInstance->SetData64(DATA_DELETE_TRASH_MOB, pSummoned->GetGUID());
-            }
+            summons.Despawn(pSummoned);
+            instance->SetData64(DATA_DELETE_TRASH_MOB, pSummoned->GetGUID());
         }
+    }
 
-        void JustDied(Unit* /*killer*/)
-        {
-            Talk(SAY_DEATH);
-            spheres.DespawnAll();
-            if (pInstance)
-                pInstance->SetData(DATA_BOSS_DIED, 0);
-        }
+    void JustDied(Unit* /*killer*/) override
+    {
+        _JustDied();
+        Talk(SAY_DEATH);
+        instance->SetData(DATA_BOSS_DIED, 0);
+    }
 
-        void KilledUnit(Unit* pVictim)
-        {
-            if (pVictim && pVictim->GetGUID() == me->GetGUID())
-                return;
+    void KilledUnit(Unit* pVictim) override
+    {
+        if (pVictim && pVictim->GetGUID() == me->GetGUID())
+            return;
 
-            Talk(SAY_SLAY);
-        }
+        Talk(SAY_SLAY);
+    }
 
-        void MoveInLineOfSight(Unit* /*who*/) {}
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 
-        void EnterEvadeMode()
-        {
-            ScriptedAI::EnterEvadeMode();
-            events.Reset();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            if (pInstance)
-                pInstance->SetData(DATA_FAILED, 1);
-        }
-    };
+    void EnterEvadeMode() override
+    {
+        _EnterEvadeMode();
+        events.Reset();
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        instance->SetData(DATA_FAILED, 1);
+    }
 };
 
 void AddSC_boss_xevozz()
 {
-    new boss_xevozz();
+    new CreatureAILoader<boss_xevozzAI>("boss_xevozz");
 }
