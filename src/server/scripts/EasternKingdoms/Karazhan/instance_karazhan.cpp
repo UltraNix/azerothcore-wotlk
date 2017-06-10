@@ -32,11 +32,6 @@ class instance_karazhan : public InstanceMapScript
                 _selectedRare = RAND(NPC_HYAKISS_THE_LURKER, NPC_SHADIKITH_THE_GLIDER, NPC_ROKAD_THE_RAVAGER);
             }
 
-            void OnCreatureCreate(Creature* creature)
-            {
-
-            }
-
             void SetData(uint32 type, uint32 uiData)
             {
                 switch (type)
@@ -140,8 +135,25 @@ class instance_karazhan : public InstanceMapScript
                 return 0;
             }
 
+            void OnCreatureCreate(Creature* creature)
+            {
+                switch (creature->GetEntry())
+                {
+                    case NPC_NIGHTBANE:
+                        _nightbaneGUID = creature->GetGUID();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             uint64 GetData64(uint32 data) const
             {
+                switch (data)
+                {
+                    case DATA_NIGHTBANE:
+                        return _nightbaneGUID;
+                }
                 /*switch (uiData)
                 {
                     case DATA_KILREK:                   return m_uiKilrekGUID;
@@ -201,6 +213,7 @@ class instance_karazhan : public InstanceMapScript
         private:
             uint32 _servantQuartersKills;
             uint32 _selectedRare;
+            uint64 _nightbaneGUID;
         };
 };
 
