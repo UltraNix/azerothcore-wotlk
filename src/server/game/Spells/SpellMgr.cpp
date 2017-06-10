@@ -3848,7 +3848,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         //Stealth
         case 1784:
-            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_DIRECT_DAMAGE | AURA_INTERRUPT_FLAG_HITBYSPELL;
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_DIRECT_DAMAGE;
             break;
         // Master of Subtlety
         case 31221:
@@ -4385,7 +4385,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_DIRECT_DAMAGE |
                                             AURA_INTERRUPT_FLAG_SPELL_ATTACK | AURA_INTERRUPT_FLAG_MELEE_ATTACK |
                                             AURA_INTERRUPT_FLAG_TALK | AURA_INTERRUPT_FLAG_USE |
-                                            AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_CAST;
+                                            AURA_INTERRUPT_FLAG_CAST;
             break;
         // Clearcasting
         case 16870:

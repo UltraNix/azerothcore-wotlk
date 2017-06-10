@@ -711,8 +711,10 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
         if (spellProto)
         {
-            if (!spellProto->HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS))
+            if (!spellProto->HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS)) {
                 victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto->Id);
+                if (damagetype == SPELL_DIRECT_DAMAGE)victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto->Id);
+            }
             if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL]) {
                 if (!spellProto->HasAura(SPELL_AURA_PERIODIC_DAMAGE) && spell->GetSpellInfo()->Id == 21651) spell->cancel();//Hack for interrupt banner capturing during absorb
             }
