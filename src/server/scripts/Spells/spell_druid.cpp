@@ -602,11 +602,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spell*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
-                    return false;
-                return true;
+                return ValidateSpellInfo({ SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, SPELL_DRUID_LIFEBLOOM_ENERGIZE });
             }
 
             void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -619,6 +615,9 @@ class spell_dru_lifebloom : public SpellScriptLoader
                 int32 stack = GetStackAmount();
                 int32 healAmount = aurEff->GetAmount();
                 const SpellInfo* finalHeal = sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL);
+
+                if (GetTarget()->HasUnitState(UNIT_STATE_ISOLATED))
+                    return;
 
                 if (Unit* caster = GetCaster())
                 {
