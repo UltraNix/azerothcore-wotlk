@@ -7084,10 +7084,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         int32 basepoints = 0;
                         uint8 stackAmount = aur->GetStackAmount();
                         if (stackAmount == 1) basepoints = 7;
-                        if (stackAmount == 2) basepoints = 13;
-                        if (stackAmount == 3) basepoints = 20;
-                        if (stackAmount == 4) basepoints = 26;
-                        if (stackAmount == 5) basepoints = 33;
+                        else if (stackAmount == 2) basepoints = 13;
+                        else if (stackAmount == 3) basepoints = 20;
+                        else if (stackAmount == 4) basepoints = 26;
+                        else if (stackAmount == 5) basepoints = 33;
                         CastCustomSpell(victim, 42463, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
 
                         if (aur->GetStackAmount() == 5)
@@ -7098,7 +7098,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                             return true;
                         }
                     }
-                    
+
                     if (!stacker)
                         return false;
                     break;
@@ -7128,10 +7128,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         int32 basepoints = 0;
                         uint8 stackAmount = aur->GetStackAmount();
                         if (stackAmount == 1) basepoints = 7;
-                        if (stackAmount == 2) basepoints = 13;
-                        if (stackAmount == 3) basepoints = 20;
-                        if (stackAmount == 4) basepoints = 26;
-                        if (stackAmount == 5) basepoints = 33;
+                        else if (stackAmount == 2) basepoints = 13;
+                        else if (stackAmount == 3) basepoints = 20;
+                        else if (stackAmount == 4) basepoints = 26;
+                        else if (stackAmount == 5) basepoints = 33;
                         CastCustomSpell(victim, 53739, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
 
                         if (aur->GetStackAmount() == 5)
