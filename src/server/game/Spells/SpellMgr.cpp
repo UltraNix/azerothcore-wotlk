@@ -3229,8 +3229,7 @@ void SpellMgr::LoadSpellCustomAttr()
     sLog->outString();
 }
 
-#define PARTIAL_CORRECTION_SPELL 40  
-uint32 partialCorretion[PARTIAL_CORRECTION_SPELL] =
+std::vector<uint32> partialCorrection =
 {
     1120,   // Drain Soul r1
     8288,   // Drain Soul r2
@@ -3313,8 +3312,8 @@ void SpellMgr::LoadDbcDataCorrections()
         if (spellInfo->activeIconID == 2158)  // flight
             spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
 
-        for (uint8 i = 0; i < PARTIAL_CORRECTION_SPELL; i++)
-            if (spellInfo->Id == partialCorretion[i])
+        for (uint8 i = 0; i < partialCorrection.size(); i++)
+            if (spellInfo->Id == partialCorrection[i])
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
         switch (spellInfo->Id)
