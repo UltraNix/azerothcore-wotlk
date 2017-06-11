@@ -5281,6 +5281,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->rangeIndex = 13;
             spellInfo->DurationIndex = 5;
             break;
+        // Onyxia's Lair, Onyxian Lair Guard, Blast Nova:
+        case 68958:
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_15_YARDS;
+            break;
         // Onyxia's Lair, Onyxia, Eruption:
         case 17731:
         case 69294:
