@@ -99,18 +99,14 @@ struct boss_xevozzAI : public BossAI
             case EVENT_CHECK_DISTANCE:
             {
                 bool found = false;
-                std::for_each(summons.begin(), summons.end(), [&](uint64 guid) 
-                {
-                    if (Creature* summon = summons.GetSummon(guid))
-                    {
-                        if (me->GetDistance(summon) < 3.0f)
+                for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                    if (Creature* creature = instance->instance->GetCreature(*itr))
+                        if (me->GetDistance(creature) < 3.0f)
                         {
-                            summon->CastSpell(me, SPELL_ARCANE_POWER, false);
-                            summon->DespawnOrUnsummon();
+                            creature->CastSpell(me, SPELL_ARCANE_POWER, false);
+                            creature->DespawnOrUnsummon(8000);
                             found = true;
                         }
-                    }
-                });
                 if (found)
                 {
                     Talk(SAY_CHARGED);
@@ -119,6 +115,7 @@ struct boss_xevozzAI : public BossAI
                 }
                 else
                     events.Repeat(2000);
+
             }
             break;
             default:
