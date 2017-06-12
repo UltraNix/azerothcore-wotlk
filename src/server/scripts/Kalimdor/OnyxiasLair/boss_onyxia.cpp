@@ -23,6 +23,7 @@ enum Spells
 
     SPELL_OLG_BLASTNOVA              = 68958,
     SPELL_OLG_IGNITEWEAPON           = 68959,
+    SPELL_OLG_CLEAVE                 = 15284,
 
     SPELL_BREATH_N_TO_S              = 17086,
     SPELL_BREATH_S_TO_N              = 18351,
@@ -55,6 +56,7 @@ enum Events
     EVENT_SUMMON_WHELP,
     EVENT_OLG_SPELL_BLASTNOVA,
     EVENT_OLG_SPELL_IGNITEWEAPON,
+    EVENT_OLG_CLEAVE,
     EVENT_ERUPTION,
 
     EVENT_LIFTOFF                    = 31,
@@ -477,6 +479,7 @@ struct npc_onyxian_lair_guardAI : public ScriptedAI
         _events.Reset();
         _events.ScheduleEvent(EVENT_OLG_SPELL_BLASTNOVA, 15000);
         _events.ScheduleEvent(EVENT_OLG_SPELL_IGNITEWEAPON, 10000);
+        _events.ScheduleEvent(EVENT_OLG_CLEAVE, 5000);
     }
 
     void MoveInLineOfSight(Unit *who) override
@@ -502,6 +505,10 @@ struct npc_onyxian_lair_guardAI : public ScriptedAI
         {
             switch (eventId)
             {
+                case EVENT_OLG_CLEAVE:
+                    DoCastVictim(SPELL_CLEAVE);
+                    _events.Repeat(15000);
+                    break;
                 case EVENT_OLG_SPELL_BLASTNOVA:
                     DoCast(me, SPELL_OLG_BLASTNOVA);
                     _events.Repeat(15000);
