@@ -7373,6 +7373,10 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     int32 extra_attack_power = CalculateSpellDamage(victim, windfurySpellInfo, 1);
 
+                    // Additional AP from Totem of Splintering
+                    if (HasAura(60764))
+                        extra_attack_power += sSpellMgr->GetSpellInfo(60764)->Effects[0].BasePoints;
+                    
                     // Value gained from additional AP
                     basepoints0 = int32(extra_attack_power / 14.0f * GetAttackTime(attType) / 1000);
 
