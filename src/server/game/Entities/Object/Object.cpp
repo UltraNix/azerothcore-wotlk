@@ -2694,33 +2694,32 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     }
 
     float step = newDist / 10.0f;
-
+    float diff = fabs(pos.m_positionZ - destz);
     for (uint8 j = 0; j < 10; ++j)
     {
         // do not allow too big z changes
-        if (fabs(pos.m_positionZ - destz) > allowedDiff)
+        if (diff > allowedDiff)
         {
             destx -= step * cos(angle);
             desty -= step * sin(angle);
             UpdateAllowedPositionZ(destx, desty, destz);
+            diff = fabs(pos.m_positionZ - destz);
         }
-        // we have correct destz now
-        else
-            break;
+        // we have correct destz now - the cake is a lie ~Crackaw
+        else break;
     }
-
     Trinity::NormalizeMapCoord(destx);
     Trinity::NormalizeMapCoord(desty);
     UpdateAllowedPositionZ(destx, desty, destz);
+    //if diff is more than 2 change your location on target location and move back a little bit
+    if (diff > 2.0f) {
+        float backMove = 0.01f;
+        destx = pos.m_positionX;
+        desty = pos.m_positionY;
+        destz = pos.m_positionZ + 1.0f;
 
-    // Crackaw: check if last z updates did not move z too far away from target and move him a bit closer
-    newDist = pos.GetExactDist(destx, desty, destz);
-    float ratio = newDist / dist;
-    if (ratio > 0.3f)
-    {
-        ratio = (1 / ratio) + (0.6f / ratio);
-        destx -= cos(angle) * ratio;
-        desty -= sin(angle) * ratio;
+        destx += backMove * cos(angle);
+        desty += backMove * sin(angle);
     }
 
     float ground = GetMap()->GetHeight(GetPhaseMask(), destx, desty, MAX_HEIGHT, true);
