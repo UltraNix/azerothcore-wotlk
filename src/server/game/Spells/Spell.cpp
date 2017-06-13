@@ -8502,13 +8502,13 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
                     return false;
                 break;
             case TARGET_CHECK_ALLY:
-                if (unitTarget->IsTotem())
+                if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
                 break;
             case TARGET_CHECK_PARTY:
-                if (unitTarget->IsTotem())
+                if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
@@ -8520,7 +8520,7 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
                     return false;
                 // nobreak;
             case TARGET_CHECK_RAID:
-                if (unitTarget->IsTotem())
+                if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
