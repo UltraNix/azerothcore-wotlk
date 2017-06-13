@@ -9450,9 +9450,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     //if (GetTypeId() == TYPEID_UNIT)
     //    ToCreature()->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
 
-    if (IsGuardian() && GetOwner() && GetOwner()->ToPlayer())
-        printf("yup");
-
     if (GetTypeId() == TYPEID_UNIT && IsNonPetGuardian()) //Monich: Not sure if non-player units can have guardians. If they do, add a player check.
     {
         // should not let player enter combat by right clicking target - doesn't helps
