@@ -32,6 +32,8 @@ enum ShamanSpells
 {
     // Ours
     SPELL_SHAMAN_GLYPH_OF_FERAL_SPIRIT            = 63271,
+    SPELL_SHAMAN_ELECTRIFIED                    = 64930,
+    SPELL_SHAMAN_T8_ELEMENTAL_4P_BONUS          = 64928,
 
     // Theirs
     SPELL_SHAMAN_ANCESTRAL_AWAKENING_PROC       = 52752,
@@ -100,6 +102,46 @@ class spell_sha_totem_of_wrath : public SpellScriptLoader
         {
             return new spell_sha_totem_of_wrath_SpellScript();
         }
+};
+
+// Shaman T8 Elemental 4P Bonus
+class spell_shaman_t8_elemental_4p_bonus : public SpellScriptLoader
+{
+public:
+    spell_shaman_t8_elemental_4p_bonus() : SpellScriptLoader("spell_shaman_t8_elemental_4p_bonus") { }
+
+    class spell_shaman_t8_elemental_4p_bonus_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_shaman_t8_elemental_4p_bonus_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_T8_ELEMENTAL_4P_BONUS) && !sSpellMgr->GetSpellInfo(SPELL_SHAMAN_ELECTRIFIED))
+                return false;
+            return true;
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            if (!eventInfo.GetDamageInfo()->GetDamage()) return;
+
+            int32 amount = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), 8);
+            //Stacking damage to periodic aura
+            eventInfo.GetProcTarget()->CastDelayedSpellWithPeriodicAmount(eventInfo.GetActor(), SPELL_SHAMAN_ELECTRIFIED, SPELL_AURA_PERIODIC_DAMAGE, amount);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_shaman_t8_elemental_4p_bonus_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_shaman_t8_elemental_4p_bonus_AuraScript();
+    }
 };
 
 class spell_sha_spirit_walk : public SpellScriptLoader
@@ -1403,6 +1445,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_totemic_mastery();
     new spell_sha_feral_spirit_scaling();
     new spell_sha_fire_elemental_scaling();
+    new spell_shaman_t8_elemental_4p_bonus();
 
     // theirs
     new spell_sha_ancestral_awakening_proc();
