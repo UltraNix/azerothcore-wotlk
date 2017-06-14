@@ -3691,6 +3691,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 49064:
         case 49065:
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+            break;
         // Furious Howl
         case 64491:
         case 64492:
