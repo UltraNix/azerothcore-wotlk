@@ -5600,6 +5600,16 @@ void Player::RepopAtGraveyard()
         SpawnCorpseBones();
     }
 
+    if (GetMapId() == 44) // Old Scarlet Monastery
+    {
+        m_deathTimer = 0;
+        ResurrectPlayer(1.0f);
+        SpawnCorpseBones();
+        TeleportTo(0, 2698.505859f, -732.688904f, 145.148428f, 0.114146f);
+
+        return;
+    }
+
     WorldSafeLocsEntry const* ClosestGrave = NULL;
 
     // Special handle for battleground maps
