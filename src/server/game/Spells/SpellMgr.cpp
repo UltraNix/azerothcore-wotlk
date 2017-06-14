@@ -3165,6 +3165,18 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->_requireCooldownInfo = true;
                 }
                 break;
+            //////////////////////////////////////////
+            ////////// Old Scarlet Monastery
+            //////////////////////////////////////////
+            case 61873: // Copy of throw spear || nieuzywany w swiecie || teraz OLD SM
+            case 38295: // auto-shoot || nieuzywany w swiecie || teraz OLD SM
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+                break;
+            /*
+            case 41105: // Defensive Aura
+            case 70768: // Shroud of the Occult
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_CANT_BE_SAVED;
+            break;*/
         }
 
         switch (spellInfo->SpellFamilyName)
@@ -4662,6 +4674,95 @@ void SpellMgr::LoadDbcDataCorrections()
         // Energy Feedback
         case 44335:
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+            break;
+
+        //////////////////////////////////////////
+        ////////// Old Scarlet Monastery
+        //////////////////////////////////////////
+
+        case 51103: // Frostbomb
+        case 34172: // Arcane Orb
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // OLDSM
+            break;
+        case 72589: // Green Beam || OLD SM
+        case 72594: // Red Beam || OLD SM
+        case 72598: // Blue Beam || OLD SM
+        case 72735: // Black Beam || OLD SM
+            spellInfo->ChannelInterruptFlags &= ~AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+            break;
+        case 63157: // Ground Fissure || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_DEST_AREA_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = 0;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_DEST_DYNOBJ_ENEMY;
+            spellInfo->EffectImplicitTargetB[1] = 0;
+            break;
+        case 38295: // auto-shoot || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->rangeIndex = 5; // 40yd
+            break;
+        case 61873: // Copy of throw spear || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->rangeIndex = 6; // 100yd
+            spellInfo->EffectBasePoints[0] = urand(18000, 25000);
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->Attributes &= ~SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION;
+            break;
+        case 30000: // Alexander's Test Spell || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->DurationIndex = 35; // 4 secs
+            break;
+        case 29324: // test Sapper Charge || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->EffectBasePoints[0] = urand(30000, 45000);
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
+            spellInfo->Effect[1] = 0;
+            break;
+        case 23951: // bloodlust || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_NOT_STEALABLE;
+            break;
+        case 2766: // KJORDAN(TEST) || nieuzywany w swiecie || teraz OLD SM
+            spellInfo->EffectApplyAuraName[0] = 0;
+            spellInfo->Attributes |= SPELL_ATTR0_HIDDEN_CLIENTSIDE | SPELL_ATTR0_HIDE_IN_COMBAT_LOG | SPELL_ATTR0_PASSIVE;
+            spellInfo->AttributesEx |= SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR;
+            spellInfo->DurationIndex = 21; 
+            break;
+        case 20545: // Lightning shield
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_NOT_STEALABLE;
+            break;
+        case 26659: // Sam's test aura || OLD SM
+            spellInfo->DurationIndex = 245;
+            spellInfo->Effect[0] = 0;
+            spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+            spellInfo->procCharges = 13;
+            spellInfo->procChance = 100;
+            spellInfo->procFlags |= PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            break;
+        case 30944: // red beam drops
+            spellInfo->ChannelInterruptFlags = 0;
+            spellInfo->AuraInterruptFlags = 0;
+            break;
+        case 23278: // shadow scythe
+            spellInfo->rangeIndex = 35; // 35yd;
+            break;
+        case 65112: // Cone Spell
+            spellInfo->EffectBasePoints[0] = 6000;
+            break;
+        case 65113: // Channel Test
+            spellInfo->EffectAmplitude[0] = 200;
+            break;
+        case 3023: // test aura(debuff nature TEST)
+            spellInfo->EffectBasePoints[0] = 0;
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            spellInfo->DurationIndex = 32;
+            break;
+        case 37993: // liquid breath
+            spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
+            break;
+        case 33071: // Shadow Prison
+            spellInfo->EffectTriggerSpell[0] = 41406; // Dementia
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+            break;
+        case 49204: // Dark Mending
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
             break;
 
         //////////////////////////////////////////
