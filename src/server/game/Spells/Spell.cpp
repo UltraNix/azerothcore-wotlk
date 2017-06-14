@@ -5480,7 +5480,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             else {
                 // Must be behind the target
-                if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
+                if (m_spellInfo->HasAttribute(SPELL_ATTR2_MUST_BE_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
                     return SPELL_FAILED_NOT_BEHIND;
 
                 // Target must be facing you
@@ -8502,13 +8502,13 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
                     return false;
                 break;
             case TARGET_CHECK_ALLY:
-                if (unitTarget->IsTotem())
+                if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
                 break;
             case TARGET_CHECK_PARTY:
-                if (unitTarget->IsTotem())
+                if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
@@ -8520,7 +8520,7 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
                     return false;
                 // nobreak;
             case TARGET_CHECK_RAID:
-                if (unitTarget->IsTotem())
+                if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;

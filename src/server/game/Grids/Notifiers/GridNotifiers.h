@@ -935,6 +935,9 @@ namespace Trinity
                 else if (!_refUnit->IsInPartyWith(u))
                     return false;
 
+                if (u->IsTotem() || u->IsVehicle() || u->IsNonPetGuardian())
+                    return false;
+
                 return !_refUnit->IsHostileTo(u) && u->IsAlive() && _source->IsWithinDistInMap(u, _range);
             }
 

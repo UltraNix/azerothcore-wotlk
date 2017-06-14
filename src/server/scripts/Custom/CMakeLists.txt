@@ -15,6 +15,15 @@ set(scripts_STAT_SRCS
   Custom/BattleForUndercity/battle_for_undercity.cpp
   Custom/BattleForUndercity/worldzone_trisfal_glades.cpp
   Custom/BattleForUndercity/battle_for_undercity.h
+
+  Custom/OldScarletMonastery/boss_dessembrae.cpp
+  Custom/OldScarletMonastery/boss_javier_voidbringer.cpp
+  Custom/OldScarletMonastery/boss_madantul_rada.cpp
+  Custom/OldScarletMonastery/boss_mazin_soulstealer.cpp
+  Custom/OldScarletMonastery/boss_reast.cpp
+  Custom/OldScarletMonastery/instance_old_scarlet_monastery.cpp
+  Custom/OldScarletMonastery/old_scarlet_Monastery.cpp
+  Custom/OldScarletMonastery/old_scarlet_monastery.h
 )
 
 message("  -> Prepared: Custom")

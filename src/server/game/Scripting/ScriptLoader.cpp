@@ -1262,6 +1262,14 @@ void AddBattlegroundScripts()
     void AddSC_battle_for_undercity_horde();
     void AddSC_battle_for_undercity();
     void AddSC_worldzone_trisfal_glades();
+    // Old Scarlet Monastery Event
+    void AddSC_instance_old_scarlet_monastery();
+    void AddSC_old_scarlet_monastery();
+    void AddSC_boss_mazin_soulstealer();
+    void AddSC_boss_javier_voidbringer();
+    void AddSC_boss_reast();
+    void AddSC_boss_madantul_rada();
+    void AddSC_boss_dessembrae();
 #endif
 
 void AddCustomScripts()
@@ -1273,5 +1281,13 @@ void AddCustomScripts()
     AddSC_battle_for_undercity_horde();
     AddSC_battle_for_undercity();
     AddSC_worldzone_trisfal_glades();
+    // Old Scarlet Monastery Event
+    AddSC_instance_old_scarlet_monastery();
+    AddSC_old_scarlet_monastery();
+    AddSC_boss_mazin_soulstealer();
+    AddSC_boss_javier_voidbringer();
+    AddSC_boss_reast();
+    AddSC_boss_madantul_rada();
+    AddSC_boss_dessembrae();
 #endif
 }

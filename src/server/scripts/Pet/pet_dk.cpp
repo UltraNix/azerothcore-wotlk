@@ -32,12 +32,12 @@
 
 enum DeathKnightSpells
 {
-    SPELL_DK_SUMMON_GARGOYLE_1      = 49206,
-    SPELL_DK_SUMMON_GARGOYLE_2      = 50514,
-    SPELL_DK_DISMISS_GARGOYLE       = 50515,
-    SPELL_DK_SANCTUARY              = 54661,
-    SPELL_DK_NIGHT_OF_THE_DEAD        = 62137,
-    SPELL_DK_PET_SCALING            = 61017
+    SPELL_DK_SUMMON_GARGOYLE_1 = 49206,
+    SPELL_DK_SUMMON_GARGOYLE_2 = 50514,
+    SPELL_DK_DISMISS_GARGOYLE  = 50515,
+    SPELL_DK_SANCTUARY         = 54661,
+    SPELL_DK_NIGHT_OF_THE_DEAD = 62137,
+    SPELL_DK_PET_SCALING       = 61017
 };
 
 class npc_pet_dk_ebon_gargoyle : public CreatureScript
@@ -352,10 +352,6 @@ class npc_pet_dk_army_of_the_dead : public CreatureScript
             {
                 CombatAI::InitializeAI();
                 ((Minion*)me)->SetFollowAngle(rand_norm()*2*M_PI);
-
-                // Heroism / Bloodlust immunity
-                me->ApplySpellImmune(0, IMMUNITY_ID, 32182, true);
-                me->ApplySpellImmune(0, IMMUNITY_ID, 2825, true);
             }
         };
 
@@ -374,7 +370,7 @@ class npc_pet_dk_dancing_rune_weapon : public CreatureScript
         {
             npc_pet_dk_dancing_rune_weaponAI(Creature* creature) : NullCreatureAI(creature) { }
 
-            void InitializeAI()
+            void InitializeAI() override
             {
                 // Xinef: Hit / Expertise scaling
                 me->AddAura(61017, me);
@@ -384,7 +380,7 @@ class npc_pet_dk_dancing_rune_weapon : public CreatureScript
             }
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_pet_dk_dancing_rune_weaponAI (creature);
         }
