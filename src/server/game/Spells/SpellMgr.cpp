@@ -3866,6 +3866,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 2836:
             spellInfo->EffectBasePoints[0] = 139;
             break;
+        //Fan of knifes
         case 51723:
             spellInfo->speed = 0;
         //Stealth
