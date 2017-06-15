@@ -3130,6 +3130,7 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
+            29306, // Naxxramas, Infected Wound
             65280, // Ulduar, Hodir, Singed
             65775, // Anub'arak, Swarm Scarab, Acid-Drenched Mandibles
             67861,
