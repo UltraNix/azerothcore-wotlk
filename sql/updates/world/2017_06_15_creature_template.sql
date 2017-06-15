@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `AIName`="", `ScriptName`="npc_onslaught_knight" WHERE `entry`=27206;
