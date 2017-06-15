@@ -2352,6 +2352,14 @@ void LFGMgr::SetLeader(uint64 gguid, uint64 leader)
 
 void LFGMgr::SetTeam(uint64 guid, TeamId teamId)
 {
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
+    {
+        if (Player* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
+        {
+            if (player->getLevel() >= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MINLVL) && player->getLevel() <= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MAXLVL))
+                teamId = TEAM_NEUTRAL;
+        }
+    }
     PlayersStore[guid].SetTeam(teamId);
 }
 
