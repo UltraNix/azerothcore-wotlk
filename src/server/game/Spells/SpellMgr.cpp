@@ -3810,6 +3810,8 @@ void SpellMgr::LoadDbcDataCorrections()
         case 2836:
             spellInfo->EffectBasePoints[0] = 139;
             break;
+        case 51723:
+            spellInfo->speed = 0;
         //Stealth
         case 1784:
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_DIRECT_DAMAGE;
