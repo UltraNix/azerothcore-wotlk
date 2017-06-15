@@ -5480,7 +5480,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             else {
                 // Must be behind the target
-                if (m_spellInfo->HasAttribute(SPELL_ATTR2_MUST_BE_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
+                if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
                     return SPELL_FAILED_NOT_BEHIND;
 
                 // Target must be facing you

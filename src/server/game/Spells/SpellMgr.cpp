@@ -2899,6 +2899,67 @@ void SpellMgr::LoadSpellCustomAttr()
             case 52743: // Head Smack
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
                 break;
+            case 53: // Backstab
+            case 2589:
+            case 2590:
+            case 2591:
+            case 7159:
+            case 8627:
+            case 8721:
+            case 11279:
+            case 11280:
+            case 11281:
+            case 15582:
+            case 15657:
+            case 22416:
+            case 25300:
+            case 26863:
+            case 37685:
+            case 48656:
+            case 48657:
+            case 703: // Garrote
+            case 8631:
+            case 8632:
+            case 8633:
+            case 11289:
+            case 11290:
+            case 26839:
+            case 26884:
+            case 48675:
+            case 48676:
+            case 5221: // Shred
+            case 6800:
+            case 8992:
+            case 9829:
+            case 9830:
+            case 27001:
+            case 27002:
+            case 48571:
+            case 48572:
+            case 8676: // Ambush
+            case 8724:
+            case 8725:
+            case 11267:
+            case 11268:
+            case 11269:
+            case 27441:
+            case 48689:
+            case 48690:
+            case 48691:
+            case 6785: // Ravage
+            case 6787:
+            case 9866:
+            case 9867:
+            case 27005:
+            case 48578:
+            case 48579:
+            case 21987: // Lash of Pain
+            case 23959: // Test Stab R50
+            case 24825: // Test Backstab
+            case 58563: // Assassinate Restless Lookout
+            case 63124: // quest There's Something About the Squire (13654)
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
+                break;
             case 26029: // Dark Glare
             case 43140: // Flame Breath
             case 43215: // Flame Breath
@@ -3269,11 +3330,6 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
-            case 21987: // Lash of Pain
-            case 58563: // Assassinate Restless Lookout
-            case 63124: // quest There's Something About the Squire (13654)
-                spellInfo->AttributesEx2 |= SPELL_ATTR2_MUST_BE_BEHIND_TARGET;
-                break;
             case 63026: // Force Cast (HACK: Target shouldn't be changed)
             case 63137: // Force Cast (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                 spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_DB;
