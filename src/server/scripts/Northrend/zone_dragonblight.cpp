@@ -1937,6 +1937,7 @@ enum Onslaught_warhorse
     SPELL_TRANSFORM = 48304,
     SPELL_RIDING_CROP = 48290,
 
+    NPC_ONSLAUGHT_WARHORSE = 27213,
     NPC_ONSLAUGHT_KNIGHT = 27206,
     NPC_KC = 27296,
     NPC_SHOWER_GUID = 98539
@@ -1947,100 +1948,107 @@ Position Warhorse_pos[] = {
     { 3239.105957f, -648.267578f, 165.650528f, 3.71414f }
 };
 
-class npc_onslaught_warhorse : public CreatureScript
+struct npc_onslaught_warhorseAI : public ScriptedAI
 {
-public:
-    npc_onslaught_warhorse() : CreatureScript("npc_onslaught_warhorse") { }
-
-    struct npc_onslaught_warhorseAI : public ScriptedAI
+    npc_onslaught_warhorseAI(Creature* creature) : ScriptedAI(creature), summons(me)
     {
-        npc_onslaught_warhorseAI(Creature* creature) : ScriptedAI(creature)
+        _playerMounted = false;
+        _knightGUID = 0;
+        _needNewKnight = false;
+    }
+
+    void EnterCombat(Unit* attacker) override
+    {
+        if (attacker)
         {
-            playermounted = false;
-            knightGUID = 0;
-            neednewknight = false;
+            if (Creature* knight = ObjectAccessor::GetCreature(*me, _knightGUID))
+                if (knight->IsAIEnabled)
+                    knight->AI()->AttackStart(attacker);
+        }
+    }
+
+    void Reset() override
+    {
+        _events.Reset();
+
+        if (Creature *knight = ObjectAccessor::GetCreature(*me, _knightGUID))
+            _needNewKnight = !knight->IsAlive() ? true : false;
+        else
+            _needNewKnight = true;
+
+        if (!_knightGUID || _needNewKnight)
+        {
+            if (Creature *knight = me->SummonCreature(NPC_ONSLAUGHT_KNIGHT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20 * IN_MILLISECONDS))
+            {
+                _knightGUID = knight->GetGUID();
+                _needNewKnight = false;
+                _events.ScheduleEvent(EVENT_MOUNT_KNIGHT, 1 * IN_MILLISECONDS);
+                knight->CastSpell(me, SPELL_RIDE_VEH_HARDCODED);
+            }
         }
 
-        void Reset() override
+        me->setFaction(67); //restore original faction
+        me->SetReactState(REACT_AGGRESSIVE);
+        _playerMounted = false;
+    }
+
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell) override
+    {
+        if (spell->Id == SPELL_HAND_OVER_REINS)
         {
-            _events.Reset();
+            me->CastSpell(me, SPELL_EJECT_ALL);
+            _events.ScheduleEvent(EVENT_MOVE_FIRST, 1 * IN_MILLISECONDS);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 48290, true);
+        }
+    }
 
-            // Not blizzlike magic by Nerv
-            if (Creature *knight = ObjectAccessor::GetCreature(*me, knightGUID))
-            {
-                if (!knight->IsAlive())
-                    neednewknight = true;
-            }
-            else
-                neednewknight = true; // my bad, fck. logic
+    void JustSummoned(Creature* summon) override
+    {
+        summons.Summon(summon);
+        _knightGUID = summon->GetGUID();
+    }
 
-
-            if (!knightGUID || neednewknight)
-            {
-                if (Creature *knight = me->SummonCreature(NPC_ONSLAUGHT_KNIGHT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20 * IN_MILLISECONDS))
-                {
-                    knightGUID = knight->GetGUID();
-                    neednewknight = false;
-                    _events.ScheduleEvent(EVENT_MOUNT_KNIGHT, 1 * IN_MILLISECONDS);
-                    knight->CastSpell(me, SPELL_RIDE_VEH_HARDCODED);
-                }
-            }
-
-            me->setFaction(67); //restore original faction
+    void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+    {
+        if (!apply && passenger->GetGUID() == _knightGUID)
             me->SetReactState(REACT_AGGRESSIVE);
-            playermounted = false;
-        }
+        if (!passenger->IsPlayer())
+            return;
+        if (apply)
+            _playerMounted = true;
+        else
+            _playerMounted = false;
+    }
 
-        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+    void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+    {
+        if (summon->GetEntry() == NPC_ONSLAUGHT_KNIGHT)
         {
-            if (spell->Id == SPELL_HAND_OVER_REINS)
-            {
-                me->CastSpell(me, SPELL_EJECT_ALL);
-                _events.ScheduleEvent(EVENT_MOVE_FIRST, 1 * IN_MILLISECONDS);
-            }
+            Position const exitPos = { frand(-2.f, 2.f), frand(-2.f, 2.f), 0.f };
+            summon->ExitVehicle(&exitPos);
+            me->CombatStop();
+            
+            me->setFaction(35);
+            me->SetReactState(REACT_PASSIVE);
         }
+    }
 
-        void JustSummoned(Creature* summon) override
+    // have to stay there for override reason(prevent for ai change i suppose)
+    void OnCharmed(bool /*apply*/) override
+    { }
+
+    void UpdateAI(uint32 diff) override
+    {
+        // attacks or process endevent only if player isn't mounted on horse
+        if (_playerMounted)
+            return;
+
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
         {
-            knightGUID = summon->GetGUID();
-        }
-
-        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
-        {
-            if (!apply && passenger->GetGUID() == knightGUID)
+            switch (eventId)
             {
-                me->SetReactState(REACT_PASSIVE);
-                me->setFaction(35); // was in tc so i assume it's correct
-                if (me->IsInCombat())
-                    me->CombatStop();
-            }
-            if (!passenger->ToPlayer())
-                return;
-            if (apply)
-            {
-                playermounted = true;
-                me->SetReactState(REACT_PASSIVE);
-            }
-            else
-                playermounted = false;
-        }
-
-        // have to stay there for override reason(prevent for ai change i suppose)
-        void OnCharmed(bool /*apply*/) override
-        { }
-
-        void UpdateAI(uint32 diff) override
-        {
-            // attacks or process endevent only if player isn't mounted on horse
-            if (playermounted)
-                return;
-
-            _events.Update(diff);
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
                 case EVENT_MOVE_FIRST:
                     me->SetWalk(true);
                     me->GetMotionMaster()->MovePoint(0, Warhorse_pos[0]);
@@ -2065,29 +2073,45 @@ public:
                     me->DespawnOrUnsummon();
                     break;
                 case EVENT_MOUNT_KNIGHT:
-                    if (Creature *knight = ObjectAccessor::GetCreature(*me, knightGUID))
+                    if (Creature *knight = ObjectAccessor::GetCreature(*me, _knightGUID))
                         knight->CastSpell(me, SPELL_RIDE_VEH_HARDCODED);
-
                     break;
-                }
+                default:
+                    break;
             }
-
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
         }
 
-    private:
-        EventMap _events;
-        bool playermounted;
-        bool neednewknight;
-        uint64 knightGUID;
-    };
+        if (!UpdateVictim())
+            return;
 
-    CreatureAI* GetAI(Creature* creature) const override
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    EventMap _events;
+    bool _playerMounted, _needNewKnight;
+    uint64 _knightGUID;
+    SummonList summons;
+};
+
+struct npc_onslaught_knightAI : public ScriptedAI
+{
+    npc_onslaught_knightAI(Creature* creature) : ScriptedAI(creature) { }
+    
+    void EnterCombat(Unit* attacker) override
     {
-        return new npc_onslaught_warhorseAI(creature);
+        if (attacker)
+        {
+            if (Unit* veh = me->GetVehicleBase())
+                if (veh->IsCreature() && veh->IsAIEnabled && veh->GetEntry() == NPC_ONSLAUGHT_WARHORSE)
+                    veh->ToCreature()->AI()->AttackStart(attacker);
+        }
+    }
+
+    void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell) override
+    {
+        if (spell->Id == 48268)
+            me->DespawnOrUnsummon();
     }
 };
 
@@ -2110,7 +2134,8 @@ void AddSC_dragonblight()
     new npc_q24545_vegard_dummy();
     new npc_q24545_vegard();
     new npc_spiritual_insight();
-    new npc_onslaught_warhorse();
+    new CreatureAILoader<npc_onslaught_warhorseAI>("npc_onslaught_warhorse");
+    new CreatureAILoader<npc_onslaught_knightAI>("npc_onslaught_knight");
 
     // Theirs
     new npc_commander_eligor_dawnbringer();

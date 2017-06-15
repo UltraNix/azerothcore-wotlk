@@ -79,6 +79,8 @@ enum KologarnSpells
 #define SPELL_RIDE_RIGHT_ARM               RAID_MODE(SPELL_RIDE_RIGHT_ARM_10, SPELL_RIDE_RIGHT_ARM_25)
 #define SPELL_STONE_SHOUT                  RAID_MODE(SPELL_STONE_SHOUT_10, SPELL_STONE_SHOUT_25)
 
+#define DEFAULT_ORIENTATION 3.193500f
+
 enum KologarnEvents
 {
     EVENT_SMASH                            = 1,
@@ -214,6 +216,7 @@ public:
         {
             _rubbleAchievement = 0;
             _looksAchievement = true;
+            me->SetOrientation(DEFAULT_ORIENTATION);
 
             me->SetDisableGravity(true);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
