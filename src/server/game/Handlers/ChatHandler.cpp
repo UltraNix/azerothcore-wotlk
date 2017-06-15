@@ -169,8 +169,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             {
                 case CHAT_MSG_PARTY:
                 case CHAT_MSG_PARTY_LEADER:
-                    if (sender->getLevel() >= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MINLVL) && sender->getLevel() <= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MAXLVL))
-                        lang = LANG_UNIVERSAL;
+                    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
+                        if (sender->getLevel() >= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MINLVL) && sender->getLevel() <= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MAXLVL))
+                            lang = LANG_UNIVERSAL;
                 case CHAT_MSG_RAID:
                 case CHAT_MSG_RAID_LEADER:
                 case CHAT_MSG_RAID_WARNING:
