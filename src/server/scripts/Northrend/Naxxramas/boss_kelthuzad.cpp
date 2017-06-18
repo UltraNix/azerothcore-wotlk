@@ -206,6 +206,9 @@ public:
 
         void JustDied(Unit* Killer)
         {
+            if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_KELTHUZAD_GATE)))
+                go->SetGoState(GO_STATE_ACTIVE);
+
             summons.DespawnAll();
             Talk(SAY_DEATH);
 

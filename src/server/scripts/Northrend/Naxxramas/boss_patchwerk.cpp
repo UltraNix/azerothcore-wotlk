@@ -197,100 +197,10 @@ public:
         {
             std::list<Creature*> formation;
             GetCreatureListWithEntryInGrid(formation, me, CREATURE_PATCHWORK_GOLEM, 400.0f);
-            if (!formation.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = formation.begin(); itr != formation.end(); ++itr)
-                {
-                    if (Creature* cFormation = *itr)
-                    {
-                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 200.0f, true))
-                        {
-                            if (cFormation->IsAlive() && cFormation->IsWithinLOS(naxxTrigger->GetPositionX(), naxxTrigger->GetPositionY(), naxxTrigger->GetPositionZ()))
-                            {
-                                cFormation->ToCreature()->AI()->AttackStart(me->GetVictim());
-                                cFormation->CallForHelp(30.0f);
-                            }
-                        }
-                    }
-                }
-            }
-
             GetCreatureListWithEntryInGrid(formation, me, CREATURE_BITE_RETCHER, 400.0f);
-            if (!formation.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = formation.begin(); itr != formation.end(); ++itr)
-                {
-                    if (Creature* cFormation = *itr)
-                    {
-                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 200.0f, true))
-                        {
-                            if (cFormation->IsAlive() && cFormation->IsWithinLOS(naxxTrigger->GetPositionX(), naxxTrigger->GetPositionY(), naxxTrigger->GetPositionZ()))
-                            {
-                                cFormation->ToCreature()->AI()->AttackStart(me->GetVictim());
-                                cFormation->CallForHelp(30.0f);
-                            }
-                        }
-                    }
-                }
-            }
-
             GetCreatureListWithEntryInGrid(formation, me, CREATURE_MAD_SCIENTIST, 400.0f);
-            if (!formation.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = formation.begin(); itr != formation.end(); ++itr)
-                {
-                    if (Creature* cFormation = *itr)
-                    {
-                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 200.0f, true))
-                        {
-                            if (cFormation->IsAlive() && cFormation->IsWithinLOS(naxxTrigger->GetPositionX(), naxxTrigger->GetPositionY(), naxxTrigger->GetPositionZ()))
-                            {
-                                cFormation->ToCreature()->AI()->AttackStart(me->GetVictim());
-                                cFormation->CallForHelp(30.0f);
-                            }
-                        }
-                    }
-                }
-            }
-
             GetCreatureListWithEntryInGrid(formation, me, CREATURE_LIVING_MONSTROSITY, 400.0f);
-            if (!formation.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = formation.begin(); itr != formation.end(); ++itr)
-                {
-                    if (Creature* cFormation = *itr)
-                    {
-                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 200.0f, true))
-                        {
-                            if (cFormation->IsAlive() && cFormation->IsWithinLOS(naxxTrigger->GetPositionX(), naxxTrigger->GetPositionY(), naxxTrigger->GetPositionZ()))
-                            {
-                                cFormation->ToCreature()->AI()->AttackStart(me->GetVictim());
-                                cFormation->CallForHelp(30.0f);
-                            }
-                        }
-                    }
-                }
-            }
-
             GetCreatureListWithEntryInGrid(formation, me, CREATURE_SURGICAL_ASSISTANT, 400.0f);
-            if (!formation.empty())
-            {
-                for (std::list<Creature*>::const_iterator itr = formation.begin(); itr != formation.end(); ++itr)
-                {
-                    if (Creature* cFormation = *itr)
-                    {
-                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 200.0f, true))
-                        {
-                            if (cFormation->IsAlive() && cFormation->IsWithinLOS(naxxTrigger->GetPositionX(), naxxTrigger->GetPositionY(), naxxTrigger->GetPositionZ()))
-                            {
-                                cFormation->ToCreature()->AI()->AttackStart(me->GetVictim());
-                                cFormation->CallForHelp(30.0f);
-                            }
-                        }
-                    }
-                }
-            }
-
             GetCreatureListWithEntryInGrid(formation, me, CREATURE_SLUDGE_BELCHER, 350.0f);
             if (!formation.empty())
             {
@@ -298,7 +208,7 @@ public:
                 {
                     if (Creature* cFormation = *itr)
                     {
-                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 150.0f, true))
+                        if (Creature* naxxTrigger = cFormation->FindNearestCreature(CREATURE_NAXXRAMAS_TRIGGER, 200.0f, true))
                         {
                             if (cFormation->IsAlive() && cFormation->IsWithinLOS(naxxTrigger->GetPositionX(), naxxTrigger->GetPositionY(), naxxTrigger->GetPositionZ()))
                             {
