@@ -2692,6 +2692,65 @@ void SpellMgr::LoadSpellSpecificAndAuraState()
     sLog->outString();
 }
 
+inline void ApplySpellFix(std::initializer_list<uint32> spellIds, void(*fix)(SpellInfo*))
+{
+    for (auto spellId : spellIds)
+    {
+        SpellInfo* spellInfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(spellId));
+        if (!spellInfo)
+        {
+            sLog->outError("Spell info correction specified for non-existing spell %u, skipped", spellId);
+            continue;
+        }
+
+        fix(const_cast<SpellInfo*>(spellInfo));
+    }
+}
+
+std::vector<uint32> partialCorrection =
+{
+    1120,   // Drain Soul r1
+    8288,   // Drain Soul r2
+    8289,   // Drain Soul r3
+    11675,  // Drain Soul r4
+    27217,  // Drain Soul r5
+    47855,  // Drain Soul r6
+    49184,  // Howling Blast r1
+    51409,  // Howling Blast r2
+    51410,  // Howling Blast r3
+    51411,  // Howling Blast r4
+    5570,   // Insect Swarm r1
+    24974,  // Insect Swarm r2
+    24975,  // Insect Swarm r3
+    24976,  // Insect Swarm r4
+    24977,  // Insect Swarm r5
+    27013,  // Insect Swarm r6
+    48468,  // Insect Swarm r7
+    20733,  // Black Arrow r1
+    63668,  // Black Arrow r2
+    63669,  // Black Arrow r3
+    63670,  // Black Arrow r4
+    63671,  // Black Arrow r5
+    63672,  // Black Arrow r6
+    47528,  // Mind Freeze r1
+    57994,  // Wind Shear  r1
+    60103,  // Lava Lash r1
+    8042,   // Earth Shock r1
+    8044,   // Earth Shock r2
+    8045,   // Earth Shock r3
+    8046,   // Earth Shock r4
+    10412,  // Earth Shock r5
+    10413,  // Earth Shock r6
+    10414,  // Earth Shock r7
+    25454,  // Earth Shock r8
+    49230,  // Earth Shock r9
+    49231,  // Earth Shock r10
+    32645,  // Envenom r1
+    32684,  // Envenom r2
+    57992,  // Envenom r3
+    57993,  // Envenom r4
+};
+
 void SpellMgr::LoadSpellCustomAttr()
 {
     uint32 oldMSTime = getMSTime();
@@ -2809,8 +2868,12 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         }
 
+        for (uint8 i = 0; i < partialCorrection.size(); i++)
+            if (spellInfo->Id == partialCorrection[i])
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NOT_BINARY_SPELL;
+
         // Xinef: spells ignoring hit result should not be binary
-        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
+        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT) || !spellInfo->HasAttribute(SPELL_ATTR0_CU_NOT_BINARY_SPELL))
         {
             for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
             {
@@ -2876,308 +2939,344 @@ void SpellMgr::LoadSpellCustomAttr()
         if (spellInfo->SpellVisual[0] == 3879)
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
-        switch (spellInfo->Id)
-        {
-            // Xinef: additional spells which should be binary
-            case 45145: // Snake Trap Effect
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
-                break;
-            case 1776: // Gouge
-            case 1777:
-            case 8629:
-            case 11285:
-            case 11286:
-            case 12540:
-            case 13579:
-            case 24698:
-            case 28456:
-            case 29425:
-            case 34940:
-            case 36862:
-            case 38764:
-            case 38863:
-            case 52743: // Head Smack
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
-                break;
-            case 53: // Backstab
-            case 2589:
-            case 2590:
-            case 2591:
-            case 7159:
-            case 8627:
-            case 8721:
-            case 11279:
-            case 11280:
-            case 11281:
-            case 15582:
-            case 15657:
-            case 22416:
-            case 25300:
-            case 26863:
-            case 37685:
-            case 48656:
-            case 48657:
-            case 703: // Garrote
-            case 8631:
-            case 8632:
-            case 8633:
-            case 11289:
-            case 11290:
-            case 26839:
-            case 26884:
-            case 48675:
-            case 48676:
-            case 5221: // Shred
-            case 6800:
-            case 8992:
-            case 9829:
-            case 9830:
-            case 27001:
-            case 27002:
-            case 48571:
-            case 48572:
-            case 8676: // Ambush
-            case 8724:
-            case 8725:
-            case 11267:
-            case 11268:
-            case 11269:
-            case 27441:
-            case 48689:
-            case 48690:
-            case 48691:
-            case 6785: // Ravage
-            case 6787:
-            case 9866:
-            case 9867:
-            case 27005:
-            case 48578:
-            case 48579:
-            case 21987: // Lash of Pain
-            case 23959: // Test Stab R50
-            case 24825: // Test Backstab
-            case 58563: // Assassinate Restless Lookout
-            case 63124: // quest There's Something About the Squire (13654)
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
-                break;
-            case 26029: // Dark Glare
-            case 43140: // Flame Breath
-            case 43215: // Flame Breath
-            case 70461: // Coldflame Trap
-            case 72133: // Pain and Suffering
-            case 73788: // Pain and Suffering
-            case 73789: // Pain and Suffering
-            case 73790: // Pain and Suffering
-            case 63293: // Mimiron - spinning damage
-            case 68873: // Wailing Souls
-            case 70324: // Wailing Souls
-            case 64619: // Ulduar, Mimiron, Emergency Fire Bot, Water Spray
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
-                break;
-            case 58690: // Cyanigosa, Tail Sweep
-            case 59283: // Cyanigosa, Tail Sweep
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
-                break;
-            case 24340: // Meteor
-            case 26558: // Meteor
-            case 28884: // Meteor
-            case 36837: // Meteor
-            case 38903: // Meteor
-            case 41276: // Meteor
-            case 57467: // Meteor
-            case 26789: // Shard of the Fallen Star
-            case 31436: // Malevolent Cleave
-            case 35181: // Dive Bomb
-            case 40810: // Saber Lash
-            case 43267: // Saber Lash
-            case 43268: // Saber Lash
-            case 42384: // Brutal Swipe
-            case 45150: // Meteor Slash
-            case 64688: // Sonic Screech
-            case 72373: // Shared Suffering
-            case 71904: // Chaos Bane
-            case 70492: // Ooze Eruption
-            case 72505: // Ooze Eruption
-            case 72624: // Ooze Eruption
-            case 72625: // Ooze Eruption
-            // ONLY SPELLS WITH SPELLFAMILY_GENERIC and EFFECT_SCHOOL_DAMAGE, OR WEAPON_DMG_X
-            case 66809: // Meteor Fists
-            case 67331: // Meteor Fists
-            case 66765: // Meteor Fists
-            case 67333: // Meteor Fists
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-                break;
-            case 18500: // Wing Buffet
-            case 33086: // Wild Bite
-            case 49749: // Piercing Blow
-            case 52890: // Penetrating Strike
-            case 53454: // Impale
-            case 59446: // Impale
-            case 62383: // Shatter
-            case 64777: // Machine Gun
-            case 65239: // Machine Gun
-            case 69293: // Wing Buffet
-            case 74439: // Machine Gun
-            // Trial of the Crusader, Jaraxxus, Shivan Slash
-            case 66378:
-            case 67097:
-            case 67098:
-            case 67099:
-            // Trial of the Crusader, Anub'arak, Impale
-            case 65919:
-            case 67858:
-            case 67859:
-            case 67860:
-            case 63278: // Mark of the Faceless (General Vezax)
-            case 64125: // Ulduar, Yogg-Saron, Squeeze
-            case 64126: // Ulduar, Yogg-Saron, Squeeze
-            case 62544: // Thrust (Argent Tournament)
-            case 64588: // Thrust (Argent Tournament)
-            case 66479: // Thrust (Argent Tournament)
-            case 68505: // Thrust (Argent Tournament)
-            case 62709: // Counterattack! (Argent Tournament)
-            case 62626: // Break-Shield (Argent Tournament, Player)
-            case 64590: // Break-Shield (Argent Tournament, Player)
-            case 64342: // Break-Shield (Argent Tournament, NPC)
-            case 64686: // Break-Shield (Argent Tournament, NPC)
-            case 65147: // Break-Shield (Argent Tournament, NPC)
-            case 68504: // Break-Shield (Argent Tournament, NPC)
-            case 62874: // Charge (Argent Tournament, Player)
-            case 68498: // Charge (Argent Tournament, Player)
-            case 64591: // Charge (Argent Tournament, Player)
-            case 63003: // Charge (Argent Tournament, NPC)
-            case 63010: // Charge (Argent Tournament, NPC)
-            case 68321: // Charge (Argent Tournament, NPC)
-            case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72409: // Rune of Blood (Deathbringer Saurfang)
-            case 72447: // Rune of Blood (Deathbringer Saurfang)
-            case 72448: // Rune of Blood (Deathbringer Saurfang)
-            case 72449: // Rune of Blood (Deathbringer Saurfang)
-            case 49882: // Leviroth Self-Impale
-            case 62775: // Ulduar: XT-002 Tympanic Tamparum
-            case 29107: // Disrupting Shout
-            case 55543: // Disrupting Shout
-            case 55550: // Jagged Knife
-            case 48642: // Launch Harpoon
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-                break;
-            case 64422: // Sonic Screech (Auriaya)
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-                break;
-            case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
-            case 72347: // Lock Players and Tap Chest (Gunship Battle)
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
-                break;
-            default:
-                break;
-            case 63675: // Improved Devouring Plague
-            case 17962: // Conflagrate
-            case 32593: // Earth Shield aura
-            case 32594: // Earth Shield aura
-            case 49283: // Earth Shield aura
-            case 49284: // Earth Shield aura
-            case 50526: // Wandering Plague
-            case 53353: // Chimera Shot - Serpent trigger
-            case 52752: // Ancestral Awakening Heal
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS;
-                break;
-            case 65280: // Ulduar, Hodir, Singed
-            case 65775: // Anub'arak, Swarm Scarab, Acid-Drenched Mandibles
-            case 67861:
-            case 67862:
-            case 67863:
-            case 67721: // Anub'arak, Nerubian Burrower, Expose Weakness
-            case 64638: // Ulduar, Winter Jormungar, Acidic Bite
-            case 71157: // Icecrown Citadel, Plagued Zombie, Infected Wound
-            case 72963: // Icecrown Citadel, Valithria Dreamwalker, Flesh Rot (Rot Worm)
-            case 72964:
-            case 72965:
-            case 72966:
-            case 72465: // Icecrown Citadel, Sindragosa, Respite for a Tormented Soul (weekly quest)
-            case 45271: // Sunwell, Eredar Twins encounter, Dark Strike
-            case 45347: // Sunwell, Eredar Twins encounter, Dark Touched
-            case 45348: // Sunwell, Eredar Twins encounter, Flame Touched
-            case 35859: // The Eye, Nether Vapor
-            case 40520: // Black Temple, Shade Soul Channel
-            case 40327: // Black Temple, Atrophy
-            case 38449: // Serpentshrine Cavern, Blessing of the Tides
-            case 38044: // Serpentshrine Cavern, Surge
-            case 74507: // Ruby Sanctum, Siphoned Might
-            case 49381: // Drak'tharon Keep, Consume
-            case 59805: // Drak'tharon Keep, Consume
-            case 55093: // Gundrak, Grip of Slad'ran
-            case 30659: // Hellfire Ramparts, Fel Infusion
-            case 54314: // Azjol'Nerub Drain Power
-            case 59354: // Azjol'Nerub Drain Power
-            case 34655: // Snake Trap, Deadly Poison
-            case 11971: // Sunder Armor
-            case 58567: // Player Sunder Armor
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
-                break;
-            case 43138: // North Fleet Reservist Kill Credit
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_ALLOW_INFLIGHT_TARGET;
-                break;
+        ApplySpellFix
+        ({ 
+            1776, // Gouge
+            1777,
+            8629,
+            11285,
+            11286,
+            12540,
+            13579,
+            24698,
+            28456,
+            29425,
+            34940,
+            36862,
+            38764,
+            38863,
+            52743 // Head Smack
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
+        });
 
-            // Xinef: NOT CUSTOM, cant add in DBC CORRECTION because i need to swap effects, too much work to do there
-            // Envenom
-            case 32645:
-            case 32684:
-            case 57992:
-            case 57993:
+        ApplySpellFix({ 45145 /* Snake Trap Effect*/ }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
+        });
+
+        ApplySpellFix
+        ({
+            53, // Backstab
+            2589,
+            2590,
+            2591,
+            7159,
+            8627,
+            8721,
+            11279,
+            11280,
+            11281,
+            15582,
+            15657,
+            22416,
+            25300,
+            26863,
+            37685,
+            48656,
+            48657,
+            703, // Garrote
+            8631,
+            8632,
+            8633,
+            11289,
+            11290,
+            26839,
+            26884,
+            48675,
+            48676,
+            5221, // Shred
+            6800,
+            8992,
+            9829,
+            9830,
+            27001,
+            27002,
+            48571,
+            48572,
+            8676, // Ambush
+            8724,
+            8725,
+            11267,
+            11268,
+            11269,
+            27441,
+            48689,
+            48690,
+            48691,
+            6785, // Ravage
+            6787,
+            9866,
+            9867,
+            27005,
+            48578,
+            48579,
+            21987, // Lash of Pain
+            23959, // Test Stab R50
+            24825, // Test Backstab
+            58563, // Assasinate Restless Lookout
+            63124, // quest There's Something About the Squire (13654)
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET;
+        });
+
+
+        ApplySpellFix
+        ({ 
+            26029, // Dark Glare
+            43140, // Flame Breath
+            43215, 
+            70461, // Coldflame Trap
+            72133, // Pain and Suffering
+            73788,
+            73789,
+            73790,
+            63293, // Mimiron - spinning damage
+            68873, // Wailing Souls
+            70324,
+            64619 // Ulduar, Mimiron, Emergency Fire Bot, Water Spray
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
+        });
+
+
+        ApplySpellFix
+        ({ 
+            58690, // Cyanigosa, Tail Sweep
+            59283 
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
+        });
+
+        ApplySpellFix
+        ({
+            24340, // Meteor
+            26558,
+            28884,
+            36837,
+            38903,
+            41276,
+            57467,
+            26789, // Shard of the Fallen Star
+            31436, // Malevolent Cleave
+            35181, // Dive Bomb
+            40810, // Saber Lash
+            43267,
+            43268,
+            42384, // Brutal Swipe
+            45150, // Meteor Slash
+            64688, // Sonic Screech
+            72373, // Shared Suffering
+            71904, // Chaos Bane
+            70492, // Ooze Eruption
+            72505, 
+            72624,
+            72625,
+            66809, // Meteor Fists
+            67331,
+            66765,
+            67333
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+        });
+
+        ApplySpellFix
+        ({
+            18500, // Wing Buffet
+            69293, 
+            33086, // Wild Bite
+            49749, // Piercing Blow
+            52890, // Penetrating Strike
+            53454, // Impale
+            59446,
+            62383, // Shatter
+            64777, // Machine Gun
+            65239,
+            74439,
+            66378, // Trial of the Crusader, Jaraxxus, Shivan Slash
+            67097,
+            67098,
+            67099,
+            65919, // Trial of the Crusader, Anub'arak, Impale
+            67858,
+            67859,
+            67860,
+            63278, // Mark of the Faceless (General Vezax)
+            64125, // Ulduar, Yogg-Saron, Squeeze
+            64126,
+            62544, // Thrust (Argent Tournament)
+            64588,
+            66479,
+            68505,
+            62709, // Counterattack! (Argent Tournament)
+            62626, // Break-Shield (Argent Tournament, Player)
+            64590,
+            64342, // Break-Shield (Argent Tournament, NPC)
+            64686,
+            65147,
+            68504,
+            62874, // Charge (Argent Tournament, Player)
+            68498,
+            64591,
+            63003, // Charge (Argent Tournament, NPC)
+            63010,
+            68321,
+            72255, // Mark of the Fallen Champion (Deathbringer Saurfang)
+            72444,
+            72445,
+            72446,
+            72409, // Rune of Blood (Deathbringer Saurfang)
+            72447,
+            72448,
+            72449,
+            49882, // Leviroth Self-Impale
+            62775, // Ulduar: XT-002 Tympanic Tamparum
+            29107, // Disrupting Shout
+            55543,
+            55550, // Jagged Knife
+            48642 // Launch Harpoon
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+        });
+
+        ApplySpellFix({ 64422 /*Sonic Screech (Auriaya)*/}, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+        }); 
+
+        ApplySpellFix
+        ({ 
+            72293, // Mark of the Fallen Champion (Deathbringer Saurfang)
+            72347  // Lock Players and Tap Chest (Gunship Battle)
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+        });
+
+        ApplySpellFix
+        ({
+            63675, // Improved Devouring Plague
+            17962, // Conflagrate
+            32593, // Earth Shield aura
+            32594,
+            49283,
+            49284,
+            50526, // Wandering Plague
+            53353, // Chimera Shot - Serpent trigger
+            52752 // Ancestral Awakening Heal
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS;
+        });
+
+        ApplySpellFix
+        ({
+            29306, // Naxxramas, Infected Wound
+            65280, // Ulduar, Hodir, Singed
+            65775, // Anub'arak, Swarm Scarab, Acid-Drenched Mandibles
+            67861,
+            67862,
+            67863,
+            67721, // Anub'arak, Nerubian Burrower, Expose Weakness
+            64638, // Ulduar, Winter Jormungar, Acidic Bite
+            71157, // Icecrown Citadel, Plagued Zombie, Infected Wound
+            72963, // Icecrown Citadel, Valithria Dreamwalker, Flesh Rot (Rot Worm)
+            72964, 
+            72965,
+            72966,
+            72465, // Icecrown Citadel, Sindragosa, Respite for a Tormented Soul (weekly quest)
+            45271, // Sunwell, Eredar Twins encounter, Dark Strike
+            45347, // Sunwell, Eredar Twins encounter, Dark Touched
+            45348, // Sunwell, Eredar Twins encounter, Flame Touched
+            35859, // The Eye, Nether Vapor
+            40520, // Black Temple, Shade Soul Channel
+            40327, // Black Temple, Atrophy
+            38449, // Serpentshrine Cavern, Blessing of the Tides
+            38044, // Serpentshrine Cavern, Surge
+            74507, // Ruby Sanctum, Siphoned Might
+            49381, // Drak'tharon Keep, Consume
+            59805,
+            55093, // Gundrak, Grip of Slad'ran
+            30659, // Hellfire Ramparts, Fel Infusion
+            54314, // Azjol'Nerub Drain Power
+            59354,
+            34655, // Snake Trap, Deadly Poison
+            11971, // Sunder Armor
+            58567, // Player Sunder Armor
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
+        });
+
+        ApplySpellFix({ 43138 /*North Fleet Reservist Kill Credit*/ }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_ALLOW_INFLIGHT_TARGET;
+        });
+
+        // Old Scarlet Monastery
+        ApplySpellFix({ 61873, 38295 }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+        });
+
+        /* ApplySpellFix({ 41105, 70768 }, [](SpellInfo* spellInfo) {
+        spellInfo->AttributesCu |= SPELL_ATTR0_CU_CANT_BE_SAVED;
+        });*/
+
+        // Xinef: NOT CUSTOM, cant add in DBC CORRECTION because i need to swap effects, too much work to do there
+        ApplySpellFix
+        ({
+            32645, // Envenom
+            32684,
+            57992,
+            57993,
+        }, [](SpellInfo* spellInfo) {
+            SpellEffectInfo info = spellInfo->Effects[EFFECT_0];
+            spellInfo->Effects[EFFECT_0] = spellInfo->Effects[EFFECT_2];
+            spellInfo->Effects[EFFECT_2] = info;
+        });
+
+        // Xinef: Cooldown overwrites
+        // Jotunheim Rapid-Fire Harpoon: Energy Reserve
+        ApplySpellFix ({ 56585 }, [](SpellInfo* spellInfo) {
+            spellInfo->RecoveryTime = 30000;
+            spellInfo->_requireCooldownInfo = true;
+        });
+
+        // Jotunheim Rapid-Fire Harpoon: Rapid-Fire Harpoon
+        ApplySpellFix({ 56570 }, [](SpellInfo* spellInfo) {
+            spellInfo->RecoveryTime = 200;
+        });
+
+        // Burst of Speed
+        ApplySpellFix({ 57493 }, [](SpellInfo* spellInfo) {
+            spellInfo->RecoveryTime = 60000;
+            spellInfo->_requireCooldownInfo = true;
+        });
+
+        // Strafe Jotunheim Building
+        ApplySpellFix({ 7769 }, [](SpellInfo* spellInfo) {
+            spellInfo->RecoveryTime = 1500;
+            spellInfo->_requireCooldownInfo = true;
+        });
+
+        ApplySpellFix
+        ({
+            56001, // Ebonweave
+            56002, // Moonshroud
+            56003, // Spellweave
+            55208, // Smelt Titansteel
+        }, [](SpellInfo* spellInfo) {
+            if (!sWorld->PatchNotes(PATCH_330))
             {
-                SpellEffectInfo info = spellInfo->Effects[EFFECT_0];
-                spellInfo->Effects[EFFECT_0] = spellInfo->Effects[EFFECT_2];
-                spellInfo->Effects[EFFECT_2] = info;
-                break;
+                spellInfo->RecoveryTime = 20 * HOUR * IN_MILLISECONDS;
+                spellInfo->_requireCooldownInfo = true;
             }
-
-            // Xinef: Cooldown overwrites
-            // Jotunheim Rapid-Fire Harpoon: Energy Reserve
-            case 56585:
-                spellInfo->RecoveryTime = 30000;
-                spellInfo->_requireCooldownInfo = true;
-                break;
-            // Jotunheim Rapid-Fire Harpoon: Rapid-Fire Harpoon
-            case 56570:
-                spellInfo->RecoveryTime = 200;
-                break;
-            // Burst of Speed
-            case 57493:
-                spellInfo->RecoveryTime = 60000;
-                spellInfo->_requireCooldownInfo = true;
-                break;
-            // Strafe Jotunheim Building
-            case 7769:
-                spellInfo->RecoveryTime = 1500;
-                spellInfo->_requireCooldownInfo = true;
-                break;
-            case 56001: // Ebonweave
-            case 56002: // Moonshroud
-            case 56003: // Spellweave
-            case 55208: // Smelt Titansteel
-                if (!sWorld->PatchNotes(PATCH_330))
-                {
-                    spellInfo->RecoveryTime = 20 * HOUR * IN_MILLISECONDS;
-                    spellInfo->_requireCooldownInfo = true;
-                }
-                break;
-            //////////////////////////////////////////
-            ////////// Old Scarlet Monastery
-            //////////////////////////////////////////
-            case 61873: // Copy of throw spear || nieuzywany w swiecie || teraz OLD SM
-            case 38295: // auto-shoot || nieuzywany w swiecie || teraz OLD SM
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-                break;
-            /*
-            case 41105: // Defensive Aura
-            case 70768: // Shroud of the Occult
-            spellInfo->AttributesCu |= SPELL_ATTR0_CU_CANT_BE_SAVED;
-            break;*/
-        }
+        });
 
         switch (spellInfo->SpellFamilyName)
         {
@@ -3241,50 +3340,6 @@ void SpellMgr::LoadSpellCustomAttr()
     sLog->outString();
 }
 
-std::vector<uint32> partialCorrection =
-{
-    1120,   // Drain Soul r1
-    8288,   // Drain Soul r2
-    8289,   // Drain Soul r3
-    11675,  // Drain Soul r4
-    27217,  // Drain Soul r5
-    47855,  // Drain Soul r6
-    49184,  // Howling Blast r1
-    51409,  // Howling Blast r2
-    51410,  // Howling Blast r3
-    51411,  // Howling Blast r4
-    5570,   // Insect Swarm r1
-    24974,  // Insect Swarm r2
-    24975,  // Insect Swarm r3
-    24976,  // Insect Swarm r4
-    24977,  // Insect Swarm r5
-    27013,  // Insect Swarm r6
-    48468,  // Insect Swarm r7
-    20733,  // Black Arrow r1
-    63668,  // Black Arrow r2
-    63669,  // Black Arrow r3
-    63670,  // Black Arrow r4
-    63671,  // Black Arrow r5
-    63672,  // Black Arrow r6
-    47528,  // Mind Freeze r1
-    57994,  // Wind Shear  r1
-    60103,  // Lava Lash r1
-    8042,   // Earth Shock r1
-    8044,   // Earth Shock r2
-    8045,   // Earth Shock r3
-    8046,   // Earth Shock r4
-    10412,  // Earth Shock r5
-    10413,  // Earth Shock r6
-    10414,  // Earth Shock r7
-    25454,  // Earth Shock r8
-    49230,  // Earth Shock r9
-    49231,  // Earth Shock r10
-    32645,  // Envenom r1
-    32684,  // Envenom r2
-    57992,  // Envenom r3
-    57993,  // Envenom r4
-};
-
 void SpellMgr::LoadDbcDataCorrections()
 {
     uint32 oldMSTime = getMSTime();
@@ -3323,10 +3378,6 @@ void SpellMgr::LoadDbcDataCorrections()
 
         if (spellInfo->activeIconID == 2158)  // flight
             spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
-
-        for (uint8 i = 0; i < partialCorrection.size(); i++)
-            if (spellInfo->Id == partialCorrection[i])
-                spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
 
         switch (spellInfo->Id)
         {
@@ -4026,7 +4077,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 55268:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_BLOCKABLE_SPELL;
             break;
-
+        //Summon Gargoyle
+        case 49206:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            break;
 
 
         /////////////////////////////////

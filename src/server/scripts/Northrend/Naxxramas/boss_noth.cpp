@@ -127,6 +127,7 @@ public:
         {
             events.Reset();
             summons.DespawnAll();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetControlled(false, UNIT_STATE_ROOT);
             me->SetReactState(REACT_AGGRESSIVE);
             totalPhase = 0;
