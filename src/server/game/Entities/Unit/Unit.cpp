@@ -9329,7 +9329,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 { 
-    return GetReactionTo(unit) >= REP_FRIENDLY;
+    return GetReactionTo(unit) >= REP_NEUTRAL;
 }
 
 bool Unit::IsHostileToPlayers() const
