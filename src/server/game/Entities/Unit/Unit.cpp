@@ -8914,8 +8914,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Proc only from Frost/Freezing trap activation or from Freezing Arrow (the periodic dmg proc handled elsewhere)
             if (!(procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) || !procSpell || !roll_chance_i(triggerAmount))
                 return false;
-            if (procSpell->Id != 63487 /*frost trap*/ && !(procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+            if (procSpell->Id == 63487 /*frost trap*/)
+            {
+                const SpellInfo* freezingAura = sSpellMgr->GetSpellInfo(13810);//13810 - frost trap aura
+                if (victim->IsImmunedToSpellEffect(freezingAura, 0))
+                    return false;
+            }
+            else if(!(procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
                 return false;
+
             break;
         }
         // Glyph of Death's Embrace
