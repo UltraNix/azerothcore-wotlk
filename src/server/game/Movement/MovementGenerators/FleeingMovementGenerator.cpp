@@ -99,7 +99,7 @@ void FleeingMovementGenerator<T>::SetTargetLocation(T* owner)
     owner->GetPosition(&currentPosition);
     if (!VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(owner->GetMapId(), currentPosition.m_positionX, currentPosition.m_positionY, currentPosition.m_positionZ + 2.0f, destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ() + 2.0f))
     {
-        _timer.Reset(200);
+        _timer.Reset(200); 
         return;
     }
 
@@ -108,9 +108,9 @@ void FleeingMovementGenerator<T>::SetTargetLocation(T* owner)
 
     _path->SetPathLengthLimit(30.0f);
     bool result = _path->CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
-    if (!result || (_path->GetPathType() & (PATHFIND_NOPATH | PATHFIND_INCOMPLETE | PATHFIND_SHORTCUT)))
+    if (!result || !(_path->GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH)))
     {
-        _timer.Reset(100);
+        _timer.Reset(100); 
         return;
     }
 
