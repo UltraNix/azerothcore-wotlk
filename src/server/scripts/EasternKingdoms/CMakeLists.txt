@@ -65,6 +65,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_ragnaros.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_garr.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/molten_core.h
+  EasternKingdoms/BlackrockMountain/MoltenCore/molten_core.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/instance_molten_core.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_sulfuron_harbinger.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_magmadar.cpp
