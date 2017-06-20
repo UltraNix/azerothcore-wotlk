@@ -6405,6 +6405,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 38;
             spellInfo->EffectImplicitTargetB[0] = 0;
             break;
+        // A Fall From Grace (12274)
+        case 48763:
+            spellInfo->AuraInterruptFlags &= ~AURA_INTERRUPT_FLAG_TRANSFORM;
+            break;
         // Rallying the Troops (12070)
         case 47394:
             spellInfo->excludeTargetAuraSpell = 47394;
