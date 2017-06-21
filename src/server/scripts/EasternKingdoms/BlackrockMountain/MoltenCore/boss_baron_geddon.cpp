@@ -16,13 +16,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Boss_Baron_Geddon
-SD%Complete: 100
-SDComment:
-SDCategory: Molten Core
-EndScriptData */
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -30,7 +23,7 @@ EndScriptData */
 
 enum Emotes
 {
-    EMOTE_SERVICE       = 0
+    EMOTE_SERVICE
 };
 
 enum Spells
@@ -44,113 +37,81 @@ enum Spells
 
 enum Events
 {
-    EVENT_INFERNO       = 1,
-    EVENT_IGNITE_MANA   = 2,
-    EVENT_LIVING_BOMB   = 3,
+    EVENT_INFERNO           = 1,
+    EVENT_IGNITE_MANA,
+    EVENT_LIVING_BOMB,
 };
 
-class boss_baron_geddon : public CreatureScript
+struct boss_baron_geddonAI : public BossAI
 {
-    public:
-        boss_baron_geddon() : CreatureScript("boss_baron_geddon") { }
+    boss_baron_geddonAI(Creature* creature) : BossAI(creature, BOSS_BARON_GEDDON) {}
 
-        struct boss_baron_geddonAI : public BossAI
+    void EnterCombat(Unit* /*victim*/) override
+    {
+        _EnterCombat();
+        events.ScheduleEvent(EVENT_INFERNO, 45000);
+        events.ScheduleEvent(EVENT_IGNITE_MANA, 30000);
+        events.ScheduleEvent(EVENT_LIVING_BOMB, 35000);
+        _armageddon = false;
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/, DamageEffectType /*damagetype*/, SpellSchoolMask /*spellschoolmask*/) override
+    {
+        // If we are <2% hp and armagedon didn't start, cast Armageddon
+        if (!HealthAbovePct(2) && !_armageddon)
         {
-            bool armagedon;
-            boss_baron_geddonAI(Creature* creature) : BossAI(creature, BOSS_BARON_GEDDON)
-            {
-            }
+            me->InterruptNonMeleeSpells(true);
+            Talk(EMOTE_SERVICE);
+            DoCast(me, SPELL_ARMAGEDDON);
+            _armageddon = true;
+        }
+    }
 
-            void EnterCombat(Unit* victim)
-            {
-                BossAI::EnterCombat(victim);
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_INFERNO:
+                DoCast(me, SPELL_INFERNO);
                 events.ScheduleEvent(EVENT_INFERNO, 45000);
+                break;
+            case EVENT_IGNITE_MANA:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_IGNITE_MANA))
+                    DoCast(target, SPELL_IGNITE_MANA);
                 events.ScheduleEvent(EVENT_IGNITE_MANA, 30000);
+                break;
+            case EVENT_LIVING_BOMB:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                    DoCast(target, SPELL_LIVING_BOMB);
                 events.ScheduleEvent(EVENT_LIVING_BOMB, 35000);
-                armagedon = false;
-            }
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                // If we are <2% hp and armagedon didn't start, cast Armageddon
-                if (!HealthAbovePct(2) && !armagedon)
-                {
-                    me->InterruptNonMeleeSpells(true);
-                    Talk(EMOTE_SERVICE);
-                    DoCast(me, SPELL_ARMAGEDDON);
-                    armagedon = true;
-                    return;
-                }
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_INFERNO:
-                            DoCast(me, SPELL_INFERNO);
-                            events.ScheduleEvent(EVENT_INFERNO, 45000);
-                            break;
-                        case EVENT_IGNITE_MANA:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_IGNITE_MANA))
-                                DoCast(target, SPELL_IGNITE_MANA);
-                            events.ScheduleEvent(EVENT_IGNITE_MANA, 30000);
-                            break;
-                        case EVENT_LIVING_BOMB:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                                DoCast(target, SPELL_LIVING_BOMB);
-                            events.ScheduleEvent(EVENT_LIVING_BOMB, 35000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_baron_geddonAI(creature);
+                break;
+            default:
+                break;
         }
+    }
+
+private:
+    bool _armageddon;
 };
 
-class spell_inferno : public SpellScriptLoader
+class spell_infernoAuraScript : public AuraScript
 {
-    public:
-        spell_inferno() : SpellScriptLoader("spell_inferno") { }
-
-        class spell_infernoAuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_infernoAuraScript)
+    PrepareAuraScript(spell_infernoAuraScript)
             
-                void HandleEffectPeriodic(AuraEffect const* aurEff)
-                {
-                    int32 damage = aurEff->GetAmount() + floor((aurEff->GetTickNumber() - 1)/2) * 500;
-                    GetUnitOwner()->CastCustomSpell(SPELL_INFERNO_DAMAGE, SPELLVALUE_BASE_POINT0, damage, GetUnitOwner(), TRIGGERED_FULL_MASK);
-                }
-
-            void Register()
-            {
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_infernoAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
+        void HandleEffectPeriodic(AuraEffect const* aurEff)
         {
-            return new spell_infernoAuraScript();
+            int32 damage = aurEff->GetAmount() + floor((aurEff->GetTickNumber() - 1)/2) * 500;
+            GetUnitOwner()->CastCustomSpell(SPELL_INFERNO_DAMAGE, SPELLVALUE_BASE_POINT0, damage, GetUnitOwner(), TRIGGERED_FULL_MASK);
         }
+
+    void Register()
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_infernoAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
 };
 
 void AddSC_boss_baron_geddon()
 {
-    new spell_inferno();
-    new boss_baron_geddon();    
+    new CreatureAILoader<boss_baron_geddonAI>("boss_baron_geddon");
+    new AuraScriptLoaderEx<spell_infernoAuraScript>("spell_inferno");
 }

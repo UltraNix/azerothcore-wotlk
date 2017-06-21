@@ -31,6 +31,93 @@
 #include "Opcodes.h"
 #include "Spell.h"
 
+Creature* InstanceScript::GetCreature(uint32 type)
+{
+    return instance->GetCreature(GetGuidData(type));
+}
+
+GameObject* InstanceScript::GetGameObject(uint32 type)
+{
+    return instance->GetGameObject(GetGuidData(type));
+}
+
+uint64 InstanceScript::GetGuidData(uint32 type) const
+{
+    GuidMap::const_iterator i = _objectGuids.find(type);
+    if (i != _objectGuids.end())
+        return i->second;
+    return 0;
+}
+
+void InstanceScript::LoadObjectData(ObjectData const* creatureData, ObjectData const* gameObjectData)
+{
+    if (creatureData)
+        LoadObjectData(creatureData, _creatureInfo);
+
+    if (gameObjectData)
+        LoadObjectData(gameObjectData, _gameObjectInfo);
+}
+
+void InstanceScript::LoadObjectData(ObjectData const* data, ObjectInfoMap& objectInfo)
+{
+    while (data->entry)
+    {
+        ASSERT(objectInfo.find(data->entry) == objectInfo.end());
+        objectInfo[data->entry] = data->type;
+        ++data;
+    }
+}
+
+void InstanceScript::AddObject(Creature* obj, bool add)
+{
+    ObjectInfoMap::const_iterator j = _creatureInfo.find(obj->GetEntry());
+    if (j != _creatureInfo.end())
+        AddObject(obj, j->second, add);
+}
+
+void InstanceScript::AddObject(GameObject* obj, bool add)
+{
+    ObjectInfoMap::const_iterator j = _gameObjectInfo.find(obj->GetEntry());
+    if (j != _gameObjectInfo.end())
+        AddObject(obj, j->second, add);
+}
+
+void InstanceScript::AddObject(WorldObject* obj, uint32 type, bool add)
+{
+    if (add)
+        _objectGuids[type] = obj->GetGUID();
+    else
+    {
+        GuidMap::iterator i = _objectGuids.find(type);
+        if (i != _objectGuids.end() && i->second == obj->GetGUID())
+            _objectGuids.erase(i);
+    }
+}
+
+void InstanceScript::OnCreatureCreate(Creature* creature)
+{
+    AddObject(creature, true);
+    AddMinion(creature, true);
+}
+
+void InstanceScript::OnCreatureRemove(Creature* creature)
+{
+    AddObject(creature, false);
+    AddMinion(creature, false);
+}
+
+void InstanceScript::OnGameObjectCreate(GameObject* go)
+{
+    AddObject(go, true);
+    AddDoor(go, true);
+}
+
+void InstanceScript::OnGameObjectRemove(GameObject* go)
+{
+    AddObject(go, false);
+    AddDoor(go, false);
+}
+
 void InstanceScript::SaveToDB()
 {
     std::string data = GetSaveData();
@@ -54,8 +141,6 @@ void InstanceScript::HandleGameObject(uint64 GUID, bool open, GameObject* go)
         go = instance->GetGameObject(GUID);
     if (go)
         go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
-    else
-        ;//sLog->outDebug(LOG_FILTER_TSCR, "TSCR: InstanceScript: HandleGameObject failed");
 }
 
 bool InstanceScript::IsEncounterInProgress() const
@@ -76,7 +161,6 @@ void InstanceScript::LoadMinionData(const MinionData* data)
 
         ++data;
     }
-    ;//sLog->outDebug(LOG_FILTER_TSCR, "InstanceScript::LoadMinionData: " UI64FMTD " minions loaded.", uint64(minions.size()));
 }
 
 void InstanceScript::LoadDoorData(const DoorData* data)
@@ -105,7 +189,7 @@ void InstanceScript::UpdateMinionState(Creature* minion, EncounterState state)
             if (!minion->IsAlive())
                 minion->Respawn();
             else if (!minion->GetVictim())
-                minion->AI()->DoZoneInCombat(NULL, 100.0f);
+                minion->AI()->DoZoneInCombat(nullptr, 100.0f);
             break;
         default:
             break;
