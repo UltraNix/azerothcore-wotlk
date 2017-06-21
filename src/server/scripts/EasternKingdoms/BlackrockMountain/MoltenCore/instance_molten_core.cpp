@@ -73,9 +73,6 @@ struct instance_molten_core_InstanceMapScript : public InstanceScript
             else if (data == 0)
                 _ragnarosAddDeaths = 0;
         }
-
-        if (type == DATA_SAI_DONE)
-            SetBossState(data, DONE);
     }
 
     uint32 GetData(uint32 type) const
