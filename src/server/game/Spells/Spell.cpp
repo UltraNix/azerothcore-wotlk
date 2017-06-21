@@ -3426,6 +3426,9 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         {
             if (!m_spellInfo->Effects[i].IsEffect())
                 continue;
+
+            if (m_spellInfo->Id == 46747)
+                continue;
             
             if (m_spellInfo->Effects[i].TargetA.GetSelectionCategory() != TARGET_SELECT_CATEGORY_NEARBY || m_spellInfo->Effects[i].TargetA.GetCheckType() != TARGET_CHECK_ENTRY)
             {
