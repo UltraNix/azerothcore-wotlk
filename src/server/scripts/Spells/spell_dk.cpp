@@ -809,7 +809,6 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                 PreventDefaultAction();
 
                 Unit* player = eventInfo.GetActor();
-                Unit* target = eventInfo.GetActionTarget();
                 Unit* dancingRuneWeapon = NULL;
                 for (Unit::ControlSet::const_iterator itr = player->m_Controlled.begin(); itr != player->m_Controlled.end(); ++itr)
                     if ((*itr)->GetEntry() == GetSpellInfo()->Effects[EFFECT_0].MiscValue)
@@ -820,6 +819,8 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                 
                 if (!dancingRuneWeapon)
                     return;
+
+                Unit* target = dancingRuneWeapon->GetVictim();
 
                 dancingRuneWeapon->SetOrientation(dancingRuneWeapon->GetAngle(target));
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())

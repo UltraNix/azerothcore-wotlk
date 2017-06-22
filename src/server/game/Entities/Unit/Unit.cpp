@@ -1629,6 +1629,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit const* attacker, Unit const* victim, co
 {
     uint32 newdamage = 0;
     float armor = float(victim->GetArmor());
+    if (attacker->GetEntry() == 27893) attacker = attacker->GetOwner();
 
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
     if (attacker)
@@ -11875,7 +11876,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         if (GetEntry() == 27893)
         {
             if (Unit* owner = GetOwner())
-                return owner->MeleeDamageBonusDone(victim, pdamage, attType, spellProto) / 2;
+                return owner->MeleeDamageBonusDone(victim, pdamage, attType, spellProto);
         }
     }
 
