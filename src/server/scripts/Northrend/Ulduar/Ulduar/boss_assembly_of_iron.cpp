@@ -325,11 +325,11 @@ public:
 
         void KilledUnit(Unit* who)
         {
+            if (who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
             if (_phase == 3)
                 me->CastSpell(me, SPELL_ELECTRICAL_CHARGE, true);
-
-            if (who->GetTypeId() != TYPEID_PLAYER || urand(0,2))
-                return;
 
             if (urand(0,1))
             {

@@ -26,6 +26,9 @@
 #include "PetAI.h"
 #include "TotemAI.h"
 
+//refreshing lightwell every 1s
+#define LIGHTWELL_REFRESH_TIME 1000
+
 enum PriestSpells
 {
     SPELL_PRIEST_GLYPH_OF_SHADOWFIEND       = 58228,
@@ -43,8 +46,13 @@ class npc_pet_pri_lightwell : public CreatureScript
         {
             npc_pet_pri_lightwellAI(Creature* creature) : TotemAI(creature) { }
 
+            std::list<uint64> guidList;
+            int32 nextCheckTime;
+
             void InitializeAI()
             {
+                nextCheckTime = 0;
+
                 if (Unit* owner = me->ToTempSummon()->GetSummoner())
                 {
                     uint32 hp = uint32(owner->GetMaxHealth()*0.3f);
@@ -55,6 +63,39 @@ class npc_pet_pri_lightwell : public CreatureScript
 
                 me->CastSpell(me, SPELL_PRIEST_LIGHTWELL_CHARGES, false); // Spell for Lightwell Charges
                 TotemAI::InitializeAI();
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                if (!guidList.empty())
+                {
+                    nextCheckTime -= diff;
+
+                    if (nextCheckTime <= 0)
+                        for (auto itr = guidList.begin(); itr != guidList.end(); itr++)
+                        {
+                            Unit* target = ObjectAccessor::GetUnit(*me, *itr);
+
+                            if (!(target && target->HasAura(7001)))
+                            {
+                                guidList.remove(*itr);
+                                sObjectAccessor->AddUpdateObject(me);
+                                nextCheckTime = guidList.empty() ? 0 : LIGHTWELL_REFRESH_TIME;
+                                break;
+                            }
+                        }
+                }
+            }
+
+            void OnSpellClick(Unit* clicker, bool& result) override
+            {
+                if (result)
+                {
+                    guidList.push_back(clicker->GetGUID());
+                    
+                    if (nextCheckTime == 0)
+                        nextCheckTime = LIGHTWELL_REFRESH_TIME;
+                }
             }
         };
 
