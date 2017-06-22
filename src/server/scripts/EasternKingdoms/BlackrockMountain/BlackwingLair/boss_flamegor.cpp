@@ -23,66 +23,55 @@ enum Events
     EVENT_THRASH
 };
 
-class boss_flamegor : public CreatureScript
+struct boss_flamegorAI : public BossAI
 {
-    public:
-        boss_flamegor() : CreatureScript("boss_flamegor") { }
+    boss_flamegorAI(Creature* creature) : BossAI(creature, BOSS_FLAMEGOR) {}
 
-        struct boss_flamegorAI : public BossAI
+    void EnterCombat(Unit* /*who*/) override
+    {
+        if (instance->GetBossState(BOSS_BROODLORD) != DONE)
         {
-            boss_flamegorAI(Creature* creature) : BossAI(creature, BOSS_FLAMEGOR) { }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-                if (instance->GetBossState(BOSS_BROODLORD) != DONE)
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-                _EnterCombat();
-
-                events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
-                events.ScheduleEvent(EVENT_WINGBUFFET, 30000);
-                events.ScheduleEvent(EVENT_FRENZY, 10000);
-                events.ScheduleEvent(EVENT_THRASH, 5000);
-            }
-
-            void ExecuteEvent(uint32 eventId) override
-            {
-                switch (eventId)
-                {
-                    case EVENT_SHADOWFLAME:
-                        DoCastVictim(SPELL_SHADOWFLAME);
-                        events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
-                        break;
-                    case EVENT_WINGBUFFET:
-                        DoCastVictim(SPELL_WINGBUFFET);
-                        if (DoGetThreat(me->GetVictim()))
-                            DoModifyThreatPercent(me->GetVictim(), -75);
-                        events.ScheduleEvent(EVENT_WINGBUFFET, 30000);
-                        break;
-                    case EVENT_FRENZY:
-                        Talk(EMOTE_FRENZY);
-                        DoCast(me, SPELL_FRENZY);
-                        events.ScheduleEvent(EVENT_FRENZY, urand(8000, 10000));
-                        break;
-                    case EVENT_THRASH:
-                        DoCast(me, SPELL_THRASH);
-                        events.ScheduleEvent(EVENT_THRASH, 18000);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<boss_flamegorAI>(creature);
+            EnterEvadeMode();
+            return;
         }
+        _EnterCombat();
+
+        events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
+        events.ScheduleEvent(EVENT_WINGBUFFET, 30000);
+        events.ScheduleEvent(EVENT_FRENZY, 10000);
+        events.ScheduleEvent(EVENT_THRASH, 5000);
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_SHADOWFLAME:
+                DoCastVictim(SPELL_SHADOWFLAME);
+                events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
+                break;
+            case EVENT_WINGBUFFET:
+                DoCastVictim(SPELL_WINGBUFFET);
+                if (DoGetThreat(me->GetVictim()))
+                    DoModifyThreatPercent(me->GetVictim(), -75);
+                events.ScheduleEvent(EVENT_WINGBUFFET, 30000);
+                break;
+            case EVENT_FRENZY:
+                Talk(EMOTE_FRENZY);
+                DoCast(me, SPELL_FRENZY);
+                events.ScheduleEvent(EVENT_FRENZY, urand(8000, 10000));
+                break;
+            case EVENT_THRASH:
+                DoCast(me, SPELL_THRASH);
+                events.ScheduleEvent(EVENT_THRASH, 18000);
+                break;
+            default:
+                break;
+        }
+    }
 };
 
 void AddSC_boss_flamegor()
 {
-    new boss_flamegor();
+    new CreatureAILoader<boss_flamegorAI>("boss_flamegor");
 }

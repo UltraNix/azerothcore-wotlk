@@ -6769,6 +6769,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_NEARBY_ENTRY;
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
+        // Flying Torch Dummy
+        case 46747:
+            spellInfo->EffectImplicitTargetA[0] = 0;
+            break;
         // Light Bonfire (DND)
         case 29831:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;

@@ -27,126 +27,105 @@ enum Events
     EVENT_CHECK_RANGE               = 1
 };
 
-class boss_garr : public CreatureScript
+struct boss_garrAI : public BossAI
 {
-    public:
-        boss_garr() : CreatureScript("boss_garr") { }
+    boss_garrAI(Creature* creature) : BossAI(creature, BOSS_GARR) { }
 
-        struct boss_garrAI : public BossAI
+    void EnterCombat(Unit* /*victim*/) override
+    {
+        _EnterCombat();
+        events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, 25000);
+        events.ScheduleEvent(EVENT_MAGMA_SHACKLES, 15000);
+    }
+
+    void EnterEvadeMode() override
+    {
+        std::list<Creature*> addList;
+        me->GetCreatureListWithEntryInGrid(addList, 12099, 100.0f);
+        if (!addList.empty())
         {
-            boss_garrAI(Creature* creature) : BossAI(creature, BOSS_GARR) { }
-
-            void EnterCombat(Unit* /*victim*/) override
+            for (auto itr : addList)
             {
-                _EnterCombat();
-                events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, 25000);
-                events.ScheduleEvent(EVENT_MAGMA_SHACKLES, 15000);
+                if (!itr->IsAlive())
+                    itr->Respawn();
+                if (itr->IsAIEnabled)
+                    itr->AI()->EnterEvadeMode();
             }
-
-            void EnterEvadeMode() override
-            {
-                std::list<Creature*> addList;
-                me->GetCreatureListWithEntryInGrid(addList, 12099, 100.0f);
-                if (!addList.empty())
-                {
-                    for (auto itr : addList)
-                    {
-                        if (!itr->IsAlive())
-                            itr->Respawn();
-                        if (itr->IsAIEnabled)
-                            itr->AI()->EnterEvadeMode();
-                    }
-                }
-                CreatureAI::EnterEvadeMode();
-            }
-
-            void ExecuteEvent(uint32 eventId) override
-            {
-                switch (eventId)
-                {
-                    case EVENT_ANTIMAGIC_PULSE:
-                        DoCast(me, SPELL_ANTIMAGIC_PULSE);
-                        events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, urand(10000, 15000));
-                        break;
-                    case EVENT_MAGMA_SHACKLES:
-                        DoCast(me, SPELL_MAGMA_SHACKLES);
-                        events.ScheduleEvent(EVENT_MAGMA_SHACKLES, urand(8000, 12000));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
-        {
-            return new boss_garrAI(creature);
         }
+        CreatureAI::EnterEvadeMode();
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_ANTIMAGIC_PULSE:
+                DoCast(me, SPELL_ANTIMAGIC_PULSE);
+                events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, urand(10000, 15000));
+                break;
+            case EVENT_MAGMA_SHACKLES:
+                DoCast(me, SPELL_MAGMA_SHACKLES);
+                events.ScheduleEvent(EVENT_MAGMA_SHACKLES, urand(8000, 12000));
+                break;
+            default:
+                break;
+        }
+    }
 };
 
-class npc_firesworn : public CreatureScript
+struct npc_fireswornAI : public ScriptedAI
 {
-    public:
-        npc_firesworn() : CreatureScript("npc_firesworn") { }
+    npc_fireswornAI(Creature* creature) : ScriptedAI(creature), instance(me->GetInstanceScript()) { }
 
-        struct npc_fireswornAI : public ScriptedAI
+    void Reset() 
+    {
+        DoCast(me, SPELL_THRASH, true);
+        DoCast(me, SPELL_IMMOLATE, true);
+    }
+
+    void EnterCombat(Unit* victim) override
+    {
+        CreatureAI::EnterCombat(victim);
+        _events.ScheduleEvent(EVENT_CHECK_RANGE, 5000);
+    }
+
+    void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        if (me->HealthBelowPctDamaged(10, damage))
         {
-            npc_fireswornAI(Creature* creature) : ScriptedAI(creature) { }
-
-            void Reset() 
-            {
-                DoCast(me, SPELL_THRASH, true);
-                DoCast(me, SPELL_IMMOLATE, true);
-            }
-
-            void EnterCombat(Unit* victim) override
-            {
-                CreatureAI::EnterCombat(victim);
-                _events.ScheduleEvent(EVENT_CHECK_RANGE, 5000);
-            }
-
-            void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
-            {
-                if (me->HealthBelowPctDamaged(10, damage))
-                {
-                    if (Creature* garr = me->FindNearestCreature(NPC_GARR, 200.0f, true))
-                        garr->AddAura(SPELL_ENRAGE, garr);
-                    damage = me->GetHealth() - 1;
-                    DoCastAOE(SPELL_ERUPTION);
-                    me->DespawnOrUnsummon();
-                }
-            }
-
-            void UpdateAI(uint32 diff) override
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                if (_events.ExecuteEvent() == EVENT_CHECK_RANGE)
-                {
-                    if (Creature* garr = me->FindNearestCreature(NPC_GARR, 200.0f, true))
-                        if (!garr->IsInRange(me, 0.0f, 50.0f) && garr->IsAlive())
-                            DoCast(me, SPELL_SEPARATION_ANXIETY_EFFECT, true);
-                    _events.Repeat(5000);
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-        private:
-            EventMap _events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_fireswornAI(creature);
+            if (Creature* garr = instance->GetCreature(BOSS_GARR))
+                garr->AddAura(SPELL_ENRAGE, garr);
+            damage = me->GetHealth() - 1;
+            DoCastAOE(SPELL_ERUPTION);
+            me->DespawnOrUnsummon();
         }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (_events.ExecuteEvent() == EVENT_CHECK_RANGE)
+        {
+            if (Creature* garr = instance->GetCreature(BOSS_GARR))
+                if (!garr->IsInRange(me, 0.0f, 50.0f) && garr->IsAlive())
+                    DoCast(me, SPELL_SEPARATION_ANXIETY_EFFECT, true);
+            _events.Repeat(5000);
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    EventMap _events;
+    InstanceScript* instance;
 };
 
 void AddSC_boss_garr()
 {
-    new boss_garr();
-    new npc_firesworn();
+    new CreatureAILoader<boss_garrAI>("boss_garr");
+    new CreatureAILoader<npc_fireswornAI>("npc_firesworn");
 }
