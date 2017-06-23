@@ -3600,15 +3600,6 @@ public:
                 break;
             case 4:
                 if (player->HasItemCount(96103))
-                    player->TeleportTo(1, -9033.777f, 2013.179f, -18.241f, player->GetOrientation());
-                else
-                {
-                    handler->PSendSysMessage("You can't do that right now.");
-                    handler->SetSentErrorMessage(true);
-                }
-                break;
-            case 5:
-                if (player->HasItemCount(96104))
                     player->TeleportTo(0, 4281.0f, -2772.0f, 9.0f, player->GetOrientation());
                 else
                 {

@@ -2667,7 +2667,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->GetEntry() != 95004)
+        if (creature->GetEntry() != 95003)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Prosze o przepustke!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
         if (creature->GetEntry() == 95000 && player->HasItemCount(96101))
@@ -2679,11 +2679,8 @@ public:
         if (creature->GetEntry() == 95002 && player->HasItemCount(96103))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
 
-        if (creature->GetEntry() == 95003 && player->HasItemCount(96104))
+        if (creature->GetEntry() == 95004 && player->HasItemCount(96103))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-
-        if (creature->GetEntry() == 95004 && player->HasItemCount(96104))
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
 
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
@@ -2703,8 +2700,6 @@ public:
                 player->AddItem(96102, 1);
             else if (creature->GetEntry() == 95002 && player->HasItemCount(96102))
                 player->AddItem(96103, 1);
-            else if (creature->GetEntry() == 95003 && player->HasItemCount(96103))
-                player->AddItem(96104, 1);
         }
         break;
         case GOSSIP_ACTION_INFO_DEF + 2:
@@ -2722,22 +2717,16 @@ public:
         case GOSSIP_ACTION_INFO_DEF + 4:
         {
             if (player->HasItemCount(96103))
-                player->TeleportTo(1, -9033.777f, 2013.179f, -18.241f, player->GetOrientation());
+                player->TeleportTo(0, 4281.0f, -2772.0f, 9.0f, player->GetOrientation());
         }
         break;
         case GOSSIP_ACTION_INFO_DEF + 5:
         {
-            if (player->HasItemCount(96104))
-                player->TeleportTo(0, 4281.0f, -2772.0f, 9.0f, player->GetOrientation());
-        }
-        break;
-        case GOSSIP_ACTION_INFO_DEF + 6:
-        {
-            if (player->HasItemCount(96104))
+            if (player->HasItemCount(96103))
             {
                 sLog->outRewards("Player: %s GUID: %u has complete event 'Schody do nieba'", player->GetName().c_str(), player->GetGUIDLow());
 
-                for (uint8 i = 0; i < 5; i++)
+                for (uint8 i = 0; i < 4; i++)
                     if (player->HasItemCount(96101 + i, 1, false))
                         player->DestroyItemCount(96101 + i, 1, true);
 
