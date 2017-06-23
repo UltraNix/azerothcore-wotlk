@@ -202,6 +202,8 @@ public:
         {
             if (m_pInstance)
                 m_pInstance->SetData(DATA_GORTOK_PALEHOOF, IN_PROGRESS);
+
+            DoResetThreat();
         }
 
         void MoveInLineOfSight(Unit *who)
