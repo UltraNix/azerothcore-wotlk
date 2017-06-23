@@ -144,7 +144,7 @@ Position const NefarianLoc[2] =
 
 struct boss_victor_nefariusAI : public BossAI
 {
-    boss_victor_nefariusAI(Creature* creature) : BossAI(creature, DATA_NEFARIAN)
+    boss_victor_nefariusAI(Creature* creature) : BossAI(creature, DATA_LORD_VICTOR_NEFARIUS)
     {
         std::vector<uint32> adds = { NPC_BLUE_DRAKANOID, NPC_RED_DRAKANOID, NPC_GREEN_DRAKANOID, NPC_BLACK_DRAKANOID, NPC_BRONZE_DRAKANOID };
         _firstAdd = Trinity::Containers::SelectRandomContainerElement(adds);
@@ -163,7 +163,7 @@ struct boss_victor_nefariusAI : public BossAI
         _addsSpawned = 0;
         if (me->GetMapId() == 469)
         {
-            if (!me->FindNearestCreature(NPC_NEFARIAN, 1000.0f, true))
+            if (!instance->GetCreature(DATA_NEFARIAN))
                 _Reset();
 
             me->SetVisible(true);
@@ -396,7 +396,7 @@ struct boss_nefarianAI : public BossAI
     void JustDied(Unit* /*Killer*/) override
     {
         _JustDied();
-        if (Creature* nefarius = me->FindNearestCreature(NPC_VICTOR_NEFARIUS, 250.0f, true))
+        if (Creature* nefarius = instance->GetCreature(DATA_LORD_VICTOR_NEFARIUS))
             nefarius->DespawnOrUnsummon();
         Talk(SAY_DEATH);
     }
