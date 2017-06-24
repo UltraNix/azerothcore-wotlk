@@ -240,18 +240,18 @@ private:
             return;
 
         Unit* victim = me->GetVictim();
-        if (!victim)
+        if (!victim || !victim->IsInWorld())
             return;
 
         if (!me->IsWithinMeleeRange(victim) || !me->IsWithinLOSInMap(victim))
         {
-            std::vector<Player*> playersAtMelee;
-            Map::PlayerList const &players = me->GetMap()->GetPlayers();
-            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                if (Player* player = itr->GetSource())
-                    if (player->IsWithinMeleeRange(me) && player->IsWithinLOSInMap(me))
-                        playersAtMelee.push_back(player);
-            if (playersAtMelee.empty())
+            if (Unit* target = me->SelectNearestPlayer(MELEE_RANGE))
+            {
+                _yelled = false;
+                AttackStart(target);
+                me->AttackerStateUpdate(target);
+            }
+            else
             {
                 if (!_yelled)
                 {
@@ -259,13 +259,6 @@ private:
                     _yelled = true;
                 }
                 DoCastVictim(SPELL_MAGMA_BLAST);
-            }
-            else
-            {
-                _yelled = false;
-                Unit* target = Trinity::Containers::SelectRandomContainerElement(playersAtMelee);
-                AttackStart(target);
-                me->AttackerStateUpdate(target);
             }
         }
         else
@@ -276,6 +269,7 @@ private:
 
         me->resetAttackTimer();
     }
+
 };
 
 void AddSC_boss_ragnaros()
