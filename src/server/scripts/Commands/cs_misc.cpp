@@ -131,6 +131,7 @@ public:
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
             { "blizzlike",          SEC_PLAYER,             false, HandleBlizzlikeCommand,              "" },
             { "arenainfo",          SEC_PLAYER,             false, HandleArenaInfoCommand,              "" },
+            { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
         };
         return commandTable;
     }
@@ -3526,6 +3527,90 @@ public:
             player->SetArenaAnnounce(false);
             handler->PSendSysMessage("Arena queue announce are disabled, please relog to take effect.");
             handler->SetSentErrorMessage(true);
+        }
+
+        return true;
+    }
+
+    static bool HandleEventGoCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        Pet* pet = player->GetPet();
+
+        if (!player)
+            return false;
+
+        if (player->GetMap()->IsBattlegroundOrArena())
+        {
+            handler->PSendSysMessage("You can't do that while character is in battleground or arena.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->IsAlive() && player->IsInCombat())
+        {
+            handler->PSendSysMessage("You can't do that while character is in combat.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->IsMounted())
+        {
+            handler->PSendSysMessage("You can't do that while character is mounted.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player && pet)
+        {
+            handler->PSendSysMessage("You can't do that while pet is summoned.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!*args)
+            return false;
+
+        char* loc = strtok((char*)args, " ");
+        if (!loc || !atoi(loc) && loc != "0")
+            return false;
+
+        switch (atoi(loc))
+        {
+            case 1:  
+                player->TeleportTo(37, 902.0f, 442.0f, 304.0f, player->GetOrientation());
+                break;
+            case 2:
+                if (player->HasItemCount(96101))
+                    player->TeleportTo(13, 100.0f, -99.0f, -144.0f, player->GetOrientation());
+                else
+                {
+                    handler->PSendSysMessage("You can't do that right now.");
+                    handler->SetSentErrorMessage(true);
+                }
+                break;
+            case 3:
+                if (player->HasItemCount(96102))
+                    player->TeleportTo(1, 5446.857f, -3511.895f, 1557.419f, player->GetOrientation());
+                else
+                {
+                    handler->PSendSysMessage("You can't do that right now.");
+                    handler->SetSentErrorMessage(true);
+                }
+                break;
+            case 4:
+                if (player->HasItemCount(96103))
+                    player->TeleportTo(0, 4281.0f, -2772.0f, 9.0f, player->GetOrientation());
+                else
+                {
+                    handler->PSendSysMessage("You can't do that right now.");
+                    handler->SetSentErrorMessage(true);
+                }
+                break;
+            default:
+                handler->PSendSysMessage("Wrong location.");
+                handler->SetSentErrorMessage(true);
+                break;
         }
 
         return true;

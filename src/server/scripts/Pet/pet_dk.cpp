@@ -265,7 +265,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
 
                     if (!_withGhoul)
                     {
-                        if (!UpdateVictimWithGaze())
+                        if (!me->GetVictim())
                         {
                             MySelectNextTarget();
                             return;

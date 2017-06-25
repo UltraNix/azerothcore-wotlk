@@ -80,11 +80,14 @@ bool UnitAI::DoSpellAttackIfReady(uint32 spell)
 
     if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell))
     {
-        if (me->IsWithinCombatRange(me->GetVictim(), spellInfo->GetMaxRange(false)))
+        if (Unit* victim = me->GetVictim())
         {
-            me->CastSpell(me->GetVictim(), spell, false);
-            me->resetAttackTimer();
-            return true;
+            if (victim->IsInWorld() && me->IsWithinCombatRange(victim, spellInfo->GetMaxRange(false)))
+            {
+                me->CastSpell(victim, spell, false);
+                me->resetAttackTimer();
+                return true;
+            }
         }
     }
 
@@ -129,7 +132,7 @@ void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
         for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
         {
             if (Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
-                if (unit->GetTypeId() == TYPEID_PLAYER)
+                if (unit->IsPlayer())
                     me->CastSpell(unit, spellid, triggered);
         }
     }
@@ -137,8 +140,7 @@ void UnitAI::DoCastToAllHostilePlayers(uint32 spellid, bool triggered)
 
 void UnitAI::DoCast(uint32 spellId)
 {
-    Unit* target = NULL;
-    //sLog->outError("aggre %u %u", spellId, (uint32)AISpellInfo[spellId].target);
+    Unit* target = nullptr;
     switch (AISpellInfo[spellId].target)
     {
         default:
@@ -148,7 +150,6 @@ void UnitAI::DoCast(uint32 spellId)
         {
             const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(spellId);
             bool playerOnly = spellInfo->HasAttribute(SPELL_ATTR3_ONLY_TARGET_PLAYERS);
-            //float range = GetSpellMaxRange(spellInfo, false);
             target = SelectTarget(SELECT_TARGET_RANDOM, 0, spellInfo->GetMaxRange(false), playerOnly);
             break;
         }
@@ -195,7 +196,15 @@ void UnitAI::DoCastAOE(uint32 spellId, bool triggered)
     if (!triggered && me->HasUnitState(UNIT_STATE_CASTING))
         return;
 
-    me->CastSpell((Unit*)NULL, spellId, triggered);
+    me->CastSpell((Unit*)nullptr, spellId, triggered);
+}
+
+void UnitAI::DoCastSelf(uint32 spellId, bool triggered)
+{
+    if (!triggered && me->HasUnitState(UNIT_STATE_CASTING))
+        return;
+
+    me->CastSpell(me, spellId, triggered);
 }
 
 #define UPDATE_TARGET(a) {if (AIInfo->target<a) AIInfo->target=a;}

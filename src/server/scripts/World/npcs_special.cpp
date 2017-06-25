@@ -2655,6 +2655,91 @@ class npc_stable_master : public CreatureScript
         }
 };
 
+
+/*######
+## npc_schody
+######*/
+
+class npc_schody : public CreatureScript
+{
+public:
+    npc_schody() : CreatureScript("npc_schody") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->GetEntry() != 95003)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Prosze o przepustke!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        if (creature->GetEntry() == 95000 && player->HasItemCount(96101))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+        if (creature->GetEntry() == 95001 && player->HasItemCount(96102))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+
+        if (creature->GetEntry() == 95002 && player->HasItemCount(96103))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+
+        if (creature->GetEntry() == 95004 && player->HasItemCount(96103))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Chce uzyc przepustki!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+
+        switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+        {
+            if (creature->GetEntry() == 95000 && !player->HasItemCount(96101))
+                player->AddItem(96101, 1);
+            else if (creature->GetEntry() == 95001 && player->HasItemCount(96101))
+                player->AddItem(96102, 1);
+            else if (creature->GetEntry() == 95002 && player->HasItemCount(96102))
+                player->AddItem(96103, 1);
+        }
+        break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+        {
+            if (player->HasItemCount(96101))
+                player->TeleportTo(13, 100.0f, -99.0f, -144.0f, player->GetOrientation());
+        }
+        break;
+        case GOSSIP_ACTION_INFO_DEF + 3:
+        {
+            if (player->HasItemCount(96102))
+                player->TeleportTo(1, 5446.857f, -3511.895f, 1557.419f, player->GetOrientation());
+        }
+        break;
+        case GOSSIP_ACTION_INFO_DEF + 4:
+        {
+            if (player->HasItemCount(96103))
+                player->TeleportTo(0, 4281.0f, -2772.0f, 9.0f, player->GetOrientation());
+        }
+        break;
+        case GOSSIP_ACTION_INFO_DEF + 5:
+        {
+            if (player->HasItemCount(96103))
+            {
+                sLog->outRewards("Player: %s GUID: %u has complete event 'Schody do nieba'", player->GetName().c_str(), player->GetGUIDLow());
+
+                for (uint8 i = 0; i < 4; i++)
+                    if (player->HasItemCount(96101 + i, 1, false))
+                        player->DestroyItemCount(96101 + i, 1, true);
+
+                player->TeleportTo(571, 5804.149902f, 624.770996f, 647.767029f, 1.640000f);
+            }
+        }
+        break;
+        }
+        player->PlayerTalkClass->SendCloseGossip();
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     // Ours
@@ -2663,7 +2748,7 @@ void AddSC_npcs_special()
     new npc_short_john_mirthil();
     new npc_target_dummy();
     new npc_training_dummy();
-
+    new npc_schody();
     // Theirs
     new npc_air_force_bots();
     new npc_lunaclaw_spirit();

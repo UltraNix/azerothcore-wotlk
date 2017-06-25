@@ -148,7 +148,7 @@ void HostileReference::addThreat(float modThreat)
 
     if (isValid() && modThreat >= 0.0f)
     {
-        Unit* victimOwner = getTarget()->GetCharmerOrOwner();
+        Unit* victimOwner = getTarget()->IsTotem() ? NULL : getTarget()->GetCharmerOrOwner();
         if (victimOwner && victimOwner->IsAlive())
             GetSource()->addThreat(victimOwner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
     }

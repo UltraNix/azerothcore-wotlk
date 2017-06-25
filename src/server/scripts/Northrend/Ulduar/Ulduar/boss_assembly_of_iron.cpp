@@ -325,11 +325,11 @@ public:
 
         void KilledUnit(Unit* who)
         {
+            if (who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
             if (_phase == 3)
                 me->CastSpell(me, SPELL_ELECTRICAL_CHARGE, true);
-
-            if (who->GetTypeId() != TYPEID_PLAYER || urand(0,2))
-                return;
 
             if (urand(0,1))
             {
@@ -937,7 +937,10 @@ public:
                     
                     _flyPhase = true;
                     _needReturnFromFly = true;
-                    _flyTarget = me->GetVictim();
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return tar->IsPlayer() && tar->IsWithinLOSInMap(me); }))
+                        _flyTarget = target;
+                    else
+                        _flyTarget = me->GetVictim();
                     me->SetRegeneratingHealth(false);
                     me->SetDisableGravity(true);
 

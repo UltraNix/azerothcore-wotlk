@@ -79,199 +79,187 @@ uint8 const NUM_WEAKNESS = 5;
 uint32 const SpellWeakness[NUM_WEAKNESS] = { 25177, 25178, 25180, 25181, 25183 };
 Position const RoomCenter = { -9343.041992f, 1923.278198f, 85.555984f, 0.0 };
 
-class boss_ossirian : public CreatureScript
+struct boss_ossirianAI : public BossAI
 {
-    public:
-        boss_ossirian() : CreatureScript("boss_ossirian") { }
+    boss_ossirianAI(Creature* creature) : BossAI(creature, DATA_OSSIRIAN)
+    {
+        _intro = false;
+    }
 
-        struct boss_ossirianAI : public BossAI
+    void Reset() override
+    {
+        _Reset();
+        _crystalIterator = 0;
+        _triggerGUID = 0;
+        _crystalGUID = 0;
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell) override
+    {
+        for (uint8 i = 0; i < NUM_WEAKNESS; ++i)
         {
-            boss_ossirianAI(Creature* creature) : BossAI(creature, DATA_OSSIRIAN)
+            if (spell->Id == SpellWeakness[i])
             {
-                SaidIntro = false;
-            }
-
-            uint64 TriggerGUID;
-            uint64 CrystalGUID;
-            uint8 CrystalIterator;
-            bool SaidIntro;
-
-            void Reset()
-            {
-                _Reset();
-                CrystalIterator = 0;
-                TriggerGUID = 0;
-                CrystalGUID = 0;
-            }
-
-            void SpellHit(Unit* caster, SpellInfo const* spell)
-            {
-                for (uint8 i = 0; i < NUM_WEAKNESS; ++i)
-                {
-                    if (spell->Id == SpellWeakness[i])
-                    {
-                        me->RemoveAurasDueToSpell(SPELL_SUPREME);
-                        ((TempSummon*)caster)->UnSummon();
-                        SpawnNextCrystal();
-                    }
-                }
-            }
-
-            void DoAction(int32 action)
-            {
-                if (action == ACTION_TRIGGER_WEAKNESS)
-                    if (Creature* Trigger = me->GetMap()->GetCreature(TriggerGUID))
-                        if (!Trigger->HasUnitState(UNIT_STATE_CASTING))
-                            Trigger->CastSpell(Trigger, SpellWeakness[urand(0, 4)], false);
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-                _EnterCombat();
-                events.Reset();
-                events.ScheduleEvent(EVENT_SILENCE, 30000);
-                events.ScheduleEvent(EVENT_CYCLONE, 20000);
-                events.ScheduleEvent(EVENT_STOMP, 30000);
-
-                DoCast(me, SPELL_SUPREME);
-                Talk(SAY_AGGRO);
-
-                Map* map = me->GetMap();
-                if (!map->IsDungeon())
-                    return;
-
-                WorldPacket data(SMSG_WEATHER, (4+4+4));
-                data << uint32(WEATHER_STATE_HEAVY_SANDSTORM) << float(1) << uint8(0);
-                map->SendToPlayers(&data);
-
-                for (uint8 i = 0; i < NUM_TORNADOS; ++i)
-                {
-                    Position Point;
-                    me->GetRandomPoint(RoomCenter, RoomRadius, Point);
-                    if (Creature* Tornado = me->GetMap()->SummonCreature(NPC_SAND_VORTEX, Point))
-                        Tornado->CastSpell(Tornado, SPELL_SAND_STORM, true);
-                }
-
+                me->RemoveAurasDueToSpell(SPELL_SUPREME);
+                ((TempSummon*)caster)->UnSummon();
                 SpawnNextCrystal();
             }
-
-            void KilledUnit(Unit* /*victim*/)
-            {
-                Talk(SAY_SLAY);
-            }
-
-            void EnterEvadeMode()
-            {
-                Cleanup();
-                summons.DespawnAll();
-                BossAI::EnterEvadeMode();
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                Cleanup();
-                _JustDied();
-            }
-
-            void Cleanup()
-            {
-                if (GameObject* Crystal = me->GetMap()->GetGameObject(CrystalGUID))
-                    Crystal->Use(me);
-            }
-
-            void SpawnNextCrystal()
-            {
-                if (CrystalIterator == NUM_CRYSTALS)
-                    CrystalIterator = 0;
-
-                if (Creature* Trigger = me->GetMap()->SummonCreature(NPC_OSSIRIAN_TRIGGER, CrystalCoordinates[CrystalIterator]))
-                {
-                    TriggerGUID = Trigger->GetGUID();
-                    if (GameObject* Crystal = Trigger->SummonGameObject(GO_OSSIRIAN_CRYSTAL,
-                                                       CrystalCoordinates[CrystalIterator].GetPositionX(),
-                                                       CrystalCoordinates[CrystalIterator].GetPositionY(),
-                                                       CrystalCoordinates[CrystalIterator].GetPositionZ(),
-                                                       0, 0, 0, 0, 0, uint32(-1)))
-                    {
-                        CrystalGUID = Crystal->GetGUID();
-                        ++CrystalIterator;
-                    }
-                }
-            }
-
-            void MoveInLineOfSight(Unit* who)
-
-            {
-                if (!SaidIntro)
-                {
-                    Talk(SAY_INTRO);
-                    SaidIntro = true;
-                }
-                BossAI::MoveInLineOfSight(who);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                // No kiting!
-                if (me->GetDistance(me->GetVictim()) > 60.00f && me->GetDistance(me->GetVictim()) < 120.00f)
-                    DoCastVictim(SPELL_SUMMON);
-
-                bool ApplySupreme = true;
-
-                if (me->HasAura(SPELL_SUPREME))
-                    ApplySupreme = false;
-                else
-                {
-                    for (uint8 i = 0; i < NUM_WEAKNESS; ++i)
-                    {
-                        if (me->HasAura(SpellWeakness[i]))
-                        {
-                            ApplySupreme = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (ApplySupreme)
-                {
-                    DoCast(me, SPELL_SUPREME);
-                    Talk(SAY_SUPREME);
-                }
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_SILENCE:
-                            DoCast(me, SPELL_SILENCE);
-                            events.ScheduleEvent(EVENT_SILENCE, urand(20000, 30000));
-                            break;
-                        case EVENT_CYCLONE:
-                            DoCastVictim(SPELL_CYCLONE);
-                            events.ScheduleEvent(EVENT_CYCLONE, 20000);
-                            break;
-                        case EVENT_STOMP:
-                            DoCast(me, SPELL_STOMP);
-                            events.ScheduleEvent(EVENT_STOMP, 30000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<boss_ossirianAI>(creature);
         }
+    }
+
+    void DoAction(int32 action) override
+    {
+        if (action == ACTION_TRIGGER_WEAKNESS)
+            if (Creature* Trigger = me->GetMap()->GetCreature(_triggerGUID))
+                if (!Trigger->HasUnitState(UNIT_STATE_CASTING))
+                    Trigger->CastSpell(Trigger, SpellWeakness[urand(0, 4)], false);
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        _EnterCombat();
+        events.Reset();
+        events.ScheduleEvent(EVENT_SILENCE, 30000);
+        events.ScheduleEvent(EVENT_CYCLONE, 20000);
+        events.ScheduleEvent(EVENT_STOMP, 30000);
+
+        DoCast(me, SPELL_SUPREME);
+        Talk(SAY_AGGRO);
+
+        Map* map = me->GetMap();
+        if (!map->IsDungeon())
+            return;
+
+        WorldPacket data(SMSG_WEATHER, (4+4+4));
+        data << uint32(WEATHER_STATE_HEAVY_SANDSTORM) << float(1) << uint8(0);
+        map->SendToPlayers(&data);
+
+        for (uint8 i = 0; i < NUM_TORNADOS; ++i)
+        {
+            Position Point;
+            me->GetRandomPoint(RoomCenter, RoomRadius, Point);
+            if (Creature* Tornado = me->GetMap()->SummonCreature(NPC_SAND_VORTEX, Point))
+                Tornado->CastSpell(Tornado, SPELL_SAND_STORM, true);
+        }
+
+        SpawnNextCrystal();
+    }
+
+    void KilledUnit(Unit* /*victim*/) override
+    {
+        Talk(SAY_SLAY);
+    }
+
+    void EnterEvadeMode() override
+    {
+        Cleanup();
+        summons.DespawnAll();
+        BossAI::EnterEvadeMode();
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        Cleanup();
+        _JustDied();
+    }
+
+    void Cleanup()
+    {
+        if (GameObject* Crystal = me->GetMap()->GetGameObject(_crystalGUID))
+            Crystal->Use(me);
+    }
+
+    void SpawnNextCrystal()
+    {
+        if (_crystalIterator == NUM_CRYSTALS)
+            _crystalIterator = 0;
+
+        if (Creature* Trigger = me->GetMap()->SummonCreature(NPC_OSSIRIAN_TRIGGER, CrystalCoordinates[_crystalIterator]))
+        {
+            _triggerGUID = Trigger->GetGUID();
+            if (GameObject* Crystal = Trigger->SummonGameObject(GO_OSSIRIAN_CRYSTAL,
+                                                CrystalCoordinates[_crystalIterator].GetPositionX(),
+                                                CrystalCoordinates[_crystalIterator].GetPositionY(),
+                                                CrystalCoordinates[_crystalIterator].GetPositionZ(),
+                                                0, 0, 0, 0, 0, uint32(-1)))
+            {
+                _crystalGUID = Crystal->GetGUID();
+                ++_crystalIterator;
+            }
+        }
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!_intro)
+        {
+            Talk(SAY_INTRO);
+            _intro = true;
+        }
+        BossAI::MoveInLineOfSight(who);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        // No kiting!
+        if (me->GetDistance(me->GetVictim()) > 60.00f && me->GetDistance(me->GetVictim()) < 120.00f)
+            DoCastVictim(SPELL_SUMMON);
+
+        bool ApplySupreme = true;
+
+        if (me->HasAura(SPELL_SUPREME))
+            ApplySupreme = false;
+        else
+        {
+            for (uint8 i = 0; i < NUM_WEAKNESS; ++i)
+            {
+                if (me->HasAura(SpellWeakness[i]))
+                {
+                    ApplySupreme = false;
+                    break;
+                }
+            }
+        }
+
+        if (ApplySupreme)
+        {
+            DoCast(me, SPELL_SUPREME);
+            Talk(SAY_SUPREME);
+        }
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_SILENCE:
+                    DoCast(me, SPELL_SILENCE);
+                    events.ScheduleEvent(EVENT_SILENCE, urand(20000, 30000));
+                    break;
+                case EVENT_CYCLONE:
+                    DoCastVictim(SPELL_CYCLONE);
+                    events.ScheduleEvent(EVENT_CYCLONE, 20000);
+                    break;
+                case EVENT_STOMP:
+                    DoCast(me, SPELL_STOMP);
+                    events.ScheduleEvent(EVENT_STOMP, 30000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        DoMeleeAttackIfReady();
+    }
+private:
+    uint64 _triggerGUID;
+    uint64 _crystalGUID;
+    uint8 _crystalIterator;
+    bool _intro;
 };
 
 class go_ossirian_crystal : public GameObjectScript
@@ -296,6 +284,6 @@ class go_ossirian_crystal : public GameObjectScript
 
 void AddSC_boss_ossirian()
 {
-    new boss_ossirian();
+    new CreatureAILoader<boss_ossirianAI>("boss_ossirian");
     new go_ossirian_crystal();
 }

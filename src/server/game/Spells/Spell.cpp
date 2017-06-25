@@ -5527,7 +5527,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Event schody
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        if (m_caster->ToPlayer()->GetZoneId() == 2037 || m_caster->ToPlayer()->GetZoneId() == 268 || m_caster->ToPlayer()->GetZoneId() == 616)
+        if (m_caster->ToPlayer()->GetZoneId() == 268 
+            || m_caster->ToPlayer()->GetZoneId() == 616 
+            || m_caster->ToPlayer()->GetZoneId() == 3817 
+            || m_caster->ToPlayer()->GetZoneId() == 2037)
             if (m_spellInfo->Id != 8690)
                 return SPELL_FAILED_DONT_REPORT;
 

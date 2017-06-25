@@ -7668,7 +7668,7 @@ void Player::UpdateArea(uint32 newArea)
     // Xinef: area should inherit zone flags
     AreaTableEntry const* zone = GetAreaEntryByAreaID(area->zone);
     uint32 areaFlags = area->flags;
-    bool isSanctuary = (area->IsSanctuary() || area->ID == 2037 || area->ID == 268 || area->ID == 616);
+    bool isSanctuary = (area->IsSanctuary() || area->ID == 268 || area->ID == 616 || area->ID == 3817 || area->ID == 2037);
     bool isInn = area->IsInn(GetTeamId());
     if (zone)
     {
@@ -25278,9 +25278,8 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
     //sLog->outDebug("zDiff = %f", z_diff);
 
-
     // event only
-    if (GetZoneId() == 2037 || GetZoneId() == 268 || GetZoneId() == 616)
+    if (GetZoneId() == 268 || GetZoneId() == 616 || GetZoneId() == 3817 || GetZoneId() == 2037)
         return;
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored

@@ -1,7 +1,3 @@
-/*
-REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "oculus.h"
@@ -9,241 +5,162 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 enum Spells
 {
     SPELL_MAGIC_PULL                    = 51336,
-    SPELL_THUNDERING_STOMP_N            = 50774,
-    SPELL_THUNDERING_STOMP_H            = 59370,
+    SPELL_THUNDERING_STOMP              = 50774,
 
-    SPELL_UNSTABLE_SPHERE_PASSIVE        = 50756,
-    SPELL_UNSTABLE_SPHERE_PULSE            = 50757,
-    SPELL_UNSTABLE_SPHERE_TIMER            = 50758,
-    SPELL_TELEPORT_VISUAL                = 52096,
+    SPELL_UNSTABLE_SPHERE_PASSIVE       = 50756,
+    SPELL_UNSTABLE_SPHERE_PULSE         = 50757,
+    SPELL_UNSTABLE_SPHERE_TIMER         = 50758,
+    SPELL_TELEPORT_VISUAL               = 52096,
 };
 
 enum DrakosNPCs
 {
-    NPC_UNSTABLE_SPHERE        = 28166,
+    NPC_UNSTABLE_SPHERE                 = 28166,
 };
 
 enum Events
 {
     EVENT_MAGIC_PULL                    = 1,
-    EVENT_THUNDERING_STOMP                = 2,
-    EVENT_SUMMON                        = 3,
-    EVENT_SUMMON_x4                        = 4,
+    EVENT_THUNDERING_STOMP,
+    EVENT_SUMMON,
+    EVENT_SUMMON_x4
 };
-
-#define SPELL_THUNDERING_STOMP            DUNGEON_MODE(SPELL_THUNDERING_STOMP_N, SPELL_THUNDERING_STOMP_H)
 
 enum Yells
 {
-    SAY_AGGRO                                     = 0,
-    SAY_KILL                                      = 1,
-    SAY_DEATH                                     = 2,
-    SAY_PULL                                      = 3,
-    SAY_STOMP                                     = 4
+    SAY_AGGRO,
+    SAY_KILL,
+    SAY_DEATH,
+    SAY_PULL,
+    SAY_STOMP,
+    EMOTE_MAGIC_PULL
 };
 
-class boss_drakos : public CreatureScript
+struct boss_drakosAI : public BossAI
 {
-public:
-    boss_drakos() : CreatureScript("boss_drakos") { }
+    boss_drakosAI(Creature* creature) : BossAI(creature, DATA_DRAKOS) {}
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    void EnterCombat(Unit* /*who*/) override
     {
-        return new boss_drakosAI (pCreature);
+        Talk(SAY_AGGRO);
+        _EnterCombat();
+        events.ScheduleEvent(EVENT_MAGIC_PULL, urand(10000,15000));
+        events.ScheduleEvent(EVENT_SUMMON, 2000);
     }
 
-    struct boss_drakosAI : public ScriptedAI
+    void JustDied(Unit* killer) override
     {
-        boss_drakosAI(Creature *c) : ScriptedAI(c)
-        {
-            pInstance = c->GetInstanceScript();
-        }
-        
-        InstanceScript* pInstance;
-        EventMap events;
+        Talk(SAY_DEATH);
+        _JustDied();
+        instance->SetData(DATA_DRAKOS, DONE);
+        for (uint8 i = 0; i<3; ++i)
+            if (uint64 guid = instance->GetData64(DATA_DCD_1 + i))
+                if (GameObject* go = ObjectAccessor::GetGameObject(*me, guid))
+                    if (go->GetGoState() != GO_STATE_ACTIVE)
+                    {
+                        go->SetLootState(GO_READY);
+                        go->UseDoorOrButton(0, false);
+                    }
+    }
 
-        void Reset()
-        {
-            if (pInstance)
-                pInstance->SetData(DATA_DRAKOS, NOT_STARTED);
-
-            events.Reset();
-        }
-
-        void EnterCombat(Unit* who)
-        {
-            Talk(SAY_AGGRO);
-
-            if (pInstance)
-                pInstance->SetData(DATA_DRAKOS, IN_PROGRESS);
-
-            me->SetInCombatWithZone();
-
-            events.RescheduleEvent(EVENT_MAGIC_PULL, urand(10000,15000));
-            events.RescheduleEvent(EVENT_THUNDERING_STOMP, urand(3000, 6000));
-            events.RescheduleEvent(EVENT_SUMMON, 2000);
-        }
-
-        void JustDied(Unit* killer)
-        {
-            Talk(SAY_DEATH);
-
-            if (pInstance)
-            {
-                pInstance->SetData(DATA_DRAKOS, DONE);
-                for( uint8 i=0; i<3; ++i )
-                    if( uint64 guid = pInstance->GetData64(DATA_DCD_1+i) )
-                        if( GameObject* pGo = ObjectAccessor::GetGameObject(*me, guid) )
-                            if( pGo->GetGoState() != GO_STATE_ACTIVE )
-                            {
-                                pGo->SetLootState(GO_READY);
-                                pGo->UseDoorOrButton(0, false);
-                            }
-            }
-
-        }
-
-        void KilledUnit(Unit *victim)
-        {
+    void KilledUnit(Unit* victim) override
+    {
+        if(victim->IsPlayer())
             Talk(SAY_KILL);
-        }
-
-        void MoveInLineOfSight(Unit* who) {}
-        void JustSummoned(Creature* summon) {}
-
-        void UpdateAI(uint32 diff)
-        {
-            if( !UpdateVictim() )
-                return;
-
-            events.Update(diff);
-
-            if( me->HasUnitState(UNIT_STATE_CASTING) )
-                return;
-
-            DoMeleeAttackIfReady();
-
-            switch( events.GetEvent() )
-            {
-                case 0:
-                    break;
-                case EVENT_MAGIC_PULL:
-                    {
-                        Talk(SAY_PULL);
-                        //me->MonsterTextEmote(TEXT_MAGIC_PULL, 0, true);
-
-                        me->CastSpell(me, SPELL_MAGIC_PULL, false);
-                        events.RepeatEvent(urand(15000,25000));
-                        events.ScheduleEvent(EVENT_SUMMON_x4, 1500);
-                    }
-                    break;
-                case EVENT_THUNDERING_STOMP:
-                    {
-                        Talk(SAY_STOMP);
-
-                        me->CastSpell(me, SPELL_THUNDERING_STOMP, false);
-                        events.RepeatEvent(urand(10000,20000));
-                    }
-                    break;
-                case EVENT_SUMMON:
-                    {
-                        for( uint8 i=0; i<2; ++i )
-                        {
-                            float angle = rand_norm()*2*M_PI;
-                            me->SummonCreature(NPC_UNSTABLE_SPHERE, me->GetPositionX() + 5.0f*cos(angle), me->GetPositionY() + 5.0f*sin(angle), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 18000);
-                        }
-                        events.RepeatEvent(2000);
-                    }
-                    break;
-                case EVENT_SUMMON_x4:
-                    for( uint8 i=0; i<4; ++i )
-                    {
-                        float angle = rand_norm()*2*M_PI;
-                        me->SummonCreature(NPC_UNSTABLE_SPHERE, me->GetPositionX() + 5.0f*cos(angle), me->GetPositionY() + 5.0f*sin(angle), me->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 18000);
-                    }
-                    events.PopEvent();
-                    break;
-            }
-        }
-    };
-};
-
-class npc_oculus_unstable_sphere : public CreatureScript
-{
-public:
-    npc_oculus_unstable_sphere() : CreatureScript("npc_oculus_unstable_sphere") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_oculus_unstable_sphereAI (pCreature);
     }
 
-    struct npc_oculus_unstable_sphereAI : public ScriptedAI
+    void SummonSphere()
     {
-        npc_oculus_unstable_sphereAI(Creature *c) : ScriptedAI(c) {}
+        Position position;
+        me->GetRandomNearPosition(position, 10.0f);
+        me->SummonCreature(NPC_UNSTABLE_SPHERE, position);
+    }
 
-        uint32 timer;
-        bool located, gonext;
+    void MoveInLineOfSight(Unit* who) override {}
 
-        void PickNewLocation()
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
         {
-            float dist = rand_norm()*40.0f;
-            float angle = rand_norm()*2*M_PI;
-            me->GetMotionMaster()->MovePoint(1, 961.29f + dist*cos(angle), 1049.0f + dist*sin(angle), 360.0f);
+            case EVENT_MAGIC_PULL:
+                Talk(SAY_PULL);
+                Talk(EMOTE_MAGIC_PULL);
+                DoCastSelf(SPELL_MAGIC_PULL);
+                events.Repeat(urand(15000, 25000));
+                events.ScheduleEvent(EVENT_SUMMON_x4, 1500);
+                events.ScheduleEvent(EVENT_THUNDERING_STOMP, urand(2000, 2750));
+                break;
+            case EVENT_THUNDERING_STOMP:
+                Talk(SAY_STOMP);
+                DoCastSelf(SPELL_THUNDERING_STOMP);
+                break;
+            case EVENT_SUMMON:
+                for (uint8 i = 0; i<2; ++i)
+                    SummonSphere();
+                events.Repeat(2000);
+                break;
+            case EVENT_SUMMON_x4:
+                for (uint8 i = 0; i<4; ++i)
+                    SummonSphere();
+                break;
+            default:
+                break;
         }
+    }
+};
 
-        void MovementInform(uint32 type, uint32 id)
+enum Sphere
+{
+    EVENT_PERIODIC_PULSE = 1,
+    EVENT_TELEPORT_VISUAL
+};
+
+struct npc_oculus_unstable_sphereAI : public ScriptedAI
+{
+    npc_oculus_unstable_sphereAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void Reset() override
+    {
+        DoCastSelf(SPELL_TELEPORT_VISUAL);
+        me->SetReactState(REACT_PASSIVE);
+        me->GetMotionMaster()->MoveRandom(40.0f);
+
+        me->AddAura(SPELL_UNSTABLE_SPHERE_PASSIVE, me);
+        me->AddAura(SPELL_UNSTABLE_SPHERE_TIMER, me);
+
+        _events.ScheduleEvent(EVENT_PERIODIC_PULSE, 3000);
+        _events.ScheduleEvent(EVENT_TELEPORT_VISUAL, 100);
+
+        me->DespawnOrUnsummon(18000);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
         {
-            if( type != POINT_MOTION_TYPE || id != 1 )
-                return;
-
-            if( !located )
-                gonext = true;
-        }
-
-        void Reset()
-        {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetSpeed(MOVE_RUN, 1.4f, true);
-            me->CastSpell(me, SPELL_UNSTABLE_SPHERE_PASSIVE, true);
-            me->CastSpell(me, SPELL_UNSTABLE_SPHERE_TIMER, true);
-            timer = 0;
-            located = false;
-            gonext = false;
-
-            PickNewLocation();
-        }
-
-        void AttackStart(Unit* who) {}
-        void MoveInLineOfSight(Unit* who) {}
-
-        void UpdateAI(uint32 diff)
-        {
-            if( timer == 0 )
-                me->CastSpell(me, SPELL_TELEPORT_VISUAL, true);
-
-            timer += diff;
-
-            if( timer > 10000 )
+            switch (eventId)
             {
-                if( !located )
-                    me->GetMotionMaster()->MoveIdle();
-                located = true;
-                me->CastSpell(me, SPELL_UNSTABLE_SPHERE_PULSE, true);
-                timer -= 2000;
-            }
-
-            if( !located && gonext )
-            {
-                PickNewLocation();
-                gonext = false;
+                case EVENT_PERIODIC_PULSE:
+                    DoCastAOE(SPELL_UNSTABLE_SPHERE_PULSE);
+                    _events.Repeat(3000);
+                    break;
+                case EVENT_TELEPORT_VISUAL:
+                    DoCastSelf(SPELL_TELEPORT_VISUAL);
+                    break;
+                default:
+                    break;
             }
         }
-    };
+    }
+
+private:
+    EventMap _events;
 };
 
 void AddSC_boss_drakos()
 {
-    new boss_drakos();
-    new npc_oculus_unstable_sphere();
+    new CreatureAILoader<boss_drakosAI>("boss_drakos");
+    new CreatureAILoader<npc_oculus_unstable_sphereAI>("npc_oculus_unstable_sphere");
 }

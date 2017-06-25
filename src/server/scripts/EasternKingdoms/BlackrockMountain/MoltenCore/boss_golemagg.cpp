@@ -34,154 +34,131 @@ enum Events
     EVENT_TRUST
 };
 
-class boss_golemagg : public CreatureScript
+struct boss_golemaggAI : public BossAI
 {
-    public:
-        boss_golemagg() : CreatureScript("boss_golemagg") { }
+    boss_golemaggAI(Creature* creature) : BossAI(creature, BOSS_GOLEMAGG_THE_INCINERATOR) { }
 
-        struct boss_golemaggAI : public BossAI
+    void Reset()
+    {
+        _Reset();
+        DoCast(me, SPELL_MAGMA_SPLASH, true);
+    }
+
+    void EnterCombat(Unit* /*victim*/)
+    {
+        _EnterCombat();
+        me->CallForHelp(15.0f);
+        events.ScheduleEvent(EVENT_PYROBLAST, 7000);
+    }
+
+    void EnterEvadeMode() override
+    {
+        std::list<Creature*> addList;
+        me->GetCreatureListWithEntryInGrid(addList, 11672, 100.0f);
+        if (!addList.empty())
         {
-            boss_golemaggAI(Creature* creature) : BossAI(creature, BOSS_GOLEMAGG_THE_INCINERATOR) { }
-
-            void Reset()
+            for (auto itr : addList)
             {
-                _Reset();
-                DoCast(me, SPELL_MAGMA_SPLASH, true);
+                if (!itr->IsAlive())
+                    itr->Respawn();
+                if (itr->IsAIEnabled)
+                    itr->AI()->EnterEvadeMode();
             }
-
-            void EnterCombat(Unit* /*victim*/)
-            {
-                _EnterCombat();
-                me->CallForHelp(15.0f);
-                events.ScheduleEvent(EVENT_PYROBLAST, 7000);
-            }
-
-            void EnterEvadeMode() override
-            {
-                std::list<Creature*> addList;
-                me->GetCreatureListWithEntryInGrid(addList, 11672, 100.0f);
-                if (!addList.empty())
-                {
-                    for (auto itr : addList)
-                    {
-                        if (!itr->IsAlive())
-                            itr->Respawn();
-                        if (itr->IsAIEnabled)
-                            itr->AI()->EnterEvadeMode();
-                    }
-                }
-                CreatureAI::EnterEvadeMode();
-            }
-
-            void JustDied(Unit* /*killer*/) override
-            {
-                std::list<Creature*> addList;
-                me->GetCreatureListWithEntryInGrid(addList, 11672, 100.0f);
-                if (!addList.empty())
-                    for (auto itr : addList)
-                        itr->DespawnOrUnsummon();
-                _JustDied();
-            }
-
-            void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
-            {
-                if (!HealthBelowPct(10) || me->HasAura(SPELL_ENRAGE))
-                    return;
-
-                DoCast(me, SPELL_ENRAGE, true);
-                events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
-            }
-
-            void ExecuteEvent(uint32 eventId) override
-            {
-                switch (eventId)
-                {
-                    case EVENT_PYROBLAST:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(target, SPELL_PYROBLAST);
-                        events.ScheduleEvent(EVENT_PYROBLAST, 7000);
-                        break;
-                    case EVENT_EARTHQUAKE:
-                        DoCastVictim(SPELL_EARTHQUAKE);
-                        events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_golemaggAI(creature);
         }
+        CreatureAI::EnterEvadeMode();
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        std::list<Creature*> addList;
+        me->GetCreatureListWithEntryInGrid(addList, 11672, 100.0f);
+        if (!addList.empty())
+            for (auto itr : addList)
+                itr->DespawnOrUnsummon();
+        _JustDied();
+    }
+
+    void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
+    {
+        if (!HealthBelowPct(10) || me->HasAura(SPELL_ENRAGE))
+            return;
+
+        DoCast(me, SPELL_ENRAGE, true);
+        events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_PYROBLAST:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, SPELL_PYROBLAST);
+                events.ScheduleEvent(EVENT_PYROBLAST, 7000);
+                break;
+            case EVENT_EARTHQUAKE:
+                DoCastVictim(SPELL_EARTHQUAKE);
+                events.ScheduleEvent(EVENT_EARTHQUAKE, 3000);
+                break;
+            default:
+                break;
+        }
+    }
 };
 
-class npc_core_rager : public CreatureScript
+struct npc_core_ragerAI : public ScriptedAI
 {
-    public:
-        npc_core_rager() : CreatureScript("npc_core_rager") { }
+    npc_core_ragerAI(Creature* creature) : ScriptedAI(creature) { }
 
-        struct npc_core_ragerAI : public ScriptedAI
+    void EnterCombat(Unit* victim)
+    {
+        CreatureAI::EnterCombat(victim);
+        _events.ScheduleEvent(EVENT_TRUST, 2000);
+    }
+
+    void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
+    {
+        if (HealthAbovePct(50))
+            return;
+
+        Talk(EMOTE_LOWHP);
+        me->SetFullHealth();
+    }
+
+    void UpdateAI(uint32 diff)
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
         {
-            npc_core_ragerAI(Creature* creature) : ScriptedAI(creature), instance(creature->GetInstanceScript()) { }
-
-            void EnterCombat(Unit* victim)
+            switch (eventId)
             {
-                CreatureAI::EnterCombat(victim);
-                _events.ScheduleEvent(EVENT_TRUST, 2000);
+                case EVENT_MANGLE:
+                    DoCastVictim(SPELL_MANGLE);
+                    _events.Repeat(10000);
+                    break;
+                case EVENT_TRUST:
+                    if (Creature* hound = me->FindNearestCreature(11672, 30.0f, true))
+                        me->AddAura(SPELL_GOLEMAGG_TRUST, me);
+                    _events.Repeat(2000);
+                    break;
+                default:
+                    break;
             }
-
-            void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
-            {
-                if (HealthAbovePct(50))
-                    return;
-
-                Talk(EMOTE_LOWHP);
-                me->SetFullHealth();
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                _events.Update(diff);
-
-                while (uint32 eventId = _events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_MANGLE:
-                            DoCastVictim(SPELL_MANGLE);
-                            _events.Repeat(10000);
-                            break;
-                        case EVENT_TRUST:
-                            if (Creature* hound = me->FindNearestCreature(11672, 30.0f, true))
-                                me->AddAura(SPELL_GOLEMAGG_TRUST, me);
-                            _events.Repeat(2000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-        private:
-            InstanceScript* instance;
-            EventMap _events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<npc_core_ragerAI>(creature);
         }
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    EventMap _events;
 };
 
 void AddSC_boss_golemagg()
 {
-    new boss_golemagg();
-    new npc_core_rager();
+    new CreatureAILoader<boss_golemaggAI>("boss_golemagg");
+    new CreatureAILoader<npc_core_ragerAI>("npc_core_rager");
 }

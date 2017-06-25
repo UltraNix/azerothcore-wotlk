@@ -34,9 +34,9 @@ enum Spells
 enum Events
 {
     EVENT_MORTAL_WOUND      = 1,
-    EVENT_SANDTRAP          = 2,
-    EVENT_TRASH             = 3,
-    EVENT_WIDE_SLASH        = 4
+    EVENT_SANDTRAP,
+    EVENT_TRASH,
+    EVENT_WIDE_SLASH
 };
 
 enum Texts
@@ -44,94 +44,74 @@ enum Texts
     SAY_KURINAXX_DEATH      = 5, // Yelled by Ossirian the Unscarred
 };
 
-class boss_kurinnaxx : public CreatureScript
+struct boss_kurinnaxxAI : public BossAI
 {
-    public:
-        boss_kurinnaxx() : CreatureScript("boss_kurinnaxx") { }
+    boss_kurinnaxxAI(Creature* creature) : BossAI(creature, DATA_KURINNAXX) { }
 
-        struct boss_kurinnaxxAI : public BossAI
+    void Reset() override
+    {
+        _Reset();
+        _enraged = false;
+        events.ScheduleEvent(EVENT_MORTAL_WOUND, 7000);
+        events.ScheduleEvent(EVENT_SANDTRAP, 7000);
+        events.ScheduleEvent(EVENT_TRASH, 10000);
+        events.ScheduleEvent(EVENT_WIDE_SLASH, 15000);
+    }
+
+    void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        if (!_enraged && me->HealthBelowPctDamaged(30, damage))
         {
-            boss_kurinnaxxAI(Creature* creature) : BossAI(creature, DATA_KURINNAXX)
-            {
-            }
-
-            void Reset()
-            {
-                _Reset();
-                _enraged = false;
-                events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
-                events.ScheduleEvent(EVENT_SANDTRAP, urand(5000, 15000));
-                events.ScheduleEvent(EVENT_TRASH, 1000);
-                events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
-            }
-
-            void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
-            {
-                if (!_enraged && HealthBelowPct(30))
-                {
-                    DoCast(me, SPELL_ENRAGE);
-                    _enraged = true;
-                }
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                _JustDied();
-                if (Creature* Ossirian = me->GetMap()->GetCreature(instance->GetData64(DATA_OSSIRIAN)))
-                    sCreatureTextMgr->SendChat(Ossirian, SAY_KURINAXX_DEATH, NULL, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_ZONE);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_MORTAL_WOUND:
-                            DoCastVictim(SPELL_MORTALWOUND);
-                            events.ScheduleEvent(EVENT_MORTAL_WOUND, 8000);
-                            break;
-                        case EVENT_SANDTRAP:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                target->CastSpell(target, SPELL_SANDTRAP, true);
-                            else if (Unit* victim = me->GetVictim())
-                                victim->CastSpell(victim, SPELL_SANDTRAP, true);
-                            events.ScheduleEvent(EVENT_SANDTRAP, urand(5000, 15000));
-                            break;
-                        case EVENT_WIDE_SLASH:
-                            DoCast(me, SPELL_WIDE_SLASH);
-                            events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
-                            break;
-                        case EVENT_TRASH:
-                            DoCast(me, SPELL_TRASH);
-                            events.ScheduleEvent(EVENT_WIDE_SLASH, 16000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-            private:
-                bool _enraged;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<boss_kurinnaxxAI>(creature);
+            DoCast(me, SPELL_ENRAGE);
+            _enraged = true;
         }
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        _JustDied();
+        Position pos;
+        me->GetPosition(&pos);
+        pos.m_positionZ -= 55.0f;
+        if (Creature* ossirian = me->SummonCreature(15339, pos, TEMPSUMMON_MANUAL_DESPAWN))
+        {
+            ossirian->SetVisible(false);
+            sCreatureTextMgr->SendChat(ossirian, SAY_KURINAXX_DEATH, nullptr, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_ZONE);
+            ossirian->DespawnOrUnsummon();
+        }
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_MORTAL_WOUND:
+                DoCastVictim(SPELL_MORTALWOUND);
+                events.ScheduleEvent(EVENT_MORTAL_WOUND, 9000);
+                break;
+            case EVENT_SANDTRAP:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    target->CastSpell(target, SPELL_SANDTRAP, true);
+                events.ScheduleEvent(EVENT_SANDTRAP, urand(5000, 15000));
+                break;
+            case EVENT_WIDE_SLASH:
+                DoCastVictim(SPELL_WIDE_SLASH);
+                events.ScheduleEvent(EVENT_WIDE_SLASH, urand(10000, 20000));
+                break;
+            case EVENT_TRASH:
+                DoCastSelf(SPELL_TRASH);
+                events.ScheduleEvent(EVENT_TRASH, urand(10000, 20000));
+                break;
+            default:
+                break;
+        }
+    }
+
+    private:
+        bool _enraged;
 };
 
 void AddSC_boss_kurinnaxx()
 {
-    new boss_kurinnaxx();
+    new CreatureAILoader<boss_kurinnaxxAI>("boss_kurinnaxx");
 }

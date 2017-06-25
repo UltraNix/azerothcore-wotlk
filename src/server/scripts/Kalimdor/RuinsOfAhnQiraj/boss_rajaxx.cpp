@@ -56,76 +56,46 @@ enum Events
     EVENT_CHANGE_AGGRO      = 3,
 };
 
-class boss_rajaxx : public CreatureScript
+struct boss_rajaxxAI : public BossAI
 {
-    public:
-        boss_rajaxx() : CreatureScript("boss_rajaxx") { }
+    boss_rajaxxAI(Creature* creature) : BossAI(creature, DATA_RAJAXX) { }
 
-        struct boss_rajaxxAI : public BossAI
+    void Reset() override
+    {
+        _Reset();
+        enraged = false;
+        events.ScheduleEvent(EVENT_DISARM, 10000);
+        events.ScheduleEvent(EVENT_THUNDERCRASH, 12000);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        //SAY_DEATH
+        _JustDied();
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
         {
-            boss_rajaxxAI(Creature* creature) : BossAI(creature, DATA_RAJAXX)
-            {
-            }
-
-            void Reset()
-            {
-                _Reset();
-                enraged = false;
-                events.ScheduleEvent(EVENT_DISARM, 10000);
-                events.ScheduleEvent(EVENT_THUNDERCRASH, 12000);
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                //SAY_DEATH
-                _JustDied();
-            }
-
-            void EnterCombat(Unit* /*victim*/)
-            {
-                _EnterCombat();
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_DISARM:
-                            DoCastVictim(SPELL_DISARM);
-                            events.ScheduleEvent(EVENT_DISARM, 22000);
-                            break;
-                        case EVENT_THUNDERCRASH:
-                            DoCast(me, SPELL_THUNDERCRASH);
-                            events.ScheduleEvent(EVENT_THUNDERCRASH, 21000);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-            private:
-                bool enraged;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_rajaxxAI(creature);
+            case EVENT_DISARM:
+                DoCastVictim(SPELL_DISARM);
+                events.ScheduleEvent(EVENT_DISARM, 22000);
+                break;
+            case EVENT_THUNDERCRASH:
+                DoCast(me, SPELL_THUNDERCRASH);
+                events.ScheduleEvent(EVENT_THUNDERCRASH, 21000);
+                break;
+            default:
+                break;
         }
+    }
+
+    private:
+        bool enraged;
 };
 
 void AddSC_boss_rajaxx()
 {
-    new boss_rajaxx();
+    new CreatureAILoader<boss_rajaxxAI>("boss_rajaxx");
 }

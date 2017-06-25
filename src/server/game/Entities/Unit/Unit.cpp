@@ -8910,8 +8910,15 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // Proc only from Frost/Freezing trap activation or from Freezing Arrow (the periodic dmg proc handled elsewhere)
             if (!(procFlags & PROC_FLAG_DONE_TRAP_ACTIVATION) || !procSpell || !roll_chance_i(triggerAmount))
                 return false;
-            if (procSpell->Id != 63487 /*frost trap*/ && !(procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+            if (procSpell->Id == 63487 /*frost trap*/)
+            {
+                const SpellInfo* freezingAura = sSpellMgr->GetSpellInfo(13810);//13810 - frost trap aura
+                if (victim->IsImmunedToSpellEffect(freezingAura, 0))
+                    return false;
+            }
+            else if(!(procSpell->SchoolMask & SPELL_SCHOOL_MASK_FROST))
                 return false;
+
             break;
         }
         // Glyph of Death's Embrace
@@ -9444,7 +9451,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     //if (GetTypeId() == TYPEID_UNIT)
     //    ToCreature()->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
 
-    if (GetTypeId() == TYPEID_UNIT && !IsPet()) 
+    if (GetTypeId() == TYPEID_UNIT && !(IsPet() || IsGuardian()))
     {
         // should not let player enter combat by right clicking target - doesn't helps
         SetInCombatWith(victim);
@@ -13078,10 +13085,19 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
             if (GetTypeId() == TYPEID_UNIT)
             {
                 Unit* pOwner = GetCharmerOrOwner();
-                if (pOwner && !IsInCombat() && !IsVehicle() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID() || GetCharmerGUID() == pOwner->GetGUID()))
+                if ((IsPet() || IsGuardian()) && !IsInCombat() && pOwner) 
                 {
-                    if (speed < pOwner->GetSpeedRate(mtype)+0.1f)
-                        speed = pOwner->GetSpeedRate(mtype)+0.1f; // pets derive speed from owner when not in combat
+                    // For every yard over 5, increase speed by 0.01
+                    // to help prevent pet from lagging behind and despawning
+                    float dist = GetDistance(pOwner);
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
+
+                    if (dist < 5)
+                        dist = 5;
+
+                    float mult = base_rate + ((dist - 5) * 0.01f);
+
+                    speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
                 }
                 else
                     speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
@@ -19266,7 +19282,24 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
             // FG: pretend that OTHER players in own group are friendly ("blue")
             else if (index == UNIT_FIELD_BYTES_2 || index == UNIT_FIELD_FACTIONTEMPLATE)
             {
-                if (target->IsSpectator() && target->FindMap() && target->FindMap()->IsBattleArena() && (this->GetTypeId() == TYPEID_PLAYER || this->GetTypeId() == TYPEID_UNIT || this->GetTypeId() == TYPEID_DYNAMICOBJECT)) // pussywizard
+                if (IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF) && IsInRaidWith(target))
+                {
+                    FactionTemplateEntry const* ft1 = GetFactionTemplateEntry();
+                    FactionTemplateEntry const* ft2 = target->GetFactionTemplateEntry();
+                    if (ft1 && ft2 && !ft1->IsFriendlyTo(*ft2))
+                    {
+                        if (index == UNIT_FIELD_BYTES_2)
+                            // Allow targetting opposite faction in party when enabled in config
+                            fieldBuffer << (m_uint32Values[UNIT_FIELD_BYTES_2] & ((UNIT_BYTE2_FLAG_SANCTUARY /*| UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5*/) << 8)); // this flag is at uint8 offset 1 !!
+                        else
+                            // pretend that all other HOSTILE players have own faction, to allow follow, heal, rezz (trade wont work)
+                            fieldBuffer << uint32(target->getFaction());
+                    }
+                    else
+                        fieldBuffer << m_uint32Values[index];
+                }
+                else if (target->IsSpectator() && target->FindMap() && target->FindMap()->IsBattleArena() &&
+                    (this->GetTypeId() == TYPEID_PLAYER || this->GetTypeId() == TYPEID_UNIT || this->GetTypeId() == TYPEID_DYNAMICOBJECT))
                 {
                     if (index == UNIT_FIELD_BYTES_2)
                         fieldBuffer << (m_uint32Values[index] & 0xFFFFF2FF); // clear UNIT_BYTE2_FLAG_PVP, UNIT_BYTE2_FLAG_FFA_PVP, UNIT_BYTE2_FLAG_SANCTUARY

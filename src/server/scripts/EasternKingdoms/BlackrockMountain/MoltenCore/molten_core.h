@@ -32,6 +32,8 @@ enum Encounters
     BOSS_MAJORDOMO_EXECUTUS         = 8,
     BOSS_RAGNAROS                   = 9,
     MAX_ENCOUNTER,
+
+    DATA_CACHE_OF_THE_FIRELORD,
 };
 
 enum Actions
@@ -77,6 +79,7 @@ enum Creatures
     NPC_FLAMEWAKER_ELITE            = 11664,
     NPC_SON_OF_FLAME                = 12143,                  
     NPC_FLAME_OF_RAGNAROS           = 13148,
+    NPC_CORE_HOUND                  = 11671
 };
 
 enum GameObjects
