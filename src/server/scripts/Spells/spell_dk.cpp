@@ -829,20 +829,8 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                     if (!procSpell->IsAffectingArea())
                         GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
                     dancingRuneWeapon->CastCustomSpell(procSpell->Id, SPELLVALUE_BASE_POINT1, eventInfo.GetDamageInfo()->GetDamage()/2, target, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
-                    //dancingRuneWeapon->CastSpell(target, procSpell->Id, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
                     GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 0.01f);
                 }
-                /*else
-                {
-                    target = player->GetMeleeHitRedirectTarget(target);
-                    CalcDamageInfo damageInfo;
-                    player->CalculateMeleeDamage(target, 0, &damageInfo, eventInfo.GetDamageInfo()->GetAttackType());
-                    Unit::DealDamageMods(target, damageInfo.damage, &damageInfo.absorb);
-                    damageInfo.attacker = dancingRuneWeapon;
-                    damageInfo.damage /= 2.0f;
-                    dancingRuneWeapon->SendAttackStateUpdate(&damageInfo);
-                    dancingRuneWeapon->DealMeleeDamage(&damageInfo, true);
-                }*/
             }
 
             void Register()
