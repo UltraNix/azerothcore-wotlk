@@ -210,6 +210,7 @@ public:
                 pInstance->SetData(DATA_JEDOGA_ACHIEVEMENT, true);
             }
 
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             events.Reset();
             SpawnInitiate(true);
             initiates = 0;
@@ -245,6 +246,7 @@ public:
             if (pInstance)
                 pInstance->SetData(DATA_JEDOGA_SHADOWSEEKER_EVENT, DONE);
 
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             summons.DespawnAll();
         }
 
