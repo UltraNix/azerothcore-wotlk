@@ -368,6 +368,7 @@ public:
             }
 
             events.Update(diff);
+
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
@@ -384,6 +385,9 @@ public:
                     events.RepeatEvent(2000);
                     break;
                 case EVENT_SMASH:
+                    if(_left || _right)
+                        me->setAttackTimer(BASE_ATTACK, 2000);
+
                     if (_left && _right)
                         me->CastSpell(me->GetVictim(), SPELL_OVERHEAD_SMASH, false);
                     else if (_left || _right)
@@ -473,7 +477,7 @@ public:
             }
 
             //Make sure our attack is ready and we aren't currently casting before checking distance
-            if (me->isAttackReady() && me->GetVictim()) // victim could die by a spell (IMPORTANT!!!) and kologarn entered evade mode
+            if (me->isAttackReady() && me->GetVictim() && events.GetNextEventTime(EVENT_SMASH) >= 2000) // victim could die by a spell (IMPORTANT!!!) and kologarn entered evade mode
             {
                 //If we are within range melee the target
                 if (me->IsWithinMeleeRange(me->GetVictim()))
