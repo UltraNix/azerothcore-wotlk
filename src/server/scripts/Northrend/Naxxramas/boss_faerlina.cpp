@@ -142,6 +142,12 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!summons.empty() && me->SelectNearestPlayer(40.0f))
+                for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                    if (Creature* creature = ObjectAccessor::GetCreature(*me, *itr))
+                        if (creature->IsInCombat())
+                            DoZoneInCombat();
+
             if (!UpdateVictim())
                 return;
 
