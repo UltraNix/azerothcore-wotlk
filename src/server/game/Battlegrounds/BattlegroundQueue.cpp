@@ -736,7 +736,7 @@ void BattlegroundQueue::BattlegroundQueueUpdate(BattlegroundBracketId bracket_id
     }
 
     // check if can start new premade battleground
-    if (bg_template->isBattleground() && m_bgTypeId != BATTLEGROUND_RB)
+    if (bg_template->isBattleground())
         if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
         {
             // create new battleground
