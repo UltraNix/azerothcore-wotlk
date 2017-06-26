@@ -323,6 +323,7 @@ enum flingTorch
     SPELL_FLING_TORCH_DUMMY            = 46747,
     SPELL_MISSED_TORCH                = 45676,
     SPELL_TORCH_COUNTER                = 45693,
+    SPELL_TORCH_SHADOW                 = 46105
 };
 
 class spell_midsummer_fling_torch : public SpellScriptLoader
@@ -341,7 +342,6 @@ class spell_midsummer_fling_torch : public SpellScriptLoader
         {
             std::list<Creature*> crList;
             caster->GetCreaturesWithEntryInRange(crList, 100.0f, NPC_TORCH_TARGET);
-
             uint8 rand = urand(0, crList.size()-1);
             Position pos;
             pos.Relocate(0.0f, 0.0f, 0.0f);
@@ -363,7 +363,10 @@ class spell_midsummer_fling_torch : public SpellScriptLoader
 
             // we have any pos
             if (pos.GetPositionX())
+            {
                 caster->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_FLING_TORCH, true);
+                caster->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_TORCH_SHADOW, true);
+            }
         }
 
         void HandleFinish()
