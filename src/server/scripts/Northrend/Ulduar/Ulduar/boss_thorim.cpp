@@ -1414,7 +1414,6 @@ public:
             _leftHand = false;
             _checkTarget = false;
             events.Reset();
-            events.ScheduleEvent(EVENT_RC_RUNIC_SMASH, 0);
             Creature* c;
 
             if (c = me->SummonCreature(33140, 2221, -385, me->GetPositionZ()))
@@ -1426,6 +1425,12 @@ public:
                 _triggerLeftGUID[0] = c->GetGUID();
             if (c = me->SummonCreature(33141, 2246, -385, me->GetPositionZ()))
                 _triggerLeftGUID[1] = c->GetGUID();
+        }
+
+        void DoAction(int32 actionId) override
+        {
+            if(actionId == 1)
+                events.ScheduleEvent(EVENT_RC_RUNIC_SMASH, 15000);
         }
 
         void JustDied(Unit*)
@@ -1763,7 +1768,12 @@ public:
     bool OnGossipHello(Player* pPlayer, GameObject* pGo)
     {
         if (GameObject *g = pPlayer->FindNearestGameObject(GO_ARENA_LEVER_GATE, 50))
+        {
             g->UseDoorOrButton();
+            if (Creature* colossus = pGo->FindNearestCreature(32872, 500.0f, true))
+                if (colossus->IsAIEnabled)
+                    colossus->AI()->DoAction(1);
+        }
 
         pGo->UseDoorOrButton();
         return true;
