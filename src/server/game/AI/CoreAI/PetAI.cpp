@@ -141,6 +141,7 @@ void PetAI::UpdateAI(uint32 diff)
 
     if (m_updateSpeedTimer <= diff)
     {
+        m_updateSpeedTimer = 500;
         me->UpdateSpeed(MOVE_RUN, true);
         me->UpdateSpeed(MOVE_SWIM, true);
         me->UpdateSpeed(MOVE_FLIGHT, true);
