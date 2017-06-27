@@ -4570,6 +4570,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 50990: // Flame Breath (Catapult)
             spellInfo->EffectRadiusIndex[EFFECT_0] = 19; // 18yd
             break;
+        case 10790: // Tiger
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;		
         case 31700: // Black Qiraji Battle Tank
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[EFFECT_2] = 99;
