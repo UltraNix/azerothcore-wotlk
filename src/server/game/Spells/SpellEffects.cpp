@@ -6055,11 +6055,15 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         //    ((Minion*)summon)->SetFollowAngle(m_caster->GetAngle(summon));
 
         // xinef: move this here, some auras are added in initstatsforlevel!
-        if (!summon->IsInCombat() && !summon->IsTrigger() && !summon->HasAura(8273)) //8273 - Shadowfiend aura
+        if (!(summon->IsInCombat() || summon->IsTrigger()))
         {
-            //    summon->AI()->EnterEvadeMode();
-            summon->GetMotionMaster()->Clear(false);
-            summon->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, summon->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            MotionMaster* mm = summon->GetMotionMaster();
+
+            if (mm->size() <= 1) //Initialization of the summon didn't set Motion Master in any way, set to follow
+            {
+                mm->Clear(false);
+                mm->MoveFollow(caster, PET_FOLLOW_DIST, summon->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+            }        
         }
 
         if (properties && properties->Category == SUMMON_CATEGORY_ALLY)
