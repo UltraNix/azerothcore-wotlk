@@ -37,11 +37,7 @@ enum DeathKnightSpells
     SPELL_DK_DISMISS_GARGOYLE  = 50515,
     SPELL_DK_SANCTUARY         = 54661,
     SPELL_DK_NIGHT_OF_THE_DEAD = 62137,
-    SPELL_DK_PET_SCALING       = 61017,
-    SPELL_DK_RUNE_WEAPON_SCALING_01 = 51905,
-    SPELL_DK_RUNE_WEAPON_SCALING = 51906,
-    SPELL_PET_SCALING__MASTER_SPELL_06__SPELL_HIT_EXPERTISE_SPELL_PENETRATION = 67561,
-    SPELL_AGGRO_8_YD_PBAE = 49813,
+    SPELL_DK_PET_SCALING       = 61017
 };
 
 class npc_pet_dk_ebon_gargoyle : public CreatureScript
@@ -365,8 +361,6 @@ class npc_pet_dk_army_of_the_dead : public CreatureScript
         }
 };
 
-
-
 class npc_pet_dk_dancing_rune_weapon : public CreatureScript
 {
     public:
@@ -378,70 +372,14 @@ class npc_pet_dk_dancing_rune_weapon : public CreatureScript
 
             void InitializeAI() override
             {
-                NullCreatureAI::InitializeAI();
-                sLog->outBasic("dziala init");
                 // Xinef: Hit / Expertise scaling
                 me->AddAura(61017, me);
-                me->SetAttackTime(BASE_ATTACK, 3500);
-                owner = me->GetOwner();
-                
+                if (Unit* owner = me->GetOwner())
+                    me->GetMotionMaster()->MoveFollow(owner, 0.01f, me->GetFollowAngle(), MOTION_SLOT_CONTROLLED);
+                NullCreatureAI::InitializeAI();
             }
-
-            void AttackStart(Unit* who) override
-            {
-                if (!owner) return;
-
-                CalcDamageInfo damageInfo;
-                owner->CalculateMeleeDamage(who, 0, &damageInfo, BASE_ATTACK);
-                damageInfo.attacker = me;
-                damageInfo.damage /= 2.0f;
-                sLog->outBasic("dziala atak");
-                me->SendAttackStateUpdate(&damageInfo);
-                me->DealMeleeDamage(&damageInfo, false);
-            }
-
-            void UpdateAI(uint32 diff) override
-            {
-                if (!UpdateVictim())
-                    return;
-
-                if (me->GetVictim()->HasBreakableByDamageCrowdControlAura(me))
-                {
-                    me->InterruptNonMeleeSpells(false);
-                    return;
-                }
-            }
-
-            void EnterEvadeMode()
-            {
-                // _EnterEvadeMode();
-                me->DeleteThreatList();
-                me->CombatStop(true);
-                me->LoadCreaturesAddon(true);
-                me->SetLootRecipient(NULL);
-                me->ResetPlayerDamageReq();
-                me->SetLastDamagedTime(0);
-
-                me->AddUnitState(UNIT_STATE_EVADE);
-                me->GetMotionMaster()->MoveTargetedHome();
-
-                Reset();
-            }
-
-            void Reset()
-            {
-                // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-                if (!me->GetVictim())
-                    if (Unit *tgt = me->SelectNearestTarget(10.0f))
-                    {
-                        me->AddThreat(tgt, 100000.0f);
-                        AttackStart(tgt);
-                    }
-            }
-
-        private:
-            Unit* owner;
         };
+
         CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_pet_dk_dancing_rune_weaponAI (creature);

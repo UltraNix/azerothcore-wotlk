@@ -827,11 +827,10 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                     // xinef: ugly hack
                     if (!procSpell->IsAffectingArea())
                         GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
-                    dancingRuneWeapon->CastCustomSpell(procSpell->Id, SPELLVALUE_BASE_POINT1, eventInfo.GetDamageInfo()->GetDamage()/2, target, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
-                    //dancingRuneWeapon->CastSpell(target, procSpell->Id, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
+                    dancingRuneWeapon->CastSpell(target, procSpell->Id, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
                     GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 0.01f);
                 }
-                /*else
+                else
                 {
                     target = player->GetMeleeHitRedirectTarget(target);
                     CalcDamageInfo damageInfo;
@@ -841,7 +840,7 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                     damageInfo.damage /= 2.0f;
                     dancingRuneWeapon->SendAttackStateUpdate(&damageInfo);
                     dancingRuneWeapon->DealMeleeDamage(&damageInfo, true);
-                }*/
+                }
             }
 
             void Register()
