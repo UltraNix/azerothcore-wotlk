@@ -809,6 +809,7 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                 PreventDefaultAction();
 
                 Unit* player = eventInfo.GetActor();
+                Unit* target = eventInfo.GetActionTarget();
                 Unit* dancingRuneWeapon = NULL;
                 for (Unit::ControlSet::const_iterator itr = player->m_Controlled.begin(); itr != player->m_Controlled.end(); ++itr)
                     if ((*itr)->GetEntry() == GetSpellInfo()->Effects[EFFECT_0].MiscValue)
@@ -820,19 +821,16 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                 if (!dancingRuneWeapon)
                     return;
 
-                Unit* target = dancingRuneWeapon->GetVictim();
-
                 dancingRuneWeapon->SetOrientation(dancingRuneWeapon->GetAngle(target));
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
                 {
                     // xinef: ugly hack
                     if (!procSpell->IsAffectingArea())
                         GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
-                    dancingRuneWeapon->CastCustomSpell(procSpell->Id, SPELLVALUE_BASE_POINT1, eventInfo.GetDamageInfo()->GetDamage()/2, target, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
-                    //dancingRuneWeapon->CastSpell(target, procSpell->Id, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
+                    dancingRuneWeapon->CastSpell(target, procSpell->Id, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
                     GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 0.01f);
                 }
-                /*else
+                else
                 {
                     target = player->GetMeleeHitRedirectTarget(target);
                     CalcDamageInfo damageInfo;
@@ -842,7 +840,7 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                     damageInfo.damage /= 2.0f;
                     dancingRuneWeapon->SendAttackStateUpdate(&damageInfo);
                     dancingRuneWeapon->DealMeleeDamage(&damageInfo, true);
-                }*/
+                }
             }
 
             void Register()

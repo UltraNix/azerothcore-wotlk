@@ -4014,7 +4014,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Dancing Rune Weapon
         case 49028:
             spellInfo->Effect[2] = 0;
-            //spellInfo->procFlags |= PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
+            spellInfo->procFlags |= PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
             break;
         // Death and Decay
         case 52212:

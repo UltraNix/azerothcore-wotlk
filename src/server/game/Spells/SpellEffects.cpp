@@ -3615,12 +3615,10 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     if (m_caster->GetEntry() == 27893)
     {
         if (Unit* owner = m_caster->GetOwner())
-            weaponDamage = owner->CalculateDamage(m_attackType, true, false);
-        sLog->outBasic("Calculate Damge: %d", weaponDamage);
-        sLog->outBasic("Calculate Damge Percent: %f", weaponDamagePercentMod);
+            weaponDamage = owner->CalculateDamage(m_attackType, normalized, true);
     }            
     else
-    weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
+        weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
     // Whirlwind
     if (m_caster->GetEntry() == 33846)

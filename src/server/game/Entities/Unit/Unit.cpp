@@ -1629,7 +1629,6 @@ uint32 Unit::CalcArmorReducedDamage(Unit const* attacker, Unit const* victim, co
 {
     uint32 newdamage = 0;
     float armor = float(victim->GetArmor());
-    if (attacker->GetEntry() == 27893) attacker = attacker->GetOwner();
 
     // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
     if (attacker)
@@ -9337,7 +9336,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
 bool Unit::IsFriendlyTo(Unit const* unit) const
 { 
-    return GetReactionTo(unit) >= REP_NEUTRAL;
+    return GetReactionTo(unit) >= REP_FRIENDLY;
 }
 
 bool Unit::IsHostileToPlayers() const
@@ -11883,7 +11882,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         if (GetEntry() == 27893)
         {
             if (Unit* owner = GetOwner())
-                return owner->MeleeDamageBonusDone(victim, pdamage, attType, spellProto);
+                return owner->MeleeDamageBonusDone(victim, pdamage, attType, spellProto) / 2;
         }
     }
 

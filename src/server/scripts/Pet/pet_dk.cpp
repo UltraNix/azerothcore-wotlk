@@ -37,11 +37,7 @@ enum DeathKnightSpells
     SPELL_DK_DISMISS_GARGOYLE  = 50515,
     SPELL_DK_SANCTUARY         = 54661,
     SPELL_DK_NIGHT_OF_THE_DEAD = 62137,
-    SPELL_DK_PET_SCALING       = 61017,
-    SPELL_DK_RUNE_WEAPON_SCALING_01 = 51905,
-    SPELL_DK_RUNE_WEAPON_SCALING = 51906,
-    SPELL_PET_SCALING__MASTER_SPELL_06__SPELL_HIT_EXPERTISE_SPELL_PENETRATION = 67561,
-    SPELL_AGGRO_8_YD_PBAE = 49813,
+    SPELL_DK_PET_SCALING       = 61017
 };
 
 class npc_pet_dk_ebon_gargoyle : public CreatureScript
@@ -365,124 +361,25 @@ class npc_pet_dk_army_of_the_dead : public CreatureScript
         }
 };
 
-enum DancingRuneWeapon {
-    ATTACK
-};
-
 class npc_pet_dk_dancing_rune_weapon : public CreatureScript
 {
     public:
         npc_pet_dk_dancing_rune_weapon() : CreatureScript("npc_pet_dk_dancing_rune_weapon") { }
 
-        struct npc_pet_dk_dancing_rune_weaponAI : public ScriptedAI
+        struct npc_pet_dk_dancing_rune_weaponAI : public NullCreatureAI
         {
-            npc_pet_dk_dancing_rune_weaponAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_pet_dk_dancing_rune_weaponAI(Creature* creature) : NullCreatureAI(creature) { }
 
             void InitializeAI() override
             {
-                ScriptedAI::InitializeAI();
-                me->SetReactState(REACT_AGGRESSIVE);
-                sLog->outBasic("dziala init");
                 // Xinef: Hit / Expertise scaling
                 me->AddAura(61017, me);
-                
-                //me->setAttackTimer(BASE_ATTACK, 3500);
-                owner = me->GetOwner();
-                sLog->outBasic("Min: %f", owner->ToPlayer()->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE));
-                sLog->outBasic("Max: %f", owner->ToPlayer()->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE));
-                me->SetLevel(owner->getLevel());
-                me->SetFloatValue(UNIT_FIELD_MINDAMAGE, owner->ToPlayer()->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE)/2.0f);
-                me->SetInt32Value(UNIT_FIELD_ATTACK_POWER, owner->GetInt32Value(UNIT_FIELD_ATTACK_POWER));
-                me->SetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, owner->GetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS));
-                me->SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, owner->GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER));
-                me->SetFloatValue(UNIT_FIELD_MAXDAMAGE, owner->ToPlayer()->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE)/2.0f);
-                UpdateVictim();
+                if (Unit* owner = me->GetOwner())
+                    me->GetMotionMaster()->MoveFollow(owner, 0.01f, me->GetFollowAngle(), MOTION_SLOT_CONTROLLED);
+                NullCreatureAI::InitializeAI();
             }
-
-            /*void DamageDealt(Unit* attacker, uint32& damage, DamageEffectType damagetype) override
-            {
-                if (!owner)return;
-                sLog->outBasic("DMG przed: %d", damage);
-                CalcDamageInfo damageInfo;
-                owner->CalculateMeleeDamage(me->GetVictim(), 0, &damageInfo, BASE_ATTACK);
-                damage = damageInfo.damage / 2;
-                me->SetFloatValue(UNIT_FIELD_MINDAMAGE, (float)damageInfo.damage - 1.0f);
-                me->SetFloatValue(UNIT_FIELD_MAXDAMAGE, (float)damageInfo.damage - 1.0f);
-                me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (float)damageInfo.damage-1.0f);
-                me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (float)damageInfo.damage+1.0f);
-                sLog->outBasic("DMG: %d", damage);
-            }*/
-
-            //void AttackStart(Unit* who) override
-            //{
-            //    if (!owner) return;
-            //    //if (!UpdateVictim()) return;
-            //    //if (!me->CanStartAttack(who))return;
-            //    CalcDamageInfo damageInfo;
-            //    owner->CalculateMeleeDamage(who, 0, &damageInfo, BASE_ATTACK);
-            //    damageInfo.attacker = me;
-            //    damageInfo.damage /= 2.0f;
-            //    //me->SetAttackTime(BASE_ATTACK, 3500)
-            //    sLog->outBasic("dziala atak");
-            //    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (float)damageInfo.damage);
-            //    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (float)damageInfo.damage);
-            //    //me->SendAttackStateUpdate(&damageInfo);
-            //}
-
-            void UpdateAI(uint32 diff) override
-            {
-                if (!UpdateVictim()) {
-                    EnterEvadeMode();
-                    return;
-                }
-                DoMeleeAttackIfReady();
-                sLog->outBasic("dziala update");
-                /*if (me->GetVictim()->HasBreakableByDamageCrowdControlAura(me))
-                {
-                    me->InterruptNonMeleeSpells(false);
-                    return;
-                }*/
-            }
-
-            void EnterEvadeMode()
-            {
-                sLog->outBasic("dziala evade");
-                me->GetMotionMaster()->MoveFollow(owner, 0.01f, me->GetFollowAngle(), MOTION_SLOT_CONTROLLED);
-                //me->AddUnitState(UNIT_STATE_EVADE);
-                me->GetMotionMaster()->MoveTargetedHome();
-                UpdateVictim();
-            }
-
-            //void MoveInLineOfSight(Unit* who)
-            //{
-            //    if (!me->GetVictim() && who->isTargetableForAttack() && (me->IsHostileTo(who)) && who->isInAccessiblePlaceFor(me))
-            //    {
-            //        if (me->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-            //            return;
-
-            //        if (me->IsWithinDistInMap(who, 10.0f))
-            //        {
-            //            //me->AddThreat(who, 100000.0f);
-            //            AttackStart(who);
-            //        }
-            //    }
-            //}
-
-            void Reset()
-            {
-                sLog->outBasic("dziala reset");
-                // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-                if (!me->GetVictim())
-                    if (Unit *tgt = me->SelectNearestTarget(10.0f))
-                    {
-                        AttackStart(tgt);
-                    }
-            }
-
-        private:
-            Unit* owner;
-            EventMap _events;
         };
+
         CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_pet_dk_dancing_rune_weaponAI (creature);
