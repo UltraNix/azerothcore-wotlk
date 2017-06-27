@@ -242,6 +242,8 @@ enum Misc
     CRITERIA_LUMBERJACKED                       = 21686,
 };
 
+std::vector<uint32> adds = { NPC_ANCIENT_WATER_SPIRIT, NPC_STORM_LASHER, NPC_SNAPLASHER, NPC_ANCIENT_CONSERVATOR, NPC_DETONATING_LASHER };
+
 class boss_freya : public CreatureScript
 {
 public:
@@ -273,6 +275,8 @@ public:
         uint8 _lumberjacked;
         bool _respawningTrio;
         bool _backToNature;
+        bool _hastenWave;
+        bool _firstWaveSpawned;
         uint8 _deforestation;
         
         uint64 _elderGUID[3];
@@ -300,6 +304,8 @@ public:
             _spawnedAmount = 0;
             _trioKilled = 0;
             _waveNumber = urand(1,3);
+            _hastenWave = false;
+            _firstWaveSpawned = false;
             _respawningTrio = false;
             _backToNature = true;
             _deforestation = 0;
@@ -389,6 +395,14 @@ public:
         void JustSummoned(Creature* cr)
         {
             summons.Summon(cr);
+        }
+
+        bool IsWaveAlive()
+        {
+            for (auto itr : adds)
+                if (me->FindNearestCreature(itr, 250.0f, true))
+                    return true;
+            return false;
         }
 
         void SpawnWave()
@@ -572,6 +586,12 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (_firstWaveSpawned && !_hastenWave && !IsWaveAlive())
+            {
+                events.RescheduleEvent(EVENT_FREYA_ADDS_SPAM, urand(5000, 10000), 0, EVENT_PHASE_ADDS);
+                _hastenWave = true;
+            }
+
             events.Update(diff);
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -579,6 +599,9 @@ public:
             switch (events.GetEvent())
             {
             case EVENT_FREYA_ADDS_SPAM:
+                _hastenWave = false;
+                if (!_firstWaveSpawned)
+                    _firstWaveSpawned = true;
                 if (_spawnedAmount < 6)
                     SpawnWave();
                 else if (me->GetAura(SPELL_ATTUNED_TO_NATURE))
@@ -590,7 +613,8 @@ public:
                     return;
                 }
                 _spawnedAmount++;
-                events.RepeatEvent(60000);
+                events.PopEvent();
+                events.ScheduleEvent(EVENT_FREYA_ADDS_SPAM, 60000, 0, EVENT_PHASE_ADDS);
                 break;
             case EVENT_FREYA_LIFEBINDER:
             {
