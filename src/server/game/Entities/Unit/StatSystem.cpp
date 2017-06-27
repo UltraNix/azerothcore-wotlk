@@ -1232,11 +1232,6 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
         val = GetStat(STAT_STRENGTH) - 10.0f;
     else if (IsPetGhoul())                                         // DK's ghoul attack power
         val = 589 /*xinef: base ap!*/ + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY);
-    else if (GetEntry() == 27893) {
-        if (GetOwner()) {
-            val = GetOwner()->GetInt32Value(UNIT_FIELD_ATTACK_POWER) / 2;
-        }
-    }
     else
         val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
 

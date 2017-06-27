@@ -4077,10 +4077,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 55268:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_BLOCKABLE_SPELL;
             break;
-        //Summon Gargoyle
-        case 49206:
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
-            break;
+
 
 
         /////////////////////////////////
@@ -4573,6 +4570,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 50990: // Flame Breath (Catapult)
             spellInfo->EffectRadiusIndex[EFFECT_0] = 19; // 18yd
             break;
+        case 10790: // Tiger
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;		
         case 31700: // Black Qiraji Battle Tank
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[EFFECT_2] = 99;
