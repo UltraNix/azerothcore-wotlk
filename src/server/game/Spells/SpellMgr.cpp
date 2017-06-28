@@ -2707,50 +2707,6 @@ inline void ApplySpellFix(std::initializer_list<uint32> spellIds, void(*fix)(Spe
     }
 }
 
-std::vector<uint32> partialCorrection =
-{
-    1120,   // Drain Soul r1
-    8288,   // Drain Soul r2
-    8289,   // Drain Soul r3
-    11675,  // Drain Soul r4
-    27217,  // Drain Soul r5
-    47855,  // Drain Soul r6
-    49184,  // Howling Blast r1
-    51409,  // Howling Blast r2
-    51410,  // Howling Blast r3
-    51411,  // Howling Blast r4
-    5570,   // Insect Swarm r1
-    24974,  // Insect Swarm r2
-    24975,  // Insect Swarm r3
-    24976,  // Insect Swarm r4
-    24977,  // Insect Swarm r5
-    27013,  // Insect Swarm r6
-    48468,  // Insect Swarm r7
-    20733,  // Black Arrow r1
-    63668,  // Black Arrow r2
-    63669,  // Black Arrow r3
-    63670,  // Black Arrow r4
-    63671,  // Black Arrow r5
-    63672,  // Black Arrow r6
-    47528,  // Mind Freeze r1
-    57994,  // Wind Shear  r1
-    60103,  // Lava Lash r1
-    8042,   // Earth Shock r1
-    8044,   // Earth Shock r2
-    8045,   // Earth Shock r3
-    8046,   // Earth Shock r4
-    10412,  // Earth Shock r5
-    10413,  // Earth Shock r6
-    10414,  // Earth Shock r7
-    25454,  // Earth Shock r8
-    49230,  // Earth Shock r9
-    49231,  // Earth Shock r10
-    32645,  // Envenom r1
-    32684,  // Envenom r2
-    57992,  // Envenom r3
-    57993,  // Envenom r4
-};
-
 void SpellMgr::LoadSpellCustomAttr()
 {
     uint32 oldMSTime = getMSTime();
@@ -2868,12 +2824,8 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         }
 
-        for (uint8 i = 0; i < partialCorrection.size(); i++)
-            if (spellInfo->Id == partialCorrection[i])
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NOT_BINARY_SPELL;
-
         // Xinef: spells ignoring hit result should not be binary
-        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT) || !spellInfo->HasAttribute(SPELL_ATTR0_CU_NOT_BINARY_SPELL))
+        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
         {
             for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
             {

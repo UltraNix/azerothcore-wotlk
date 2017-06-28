@@ -2551,6 +2551,11 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (spell->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
         return SPELL_MISS_NONE;
 
+    // Partial resist temporary
+    for (uint8 i = 0; i < partialCorrection.size(); i++)
+        if (spell->Id == partialCorrection[i] && victim->GetTypeId() != TYPEID_PLAYER)
+            return SPELL_MISS_NONE;
+ 
     WeaponAttackType attType = BASE_ATTACK;
 
     // Check damage class instead of attack type to correctly handle judgements
@@ -2723,6 +2728,11 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     // xinef: skip all calculations, proof: Toxic Tolerance quest
     if (spell->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
         return SPELL_MISS_NONE;
+
+    // Partial resist temporary
+    for (uint8 i = 0; i < partialCorrection.size(); i++)
+        if (spell->Id == partialCorrection[i] && victim->GetTypeId() != TYPEID_PLAYER)
+            return SPELL_MISS_NONE;
 
     // @todo: move this out of this function
     switch (spell->Id)
