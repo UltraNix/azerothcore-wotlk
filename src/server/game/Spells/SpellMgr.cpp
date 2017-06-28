@@ -2873,10 +2873,13 @@ void SpellMgr::LoadSpellCustomAttr()
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NOT_BINARY_SPELL;
 
         // Xinef: spells ignoring hit result should not be binary
-        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT) || !spellInfo->HasAttribute(SPELL_ATTR0_CU_NOT_BINARY_SPELL))
+        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
         {
             for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
             {
+                if (spellInfo->HasAttribute(SPELL_ATTR0_CU_NOT_BINARY_SPELL))
+                    continue;
+
                 if (spellInfo->Effects[j].Effect)
                 {
                     switch(spellInfo->Effects[j].Effect)
