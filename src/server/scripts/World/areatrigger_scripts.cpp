@@ -220,10 +220,12 @@ class AreaTrigger_at_last_rites : public AreaTriggerScript
         {
             QuestStatus QLR = player->GetQuestStatus(QUEST_LAST_RITES);
             QuestStatus QBT = player->GetQuestStatus(QUEST_BREAKING_THROUGH);
-            if (!(QLR == QUEST_STATUS_INCOMPLETE || QLR  == QUEST_STATUS_COMPLETE ||
-                  QBT == QUEST_STATUS_INCOMPLETE || QBT == QUEST_STATUS_COMPLETE))
-                return false;
-
+            if (!(player->IsQuestRewarded(QUEST_LAST_RITES) || player->IsQuestRewarded(QUEST_BREAKING_THROUGH)))
+            {
+                if (!(  QLR == QUEST_STATUS_INCOMPLETE || QLR == QUEST_STATUS_COMPLETE ||
+                        QBT == QUEST_STATUS_INCOMPLETE || QBT == QUEST_STATUS_COMPLETE))
+                    return false;
+            }
             WorldLocation pPosition;
 
             switch (trigger->id)
