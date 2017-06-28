@@ -1973,8 +1973,14 @@ public:
     {
         npc_ulduar_proximity_mineAI(Creature *pCreature) : ScriptedAI(pCreature)
         {
+            _reached = false;
             _exploded = false;
             _events.ScheduleEvent(EVENT_EXPLODE, 35000);
+        }
+
+        void MovementInform(uint32 /*type*/, uint32 /*id*/) override
+        {
+            _reached = true;
         }
 
         void AttackStart(Unit* /*who*/) {}
@@ -1993,6 +1999,9 @@ public:
         void UpdateAI(uint32 diff)
         {
             _events.Update(diff);
+
+            if (!_reached)
+                return;
 
             if (!_exploded && SelectTargetFromPlayerList(1.9f))
             {
@@ -2018,7 +2027,7 @@ public:
         }
 
     private:
-        bool _exploded;
+        bool _exploded, _reached;
         EventMap _events;
     };
 };
