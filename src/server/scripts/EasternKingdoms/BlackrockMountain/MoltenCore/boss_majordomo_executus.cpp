@@ -307,7 +307,7 @@ struct boss_majordomoAI : public BossAI
         uint8 _addsKilled;
         Creature* const _GetRagnaros()
         {
-            return ObjectAccessor::GetCreature(*me, instance->GetData64(BOSS_RAGNAROS));
+            return instance->GetCreature(BOSS_RAGNAROS);
         }
 };
 
