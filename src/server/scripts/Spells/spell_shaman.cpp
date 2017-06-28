@@ -563,14 +563,13 @@ class spell_sha_bloodlust : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_SATED))
-                    return false;
-                return true;
+                return ValidateSpellInfo({ SPELL_SHAMAN_EXHAUSTION, SPELL_SHAMAN_SATED });
             }
 
             void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
             }
 
             void ApplyDebuff()
@@ -1018,14 +1017,13 @@ class spell_sha_heroism : public SpellScriptLoader
 
             bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_EXHAUSTION))
-                    return false;
-                return true;
+                return ValidateSpellInfo({ SPELL_SHAMAN_EXHAUSTION, SPELL_SHAMAN_SATED });
             }
 
             void RemoveInvalidTargets(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_EXHAUSTION));
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SHAMAN_SATED));
             }
 
             void ApplyDebuff()
@@ -1036,9 +1034,7 @@ class spell_sha_heroism : public SpellScriptLoader
 
             void Register()
             {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_2, TARGET_UNIT_CASTER_AREA_RAID);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_heroism_SpellScript::RemoveInvalidTargets, EFFECT_ALL, TARGET_UNIT_CASTER_AREA_RAID);
                 AfterHit += SpellHitFn(spell_sha_heroism_SpellScript::ApplyDebuff);
             }
         };
