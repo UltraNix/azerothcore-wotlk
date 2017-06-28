@@ -4080,7 +4080,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 55268:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_BLOCKABLE_SPELL;
             break;
-
+        //Summon Gargoyle
+        case 49206:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            break;
 
 
         /////////////////////////////////
