@@ -92,6 +92,9 @@ void DistractMovementGenerator::Initialize(Unit* owner)
     if (!owner->IsStandState())
         owner->SetStandState(UNIT_STAND_STATE_STAND);
 
+    // Channeling spells should be interrupted
+    owner->InterruptSpell(CURRENT_CHANNELED_SPELL);
+
     owner->AddUnitState(UNIT_STATE_DISTRACTED);
 }
 
