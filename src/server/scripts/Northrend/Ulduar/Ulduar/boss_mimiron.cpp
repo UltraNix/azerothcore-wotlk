@@ -27,10 +27,11 @@ enum SpellData
 
     SPELL_SHOCK_BLAST                                = 63631,
 
-    SPELL_PROXIMITY_MINES                            = 63027,
-    NPC_PROXIMITY_MINE                               = 34362,
+    // Proximity Mines
+    SPELL_PROXIMITY_MINES                            = 63027, // Cast by Leviathan MK II
     SPELL_MINE_EXPLOSION_25                          = 63009,
     SPELL_MINE_EXPLOSION_10                          = 66351,
+    SPELL_SUMMON_PROXIMITY_MINE                      = 65347,
 
     // PHASE 2:
     SPELL_HEAT_WAVE                                  = 64533,
@@ -1143,21 +1144,25 @@ public:
                 {
                     case EVENT_SPELL_NAPALM_SHELL:
                     {
-                        Player* pTarget = nullptr;
-                        std::vector<Player*> pList;
-                        Map::PlayerList const &pl = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
-                            if (Player* plr = itr->GetSource())
-                                if (plr->IsAlive() && plr->GetDistance2d(me) > 15.0f)
-                                    pList.push_back(plr);
+                        Player* target = nullptr;
+                        std::vector<Player*> list;
+                        Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                            if (Player* player = itr->GetSource())
+                                if (player->IsAlive() && player->GetDistance2d(me) > 15.0f)
+                                    list.push_back(player);
 
-                        if (!pList.empty())
-                            pTarget = pList[urand(0, pList.size() - 1)];
+                        if (!list.empty())
+                            target = Trinity::Containers::SelectRandomContainerElement(list);
                         else
-                            pTarget = (Player*)SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true);
+                        {
+                            if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                                if (tar->IsPlayer())
+                                    target = tar->ToPlayer();
+                        }
 
-                        if (pTarget)
-                            cannon->CastSpell(pTarget, SPELL_NAPALM_SHELL, false);
+                        if (target && cannon)
+                            cannon->CastSpell(target, SPELL_NAPALM_SHELL, false);
 
                         events.Repeat(urand(5000, 10000));
                     }
@@ -1176,23 +1181,8 @@ public:
                         events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 10000);
                         break;
                     case EVENT_PROXIMITY_MINES_1:
-                    {
-                        float angle = rand_norm() * urand(0, 4) * M_PI;
-                        float x, y, z;
-                        me->GetPosition(x, y, z);
-
-                        for (uint8 i = 0; i < 13; ++i)
-                        {
-                            if (i == 7)
-                                continue;
-
-                            float v_xmin = 0.1f * cos(angle + i * M_PI / 6);
-                            float v_ymin = 0.1f * sin(angle + i * M_PI / 6);
-                            if (Creature* pmNPC = me->SummonCreature(NPC_PROXIMITY_MINE, x + v_xmin, y + v_ymin, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 40000))
-                                pmNPC->KnockbackFrom(x, y, 6.0f, 25.0f);
-                        }
-                    }
-                    break;
+                        DoCastAOE(SPELL_PROXIMITY_MINES);
+                        break;
                     case EVENT_FLAME_SUPPRESSION_50000:
                         DoCastSelf(SPELL_FLAME_SUPPRESSANT_50000yd);
                         break;
@@ -1956,6 +1946,7 @@ public:
 enum Mine
 {
     EVENT_EXPLODE = 1,
+    EVENT_ARM,
     EVENT_DESPAWN
 };
 
@@ -1966,21 +1957,17 @@ public:
 
     CreatureAI* GetAI(Creature* pCreature) const
     {
-        return new npc_ulduar_proximity_mineAI (pCreature);
+        return new npc_ulduar_proximity_mineAI(pCreature);
     }
 
     struct npc_ulduar_proximity_mineAI : public ScriptedAI
     {
         npc_ulduar_proximity_mineAI(Creature *pCreature) : ScriptedAI(pCreature)
         {
-            _reached = false;
+            _armed = false;
             _exploded = false;
             _events.ScheduleEvent(EVENT_EXPLODE, 35000);
-        }
-
-        void MovementInform(uint32 /*type*/, uint32 /*id*/) override
-        {
-            _reached = true;
+            _events.ScheduleEvent(EVENT_ARM, 500);
         }
 
         void AttackStart(Unit* /*who*/) {}
@@ -2000,10 +1987,7 @@ public:
         {
             _events.Update(diff);
 
-            if (!_reached)
-                return;
-
-            if (!_exploded && SelectTargetFromPlayerList(1.9f))
+            if (!_exploded && _armed && SelectTargetFromPlayerList(1.9f))
             {
                 _exploded = true;
                 _events.RescheduleEvent(EVENT_EXPLODE, 0);
@@ -2017,6 +2001,9 @@ public:
                         DoCastSelf(SPELL_MINE_EXPLOSION);
                         _events.ScheduleEvent(EVENT_DESPAWN, 1000);
                         break;
+                    case EVENT_ARM:
+                        _armed = true;
+                        break;
                     case EVENT_DESPAWN:
                         me->DespawnOrUnsummon();
                         break;
@@ -2027,7 +2014,7 @@ public:
         }
 
     private:
-        bool _exploded, _reached;
+        bool _exploded, _armed;
         EventMap _events;
     };
 };
@@ -2796,6 +2783,38 @@ public:
     }
 };
 
+class spell_mimiron_proximity_mines : public SpellScriptLoader
+{
+public:
+    spell_mimiron_proximity_mines() : SpellScriptLoader("spell_mimiron_proximity_mines") { }
+
+    class spell_mimiron_proximity_mines_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mimiron_proximity_mines_SpellScript);
+
+        bool Validate(SpellInfo const* /*spell*/) override
+        {
+            return ValidateSpellInfo({ SPELL_SUMMON_PROXIMITY_MINE });
+        }
+
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            for (uint8 i = 0; i < 10; ++i)
+                GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_PROXIMITY_MINE, true);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mimiron_proximity_mines_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mimiron_proximity_mines_SpellScript();
+    }
+};
+
 void AddSC_boss_mimiron()
 {
     new boss_mimiron();
@@ -2824,4 +2843,6 @@ void AddSC_boss_mimiron()
     new spell_lasser_barrage_targeting();
     new spell_lasser_barrage_rotating();
     new spell_spinning_up_mimiron();
+
+    new spell_mimiron_proximity_mines();
 }
