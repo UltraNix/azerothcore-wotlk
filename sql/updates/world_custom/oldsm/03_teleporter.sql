@@ -15,7 +15,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 
 DELETE FROM `creature` WHERE `id` = @TELEPORT;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID, @TELEPORT, 0, 1, 1, 0, 1, 2926.5149, -737.7026, 153.9836, 1.130361, 604800, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+(@CGUID, @TELEPORT, 0, 1, 1, 0, 1, 2926.5149, -737.7026, 153.9836, 1.130361, 604800, 0, 0, 0, 0, 0, 0, 0, 0);
 
 DELETE FROM `game_event_creature` WHERE `eventEntry` = 88;
 INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
