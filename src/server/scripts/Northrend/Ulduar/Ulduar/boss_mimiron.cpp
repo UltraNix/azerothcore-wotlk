@@ -2611,7 +2611,7 @@ void AddSC_boss_mimiron()
     new CreatureAILoader<npc_ulduar_magnetic_coreAI>("npc_ulduar_magnetic_core");
     new CreatureAILoader<npc_ulduar_bot_summon_triggerAI>("npc_ulduar_bot_summon_trigger");
     new AuraScriptLoaderEx<spell_mimiron_rapid_burst_AuraScript>("spell_mimiron_rapid_burst");
-    new SpellScriptLoaderEx<spell_rapid_burst_targeting_SpellScript>("spell_rapid_burst_targeting_SpellScript");
+    new SpellScriptLoaderEx<spell_rapid_burst_targeting_SpellScript>("spell_rapid_burst_targeting");
     new go_ulduar_do_not_push_this_button();
     new CreatureAILoader<npc_ulduar_flames_initialAI>("npc_ulduar_flames_initial");
     new CreatureAILoader<npc_ulduar_flames_spreadAI>("npc_ulduar_flames_spread");
