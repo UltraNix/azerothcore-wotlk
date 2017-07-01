@@ -852,7 +852,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET
         && effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
         return;
-
+    bool hasAura = false;
+    if (m_caster->HasAura(14177))hasAura = true;
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
 
     // todo: move those to spell scripts
@@ -980,7 +981,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         ;//sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::EffectTriggerSpell spell %u tried to trigger unknown spell %u", m_spellInfo->Id, triggered_spell_id);
         return;
     }
-
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
@@ -1019,6 +1019,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
 
     // original caster guid only for GO cast
     m_caster->CastSpell(targets, spellInfo, &values, TriggerCastFlags(TRIGGERED_FULL_MASK&~TRIGGERED_NO_PERIODIC_RESET), NULL, NULL, m_originalCasterGUID);
+    if (spellInfo->SpellFamilyFlags[1] & 0x2 && hasAura)m_caster->AddAura(14177,m_caster);
 }
 
 void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
