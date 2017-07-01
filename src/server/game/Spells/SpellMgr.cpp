@@ -5088,7 +5088,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_SRC_AREA_ALLY;
             spellInfo->EffectPointsPerComboPoint[1] = 2500;
             spellInfo->EffectBasePoints[1] = 2499;
-            spellInfo->rangeIndex = 1;
+            spellInfo->rangeIndex = RANGE_INDEX_25YD;
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         //Alexstrasza - Gift
