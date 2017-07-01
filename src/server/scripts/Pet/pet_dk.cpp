@@ -262,7 +262,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
 
                     if (!_withGhoul)
                     {
-                        if (!UpdateVictimWithGaze())
+                        if (!me->GetVictim())
                         {
                             MySelectNextTarget();
                             return;
@@ -330,6 +330,25 @@ class npc_pet_dk_ghoul : public CreatureScript
             {
                 if (me->IsGuardian() || me->IsSummon())
                     me->ToTempSummon()->UnSummon();
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (me->GetVictim() || UpdateVictim())
+                {
+                    events.Update(diff);
+
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
+
+                    if (uint32 spellId = events.ExecuteEvent())
+                    {
+                        DoCast(spellId);
+                        events.ScheduleEvent(spellId, AISpellInfo[spellId].cooldown + rand() % AISpellInfo[spellId].cooldown);
+                    }
+                    else
+                        DoMeleeAttackIfReady();
+                }
             }
         };
 
