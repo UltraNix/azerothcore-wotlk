@@ -421,6 +421,7 @@ struct Position
     float GetPositionY() const { return m_positionY; }
     float GetPositionZ() const { return m_positionZ; }
     float GetOrientation() const { return m_orientation; }
+    Position GetPosition() const { return *this; }
 
     void GetPosition(float &x, float &y) const
         { x = m_positionX; y = m_positionY; }
@@ -484,6 +485,11 @@ struct Position
     bool HasInArc(float arcangle, const Position* pos, float targetRadius = 0.0f) const;
     bool HasInLine(WorldObject const* target, float width) const;
     std::string ToString() const;
+
+    static float RandomOrientation()
+    {
+        return frand(0.0f, 2 * M_PI);
+    }
 
     // modulos a radian orientation to the range of 0..2PI
     static float NormalizeOrientation(float o)
