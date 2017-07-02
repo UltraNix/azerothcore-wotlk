@@ -966,6 +966,73 @@ public:
     }
 };
 
+enum Naberius
+{
+    SPELL_CHAINS_OF_NABERIUS = 36146,
+    SPELL_FROSTBOLT          = 15497,
+    SPELL_CHILL_NOVA         = 36148,
+
+    EVENT_CHAINS_OF_NABERIUS = 1,
+    EVENT_FROSTBOLT,
+    EVENT_CHILL_NOVA
+};
+
+struct npc_naberiusAI : public ScriptedAI
+{
+    npc_naberiusAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_CHAINS_OF_NABERIUS, urand(10000, 15000));
+        _events.ScheduleEvent(EVENT_FROSTBOLT, urand(1000, 4000));
+        _events.ScheduleEvent(EVENT_CHILL_NOVA, urand(2000, 5000));
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_CHAINS_OF_NABERIUS:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        DoCast(target, SPELL_CHAINS_OF_NABERIUS);
+                    _events.Repeat(urand(25000, 30000));
+                    break;
+                case EVENT_FROSTBOLT:
+                    DoCastVictim(SPELL_FROSTBOLT);
+                    _events.Repeat(4000);
+                    break;
+                case EVENT_CHILL_NOVA:
+                    DoCastAOE(SPELL_CHILL_NOVA);
+                    _events.Repeat(urand(10000, 12000));
+                    break;
+                default:
+                    break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+        }
+    }
+
+private:
+    EventMap _events;
+};
+
 void AddSC_netherstorm()
 {
     // Ours
@@ -978,4 +1045,5 @@ void AddSC_netherstorm()
     new npc_phase_hunter();
     new npc_bessy();
     new npc_maxx_a_million_escort();
+    new CreatureAILoader<npc_naberiusAI>("npc_naberius");
 }
