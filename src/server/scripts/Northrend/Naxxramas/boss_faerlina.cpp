@@ -9,10 +9,10 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 
 enum Yells
 {
-    SAY_GREET                          = 0,
-    SAY_AGGRO                          = 1,
-    SAY_SLAY                           = 2,
-    SAY_DEATH                          = 3
+    SAY_GREET,
+    SAY_AGGRO,
+    SAY_SLAY,
+    SAY_DEATH
 };
 
 enum Spells
@@ -29,8 +29,8 @@ enum Spells
 enum Events
 {
     EVENT_SPELL_POISON_BOLT            = 1,
-    EVENT_SPELL_RAIN_OF_FIRE           = 2,
-    EVENT_SPELL_FRENZY                 = 3
+    EVENT_SPELL_RAIN_OF_FIRE,
+    EVENT_SPELL_FRENZY
 };
 
 enum Misc
@@ -39,166 +39,159 @@ enum Misc
     NPC_NAXXRAMAS_FOLLOWER             = 16505
 };
 
-class boss_faerlina : public CreatureScript
+enum SummonGroups
 {
-public:
-    boss_faerlina() : CreatureScript("boss_faerlina") { }
+    SUMMON_GROUP_WORSHIPPERS           = 1,
+    SUMMON_GROUP_FOLLOWERS
+};
 
-    CreatureAI* GetAI(Creature* pCreature) const
+struct boss_faerlinaAI : public ScriptedAI
+{
+    boss_faerlinaAI(Creature* creature) : ScriptedAI(creature), summons(me)
     {
-        return new boss_faerlinaAI (pCreature);
+        instance = me->GetInstanceScript();
+        _greet = false;
     }
 
-    struct boss_faerlinaAI : public ScriptedAI
+    void SummonHelpers()
     {
-        boss_faerlinaAI(Creature *c) : ScriptedAI(c), summons(me)
+        me->SummonCreatureGroup(SUMMON_GROUP_WORSHIPPERS);
+        if (Is25ManRaid())
+            me->SummonCreatureGroup(SUMMON_GROUP_FOLLOWERS);
+    }
+
+    void JustSummoned(Creature* creature) override
+    { 
+        if (creature)
+            creature->setFaction(me->getFaction());
+
+        summons.Summon(creature);
+    }
+
+    void Reset() override
+    {
+        events.Reset();
+        summons.DespawnAll();
+        SummonHelpers();
+
+        if (instance)
+            instance->SetData(EVENT_FAERLINA, NOT_STARTED);
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        me->SetInCombatWithZone();
+        summons.DoZoneInCombat();
+
+        Talk(SAY_AGGRO);
+        events.ScheduleEvent(EVENT_SPELL_POISON_BOLT, urand(12000, 15000));
+        events.ScheduleEvent(EVENT_SPELL_RAIN_OF_FIRE, urand(6000, 18000));
+        events.ScheduleEvent(EVENT_SPELL_FRENZY, urand(60000, 80000), 1);
+        events.SetPhase(1);
+
+        if (instance)
+            instance->SetData(EVENT_FAERLINA, IN_PROGRESS);
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!_greet && who->GetTypeId() == TYPEID_PLAYER)
         {
-            pInstance = me->GetInstanceScript();
-            sayGreet = false;
+            Talk(SAY_GREET);
+            _greet = true;
         }
 
-        InstanceScript* pInstance;
-        EventMap events;
-        SummonList summons;
-        bool sayGreet;
+        ScriptedAI::MoveInLineOfSight(who);
+    }
 
-        void SummonHelpers()
+    void KilledUnit(Unit* who) override
+    {
+        if (who->IsPlayer() && !urand(0, 3))
+            Talk(SAY_SLAY);
+
+        if (instance)
+            instance->SetData(DATA_IMMORTAL_FAIL, 0);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        Talk(SAY_DEATH);
+        if (instance)
+            instance->SetData(EVENT_FAERLINA, DONE);
+    }
+
+    void SpellHit(Unit* /*caster*/, const SpellInfo *spell) override
+    {
+        if (spell->Id == SPELL_WIDOWS_EMBRACE)
         {
-            me->SummonCreature(NPC_NAXXRAMAS_WORSHIPPER, 3362.66f, -3620.97f, 261.08f, 4.57276f);
-            me->SummonCreature(NPC_NAXXRAMAS_WORSHIPPER, 3344.3f, -3618.31f, 261.08f, 4.69494f);
-            me->SummonCreature(NPC_NAXXRAMAS_WORSHIPPER, 3356.71f, -3620.05f, 261.08f, 4.57276f);
-            me->SummonCreature(NPC_NAXXRAMAS_WORSHIPPER, 3350.26f, -3619.11f, 261.08f, 4.67748f);
-
-            // Followers
-            if (Is25ManRaid())
+            me->MonsterTextEmote("%s is affected by Widow's Embrace!", 0, true);
+            if (me->HasAura(RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25)))
             {
-                me->SummonCreature(NPC_NAXXRAMAS_FOLLOWER, 3347.49f, -3617.59f, 261.0f, 4.49f);
-                me->SummonCreature(NPC_NAXXRAMAS_FOLLOWER, 3359.64f, -3619.16f, 261.0f, 4.56f);
+                me->RemoveAurasDueToSpell(RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25));
+                events.DelayEvents(60000, 1);
             }
+            else
+                events.DelayEvents(30000, 1);
+
+            if (instance)
+                instance->SetData(DATA_FRENZY_REMOVED, 0);
         }
+    }
 
-        void JustSummoned(Creature* cr) 
-        { 
-            if (cr) 
-                cr->setFaction(me->getFaction());
+    void UpdateAI(uint32 diff) override
+    {
+        if (!me->IsInCombat() && !summons.empty() && me->SelectNearestPlayer(40.0f))
+            for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
+                if (Creature* creature = ObjectAccessor::GetCreature(*me, *itr))
+                    if (creature->IsInCombat())
+                        DoZoneInCombat();
 
-            summons.Summon(cr);  
-        }
+        if (!UpdateVictim())
+            return;
 
-        void Reset()
+        events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = events.ExecuteEvent())
         {
-            events.Reset();
-            summons.DespawnAll();
-            SummonHelpers();
-
-            if (pInstance)
-                pInstance->SetData(EVENT_FAERLINA, NOT_STARTED);
-        }
-
-        void EnterCombat(Unit *who)
-        {
-            me->SetInCombatWithZone();
-            summons.DoZoneInCombat();
-
-            Talk(SAY_AGGRO);
-            events.ScheduleEvent(EVENT_SPELL_POISON_BOLT, urand(12000, 15000));
-            events.ScheduleEvent(EVENT_SPELL_RAIN_OF_FIRE, urand(6000, 18000));
-            events.ScheduleEvent(EVENT_SPELL_FRENZY, urand(60000, 80000), 1);
-            events.SetPhase(1);
-
-            if (pInstance)
-                pInstance->SetData(EVENT_FAERLINA, IN_PROGRESS);
-        }
-
-        void MoveInLineOfSight(Unit *who)
-        {
-            if (!sayGreet && who->GetTypeId() == TYPEID_PLAYER)
-            {
-                Talk(SAY_GREET);
-                sayGreet = true;
-            }
-
-            ScriptedAI::MoveInLineOfSight(who);
-        }
-
-        void KilledUnit(Unit* who)
-        {
-            if (who->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            if (!urand(0, 3))
-                Talk(SAY_SLAY);
-
-            if (pInstance)
-                pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
-        }
-
-        void JustDied(Unit* Killer)
-        {
-            Talk(SAY_DEATH);
-            if (pInstance)
-                pInstance->SetData(EVENT_FAERLINA, DONE);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!me->IsInCombat() && !summons.empty() && me->SelectNearestPlayer(40.0f))
-                for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                    if (Creature* creature = ObjectAccessor::GetCreature(*me, *itr))
-                        if (creature->IsInCombat())
-                            DoZoneInCombat();
-
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.GetEvent())
+            switch (eventId)
             {
                 case EVENT_SPELL_POISON_BOLT:
                     if (!me->HasAura(SPELL_WIDOWS_EMBRACE))
                         me->CastCustomSpell(RAID_MODE(SPELL_POISON_BOLT_VOLLEY_10, SPELL_POISON_BOLT_VOLLEY_25), SPELLVALUE_MAX_TARGETS, 3, me, false);
-                    events.RepeatEvent(14000);
+                    events.Repeat(14000);
                     break;
                 case EVENT_SPELL_RAIN_OF_FIRE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         me->CastSpell(target, RAID_MODE(SPELL_RAIN_OF_FIRE_10, SPELL_RAIN_OF_FIRE_25), false);
-                    events.RepeatEvent(12000);
+                    events.Repeat(12000);
                     break;
                 case EVENT_SPELL_FRENZY:
                     me->MonsterTextEmote("%s goes into a frenzy!", 0, true);
                     me->CastSpell(me, RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25), true);
-                    events.RepeatEvent(70000);
+                    events.Repeat(70000);
+                    break;
+                default:
                     break;
             }
 
-            DoMeleeAttackIfReady();
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
-        
-        void SpellHit(Unit* caster, const SpellInfo *spell)
-        {
-            if (spell->Id == SPELL_WIDOWS_EMBRACE)
-            {
-                me->MonsterTextEmote("%s is affected by Widow's Embrace!", 0, true);
-                if (me->HasAura(RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25)))
-                {
-                    me->RemoveAurasDueToSpell(RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25));
-                    events.DelayEvents(60000, 1);
-                }
-                else
-                    events.DelayEvents(30000, 1);
 
-                if (pInstance)
-                    pInstance->SetData(DATA_FRENZY_REMOVED, 0);
-            }
-        }
-    };
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    InstanceScript* instance;
+    EventMap events;
+    SummonList summons;
+    bool _greet;
 };
 
 void AddSC_boss_faerlina()
 {
-    new boss_faerlina();
+    new CreatureAILoader<boss_faerlinaAI>("boss_faerlina");
 }
