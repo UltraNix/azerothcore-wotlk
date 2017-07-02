@@ -3043,11 +3043,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
             else if (mod->op == SPELLMOD_GLOBAL_COOLDOWN && spell && !HasSpellMod(mod, spell))
                 continue;
 
-            // xinef: those two mods should be multiplicative (Glyph of Renew)
-            if ((mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT) && spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK)
-                totalmul *= CalculatePct(1.0f, 100.0f+mod->value);
-            else
-                totalmul += CalculatePct(1.0f, mod->value);
+            // xinef lied ~Crackaw
+            totalmul += roundf(CalculatePct(1.0f, mod->value)*100.0f)/100.0f;
         }
 
         DropModCharge(mod, spell);
