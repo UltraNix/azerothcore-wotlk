@@ -114,17 +114,8 @@ struct instance_molten_core_InstanceMapScript : public InstanceScript
         _summonedExecutus = true;
         if (!done)
         {
-            if (Creature* majordomo = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, SummonPositions[0]))
-            {
-                majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[1]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[2]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[3]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_HEALER, SummonPositions[4]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[5]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[6]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[7]);
-                majordomo->SummonCreature(NPC_FLAMEWAKER_ELITE, SummonPositions[8]);
-            }
+            if (Creature* majordomo = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, MajordomoSummonPos))
+                majordomo->SummonCreatureGroup(SUMMON_GROUP_MAJORDOMO);
         }
     }
 
