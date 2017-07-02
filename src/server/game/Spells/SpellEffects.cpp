@@ -3696,16 +3696,30 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
 
     // damage == 0 - heal for caster max health
     if (damage == 0)
+    {
         addhealth = m_caster->GetMaxHealth();
+
+        // Lay on Hands 
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_PALADIN_LAY_ON_HANDS)
+        {
+            if (unitTarget->HasAura(55593)) //Fix for Necrotic Aura
+                addhealth = 0;
+            else { //Fix for Mortal Strike
+                Unit::AuraEffectList const &list = unitTarget->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_PCT);
+                auto end = list.end();
+                for (auto iter = list.begin(); iter != end; ++iter)
+                    if (const SpellInfo* info = sSpellMgr->GetSpellInfo((*iter)->GetId()))
+                        if (const SpellInfo* fInfo = info->GetFirstRankSpell())
+                            if (fInfo->Id == 12294)
+                            {
+                                addhealth >>= 1;
+                                break;
+                            }
+            }
+        }
+    }
     else
         addhealth = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
-
-    // Lay on Hands - Fix for Necrotic Aura
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_PALADIN_LAY_ON_HANDS)
-    {
-        if (unitTarget->HasAura(55593))
-            addhealth = 0;
-    }
 
     m_healing += addhealth;
 }
