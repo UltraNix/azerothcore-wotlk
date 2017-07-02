@@ -2832,6 +2832,17 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
+    if (!m_caster->IsInCombat() && m_caster->IsFriendlyTo(effectUnit) && effectUnit->IsInCombat() && m_spellInfo->IsPositive())
+    {
+        HostileRefManager ref = effectUnit->getHostileRefManager();
+        if (ref.begin()->GetSource())
+        {
+            Unit* target = ref.begin()->GetSource()->GetOwner();
+            if (target)
+                m_caster->SetInCombatWith(target);
+        }
+    }
+
     // Interrupt Spell casting
     if (m_spellInfo->HasAttribute(SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER) && unitTarget->GetTypeId() != TYPEID_PLAYER)
         m_caster->CastSpell(unitTarget, 32747, true);
