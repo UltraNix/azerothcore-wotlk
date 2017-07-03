@@ -17023,25 +17023,6 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 if (playerCharmer && this != charmer->GetFirstControlled())
                     playerCharmer->SendRemoveControlBar();
                 break;
-            //    if (GetTypeId() == TYPEID_UNIT && charmer->getClass() == CLASS_WARLOCK)
-            //    {
-            //        CreatureTemplate const* cinfo = ToCreature()->GetCreatureTemplate();
-            //        if (cinfo && cinfo->type == CREATURE_TYPE_DEMON)
-            //        {
-            //            // to prevent client crash
-            //            SetByteValue(UNIT_FIELD_BYTES_0, 1, (uint8)CLASS_MAGE);
-
-            //            // just to enable stat window
-            //            if (GetCharmInfo())
-            //                GetCharmInfo()->SetPetNumber(sObjectMgr->GeneratePetNumber(), true);
-
-            //            // if charmed two demons the same session, the 2nd gets the 1st one's name
-            //            SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped
-            //        }
-            //    }
-            //    GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, GetFollowAngle());
-            //    playerCharmer->CharmSpellInitialize();
-            //    break;
             default:
                 break;
         }
