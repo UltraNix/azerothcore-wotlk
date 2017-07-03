@@ -411,7 +411,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         break;
                     // Gravity Bomb
                     case 64233:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? (damage + urand(4000, 6000)) : damage);
+                        //damage = (m_caster->GetMap()->Is25ManRaid() ? (damage + urand(4000, 6000)) : damage);
                         break;
                     // Lightning Whirl
                     case 63482:
@@ -513,7 +513,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         
                         damage += int32(CalculatePct(pdamage * baseTotalTicks, pct_dir));
 
-                        uint32 pct_dot = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2)) / 3;
+                        float pct_dot = float(m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2))) / 3.0f;
                         m_spellValue->EffectBasePoints[1] = m_spellInfo->Effects[EFFECT_1].CalcBaseValue(int32(CalculatePct(pdamage * baseTotalTicks, pct_dot)));
 
                         apply_direct_bonus = false;
@@ -1255,7 +1255,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     float x, y, z, orientation;
     destTarget->GetPosition(x, y, z, orientation);
     if (!orientation && m_targets.GetUnitTarget())
-        orientation = m_targets.GetUnitTarget()->GetOrientation();
+        if(m_spellInfo->Id != 57840)orientation = m_targets.GetUnitTarget()->GetOrientation();
     ;//sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell::EffectTeleportUnits - teleport unit to %u %f %f %f %f\n", mapid, x, y, z, orientation);
 
     if (mapid == unitTarget->GetMapId())
