@@ -411,7 +411,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         break;
                     // Gravity Bomb
                     case 64233:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? (damage + urand(4000, 6000)) : damage);
+                        //damage = (m_caster->GetMap()->Is25ManRaid() ? (damage + urand(4000, 6000)) : damage);
                         break;
                     // Lightning Whirl
                     case 63482:
