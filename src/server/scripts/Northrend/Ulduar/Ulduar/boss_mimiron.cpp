@@ -208,6 +208,7 @@ enum EVENTS
     EVENT_EMERGENCY_BOT_ATTACK                       = 70,
 };
 
+
 enum SOUNDS
 {
     SOUND_TANK_INTRO                                 = 15611,
@@ -238,6 +239,7 @@ enum SOUNDS
 #define SPELL_HAND_PULSE_R                           RAID_MODE(SPELL_HAND_PULSE_10_R, SPELL_HAND_PULSE_25_R)
 #define SPELL_HAND_PULSE_L                           RAID_MODE(SPELL_HAND_PULSE_10_L, SPELL_HAND_PULSE_25_L)
 #define SPELL_FROST_BOMB_EXPLOSION                   RAID_MODE(SPELL_FROST_BOMB_EXPLOSION_10, SPELL_FROST_BOMB_EXPLOSION_25)
+
 
 #define TEXT_AGGRO                                   "Oh, my! I wasn't expecting company! The workshop is such a mess! How embarrassing!"
 #define TEXT_BERSERK                                 "Oh, my! It would seem that we are out of time, my friends!"
@@ -283,1618 +285,1662 @@ enum ComputerTalks
 
 Position const LeviathanCenter = { 2744.854736f, 2569.270020f, 364.343629f, 0.0f };
 
-struct boss_mimironAI : public ScriptedAI
+class boss_mimiron : public CreatureScript
 {
-    boss_mimironAI(Creature *pCreature) : ScriptedAI(pCreature), summons(me)
+public:
+    boss_mimiron() : CreatureScript("boss_mimiron") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        pInstance = me->GetInstanceScript();
-        if (!me->IsAlive())
-            if (pInstance)
-                pInstance->SetData(TYPE_MIMIRON, DONE);
-        bIsEvading = false;
+        return new boss_mimironAI (pCreature);
     }
 
-    InstanceScript* pInstance;
-    EventMap events;
-    SummonList summons;
-    bool bIsEvading;
-    bool hardmode;
-    bool berserk;
-    bool bAchievProximityMine;
-    bool bAchievBombBot;
-    bool bAchievRocketStrike;
-    uint32 allowedFlameSpreadTime;
-    bool changeAllowedFlameSpreadTime;
-    uint8 minutesTalkNum;
-    uint32 outofCombatTimer;
-
-    void Reset()
+    struct boss_mimironAI : public ScriptedAI
     {
-        hardmode = false;
-        berserk = false;
-        bAchievProximityMine = false;
-        bAchievBombBot = false;
-        bAchievRocketStrike = false;
-        allowedFlameSpreadTime = 0;
-        outofCombatTimer = 0;
-        changeAllowedFlameSpreadTime = false;
-        ResetGameObjects();
-        events.Reset();
-        summons.DespawnAll();
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-        if (pInstance)
+        boss_mimironAI(Creature *pCreature) : ScriptedAI(pCreature), summons(me)
         {
-            if (pInstance->GetData(TYPE_MIMIRON) != DONE)
-                pInstance->SetData(TYPE_MIMIRON, NOT_STARTED);
-
-            if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
-                dbTarget->StopMoving();
+            pInstance = me->GetInstanceScript();
+            if (!me->IsAlive())
+                if (pInstance)
+                    pInstance->SetData(TYPE_MIMIRON, DONE);
+            bIsEvading = false;
         }
-    }
 
-    void AttackStart(Unit* who)
-    {
-        if (who)
-            me->Attack(who, true); // skip following
-    }
+        InstanceScript* pInstance;
+        EventMap events;
+        SummonList summons;
+        bool bIsEvading;
+        bool hardmode;
+        bool berserk;
+        bool bAchievProximityMine;
+        bool bAchievBombBot;
+        bool bAchievRocketStrike;
+        uint32 allowedFlameSpreadTime;
+        bool changeAllowedFlameSpreadTime;
+        uint8 minutesTalkNum;
+        uint32 outofCombatTimer;
 
-    void JustReachedHome()
-    {
-        me->setActive(false);
-        ScriptedAI::JustReachedHome();
-    }
-
-    void EnterCombat(Unit* who)
-    {
-        me->setActive(true);
-        DoZoneInCombat();
-        me->RemoveAllAuras();
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        events.Reset();
-
-        if (Creature* c = GetLMK2())
+        void Reset()
         {
-            if (c->IsInEvadeMode())
+            hardmode = false;
+            berserk = false;
+            bAchievProximityMine = false;
+            bAchievBombBot = false;
+            bAchievRocketStrike = false;
+            allowedFlameSpreadTime = 0;
+            outofCombatTimer = 0;
+            changeAllowedFlameSpreadTime = false;
+            ResetGameObjects();
+            events.Reset();
+            summons.DespawnAll();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            if (pInstance)
+            {
+                if (pInstance->GetData(TYPE_MIMIRON) != DONE)
+                    pInstance->SetData(TYPE_MIMIRON, NOT_STARTED);
+
+                if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                    dbTarget->StopMoving();
+            }
+        }
+
+        void AttackStart(Unit* who)
+        {
+            if (who)
+                me->Attack(who, true); // skip following
+        }
+
+        void JustReachedHome()
+        {
+            me->setActive(false);
+            ScriptedAI::JustReachedHome();
+        }
+
+        void EnterCombat(Unit* who)
+        {
+            me->setActive(true);
+            DoZoneInCombat();
+            me->RemoveAllAuras();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            events.Reset();
+
+            if (Creature* c = GetLMK2())
+            {
+                if (c->IsInEvadeMode())
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+                if (!c->IsAlive())
+                    c->Respawn();
+
+                me->EnterVehicle(c, 1);
+            }
+            else
             {
                 EnterEvadeMode();
                 return;
             }
-            if (!c->IsAlive())
-                c->Respawn();
+            CloseDoorAndButton();
 
-            me->EnterVehicle(c, 1);
-        }
-        else
-        {
-            EnterEvadeMode();
-            return;
-        }
-        CloseDoorAndButton();
-
-        if (!hardmode)
-        {
-            me->MonsterYell(TEXT_LMK2_ACTIVATE, LANG_UNIVERSAL, 0);
-            me->PlayDirectSound(SOUND_TANK_ACTIVE);
-            events.ScheduleEvent(EVENT_SIT_LMK2, 6000);
-            events.ScheduleEvent(EVENT_BERSERK, 10 * MINUTE * IN_MILLISECONDS);
-        }
-        else
-        {
-            events.ScheduleEvent(EVENT_MIMIRON_SAY_HARDMODE, 7000);
-            events.ScheduleEvent(EVENT_BERSERK, 8 * MINUTE*IN_MILLISECONDS);
-
-            events.ScheduleEvent(EVENT_COMPUTER_SAY_INITIATED, 0);
-            events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, 3000);
-            minutesTalkNum = TALK_COMPUTER_EIGHT;
-            for (uint32 i=0; i<uint32(TALK_COMPUTER_ZERO-minutesTalkNum-1); ++i)
-                events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, (i+1)*MINUTE*IN_MILLISECONDS);
-            events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, (TALK_COMPUTER_ZERO-minutesTalkNum)*MINUTE*IN_MILLISECONDS + 6000);
-        }
-
-        // ensure LMK2 is at proper position
-        if (Creature* LMK2 = GetLMK2())
-        {
-            LMK2->UpdatePosition(LMK2->GetHomePosition(), true);
-            LMK2->StopMovingOnCurrentPos();
-        }
-
-        if (pInstance)
-        {
-            if (pInstance->GetData(TYPE_MIMIRON) != DONE)
-                pInstance->SetData(TYPE_MIMIRON, IN_PROGRESS);
-
-            if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
-                dbTarget->AI()->DoAction(1);
-        }
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (!me->IsInCombat())
-        {
-            outofCombatTimer += diff;
-            if (outofCombatTimer >= 10000)
+            if (!hardmode)
             {
-                outofCombatTimer = 0;
-                if (Creature* c = GetLMK2())
-                    me->CastSpell(c, RAND(SPELL_ENTER_VEHICLE_0, SPELL_ENTER_VEHICLE_1, SPELL_ENTER_VEHICLE_2, SPELL_ENTER_VEHICLE_4), true);
+                me->MonsterYell(TEXT_LMK2_ACTIVATE, LANG_UNIVERSAL, 0);
+                me->PlayDirectSound(SOUND_TANK_ACTIVE);
+                events.ScheduleEvent(EVENT_SIT_LMK2, 6000);
+                events.ScheduleEvent(EVENT_BERSERK, 10 * MINUTE * IN_MILLISECONDS);
             }
-            return;
-        }
-
-        Position p = me->GetHomePosition();
-        if (me->GetExactDist(&p) > 80.0f || !SelectTargetFromPlayerList(150.0f))
-        {
-            EnterEvadeMode();
-            return;
-        }
-
-        events.Update(diff);
-
-        while (uint32 eventId = events.ExecuteEvent())
-        {
-            switch (eventId)
+            else
             {
-                case EVENT_COMPUTER_SAY_INITIATED:
-                    if (Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
-                        computer->AI()->Talk(TALK_COMPUTER_INITIATED);
-                    break;
-                case EVENT_COMPUTER_SAY_MINUTES:
-                    if (Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
-                        computer->AI()->Talk(minutesTalkNum++);
-                    break;
-                case EVENT_MIMIRON_SAY_HARDMODE:
-                    me->MonsterYell(TEXT_HARDMODE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_TANK_HARD_INTRO);
-                    events.ScheduleEvent(EVENT_SPAWN_FLAMES_INITIAL, 0);
-                    events.ScheduleEvent(EVENT_SIT_LMK2, 4000);
-                    break;
-                case EVENT_SPAWN_FLAMES_INITIAL:
+                events.ScheduleEvent(EVENT_MIMIRON_SAY_HARDMODE, 7000);
+                events.ScheduleEvent(EVENT_BERSERK, 8 * MINUTE*IN_MILLISECONDS);
+
+                events.ScheduleEvent(EVENT_COMPUTER_SAY_INITIATED, 0);
+                events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, 3000);
+                minutesTalkNum = TALK_COMPUTER_EIGHT;
+                for (uint32 i=0; i<uint32(TALK_COMPUTER_ZERO-minutesTalkNum-1); ++i)
+                    events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, (i+1)*MINUTE*IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, (TALK_COMPUTER_ZERO-minutesTalkNum)*MINUTE*IN_MILLISECONDS + 6000);
+            }
+
+            // ensure LMK2 is at proper position
+            if (Creature* LMK2 = GetLMK2())
+            {
+                LMK2->UpdatePosition(LMK2->GetHomePosition(), true);
+                LMK2->StopMovingOnCurrentPos();
+            }
+
+            if (pInstance)
+            {
+                if (pInstance->GetData(TYPE_MIMIRON) != DONE)
+                    pInstance->SetData(TYPE_MIMIRON, IN_PROGRESS);
+
+                if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                    dbTarget->AI()->DoAction(1);
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!me->IsInCombat())
+            {
+                outofCombatTimer += diff;
+                if (outofCombatTimer >= 10000)
                 {
-                    if (changeAllowedFlameSpreadTime)
-                        allowedFlameSpreadTime = time(NULL);
+                    outofCombatTimer = 0;
+                    if (Creature* c = GetLMK2())
+                        me->CastSpell(c, RAND(SPELL_ENTER_VEHICLE_0, SPELL_ENTER_VEHICLE_1, SPELL_ENTER_VEHICLE_2, SPELL_ENTER_VEHICLE_4), true);
+                }
+                return;
+            }
 
-                    std::vector<Player*> pg;
-                    Map::PlayerList const &pl = me->GetMap()->GetPlayers();
-                    for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
-                        if (Player* plr = itr->GetSource())
-                            if (plr->IsAlive() && plr->GetExactDist2d(me) < 150.0f && !plr->IsGameMaster())
-                                pg.push_back(plr);
+            Position p = me->GetHomePosition();
+            if (me->GetExactDist(&p) > 80.0f || !SelectTargetFromPlayerList(150.0f))
+            {
+                EnterEvadeMode();
+                return;
+            }
 
-                    for (uint8 i = 0; i<3; ++i)
-                        if (!pg.empty())
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_COMPUTER_SAY_INITIATED:
+                        if (Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
+                            computer->AI()->Talk(TALK_COMPUTER_INITIATED);
+                        break;
+                    case EVENT_COMPUTER_SAY_MINUTES:
+                        if (Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
+                            computer->AI()->Talk(minutesTalkNum++);
+                        break;
+                    case EVENT_MIMIRON_SAY_HARDMODE:
+                        me->MonsterYell(TEXT_HARDMODE, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_TANK_HARD_INTRO);
+                        events.ScheduleEvent(EVENT_SPAWN_FLAMES_INITIAL, 0);
+                        events.ScheduleEvent(EVENT_SIT_LMK2, 4000);
+                        break;
+                    case EVENT_SPAWN_FLAMES_INITIAL:
+                    {
+                        if (changeAllowedFlameSpreadTime)
+                            allowedFlameSpreadTime = time(NULL);
+
+                        std::vector<Player*> pg;
+                        Map::PlayerList const &pl = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                            if (Player* plr = itr->GetSource())
+                                if (plr->IsAlive() && plr->GetExactDist2d(me) < 150.0f && !plr->IsGameMaster())
+                                    pg.push_back(plr);
+
+                        for (uint8 i = 0; i<3; ++i)
+                            if (!pg.empty())
+                            {
+                                uint8 index = urand(0, pg.size() - 1);
+                                Player* p = pg[index];
+                                float angle = rand_norm() * 2 * M_PI;
+                                float z = 364.35f;
+                                if (!p->IsWithinLOS(p->GetPositionX() + cos(angle)*5.0f, p->GetPositionY() + sin(angle)*5.0f, z))
+                                    angle = p->GetAngle(2744.65f, 2569.46f);
+                                me->CastSpell(p->GetPositionX() + cos(angle)*5.0f, p->GetPositionY() + sin(angle)*5.0f, z, SPELL_SUMMON_FLAMES_INITIAL, true);
+                                pg.erase(pg.begin() + index);
+                            }
+
+                        events.Repeat(30000);
+                    }
+                    break;
+                    case EVENT_BERSERK:
+                        berserk = true;
+                        me->MonsterYell(TEXT_BERSERK, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_BERSERK);
+                        DoCast(me, SPELL_SELF_DESTRUCT, true);
+                        DoCast(me, SPELL_SELF_DESTRUCT_VISUAL, true);
+                        events.ScheduleEvent(EVENT_BERSERK_2, 0);
+                        break;
+                    case EVENT_BERSERK_2:
+                    {
+                        Creature* VX001 = nullptr;
+                        Creature* LMK2 = nullptr;
+                        Creature* ACU = nullptr;
+                        if (VX001 = GetVX001())
+                            VX001->CastSpell(VX001, SPELL_BERSERK, true);
+                        if (LMK2 = GetLMK2())
+                            LMK2->CastSpell(LMK2, SPELL_BERSERK, true);
+                        if (ACU = GetACU())
+                            ACU->CastSpell(ACU, SPELL_BERSERK, true);
+                        events.Repeat(30000);
+                    }
+                    break;
+                    case EVENT_SIT_LMK2:
+                        if (Creature* LMK2 = GetLMK2())
                         {
-                            uint8 index = urand(0, pg.size() - 1);
-                            Player* p = pg[index];
-                            float angle = rand_norm() * 2 * M_PI;
-                            float z = 364.35f;
-                            if (!p->IsWithinLOS(p->GetPositionX() + cos(angle)*5.0f, p->GetPositionY() + sin(angle)*5.0f, z))
-                                angle = p->GetAngle(2744.65f, 2569.46f);
-                            me->CastSpell(p->GetPositionX() + cos(angle)*5.0f, p->GetPositionY() + sin(angle)*5.0f, z, SPELL_SUMMON_FLAMES_INITIAL, true);
-                            pg.erase(pg.begin() + index);
+                            me->EnterVehicle(LMK2, 6);
+                            events.ScheduleEvent(EVENT_SIT_LMK2_INTERVAL, 2000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_SIT_LMK2_INTERVAL:
+                        if (Creature* LMK2 = GetLMK2())
+                        {
+                            if (hardmode)
+                            {
+                                LMK2->CastSpell(LMK2, SPELL_EMERGENCY_MODE, true);
+                                if (Vehicle* veh = LMK2->GetVehicleKit())
+                                    if (Unit* cannon = veh->GetPassenger(3))
+                                        cannon->CastSpell(cannon, SPELL_EMERGENCY_MODE, true);
+                            }
+                            LMK2->AI()->SetData(1, 1);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_LMK2_RETREAT_INTERVAL:
+                        if (Creature* LMK2 = GetLMK2())
+                        {
+                            me->EnterVehicle(LMK2, 1);
+                            me->MonsterYell(TEXT_LMK2_DEATH, LANG_UNIVERSAL, 0);
+                            me->PlayDirectSound(SOUND_TANK_DEATH);
+                            LMK2->SetFacingTo(3.58f);
+                            events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_0, 6000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_ELEVATOR_INTERVAL_0:
+                        if (GameObject* elevator = me->FindNearestGameObject(GO_MIMIRON_ELEVATOR, 100.0f))
+                        {
+                            elevator->SetLootState(GO_READY);
+                            elevator->UseDoorOrButton(0, false);
+                            elevator->EnableCollision(false);
+                        }
+                        events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_1, 6000);
+                        break;
+                    case EVENT_ELEVATOR_INTERVAL_1:
+                        if (Creature* VX001 = me->SummonCreature(NPC_VX001, 2744.65f, 2569.46f, 364.40f, 3.14f, TEMPSUMMON_MANUAL_DESPAWN))
+                        {
+                            if (GameObject *elevator = me->FindNearestGameObject(GO_MIMIRON_ELEVATOR, 100.0f))
+                            {
+                                elevator->SetLootState(GO_READY);
+                                elevator->UseDoorOrButton(0, true);
+                                elevator->EnableCollision(false);
+                            }
+                            events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_2, 18000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_ELEVATOR_INTERVAL_2:
+                        if (Creature* VX001 = GetVX001())
+                        {
+                            me->EnterVehicle(VX001, 0);
+                            events.ScheduleEvent(EVENT_SITTING_ON_VX001, 4000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_SITTING_ON_VX001:
+                        me->MonsterYell(TEXT_VX001_ACTIVATE, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_TORSO_ACTIVE);
+                        events.ScheduleEvent(EVENT_ENTER_VX001, 5000);
+                        break;
+                    case EVENT_ENTER_VX001:
+                        if (Creature* VX001 = GetVX001())
+                        {
+                            me->EnterVehicle(VX001, 1);
+                            events.ScheduleEvent(EVENT_EMOTE_VX001, 2000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_EMOTE_VX001:
+                        if (Creature* VX001 = GetVX001())
+                        {
+                            VX001->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                            events.ScheduleEvent(EVENT_VX001_START_FIGHT, 1750);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_VX001_START_FIGHT:
+                        if (Creature* VX001 = GetVX001())
+                        {
+                            if (hardmode)
+                                VX001->CastSpell(VX001, SPELL_EMERGENCY_MODE, true);
+                            VX001->AI()->SetData(1, 2);
+                            me->SetInCombatWithZone();
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_VX001_EMOTESTATE_DEATH:
+                        if (Creature* VX001 = GetVX001())
+                        {
+                            VX001->HandleEmoteCommand(EMOTE_STATE_DROWNED);
+                            VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                            events.ScheduleEvent(EVENT_GET_OUT_VX001, 2500);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_GET_OUT_VX001:
+                        if (Creature* VX001 = GetVX001())
+                            if (Creature* ACU = me->SummonCreature(NPC_AERIAL_COMMAND_UNIT, 2743.91f, 2568.78f, 391.34f, M_PI, TEMPSUMMON_MANUAL_DESPAWN))
+                            {
+                                me->EnterVehicle(VX001, 4);
+                                float speed = ACU->GetDistance(2737.75f, 2574.22f, 381.34f) / 2.0f;
+                                ACU->MonsterMoveWithSpeed(2737.75f, 2574.22f, 381.34f, speed);
+                                ACU->SetPosition(2737.75f, 2574.22f, 381.34f, M_PI);
+                                events.ScheduleEvent(EVENT_SAY_VX001_DEAD, 2000);
+                                break;
+                            }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_SAY_VX001_DEAD:
+                        changeAllowedFlameSpreadTime = true;
+                        me->MonsterYell(TEXT_VX001_DEATH, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_TORSO_DEATH);
+                        events.ScheduleEvent(EVENT_ENTER_ACU, 7000);
+                        break;
+                    case EVENT_ENTER_ACU:
+                        if (Creature* ACU = GetACU())
+                        {
+                            me->EnterVehicle(ACU, 0);
+                            events.ScheduleEvent(EVENT_SAY_ACU_ACTIVATE, 6000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_SAY_ACU_ACTIVATE:
+                        me->MonsterYell(TEXT_ACU_ACTIVATE, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_HEAD_ACTIVE);
+                        events.ScheduleEvent(EVENT_ACU_START_ATTACK, 4000);
+                        break;
+                    case EVENT_ACU_START_ATTACK:
+                        if (Creature* ACU = GetACU())
+                        {
+                            if (hardmode)
+                                ACU->CastSpell(ACU, SPELL_EMERGENCY_MODE, true);
+                            ACU->AI()->SetData(1, 3);
+                            me->SetInCombatWithZone();
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_SAY_ACU_DEAD:
+                        me->MonsterYell(TEXT_ACU_DEATH, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_HEAD_DEATH);
+                        events.ScheduleEvent(EVENT_LEVIATHAN_COME_CLOSER, 5000);
+                        break;
+                    case EVENT_LEVIATHAN_COME_CLOSER:
+                        if (Creature* LMK2 = GetLMK2())
+                        {
+                            LMK2->GetMotionMaster()->MoveCharge(2755.77f, 2574.95f, 364.31f, 21.0f);
+                            events.ScheduleEvent(EVENT_VX001_EMOTE_JUMP, 4000);
+                            break;
+                        }
+                        EnterEvadeMode();
+                        break;
+                    case EVENT_VX001_EMOTE_JUMP:
+                    {
+                        Creature* LMK2 = GetLMK2();
+                        Creature* VX001 = GetVX001();
+                        if (!VX001 || !LMK2)
+                        {
+                            EnterEvadeMode();
+                            return;
                         }
 
-                    events.Repeat(30000);
-                }
-                break;
-                case EVENT_BERSERK:
-                    berserk = true;
-                    me->MonsterYell(TEXT_BERSERK, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_BERSERK);
-                    DoCast(me, SPELL_SELF_DESTRUCT, true);
-                    DoCast(me, SPELL_SELF_DESTRUCT_VISUAL, true);
-                    events.ScheduleEvent(EVENT_BERSERK_2, 0);
-                    break;
-                case EVENT_BERSERK_2:
-                {
-                    Creature* VX001 = nullptr;
-                    Creature* LMK2 = nullptr;
-                    Creature* ACU = nullptr;
-                    if (VX001 = GetVX001())
-                        VX001->CastSpell(VX001, SPELL_BERSERK, true);
-                    if (LMK2 = GetLMK2())
-                        LMK2->CastSpell(LMK2, SPELL_BERSERK, true);
-                    if (ACU = GetACU())
-                        ACU->CastSpell(ACU, SPELL_BERSERK, true);
-                    events.Repeat(30000);
-                }
-                break;
-                case EVENT_SIT_LMK2:
-                    if (Creature* LMK2 = GetLMK2())
-                    {
-                        me->EnterVehicle(LMK2, 6);
-                        events.ScheduleEvent(EVENT_SIT_LMK2_INTERVAL, 2000);
-                        break;
+                        VX001->SendMeleeAttackStop();
+                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_CUSTOM_SPELL_02);
+                        VX001->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_02);
+                        VX001->EnterVehicle(LMK2, 7);
+                        events.ScheduleEvent(EVENT_LEVIATHAN_RIDE_MIDDLE, 4800);
                     }
-                    EnterEvadeMode();
                     break;
-                case EVENT_SIT_LMK2_INTERVAL:
-                    if (Creature* LMK2 = GetLMK2())
+                    case EVENT_LEVIATHAN_RIDE_MIDDLE:
                     {
+                        Creature* VX001 = GetVX001();
+                        Creature* LMK2 = GetLMK2();
+                        if (!VX001 || !LMK2)
+                        {
+                            EnterEvadeMode();
+                            return;
+                        }
+
+                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
+                        VX001->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
+                        LMK2->GetMotionMaster()->MoveCharge(2744.65f, 2569.46f, 364.31f, 21.0f);
+                        events.ScheduleEvent(EVENT_JOIN_TOGETHER, 3000);
+                    }
+                    break;
+                    case EVENT_JOIN_TOGETHER:
+                    {
+                        Creature* ACU = GetACU();
+                        Creature* VX001 = GetVX001();
+                        if (!VX001 || !ACU)
+                        {
+                            EnterEvadeMode();
+                            return;
+                        }
+
+                        ACU->EnterVehicle(VX001, 3);
+                        me->EnterVehicle(VX001, 1);
+                        me->MonsterYell(TEXT_VOLTRON_ACTIVATE, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_VOLTRON_ACTIVE);
+                        events.ScheduleEvent(EVENT_START_PHASE4, 10000);
+                    }
+                    break;
+                    case EVENT_START_PHASE4:
+                    {
+                        Creature* VX001 = GetVX001();
+                        Creature* LMK2 = GetLMK2();
+                        Creature* ACU = GetACU();
+                        if (!VX001 || !LMK2 || !ACU)
+                        {
+                            EnterEvadeMode();
+                            return;
+                        }
+
+                        LMK2->AI()->SetData(1, 4);
+                        VX001->AI()->SetData(1, 4);
+                        ACU->AI()->SetData(1, 4);
+                        LMK2->SetHealth(LMK2->GetMaxHealth() / 2);
+                        LMK2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        VX001->SetHealth(VX001->GetMaxHealth() / 2);
+                        VX001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        ACU->SetHealth(ACU->GetMaxHealth() / 2);
+                        ACU->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         if (hardmode)
                         {
                             LMK2->CastSpell(LMK2, SPELL_EMERGENCY_MODE, true);
-                            if (Vehicle* veh = LMK2->GetVehicleKit())
-                                if (Unit* cannon = veh->GetPassenger(3))
-                                    cannon->CastSpell(cannon, SPELL_EMERGENCY_MODE, true);
-                        }
-                        LMK2->AI()->SetData(1, 1);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_LMK2_RETREAT_INTERVAL:
-                    if (Creature* LMK2 = GetLMK2())
-                    {
-                        me->EnterVehicle(LMK2, 1);
-                        me->MonsterYell(TEXT_LMK2_DEATH, LANG_UNIVERSAL, 0);
-                        me->PlayDirectSound(SOUND_TANK_DEATH);
-                        LMK2->SetFacingTo(3.58f);
-                        events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_0, 6000);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_ELEVATOR_INTERVAL_0:
-                    if (GameObject* elevator = me->FindNearestGameObject(GO_MIMIRON_ELEVATOR, 100.0f))
-                    {
-                        elevator->SetLootState(GO_READY);
-                        elevator->UseDoorOrButton(0, false);
-                        elevator->EnableCollision(false);
-                    }
-                    events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_1, 6000);
-                    break;
-                case EVENT_ELEVATOR_INTERVAL_1:
-                    if (Creature* VX001 = me->SummonCreature(NPC_VX001, 2744.65f, 2569.46f, 364.40f, 3.14f, TEMPSUMMON_MANUAL_DESPAWN))
-                    {
-                        if (GameObject *elevator = me->FindNearestGameObject(GO_MIMIRON_ELEVATOR, 100.0f))
-                        {
-                            elevator->SetLootState(GO_READY);
-                            elevator->UseDoorOrButton(0, true);
-                            elevator->EnableCollision(false);
-                        }
-                        events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_2, 18000);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_ELEVATOR_INTERVAL_2:
-                    if (Creature* VX001 = GetVX001())
-                    {
-                        me->EnterVehicle(VX001, 0);
-                        events.ScheduleEvent(EVENT_SITTING_ON_VX001, 4000);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_SITTING_ON_VX001:
-                    me->MonsterYell(TEXT_VX001_ACTIVATE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_TORSO_ACTIVE);
-                    events.ScheduleEvent(EVENT_ENTER_VX001, 5000);
-                    break;
-                case EVENT_ENTER_VX001:
-                    if (Creature* VX001 = GetVX001())
-                    {
-                        me->EnterVehicle(VX001, 1);
-                        events.ScheduleEvent(EVENT_EMOTE_VX001, 2000);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_EMOTE_VX001:
-                    if (Creature* VX001 = GetVX001())
-                    {
-                        VX001->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        events.ScheduleEvent(EVENT_VX001_START_FIGHT, 1750);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_VX001_START_FIGHT:
-                    if (Creature* VX001 = GetVX001())
-                    {
-                        if (hardmode)
                             VX001->CastSpell(VX001, SPELL_EMERGENCY_MODE, true);
-                        VX001->AI()->SetData(1, 2);
-                        me->SetInCombatWithZone();
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_VX001_EMOTESTATE_DEATH:
-                    if (Creature* VX001 = GetVX001())
-                    {
-                        VX001->HandleEmoteCommand(EMOTE_STATE_DROWNED);
-                        VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
-                        events.ScheduleEvent(EVENT_GET_OUT_VX001, 2500);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_GET_OUT_VX001:
-                    if (Creature* VX001 = GetVX001())
-                        if (Creature* ACU = me->SummonCreature(NPC_AERIAL_COMMAND_UNIT, 2743.91f, 2568.78f, 391.34f, M_PI, TEMPSUMMON_MANUAL_DESPAWN))
-                        {
-                            me->EnterVehicle(VX001, 4);
-                            float speed = ACU->GetDistance(2737.75f, 2574.22f, 381.34f) / 2.0f;
-                            ACU->MonsterMoveWithSpeed(2737.75f, 2574.22f, 381.34f, speed);
-                            ACU->SetPosition(2737.75f, 2574.22f, 381.34f, M_PI);
-                            events.ScheduleEvent(EVENT_SAY_VX001_DEAD, 2000);
-                            break;
-                        }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_SAY_VX001_DEAD:
-                    changeAllowedFlameSpreadTime = true;
-                    me->MonsterYell(TEXT_VX001_DEATH, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_TORSO_DEATH);
-                    events.ScheduleEvent(EVENT_ENTER_ACU, 7000);
-                    break;
-                case EVENT_ENTER_ACU:
-                    if (Creature* ACU = GetACU())
-                    {
-                        me->EnterVehicle(ACU, 0);
-                        events.ScheduleEvent(EVENT_SAY_ACU_ACTIVATE, 6000);
-                        break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_SAY_ACU_ACTIVATE:
-                    me->MonsterYell(TEXT_ACU_ACTIVATE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_HEAD_ACTIVE);
-                    events.ScheduleEvent(EVENT_ACU_START_ATTACK, 4000);
-                    break;
-                case EVENT_ACU_START_ATTACK:
-                    if (Creature* ACU = GetACU())
-                    {
-                        if (hardmode)
                             ACU->CastSpell(ACU, SPELL_EMERGENCY_MODE, true);
-                        ACU->AI()->SetData(1, 3);
+                        }
                         me->SetInCombatWithZone();
+                    }
+                    break;
+                    case EVENT_FINISH:
+                    {
+                        Creature* LMK2 = GetLMK2();
+                        Creature* VX001 = GetVX001();
+                        Creature* ACU = GetACU();
+
+                        if (!VX001 || !LMK2 || !ACU)
+                            return;
+
+                        LMK2->GetMotionMaster()->Clear();
+                        LMK2->StopMoving();
+                        LMK2->InterruptNonMeleeSpells(false);
+                        LMK2->AttackStop();
+                        LMK2->AI()->SetData(1, 0);
+                        LMK2->DespawnOrUnsummon(7000);
+                        LMK2->SetReactState(REACT_PASSIVE);
+                        VX001->InterruptNonMeleeSpells(false);
+                        VX001->AttackStop();
+                        VX001->AI()->SetData(1, 0);
+                        VX001->DespawnOrUnsummon(7000);
+                        ACU->InterruptNonMeleeSpells(false);
+                        ACU->AttackStop();
+                        ACU->AI()->SetData(1, 0);
+                        ACU->DespawnOrUnsummon(7000);
+                        ACU->SetReactState(REACT_PASSIVE);
+
+                        Position exitPos;
+                        me->GetPosition(&exitPos);
+                        me->_ExitVehicle(&exitPos);
+                        me->AttackStop();
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
+                        me->GetMotionMaster()->Clear();
+                        summons.DoAction(1337); // despawn summons of summons
+                        summons.DespawnEntry(NPC_FLAMES_INITIAL);
+
+                        float angle = VX001->GetOrientation();
+                        float v_x = me->GetPositionX() + cos(angle)*10.0f;
+                        float v_y = me->GetPositionY() + sin(angle)*10.0f;
+                        me->GetMotionMaster()->MoveJump(v_x, v_y, 364.32f, 7.0f, 7.0f);
+
+                        if (pInstance)
+                            for (uint16 i = 0; i<3; ++i)
+                                if (uint64 guid = pInstance->GetData64(DATA_GO_MIMIRON_DOOR_1 + i))
+                                    if (GameObject* door = ObjectAccessor::GetGameObject(*me, guid))
+                                        if (door->GetGoState() != GO_STATE_ACTIVE)
+                                        {
+                                            door->SetLootState(GO_READY);
+                                            door->UseDoorOrButton(0, false);
+                                        }
+
+                        if (pInstance)
+                            pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_LEVIATHAN_MKII, 1, me);
+
+                        if (hardmode)
+                            if (Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
+                                computer->AI()->Talk(TALK_COMPUTER_TERMINATED);
+
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_SAY_VOLTRON_DEAD, 6000);
+                    }
+                    break;
+                    case EVENT_SAY_VOLTRON_DEAD:
+                        me->MonsterYell(TEXT_VOLTRON_DEATH, LANG_UNIVERSAL, 0);
+                        me->PlayDirectSound(SOUND_VOLTRON_DEATH);
+                        // spawn chest
+                        if (uint32 chestId = (hardmode ? RAID_MODE(GO_MIMIRON_CHEST_HARD, GO_MIMIRON_CHEST_HERO_HARD) : RAID_MODE(GO_MIMIRON_CHEST, GO_MIMIRON_CHEST_HERO)))
+                            if (GameObject *go = me->SummonGameObject(chestId, 2744.65f, 2569.46f, 364.397f, 0, 0, 0, 0, 0, 0))
+                                go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                        events.ScheduleEvent(EVENT_DISAPPEAR, 15000);
                         break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_SAY_ACU_DEAD:
-                    me->MonsterYell(TEXT_ACU_DEATH, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_HEAD_DEATH);
-                    events.ScheduleEvent(EVENT_LEVIATHAN_COME_CLOSER, 5000);
-                    break;
-                case EVENT_LEVIATHAN_COME_CLOSER:
-                    if (Creature* LMK2 = GetLMK2())
-                    {
-                        LMK2->GetMotionMaster()->MoveCharge(2755.77f, 2574.95f, 364.31f, 21.0f);
-                        events.ScheduleEvent(EVENT_VX001_EMOTE_JUMP, 4000);
+                    case EVENT_DISAPPEAR:
+                        if (pInstance)
+                            pInstance->SetData(TYPE_MIMIRON, DONE);
+                        summons.DespawnAll();
+                        me->DespawnOrUnsummon();
                         break;
-                    }
-                    EnterEvadeMode();
-                    break;
-                case EVENT_VX001_EMOTE_JUMP:
-                {
-                    Creature* LMK2 = GetLMK2();
-                    Creature* VX001 = GetVX001();
-                    if (!VX001 || !LMK2)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-
-                    VX001->SendMeleeAttackStop();
-                    VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_CUSTOM_SPELL_02);
-                    VX001->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_02);
-                    VX001->EnterVehicle(LMK2, 7);
-                    events.ScheduleEvent(EVENT_LEVIATHAN_RIDE_MIDDLE, 4800);
+                    default:
+                        break;
                 }
-                break;
-                case EVENT_LEVIATHAN_RIDE_MIDDLE:
-                {
-                    Creature* VX001 = GetVX001();
-                    Creature* LMK2 = GetLMK2();
-                    if (!VX001 || !LMK2)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-
-                    VX001->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
-                    VX001->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
-                    LMK2->GetMotionMaster()->MoveCharge(2744.65f, 2569.46f, 364.31f, 21.0f);
-                    events.ScheduleEvent(EVENT_JOIN_TOGETHER, 3000);
-                }
-                break;
-                case EVENT_JOIN_TOGETHER:
-                {
-                    Creature* ACU = GetACU();
-                    Creature* VX001 = GetVX001();
-                    if (!VX001 || !ACU)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-
-                    ACU->EnterVehicle(VX001, 3);
-                    me->EnterVehicle(VX001, 1);
-                    me->MonsterYell(TEXT_VOLTRON_ACTIVATE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_VOLTRON_ACTIVE);
-                    events.ScheduleEvent(EVENT_START_PHASE4, 10000);
-                }
-                break;
-                case EVENT_START_PHASE4:
-                {
-                    Creature* VX001 = GetVX001();
-                    Creature* LMK2 = GetLMK2();
-                    Creature* ACU = GetACU();
-                    if (!VX001 || !LMK2 || !ACU)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-
-                    LMK2->AI()->SetData(1, 4);
-                    VX001->AI()->SetData(1, 4);
-                    ACU->AI()->SetData(1, 4);
-                    LMK2->SetHealth(LMK2->GetMaxHealth() / 2);
-                    LMK2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    VX001->SetHealth(VX001->GetMaxHealth() / 2);
-                    VX001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    ACU->SetHealth(ACU->GetMaxHealth() / 2);
-                    ACU->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    if (hardmode)
-                    {
-                        LMK2->CastSpell(LMK2, SPELL_EMERGENCY_MODE, true);
-                        VX001->CastSpell(VX001, SPELL_EMERGENCY_MODE, true);
-                        ACU->CastSpell(ACU, SPELL_EMERGENCY_MODE, true);
-                    }
-                    me->SetInCombatWithZone();
-                }
-                break;
-                case EVENT_FINISH:
-                {
-                    Creature* LMK2 = GetLMK2();
-                    Creature* VX001 = GetVX001();
-                    Creature* ACU = GetACU();
-
-                    if (!VX001 || !LMK2 || !ACU)
-                        return;
-
-                    LMK2->GetMotionMaster()->Clear();
-                    LMK2->StopMoving();
-                    LMK2->InterruptNonMeleeSpells(false);
-                    LMK2->AttackStop();
-                    LMK2->AI()->SetData(1, 0);
-                    LMK2->DespawnOrUnsummon(7000);
-                    LMK2->SetReactState(REACT_PASSIVE);
-                    VX001->InterruptNonMeleeSpells(false);
-                    VX001->AttackStop();
-                    VX001->AI()->SetData(1, 0);
-                    VX001->DespawnOrUnsummon(7000);
-                    ACU->InterruptNonMeleeSpells(false);
-                    ACU->AttackStop();
-                    ACU->AI()->SetData(1, 0);
-                    ACU->DespawnOrUnsummon(7000);
-                    ACU->SetReactState(REACT_PASSIVE);
-
-                    Position exitPos;
-                    me->GetPosition(&exitPos);
-                    me->_ExitVehicle(&exitPos);
-                    me->AttackStop();
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_TALK);
-                    me->GetMotionMaster()->Clear();
-                    summons.DoAction(1337); // despawn summons of summons
-                    summons.DespawnEntry(NPC_FLAMES_INITIAL);
-
-                    float angle = VX001->GetOrientation();
-                    float v_x = me->GetPositionX() + cos(angle)*10.0f;
-                    float v_y = me->GetPositionY() + sin(angle)*10.0f;
-                    me->GetMotionMaster()->MoveJump(v_x, v_y, 364.32f, 7.0f, 7.0f);
-
-                    if (pInstance)
-                        for (uint16 i = 0; i<3; ++i)
-                            if (uint64 guid = pInstance->GetData64(DATA_GO_MIMIRON_DOOR_1 + i))
-                                if (GameObject* door = ObjectAccessor::GetGameObject(*me, guid))
-                                    if (door->GetGoState() != GO_STATE_ACTIVE)
-                                    {
-                                        door->SetLootState(GO_READY);
-                                        door->UseDoorOrButton(0, false);
-                                    }
-
-                    if (pInstance)
-                        pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_LEVIATHAN_MKII, 1, me);
-
-                    if (hardmode)
-                        if (Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000))
-                            computer->AI()->Talk(TALK_COMPUTER_TERMINATED);
-
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SAY_VOLTRON_DEAD, 6000);
-                }
-                break;
-                case EVENT_SAY_VOLTRON_DEAD:
-                    me->MonsterYell(TEXT_VOLTRON_DEATH, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_VOLTRON_DEATH);
-                    // spawn chest
-                    if (uint32 chestId = (hardmode ? RAID_MODE(GO_MIMIRON_CHEST_HARD, GO_MIMIRON_CHEST_HERO_HARD) : RAID_MODE(GO_MIMIRON_CHEST, GO_MIMIRON_CHEST_HERO)))
-                        if (GameObject *go = me->SummonGameObject(chestId, 2744.65f, 2569.46f, 364.397f, 0, 0, 0, 0, 0, 0))
-                            go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
-                    events.ScheduleEvent(EVENT_DISAPPEAR, 15000);
-                    break;
-                case EVENT_DISAPPEAR:
-                    if (pInstance)
-                        pInstance->SetData(TYPE_MIMIRON, DONE);
-                    summons.DespawnAll();
-                    me->DespawnOrUnsummon();
-                    break;
-                default:
-                    break;
             }
         }
-    }
 
-    void MoveInLineOfSight(Unit* mover) {}
+        void MoveInLineOfSight(Unit* mover) {}
 
-    void EnterEvadeMode()
-    {
-        if (bIsEvading)
-            return;
-        bIsEvading = true;
-
-        if (Creature* c = GetLMK2())
+        void EnterEvadeMode()
         {
-            c->AI()->EnterEvadeMode();
-        }
-        if (Creature* c = GetVX001())
-        {
-            c->AI()->EnterEvadeMode();
-            c->DespawnOrUnsummon();
-        }
-        if (Creature* c = GetACU())
-        {
-            c->AI()->EnterEvadeMode();
-            c->DespawnOrUnsummon();
-        }
+            if (bIsEvading)
+                return;
+            bIsEvading = true;
 
-        summons.DoAction(1337); // despawn summons of summons
-
-        me->RemoveAllAuras();
-        me->ExitVehicle();
-        ScriptedAI::EnterEvadeMode();
-
-        bIsEvading = false;
-    }
-
-    void JustSummoned(Creature* s)
-    {
-        summons.Summon(s);
-    }
-
-    void SummonedCreatureDespawn(Creature* s)
-    {
-        summons.Despawn(s);
-    }
-
-    void ResetGameObjects()
-    {
-        if( pInstance )
-            for( uint16 i=0; i<3; ++i )
-                if( uint64 guid = pInstance->GetData64(DATA_GO_MIMIRON_DOOR_1 + i) )
-                    if( GameObject* door = ObjectAccessor::GetGameObject(*me, guid) )
-                        if( door->GetGoState() != GO_STATE_ACTIVE )
-                        {
-                            door->SetLootState(GO_READY);
-                            door->UseDoorOrButton(0, false);
-                        }
-
-        if( GameObject *elevator = me->FindNearestGameObject(GO_MIMIRON_ELEVATOR, 200.0f) )
-        {
-            if( elevator->GetGoState() != GO_STATE_ACTIVE )
+            if (Creature* c = GetLMK2())
             {
-                elevator->SetLootState(GO_READY);
-                elevator->SetByteValue(GAMEOBJECT_BYTES_1, 0, GO_STATE_ACTIVE);
+                c->AI()->EnterEvadeMode();
             }
-            elevator->EnableCollision(false);
+            if (Creature* c = GetVX001())
+            {
+                c->AI()->EnterEvadeMode();
+                c->DespawnOrUnsummon();
+            }
+            if (Creature* c = GetACU())
+            {
+                c->AI()->EnterEvadeMode();
+                c->DespawnOrUnsummon();
+            }
+
+            summons.DoAction(1337); // despawn summons of summons
+
+            me->RemoveAllAuras();
+            me->ExitVehicle();
+            ScriptedAI::EnterEvadeMode();
+
+            bIsEvading = false;
         }
 
-        if( GameObject *button = me->FindNearestGameObject(GO_BUTTON, 200.0f) )
-            if( button->GetGoState() != GO_STATE_READY )
-            {
-                button->SetLootState(GO_READY);
-                button->UseDoorOrButton(0, false);
-                button->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-            }
-    }
-
-    void CloseDoorAndButton()
-    {
-        if( pInstance )
-            for( uint16 i=0; i<3; ++i )
-                if( uint64 guid = pInstance->GetData64(DATA_GO_MIMIRON_DOOR_1 + i) )
-                    if( GameObject* door = ObjectAccessor::GetGameObject(*me, guid) )
-                        if( door->GetGoState() != GO_STATE_READY )
-                        {
-                            door->SetLootState(GO_READY);
-                            door->UseDoorOrButton(0, false);
-                        }
-
-        if( GameObject *button = me->FindNearestGameObject(GO_BUTTON, 200.0f) )
-            if( button->GetGoState() != GO_STATE_ACTIVE )
-            {
-                button->SetLootState(GO_READY);
-                button->UseDoorOrButton(0, false);
-            }
-    }
-
-    void SetData(uint32 id, uint32 value)
-    {
-        switch (value) // end of phase 1-3, 4-6 for voltron
+        void JustSummoned(Creature* s)
         {
-            case 1:
-                events.ScheduleEvent(EVENT_LMK2_RETREAT_INTERVAL, 5000);
-                break;
-            case 2:
-                events.ScheduleEvent(EVENT_VX001_EMOTESTATE_DEATH, 2500);
-                break;
-            case 3:
-                events.ScheduleEvent(EVENT_SAY_ACU_DEAD, 5000);
-                break;
-            case 4:
-            case 5:
-            case 6:
+            summons.Summon(s);
+        }
+
+        void SummonedCreatureDespawn(Creature* s)
+        {
+            summons.Despawn(s);
+        }
+
+        void ResetGameObjects()
+        {
+            if( pInstance )
+                for( uint16 i=0; i<3; ++i )
+                    if( uint64 guid = pInstance->GetData64(DATA_GO_MIMIRON_DOOR_1 + i) )
+                        if( GameObject* door = ObjectAccessor::GetGameObject(*me, guid) )
+                            if( door->GetGoState() != GO_STATE_ACTIVE )
+                            {
+                                door->SetLootState(GO_READY);
+                                door->UseDoorOrButton(0, false);
+                            }
+
+            if( GameObject *elevator = me->FindNearestGameObject(GO_MIMIRON_ELEVATOR, 200.0f) )
+            {
+                if( elevator->GetGoState() != GO_STATE_ACTIVE )
                 {
-                    Creature* LMK2 = GetLMK2();
-                    Creature* VX001 = GetVX001();
-                    Creature* ACU = GetACU();
-                    if (!LMK2 || !VX001 || !ACU)
-                    {
-                        EnterEvadeMode();
-                        return;
-                    }
-
-                    Spell* s1 = LMK2->GetCurrentSpell(CURRENT_GENERIC_SPELL);
-                    Spell* s2 = VX001->GetCurrentSpell(CURRENT_GENERIC_SPELL);
-                    Spell* s3 = ACU->GetCurrentSpell(CURRENT_GENERIC_SPELL);
-                    if (s1 && s2 && s3 && s1->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s2->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s3->GetSpellInfo()->Id == SPELL_SELF_REPAIR)
-                        events.ScheduleEvent(EVENT_FINISH, 0);
+                    elevator->SetLootState(GO_READY);
+                    elevator->SetByteValue(GAMEOBJECT_BYTES_1, 0, GO_STATE_ACTIVE);
                 }
-                break;
-            case 7:
-                hardmode = true;
-                break;
-            case 11:
-                bAchievProximityMine = true;
-                break;
-            case 12:
-                bAchievBombBot = true;
-                break;
-            case 13:
-                bAchievRocketStrike = true;
-                break;
+                elevator->EnableCollision(false);
+            }
+
+            if( GameObject *button = me->FindNearestGameObject(GO_BUTTON, 200.0f) )
+                if( button->GetGoState() != GO_STATE_READY )
+                {
+                    button->SetLootState(GO_READY);
+                    button->UseDoorOrButton(0, false);
+                    button->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+                }
         }
-    }
 
-    uint32 GetData(uint32 id) const
-    {
-        switch (id)
+        void CloseDoorAndButton()
         {
-            case 1: return (hardmode ? 1 : 0);
-            case 2: return (berserk ? 1 : 0);
-            case 10: return allowedFlameSpreadTime;
-            case 11: return (bAchievProximityMine ? 1 : 0);
-            case 12: return (bAchievBombBot ? 1 : 0);
-            case 13: return (bAchievRocketStrike ? 1 : 0);
+            if( pInstance )
+                for( uint16 i=0; i<3; ++i )
+                    if( uint64 guid = pInstance->GetData64(DATA_GO_MIMIRON_DOOR_1 + i) )
+                        if( GameObject* door = ObjectAccessor::GetGameObject(*me, guid) )
+                            if( door->GetGoState() != GO_STATE_READY )
+                            {
+                                door->SetLootState(GO_READY);
+                                door->UseDoorOrButton(0, false);
+                            }
+
+            if( GameObject *button = me->FindNearestGameObject(GO_BUTTON, 200.0f) )
+                if( button->GetGoState() != GO_STATE_ACTIVE )
+                {
+                    button->SetLootState(GO_READY);
+                    button->UseDoorOrButton(0, false);
+                }
         }
-        return 0;
-    }
-};
 
-struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
-{
-    npc_ulduar_leviathan_mkiiAI(Creature *pCreature) : ScriptedAI(pCreature)
-    {
-        pInstance = me->GetInstanceScript();
-        bIsEvading = false;
-    }
-
-    InstanceScript* pInstance;
-    EventMap events;
-    bool bIsEvading;
-    uint8 Phase;
-
-    void Reset()
-    {
-        Phase = 0;
-        if (Unit* c = GetS3())
-            c->ExitVehicle(); // this should never happen!
-        if (Creature* c = me->SummonCreature(NPC_LEVIATHAN_MKII_CANNON, *me, TEMPSUMMON_MANUAL_DESPAWN))
-            c->EnterVehicle(me, 3);
-        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->SetReactState(REACT_AGGRESSIVE);
-        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-
-        events.Reset();
-    }
-
-    void SetData(uint32 id, uint32 value)
-    {
-        if (id == 1) // setting phase to start fighting
+        void SetData(uint32 id, uint32 value)
         {
-            switch (value)
+            switch (value) // end of phase 1-3, 4-6 for voltron
             {
-                case 0:
-                    Phase = 0;
-                    events.Reset();
-                    break;
                 case 1:
-                    Phase = 1;
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    if (Unit* target = SelectTargetFromPlayerList(75.0f))
-                        AttackStart(target);
-                    DoZoneInCombat();
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SPELL_NAPALM_SHELL, 6000);
-                    events.ScheduleEvent(EVENT_SPELL_PLASMA_BLAST, 15000);
-                    events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 20000);
-                    events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
-                    if (Creature* c = GetMimiron())
-                        if (c->AI()->GetData(1))
-                            events.ScheduleEvent(EVENT_FLAME_SUPPRESSION_50000, 60000);
-                    break;
-                case 4:
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    DoResetThreat();
-                    Phase = 4;
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    if (Unit* target = SelectTargetFromPlayerList(75.0f))
-                        AttackStart(target);
-                    DoZoneInCombat();
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 30000);
-                    events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
-                    break;
-
-            }
-        }
-    }
-
-    void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
-    {
-        if (damage >= me->GetHealth() || me->GetHealth() < 15000)
-        {
-            damage = 0;
-            if (me->GetReactState() == REACT_PASSIVE)
-                return;
-            me->SetReactState(REACT_PASSIVE);
-            if (Phase == 1)
-            {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    me->GetMotionMaster()->Clear();
-                    me->AttackStop();
-                    me->SetReactState(REACT_PASSIVE);
-                    SetData(1, 0);
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    if (Unit* cannon = GetS3())
-                        cannon->ExitVehicle();
-                    me->GetMotionMaster()->MoveCharge(2795.076f, 2598.616f, 364.32f, 21.0f);
-                    if (Creature* c = GetMimiron())
-                        c->AI()->SetData(0, 1);
-                }
-            }
-            else if (Phase == 4)
-            {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->CastSpell(me, SPELL_SELF_REPAIR, false);
-                    if (Creature* c = GetMimiron())
-                    {
-                        if (c->AI()->GetData(1))
-                            me->CastSpell(me, SPELL_EMERGENCY_MODE, true);
-                        if (c->AI()->GetData(2))
-                            me->CastSpell(me, SPELL_BERSERK, true);
-                        c->AI()->SetData(0, 4);
-                    }
-                }
-            }
-        }
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (!UpdateVictim())
-            return;
-
-        events.Update(diff);
-
-        Unit* cannon = GetS3();
-        if ((cannon && cannon->HasUnitState(UNIT_STATE_CASTING)) || me->HasUnitState(UNIT_STATE_CASTING))
-            return;
-
-        while (uint32 eventId = events.ExecuteEvent())
-        {
-            switch (eventId)
-            {
-                case EVENT_SPELL_NAPALM_SHELL:
-                {
-                    Player* target = nullptr;
-                    std::vector<Player*> list;
-                    Map::PlayerList const &players = me->GetMap()->GetPlayers();
-                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                        if (Player* player = itr->GetSource())
-                            if (player->IsAlive() && player->GetDistance2d(me) > 15.0f)
-                                list.push_back(player);
-
-                    if (!list.empty())
-                        target = Trinity::Containers::SelectRandomContainerElement(list);
-                    else
-                    {
-                        if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                            if (tar->IsPlayer())
-                                target = tar->ToPlayer();
-                    }
-
-                    if (target && cannon)
-                        cannon->CastSpell(target, SPELL_NAPALM_SHELL, false);
-
-                    events.Repeat(urand(5000, 10000));
-                }
-                break;
-                case EVENT_SPELL_PLASMA_BLAST:
-                    if (Unit* victim = me->GetVictim())
-                    {
-                        me->MonsterTextEmote("Leviathan Mk II begins to cast Plasma Blast!", 0, true);
-                        cannon->CastSpell(victim, SPELL_PLASMA_BLAST, false);
-                    }
-                    events.Repeat(45000);
-                    break;
-                case EVENT_SPELL_SHOCK_BLAST:
-                    DoCastVictim(SPELL_SHOCK_BLAST);
-                    events.Repeat(30000);
-                    events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 10000);
-                    break;
-                case EVENT_PROXIMITY_MINES_1:
-                    DoCastAOE(SPELL_PROXIMITY_MINES);
-                    break;
-                case EVENT_FLAME_SUPPRESSION_50000:
-                    DoCastSelf(SPELL_FLAME_SUPPRESSANT_50000yd);
-                    break;
-                default:
-                    break;
-            }
-
-            if ((cannon && cannon->HasUnitState(UNIT_STATE_CASTING)) || me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-        }
-
-        DoMeleeAttackIfReady();
-    }
-
-    void MoveInLineOfSight(Unit* /*mover*/) {}
-
-    void KilledUnit(Unit* who)
-    {
-        if( who->GetTypeId() == TYPEID_PLAYER )
-            if (Creature* c = GetMimiron())
-            {
-                if( Phase == 1 )
-                {
-                    if( rand()%2 )
-                    {
-                        c->MonsterYell(TEXT_LMK2_SLAIN_1, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_TANK_SLAY_1);
-                    }
-                    else
-                    {
-                        c->MonsterYell(TEXT_LMK2_SLAIN_2, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_TANK_SLAY_2);
-                    }
-                }
-                else
-                {
-                    if( rand()%2 )
-                    {
-                        c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
-                    }
-                    else
-                    {
-                        c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
-                    }
-                }
-            }
-    }
-
-    void EnterEvadeMode()
-    {
-        if (bIsEvading)
-            return;
-        bIsEvading = true;
-
-        me->RemoveAllAuras();
-        me->ExitVehicle();
-        ScriptedAI::EnterEvadeMode();
-
-        if (Creature* mimiron = GetMimiron())
-            mimiron->AI()->EnterEvadeMode();
-
-        bIsEvading = false;
-    }
-
-    void PassengerBoarded(Unit* p, int8 seat, bool apply)
-    {
-        if (p->GetEntry() == NPC_LEVIATHAN_MKII_CANNON && !apply)
-        {
-            Unit::Kill(p, p);
-            p->ToCreature()->DespawnOrUnsummon(6000);
-        }
-    }
-
-    Unit* GetS3()
-    {
-        if (Vehicle* vk = me->GetVehicleKit())
-            if (Unit* cannon = vk->GetPassenger(3))
-                if (cannon->GetEntry() == NPC_LEVIATHAN_MKII_CANNON)
-                    return cannon;
-
-        return nullptr;
-    }
-
-    void SpellHit(Unit* caster, const SpellInfo *spell)
-    {
-        if( spell->Id == SPELL_SELF_REPAIR )
-        {
-            me->SetHealth(me->GetMaxHealth() / 2);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetReactState(REACT_AGGRESSIVE);
-        }
-    }
-};
-
-struct npc_ulduar_vx001AI : public ScriptedAI
-{
-    npc_ulduar_vx001AI(Creature *pCreature) : ScriptedAI(pCreature)
-    {
-        pInstance = me->GetInstanceScript();
-        bIsEvading = false;
-    }
-
-    InstanceScript* pInstance;
-    EventMap events;
-    bool bIsEvading;
-    uint8 Phase;
-    bool fighting;
-    bool leftarm;
-
-    void Reset()
-    {
-        Phase = 0;
-        fighting = false;
-        leftarm = false;
-        me->SetRegeneratingHealth(false);
-        events.Reset();
-        me->SetReactState(REACT_PASSIVE);
-    }
-
-    void AttackStart(Unit* /*who*/) {}
-
-    void SetData(uint32 id, uint32 value)
-    {
-        if (id == 1) // setting phase to start fighting
-        {
-            switch (value)
-            {
-                case 0:
-                    Phase = 0;
-                    fighting = false;
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-                    events.Reset();
+                    events.ScheduleEvent(EVENT_LMK2_RETREAT_INTERVAL, 5000);
                     break;
                 case 2:
-                    Phase = 2;
-                    fighting = true;
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_SPELL_CAST_OMNI);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SPELL_HEAT_WAVE, 10000);
-                    events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
-                    events.ScheduleEvent(EVENT_SPELL_RAPID_BURST, 0);
-                    events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
-                    events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
-                    if (Creature* c = GetMimiron())
-                        if (c->AI()->GetData(1))
-                        {
-                            events.ScheduleEvent(EVENT_FLAME_SUPPRESSION_10, 7000);
-                            events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
-                        }
+                    events.ScheduleEvent(EVENT_VX001_EMOTESTATE_DEATH, 2500);
+                    break;
+                case 3:
+                    events.ScheduleEvent(EVENT_SAY_ACU_DEAD, 5000);
                     break;
                 case 4:
-                    Phase = 4;
-                    fighting = true;
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
-                    events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
-                    events.ScheduleEvent(EVENT_HAND_PULSE, 1);
-                    events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 45000);
-                    if (Creature* c = GetMimiron())
-                        if (c->AI()->GetData(1))
-                            events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
-                    break;
-            }
-        }
-    }
-
-    void DoAction(int32 action)
-    {
-        if (action == 1337)
-            if( Vehicle* vk = me->GetVehicleKit() )
-                for (uint8 i=0; i<2; ++i)
-                    if (Unit* r = vk->GetPassenger(5+i))
-                        if (r->GetTypeId() == TYPEID_UNIT)
-                            r->ToCreature()->DespawnOrUnsummon(1);
-    }
-
-    void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
-    {
-        if (damage >= me->GetHealth() || me->GetHealth() < 15000)
-        {
-            damage = 0;
-            if (Phase == 2)
-            {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    SetData(1, 0);
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->SendMeleeAttackStop();
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_CUSTOM_SPELL_06);
-                    me->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_06);
-                    if (Creature* c = GetMimiron())
-                        c->AI()->SetData(0, 2);
-                }
-            }
-            else if (Phase == 4)
-            {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->CastSpell(me, SPELL_SELF_REPAIR, false);
-                    if (Creature* c = GetMimiron())
+                case 5:
+                case 6:
                     {
-                        if (c->AI()->GetData(1))
-                            me->CastSpell(me, SPELL_EMERGENCY_MODE, true);
-                        if (c->AI()->GetData(2))
-                            me->CastSpell(me, SPELL_BERSERK, true);
-                        c->AI()->SetData(0, 5);
-                    }
-                }
-            }
-        }
-    }
-
-    void CastHandler()
-    {
-        // Its here to force VX_001 to face mimiron db target during spinning cast
-        // because in phase 4 if tank turns leviathan MK II around
-        // VX will turn around as well, and then when laser barrage begins to cast
-        // he will change direction to where trigger is
-        if (Spell* spell = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            if (spell->GetSpellInfo()->Id == SPELL_SPINNING_UP)
-                if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
-                    me->SetFacingToObject(dbTarget);
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (!fighting)
-            return;
-
-        events.Update(diff);
-
-        if (me->HasUnitState(UNIT_STATE_CASTING))
-        {
-            CastHandler();
-            return;
-        }
-
-        while (uint32 eventId = events.ExecuteEvent())
-        {
-            switch (eventId)
-            {
-                case EVENT_SPELL_HEAT_WAVE:
-                    DoCast(SPELL_HEAT_WAVE);
-                    events.Repeat(30000);
-                    break;
-                case EVENT_SPELL_ROCKET_STRIKE:
-                    if (Vehicle* vk = me->GetVehicleKit())
-                    {
-                        for (int i = 0; i<(Phase / 2); ++i)
+                        Creature* LMK2 = GetLMK2();
+                        Creature* VX001 = GetVX001();
+                        Creature* ACU = GetACU();
+                        if (!LMK2 || !VX001 || !ACU)
                         {
-                            uint8 index = (Phase == 2 ? rand() % 2 : i);
-                            if (Unit* r = vk->GetPassenger(5 + index))
-                                if (Player* temp = SelectTargetFromPlayerList(100.0f))
-                                {
-                                    if (Creature* trigger = me->SummonCreature(NPC_ROCKET_STRIKE_N, temp->GetPositionX(), temp->GetPositionY(), temp->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 6000))
-                                        trigger->CastSpell(trigger, SPELL_ROCKET_STRIKE_AURA, true);
-                                    Position exitPos;
-                                    r->GetPosition(&exitPos);
-                                    exitPos.m_positionX += cos(me->GetOrientation())*2.35f;
-                                    exitPos.m_positionY += sin(me->GetOrientation())*2.35f;
-                                    exitPos.m_positionZ += 2.0f*Phase;
-                                    r->_ExitVehicle(&exitPos);
-                                    me->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, r->GetGUID());
-                                    if (r->GetTypeId() == TYPEID_UNIT)
-                                        r->ToCreature()->AI()->SetData(0, 0);
-                                }
+                            EnterEvadeMode();
+                            return;
                         }
-                        events.Repeat(25000);
-                        events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 10000);
+
+                        Spell* s1 = LMK2->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+                        Spell* s2 = VX001->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+                        Spell* s3 = ACU->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+                        if (s1 && s2 && s3 && s1->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s2->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s3->GetSpellInfo()->Id == SPELL_SELF_REPAIR)
+                            events.ScheduleEvent(EVENT_FINISH, 0);
                     }
                     break;
-                case EVENT_REINSTALL_ROCKETS:
-                    if (Vehicle* vk = me->GetVehicleKit())
-                    {
-                        for (uint8 i = 5; i <= 6; ++i)
-                            if (!vk->GetPassenger(i))
-                                if (TempSummon* accessory = me->SummonCreature(NPC_ROCKET_VISUAL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 4.0f, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
-                                    if (!me->HandleSpellClick(accessory, i))
-                                        accessory->UnSummon();
-                    }
+                case 7:
+                    hardmode = true;
                     break;
-                case EVENT_SPELL_RAPID_BURST:
-                    if (Player* p = SelectTargetFromPlayerList(80.0f))
-                    {
-                        me->SetFacingToObject(p);
-                        DoCast(me, SPELL_RAPID_BURST);
-                    }
-                    events.Repeat(3200);
+                case 11:
+                    bAchievProximityMine = true;
                     break;
-                case EVENT_HAND_PULSE:
-                    if (Player* p = SelectTargetFromPlayerList(80.0f))
+                case 12:
+                    bAchievBombBot = true;
+                    break;
+                case 13:
+                    bAchievRocketStrike = true;
+                    break;
+            }
+        }
+
+        uint32 GetData(uint32 id) const
+        {
+            switch (id)
+            {
+                case 1: return (hardmode ? 1 : 0);
+                case 2: return (berserk ? 1 : 0);
+                case 10: return allowedFlameSpreadTime;
+                case 11: return (bAchievProximityMine ? 1 : 0);
+                case 12: return (bAchievBombBot ? 1 : 0);
+                case 13: return (bAchievRocketStrike ? 1 : 0);
+            }
+            return 0;
+        }
+    };
+};
+
+class npc_ulduar_leviathan_mkii : public CreatureScript
+{
+public:
+    npc_ulduar_leviathan_mkii() : CreatureScript("npc_ulduar_leviathan_mkii") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_leviathan_mkiiAI (pCreature);
+    }
+
+    struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
+    {
+        npc_ulduar_leviathan_mkiiAI(Creature *pCreature) : ScriptedAI(pCreature)
+        {
+            pInstance = me->GetInstanceScript();
+            bIsEvading = false;
+        }
+
+        InstanceScript* pInstance;
+        EventMap events;
+        bool bIsEvading;
+        uint8 Phase;
+
+        void Reset()
+        {
+            Phase = 0;
+            if (Unit* c = GetS3())
+                c->ExitVehicle(); // this should never happen!
+            if (Creature* c = me->SummonCreature(NPC_LEVIATHAN_MKII_CANNON, *me, TEMPSUMMON_MANUAL_DESPAWN))
+                c->EnterVehicle(me, 3);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+
+            events.Reset();
+        }
+
+        void SetData(uint32 id, uint32 value)
+        {
+            if (id == 1) // setting phase to start fighting
+            {
+                switch (value)
+                {
+                    case 0:
+                        Phase = 0;
+                        events.Reset();
+                        break;
+                    case 1:
+                        Phase = 1;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (Unit* target = SelectTargetFromPlayerList(75.0f))
+                            AttackStart(target);
+                        DoZoneInCombat();
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_SPELL_NAPALM_SHELL, 6000);
+                        events.ScheduleEvent(EVENT_SPELL_PLASMA_BLAST, 15000);
+                        events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 20000);
+                        events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
+                        if (Creature* c = GetMimiron())
+                            if (c->AI()->GetData(1))
+                                events.ScheduleEvent(EVENT_FLAME_SUPPRESSION_50000, 60000);
+                        break;
+                    case 4:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        DoResetThreat();
+                        Phase = 4;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (Unit* target = SelectTargetFromPlayerList(75.0f))
+                            AttackStart(target);
+                        DoZoneInCombat();
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 30000);
+                        events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
+                        break;
+
+                }
+            }
+        }
+
+        void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
+        {
+            if (damage >= me->GetHealth() || me->GetHealth() < 15000)
+            {
+                damage = 0;
+                if (me->GetReactState() == REACT_PASSIVE)
+                    return;
+                me->SetReactState(REACT_PASSIVE);
+                if (Phase == 1)
+                {
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                     {
-                        me->SetFacingToObject(p);
-                        if (!leftarm)
-                            DoCast(p, SPELL_HAND_PULSE_R);
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->GetMotionMaster()->Clear();
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        SetData(1, 0);
+                        me->InterruptNonMeleeSpells(false);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
+                        if (Unit* cannon = GetS3())
+                            cannon->ExitVehicle();
+                        me->GetMotionMaster()->MoveCharge(2795.076f, 2598.616f, 364.32f, 21.0f);
+                        if (Creature* c = GetMimiron())
+                            c->AI()->SetData(0, 1);
+                    }
+                }
+                else if (Phase == 4)
+                {
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->InterruptNonMeleeSpells(false);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
+                        me->CastSpell(me, SPELL_SELF_REPAIR, false);
+                        if (Creature* c = GetMimiron())
+                        {
+                            if (c->AI()->GetData(1))
+                                me->CastSpell(me, SPELL_EMERGENCY_MODE, true);
+                            if (c->AI()->GetData(2))
+                                me->CastSpell(me, SPELL_BERSERK, true);
+                            c->AI()->SetData(0, 4);
+                        }
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            Unit* cannon = GetS3();
+            if ((cannon && cannon->HasUnitState(UNIT_STATE_CASTING)) || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SPELL_NAPALM_SHELL:
+                    {
+                        Player* target = nullptr;
+                        std::vector<Player*> list;
+                        Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                            if (Player* player = itr->GetSource())
+                                if (player->IsAlive() && player->GetDistance2d(me) > 15.0f)
+                                    list.push_back(player);
+
+                        if (!list.empty())
+                            target = Trinity::Containers::SelectRandomContainerElement(list);
                         else
-                            DoCast(p, SPELL_HAND_PULSE_L);
-
-                        leftarm = !leftarm;
-                    }
-                    events.Repeat(1750);
-                    break;
-                case EVENT_SPELL_SPINNING_UP:
-                    events.Repeat(45000);
-                    {
-                        me->RemoveAurasDueToSpell(SPELL_RAPID_BURST);
-
-                        if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
                         {
-                            me->SetFacingToObject(dbTarget);
-                            dbTarget->StopMoving();
-                            DoCastSelf(SPELL_SPINNING_UP);
+                            if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                                if (tar->IsPlayer())
+                                    target = tar->ToPlayer();
                         }
 
-                        events.RescheduleEvent((Phase == 2 ? EVENT_SPELL_RAPID_BURST : EVENT_HAND_PULSE), 14500);
+                        if (target && cannon)
+                            cannon->CastSpell(target, SPELL_NAPALM_SHELL, false);
+
+                        events.Repeat(urand(5000, 10000));
                     }
                     break;
-                case EVENT_FLAME_SUPPRESSION_10:
-                    DoCast(SPELL_FLAME_SUPPRESSANT_10yd);
-                    events.Repeat(urand(5000, 15000));
-                    break;
-                case EVENT_FROST_BOMB:
-                    me->CastCustomSpell(SPELL_VX001_FROST_BOMB, SPELLVALUE_MAX_TARGETS, 1, (Unit*)nullptr, false);
-                    events.Repeat(urand(30000, 35000));
-                    break;
+                    case EVENT_SPELL_PLASMA_BLAST:
+                        if (Unit* victim = me->GetVictim())
+                        {
+                            me->MonsterTextEmote("Leviathan Mk II begins to cast Plasma Blast!", 0, true);
+                            cannon->CastSpell(victim, SPELL_PLASMA_BLAST, false);
+                        }
+                        events.Repeat(45000);
+                        break;
+                    case EVENT_SPELL_SHOCK_BLAST:
+                        DoCastVictim(SPELL_SHOCK_BLAST);
+                        events.Repeat(30000);
+                        events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 10000);
+                        break;
+                    case EVENT_PROXIMITY_MINES_1:
+                        DoCastAOE(SPELL_PROXIMITY_MINES);
+                        break;
+                    case EVENT_FLAME_SUPPRESSION_50000:
+                        DoCastSelf(SPELL_FLAME_SUPPRESSANT_50000yd);
+                        break;
+                    default:
+                        break;
+                }
+
+                if ((cannon && cannon->HasUnitState(UNIT_STATE_CASTING)) || me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
             }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void MoveInLineOfSight(Unit* /*mover*/) {}
+
+        void KilledUnit(Unit* who)
+        {
+            if( who->GetTypeId() == TYPEID_PLAYER )
+                if (Creature* c = GetMimiron())
+                {
+                    if( Phase == 1 )
+                    {
+                        if( rand()%2 )
+                        {
+                            c->MonsterYell(TEXT_LMK2_SLAIN_1, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_TANK_SLAY_1);
+                        }
+                        else
+                        {
+                            c->MonsterYell(TEXT_LMK2_SLAIN_2, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_TANK_SLAY_2);
+                        }
+                    }
+                    else
+                    {
+                        if( rand()%2 )
+                        {
+                            c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
+                        }
+                        else
+                        {
+                            c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
+                        }
+                    }
+                }
+        }
+
+        void EnterEvadeMode()
+        {
+            if (bIsEvading)
+                return;
+            bIsEvading = true;
+
+            me->RemoveAllAuras();
+            me->ExitVehicle();
+            ScriptedAI::EnterEvadeMode();
+
+            if (Creature* mimiron = GetMimiron())
+                mimiron->AI()->EnterEvadeMode();
+
+            bIsEvading = false;
+        }
+
+        void PassengerBoarded(Unit* p, int8 seat, bool apply)
+        {
+            if (p->GetEntry() == NPC_LEVIATHAN_MKII_CANNON && !apply)
+            {
+                Unit::Kill(p, p);
+                p->ToCreature()->DespawnOrUnsummon(6000);
+            }
+        }
+
+        Unit* GetS3()
+        {
+            if (Vehicle* vk = me->GetVehicleKit())
+                if (Unit* cannon = vk->GetPassenger(3))
+                    if (cannon->GetEntry() == NPC_LEVIATHAN_MKII_CANNON)
+                        return cannon;
+
+            return nullptr;
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo *spell)
+        {
+            if( spell->Id == SPELL_SELF_REPAIR )
+            {
+                me->SetHealth(me->GetMaxHealth() / 2);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_AGGRESSIVE);
+            }
+        }
+    };
+};
+
+class npc_ulduar_vx001 : public CreatureScript
+{
+public:
+    npc_ulduar_vx001() : CreatureScript("npc_ulduar_vx001") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_vx001AI (pCreature);
+    }
+
+    struct npc_ulduar_vx001AI : public ScriptedAI
+    {
+        npc_ulduar_vx001AI(Creature *pCreature) : ScriptedAI(pCreature)
+        {
+            pInstance = me->GetInstanceScript();
+            bIsEvading = false;
+        }
+
+        InstanceScript* pInstance;
+        EventMap events;
+        bool bIsEvading;
+        uint8 Phase;
+        bool fighting;
+        bool leftarm;
+
+        void Reset()
+        {
+            Phase = 0;
+            fighting = false;
+            leftarm = false;
+            me->SetRegeneratingHealth(false);
+            events.Reset();
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void AttackStart(Unit* /*who*/) {}
+
+        void SetData(uint32 id, uint32 value)
+        {
+            if (id == 1) // setting phase to start fighting
+            {
+                switch (value)
+                {
+                    case 0:
+                        Phase = 0;
+                        fighting = false;
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
+                        events.Reset();
+                        break;
+                    case 2:
+                        Phase = 2;
+                        fighting = true;
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_SPELL_CAST_OMNI);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_SPELL_HEAT_WAVE, 10000);
+                        events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
+                        events.ScheduleEvent(EVENT_SPELL_RAPID_BURST, 0);
+                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
+                        events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
+                        if (Creature* c = GetMimiron())
+                            if (c->AI()->GetData(1))
+                            {
+                                events.ScheduleEvent(EVENT_FLAME_SUPPRESSION_10, 7000);
+                                events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
+                            }
+                        break;
+                    case 4:
+                        Phase = 4;
+                        fighting = true;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
+                        events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
+                        events.ScheduleEvent(EVENT_HAND_PULSE, 1);
+                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 45000);
+                        if (Creature* c = GetMimiron())
+                            if (c->AI()->GetData(1))
+                                events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
+                        break;
+                }
+            }
+        }
+
+        void DoAction(int32 action)
+        {
+            if (action == 1337)
+                if( Vehicle* vk = me->GetVehicleKit() )
+                    for (uint8 i=0; i<2; ++i)
+                        if (Unit* r = vk->GetPassenger(5+i))
+                            if (r->GetTypeId() == TYPEID_UNIT)
+                                r->ToCreature()->DespawnOrUnsummon(1);
+        }
+
+        void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
+        {
+            if (damage >= me->GetHealth() || me->GetHealth() < 15000)
+            {
+                damage = 0;
+                if (Phase == 2)
+                {
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        SetData(1, 0);
+                        me->InterruptNonMeleeSpells(false);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
+                        me->SendMeleeAttackStop();
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_CUSTOM_SPELL_06);
+                        me->HandleEmoteCommand(EMOTE_ONESHOT_CUSTOM_SPELL_06);
+                        if (Creature* c = GetMimiron())
+                            c->AI()->SetData(0, 2);
+                    }
+                }
+                else if (Phase == 4)
+                {
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->InterruptNonMeleeSpells(false);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
+                        me->CastSpell(me, SPELL_SELF_REPAIR, false);
+                        if (Creature* c = GetMimiron())
+                        {
+                            if (c->AI()->GetData(1))
+                                me->CastSpell(me, SPELL_EMERGENCY_MODE, true);
+                            if (c->AI()->GetData(2))
+                                me->CastSpell(me, SPELL_BERSERK, true);
+                            c->AI()->SetData(0, 5);
+                        }
+                    }
+                }
+            }
+        }
+
+        void CastHandler()
+        {
+            // Its here to force VX_001 to face mimiron db target during spinning cast
+            // because in phase 4 if tank turns leviathan MK II around
+            // VX will turn around as well, and then when laser barrage begins to cast
+            // he will change direction to where trigger is
+            if (Spell* spell = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                if (spell->GetSpellInfo()->Id == SPELL_SPINNING_UP)
+                    if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                        me->SetFacingToObject(dbTarget);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!fighting)
+                return;
+
+            events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
             {
                 CastHandler();
                 return;
             }
-        }
-    }
 
-    void MoveInLineOfSight(Unit* /*mover*/) {}
-
-    void KilledUnit(Unit* who)
-    {
-        if( who->GetTypeId() == TYPEID_PLAYER )
-            if( Creature* c = GetMimiron() )
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if( Phase == 2 )
+                switch (eventId)
                 {
-                    if( rand()%2 )
-                    {
-                        c->MonsterYell(TEXT_VX001_SLAIN_1, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_TORSO_SLAY_1);
-                    }
-                    else
-                    {
-                        c->MonsterYell(TEXT_VX001_SLAIN_2, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_TORSO_SLAY_2);
-                    }
-                }
-                else
-                {
-                    if( rand()%2 )
-                    {
-                        c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
-                    }
-                    else
-                    {
-                        c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
-                    }
-                }
-            }
-    }
-
-    void EnterEvadeMode()
-    {
-        if (bIsEvading)
-            return;
-        bIsEvading = true;
-
-        me->RemoveAllAuras();
-        me->ExitVehicle();
-        _EnterEvadeMode();
-        Reset();
-        if (Creature* mimiron = GetMimiron())
-            mimiron->AI()->EnterEvadeMode();
-
-        bIsEvading = false;
-    }
-
-    void PassengerBoarded(Unit* p, int8 seat, bool apply)
-    {
-        if (p->GetEntry() == NPC_ROCKET_VISUAL && !apply)
-            p->ToCreature()->DespawnOrUnsummon(8000);
-    }
-
-    void SpellHit(Unit* caster, const SpellInfo *spell)
-    {
-        if( spell->Id == SPELL_SELF_REPAIR )
-        {
-            me->SetHealth(me->GetMaxHealth() / 2);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        }
-    }
-};
-
-struct npc_ulduar_aerial_command_unitAI : public ScriptedAI
-{
-    npc_ulduar_aerial_command_unitAI(Creature *pCreature) : ScriptedAI(pCreature), summons(me)
-    {
-        pInstance = me->GetInstanceScript();
-        bIsEvading = false;
-        immobilized = false;
-        me->SetDisableGravity(true);
-    }
-
-    InstanceScript* pInstance;
-    EventMap events;
-    SummonList summons;
-    bool bIsEvading;
-    uint8 Phase;
-    bool immobilized;
-
-    void Reset()
-    {
-        Phase = 0;
-        events.Reset();
-        summons.DespawnAll();
-    }
-
-    void AttackStart(Unit* who)
-    {
-        if (who)
-            me->Attack(who, true); // skip following
-    }
-
-    void SetData(uint32 id, uint32 value)
-    {
-        if (id == 1) // setting phase to start fighting
-        {
-            switch (value)
-            {
-                case 0:
-                    Phase = 0;
-                    events.Reset();
-                    immobilized = false;
-                    break;
-                case 3:
-                    Phase = 3;
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    if (Unit* target = SelectTargetFromPlayerList(75.0f))
-                        AttackStart(target);
-                    DoZoneInCombat();
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
-                    events.ScheduleEvent(EVENT_SUMMON_BOMB_BOT, 15000);
-                    events.ScheduleEvent(EVENT_SUMMON_ASSAULT_BOT, 1000);
-                    events.ScheduleEvent(EVENT_SUMMON_JUNK_BOT, 10000);
-                    if (Creature* c = GetMimiron())
-                        if (c->AI()->GetData(1))
-                            events.ScheduleEvent(EVENT_SUMMON_EMERGENCY_FIRE_BOTS, 0);
-                    break;
-                case 4:
-                    me->SetReactState(REACT_AGGRESSIVE);
-                    DoResetThreat();
-                    Phase = 4;
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    if (Unit* target = SelectTargetFromPlayerList(75.0f))
-                        AttackStart(target);
-                    DoZoneInCombat();
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
-
-            }
-        }
-        else if (id == 2 && !immobilized && Phase == 3) // magnetic core
-        {
-            immobilized = true;
-            events.ScheduleEvent(EVENT_MAGNETIC_CORE_PULL_DOWN, 2000);
-        }
-    }
-
-    void DoAction(int32 param)
-    {
-        if (param == 1337)
-            summons.DespawnAll();
-    }
-
-    void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
-    {
-        if (damage >= me->GetHealth() || me->GetHealth() < 15000)
-        {
-            damage = 0;
-            if (me->GetReactState() == REACT_PASSIVE)
-                return;
-            me->SetReactState(REACT_PASSIVE);
-            if (Phase == 3)
-            {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    me->GetMotionMaster()->Clear();
-                    me->StopMoving();
-                    me->AttackStop();
-                    me->SetReactState(REACT_PASSIVE);
-                    SetData(1, 0);
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-
-                    me->MonsterMoveWithSpeed(2744.65f, 2569.46f, 381.34f, me->GetDistance(2744.65f, 2569.46f, 381.34f));
-                    me->UpdatePosition(2744.65f, 2569.46f, 381.34f, M_PI, false);
-
-                    if (Creature* c = GetMimiron())
-                        c->AI()->SetData(0, 3);
-                }
-            }
-            else if (Phase == 4)
-            {
-                if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    me->InterruptNonMeleeSpells(false);
-                    me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
-                    me->CastSpell(me, SPELL_SELF_REPAIR, false);
-                    if (Creature* c = GetMimiron())
-                    {
-                        if (c->AI()->GetData(1))
-                            me->CastSpell(me, SPELL_EMERGENCY_MODE, true);
-                        if (c->AI()->GetData(2))
-                            me->CastSpell(me, SPELL_BERSERK, true);
-                        c->AI()->SetData(0, 6);
-                    }
-                }
-            }
-        }
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (!UpdateVictim())
-            return;
-
-        // following :D
-        if( Phase == 3 && !immobilized )
-            if( Unit* victim = me->GetVictim() )
-                if( me->GetExactDist2d(victim) > 25.0f )
-                {
-                    float angle = victim->GetAngle(me->GetPositionX(), me->GetPositionY());
-                    me->SetOrientation( me->GetAngle(victim->GetPositionX(), victim->GetPositionY()) );
-                    float x = victim->GetPositionX() + 15.0f*cos(angle);
-                    float y = victim->GetPositionY() + 15.0f*sin(angle);
-
-                    // check if there's magnetic core in line of movement
-                    Creature* mc = nullptr;
-                    std::list<Creature*> cl;
-                    me->GetCreaturesWithEntryInRange(cl, me->GetExactDist2d(victim), NPC_MAGNETIC_CORE);
-                    for( std::list<Creature*>::iterator itr = cl.begin(); itr != cl.end(); ++itr )
-                    {
-                        if ((*itr)->IsInBetween(me, victim, 4.0f) && (*itr)->GetExactDist2d(victim) >= 10.0f) // don't come very close just because there's a magnetic core
+                    case EVENT_SPELL_HEAT_WAVE:
+                        DoCast(SPELL_HEAT_WAVE);
+                        events.Repeat(30000);
+                        break;
+                    case EVENT_SPELL_ROCKET_STRIKE:
+                        if (Vehicle* vk = me->GetVehicleKit())
                         {
-                            x = (*itr)->GetPositionX();
-                            y = (*itr)->GetPositionY();
-                            mc = (*itr);
-                            break;
+                            for (int i = 0; i<(Phase / 2); ++i)
+                            {
+                                uint8 index = (Phase == 2 ? rand() % 2 : i);
+                                if (Unit* r = vk->GetPassenger(5 + index))
+                                    if (Player* temp = SelectTargetFromPlayerList(100.0f))
+                                    {
+                                        if (Creature* trigger = me->SummonCreature(NPC_ROCKET_STRIKE_N, temp->GetPositionX(), temp->GetPositionY(), temp->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_DESPAWN, 6000))
+                                            trigger->CastSpell(trigger, SPELL_ROCKET_STRIKE_AURA, true);
+                                        Position exitPos;
+                                        r->GetPosition(&exitPos);
+                                        exitPos.m_positionX += cos(me->GetOrientation())*2.35f;
+                                        exitPos.m_positionY += sin(me->GetOrientation())*2.35f;
+                                        exitPos.m_positionZ += 2.0f*Phase;
+                                        r->_ExitVehicle(&exitPos);
+                                        me->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE, r->GetGUID());
+                                        if (r->GetTypeId() == TYPEID_UNIT)
+                                            r->ToCreature()->AI()->SetData(0, 0);
+                                    }
+                            }
+                            events.Repeat(25000);
+                            events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 10000);
                         }
-                    }
+                        break;
+                    case EVENT_REINSTALL_ROCKETS:
+                        if (Vehicle* vk = me->GetVehicleKit())
+                        {
+                            for (uint8 i = 5; i <= 6; ++i)
+                                if (!vk->GetPassenger(i))
+                                    if (TempSummon* accessory = me->SummonCreature(NPC_ROCKET_VISUAL, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 4.0f, me->GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN))
+                                        if (!me->HandleSpellClick(accessory, i))
+                                            accessory->UnSummon();
+                        }
+                        break;
+                    case EVENT_SPELL_RAPID_BURST:
+                        if (Player* p = SelectTargetFromPlayerList(80.0f))
+                        {
+                            me->SetFacingToObject(p);
+                            DoCast(me, SPELL_RAPID_BURST);
+                        }
+                        events.Repeat(3200);
+                        break;
+                    case EVENT_HAND_PULSE:
+                        if (Player* p = SelectTargetFromPlayerList(80.0f))
+                        {
+                            me->SetFacingToObject(p);
+                            if (!leftarm)
+                                DoCast(p, SPELL_HAND_PULSE_R);
+                            else
+                                DoCast(p, SPELL_HAND_PULSE_L);
 
-                    float speed = me->GetExactDist(x, y, 381.34f);
-                    me->MonsterMoveWithSpeed(x, y, 381.34f, speed);
-                    me->UpdatePosition(x, y, 381.34f, me->GetAngle(victim), false);
-                    if (mc)
-                    {
-                        mc->AI()->SetData(0, 0);
-                        SetData(2, 1);
-                    }
+                            leftarm = !leftarm;
+                        }
+                        events.Repeat(1750);
+                        break;
+                    case EVENT_SPELL_SPINNING_UP:
+                        events.Repeat(45000);
+                        {
+                            me->RemoveAurasDueToSpell(SPELL_RAPID_BURST);
+
+                            if (Creature* dbTarget = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                            {
+                                me->SetFacingToObject(dbTarget);
+                                dbTarget->StopMoving();
+                                DoCastSelf(SPELL_SPINNING_UP);
+                            }
+
+                            events.RescheduleEvent((Phase == 2 ? EVENT_SPELL_RAPID_BURST : EVENT_HAND_PULSE), 14500);
+                        }
+                        break;
+                    case EVENT_FLAME_SUPPRESSION_10:
+                        DoCast(SPELL_FLAME_SUPPRESSANT_10yd);
+                        events.Repeat(urand(5000, 15000));
+                        break;
+                    case EVENT_FROST_BOMB:
+                        me->CastCustomSpell(SPELL_VX001_FROST_BOMB, SPELLVALUE_MAX_TARGETS, 1, (Unit*)nullptr, false);
+                        events.Repeat(urand(30000, 35000));
+                        break;
                 }
 
-        events.Update(diff);
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                {
+                    CastHandler();
+                    return;
+                }
+            }
+        }
 
-        if (me->HasUnitState(UNIT_STATE_CASTING))
-            return;
+        void MoveInLineOfSight(Unit* /*mover*/) {}
 
-        while (uint32 eventId = events.ExecuteEvent())
+        void KilledUnit(Unit* who)
         {
-            switch (eventId)
-            {
-                case EVENT_SPELL_PLASMA_BALL:
-                    if (!immobilized)
+            if( who->GetTypeId() == TYPEID_PLAYER )
+                if( Creature* c = GetMimiron() )
+                {
+                    if( Phase == 2 )
                     {
-                        if (Phase == 3)
+                        if( rand()%2 )
                         {
-                            if (Unit* victim = me->GetVictim())
-                                me->CastSpell(victim, SPELL_PLASMA_BALL, false);
+                            c->MonsterYell(TEXT_VX001_SLAIN_1, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_TORSO_SLAY_1);
                         }
                         else
                         {
-                            if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0, 27.5f, true))
-                            {
-                                me->SetFacingTo(me->GetAngle(victim));
-                                me->CastSpell(victim, SPELL_PLASMA_BALL, false);
-                            }
+                            c->MonsterYell(TEXT_VX001_SLAIN_2, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_TORSO_SLAY_2);
                         }
                     }
-                    events.Repeat(3000);
-                    break;
-                case EVENT_SUMMON_BOMB_BOT:
-                    if (!immobilized)
-                        me->CastSpell(me, SPELL_SUMMON_BOMB_BOT, false);
-                    events.Repeat(15000);
-                    break;
-                case EVENT_SUMMON_ASSAULT_BOT:
-                    if (GameObject* pad = me->FindNearestGameObject(RAND(194742, 194746, 194745), 200.0f))
-                        if (Creature* trigger = me->SummonCreature(NPC_BOT_SUMMON_TRIGGER, *pad, TEMPSUMMON_TIMED_DESPAWN, 15000))
-                            trigger->AI()->DoAction(2);
-                    events.Repeat(30000);
-                    break;
-                case EVENT_SUMMON_JUNK_BOT:
-                    if (GameObject* pad = me->FindNearestGameObject(RAND(194741, 194744, 194747), 200.0f))
-                        if (Creature* trigger = me->SummonCreature(NPC_BOT_SUMMON_TRIGGER, *pad, TEMPSUMMON_TIMED_DESPAWN, 15000))
-                            trigger->AI()->DoAction(1);
-                    events.Repeat(10000);
-                    break;
-                case EVENT_SUMMON_EMERGENCY_FIRE_BOTS:
-                {
-                    uint32 ids[3] = { 194740, 194743, 194748 };
-                    for (uint8 i = 0; i<3; ++i)
-                        if (GameObject* pad = me->FindNearestGameObject(ids[i], 200.0f))
-                            if (Creature* trigger = me->SummonCreature(NPC_BOT_SUMMON_TRIGGER, *pad, TEMPSUMMON_MANUAL_DESPAWN))
-                                trigger->AI()->DoAction(3);
-                    events.Repeat(45000);
+                    else
+                    {
+                        if( rand()%2 )
+                        {
+                            c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
+                        }
+                        else
+                        {
+                            c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
+                        }
+                    }
                 }
-                break;
-                case EVENT_MAGNETIC_CORE_PULL_DOWN:
-                    me->CastSpell(me, SPELL_MAGNETIC_CORE, true);
-                    me->CastSpell(me, SPELL_SPINNING, true);
-                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 365.34f, me->GetExactDist(me->GetPositionX(), me->GetPositionY(), 365.34f));
-                    me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), 365.34f, me->GetOrientation(), false);
-                    events.ScheduleEvent(EVENT_MAGNETIC_CORE_FREE, 20000);
-                    break;
-                case EVENT_MAGNETIC_CORE_FREE:
-                    me->RemoveAura(SPELL_SPINNING);
-                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 381.34f, me->GetDistance(me->GetPositionX(), me->GetPositionY(), 381.34f));
-                    me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), 381.34f, me->GetOrientation(), false);
-                    events.ScheduleEvent(EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE, 1000);
-                    break;
-                case EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE:
-                    immobilized = false;
-                    break;
-                default:
-                    break;
+        }
+
+        void EnterEvadeMode()
+        {
+            if (bIsEvading)
+                return;
+            bIsEvading = true;
+
+            me->RemoveAllAuras();
+            me->ExitVehicle();
+            _EnterEvadeMode();
+            Reset();
+            if (Creature* mimiron = GetMimiron())
+                mimiron->AI()->EnterEvadeMode();
+
+            bIsEvading = false;
+        }
+
+        void PassengerBoarded(Unit* p, int8 seat, bool apply)
+        {
+            if (p->GetEntry() == NPC_ROCKET_VISUAL && !apply)
+                p->ToCreature()->DespawnOrUnsummon(8000);
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo *spell)
+        {
+            if( spell->Id == SPELL_SELF_REPAIR )
+            {
+                me->SetHealth(me->GetMaxHealth() / 2);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
+        }
+    };
+};
+
+class npc_ulduar_aerial_command_unit : public CreatureScript
+{
+public:
+    npc_ulduar_aerial_command_unit() : CreatureScript("npc_ulduar_aerial_command_unit") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_aerial_command_unitAI (pCreature);
+    }
+
+    struct npc_ulduar_aerial_command_unitAI : public ScriptedAI
+    {
+        npc_ulduar_aerial_command_unitAI(Creature *pCreature) : ScriptedAI(pCreature), summons(me)
+        {
+            pInstance = me->GetInstanceScript();
+            bIsEvading = false;
+            immobilized = false;
+            me->SetDisableGravity(true);
+        }
+
+        InstanceScript* pInstance;
+        EventMap events;
+        SummonList summons;
+        bool bIsEvading;
+        uint8 Phase;
+        bool immobilized;
+
+        void Reset()
+        {
+            Phase = 0;
+            events.Reset();
+            summons.DespawnAll();
+        }
+
+        void AttackStart(Unit* who)
+        {
+            if (who)
+                me->Attack(who, true); // skip following
+        }
+
+        void SetData(uint32 id, uint32 value)
+        {
+            if (id == 1) // setting phase to start fighting
+            {
+                switch (value)
+                {
+                    case 0:
+                        Phase = 0;
+                        events.Reset();
+                        immobilized = false;
+                        break;
+                    case 3:
+                        Phase = 3;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (Unit* target = SelectTargetFromPlayerList(75.0f))
+                            AttackStart(target);
+                        DoZoneInCombat();
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
+                        events.ScheduleEvent(EVENT_SUMMON_BOMB_BOT, 15000);
+                        events.ScheduleEvent(EVENT_SUMMON_ASSAULT_BOT, 1000);
+                        events.ScheduleEvent(EVENT_SUMMON_JUNK_BOT, 10000);
+                        if (Creature* c = GetMimiron())
+                            if (c->AI()->GetData(1))
+                                events.ScheduleEvent(EVENT_SUMMON_EMERGENCY_FIRE_BOTS, 0);
+                        break;
+                    case 4:
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        DoResetThreat();
+                        Phase = 4;
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (Unit* target = SelectTargetFromPlayerList(75.0f))
+                            AttackStart(target);
+                        DoZoneInCombat();
+                        events.Reset();
+                        events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
+
+                }
+            }
+            else if (id == 2 && !immobilized && Phase == 3) // magnetic core
+            {
+                immobilized = true;
+                events.ScheduleEvent(EVENT_MAGNETIC_CORE_PULL_DOWN, 2000);
+            }
+        }
+
+        void DoAction(int32 param)
+        {
+            if (param == 1337)
+                summons.DespawnAll();
+        }
+
+        void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
+        {
+            if (damage >= me->GetHealth() || me->GetHealth() < 15000)
+            {
+                damage = 0;
+                if (me->GetReactState() == REACT_PASSIVE)
+                    return;
+                me->SetReactState(REACT_PASSIVE);
+                if (Phase == 3)
+                {
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->GetMotionMaster()->Clear();
+                        me->StopMoving();
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        SetData(1, 0);
+                        me->InterruptNonMeleeSpells(false);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
+
+                        me->MonsterMoveWithSpeed(2744.65f, 2569.46f, 381.34f, me->GetDistance(2744.65f, 2569.46f, 381.34f));
+                        me->UpdatePosition(2744.65f, 2569.46f, 381.34f, M_PI, false);
+
+                        if (Creature* c = GetMimiron())
+                            c->AI()->SetData(0, 3);
+                    }
+                }
+                else if (Phase == 4)
+                {
+                    if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+                    {
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->InterruptNonMeleeSpells(false);
+                        me->RemoveAllAurasExceptType(SPELL_AURA_CONTROL_VEHICLE);
+                        me->CastSpell(me, SPELL_SELF_REPAIR, false);
+                        if (Creature* c = GetMimiron())
+                        {
+                            if (c->AI()->GetData(1))
+                                me->CastSpell(me, SPELL_EMERGENCY_MODE, true);
+                            if (c->AI()->GetData(2))
+                                me->CastSpell(me, SPELL_BERSERK, true);
+                            c->AI()->SetData(0, 6);
+                        }
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            // following :D
+            if( Phase == 3 && !immobilized )
+                if( Unit* victim = me->GetVictim() )
+                    if( me->GetExactDist2d(victim) > 25.0f )
+                    {
+                        float angle = victim->GetAngle(me->GetPositionX(), me->GetPositionY());
+                        me->SetOrientation( me->GetAngle(victim->GetPositionX(), victim->GetPositionY()) );
+                        float x = victim->GetPositionX() + 15.0f*cos(angle);
+                        float y = victim->GetPositionY() + 15.0f*sin(angle);
+
+                        // check if there's magnetic core in line of movement
+                        Creature* mc = nullptr;
+                        std::list<Creature*> cl;
+                        me->GetCreaturesWithEntryInRange(cl, me->GetExactDist2d(victim), NPC_MAGNETIC_CORE);
+                        for( std::list<Creature*>::iterator itr = cl.begin(); itr != cl.end(); ++itr )
+                        {
+                            if ((*itr)->IsInBetween(me, victim, 4.0f) && (*itr)->GetExactDist2d(victim) >= 10.0f) // don't come very close just because there's a magnetic core
+                            {
+                                x = (*itr)->GetPositionX();
+                                y = (*itr)->GetPositionY();
+                                mc = (*itr);
+                                break;
+                            }
+                        }
+
+                        float speed = me->GetExactDist(x, y, 381.34f);
+                        me->MonsterMoveWithSpeed(x, y, 381.34f, speed);
+                        me->UpdatePosition(x, y, 381.34f, me->GetAngle(victim), false);
+                        if (mc)
+                        {
+                            mc->AI()->SetData(0, 0);
+                            SetData(2, 1);
+                        }
+                    }
+
+            events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-        }
-    }
 
-    void MoveInLineOfSight(Unit* /*mover*/) {}
-
-    void KilledUnit(Unit* who)
-    {
-        if( who->GetTypeId() == TYPEID_PLAYER )
-            if( Creature* c = GetMimiron() )
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if( Phase == 3 )
+                switch (eventId)
                 {
-                    if( rand()%2 )
+                    case EVENT_SPELL_PLASMA_BALL:
+                        if (!immobilized)
+                        {
+                            if (Phase == 3)
+                            {
+                                if (Unit* victim = me->GetVictim())
+                                    me->CastSpell(victim, SPELL_PLASMA_BALL, false);
+                            }
+                            else
+                            {
+                                if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0, 27.5f, true))
+                                {
+                                    me->SetFacingTo(me->GetAngle(victim));
+                                    me->CastSpell(victim, SPELL_PLASMA_BALL, false);
+                                }
+                            }
+                        }
+                        events.Repeat(3000);
+                        break;
+                    case EVENT_SUMMON_BOMB_BOT:
+                        if (!immobilized)
+                            me->CastSpell(me, SPELL_SUMMON_BOMB_BOT, false);
+                        events.Repeat(15000);
+                        break;
+                    case EVENT_SUMMON_ASSAULT_BOT:
+                        if (GameObject* pad = me->FindNearestGameObject(RAND(194742, 194746, 194745), 200.0f))
+                            if (Creature* trigger = me->SummonCreature(NPC_BOT_SUMMON_TRIGGER, *pad, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                                trigger->AI()->DoAction(2);
+                        events.Repeat(30000);
+                        break;
+                    case EVENT_SUMMON_JUNK_BOT:
+                        if (GameObject* pad = me->FindNearestGameObject(RAND(194741, 194744, 194747), 200.0f))
+                            if (Creature* trigger = me->SummonCreature(NPC_BOT_SUMMON_TRIGGER, *pad, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                                trigger->AI()->DoAction(1);
+                        events.Repeat(10000);
+                        break;
+                    case EVENT_SUMMON_EMERGENCY_FIRE_BOTS:
                     {
-                        c->MonsterYell(TEXT_ACU_SLAIN_1, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_HEAD_SLAY_1);
+                        uint32 ids[3] = { 194740, 194743, 194748 };
+                        for (uint8 i = 0; i<3; ++i)
+                            if (GameObject* pad = me->FindNearestGameObject(ids[i], 200.0f))
+                                if (Creature* trigger = me->SummonCreature(NPC_BOT_SUMMON_TRIGGER, *pad, TEMPSUMMON_MANUAL_DESPAWN))
+                                    trigger->AI()->DoAction(3);
+                        events.Repeat(45000);
                     }
-                    else
-                    {
-                        c->MonsterYell(TEXT_ACU_SLAIN_2, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_HEAD_SLAY_2);
-                    }
+                    break;
+                    case EVENT_MAGNETIC_CORE_PULL_DOWN:
+                        me->CastSpell(me, SPELL_MAGNETIC_CORE, true);
+                        me->CastSpell(me, SPELL_SPINNING, true);
+                        me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 365.34f, me->GetExactDist(me->GetPositionX(), me->GetPositionY(), 365.34f));
+                        me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), 365.34f, me->GetOrientation(), false);
+                        events.ScheduleEvent(EVENT_MAGNETIC_CORE_FREE, 20000);
+                        break;
+                    case EVENT_MAGNETIC_CORE_FREE:
+                        me->RemoveAura(SPELL_SPINNING);
+                        me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 381.34f, me->GetDistance(me->GetPositionX(), me->GetPositionY(), 381.34f));
+                        me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), 381.34f, me->GetOrientation(), false);
+                        events.ScheduleEvent(EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE, 1000);
+                        break;
+                    case EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE:
+                        immobilized = false;
+                        break;
+                    default:
+                        break;
                 }
-                else
-                {
-                    if( rand()%2 )
-                    {
-                        c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
-                    }
-                    else
-                    {
-                        c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
-                        c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
-                    }
-                }
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
             }
-    }
-
-    void EnterEvadeMode()
-    {
-        if (bIsEvading)
-            return;
-        bIsEvading = true;
-
-        me->RemoveAllAuras();
-        me->ExitVehicle();
-        _EnterEvadeMode();
-        Reset();
-        if (Creature* mimiron = GetMimiron())
-            mimiron->AI()->EnterEvadeMode();
-
-        bIsEvading = false;
-    }
-
-    void JustSummoned(Creature* s)
-    {
-        summons.Summon(s);
-        if (s->GetEntry() == NPC_BOMB_BOT)
-            s->m_positionZ = 364.34f;
-    }
-
-    void SummonedCreatureDespawn(Creature* s)
-    {
-        summons.Despawn(s);
-    }
-
-    void SpellHit(Unit* caster, const SpellInfo *spell)
-    {
-        if( spell->Id == SPELL_SELF_REPAIR )
-        {
-            me->SetHealth(me->GetMaxHealth() / 2);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
-    }
+
+        void MoveInLineOfSight(Unit* /*mover*/) {}
+
+        void KilledUnit(Unit* who)
+        {
+            if( who->GetTypeId() == TYPEID_PLAYER )
+                if( Creature* c = GetMimiron() )
+                {
+                    if( Phase == 3 )
+                    {
+                        if( rand()%2 )
+                        {
+                            c->MonsterYell(TEXT_ACU_SLAIN_1, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_HEAD_SLAY_1);
+                        }
+                        else
+                        {
+                            c->MonsterYell(TEXT_ACU_SLAIN_2, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_HEAD_SLAY_2);
+                        }
+                    }
+                    else
+                    {
+                        if( rand()%2 )
+                        {
+                            c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
+                        }
+                        else
+                        {
+                            c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
+                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
+                        }
+                    }
+                }
+        }
+
+        void EnterEvadeMode()
+        {
+            if (bIsEvading)
+                return;
+            bIsEvading = true;
+
+            me->RemoveAllAuras();
+            me->ExitVehicle();
+            _EnterEvadeMode();
+            Reset();
+            if (Creature* mimiron = GetMimiron())
+                mimiron->AI()->EnterEvadeMode();
+
+            bIsEvading = false;
+        }
+
+        void JustSummoned(Creature* s)
+        {
+            summons.Summon(s);
+            if (s->GetEntry() == NPC_BOMB_BOT)
+                s->m_positionZ = 364.34f;
+        }
+
+        void SummonedCreatureDespawn(Creature* s)
+        {
+            summons.Despawn(s);
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo *spell)
+        {
+            if( spell->Id == SPELL_SELF_REPAIR )
+            {
+                me->SetHealth(me->GetMaxHealth() / 2);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            }
+        }
+    };
 };
 
 enum Mine
@@ -1904,644 +1950,792 @@ enum Mine
     EVENT_DESPAWN
 };
 
-struct npc_ulduar_proximity_mineAI : public ScriptedAI
+class npc_ulduar_proximity_mine : public CreatureScript
 {
-    npc_ulduar_proximity_mineAI(Creature *pCreature) : ScriptedAI(pCreature)
+public:
+    npc_ulduar_proximity_mine() : CreatureScript("npc_ulduar_proximity_mine") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        _armed = false;
-        _exploded = false;
-        _events.ScheduleEvent(EVENT_EXPLODE, 35000);
-        _events.ScheduleEvent(EVENT_ARM, 500);
+        return new npc_ulduar_proximity_mineAI(pCreature);
     }
 
-    void AttackStart(Unit* /*who*/) {}
-    void MoveInLineOfSight(Unit* /*who*/) {}
-    bool CanAIAttack(const Unit* target) const { return false; }
-
-    void SpellHitTarget(Unit* target, const SpellInfo* spell)
+    struct npc_ulduar_proximity_mineAI : public ScriptedAI
     {
-        if (target && spell && target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_MINE_EXPLOSION)
-            if (InstanceScript* pInstance = me->GetInstanceScript())
-                if (Creature* c = GetMimiron())
-                    c->AI()->SetData(0, 11);
-    }
-
-    // MoveInLineOfSight is checked every few yards, can't use it
-    void UpdateAI(uint32 diff)
-    {
-        _events.Update(diff);
-
-        if (!_exploded && _armed && SelectTargetFromPlayerList(1.9f))
+        npc_ulduar_proximity_mineAI(Creature *pCreature) : ScriptedAI(pCreature)
         {
-            _exploded = true;
-            _events.RescheduleEvent(EVENT_EXPLODE, 0);
+            _armed = false;
+            _exploded = false;
+            _events.ScheduleEvent(EVENT_EXPLODE, 35000);
+            _events.ScheduleEvent(EVENT_ARM, 500);
         }
 
-        while (uint32 eventId = _events.ExecuteEvent())
+        void AttackStart(Unit* /*who*/) {}
+        void MoveInLineOfSight(Unit* /*who*/) {}
+        bool CanAIAttack(const Unit* target) const { return false; }
+
+        void SpellHitTarget(Unit* target, const SpellInfo* spell)
         {
-            switch (eventId)
+            if (target && spell && target->GetTypeId() == TYPEID_PLAYER && spell->Id == SPELL_MINE_EXPLOSION)
+                if (InstanceScript* pInstance = me->GetInstanceScript())
+                    if (Creature* c = GetMimiron())
+                        c->AI()->SetData(0, 11);
+        }
+
+        // MoveInLineOfSight is checked every few yards, can't use it
+        void UpdateAI(uint32 diff)
+        {
+            _events.Update(diff);
+
+            if (!_exploded && _armed && SelectTargetFromPlayerList(1.9f))
             {
-                case EVENT_EXPLODE:
-                    DoCastSelf(SPELL_MINE_EXPLOSION);
-                    _events.ScheduleEvent(EVENT_DESPAWN, 1000);
-                    break;
-                case EVENT_ARM:
-                    _armed = true;
-                    break;
-                case EVENT_DESPAWN:
-                    me->DespawnOrUnsummon();
-                    break;
-                default:
-                    break;
+                _exploded = true;
+                _events.RescheduleEvent(EVENT_EXPLODE, 0);
             }
-        }
-    }
 
-private:
-    bool _exploded, _armed;
-    EventMap _events;
-};
-
-struct npc_ulduar_mimiron_rocketAI : public NullCreatureAI
-{
-    npc_ulduar_mimiron_rocketAI(Creature *pCreature) : NullCreatureAI(pCreature) {}
-
-    void InitializeAI()
-    {
-        if (!me->isDead())
-            Reset();
-    }
-
-    void Reset()
-    {
-        me->SetCanFly(true);
-        me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
-        me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
-    }
-
-    void SetData(uint32 id, uint32 value)
-    {
-        me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+100.0f, false, true);
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (!me->GetVehicle())
-        {
-            me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN)+0.4f, false);
-            me->SetSpeed(MOVE_FLIGHT, me->GetSpeedRate(MOVE_RUN), false);
-        }
-    }
-};
-
-struct npc_ulduar_magnetic_coreAI : public NullCreatureAI
-{
-    npc_ulduar_magnetic_coreAI(Creature *pCreature) : NullCreatureAI(pCreature)
-    {
-        pInstance = me->GetInstanceScript();
-        if (Creature* c = GetACU())
-            if (c->GetExactDist2d(me) <= 10.0f)
+            while (uint32 eventId = _events.ExecuteEvent())
             {
-                me->SendMonsterMove(c->GetPositionX(), c->GetPositionY(), 364.313f, 1);
-                me->UpdatePosition(c->GetPositionX(), c->GetPositionY(), 364.313f, me->GetOrientation(), true);
-                me->StopMovingOnCurrentPos();
-                c->AI()->SetData(2, 1);
-                despawnTimer = 20000;
-                return;
-            }
-        despawnTimer = 60000;
-    }
-
-    InstanceScript* pInstance;
-    uint16 despawnTimer;
-
-    void SetData(uint32 id, uint32 value)
-    {
-        despawnTimer = 20000;
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (despawnTimer <= diff)
-        {
-            despawnTimer = 60000;
-            me->DespawnOrUnsummon(1);
-        }
-        else
-            despawnTimer -= diff;
-    }
-};
-
-struct npc_ulduar_bot_summon_triggerAI : public NullCreatureAI
-{
-    npc_ulduar_bot_summon_triggerAI(Creature *pCreature) : NullCreatureAI(pCreature) { }
-
-    uint32 timer;
-    uint8 option;
-
-    void Reset()
-    {
-        timer = 8000;
-        option = 0;
-    }
-
-    void DoAction(int32 param)
-    {
-        switch( param )
-        {
-            case 1:
-                me->CastSpell(me, SPELL_BEAM_GREEN, true);
-                option = 1;
-                break;
-            case 2:
-                me->CastSpell(me, SPELL_BEAM_YELLOW, true);
-                option = 2;
-                break;
-            case 3:
-                me->CastSpell(me, SPELL_BEAM_BLUE, true);
-                option = 3;
-                break;
-        }
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if( timer <= diff )
-        {
-            uint32 option_npcid[3] = {NPC_JUNK_BOT, NPC_ASSAULT_BOT, NPC_EMERGENCY_FIRE_BOT};
-            InstanceScript* pInstance = me->GetInstanceScript();
-            if (Creature* ACU = GetACU()) // ACU summons for easy removing
-                if( Creature* bot = ACU->SummonCreature( option_npcid[option-1], *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000 ) )
+                switch (eventId)
                 {
-                    if( option < 3 )
-                        bot->SetInCombatWithZone();
-                    if (Creature* m = GetMimiron())
-                        if (m->AI()->GetData(1)) // hardmode
-                            bot->CastSpell(bot, SPELL_EMERGENCY_MODE, true);
+                    case EVENT_EXPLODE:
+                        DoCastSelf(SPELL_MINE_EXPLOSION);
+                        _events.ScheduleEvent(EVENT_DESPAWN, 1000);
+                        break;
+                    case EVENT_ARM:
+                        _armed = true;
+                        break;
+                    case EVENT_DESPAWN:
+                        me->DespawnOrUnsummon();
+                        break;
+                    default:
+                        break;
                 }
-
-            me->DespawnOrUnsummon(500);
-            timer = 99999;
+            }
         }
-        else
-            timer -= diff;
+
+    private:
+        bool _exploded, _armed;
+        EventMap _events;
+    };
+};
+
+class npc_ulduar_mimiron_rocket : public CreatureScript
+{
+public:
+    npc_ulduar_mimiron_rocket() : CreatureScript("npc_ulduar_mimiron_rocket") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_mimiron_rocketAI (pCreature);
     }
+
+    struct npc_ulduar_mimiron_rocketAI : public NullCreatureAI
+    {
+        npc_ulduar_mimiron_rocketAI(Creature *pCreature) : NullCreatureAI(pCreature) {}
+
+        void InitializeAI()
+        {
+            if (!me->isDead())
+                Reset();
+        }
+
+        void Reset()
+        {
+            me->SetCanFly(true);
+            me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
+            me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
+        }
+
+        void SetData(uint32 id, uint32 value)
+        {
+            me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+100.0f, false, true);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!me->GetVehicle())
+            {
+                me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN)+0.4f, false);
+                me->SetSpeed(MOVE_FLIGHT, me->GetSpeedRate(MOVE_RUN), false);
+            }
+        }
+    };
+};
+
+class npc_ulduar_magnetic_core : public CreatureScript
+{
+public:
+    npc_ulduar_magnetic_core() : CreatureScript("npc_ulduar_magnetic_core") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_magnetic_coreAI (pCreature);
+    }
+
+    struct npc_ulduar_magnetic_coreAI : public NullCreatureAI
+    {
+        npc_ulduar_magnetic_coreAI(Creature *pCreature) : NullCreatureAI(pCreature)
+        {
+            pInstance = me->GetInstanceScript();
+            if (Creature* c = GetACU())
+                if (c->GetExactDist2d(me) <= 10.0f)
+                {
+                    me->SendMonsterMove(c->GetPositionX(), c->GetPositionY(), 364.313f, 1);
+                    me->UpdatePosition(c->GetPositionX(), c->GetPositionY(), 364.313f, me->GetOrientation(), true);
+                    me->StopMovingOnCurrentPos();
+                    c->AI()->SetData(2, 1);
+                    despawnTimer = 20000;
+                    return;
+                }
+            despawnTimer = 60000;
+        }
+
+        InstanceScript* pInstance;
+        uint16 despawnTimer;
+
+        void SetData(uint32 id, uint32 value)
+        {
+            despawnTimer = 20000;
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (despawnTimer <= diff)
+            {
+                despawnTimer = 60000;
+                me->DespawnOrUnsummon(1);
+            }
+            else
+                despawnTimer -= diff;
+        }
+    };
+};
+
+class npc_ulduar_bot_summon_trigger : public CreatureScript
+{
+public:
+    npc_ulduar_bot_summon_trigger() : CreatureScript("npc_ulduar_bot_summon_trigger") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_bot_summon_triggerAI (pCreature);
+    }
+
+    struct npc_ulduar_bot_summon_triggerAI : public NullCreatureAI
+    {
+        npc_ulduar_bot_summon_triggerAI(Creature *pCreature) : NullCreatureAI(pCreature) { }
+
+        uint32 timer;
+        uint8 option;
+
+        void Reset()
+        {
+            timer = 8000;
+            option = 0;
+        }
+
+        void DoAction(int32 param)
+        {
+            switch( param )
+            {
+                case 1:
+                    me->CastSpell(me, SPELL_BEAM_GREEN, true);
+                    option = 1;
+                    break;
+                case 2:
+                    me->CastSpell(me, SPELL_BEAM_YELLOW, true);
+                    option = 2;
+                    break;
+                case 3:
+                    me->CastSpell(me, SPELL_BEAM_BLUE, true);
+                    option = 3;
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if( timer <= diff )
+            {
+                uint32 option_npcid[3] = {NPC_JUNK_BOT, NPC_ASSAULT_BOT, NPC_EMERGENCY_FIRE_BOT};
+                InstanceScript* pInstance = me->GetInstanceScript();
+                if (Creature* ACU = GetACU()) // ACU summons for easy removing
+                    if( Creature* bot = ACU->SummonCreature( option_npcid[option-1], *me, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000 ) )
+                    {
+                        if( option < 3 )
+                            bot->SetInCombatWithZone();
+                        if (Creature* m = GetMimiron())
+                            if (m->AI()->GetData(1)) // hardmode
+                                bot->CastSpell(bot, SPELL_EMERGENCY_MODE, true);
+                    }
+
+                me->DespawnOrUnsummon(500);
+                timer = 99999;
+            }
+            else
+                timer -= diff;
+        }
+    };
 };
 
 class TargetNotInFront
 {
-    public:
-        TargetNotInFront(WorldObject* obj, float arc) : _obj(obj), _arc(arc) { }
+public:
+    TargetNotInFront(WorldObject* obj, float arc) : _obj(obj), _arc(arc) { }
 
-        bool operator() (WorldObject* unit)
-        {
-            return !_obj->isInFront(unit, _arc);
-        }
+    bool operator() (WorldObject* unit)
+    {
+        return !_obj->isInFront(unit, _arc);
+    }
 
-    private:
-        WorldObject* _obj;
-        float _arc;
+private:
+    WorldObject* _obj;
+    float _arc;
 };
 
-class spell_rapid_burst_targeting_SpellScript : public SpellScript
+class spell_rapid_burst_targeting : public SpellScriptLoader
 {
-    PrepareSpellScript(spell_rapid_burst_targeting_SpellScript);
+public:
+    spell_rapid_burst_targeting() : SpellScriptLoader("spell_rapid_burst_targeting") { }
 
-    void FilterTargets(std::list<WorldObject*>& targetList)
+    class spell_rapid_burst_targeting_SpellScript : public SpellScript
     {
-        targetList.remove_if(TargetNotInFront(GetCaster(), static_cast<float>(M_PI / 4)));
-    }
+        PrepareSpellScript(spell_rapid_burst_targeting_SpellScript);
 
-    void Register() override
+        void FilterTargets(std::list<WorldObject*>& targetList)
+        {
+            targetList.remove_if(TargetNotInFront(GetCaster(), static_cast<float>(M_PI / 4)));
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rapid_burst_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rapid_burst_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        return new spell_rapid_burst_targeting_SpellScript();
     }
 };
 
-class spell_mimiron_rapid_burst_AuraScript : public AuraScript
+class spell_mimiron_rapid_burst : public SpellScriptLoader
 {
-    PrepareAuraScript(spell_mimiron_rapid_burst_AuraScript)
+public:
+    spell_mimiron_rapid_burst() : SpellScriptLoader("spell_mimiron_rapid_burst") { }
 
-    void HandleEffectPeriodic(AuraEffect const * aurEff)
+    class spell_mimiron_rapid_burst_AuraScript : public AuraScript
     {
-        if (Unit* caster = GetCaster())
+        PrepareAuraScript(spell_mimiron_rapid_burst_AuraScript)
+
+        void HandleEffectPeriodic(AuraEffect const * aurEff)
         {
-            uint32 id = (caster->GetMap()->Is25ManRaid() ? ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_25_2 : SPELL_RAPID_BURST_DAMAGE_25_1) : ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_10_2 : SPELL_RAPID_BURST_DAMAGE_10_1) );
-            caster->CastSpell(caster, id, true);
+            if (Unit* caster = GetCaster())
+            {
+                uint32 id = (caster->GetMap()->Is25ManRaid() ? ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_25_2 : SPELL_RAPID_BURST_DAMAGE_25_1) : ((aurEff->GetTickNumber()%2) ? SPELL_RAPID_BURST_DAMAGE_10_2 : SPELL_RAPID_BURST_DAMAGE_10_1) );
+                caster->CastSpell(caster, id, true);
+            }
         }
-    }
 
-    void Register()
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mimiron_rapid_burst_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript *GetAuraScript() const
     {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_mimiron_rapid_burst_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        return new spell_mimiron_rapid_burst_AuraScript();
     }
 };
 
 class go_ulduar_do_not_push_this_button : public GameObjectScript
 {
-    public:
-        go_ulduar_do_not_push_this_button() : GameObjectScript("go_ulduar_do_not_push_this_button") { }
+public:
+    go_ulduar_do_not_push_this_button() : GameObjectScript("go_ulduar_do_not_push_this_button") { }
 
-        bool OnGossipHello(Player* Player, GameObject* GO)
+    bool OnGossipHello(Player* Player, GameObject* GO)
+    {
+        if( !Player || !GO )
+            return true;
+
+        InstanceScript* pInstance = GO->GetInstanceScript();
+        if (pInstance)
         {
-            if( !Player || !GO )
-                return true;
+            if( pInstance->GetData(TYPE_MIMIRON) != NOT_STARTED )
+                return false;
 
-            InstanceScript* pInstance = GO->GetInstanceScript();
-            if (pInstance)
+            if (Creature* c = ObjectAccessor::GetCreature(*GO, pInstance->GetData64(TYPE_MIMIRON)))
             {
-                if( pInstance->GetData(TYPE_MIMIRON) != NOT_STARTED )
-                    return false;
-
-                if (Creature* c = ObjectAccessor::GetCreature(*GO, pInstance->GetData64(TYPE_MIMIRON)))
-                {
-                    c->AI()->SetData(0, 7);
-                    c->AI()->AttackStart(Player);
-                }
+                c->AI()->SetData(0, 7);
+                c->AI()->AttackStart(Player);
             }
-
-            return false;
         }
+
+        return false;
+    }
 };
 
-struct npc_ulduar_flames_initialAI : public NullCreatureAI
+class npc_ulduar_flames_initial : public CreatureScript
 {
-    npc_ulduar_flames_initialAI(Creature *pCreature) : NullCreatureAI(pCreature)
+public:
+    npc_ulduar_flames_initial() : CreatureScript("npc_ulduar_flames_initial") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        CreateTime = time(NULL);
-        events.Reset();
-        events.ScheduleEvent(EVENT_FLAMES_SPREAD, 5750);
-        if( Creature* flame = me->SummonCreature(NPC_FLAMES_SPREAD, me->GetPositionX(), me->GetPositionY(), 364.32f, 0.0f) )
+        return new npc_ulduar_flames_initialAI (pCreature);
+    }
+
+    struct npc_ulduar_flames_initialAI : public NullCreatureAI
+    {
+        npc_ulduar_flames_initialAI(Creature *pCreature) : NullCreatureAI(pCreature)
         {
-            FlameList.push_back(flame->GetGUID());
-            flame->CastSpell(flame, SPELL_FLAMES_AURA, true);
-        }
-    }
-
-    std::list<uint64> FlameList;
-    EventMap events;
-    uint32 CreateTime;
-
-    void DoAction(int32 action)
-    {
-        if (action == 1337)
-            RemoveAll();
-    }
-
-    void SpreadFlame(float x, float y)
-    {
-        if (FlameList.size() >= 50)
-            return;
-
-        if( Creature* flame = me->SummonCreature(NPC_FLAMES_SPREAD, x, y, 364.32f, 0.0f) )
-        {
-            FlameList.push_back(flame->GetGUID());
-            if (Creature* c = me->FindNearestCreature(NPC_FLAMES_SPREAD, 10.0f))
-                if (c->GetExactDist2d(flame->GetPositionX(), flame->GetPositionY()) <= 4.0f)
-                    return;
-            flame->CastSpell(flame, SPELL_FLAMES_AURA, true);
-        }
-    }
-
-    void RemoveFlame(uint64 guid)
-    {
-        FlameList.remove(guid);
-    }
-
-    void RemoveAll()
-    {
-        for( std::list<uint64>::iterator itr = FlameList.begin(); itr != FlameList.end(); ++itr )
-            if (Creature* c = ObjectAccessor::GetCreature(*me, (*itr)))
-                c->DespawnOrUnsummon();
-        FlameList.clear();
-        me->DespawnOrUnsummon();
-    }
-
-    void UpdateAI(uint32 diff)
-    {
-        if (InstanceScript* pInstance = me->GetInstanceScript())
-            if (pInstance->GetData(TYPE_MIMIRON) != IN_PROGRESS)
+            CreateTime = time(NULL);
+            events.Reset();
+            events.ScheduleEvent(EVENT_FLAMES_SPREAD, 5750);
+            if( Creature* flame = me->SummonCreature(NPC_FLAMES_SPREAD, me->GetPositionX(), me->GetPositionY(), 364.32f, 0.0f) )
             {
+                FlameList.push_back(flame->GetGUID());
+                flame->CastSpell(flame, SPELL_FLAMES_AURA, true);
+            }
+        }
+
+        std::list<uint64> FlameList;
+        EventMap events;
+        uint32 CreateTime;
+
+        void DoAction(int32 action)
+        {
+            if (action == 1337)
                 RemoveAll();
+        }
+
+        void SpreadFlame(float x, float y)
+        {
+            if (FlameList.size() >= 50)
                 return;
-            }
 
-        events.Update(diff);
-
-        while (uint32 eventId = events.ExecuteEvent())
-        {
-            switch (eventId)
+            if( Creature* flame = me->SummonCreature(NPC_FLAMES_SPREAD, x, y, 364.32f, 0.0f) )
             {
-                case EVENT_FLAMES_SPREAD:
-                    if (FlameList.empty())
-                    {
-                        me->DespawnOrUnsummon();
+                FlameList.push_back(flame->GetGUID());
+                if (Creature* c = me->FindNearestCreature(NPC_FLAMES_SPREAD, 10.0f))
+                    if (c->GetExactDist2d(flame->GetPositionX(), flame->GetPositionY()) <= 4.0f)
                         return;
-                    }
-
-                    if (InstanceScript* pInstance = me->GetInstanceScript())
-                        if (Creature* mimiron = GetMimiron())
-                            if (CreateTime < mimiron->AI()->GetData(10))
-                                break;
-
-                    if (Creature* last = ObjectAccessor::GetCreature(*me, FlameList.back()))
-                    {
-                        float prevdist = 100.0f;
-                        Player* target = nullptr;
-
-                        Map::PlayerList const &pl = me->GetMap()->GetPlayers();
-                        for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
-                            if (Player* plr = itr->GetSource())
-                                if (plr->IsAlive() && plr->GetExactDist2d(last) < prevdist && !plr->IsGameMaster())
-                                {
-                                    target = plr;
-                                    prevdist = plr->GetExactDist2d(last);
-                                }
-
-                        if (target && prevdist >= 4.0f) // no need to spread when player is standing in fire, check distance
-                        {
-                            float angle = last->GetAngle(target->GetPositionX(), target->GetPositionY()) - M_PI / 8 + rand_norm() * 2 * M_PI / 8;
-                            SpreadFlame(last->GetPositionX() + 7.0f*cos(angle), last->GetPositionY() + 7.0f*sin(angle));
-                        }
-                    }
-
-                    events.Repeat(5750);
-                    break;
-                default:
-                    break;
+                flame->CastSpell(flame, SPELL_FLAMES_AURA, true);
             }
         }
-    }
-};
 
-struct npc_ulduar_flames_spreadAI : public NullCreatureAI
-{
-    npc_ulduar_flames_spreadAI(Creature *pCreature) : NullCreatureAI(pCreature) {}
-
-    void SpellHit(Unit* caster, const SpellInfo* spell)
-    {
-        switch( spell->Id )
+        void RemoveFlame(uint64 guid)
         {
-            case SPELL_FROST_BOMB_EXPLOSION_10:
-            case SPELL_FROST_BOMB_EXPLOSION_25:
-            case SPELL_FLAME_SUPPRESSANT_10yd:
-            case SPELL_FLAME_SUPPRESSANT_50000yd:
-            case SPELL_WATER_SPRAY:
+            FlameList.remove(guid);
+        }
+
+        void RemoveAll()
+        {
+            for( std::list<uint64>::iterator itr = FlameList.begin(); itr != FlameList.end(); ++itr )
+                if (Creature* c = ObjectAccessor::GetCreature(*me, (*itr)))
+                    c->DespawnOrUnsummon();
+            FlameList.clear();
+            me->DespawnOrUnsummon();
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (InstanceScript* pInstance = me->GetInstanceScript())
+                if (pInstance->GetData(TYPE_MIMIRON) != IN_PROGRESS)
                 {
-                    if (me->IsSummon())
-                        if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                            if (Creature* c = summoner->ToCreature())
-                                if (c->AI())
-                                    CAST_AI(npc_ulduar_flames_initialAI, c->AI())->RemoveFlame(me->GetGUID());
-
-                    me->RemoveAllAuras();
-                    me->DisappearAndDie();
+                    RemoveAll();
+                    return;
                 }
-                break;
-            case SPELL_VX001_FROST_BOMB:
-                me->CastSpell(me, SPELL_SUMMON_FROST_BOMB, true);
-                break;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_FLAMES_SPREAD:
+                        if (FlameList.empty())
+                        {
+                            me->DespawnOrUnsummon();
+                            return;
+                        }
+
+                        if (InstanceScript* pInstance = me->GetInstanceScript())
+                            if (Creature* mimiron = GetMimiron())
+                                if (CreateTime < mimiron->AI()->GetData(10))
+                                    break;
+
+                        if (Creature* last = ObjectAccessor::GetCreature(*me, FlameList.back()))
+                        {
+                            float prevdist = 100.0f;
+                            Player* target = nullptr;
+
+                            Map::PlayerList const &pl = me->GetMap()->GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                                if (Player* plr = itr->GetSource())
+                                    if (plr->IsAlive() && plr->GetExactDist2d(last) < prevdist && !plr->IsGameMaster())
+                                    {
+                                        target = plr;
+                                        prevdist = plr->GetExactDist2d(last);
+                                    }
+
+                            if (target && prevdist >= 4.0f) // no need to spread when player is standing in fire, check distance
+                            {
+                                float angle = last->GetAngle(target->GetPositionX(), target->GetPositionY()) - M_PI / 8 + rand_norm() * 2 * M_PI / 8;
+                                SpreadFlame(last->GetPositionX() + 7.0f*cos(angle), last->GetPositionY() + 7.0f*sin(angle));
+                            }
+                        }
+
+                        events.Repeat(5750);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
-    }
+    };
 };
 
-struct npc_ulduar_emergency_fire_botAI : public ScriptedAI
+class npc_ulduar_flames_spread : public CreatureScript
 {
-    npc_ulduar_emergency_fire_botAI(Creature *pCreature) : ScriptedAI(pCreature)
+public:
+    npc_ulduar_flames_spread() : CreatureScript("npc_ulduar_flames_spread") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        events.Reset();
-        events.ScheduleEvent(EVENT_EMERGENCY_BOT_CHECK, 1000);
+        return new npc_ulduar_flames_spreadAI (pCreature);
     }
 
-    EventMap events;
-
-    void MoveInLineOfSight(Unit*) {}
-    void AttackStart(Unit*) {}
-
-    void MovementInform(uint32 type, uint32 id)
+    struct npc_ulduar_flames_spreadAI : public NullCreatureAI
     {
-        if (type == POINT_MOTION_TYPE && id == 1)
-            events.ScheduleEvent(EVENT_EMERGENCY_BOT_ATTACK, 0);
-    }
+        npc_ulduar_flames_spreadAI(Creature *pCreature) : NullCreatureAI(pCreature) {}
 
-    void UpdateAI(uint32 diff)
-    {
-        events.Update(diff);
-
-        if (me->HasUnitState(UNIT_STATE_CASTING))
-            return;
-
-        while (uint32 eventId = events.ExecuteEvent())
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
-            switch (eventId)
+            switch( spell->Id )
             {
-                case EVENT_EMERGENCY_BOT_CHECK:
-                    events.Repeat(15000); // just in case, will be rescheduled
-                    if (Creature* flame = me->FindNearestCreature(NPC_FLAMES_SPREAD, 150.0f, true))
+                case SPELL_FROST_BOMB_EXPLOSION_10:
+                case SPELL_FROST_BOMB_EXPLOSION_25:
+                case SPELL_FLAME_SUPPRESSANT_10yd:
+                case SPELL_FLAME_SUPPRESSANT_50000yd:
+                case SPELL_WATER_SPRAY:
                     {
-                        me->m_orientation = me->GetAngle(flame->GetPositionX(), flame->GetPositionY());
-                        float dist = me->GetExactDist2d(flame);
-                        if (dist <= 15.0f)
-                            events.ScheduleEvent(EVENT_EMERGENCY_BOT_ATTACK, 0);
-                        else
-                            me->GetMotionMaster()->MovePoint(1, me->GetPositionX() + (dist - 5.0f)*cos(me->GetOrientation()), me->GetPositionY() + (dist - 5.0f)*sin(me->GetOrientation()), 364.32f);
+                        if (me->IsSummon())
+                            if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+                                if (Creature* c = summoner->ToCreature())
+                                    if (c->AI())
+                                        CAST_AI(npc_ulduar_flames_initial::npc_ulduar_flames_initialAI, c->AI())->RemoveFlame(me->GetGUID());
+
+                        me->RemoveAllAuras();
+                        me->DisappearAndDie();
                     }
                     break;
-                case EVENT_EMERGENCY_BOT_ATTACK:
-                    DoCastAOE(SPELL_WATER_SPRAY);
-                    events.RescheduleEvent(EVENT_EMERGENCY_BOT_CHECK, 5000);
-                    break;
-                default:
+                case SPELL_VX001_FROST_BOMB:
+                    me->CastSpell(me, SPELL_SUMMON_FROST_BOMB, true);
                     break;
             }
+        }
+    };
+};
+
+class npc_ulduar_emergency_fire_bot : public CreatureScript
+{
+public:
+    npc_ulduar_emergency_fire_bot() : CreatureScript("npc_ulduar_emergency_fire_bot") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_ulduar_emergency_fire_botAI (pCreature);
+    }
+
+    struct npc_ulduar_emergency_fire_botAI : public ScriptedAI
+    {
+        npc_ulduar_emergency_fire_botAI(Creature *pCreature) : ScriptedAI(pCreature)
+        {
+            events.Reset();
+            events.ScheduleEvent(EVENT_EMERGENCY_BOT_CHECK, 1000);
+        }
+
+        EventMap events;
+
+        void MoveInLineOfSight(Unit*) {}
+        void AttackStart(Unit*) {}
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type == POINT_MOTION_TYPE && id == 1)
+                events.ScheduleEvent(EVENT_EMERGENCY_BOT_ATTACK, 0);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_EMERGENCY_BOT_CHECK:
+                        events.Repeat(15000); // just in case, will be rescheduled
+                        if (Creature* flame = me->FindNearestCreature(NPC_FLAMES_SPREAD, 150.0f, true))
+                        {
+                            me->m_orientation = me->GetAngle(flame->GetPositionX(), flame->GetPositionY());
+                            float dist = me->GetExactDist2d(flame);
+                            if (dist <= 15.0f)
+                                events.ScheduleEvent(EVENT_EMERGENCY_BOT_ATTACK, 0);
+                            else
+                                me->GetMotionMaster()->MovePoint(1, me->GetPositionX() + (dist - 5.0f)*cos(me->GetOrientation()), me->GetPositionY() + (dist - 5.0f)*sin(me->GetOrientation()), 364.32f);
+                        }
+                        break;
+                    case EVENT_EMERGENCY_BOT_ATTACK:
+                        DoCastAOE(SPELL_WATER_SPRAY);
+                        events.RescheduleEvent(EVENT_EMERGENCY_BOT_CHECK, 5000);
+                        break;
+                    default:
+                        break;
+                }
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+            }
         }
-    }
+    };
 };
 
-struct npc_ulduar_rocket_strike_triggerAI : public NullCreatureAI
+class npc_ulduar_rocket_strike_trigger : public CreatureScript
 {
-    npc_ulduar_rocket_strike_triggerAI(Creature *pCreature) : NullCreatureAI(pCreature) {}
+public:
+    npc_ulduar_rocket_strike_trigger() : CreatureScript("npc_ulduar_rocket_strike_trigger") { }
 
-    void SpellHitTarget(Unit* target, const SpellInfo* spell)
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        if (!target || !spell)
-            return;
-        if (spell->Id == 63041)
-        {
-            if (target->GetEntry() == NPC_ASSAULT_BOT)
-                me->CastSpell(me, 65040, true); // achievement Not-So-Friendly Fire
-            else if (target->GetTypeId() == TYPEID_PLAYER)
-                if (InstanceScript* pInstance = me->GetInstanceScript())
-                    if (Creature* c = GetMimiron())
-                        c->AI()->SetData(0, 13);
-        }
+        return new npc_ulduar_rocket_strike_triggerAI (pCreature);
     }
+
+    struct npc_ulduar_rocket_strike_triggerAI : public NullCreatureAI
+    {
+        npc_ulduar_rocket_strike_triggerAI(Creature *pCreature) : NullCreatureAI(pCreature) {}
+
+        void SpellHitTarget(Unit* target, const SpellInfo* spell)
+        {
+            if (!target || !spell)
+                return;
+            if (spell->Id == 63041)
+            {
+                if (target->GetEntry() == NPC_ASSAULT_BOT)
+                    me->CastSpell(me, 65040, true); // achievement Not-So-Friendly Fire
+                else if (target->GetTypeId() == TYPEID_PLAYER)
+                    if (InstanceScript* pInstance = me->GetInstanceScript())
+                        if (Creature* c = GetMimiron())
+                            c->AI()->SetData(0, 13);
+            }
+        }
+    };
 };
 
-struct npc_db_target_mimironAI : public ScriptedAI
+class npc_db_target_mimiron : public CreatureScript
 {
-    npc_db_target_mimironAI(Creature * creature) : ScriptedAI(creature)
-    {
-        me->SetSpeed(MOVE_RUN, 4.0f);
-        me->SetSpeed(MOVE_WALK, 4.0f);
-        me->SetSpeed(MOVE_FLIGHT, 4.0f);
-    }
+public:
+    npc_db_target_mimiron() : CreatureScript("npc_db_target_mimiron") { }
 
-    void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path)
+    struct npc_db_target_mimironAI : public ScriptedAI
     {
-        float step = -M_PI / 8.0f;
-        float angle = centerPos.GetAngle(me->GetPositionX(), me->GetPositionY());
-
-        for (uint8 i = 0; i < 16; angle += step, ++i)
+        npc_db_target_mimironAI(Creature * creature) : ScriptedAI(creature)
         {
-            G3D::Vector3 point;
-            point.x = centerPos.GetPositionX() + radius * cosf(angle);
-            point.y = centerPos.GetPositionY() + radius * sinf(angle);
-            point.z = z;
-            path.push_back(point);
+            me->SetSpeed(MOVE_RUN, 4.0f);
+            me->SetSpeed(MOVE_WALK, 4.0f);
+            me->SetSpeed(MOVE_FLIGHT, 4.0f);
         }
-    }
 
-    void MoveCyclicPath()
+        void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path)
+        {
+            float step = -M_PI / 8.0f;
+            float angle = centerPos.GetAngle(me->GetPositionX(), me->GetPositionY());
+
+            for (uint8 i = 0; i < 16; angle += step, ++i)
+            {
+                G3D::Vector3 point;
+                point.x = centerPos.GetPositionX() + radius * cosf(angle);
+                point.y = centerPos.GetPositionY() + radius * sinf(angle);
+                point.z = z;
+                path.push_back(point);
+            }
+        }
+
+        void MoveCyclicPath()
+        {
+            Movement::MoveSplineInit init(me);
+            FillCirclePath(LeviathanCenter, homePos.GetExactDist2d(LeviathanCenter.GetPositionX(), LeviathanCenter.GetPositionY()), me->GetPositionZ(), init.Path());
+            init.SetWalk(false);
+            init.SetSmooth();
+            init.SetCyclic();
+            init.Launch();
+        }
+
+        void Reset() override
+        {
+            homePos = me->GetHomePosition();
+            events.Reset();
+        }
+
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
+        {
+            if (spell->Id == SPELL_P3WX2_BOLTS)
+                events.ScheduleEvent(EVENT_RESTART_DB_TARGET, 100);
+        }
+
+        void DoAction(int32 param) override
+        {
+            if (param == 1)
+                events.ScheduleEvent(EVENT_RESTART_DB_TARGET, 100);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+
+            if (events.ExecuteEvent() == EVENT_RESTART_DB_TARGET)
+                MoveCyclicPath();
+        }
+
+    private:
+        EventMap events;
+        Position homePos;
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
     {
-        Movement::MoveSplineInit init(me);
-        FillCirclePath(LeviathanCenter, homePos.GetExactDist2d(LeviathanCenter.GetPositionX(), LeviathanCenter.GetPositionY()), me->GetPositionZ(), init.Path());
-        init.SetWalk(false);
-        init.SetSmooth();
-        init.SetCyclic();
-        init.Launch();
+        return new npc_db_target_mimironAI(pCreature);
     }
-
-    void Reset() override
-    {
-        homePos = me->GetHomePosition();
-        events.Reset();
-    }
-
-    void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
-    {
-        if (spell->Id == SPELL_P3WX2_BOLTS)
-            events.ScheduleEvent(EVENT_RESTART_DB_TARGET, 100);
-    }
-
-    void DoAction(int32 param) override
-    {
-        if (param == 1)
-            events.ScheduleEvent(EVENT_RESTART_DB_TARGET, 100);
-    }
-
-    void UpdateAI(uint32 diff) override
-    {
-        events.Update(diff);
-
-        if (events.ExecuteEvent() == EVENT_RESTART_DB_TARGET)
-            MoveCyclicPath();
-    }
-
-private:
-    EventMap events;
-    Position homePos;
 };
 
 class achievement_mimiron_firefighter : public AchievementCriteriaScript
 {
-    public:
-        achievement_mimiron_firefighter() : AchievementCriteriaScript("achievement_mimiron_firefighter") {}
+public:
+    achievement_mimiron_firefighter() : AchievementCriteriaScript("achievement_mimiron_firefighter") {}
 
-        bool OnCheck(Player* player, Unit* target)
-        {
-            return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->AI()->GetData(1);
-        }
+    bool OnCheck(Player* player, Unit* target)
+    {
+        return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->AI()->GetData(1);
+    }
 };
 
 class achievement_mimiron_set_up_us_the_bomb_11 : public AchievementCriteriaScript
 {
-    public:
-        achievement_mimiron_set_up_us_the_bomb_11() : AchievementCriteriaScript("achievement_mimiron_set_up_us_the_bomb_11") {}
+public:
+    achievement_mimiron_set_up_us_the_bomb_11() : AchievementCriteriaScript("achievement_mimiron_set_up_us_the_bomb_11") {}
 
-        bool OnCheck(Player* player, Unit* target)
-        {
-            return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->AI()->GetData(11);
-        }
+    bool OnCheck(Player* player, Unit* target)
+    {
+        return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->AI()->GetData(11);
+    }
 };
 
 class achievement_mimiron_set_up_us_the_bomb_12 : public AchievementCriteriaScript
 {
-    public:
-        achievement_mimiron_set_up_us_the_bomb_12() : AchievementCriteriaScript("achievement_mimiron_set_up_us_the_bomb_12") {}
+public:
+    achievement_mimiron_set_up_us_the_bomb_12() : AchievementCriteriaScript("achievement_mimiron_set_up_us_the_bomb_12") {}
 
-        bool OnCheck(Player* player, Unit* target)
-        {
-            return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->AI()->GetData(12);
-        }
+    bool OnCheck(Player* player, Unit* target)
+    {
+        return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->AI()->GetData(12);
+    }
 };
 
 class achievement_mimiron_set_up_us_the_bomb_13 : public AchievementCriteriaScript
 {
-    public:
-        achievement_mimiron_set_up_us_the_bomb_13() : AchievementCriteriaScript("achievement_mimiron_set_up_us_the_bomb_13") {}
+public:
+    achievement_mimiron_set_up_us_the_bomb_13() : AchievementCriteriaScript("achievement_mimiron_set_up_us_the_bomb_13") {}
 
-        bool OnCheck(Player* player, Unit* target)
+    bool OnCheck(Player* player, Unit* target)
+    {
+        return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->AI()->GetData(13);
+    }
+};
+
+class spell_lasser_barrage_rotating : public SpellScriptLoader
+{
+public:
+    spell_lasser_barrage_rotating() : SpellScriptLoader("spell_lasser_barrage_rotating") { }
+
+    class spell_lasser_barrage_rotating_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_lasser_barrage_rotating_AuraScript);
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
         {
-            return target && target->GetEntry() == NPC_MIMIRON && target->GetTypeId() == TYPEID_UNIT && !target->ToCreature()->AI()->GetData(13);
+            if (InstanceScript* instance = GetCaster()->GetInstanceScript())
+                if (Creature* dbTarget = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                    GetCaster()->SetFacingToObject(dbTarget);
         }
-};
 
-class spell_lasser_barrage_rotating_AuraScript : public AuraScript
-{
-    PrepareAuraScript(spell_lasser_barrage_rotating_AuraScript);
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_lasser_barrage_rotating_AuraScript::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
 
-    void HandlePeriodic(AuraEffect const* /*aurEff*/)
+    AuraScript* GetAuraScript() const override
     {
-        if (InstanceScript* instance = GetCaster()->GetInstanceScript())
-            if (Creature* dbTarget = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(DATA_MIMIRON_DB_TARGET)))
-                GetCaster()->SetFacingToObject(dbTarget);
+        return new spell_lasser_barrage_rotating_AuraScript();
     }
 
-    void Register() override
+    // I know this is bad, but cant be done any other way currently
+    // This spell and the one below, both hit two targets and when that happens it sets CHANNEL_OBJECT guid
+    // to self instead of proper target and unit is trying to track itself
+    class spell_lasser_barrage_rotating_SpellScript : public SpellScript
     {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_lasser_barrage_rotating_AuraScript::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-    }
-};
+        PrepareSpellScript(spell_lasser_barrage_rotating_SpellScript);
 
-// I know this is bad, but cant be done any other way currently
-// This spell and the one below, both hit two targets and when that happens it sets CHANNEL_OBJECT guid
-// to self instead of proper target and unit is trying to track itself
-class spell_lasser_barrage_rotating_SpellScript : public SpellScript
-{
-    PrepareSpellScript(spell_lasser_barrage_rotating_SpellScript);
+        void OnEffectHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, GetHitUnit()->GetGUID());
+        }
 
-    void OnEffectHit(SpellEffIndex /*effIndex*/)
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_lasser_barrage_rotating_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
     {
-        if (Unit* caster = GetCaster())
-            caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, GetHitUnit()->GetGUID());
-    }
-
-    void Register() override
-    {
-        OnEffectHitTarget += SpellEffectFn(spell_lasser_barrage_rotating_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        return new spell_lasser_barrage_rotating_SpellScript();
     }
 };
 
 // spell spinning up 63414
 // explanation of why this is here in spellscript above
-class spell_spinning_up_mimiron_SpellScript : public SpellScript
+class spell_spinning_up_mimiron : public SpellScriptLoader
 {
-    PrepareSpellScript(spell_spinning_up_mimiron_SpellScript);
+public:
+    spell_spinning_up_mimiron() : SpellScriptLoader("spell_spinning_up_mimiron") { }
 
-    void OnEffectHit(SpellEffIndex /*effIndex*/)
+    class spell_spinning_up_mimiron_SpellScript : public SpellScript
     {
-        if (Unit* caster = GetCaster())
-            if (GetHitUnit() != caster)
-                caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, GetHitUnit()->GetGUID());
-    }
+        PrepareSpellScript(spell_spinning_up_mimiron_SpellScript);
 
-    void Register() override
+        void OnEffectHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (GetHitUnit() != caster)
+                    caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, GetHitUnit()->GetGUID());
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_spinning_up_mimiron_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
     {
-        OnEffectHitTarget += SpellEffectFn(spell_spinning_up_mimiron_SpellScript::OnEffectHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        return new spell_spinning_up_mimiron_SpellScript();
     }
 };
 
@@ -2560,73 +2754,95 @@ class targetNotInBetween
         WorldObject* _target;
 };
 
-class spell_lasser_barrage_targeting_SpellScript : public SpellScript
+class spell_lasser_barrage_targeting : public SpellScriptLoader
 {
-    PrepareSpellScript(spell_lasser_barrage_targeting_SpellScript);
+public:
+    spell_lasser_barrage_targeting() : SpellScriptLoader("spell_lasser_barrage_targeting") { }
 
-    void FilterTargets(std::list<WorldObject*>& unitList)
+    class spell_lasser_barrage_targeting_SpellScript : public SpellScript
     {
-        if (Unit* caster = GetCaster())
-            if (InstanceScript* instance = caster->GetInstanceScript())
-                if (Unit* target = ObjectAccessor::GetUnit(*caster, instance->GetData64(DATA_MIMIRON_DB_TARGET)))
-                    unitList.remove_if(targetNotInBetween(GetCaster(), target));
-    }
+        PrepareSpellScript(spell_lasser_barrage_targeting_SpellScript);
 
-    void Register() override
+        void FilterTargets(std::list<WorldObject*>& unitList)
+        {
+            if (Unit* caster = GetCaster())
+                if (InstanceScript* instance = caster->GetInstanceScript())
+                    if (Unit* target = ObjectAccessor::GetUnit(*caster, instance->GetData64(DATA_MIMIRON_DB_TARGET)))
+                        unitList.remove_if(targetNotInBetween(GetCaster(), target));
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lasser_barrage_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_lasser_barrage_targeting_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CONE_ENEMY_104);
+        return new spell_lasser_barrage_targeting_SpellScript();
     }
 };
 
-class spell_mimiron_proximity_mines_SpellScript : public SpellScript
+class spell_mimiron_proximity_mines : public SpellScriptLoader
 {
-    PrepareSpellScript(spell_mimiron_proximity_mines_SpellScript);
+public:
+    spell_mimiron_proximity_mines() : SpellScriptLoader("spell_mimiron_proximity_mines") { }
 
-    bool Validate(SpellInfo const* /*spell*/) override
+    class spell_mimiron_proximity_mines_SpellScript : public SpellScript
     {
-        return ValidateSpellInfo({ SPELL_SUMMON_PROXIMITY_MINE });
-    }
+        PrepareSpellScript(spell_mimiron_proximity_mines_SpellScript);
 
-    void HandleScript(SpellEffIndex /*effIndex*/)
-    {
-        for (uint8 i = 0; i < 10; ++i)
-            GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_PROXIMITY_MINE, true);
-    }
+        bool Validate(SpellInfo const* /*spell*/) override
+        {
+            return ValidateSpellInfo({ SPELL_SUMMON_PROXIMITY_MINE });
+        }
 
-    void Register() override
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            for (uint8 i = 0; i < 10; ++i)
+                GetCaster()->CastSpell(GetCaster(), SPELL_SUMMON_PROXIMITY_MINE, true);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mimiron_proximity_mines_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
     {
-        OnEffectHitTarget += SpellEffectFn(spell_mimiron_proximity_mines_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        return new spell_mimiron_proximity_mines_SpellScript();
     }
 };
 
 void AddSC_boss_mimiron()
 {
-    new CreatureAILoader<boss_mimironAI>("boss_mimiron");
-    new CreatureAILoader<npc_ulduar_leviathan_mkiiAI>("npc_ulduar_leviathan_mkii");
-    new CreatureAILoader<npc_ulduar_vx001AI>("npc_ulduar_vx001");
-    new CreatureAILoader<npc_ulduar_aerial_command_unitAI>("npc_ulduar_aerial_command_unit");
+    new boss_mimiron();
+    new npc_ulduar_leviathan_mkii();
+    new npc_ulduar_vx001();
+    new npc_ulduar_aerial_command_unit();
 
-    new CreatureAILoader<npc_ulduar_proximity_mineAI>("npc_ulduar_proximity_mine");
-    new CreatureAILoader<npc_ulduar_mimiron_rocketAI>("npc_ulduar_mimiron_rocket");
-    new CreatureAILoader<npc_ulduar_magnetic_coreAI>("npc_ulduar_magnetic_core");
-    new CreatureAILoader<npc_ulduar_bot_summon_triggerAI>("npc_ulduar_bot_summon_trigger");
-    new AuraScriptLoaderEx<spell_mimiron_rapid_burst_AuraScript>("spell_mimiron_rapid_burst");
-    new SpellScriptLoaderEx<spell_rapid_burst_targeting_SpellScript>("spell_rapid_burst_targeting");
+    new npc_ulduar_proximity_mine();
+    new npc_ulduar_mimiron_rocket();
+    new npc_ulduar_magnetic_core();
+    new npc_ulduar_bot_summon_trigger();
+    new spell_mimiron_rapid_burst();
+    new spell_rapid_burst_targeting();
     new go_ulduar_do_not_push_this_button();
-    new CreatureAILoader<npc_ulduar_flames_initialAI>("npc_ulduar_flames_initial");
-    new CreatureAILoader<npc_ulduar_flames_spreadAI>("npc_ulduar_flames_spread");
-    new CreatureAILoader<npc_ulduar_emergency_fire_botAI>("npc_ulduar_emergency_fire_bot");
-    new CreatureAILoader<npc_ulduar_rocket_strike_triggerAI>("npc_ulduar_rocket_strike_trigger");
-    new CreatureAILoader<npc_db_target_mimironAI>("npc_db_target_mimiron");
+    new npc_ulduar_flames_initial();
+    new npc_ulduar_flames_spread();
+    new npc_ulduar_emergency_fire_bot();
+    new npc_ulduar_rocket_strike_trigger();
+    new npc_db_target_mimiron();
 
     new achievement_mimiron_firefighter();
     new achievement_mimiron_set_up_us_the_bomb_11();
     new achievement_mimiron_set_up_us_the_bomb_12();
     new achievement_mimiron_set_up_us_the_bomb_13();
 
-    new SpellScriptLoaderEx<spell_lasser_barrage_targeting_SpellScript>("spell_lasser_barrage_targeting");
-    new SpellAuraScriptLoaderEx<spell_lasser_barrage_rotating_SpellScript, spell_lasser_barrage_rotating_AuraScript>("spell_lasser_barrage_rotating");
-    new SpellScriptLoaderEx<spell_spinning_up_mimiron_SpellScript>("spell_spinning_up_mimiron");
+    new spell_lasser_barrage_targeting();
+    new spell_lasser_barrage_rotating();
+    new spell_spinning_up_mimiron();
 
-    new SpellScriptLoaderEx<spell_mimiron_proximity_mines_SpellScript>("spell_mimiron_proximity_mines");
+    new spell_mimiron_proximity_mines();
 }
