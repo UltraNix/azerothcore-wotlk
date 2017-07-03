@@ -2912,6 +2912,7 @@ void SpellMgr::LoadSpellCustomAttr()
                                 if (spellInfo->SpellFamilyName != SPELLFAMILY_MAGE || !(spellInfo->SpellFamilyFlags[0] & 0x20)) // frostbolt
                                 if (spellInfo->Id != 55095) // frost fever
                                 if (spellInfo->Id != 64233 && spellInfo->Id != 63025 && spellInfo->Id != 46264) // gravity bomb
+                                if (spellInfo->Id != 62601 && spellInfo->Id != 62604) // sif
                                 if (spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK || !(spellInfo->SpellFamilyFlags[1] & 0x40000)) // Haunt
                                 {
                                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
@@ -5125,6 +5126,10 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// ULDUAR
         //////////////////////////////////////////,
+        // XT-002 Void Zone
+        case 46264:
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         // Steelbreaker fusion punch
         case 61903:
         case 63493:
