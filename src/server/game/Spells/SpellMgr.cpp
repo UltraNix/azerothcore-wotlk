@@ -2868,18 +2868,17 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         }
 
+        // Partial resists
+        bool partialcheck = false;
         for (uint8 i = 0; i < partialCorrection.size(); i++)
             if (spellInfo->Id == partialCorrection[i])
-                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NOT_BINARY_SPELL;
+                partialcheck = true;
 
         // Xinef: spells ignoring hit result should not be binary
-        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
+        if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT) && !partialcheck)
         {
             for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
             {
-                if (spellInfo->HasAttribute(SPELL_ATTR0_CU_NOT_BINARY_SPELL))
-                    continue;
-
                 if (spellInfo->Effects[j].Effect)
                 {
                     switch(spellInfo->Effects[j].Effect)
@@ -2912,6 +2911,7 @@ void SpellMgr::LoadSpellCustomAttr()
                                 if (spellInfo->Id != 69649 && spellInfo->Id != 71056 && spellInfo->Id != 71057 && spellInfo->Id != 71058 && spellInfo->Id != 73061 && spellInfo->Id != 73062 && spellInfo->Id != 73063 && spellInfo->Id != 73064) // Sindragosa Frost Breath
                                 if (spellInfo->SpellFamilyName != SPELLFAMILY_MAGE || !(spellInfo->SpellFamilyFlags[0] & 0x20)) // frostbolt
                                 if (spellInfo->Id != 55095) // frost fever
+                                if (spellInfo->Id != 64233 && spellInfo->Id != 63025) // gravity bomb
                                 if (spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK || !(spellInfo->SpellFamilyFlags[1] & 0x40000)) // Haunt
                                 {
                                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
