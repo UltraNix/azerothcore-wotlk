@@ -39,6 +39,20 @@ class instance_shadowfang_keep : public InstanceMapScript
                 memset(&_encounters, 0, sizeof(_encounters));
             }
 
+            void OnCreatureCreate(Creature* creature) override
+            {
+                if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
+                {
+                    if (creature->GetEntry() == NPC_ADA || creature->GetEntry() == NPC_ASH)
+                    {
+                        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        creature->setFaction(31);
+                    }
+                }
+
+                InstanceScript::OnCreatureCreate(creature);
+            }
+
             void OnGameObjectCreate(GameObject* gameobject)
             {
                 switch (gameobject->GetEntry())
