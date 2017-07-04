@@ -2038,12 +2038,7 @@ bool Aura::CanStackWith(Aura const* existingAura, bool remove) const
 
 bool Aura::IsProcOnCooldown() const
 {
-    if (m_procCooldown)
-    {
-        if (m_procCooldown > time(NULL))
-            return true;
-    }
-    return false;
+    return m_procCooldown && m_procCooldown > time(NULL);
 }
 
 void Aura::AddProcCooldown(uint32 msec)
