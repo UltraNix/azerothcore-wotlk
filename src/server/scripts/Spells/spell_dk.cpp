@@ -649,14 +649,15 @@ class spell_dk_bone_shield : public SpellScriptLoader
         {
             PrepareAuraScript(spell_dk_bone_shield_AuraScript);
 
+            /*
             void HandleProc(ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
                 if (!eventInfo.GetDamageInfo()->GetSpellInfo() || !eventInfo.GetDamageInfo()->GetSpellInfo()->IsTargetingArea())
                     DropCharge();
             }
-
-            /*
+            */
+            
             void HandleProc(ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
@@ -665,14 +666,13 @@ class spell_dk_bone_shield : public SpellScriptLoader
 
                 if (!eventInfo.GetDamageInfo()->GetSpellInfo() || !eventInfo.GetDamageInfo()->GetSpellInfo()->IsTargetingArea())
                 {
-                    if (GetAura()->IsProcOnCooldown() != 0)
-                        return;
-
-                    GetAura()->AddProcCooldown(cooldown);
-                    DropCharge();
+                    if (!GetAura()->IsProcOnCooldown())
+                    {
+                        GetAura()->AddProcCooldown(2000 / IN_MILLISECONDS);
+                        DropCharge();
+                    }
                 }
             }
-            */
 
             void Register()
             {
