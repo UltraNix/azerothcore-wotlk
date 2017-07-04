@@ -5429,6 +5429,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 62168:
         case 65250:
         case 62169:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
 			spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
             break;
