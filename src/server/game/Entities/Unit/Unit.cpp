@@ -9365,6 +9365,29 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
+Unit* Unit::getAttackerForHelper() const
+{
+    if (!IsInCombat())
+        return nullptr;
+
+    if (Unit* victim = GetVictim())
+        if ((!IsPet() && !GetOwner()) || IsInCombatWith(victim) || victim->IsInCombatWith(this))
+            return victim;
+
+    if (!m_attackers.empty())
+        return *(m_attackers.begin());
+
+    if (Player* owner = GetCharmerOrOwnerPlayerOrPlayerItself())
+    {
+        HostileRefManager& refs = owner->getHostileRefManager();
+        for (Reference<Unit, ThreatManager> const& ref : refs)
+            if (Unit* hostile = ref.GetSource()->GetOwner())
+                return hostile;
+    }
+
+    return nullptr;
+}
+
 bool Unit::Attack(Unit* victim, bool meleeAttack)
 { 
     if (!victim || victim == this)
@@ -12415,6 +12438,27 @@ void Unit::SetInCombatWith(Unit* enemy, uint32 duration)
         }
     }
     SetInCombatState(false, enemy, duration);
+}
+
+// Check if unit in combat with specific unit
+bool Unit::IsInCombatWith(Unit const* who) const
+{
+    if (!who)
+        return false;
+    
+    // Search in threat list
+    uint64 guid = who->GetGUID();
+    for (ThreatContainer::StorageType::const_iterator i = m_ThreatManager.getThreatList().begin(); i != m_ThreatManager.getThreatList().end(); ++i)
+    {
+        HostileReference* ref = (*i);
+
+        // Return true if the unit matches
+        if (ref && ref->getUnitGuid() == guid)
+            return true;
+    }
+
+    // Nothing found, false.
+    return false;
 }
 
 void Unit::CombatStart(Unit* target, bool initialAggro)
