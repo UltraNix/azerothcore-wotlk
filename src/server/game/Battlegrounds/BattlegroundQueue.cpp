@@ -864,13 +864,14 @@ void BattlegroundQueue::BattlegroundQueueUpdate(BattlegroundBracketId bracket_id
                             shorterWaitTime = currMSTime-(*itr2)->JoinTime;
                             longerWaitTime = currMSTime-(*itr)->JoinTime;
                         }
+
                         if (longerWaitTime >= discardTime)
                             maxAllowedDiff += 150;
-                        maxAllowedDiff += shorterWaitTime/600; // increased by 100 for each minute
+
+                        maxAllowedDiff += shorterWaitTime / 600; // increased by 100 for each minute
 
                         // now check if this team is more appropriate than previous ones:
-
-                        if (currMSTime-(*itr)->JoinTime >= 20*MINUTE*IN_MILLISECONDS && (oponentValid < 3 || MMRDiff < minOponentMMRDiff)) // after 20 minutes of waiting, pair with closest mmr, regardless the difference
+                        if (currMSTime-(*itr)->JoinTime >= 10 * MINUTE * IN_MILLISECONDS && (oponentValid < 3 || MMRDiff < minOponentMMRDiff)) // after 20 minutes of waiting, pair with closest mmr, regardless the difference
                         {
                             oponentValid = 3;
                             minOponentMMRDiff = MMRDiff; oponentItr = itr2; oponentQueue = j;
