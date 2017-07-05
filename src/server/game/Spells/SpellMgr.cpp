@@ -2749,6 +2749,8 @@ std::vector<uint32> partialCorrection =
     32684,  // Envenom r2
     57992,  // Envenom r3
     57993,  // Envenom r4
+    44614,  // Frostfire Bolt r1
+    47610,  // Frostfire Bolt r2
 };
 
 void SpellMgr::LoadSpellCustomAttr()
