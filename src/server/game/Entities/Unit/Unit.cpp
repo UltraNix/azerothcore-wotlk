@@ -1203,10 +1203,6 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
             break;
     }
 
-    // Ulduar damage 90%
-    if (GetTypeId() == TYPEID_PLAYER && GetMapId() == 603)
-        damage *= 0.90f;
-
     // Calculate absorb resist
     if (damage > 0)
     {
@@ -1430,10 +1426,6 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
     resilienceReduction = damageInfo->damage - resilienceReduction;
     damageInfo->damage      -= resilienceReduction;
     damageInfo->cleanDamage += resilienceReduction;
-
-    // Ulduar damage 90%
-    if (GetTypeId() == TYPEID_PLAYER && GetMapId() == 603)
-        damage *= 0.90f;
 
     // Calculate absorb resist
     if (int32(damageInfo->damage) > 0)
