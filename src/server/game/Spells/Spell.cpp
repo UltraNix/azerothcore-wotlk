@@ -6725,7 +6725,7 @@ SpellCastResult Spell::CheckRange(bool strict)
 
             minRange = m_caster->GetSpellMinRangeForTarget(target, m_spellInfo) + meleeRange;
             maxRange = m_caster->GetSpellMaxRangeForTarget(target, m_spellInfo);
-            if ((target || m_targets.GetCorpseTarget()) && (range_type & SPELL_RANGE_MELEE))
+            if ((target || m_targets.GetCorpseTarget()))
             {
                 rangeMod = m_caster->GetCombatReach();
                 if (target)
