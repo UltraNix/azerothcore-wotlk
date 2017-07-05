@@ -122,6 +122,16 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if(id == 195)
+                if (Creature* announcer = pInstance->instance->GetCreature(pInstance->GetData64(DATA_ANNOUNCER)))
+                    me->SetFacingToObject(announcer);   
+        }
+
         void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
         {
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
@@ -329,6 +339,32 @@ public:
 
         void Reset()
         {
+            // Black Knight is flying towards arena
+            AddWaypoint(0, 766.99f, 657.16f, 457.43f);
+            AddWaypoint(1, 747.28f, 659.71f, 440.49f);
+            AddWaypoint(2, 730.03f, 639.59f, 428.16f);
+            AddWaypoint(3, 721.13f, 621.49f, 423.16f);
+            AddWaypoint(4, 731.72f, 599.81f, 421.99f);
+            AddWaypoint(5, 753.71f, 591.09f, 420.63f);
+            AddWaypoint(6, 776.53f, 597.52f, 418.05f);
+            AddWaypoint(7, 787.38f, 617.07f, 417.49f);
+            AddWaypoint(8, 777.06f, 636.98f, 416.57f);
+            AddWaypoint(9, 760.6f, 642.12f, 414.71f);
+            AddWaypoint(10, 751.697144f, 632.806641f, 411.573242f);
+            // The vehicle starts flying away
+            AddWaypoint(11, 748.89f, 633.61f, 415.24f);
+            AddWaypoint(12, 740.42f, 636.31f, 418.32f);
+            AddWaypoint(13, 727.49f, 637.4f, 422.24f);
+            AddWaypoint(14, 716.59f, 617.99f, 422.24f);
+            AddWaypoint(15, 727.18f, 599.29f, 422.24f);
+            AddWaypoint(16, 746.63f, 587.77f, 422.24f);
+            AddWaypoint(17, 765.6f, 599.52f, 422.24f);
+            AddWaypoint(18, 777.01f, 618.79f, 422.24f);
+            AddWaypoint(19, 761.84f, 642.18f, 422.24f);
+            AddWaypoint(20, 746.09f, 670.33f, 429.68f);
+            AddWaypoint(21, 748.02f, 728.22f, 466.68f);
+            AddWaypoint(22, 779.44f, 797.49f, 477.79f);
+            AddWaypoint(23, 859.14f, 807.98f, 477.79f);
             Start(false,true,0,NULL);
             SetDespawnAtEnd(true);
         }
@@ -337,8 +373,8 @@ public:
         {
             if( param == 1 )
             {
-                me->SetControlled(false, UNIT_STATE_ROOT);
-                me->DisableRotate(false);
+                me->SetCanFly(true);
+                me->SetDisableGravity(true);
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
                 SetEscortPaused(false);
             }
@@ -346,16 +382,21 @@ public:
 
         void WaypointReached(uint32 i)
         {
-            if( i == 12 )
+            if (i == 10)
             {
                 SetEscortPaused(true);
-                me->SetOrientation(3.62f);
-                me->SetControlled(true, UNIT_STATE_ROOT);
-                me->DisableRotate(true);
-                me->SetFacingTo(3.62f);
-                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_MOUNT_SPECIAL);
-                if( InstanceScript* pInstance = me->GetInstanceScript() )
-                    pInstance->SetData(DATA_SKELETAL_GRYPHON_LANDED, 0);
+                me->SetCanFly(false);
+                me->SetDisableGravity(false);
+                if (InstanceScript* instance = me->GetInstanceScript())
+                {
+                    if (Creature* announcer = instance->instance->GetCreature(instance->GetData64(DATA_ANNOUNCER)))
+                    {
+                        me->SetOrientation(me->GetAngle(announcer));
+                        me->SetFacingToObject(announcer);
+                    }
+
+                    instance->SetData(DATA_SKELETAL_GRYPHON_LANDED, 0);
+                }
             }
         }
 
@@ -363,7 +404,6 @@ public:
         {
             npc_escortAI::UpdateAI(uiDiff);
         }
-
     };
 
     CreatureAI* GetAI(Creature* pCreature) const

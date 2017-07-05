@@ -1141,15 +1141,24 @@ public:
                     {
                         if( Creature* bk = instance->GetCreature(NPC_BlackKnightGUID) )
                         {
-                            Position exitPos = {745.016f, 631.506f, 411.575f, M_PI};
-                            bk->ExitVehicle(/*&exitPos*/);
-                            bk->GetMotionMaster()->MoveJump(exitPos, 2.0f, 2.0f);
+                            Position jumpPos = { 751.356262f, 633.437134f, 411.572876f };
+                            bk->SetWalk(true);
+                            bk->_ExitVehicle(&jumpPos);
+                            events.ScheduleEvent(251, 250);
                             bk->AI()->Talk(TEXT_BK_SPOILED);
                         }
-                        events.ScheduleEvent(EVENT_BLACK_KNIGHT_CAST_ANNOUNCER, 2000);
+                        events.ScheduleEvent(EVENT_BLACK_KNIGHT_CAST_ANNOUNCER, 3500);
                         events.PopEvent();
                     }
                     break;
+                case 251:
+                    {
+                        Position exitPos = { 745.016f, 631.506f, 411.575f, M_PI };
+                        if (Creature* bk = instance->GetCreature(NPC_BlackKnightGUID))
+                            bk->GetMotionMaster()->MovePoint(195, exitPos);
+                        events.PopEvent();
+                        break;
+                    }
                 case EVENT_BLACK_KNIGHT_CAST_ANNOUNCER:
                     {
                         if( Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID) )
@@ -1158,7 +1167,6 @@ public:
                             {
                                 bk->SetPosition(745.016f, 631.506f, 411.575f, bk->GetAngle(announcer));
                                 bk->SetHomePosition(*bk);
-                                bk->SetFacingToObject(announcer);
                                 announcer->SetFacingToObject(bk);
                                 announcer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 bk->AddAura(68306, announcer); // spell has attribute player only
