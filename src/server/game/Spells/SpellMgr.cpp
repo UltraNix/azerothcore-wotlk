@@ -4178,6 +4178,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 60510: // Soul Preserver
             spellInfo->EffectBasePoints[EFFECT_0] = 2;
             break;
+        case 16312: //Flametongue Weapon rank 6 - Passive
+            spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
+            break;
 
         /////////////////////////////////
         ///// WARLOCK

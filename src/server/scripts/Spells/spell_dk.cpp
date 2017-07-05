@@ -648,27 +648,16 @@ class spell_dk_bone_shield : public SpellScriptLoader
         class spell_dk_bone_shield_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_dk_bone_shield_AuraScript);
-
-            /*
-            void HandleProc(ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-                if (!eventInfo.GetDamageInfo()->GetSpellInfo() || !eventInfo.GetDamageInfo()->GetSpellInfo()->IsTargetingArea())
-                    DropCharge();
-            }
-            */
             
             void HandleProc(ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
 
-                uint32 cooldown = 2000 / IN_MILLISECONDS;
-
                 if (!eventInfo.GetDamageInfo()->GetSpellInfo() || !eventInfo.GetDamageInfo()->GetSpellInfo()->IsTargetingArea())
                 {
                     if (!GetAura()->IsProcOnCooldown())
                     {
-                        GetAura()->AddProcCooldown(2000 / IN_MILLISECONDS);
+                        GetAura()->AddProcCooldown(2 /*seconds*/);
                         DropCharge();
                     }
                 }
