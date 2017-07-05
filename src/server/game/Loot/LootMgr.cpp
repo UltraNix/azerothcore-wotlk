@@ -435,7 +435,7 @@ bool LootItem::AllowedForPlayer(Player const* player) const
 
     // @toc beta test
     if (player->GetMapId() == 650)
-        return;
+        return false;
 
     return true;
 }
