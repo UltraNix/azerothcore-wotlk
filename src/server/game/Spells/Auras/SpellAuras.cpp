@@ -413,6 +413,7 @@ m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
     m_procCharges = CalcMaxCharges(caster);
     m_isUsingCharges = m_procCharges != 0;
     memset(m_effects, 0, sizeof(m_effects));
+    m_procCooldown = m_applyTime;
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
 }
 
@@ -2037,12 +2038,7 @@ bool Aura::CanStackWith(Aura const* existingAura, bool remove) const
 
 bool Aura::IsProcOnCooldown() const
 {
-    if (m_procCooldown)
-    {
-        if (m_procCooldown > time(NULL))
-            return true;
-    }
-    return false;
+    return m_procCooldown && m_procCooldown > time(NULL);
 }
 
 void Aura::AddProcCooldown(uint32 msec)
