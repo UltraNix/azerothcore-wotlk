@@ -2911,6 +2911,8 @@ void SpellMgr::LoadSpellCustomAttr()
                                 if (spellInfo->Id != 69649 && spellInfo->Id != 71056 && spellInfo->Id != 71057 && spellInfo->Id != 71058 && spellInfo->Id != 73061 && spellInfo->Id != 73062 && spellInfo->Id != 73063 && spellInfo->Id != 73064) // Sindragosa Frost Breath
                                 if (spellInfo->SpellFamilyName != SPELLFAMILY_MAGE || !(spellInfo->SpellFamilyFlags[0] & 0x20)) // frostbolt
                                 if (spellInfo->Id != 55095) // frost fever
+                                if (spellInfo->Id != 64233 && spellInfo->Id != 63025 && spellInfo->Id != 46264) // gravity bomb
+                                if (spellInfo->Id != 62601 && spellInfo->Id != 62604) // sif
                                 if (spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK || !(spellInfo->SpellFamilyFlags[1] & 0x40000)) // Haunt
                                 {
                                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
@@ -4241,6 +4243,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 1122:
             spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
             break;
+        // Conflagrate
+        case 17962: 
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            break;
 
         /////////////////////////////////
         ///// MAGE
@@ -5120,6 +5126,10 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// ULDUAR
         //////////////////////////////////////////,
+        // XT-002 Void Zone
+        case 46264:
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         // Steelbreaker fusion punch
         case 61903:
         case 63493:
@@ -5419,6 +5429,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 62168:
         case 65250:
         case 62169:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
 			spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
             break;

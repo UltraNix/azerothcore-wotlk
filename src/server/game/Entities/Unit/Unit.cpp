@@ -560,7 +560,7 @@ bool Unit::IsWithinCombatRange(const Unit* obj, float dist2compare) const
     float dz = GetPositionZ() - obj->GetPositionZ();
     float distsq = dx * dx + dy * dy + dz * dz;
 
-    float sizefactor = GetCombatReach() + obj->GetCombatReach();
+    float sizefactor = GetCombatReach() + obj->GetCombatReach() + 4.0f / 3.0f;
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
@@ -576,7 +576,7 @@ bool Unit::IsWithinMeleeRange(const Unit* obj, float dist) const
     float dz = GetPositionZ() - obj->GetPositionZ();
     float distsq = dx*dx + dy*dy + dz*dz;
 
-    float sizefactor = GetMeleeReach() + obj->GetMeleeReach();
+    float sizefactor = GetCombatReach() + obj->GetCombatReach() + 4.0f / 3.0f;
     float maxdist = dist + sizefactor;
 
     return distsq < maxdist * maxdist;
@@ -607,7 +607,7 @@ bool Unit::GetRandomContactPoint(const Unit* obj, float &x, float &y, float &z, 
         z = this->GetPositionZ();
         obj->UpdateAllowedPositionZ(x, y, z);
     }
-    float maxDist = MELEE_RANGE + GetMeleeReach() + obj->GetMeleeReach();
+    float maxDist = MELEE_RANGE + GetCombatReach() + obj->GetCombatReach() + 4.0f / 3.0f;
     if (GetExactDistSq(x, y, z) >= maxDist*maxDist)
     {
         if (force)
@@ -9365,6 +9365,29 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
+Unit* Unit::getAttackerForHelper() const
+{
+    if (!IsInCombat())
+        return nullptr;
+
+    if (Unit* victim = GetVictim())
+        if ((!IsPet() && !GetOwner()) || IsInCombatWith(victim) || victim->IsInCombatWith(this))
+            return victim;
+
+    if (!m_attackers.empty())
+        return *(m_attackers.begin());
+
+    if (Player* owner = GetCharmerOrOwnerPlayerOrPlayerItself())
+    {
+        HostileRefManager& refs = owner->getHostileRefManager();
+        for (Reference<Unit, ThreatManager> const& ref : refs)
+            if (Unit* hostile = ref.GetSource()->GetOwner())
+                return hostile;
+    }
+
+    return nullptr;
+}
+
 bool Unit::Attack(Unit* victim, bool meleeAttack)
 { 
     if (!victim || victim == this)
@@ -12415,6 +12438,27 @@ void Unit::SetInCombatWith(Unit* enemy, uint32 duration)
         }
     }
     SetInCombatState(false, enemy, duration);
+}
+
+// Check if unit in combat with specific unit
+bool Unit::IsInCombatWith(Unit const* who) const
+{
+    if (!who)
+        return false;
+    
+    // Search in threat list
+    uint64 guid = who->GetGUID();
+    for (ThreatContainer::StorageType::const_iterator i = m_ThreatManager.getThreatList().begin(); i != m_ThreatManager.getThreatList().end(); ++i)
+    {
+        HostileReference* ref = (*i);
+
+        // Return true if the unit matches
+        if (ref && ref->getUnitGuid() == guid)
+            return true;
+    }
+
+    // Nothing found, false.
+    return false;
 }
 
 void Unit::CombatStart(Unit* target, bool initialAggro)
@@ -17019,24 +17063,9 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 playerCharmer->PossessSpellInitialize();
                 break;
             case CHARM_TYPE_CHARM:
-                if (GetTypeId() == TYPEID_UNIT && charmer->getClass() == CLASS_WARLOCK)
-                {
-                    CreatureTemplate const* cinfo = ToCreature()->GetCreatureTemplate();
-                    if (cinfo && cinfo->type == CREATURE_TYPE_DEMON)
-                    {
-                        // to prevent client crash
-                        SetByteValue(UNIT_FIELD_BYTES_0, 1, (uint8)CLASS_MAGE);
-
-                        // just to enable stat window
-                        if (GetCharmInfo())
-                            GetCharmInfo()->SetPetNumber(sObjectMgr->GeneratePetNumber(), true);
-
-                        // if charmed two demons the same session, the 2nd gets the 1st one's name
-                        SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL))); // cast can't be helped
-                    }
-                }
-                GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, GetFollowAngle());
-                playerCharmer->CharmSpellInitialize();
+                // a guardian should always have charminfo
+                if (playerCharmer && this != charmer->GetFirstControlled())
+                    playerCharmer->SendRemoveControlBar();
                 break;
             default:
                 break;
