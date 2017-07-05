@@ -578,6 +578,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_BAZAR_AUCTION_TYPE, "SELECT auction_type FROM bazar_auction WHERE auctionId = ?", CONNECTION_SYNCH);
     // SLAVE MARKET
     PrepareStatement(CHAR_UPD_SLAVE_ACCOUNT_ID, "UPDATE characters SET account = ? WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_SLAVE_CHAR_ACHIEVEMENT, "DELETE FROM character_achievement WHERE guid = ? AND achievement NOT BETWEEN '6' AND '13'", CONNECTION_ASYNC);
     // NINJA LOOTERS
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK, "SELECT guid FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT name FROM characters WHERE ninjaLooter = 1", CONNECTION_SYNCH);

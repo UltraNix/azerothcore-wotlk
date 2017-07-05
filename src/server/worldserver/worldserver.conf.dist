@@ -3273,4 +3273,12 @@ CrossFactionMail.Enable = 0
 PTR.Realm = 0
 
 #
+#     CrossFactionRDF.Enable
+#        Description: Allow or disallow leveling with RDF between two factions.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+CrossFactionRDF.Enable = 0
+
+#
 ###################################################################################################

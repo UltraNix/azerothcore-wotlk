@@ -61,7 +61,7 @@ class instance_old_scarlet_monastery : public InstanceMapScript
             void OnPlayerEnter(Player* player) override
             {
                 // 15% ICC buff
-                player->AddAura(player->GetTeamId() == ALLIANCE ? 73825 : 73819, player);
+                player->AddAura(player->GetTeamId() == TEAM_ALLIANCE ? 73825 : 73819, player);
             }
 
             void OnCreatureCreate(Creature* creature) override

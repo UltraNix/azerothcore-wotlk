@@ -674,6 +674,8 @@ public:
         npc_ulduar_toasty_fireAI(Creature *pCreature) : NullCreatureAI(pCreature)
         {
             me->CastSpell(me, SPELL_MAGE_TOASTY_FIRE_AURA, true);
+            if (GameObject* fire = me->FindNearestGameObject(194300, 1.0f))
+                fire->EnableCollision(false);
         }
 
         void DoAction(int32 a)

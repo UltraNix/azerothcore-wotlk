@@ -223,7 +223,7 @@ void BazaarMgr::ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy)
                 stmt->setUInt32(1, charGuid);
                 CharacterDatabase.Execute(stmt);
 
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_ACHIEVEMENT);
+                stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_SLAVE_CHAR_ACHIEVEMENT);
                 stmt->setUInt32(0, charGuid);
                 CharacterDatabase.Execute(stmt);
 
