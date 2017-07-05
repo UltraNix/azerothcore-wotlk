@@ -2751,6 +2751,19 @@ std::vector<uint32> partialCorrection =
     57993,  // Envenom r4
     44614,  // Frostfire Bolt r1
     47610,  // Frostfire Bolt r2
+    51490,  // Thunderstorm r1
+    59156,  // Thunderstorm r2
+    59158,  // Thunderstorm r3
+    59159,  // Thunderstorm r4
+    1714,   // Curse of Tongues r1
+    11719,  // Curse of Tongues r2
+    603,    // Curse of Doom r1
+    30910,  // Curse of Doom r2
+    47867,  // Curse of Doom r3
+    1490,   // Curse of the Elements r1
+    11721,  // Curse of the Elements r2
+    11722,  // Curse of the Elements r3
+    27228,  // Curse of the Elements r4
 };
 
 void SpellMgr::LoadSpellCustomAttr()
