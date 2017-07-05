@@ -13,6 +13,45 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #define GOSSIP_START_EVENT2     "I'm ready for the next challenge."
 #define GOSSIP_START_EVENT3  "I'm ready."
 
+enum Spectators
+{
+    NPC_SPECTATOR_HORDE     = 34883,
+    NPC_SPECTATOR_ALLIANCE  = 34887,
+    NPC_SPECTATOR_HUMAN     = 34900,
+    NPC_SPECTATOR_ORC       = 34901,
+    NPC_SPECTATOR_TROLL     = 34902,
+    NPC_SPECTATOR_TAUREN    = 34903,
+    NPC_SPECTATOR_BELF      = 34904,
+    NPC_SPECTATOR_UNDEAD    = 34905,
+    NPC_SPECTATOR_DWARF     = 34906,
+    NPC_SPECTATOR_DRAENEI   = 34908,
+    NPC_SPECTATOR_NELF      = 34909,
+    NPC_SPECTATOR_GNOME     = 34910
+};
+
+uint32 const SpectatorData[12] =
+{
+    0,
+    NPC_SPECTATOR_HUMAN,
+    NPC_SPECTATOR_ORC,
+    NPC_SPECTATOR_DWARF,
+    NPC_SPECTATOR_NELF,
+    NPC_SPECTATOR_UNDEAD,
+    NPC_SPECTATOR_TAUREN,
+    NPC_SPECTATOR_GNOME,
+    NPC_SPECTATOR_TROLL,
+    0,
+    NPC_SPECTATOR_BELF,
+    NPC_SPECTATOR_DRAENEI
+};
+
+enum Announcer
+{
+    EVENT_RANDOM_EMOTE      = 1,
+
+    EMOTE_CHEER             = 0
+};
+
 class npc_announcer_toc5 : public CreatureScript
 {
 public:
@@ -81,6 +120,9 @@ public:
 
         void Reset()
         {
+            if(!_events.GetNextEventTime(EVENT_RANDOM_EMOTE))
+                _events.ScheduleEvent(EVENT_RANDOM_EMOTE, 30000);
+
             InstanceScript* pInstance = me->GetInstanceScript();
             if( !pInstance )
                 return;
@@ -108,7 +150,63 @@ public:
             Unit::Kill(me, me); // for bk scene, die after knockback
         }
 
-        void UpdateAI(uint32 diff) {}
+        void UpdateAI(uint32 diff) 
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_RANDOM_EMOTE:
+                        if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !me->isMoving() && !me->HasAura(66804))
+                        {
+                            _events.Repeat(120000);
+                            InstanceScript* instance = me->GetInstanceScript();
+
+                            if (!instance)
+                                return;
+
+                            // Every 2 minutes a random player is being cheered by his/her race's spectators
+                            // cheer should only occur during fights
+                            Map::PlayerList const &pList = me->GetMap()->GetPlayers();
+                            // Player list is always in the same order so we must randomize it
+                            if (!pList.isEmpty())
+                            {
+                                uint32 rand = urand(0, pList.getSize() - 1);
+                                for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                                {
+                                    if (rand == 0)
+                                    {
+                                        Player* plr = itr->GetSource();
+                                        if (plr && !plr->IsGameMaster() && plr->IsAlive())
+                                        {
+                                            // 50% chance for race cheering at you or faction cheering at you
+                                            uint32 spectatorEntry = RAND(SpectatorData[plr->getRace()], uint32(instance->GetData(DATA_TEAMID_IN_INSTANCE) == ALLIANCE ? NPC_SPECTATOR_ALLIANCE : NPC_SPECTATOR_HORDE));
+
+                                            if (Creature* spectator = me->FindNearestCreature(spectatorEntry, 200.0f))
+                                                spectator->AI()->Talk(EMOTE_CHEER, plr);
+                                            break;
+                                        }
+                                        else
+                                            continue;
+                                    }
+                                    else
+                                        --rand;
+                                }
+                            }
+                        }
+                        else
+                            _events.Repeat(40000);
+                        break;
+                    default:
+                        break;               
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
     };
 };
 
