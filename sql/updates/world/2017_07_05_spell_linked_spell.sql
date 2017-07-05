@@ -1,0 +1,2 @@
+UPDATE `spell_linked_spell` SET `spell_trigger` = '56002' WHERE `spell_linked_spell`.`spell_effect` = 59676;
+UPDATE `spell_linked_spell` SET `spell_trigger` = '56001' WHERE `spell_linked_spell`.`spell_effect` = 59674;
