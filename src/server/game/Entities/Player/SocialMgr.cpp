@@ -237,7 +237,13 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &fri
             friendInfo.Status = FRIEND_STATUS_AFK;
         if (pFriend->isDND())
             friendInfo.Status = FRIEND_STATUS_DND;
-        friendInfo.Area = pFriend->GetZoneId();
+
+        // .dodge command
+        if (pFriend->IsInDodgeMode())
+            friendInfo.Area = 4395; // Dalaran
+        else
+            friendInfo.Area = pFriend->GetZoneId();
+
         friendInfo.Level = pFriend->getLevel();
         friendInfo.Class = pFriend->getClass();
     }
