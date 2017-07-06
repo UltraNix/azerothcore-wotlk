@@ -111,7 +111,7 @@ bool ArenaSpectator::HandleSpectatorSpectateCommand(ChatHandler* handler, char c
         handler->SendSysMessage("Requested player is a spectator.");
         return true;
     }
-    if (!spectate->FindMap() || !spectate->FindMap()->IsBattleArena())
+    if (!spectate->FindMap() || !spectate->FindMap()->IsBattleArena() || spectate->IsInDodgeMode())
     {
         handler->SendSysMessage("Requested player is not in arena.");
         return true;

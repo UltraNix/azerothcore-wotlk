@@ -526,9 +526,10 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_GM_INVISIBLE       = 0x0010,
     PLAYER_EXTRA_GM_CHAT            = 0x0020,               // Show GM badge in chat messages
     PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
-    PLAYER_EXTRA_SPECTATOR_ON        = 0x0080,                // Marks if player is spectactor
+    PLAYER_EXTRA_SPECTATOR_ON       = 0x0080,               // Marks if player is spectactor
     PLAYER_EXTRA_PVP_DEATH          = 0x0100,               // store PvP death status until corpse creating.
-    PLAYER_EXTRA_SHOW_DK_PET        = 0x0400,                // Marks if player should see ghoul on login screen
+    PLAYER_EXTRA_SHOW_DK_PET        = 0x0400,               // Marks if player should see ghoul on login screen
+    PLAYER_EXTRA_DODGE_LOCATION     = 0x0800,               // Marks if player should hide own location at who list
 };
 
 // 2^n values
@@ -2608,6 +2609,10 @@ class Player : public Unit, public GridObject<Player>
 
         bool CanSeeDKPet() const    { return m_ExtraFlags & PLAYER_EXTRA_SHOW_DK_PET; }
         void SetShowDKPet(bool on)    { if (on) m_ExtraFlags |= PLAYER_EXTRA_SHOW_DK_PET; else m_ExtraFlags &= ~PLAYER_EXTRA_SHOW_DK_PET; };
+
+        bool IsInDodgeMode() const { return m_ExtraFlags & PLAYER_EXTRA_DODGE_LOCATION; }
+        void SetDodgeMode(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_DODGE_LOCATION; else m_ExtraFlags &= ~PLAYER_EXTRA_DODGE_LOCATION; };
+        
         void PrepareCharmAISpells();
         uint32 m_charmUpdateTimer;
 

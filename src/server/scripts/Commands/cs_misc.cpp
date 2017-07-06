@@ -131,7 +131,7 @@ public:
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
             { "blizzlike",          SEC_PLAYER,             false, HandleBlizzlikeCommand,              "" },
             { "arenainfo",          SEC_PLAYER,             false, HandleArenaInfoCommand,              "" },
-            { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
+            { "dodge",              SEC_PLAYER,             false, &HandleDodgeModeCommand,             "" },
         };
         return commandTable;
     }
@@ -3611,6 +3611,29 @@ public:
                 handler->PSendSysMessage("Wrong location.");
                 handler->SetSentErrorMessage(true);
                 break;
+        }
+
+        return true;
+    }
+
+    static bool HandleDodgeModeCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (!player->IsInDodgeMode())
+        {
+            player->SetDodgeMode(true);
+            handler->PSendSysMessage("Dodge mode has been enabled, display of your location is disabled.");
+            handler->SetSentErrorMessage(true);
+        }
+        else
+        {
+            player->SetDodgeMode(false);
+            handler->PSendSysMessage("Dodge mode has been disabled, display of your location is enabled.");
+            handler->SetSentErrorMessage(true);
         }
 
         return true;

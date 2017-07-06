@@ -38,9 +38,9 @@ void WhoListCacheMgr::Update()
         if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneId()))
             aname = areaEntry->area_name[sWorld->GetDefaultDbcLocale()];
 
-        if (itr->second->IsSpectator())
+        if (itr->second->IsSpectator() || itr->second->IsInDodgeMode())
             aname = "Dalaran";
 
-        m_whoOpcodeList.push_back( WhoListPlayerInfo(itr->second->GetTeamId(), itr->second->GetSession()->GetSecurity(), itr->second->getLevel(), itr->second->getClass(), itr->second->getRace(), (itr->second->IsSpectator() ? 4395 /*Dalaran*/ : itr->second->GetZoneId()), itr->second->getGender(), wpname, wgname, aname, pname, gname) );
+        m_whoOpcodeList.push_back( WhoListPlayerInfo(itr->second->GetTeamId(), itr->second->GetSession()->GetSecurity(), itr->second->getLevel(), itr->second->getClass(), itr->second->getRace(), ((itr->second->IsSpectator() || itr->second->IsInDodgeMode()) ? 4395 /*Dalaran*/ : itr->second->GetZoneId()), itr->second->getGender(), wpname, wgname, aname, pname, gname) );
     }
 }
