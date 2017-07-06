@@ -560,7 +560,7 @@ bool Unit::IsWithinCombatRange(const Unit* obj, float dist2compare) const
     float dz = GetPositionZ() - obj->GetPositionZ();
     float distsq = dx * dx + dy * dy + dz * dz;
 
-    float sizefactor = GetCombatReach() + obj->GetCombatReach() + 4.0f / 3.0f;
+    float sizefactor = GetCombatReach() + obj->GetCombatReach();
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
