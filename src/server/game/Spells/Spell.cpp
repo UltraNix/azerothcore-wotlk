@@ -6777,7 +6777,7 @@ SpellCastResult Spell::CheckRange(bool strict)
         }
     }
 
-    if (m_targets.HasDst() && !m_targets.HasTraj())
+    if (m_targets.HasDst() && !m_targets.HasTraj() && maxRange != 0)
     {
         if (!m_caster->IsWithinDist3d(m_targets.GetDstPos(), maxRange))
             return SPELL_FAILED_OUT_OF_RANGE;

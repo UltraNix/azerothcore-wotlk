@@ -2749,6 +2749,7 @@ std::vector<uint32> partialCorrection =
     32684,  // Envenom r2
     57992,  // Envenom r3
     57993,  // Envenom r4
+    64639,  // Stomp
 };
 
 void SpellMgr::LoadSpellCustomAttr()
