@@ -15,34 +15,50 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 
 enum Spectators
 {
-    NPC_SPECTATOR_HORDE     = 34883,
-    NPC_SPECTATOR_ALLIANCE  = 34887,
-    NPC_SPECTATOR_HUMAN     = 34900,
-    NPC_SPECTATOR_ORC       = 34901,
-    NPC_SPECTATOR_TROLL     = 34902,
-    NPC_SPECTATOR_TAUREN    = 34903,
-    NPC_SPECTATOR_BELF      = 34904,
-    NPC_SPECTATOR_UNDEAD    = 34905,
-    NPC_SPECTATOR_DWARF     = 34906,
-    NPC_SPECTATOR_DRAENEI   = 34908,
-    NPC_SPECTATOR_NELF      = 34909,
-    NPC_SPECTATOR_GNOME     = 34910
+    NPC_SPECTATOR_HORDE         = 34883,
+    NPC_SPECTATOR_ALLIANCE      = 34887,
+    NPC_SPECTATOR_HUMAN         = 34900,
+    NPC_SPECTATOR_ORC           = 34901,
+    NPC_SPECTATOR_TROLL         = 34902,
+    NPC_SPECTATOR_TAUREN        = 34903,
+    NPC_SPECTATOR_BELF          = 34904,
+    NPC_SPECTATOR_UNDEAD        = 34905,
+    NPC_SPECTATOR_DWARF         = 34906,
+    NPC_SPECTATOR_DRAENEI       = 34908,
+    NPC_SPECTATOR_NELF          = 34909,
+    NPC_SPECTATOR_GNOME         = 34910,
+
+    NPC_SPECTATOR_ANIM_HUMAN    = 34870,
+    NPC_SPECTATOR_ANIM_ORC      = 34859,
+    NPC_SPECTATOR_ANIM_DWARF    = 34856,
+    NPC_SPECTATOR_ANIM_NELF     = 34871,
+    NPC_SPECTATOR_ANIM_UNDEAD   = 34860,
+    NPC_SPECTATOR_ANIM_TAUREN   = 34858,
+    NPC_SPECTATOR_ANIM_GNOME    = 34869,
+    NPC_SPECTATOR_ANIM_TROLL    = 34857,
+    NPC_SPECTATOR_ANIM_BELF     = 34861,
+    NPC_SPECTATOR_ANIM_DRAENEI  = 34868
 };
 
-uint32 const SpectatorData[12] =
+struct SpectatorsInfo
 {
-    0,
-    NPC_SPECTATOR_HUMAN,
-    NPC_SPECTATOR_ORC,
-    NPC_SPECTATOR_DWARF,
-    NPC_SPECTATOR_NELF,
-    NPC_SPECTATOR_UNDEAD,
-    NPC_SPECTATOR_TAUREN,
-    NPC_SPECTATOR_GNOME,
-    NPC_SPECTATOR_TROLL,
-    0,
-    NPC_SPECTATOR_BELF,
-    NPC_SPECTATOR_DRAENEI
+    uint32 spectatorForEmote, spectatorForAnim;
+};
+
+SpectatorsInfo const SpectatorData[12] =
+{
+    { 0, 0 },
+    { NPC_SPECTATOR_HUMAN, NPC_SPECTATOR_ANIM_HUMAN },
+    { NPC_SPECTATOR_ORC, NPC_SPECTATOR_ANIM_ORC },
+    { NPC_SPECTATOR_DWARF, NPC_SPECTATOR_ANIM_DWARF},
+    { NPC_SPECTATOR_NELF, NPC_SPECTATOR_ANIM_NELF },
+    { NPC_SPECTATOR_UNDEAD,  NPC_SPECTATOR_ANIM_UNDEAD },
+    { NPC_SPECTATOR_TAUREN, NPC_SPECTATOR_ANIM_TAUREN },
+    { NPC_SPECTATOR_GNOME, NPC_SPECTATOR_ANIM_GNOME },
+    { NPC_SPECTATOR_TROLL, NPC_SPECTATOR_ANIM_TROLL },
+    { 0, 0},
+    { NPC_SPECTATOR_BELF, NPC_SPECTATOR_ANIM_BELF },
+    { NPC_SPECTATOR_DRAENEI, NPC_SPECTATOR_ANIM_DRAENEI }
 };
 
 enum Announcer
@@ -150,6 +166,27 @@ public:
             Unit::Kill(me, me); // for bk scene, die after knockback
         }
 
+        void GetSpectators(std::list<Creature*>& list, uint32 team)
+        {
+            list.clear();
+            if (team == TEAM_HORDE)
+            {
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_BELF, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_UNDEAD, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_ORC, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_TAUREN, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_TROLL, 250.0f);
+            }
+            else if (team == TEAM_ALLIANCE)
+            {
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_DWARF, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_DRAENEI, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_GNOME, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_HUMAN, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_NELF, 250.0f);
+            }
+        }
+
         void UpdateAI(uint32 diff) 
         {
             _events.Update(diff);
@@ -181,11 +218,31 @@ public:
                                         Player* plr = itr->GetSource();
                                         if (plr && !plr->IsGameMaster() && plr->IsAlive())
                                         {
-                                            // 50% chance for race cheering at you or faction cheering at you
-                                            uint32 spectatorEntry = RAND(SpectatorData[plr->getRace()], uint32(instance->GetData(DATA_TEAMID_IN_INSTANCE) == ALLIANCE ? NPC_SPECTATOR_ALLIANCE : NPC_SPECTATOR_HORDE));
+                                            uint32 id = instance->GetData(DATA_TEAMID_IN_INSTANCE);
 
-                                            if (Creature* spectator = me->FindNearestCreature(spectatorEntry, 200.0f))
-                                                spectator->AI()->Talk(EMOTE_CHEER, plr);
+                                            // 50% chance for race cheering at you or faction cheering at you
+                                            uint32 spectatorEntry = RAND(SpectatorData[plr->getRace()].spectatorForEmote, uint32(id == TEAM_ALLIANCE ? NPC_SPECTATOR_ALLIANCE : NPC_SPECTATOR_HORDE));
+
+                                            if (Creature* spectator = me->FindNearestCreature(spectatorEntry, 250.0f))
+                                                if (spectator->IsAIEnabled)
+                                                    spectator->AI()->Talk(EMOTE_CHEER, plr);
+
+                                            std::list<Creature*> spectators;
+                                            if (spectatorEntry == NPC_SPECTATOR_HORDE || spectatorEntry == NPC_SPECTATOR_ALLIANCE)
+                                            {
+                                                GetSpectators(spectators, id);
+                                                Trinity::Containers::RandomResizeList(spectators, urand(6, 10));
+                                            }
+                                            else
+                                            {
+                                                me->GetCreatureListWithEntryInGrid(spectators, SpectatorData[plr->getRace()].spectatorForAnim, 250.0f);
+                                                Trinity::Containers::RandomResizeList(spectators, urand(2, 5));
+                                            }
+
+                                            if (!spectators.empty())
+                                                for (auto itr : spectators)
+                                                    itr->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
+
                                             break;
                                         }
                                         else
