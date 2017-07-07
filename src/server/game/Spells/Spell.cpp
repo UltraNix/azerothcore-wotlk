@@ -6752,13 +6752,13 @@ SpellCastResult Spell::CheckRange(bool strict)
     if (Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, maxRange, this);
 
-    maxRange += rangeMod;
+    if(!m_spellInfo->HasAnyAura())maxRange += rangeMod;
 
     // xinef: dont check max_range to strictly after cast
     if (range_type != SPELL_RANGE_MELEE && !strict)
         maxRange += std::min(3.0f, maxRange*0.1f); // 10% but no more than 3yd
 
-    if (target)
+    if (target && !m_spellInfo->HasAnyAura())
     {
         if (target != m_caster)
         {
