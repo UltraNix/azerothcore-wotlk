@@ -49,25 +49,26 @@ public:
 
         static std::vector<ChatCommand> modifyCommandTable =
         {
-            { "hp",             SEC_GAMEMASTER,      false, &HandleModifyHPCommand,            "" },
-            { "mana",           SEC_GAMEMASTER,      false, &HandleModifyManaCommand,          "" },
-            { "rage",           SEC_GAMEMASTER,      false, &HandleModifyRageCommand,          "" },
-            { "runicpower",     SEC_GAMEMASTER,      false, &HandleModifyRunicPowerCommand,    "" },
-            { "energy",         SEC_GAMEMASTER,      false, &HandleModifyEnergyCommand,        "" },
-            { "money",          SEC_GAMEMASTER,      false, &HandleModifyMoneyCommand,         "" },
-            { "scale",          SEC_GAMEMASTER,      false, &HandleModifyScaleCommand,         "" },
-            { "bit",            SEC_GAMEMASTER,      false, &HandleModifyBitCommand,           "" },
-            { "faction",        SEC_GAMEMASTER,      false, &HandleModifyFactionCommand,       "" },
-            { "spell",          SEC_GAMEMASTER,      false, &HandleModifySpellCommand,         "" },
-            { "talentpoints",   SEC_GAMEMASTER,      false, &HandleModifyTalentCommand,        "" },
-            { "mount",          SEC_GAMEMASTER,      false, &HandleModifyMountCommand,         "" },
-            { "honor",          SEC_GAMEMASTER,      false, &HandleModifyHonorCommand,         "" },
-            { "reputation",     SEC_GAMEMASTER,     false, &HandleModifyRepCommand,           "" },
-            { "arenapoints",    SEC_GAMEMASTER,      false, &HandleModifyArenaCommand,         "" },
-            { "drunk",          SEC_GAMEMASTER,      false, &HandleModifyDrunkCommand,         "" },
-            { "standstate",     SEC_GAMEMASTER,     false, &HandleModifyStandStateCommand,    "" },
-            { "phase",          SEC_ADMINISTRATOR,  false, &HandleModifyPhaseCommand,         "" },
-            { "gender",         SEC_GAMEMASTER,     false, &HandleModifyGenderCommand,        "" },
+            { "hp",             SEC_GAMEMASTER,      false, &HandleModifyHPCommand,             "" },
+            { "mana",           SEC_GAMEMASTER,      false, &HandleModifyManaCommand,           "" },
+            { "rage",           SEC_GAMEMASTER,      false, &HandleModifyRageCommand,           "" },
+            { "runicpower",     SEC_GAMEMASTER,      false, &HandleModifyRunicPowerCommand,     "" },
+            { "energy",         SEC_GAMEMASTER,      false, &HandleModifyEnergyCommand,         "" },
+            { "money",          SEC_GAMEMASTER,      false, &HandleModifyMoneyCommand,          "" },
+            { "scale",          SEC_GAMEMASTER,      false, &HandleModifyScaleCommand,          "" },
+            { "bit",            SEC_GAMEMASTER,      false, &HandleModifyBitCommand,            "" },
+            { "faction",        SEC_GAMEMASTER,      false, &HandleModifyFactionCommand,        "" },
+            { "spell",          SEC_GAMEMASTER,      false, &HandleModifySpellCommand,          "" },
+            { "talentpoints",   SEC_GAMEMASTER,      false, &HandleModifyTalentCommand,         "" },
+            { "mount",          SEC_GAMEMASTER,      false, &HandleModifyMountCommand,          "" },
+            { "honor",          SEC_GAMEMASTER,      false, &HandleModifyHonorCommand,          "" },
+            { "reputation",     SEC_GAMEMASTER,      false, &HandleModifyRepCommand,            "" },
+            { "arenapoints",    SEC_GAMEMASTER,      false, &HandleModifyArenaCommand,          "" },
+            { "drunk",          SEC_GAMEMASTER,      false, &HandleModifyDrunkCommand,          "" },
+            { "standstate",     SEC_GAMEMASTER,      false, &HandleModifyStandStateCommand,     "" },
+            { "phase",          SEC_ADMINISTRATOR,   false, &HandleModifyPhaseCommand,          "" },
+            { "gender",         SEC_GAMEMASTER,      false, &HandleModifyGenderCommand,         "" },
+            { "stats",          SEC_GAMEMASTER,      false, &HandleModifyStats,                 "" },
             { "speed",          SEC_GAMEMASTER,      false, NULL,           "", modifyspeedCommandTable }
         };
         static std::vector<ChatCommand> commandTable =
@@ -79,6 +80,52 @@ public:
         return commandTable;
     }
 
+    static bool HandleModifyStats(ChatHandler* handler, char const* args)
+    {
+
+        Player* target = handler->getSelectedPlayer();
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (handler->HasLowerSecurity(target, 0))
+            return false;
+
+        if (!*args)
+        {
+            if (target->CanModifyStats()){
+                target->SetCanModifyStats(false);
+                handler->SendSysMessage("Modyfikacja statow wylaczona");
+            }
+            else {
+                target->SetCanModifyStats(true);
+                handler->SendSysMessage("Modyfikacja statow wlaczona");
+            }
+            return true;
+        }
+
+        std::string param = (char*)args;
+
+        if (param == "on")
+        {
+            target->SetCanModifyStats(true);
+            handler->SendSysMessage("Modyfikacja statow wlaczona");
+            return true;
+        }
+
+        if (param == "off")
+        {
+            target->SetCanModifyStats(false);
+            handler->SendSysMessage("Modyfikacja statow wylaczona");
+            return true;
+        }
+
+        handler->SetSentErrorMessage(true);
+        return false;
+    }
 
     //Edit Player HP
     static bool HandleModifyHPCommand(ChatHandler* handler, const char* args)
