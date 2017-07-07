@@ -3004,7 +3004,6 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
         return 0;
     float totalmul = 1.0f;
     int32 totalflat = 0;
-    int32 bonusValues = 0;
 
     // Drop charges for triggering spells instead of triggered ones
     if (m_spellModTakingSpell)
@@ -3050,13 +3049,11 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
                 continue;
 
             // xinef lied ~Crackaw
-            //totalmul += roundf(CalculatePct(1.0f, mod->value)*100.0f)/100.0f;
-            bonusValues += mod->value;
+            totalmul += roundf(CalculatePct(1.0f, mod->value)*100.0f)/100.0f;
         }
 
         DropModCharge(mod, spell);
     }
-    totalmul += roundf(CalculatePct(1.0f, bonusValues)*100.0f) / 100.0f;
     float diff = 0.0f;
     if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION)
         diff = ((float)basevalue + totalflat) * (totalmul - 1.0f) + (float)totalflat;
