@@ -728,9 +728,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             // Xinef: protection
             if (damage < 0)
                 damage = 0;
-
-            damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
-            damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            if (!m_spellInfo->AttributesCu & SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS) {
+                damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+                damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
+            }
         }
 
         m_damage += damage;
