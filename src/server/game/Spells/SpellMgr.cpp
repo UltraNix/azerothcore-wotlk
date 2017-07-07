@@ -2749,21 +2749,7 @@ std::vector<uint32> partialCorrection =
     32684,  // Envenom r2
     57992,  // Envenom r3
     57993,  // Envenom r4
-    44614,  // Frostfire Bolt r1
-    47610,  // Frostfire Bolt r2
-    51490,  // Thunderstorm r1
-    59156,  // Thunderstorm r2
-    59158,  // Thunderstorm r3
-    59159,  // Thunderstorm r4
-    1714,   // Curse of Tongues r1
-    11719,  // Curse of Tongues r2
-    603,    // Curse of Doom r1
-    30910,  // Curse of Doom r2
-    47867,  // Curse of Doom r3
-    1490,   // Curse of the Elements r1
-    11721,  // Curse of the Elements r2
-    11722,  // Curse of the Elements r3
-    27228,  // Curse of the Elements r4
+    64639,  // Stomp
 };
 
 void SpellMgr::LoadSpellCustomAttr()
@@ -3393,7 +3379,7 @@ void SpellMgr::LoadDbcDataCorrections()
         for (uint8 j = 0; j < 3; ++j)
             if (spellInfo->rangeIndex == 1 && (spellInfo->EffectImplicitTargetA[j] == TARGET_DEST_TRAJ || spellInfo->EffectImplicitTargetB[j] == TARGET_DEST_TRAJ))
                 if (SpellEntry* spellInfo2 = (SpellEntry*)sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[j]))
-                    spellInfo2->rangeIndex = RANGE_INDEX_300YD; 
+                    spellInfo2->rangeIndex = 187; // 300yd
 
         if (spellInfo->activeIconID == 2158)  // flight
             spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
@@ -3444,7 +3430,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 42818: // Headless Horseman - Wisp Flight Port
             case 42821: // Headless Horseman - Wisp Flight Missile
-                spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD; 
+                spellInfo->rangeIndex = 6; // 100 yards
                 break;
             case 36350: //They Must Burn Bomb Aura (self)
                 spellInfo->EffectTriggerSpell[0] = 36325; // They Must Burn Bomb Drop (DND)
@@ -3573,7 +3559,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 27915: // Anchor to Skulls
         case 27931: // Anchor to Skulls
         case 27937: // Anchor to Skulls
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13;
             break;
         // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
         // this is the only known exception, probably just wrong data
@@ -3977,7 +3963,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Killing Spree (teleport)
         case 57840:
-            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD; 
+            spellInfo->rangeIndex = 6; // 100 yards
             break;
         // Killing Spree
         case 51690:
@@ -4192,6 +4178,9 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 60510: // Soul Preserver
             spellInfo->EffectBasePoints[EFFECT_0] = 2;
+            break;
+        case 16312: //Flametongue Weapon rank 6 - Passive
+            spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
             break;
 
         /////////////////////////////////
@@ -4571,7 +4560,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Isle of Conquest - Teleport in, missing range
         case 66551:
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD; 
+            spellInfo->rangeIndex = 13; // 50000yd
             break;
         // A'dal's Song of Battle
         case 39953:
@@ -4632,7 +4621,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Piercing Blow
         case 49749:
-            spellInfo->rangeIndex = RANGE_INDEX_COMBAT_5YD; 
+            spellInfo->rangeIndex = 2; // combat range;
             break;
         // Twisted Reflection (heal)
         case 21064:
@@ -4691,7 +4680,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // The Botanica
         // Crystal Channel
         case 34156:
-            spellInfo->rangeIndex = RANGE_INDEX_MEDIUM_LONG_RANGE_35YD;
+            spellInfo->rangeIndex = 35; // 35yd;
             spellInfo->ChannelInterruptFlags |= AURA_INTERRUPT_FLAG_MOVE;
             break;
 
@@ -4713,7 +4702,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Activate Sunblade Protecto
         case 46475:
         case 46476:
-            spellInfo->rangeIndex = RANGE_INDEX_EXTRA_LONG_RANGE_60YD; 
+            spellInfo->rangeIndex = 14; // 60yd
             break;
         // Break Ice
         case 46638:
@@ -4753,7 +4742,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Teleport Maiev
         case 41221:
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13; // 0-50000yd
             break;
 
         // Serpentshrine Cavern
@@ -4789,10 +4778,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetB[1] = 0;
             break;
         case 38295: // auto-shoot || nieuzywany w swiecie || teraz OLD SM
-            spellInfo->rangeIndex = RANGE_INDEX_LONG_RANGE_40YD; 
+            spellInfo->rangeIndex = 5; // 40yd
             break;
         case 61873: // Copy of throw spear || nieuzywany w swiecie || teraz OLD SM
-            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
+            spellInfo->rangeIndex = 6; // 100yd
             spellInfo->EffectBasePoints[0] = urand(18000, 25000);
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->Attributes &= ~SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION;
@@ -4832,7 +4821,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AuraInterruptFlags = 0;
             break;
         case 23278: // shadow scythe
-            spellInfo->rangeIndex = RANGE_INDEX_MEDIUM_LONG_RANGE_35YD; 
+            spellInfo->rangeIndex = 35; // 35yd;
             break;
         case 65112: // Cone Spell
             spellInfo->EffectBasePoints[0] = 6000;
@@ -4926,7 +4915,7 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         // Charged Chaotic rift aura, trigger
         case 47737:
-            spellInfo->rangeIndex = RANGE_INDEX_EXTENDED_RANGE_50YD; 
+            spellInfo->rangeIndex = 37; // 50yd
             break;
 
         //////////////////////////////////////////
@@ -4968,7 +4957,7 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         // Skarvald, Charge
         case 43651:
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13; // 0-50000yd
             break;
         // Ingvar the Plunderer, Woe Strike
         case 42730:
@@ -5112,7 +5101,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_SRC_AREA_ALLY;
             spellInfo->EffectPointsPerComboPoint[1] = 2500;
             spellInfo->EffectBasePoints[1] = 2499;
-            spellInfo->rangeIndex = RANGE_INDEX_SELF_ONLY;
+            spellInfo->rangeIndex = 1;
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         //Alexstrasza - Gift
@@ -5201,7 +5190,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Flame Leviathan
         // Battering Ram
         case 62376:
-            spellInfo->rangeIndex = RANGE_INDEX_MEDIUM_RANGE_30YD;
+            spellInfo->rangeIndex = 3;
             break;
         // Hurl Pyrite
         case 62490:
@@ -5384,7 +5373,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Charge Orb P2
         case 62976:
-            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
+            spellInfo->rangeIndex = 6;
             spellInfo->DurationIndex = 28;
             break;
         // Sif's Blizzard
@@ -5434,7 +5423,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64596:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->EffectRadiusIndex[0] = 12; // 100yd
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;  
+            spellInfo->rangeIndex = 13;  // 50000yd
             break;
         // Constellation Phase Effect
         case 65509:
@@ -5476,7 +5465,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 68968:
             spellInfo->Targets |= TARGET_FLAG_DEST_LOCATION;
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13;
             spellInfo->DurationIndex = 5;
             break;
         // Onyxia's Lair, Onyxian Lair Guard, Blast Nova:
@@ -5616,7 +5605,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_SET_VEHICLE_ID;
             spellInfo->EffectMiscValue[0] = 496;
             spellInfo->DurationIndex = 21;
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13;
             spellInfo->EffectImplicitTargetA[0] = 25;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_CHANGE_MAP;
@@ -5884,7 +5873,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Frost Nova
         case 68198:
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13;
             spellInfo->Targets |= TARGET_FLAG_DEST_LOCATION;
             break;
         // Blight
@@ -5913,7 +5902,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetB[1] = 0;
             spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_CASTER;
             spellInfo->EffectImplicitTargetB[2] = 0;
-            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
+            spellInfo->rangeIndex = 6; // 100yd
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         case 69029:
@@ -5988,7 +5977,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Essence of the Captured
         case 73035:
         case 70719:
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+            spellInfo->rangeIndex = 13;
             break;
         // Achievement Check
         case 72830:
@@ -6257,7 +6246,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
             break;
         case 71809: // Jump
-            spellInfo->rangeIndex = RANGE_INDEX_LONG_RANGE_40YD; 
+            spellInfo->rangeIndex = 5; // 40yd
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS; // 10yd
             spellInfo->EffectMiscValue[0] = 190;
             break;
@@ -6277,7 +6266,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;   // 3yd
             break;
         case 69198: // Raging Spirit Visual
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;           
+            spellInfo->rangeIndex = 13;             // 50000yd
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
@@ -6344,7 +6333,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Leap to a Random Location
         case 70485:
-            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD; 
+            spellInfo->rangeIndex = 6; // 100yd
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
             spellInfo->EffectMiscValue[0] = 100;
             break;
@@ -6696,7 +6685,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Dragon Kite, Tuskarr Kite - Kite String
         case 45192:
-            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
+            spellInfo->rangeIndex = 6; // 100yd
             break;
         // Frigid Frostling, Infrigidate
         case 74960:

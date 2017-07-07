@@ -591,6 +591,8 @@ uint32 ArenaTeam::GetPoints(uint32 memberRating)
     return (uint32) points;
 }
 
+#define MMR_ABUSE_MAX_DIFFERENCE 300
+
 uint32 ArenaTeam::GetAverageMMR(Group* group) const
 {
     if (!group)
@@ -608,7 +610,12 @@ uint32 ArenaTeam::GetAverageMMR(Group* group) const
         if (!group->IsMember(itr->Guid))
             continue;
 
-        matchMakerRating += itr->MatchMakerRating;
+        //Monich: MMR Abuse
+        uint16 rating = itr->MatchMakerRating;
+        if (GetRating() > rating + MMR_ABUSE_MAX_DIFFERENCE)
+            rating = GetRating();
+
+        matchMakerRating += rating;
         ++playerDivider;
     }
 

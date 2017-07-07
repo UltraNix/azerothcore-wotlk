@@ -2832,6 +2832,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
+    if (m_caster->IsPlayer() && unitTarget->IsPlayer() || (unitTarget->IsPet() && unitTarget->GetOwner()->IsPlayer()))
+        if (!m_caster->IsInCombat() && m_caster->IsFriendlyTo(unitTarget) && unitTarget->IsInCombat() && m_spellInfo->IsPositive() && !m_spellInfo->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO) && !m_triggeredByAuraSpell)
+            m_caster->SetInCombatState(true);
+
     // Interrupt Spell casting
     if (m_spellInfo->HasAttribute(SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER) && unitTarget->GetTypeId() != TYPEID_PLAYER)
         m_caster->CastSpell(unitTarget, 32747, true);
@@ -6773,7 +6777,7 @@ SpellCastResult Spell::CheckRange(bool strict)
         }
     }
 
-    if (m_targets.HasDst() && !m_targets.HasTraj())
+    if (m_targets.HasDst() && !m_targets.HasTraj() && maxRange != 0)
     {
         if (!m_caster->IsWithinDist3d(m_targets.GetDstPos(), maxRange))
             return SPELL_FAILED_OUT_OF_RANGE;

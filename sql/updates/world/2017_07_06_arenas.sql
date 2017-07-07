@@ -1,0 +1,2 @@
+UPDATE `world`.`trinity_string` SET `content_default`='|cff77a5c4[5v5] - Team has joined arena queue!|r' WHERE  `entry`=10504;
+UPDATE `world`.`trinity_string` SET `content_default`='|cff77a5c4[3v3] - Team has joined arena queue!|r' WHERE  `entry`=10503;
