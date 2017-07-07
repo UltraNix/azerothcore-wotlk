@@ -3704,17 +3704,22 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
         {
             if (unitTarget->HasAura(55593)) //Fix for Necrotic Aura
                 addhealth = 0;
-            else { //Fix for Mortal Strike
+            else { //Fix for Mortal Strike and similar spells
                 Unit::AuraEffectList const &list = unitTarget->GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_PCT);
                 auto end = list.end();
+                int32 value = 0;
                 for (auto iter = list.begin(); iter != end; ++iter)
-                    if (const SpellInfo* info = sSpellMgr->GetSpellInfo((*iter)->GetId()))
-                        if (const SpellInfo* fInfo = info->GetFirstRankSpell())
-                            if (fInfo->Id == 12294)
-                            {
-                                addhealth >>= 1;
-                                break;
-                            }
+                {
+                    int32 val = (*iter)->GetAmount();
+                    if (val < value)
+                        value = val;
+                }
+
+                if (value)
+                {
+                    addhealth *= -value;
+                    addhealth /= 100;
+                }
             }
         }
     }
