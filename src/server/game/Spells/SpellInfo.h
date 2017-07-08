@@ -193,7 +193,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_ALLOW_INFLIGHT_TARGET         = 0x00040000,
     SPELL_ATTR0_CU_NOT_BINARY_SPELL              = 0x00080000,  
     SPELL_ATTR0_CU_BINARY_SPELL                  = 0x00100000,
-    SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS       = 0x00200000, // Damage spells doesn't take bonus from spell power or other spell damage bonus 
+    SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS       = 0x00200000,
     SPELL_ATTR0_CU_SINGLE_AURA_STACK             = 0x00400000, // pussywizard
     SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC  = 0x00800000,
     SPELL_ATTR0_CU_ENCOUNTER_REWARD              = 0x01000000, // pussywizard
