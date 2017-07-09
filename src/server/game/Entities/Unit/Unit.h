@@ -1455,7 +1455,6 @@ class Unit : public WorldObject
         bool IsTotem() const    { return m_unitTypeMask & UNIT_MASK_TOTEM; }
         bool IsVehicle() const  { return m_unitTypeMask & UNIT_MASK_VEHICLE; }
         bool IsNonPetGuardian() const { return m_unitTypeMask & UNIT_MASK_GUARDIAN && !(m_unitTypeMask & UNIT_MASK_CONTROLABLE_GUARDIAN); }
-        bool IsPetLikeGuardian() const { return m_unitTypeMask & UNIT_MASK_GUARDIAN && m_unitTypeMask & UNIT_MASK_CONTROLABLE_GUARDIAN; }
 
         uint8 getLevel() const { return uint8(GetUInt32Value(UNIT_FIELD_LEVEL)); }
         uint8 getLevelForTarget(WorldObject const* /*target*/) const { return getLevel(); }
