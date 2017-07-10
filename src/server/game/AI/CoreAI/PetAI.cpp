@@ -40,7 +40,7 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), m_updateSpeedTimer(2000)
+PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK)
 {
     UpdateAllies();
 }
@@ -136,17 +136,6 @@ void PetAI::UpdateAI(uint32 diff)
 {
     if (!me->IsAlive() || !me->GetCharmInfo())
         return;
-
-    if (m_updateSpeedTimer <= diff)
-    {
-        m_updateSpeedTimer = 500;
-        me->UpdateSpeed(MOVE_RUN, true);
-        me->UpdateSpeed(MOVE_SWIM, true);
-        me->UpdateSpeed(MOVE_FLIGHT, true);
-    }
-    else
-        m_updateSpeedTimer -= diff;
-
 
     Unit* owner = me->GetCharmerOrOwner();
 

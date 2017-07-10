@@ -62,7 +62,6 @@ class PetAI : public CreatureAI
         TimeTracker i_tracker;
         std::set<uint64> m_AllySet;
         uint32 m_updateAlliesTimer;
-        uint32 m_updateSpeedTimer;
 
         Unit* SelectNextTarget(bool allowAutoSelect) const;
         void HandleReturnMovement();
