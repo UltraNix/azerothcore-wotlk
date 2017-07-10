@@ -1171,7 +1171,8 @@ bool SpellInfo::ComputeIsCritCapable() const
                 return true;
         }
     }
-    return false;
+
+    return SpellFamilyName == SPELLFAMILY_PALADIN && SpellFamilyFlags[0] & SPELLFAMILYFLAG_PALADIN_LAY_ON_HANDS; //LoH should crit
 }
 
 bool SpellInfo::IsCritCapable() const
