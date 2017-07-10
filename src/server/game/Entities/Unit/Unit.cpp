@@ -10339,7 +10339,7 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
         return 1.0f;
 
     // Some spells don't benefit from done mods
-    if (spellProto->HasAttribute(SPELL_ATTR3_NO_DONE_BONUS))
+    if (spellProto->HasAttribute(SPELL_ATTR3_NO_DONE_BONUS) || spellProto->HasAttribute(SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS))
         return 1.0f;
 
     // For totems get damage bonus from owner
@@ -10655,7 +10655,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         return pdamage;
 
     // Some spells don't benefit from done mods
-    if (spellProto->HasAttribute(SPELL_ATTR3_NO_DONE_BONUS))
+    if (spellProto->HasAttribute(SPELL_ATTR3_NO_DONE_BONUS) || spellProto->HasAttribute(SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS))
         return pdamage;
 
     // For totems get damage bonus from owner
@@ -10676,7 +10676,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
     // Done total percent damage auras
     float ApCoeffMod = 1.0f;
-    int32 DoneTotal = 0;
+    float DoneTotal = 0;
     float DoneTotalMod = TotalMod ? TotalMod : SpellPctDamageModsDone(victim, spellProto, damagetype);
 
     // Some spells don't benefit from pct done mods
@@ -10684,7 +10684,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     {
         uint32 creatureTypeMask = victim->GetCreatureTypeMask();
         // Add flat bonus from spell damage versus
-        DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
+        DoneTotal += float(GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask));
     }
 
     // done scripted mod (take it from owner)
@@ -10706,7 +10706,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             case 6008: // Increased Lightning Damage
             case 8627: // Totem of Hex
             {
-                DoneTotal += (*i)->GetAmount();
+                DoneTotal += float((*i)->GetAmount());
                 break;
             }
         }
@@ -10728,13 +10728,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
         if (spellProto->SpellFamilyFlags[0] & 0x00040000)
             if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, 0, 0, 0x00000002, GetGUID()))
             {
-                DoneTotal += 95;
+                DoneTotal += 95.0f;
                 ApCoeffMod = 1.5835f;
             }
     }
 
     // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit  = SpellBaseDamageBonusDone(spellProto->GetSchoolMask());
+    float DoneAdvertisedBenefit  = float(SpellBaseDamageBonusDone(spellProto->GetSchoolMask()));
 
     // Check for table values
     float coeff = 0;
@@ -10749,7 +10749,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
-                DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
+                DoneTotal += float(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
             }
         }
         else
@@ -10760,7 +10760,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? RANGED_ATTACK : BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
-                DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
+                DoneTotal += float(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
             }
         }
     }
@@ -10777,7 +10777,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             coeff /= 100.0f;
         }
 
-        DoneTotal += int32(DoneAdvertisedBenefit * coeff * factorMod);
+        DoneTotal += float(DoneAdvertisedBenefit * coeff * factorMod);
     }
     
     float tmpDamage = (float(pdamage) + DoneTotal) * DoneTotalMod;
