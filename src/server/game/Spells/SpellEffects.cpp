@@ -3721,11 +3721,6 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
                     addhealth /= 100;
                 }
             }
-
-            //Adding crit chance
-            TargetInfo info = *m_UniqueTargetInfo.begin();
-            if (info.crit)
-                addhealth = Unit::SpellCriticalHealingBonus(m_caster, m_spellInfo, addhealth, unitTarget);
         }
     }
     else
