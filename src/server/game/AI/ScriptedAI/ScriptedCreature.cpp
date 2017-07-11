@@ -461,6 +461,8 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
 
 void BossAI::_DespawnAtEvade(uint32 delayToRespawn /*= 30*/, Creature* who /*= nullptr*/)
 {
+    summons.DespawnAll();
+
     if (delayToRespawn < 2)
     {
         sLog->outError("_DespawnAtEvade called with delay of %u seconds, defaulting to 2.", delayToRespawn);
