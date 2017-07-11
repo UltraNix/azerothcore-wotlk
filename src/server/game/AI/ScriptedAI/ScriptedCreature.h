@@ -398,6 +398,7 @@ class BossAI : public ScriptedAI
         void JustReachedHome() { _JustReachedHome(); }
 
     protected:
+        void _DespawnAtEvade(uint32 delayToRespawn = 30, Creature* who = nullptr);
         void _Reset();
         void _EnterCombat();
         void _JustDied();

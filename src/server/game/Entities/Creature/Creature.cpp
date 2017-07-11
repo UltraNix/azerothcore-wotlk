@@ -164,7 +164,7 @@ CreatureBaseStats const* CreatureBaseStats::GetBaseStats(uint8 level, uint8 unit
 
 bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
-    m_owner.DespawnOrUnsummon();    // since we are here, we are not TempSummon as object type cannot change during runtime
+    m_owner.DespawnOrUnsummon(0, m_respawnTimer);    // since we are here, we are not TempSummon as object type cannot change during runtime
     return true;
 }
 
@@ -1694,29 +1694,46 @@ void Creature::Respawn(bool force)
     UpdateObjectVisibility(false);
 }
 
-void Creature::ForcedDespawn(uint32 timeMSToDespawn)
+void Creature::ForcedDespawn(uint32 timeMSToDespawn, uint32 forceRespawnTimer)
 { 
     if (timeMSToDespawn)
     {
-        ForcedDespawnDelayEvent* pEvent = new ForcedDespawnDelayEvent(*this);
-
-        m_Events.AddEvent(pEvent, m_Events.CalculateTime(timeMSToDespawn));
+        m_Events.AddEvent(new ForcedDespawnDelayEvent(*this, forceRespawnTimer), m_Events.CalculateTime(timeMSToDespawn));
         return;
     }
 
-    if (IsAlive())
-        setDeathState(JUST_DIED, true);
+    uint32 corpseDelay = GetCorpseDelay();
+    uint32 respawnDelay = GetRespawnDelay();
 
-    // Xinef: set new respawn time, ignore corpse decay time...
-    RemoveCorpse(true);
+    // do it before killing creature
+    DestroyForNearbyPlayers();
+
+    bool overrideRespawnTime = true;
+    if (IsAlive())
+    {
+        if (forceRespawnTimer > 0)
+        {
+            SetCorpseDelay(0);
+            SetRespawnDelay(forceRespawnTimer);
+            overrideRespawnTime = false;
+        }
+
+        setDeathState(JUST_DIED);
+    }
+
+    // Skip corpse decay time
+    RemoveCorpse(overrideRespawnTime, false);
+
+    SetCorpseDelay(corpseDelay);
+    SetRespawnDelay(respawnDelay);
 }
 
-void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
+void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/, uint32 forceRespawnTimer)
 { 
     if (TempSummon* summon = this->ToTempSummon())
         summon->UnSummon(msTimeToDespawn);
     else
-        ForcedDespawn(msTimeToDespawn);
+        ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
 }
 
 void Creature::InitializeReactState()
