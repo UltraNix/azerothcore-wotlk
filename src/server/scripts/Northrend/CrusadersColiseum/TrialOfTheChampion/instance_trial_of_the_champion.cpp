@@ -260,7 +260,7 @@ public:
             Map::PlayerList const &pl = instance->GetPlayers();
             for( Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr )
                 if( Player* plr = itr->GetSource() )
-                    if( plr->IsAlive() && !plr->IsGameMaster() )
+                    if( plr->IsAlive() && !plr->IsGameMaster() && !plr->HasStealthAura() )
                         ++aliveCount;
 
             bool need = aliveCount==0;
