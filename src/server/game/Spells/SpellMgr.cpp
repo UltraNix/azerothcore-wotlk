@@ -2764,7 +2764,10 @@ std::vector<uint32> partialCorrection =
     11721,  // Curse of the Elements r2
     11722,  // Curse of the Elements r3
     27228,  // Curse of the Elements r4
-    64639,  // Stomp
+    64639,  // Stomp 10 man
+    64652,  // Stomp 25 man
+    64649,  // Freezing Breath
+    63705,  // Void Wave
 };
 
 void SpellMgr::LoadSpellCustomAttr()
