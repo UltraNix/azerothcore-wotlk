@@ -875,6 +875,8 @@ public:
 
         void JustDied(Unit* killer)
         {
+            summons.DespawnAll();
+
             if (me->GetEntry() == killer->GetEntry())
                 return;
             me->MonsterYell("Matron, one has fallen!", LANG_UNIVERSAL, 0);
