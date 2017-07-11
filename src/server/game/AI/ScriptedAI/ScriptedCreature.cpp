@@ -459,6 +459,30 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
 {
 }
 
+void BossAI::_DespawnAtEvade(uint32 delayToRespawn /*= 30*/, Creature* who /*= nullptr*/)
+{
+    if (delayToRespawn < 2)
+    {
+        sLog->outError("_DespawnAtEvade called with delay of %u seconds, defaulting to 2.", delayToRespawn);
+        delayToRespawn = 2;
+    }
+
+    if (!who)
+        who = me;
+
+    if (TempSummon* whoSummon = who->ToTempSummon())
+    {
+        sLog->outError("_DespawnAtEvade called on a temporary summon.");
+        whoSummon->UnSummon();
+        return;
+    }
+
+    who->DespawnOrUnsummon(0, delayToRespawn);
+
+    if (instance && who == me)
+        instance->SetBossState(_bossId, FAIL);
+}
+
 void BossAI::_Reset()
 {
     if (!me->IsAlive())

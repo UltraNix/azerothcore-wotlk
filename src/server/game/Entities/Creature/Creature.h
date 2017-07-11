@@ -639,7 +639,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         void RemoveCorpse(bool setSpawnTime = true, bool skipVisibility = false);
 
-        void DespawnOrUnsummon(uint32 msTimeToDespawn = 0);
+        void DespawnOrUnsummon(uint32 msTimeToDespawn = 0, uint32 forceRespawnTime = 0);
 
         time_t const& GetRespawnTime() const { return m_respawnTime; }
         time_t GetRespawnTimeEx() const;
@@ -783,7 +783,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool CanAlwaysSee(WorldObject const* obj) const;
 
     private:
-        void ForcedDespawn(uint32 timeMSToDespawn = 0);
+        void ForcedDespawn(uint32 timeMSToDespawn = 0, uint32 forceRespawnTimer = 0);
 
         //WaypointMovementGenerator vars
         uint32 m_waypointID;
@@ -816,11 +816,12 @@ class AssistDelayEvent : public BasicEvent
 class ForcedDespawnDelayEvent : public BasicEvent
 {
     public:
-        ForcedDespawnDelayEvent(Creature& owner) : BasicEvent(), m_owner(owner) { }
-        bool Execute(uint64 e_time, uint32 p_time);
+        ForcedDespawnDelayEvent(Creature& owner, uint32 respawnTimer) : BasicEvent(), m_owner(owner), m_respawnTimer(respawnTimer) { }
+        bool Execute(uint64 e_time, uint32 p_time) override;
 
     private:
         Creature& m_owner;
+        uint32 m_respawnTimer;
 };
 
 #endif

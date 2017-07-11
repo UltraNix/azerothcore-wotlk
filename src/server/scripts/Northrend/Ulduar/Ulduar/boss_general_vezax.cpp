@@ -97,12 +97,9 @@ enum VezaxEvents
 #define TEXT_VEZAX_DEATH                            "Oh, what horrors await...."
 #define TEXT_VEZAX_HARDMODE                         "Behold, now! Terror, absolute!"
 
-struct boss_vezaxAI : public ScriptedAI
+struct boss_vezaxAI : public BossAI
 {
-    boss_vezaxAI(Creature* creature) : ScriptedAI(creature), summons(me)
-    {
-        instance = me->GetInstanceScript();
-    }
+    boss_vezaxAI(Creature* creature) : BossAI(creature, TYPE_VEZAX) { }
 
     void Reset() override
     {
@@ -110,24 +107,20 @@ struct boss_vezaxAI : public ScriptedAI
         _hardmodeAvailable = true;
         _berserk = false;
         _shadowdodger = true;
-        events.Reset();
-        summons.DespawnAll();
         me->SetLootMode(1);
 
         if (instance)
             instance->SetData(TYPE_VEZAX, NOT_STARTED);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
-        me->setActive(false);
+        _DespawnAtEvade();
     }
 
     void EnterCombat(Unit* /*who*/) override
     {
-        me->setActive(true);
-        me->SetInCombatWithZone();
-
+        _EnterCombat();
         events.Reset();
         events.RescheduleEvent(EVENT_SPELL_VEZAX_SHADOW_CRASH, 13000);
         events.RescheduleEvent(EVENT_SPELL_SEARING_FLAMES, 10000, 1);
@@ -346,7 +339,7 @@ struct boss_vezaxAI : public ScriptedAI
 
     void JustDied(Unit* killer) override
     {
-        summons.DespawnAll();
+        _JustDied();
         if (instance)
             instance->SetData(TYPE_VEZAX, DONE);
 
@@ -391,9 +384,6 @@ struct boss_vezaxAI : public ScriptedAI
     }
 
 private:
-    EventMap events;
-    SummonList summons;
-    InstanceScript* instance;
     uint8 _vaporsCount;
     bool _hardmodeAvailable;
     bool _berserk;
