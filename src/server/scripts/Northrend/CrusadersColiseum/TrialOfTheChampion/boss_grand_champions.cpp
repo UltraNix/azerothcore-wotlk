@@ -680,7 +680,7 @@ struct boss_grand_championAI : public npc_escortAI
                     for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                         if (Player* player = itr->GetSource())
                         {
-                            if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead());
+                            if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead())
                                 continue;
                             if (!player->GetVehicle())
                                 list.push_back(player->GetGUID());
