@@ -109,7 +109,7 @@ struct boss_ouroAI : public BossAI
         if (me->HealthBelowPctDamaged(20, damage) && !_enraged)
         {
             _enraged = true;
-            DoCast(me, SPELL_BERSERK);
+            DoCastSelf(SPELL_BERSERK);
             events.CancelEvent(EVENT_SUBMERGE);
             events.CancelEvent(EVENT_MELEE_CHECK);
             events.ScheduleEvent(EVENT_SUMMON_MOUND, 10000, 0, PHASE_FIGHT);
@@ -134,7 +134,7 @@ struct boss_ouroAI : public BossAI
             switch (eventId)
             {
                 case EVENT_SWEEP:
-                    DoCast(me, SPELL_SWEEP);
+                    DoCastSelf(SPELL_SWEEP);
                     events.Repeat(urand(15000, 30000));
                     break;
                 case EVENT_SAND_BLAST:
@@ -144,9 +144,9 @@ struct boss_ouroAI : public BossAI
                 case EVENT_SUBMERGE:
                     events.SetPhase(PHASE_SUBMERGE);
                     DespawnBase();
-                    DoCast(me, SPELL_SUBMERGE_VISUAL);
-                    DoCast(me, SPELL_SUMMON_OURO_MOUNDS, true);
-                    DoCast(me, SPELL_SUMMON_TRIGGER, true);
+                    DoCastSelf(SPELL_SUBMERGE_VISUAL);
+                    DoCastSelf(SPELL_SUMMON_OURO_MOUNDS, true);
+                    DoCastSelf(SPELL_SUMMON_TRIGGER, true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     events.ScheduleEvent(EVENT_EMERGE, 30000, 0, PHASE_SUBMERGE);
                     break;
@@ -155,17 +155,17 @@ struct boss_ouroAI : public BossAI
                     Schedule();
                     if (Creature* trigger = me->FindNearestCreature(NPC_OURO_TRIGGER, 250.0f))
                         me->NearTeleportTo(trigger->GetPositionX(), trigger->GetPositionY(), trigger->GetPositionZ(), false);
-                    DoCast(me, SPELL_BIRTH);
+                    DoCastSelf(SPELL_BIRTH);
                     DoCastAOE(SPELL_GROUND_RUPTURE);
                     me->RemoveAurasDueToSpell(SPELL_SUBMERGE_VISUAL);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     events.ScheduleEvent(EVENT_SUBMERGE, 90000, 0, PHASE_FIGHT);
                     break;
                 case EVENT_SUMMON_BASE:
-                    DoCast(me, SPELL_SUMMON_BASE, true);
+                    DoCastSelf(SPELL_SUMMON_BASE, true);
                     break;
                 case EVENT_SUMMON_MOUND:
-                    DoCast(me, SPELL_SUMMON_OURO_MOUND);
+                    DoCastSelf(SPELL_SUMMON_OURO_MOUND);
                     events.Repeat(10000);
                     break;
                 case EVENT_MELEE_CHECK:
@@ -276,7 +276,7 @@ struct npc_dirt_moundAI : public ScriptedAI
 
     void Reset() override
     {
-        DoCast(me, SPELL_DIRTMOUND_PASSIVE);
+        DoCastSelf(SPELL_DIRTMOUND_PASSIVE);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
         _events.ScheduleEvent(EVENT_DESPAWN, 30000);
         _events.ScheduleEvent(EVENT_CHANGE_TARGET, 0);
