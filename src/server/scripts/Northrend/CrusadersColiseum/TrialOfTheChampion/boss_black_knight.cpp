@@ -345,6 +345,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
 
     void Reset() override
     {
+        _explode = false;
         _events.Reset();
     }
 
@@ -356,13 +357,26 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
         _events.RescheduleEvent(EVENT_CLAW, urand(3000, 4000)); 
     }
 
-    void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
+    void DoExplode()
     {
-        if (spell->Id == SPELL_BK_GHOUL_EXPLODE)
+        if (!_explode)
         {
+            _explode = true;
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             DoCastSelf(SPELL_EXPLODE);
         }
+    }
+
+    void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
+    {
+        if (spell->Id == SPELL_BK_GHOUL_EXPLODE)
+            DoExplode();
+    }
+
+    void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
+    {
+        if (me->HealthBelowPctDamaged(30, damage))
+            DoExplode();
     }
 
     void SpellHitTarget(Unit* target, const SpellInfo* spell)
@@ -428,6 +442,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
 private:
     InstanceScript* instance;
     EventMap _events;
+    bool _explode;
 };
 
 void AddSC_boss_black_knight()
