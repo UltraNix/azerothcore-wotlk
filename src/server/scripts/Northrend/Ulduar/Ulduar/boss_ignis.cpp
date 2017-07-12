@@ -420,6 +420,7 @@ struct boss_ignisAI : public BossAI
         me->SetControlled(false, UNIT_STATE_ROOT);
         me->DisableRotate(false);
         _DespawnAtEvade();
+        instance->SetData(TYPE_IGNIS, FAIL);
     }
 
 private:
