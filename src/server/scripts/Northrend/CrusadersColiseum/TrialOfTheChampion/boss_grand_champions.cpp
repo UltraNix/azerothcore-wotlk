@@ -230,40 +230,21 @@ struct npc_toc5_grand_champion_minionAI : public ScriptedAI
                             if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead())
                                 continue;
                             if (Vehicle* vehicle = player->GetVehicle())
-                            {
                                 if (Unit* mount = vehicle->GetBase())
                                     list.push_back(mount->GetGUID());
-                            }
-                            else if (!player->GetVehicle())
-                                list.push_back(player->GetGUID());
                         }
 
-                    std::list<Player*> playerList;
                     std::list<Unit*> vehicleList;
 
                     if (!list.empty())
-                    {
                         for (auto itr : list)
-                        {
-                            if (IS_PLAYER_GUID(itr))
-                            {
-                                if (Player* player = ObjectAccessor::GetPlayer(*me, itr))
-                                    playerList.push_back(player);
-                            }
-                            else
-                            {
-                                if (Unit* vehicle = ObjectAccessor::GetUnit(*me, itr))
-                                    vehicleList.push_back(vehicle);
-                            }
-                        }
-                    }
+                            if (Unit* vehicle = ObjectAccessor::GetUnit(*me, itr))
+                                vehicleList.push_back(vehicle);
 
                     Unit* target = nullptr;
                     if (!vehicleList.empty())
                         target = Trinity::Containers::SelectRandomContainerElement(vehicleList);
-                    else if (!playerList.empty())
-                        target = Trinity::Containers::SelectRandomContainerElement(playerList);
-                    
+
                     if (target)
                     {
                         me->getThreatManager().resetAllAggro();
@@ -705,39 +686,20 @@ struct boss_grand_championAI : public npc_escortAI
                             if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead())
                                 continue;
                             if (Vehicle* vehicle = player->GetVehicle())
-                            {
                                 if (Unit* mount = vehicle->GetBase())
                                     list.push_back(mount->GetGUID());
-                            }
-                            else if (!player->GetVehicle())
-                                list.push_back(player->GetGUID());
                         }
 
-                    std::list<Player*> playerList;
                     std::list<Unit*> vehicleList;
 
                     if (!list.empty())
-                    {
                         for (auto itr : list)
-                        {
-                            if (IS_PLAYER_GUID(itr))
-                            {
-                                if (Player* player = ObjectAccessor::GetPlayer(*me, itr))
-                                    playerList.push_back(player);
-                            }
-                            else
-                            {
-                                if (Unit* vehicle = ObjectAccessor::GetUnit(*me, itr))
-                                    vehicleList.push_back(vehicle);
-                            }
-                        }
-                    }
+                            if (Unit* vehicle = ObjectAccessor::GetUnit(*me, itr))
+                                vehicleList.push_back(vehicle);
 
                     Unit* target = nullptr;
                     if (!vehicleList.empty())
                         target = Trinity::Containers::SelectRandomContainerElement(vehicleList);
-                    else if (!playerList.empty())
-                        target = Trinity::Containers::SelectRandomContainerElement(playerList);
 
                     if (target)
                     {

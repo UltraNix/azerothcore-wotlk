@@ -5556,6 +5556,9 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// TRIAL OF THE CHAMPION
         //////////////////////////////////////////
+        // Trial of the Champion, Trampled
+        case 67867:
+            spellInfo->DurationIndex = 27 // 3s
         // Trial of the Champion, Death's Respite
         case 68306:
             spellInfo->EffectImplicitTargetA[0] = 25;
