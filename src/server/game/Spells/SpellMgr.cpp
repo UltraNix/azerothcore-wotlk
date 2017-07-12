@@ -5604,6 +5604,28 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// TRIAL OF THE CRUSADER
         //////////////////////////////////////////
+        // Trial of the Crusader, Icehowl damage corrections
+        case 67345: // Whirl 10 man
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(9200, 10700);
+            break;
+        case 67663: // Whirl 25 man
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(12900, 15000);
+            break;
+        case 67664: // Whirl 10 man heroic
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(10800, 12300);
+            break;
+        case 67665: // Whirl 25 man heroic
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(15900, 18000);
+            break;
+        case 67660: // Massive Crash 25 man
+            spellInfo->EffectBasePoints[EFFECT_1] = urand(10200, 11800);
+            break;
+        case 66770: // Ferocious Butt 10 man
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(60000, 69900);
+            break;
+        case 67655: // Ferocious Butt 10 man heroic
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(65000, 74000);
+            break;
         // Trial of the Crusader, Jaraxxus Intro spell
         case 67888:
             spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
