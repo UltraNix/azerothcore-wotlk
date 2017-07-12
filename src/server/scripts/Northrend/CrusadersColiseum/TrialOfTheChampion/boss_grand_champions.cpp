@@ -682,13 +682,13 @@ struct boss_grand_championAI : public npc_escortAI
                         {
                             if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead())
                                 continue;
-                            if (!player->GetVehicle())
-                                list.push_back(player->GetGUID());
-                            else if (Vehicle* vehicle = player->GetVehicle())
+                            if (Vehicle* vehicle = player->GetVehicle())
                             {
                                 if (Unit* mount = vehicle->GetBase())
                                     list.push_back(mount->GetGUID());
                             }
+                            else if (!player->GetVehicle())
+                                list.push_back(player->GetGUID());
                         }
 
                     if (!list.empty())
