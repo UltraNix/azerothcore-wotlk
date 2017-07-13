@@ -85,6 +85,7 @@ struct boss_black_knightAI : public BossAI
 
     void EnterEvadeMode() override
     {
+        summons.DespawnAll();
         me->DespawnOrUnsummon(1);
         _EnterEvadeMode();
     }
