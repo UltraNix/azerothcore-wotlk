@@ -191,6 +191,7 @@ struct npc_toc5_grand_champion_minionAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        me->CallForHelp(15.0f);
         _events.Reset();
         _events.ScheduleEvent(EVENT_MOUNT_CHARGE, urand(2500,4000));
         _events.ScheduleEvent(EVENT_SHIELD_BREAKER, urand(5000,8000));
@@ -293,6 +294,8 @@ struct npc_toc5_grand_champion_minionAI : public ScriptedAI
         }
     }
 
+    void MoveInLineOfSight(Unit* /*who*/) override {}
+
     void JustDied(Unit* /*killer*/) override
     {
         me->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -359,6 +362,7 @@ struct boss_grand_championAI : public npc_escortAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        DoAction(2);
         if (instance && instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_CHAMPIONS_UNMOUNTED)
             me->CallForHelp(100.0f);
     }

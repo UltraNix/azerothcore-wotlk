@@ -126,6 +126,11 @@ struct boss_black_knightAI : public BossAI
         }
     }
 
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        DoAction(1);
+    }
+
     void DoAction(int32 param) override
     {
         if (param == -1)
@@ -273,6 +278,8 @@ struct boss_black_knightAI : public BossAI
         if (me->ToTempSummon())
             me->ToTempSummon()->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
     }
+
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 
 private:
     uint8 _phase;

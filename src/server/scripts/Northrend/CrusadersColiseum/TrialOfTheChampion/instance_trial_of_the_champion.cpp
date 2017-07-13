@@ -799,12 +799,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                            }
                         }
                     Counter = 0;
                     break;
@@ -824,12 +818,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                            }
                         }
                     break;
                 case EVENT_GRAND_GROUP_3_MOVE_MIDDLE:
@@ -848,12 +836,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                            }
                         }
                     break;
                 case EVENT_GRAND_CHAMPIONS_MOVE_MIDDLE:
@@ -908,13 +890,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                                creature->AI()->DoAction(2);
-                            }
                         }
                     break;
                 case EVENT_GRATZ_SLAIN_CHAMPIONS:
@@ -1022,12 +997,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     {
                         boss->SetReactState(REACT_AGGRESSIVE);
                         boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        if (boss->IsAIEnabled)
-                        {
-                            if (Unit* target = boss->SelectNearestTarget(200.0f))
-                                boss->AI()->AttackStart(target);
-                            boss->AI()->DoZoneInCombat();
-                        }
                     }
                     break;
                 case EVENT_ARGENT_CHALLENGE_RUN_MIDDLE:
@@ -1164,13 +1133,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     {
                         blackKnight->SetReactState(REACT_AGGRESSIVE);
                         blackKnight->SetUInt32Value(UNIT_FIELD_FLAGS, 0);
-                        if (blackKnight->IsAIEnabled)
-                        {
-                            if (Unit* target = blackKnight->SelectNearestTarget(200.0f))
-                                blackKnight->AI()->AttackStart(target);
-                            blackKnight->AI()->DoZoneInCombat();
-                            blackKnight->AI()->DoAction(1);
-                        }
                     }
                     break;
                 default:
