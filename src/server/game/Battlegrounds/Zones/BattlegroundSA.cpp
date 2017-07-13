@@ -879,7 +879,11 @@ void BattlegroundSA::EventPlayerClickedOnFlag(Player* Source, GameObject* gameOb
         case 191310:
         case 191309:
             if (CanInteractWithObject(BG_SA_CENTRAL_FLAG))
+            {
                 CaptureGraveyard(BG_SA_CENTRAL_CAPTURABLE_GY, Source);
+                CaptureGraveyard(BG_SA_LEFT_CAPTURABLE_GY, Source);
+                CaptureGraveyard(BG_SA_RIGHT_CAPTURABLE_GY, Source);
+            }
             break;
         default:
             return;
