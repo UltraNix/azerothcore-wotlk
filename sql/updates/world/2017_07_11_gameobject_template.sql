@@ -1,12 +1,5 @@
--- Huge Seaforium Bombs SAI
-SET @ENTRY := 195332;
-UPDATE `gameobject_template` SET `AIName`="SmartGameObjectAI" , `data3` = 10000, `data5` = 0, `data6` = 10000 WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=1;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,1,0,0,64,0,100,0,0,0,0,0,70,10,0,0,0,0,0,1,0,0,0,0,0,0,0,"Huge Seaforium Bombs - On Gossip Hello - Reset Gameobject");
-
-SET @ENTRY := 195333;
-UPDATE `gameobject_template` SET `AIName`="SmartGameObjectAI" , `data3` = 10000, `data5` = 0, `data6` = 10000 WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=1;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,1,0,0,64,0,100,0,0,0,0,0,70,10,0,0,0,0,0,1,0,0,0,0,0,0,0,"Huge Seaforium Bombs - On Gossip Hello - Reset Gameobject");
+-- Huge Seaforium Bombs 
+DELETE FROM `gameobject_template` WHERE `entry`=195332;
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES (195332, 10, 8976, 'Huge Seaforium Bombs', '', '', '', 1995, 32, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 2, 0, 0, 0, 0, 0, 66669, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, '', 'go_huge_seaforium_bombs', 12340);
+DELETE FROM `gameobject_template` WHERE `entry`=195333;
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES (195333, 10, 8976, 'Huge Seaforium Bombs', '', '', '', 1997, 32, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000, 2, 0, 0, 0, 0, 0, 66669, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, '', 'go_huge_seaforium_bombs', 12340);
