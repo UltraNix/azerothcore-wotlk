@@ -4262,10 +4262,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 1122:
             spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
             break;
-        // Conflagrate
-        case 17962: 
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
-            break;
 
         /////////////////////////////////
         ///// MAGE
