@@ -150,6 +150,8 @@ struct boss_eadricAI : public BossAI
                 break;
         }
     }
+
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 };
 
 struct boss_paletressAI : public BossAI
@@ -290,6 +292,8 @@ struct boss_paletressAI : public BossAI
                 break;
         }
     }
+
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 
 private:
     bool _summoned;
