@@ -135,6 +135,7 @@ struct boss_black_knightAI : public BossAI
 
     void EnterCombat(Unit* /*attacker*/) override
     {
+        instance->SetData(579, 0);
         DoAction(1);
     }
 
@@ -270,6 +271,7 @@ struct boss_black_knightAI : public BossAI
 
     void JustDied(Unit* /*killer*/) override
     {
+        instance->SetData(579, 1);
         instance->SetData(247, 0);
         DoCastAOE(SPELL_BK_KILL_CREDIT, true);
         Talk(TEXT_BK_DEATH);

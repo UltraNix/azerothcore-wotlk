@@ -89,6 +89,7 @@ struct boss_eadricAI : public BossAI
 
     void EnterCombat(Unit* who) override
     {
+        instance->SetData(579, 0);
         _EnterCombat();
         events.Reset();
         events.ScheduleEvent(EVENT_SPELL_RADIANCE, 16000);
@@ -187,6 +188,7 @@ struct boss_paletressAI : public BossAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        instance->SetData(579, 0);
         _EnterCombat();
         events.Reset();
         events.ScheduleEvent(EVENT_SPELL_HOLY_FIRE, urand(9000,12000));

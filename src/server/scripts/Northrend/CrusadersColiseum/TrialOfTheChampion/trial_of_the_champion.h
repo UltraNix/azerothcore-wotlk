@@ -26,6 +26,8 @@ enum eData
     DATA_PALETRESS,
     DATA_MEMORY_ENTRY,
     DATA_ACHIEV_IVE_HAD_WORSE,
+    
+    DATA_NORTH_PORTCULLIS
 };
 
 enum eProgress

@@ -38,6 +38,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
     uint64 NPC_BlackKnightVehicleGUID;
     uint64 NPC_BlackKnightGUID;
     uint64 GO_MainGateGUID;
+    uint64 GO_NorthPortcullisGUID;
 
     void Initialize() override
     {
@@ -65,12 +66,13 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         NPC_BlackKnightVehicleGUID = 0;
         NPC_BlackKnightGUID = 0;
         GO_MainGateGUID = 0;
+        GO_NorthPortcullisGUID = 0;
     }
 
     bool IsEncounterInProgress() const override
     {
-        for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            if (m_auiEncounter[i] == IN_PROGRESS)
+        if (GameObject* go = instance->GetGameObject(GO_NorthPortcullisGUID))
+            if (go->GetGoState() == GO_STATE_READY)
                 return true;
 
         return false;
@@ -185,6 +187,9 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             case GO_EAST_PORTCULLIS:
                 HandleGameObject(go->GetGUID(), false, go);
                 break;
+            case 195650:
+                GO_NorthPortcullisGUID = go->GetGUID();
+                break;
         }
 
         InstanceScript::OnGameObjectCreate(go);
@@ -241,12 +246,14 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 
 
     // EVENT STUFF BELOW:
-    void OnPlayerEnter(Player* /*player*/) override
+    void OnPlayerEnter(Player* player) override
     {
         if (DoNeedCleanup(true))
             InstanceCleanup();
 
         events.RescheduleEvent(EVENT_CHECK_PLAYERS, CLEANUP_CHECK_INTERVAL);
+
+        InstanceScript::OnPlayerEnter(player);
     }
 
     bool DoNeedCleanup(bool /*enter*/)
@@ -268,6 +275,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
     {
         if (CLEANED)
             return;
+
+        HandleGate(true);
 
         switch (InstanceProgress)
         {
@@ -470,6 +479,9 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 }
                 break;
             }
+            case 579:
+                HandleGate(data == 0 ? false : true);
+                break;
             case DATA_ANNOUNCER_GOSSIP_SELECT:
                 switch (InstanceProgress)
                 {
@@ -599,6 +611,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             case DATA_GRAND_CHAMPION_DIED:
                 if (++Counter >= 3)
                 {
+                    HandleGate(true);
                     SetData(247, 0);
                     Counter = 0;
                     VehicleList.clear();
@@ -755,6 +768,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             }
     }
 
+    void HandleGate(bool open)
+    {
+        if (GameObject* go = instance->GetGameObject(GO_NorthPortcullisGUID))
+            go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
+    }
+
     void Update(uint32 diff) override
     {
         events.Update(diff);
@@ -889,6 +908,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         }
                     break;
                 case EVENT_GRAND_CHAMPIONS_MOVE_SIDE:
+                    HandleGate(false);
                     for (uint8 i = 0; i<3; ++i)
                         if (Creature* creature = instance->GetCreature(NPC_GrandChampionGUID[i]))
                         {
@@ -1032,6 +1052,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     }
                     break;
                 case EVENT_ARGENT_CHALLENGE_LEAVE_CHEST:
+                    HandleGate(true);
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                         if (Creature* boss = instance->GetCreature(NPC_ArgentChampionGUID))
                         {
@@ -1044,7 +1065,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             if (GameObject* go = announcer->SummonGameObject(chest, 748.7604f, 618.309f, 411.0891f, 1.588249f, 0, 0, 0, 0, 90000000)) // [LOOT]
                                 go->EnableCollision(false);
                         }
-
+                    
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_DISAPPEAR, 4000);
                     events.ScheduleEvent(EVENT_RESTORE_ANNOUNCER_GOSSIP, 15000);
                     break;

@@ -362,9 +362,12 @@ struct boss_grand_championAI : public npc_escortAI
 
     void EnterCombat(Unit* /*who*/) override
     {
-        DoAction(2);
         if (instance && instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_CHAMPIONS_UNMOUNTED)
+        {
             me->CallForHelp(100.0f);
+            DoAction(2);
+            instance->SetData(579, 0);
+        }
     }
 
     void ScheduleAbilitiesEvents()
