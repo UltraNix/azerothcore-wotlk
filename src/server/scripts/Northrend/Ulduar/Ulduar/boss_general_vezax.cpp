@@ -116,6 +116,7 @@ struct boss_vezaxAI : public BossAI
     void EnterEvadeMode() override
     {
         _DespawnAtEvade();
+        instance->SetData(TYPE_VEZAX, FAIL);
     }
 
     void EnterCombat(Unit* /*who*/) override
