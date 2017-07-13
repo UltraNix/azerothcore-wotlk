@@ -2768,6 +2768,17 @@ std::vector<uint32> partialCorrection =
     64652,  // Stomp 25 man
     64649,  // Freezing Breath
     63705,  // Void Wave
+    62661,  // Searing Flames
+    29865,  // Deathbloom 10 man
+    55053,  // Deathbloom 25 man
+    66689,  // Arctic Breath 10 man
+    67650,  // Arctic Breath 25 man
+    67651,  // Arctic Breath 10 man heroic
+    67652,  // Arctic Breath 25 man heroic
+    66528,  // Fel Lightning 10 man
+    67029,  // Fel Lightning 25 man
+    67030,  // Fel Lightning 10 man heroic
+    67031,  // Fel Lightning 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
