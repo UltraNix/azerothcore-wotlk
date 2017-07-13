@@ -150,7 +150,6 @@ public:
 		bool GossipHello(Player* /*player*/, bool reportUse)
 		{
 			go->SetVisible(false);
-			go->UpdateObjectVisibility();
 			isTimed = true;
 			return false; 
 		}
