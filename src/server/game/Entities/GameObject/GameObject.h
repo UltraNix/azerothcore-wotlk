@@ -797,6 +797,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Mov
         bool IsNeverVisible() const;
         bool IsAlwaysVisibleFor(WorldObject const* seer) const;
         bool IsInvisibleDueToDespawn() const;
+		void SetVisible(bool visible);
 
         uint8 getLevelForTarget(WorldObject const* target) const
         {

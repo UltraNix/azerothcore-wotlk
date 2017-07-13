@@ -149,7 +149,7 @@ public:
 
 		bool GossipHello(Player* /*player*/, bool reportUse)
 		{
-			go->m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_GAMEMASTER);
+			go->SetVisible(false);
 			go->UpdateObjectVisibility();
 			isTimed = true;
 			return false; 
@@ -162,8 +162,7 @@ public:
 				_timer += diff;
 				if (_timer > 10000)
 				{
-					go->m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
-					go->UpdateObjectVisibility();
+					go->SetVisible(true);
 					isTimed = false;
 					_timer = 1;
 				}

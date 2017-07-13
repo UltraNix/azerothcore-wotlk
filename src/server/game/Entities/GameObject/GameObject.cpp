@@ -2445,3 +2445,13 @@ void GameObject::UpdateModelPosition()
         GetMap()->InsertGameObjectModel(*m_model);
     }
 }
+
+void GameObject::SetVisible(bool visible)
+{
+	if (!visible)
+		m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_GAMEMASTER);
+	else
+		m_serverSideVisibility.SetValue(SERVERSIDE_VISIBILITY_GM, SEC_PLAYER);
+
+	UpdateObjectVisibility();
+}
