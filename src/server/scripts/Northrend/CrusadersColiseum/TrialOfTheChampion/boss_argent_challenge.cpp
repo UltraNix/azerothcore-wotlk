@@ -111,6 +111,7 @@ struct boss_eadricAI : public BossAI
             damage = me->GetHealth() - 1;
             if (me->getFaction() != 35)
             {
+                instance->SetData(247, 0);
                 DoCastAOE(SPELL_EADRIC_CREDIT, true);
                 me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_PALETRESS_CREDIT, me); // paletress' spell credits encounter, but shouldn't credit achievements
                 me->setFaction(35);
@@ -238,6 +239,7 @@ struct boss_paletressAI : public BossAI
 
             if (me->getFaction() != 35)
             {
+                instance->SetData(247, 0);
                 DoCastAOE(SPELL_PALETRESS_CREDIT, true); // achievements
                 me->setFaction(35);
                 events.Reset();

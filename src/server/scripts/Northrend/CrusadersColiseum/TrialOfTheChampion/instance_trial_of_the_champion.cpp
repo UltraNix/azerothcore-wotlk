@@ -446,10 +446,30 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         return 0;
     }
 
+    void HandleFireworks()
+    {
+        std::list<Creature*> triggerList;
+        if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+            announcer->GetCreatureListWithEntryInGrid(triggerList, 12999, 250.0f);
+        if (!triggerList.empty())
+            for (auto itr : triggerList)
+                itr->CastSpell(itr, 25465, false);
+    }
+
     void SetData(uint32 type, uint32 data)
     {
         switch (type)
         {
+            case 247:
+            {
+                uint32 count = 0;
+                for (uint8 i = 0; i < 5; ++i)
+                {
+                    events.ScheduleEvent(594, count);
+                    count += 1000;
+                }
+                break;
+            }
             case DATA_ANNOUNCER_GOSSIP_SELECT:
                 switch (InstanceProgress)
                 {
@@ -579,6 +599,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             case DATA_GRAND_CHAMPION_DIED:
                 if (++Counter >= 3)
                 {
+                    SetData(247, 0);
                     Counter = 0;
                     VehicleList.clear();
                     data = DONE;
@@ -741,6 +762,9 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         {
             switch (eventId)
             {
+                case 594:
+                    HandleFireworks();
+                    break;
                 case EVENT_CHECK_PLAYERS:
                     if (DoNeedCleanup(false))
                         InstanceCleanup();
