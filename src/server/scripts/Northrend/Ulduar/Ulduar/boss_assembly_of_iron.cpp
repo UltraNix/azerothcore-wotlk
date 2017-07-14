@@ -576,7 +576,7 @@ public:
                 case EVENT_RUNE_OF_POWER:
                 {
                     std::list<Creature*> assemblyList;
-                    for(uint8 i = 20; i<=22; ++i)
+                    for(uint8 i = DATA_STEELBREAKER; i<=DATA_BRUNDIR; ++i)
                         if (Creature* boss = ObjectAccessor::GetCreature(*me, pInstance->GetData64(i)))
                             assemblyList.push_back(boss);
                     
