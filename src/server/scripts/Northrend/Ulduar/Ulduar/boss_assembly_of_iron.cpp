@@ -575,11 +575,14 @@ public:
             {
                 case EVENT_RUNE_OF_POWER:
                 {
-                    Unit* target = DoSelectLowestHpFriendly(60);
-                    if (!target || !target->IsAlive())
-                        target = me;
+                    std::list<Creature*> assemblyList;
+                    for(uint8 i = 20; i<=22; ++i)
+                        if (Creature* boss = ObjectAccessor::GetCreature(*me, pInstance->GetData64(i)))
+                            assemblyList.push_back(boss);
+                    
+                    if (Creature* target = Trinity::Containers::SelectRandomContainerElement(assemblyList))
+                        DoCast(target, SPELL_RUNE_OF_POWER, true);
 
-                    me->CastSpell(target, SPELL_RUNE_OF_POWER, true);
                     events.RepeatEvent(60000);
                     break;
                 }
