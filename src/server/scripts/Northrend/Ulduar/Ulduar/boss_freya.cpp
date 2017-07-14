@@ -1193,8 +1193,6 @@ public:
 
         void Reset()
         {
-            if (me->GetEntry() == NPC_DETONATING_LASHER)
-                me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
             _stackCount = 0;
             events.Reset();
             if (me->GetEntry() == NPC_DETONATING_LASHER)
