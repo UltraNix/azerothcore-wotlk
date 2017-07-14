@@ -168,6 +168,8 @@ enum FreyaEvents
     EVENT_STORM_LASHER_LIGHTNING_LASH            = 50,
     EVENT_STORM_LASHER_STORMBOLT                 = 51,
     EVENT_DETONATING_LASHER_FLAME_LASH           = 55,
+    EVENT_DETONATING_LASHER_START_ATTACK         = 56,
+    EVENT_DETONATING_LASHER_CHANGE_TARGET        = 57,
 };
 
 enum FreyaSounds
@@ -1191,10 +1193,25 @@ public:
 
         void Reset()
         {
+            if (me->GetEntry() == NPC_DETONATING_LASHER)
+                me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
             _stackCount = 0;
             events.Reset();
-            if (Unit* target = SelectTargetFromPlayerList(70))
+            if (me->GetEntry() == NPC_DETONATING_LASHER)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 1500);
+            }
+            else if (Unit* target = SelectTargetFromPlayerList(70))
                 AttackStart(target);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (me->GetEntry() != NPC_DETONATING_LASHER)
+                ScriptedAI::MoveInLineOfSight(who);
         }
 
         void JustDied(Unit*)
@@ -1245,7 +1262,8 @@ public:
             }
             else if (me->GetEntry() == NPC_DETONATING_LASHER)
             {
-                events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 10000);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 5000);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_CHANGE_TARGET, 7500);
                 _stackCount = ACTION_REMOVE_2_STACK;
             }
             else if (me->GetEntry() == NPC_SNAPLASHER)
@@ -1259,7 +1277,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->GetEntry() != NPC_DETONATING_LASHER)
                 return;
 
             events.Update(diff);
@@ -1296,13 +1314,30 @@ public:
                     events.RepeatEvent(6000);
                     break;
                 case EVENT_DETONATING_LASHER_FLAME_LASH:
-                    me->CastSpell(me->GetVictim(), SPELL_FLAME_LASH, false);
-                    DoResetThreat();
+                    DoCastVictim(SPELL_FLAME_LASH);
+                    events.RepeatEvent(urand(5000, 10000));
+                    break;
+                case EVENT_DETONATING_LASHER_START_ATTACK:
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0); 
                     if (Unit* target = SelectTargetFromPlayerList(80))
+                    {
+                        me->AddThreat(target, 100.0f);
                         AttackStart(target);
+                    }
+                    events.PopEvent();
+                    break;
+                case EVENT_DETONATING_LASHER_CHANGE_TARGET:
+                    if (Unit* target = SelectTargetFromPlayerList(80))
+                    {
+                        // Switching to other target - modify aggro of new target by 20% from current target's aggro
+                        if (me->GetVictim())
+                            me->AddThreat(target, me->getThreatManager().getThreat(me->GetVictim(), false) * 1.2f);
+                        AttackStart(target);
+                    }
                     else
                         me->DespawnOrUnsummon(1);
-                    events.RepeatEvent(10000);
+                    events.RepeatEvent(urand(5000, 10000));
                     break;
             }
 
