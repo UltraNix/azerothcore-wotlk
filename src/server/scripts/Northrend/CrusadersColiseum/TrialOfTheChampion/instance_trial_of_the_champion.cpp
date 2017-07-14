@@ -828,12 +828,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             if(tirion->IsAIEnabled)
                                 tirion->AI()->Talk(TEXT_BEGIN);
                     }
-                    for (uint8 i = 0; i<3; ++i)
-                        if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][i]))
-                        {
-                            float angle = Position::RandomOrientation();
-                            creature->GetMotionMaster()->MovePoint(0, 748.309f + 3.0f*cos(angle), 619.448f + 3.0f*sin(angle), 411.3f);
-                        }
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][0]))
+                        creature->GetMotionMaster()->MovePoint(0, 754.188354f, 605.095825f, 411.573547f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][1]))
+                        creature->GetMotionMaster()->MovePoint(0, 756.782959f, 607.805786f, 411.573547f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][2]))
+                        creature->GetMotionMaster()->MovePoint(0, 759.685181f, 610.878296f, 411.573547f);
 
                     events.ScheduleEvent(EVENT_GRAND_GROUP_1_ATTACK, 3000);
                     break;
@@ -844,15 +844,17 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         }
+
                     Counter = 0;
                     break;
                 case EVENT_GRAND_GROUP_2_MOVE_MIDDLE:
-                    for (uint8 i = 0; i<3; ++i)
-                        if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][i]))
-                        {
-                            float angle = Position::RandomOrientation();
-                            creature->GetMotionMaster()->MovePoint(0, 748.309f + 3.0f*cos(angle), 619.448f + 3.0f*sin(angle), 411.3f);
-                        }
+
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][0]))
+                        creature->GetMotionMaster()->MovePoint(0, 758.660522f, 608.462952f, 411.572632f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][1]))
+                        creature->GetMotionMaster()->MovePoint(0, 760.467407f, 612.172485f, 411.573547f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][2]))
+                        creature->GetMotionMaster()->MovePoint(0, 761.657837f, 616.139282f, 411.573547f);
 
                     events.ScheduleEvent(EVENT_GRAND_GROUP_2_ATTACK, 3000);
                     break;
@@ -863,15 +865,16 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         }
+
                     break;
                 case EVENT_GRAND_GROUP_3_MOVE_MIDDLE:
-                    for (uint8 i = 0; i<3; ++i)
-                        if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][i]))
-                        {
-                            float angle = Position::RandomOrientation();
-                            creature->GetMotionMaster()->MovePoint(0, 748.309f + 3.0f*cos(angle), 619.448f + 3.0f*sin(angle), 411.3f);
-                        }
-
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][0]))
+                        creature->GetMotionMaster()->MovePoint(0, 763.211182f, 619.917969f, 411.573273f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][1]))
+                        creature->GetMotionMaster()->MovePoint(0, 760.525879f, 624.286255f, 411.575439f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][2]))
+                        creature->GetMotionMaster()->MovePoint(0, 758.430603f, 628.841125f, 411.574677f);
+             
                     events.ScheduleEvent(EVENT_GRAND_GROUP_3_ATTACK, 3000);
                     break;
                 case EVENT_GRAND_GROUP_3_ATTACK:
