@@ -170,6 +170,7 @@ enum FreyaEvents
     EVENT_DETONATING_LASHER_FLAME_LASH           = 55,
     EVENT_DETONATING_LASHER_START_ATTACK         = 56,
     EVENT_DETONATING_LASHER_CHANGE_TARGET        = 57,
+    EVENT_DETONATING_LASHER_ANIM                 = 58
 };
 
 enum FreyaSounds
@@ -1198,9 +1199,12 @@ public:
             if (me->GetEntry() == NPC_DETONATING_LASHER)
             {
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 me->SetReactState(REACT_PASSIVE);
+                me->SetControlled(true, UNIT_STATE_ROOT);
                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 1500);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_ANIM, 1000);
             }
             else if (Unit* target = SelectTargetFromPlayerList(70))
                 AttackStart(target);
@@ -1260,6 +1264,7 @@ public:
             }
             else if (me->GetEntry() == NPC_DETONATING_LASHER)
             {
+                events.RescheduleEvent(EVENT_DETONATING_LASHER_ANIM, 0);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 5000);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_CHANGE_TARGET, 7500);
                 _stackCount = ACTION_REMOVE_2_STACK;
@@ -1316,8 +1321,8 @@ public:
                     events.RepeatEvent(urand(5000, 10000));
                     break;
                 case EVENT_DETONATING_LASHER_START_ATTACK:
+                    me->SetControlled(false, UNIT_STATE_ROOT);
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0); 
                     if (Unit* target = SelectTargetFromPlayerList(80))
                     {
                         me->AddThreat(target, 100.0f);
@@ -1336,6 +1341,10 @@ public:
                     else
                         me->DespawnOrUnsummon(1);
                     events.RepeatEvent(urand(5000, 10000));
+                    break;
+                case EVENT_DETONATING_LASHER_ANIM:
+                    me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                    events.PopEvent();
                     break;
             }
 
