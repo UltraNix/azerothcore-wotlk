@@ -1762,7 +1762,7 @@ struct npc_ulduar_aerial_command_unitAI : public ScriptedAI
                         }
                         else
                         {
-                            if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0, 27.5f, true))
+                            if (Unit* victim = me->GetVictim())
                             {
                                 me->SetFacingTo(me->GetAngle(victim));
                                 me->CastSpell(victim, SPELL_PLASMA_BALL, false);
