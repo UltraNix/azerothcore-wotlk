@@ -763,8 +763,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             {
                 if (TeamIdInInstance == TEAM_HORDE)
                     TEXT_ID -= 10;
-                announcer->AI()->Talk(TEXT_ID);
-                announcer->AI()->Talk(TEXT_ID + 1);
+
+                if (announcer->IsAIEnabled)
+                {
+                    announcer->AI()->Talk(TEXT_ID);
+                    announcer->AI()->Talk(TEXT_ID + 1);
+                }
             }
     }
 
@@ -915,7 +919,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     for (uint8 i = 0; i<3; ++i)
                         if (Creature* creature = instance->GetCreature(NPC_GrandChampionGUID[i]))
                         {
-                            creature->AI()->DoAction(1);
+                            if (creature->IsAIEnabled)
+                                creature->AI()->DoAction(1);
                             switch (i)
                             {
                                 case 0:
@@ -956,19 +961,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             announcer->SetFacingToObject(gate);
                             HandleGameObject(GO_MainGateGUID, true, gate);
-                        }
-                        if (announcer->IsAIEnabled)
-                        {
-                            if (Counter)
-                            {
-                                announcer->AI()->Talk(TEXT_CHEER_EADRIC_1);
-                                announcer->AI()->Talk(TEXT_CHEER_EADRIC_2);
-                            }
-                            else
-                            {
-                                announcer->AI()->Talk(TEXT_CHEER_PALETRESS_1);
-                                announcer->AI()->Talk(TEXT_CHEER_PALETRESS_2);
-                            }
                         }
                     }
 

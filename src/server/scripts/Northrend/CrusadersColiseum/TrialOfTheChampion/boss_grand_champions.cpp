@@ -115,8 +115,25 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 
     void Reset() override
     {
+        _despawnTimer = 0;
+        _respawn = false;
         me->SetReactState(REACT_PASSIVE);
         me->getHostileRefManager().setOnlineOfflineState(false);
+    }
+
+    void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
+    {
+        if (damage > me->GetHealth())
+        {
+            damage = me->GetHealth() - 1;
+            if (me->GetVehicleKit())
+                me->GetVehicleKit()->RemoveAllPassengers();
+            me->SetVisible(false);
+            _respawn = true;
+            _despawnTimer = 5000;
+            Position pos(me->GetHomePosition());
+            me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), true, true);
+        }
     }
 
     void OnCharmed(bool apply) override
@@ -133,8 +150,31 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
         else
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->StopMoving();
+            Position pos;
+            me->SetWalk(true);
+            me->GetRandomNearPosition(pos, 15.0f);
+            me->GetMotionMaster()->MovePoint(1, pos);
             me->RemoveAura(SPELL_TRAMPLE_AURA);
+        }
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == 1)
+        {
+            me->SetWalk(false);
+            _despawnTimer = 5000;
+            _respawn = true;
+            me->SetVisible(false);
+            me->SetHealth(me->CountPctFromMaxHealth(100));
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            Position pos(me->GetHomePosition());
+            me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), true, true);
         }
     }
 
@@ -155,6 +195,20 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (_despawnTimer <= diff)
+        {
+            if (_respawn)
+            {
+                if (me->IsInCombat())
+                    me->ClearInCombat();
+                _respawn = false;
+                me->SetVisible(true);
+            }
+            _despawnTimer = 5000;
+        }
+        else 
+            _despawnTimer -= diff;
+
         if (_conditionsTimer <= diff)
         {
             if (!_conditions.empty())
@@ -174,6 +228,8 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 private:
     ConditionList _conditions;
     uint16 _conditionsTimer;
+    uint16 _despawnTimer;
+    bool _respawn;
 };
 
 struct npc_toc5_grand_champion_minionAI : public ScriptedAI

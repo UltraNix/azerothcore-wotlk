@@ -77,8 +77,23 @@ struct boss_eadricAI : public BossAI
         
     void MovementInform(uint32 type, uint32 id) override
     {
-        if (type == POINT_MOTION_TYPE && id == 1)
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == 1)
             me->SetFacingTo(3 * M_PI / 2);
+
+        if (id == 0)
+        {
+            if (Creature* announcer = instance->instance->GetCreature(instance->GetData64(DATA_ANNOUNCER)))
+            {
+                if (announcer->IsAIEnabled)
+                {
+                    announcer->AI()->Talk(TEXT_CHEER_EADRIC_1);
+                    announcer->AI()->Talk(TEXT_CHEER_EADRIC_2);
+                }
+            }
+        }
     }
 
     void KilledUnit(Unit* who) override
@@ -176,8 +191,23 @@ struct boss_paletressAI : public BossAI
         
     void MovementInform(uint32 type, uint32 id) override
     {
-        if (type == POINT_MOTION_TYPE && id == 1)
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == 1)
             me->SetFacingTo(3 * M_PI / 2);
+
+        if (id == 0)
+        {
+            if (Creature* announcer = instance->instance->GetCreature(instance->GetData64(DATA_ANNOUNCER)))
+            {
+                if (announcer->IsAIEnabled)
+                {
+                    announcer->AI()->Talk(TEXT_CHEER_PALETRESS_1);
+                    announcer->AI()->Talk(TEXT_CHEER_PALETRESS_2);
+                }
+            }
+        }
     }
 
     void KilledUnit(Unit* who) override
