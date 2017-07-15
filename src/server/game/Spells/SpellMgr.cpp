@@ -5454,10 +5454,11 @@ void SpellMgr::LoadDbcDataCorrections()
         // Black Hole
         case 62168:
         case 65250:
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_2_YARDS;
         case 62169:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
-			spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
+			spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_2_YARDS;
             break;
         // Assembly of iron
         case 61869: // 10
