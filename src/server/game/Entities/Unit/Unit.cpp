@@ -17655,7 +17655,9 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
         player->GetSession()->SendPacket(&data);
 
         if (player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || player->HasAuraType(SPELL_AURA_FLY))
-            player->SetCanFly(true, true);
+            if(player->CanFly())
+                player->SetCanFly(true, true);
+            
     }
 }
 
