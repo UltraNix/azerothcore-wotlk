@@ -5517,6 +5517,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 17089: case 17090: case 17091: case 17092: case 17093: case 17094: case 17095: case 17097:
         case 22267: case 22268: case 21132: case 21133: case 21135: case 21136: case 21137: case 21138:
         case 21139:
+            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_30_YARDS;
             spellInfo->DurationIndex = 328; // 250ms
             spellInfo->EffectImplicitTargetA[1] = 1;
             if( spellInfo->Effect[1] )
