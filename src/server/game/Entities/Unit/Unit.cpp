@@ -17046,9 +17046,9 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 playerCharmer->PossessSpellInitialize();
                 break;
             case CHARM_TYPE_CHARM:
-                // a guardian should always have charminfo
-                if (playerCharmer && this != charmer->GetFirstControlled())
-                    playerCharmer->SendRemoveControlBar();
+                GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, GetFollowAngle());
+                playerCharmer->CharmSpellInitialize();
+				if(playerCharmer->HasAura(605))playerCharmer->SendRemoveControlBar();
                 break;
             default:
                 break;
