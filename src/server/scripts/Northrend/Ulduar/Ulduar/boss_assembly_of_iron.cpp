@@ -953,6 +953,7 @@ public:
                     me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
                     me->SendMonsterMove(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ()+15, 1500, SPLINEFLAG_FLYING);
+                    me->SetTarget(_flyTarget->GetGUID());
                     
                     me->CastSpell(me, SPELL_LIGHTNING_TENDRILS, true);
                     me->CastSpell(me, 61883, true);
