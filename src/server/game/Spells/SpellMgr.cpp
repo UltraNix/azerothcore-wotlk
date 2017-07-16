@@ -5179,6 +5179,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // OVERWHELMING
         case 61888:
+            spellInfo->EffectAmplitude[EFFECT_1] = 25000;
             spellInfo->DurationIndex = 63; // 25 seconds
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
