@@ -3244,6 +3244,7 @@ void SpellMgr::LoadSpellCustomAttr()
             34655, // Snake Trap, Deadly Poison
             11971, // Sunder Armor
             58567, // Player Sunder Armor
+            61920, // Assembly of Iron Supercharge
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
