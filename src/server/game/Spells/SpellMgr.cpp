@@ -3245,6 +3245,10 @@ void SpellMgr::LoadSpellCustomAttr()
             11971, // Sunder Armor
             58567, // Player Sunder Armor
             61920, // Assembly of Iron Supercharge
+            66320, // Fire Bomb 10 man 
+            67472, // Fire Bomb 25 man
+            67473, // Fire Bomb 10 man heroic
+            67475, // Fire Bomb 25 man heroic
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
@@ -5676,10 +5680,11 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
-        case 66320:
-        case 67472:
-        case 67473:
-        case 67475:
+        case 66320: // Fire Bomb 10 man 
+        case 67472: // Fire Bomb 25 man
+        case 67473: // Fire Bomb 10 man heroic
+        case 67475: // Fire Bomb 25 man heroic
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             spellInfo->EffectRadiusIndex[0] = 7;
             spellInfo->EffectRadiusIndex[1] = 7;
             break;
