@@ -1061,6 +1061,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_ARGENT_CHALLENGE_ATTACK:
                     if (Creature* boss = instance->GetCreature(NPC_ArgentChampionGUID))
                     {
+                        boss->SetHomePosition(746.881f, 660.263f, 411.7f, 3 * M_PI / 2);
                         boss->SetReactState(REACT_AGGRESSIVE);
                         boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     }

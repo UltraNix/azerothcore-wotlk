@@ -71,7 +71,13 @@ struct boss_eadricAI : public BossAI
     void Reset() override
     {
         _Reset();
-        me->SetReactState(REACT_PASSIVE);
+        if (instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+            me->SetReactState(REACT_PASSIVE);
         instance->SetData(BOSS_ARGENT_CHALLENGE, NOT_STARTED);
     }
         
@@ -185,7 +191,13 @@ struct boss_paletressAI : public BossAI
                 memory->DespawnOrUnsummon();
             _memoryGUID = 0;
         }
-        me->SetReactState(REACT_PASSIVE);
+        if(instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+            me->SetReactState(REACT_PASSIVE);
         instance->SetData(BOSS_ARGENT_CHALLENGE, NOT_STARTED);
     }
         
