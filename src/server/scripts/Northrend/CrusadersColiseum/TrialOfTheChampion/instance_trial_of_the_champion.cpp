@@ -232,6 +232,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             InstanceProgress = data3;
             if (InstanceProgress == INSTANCE_PROGRESS_CHAMPIONS_UNMOUNTED)
                 InstanceProgress = INSTANCE_PROGRESS_INITIAL;
+            if (InstanceProgress == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
+                InstanceProgress = INSTANCE_PROGRESS_CHAMPIONS_DEAD;
 
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
@@ -262,7 +264,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         Map::PlayerList const &players = instance->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
             if (Player* player = itr->GetSource())
-                if (player->IsAlive() && !player->IsGameMaster() && !player->HasStealthAura())
+                if (!player->isDead() && !player->IsGameMaster() && !player->HasStealthAura())
                     ++aliveCount;
 
         bool need = aliveCount == 0;
@@ -389,6 +391,30 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     }
                     NPC_MemoryEntry = 0;
                     InstanceProgress = INSTANCE_PROGRESS_CHAMPIONS_DEAD;
+                }
+                break;
+            case INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS:
+                if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+                {
+                    announcer->DespawnOrUnsummon();
+                    announcer->SetHomePosition(735.81f, 661.92f, 412.39f, 4.714f);
+                    announcer->SetPosition(735.81f, 661.92f, 412.39f, 4.714f);
+                    announcer->SetRespawnTime(3);
+                    announcer->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                    if (Creature* c = instance->GetCreature(NPC_ArgentChampionGUID))
+                    {
+                        uint32 entry = c->GetEntry();
+                        c->AI()->DoAction(-1); // paletress despawn memory
+                        c->DespawnOrUnsummon();
+                        if (Creature* boss = announcer->SummonCreature(entry, 746.881f, 660.263f, 411.7f, 3 * M_PI / 2))
+                        {
+                            boss->SetReactState(REACT_AGGRESSIVE);
+                            boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            NPC_ArgentChampionGUID = boss->GetGUID();
+                        }
+                        NPC_MemoryEntry = 0;
+                    }
                 }
                 break;
             case INSTANCE_PROGRESS_ARGENT_CHALLENGE_DIED:
@@ -648,7 +674,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 if (++Counter >= 9)
                 {
                     Counter = 0;
-                    InstanceProgress = INSTANCE_PROGRESS_ARGENT_SOLDIERS_DIED;
+                    InstanceProgress = INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS;
                     data = DONE; // save to db
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_MOVE_FORWARD, 0);
                 }
