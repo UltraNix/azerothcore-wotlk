@@ -5523,14 +5523,13 @@ void SpellMgr::LoadDbcDataCorrections()
         case 17089: case 17090: case 17091: case 17092: case 17093: case 17094: case 17095: case 17097:
         case 22267: case 22268: case 21132: case 21133: case 21135: case 21136: case 21137: case 21138:
         case 21139:
-            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_30_YARDS;
             spellInfo->DurationIndex = 328; // 250ms
             spellInfo->EffectImplicitTargetA[1] = 1;
             if( spellInfo->Effect[1] )
             {
                 spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->EffectApplyAuraName[1] = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
-                spellInfo->EffectAmplitude[1] = ((spellInfo->CastingTimeIndex == 170) ? 50 : 215);
+                spellInfo->EffectAmplitude[1] = ((spellInfo->CastingTimeIndex == 170) ? 50 : 150);
             }
             break;
 
