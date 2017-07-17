@@ -960,9 +960,35 @@ private:
     uint64 _unitTargetGUID;
 };
 
+class spell_toc5_mount_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_toc5_mount_SpellScript);
+
+    SpellCastResult CheckIfLanceEquiped()
+    {
+        if (GetCaster()->GetMapId() != 650) // TOC5
+            return SPELL_CAST_OK;
+
+        if (auto caster = GetCaster()->ToPlayer())
+            if (!caster->HasItemOrGemWithIdEquipped(46106, 1))
+            {
+                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_HAVE_LANCE_EQUIPPED);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+
+        return SPELL_CAST_OK;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_toc5_mount_SpellScript::CheckIfLanceEquiped);
+    }
+};
+
 void AddSC_boss_grand_champions()
 {
     new CreatureAILoader<boss_grand_championAI>("boss_grand_champion");
     new CreatureAILoader<npc_toc5_grand_champion_minionAI>("npc_toc5_grand_champion_minion");
     new CreatureAILoader<npc_toc5_player_vehicleAI>("npc_toc5_player_vehicle");
+    new SpellScriptLoaderEx<spell_toc5_mount_SpellScript>("spell_toc5_mount");
 }
