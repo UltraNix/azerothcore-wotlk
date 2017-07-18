@@ -93,62 +93,85 @@ bool BazaarMgr::CanEffortAuction(Player* player, uint32 auctionId)
 
 enum TaxRates 
 {
-    SLAVE_TAX_RATE_0_500      = 10,
-    SLAVE_TAX_RATE_501_750    = 20,
-    SLAVE_TAX_RATE_751_1000   = 30,
-    SLAVE_TAX_RATE_OVER_1000  = 40,
+    SLAVE_PREMIUM_TAX_RATE_0_500      = 10,
+    SLAVE_PREMIUM_TAX_RATE_501_750    = 20,
+    SLAVE_PREMIUM_TAX_RATE_751_1000   = 30,
+    SLAVE_PREMIUM_TAX_RATE_OVER_1000  = 40,
+
+    SLAVE_GOLD_TAX_RATE_0_500     = 50,
+    SLAVE_GOLD_TAX_RATE_501_750   = 100,
+    SLAVE_GOLD_TAX_RATE_751_1000  = 150,
+    SLAVE_GOLD_TAX_RATE_OVER_1000 = 200,
 };
 
-bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type)
+bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type, bool extraTax)
 {
     if (!player)
         return false;
 
     uint32 accId = player->GetSession()->GetAccountId();
     uint32 BazaarTaxRate = price / 10;
-    uint32 FinalTaxRate  = 0;
-
+    uint32 FinalPremiumTaxRate  = 0;
+    uint32 FinalGoldTaxRate     = 0;
     switch (type)
     {
         case AUCTION_SELL_PREMIUM:
-            FinalTaxRate = BazaarTaxRate;
+            FinalPremiumTaxRate = BazaarTaxRate;
             if (!CheckPremiumAmount(accId, price + BazaarTaxRate))
                 return false;
         case AUCTION_SELL_MONEY:
-            FinalTaxRate = BazaarTaxRate;
+            FinalGoldTaxRate = BazaarTaxRate;
             if (!CheckMoneyAmount(player, price + BazaarTaxRate))
                 return false;
             break;
         case AUCTION_SELL_CHARACTER:
             if (price < 500)
             {
-                FinalTaxRate = SLAVE_TAX_RATE_0_500;
-                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_0_500))
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_0_500;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_0_500;
+
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_0_500))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_0_500))
                     return false;
             } 
             else if (price > 500 && price <= 750)
             {
-                FinalTaxRate = SLAVE_TAX_RATE_501_750;
-                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_501_750))
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_501_750;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_501_750;
+
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_501_750))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_501_750))
                     return false;
             }
             else if (price > 750 && price <= 1000)
             {
-                FinalTaxRate = SLAVE_TAX_RATE_751_1000;
-                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_751_1000))
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_751_1000;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_751_1000;
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_751_1000))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_751_1000))
                     return false;
             }
             else if (price > 1000)
             {
-                FinalTaxRate = SLAVE_TAX_RATE_OVER_1000;
-                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_OVER_1000))
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_OVER_1000;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_OVER_1000;
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_OVER_1000))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_751_1000))
                     return false;
             }
             break;
     }
     
-    // Pay the taxes!
-    TakeRequiredAmount(player, FinalTaxRate, type);
+    // Pay the taxes
+    TakeRequiredAmount(player, FinalPremiumTaxRate, type);
+    // Slave market gold tax
+    if (extraTax == true)
+        TakeRequiredAmount(player, FinalGoldTaxRate, type, true);
+
     return true;
 }
 
@@ -412,7 +435,7 @@ bool BazaarMgr::SendAuctionOffer(Player* player, uint32 auctionId)
     return true;
 }
 
-void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type)
+void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type, bool extraTax)
 {
     if (!player)
         return;
@@ -424,6 +447,12 @@ void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type)
         case AUCTION_SELL_PREMIUM:
         case AUCTION_SELL_CHARACTER:
         {
+            if (extraTax == true)
+            {
+                player->ModifyMoney(-(amount * GOLD));
+                break;
+            }
+
             PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PREMIUM_POINTS);
             stmt->setInt32(0, -(amount));
             stmt->setUInt32(1, accId);
@@ -776,11 +805,15 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
         ChatHandler(player->GetSession()).PSendSysMessage("Your bazaar auction has been created.");
 
         if (type == AUCTION_SELL_MONEY)
-            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u,  Type (1 - Gold Auction ), Price: %u Premium for %u Gold", auctionId, dpAmount, uint32(moneyAmount));
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u,  Type (1 - Gold Auction ), Price: %u Premium for %u Gold", auctionId, dpAmount, moneyAmount);
+            ChatHandler(player->GetSession()).PSendSysMessage("Total tax rate: 10% of gold price (%u) - non-refundable", moneyAmount / TAX_RATE);
+        }
         else
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u, Type (0 - Premium Auction), Price: %u Gold for %u Premium Points", auctionId, uint32(moneyAmount), dpAmount);
-            PremiumAmount(player);
+            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u, Type (0 - Premium Auction), Price: %u Gold for %u Premium Points", auctionId, moneyAmount, dpAmount);
+            ChatHandler(player->GetSession()).PSendSysMessage("Total tax rate: 10% (%u) - non-refundable", dpAmount / TAX_RATE);
+            //PremiumAmount(player);
         }
 
         if (type == AUCTION_SELL_MONEY)

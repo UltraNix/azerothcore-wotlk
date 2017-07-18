@@ -446,7 +446,7 @@ public:
             return false;
         }
 
-        if (!sBazaarMgr->CanEffortTaxRate(player, dpAmount, AUCTION_SELL_CHARACTER))
+        if (!sBazaarMgr->CanEffortTaxRate(player, dpAmount, AUCTION_SELL_CHARACTER, true))
         {
             handler->PSendSysMessage("You don't have enough money to pay taxes.");
             handler->SetSentErrorMessage(true);
