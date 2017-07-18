@@ -26,6 +26,9 @@
 #include "Chat.h"
 #include "AccountMgr.h"
 
+// Bazaar Tax Rate 10%
+#define TAX_RATE 10
+
 enum BazarAuctionTypes
 {
     AUCTION_SELL_PREMIUM   = 0x00,
@@ -48,6 +51,7 @@ class BazaarMgr
         bool CheckPremiumAmount(uint32 accountId, uint32 sellAmount);
         bool CheckMoneyAmount(Player* player, uint32 sellAmount);
         bool CanEffortAuction(Player* player, uint32 auctionId);
+        bool CanEffortTaxRate(Player* player, uint32 price, uint8 type, bool extraTax = false);
         bool CheckAuctionOwner(Player* player, uint32 auctionId);
         bool CheckAuctionType(Player* player, uint32 auctionId);
         void ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy = false);
@@ -56,7 +60,7 @@ class BazaarMgr
 
         void RemoveOutdatedAuctions(Player* player, uint32 auctionId);
 
-        void TakeRequiredAmount(Player* player, int32 amount, uint8 type);
+        void TakeRequiredAmount(Player* player, int32 amount, uint8 type, bool extraTax = false);
         bool CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 dpAmount, uint8 type, uint8 mainSpec, uint8 offSpec, std::string description);
         void DeleteBazaarAuction(uint32 auctionId);
         void PremiumAmount(Player* player);
