@@ -689,6 +689,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
     uint8 slave_class   = (type == AUCTION_SELL_CHARACTER ? player->getClass() : 0);
     uint8 slave_gender  = (type == AUCTION_SELL_CHARACTER ? player->getGender() : 0);
     uint8 slave_level   = (type == AUCTION_SELL_CHARACTER ? player->getLevel() : 0);
+    uint8 slave_team    = (type == AUCTION_SELL_CHARACTER ? player->GetTeamId() : 0);
     uint32 slave_money  = (type == AUCTION_SELL_CHARACTER ? player->GetMoney() / GOLD : 0);
     uint32 slave_arena  = (type == AUCTION_SELL_CHARACTER ? player->GetArenaPoints() : 0);
     uint32 slave_honor  = (type == AUCTION_SELL_CHARACTER ? player->GetHonorPoints() : 0);
@@ -725,7 +726,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, getMSTime());
+            stmt->setUInt32(38, slave_team);
+            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
             break;
         }
         case AUCTION_SELL_MONEY:
@@ -754,7 +756,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, getMSTime());
+            stmt->setUInt32(38, slave_team);
+            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
             break;
         }
         case AUCTION_SELL_CHARACTER:
@@ -786,7 +789,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                     stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, getMSTime());
+            stmt->setUInt32(38, slave_team);
+            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
             break;
         }
     }

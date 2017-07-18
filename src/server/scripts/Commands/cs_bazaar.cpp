@@ -691,6 +691,7 @@ class npc_slave : public CreatureScript
 public:
     npc_slave() : CreatureScript("npc_slave") { }
 
+    uint32 team = 0;
     uint32 type = 0;
     uint16 count = 0;
     uint32 id[2000];
@@ -698,18 +699,10 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        selectedAuctionId = 0; type = 0;
+        selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
 
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
 
 
@@ -723,73 +716,103 @@ public:
     {
         player->PlayerTalkClass->ClearMenus();
 
-        if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS)
+        if (action == TEAM_ALLIANCE)
+        {
+            selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        }
+        else if (action == TEAM_HORDE)
+        {
+            selectedAuctionId = 0; type = 0; team = TEAM_HORDE;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        }
+        else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS;
-            LoadSlaveAuctions(CLASS_WARRIOR);
+            LoadSlaveAuctions(CLASS_WARRIOR, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS;
-            LoadSlaveAuctions(CLASS_PALADIN);
+            LoadSlaveAuctions(CLASS_PALADIN, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS;
-            LoadSlaveAuctions(CLASS_HUNTER);
+            LoadSlaveAuctions(CLASS_HUNTER, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS;
-            LoadSlaveAuctions(CLASS_ROGUE);
+            LoadSlaveAuctions(CLASS_ROGUE, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS;
-            LoadSlaveAuctions(CLASS_PRIEST);
+            LoadSlaveAuctions(CLASS_PRIEST, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS;
-            LoadSlaveAuctions(CLASS_DEATH_KNIGHT);
+            LoadSlaveAuctions(CLASS_DEATH_KNIGHT, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS;
-            LoadSlaveAuctions(CLASS_SHAMAN);
+            LoadSlaveAuctions(CLASS_SHAMAN, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS;
-            LoadSlaveAuctions(CLASS_MAGE);
+            LoadSlaveAuctions(CLASS_MAGE, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS;
-            LoadSlaveAuctions(CLASS_WARLOCK);
+            LoadSlaveAuctions(CLASS_WARLOCK, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS && action < NPC_SLAVE_ACTION_SELECTED_AUCTION)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS;
-            LoadSlaveAuctions(CLASS_DRUID);
+            LoadSlaveAuctions(CLASS_DRUID, team);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
@@ -802,17 +825,9 @@ public:
         }
         else if (action == NPC_SLAVE_ACTION_RETURN_MAIN)
         {
-            selectedAuctionId = 0; type = 0;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+            selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action == NPC_SLAVE_ACTION_CLOSE)
@@ -876,11 +891,11 @@ public:
         return true;
     }
 
-    void LoadSlaveAuctions(uint32 slave_class)
+    void LoadSlaveAuctions(uint32 slave_class, uint32 slave_team)
     {
         count = 0;
                                                                                                                  // AUCTION_SELL_CHARACTER = 0x02
-        QueryResult result = CharacterDatabase.PQuery("SELECT auctionId FROM bazar_auction WHERE slave_class = %u AND auction_type = 2", slave_class);
+        QueryResult result = CharacterDatabase.PQuery("SELECT auctionId FROM bazar_auction WHERE slave_class = %u AND auction_type = 2 AND slave_team = %u ORDER BY dp_amount ASC", slave_class, slave_team);
 
         if (result)
         {
