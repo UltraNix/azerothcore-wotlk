@@ -123,25 +123,25 @@ bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type)
             if (price < 500)
             {
                 FinalTaxRate = SLAVE_TAX_RATE_0_500;
-                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_0_500))
+                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_0_500))
                     return false;
             } 
             else if (price > 500 && price <= 750)
             {
                 FinalTaxRate = SLAVE_TAX_RATE_501_750;
-                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_501_750))
+                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_501_750))
                     return false;
             }
             else if (price > 750 && price <= 1000)
             {
                 FinalTaxRate = SLAVE_TAX_RATE_751_1000;
-                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_751_1000))
+                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_751_1000))
                     return false;
             }
             else if (price > 1000)
             {
                 FinalTaxRate = SLAVE_TAX_RATE_OVER_1000;
-                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_OVER_1000))
+                if (!CheckPremiumAmount(accId, SLAVE_TAX_RATE_OVER_1000))
                     return false;
             }
             break;
