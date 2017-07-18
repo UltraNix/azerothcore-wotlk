@@ -889,11 +889,6 @@ public:
                             c->SetReactState(REACT_AGGRESSIVE);
                             c->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             c->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                            if( Unit* target = c->SelectNearestTarget(200.0f) )
-                            {
-                                c->AI()->AttackStart(target);
-                                c->AI()->DoZoneInCombat();
-                            }
                         }
                         events.PopEvent();
                     }
