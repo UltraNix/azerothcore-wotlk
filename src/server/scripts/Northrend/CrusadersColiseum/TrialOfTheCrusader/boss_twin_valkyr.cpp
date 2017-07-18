@@ -726,7 +726,7 @@ class spell_valkyr_essence : public SpellScriptLoader
 
             void HandleAfterEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
             {
-                uint16 count = absorbAmount/1000;
+                uint16 count = absorbAmount/3000;
                 if( !count || !GetOwner() )
                     return;
 
