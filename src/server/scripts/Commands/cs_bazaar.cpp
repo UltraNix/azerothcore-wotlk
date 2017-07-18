@@ -106,6 +106,13 @@ public:
             return false;
         }
 
+        if (!sBazaarMgr->CanEffortTaxRate(player, dpAmount, AUCTION_SELL_PREMIUM))
+        {
+            handler->PSendSysMessage("You don't have enough money to pay taxes.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
         if (sBazaarMgr->CreateBazaarAuction(player, moneyAmount, dpAmount, AUCTION_SELL_PREMIUM, 0, 0, ""))
             sBazaarMgr->TakeRequiredAmount(player, dpAmount, AUCTION_SELL_PREMIUM);
         else
@@ -172,6 +179,13 @@ public:
         if (!sBazaarMgr->CheckMoneyAmount(player, moneyAmount))
         {
             handler->PSendSysMessage("You don't have enough money to do that.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!sBazaarMgr->CanEffortTaxRate(player, moneyAmount, AUCTION_SELL_MONEY))
+        {
+            handler->PSendSysMessage("You don't have enough money to pay taxes.");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -428,6 +442,13 @@ public:
         if (auctionCount >= 3)
         {
             handler->PSendSysMessage("You can't have more than 3 auctions of this type at one account.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!sBazaarMgr->CanEffortTaxRate(player, dpAmount, AUCTION_SELL_CHARACTER))
+        {
+            handler->PSendSysMessage("You don't have enough money to pay taxes.");
             handler->SetSentErrorMessage(true);
             return false;
         }

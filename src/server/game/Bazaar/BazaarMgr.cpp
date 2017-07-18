@@ -91,6 +91,67 @@ bool BazaarMgr::CanEffortAuction(Player* player, uint32 auctionId)
     return true;
 }
 
+enum TaxRates 
+{
+    SLAVE_TAX_RATE_0_500      = 10,
+    SLAVE_TAX_RATE_501_750    = 20,
+    SLAVE_TAX_RATE_751_1000   = 30,
+    SLAVE_TAX_RATE_OVER_1000  = 40,
+};
+
+bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type)
+{
+    if (!player)
+        return false;
+
+    uint32 accId = player->GetSession()->GetAccountId();
+    uint32 BazaarTaxRate = price / 10;
+    uint32 FinalTaxRate  = 0;
+
+    switch (type)
+    {
+        case AUCTION_SELL_PREMIUM:
+            FinalTaxRate = BazaarTaxRate;
+            if (!CheckPremiumAmount(accId, price + BazaarTaxRate))
+                return false;
+        case AUCTION_SELL_MONEY:
+            FinalTaxRate = BazaarTaxRate;
+            if (!CheckMoneyAmount(player, price + BazaarTaxRate))
+                return false;
+            break;
+        case AUCTION_SELL_CHARACTER:
+            if (price < 500)
+            {
+                FinalTaxRate = SLAVE_TAX_RATE_0_500;
+                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_0_500))
+                    return false;
+            } 
+            else if (price > 500 && price <= 750)
+            {
+                FinalTaxRate = SLAVE_TAX_RATE_501_750;
+                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_501_750))
+                    return false;
+            }
+            else if (price > 750 && price <= 1000)
+            {
+                FinalTaxRate = SLAVE_TAX_RATE_751_1000;
+                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_751_1000))
+                    return false;
+            }
+            else if (price > 1000)
+            {
+                FinalTaxRate = SLAVE_TAX_RATE_OVER_1000;
+                if (!CheckPremiumAmount(accId, price + SLAVE_TAX_RATE_OVER_1000))
+                    return false;
+            }
+            break;
+    }
+    
+    // Pay the taxes!
+    TakeRequiredAmount(player, FinalTaxRate, type);
+    return true;
+}
+
 // Check auction owner by account id
 bool BazaarMgr::CheckAuctionOwner(Player* player, uint32 auctionId)
 {
@@ -264,7 +325,7 @@ void BazaarMgr::ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy)
 
 void BazaarMgr::RemoveOutdatedAuctions(Player* player, uint32 auctionId)
 {
-
+    // TO-DO
 }
 
 bool BazaarMgr::SendAuctionOffer(Player* player, uint32 auctionId)
@@ -361,6 +422,7 @@ void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type)
     switch (type)
     {
         case AUCTION_SELL_PREMIUM:
+        case AUCTION_SELL_CHARACTER:
         {
             PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PREMIUM_POINTS);
             stmt->setInt32(0, -(amount));

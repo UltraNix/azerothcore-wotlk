@@ -48,6 +48,7 @@ class BazaarMgr
         bool CheckPremiumAmount(uint32 accountId, uint32 sellAmount);
         bool CheckMoneyAmount(Player* player, uint32 sellAmount);
         bool CanEffortAuction(Player* player, uint32 auctionId);
+        bool CanEffortTaxRate(Player* player, uint32 price, uint8 type);
         bool CheckAuctionOwner(Player* player, uint32 auctionId);
         bool CheckAuctionType(Player* player, uint32 auctionId);
         void ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy = false);
