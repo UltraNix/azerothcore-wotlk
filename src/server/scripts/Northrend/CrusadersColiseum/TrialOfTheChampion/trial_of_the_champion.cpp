@@ -73,6 +73,60 @@ class npc_announcer_toc5 : public CreatureScript
 public:
     npc_announcer_toc5() : CreatureScript("npc_announcer_toc5") {}
 
+    bool HasAllSeenEvent(Player* player)
+    {
+        if (!player)
+            return false;
+
+        if (player->IsGameMaster())
+            return true;
+
+        bool seen = true;
+        Map::PlayerList const& players = player->GetMap()->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player const *plr = itr->GetSource())
+            {
+                if (!plr->HasAchieved(4298) /* Heroic ToC (alliance) */ && !plr->HasAchieved(3778) /* Normal ToC (horde) */ && !plr->HasAchieved(4297) /* Heroic ToC (horde) */ && !plr->HasAchieved(4296) /* Normal ToC (alliance) */)
+                {
+                    seen = false;
+                    break;
+                }
+            }
+        }
+        return seen;
+    }
+
+    bool AllMountedCheck(Creature* creature, InstanceScript* instance)
+    {
+        bool check = false;
+        if (instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_INITIAL)
+        {
+            uint32 count = 0;
+            Map::PlayerList const &players = creature->GetMap()->GetPlayers();
+
+            if (!players.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    if (Player* player = itr->GetSource())
+                    {
+                        if (Unit* veh = player->GetVehicleBase())
+                        {
+                            if (veh->GetEntry() == VEHICLE_ARGENT_WARHORSE || veh->GetEntry() == VEHICLE_ARGENT_BATTLEWORG)
+                                ++count;
+                        }
+                    }
+                }
+
+                if (count == players.getSize())
+                    check = true;
+            }
+        }
+
+        return check;
+    }
+
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
         if( !pCreature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) )
@@ -82,13 +136,21 @@ public:
         if( !pInstance )
             return true;
 
+        bool check = AllMountedCheck(pCreature, pInstance);
+
         uint32 gossipTextId = 0;
         switch( pInstance->GetData(DATA_INSTANCE_PROGRESS) )
         {
             case INSTANCE_PROGRESS_INITIAL:
-                gossipTextId = 14688;
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1a, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1338);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1b, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1341);
+                if (check)
+                {
+                    gossipTextId = 14688;
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1a, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1338);
+                    if (HasAllSeenEvent(pPlayer))
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1b, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1341);
+                }
+                else
+                    gossipTextId = (pInstance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_ALLIANCE ? 14757 : 15043);
                 break;
             case INSTANCE_PROGRESS_CHAMPIONS_DEAD:
                 gossipTextId = 14737;
@@ -168,7 +230,6 @@ public:
 
         void GetSpectators(std::list<Creature*>& list, uint32 team)
         {
-            list.clear();
             if (team == TEAM_HORDE)
             {
                 me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_BELF, 250.0f);
