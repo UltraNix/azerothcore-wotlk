@@ -110,7 +110,7 @@ bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type, bool 
         return false;
 
     uint32 accId = player->GetSession()->GetAccountId();
-    uint32 BazaarTaxRate = price / 10;
+    uint32 BazaarTaxRate = price / TAX_RATE;
     uint32 FinalPremiumTaxRate  = 0;
     uint32 FinalGoldTaxRate     = 0;
     switch (type)
@@ -119,6 +119,7 @@ bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type, bool 
             FinalPremiumTaxRate = BazaarTaxRate;
             if (!CheckPremiumAmount(accId, price + BazaarTaxRate))
                 return false;
+            break;
         case AUCTION_SELL_MONEY:
             FinalGoldTaxRate = BazaarTaxRate;
             if (!CheckMoneyAmount(player, price + BazaarTaxRate))
@@ -160,7 +161,7 @@ bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type, bool 
                 FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_OVER_1000;
                 if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_OVER_1000))
                     return false;
-                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_751_1000))
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_OVER_1000))
                     return false;
             }
             break;
