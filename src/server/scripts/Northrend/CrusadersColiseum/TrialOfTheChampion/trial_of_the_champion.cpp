@@ -96,10 +96,15 @@ public:
         {
             if (Player const *plr = itr->GetSource())
             {
-                if (!plr->HasAchieved(4298) /* Heroic ToC (alliance) */ && !plr->HasAchieved(3778) /* Normal ToC (horde) */ && !plr->HasAchieved(4297) /* Heroic ToC (horde) */ && !plr->HasAchieved(4296) /* Normal ToC (alliance) */)
+                if (!plr->GetMap()->IsHeroic())
                 {
-                    seen = false;
-                    break;
+                    if (!plr->HasAchieved(3778) /* Normal ToC (horde) */ && !plr->HasAchieved(4296) /* Normal ToC (alliance) */)
+                        seen = false;
+                }
+                else
+                {
+                    if (!plr->HasAchieved(4298) /* Heroic ToC (alliance) */ && !plr->HasAchieved(4297) /* Heroic ToC (horde) */)
+                        seen = false;
                 }
             }
         }
@@ -301,6 +306,7 @@ public:
                             _events.Repeat(urand(500, 1000));
                         else
                             count = 0;
+                        break;
                     }
                     case EVENT_RANDOM_EMOTE:
                         if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !me->isMoving() && !me->HasAura(66804))
