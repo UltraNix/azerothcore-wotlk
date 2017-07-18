@@ -134,6 +134,51 @@ class go_witherbark_totem_bundle : public GameObjectScript
         }
 };
 
+class go_huge_seaforium_bombs : public GameObjectScript
+{
+public:
+	go_huge_seaforium_bombs() : GameObjectScript("go_huge_seaforium_bombs") { }
+
+	struct go_huge_seaforium_bombsAI : public GameObjectAI
+	{
+		go_huge_seaforium_bombsAI(GameObject* gameObject) : GameObjectAI(gameObject)
+		{
+			_timer = 1;
+			isTimed = false;
+		}
+
+		bool GossipHello(Player* /*player*/, bool reportUse)
+		{
+			go->SetVisible(false);
+			isTimed = true;
+			return false; 
+		}
+
+		void UpdateAI(uint32 diff)
+		{
+			if (_timer && isTimed)
+			{
+				_timer += diff;
+				if (_timer > 10000)
+				{
+					go->SetVisible(true);
+					isTimed = false;
+					_timer = 1;
+				}
+			}
+		}
+
+		uint32 _timer;
+		bool isTimed;
+	};
+
+	GameObjectAI* GetAI(GameObject* go) const
+	{
+		return new go_huge_seaforium_bombsAI(go);
+	}
+
+};
+
 class go_arena_ready_marker : public GameObjectScript
 {
 public:
@@ -1171,6 +1216,7 @@ void AddSC_go_scripts()
     new go_lard_picnic_basket();
     new go_war_horn_of_jotunheim();
     new go_dirt_mound();
+	new go_huge_seaforium_bombs();
 
     // Theirs
     new go_cat_figurine();
