@@ -494,6 +494,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
 
     void EnterEvadeMode()
     {
+        pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POWERING_UP);
         if( pInstance )
             pInstance->SetData(TYPE_FAILED, 0);
     }
