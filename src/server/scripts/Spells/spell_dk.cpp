@@ -1667,6 +1667,17 @@ class spell_dk_death_pact : public SpellScriptLoader
                         }
                 }
 
+                if (!target)    // Monich: ghoul can be a guardian - if so, it's not shown on the list
+                {
+                    auto targetSet = GetCaster()->m_Controlled;
+                    for (auto itr = targetSet.begin(); itr != targetSet.end(); itr++)
+                        if ((*itr)->GetCreatureType() == CREATURE_TYPE_UNDEAD)
+                        {
+                            target = *itr;
+                            break;
+                        }
+                }
+
                 targetList.clear();
                 if (target)
                 {
