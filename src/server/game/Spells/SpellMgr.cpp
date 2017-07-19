@@ -5599,18 +5599,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67715:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
             break;
-        // Trial of the Champion, Ghoul Explode
-        case 67751:
-            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_SRC_AREA_ENTRY;
-            spellInfo->EffectRadiusIndex[0] = 12;
-            spellInfo->EffectImplicitTargetA[1] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_SRC_AREA_ENTRY;
-            spellInfo->EffectRadiusIndex[1] = 12;
-            spellInfo->EffectImplicitTargetA[2] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_SRC_AREA_ENTRY;
-            spellInfo->EffectRadiusIndex[3] = 12;
-            break;
         // Trial of the Champion, Desecration
         case 67778:
         case 67877:
