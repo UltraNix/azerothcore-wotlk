@@ -1141,9 +1141,12 @@ public:
                             if (GameObject* go = pInstance->instance->GetGameObject(pInstance->GetData64(DATA_EXIT_GATE)))
                                 go->SetGoState(GO_STATE_ACTIVE);
                             
-                            if (!me->GetMap()->GetPlayers().isEmpty())
+                            if (!(_lootSpawned || me->GetMap()->GetPlayers().isEmpty()))
                                 if (InstanceScript* is = me->GetInstanceScript())
+                                {
+                                    _lootSpawned = true;
                                     is->instance->SummonGameObject(DUNGEON_MODE(GO_MALGANIS_CHEST_N, GO_MALGANIS_CHEST_H), 2288.35f, 1498.73f, 128.414f, -0.994837f, 0, 0, 0, 0, 0);
+                                }
                         }
                         ScheduleNextEvent(currentEvent, 10000);
                         break;
@@ -1181,6 +1184,8 @@ public:
 
             DoMeleeAttackIfReady();
         }
+        private:
+            bool _lootSpawned = false;
     };
 };
 
