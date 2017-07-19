@@ -1079,7 +1079,14 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             announcer->SetFacingToObject(bk_vehicle);
                             if(announcer->IsAIEnabled)
                                 announcer->AI()->Talk(TEXT_BK_RAFTERS);
+                            events.ScheduleEvent(301, 25);
                         }
+                    break;
+                case 301:
+                    if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+                        if (Creature* bk_vehicle = announcer->FindNearestCreature(VEHICLE_BLACK_KNIGHT, 250.0f))
+                            announcer->SetFacingToObject(bk_vehicle);
+                    events.Repeat(25);
                     break;
                 case EVENT_START_BLACK_KNIGHT_SCENE:
                     if (Creature* blackKnight = instance->GetCreature(NPC_BlackKnightGUID))
@@ -1087,6 +1094,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         Position jumpPos = { 751.356262f, 633.437134f, 411.572876f };
                         blackKnight->SetWalk(true);
                         blackKnight->_ExitVehicle(&jumpPos);
+                        events.CancelEvent(301);
                         events.ScheduleEvent(251, 250);
                         if(blackKnight->IsAIEnabled)
                             blackKnight->AI()->Talk(TEXT_BK_SPOILED);
@@ -1109,13 +1117,19 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             bk->SetHomePosition(*bk);
                             announcer->SetFacingToObject(bk);
                             announcer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            bk->AddAura(68306, announcer); // spell has attribute player only
+                            bk->CastSpell(announcer, 66798, false);
+                            events.ScheduleEvent(252, 1000);
                             if (Creature* tirion = instance->GetCreature(NPC_TirionGUID))
                                 if(tirion->IsAIEnabled)
                                     tirion->AI()->Talk(TEXT_BK_MEANING);
                         }
                     }
                     events.ScheduleEvent(EVENT_BLACK_KNIGHT_KILL_ANNOUNCER, 1000);
+                    break;
+                case 252:
+                    if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+                        if (Creature* bk = instance->GetCreature(NPC_BlackKnightGUID))
+                            bk->AddAura(68306, announcer);
                     break;
                 case EVENT_BLACK_KNIGHT_KILL_ANNOUNCER:
                     if (Creature* bk_vehicle = instance->GetCreature(NPC_BlackKnightVehicleGUID))

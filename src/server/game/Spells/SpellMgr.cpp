@@ -5556,6 +5556,11 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// TRIAL OF THE CHAMPION
         //////////////////////////////////////////
+        // Trial of the Champion, Death's Respite (casted at announcer)
+        case 66798:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            break;
         // Trial of the Champion, Trampled
         case 67867:
             spellInfo->DurationIndex = 27; // 3s
