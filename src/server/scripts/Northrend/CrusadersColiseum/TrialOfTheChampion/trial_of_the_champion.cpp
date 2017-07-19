@@ -218,6 +218,11 @@ public:
             if (!_events.GetNextEventTime(EVENT_RANDOM_ANIMS))
                 _events.ScheduleEvent(EVENT_RANDOM_ANIMS, 5000);
 
+            spectators.clear();
+            GetSpectators(spectators, TEAM_ALLIANCE);
+            GetSpectators(spectators, TEAM_HORDE);
+            GetSpectators(spectators, TEAM_NEUTRAL);
+
             count = 0;
             InstanceScript* pInstance = me->GetInstanceScript();
             if( !pInstance )
@@ -290,24 +295,16 @@ public:
                         break;
                     }
                     case EVENT_RANDOM_ANIMS_TRIGGER:
-                    {
-                        std::list<Creature*> spectators;
-                        GetSpectators(spectators, TEAM_ALLIANCE);
-                        GetSpectators(spectators, TEAM_HORDE);
-                        GetSpectators(spectators, TEAM_NEUTRAL);
                         if (!spectators.empty())
-                        {
-                            Trinity::Containers::RandomResizeList(spectators, urand(10, 20));
                             for (auto itr : spectators)
-                                itr->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
-                        }
+                                if (roll_chance_i(70))
+                                    itr->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
 
-                        if (++count <= 4)
+                        if (++count <= 3)
                             _events.Repeat(urand(500, 1000));
                         else
                             count = 0;
                         break;
-                    }
                     case EVENT_RANDOM_EMOTE:
                         if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !me->isMoving() && !me->HasAura(66804))
                         {
@@ -376,6 +373,7 @@ public:
         }
 
     private:
+        std::list<Creature*> spectators;
         uint32 count;
         EventMap _events;
     };

@@ -49,7 +49,8 @@ enum Events
     EVENT_SPELL_DESECRATION,
     EVENT_SPELL_DEATH_BITE,
     EVENT_SPELL_MARKED_DEATH,
-    
+    EVENT_RANDOM_EXPLODE,
+
     // ghouls
     EVENT_LEAP                  = 1,
     EVENT_CLAW
@@ -169,6 +170,7 @@ struct boss_black_knightAI : public BossAI
                     me->CastSpell(me, SPELL_ARMY_DEAD, false);
 
                     events.Reset();
+                    events.ScheduleEvent(EVENT_RANDOM_EXPLODE, urand(10000, 15000));
                     events.ScheduleEvent(EVENT_SPELL_PLAGUE_STRIKE, urand(7000, 9000));
                     events.ScheduleEvent(EVENT_SPELL_ICY_TOUCH, urand(3500, 7000));
                     events.ScheduleEvent(EVENT_SPELL_OBLITERATE, urand(11000, 19000));
@@ -211,6 +213,19 @@ struct boss_black_knightAI : public BossAI
                     DoCast(target, SPELL_DEATH_RESPITE);
                 events.Repeat(urand(13000, 15000));
                 break;
+            case EVENT_RANDOM_EXPLODE:
+            {
+                std::list<Creature*> ghouls;
+                me->GetCreatureListWithEntryInGrid(ghouls, 35590, 250.0f);
+                if (!ghouls.empty())
+                    if (Creature* ghoul = Trinity::Containers::SelectRandomContainerElement(ghouls))
+                    {
+                        ghoul->AddAura(SPELL_BK_GHOUL_EXPLODE, ghoul);
+                        ghoul->CastSpell(ghoul, SPELL_EXPLODE);
+                    }
+                events.Repeat(urand(15000, 25000));
+                break;
+            }
             case EVENT_SPELL_OBLITERATE:
                 DoCastVictim(SPELL_OBLITERATE);
                 events.Repeat(urand(15000, 17000));

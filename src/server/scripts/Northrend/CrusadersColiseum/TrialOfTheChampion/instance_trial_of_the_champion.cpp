@@ -599,7 +599,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                     {
                         announcer->GetMotionMaster()->MovePoint(0, 743.14f, 628.77f, 411.2f);
-                        announcer->SummonGameObject(instance->IsHeroic() ? GO_CHAMPIONS_LOOT_H : GO_CHAMPIONS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, 0, 0, 0, 0, 90000000); // [LOOT]
+                        announcer->SummonGameObject(instance->IsHeroic() ? GO_CHAMPIONS_LOOT_H : GO_CHAMPIONS_LOOT, 744.7205f, 618.3073f, 411.0891f, 1.53589f, 0, 0, 0, 0, 90000000); // [LOOT]
                         events.ScheduleEvent(EVENT_RESTORE_ANNOUNCER_GOSSIP, 15000);
                         events.ScheduleEvent(EVENT_GRATZ_SLAIN_CHAMPIONS, 6000);
                     }
@@ -1047,7 +1047,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                                 chest = (boss->GetEntry() == NPC_EADRIC || boss->GetEntry() == NPC_EADRIC_H) ? GO_EADRIC_LOOT_H : GO_PALETRESS_LOOT_H;
                             else
                                 chest = (boss->GetEntry() == NPC_EADRIC || boss->GetEntry() == NPC_EADRIC_H) ? GO_EADRIC_LOOT : GO_PALETRESS_LOOT;
-                            announcer->SummonGameObject(chest, 746.59f, 618.49f, 411.09f, 1.42f, 0, 0, 0, 0, 90000000); // [LOOT]
+                            announcer->SummonGameObject(chest, 748.7604f, 618.309f, 411.0891f, 1.588249f, 0, 0, 0, 0, 90000000); // [LOOT]
                         }
 
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_DISAPPEAR, 4000);
