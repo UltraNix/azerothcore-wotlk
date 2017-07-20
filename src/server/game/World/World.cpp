@@ -1288,6 +1288,10 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PTR_REALM] = sConfigMgr->GetBoolDefault("PTR.Realm", false);
     m_bool_configs[CONFIG_CROSSFACTION_RDF] = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
 
+    // Premium Config
+    m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);
+    m_bool_configs[CONFIG_PREMIUM_INSTANT_FLYING_ENABLE] = sConfigMgr->GetBoolDefault("Premium.InstantFlying.Enable", true);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
