@@ -434,7 +434,18 @@ public:
                 me->MonsterYell("The swarm of the elements shall overtake you!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_DETONATING);
                 for (uint8 i = 0; i < 10; ++i)
-                    me->SummonCreature(NPC_DETONATING_LASHER, me->GetPositionX()+urand(5,20), me->GetPositionY()+urand(5,20), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_DESPAWN);
+                {
+                    float angle = i * 2 * M_PI / 10;
+                    float x = me->GetPositionX() + cos(angle) * 15.0f;
+                    float y = me->GetPositionY() + sin(angle) * 15.0f;
+                    float z = me->GetPositionZ();
+
+                    if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z))
+                    {
+                        lasher->UpdateAllowedPositionZ(x, y, z);
+                        lasher->NearTeleportTo(x, y, z, 0.0f);
+                    }
+                }
             }
         }
 
