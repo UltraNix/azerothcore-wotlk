@@ -2740,6 +2740,388 @@ public:
     }
 };
 
+/*######
+## npc_lore
+######*/
+
+enum Pytania
+{
+    ANNOUNCEMENT             = 100,
+    QUESTION_1               = 1000,
+    QUESTION_2               = 2000,
+    QUESTION_3               = 3000,
+    QUESTION_4               = 4000,
+    QUESTION_5               = 5000,
+    QUESTION_6               = 6000,
+    QUESTION_7               = 7000,
+    QUESTION_8               = 8000,
+    QUESTION_9               = 9000,
+    QUESTION_10              = 10000,
+    QUESTION_11              = 11000,
+    QUESTION_CORRECT_ANSWER  = 30000,
+    QUESTION_WRONG_ANSWER    = 40000,
+
+    NPC_GREETINGS_TEXT_1    = 970001,
+    NPC_GREETINGS_TEXT_2    = 970002,
+    NPC_GREETINGS_TEXT_3    = 970003,
+    NPC_GREETINGS_TEXT_4    = 970004,
+    NPC_GREETINGS_TEXT_5    = 970005,
+    NPC_GREETINGS_TEXT_6    = 970006,
+    NPC_GREETINGS_TEXT_7    = 970007,
+    NPC_GREETINGS_TEXT_8    = 970008,
+    NPC_GREETINGS_TEXT_9    = 970009,
+    NPC_GREETINGS_TEXT_10   = 970010,
+    NPC_GREETINGS_TEXT_11   = 970011,
+    NPC_GREETINGS_TEXT_12   = 970012,
+    NPC_GREETINGS_TEXT_13   = 970013,
+    NPC_QUESTION_TEXT_1     = 970014,
+    NPC_QUESTION_TEXT_2     = 970015,
+    NPC_QUESTION_TEXT_3     = 970016,
+    NPC_QUESTION_TEXT_4     = 970017,
+    NPC_QUESTION_TEXT_5     = 970018,
+    NPC_QUESTION_TEXT_6     = 970019,
+    NPC_QUESTION_TEXT_7     = 970020,
+    NPC_QUESTION_TEXT_8     = 970021,
+    NPC_QUESTION_TEXT_9     = 970022,
+    NPC_QUESTION_TEXT_10    = 970023,
+    NPC_QUESTION_TEXT_11    = 970024,
+
+    NPC_CORRECT_TEXT_1      = 980001,
+    NPC_CORRECT_TEXT_2      = 980002,
+    NPC_CORRECT_TEXT_3      = 980003,
+    NPC_CORRECT_TEXT_4      = 980004,
+    NPC_CORRECT_TEXT_5      = 980005,
+    NPC_CORRECT_TEXT_6      = 980006,
+    NPC_CORRECT_TEXT_7      = 980007,
+    NPC_CORRECT_TEXT_8      = 980008,
+    NPC_CORRECT_TEXT_9      = 980009,
+    NPC_CORRECT_TEXT_10     = 980010,
+    NPC_CORRECT_TEXT_11     = 980011,
+    BLANK                   = 980012
+};
+
+class npc_lore : public CreatureScript
+{
+public:
+    npc_lore() : CreatureScript("npc_lore") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        //Announce for next questions
+        if (creature->GetEntry() == 96000)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Oczywiscie. Gdzie mam zaczac?", GOSSIP_SENDER_MAIN, ANNOUNCEMENT);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_1, creature->GetGUID());
+        }
+        //Question 1
+        if (creature->GetEntry() == 96001)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Oczywiscie.", GOSSIP_SENDER_MAIN, QUESTION_1);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_2, creature->GetGUID());
+        }
+        //Question 2
+        if (creature->GetEntry() == 96002 && player->HasItemCount(86101))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "\"Thus mush talAh rini Dorados'no eraburis.\" Co to znaczy?", GOSSIP_SENDER_MAIN, QUESTION_2);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_3, creature->GetGUID());
+        }
+        //Question 3
+        if (creature->GetEntry() == 96003 && player->HasItemCount(86102))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "No dobrze, zobaczmy.", GOSSIP_SENDER_MAIN, QUESTION_3);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_4, creature->GetGUID());
+        }
+        //Question 4
+        if (creature->GetEntry() == 96004 && player->HasItemCount(86103))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Oczywiscie, przeczytaj mi ta zagadke.", GOSSIP_SENDER_MAIN, QUESTION_4);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_5, creature->GetGUID());
+        }
+        //Question 5
+        if (creature->GetEntry() == 96005 && player->HasItemCount(86104))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zaczynajmy.", GOSSIP_SENDER_MAIN, QUESTION_5);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_6, creature->GetGUID());
+        }
+        //Question 6
+        if (creature->GetEntry() == 96006 && player->HasItemCount(86105))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Masz dla mnie jakas zagadke?", GOSSIP_SENDER_MAIN, QUESTION_6);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_7, creature->GetGUID());
+        }
+        //Question 7
+        if (creature->GetEntry() == 96007 && player->HasItemCount(86106))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wspaniale, moge poznac jego tresc?", GOSSIP_SENDER_MAIN, QUESTION_7);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_8, creature->GetGUID());
+        }
+        //Question 8
+        if (creature->GetEntry() == 96008 && player->HasItemCount(86107))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Czy jest cos w czym moge Ci pomoc?", GOSSIP_SENDER_MAIN, QUESTION_8);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_9, creature->GetGUID());
+        }
+        //Question 9
+        if (creature->GetEntry() == 96009 && player->HasItemCount(86108))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Oczywiscie.", GOSSIP_SENDER_MAIN, QUESTION_9);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_10, creature->GetGUID());
+        }
+        //Question 10
+        if (creature->GetEntry() == 96010 && player->HasItemCount(86109))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Powiedz mi, co to za wiadomosc.", GOSSIP_SENDER_MAIN, QUESTION_10);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_11, creature->GetGUID());
+        }
+        //Question 11
+        if (creature->GetEntry() == 96011 && player->HasItemCount(86110))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Slucham wiec.", GOSSIP_SENDER_MAIN, QUESTION_11);
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_12, creature->GetGUID());
+        }
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+
+        switch (action)
+        {
+        case QUESTION_CORRECT_ANSWER:
+        {
+            switch (player->GetSelectedAuction())
+            {
+            case QUESTION_1:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_1, creature->GetGUID());
+                if (!player->HasItemCount(86101))
+                    player->AddItem(86101, 1);
+                break;
+            case QUESTION_2:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_2, creature->GetGUID());
+                if (!player->HasItemCount(86102))
+                    player->AddItem(86102, 1);
+                break;
+            case QUESTION_3:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_3, creature->GetGUID());
+                if (!player->HasItemCount(86103))
+                    player->AddItem(86103, 1);
+                break;
+            case QUESTION_4:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_4, creature->GetGUID());
+                if (!player->HasItemCount(86104))
+                    player->AddItem(86104, 1);
+                break;
+            case QUESTION_5:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_5, creature->GetGUID());
+                if (!player->HasItemCount(86105))
+                    player->AddItem(86105, 1);
+                break;
+            case QUESTION_6:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_6, creature->GetGUID());
+                if (!player->HasItemCount(86106))
+                    player->AddItem(86106, 1);
+                break;
+            case QUESTION_7:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_7, creature->GetGUID());
+                if (!player->HasItemCount(86107))
+                    player->AddItem(86107, 1);
+                break;
+            case QUESTION_8:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_8, creature->GetGUID());
+                if (!player->HasItemCount(86108))
+                    player->AddItem(86108, 1);
+                break;
+            case QUESTION_9:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_9, creature->GetGUID());
+                if (!player->HasItemCount(86109))
+                    player->AddItem(86109, 1);
+                break;
+            case QUESTION_10:
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_10, creature->GetGUID());
+                if (!player->HasItemCount(86110))
+                    player->AddItem(86110, 1);
+                break;
+            case QUESTION_11:
+            {
+                player->SEND_GOSSIP_MENU(NPC_CORRECT_TEXT_11, creature->GetGUID());
+                for (uint8 i = 0; i < 10; i++)
+                    if (player->HasItemCount(86101 + i, 1, false))
+                        player->DestroyItemCount(86101 + i, 1, true);
+                std::string message = "Gratulacje ukonczyles event Kroniki Azeroth!";
+                std::string s = "Kroniki Azeroth";
+                ChatHandler handler(player->GetSession());
+                handler.PSendSysMessage(message.c_str());
+                sWorld->SendWorldText(LANG_EVENT_WINNER, player->GetName().c_str(), s.c_str());
+                sLog->outRewards("Player: %s GUID: %u has complete event 'LORE'", player->GetName().c_str(), player->GetGUIDLow());
+               
+            } break;
+            default:
+                player->CLOSE_GOSSIP_MENU();
+                break;
+            }
+        } break;
+        case QUESTION_WRONG_ANSWER:
+        {
+            std::string message = "";
+            ChatHandler handler(player->GetSession());
+
+            switch (player->GetSelectedAuction())
+            {
+            case QUESTION_1:
+                message = "Nie nie nie! Wroc jak zglebisz nieco wiecej wiedzy.";
+                break;
+            case QUESTION_2:
+                message = "Widze, ze tez masz problemy z elfickim jezykiem. Potrzebuje kogos bardziej wykwalifikowanego. Przyjdz, jak dowiesz sie, jaka jest odpowiedz.";
+                break;
+            case QUESTION_3:
+                message = "Co mi po nieskalanym podrozniku, co wiedzy nie ma, idz precz!";
+                break;
+            case QUESTION_4:
+                message = "Zostaw, bo zniszczysz! Nie wiesz, to nie zgaduj! Wroc do mnie jak sobie przypomnisz!";
+                break;
+            case QUESTION_5:
+                message = "Zaufalam Ci! Mogles zablokowac portal, dobrze, ze zabral tylko Ciebie! Wroc tu i tym razem sie nie pomyl, to dla mnie wazne!";
+                break;
+            case QUESTION_6:
+                message = "Kazdy mogl sie pomylic, zasiegnij wiedzy od uczonego nim do mnie wrocisz, dobrze?";
+                break;
+            case QUESTION_7:
+                message = "Nie draznij mnie, nie masz pojecia co mowisz! Nie chce Cie tu widziec, poki nie bedziesz pewien swoich slow!";
+                break;
+            case QUESTION_8:
+                message = "Nie potrafisz mi pomoc? Trudno, znajde kogos, kto wie. Jezeli Ci sie przypomni, przyjdz do mnie i powiedz, co wiesz.";
+                break;
+            case QUESTION_9:
+                message = "Uwazaj! ... Musialem Cie przeteleportowac, inaczej zginalbys od pioruna kulistego. Nie powinienes odpowiadac pochopnie. Przyjdz do mnie, gdy bedziesz znal odpowiedz.";
+                break;
+            case QUESTION_10:
+                message = "Zawiodles. Nawet tajemnicza istota zawibrowala swoja magia w zlosci. Niewiedza niesie za soba kolosalne skutki! Wroc, gdy bedziesz pewien swojej decyzji.";
+                break;
+            case QUESTION_11:
+                message = "Nie nie nie. Zasiegnij wiedzy ze sprawdzonego zrodla i wroc, gdy bedziesz wiedzial, co zrobiles nie tak.";
+                break;
+            }
+
+            handler.PSendSysMessage(message.c_str());
+
+            if (player->GetTeamId() == TEAM_HORDE)
+                player->TeleportTo(0, 2439.0f, 45.0f, 500.0f, player->GetOrientation());
+            else
+                player->TeleportTo(0, -9444.0f, 1258.0f, 500.0f, player->GetOrientation());
+
+            player->CLOSE_GOSSIP_MENU();
+        } break;
+        case ANNOUNCEMENT:
+        {
+            player->SEND_GOSSIP_MENU(NPC_GREETINGS_TEXT_13, creature->GetGUID());
+        } break;
+        case QUESTION_1:
+        {
+            player->SetSelectedAuction(QUESTION_1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Courage.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Hope.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Pride.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Fate.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_1, creature->GetGUID());
+        } break;
+        case QUESTION_2:
+        {
+            player->SetSelectedAuction(QUESTION_2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) o Lor'Themara.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) o Dar'Khana.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) o Dath'Remara.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) oczywiscie o Andrzeja Golote.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_2, creature->GetGUID());
+        } break;
+        case QUESTION_3:
+        {
+            player->SetSelectedAuction(QUESTION_3);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Malfuriona Stormrage'a", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Fandrala Staghelm'a.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Tyrande Whisperwind.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Ysery.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_3, creature->GetGUID());
+        } break;
+        case QUESTION_4:
+        {
+            player->SetSelectedAuction(QUESTION_4);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Kaldorei i Quel'dorei.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Kaldorei i Shen'dralar.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Kaldorei i Kaplanki Elune.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Kaplanki Elune i Shen'dralar.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_4, creature->GetGUID());
+        } break;
+        case QUESTION_5:
+        {
+            player->SetSelectedAuction(QUESTION_5);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Lady Vashj.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Sargeras.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Xavius.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) N'Zoth.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_5, creature->GetGUID());
+        } break;
+        case QUESTION_6:
+        {
+            player->SetSelectedAuction(QUESTION_6);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Kamienna Statuetka.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Zloty zegarek kieszonkowy.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Czarna ksiega.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Obsydianowa klepsydra.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_6, creature->GetGUID());
+        } break;
+        case QUESTION_7:
+        {
+            player->SetSelectedAuction(QUESTION_7);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Kaldorei.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Quel'Dorei.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Gnomy.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Ludzie.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_7, creature->GetGUID());
+        } break;
+        case QUESTION_8:
+        {
+            player->SetSelectedAuction(QUESTION_8);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Icefang.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Frostclaw.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Snowsong.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Coldpaw.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_8, creature->GetGUID());
+        } break;
+        case QUESTION_9:
+        {
+            player->SetSelectedAuction(QUESTION_9);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Drek'Thar.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Ner'Zhul.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Velen.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Blackhand.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_9, creature->GetGUID());
+        } break;
+        case QUESTION_10:
+        {
+            player->SetSelectedAuction(QUESTION_10);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Porzucona latajaca forteca.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Swiatynia w zakleciu ochronnym w postaci krysztalu.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Tajny bunkier ludu Draenei.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Miedzywymiarowy statek kosmiczny.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_10, creature->GetGUID());
+        } break;
+        case QUESTION_11:
+        {
+            player->SetSelectedAuction(QUESTION_11);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "A) Pit Lord Brutallus.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Doom Lord Kazzak.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Pit Lord Magtheridon.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Doom Lord Kaz'Rogal.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
+            player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_11, creature->GetGUID());
+        } break;
+        }
+
+        return true;
+    }
+};
+
 void AddSC_npcs_special()
 {
     // Ours
@@ -2749,6 +3131,7 @@ void AddSC_npcs_special()
     new npc_target_dummy();
     new npc_training_dummy();
     new npc_schody();
+    new npc_lore();
     // Theirs
     new npc_air_force_bots();
     new npc_lunaclaw_spirit();
