@@ -344,6 +344,8 @@ struct boss_vezaxAI : public BossAI
         if (instance)
             instance->SetData(TYPE_VEZAX, DONE);
 
+        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_PROFOUND_DARKNESS);
+
         me->MonsterYell(TEXT_VEZAX_DEATH, LANG_UNIVERSAL, 0);
         me->PlayDirectSound(SOUND_VEZAX_DEATH, 0);
 
@@ -581,7 +583,7 @@ class achievement_smell_saronite : public AchievementCriteriaScript
     public:
         achievement_smell_saronite() : AchievementCriteriaScript("achievement_smell_saronite") {}
 
-        bool OnCheck(Player* player, Unit* target)
+        bool OnCheck(Player* player, Unit* target) override
         {
             return target && target->GetEntry() == NPC_VEZAX && target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->AI()->GetData(1);
         }
