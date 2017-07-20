@@ -370,7 +370,6 @@ public:
         InstanceScript* pInstance;
         SummonList summons;
         bool eventInRun;
-        bool lootSpawned;
         EventMap actionEvents;
         EventMap combatEvents;
         uint8 waveGroupId;
@@ -489,7 +488,6 @@ public:
             combatEvents.Reset();
             summons.DespawnAll();
             eventInRun = false;
-            lootSpawned = false;
             waveGroupId = 0;
             waveKillCount = 0;
             timeRiftId = 0;
@@ -1144,11 +1142,9 @@ public:
                             if (GameObject* go = pInstance->instance->GetGameObject(pInstance->GetData64(DATA_EXIT_GATE)))
                                 go->SetGoState(GO_STATE_ACTIVE);
 
-                            if (!lootSpawned)
-                            {
-                                lootSpawned = true;
-                                pInstance->instance->SummonGameObject(DUNGEON_MODE(GO_MALGANIS_CHEST_N, GO_MALGANIS_CHEST_H), 2288.35f, 1498.73f, 128.414f, -0.994837f, 0, 0, 0, 0, 0);
-                            }
+                            // Spawn chest
+                            if (GameObject* chest = me->SummonGameObject(DUNGEON_MODE(GO_MALGANIS_CHEST_N, GO_MALGANIS_CHEST_H), 2288.35f, 1498.73f, 128.414f, -0.994837f, 0, 0, 0, 0, 0))
+                                chest->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
                         }
                         ScheduleNextEvent(currentEvent, 10000);
                         break;
