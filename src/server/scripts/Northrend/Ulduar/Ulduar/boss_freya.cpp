@@ -440,7 +440,7 @@ public:
                     float y = me->GetPositionY() + sin(angle) * 15.0f;
                     float z = me->GetPositionZ();
 
-                    if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z))
+                    if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z, 0.0f, TEMPSUMMON_CORPSE_DESPAWN))
                     {
                         lasher->UpdateAllowedPositionZ(x, y, z);
                         lasher->NearTeleportTo(x, y, z, 0.0f);
