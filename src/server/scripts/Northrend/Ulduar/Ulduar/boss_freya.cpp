@@ -609,7 +609,6 @@ public:
                     SpawnWave();
                 else if (me->GetAura(SPELL_ATTUNED_TO_NATURE))
                 {
-                    me->RemoveAura(SPELL_ATTUNED_TO_NATURE);
                     events.ScheduleEvent(EVENT_FREYA_NATURE_BOMB, 5000);
                     events.SetPhase(EVENT_PHASE_FINAL);
                     events.PopEvent();
@@ -1203,7 +1202,7 @@ public:
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
-                events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 1500);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 2000);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_ANIM, 1000);
             }
             else if (Unit* target = SelectTargetFromPlayerList(70))
