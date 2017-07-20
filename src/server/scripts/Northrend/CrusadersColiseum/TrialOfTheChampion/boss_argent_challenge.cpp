@@ -364,13 +364,13 @@ struct npc_memoryAI : public ScriptedAI
         me->DespawnOrUnsummon(20000);
         if (instance)
             if (Creature* paletress = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PALETRESS)))
-                if(paletress->IsAIEnabled)
+                if (paletress->IsAIEnabled)
                     paletress->AI()->DoAction(1);
     }
 
     void UpdateAI(uint32 diff) override
     {
-        if (UpdateVictim())
+        if (!UpdateVictim() && !me->HasReactState(REACT_PASSIVE))
             return;
 
         _events.Update(diff);
