@@ -31,7 +31,7 @@ public:
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "bazarpp",        SEC_PLAYER,          false, &HandleBazaarPremiumCommand,          "" },
+            { "bazarsc",        SEC_PLAYER,          false, &HandleBazaarSunwellCommand,          "" },
             { "bazargold",      SEC_PLAYER,          false, &HandleBazaarGoldCommand,             "" },
             { "bazaramount",    SEC_PLAYER,          false, &HandleBazaarAmountCommand,           "" },
             { "bazarbuy",       SEC_PLAYER,          false, &HandleBazaarBuyCommand,              "" },
@@ -45,7 +45,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleBazaarPremiumCommand(ChatHandler* handler, char const* args)
+    static bool HandleBazaarSunwellCommand(ChatHandler* handler, char const* args)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
@@ -101,7 +101,7 @@ public:
 
         if (!sBazaarMgr->CheckPremiumAmount(accId, dpAmount))
         {
-            handler->PSendSysMessage("You don't have enough points to do that.");
+            handler->PSendSysMessage("You don't have enough coins to do that.");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -492,8 +492,8 @@ public:
     {
         selectedAuctionId = 0;
         auctionGold = false;
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View premium auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View gold auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Sunwell Coins auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Gold auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
@@ -525,8 +525,8 @@ public:
         {
             selectedAuctionId = 0;
             auctionGold = false;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View premium auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View gold auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Sunwell Coins auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Gold auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action == NPC_BAZAAR_ACTION_CLOSE)
@@ -591,7 +591,7 @@ public:
             auctionList[2] = fields[2].GetString();
         }
 
-        std::string data = gold ? ("Offer: " + auctionList[0] + "g for " + auctionList[1] + "pp - by: " + auctionList[2]) : ("Offer: " + auctionList[1] + "pp for " + auctionList[0] + "g - by: " + auctionList[2]);
+        std::string data = gold ? ("Offer: " + auctionList[0] + "g for " + auctionList[1] + "sc - by: " + auctionList[2]) : ("Offer: " + auctionList[1] + "sc for " + auctionList[0] + "g - by: " + auctionList[2]);
         return data;
     }
 
@@ -621,7 +621,7 @@ public:
             auctionList[1] = fields[1].GetString();
         }
 
-        std::string data = gold ? ("Accept Offer: " + auctionList[0] + "g for " + auctionList[1] + "pp") : ("Accept Offer: " + auctionList[1] + "pp for " + auctionList[0] + "g");
+        std::string data = gold ? ("Accept Offer: " + auctionList[0] + "g for " + auctionList[1] + "sc") : ("Accept Offer: " + auctionList[1] + "sc for " + auctionList[0] + "g");
         return data;
     }
 
@@ -937,7 +937,7 @@ public:
             auctionList[1] = fields[1].GetString();
         }
 
-        std::string data = "Char: " + auctionList[1] + " for " + auctionList[0] + "pp (details)";
+        std::string data = "Char: " + auctionList[1] + " for " + auctionList[0] + "sc (details)";
         return data;
     }
 
@@ -1205,7 +1205,7 @@ public:
                 data = "Armory: sunwell.pl/character/1/" + auctionList;
                 break;
             case 1:
-                data = "Price: " + auctionList + " Premium";
+                data = "Price: " + auctionList + " Sunwell Coins";
                 break;
             case 2:
                 data = "Name: " + auctionList;
