@@ -3218,7 +3218,8 @@ void SpellMgr::LoadSpellCustomAttr()
             67861,
             67862,
             67863,
-            67721, // Anub'arak, Nerubian Burrower, Expose Weakness
+            67721, // Anub'arak, Nerubian Burrower, Expose Weakness 10
+            67847, // Anub'arak, Nerubian Burrower, Expose Weakness 25
             64638, // Ulduar, Winter Jormungar, Acidic Bite
             71157, // Icecrown Citadel, Plagued Zombie, Infected Wound
             72963, // Icecrown Citadel, Valithria Dreamwalker, Flesh Rot (Rot Worm)
@@ -3249,6 +3250,7 @@ void SpellMgr::LoadSpellCustomAttr()
             67472, // Fire Bomb 25 man
             67473, // Fire Bomb 10 man heroic
             67475, // Fire Bomb 25 man heroic
+            66129, // Spider Frenzy
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
