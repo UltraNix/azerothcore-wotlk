@@ -51,7 +51,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 -- Elwynn Forest
 (NULL, 18338, 0, 1, 300, 0, 0, -9071.675781, 427.454132, 93.056282, 0.652231, 28800, 10, 0, 0, 0, 0, 0, 0, 0); 
 
---Waypoints
+-- Waypoints
 
 -- Redridge Mountains
 SET @PATH_ID := 999999;
