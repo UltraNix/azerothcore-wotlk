@@ -3250,7 +3250,6 @@ void SpellMgr::LoadSpellCustomAttr()
             67472, // Fire Bomb 25 man
             67473, // Fire Bomb 10 man heroic
             67475, // Fire Bomb 25 man heroic
-            66129, // Spider Frenzy
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
@@ -5887,6 +5886,10 @@ void SpellMgr::LoadDbcDataCorrections()
         // Trial of the Crusader, Anub'arak, Spider Frenzy
         case 66129:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        // Trial of the Crusader, Anub'Arak, Leeching Swarm
+        case 66240:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
 
         //////////////////////////////////////////
