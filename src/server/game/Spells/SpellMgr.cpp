@@ -4435,6 +4435,14 @@ void SpellMgr::LoadDbcDataCorrections()
         case 59725:
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_CASTER_AREA_PARTY;
             break;
+        //! Throws
+        // Shattering throw
+        case 64382:
+        //Heroic throw
+        case 57755:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_UNK15;
+            break;
+
 
 
 
