@@ -72,10 +72,16 @@ bool npc_escortAI::LoadWaypointsFromWaypointData(uint32 pathId)
     {
         Field* fields = result->Fetch();
 
+        float x = fields[1].GetFloat();
+        float y = fields[2].GetFloat();
+
+        Trinity::NormalizeMapCoord(x);
+        Trinity::NormalizeMapCoord(y);
+
         AddWaypoint(
             fields[0].GetInt32(),
-            fields[1].GetFloat(),
-            fields[2].GetFloat(),
+            x,
+            y,
             fields[3].GetFloat(),
             fields[5].GetInt32()
         );
