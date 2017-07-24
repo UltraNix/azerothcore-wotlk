@@ -1213,6 +1213,7 @@ public:
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 2000);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_ANIM, 1000);
             }
@@ -1331,6 +1332,7 @@ public:
                     events.RepeatEvent(urand(5000, 10000));
                     break;
                 case EVENT_DETONATING_LASHER_START_ATTACK:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->SetControlled(false, UNIT_STATE_ROOT);
                     me->SetReactState(REACT_AGGRESSIVE);
                     if (Unit* target = SelectTargetFromPlayerList(80))
