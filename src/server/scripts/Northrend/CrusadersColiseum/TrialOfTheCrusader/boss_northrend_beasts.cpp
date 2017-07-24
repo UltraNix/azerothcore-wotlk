@@ -798,7 +798,8 @@ public:
             events.RescheduleEvent(EVENT_SPELL_WHIRL, urand(10000,12000));
             events.RescheduleEvent(EVENT_SPELL_ARCTIC_BREATH, 14000);
             events.RescheduleEvent(EVENT_JUMP_MIDDLE, 30000);
-            events.RescheduleEvent(EVENT_BERSERK, 150000);
+            if (IsHeroic())
+                events.RescheduleEvent(EVENT_BERSERK, 150000);
         }
 
         void JustReachedHome()
