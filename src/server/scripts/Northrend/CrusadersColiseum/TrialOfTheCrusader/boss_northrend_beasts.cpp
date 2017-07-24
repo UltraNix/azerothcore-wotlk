@@ -749,6 +749,7 @@ enum IcehowlEvents
     EVENT_SPELL_MASSIVE_CRASH,
     EVENT_SPELL_WHIRL,
     EVENT_SPELL_ARCTIC_BREATH,
+    EVENT_BERSERK
 };
 
 class boss_icehowl : public CreatureScript
@@ -797,6 +798,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_WHIRL, urand(10000,12000));
             events.RescheduleEvent(EVENT_SPELL_ARCTIC_BREATH, 14000);
             events.RescheduleEvent(EVENT_JUMP_MIDDLE, 30000);
+            events.RescheduleEvent(EVENT_BERSERK, 150000);
         }
 
         void JustReachedHome()
@@ -984,6 +986,10 @@ public:
                     break;
                 case EVENT_REFRESH_POSITION:
                     //me->SetFacingTo(me->GetOrientation());
+                    events.PopEvent();
+                    break;
+                case EVENT_BERSERK:
+                    DoCastSelf(SPELL_ENRAGE, true);
                     events.PopEvent();
                     break;
             }
