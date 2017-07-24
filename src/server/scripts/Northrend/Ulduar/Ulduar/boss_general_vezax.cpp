@@ -239,7 +239,8 @@ struct boss_vezaxAI : public BossAI
                         me->SetTarget(me->GetVictim()->GetGUID());
                     break;
                 case EVENT_SPELL_SEARING_FLAMES:
-                    DoCastAOE(SPELL_SEARING_FLAMES);
+                    if (Is25ManRaid() || !me->FindNearestCreature(NPC_SARONITE_ANIMUS, 250.0f))
+                        DoCastAOE(SPELL_SEARING_FLAMES);
                     events.Repeat(me->GetMap()->Is25ManRaid() ? 8000 : 15000);
                     break;
                 case EVENT_SPELL_SURGE_OF_DARKNESS:
