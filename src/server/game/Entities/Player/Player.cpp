@@ -2394,7 +2394,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove pet on map change
             if (pet)
-                UnsummonPetTemporaryIfAny();
+            {
+                if (mEntry->IsBattleArena())
+                    RemovePet(pet, PET_SAVE_AS_CURRENT);
+                else UnsummonPetTemporaryIfAny();
+            }
 
             // remove all dyn objects
             RemoveAllDynObjects();
