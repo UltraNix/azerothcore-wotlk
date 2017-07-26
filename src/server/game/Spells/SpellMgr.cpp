@@ -5776,16 +5776,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67311:
             spellInfo->procCharges = 10;
             break;
-        case 65724:
-	    case 67213:
-	    case 67214:
-	    case 67215:
-	    case 65748:
-	    case 67216:
-	    case 67217:
-		case 67218:
-		    spellInfo->DurationIndex = 8;
-		    break;
         // Trial of the Crusader, Twin Valkyr, Touch of Light/Darkness, Light/Dark Surge
         case 65950: // light 0
             //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
