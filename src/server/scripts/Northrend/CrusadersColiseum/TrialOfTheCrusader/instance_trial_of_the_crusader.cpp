@@ -896,7 +896,6 @@ public:
                                     c->AI()->AttackStart(target);
                                     c->AI()->DoZoneInCombat();
                                 }
-
                             }
                         }
                         events.PopEvent();
@@ -1124,7 +1123,11 @@ public:
                 case EVENT_SCENE_302:
                     {
                         if( Creature* c = instance->GetCreature(NPC_TirionGUID) )
+                        {
+                            c->SummonCreature(NPC_LIGHTBANE, Locs[LOC_VALKYR_RIGHT].GetPositionX(), Locs[LOC_VALKYR_RIGHT].GetPositionY(), Locs[LOC_VALKYR_RIGHT].GetPositionZ(), Locs[LOC_VALKYR_RIGHT].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
+                            c->SummonCreature(NPC_DARKBANE, Locs[LOC_VALKYR_LEFT].GetPositionX(), Locs[LOC_VALKYR_LEFT].GetPositionY(), Locs[LOC_VALKYR_LEFT].GetPositionZ(), Locs[LOC_VALKYR_LEFT].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
                             c->AI()->Talk(SAY_STAGE_3_02);
+                        }
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_SCENE_303, 3000);
                     }
@@ -1135,9 +1138,9 @@ public:
                         if( Creature* c = instance->GetCreature(NPC_TirionGUID) )
                         {
                             HandleGameObject(GO_MainGateGUID, true);
-                            if( Creature* t = c->SummonCreature(NPC_LIGHTBANE, Locs[LOC_VALKYR_RIGHT].GetPositionX(), Locs[LOC_VALKYR_RIGHT].GetPositionY(), Locs[LOC_VALKYR_RIGHT].GetPositionZ(), Locs[LOC_VALKYR_RIGHT].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000) )
+                            if( Creature* t = instance->GetCreature(NPC_LightbaneGUID))
                                 t->GetMotionMaster()->MovePoint(0, Locs[LOC_VALKYR_DEST_RIGHT].GetPositionX(), Locs[LOC_VALKYR_DEST_RIGHT].GetPositionY(), Locs[LOC_VALKYR_DEST_RIGHT].GetPositionZ());
-                            if( Creature* t = c->SummonCreature(NPC_DARKBANE, Locs[LOC_VALKYR_LEFT].GetPositionX(), Locs[LOC_VALKYR_LEFT].GetPositionY(), Locs[LOC_VALKYR_LEFT].GetPositionZ(), Locs[LOC_VALKYR_LEFT].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000) )
+                            if( Creature* t = instance->GetCreature(NPC_DarkbaneGUID))
                                 t->GetMotionMaster()->MovePoint(0, Locs[LOC_VALKYR_DEST_LEFT].GetPositionX(), Locs[LOC_VALKYR_DEST_LEFT].GetPositionY(), Locs[LOC_VALKYR_DEST_LEFT].GetPositionZ());
                         }
                         events.PopEvent();
