@@ -14227,6 +14227,26 @@ void Player::RemoveEnchantmentDurationsReferences(Item* item)
     }
 }
 
+void Player::RemoveAllTmpEnchantmentDurations()
+{
+    for (EnchantDurationList::iterator itr = m_enchantDuration.begin(), next; itr != m_enchantDuration.end(); itr = next)
+    {
+        next = itr;
+        if (itr->slot == TEMP_ENCHANTMENT_SLOT)
+        {
+            if (itr->item && itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+            {
+                ApplyEnchantment(itr->item, TEMP_ENCHANTMENT_SLOT, false, false);
+                itr->item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
+            }
+            // remove from update list
+            next = m_enchantDuration.erase(itr);
+        }
+        else
+            ++next;
+    }
+}
+
 void Player::RemoveArenaEnchantments(EnchantmentSlot slot)
 { 
     // remove enchantments from equipped items first to clean up the m_enchantDuration list
@@ -26551,6 +26571,8 @@ void Player::ActivateSpec(uint8 spec)
             if (GlyphPropertiesEntry const* glyphEntry = sGlyphPropertiesStore.LookupEntry(glyphId))
                 RemoveAurasDueToSpell(glyphEntry->SpellId);
 
+    RemoveAllTmpEnchantmentDurations();
+
     // xinef: set active spec as new one
     SetActiveSpec(spec);
     uint32 spentTalents = 0;
@@ -26596,6 +26618,13 @@ void Player::ActivateSpec(uint8 spec)
 
     m_usedTalentCount = spentTalents;
     InitTalentForLevel();
+
+    // some auras are stubborn and won't fade, unaura here
+    {
+        //Glyph of Totem of Wrath
+        if (HasAura(63283) && !HasAura(63280))
+            RemoveAura(63283);
+    }
 
     // xinef: optimization, use callback to read the data
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_ACTIONS_SPEC);
