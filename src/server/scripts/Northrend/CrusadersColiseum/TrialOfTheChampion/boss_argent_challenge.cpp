@@ -327,11 +327,21 @@ struct boss_paletressAI : public BossAI
             case EVENT_SPELL_RENEW:
                 if (!_memoryGUID)
                     break;
-                if (urand(0, 1))
-                    DoCastSelf(SPELL_RENEW);
-                else if (Creature* memory = ObjectAccessor::GetCreature(*me, _memoryGUID))
-                    if (memory->IsAlive())
+
+                if (Creature* memory = ObjectAccessor::GetCreature(*me, _memoryGUID))
+                {
+                    if (memory->GetHealthPct() >= 90.0f)
+                        DoCastSelf(SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 75.0f && memory->GetHealthPct() < 90.0f)
+                        DoCast(roll_chance_i(75) ? me : memory, SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 50.0f && memory->GetMaxHealth() < 75.0f)
+                        DoCast(roll_chance_i(50) ? me : memory, SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 25.0f && memory->GetMaxHealth() < 50.0f)
+                        DoCast(roll_chance_i(25) ? me : memory, SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 0.0f && memory->GetMaxHealth() < 25.0f)
                         DoCast(memory, SPELL_RENEW);
+                }
+
                 events.Repeat(urand(15000, 17000));
                 break;
             default:
