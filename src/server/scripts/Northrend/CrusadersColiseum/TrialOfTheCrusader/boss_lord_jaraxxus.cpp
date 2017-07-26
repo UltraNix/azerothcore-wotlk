@@ -469,15 +469,17 @@ class spell_mistress_kiss_area : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
+                auto is25ManRaid = false;
+                auto caster = GetCaster();
+                if (auto map = caster->GetMap())
+                    if (map->Is25ManRaid())
+                        is25ManRaid = true;
                 // get a list of players with mana
                 targets.remove_if(Trinity::ObjectTypeIdCheck(TYPEID_PLAYER, false));
                 targets.remove_if(Trinity::PowerCheck(POWER_MANA, false));
                 if (targets.empty())
                     return;
-
-                WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-                targets.clear();
-                targets.push_back(target);
+                Trinity::Containers::RandomResizeList(targets, is25ManRaid ? 5 : 1);
             }
 
             void HandleScript(SpellEffIndex /*effIndex*/)
