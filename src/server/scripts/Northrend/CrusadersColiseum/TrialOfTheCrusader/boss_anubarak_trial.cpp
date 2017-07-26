@@ -196,7 +196,7 @@ public:
             events.RescheduleEvent(EVENT_ENRAGE, 600000);
             events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000,15000));
             events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000,20000));
-            events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000,10000));
+            events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000,10000))
             events.RescheduleEvent(EVENT_SUBMERGE, SUBMERGE_INTERVAL);
             if( !IsHeroic() )
                 events.RescheduleEvent(EVENT_RESPAWN_SPHERE, 4000);
