@@ -11,6 +11,11 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 const Position SpawnPosition = {746.67f, 684.08f, 412.5f, 4.65f};
 #define CLEANUP_CHECK_INTERVAL    5000
 
+struct ArgentChallengeData
+{
+    uint32 entry, counter, lastSummon;
+};
+
 struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 {
     instance_trial_of_the_champion_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); }
@@ -27,6 +32,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
     uint8 temp1, temp2;
     bool shortver;
     bool bAchievIveHadWorse;
+    ArgentChallengeData ChallengeEntry;
 
     uint64 NPC_AnnouncerGUID;
     uint64 NPC_TirionGUID;
@@ -67,6 +73,9 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         NPC_BlackKnightGUID = 0;
         GO_MainGateGUID = 0;
         GO_NorthPortcullisGUID = 0;
+        ChallengeEntry.entry = RAND(NPC_EADRIC, NPC_PALETRESS);
+        ChallengeEntry.counter = (ChallengeEntry.entry == NPC_EADRIC) ? 1 : 0;
+        ChallengeEntry.lastSummon = 0;
     }
 
     bool IsEncounterInProgress() const override
@@ -238,7 +247,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
                     m_auiEncounter[i] = NOT_STARTED;
-
         }
         else
             OUT_LOAD_INST_DATA_FAIL;
@@ -260,6 +268,10 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 
     bool DoNeedCleanup(bool /*enter*/)
     {
+        if (ChallengeEntry.lastSummon != 0)
+            ChallengeEntry.counter = (ChallengeEntry.lastSummon == NPC_EADRIC) ? 1 : 0;
+        else
+            ChallengeEntry.counter = (ChallengeEntry.entry == NPC_EADRIC) ? 1 : 0;
         uint8 aliveCount = 0;
         Map::PlayerList const &players = instance->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -1022,8 +1034,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_SUMMON_ARGENT_CHALLENGE:
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                         announcer->GetMotionMaster()->MovePoint(0, 735.81f, 661.92f, 412.39f);
-                    if (Creature* boss = instance->SummonCreature(Counter ? NPC_EADRIC : NPC_PALETRESS, SpawnPosition))
+                    if (Creature* boss = instance->SummonCreature(ChallengeEntry.lastSummon != 0 ? ChallengeEntry.lastSummon : ChallengeEntry.entry, SpawnPosition))
+                    {
+                        if (ChallengeEntry.lastSummon == 0)
+                            ChallengeEntry.lastSummon = boss->GetEntry();
                         boss->GetMotionMaster()->MovePoint(0, 746.881f, 660.263f, 411.7f);
+                    }
                     events.ScheduleEvent(EVENT_CLOSE_GATE, 5000);
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_SAY_1, 4000);
                     events.ScheduleEvent(EVENT_ARGENT_SOLDIER_GROUP_ATTACK, 12500);
@@ -1031,8 +1047,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_ARGENT_CHALLENGE_SAY_1:
                     if (Creature* champion = instance->GetCreature(NPC_ArgentChampionGUID))
                         if (champion->IsAIEnabled)
-                            champion->AI()->Talk(Counter ? TEXT_EADRIC_SAY_1 : TEXT_PALETRESS_SAY_1);
-                    if (!Counter)
+                            champion->AI()->Talk(ChallengeEntry.counter ? TEXT_EADRIC_SAY_1 : TEXT_PALETRESS_SAY_1);
+                    if (!ChallengeEntry.counter)
                         events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_SAY_2, 6000);
                     break;
                 case EVENT_ARGENT_CHALLENGE_SAY_2:
