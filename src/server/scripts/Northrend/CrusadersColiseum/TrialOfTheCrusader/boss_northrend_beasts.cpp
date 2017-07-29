@@ -781,6 +781,7 @@ public:
 
         InstanceScript* pInstance;
         EventMap events;
+        EventMap events2;
         uint64 TargetGUID;
         float destX, destY, destZ;
 
@@ -799,7 +800,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_ARCTIC_BREATH, 14000);
             events.RescheduleEvent(EVENT_JUMP_MIDDLE, 30000);
             if (IsHeroic())
-                events.RescheduleEvent(EVENT_BERSERK, 150000);
+                events2.RescheduleEvent(EVENT_BERSERK, 150000);
         }
 
         void JustReachedHome()
@@ -860,9 +861,13 @@ public:
                 return;
 
             events.Update(diff);
+            events2.Update(diff);
 
             if( me->HasUnitState(UNIT_STATE_CASTING) )
                 return;
+
+            if (events2.ExecuteEvent() == EVENT_BERSERK)
+                DoCastSelf(47008, true);
 
             switch( events.GetEvent() )
             {
@@ -987,10 +992,6 @@ public:
                     break;
                 case EVENT_REFRESH_POSITION:
                     //me->SetFacingTo(me->GetOrientation());
-                    events.PopEvent();
-                    break;
-                case EVENT_BERSERK:
-                    DoCastSelf(SPELL_ENRAGE, true);
                     events.PopEvent();
                     break;
             }
