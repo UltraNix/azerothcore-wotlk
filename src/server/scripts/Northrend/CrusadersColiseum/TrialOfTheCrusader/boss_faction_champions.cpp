@@ -26,6 +26,7 @@ struct boss_faction_championsAI : public ScriptedAI
 {
     boss_faction_championsAI(Creature* pCreature, uint32 aitype) : ScriptedAI(pCreature)
     {
+        boundaryHandler.SetBoundary(new CircleBoundary(Position(563.26f, 139.6f), 75.0));
         pInstance = pCreature->GetInstanceScript();
         me->SetReactState(REACT_PASSIVE);
         mAIType = aitype;

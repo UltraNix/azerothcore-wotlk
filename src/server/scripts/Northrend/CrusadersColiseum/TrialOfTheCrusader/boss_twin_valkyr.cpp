@@ -92,6 +92,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
 {
     boss_twin_valkyrAI(Creature* pCreature) : ScriptedAI(pCreature), summons(me)
     {
+        boundaryHandler.SetBoundary(new CircleBoundary(Position(563.26f, 139.6f), 75.0));
         pInstance = pCreature->GetInstanceScript();
         me->SetReactState(REACT_PASSIVE);
         me->SetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, 1.0f);

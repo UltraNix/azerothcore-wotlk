@@ -226,6 +226,7 @@ public:
     {
         boss_gormokAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
         {
+            boundaryHandler.SetBoundary(new CircleBoundary(Position(563.26f, 139.6f), 75.0));
             pInstance = pCreature->GetInstanceScript();
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->SetReactState(REACT_PASSIVE);
@@ -459,6 +460,7 @@ struct boss_jormungarAI : public ScriptedAI
 {
     boss_jormungarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
+        boundaryHandler.SetBoundary(new CircleBoundary(Position(563.26f, 139.6f), 75.0));
         pInstance = pCreature->GetInstanceScript();
         me->SetReactState(REACT_PASSIVE);
     }
@@ -766,6 +768,7 @@ public:
     {
         boss_icehowlAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+            boundaryHandler.SetBoundary(new CircleBoundary(Position(563.26f, 139.6f), 75.0));
             pInstance = pCreature->GetInstanceScript();
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->SetReactState(REACT_PASSIVE);

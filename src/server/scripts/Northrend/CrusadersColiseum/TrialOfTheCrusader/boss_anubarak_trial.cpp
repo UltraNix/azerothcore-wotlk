@@ -145,6 +145,7 @@ public:
     {
         boss_anubarak_trialAI(Creature* pCreature) : ScriptedAI(pCreature), summons(me)
         {
+            boundaryHandler.SetBoundary(new EllipseBoundary(Position(746.0f, 135.0f), 100.0, 75.0));
             pInstance = (InstanceScript*)pCreature->GetInstanceScript();
             events.Reset();
             bIntro = false;
