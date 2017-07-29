@@ -206,6 +206,16 @@ public:
 
         void DoAction(int32 param)
         {
+            if (param == 2)
+            {
+                Position pos;
+                me->GetRandomNearPosition(pos, 5.0f);
+                me->GetMotionMaster()->MoveJump(pos, 5.0f, 5.0f);
+                events.Reset();
+                events.ScheduleEvent(EVENT_SPELL_FIRE_BOMB, urand(5000, 20000));
+                me->SetInCombatWithZone();
+            }
+            
             if( param == 1 && !TargetGUID )
                 me->DespawnOrUnsummon();
         }
@@ -370,7 +380,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
-            summons.DoAction(1);
+            summons.DoAction(2);
 
             if( pInstance )
                 pInstance->SetData(TYPE_GORMOK, DONE);
