@@ -6,45 +6,43 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "ScriptedCreature.h"
 #include "nexus.h"
 #include "Player.h"
-#include "SpellInfo.h"
 #include "World.h"
 
 enum Spells
 {
-    SPELL_SPARK                            = 47751,
-    SPELL_RIFT_SHIELD                    = 47748,
-    SPELL_CHARGE_RIFTS                    = 47747,
-    SPELL_CREATE_RIFT                    = 47743,
-    SPELL_ARCANE_ATTRACTION                = 57063,
-    SPELL_CLOSE_RIFTS                    = 47745
+    SPELL_SPARK                             = 47751,
+    SPELL_RIFT_SHIELD                       = 47748,
+    SPELL_CHARGE_RIFTS                      = 47747,
+    SPELL_CREATE_RIFT                       = 47743,
+    SPELL_ARCANE_ATTRACTION                 = 57063,
+    SPELL_CLOSE_RIFTS                       = 47745
 };
 
 enum Yells
 {
-    SAY_AGGRO                            = 0,
-    SAY_DEATH                            = 1,
-    SAY_RIFT                            = 2,
-    EMOTE_RIFT                            = 3,
-    EMOTE_SHIELD                        = 4
+    SAY_AGGRO,
+    SAY_DEATH,
+    SAY_RIFT,
+    EMOTE_RIFT,
+    EMOTE_SHIELD
 };
 
 enum Events
 {
-    EVENT_ANOMALUS_SPARK                = 1,
-    EVENT_ANOMALUS_HEALTH                = 2,
-    EVENT_ANOMALUS_ARCANE_ATTRACTION    = 3
+    EVENT_ANOMALUS_SPARK                    = 1,
+    EVENT_ANOMALUS_HEALTH,
+    EVENT_ANOMALUS_ARCANE_ATTRACTION
 };
 
 class ChargeRifts : public BasicEvent
 {
     public:
-        ChargeRifts(Creature* caster) : _caster(caster)
-        {
-        }
+        explicit ChargeRifts(Creature* caster) : _caster(caster) {}
 
-        bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+        bool Execute(uint64 /*execTime*/, uint32 /*diff*/) override
         {
-            _caster->AI()->Talk(EMOTE_SHIELD);
+            if (_caster->IsAIEnabled)
+                _caster->AI()->Talk(EMOTE_SHIELD);
             _caster->CastSpell(_caster, SPELL_CHARGE_RIFTS, true);
             return true;
         }
@@ -53,152 +51,128 @@ class ChargeRifts : public BasicEvent
         Creature* _caster;
 };
 
-class boss_anomalus : public CreatureScript
+struct boss_anomalusAI : BossAI
 {
-    public:
-        boss_anomalus() : CreatureScript("boss_anomalus") { }
+    explicit boss_anomalusAI(Creature* creature) : BossAI(creature, DATA_ANOMALUS_EVENT), _achievement(false), _riftCount(0), _preNerf(sWorld->PatchNotes(PATCH_MIN, PATCH_332))
+    {
+        boundaryHandler.SetBoundary(new CircleBoundary(me->GetHomePosition(), 60.0f));
+    }
 
-        CreatureAI* GetAI(Creature* creature) const
+    void Reset() override
+    {
+        _Reset();
+        _achievement = true;
+        _riftCount = 0;
+        DoCastSelf(SPELL_CLOSE_RIFTS, true);
+    }
+
+    uint32 GetData(uint32 data) const override
+    {
+        if (data == me->GetEntry())
+            return _achievement;
+        return 0;
+    }
+
+    void SetData(uint32 type, uint32) override
+    {
+        if (_preNerf)
+            events.ScheduleEvent(EVENT_ANOMALUS_HEALTH, 1000);
+
+        if (type == me->GetEntry())
         {
-            return new boss_anomalusAI (creature);
+            me->RemoveAura(SPELL_RIFT_SHIELD);
+            me->InterruptNonMeleeSpells(false);
+            _achievement = false;
         }
+    }
 
-        struct boss_anomalusAI : public BossAI
+    void JustSummoned(Creature* summon) override
+    {
+        summons.Summon(summon);
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        Talk(SAY_AGGRO);
+        _EnterCombat();
+
+        events.SetTimer(45000);
+        events.ScheduleEvent(EVENT_ANOMALUS_SPARK, 5000);
+        events.ScheduleEvent(EVENT_ANOMALUS_HEALTH, 1000);
+        if (IsHeroic())
+            events.ScheduleEvent(EVENT_ANOMALUS_ARCANE_ATTRACTION, 8000);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        Talk(SAY_DEATH);
+        _JustDied();
+        DoCastSelf(SPELL_CLOSE_RIFTS, true);
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch(eventId)
         {
-            boss_anomalusAI(Creature* creature) : BossAI(creature, DATA_ANOMALUS_EVENT)
+            case EVENT_ANOMALUS_HEALTH:
             {
-                preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
-            }
+                bool healthCheck;
 
-            bool achievement;
-            uint8 riftCount;
-            bool preNerf;
-
-            void Reset()
-            {
-                BossAI::Reset();
-                achievement = true;
-                riftCount = 0;
-                me->CastSpell(me, SPELL_CLOSE_RIFTS, true);
-            }
-
-            uint32 GetData(uint32 data) const
-            {
-                if (data == me->GetEntry())
-                    return achievement;
-                return 0;
-            }
-
-            void SetData(uint32 type, uint32)
-            {
-                if (preNerf)
-                    events.ScheduleEvent(EVENT_ANOMALUS_HEALTH, 1000);
-
-                if (type == me->GetEntry())
+                if (_preNerf)
                 {
-                    me->RemoveAura(SPELL_RIFT_SHIELD);
-                    me->InterruptNonMeleeSpells(false);
-                    achievement = false;
+                    healthCheck = (me->HealthBelowPct(75) && _riftCount == 0) ||
+                        (me->HealthBelowPct(50) && _riftCount == 1) ||
+                        (me->HealthBelowPct(25) && _riftCount == 2);
                 }
-            }
+                else
+                    healthCheck = (me->HealthBelowPct(50) && _riftCount == 0);
 
-            void JustSummoned(Creature* summon)
-            {
-                summons.Summon(summon);
-            }
-
-            void EnterCombat(Unit* who)
-            {
-                Talk(SAY_AGGRO);
-                BossAI::EnterCombat(who);
-
-                events.SetTimer(45000);
-                events.ScheduleEvent(EVENT_ANOMALUS_SPARK, 5000);
-                events.ScheduleEvent(EVENT_ANOMALUS_HEALTH, 1000);
-                if (IsHeroic())
-                    events.ScheduleEvent(EVENT_ANOMALUS_ARCANE_ATTRACTION, 8000);
-            }
-
-            void JustDied(Unit* killer)
-            {
-                Talk(SAY_DEATH);
-                BossAI::JustDied(killer);
-                me->CastSpell(me, SPELL_CLOSE_RIFTS, true);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                switch (events.ExecuteEvent())
+                if (healthCheck)
                 {
-					case EVENT_ANOMALUS_HEALTH:
-                        {
-                            bool healthCheck = false;
+                    _riftCount++;
+                    Talk(SAY_RIFT);
+                    Talk(EMOTE_RIFT);
 
-                            if (preNerf)
-                            {
-                                healthCheck = (me->HealthBelowPct(75) && riftCount == 0) || 
-                                    (me->HealthBelowPct(50) && riftCount == 1) || 
-                                    (me->HealthBelowPct(25) && riftCount == 2);
-                            } 
-                            else
-                            {
-                                healthCheck = (me->HealthBelowPct(50) && riftCount == 0);
-                            }
-
-						    if (healthCheck)
-						    {
-                                riftCount++;
-							    Talk(SAY_RIFT);
-							    Talk(EMOTE_RIFT);
-							
-							    me->CastSpell(me, SPELL_CREATE_RIFT, false);
-							    me->CastSpell(me, SPELL_RIFT_SHIELD, true);
-							    me->m_Events.AddEvent(new ChargeRifts(me), me->m_Events.CalculateTime(1000));
-							    events.DelayEvents(46000);
-							    break;
-						    }
-						    events.ScheduleEvent(EVENT_ANOMALUS_HEALTH, 1000);
-                        }
-					    break;
-                    case EVENT_ANOMALUS_SPARK:
-                        me->CastSpell(me->GetVictim(), SPELL_SPARK, false);
-                        events.ScheduleEvent(EVENT_ANOMALUS_SPARK, 5000);
-                        break;
-                    case EVENT_ANOMALUS_ARCANE_ATTRACTION:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                            me->CastSpell(target, SPELL_ARCANE_ATTRACTION, false);
-                        events.ScheduleEvent(EVENT_ANOMALUS_ARCANE_ATTRACTION, 15000);
-                        break;
+                    DoCastSelf(SPELL_CREATE_RIFT);
+                    DoCastSelf(SPELL_RIFT_SHIELD, true);
+                    me->m_Events.AddEvent(new ChargeRifts(me), me->m_Events.CalculateTime(1000));
+                    events.DelayEvents(46000);
+                    break;
                 }
+                events.Repeat(1000);
+            }
+            break;
+            case EVENT_ANOMALUS_SPARK:
+                DoCastVictim(SPELL_SPARK);
+                events.Repeat(5000);
+                break;
+            case EVENT_ANOMALUS_ARCANE_ATTRACTION:
+                if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                    DoCast(target, SPELL_ARCANE_ATTRACTION);
+                events.Repeat(15000);
+                break;
+            default:
+                break;
+        }
+    }
 
-                DoMeleeAttackIfReady();
-                EnterEvadeIfOutOfCombatArea();
-            }
-                    
-            bool CheckEvadeIfOutOfCombatArea() const
-            {
-                return me->GetHomePosition().GetExactDist2d(me) > 60.0f;
-            }
-        };
+private:
+    bool _achievement;
+    uint8 _riftCount;
+    bool _preNerf;
 };
 
 class achievement_chaos_theory : public AchievementCriteriaScript
 {
     public:
-        achievement_chaos_theory() : AchievementCriteriaScript("achievement_chaos_theory")
-        {
-        }
+        achievement_chaos_theory() : AchievementCriteriaScript("achievement_chaos_theory") {}
 
-        bool OnCheck(Player* /*player*/, Unit* target)
+        bool OnCheck(Player* /*player*/, Unit* target) override
         {
             if (!target)
+                return false;
+
+            if (!target->IsAIEnabled)
                 return false;
 
             return target->GetAI()->GetData(target->GetEntry());
@@ -207,6 +181,6 @@ class achievement_chaos_theory : public AchievementCriteriaScript
 
 void AddSC_boss_anomalus()
 {
-    new boss_anomalus();
+    new CreatureAILoader<boss_anomalusAI>("boss_anomalus");
     new achievement_chaos_theory();
 }
