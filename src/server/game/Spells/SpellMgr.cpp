@@ -3218,7 +3218,8 @@ void SpellMgr::LoadSpellCustomAttr()
             67861,
             67862,
             67863,
-            67721, // Anub'arak, Nerubian Burrower, Expose Weakness
+            67721, // Anub'arak, Nerubian Burrower, Expose Weakness 10
+            67847, // Anub'arak, Nerubian Burrower, Expose Weakness 25
             64638, // Ulduar, Winter Jormungar, Acidic Bite
             71157, // Icecrown Citadel, Plagued Zombie, Infected Wound
             72963, // Icecrown Citadel, Valithria Dreamwalker, Flesh Rot (Rot Worm)
@@ -4434,6 +4435,14 @@ void SpellMgr::LoadDbcDataCorrections()
         case 59725:
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_CASTER_AREA_PARTY;
             break;
+        //! Throws
+        // Shattering throw
+        case 64382:
+        //Heroic throw
+        case 57755:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_UNK15;
+            break;
+
 
 
 
@@ -5885,6 +5894,10 @@ void SpellMgr::LoadDbcDataCorrections()
         // Trial of the Crusader, Anub'arak, Spider Frenzy
         case 66129:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        // Trial of the Crusader, Anub'Arak, Leeching Swarm
+        case 66240:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
 
         //////////////////////////////////////////

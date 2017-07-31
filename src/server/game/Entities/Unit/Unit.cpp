@@ -8701,6 +8701,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 if ((aurEff->GetBase()->GetMaxDuration() - aurEff->GetBase()->GetDuration()) < 1000)
                     return false;
 
+            if (procSpell && procSpell->AttributesEx4 & SPELL_ATTR4_UNK15)
+                return false;
+
             CastSpell(victim, trigger_spell_id, true);
             return true;
         }

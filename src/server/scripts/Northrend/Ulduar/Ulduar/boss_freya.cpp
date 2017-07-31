@@ -434,7 +434,18 @@ public:
                 me->MonsterYell("The swarm of the elements shall overtake you!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_DETONATING);
                 for (uint8 i = 0; i < 10; ++i)
-                    me->SummonCreature(NPC_DETONATING_LASHER, me->GetPositionX()+urand(5,20), me->GetPositionY()+urand(5,20), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_DESPAWN);
+                {
+                    float angle = i * 2 * M_PI / 10;
+                    float x = me->GetPositionX() + cos(angle) * 15.0f;
+                    float y = me->GetPositionY() + sin(angle) * 15.0f;
+                    float z = me->GetPositionZ();
+
+                    if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z, 0.0f, TEMPSUMMON_CORPSE_DESPAWN))
+                    {
+                        lasher->UpdateAllowedPositionZ(x, y, z);
+                        lasher->NearTeleportTo(x, y, z, 0.0f);
+                    }
+                }
             }
         }
 
@@ -609,7 +620,6 @@ public:
                     SpawnWave();
                 else if (me->GetAura(SPELL_ATTUNED_TO_NATURE))
                 {
-                    me->RemoveAura(SPELL_ATTUNED_TO_NATURE);
                     events.ScheduleEvent(EVENT_FREYA_NATURE_BOMB, 5000);
                     events.SetPhase(EVENT_PHASE_FINAL);
                     events.PopEvent();
@@ -1203,7 +1213,8 @@ public:
                 me->SetReactState(REACT_PASSIVE);
                 me->SetControlled(true, UNIT_STATE_ROOT);
                 me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
-                events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 1500);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 2000);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_ANIM, 1000);
             }
             else if (Unit* target = SelectTargetFromPlayerList(70))
@@ -1321,6 +1332,7 @@ public:
                     events.RepeatEvent(urand(5000, 10000));
                     break;
                 case EVENT_DETONATING_LASHER_START_ATTACK:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->SetControlled(false, UNIT_STATE_ROOT);
                     me->SetReactState(REACT_AGGRESSIVE);
                     if (Unit* target = SelectTargetFromPlayerList(80))

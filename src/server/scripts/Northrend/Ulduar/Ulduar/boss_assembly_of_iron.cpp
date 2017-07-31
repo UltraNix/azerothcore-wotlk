@@ -576,12 +576,14 @@ public:
                 case EVENT_RUNE_OF_POWER:
                 {
                     std::list<Creature*> assemblyList;
-                    for(uint8 i = DATA_STEELBREAKER; i<=DATA_BRUNDIR; ++i)
+                    for (uint8 i = DATA_STEELBREAKER; i <= DATA_BRUNDIR; ++i)
                         if (Creature* boss = ObjectAccessor::GetCreature(*me, pInstance->GetData64(i)))
-                            assemblyList.push_back(boss);
+                            if (boss->IsAlive())
+                                assemblyList.push_back(boss);
                     
-                    if (Creature* target = Trinity::Containers::SelectRandomContainerElement(assemblyList))
-                        DoCast(target, SPELL_RUNE_OF_POWER, true);
+                    if (!assemblyList.empty())
+                        if (Creature* target = Trinity::Containers::SelectRandomContainerElement(assemblyList))
+                            DoCast(target, SPELL_RUNE_OF_POWER, true);
 
                     events.RepeatEvent(60000);
                     break;
