@@ -502,7 +502,10 @@ struct boss_grand_championAI : public npc_escortAI
             me->SetSpeed(MOVE_RUN, 1.0f, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-            me->RemoveAllAuras();
+            me->RemoveAurasDueToSpell(67867);
+            me->RemoveAurasDueToSpell(67866);
+            me->RemoveAurasDueToSpell(67865);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             AddCreatureAddonAuras();
             _events.Reset();
         }
