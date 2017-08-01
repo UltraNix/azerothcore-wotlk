@@ -710,17 +710,10 @@ class spell_toc5_light_rain_SpellScript : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-        for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); )
+        targets.remove_if([](WorldObject* target) -> bool
         {
-            if ((*itr)->GetTypeId() == TYPEID_UNIT)
-                if ((*itr)->ToCreature()->GetEntry() == NPC_FOUNTAIN_OF_LIGHT)
-                {
-                    targets.erase(itr);
-                    itr = targets.begin();
-                    continue;
-                }
-            ++itr;
-        }
+            return target->GetEntry() == NPC_FOUNTAIN_OF_LIGHT;
+        });
     }
 
     void Register()
