@@ -386,7 +386,7 @@ struct boss_mimironAI : public ScriptedAI
 
             events.ScheduleEvent(EVENT_COMPUTER_SAY_INITIATED, 0);
             events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, 3000);
-            minutesTalkNum = TALK_COMPUTER_EIGHT;
+            minutesTalkNum = TALK_COMPUTER_TEN;
             for (uint32 i=0; i<uint32(TALK_COMPUTER_ZERO-minutesTalkNum-1); ++i)
                 events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, (i+1)*MINUTE*IN_MILLISECONDS);
             events.ScheduleEvent(EVENT_COMPUTER_SAY_MINUTES, (TALK_COMPUTER_ZERO-minutesTalkNum)*MINUTE*IN_MILLISECONDS + 6000);

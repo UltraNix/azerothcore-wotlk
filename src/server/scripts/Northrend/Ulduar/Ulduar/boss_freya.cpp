@@ -533,7 +533,7 @@ public:
             events.ScheduleEvent(EVENT_FREYA_ADDS_SPAM, 10000, 0, EVENT_PHASE_ADDS);
             events.ScheduleEvent(EVENT_FREYA_LIFEBINDER, 30000);
             events.ScheduleEvent(EVENT_FREYA_SUNBEAM, 17000);
-            events.ScheduleEvent(EVENT_FREYA_BERSERK, 480000);
+            events.ScheduleEvent(EVENT_FREYA_BERSERK, 600000);
             events.SetPhase(EVENT_PHASE_ADDS);
 
             if( !m_pInstance )
