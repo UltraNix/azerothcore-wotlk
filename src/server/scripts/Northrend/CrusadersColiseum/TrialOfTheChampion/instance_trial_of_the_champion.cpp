@@ -268,10 +268,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 
     bool DoNeedCleanup(bool /*enter*/)
     {
-        if (ChallengeEntry.lastSummon != 0)
-            ChallengeEntry.counter = (ChallengeEntry.lastSummon == NPC_EADRIC) ? 1 : 0;
-        else
-            ChallengeEntry.counter = (ChallengeEntry.entry == NPC_EADRIC) ? 1 : 0;
         uint8 aliveCount = 0;
         Map::PlayerList const &players = instance->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
@@ -818,6 +814,11 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 
     void Update(uint32 diff) override
     {
+        if (ChallengeEntry.lastSummon != 0)
+            ChallengeEntry.counter = (ChallengeEntry.lastSummon == NPC_EADRIC) ? 1 : 0;
+        else
+            ChallengeEntry.counter = (ChallengeEntry.entry == NPC_EADRIC) ? 1 : 0;
+
         events.Update(diff);
 
         while (uint32 eventId = events.ExecuteEvent())
@@ -1096,7 +1097,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             announcer->GetMotionMaster()->MovePoint(0, 743.14f, 628.77f, 411.2f);
                             uint32 chest = 0;
-                            if (instance->IsHeroic())
+                            if (instance->IsHeroic()) 
                                 chest = (boss->GetEntry() == NPC_EADRIC || boss->GetEntry() == NPC_EADRIC_H) ? GO_EADRIC_LOOT_H : GO_PALETRESS_LOOT_H;
                             else
                                 chest = (boss->GetEntry() == NPC_EADRIC || boss->GetEntry() == NPC_EADRIC_H) ? GO_EADRIC_LOOT : GO_PALETRESS_LOOT;
