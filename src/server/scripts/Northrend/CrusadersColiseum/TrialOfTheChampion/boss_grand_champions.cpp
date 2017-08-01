@@ -370,6 +370,7 @@ struct boss_grand_championAI : public npc_escortAI
 {
     boss_grand_championAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
+        me->RemoveAllAuras();
         AddCreatureAddonAuras();
         instance = pCreature->GetInstanceScript();
         _mountPhase = true;
@@ -506,6 +507,8 @@ struct boss_grand_championAI : public npc_escortAI
             me->RemoveAurasDueToSpell(67867);
             me->RemoveAurasDueToSpell(67866);
             me->RemoveAurasDueToSpell(67865);
+            me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND);
+            me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND_PERIODIC);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             AddCreatureAddonAuras();
             _events.Reset();
