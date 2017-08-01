@@ -245,7 +245,7 @@ public:
             events.RescheduleEvent(EVENT_FLASH_FREEZE, 60000);
             events.RescheduleEvent(EVENT_FREEZE, 15000);
             events.RescheduleEvent(EVENT_BERSERK, 480000);
-            events.RescheduleEvent(EVENT_HARD_MODE_MISSED, 180000));
+            events.RescheduleEvent(EVENT_HARD_MODE_MISSED, 180000);
 
             me->MonsterYell(TEXT_HODIR_AGGRO, LANG_UNIVERSAL, 0);
             me->PlayDirectSound(SOUND_HODIR_AGGRO, 0);
