@@ -370,6 +370,7 @@ struct boss_grand_championAI : public npc_escortAI
 {
     boss_grand_championAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
+        AddCreatureAddonAuras();
         instance = pCreature->GetInstanceScript();
         _mountPhase = true;
         SetDespawnAtEnd(false);
