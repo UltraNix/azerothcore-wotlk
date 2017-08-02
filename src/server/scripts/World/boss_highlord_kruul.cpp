@@ -88,12 +88,12 @@ public:
                 return 999992;
             case 44:
                 return 999999;
-            case 400: //feralas, but spawns in 1k needles
+            case 400:
                 return 999997;
             case 405:
                 return 999995;
             case 406:
-                return 999992;
+                return 999998;
             case 618:
                 return 999996;
             default:
