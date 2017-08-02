@@ -421,7 +421,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
                     AttackStart(target);
                 }
                 break;
-            case SPELL_EXPLODE:
+            case 67886:
                 if (target && target->IsPlayer())
                     if (instance)
                         instance->SetData(DATA_ACHIEV_IVE_HAD_WORSE, 0);
