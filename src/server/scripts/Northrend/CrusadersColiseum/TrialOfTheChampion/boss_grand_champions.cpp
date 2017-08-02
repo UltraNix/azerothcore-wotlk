@@ -143,13 +143,13 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 
         if (apply)
         {
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetAttackable(true);
             me->SetSpeed(MOVE_RUN, 2.0f, false);
             DoCastSelf(SPELL_TRAMPLE_AURA, true);
         }
         else
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetAttackable(false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->StopMoving();
             Position pos;
@@ -412,7 +412,7 @@ struct boss_grand_championAI : public npc_escortAI
         {
             DoAction(1);
             DoAction(2);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetAttackable(true);
             me->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
             me->SetReactState(REACT_AGGRESSIVE);
         }
@@ -502,7 +502,7 @@ struct boss_grand_championAI : public npc_escortAI
             me->SetRegeneratingHealth(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
             me->SetSpeed(MOVE_RUN, 1.0f, false);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetAttackable(false);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->RemoveAurasDueToSpell(67867);
             me->RemoveAurasDueToSpell(67866);
@@ -576,7 +576,7 @@ struct boss_grand_championAI : public npc_escortAI
                 me->StopMoving();
                 me->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
                 me->SetRegeneratingHealth(false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetAttackable(false);
                 me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                 if (instance)
                 {
@@ -603,7 +603,7 @@ struct boss_grand_championAI : public npc_escortAI
                 me->CombatStop(true);
                 me->GetMotionMaster()->Clear();
                 me->SetRegeneratingHealth(false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetAttackable(false);
                 if (instance)
                     instance->SetData(DATA_GRAND_CHAMPION_DIED, _bossOrder);
             }
@@ -646,7 +646,7 @@ struct boss_grand_championAI : public npc_escortAI
                         _events.ScheduleEvent(EVENT_SHIELD_BREAKER, urand(5000, 8000));
                         _events.ScheduleEvent(EVENT_THRUST, urand(3000, 5000));
                         me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->SetAttackable(true);
                         if (Unit* target = me->SelectNearestTarget(200.0f))
                             AttackStart(target);
                         DoZoneInCombat();
@@ -739,7 +739,7 @@ struct boss_grand_championAI : public npc_escortAI
                     {
                         me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                         _newMountGUID = mount->GetGUID();
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                        me->SetAttackable(false);
                         me->GetMotionMaster()->MovePoint(7, *mount);
                         _events.Repeat(200);
                         break;
