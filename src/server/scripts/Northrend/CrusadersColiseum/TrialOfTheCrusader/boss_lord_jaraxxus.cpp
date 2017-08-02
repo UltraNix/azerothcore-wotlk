@@ -92,7 +92,6 @@ public:
     {
         boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
         {
-            boundaryHandler.SetBoundary(new CircleBoundary(Position(563.26f, 139.6f), 75.0));
             pInstance = pCreature->GetInstanceScript();
             me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->SetReactState(REACT_PASSIVE);
