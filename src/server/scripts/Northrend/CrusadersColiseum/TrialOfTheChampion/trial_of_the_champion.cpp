@@ -125,6 +125,12 @@ public:
                 {
                     if (Player* player = itr->GetSource())
                     {
+                        if (player->IsGameMaster())
+		                {
+		                    ++count;
+		                    continue;
+		                }
+									
                         if (Unit* veh = player->GetVehicleBase())
                         {
                             if (veh->GetEntry() == VEHICLE_ARGENT_WARHORSE || veh->GetEntry() == VEHICLE_ARGENT_BATTLEWORG)

@@ -430,7 +430,7 @@ struct boss_grand_championAI : public npc_escortAI
 
     void ScheduleAbilitiesEvents()
     {
-        me->m_spellImmune[IMMUNITY_MECHANIC].clear();
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
         _events.Reset();
         switch (me->GetEntry())
         {
