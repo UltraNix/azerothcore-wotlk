@@ -607,7 +607,10 @@ struct boss_grand_championAI : public npc_escortAI
                 me->SetRegeneratingHealth(false);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 if (instance)
+                {
+                    me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
                     instance->SetData(DATA_GRAND_CHAMPION_DIED, _bossOrder);
+                }
             }
         }
     }
