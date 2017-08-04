@@ -509,6 +509,7 @@ struct boss_grand_championAI : public npc_escortAI
             me->RemoveAurasDueToSpell(67865);
             me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND);
             me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND_PERIODIC);
+            me->RemoveMovementImpairingAuras(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             AddCreatureAddonAuras();
             _events.Reset();
