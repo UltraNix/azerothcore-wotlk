@@ -232,6 +232,7 @@ DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 6174;
 DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 90010;
 DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 90015;
 DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 90023;
+DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 90027;
 DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 90028;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `TextRange`, `comment`) VALUES
 (5603, 0, 0, 'You should visit the slave market. A lot of meat ready to be sold!', 12, 0, 100, 0, 0, 0, 0, 'Grunt Mojka'),
@@ -252,7 +253,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (90010, 2, 0, 'If you let us out, we’ll pay you! We have gold!', 12, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
 (90010, 3, 0, 'I’ll give everything…', 12, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
 (90010, 4, 0, 'Slave looks at Zork in silence.', 16, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
-(90010, 4, 0, 'If you let us out, we…', 12, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
+(90010, 5, 0, 'If you let us out, we…', 12, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
 
 (90015, 0, 0, 'Scum.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 (90015, 0, 1, 'Come closer, <class> and take a look at my slaves.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
@@ -288,8 +289,24 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 
 (90027, 0, 0, 'Come and get your slave!', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant'),
 (90027, 0, 1, 'You look like you need to get a slave.', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant'),
-(90027, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant');
+(90027, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant'),
 
 (90028, 0, 0, 'Come and get your slave!', 14, 0, 100, 0, 0, 0, 0, 'Zork Assistant'),
 (90028, 0, 1, 'You look like you need to get a slave.', 14, 0, 100, 0, 0, 0, 0, 'Zork Assistant'),
 (90028, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Zork Assistant');
+
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90015;
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90016;
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90023;
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90024;
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90027;
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90028;
+DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90029;
+INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES 
+(90015, 'You came to see Valak’s slaves? Ha! You can buy one you like or you can sell your slave here!'),
+(90016, 'That scum wanted to kill the Warchief. Thrall didn’t want them to be killed, so I’m selling them. If I won’t, I can just end their miserable life.\nThey are mercenaries from both the Horde and the Alliance. They have no honor!'),
+(90023, 'I am Zork, the Slave Trader. The foul creatures I hold in these cages had it coming. You want to buy a slave or sell one?'),
+(90024, 'There was an attempt to assassinate our king, but it failed. Mercenaries formed from members of both the Alliance and the Horde tried to infiltrate Stormwind Keep and kill King Varian, but they have been caught. Varian insisted not to kill these mercenaries, but… sell them.\nThen I’ve decided to grow this business a bit, so if you have a slave, you can get rid of him here.'),
+(90027, 'If you want to buy or sell a slave, you’ve come to a right place, %C!'),
+(90028, 'If you want to buy or sell a slave, you’ve come to a right place, %C!'),
+(90029, 'A slave market! We’ve got slaves from all over Azeroth. You can buy one or sell one. I don’t care as long as you have something to pay for them!');

@@ -778,7 +778,7 @@ public:
     }
 
     void ExecuteSay(uint32 group)
-    {
+    {        
         QueryResult res = WorldDatabase.PQuery("SELECT `text`, `type` FROM `creature_text` WHERE entry = %u AND groupid = %u", creatureTextEntry, group);
 
         if (res)
@@ -917,13 +917,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-
-
+        DisplayMainMenu(player, creature);
         ChatHandler handler(player->GetSession());
         //handler.PSendSysMessage("Tip: Prat lets you copy links not text, http:// and will turn it into a link.");
         handler.PSendSysMessage("Tip: Pobierz addon prat, a swobodnie dostaniesz kopie linku do armory!");
@@ -1043,10 +1037,7 @@ public:
         }
         else if (action == NPC_SLAVE_ACTION_RETURN_MAIN)
         {
-            selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            DisplayMainMenu(player, creature);
         }
         else if (action == NPC_SLAVE_ACTION_CLOSE)
             player->CLOSE_GOSSIP_MENU();
@@ -1090,6 +1081,17 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
+        else if (action == NPC_SLAVE_ACTION_MORE_INFO)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I understand.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
+
+            uint32 textEntry = creature->GetEntry() + 1;
+
+            if (textEntry == 90028)
+                textEntry++;
+
+            player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
+        }
         else
         {
             selectedAuctionId = action - NPC_SLAVE_ACTION_SELECTED_AUCTION; type = 0;
@@ -1107,6 +1109,40 @@ public:
         }
 
         return true;
+    }
+
+    void DisplayMainMenu(Player* player, Creature* creature)
+    {
+        selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+
+        std::string moreInfoString;
+
+        switch (creature->GetEntry())
+        {
+        case NPC_SLAVE_ENTRY_ZORK:
+            moreInfoString = "Zork, why do you hold a slave market in Stormwind? And who are the slaves?";
+            break;
+        case NPC_SLAVE_ENTRY_VALAK:
+            moreInfoString = "Valak, why do you sell slaves? And who are they?";
+            break;
+        default:
+            moreInfoString = "What is this?";
+        }
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, moreInfoString, GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_MORE_INFO);
+
+        player->SEND_GOSSIP_MENU(creature->GetEntry(), creature->GetGUID());
     }
 
     void LoadSlaveAuctions(uint32 slave_class, uint32 slave_team)
