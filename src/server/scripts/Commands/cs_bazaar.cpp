@@ -677,6 +677,7 @@ enum NpcSlaveEvents
     NPC_SLAVE_EVENT_SAY_GROUP_3,
     NPC_SLAVE_EVENT_SAY_GROUP_4,
     NPC_SLAVE_EVENT_SAY_GROUP_5,
+    NPC_SLAVE_EVENT_ACTIVATE_SLAVE,
     NPC_SLAVE_EVENT_SCENE,
     NPC_SLAVE_EVENT_END_SCENE
 };
@@ -716,10 +717,10 @@ public:
         events.Empty();
         isEventInAction = false;
 
-        events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, urand(1000, NPC_SLAVE_INTERVAL_SAY));
-
         if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK || creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
         {
+            events.ScheduleEvent(NPC_SLAVE_EVENT_ACTIVATE_SLAVE, urand(1000, NPC_SLAVE_INTERVAL_SAY));
+            events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, urand(1000, NPC_SLAVE_INTERVAL_SAY));
             events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_1, urand(1000, NPC_SLAVE_INTERVAL_YELL));
             events.ScheduleEvent(NPC_SLAVE_EVENT_SCENE, urand(1000, NPC_SLAVE_INTERVAL_SCENE));
         }
@@ -742,7 +743,8 @@ public:
                 {
                 case NPC_SLAVE_EVENT_SAY_GROUP_0:
                 case NPC_SLAVE_EVENT_SAY_GROUP_1:
-                    events.RescheduleEvent(eventId, GetIntervalFor(eventId));
+                    if(creatureTextEntry != NPC_SLAVE_ENTRY_0)
+                        events.RescheduleEvent(eventId, GetIntervalFor(eventId));
                     if (isEventInAction)
                         break;
 
@@ -751,6 +753,11 @@ public:
                 case NPC_SLAVE_EVENT_SAY_GROUP_4:
                 case NPC_SLAVE_EVENT_SAY_GROUP_5:
                     ExecuteSay(eventId - 1);
+                    break;
+                case NPC_SLAVE_EVENT_ACTIVATE_SLAVE:
+                    if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
+                        slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, 10);
+                    events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SAY);
                     break;
                 case NPC_SLAVE_EVENT_SCENE:
                     ExecuteScene();
@@ -775,6 +782,40 @@ public:
             return NPC_SLAVE_INTERVAL_YELL;
 
         return 0;
+    }
+
+    npc_slaveAI* GetRandomSlaveAI()
+    {
+        uint32 slaveDB_GUID;
+        uint32 slaveId;
+
+        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+            slaveDB_GUID = urand(250012, 250016);
+        else if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK)
+            slaveDB_GUID = urand(250000, 250004);
+        else return NULL;
+
+        QueryResult res = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
+
+        if (!res)
+            return NULL;
+
+        slaveId = res->operator[](0).GetUInt32();
+
+        uint64 slaveGUID = MAKE_NEW_GUID(slaveDB_GUID, slaveId, HIGHGUID_UNIT);
+
+        Creature* slave = ObjectAccessor::GetCreature(*me, slaveGUID);
+
+        if (!slave)
+            return NULL;
+
+        CreatureAI* c_slaveAI = slave->AI();
+
+        if (!c_slaveAI || slave->GetScriptName() != "npc_slave_slave")
+            return NULL;
+
+        //should be safe, npc_slave_slave always adds npc_slaveAI as AI
+        return dynamic_cast<npc_slaveAI*>(c_slaveAI);
     }
 
     void ExecuteSay(uint32 group)
@@ -805,56 +846,28 @@ public:
 
     void ExecuteScene()
     {
-        uint32 slaveDB_GUID;
-        uint32 slaveId;
-
-        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
-            slaveDB_GUID = urand(250012, 250016);
-        else if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK)
-            slaveDB_GUID = urand(250000, 250004);
-        else return;
-
-        QueryResult res = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
-
-        if (!res)
-            return;
-
-        slaveId = res->operator[](0).GetUInt32();
-
-        uint64 slaveGUID = MAKE_NEW_GUID(slaveDB_GUID, slaveId, HIGHGUID_UNIT);
-
-        Creature* slave = ObjectAccessor::GetCreature(*me, slaveGUID);
-
-        if (!slave)
-            return;
-
-        CreatureAI* c_slaveAI = slave->AI();
-
-        if (!c_slaveAI || slave->GetScriptName() != "npc_slave_slave")
-            return;
-
-        //should be safe, npc_slave_slave always adds npc_slaveAI as AI
-        npc_slaveAI* slaveAI = dynamic_cast<npc_slaveAI*>(c_slaveAI);
-
-        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+        if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
         {
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000); // S: If you let us out, we’ll pay you! We have gold!
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000); // Z: Don’t bother, you mercenary scum. 
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); //S: I’ll give everything…
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000); // Z: laughs.
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000); // Z: You surely would.
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); //S: looks at Zork in silence.
+            if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+            {
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000); // S: If you let us out, we’ll pay you! We have gold!
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000); // Z: Don’t bother, you mercenary scum. 
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); //S: I’ll give everything…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000); // Z: laughs. 
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000); // Z: You surely would.
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); //S: looks at Zork in silence.
 
-            SetEventInAction(30000);
-            slaveAI->SetEventInAction(30000);
-        }
-        else //VALAK
-        {
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000); // S: If you let us out, we…
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000); // V: Shut your mouth, maggot, or I will knock out your teeth!
+                SetEventInAction(30000);
+                slaveAI->SetEventInAction(30000);
+            }
+            else //VALAK
+            {
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000); // S: If you let us out, we…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000); // V: Shut your mouth, maggot, or I will knock out your teeth!
 
-            SetEventInAction(10000);
-            slaveAI->SetEventInAction(10000);
+                SetEventInAction(10000);
+                slaveAI->SetEventInAction(10000);
+            }
         }
     }
 

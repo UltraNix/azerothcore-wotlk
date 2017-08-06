@@ -256,12 +256,11 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (90010, 5, 0, 'If you let us out, we…', 12, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
 
 (90015, 0, 0, 'Scum.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 1, 'Come closer, <class> and take a look at my slaves.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
+(90015, 0, 1, 'I can’t tell you how much I want to kill every one of them.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 (90015, 0, 2, 'I love the smell of freedom.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 (90015, 0, 3, 'If any slave tries to catch you, feel free to chop off his hand!', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 (90015, 0, 4, 'Even though they are honorless, they can still serve greatly!', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 (90015, 0, 5, 'If not Thrall, they’d be dead by now.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 6, 'I can’t tell you how much I want to kill every one of them.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 
 (90015, 1, 0, 'Valak’s slaves - best slaves!', 14, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
 (90015, 1, 1, 'Toughest slaves in Kalimdor!', 14, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
@@ -276,7 +275,6 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (90023, 0, 3, 'I love this job.', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
 (90023, 0, 4, 'They always said.“you wouldn’t sell your mother, would you?”. Now I can answer: I would!', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
 (90023, 0, 5, 'Unholy maggots!', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 0, 6, 'Hey, <class>, come closer!', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
 
 (90023, 1, 0, 'Strong slaves ready to be sold!', 14, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
 (90023, 1, 1, 'Visit our slave market!', 14, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
