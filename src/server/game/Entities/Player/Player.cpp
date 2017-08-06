@@ -14240,6 +14240,14 @@ void Player::RemoveAllTmpEnchantmentDurations()
         {
             if (itr->item && itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
             {
+                // Monich: Rogue's poison enchs shouldn`t be removed - continue
+                // For some reason all poisons have aura_id 26, whatever that means
+                if (sSpellItemEnchantmentStore.LookupEntry(itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))->aura_id == 26) 
+                {
+                    next++;
+                    continue;
+                }
+
                 ApplyEnchantment(itr->item, TEMP_ENCHANTMENT_SLOT, false, false);
                 itr->item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
             }
