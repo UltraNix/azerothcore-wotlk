@@ -194,7 +194,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (90012, 0, 0, 0, 0, 0, 3167, 5446, 0, 0, 'Slave', '', '', 0, 1, 1, 0, 1078, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
 (90013, 0, 0, 0, 0, 0, 19171, 19172, 0, 0, 'Slave', '', '', 0, 1, 1, 0, 1078, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
 (90014, 0, 0, 0, 0, 0, 2306, 14613, 14614, 14615, 'Slave', '', '', 0, 1, 1, 0, 1078, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
-(90015, 0, 0, 0, 0, 0, 14429, 0, 0, 0, 'Valak The Slave Trader', 'Slave Market', NULL, 0, 80, 80, 0, 29, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1000, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340),
+(90015, 0, 0, 0, 0, 0, 14429, 0, 0, 0, 'Valak the Slave Trader', 'Slave Market', NULL, 0, 80, 80, 0, 29, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1000, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340),
 (90016, 0, 0, 0, 0, 0, 415, 0, 0, 0, 'Bazaar Guard', '', NULL, 0, 83, 83, 0, 29, 0, 1.2, 1.14286, 1, 0, 2, 2, 0, 24, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 1, 1, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 12340),
 (90017, 0, 0, 0, 0, 0, 7108, 0, 0, 0, 'Kenno Goldbringer', 'The Bazaar Trader', NULL, 0, 80, 80, 0, 29, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 500, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_bazaar', 12340),
 (90018, 0, 0, 0, 0, 0, 15511, 0, 0, 0, 'Slave', '', '', 0, 1, 1, 0, 29, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
@@ -202,12 +202,12 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (90020, 0, 0, 0, 0, 0, 4259, 4260, 4601, 4602, 'Slave', '', '', 0, 1, 1, 0, 29, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
 (90021, 0, 0, 0, 0, 0, 2141, 8572, 9391, 9392, 'Slave', '', '', 0, 1, 1, 0, 29, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
 (90022, 0, 0, 0, 0, 0, 4123, 0, 0, 0, 'Slave', '', '', 0, 1, 1, 0, 29, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_slave_slave', 12340),
-(90023, 0, 0, 0, 0, 0, 5567, 0, 0, 0, 'Zork The Slave Trader', 'Slave Market', NULL, 0, 80, 80, 0, 11, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1000, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340),
+(90023, 0, 0, 0, 0, 0, 5567, 0, 0, 0, 'Zork the Slave Trader', 'Slave Market', NULL, 0, 80, 80, 0, 11, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1000, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340),
 (90024, 0, 0, 0, 0, 0, 415, 0, 0, 0, 'Bazaar Guard', '', NULL, 0, 83, 83, 0, 11, 0, 1.2, 1.14286, 1, 0, 2, 2, 0, 24, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 1, 1, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1.05, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 12340),
 (90025, 0, 0, 0, 0, 0, 7108, 0, 0, 0, 'Zenno Goldbringer', 'The Bazaar Trader', NULL, 0, 80, 80, 0, 11, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 500, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_bazaar', 12340),
 (90026, 0, 0, 0, 0, 0, 7108, 0, 0, 0, 'Senno Goldbringer', 'The Bazaar Trader', NULL, 0, 80, 80, 0, 35, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 500, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_bazaar', 12340),
-(90027, 0, 0, 0, 0, 0, 7107, 0, 0, 0, 'Valak Assistant', 'Slave Market', NULL, 0, 80, 80, 0, 29, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 200, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340),
-(90028, 0, 0, 0, 0, 0, 7107, 0, 0, 0, 'Zork Assistant', 'Slave Market', NULL, 0, 80, 80, 0, 11, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 200, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340);
+(90027, 0, 0, 0, 0, 0, 7107, 0, 0, 0, 'Valak`s Assistant', 'Slave Market', NULL, 0, 80, 80, 0, 29, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 200, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340),
+(90028, 0, 0, 0, 0, 0, 7107, 0, 0, 0, 'Zork`s Assistant', 'Slave Market', NULL, 0, 80, 80, 0, 11, 3, 1, 1.14286, 1, 1, 29, 39, 0, 80, 1, 1500, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 20, 30, 4, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 200, 1, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_slave', 12340);
 
 UPDATE `creature_template` SET `creature_template`.`AIName` = 'SmartAI' WHERE `creature_template`.`entry` = 6174;
 UPDATE `creature_template` SET `creature_template`.`AIName` = 'SmartAI' WHERE `creature_template`.`entry` = 5603;
@@ -223,8 +223,8 @@ SET @SAY_INTERVAL := 120000;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (5603, 0, 0, 0, 60, 0, 100, 0, 1000, @SAY_INTERVAL, @SAY_INTERVAL, @SAY_INTERVAL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Grunt Mojka - On Update - Say'),
 (6174, 0, 0, 0, 60, 0, 100, 0, 1000, @SAY_INTERVAL, @SAY_INTERVAL, @SAY_INTERVAL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Stephanie Turner - On Update - Say'),
-(90027, 0, 0, 0, 60, 0, 100, 0, 1000, @YELL_INTERVAL, @YELL_INTERVAL, @YELL_INTERVAL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Valak Assistant - On Update - Yell'),
-(90028, 0, 0, 0, 60, 0, 100, 0, 1000, @YELL_INTERVAL, @YELL_INTERVAL, @YELL_INTERVAL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Zork Assistant - On Update - Yell');
+(90027, 0, 0, 0, 60, 0, 100, 0, 1000, @YELL_INTERVAL, @YELL_INTERVAL, @YELL_INTERVAL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Valak`s Assistant - On Update - Yell'),
+(90028, 0, 0, 0, 60, 0, 100, 0, 1000, @YELL_INTERVAL, @YELL_INTERVAL, @YELL_INTERVAL, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Zork`s Assistant - On Update - Yell');
 
 
 DELETE FROM `creature_text` WHERE `creature_text`.`entry` = 5603;
@@ -255,43 +255,43 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 (90010, 4, 0, 'Slave looks at Zork in silence.', 16, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
 (90010, 5, 0, 'If you let us out, we…', 12, 0, 100, 0, 0, 0, 0, 'SM Slaves'),
 
-(90015, 0, 0, 'Scum.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 1, 'I can’t tell you how much I want to kill every one of them.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 2, 'I love the smell of freedom.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 3, 'If any slave tries to catch you, feel free to chop off his hand!', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 4, 'Even though they are honorless, they can still serve greatly!', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 0, 5, 'If not Thrall, they’d be dead by now.', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
+(90015, 0, 0, 'Scum.', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 0, 1, 'I can’t tell you how much I want to kill every one of them.', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 0, 2, 'I love the smell of freedom.', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 0, 3, 'If any slave tries to catch you, feel free to chop off his hand!', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 0, 4, 'Even though they are honorless, they can still serve greatly!', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 0, 5, 'If not Thrall, they’d be dead by now.', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
 
-(90015, 1, 0, 'Valak’s slaves - best slaves!', 14, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 1, 1, 'Toughest slaves in Kalimdor!', 14, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 1, 2, 'Buy yourself a nice slave, man or a woman, Alliance or Horde!', 14, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
-(90015, 1, 3, 'Unsold slaves will be killed, don’t waste any of them!', 14, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
+(90015, 1, 0, 'Valak’s slaves - best slaves!', 14, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 1, 1, 'Toughest slaves in Kalimdor!', 14, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 1, 2, 'Buy yourself a nice slave, man or a woman, Alliance or Horde!', 14, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
+(90015, 1, 3, 'Unsold slaves will be killed, don’t waste any of them!', 14, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
 
-(90015, 2, 0, 'Shut your mouth, maggot, or I will knock out your teeth!', 12, 0, 100, 0, 0, 0, 0, 'Valak The Slave Trader'),
+(90015, 2, 0, 'Shut your mouth, maggot, or I will knock out your teeth!', 12, 0, 100, 0, 0, 0, 0, 'Valak the Slave Trader'),
 
-(90023, 0, 0, 'Don’t be afraid to come closer.', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 0, 1, 'Feel free to look at them, they won’t bite… I think. ', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 0, 2, 'If you want to buy a slave, come closer and let’s talk.', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 0, 3, 'I love this job.', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 0, 4, 'They always said.“you wouldn’t sell your mother, would you?”. Now I can answer: I would!', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 0, 5, 'Unholy maggots!', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
+(90023, 0, 0, 'Don’t be afraid to come closer.', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 0, 1, 'Feel free to look at them, they won’t bite… I think. ', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 0, 2, 'If you want to buy a slave, come closer and let’s talk.', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 0, 3, 'I love this job.', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 0, 4, 'They always said.“you wouldn’t sell your mother, would you?”. Now I can answer: I would!', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 0, 5, 'Unholy maggots!', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
 
-(90023, 1, 0, 'Strong slaves ready to be sold!', 14, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 1, 1, 'Visit our slave market!', 14, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 1, 2, 'Buy them or we’ll kill them!', 14, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 1, 3, 'Biggest choice of slaves in Eastern Kingdoms!', 14, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
+(90023, 1, 0, 'Strong slaves ready to be sold!', 14, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 1, 1, 'Visit our slave market!', 14, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 1, 2, 'Buy them or we’ll kill them!', 14, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 1, 3, 'Biggest choice of slaves in Eastern Kingdoms!', 14, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
 
-(90023, 2, 0, 'Don’t bother, you mercenary scum.', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 3, 0, 'Zork The Slave Trader laughs.', 16, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
-(90023, 4, 0, 'You surely would.', 12, 0, 100, 0, 0, 0, 0, 'Zork The Slave Trader'),
+(90023, 2, 0, 'Don’t bother, you mercenary scum.', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 3, 0, 'Zork the Slave Trader laughs.', 16, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
+(90023, 4, 0, 'You surely would.', 12, 0, 100, 0, 0, 0, 0, 'Zork the Slave Trader'),
 
-(90027, 0, 0, 'Come and get your slave!', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant'),
-(90027, 0, 1, 'You look like you need to get a slave.', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant'),
-(90027, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Valak Assistant'),
+(90027, 0, 0, 'Come and get your slave!', 14, 0, 100, 0, 0, 0, 0, 'Valak`s Assistant'),
+(90027, 0, 1, 'You look like you need to get a slave.', 14, 0, 100, 0, 0, 0, 0, 'Valak`s Assistant'),
+(90027, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Valak`s Assistant'),
 
-(90028, 0, 0, 'Come and get your slave!', 14, 0, 100, 0, 0, 0, 0, 'Zork Assistant'),
-(90028, 0, 1, 'You look like you need to get a slave.', 14, 0, 100, 0, 0, 0, 0, 'Zork Assistant'),
-(90028, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Zork Assistant');
+(90028, 0, 0, 'Come and get your slave!', 14, 0, 100, 0, 0, 0, 0, 'Zork`s Assistant'),
+(90028, 0, 1, 'You look like you need to get a slave.', 14, 0, 100, 0, 0, 0, 0, 'Zork`s Assistant'),
+(90028, 0, 2, 'The biggest scum on Azeroth is now available to buy!', 14, 0, 100, 0, 0, 0, 0, 'Zork`s Assistant');
 
 DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90015;
 DELETE FROM `npc_text` WHERE `npc_text`.`ID` = 90016;
@@ -305,6 +305,6 @@ INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES
 (90016, 'That scum wanted to kill the Warchief. Thrall didn’t want them to be killed, so I’m selling them. If I won’t, I can just end their miserable life.\nThey are mercenaries from both the Horde and the Alliance. They have no honor!'),
 (90023, 'I am Zork, the Slave Trader. The foul creatures I hold in these cages had it coming. You want to buy a slave or sell one?'),
 (90024, 'There was an attempt to assassinate our king, but it failed. Mercenaries formed from members of both the Alliance and the Horde tried to infiltrate Stormwind Keep and kill King Varian, but they have been caught. Varian insisted not to kill these mercenaries, but… sell them.\nThen I’ve decided to grow this business a bit, so if you have a slave, you can get rid of him here.'),
-(90027, 'If you want to buy or sell a slave, you’ve come to a right place, %C!'),
-(90028, 'If you want to buy or sell a slave, you’ve come to a right place, %C!'),
+(90027, 'If you want to buy or sell a slave, you’ve come to a right place, $C!'),
+(90028, 'If you want to buy or sell a slave, you’ve come to a right place, $C!'),
 (90029, 'A slave market! We’ve got slaves from all over Azeroth. You can buy one or sell one. I don’t care as long as you have something to pay for them!');
