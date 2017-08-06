@@ -1384,6 +1384,7 @@ class Player : public Unit, public GridObject<Player>
         void AddEnchantmentDurations(Item* item);
         void RemoveEnchantmentDurations(Item* item);
         void RemoveEnchantmentDurationsReferences(Item* item); // pussywizard
+        void RemoveAllTmpEnchantmentDurations();
         void RemoveArenaEnchantments(EnchantmentSlot slot);
         void AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 duration);
         void ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);

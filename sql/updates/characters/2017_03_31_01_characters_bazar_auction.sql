@@ -39,6 +39,7 @@ CREATE TABLE `bazar_auction` (
   `slave_level_slot18` int(10) unsigned NOT NULL DEFAULT '0',
   `slave_level_slot19` int(10) unsigned NOT NULL DEFAULT '0',
   `slave_description` varchar(130) NOT NULL DEFAULT '',
-  `create_time` int(10) unsigned NOT NULL DEFAULT '0',
+  `slave_team` int(10) unsigned NOT NULL DEFAULT '0',
+  `create_time` varchar(130) NOT NULL DEFAULT '',
   PRIMARY KEY (`auctionId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

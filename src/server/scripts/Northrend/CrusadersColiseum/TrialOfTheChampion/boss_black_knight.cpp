@@ -49,7 +49,8 @@ enum Events
     EVENT_SPELL_DESECRATION,
     EVENT_SPELL_DEATH_BITE,
     EVENT_SPELL_MARKED_DEATH,
-    
+    EVENT_RANDOM_EXPLODE,
+
     // ghouls
     EVENT_LEAP                  = 1,
     EVENT_CLAW
@@ -84,6 +85,7 @@ struct boss_black_knightAI : public BossAI
 
     void EnterEvadeMode() override
     {
+        summons.DespawnAll();
         me->DespawnOrUnsummon(1);
         _EnterEvadeMode();
     }
@@ -114,7 +116,13 @@ struct boss_black_knightAI : public BossAI
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveAllAuras();
             me->SetControlled(true, UNIT_STATE_STUNNED);
-            DoCastSelf(SPELL_BK_GHOUL_EXPLODE, true);
+            for (auto itr : summons)
+            {
+                if (Creature* summon = instance->instance->GetCreature(itr))
+                    if (summon->IsAIEnabled)
+                        summon->AI()->DoAction(1);
+
+            }
             summons.clear();
 
             DoCastSelf(SPELL_BK_FEIGN_DEATH, true);
@@ -123,6 +131,12 @@ struct boss_black_knightAI : public BossAI
             me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
             me->AddUnitState(UNIT_STATE_DIED);
         }
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        instance->SetData(579, 0);
+        DoAction(1);
     }
 
     void DoAction(int32 param) override
@@ -166,9 +180,10 @@ struct boss_black_knightAI : public BossAI
                 case 2:
                     me->SetDisplayId(MODEL_SKELETON);
                     Talk(TEXT_BK_SKELETON_RES);
-                    me->CastSpell(me, SPELL_ARMY_DEAD, false);
+                    DoCastSelf(SPELL_ARMY_DEAD);
 
                     events.Reset();
+                    events.ScheduleEvent(EVENT_RANDOM_EXPLODE, 15000);
                     events.ScheduleEvent(EVENT_SPELL_PLAGUE_STRIKE, urand(7000, 9000));
                     events.ScheduleEvent(EVENT_SPELL_ICY_TOUCH, urand(3500, 7000));
                     events.ScheduleEvent(EVENT_SPELL_OBLITERATE, urand(11000, 19000));
@@ -211,6 +226,10 @@ struct boss_black_knightAI : public BossAI
                     DoCast(target, SPELL_DEATH_RESPITE);
                 events.Repeat(urand(13000, 15000));
                 break;
+            case EVENT_RANDOM_EXPLODE:
+                DoCastAOE(SPELL_BK_GHOUL_EXPLODE);
+                events.Repeat(15000);
+                break;
             case EVENT_SPELL_OBLITERATE:
                 DoCastVictim(SPELL_OBLITERATE);
                 events.Repeat(urand(15000, 17000));
@@ -252,12 +271,16 @@ struct boss_black_knightAI : public BossAI
 
     void JustDied(Unit* /*killer*/) override
     {
+        instance->SetData(579, 1);
+        instance->SetData(247, 0);
         DoCastAOE(SPELL_BK_KILL_CREDIT, true);
         Talk(TEXT_BK_DEATH);
         instance->SetData(BOSS_BLACK_KNIGHT, DONE);
         if (me->ToTempSummon())
             me->ToTempSummon()->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
     }
+
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 
 private:
     uint8 _phase;
@@ -363,8 +386,15 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
         {
             _explode = true;
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            me->AddAura(SPELL_BK_GHOUL_EXPLODE, me);
             DoCastSelf(SPELL_EXPLODE);
         }
+    }
+
+    void DoAction(int32 actionId) override
+    {
+        if (actionId == 1)
+            DoExplode();
     }
 
     void SpellHit(Unit* /*caster*/, const SpellInfo* spell) override
@@ -391,7 +421,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
                     AttackStart(target);
                 }
                 break;
-            case SPELL_EXPLODE:
+            case 67886:
                 if (target && target->IsPlayer())
                     if (instance)
                         instance->SetData(DATA_ACHIEV_IVE_HAD_WORSE, 0);

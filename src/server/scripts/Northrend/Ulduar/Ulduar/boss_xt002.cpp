@@ -189,7 +189,7 @@ public:
         void EnterCombat(Unit*)
         {
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-            events.ScheduleEvent(EVENT_ENRAGE, me->GetMap()->Is25ManRaid() ? 420000 : 600000, 0, 0);
+            events.ScheduleEvent(EVENT_ENRAGE, 600000, 0, 0);
             events.ScheduleEvent(EVENT_CHECK_ROOM, 5000, 0, 0);
             RescheduleEvents(); // Other events are scheduled here
 

@@ -3281,4 +3281,13 @@ PTR.Realm = 0
 CrossFactionRDF.Enable = 0
 
 #
+#     Premium.Service.Enable
+#        Description: Allow or disallow usage of specified premium service.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Premium.Teleport.Enable = 1
+Premium.InstantFlying.Enable = 1
+
+#
 ###################################################################################################

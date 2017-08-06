@@ -62,6 +62,13 @@ public:
             return false;
         }
 
+        if (!sWorld->getBoolConfig(CONFIG_PREMIUM_TELEPORT_ENABLE))
+        {
+            handler->SendSysMessage("You can't do that when Sunwell event is running.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
         if (!*args)
             return false;
 

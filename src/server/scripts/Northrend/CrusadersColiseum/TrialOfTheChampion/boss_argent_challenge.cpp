@@ -71,14 +71,35 @@ struct boss_eadricAI : public BossAI
     void Reset() override
     {
         _Reset();
-        me->SetReactState(REACT_PASSIVE);
+        if (instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+            me->SetReactState(REACT_PASSIVE);
         instance->SetData(BOSS_ARGENT_CHALLENGE, NOT_STARTED);
     }
         
     void MovementInform(uint32 type, uint32 id) override
     {
-        if (type == POINT_MOTION_TYPE && id == 1)
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == 1)
             me->SetFacingTo(3 * M_PI / 2);
+
+        if (id == 0)
+        {
+            if (Creature* announcer = instance->instance->GetCreature(instance->GetData64(DATA_ANNOUNCER)))
+            {
+                if (announcer->IsAIEnabled)
+                {
+                    announcer->AI()->Talk(TEXT_CHEER_EADRIC_1);
+                    announcer->AI()->Talk(TEXT_CHEER_EADRIC_2);
+                }
+            }
+        }
     }
 
     void KilledUnit(Unit* who) override
@@ -89,6 +110,7 @@ struct boss_eadricAI : public BossAI
 
     void EnterCombat(Unit* who) override
     {
+        instance->SetData(579, 0);
         _EnterCombat();
         events.Reset();
         events.ScheduleEvent(EVENT_SPELL_RADIANCE, 16000);
@@ -111,6 +133,7 @@ struct boss_eadricAI : public BossAI
             damage = me->GetHealth() - 1;
             if (me->getFaction() != 35)
             {
+                instance->SetData(247, 0);
                 DoCastAOE(SPELL_EADRIC_CREDIT, true);
                 me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, SPELL_PALETRESS_CREDIT, me); // paletress' spell credits encounter, but shouldn't credit achievements
                 me->setFaction(35);
@@ -150,6 +173,8 @@ struct boss_eadricAI : public BossAI
                 break;
         }
     }
+
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 };
 
 struct boss_paletressAI : public BossAI
@@ -166,14 +191,35 @@ struct boss_paletressAI : public BossAI
                 memory->DespawnOrUnsummon();
             _memoryGUID = 0;
         }
-        me->SetReactState(REACT_PASSIVE);
+        if(instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        }
+        else
+            me->SetReactState(REACT_PASSIVE);
         instance->SetData(BOSS_ARGENT_CHALLENGE, NOT_STARTED);
     }
         
     void MovementInform(uint32 type, uint32 id) override
     {
-        if (type == POINT_MOTION_TYPE && id == 1)
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == 1)
             me->SetFacingTo(3 * M_PI / 2);
+
+        if (id == 0)
+        {
+            if (Creature* announcer = instance->instance->GetCreature(instance->GetData64(DATA_ANNOUNCER)))
+            {
+                if (announcer->IsAIEnabled)
+                {
+                    announcer->AI()->Talk(TEXT_CHEER_PALETRESS_1);
+                    announcer->AI()->Talk(TEXT_CHEER_PALETRESS_2);
+                }
+            }
+        }
     }
 
     void KilledUnit(Unit* who) override
@@ -184,6 +230,7 @@ struct boss_paletressAI : public BossAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        instance->SetData(579, 0);
         _EnterCombat();
         events.Reset();
         events.ScheduleEvent(EVENT_SPELL_HOLY_FIRE, urand(9000,12000));
@@ -236,6 +283,7 @@ struct boss_paletressAI : public BossAI
 
             if (me->getFaction() != 35)
             {
+                instance->SetData(247, 0);
                 DoCastAOE(SPELL_PALETRESS_CREDIT, true); // achievements
                 me->setFaction(35);
                 events.Reset();
@@ -279,17 +327,29 @@ struct boss_paletressAI : public BossAI
             case EVENT_SPELL_RENEW:
                 if (!_memoryGUID)
                     break;
-                if (urand(0, 1))
-                    DoCastSelf(SPELL_RENEW);
-                else if (Creature* memory = ObjectAccessor::GetCreature(*me, _memoryGUID))
-                    if (memory->IsAlive())
+
+                if (Creature* memory = ObjectAccessor::GetCreature(*me, _memoryGUID))
+                {
+                    if (memory->GetHealthPct() >= 90.0f)
+                        DoCastSelf(SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 75.0f && memory->GetHealthPct() < 90.0f)
+                        DoCast(roll_chance_i(75) ? me : memory, SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 50.0f && memory->GetMaxHealth() < 75.0f)
+                        DoCast(roll_chance_i(50) ? me : memory, SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 25.0f && memory->GetMaxHealth() < 50.0f)
+                        DoCast(roll_chance_i(25) ? me : memory, SPELL_RENEW);
+                    else if (memory->GetHealthPct() >= 0.0f && memory->GetMaxHealth() < 25.0f)
                         DoCast(memory, SPELL_RENEW);
+                }
+
                 events.Repeat(urand(15000, 17000));
                 break;
             default:
                 break;
         }
     }
+
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 
 private:
     bool _summoned;
@@ -314,13 +374,13 @@ struct npc_memoryAI : public ScriptedAI
         me->DespawnOrUnsummon(20000);
         if (instance)
             if (Creature* paletress = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PALETRESS)))
-                if(paletress->IsAIEnabled)
+                if (paletress->IsAIEnabled)
                     paletress->AI()->DoAction(1);
     }
 
     void UpdateAI(uint32 diff) override
     {
-        if (UpdateVictim())
+        if (!UpdateVictim() && !me->HasReactState(REACT_PASSIVE))
             return;
 
         _events.Update(diff);
@@ -650,17 +710,10 @@ class spell_toc5_light_rain_SpellScript : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-        for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); )
+        targets.remove_if([](WorldObject* target) -> bool
         {
-            if ((*itr)->IsUnit())
-                if ((*itr)->ToCreature()->GetEntry() == NPC_FOUNTAIN_OF_LIGHT)
-                {
-                    targets.erase(itr);
-                    itr = targets.begin();
-                    continue;
-                }
-            ++itr;
-        }
+            return target->GetEntry() == NPC_FOUNTAIN_OF_LIGHT;
+        });
     }
 
     void Register()

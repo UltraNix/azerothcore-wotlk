@@ -186,7 +186,7 @@ void PetAI::UpdateAI(uint32 diff)
             else
                 HandleReturnMovement();
         }
-        else
+        else if(!me->HasUnitState(UNIT_STATE_STUNNED))
             HandleReturnMovement();
     }
 

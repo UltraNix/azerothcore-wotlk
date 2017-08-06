@@ -115,8 +115,25 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 
     void Reset() override
     {
+        _despawnTimer = 0;
+        _respawn = false;
         me->SetReactState(REACT_PASSIVE);
         me->getHostileRefManager().setOnlineOfflineState(false);
+    }
+
+    void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
+    {
+        if (damage > me->GetHealth())
+        {
+            damage = me->GetHealth() - 1;
+            if (me->GetVehicleKit())
+                me->GetVehicleKit()->RemoveAllPassengers();
+            me->SetVisible(false);
+            _respawn = true;
+            _despawnTimer = 5000;
+            Position pos(me->GetHomePosition());
+            me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), true, true);
+        }
     }
 
     void OnCharmed(bool apply) override
@@ -133,8 +150,31 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
         else
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->StopMoving();
+            Position pos;
+            me->SetWalk(true);
+            me->GetRandomNearPosition(pos, 15.0f);
+            me->GetMotionMaster()->MovePoint(1, pos);
             me->RemoveAura(SPELL_TRAMPLE_AURA);
+        }
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == 1)
+        {
+            me->SetWalk(false);
+            _despawnTimer = 5000;
+            _respawn = true;
+            me->SetVisible(false);
+            me->SetHealth(me->CountPctFromMaxHealth(100));
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            Position pos(me->GetHomePosition());
+            me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), true, true);
         }
     }
 
@@ -155,6 +195,20 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (_despawnTimer <= diff)
+        {
+            if (_respawn)
+            {
+                if (me->IsInCombat())
+                    me->ClearInCombat();
+                _respawn = false;
+                me->SetVisible(true);
+            }
+            _despawnTimer = 5000;
+        }
+        else 
+            _despawnTimer -= diff;
+
         if (_conditionsTimer <= diff)
         {
             if (!_conditions.empty())
@@ -174,6 +228,8 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
 private:
     ConditionList _conditions;
     uint16 _conditionsTimer;
+    uint16 _despawnTimer;
+    bool _respawn;
 };
 
 struct npc_toc5_grand_champion_minionAI : public ScriptedAI
@@ -191,6 +247,7 @@ struct npc_toc5_grand_champion_minionAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        me->CallForHelp(15.0f);
         _events.Reset();
         _events.ScheduleEvent(EVENT_MOUNT_CHARGE, urand(2500,4000));
         _events.ScheduleEvent(EVENT_SHIELD_BREAKER, urand(5000,8000));
@@ -229,25 +286,28 @@ struct npc_toc5_grand_champion_minionAI : public ScriptedAI
                         {
                             if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead())
                                 continue;
-                            if (!player->GetVehicle())
-                                list.push_back(player->GetGUID());
-                            else if (Vehicle* vehicle = player->GetVehicle())
-                            {
+                            if (Vehicle* vehicle = player->GetVehicle())
                                 if (Unit* mount = vehicle->GetBase())
                                     list.push_back(mount->GetGUID());
-                            }
                         }
 
+                    std::list<Unit*> vehicleList;
+
                     if (!list.empty())
+                        for (auto itr : list)
+                            if (Unit* vehicle = ObjectAccessor::GetUnit(*me, itr))
+                                vehicleList.push_back(vehicle);
+
+                    Unit* target = nullptr;
+                    if (!vehicleList.empty())
+                        target = Trinity::Containers::SelectRandomContainerElement(vehicleList);
+
+                    if (target)
                     {
-                        uint64 guid = Trinity::Containers::SelectRandomContainerElement(list);
-                        if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                        {
-                            me->getThreatManager().resetAllAggro();
-                            me->AddThreat(target, 10000.0f);
-                            AttackStart(target);
-                            DoCast(target, SPELL_MINIONS_CHARGE);
-                        }
+                        me->getThreatManager().resetAllAggro();
+                        me->AddThreat(target, 10000.0f);
+                        AttackStart(target);
+                        DoCast(target, SPELL_MINIONS_CHARGE);
                     }
                     _events.Repeat(urand(4500, 6000));
                 }
@@ -290,6 +350,8 @@ struct npc_toc5_grand_champion_minionAI : public ScriptedAI
         }
     }
 
+    void MoveInLineOfSight(Unit* /*who*/) override {}
+
     void JustDied(Unit* /*killer*/) override
     {
         me->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -308,6 +370,8 @@ struct boss_grand_championAI : public npc_escortAI
 {
     boss_grand_championAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
+        me->RemoveAllAuras();
+        AddCreatureAddonAuras();
         instance = pCreature->GetInstanceScript();
         _mountPhase = true;
         SetDespawnAtEnd(false);
@@ -357,12 +421,16 @@ struct boss_grand_championAI : public npc_escortAI
     void EnterCombat(Unit* /*who*/) override
     {
         if (instance && instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_CHAMPIONS_UNMOUNTED)
+        {
             me->CallForHelp(100.0f);
+            DoAction(2);
+            instance->SetData(579, 0);
+        }
     }
 
     void ScheduleAbilitiesEvents()
     {
-        me->m_spellImmune[IMMUNITY_MECHANIC].clear();
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);
         _events.Reset();
         switch (me->GetEntry())
         {
@@ -436,7 +504,12 @@ struct boss_grand_championAI : public npc_escortAI
             me->SetSpeed(MOVE_RUN, 1.0f, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-            me->RemoveAllAuras();
+            me->RemoveAurasDueToSpell(67867);
+            me->RemoveAurasDueToSpell(67866);
+            me->RemoveAurasDueToSpell(67865);
+            me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND);
+            me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND_PERIODIC);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             AddCreatureAddonAuras();
             _events.Reset();
         }
@@ -682,25 +755,28 @@ struct boss_grand_championAI : public npc_escortAI
                         {
                             if (!me->IsInRange(player, 8.0f, 25.0f) || player->isDead())
                                 continue;
-                            if (!player->GetVehicle())
-                                list.push_back(player->GetGUID());
-                            else if (Vehicle* vehicle = player->GetVehicle())
-                            {
+                            if (Vehicle* vehicle = player->GetVehicle())
                                 if (Unit* mount = vehicle->GetBase())
                                     list.push_back(mount->GetGUID());
-                            }
                         }
 
+                    std::list<Unit*> vehicleList;
+
                     if (!list.empty())
+                        for (auto itr : list)
+                            if (Unit* vehicle = ObjectAccessor::GetUnit(*me, itr))
+                                vehicleList.push_back(vehicle);
+
+                    Unit* target = nullptr;
+                    if (!vehicleList.empty())
+                        target = Trinity::Containers::SelectRandomContainerElement(vehicleList);
+
+                    if (target)
                     {
-                        uint64 guid = Trinity::Containers::SelectRandomContainerElement(list);
-                        if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                        {
-                            me->getThreatManager().resetAllAggro();
-                            me->AddThreat(target, 10000.0f);
-                            AttackStart(target);
-                            DoCast(target, SPELL_MINIONS_CHARGE);
-                        }
+                        me->getThreatManager().resetAllAggro();
+                        me->AddThreat(target, 10000.0f);
+                        AttackStart(target);
+                        DoCast(target, SPELL_MINIONS_CHARGE);
                     }
                     _events.Repeat(urand(4500, 6000));
                 }
@@ -891,9 +967,35 @@ private:
     uint64 _unitTargetGUID;
 };
 
+class spell_toc5_mount_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_toc5_mount_SpellScript);
+
+    SpellCastResult CheckIfLanceEquiped()
+    {
+        if (GetCaster()->GetMapId() != 650) // TOC5
+            return SPELL_CAST_OK;
+
+        if (auto caster = GetCaster()->ToPlayer())
+            if (!caster->HasItemOrGemWithIdEquipped(46106, 1))
+            {
+                SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_HAVE_LANCE_EQUIPPED);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+
+        return SPELL_CAST_OK;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_toc5_mount_SpellScript::CheckIfLanceEquiped);
+    }
+};
+
 void AddSC_boss_grand_champions()
 {
     new CreatureAILoader<boss_grand_championAI>("boss_grand_champion");
     new CreatureAILoader<npc_toc5_grand_champion_minionAI>("npc_toc5_grand_champion_minion");
     new CreatureAILoader<npc_toc5_player_vehicleAI>("npc_toc5_player_vehicle");
+    new SpellScriptLoaderEx<spell_toc5_mount_SpellScript>("spell_toc5_mount");
 }

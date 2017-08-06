@@ -206,6 +206,16 @@ public:
 
         void DoAction(int32 param)
         {
+            if (param == 2)
+            {
+                Position pos;
+                me->GetRandomNearPosition(pos, 5.0f);
+                me->GetMotionMaster()->MoveJump(pos, 5.0f, 5.0f);
+                events.Reset();
+                events.ScheduleEvent(EVENT_SPELL_FIRE_BOMB, urand(5000, 20000));
+                me->SetInCombatWithZone();
+            }
+            
             if( param == 1 && !TargetGUID )
                 me->DespawnOrUnsummon();
         }
@@ -369,7 +379,7 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
-            summons.DoAction(1);
+            summons.DoAction(2);
 
             if( pInstance )
                 pInstance->SetData(TYPE_GORMOK, DONE);
@@ -749,6 +759,7 @@ enum IcehowlEvents
     EVENT_SPELL_MASSIVE_CRASH,
     EVENT_SPELL_WHIRL,
     EVENT_SPELL_ARCTIC_BREATH,
+    EVENT_BERSERK
 };
 
 class boss_icehowl : public CreatureScript
@@ -780,6 +791,7 @@ public:
 
         InstanceScript* pInstance;
         EventMap events;
+        EventMap events2;
         uint64 TargetGUID;
         float destX, destY, destZ;
 
@@ -797,6 +809,8 @@ public:
             events.RescheduleEvent(EVENT_SPELL_WHIRL, urand(10000,12000));
             events.RescheduleEvent(EVENT_SPELL_ARCTIC_BREATH, 14000);
             events.RescheduleEvent(EVENT_JUMP_MIDDLE, 30000);
+            if (IsHeroic())
+                events2.RescheduleEvent(EVENT_BERSERK, 150000);
         }
 
         void JustReachedHome()
@@ -857,9 +871,13 @@ public:
                 return;
 
             events.Update(diff);
+            events2.Update(diff);
 
             if( me->HasUnitState(UNIT_STATE_CASTING) )
                 return;
+
+            if (events2.ExecuteEvent() == EVENT_BERSERK)
+                DoCastSelf(47008, true);
 
             switch( events.GetEvent() )
             {

@@ -2768,6 +2768,17 @@ std::vector<uint32> partialCorrection =
     64652,  // Stomp 25 man
     64649,  // Freezing Breath
     63705,  // Void Wave
+    62661,  // Searing Flames
+    29865,  // Deathbloom 10 man
+    55053,  // Deathbloom 25 man
+    66689,  // Arctic Breath 10 man
+    67650,  // Arctic Breath 25 man
+    67651,  // Arctic Breath 10 man heroic
+    67652,  // Arctic Breath 25 man heroic
+    66528,  // Fel Lightning 10 man
+    67029,  // Fel Lightning 25 man
+    67030,  // Fel Lightning 10 man heroic
+    67031,  // Fel Lightning 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
@@ -3207,7 +3218,8 @@ void SpellMgr::LoadSpellCustomAttr()
             67861,
             67862,
             67863,
-            67721, // Anub'arak, Nerubian Burrower, Expose Weakness
+            67721, // Anub'arak, Nerubian Burrower, Expose Weakness 10
+            67847, // Anub'arak, Nerubian Burrower, Expose Weakness 25
             64638, // Ulduar, Winter Jormungar, Acidic Bite
             71157, // Icecrown Citadel, Plagued Zombie, Infected Wound
             72963, // Icecrown Citadel, Valithria Dreamwalker, Flesh Rot (Rot Worm)
@@ -3233,6 +3245,11 @@ void SpellMgr::LoadSpellCustomAttr()
             34655, // Snake Trap, Deadly Poison
             11971, // Sunder Armor
             58567, // Player Sunder Armor
+            61920, // Assembly of Iron Supercharge
+            66320, // Fire Bomb 10 man 
+            67472, // Fire Bomb 25 man
+            67473, // Fire Bomb 10 man heroic
+            67475, // Fire Bomb 25 man heroic
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
@@ -4262,10 +4279,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 1122:
             spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
             break;
-        // Conflagrate
-        case 17962: 
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
-            break;
 
         /////////////////////////////////
         ///// MAGE
@@ -4422,6 +4435,14 @@ void SpellMgr::LoadDbcDataCorrections()
         case 59725:
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_CASTER_AREA_PARTY;
             break;
+        //! Throws
+        // Shattering throw
+        case 64382:
+        //Heroic throw
+        case 57755:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_UNK15;
+            break;
+
 
 
 
@@ -5172,6 +5193,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // OVERWHELMING
         case 61888:
+            spellInfo->EffectAmplitude[EFFECT_1] = 25000;
             spellInfo->DurationIndex = 63; // 25 seconds
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
@@ -5447,10 +5469,11 @@ void SpellMgr::LoadDbcDataCorrections()
         // Black Hole
         case 62168:
         case 65250:
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_2_YARDS;
         case 62169:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
-			spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
+			spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_2_YARDS;
             break;
         // Assembly of iron
         case 61869: // 10
@@ -5515,7 +5538,7 @@ void SpellMgr::LoadDbcDataCorrections()
             {
                 spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
                 spellInfo->EffectApplyAuraName[1] = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
-                spellInfo->EffectAmplitude[1] = ((spellInfo->CastingTimeIndex == 170) ? 50 : 215);
+                spellInfo->EffectAmplitude[1] = ((spellInfo->CastingTimeIndex == 170) ? 50 : 150);
             }
             break;
 
@@ -5560,6 +5583,15 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// TRIAL OF THE CHAMPION
         //////////////////////////////////////////
+        // Trial of the Champion, Death's Respite (casted at announcer)
+        case 66798:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            break;
+        // Trial of the Champion, Trampled
+        case 67867:
+            spellInfo->DurationIndex = 27; // 3s
+            break;
         // Trial of the Champion, Death's Respite
         case 68306:
             spellInfo->EffectImplicitTargetA[0] = 25;
@@ -5583,18 +5615,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67715:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
             break;
-        // Trial of the Champion, Ghoul Explode
-        case 67751:
-            spellInfo->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_SRC_AREA_ENTRY;
-            spellInfo->EffectRadiusIndex[0] = 12;
-            spellInfo->EffectImplicitTargetA[1] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_SRC_AREA_ENTRY;
-            spellInfo->EffectRadiusIndex[1] = 12;
-            spellInfo->EffectImplicitTargetA[2] = TARGET_SRC_CASTER;
-            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_SRC_AREA_ENTRY;
-            spellInfo->EffectRadiusIndex[3] = 12;
-            break;
         // Trial of the Champion, Desecration
         case 67778:
         case 67877:
@@ -5604,6 +5624,28 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// TRIAL OF THE CRUSADER
         //////////////////////////////////////////
+        // Trial of the Crusader, Icehowl damage corrections
+        case 67345: // Whirl 10 man
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(9200, 10700);
+            break;
+        case 67663: // Whirl 25 man
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(12900, 15000);
+            break;
+        case 67664: // Whirl 10 man heroic
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(10800, 12300);
+            break;
+        case 67665: // Whirl 25 man heroic
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(15900, 18000);
+            break;
+        case 67660: // Massive Crash 25 man
+            spellInfo->EffectBasePoints[EFFECT_1] = urand(10200, 11800);
+            break;
+        case 66770: // Ferocious Butt 10 man
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(60000, 69900);
+            break;
+        case 67655: // Ferocious Butt 10 man heroic
+            spellInfo->EffectBasePoints[EFFECT_0] = urand(65000, 74000);
+            break;
         // Trial of the Crusader, Jaraxxus Intro spell
         case 67888:
             spellInfo->Attributes |= SPELL_ATTR0_STOP_ATTACK_TARGET;
@@ -5646,10 +5688,11 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
-        case 66320:
-        case 67472:
-        case 67473:
-        case 67475:
+        case 66320: // Fire Bomb 10 man 
+        case 67472: // Fire Bomb 25 man
+        case 67473: // Fire Bomb 10 man heroic
+        case 67475: // Fire Bomb 25 man heroic
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             spellInfo->EffectRadiusIndex[0] = 7;
             spellInfo->EffectRadiusIndex[1] = 7;
             break;
@@ -5722,7 +5765,26 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectBasePoints[0] = 10;
             spellInfo->EffectDieSides[0] = 0;
             break;
-
+        case 65724:
+        case 67213:
+        case 67214:
+        case 67215:
+        case 65748:
+        case 67216:
+        case 67217:
+        case 67218:
+            spellInfo->DurationIndex = 8;
+            break;
+        case 66075:
+        case 67312:
+        case 67313:
+        case 67314:
+        case 66069:
+        case 67309:
+        case 67310:
+        case 67311:
+            spellInfo->procCharges = 10;
+            break;
         // Trial of the Crusader, Twin Valkyr, Touch of Light/Darkness, Light/Dark Surge
         case 65950: // light 0
             //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
@@ -5832,6 +5894,10 @@ void SpellMgr::LoadDbcDataCorrections()
         // Trial of the Crusader, Anub'arak, Spider Frenzy
         case 66129:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            break;
+        // Trial of the Crusader, Anub'Arak, Leeching Swarm
+        case 66240:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
 
         //////////////////////////////////////////

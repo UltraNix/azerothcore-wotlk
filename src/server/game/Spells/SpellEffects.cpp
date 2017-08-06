@@ -4904,11 +4904,12 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
         (*itr)->AttackStop();
 
     // Xinef: Mirror images code Initialize Images
-    if (m_spellInfo->Id == 58836)
+    // Monich: Apparently it shouldn't work like that
+    /*if (m_spellInfo->Id == 58836)
     {
         std::vector<Unit*> images;
         for (Unit::ControlSet::const_iterator itr = m_caster->m_Controlled.begin(); itr != m_caster->m_Controlled.end(); ++itr)
-            if ((*itr)->GetEntry() == 31216 /*NPC_MIRROR_IMAGE*/)
+            if ((*itr)->GetEntry() == 31216) //NPC_MIRROR_IMAGE
                 images.push_back(*itr);
 
         if (images.empty())
@@ -4950,6 +4951,7 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
             }
         }
     }
+    */
 }
 
 void Spell::EffectSelfResurrect(SpellEffIndex effIndex)

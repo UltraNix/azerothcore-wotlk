@@ -1,11 +1,6 @@
-/*
-REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "onyxias_lair.h"
-#include "Player.h"
 #include "SpellInfo.h"
 
 enum Spells
@@ -99,12 +94,12 @@ enum Yells
 
 struct boss_onyxiaAI : public BossAI
 {
-    boss_onyxiaAI(Creature* creature) : BossAI(creature, DATA_ONYXIA) { }
+    explicit boss_onyxiaAI(Creature* creature) : BossAI(creature, DATA_ONYXIA), _phase(0), _currentWP(0), _whelpSpam(false), _whelpCount(0), _whelpSpamTimer(0), _manyWhelpsAvailable(false) { }
 
     void SetPhase(uint8 ph)
     {
         events.Reset();
-        Phase = ph;
+        _phase = ph;
         switch (ph)
         {
             case 1:
@@ -127,7 +122,7 @@ struct boss_onyxiaAI : public BossAI
     void Reset() override
     {
         _Reset();
-        CurrentWP = 0;
+        _currentWP = 0;
         SetPhase(0);
         me->SetReactState(REACT_AGGRESSIVE);
         me->SetCanFly(false);
@@ -135,10 +130,10 @@ struct boss_onyxiaAI : public BossAI
         me->SetHover(false);
         me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run, false);
 
-        whelpSpam = false;
-        whelpCount = 0;
-        whelpSpamTimer = 0;
-        bManyWhelpsAvailable = false;
+        _whelpSpam = false;
+        _whelpCount = 0;
+        _whelpSpamTimer = 0;
+        _manyWhelpsAvailable = false;
 
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
     }
@@ -151,15 +146,20 @@ struct boss_onyxiaAI : public BossAI
         if (who->GetTypeId() == TYPEID_PLAYER)
             AttackStart(who);
     }
-
+    
     void DoAction(int32 param) override
     {
         if (param == -1)
-            if (bManyWhelpsAvailable)
+            if (_manyWhelpsAvailable)
                 instance->SetData(DATA_WHELP_SUMMONED, 1);
     }
 
-    void BindPlayers()
+    void EnterEvadeMode() override
+    {
+        _DespawnAtEvade();
+    }
+
+    void BindPlayers() const
     {
         me->GetMap()->ToInstanceMap()->PermBindAllPlayers();
     }
@@ -178,12 +178,12 @@ struct boss_onyxiaAI : public BossAI
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
     {
-        if (Phase == 1)
+        if (_phase == 1)
         {
             if (me->HealthBelowPctDamaged(65, damage))
                 SetPhase(2);
         }
-        else if (Phase == 2)
+        else if (_phase == 2)
         {
             if (me->HealthBelowPctDamaged(45, damage))
             {
@@ -203,9 +203,9 @@ struct boss_onyxiaAI : public BossAI
         if (summon->GetEntry() != NPC_ONYXIAN_WHELP && summon->GetEntry() != NPC_ONYXIAN_LAIR_GUARD)
             return;
 
-        if (Unit* target = summon->SelectNearestTarget(300.0f))
+        if (auto target = summon->SelectNearestTarget(300.0f))
         {
-            if(summon->IsAIEnabled)
+            if (summon->IsAIEnabled)
                 summon->AI()->AttackStart(target);
             DoZoneInCombat(summon);
         }
@@ -218,11 +218,11 @@ struct boss_onyxiaAI : public BossAI
 
         if (id < 9)
         {
-            if (id > 0 && Phase == 2)
+            if (id > 0 && _phase == 2)
             {
                 me->SetFacingTo(OnyxiaMoveData[id].o);
                 me->SetSpeed(MOVE_RUN, 1.6f, false);
-                CurrentWP = id;
+                _currentWP = id;
                 events.ScheduleEvent(EVENT_SPELL_FIREBALL_FIRST, 1000);
             }
         }
@@ -247,31 +247,33 @@ struct boss_onyxiaAI : public BossAI
                 me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run, false);
                 events.ScheduleEvent(EVENT_PHASE_3_ATTACK, 0);
                 break;
+            default:
+                break;
         }
     }
 
     void HandleWhelpSpam(const uint32 diff)
     {
-        if (whelpSpam)
+        if (_whelpSpam)
         {
-            if (whelpCount < 40)
+            if (_whelpCount < 40)
             {
-                whelpSpamTimer -= diff;
-                if (whelpSpamTimer <= 0)
+                _whelpSpamTimer -= diff;
+                if (_whelpSpamTimer <= 0)
                 {
-                    float angle = rand_norm() * 2 * M_PI;
-                    float dist = rand_norm()*4.0f;
+                    auto angle = Position::RandomOrientation();
+                    auto dist = frand(0.0f, 4.0f);
                     me->CastSpell(-33.18f + cos(angle)*dist, -258.80f + sin(angle)*dist, -89.0f, 17646, true);
                     me->CastSpell(-32.535f + cos(angle)*dist, -170.190f + sin(angle)*dist, -89.0f, 17646, true);
-                    whelpCount += 2;
-                    whelpSpamTimer += 600;
+                    _whelpCount += 2;
+                    _whelpSpamTimer += 600;
                 }
             }
             else
             {
-                whelpSpam = false;
-                whelpCount = 0;
-                whelpSpamTimer = 0;
+                _whelpSpam = false;
+                _whelpCount = 0;
+                _whelpSpamTimer = 0;
             }
         }
     }
@@ -292,15 +294,15 @@ struct boss_onyxiaAI : public BossAI
             switch (eventId)
             {
                 case EVENT_SPELL_WINGBUFFET:
-                    DoCast(me, SPELL_WINGBUFFET);
+                    DoCastSelf(SPELL_WINGBUFFET);
                     events.Repeat(urand(15000, 30000));
                     break;
                 case EVENT_SPELL_FLAMEBREATH:
-                    DoCast(me, SPELL_FLAMEBREATH);
+                    DoCastSelf(SPELL_FLAMEBREATH);
                     events.Repeat(urand(10000, 20000));
                     break;
                 case EVENT_SPELL_TAILSWEEP:
-                    DoCast(me, SPELL_TAILSWEEP);
+                    DoCastSelf(SPELL_TAILSWEEP);
                     events.Repeat(urand(15000, 20000));
                     break;
                 case EVENT_SPELL_CLEAVE:
@@ -325,16 +327,16 @@ struct boss_onyxiaAI : public BossAI
                     me->SetOrientation(OnyxiaMoveData[0].o);
                     me->SendMovementFlagUpdate();
                     me->GetMotionMaster()->MoveTakeoff(11, OnyxiaMoveData[1].x + 1.0f, OnyxiaMoveData[1].y, OnyxiaMoveData[1].z, 12.0f);
-                    bManyWhelpsAvailable = true;
+                    _manyWhelpsAvailable = true;
                     events.RescheduleEvent(EVENT_END_MANY_WHELPS_TIME, 10000);
                     break;
                 case EVENT_END_MANY_WHELPS_TIME:
-                    bManyWhelpsAvailable = false;
+                    _manyWhelpsAvailable = false;
                     break;
                 case EVENT_FLY_S_TO_N:
                     me->SetSpeed(MOVE_RUN, 2.95f, false);
                     me->GetMotionMaster()->MovePoint(5, OnyxiaMoveData[5].x, OnyxiaMoveData[5].y, OnyxiaMoveData[5].z);
-                    whelpSpam = true;
+                    _whelpSpam = true;
                     events.ScheduleEvent(EVENT_WHELP_SPAM, 90000);
                     events.ScheduleEvent(EVENT_SUMMON_LAIR_GUARD, 30000);
                     break;
@@ -343,7 +345,7 @@ struct boss_onyxiaAI : public BossAI
                     events.Repeat(30000);
                     break;
                 case EVENT_WHELP_SPAM:
-                    whelpSpam = true;
+                    _whelpSpam = true;
                     events.Repeat(90000);
                     break;
                 case EVENT_LAND:
@@ -353,7 +355,7 @@ struct boss_onyxiaAI : public BossAI
                     DoResetThreat();
                     break;
                 case EVENT_SPELL_FIREBALL_FIRST:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                    if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                     {
                         me->SetFacingToObject(target);
                         DoCast(target, SPELL_FIREBALL);
@@ -361,7 +363,7 @@ struct boss_onyxiaAI : public BossAI
                     events.ScheduleEvent(EVENT_SPELL_FIREBALL_SECOND, 4000);
                     break;
                 case EVENT_SPELL_FIREBALL_SECOND:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
+                    if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                     {
                         me->SetFacingToObject(target);
                         DoCast(target, SPELL_FIREBALL);
@@ -378,11 +380,13 @@ struct boss_onyxiaAI : public BossAI
                         case 2:
                             events.ScheduleEvent(EVENT_PHASE_2_STEP_ACROSS, 4000);
                             break;
+                        default:
+                            break;
                     }
                     break;
                 case EVENT_PHASE_2_STEP_CW:
                 {
-                    uint8 newWP = CurrentWP + 1;
+                    uint8 newWP = _currentWP + 1;
                     if (newWP > 8)
                         newWP = 1;
                     me->GetMotionMaster()->MovePoint(newWP, OnyxiaMoveData[newWP].x, OnyxiaMoveData[newWP].y, OnyxiaMoveData[newWP].z);
@@ -390,21 +394,21 @@ struct boss_onyxiaAI : public BossAI
                     break;
                 case EVENT_PHASE_2_STEP_ACW:
                 {
-                    uint8 newWP = CurrentWP - 1;
+                    uint8 newWP = _currentWP - 1;
                     if (newWP < 1)
                         newWP = 8;
                     me->GetMotionMaster()->MovePoint(newWP, OnyxiaMoveData[newWP].x, OnyxiaMoveData[newWP].y, OnyxiaMoveData[newWP].z);
                 }
                     break;
                 case EVENT_PHASE_2_STEP_ACROSS:
-                    me->SetFacingTo(OnyxiaMoveData[CurrentWP].o);
-                    me->MonsterTextEmote("Onyxia takes in a deep breath...", 0, true);
-                    me->CastSpell(me, OnyxiaMoveData[CurrentWP].spellId, false);
+                    me->SetFacingTo(OnyxiaMoveData[_currentWP].o);
+                    me->MonsterTextEmote("Onyxia takes in a deep breath...", nullptr, true);
+                    DoCastSelf(OnyxiaMoveData[_currentWP].spellId);
                     events.ScheduleEvent(EVENT_SPELL_BREATH, 8250);
                     break;
                 case EVENT_SPELL_BREATH:
                 {
-                    uint8 newWP = OnyxiaMoveData[CurrentWP].DestId;
+                    auto newWP = OnyxiaMoveData[_currentWP].DestId;
                     me->SetSpeed(MOVE_RUN, 2.95f, false);
                     me->GetMotionMaster()->MovePoint(newWP, OnyxiaMoveData[newWP].x, OnyxiaMoveData[newWP].y, OnyxiaMoveData[newWP].z);
                 }
@@ -416,7 +420,7 @@ struct boss_onyxiaAI : public BossAI
                 case EVENT_PHASE_3_ATTACK:
                     me->SetReactState(REACT_AGGRESSIVE);
                     AttackStart(SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 0, false));
-                    DoCast(me, SPELL_BELLOWINGROAR);
+                    DoCastSelf(SPELL_BELLOWINGROAR);
 
                     events.ScheduleEvent(EVENT_ERUPTION, 0);
                     events.ScheduleEvent(EVENT_SPELL_WINGBUFFET, urand(10000, 20000));
@@ -427,7 +431,7 @@ struct boss_onyxiaAI : public BossAI
                     events.ScheduleEvent(EVENT_SUMMON_WHELP, 10000);
                     break;
                 case EVENT_SPELL_BELLOWINGROAR:
-                    DoCast(me, SPELL_BELLOWINGROAR);
+                    DoCastSelf(SPELL_BELLOWINGROAR);
                     events.Repeat(22000);
                     events.ScheduleEvent(EVENT_ERUPTION, 0);
                     break;
@@ -437,8 +441,8 @@ struct boss_onyxiaAI : public BossAI
                     break;
                 case EVENT_SUMMON_WHELP:
                 {
-                    float angle = rand_norm() * 2 * M_PI;
-                    float dist = rand_norm()*4.0f;
+                    auto angle = Position::RandomOrientation();
+                    auto dist = frand(0.0f, 4.0f);
                     me->CastSpell(-33.18f + cos(angle)*dist, -258.80f + sin(angle)*dist, -89.0f, 17646, true);
                     me->CastSpell(-32.535f + cos(angle)*dist, -170.190f + sin(angle)*dist, -89.0f, 17646, true);
                     events.Repeat(30000);
@@ -462,17 +466,17 @@ struct boss_onyxiaAI : public BossAI
     }
 
 private:
-    uint8 Phase;
-    int8 CurrentWP;
-    bool whelpSpam;
-    uint8 whelpCount;
-    int32 whelpSpamTimer;
-    bool bManyWhelpsAvailable;
+    uint8 _phase;
+    int8 _currentWP;
+    bool _whelpSpam;
+    uint8 _whelpCount;
+    int32 _whelpSpamTimer;
+    bool _manyWhelpsAvailable;
 };
 
 struct npc_onyxian_lair_guardAI : public ScriptedAI
 {
-    npc_onyxian_lair_guardAI(Creature* creature) : ScriptedAI(creature) { }
+    explicit npc_onyxian_lair_guardAI(Creature* creature) : ScriptedAI(creature) { }
 
     void EnterCombat(Unit* /*attacker*/) override
     {
@@ -501,7 +505,7 @@ struct npc_onyxian_lair_guardAI : public ScriptedAI
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
 
-        while (uint32 eventId = _events.ExecuteEvent())
+        while (auto eventId = _events.ExecuteEvent())
         {
             switch (eventId)
             {
@@ -510,7 +514,7 @@ struct npc_onyxian_lair_guardAI : public ScriptedAI
                     _events.Repeat(15000);
                     break;
                 case EVENT_OLG_SPELL_BLASTNOVA:
-                    DoCast(me, SPELL_OLG_BLASTNOVA);
+                    DoCastSelf(SPELL_OLG_BLASTNOVA);
                     _events.Repeat(15000);
                     break;
                 case EVENT_OLG_SPELL_IGNITEWEAPON:
@@ -518,7 +522,7 @@ struct npc_onyxian_lair_guardAI : public ScriptedAI
                         _events.Repeat(5000);
                     else
                     {
-                        DoCast(me, SPELL_OLG_IGNITEWEAPON);
+                        DoCastSelf(SPELL_OLG_IGNITEWEAPON);
                         _events.Repeat(urand(18000, 21000));
                     }
                     break;
@@ -544,7 +548,7 @@ private:
 
 struct npc_onyxia_whelpAI : public ScriptedAI
 {
-    npc_onyxia_whelpAI(Creature* creature) : ScriptedAI(creature) {}
+    explicit npc_onyxia_whelpAI(Creature* creature) : ScriptedAI(creature) {}
 
     void MoveInLineOfSight(Unit *who) override
     {
@@ -558,7 +562,7 @@ struct npc_onyxia_whelpAI : public ScriptedAI
 
 struct npc_onyxia_triggerAI : public ScriptedAI
 {
-    npc_onyxia_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+    explicit npc_onyxia_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
     void MoveInLineOfSight(Unit* who) override {}
     void UpdateAI(uint32 diff) override {}

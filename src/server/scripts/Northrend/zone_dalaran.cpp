@@ -280,6 +280,7 @@ enum ArchmageLandalockQuests
     QUEST_PROOF_OF_DEMISE_ANUB_ARAK         = 13254,
     QUEST_PROOF_OF_DEMISE_HERALD_VOLAZJ     = 13255,
     QUEST_PROOF_OF_DEMISE_CYANIGOSA         = 13256,
+    QUEST_PROOF_OF_DEMISE_BLACK_KNIGHT      = 14199,
     // Post 3.3.x
     QUEST_SARTHARION_MUST_DIE               = 24579,
     QUEST_ANUBREKHAN_MUST_DIE               = 24580,
@@ -310,6 +311,7 @@ enum ArchmageLandalockImages
     NPC_ANUB_ARAK_IMAGE                 = 31626,
     NPC_HERALD_VOLAZJ_IMAGE             = 31627,
     NPC_CYANIGOSA_IMAGE                 = 31629,
+    NPC_BLACK_KNIGHT_IMAGE              = 35461,
     // Post 3.3.x
     NPC_SARTHARION_IMAGE                = 37849,
     NPC_ANUBREKHAN_IMAGE                = 37850,
@@ -374,6 +376,8 @@ class npc_archmage_landalock : public CreatureScript
                         return NPC_HERALD_VOLAZJ_IMAGE;
                     case QUEST_PROOF_OF_DEMISE_CYANIGOSA:
                         return NPC_CYANIGOSA_IMAGE;
+                    case QUEST_PROOF_OF_DEMISE_BLACK_KNIGHT:
+                        return NPC_BLACK_KNIGHT_IMAGE;
                     // Post 3.3.x
                     case QUEST_SARTHARION_MUST_DIE:
                         return NPC_SARTHARION_IMAGE;

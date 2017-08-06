@@ -91,6 +91,91 @@ bool BazaarMgr::CanEffortAuction(Player* player, uint32 auctionId)
     return true;
 }
 
+enum TaxRates 
+{
+    SLAVE_PREMIUM_TAX_RATE_0_500      = 10,
+    SLAVE_PREMIUM_TAX_RATE_501_750    = 20,
+    SLAVE_PREMIUM_TAX_RATE_751_1000   = 30,
+    SLAVE_PREMIUM_TAX_RATE_OVER_1000  = 40,
+
+    SLAVE_GOLD_TAX_RATE_0_500     = 50,
+    SLAVE_GOLD_TAX_RATE_501_750   = 100,
+    SLAVE_GOLD_TAX_RATE_751_1000  = 150,
+    SLAVE_GOLD_TAX_RATE_OVER_1000 = 200,
+};
+
+bool BazaarMgr::CanEffortTaxRate(Player* player, uint32 price, uint8 type, bool extraTax)
+{
+    if (!player)
+        return false;
+
+    uint32 accId = player->GetSession()->GetAccountId();
+    uint32 BazaarTaxRate = price / TAX_RATE;
+    uint32 FinalPremiumTaxRate  = 0;
+    uint32 FinalGoldTaxRate     = 0;
+    switch (type)
+    {
+        case AUCTION_SELL_PREMIUM:
+            FinalPremiumTaxRate = BazaarTaxRate;
+            if (!CheckPremiumAmount(accId, price + BazaarTaxRate))
+                return false;
+            break;
+        case AUCTION_SELL_MONEY:
+            FinalGoldTaxRate = BazaarTaxRate;
+            if (!CheckMoneyAmount(player, price + BazaarTaxRate))
+                return false;
+            break;
+        case AUCTION_SELL_CHARACTER:
+            if (price < 500)
+            {
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_0_500;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_0_500;
+
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_0_500))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_0_500))
+                    return false;
+            } 
+            else if (price > 500 && price <= 750)
+            {
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_501_750;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_501_750;
+
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_501_750))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_501_750))
+                    return false;
+            }
+            else if (price > 750 && price <= 1000)
+            {
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_751_1000;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_751_1000;
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_751_1000))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_751_1000))
+                    return false;
+            }
+            else if (price > 1000)
+            {
+                FinalPremiumTaxRate = SLAVE_PREMIUM_TAX_RATE_OVER_1000;
+                FinalGoldTaxRate = SLAVE_GOLD_TAX_RATE_OVER_1000;
+                if (!CheckPremiumAmount(accId, SLAVE_PREMIUM_TAX_RATE_OVER_1000))
+                    return false;
+                if (!CheckMoneyAmount(player, SLAVE_GOLD_TAX_RATE_OVER_1000))
+                    return false;
+            }
+            break;
+    }
+    
+    // Pay the taxes
+    TakeRequiredAmount(player, FinalPremiumTaxRate, type);
+    // Slave market gold tax
+    if (extraTax == true)
+        TakeRequiredAmount(player, FinalGoldTaxRate, type, true);
+
+    return true;
+}
+
 // Check auction owner by account id
 bool BazaarMgr::CheckAuctionOwner(Player* player, uint32 auctionId)
 {
@@ -175,10 +260,10 @@ void BazaarMgr::ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy)
                 stmt->setUInt32(1, accId);
                 LoginDatabase.Execute(stmt);
 
-                ChatHandler(player->GetSession()).PSendSysMessage("Details: You paid: %u gold for %u premium points.", moneyAmount, premiumAmount);
+                ChatHandler(player->GetSession()).PSendSysMessage("Details: You paid: %u gold for %u Sunwell Coins.", moneyAmount, premiumAmount);
                 ChatHandler(player->GetSession()).PSendSysMessage("Points has been added to your account.", moneyAmount, premiumAmount);
 
-                sLog->outBazaar("Auction Id: %u sold, buyer: %s, premium amount: %u, money amount: %u, type: [AUCTION_SELL_PREMIUM]", auctionId, player->GetName().c_str(), premiumAmount, moneyAmount);
+                sLog->outBazaar("Auction Id: %u sold, buyer: %s, Sunwell Coins amount: %u, money amount: %u, type: [AUCTION_SELL_PREMIUM]", auctionId, player->GetName().c_str(), premiumAmount, moneyAmount);
             }
             else 
             {
@@ -200,10 +285,10 @@ void BazaarMgr::ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy)
                 stmt->setUInt32(1, accId);
                 LoginDatabase.Execute(stmt);
 
-                ChatHandler(player->GetSession()).PSendSysMessage("Details: You paid: %u premium points for %u gold.", premiumAmount, moneyAmount);
+                ChatHandler(player->GetSession()).PSendSysMessage("Details: You paid: %u Sunwell Coins for %u gold.", premiumAmount, moneyAmount);
                 ChatHandler(player->GetSession()).PSendSysMessage("Gold has been added to your character.", moneyAmount, premiumAmount);
 
-                sLog->outBazaar("Auction Id: %u sold, buyer: %s, premium amount: %u, money amount: %u, type: [AUCTION_SELL_MONEY]", auctionId, player->GetName().c_str(), premiumAmount, moneyAmount);
+                sLog->outBazaar("Auction Id: %u sold, buyer: %s, Sunwell Coins amount: %u, money amount: %u, type: [AUCTION_SELL_MONEY]", auctionId, player->GetName().c_str(), premiumAmount, moneyAmount);
             }
             else
                 player->ModifyMoney(moneyAmount * GOLD);
@@ -245,10 +330,10 @@ void BazaarMgr::ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy)
                 stmt->setUInt32(1, charGuid);
                 CharacterDatabase.Execute(stmt);
 
-                ChatHandler(player->GetSession()).PSendSysMessage("Details: You paid: %u premium points for Character: %s", premiumAmount, name.c_str());
+                ChatHandler(player->GetSession()).PSendSysMessage("Details: You paid: %u Sunwell Coins for Character: %s", premiumAmount, name.c_str());
                 ChatHandler(player->GetSession()).PSendSysMessage("Character has been added to your account.", moneyAmount, premiumAmount);
 
-                sLog->outSlave("Auction Id: %u sold, buyer: %s GUID: %u, price: %u PP, type: [AUCTION_SELL_CHARACTER] - Character Sold: %s, GUID: %u", auctionId, player->GetName().c_str(), player->GetGUIDLow(), premiumAmount, name.c_str(), charGuid);
+                sLog->outSlave("Auction Id: %u sold, buyer: %s GUID: %u, price: %u SC, type: [AUCTION_SELL_CHARACTER] - Character Sold: %s, GUID: %u", auctionId, player->GetName().c_str(), player->GetGUIDLow(), premiumAmount, name.c_str(), charGuid);
             }
             else
             {
@@ -264,7 +349,7 @@ void BazaarMgr::ReturnAuctionAmount(Player* player, uint32 auctionId, bool buy)
 
 void BazaarMgr::RemoveOutdatedAuctions(Player* player, uint32 auctionId)
 {
-
+    // TO-DO
 }
 
 bool BazaarMgr::SendAuctionOffer(Player* player, uint32 auctionId)
@@ -304,7 +389,7 @@ bool BazaarMgr::SendAuctionOffer(Player* player, uint32 auctionId)
             {
                 int32 new_money = bidder->GetMoney() + (mo_amount * GOLD);
                 bidder->SetMoney(new_money);
-                ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: Your Bazaar Premium auction has been sold.");
+                ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: Your Sunwell Coin auction has been sold.");
                 ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: %u gold has been added to your character.", mo_amount);
             }
             else
@@ -321,8 +406,8 @@ bool BazaarMgr::SendAuctionOffer(Player* player, uint32 auctionId)
         {
             if (Player* bidder = ObjectAccessor::FindPlayerByName(name, false))
             {
-                ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: Your Bazaar Gold auction has been sold.");
-                ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: %u premium points has been added to your account. ", dp_amount);
+                ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: Your Gold auction has been sold.");
+                ChatHandler(bidder->GetSession()).PSendSysMessage("Bazaar: %u Sunwell Coins has been added to your account. ", dp_amount);
 
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PREMIUM_POINTS);
                 stmt->setUInt32(0, dp_amount);
@@ -351,7 +436,7 @@ bool BazaarMgr::SendAuctionOffer(Player* player, uint32 auctionId)
     return true;
 }
 
-void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type)
+void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type, bool extraTax)
 {
     if (!player)
         return;
@@ -361,7 +446,14 @@ void BazaarMgr::TakeRequiredAmount(Player* player, int32 amount, uint8 type)
     switch (type)
     {
         case AUCTION_SELL_PREMIUM:
+        case AUCTION_SELL_CHARACTER:
         {
+            if (extraTax == true)
+            {
+                player->ModifyMoney(-(amount * GOLD));
+                break;
+            }
+
             PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PREMIUM_POINTS);
             stmt->setInt32(0, -(amount));
             stmt->setUInt32(1, accId);
@@ -597,6 +689,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
     uint8 slave_class   = (type == AUCTION_SELL_CHARACTER ? player->getClass() : 0);
     uint8 slave_gender  = (type == AUCTION_SELL_CHARACTER ? player->getGender() : 0);
     uint8 slave_level   = (type == AUCTION_SELL_CHARACTER ? player->getLevel() : 0);
+    uint8 slave_team    = (type == AUCTION_SELL_CHARACTER ? player->GetTeamId() : 0);
     uint32 slave_money  = (type == AUCTION_SELL_CHARACTER ? player->GetMoney() / GOLD : 0);
     uint32 slave_arena  = (type == AUCTION_SELL_CHARACTER ? player->GetArenaPoints() : 0);
     uint32 slave_honor  = (type == AUCTION_SELL_CHARACTER ? player->GetHonorPoints() : 0);
@@ -633,7 +726,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, getMSTime());
+            stmt->setUInt32(38, slave_team);
+            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
             break;
         }
         case AUCTION_SELL_MONEY:
@@ -662,7 +756,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, getMSTime());
+            stmt->setUInt32(38, slave_team);
+            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
             break;
         }
         case AUCTION_SELL_CHARACTER:
@@ -694,7 +789,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                     stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, getMSTime());
+            stmt->setUInt32(38, slave_team);
+            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
             break;
         }
     }
@@ -714,17 +810,20 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
         ChatHandler(player->GetSession()).PSendSysMessage("Your bazaar auction has been created.");
 
         if (type == AUCTION_SELL_MONEY)
-            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u,  Type (1 - Gold Auction ), Price: %u Premium for %u Gold", auctionId, dpAmount, uint32(moneyAmount));
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u,  Type (1 - Gold Auction), Price: %u Sunwell Coins for %u Gold", auctionId, dpAmount, moneyAmount);
+            ChatHandler(player->GetSession()).PSendSysMessage("Total tax rate: 10% of gold price (%u) - non-refundable", moneyAmount / TAX_RATE);
+        }
         else
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u, Type (0 - Premium Auction), Price: %u Gold for %u Premium Points", auctionId, uint32(moneyAmount), dpAmount);
-            PremiumAmount(player);
+            ChatHandler(player->GetSession()).PSendSysMessage("Details: Id: %u, Type (0 - Sunwell Auction), Price: %u Gold for %u Sunwell Coins", auctionId, moneyAmount, dpAmount);
+            ChatHandler(player->GetSession()).PSendSysMessage("Total tax rate: 10% (%u) - non-refundable", dpAmount / TAX_RATE);
         }
 
         if (type == AUCTION_SELL_MONEY)
-            sLog->outBazaar("Auction Id: %u created by Player: %s GUID: %u, gold amount: %u, premium amount: %u, type: [AUCTION_SELL_MONEY]", auctionId, player->GetName().c_str(), player->GetGUIDLow(), moneyAmount, dpAmount);
+            sLog->outBazaar("Auction Id: %u created by Player: %s GUID: %u, gold amount: %u, sunwell coins amount: %u, type: [AUCTION_SELL_MONEY]", auctionId, player->GetName().c_str(), player->GetGUIDLow(), moneyAmount, dpAmount);
         else
-            sLog->outBazaar("Auction Id: %u created by Player: %s GUID: %u, premium amount: %u, gold amount: %u, type: [AUCTION_SELL_PREMIUM]", auctionId, player->GetName().c_str(), player->GetGUIDLow(), dpAmount, moneyAmount);
+            sLog->outBazaar("Auction Id: %u created by Player: %s GUID: %u, sunwell coins amount: %u, gold amount: %u, type: [AUCTION_SELL_PREMIUM]", auctionId, player->GetName().c_str(), player->GetGUIDLow(), dpAmount, moneyAmount);
     }
 
     return true;
@@ -747,7 +846,7 @@ void BazaarMgr::PremiumAmount(Player* player)
 
     uint32 amount = (*result)[0].GetUInt32();
 
-    ChatHandler(player->GetSession()).PSendSysMessage("Your premium points status: %u", amount);
+    ChatHandler(player->GetSession()).PSendSysMessage("Your Sunwell Coins status: %u", amount);
 }
 
 void BazaarMgr::DeleteBazaarAuction(uint32 auctionId)
@@ -817,13 +916,13 @@ void BazaarMgr::PlayerAuctions(Player* player)
         switch (auctionType)
         {
             case AUCTION_SELL_PREMIUM:
-                ChatHandler(player->GetSession()).PSendSysMessage("Auction ID: %u Premium Auction (Price: %u g for %u pp)", auctionId, mo_amount, dp_amount);
+                ChatHandler(player->GetSession()).PSendSysMessage("Auction ID: %u Sunwell Auction (Price: %u g for %u sc)", auctionId, mo_amount, dp_amount);
                 break;
             case AUCTION_SELL_MONEY:
-                ChatHandler(player->GetSession()).PSendSysMessage("Auction ID: %u Gold Auction (Price: %u pp for %u g)", auctionId, dp_amount, mo_amount);
+                ChatHandler(player->GetSession()).PSendSysMessage("Auction ID: %u Gold Auction (Price: %u sc for %u g)", auctionId, dp_amount, mo_amount);
                 break;
             case AUCTION_SELL_CHARACTER:
-                ChatHandler(player->GetSession()).PSendSysMessage("Auction ID: %u Character Auction (Character Name: %s for %u pp)", auctionId, name.c_str(), dp_amount);
+                ChatHandler(player->GetSession()).PSendSysMessage("Auction ID: %u Character Auction (Character Name: %s for %u sc)", auctionId, name.c_str(), dp_amount);
                 break;
         }
 

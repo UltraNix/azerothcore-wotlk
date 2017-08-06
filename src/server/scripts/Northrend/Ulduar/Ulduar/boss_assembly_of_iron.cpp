@@ -575,11 +575,16 @@ public:
             {
                 case EVENT_RUNE_OF_POWER:
                 {
-                    Unit* target = DoSelectLowestHpFriendly(60);
-                    if (!target || !target->IsAlive())
-                        target = me;
+                    std::list<Creature*> assemblyList;
+                    for (uint8 i = DATA_STEELBREAKER; i <= DATA_BRUNDIR; ++i)
+                        if (Creature* boss = ObjectAccessor::GetCreature(*me, pInstance->GetData64(i)))
+                            if (boss->IsAlive())
+                                assemblyList.push_back(boss);
+                    
+                    if (!assemblyList.empty())
+                        if (Creature* target = Trinity::Containers::SelectRandomContainerElement(assemblyList))
+                            DoCast(target, SPELL_RUNE_OF_POWER, true);
 
-                    me->CastSpell(target, SPELL_RUNE_OF_POWER, true);
                     events.RepeatEvent(60000);
                     break;
                 }
@@ -950,6 +955,7 @@ public:
                     me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
                     me->SendMonsterMove(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ()+15, 1500, SPLINEFLAG_FLYING);
+                    me->SetTarget(_flyTarget->GetGUID());
                     
                     me->CastSpell(me, SPELL_LIGHTNING_TENDRILS, true);
                     me->CastSpell(me, 61883, true);

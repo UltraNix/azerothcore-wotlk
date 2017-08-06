@@ -196,7 +196,7 @@ public:
             events.RescheduleEvent(EVENT_ENRAGE, 600000);
             events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000,15000));
             events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000,20000));
-            events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(5000,8000));
+            events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000,10000));
             events.RescheduleEvent(EVENT_SUBMERGE, SUBMERGE_INTERVAL);
             if( !IsHeroic() )
                 events.RescheduleEvent(EVENT_RESPAWN_SPHERE, 4000);
@@ -291,7 +291,7 @@ public:
                 case EVENT_SPELL_PENETRATING_COLD:
                     {
                         me->CastCustomSpell(SPELL_PENETRATING_COLD, SPELLVALUE_MAX_TARGETS, RAID_MODE(2,5,2,5));
-                        events.RepeatEvent(18000);
+                        events.RepeatEvent(20000);
                     }
                     break;
                 case EVENT_SUMMON_NERUBIAN:
@@ -343,7 +343,7 @@ public:
                         me->setAttackTimer(BASE_ATTACK, 3000);
                         me->RemoveAura(SPELL_SUBMERGE);
                         me->CastSpell(me, SPELL_EMERGE, false);
-                        events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(5000,8000));
+                        events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000,10000));
                         events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000,15000));
                         events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000,20000));
                         events.RescheduleEvent(EVENT_SUBMERGE, SUBMERGE_INTERVAL);
@@ -692,7 +692,7 @@ public:
                         me->CastSpell(me, SPELL_SUBMERGE, false);
                         events.PopEvent();
                         events.DelayEvents(15000);
-                        events.RescheduleEvent(EVENT_EMERGE, 10000);
+                        events.RescheduleEvent(EVENT_EMERGE, 15000);
                     }
                     else
                         events.RepeatEvent(3000);
@@ -903,6 +903,11 @@ class spell_gen_leeching_swarm : public SpellScriptLoader
                 if (lifeLeeched < 250)
                     lifeLeeched = 250;
                 // Damage
+                // TODO: Heal effect should be modified:
+                // 10 man - 68% of dmg
+                // 10 man hc - 92% of dmg
+                // 25 man - 155% of dmg
+                // 25 man hc - 230% of dmg  
                 caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
                 // Heal is handled in damage spell. It has to heal the same amount, but some of the dmg can be resisted.
             }

@@ -37,7 +37,14 @@ enum Spectators
     NPC_SPECTATOR_ANIM_GNOME    = 34869,
     NPC_SPECTATOR_ANIM_TROLL    = 34857,
     NPC_SPECTATOR_ANIM_BELF     = 34861,
-    NPC_SPECTATOR_ANIM_DRAENEI  = 34868
+    NPC_SPECTATOR_ANIM_DRAENEI  = 34868,
+
+    NPC_NEUTRAL_DWARF           = 34974,
+    NPC_NEUTRAL_DRAENEI         = 34975,
+    NPC_NEUTRAL_HUMAN           = 34970,
+    NPC_NEUTRAL_ORC             = 34977,
+    NPC_NEUTRAL_BELF            = 34966,
+    NPC_NEUTRAL_TAUREN          = 34979
 };
 
 struct SpectatorsInfo
@@ -64,6 +71,8 @@ SpectatorsInfo const SpectatorData[12] =
 enum Announcer
 {
     EVENT_RANDOM_EMOTE      = 1,
+    EVENT_RANDOM_ANIMS,
+    EVENT_RANDOM_ANIMS_TRIGGER,
 
     EMOTE_CHEER             = 0
 };
@@ -72,6 +81,71 @@ class npc_announcer_toc5 : public CreatureScript
 {
 public:
     npc_announcer_toc5() : CreatureScript("npc_announcer_toc5") {}
+
+    bool HasAllSeenEvent(Player* player)
+    {
+        if (!player)
+            return false;
+
+        if (player->IsGameMaster())
+            return true;
+
+        bool seen = true;
+        Map::PlayerList const& players = player->GetMap()->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player const *plr = itr->GetSource())
+            {
+                if (!plr->GetMap()->IsHeroic())
+                {
+                    if (!plr->HasAchieved(3778) /* Normal ToC (horde) */ && !plr->HasAchieved(4296) /* Normal ToC (alliance) */)
+                        seen = false;
+                }
+                else
+                {
+                    if (!plr->HasAchieved(4298) /* Heroic ToC (alliance) */ && !plr->HasAchieved(4297) /* Heroic ToC (horde) */)
+                        seen = false;
+                }
+            }
+        }
+        return seen;
+    }
+
+    bool AllMountedCheck(Creature* creature, InstanceScript* instance)
+    {
+        bool check = false;
+        if (instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_INITIAL)
+        {
+            uint32 count = 0;
+            Map::PlayerList const &players = creature->GetMap()->GetPlayers();
+
+            if (!players.isEmpty())
+            {
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    if (Player* player = itr->GetSource())
+                    {
+                        if (player->IsGameMaster())
+		                {
+		                    ++count;
+		                    continue;
+		                }
+									
+                        if (Unit* veh = player->GetVehicleBase())
+                        {
+                            if (veh->GetEntry() == VEHICLE_ARGENT_WARHORSE || veh->GetEntry() == VEHICLE_ARGENT_BATTLEWORG)
+                                ++count;
+                        }
+                    }
+                }
+
+                if (count == players.getSize())
+                    check = true;
+            }
+        }
+
+        return check;
+    }
 
     bool OnGossipHello(Player* pPlayer, Creature* pCreature)
     {
@@ -82,13 +156,21 @@ public:
         if( !pInstance )
             return true;
 
+        bool check = AllMountedCheck(pCreature, pInstance);
+
         uint32 gossipTextId = 0;
         switch( pInstance->GetData(DATA_INSTANCE_PROGRESS) )
         {
             case INSTANCE_PROGRESS_INITIAL:
-                gossipTextId = 14688;
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1a, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1338);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1b, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1341);
+                if (check)
+                {
+                    gossipTextId = 14688;
+                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1a, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1338);
+                    if (HasAllSeenEvent(pPlayer))
+                        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_EVENT1b, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1341);
+                }
+                else
+                    gossipTextId = (pInstance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_ALLIANCE ? 14757 : 15043);
                 break;
             case INSTANCE_PROGRESS_CHAMPIONS_DEAD:
                 gossipTextId = 14737;
@@ -139,6 +221,15 @@ public:
             if(!_events.GetNextEventTime(EVENT_RANDOM_EMOTE))
                 _events.ScheduleEvent(EVENT_RANDOM_EMOTE, 30000);
 
+            if (!_events.GetNextEventTime(EVENT_RANDOM_ANIMS))
+                _events.ScheduleEvent(EVENT_RANDOM_ANIMS, 5000);
+
+            spectators.clear();
+            GetSpectators(spectators, TEAM_ALLIANCE);
+            GetSpectators(spectators, TEAM_HORDE);
+            GetSpectators(spectators, TEAM_NEUTRAL);
+
+            count = 0;
             InstanceScript* pInstance = me->GetInstanceScript();
             if( !pInstance )
                 return;
@@ -168,7 +259,6 @@ public:
 
         void GetSpectators(std::list<Creature*>& list, uint32 team)
         {
-            list.clear();
             if (team == TEAM_HORDE)
             {
                 me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_BELF, 250.0f);
@@ -185,6 +275,15 @@ public:
                 me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_HUMAN, 250.0f);
                 me->GetCreatureListWithEntryInGrid(list, NPC_SPECTATOR_ANIM_NELF, 250.0f);
             }
+            else if (team == TEAM_NEUTRAL)
+            {
+                me->GetCreatureListWithEntryInGrid(list, NPC_NEUTRAL_DWARF, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_NEUTRAL_DRAENEI, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_NEUTRAL_HUMAN, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_NEUTRAL_ORC, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_NEUTRAL_BELF, 250.0f);
+                me->GetCreatureListWithEntryInGrid(list, NPC_NEUTRAL_TAUREN, 250.0f);
+            }
         }
 
         void UpdateAI(uint32 diff) 
@@ -195,6 +294,23 @@ public:
             {
                 switch (eventId)
                 {
+                    case EVENT_RANDOM_ANIMS:
+                    {
+                        _events.ScheduleEvent(EVENT_RANDOM_ANIMS_TRIGGER, 0);
+                        _events.Repeat(urand(9000, 10000));
+                        break;
+                    }
+                    case EVENT_RANDOM_ANIMS_TRIGGER:
+                        if (!spectators.empty())
+                            for (auto itr : spectators)
+                                if (roll_chance_i(70))
+                                    itr->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
+
+                        if (++count <= 3)
+                            _events.Repeat(urand(500, 1000));
+                        else
+                            count = 0;
+                        break;
                     case EVENT_RANDOM_EMOTE:
                         if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !me->isMoving() && !me->HasAura(66804))
                         {
@@ -263,6 +379,8 @@ public:
         }
 
     private:
+        std::list<Creature*> spectators;
+        uint32 count;
         EventMap _events;
     };
 };

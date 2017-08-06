@@ -3242,7 +3242,7 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
         if (apply && !(target->GetMapId() == 530 || (target->GetMapId() == 571 && target->HasSpell(54197))))
             return;
         //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar 
-        if (apply && target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
+        if (apply && target->GetMapId() == 530 && target->GetZoneId() == 3430 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
             return;
 
         //           Dalaran City  

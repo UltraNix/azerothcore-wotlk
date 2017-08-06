@@ -2600,18 +2600,15 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
 
     // Check for attack from behind
     // xinef: if from behind or spell requires cast from behind
-    if (!victim->HasInArc(M_PI, this) || spell->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET))
+    if (spell->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) || !(victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION)))
     {
-        if (!victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
-        {
-            // Can`t dodge from behind in PvP (but its possible in PvE)
-            if (victim->GetTypeId() == TYPEID_PLAYER)
-                canDodge = false;
-            // Can`t parry or block
-            canParry = false;
-            canBlock = false;
-        }
-    }
+        // Can`t dodge from behind in PvP (but its possible in PvE)
+        if (victim->GetTypeId() == TYPEID_PLAYER)
+            canDodge = false;
+        // Can`t parry or block
+        canParry = false;
+        canBlock = false;
+    } 
 
     // Check creatures flags_extra for disable parry
     if (victim->GetTypeId() == TYPEID_UNIT)
@@ -8703,6 +8700,9 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             if (AuraEffect *aurEff = victim->GetAuraEffect(SPELL_AURA_MOD_ROOT, SPELLFAMILY_DRUID, 20, 0))
                 if ((aurEff->GetBase()->GetMaxDuration() - aurEff->GetBase()->GetDuration()) < 1000)
                     return false;
+
+            if (procSpell && procSpell->AttributesEx4 & SPELL_ATTR4_UNK15)
+                return false;
 
             CastSpell(victim, trigger_spell_id, true);
             return true;
@@ -17046,9 +17046,9 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 playerCharmer->PossessSpellInitialize();
                 break;
             case CHARM_TYPE_CHARM:
-                // a guardian should always have charminfo
-                if (playerCharmer && this != charmer->GetFirstControlled())
-                    playerCharmer->SendRemoveControlBar();
+                GetMotionMaster()->MoveFollow(charmer, PET_FOLLOW_DIST, GetFollowAngle());
+                playerCharmer->CharmSpellInitialize();
+				if(playerCharmer->HasAura(605))playerCharmer->SendRemoveControlBar();
                 break;
             default:
                 break;
@@ -17658,7 +17658,9 @@ void Unit::KnockbackFrom(float x, float y, float speedXY, float speedZ)
         player->GetSession()->SendPacket(&data);
 
         if (player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || player->HasAuraType(SPELL_AURA_FLY))
-            player->SetCanFly(true, true);
+            if(player->CanFly())
+                player->SetCanFly(true, true);
+            
     }
 }
 
@@ -18134,6 +18136,17 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
 
     ASSERT(!m_vehicle);
     m_vehicle = vehicle;
+
+    // siege vehicle hack fix
+    if (GetTypeId() == TYPEID_PLAYER && vehicle->GetCreatureEntry() == 33060 && vehicle->GetPassenger(0))
+    {
+        if (!vehicle->HasEmptySeat(7))
+        {
+            Unit* turret = vehicle->GetPassenger(7); 
+            CastSpell(turret, 65031, turret->GetVehicleKit() ? TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE : TRIGGERED_NONE, NULL, NULL, GetGUID());
+            return;
+        }
+    }
 
     if (!m_vehicle->AddPassenger(this, seatId))
     {

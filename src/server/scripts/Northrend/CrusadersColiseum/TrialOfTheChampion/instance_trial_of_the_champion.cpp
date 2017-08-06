@@ -11,6 +11,11 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 const Position SpawnPosition = {746.67f, 684.08f, 412.5f, 4.65f};
 #define CLEANUP_CHECK_INTERVAL    5000
 
+struct ArgentChallengeData
+{
+    uint32 entry, counter, lastSummon;
+};
+
 struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 {
     instance_trial_of_the_champion_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); }
@@ -27,6 +32,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
     uint8 temp1, temp2;
     bool shortver;
     bool bAchievIveHadWorse;
+    ArgentChallengeData ChallengeEntry;
 
     uint64 NPC_AnnouncerGUID;
     uint64 NPC_TirionGUID;
@@ -38,6 +44,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
     uint64 NPC_BlackKnightVehicleGUID;
     uint64 NPC_BlackKnightGUID;
     uint64 GO_MainGateGUID;
+    uint64 GO_NorthPortcullisGUID;
 
     void Initialize() override
     {
@@ -65,12 +72,16 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         NPC_BlackKnightVehicleGUID = 0;
         NPC_BlackKnightGUID = 0;
         GO_MainGateGUID = 0;
+        GO_NorthPortcullisGUID = 0;
+        ChallengeEntry.entry = RAND(NPC_EADRIC, NPC_PALETRESS);
+        ChallengeEntry.counter = (ChallengeEntry.entry == NPC_EADRIC) ? 1 : 0;
+        ChallengeEntry.lastSummon = 0;
     }
 
     bool IsEncounterInProgress() const override
     {
-        for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            if (m_auiEncounter[i] == IN_PROGRESS)
+        if (GameObject* go = instance->GetGameObject(GO_NorthPortcullisGUID))
+            if (go->GetGoState() == GO_STATE_READY)
                 return true;
 
         return false;
@@ -185,6 +196,9 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             case GO_EAST_PORTCULLIS:
                 HandleGameObject(go->GetGUID(), false, go);
                 break;
+            case 195650:
+                GO_NorthPortcullisGUID = go->GetGUID();
+                break;
         }
 
         InstanceScript::OnGameObjectCreate(go);
@@ -227,11 +241,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             InstanceProgress = data3;
             if (InstanceProgress == INSTANCE_PROGRESS_CHAMPIONS_UNMOUNTED)
                 InstanceProgress = INSTANCE_PROGRESS_INITIAL;
+            if (InstanceProgress == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
+                InstanceProgress = INSTANCE_PROGRESS_CHAMPIONS_DEAD;
 
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)
                     m_auiEncounter[i] = NOT_STARTED;
-
         }
         else
             OUT_LOAD_INST_DATA_FAIL;
@@ -241,12 +256,14 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
 
 
     // EVENT STUFF BELOW:
-    void OnPlayerEnter(Player* /*player*/) override
+    void OnPlayerEnter(Player* player) override
     {
         if (DoNeedCleanup(true))
             InstanceCleanup();
 
         events.RescheduleEvent(EVENT_CHECK_PLAYERS, CLEANUP_CHECK_INTERVAL);
+
+        InstanceScript::OnPlayerEnter(player);
     }
 
     bool DoNeedCleanup(bool /*enter*/)
@@ -255,7 +272,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         Map::PlayerList const &players = instance->GetPlayers();
         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
             if (Player* player = itr->GetSource())
-                if (player->IsAlive() && !player->IsGameMaster() && !player->HasStealthAura())
+                if (!player->isDead() && !player->IsGameMaster() && !player->HasStealthAura())
                     ++aliveCount;
 
         bool need = aliveCount == 0;
@@ -268,6 +285,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
     {
         if (CLEANED)
             return;
+
+        HandleGate(true);
 
         switch (InstanceProgress)
         {
@@ -382,6 +401,30 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     InstanceProgress = INSTANCE_PROGRESS_CHAMPIONS_DEAD;
                 }
                 break;
+            case INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS:
+                if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+                {
+                    announcer->DespawnOrUnsummon();
+                    announcer->SetHomePosition(735.81f, 661.92f, 412.39f, 4.714f);
+                    announcer->SetPosition(735.81f, 661.92f, 412.39f, 4.714f);
+                    announcer->SetRespawnTime(3);
+                    announcer->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                    if (Creature* c = instance->GetCreature(NPC_ArgentChampionGUID))
+                    {
+                        uint32 entry = c->GetEntry();
+                        c->AI()->DoAction(-1); // paletress despawn memory
+                        c->DespawnOrUnsummon();
+                        if (Creature* boss = announcer->SummonCreature(entry, 746.881f, 660.263f, 411.7f, 3 * M_PI / 2))
+                        {
+                            boss->SetReactState(REACT_AGGRESSIVE);
+                            boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            NPC_ArgentChampionGUID = boss->GetGUID();
+                        }
+                        NPC_MemoryEntry = 0;
+                    }
+                }
+                break;
             case INSTANCE_PROGRESS_ARGENT_CHALLENGE_DIED:
                 // revert to INSTANCE_PROGRESS_ARGENT_CHALLENGE_DIED
                 {
@@ -446,10 +489,33 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
         return 0;
     }
 
+    void HandleFireworks()
+    {
+        std::list<Creature*> triggerList;
+        if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+            announcer->GetCreatureListWithEntryInGrid(triggerList, 12999, 250.0f);
+        if (!triggerList.empty())
+            for (auto itr : triggerList)
+                itr->CastSpell(itr, 25465, false);
+    }
+
     void SetData(uint32 type, uint32 data)
     {
         switch (type)
         {
+            case 247:
+            {
+                uint32 count = 0;
+                for (uint8 i = 0; i < 5; ++i)
+                {
+                    events.ScheduleEvent(594, count);
+                    count += 1000;
+                }
+                break;
+            }
+            case 579:
+                HandleGate(data == 0 ? false : true);
+                break;
             case DATA_ANNOUNCER_GOSSIP_SELECT:
                 switch (InstanceProgress)
                 {
@@ -579,6 +645,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             case DATA_GRAND_CHAMPION_DIED:
                 if (++Counter >= 3)
                 {
+                    HandleGate(true);
+                    SetData(247, 0);
                     Counter = 0;
                     VehicleList.clear();
                     data = DONE;
@@ -599,7 +667,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                     {
                         announcer->GetMotionMaster()->MovePoint(0, 743.14f, 628.77f, 411.2f);
-                        announcer->SummonGameObject(instance->IsHeroic() ? GO_CHAMPIONS_LOOT_H : GO_CHAMPIONS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, 0, 0, 0, 0, 90000000); // [LOOT]
+                        if (GameObject* go = announcer->SummonGameObject(instance->IsHeroic() ? GO_CHAMPIONS_LOOT_H : GO_CHAMPIONS_LOOT, 744.7205f, 618.3073f, 411.0891f, 1.53589f, 0, 0, 0, 0, 90000000)) // [LOOT]
+                            go->EnableCollision(false);
                         events.ScheduleEvent(EVENT_RESTORE_ANNOUNCER_GOSSIP, 15000);
                         events.ScheduleEvent(EVENT_GRATZ_SLAIN_CHAMPIONS, 6000);
                     }
@@ -613,7 +682,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 if (++Counter >= 9)
                 {
                     Counter = 0;
-                    InstanceProgress = INSTANCE_PROGRESS_ARGENT_SOLDIERS_DIED;
+                    InstanceProgress = INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS;
                     data = DONE; // save to db
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_MOVE_FORWARD, 0);
                 }
@@ -728,19 +797,37 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             {
                 if (TeamIdInInstance == TEAM_HORDE)
                     TEXT_ID -= 10;
-                announcer->AI()->Talk(TEXT_ID);
-                announcer->AI()->Talk(TEXT_ID + 1);
+
+                if (announcer->IsAIEnabled)
+                {
+                    announcer->AI()->Talk(TEXT_ID);
+                    announcer->AI()->Talk(TEXT_ID + 1);
+                }
             }
+    }
+
+    void HandleGate(bool open)
+    {
+        if (GameObject* go = instance->GetGameObject(GO_NorthPortcullisGUID))
+            go->SetGoState(open ? GO_STATE_ACTIVE : GO_STATE_READY);
     }
 
     void Update(uint32 diff) override
     {
+        if (ChallengeEntry.lastSummon != 0)
+            ChallengeEntry.counter = (ChallengeEntry.lastSummon == NPC_EADRIC) ? 1 : 0;
+        else
+            ChallengeEntry.counter = (ChallengeEntry.entry == NPC_EADRIC) ? 1 : 0;
+
         events.Update(diff);
 
         while (uint32 eventId = events.ExecuteEvent())
         {
             switch (eventId)
             {
+                case 594:
+                    HandleFireworks();
+                    break;
                 case EVENT_CHECK_PLAYERS:
                     if (DoNeedCleanup(false))
                         InstanceCleanup();
@@ -784,12 +871,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             if(tirion->IsAIEnabled)
                                 tirion->AI()->Talk(TEXT_BEGIN);
                     }
-                    for (uint8 i = 0; i<3; ++i)
-                        if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][i]))
-                        {
-                            float angle = Position::RandomOrientation();
-                            creature->GetMotionMaster()->MovePoint(0, 748.309f + 3.0f*cos(angle), 619.448f + 3.0f*sin(angle), 411.3f);
-                        }
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][0]))
+                        creature->GetMotionMaster()->MovePoint(0, 754.188354f, 605.095825f, 411.573547f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][1]))
+                        creature->GetMotionMaster()->MovePoint(0, 756.782959f, 607.805786f, 411.573547f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[1][2]))
+                        creature->GetMotionMaster()->MovePoint(0, 759.685181f, 610.878296f, 411.573547f);
 
                     events.ScheduleEvent(EVENT_GRAND_GROUP_1_ATTACK, 3000);
                     break;
@@ -799,22 +886,18 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                            }
                         }
+
                     Counter = 0;
                     break;
                 case EVENT_GRAND_GROUP_2_MOVE_MIDDLE:
-                    for (uint8 i = 0; i<3; ++i)
-                        if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][i]))
-                        {
-                            float angle = Position::RandomOrientation();
-                            creature->GetMotionMaster()->MovePoint(0, 748.309f + 3.0f*cos(angle), 619.448f + 3.0f*sin(angle), 411.3f);
-                        }
+
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][0]))
+                        creature->GetMotionMaster()->MovePoint(0, 758.660522f, 608.462952f, 411.572632f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][1]))
+                        creature->GetMotionMaster()->MovePoint(0, 760.467407f, 612.172485f, 411.573547f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[0][2]))
+                        creature->GetMotionMaster()->MovePoint(0, 761.657837f, 616.139282f, 411.573547f);
 
                     events.ScheduleEvent(EVENT_GRAND_GROUP_2_ATTACK, 3000);
                     break;
@@ -824,22 +907,17 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                            }
-                        }
-                    break;
-                case EVENT_GRAND_GROUP_3_MOVE_MIDDLE:
-                    for (uint8 i = 0; i<3; ++i)
-                        if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][i]))
-                        {
-                            float angle = Position::RandomOrientation();
-                            creature->GetMotionMaster()->MovePoint(0, 748.309f + 3.0f*cos(angle), 619.448f + 3.0f*sin(angle), 411.3f);
                         }
 
+                    break;
+                case EVENT_GRAND_GROUP_3_MOVE_MIDDLE:
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][0]))
+                        creature->GetMotionMaster()->MovePoint(0, 763.211182f, 619.917969f, 411.573273f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][1]))
+                        creature->GetMotionMaster()->MovePoint(0, 760.525879f, 624.286255f, 411.575439f);
+                    if (Creature* creature = instance->GetCreature(NPC_GrandChampionMinionsGUID[2][2]))
+                        creature->GetMotionMaster()->MovePoint(0, 758.430603f, 628.841125f, 411.574677f);
+             
                     events.ScheduleEvent(EVENT_GRAND_GROUP_3_ATTACK, 3000);
                     break;
                 case EVENT_GRAND_GROUP_3_ATTACK:
@@ -848,12 +926,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                            }
                         }
                     break;
                 case EVENT_GRAND_CHAMPIONS_MOVE_MIDDLE:
@@ -882,10 +954,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         }
                     break;
                 case EVENT_GRAND_CHAMPIONS_MOVE_SIDE:
+                    HandleGate(false);
                     for (uint8 i = 0; i<3; ++i)
                         if (Creature* creature = instance->GetCreature(NPC_GrandChampionGUID[i]))
                         {
-                            creature->AI()->DoAction(1);
+                            if (creature->IsAIEnabled)
+                                creature->AI()->DoAction(1);
                             switch (i)
                             {
                                 case 0:
@@ -908,13 +982,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
                             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            if (creature->IsAIEnabled)
-                            {
-                                if (Unit* target = creature->SelectNearestTarget(200.0f))
-                                    creature->AI()->AttackStart(target);
-                                creature->AI()->DoZoneInCombat();
-                                creature->AI()->DoAction(2);
-                            }
                         }
                     break;
                 case EVENT_GRATZ_SLAIN_CHAMPIONS:
@@ -933,19 +1000,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         {
                             announcer->SetFacingToObject(gate);
                             HandleGameObject(GO_MainGateGUID, true, gate);
-                        }
-                        if (announcer->IsAIEnabled)
-                        {
-                            if (Counter)
-                            {
-                                announcer->AI()->Talk(TEXT_CHEER_EADRIC_1);
-                                announcer->AI()->Talk(TEXT_CHEER_EADRIC_2);
-                            }
-                            else
-                            {
-                                announcer->AI()->Talk(TEXT_CHEER_PALETRESS_1);
-                                announcer->AI()->Talk(TEXT_CHEER_PALETRESS_2);
-                            }
                         }
                     }
 
@@ -981,8 +1035,12 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_SUMMON_ARGENT_CHALLENGE:
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                         announcer->GetMotionMaster()->MovePoint(0, 735.81f, 661.92f, 412.39f);
-                    if (Creature* boss = instance->SummonCreature(Counter ? NPC_EADRIC : NPC_PALETRESS, SpawnPosition))
+                    if (Creature* boss = instance->SummonCreature(ChallengeEntry.lastSummon != 0 ? ChallengeEntry.lastSummon : ChallengeEntry.entry, SpawnPosition))
+                    {
+                        if (ChallengeEntry.lastSummon == 0)
+                            ChallengeEntry.lastSummon = boss->GetEntry();
                         boss->GetMotionMaster()->MovePoint(0, 746.881f, 660.263f, 411.7f);
+                    }
                     events.ScheduleEvent(EVENT_CLOSE_GATE, 5000);
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_SAY_1, 4000);
                     events.ScheduleEvent(EVENT_ARGENT_SOLDIER_GROUP_ATTACK, 12500);
@@ -990,8 +1048,8 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_ARGENT_CHALLENGE_SAY_1:
                     if (Creature* champion = instance->GetCreature(NPC_ArgentChampionGUID))
                         if (champion->IsAIEnabled)
-                            champion->AI()->Talk(Counter ? TEXT_EADRIC_SAY_1 : TEXT_PALETRESS_SAY_1);
-                    if (!Counter)
+                            champion->AI()->Talk(ChallengeEntry.counter ? TEXT_EADRIC_SAY_1 : TEXT_PALETRESS_SAY_1);
+                    if (!ChallengeEntry.counter)
                         events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_SAY_2, 6000);
                     break;
                 case EVENT_ARGENT_CHALLENGE_SAY_2:
@@ -1020,14 +1078,9 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_ARGENT_CHALLENGE_ATTACK:
                     if (Creature* boss = instance->GetCreature(NPC_ArgentChampionGUID))
                     {
+                        boss->SetHomePosition(746.881f, 660.263f, 411.7f, 3 * M_PI / 2);
                         boss->SetReactState(REACT_AGGRESSIVE);
                         boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        if (boss->IsAIEnabled)
-                        {
-                            if (Unit* target = boss->SelectNearestTarget(200.0f))
-                                boss->AI()->AttackStart(target);
-                            boss->AI()->DoZoneInCombat();
-                        }
                     }
                     break;
                 case EVENT_ARGENT_CHALLENGE_RUN_MIDDLE:
@@ -1038,18 +1091,20 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     }
                     break;
                 case EVENT_ARGENT_CHALLENGE_LEAVE_CHEST:
+                    HandleGate(true);
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                         if (Creature* boss = instance->GetCreature(NPC_ArgentChampionGUID))
                         {
                             announcer->GetMotionMaster()->MovePoint(0, 743.14f, 628.77f, 411.2f);
                             uint32 chest = 0;
-                            if (instance->IsHeroic())
+                            if (instance->IsHeroic()) 
                                 chest = (boss->GetEntry() == NPC_EADRIC || boss->GetEntry() == NPC_EADRIC_H) ? GO_EADRIC_LOOT_H : GO_PALETRESS_LOOT_H;
                             else
                                 chest = (boss->GetEntry() == NPC_EADRIC || boss->GetEntry() == NPC_EADRIC_H) ? GO_EADRIC_LOOT : GO_PALETRESS_LOOT;
-                            announcer->SummonGameObject(chest, 746.59f, 618.49f, 411.09f, 1.42f, 0, 0, 0, 0, 90000000); // [LOOT]
+                            if (GameObject* go = announcer->SummonGameObject(chest, 748.7604f, 618.309f, 411.0891f, 1.588249f, 0, 0, 0, 0, 90000000)) // [LOOT]
+                                go->EnableCollision(false);
                         }
-
+                    
                     events.ScheduleEvent(EVENT_ARGENT_CHALLENGE_DISAPPEAR, 4000);
                     events.ScheduleEvent(EVENT_RESTORE_ANNOUNCER_GOSSIP, 15000);
                     break;
@@ -1079,7 +1134,14 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             announcer->SetFacingToObject(bk_vehicle);
                             if(announcer->IsAIEnabled)
                                 announcer->AI()->Talk(TEXT_BK_RAFTERS);
+                            events.ScheduleEvent(301, 25);
                         }
+                    break;
+                case 301:
+                    if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+                        if (Creature* bk_vehicle = announcer->FindNearestCreature(VEHICLE_BLACK_KNIGHT, 250.0f))
+                            announcer->SetFacingToObject(bk_vehicle);
+                    events.Repeat(25);
                     break;
                 case EVENT_START_BLACK_KNIGHT_SCENE:
                     if (Creature* blackKnight = instance->GetCreature(NPC_BlackKnightGUID))
@@ -1087,6 +1149,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         Position jumpPos = { 751.356262f, 633.437134f, 411.572876f };
                         blackKnight->SetWalk(true);
                         blackKnight->_ExitVehicle(&jumpPos);
+                        events.CancelEvent(301);
                         events.ScheduleEvent(251, 250);
                         if(blackKnight->IsAIEnabled)
                             blackKnight->AI()->Talk(TEXT_BK_SPOILED);
@@ -1109,13 +1172,19 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             bk->SetHomePosition(*bk);
                             announcer->SetFacingToObject(bk);
                             announcer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                            bk->AddAura(68306, announcer); // spell has attribute player only
+                            bk->CastSpell(announcer, 66798, false);
+                            events.ScheduleEvent(252, 1000);
                             if (Creature* tirion = instance->GetCreature(NPC_TirionGUID))
                                 if(tirion->IsAIEnabled)
                                     tirion->AI()->Talk(TEXT_BK_MEANING);
                         }
                     }
                     events.ScheduleEvent(EVENT_BLACK_KNIGHT_KILL_ANNOUNCER, 1000);
+                    break;
+                case 252:
+                    if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
+                        if (Creature* bk = instance->GetCreature(NPC_BlackKnightGUID))
+                            bk->AddAura(68306, announcer);
                     break;
                 case EVENT_BLACK_KNIGHT_KILL_ANNOUNCER:
                     if (Creature* bk_vehicle = instance->GetCreature(NPC_BlackKnightVehicleGUID))
@@ -1150,13 +1219,6 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     {
                         blackKnight->SetReactState(REACT_AGGRESSIVE);
                         blackKnight->SetUInt32Value(UNIT_FIELD_FLAGS, 0);
-                        if (blackKnight->IsAIEnabled)
-                        {
-                            if (Unit* target = blackKnight->SelectNearestTarget(200.0f))
-                                blackKnight->AI()->AttackStart(target);
-                            blackKnight->AI()->DoZoneInCombat();
-                            blackKnight->AI()->DoAction(1);
-                        }
                     }
                     break;
                 default:

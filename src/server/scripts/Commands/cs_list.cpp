@@ -26,7 +26,6 @@ EndScriptData */
 #include "Chat.h"
 #include "SpellAuraEffects.h"
 #include "Language.h"
-#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 
@@ -42,13 +41,96 @@ public:
             { "creature",       SEC_ADMINISTRATOR,  true,  &HandleListCreatureCommand,          "" },
             { "item",           SEC_ADMINISTRATOR,  true,  &HandleListItemCommand,              "" },
             { "object",         SEC_ADMINISTRATOR,  true,  &HandleListObjectCommand,            "" },
-            { "auras",          SEC_ADMINISTRATOR,  false, &HandleListAurasCommand,             "" }
+            { "auras",          SEC_ADMINISTRATOR,  false, &HandleListAurasCommand,             "" },
+            { "premium",        SEC_MODERATOR,      true,  &HandleListPremiumCommand,           ""},
         };
         static std::vector<ChatCommand> commandTable =
         {
             { "list",          SEC_ADMINISTRATOR,   true, NULL,                                 "", listCommandTable }
         };
         return commandTable;
+    }
+
+    static bool HandleListPremiumCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->getSelectedPlayerOrSelf();
+
+        if (!player)
+            return false;
+        
+        char buff[20];
+
+        bool isActiveTeleport = player->GetSession()->IsPremiumServiceActive(PREMIUM_TELEPORT);
+        bool isActiveSickness = player->GetSession()->IsPremiumServiceActive(PREMIUM_NO_RESSURECTION_SICKNESS);
+        bool isActiveExpBoost = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
+        bool isActiveNoDurLoss = player->GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS);
+        bool isActiveInstantFly = player->GetSession()->IsPremiumServiceActive(PREMIUM_INSTANT_FLIGHT_PATHS);
+        bool isActiveBoostX4 = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+
+        ChatHandler(handler->GetSession()).PSendSysMessage("Selected player privileges (%s):", player->GetName());
+        if (isActiveTeleport)
+        {
+            time_t now = player->GetSession()->GetPremiumService(PREMIUM_TELEPORT);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Teleport' - is |cff00ff00Enabled|r and expire at: %s", buff);
+        }
+        else 
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Teleport' - is |cffff0000Disabled", buff);
+
+        if (isActiveSickness)
+        {
+            time_t now = player->GetSession()->GetPremiumService(PREMIUM_NO_RESSURECTION_SICKNESS);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Sickness' - is |cff00ff00Enabled|r and expire at: %s", buff);
+        }
+        else 
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Sickness' - is |cffff0000Disabled");
+
+        if (isActiveExpBoost)
+        {
+            char buff[20];
+            time_t now = player->GetSession()->GetPremiumService(PREMIUM_EXP_BOOST);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost' - is |cff00ff00Enabled|r and expire at: %s", buff);
+        }
+        else 
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost' - is |cffff0000Disabled");
+
+        if (isActiveBoostX4)
+        {
+            char buff[20];
+            time_t now = player->GetSession()->GetPremiumService(PREMIUM_EXP_BOOST_X4);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost X4' - is |cff00ff00Enabled|r and expire at: %s", buff);
+        }
+        else 
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost X4' - is |cffff0000Disabled");
+
+        if (isActiveNoDurLoss)
+        {
+            time_t now = player->GetSession()->GetPremiumService(PREMIUM_NO_DURABILITY_LOSS);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Durability' - is |cff00ff00Enabled|r and expire at: %s", buff);
+        }
+        else {
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Durability' - is |cffff0000Disabled");
+        }
+
+        if (isActiveInstantFly)
+        {
+            time_t now = player->GetSession()->GetPremiumService(PREMIUM_INSTANT_FLIGHT_PATHS);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Instant Flying' - is |cff00ff00Enabled|r and expire at: %s", buff);
+        }
+        else 
+            ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Instant Flying' - is |cffff0000Disabled");
+        return true;
     }
 
     static bool HandleListCreatureCommand(ChatHandler* handler, char const* args)

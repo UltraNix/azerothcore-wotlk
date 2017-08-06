@@ -168,6 +168,9 @@ enum FreyaEvents
     EVENT_STORM_LASHER_LIGHTNING_LASH            = 50,
     EVENT_STORM_LASHER_STORMBOLT                 = 51,
     EVENT_DETONATING_LASHER_FLAME_LASH           = 55,
+    EVENT_DETONATING_LASHER_START_ATTACK         = 56,
+    EVENT_DETONATING_LASHER_CHANGE_TARGET        = 57,
+    EVENT_DETONATING_LASHER_ANIM                 = 58
 };
 
 enum FreyaSounds
@@ -431,7 +434,18 @@ public:
                 me->MonsterYell("The swarm of the elements shall overtake you!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_DETONATING);
                 for (uint8 i = 0; i < 10; ++i)
-                    me->SummonCreature(NPC_DETONATING_LASHER, me->GetPositionX()+urand(5,20), me->GetPositionY()+urand(5,20), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_DESPAWN);
+                {
+                    float angle = i * 2 * M_PI / 10;
+                    float x = me->GetPositionX() + cos(angle) * 15.0f;
+                    float y = me->GetPositionY() + sin(angle) * 15.0f;
+                    float z = me->GetPositionZ();
+
+                    if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z, 0.0f, TEMPSUMMON_CORPSE_DESPAWN))
+                    {
+                        lasher->UpdateAllowedPositionZ(x, y, z);
+                        lasher->NearTeleportTo(x, y, z, 0.0f);
+                    }
+                }
             }
         }
 
@@ -519,7 +533,7 @@ public:
             events.ScheduleEvent(EVENT_FREYA_ADDS_SPAM, 10000, 0, EVENT_PHASE_ADDS);
             events.ScheduleEvent(EVENT_FREYA_LIFEBINDER, 30000);
             events.ScheduleEvent(EVENT_FREYA_SUNBEAM, 17000);
-            events.ScheduleEvent(EVENT_FREYA_BERSERK, 480000);
+            events.ScheduleEvent(EVENT_FREYA_BERSERK, 600000);
             events.SetPhase(EVENT_PHASE_ADDS);
 
             if( !m_pInstance )
@@ -606,7 +620,6 @@ public:
                     SpawnWave();
                 else if (me->GetAura(SPELL_ATTUNED_TO_NATURE))
                 {
-                    me->RemoveAura(SPELL_ATTUNED_TO_NATURE);
                     events.ScheduleEvent(EVENT_FREYA_NATURE_BOMB, 5000);
                     events.SetPhase(EVENT_PHASE_FINAL);
                     events.PopEvent();
@@ -1193,8 +1206,25 @@ public:
         {
             _stackCount = 0;
             events.Reset();
-            if (Unit* target = SelectTargetFromPlayerList(70))
+            if (me->GetEntry() == NPC_DETONATING_LASHER)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetControlled(true, UNIT_STATE_ROOT);
+                me->SetUInt32Value(UNIT_FIELD_BYTES_1, 9);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_START_ATTACK, 2000);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_ANIM, 1000);
+            }
+            else if (Unit* target = SelectTargetFromPlayerList(70))
                 AttackStart(target);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (me->GetEntry() != NPC_DETONATING_LASHER)
+                ScriptedAI::MoveInLineOfSight(who);
         }
 
         void JustDied(Unit*)
@@ -1245,7 +1275,9 @@ public:
             }
             else if (me->GetEntry() == NPC_DETONATING_LASHER)
             {
-                events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 10000);
+                events.RescheduleEvent(EVENT_DETONATING_LASHER_ANIM, 0);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 5000);
+                events.ScheduleEvent(EVENT_DETONATING_LASHER_CHANGE_TARGET, 7500);
                 _stackCount = ACTION_REMOVE_2_STACK;
             }
             else if (me->GetEntry() == NPC_SNAPLASHER)
@@ -1259,7 +1291,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!UpdateVictim())
+            if (!UpdateVictim() && me->GetEntry() != NPC_DETONATING_LASHER)
                 return;
 
             events.Update(diff);
@@ -1296,13 +1328,35 @@ public:
                     events.RepeatEvent(6000);
                     break;
                 case EVENT_DETONATING_LASHER_FLAME_LASH:
-                    me->CastSpell(me->GetVictim(), SPELL_FLAME_LASH, false);
-                    DoResetThreat();
+                    DoCastVictim(SPELL_FLAME_LASH);
+                    events.RepeatEvent(urand(5000, 10000));
+                    break;
+                case EVENT_DETONATING_LASHER_START_ATTACK:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetControlled(false, UNIT_STATE_ROOT);
+                    me->SetReactState(REACT_AGGRESSIVE);
                     if (Unit* target = SelectTargetFromPlayerList(80))
+                    {
+                        me->AddThreat(target, 100.0f);
                         AttackStart(target);
+                    }
+                    events.PopEvent();
+                    break;
+                case EVENT_DETONATING_LASHER_CHANGE_TARGET:
+                    if (Unit* target = SelectTargetFromPlayerList(80))
+                    {
+                        // Switching to other target - modify aggro of new target by 20% from current target's aggro
+                        if (me->GetVictim())
+                            me->AddThreat(target, me->getThreatManager().getThreat(me->GetVictim(), false) * 1.2f);
+                        AttackStart(target);
+                    }
                     else
                         me->DespawnOrUnsummon(1);
-                    events.RepeatEvent(10000);
+                    events.RepeatEvent(urand(5000, 10000));
+                    break;
+                case EVENT_DETONATING_LASHER_ANIM:
+                    me->SetUInt32Value(UNIT_FIELD_BYTES_1, 0);
+                    events.PopEvent();
                     break;
             }
 
