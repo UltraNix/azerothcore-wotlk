@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C)
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "Language.h"
 #include "ScriptMgr.h"
@@ -28,11 +28,11 @@ class bazaar_commandscript : public CommandScript
 public:
     bazaar_commandscript() : CommandScript("bazar_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const 
+    std::vector<ChatCommand> GetCommands() const
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "bazarsc",        SEC_PLAYER,          false, &HandleBazaarSunwellCommand,          "" },
+            { "bazarpp",        SEC_PLAYER,          false, &HandleBazaarPremiumCommand,          "" },
             { "bazargold",      SEC_PLAYER,          false, &HandleBazaarGoldCommand,             "" },
             { "bazaramount",    SEC_PLAYER,          false, &HandleBazaarAmountCommand,           "" },
             { "bazarbuy",       SEC_PLAYER,          false, &HandleBazaarBuyCommand,              "" },
@@ -46,7 +46,7 @@ public:
         return commandTable;
     }
 
-    static bool HandleBazaarSunwellCommand(ChatHandler* handler, char const* args)
+    static bool HandleBazaarPremiumCommand(ChatHandler* handler, char const* args)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
@@ -102,14 +102,7 @@ public:
 
         if (!sBazaarMgr->CheckPremiumAmount(accId, dpAmount))
         {
-            handler->PSendSysMessage("You don't have enough coins to do that.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (!sBazaarMgr->CanEffortTaxRate(player, dpAmount, AUCTION_SELL_PREMIUM))
-        {
-            handler->PSendSysMessage("You don't have enough money to pay taxes.");
+            handler->PSendSysMessage("You don't have enough points to do that.");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -145,7 +138,7 @@ public:
 
         uint32 accId = player->GetSession()->GetAccountId();
 
-        uint32 dpAmount    = atoi(ppStr);
+        uint32 dpAmount = atoi(ppStr);
         uint32 moneyAmount = atoi(moneyStr);
         uint32 auctionCount = sBazaarMgr->GetAuctionCount(accId, AUCTION_SELL_MONEY);
 
@@ -169,7 +162,7 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        
+
         if (auctionCount >= 3)
         {
             handler->PSendSysMessage("You can't have more than 3 auctions of this type at one account.");
@@ -180,13 +173,6 @@ public:
         if (!sBazaarMgr->CheckMoneyAmount(player, moneyAmount))
         {
             handler->PSendSysMessage("You don't have enough money to do that.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (!sBazaarMgr->CanEffortTaxRate(player, moneyAmount, AUCTION_SELL_MONEY))
-        {
-            handler->PSendSysMessage("You don't have enough money to pay taxes.");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -394,13 +380,13 @@ public:
         // Description
         char* descriptionStr = strtok(nullptr, "");
         if (!descriptionStr)
-	        return false;
-		 
+            return false;
+
         uint32 accId = player->GetSession()->GetAccountId();
 
         uint32 dpAmount = atoi(ppStr);
         uint8  mainSpec = atoi(mainSpecStr);
-        uint8  offSpec  = atoi(offSpecStr);
+        uint8  offSpec = atoi(offSpecStr);
         std::string description = descriptionStr;
 
         uint32 auctionCount = sBazaarMgr->GetAuctionCount(accId, AUCTION_SELL_CHARACTER);
@@ -447,13 +433,6 @@ public:
             return false;
         }
 
-        if (!sBazaarMgr->CanEffortTaxRate(player, dpAmount, AUCTION_SELL_CHARACTER, true))
-        {
-            handler->PSendSysMessage("You don't have enough money to pay taxes.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
         if (sBazaarMgr->CreateBazaarAuction(player, 0, dpAmount, AUCTION_SELL_CHARACTER, mainSpec, offSpec, description))
             sBazaarMgr->LogoutCharacterAfterAuction(player);
         else
@@ -470,39 +449,48 @@ enum NpcBazaarActions
 {
     // will be used for scrolling
     NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS = 1000,
-    NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS    = 2000,
-    NPC_BAZAAR_ACTION_SELECTED_AUCTION      = 3000,
-    NPC_BAZAAR_ACTION_ACCEPT_OFFER          = 2000000,
-    NPC_BAZAAR_ACTION_RETURN_MAIN           = 2000001,
-    NPC_BAZAAR_ACTION_CLOSE                 = 2000002
+    NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS = 2000,
+    NPC_BAZAAR_ACTION_SELECTED_AUCTION = 3000,
+    NPC_BAZAAR_ACTION_ACCEPT_OFFER = 2000000,
+    NPC_BAZAAR_ACTION_RETURN_MAIN = 2000001,
+    NPC_BAZAAR_ACTION_CHAT_1 = 2000002,
+    NPC_BAZAAR_ACTION_CHAT_2 = 2000003,
+    NPC_BAZAAR_ACTION_CHAT_3 = 2000004,
+    NPC_BAZAAR_ACTION_CLOSE = 2000005,
 };
 
-const uint8  AuctionsOnPage    = 20;
+const uint8  AuctionsOnPage = 20;
 
 class npc_bazaar : public CreatureScript
 {
 public:
     npc_bazaar() : CreatureScript("npc_bazaar") { }
 
-    uint16 count = 0; 
+    uint16 count = 0;
     uint32 id[2000];
     uint32 selectedAuctionId = 0;
     bool auctionGold = false;
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    void DisplayMainMenu(Player* player, Creature* creature)
     {
         selectedAuctionId = 0;
         auctionGold = false;
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Sunwell Coins auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Gold auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Buy Coins", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Sell Gold", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What are those Sunwell Coins and why are they so unique?", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_CHAT_1);
+        player->SEND_GOSSIP_MENU(90017, creature->GetGUID());
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        DisplayMainMenu(player, creature);
         return true;
     }
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        
+
         if (action >= NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS && action < NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS)
         {
             LoadBazaarAuctions(AUCTION_SELL_PREMIUM);
@@ -523,12 +511,21 @@ public:
             player->CLOSE_GOSSIP_MENU();
         }
         else if (action == NPC_BAZAAR_ACTION_RETURN_MAIN)
+            DisplayMainMenu(player, creature);
+        else if (action == NPC_BAZAAR_ACTION_CHAT_1)
         {
-            selectedAuctionId = 0;
-            auctionGold = false;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Sunwell Coins auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_PREMIUM_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Gold auctions...", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_LIST_GOLD_AUCTIONS);
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Why are they so important?", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_CHAT_2);
+            player->SEND_GOSSIP_MENU(90018, creature->GetGUID());
+        }
+        else if (action == NPC_BAZAAR_ACTION_CHAT_2)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What can I do with them?", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_CHAT_3);
+            player->SEND_GOSSIP_MENU(90019, creature->GetGUID());
+        }
+        else if (action == NPC_BAZAAR_ACTION_CHAT_3)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Okay... I`m sorry.", GOSSIP_SENDER_MAIN, NPC_BAZAAR_ACTION_RETURN_MAIN);
+            player->SEND_GOSSIP_MENU(90020, creature->GetGUID());
         }
         else if (action == NPC_BAZAAR_ACTION_CLOSE)
             player->CLOSE_GOSSIP_MENU();
@@ -548,7 +545,7 @@ public:
     void LoadBazaarAuctions(uint8 type)
     {
         count = 0;
-        
+
         QueryResult result = CharacterDatabase.PQuery("SELECT auctionId FROM bazar_auction WHERE auction_type = %u", type);
 
         if (result)
@@ -592,7 +589,7 @@ public:
             auctionList[2] = fields[2].GetString();
         }
 
-        std::string data = gold ? ("Offer: " + auctionList[0] + "g for " + auctionList[1] + "sc - by: " + auctionList[2]) : ("Offer: " + auctionList[1] + "sc for " + auctionList[0] + "g - by: " + auctionList[2]);
+        std::string data = gold ? ("Offer: " + auctionList[0] + "g for " + auctionList[1] + "pp - by: " + auctionList[2]) : ("Offer: " + auctionList[1] + "pp for " + auctionList[0] + "g - by: " + auctionList[2]);
         return data;
     }
 
@@ -622,7 +619,7 @@ public:
             auctionList[1] = fields[1].GetString();
         }
 
-        std::string data = gold ? ("Accept Offer: " + auctionList[0] + "g for " + auctionList[1] + "sc") : ("Accept Offer: " + auctionList[1] + "sc for " + auctionList[0] + "g");
+        std::string data = gold ? ("Accept Offer: " + auctionList[0] + "g for " + auctionList[1] + "pp") : ("Accept Offer: " + auctionList[1] + "pp for " + auctionList[0] + "g");
         return data;
     }
 
@@ -640,7 +637,7 @@ public:
         for (uint16 i = 0; i < count; ++i)
         {
             auctions++;
-            if (auctions > (page + 1) * AuctionsOnPage)
+            if (auctions >(page + 1) * AuctionsOnPage)
             {
                 haveNextPage = true;
                 break;
@@ -677,6 +674,7 @@ enum NpcSlaveEvents
     NPC_SLAVE_EVENT_SAY_GROUP_3,
     NPC_SLAVE_EVENT_SAY_GROUP_4,
     NPC_SLAVE_EVENT_SAY_GROUP_5,
+    NPC_SLAVE_EVENT_ACTIVATE_SLAVE,
     NPC_SLAVE_EVENT_SCENE,
     NPC_SLAVE_EVENT_END_SCENE
 };
@@ -701,7 +699,7 @@ enum NpcSlaveEntries
 class npc_slaveAI : public CreatureAI
 {
 public:
-    npc_slaveAI(Creature* c) : CreatureAI(c) 
+    npc_slaveAI(Creature* c) : CreatureAI(c)
     {
         creatureTextEntry = me->GetEntry();
 
@@ -716,10 +714,10 @@ public:
         events.Empty();
         isEventInAction = false;
 
-        events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, urand(1000, NPC_SLAVE_INTERVAL_SAY));
-
         if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK || creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
         {
+            events.ScheduleEvent(NPC_SLAVE_EVENT_ACTIVATE_SLAVE, urand(1000, NPC_SLAVE_INTERVAL_SAY));
+            events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, urand(1000, NPC_SLAVE_INTERVAL_SAY));
             events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_1, urand(1000, NPC_SLAVE_INTERVAL_YELL));
             events.ScheduleEvent(NPC_SLAVE_EVENT_SCENE, urand(1000, NPC_SLAVE_INTERVAL_SCENE));
         }
@@ -742,7 +740,8 @@ public:
                 {
                 case NPC_SLAVE_EVENT_SAY_GROUP_0:
                 case NPC_SLAVE_EVENT_SAY_GROUP_1:
-                    events.RescheduleEvent(eventId, GetIntervalFor(eventId));
+                    if (creatureTextEntry != NPC_SLAVE_ENTRY_0)
+                        events.RescheduleEvent(eventId, GetIntervalFor(eventId));
                     if (isEventInAction)
                         break;
 
@@ -751,6 +750,11 @@ public:
                 case NPC_SLAVE_EVENT_SAY_GROUP_4:
                 case NPC_SLAVE_EVENT_SAY_GROUP_5:
                     ExecuteSay(eventId - 1);
+                    break;
+                case NPC_SLAVE_EVENT_ACTIVATE_SLAVE:
+                    if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
+                        slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, 10);
+                    events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SAY);
                     break;
                 case NPC_SLAVE_EVENT_SCENE:
                     ExecuteScene();
@@ -775,6 +779,40 @@ public:
             return NPC_SLAVE_INTERVAL_YELL;
 
         return 0;
+    }
+
+    npc_slaveAI* GetRandomSlaveAI()
+    {
+        uint32 slaveDB_GUID;
+        uint32 slaveId;
+
+        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+            slaveDB_GUID = urand(250012, 250016);
+        else if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK)
+            slaveDB_GUID = urand(250000, 250004);
+        else return NULL;
+
+        QueryResult res = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
+
+        if (!res)
+            return NULL;
+
+        slaveId = res->operator[](0).GetUInt32();
+
+        uint64 slaveGUID = MAKE_NEW_GUID(slaveDB_GUID, slaveId, HIGHGUID_UNIT);
+
+        Creature* slave = ObjectAccessor::GetCreature(*me, slaveGUID);
+
+        if (!slave)
+            return NULL;
+
+        CreatureAI* c_slaveAI = slave->AI();
+
+        if (!c_slaveAI || slave->GetScriptName() != "npc_slave_slave")
+            return NULL;
+
+        //should be safe, npc_slave_slave always adds npc_slaveAI as AI
+        return dynamic_cast<npc_slaveAI*>(c_slaveAI);
     }
 
     void ExecuteSay(uint32 group)
@@ -805,56 +843,28 @@ public:
 
     void ExecuteScene()
     {
-        uint32 slaveDB_GUID;
-        uint32 slaveId;
-
-        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
-            slaveDB_GUID = urand(250012, 250016);
-        else if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK)
-            slaveDB_GUID = urand(250000, 250004);
-        else return;
-
-        QueryResult res = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
-
-        if (!res)
-            return;
-
-        slaveId = res->operator[](0).GetUInt32();
-
-        uint64 slaveGUID = MAKE_NEW_GUID(slaveDB_GUID, slaveId, HIGHGUID_UNIT);
-
-        Creature* slave = ObjectAccessor::GetCreature(*me, slaveGUID);
-
-        if (!slave)
-            return;
-
-        CreatureAI* c_slaveAI = slave->AI();
-
-        if (!c_slaveAI || slave->GetScriptName() != "npc_slave_slave")
-            return;
-
-        //should be safe, npc_slave_slave always adds npc_slaveAI as AI
-        npc_slaveAI* slaveAI = dynamic_cast<npc_slaveAI*>(c_slaveAI);
-
-        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+        if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
         {
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000); // S: If you let us out, we’ll pay you! We have gold!
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000); // Z: Don’t bother, you mercenary scum. 
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); //S: I’ll give everything…
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000); // Z: laughs.
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000); // Z: You surely would.
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); //S: looks at Zork in silence.
+            if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+            {
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000); // S: If you let us out, we’ll pay you! We have gold!
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000); // Z: Don’t bother, you mercenary scum. 
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); //S: I’ll give everything…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000); // Z: laughs. 
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000); // Z: You surely would.
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); //S: looks at Zork in silence.
 
-            SetEventInAction(30000);
-            slaveAI->SetEventInAction(30000);
-        }
-        else //VALAK
-        {
-            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000); // S: If you let us out, we…
-            this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000); // V: Shut your mouth, maggot, or I will knock out your teeth!
+                SetEventInAction(30000);
+                slaveAI->SetEventInAction(30000);
+            }
+            else //VALAK
+            {
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000); // S: If you let us out, we…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000); // V: Shut your mouth, maggot, or I will knock out your teeth!
 
-            SetEventInAction(10000);
-            slaveAI->SetEventInAction(10000);
+                SetEventInAction(10000);
+                slaveAI->SetEventInAction(10000);
+            }
         }
     }
 
@@ -883,25 +893,25 @@ private:
 enum NpcSlaveActions
 {
     // will be used for scrolling
-    NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS      = 1000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS      = 2000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS       = 3000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS        = 4000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS       = 5000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS = 1000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS = 2000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS = 3000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS = 4000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS = 5000,
     NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS = 6000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS       = 7000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS         = 8000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS      = 9000,
-    NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS        = 10000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS = 7000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS = 8000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS = 9000,
+    NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS = 10000,
 
-    NPC_SLAVE_ACTION_SELECTED_AUCTION        = 20000,
-    NPC_SLAVE_ACTION_ACCEPT_OFFER            = 3000000,
-    NPC_SLAVE_ACTION_RETURN_MAIN             = 3000001,
-    NPC_SLAVE_ACTION_CLOSE                   = 3000002,
-    NPC_SLAVE_OUTPUT_ARMORY_LINK             = 3000003,
-    NPC_SLAVE_ACTION_SEND_ITEM_LIST          = 3000004,
-    NPC_SLAVE_ACTION_CONFIRM_OFFER           = 3000005,
-    NPC_SLAVE_ACTION_MORE_INFO               = 3000006,
+    NPC_SLAVE_ACTION_SELECTED_AUCTION = 20000,
+    NPC_SLAVE_ACTION_ACCEPT_OFFER = 3000000,
+    NPC_SLAVE_ACTION_RETURN_MAIN = 3000001,
+    NPC_SLAVE_ACTION_CLOSE = 3000002,
+    NPC_SLAVE_OUTPUT_ARMORY_LINK = 3000003,
+    NPC_SLAVE_ACTION_SEND_ITEM_LIST = 3000004,
+    NPC_SLAVE_ACTION_CONFIRM_OFFER = 3000005,
+    NPC_SLAVE_ACTION_MORE_INFO = 3000006,
 };
 
 class npc_slave : public CreatureScript
@@ -909,7 +919,6 @@ class npc_slave : public CreatureScript
 public:
     npc_slave() : CreatureScript("npc_slave") { }
 
-    uint32 team = 0;
     uint32 type = 0;
     uint16 count = 0;
     uint32 id[2000];
@@ -917,13 +926,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-
-
+        DisplayMainMenu(player, creature);
         ChatHandler handler(player->GetSession());
         //handler.PSendSysMessage("Tip: Prat lets you copy links not text, http:// and will turn it into a link.");
         handler.PSendSysMessage("Tip: Pobierz addon prat, a swobodnie dostaniesz kopie linku do armory!");
@@ -934,103 +937,73 @@ public:
     {
         player->PlayerTalkClass->ClearMenus();
 
-        if (action == TEAM_ALLIANCE)
-        {
-            selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-        }
-        else if (action == TEAM_HORDE)
-        {
-            selectedAuctionId = 0; type = 0; team = TEAM_HORDE;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-        }
-        else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS)
+        if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS;
-            LoadSlaveAuctions(CLASS_WARRIOR, team);
+            LoadSlaveAuctions(CLASS_WARRIOR);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS;
-            LoadSlaveAuctions(CLASS_PALADIN, team);
+            LoadSlaveAuctions(CLASS_PALADIN);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS;
-            LoadSlaveAuctions(CLASS_HUNTER, team);
+            LoadSlaveAuctions(CLASS_HUNTER);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS;
-            LoadSlaveAuctions(CLASS_ROGUE, team);
+            LoadSlaveAuctions(CLASS_ROGUE);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS;
-            LoadSlaveAuctions(CLASS_PRIEST, team);
+            LoadSlaveAuctions(CLASS_PRIEST);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS;
-            LoadSlaveAuctions(CLASS_DEATH_KNIGHT, team);
+            LoadSlaveAuctions(CLASS_DEATH_KNIGHT);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS;
-            LoadSlaveAuctions(CLASS_SHAMAN, team);
+            LoadSlaveAuctions(CLASS_SHAMAN);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS;
-            LoadSlaveAuctions(CLASS_MAGE, team);
+            LoadSlaveAuctions(CLASS_MAGE);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS && action < NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS;
-            LoadSlaveAuctions(CLASS_WARLOCK, team);
+            LoadSlaveAuctions(CLASS_WARLOCK);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
         else if (action >= NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS && action < NPC_SLAVE_ACTION_SELECTED_AUCTION)
         {
             type = NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS;
-            LoadSlaveAuctions(CLASS_DRUID, team);
+            LoadSlaveAuctions(CLASS_DRUID);
             ShowPage(player, action - NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
@@ -1043,10 +1016,7 @@ public:
         }
         else if (action == NPC_SLAVE_ACTION_RETURN_MAIN)
         {
-            selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            DisplayMainMenu(player, creature);
         }
         else if (action == NPC_SLAVE_ACTION_CLOSE)
             player->CLOSE_GOSSIP_MENU();
@@ -1086,9 +1056,20 @@ public:
         }
         else if (action == NPC_SLAVE_ACTION_CONFIRM_OFFER)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GetAuctionConfirmStringData(player->GetSelectedAuction()), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_ACCEPT_OFFER);        
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, GetAuctionConfirmStringData(player->GetSelectedAuction()), GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_ACCEPT_OFFER);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        }
+        else if (action == NPC_SLAVE_ACTION_MORE_INFO)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I understand.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
+
+            uint32 textEntry = creature->GetEntry() + 1;
+
+            if (textEntry == 90028)
+                textEntry++;
+
+            player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
         }
         else
         {
@@ -1109,11 +1090,45 @@ public:
         return true;
     }
 
-    void LoadSlaveAuctions(uint32 slave_class, uint32 slave_team)
+    void DisplayMainMenu(Player* player, Creature* creature)
+    {
+        selectedAuctionId = 0; type = 0;
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+
+        std::string moreInfoString;
+
+        switch (creature->GetEntry())
+        {
+        case NPC_SLAVE_ENTRY_ZORK:
+            moreInfoString = "Zork, why do you hold a slave market in Stormwind? And who are the slaves?";
+            break;
+        case NPC_SLAVE_ENTRY_VALAK:
+            moreInfoString = "Valak, why do you sell slaves? And who are they?";
+            break;
+        default:
+            moreInfoString = "What is this?";
+        }
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, moreInfoString, GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_MORE_INFO);
+
+        player->SEND_GOSSIP_MENU(creature->GetEntry(), creature->GetGUID());
+    }
+
+    void LoadSlaveAuctions(uint32 slave_class)
     {
         count = 0;
-                                                                                                                 // AUCTION_SELL_CHARACTER = 0x02
-        QueryResult result = CharacterDatabase.PQuery("SELECT auctionId FROM bazar_auction WHERE slave_class = %u AND auction_type = 2 AND slave_team = %u ORDER BY dp_amount ASC", slave_class, slave_team);
+        // AUCTION_SELL_CHARACTER = 0x02
+        QueryResult result = CharacterDatabase.PQuery("SELECT auctionId FROM bazar_auction WHERE slave_class = %u AND auction_type = 2", slave_class);
 
         if (result)
         {
@@ -1155,7 +1170,7 @@ public:
             auctionList[1] = fields[1].GetString();
         }
 
-        std::string data = "Char: " + auctionList[1] + " for " + auctionList[0] + "sc (details)";
+        std::string data = "Char: " + auctionList[1] + " for " + auctionList[0] + "pp (details)";
         return data;
     }
 
@@ -1263,60 +1278,60 @@ public:
         {
             switch (slot)
             {
-                case EQUIPMENT_SLOT_HEAD:
-                    handler.PSendSysMessage("[HEAD]: -");
-                    break;
-                case EQUIPMENT_SLOT_NECK:
-                    handler.PSendSysMessage("[NECK]: -");
-                    break;
-                case EQUIPMENT_SLOT_SHOULDERS:
-                    handler.PSendSysMessage("[SHOULDERS]: -");
-                    break;
-                case EQUIPMENT_SLOT_BODY:
-                    handler.PSendSysMessage("[BODY]: -");
-                    break;
-                case EQUIPMENT_SLOT_CHEST:
-                    handler.PSendSysMessage("[CHEST]: -");
-                    break;
-                case EQUIPMENT_SLOT_WAIST:
-                    handler.PSendSysMessage("[WAIST]: -");
-                    break;
-                case EQUIPMENT_SLOT_LEGS:
-                    handler.PSendSysMessage("[LEGS]: -");
-                    break;
-                case EQUIPMENT_SLOT_FEET:
-                    handler.PSendSysMessage("[FEET]: -");
-                    break;
-                case EQUIPMENT_SLOT_WRISTS:
-                    handler.PSendSysMessage("[WRISTS]: -");
-                    break;
-                case EQUIPMENT_SLOT_HANDS:
-                    handler.PSendSysMessage("[HANDS]: -");
-                    break;
-                case EQUIPMENT_SLOT_FINGER1:
-                    handler.PSendSysMessage("[FINGER1]: -");
-                    break;
-                case EQUIPMENT_SLOT_FINGER2:
-                    handler.PSendSysMessage("[FINGER2]: -");
-                    break;
-                case EQUIPMENT_SLOT_TRINKET1:
-                    handler.PSendSysMessage("[TRINKET1]: -");
-                    break;
-                case EQUIPMENT_SLOT_TRINKET2:
-                    handler.PSendSysMessage("[TRINKET2]: -");
-                    break;
-                case EQUIPMENT_SLOT_MAINHAND:
-                    handler.PSendSysMessage("[MAINHAND]: -");
-                    break;
-                case EQUIPMENT_SLOT_OFFHAND:
-                    handler.PSendSysMessage("[OFFHAND]: -");
-                    break;
-                case EQUIPMENT_SLOT_RANGED:
-                    handler.PSendSysMessage("[RANGED]: -");
-                    break;
-                case EQUIPMENT_SLOT_TABARD:
-                    handler.PSendSysMessage("[TABARD]: -");
-                    break;
+            case EQUIPMENT_SLOT_HEAD:
+                handler.PSendSysMessage("[HEAD]: -");
+                break;
+            case EQUIPMENT_SLOT_NECK:
+                handler.PSendSysMessage("[NECK]: -");
+                break;
+            case EQUIPMENT_SLOT_SHOULDERS:
+                handler.PSendSysMessage("[SHOULDERS]: -");
+                break;
+            case EQUIPMENT_SLOT_BODY:
+                handler.PSendSysMessage("[BODY]: -");
+                break;
+            case EQUIPMENT_SLOT_CHEST:
+                handler.PSendSysMessage("[CHEST]: -");
+                break;
+            case EQUIPMENT_SLOT_WAIST:
+                handler.PSendSysMessage("[WAIST]: -");
+                break;
+            case EQUIPMENT_SLOT_LEGS:
+                handler.PSendSysMessage("[LEGS]: -");
+                break;
+            case EQUIPMENT_SLOT_FEET:
+                handler.PSendSysMessage("[FEET]: -");
+                break;
+            case EQUIPMENT_SLOT_WRISTS:
+                handler.PSendSysMessage("[WRISTS]: -");
+                break;
+            case EQUIPMENT_SLOT_HANDS:
+                handler.PSendSysMessage("[HANDS]: -");
+                break;
+            case EQUIPMENT_SLOT_FINGER1:
+                handler.PSendSysMessage("[FINGER1]: -");
+                break;
+            case EQUIPMENT_SLOT_FINGER2:
+                handler.PSendSysMessage("[FINGER2]: -");
+                break;
+            case EQUIPMENT_SLOT_TRINKET1:
+                handler.PSendSysMessage("[TRINKET1]: -");
+                break;
+            case EQUIPMENT_SLOT_TRINKET2:
+                handler.PSendSysMessage("[TRINKET2]: -");
+                break;
+            case EQUIPMENT_SLOT_MAINHAND:
+                handler.PSendSysMessage("[MAINHAND]: -");
+                break;
+            case EQUIPMENT_SLOT_OFFHAND:
+                handler.PSendSysMessage("[OFFHAND]: -");
+                break;
+            case EQUIPMENT_SLOT_RANGED:
+                handler.PSendSysMessage("[RANGED]: -");
+                break;
+            case EQUIPMENT_SLOT_TABARD:
+                handler.PSendSysMessage("[TABARD]: -");
+                break;
             }
 
             return;
@@ -1326,64 +1341,64 @@ public:
         {
             Field *fields = result1->Fetch();
             itemName = fields[0].GetString();
-            quality  = fields[1].GetUInt8();
- 
+            quality = fields[1].GetUInt8();
+
             switch (slot)
             {
-                case EQUIPMENT_SLOT_HEAD:
-                    handler.PSendSysMessage("[HEAD] - %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_NECK:
-                    handler.PSendSysMessage("[NECK]: - %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_SHOULDERS:
-                    handler.PSendSysMessage("[SHOULDERS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_BODY:
-                    handler.PSendSysMessage("[BODY]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_CHEST:
-                    handler.PSendSysMessage("[CHEST]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_WAIST:
-                    handler.PSendSysMessage("[WAIST]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_LEGS:
-                    handler.PSendSysMessage("[LEGS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_FEET:
-                    handler.PSendSysMessage("[FEET]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_WRISTS:
-                    handler.PSendSysMessage("[WRISTS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_HANDS:
-                    handler.PSendSysMessage("[HANDS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_FINGER1:
-                    handler.PSendSysMessage("[FINGER1]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_FINGER2:
-                    handler.PSendSysMessage("[FINGER2]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_TRINKET1:
-                    handler.PSendSysMessage("[TRINKET1]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_TRINKET2:
-                    handler.PSendSysMessage("[TRINKET2]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_MAINHAND:
-                    handler.PSendSysMessage("[MAINHAND]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_OFFHAND:
-                    handler.PSendSysMessage("[OFFHAND]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_RANGED:
-                    handler.PSendSysMessage("[RANGED]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
-                case EQUIPMENT_SLOT_TABARD:
-                    handler.PSendSysMessage("[TABARD]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
-                    break;
+            case EQUIPMENT_SLOT_HEAD:
+                handler.PSendSysMessage("[HEAD] - %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_NECK:
+                handler.PSendSysMessage("[NECK]: - %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_SHOULDERS:
+                handler.PSendSysMessage("[SHOULDERS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_BODY:
+                handler.PSendSysMessage("[BODY]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_CHEST:
+                handler.PSendSysMessage("[CHEST]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_WAIST:
+                handler.PSendSysMessage("[WAIST]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_LEGS:
+                handler.PSendSysMessage("[LEGS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_FEET:
+                handler.PSendSysMessage("[FEET]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_WRISTS:
+                handler.PSendSysMessage("[WRISTS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_HANDS:
+                handler.PSendSysMessage("[HANDS]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_FINGER1:
+                handler.PSendSysMessage("[FINGER1]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_FINGER2:
+                handler.PSendSysMessage("[FINGER2]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_TRINKET1:
+                handler.PSendSysMessage("[TRINKET1]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_TRINKET2:
+                handler.PSendSysMessage("[TRINKET2]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_MAINHAND:
+                handler.PSendSysMessage("[MAINHAND]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_OFFHAND:
+                handler.PSendSysMessage("[OFFHAND]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_RANGED:
+                handler.PSendSysMessage("[RANGED]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
+            case EQUIPMENT_SLOT_TABARD:
+                handler.PSendSysMessage("[TABARD]: %s|Hitem:%u:0:0:0:0:0:0:0:0|h[%s]|h|r", color[quality].c_str(), itemId, itemName.c_str());
+                break;
             }
         }
     }
@@ -1419,135 +1434,135 @@ public:
 
         switch (info_return)
         {
-            case 0:
-                data = "Armory: sunwell.pl/character/1/" + auctionList;
-                break;
+        case 0:
+            data = "Armory: sunwell.pl/character/1/" + auctionList;
+            break;
+        case 1:
+            data = "Price: " + auctionList + " Premium";
+            break;
+        case 2:
+            data = "Name: " + auctionList;
+            break;
+        case 3:
+            switch (auctionListAlternative)
+            {
             case 1:
-                data = "Price: " + auctionList + " Sunwell Coins";
+                data = "Race: Human";
                 break;
             case 2:
-                data = "Name: " + auctionList;
+                data = "Race: Orc";
                 break;
             case 3:
-                switch (auctionListAlternative)
-                {
-                    case 1:
-                        data = "Race: Human";
-                        break;
-                    case 2:
-                        data = "Race: Orc";
-                        break;
-                    case 3:
-                        data = "Race: Dwarf";
-                        break;
-                    case 4:
-                        data = "Race: Night Elf";
-                        break;
-                    case 5:
-                        data = "Race: Undead";
-                        break;
-                    case 6:
-                        data = "Race: Tauren";
-                        break;
-                    case 7:
-                        data = "Race: Gnome";
-                        break;
-                    case 8:
-                        data = "Race: Troll";
-                        break;
-                    case 10:
-                        data = "Race: Blood Elf";
-                        break;
-                    case 11:
-                        data = "Race: Draenei";
-                        break;
-                    default:
-                        data = "Race: Unknown";
-                        break;
-                }
+                data = "Race: Dwarf";
                 break;
             case 4:
-                switch (auctionListAlternative)
-                {
-                    case 1:
-                        data = "Class: Warrior";
-                        break;
-                    case 2:
-                        data = "Class: Paladin";
-                        break;
-                    case 3:
-                        data = "Class: Hunter";
-                        break;
-                    case 4:
-                        data = "Class: Rogue";
-                        break;
-                    case 5:
-                        data = "Class: Priest";
-                        break;
-                    case 6:
-                        data = "Class: Death Knight";
-                        break;
-                    case 7:
-                        data = "Class: Shaman";
-                        break;
-                    case 8:
-                        data = "Class: Mage";
-                        break;
-                    case 9:
-                        data = "Class: Warlock";
-                        break;
-                    case 11:
-                        data = "Class: Druid";
-                        break;
-                    default:
-                        data = "Class: Unknown";
-                        break;
-                }
+                data = "Race: Night Elf";
                 break;
             case 5:
-                switch (auctionListAlternative)
-                {
-                    case 0:
-                        data = "Gender: Male";
-                        break;
-                    case 1:
-                        data = "Gender: Female";
-                        break;
-                    default:
-                        data = "Gender: Unknown";
-                        break;
-                }
+                data = "Race: Undead";
                 break;
             case 6:
-                data = "Level: " + auctionList;
+                data = "Race: Tauren";
                 break;
             case 7:
-                data = "Gold: " + auctionList + "g";
+                data = "Race: Gnome";
                 break;
             case 8:
-                data = "Arena Points: " + auctionList;
-                break;
-            case 9:
-                data = "Honor Points: " + auctionList;
+                data = "Race: Troll";
                 break;
             case 10:
-                data = "Riding Skill: " + auctionList;
+                data = "Race: Blood Elf";
                 break;
             case 11:
-                data = "MainSpec: " + auctionList;
-                break;
-            case 12:
-                data = "Offspec: " + auctionList;
-                break;
-            case 13:
-                data = "Average Item Level: " + auctionList + " [show items]";
-                break;
-            case 14:
-                data = "Desc: " + auctionList;
+                data = "Race: Draenei";
                 break;
             default:
-                data = "Unknown";
+                data = "Race: Unknown";
                 break;
+            }
+            break;
+        case 4:
+            switch (auctionListAlternative)
+            {
+            case 1:
+                data = "Class: Warrior";
+                break;
+            case 2:
+                data = "Class: Paladin";
+                break;
+            case 3:
+                data = "Class: Hunter";
+                break;
+            case 4:
+                data = "Class: Rogue";
+                break;
+            case 5:
+                data = "Class: Priest";
+                break;
+            case 6:
+                data = "Class: Death Knight";
+                break;
+            case 7:
+                data = "Class: Shaman";
+                break;
+            case 8:
+                data = "Class: Mage";
+                break;
+            case 9:
+                data = "Class: Warlock";
+                break;
+            case 11:
+                data = "Class: Druid";
+                break;
+            default:
+                data = "Class: Unknown";
+                break;
+            }
+            break;
+        case 5:
+            switch (auctionListAlternative)
+            {
+            case 0:
+                data = "Gender: Male";
+                break;
+            case 1:
+                data = "Gender: Female";
+                break;
+            default:
+                data = "Gender: Unknown";
+                break;
+            }
+            break;
+        case 6:
+            data = "Level: " + auctionList;
+            break;
+        case 7:
+            data = "Gold: " + auctionList + "g";
+            break;
+        case 8:
+            data = "Arena Points: " + auctionList;
+            break;
+        case 9:
+            data = "Honor Points: " + auctionList;
+            break;
+        case 10:
+            data = "Riding Skill: " + auctionList;
+            break;
+        case 11:
+            data = "MainSpec: " + auctionList;
+            break;
+        case 12:
+            data = "Offspec: " + auctionList;
+            break;
+        case 13:
+            data = "Average Item Level: " + auctionList + " [show items]";
+            break;
+        case 14:
+            data = "Desc: " + auctionList;
+            break;
+        default:
+            data = "Unknown";
+            break;
         }
         return data;
     }
@@ -1614,8 +1629,8 @@ public:
     CreatureAI* GetAI(Creature* c) const override
     {
         uint32 entry = c->GetEntry();
-        
-        if(entry == NPC_SLAVE_ENTRY_VALAK || entry == NPC_SLAVE_ENTRY_ZORK)
+
+        if (entry == NPC_SLAVE_ENTRY_VALAK || entry == NPC_SLAVE_ENTRY_ZORK)
             return new npc_slaveAI(c);
         else return new SmartAI(c);
     }
