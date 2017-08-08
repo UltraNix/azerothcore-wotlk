@@ -3556,29 +3556,29 @@ public:
 
         return true;
     }
-};
 
-static bool HandleTocResetCommand(ChatHandler* handler, char const* /*args*/)
-{
-    Player* player = handler->GetSession()->GetPlayer();
-    uint32 trialMapID = 649;
-
-    if (!player)
-        return false;
-
-    if (player->GetMap()->Instanceable())
+    static bool HandleTocResetCommand(ChatHandler* handler, char const* /*args*/)
     {
-        handler->PSendSysMessage("You can't do that here.");
-        handler->SetSentErrorMessage(true);
-        return false;
+        Player* player = handler->GetSession()->GetPlayer();
+        uint32 trialMapID = 649;
+
+        if (!player)
+            return false;
+
+        if (player->GetMap()->Instanceable())
+        {
+            handler->PSendSysMessage("You can't do that here.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+            sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUIDLow(), trialMapID, Difficulty(i), true, player);
+
+        handler->PSendSysMessage("ToC has been successfully reset.");
+        return true;
     }
-
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUIDLow(), trialMapID, Difficulty(i), true, player);
-
-    handler->PSendSysMessage("ToC has been successfully reset.");
-    return true;
-}
+};
 
 void AddSC_misc_commandscript()
 {
