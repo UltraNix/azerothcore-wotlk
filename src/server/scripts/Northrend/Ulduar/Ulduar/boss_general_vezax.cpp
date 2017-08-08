@@ -280,7 +280,7 @@ struct boss_vezaxAI : public BossAI
                     DoCastSelf(SPELL_SUMMON_SARONITE_VAPORS);
                     me->MonsterTextEmote("A cloud of saronite vapors coalesces nearby!", nullptr, true);
 
-                    if (_vaporsCount < (me->GetMap()->Is25ManRaid() ? 8 : 6) || !_hardmodeAvailable)
+                    if (_vaporsCount < 6 || !_hardmodeAvailable)
                         events.Repeat(30000);
                     else
                     {
