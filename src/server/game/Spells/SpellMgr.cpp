@@ -5904,7 +5904,125 @@ void SpellMgr::LoadDbcDataCorrections()
         case 66240:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
-
+        // Trial of the Crusader, Faction Champions:
+        case 65792: // frost nova
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_12_YARDS;
+            spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_12_YARDS;
+            break;
+        case 67953: // wrath 25 hc
+            spellInfo->EffectBasePoints[0] = urand(7600, 8600);
+            break;
+        case 67945: // moonfire 10 hc
+            spellInfo->EffectBasePoints[0] = 1350;
+            spellInfo->EffectBasePoints[1] = urand(2500, 3000);
+            break;
+        case 67946: // moonfire 25 hc
+            spellInfo->EffectBasePoints[0] = 1575;
+            spellInfo->EffectBasePoints[1] = urand(3700, 4400);
+            break;
+        case 67947: // starfire 25 n
+        case 67948: // starfire 10 hc
+            spellInfo->EffectBasePoints[0] = urand(7400, 8700);
+            break;
+        case 67949: // starfire 25 hc
+            spellInfo->EffectBasePoints[0] = urand(11100, 13100);
+            break;
+        case 68094: // eviscerate 25 n
+            spellInfo->EffectBasePoints[0] = urand(5500, 7100);
+            break;
+        case 68095: // eviscerate 10 hc
+            spellInfo->EffectBasePoints[0] = urand(6300, 8100);
+            break;
+        case 68096: // eviscerate 25 hc
+            spellInfo->EffectBasePoints[0] = urand(7800, 10100);
+            break;
+        case 67977: // aimed shot 25 n
+            spellInfo->EffectBasePoints[0] = 1800;
+            break;
+        case 67978: // aimed shot 10 hc
+            spellInfo->EffectBasePoints[0] = 2700;
+            break;
+        case 67979: // aimed shot 25 hc
+            spellInfo->EffectBasePoints[0] = 5400;
+            break;
+        case 67988: // shoot 25 n
+        case 67989: // shoot 10 hc
+            spellInfo->EffectBasePoints[0] = urand(6100, 8300);
+            break;
+        case 67990: // shoot 25 hc
+            spellInfo->EffectBasePoints[0] = urand(7650, 10350);
+            break;
+        case 68038: // mind blast 25 n
+        case 68039: // mind blast 10 hc
+            spellInfo->EffectBasePoints[0] = urand(5100, 5700);
+            break;
+        case 68040: // mind blast 25 hc
+            spellInfo->EffectBasePoints[0] = urand(6400, 7100);
+            break;
+        case 65817: // hellfire damage effect
+            spellInfo->EffectBasePoints[0] = 5500;
+            break;
+        case 68148: // searing pain 25 n
+        case 68149: // searing pain 10 hc
+            spellInfo->EffectBasePoints[0] = urand(4100, 4800);
+            break;
+        case 68150: // searing pain 25 hc
+            spellInfo->EffectBasePoints[0] = urand(4900, 5900);
+            break;
+        case 68151: // shadow bolt 25 n
+        case 68152: // shadow bolt 10 hc
+            spellInfo->EffectBasePoints[0] = urand(8500, 9500);
+            break;
+        case 68153: // shadow bolt 25 hc
+            spellInfo->EffectBasePoints[0] = urand(10600, 11900);
+            break;
+        case 68139: // death coil (warlock) 25 n
+            spellInfo->EffectValueMultiplier[0] = 5;
+        case 68140: // death coil (warlock) 10 hc
+            spellInfo->EffectBasePoints[0] = urand(6700, 7600);
+            break;
+        case 68141: // death coil (warlock) 25 hc
+            spellInfo->EffectBasePoints[0] = urand(8400, 9500);
+            spellInfo->EffectValueMultiplier[0] = 5;
+            break;
+        case 68017: // judgement of command 25 n
+            spellInfo->EffectBasePoints[0] = urand(3800, 4200);
+            break;
+        case 68018: // judgement of command 10 hc
+            spellInfo->EffectBasePoints[0] = urand(5900, 6600);
+            break;
+        case 68019: // judgement of command 25 hc
+            spellInfo->EffectBasePoints[0] = urand(7700, 8500);
+            break;
+        case 67929: // death coil (dk) 25 n
+        case 67930: // death coil (dk) 10 hc
+            spellInfo->EffectBasePoints[0] = urand(5000, 5800);
+            break;
+        case 67931: // death coil (dk) 25 hc
+            spellInfo->EffectBasePoints[0] = urand(5800, 6800);
+            break;
+        case 67935: // frost strike 25 n
+            spellInfo->EffectBasePoints[0] = 202;
+            break;
+        case 67936: // frost strike 10 hc
+        case 67937: // frost strike 25 hc
+            spellInfo->EffectBasePoints[0] = 225;
+            break;
+        case 67938: // icy touch 25 n
+            spellInfo->EffectBasePoints[0] = urand(3450, 3750);
+            break;
+        case 67939: // icy touch 10 hc
+            spellInfo->EffectBasePoints[0] = urand(3881, 4219);
+            break;
+        case 67940: // icy touch 25 hc
+            spellInfo->EffectBasePoints[0] = urand(4744, 5156);
+            break;
+        case 65936: // sunder armor
+            spellInfo->DurationIndex = 18; // 20 sec
+            break;
+        case 65976: // windfury effect
+            spellInfo->procCharges = 2;
+            break;
         //////////////////////////////////////////
         ////////// THE FORGE OF SOULS
         //////////////////////////////////////////
