@@ -104,7 +104,7 @@ struct boss_xt002AI : BossAI
 {
     explicit boss_xt002AI(Creature* creature) : BossAI(creature, TYPE_XT002), _healthCheck(75), _hardMode(false), _nerfAchievement(true), _gravityAchievement(true)
     {
-        boundaryHandler.SetBoundary(new RectangleBoundary(755.0f, 940.0f, -125.0f, 95.0f));
+        //boundaryHandler.SetBoundary(new RectangleBoundary(755.0f, 940.0f, -125.0f, 95.0f));
     }
 
     void RescheduleEvents()
