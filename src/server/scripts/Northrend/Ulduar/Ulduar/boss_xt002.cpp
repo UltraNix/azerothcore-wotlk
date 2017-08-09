@@ -963,7 +963,7 @@ class achievement_xt002_nerf_gravity_bombs : public AchievementCriteriaScript
 void AddSC_boss_xt002()
 {
     // Npcs
-    new CreatureAILoader<boss_xt002AI>("boss_xt002AI");
+    new CreatureAILoader<boss_xt002AI>("boss_xt002");
     new CreatureAILoader<npc_xt002_heartAI>("npc_xt002_heart");
     new CreatureAILoader<npc_xt002_scrapbotAI>("npc_xt002_scrapbot");
     new CreatureAILoader<npc_xt002_pummellerAI>("npc_xt002_pummeller");
