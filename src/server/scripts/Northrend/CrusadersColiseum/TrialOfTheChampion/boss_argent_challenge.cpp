@@ -74,7 +74,7 @@ struct boss_eadricAI : public BossAI
         if (instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
         {
             me->SetReactState(REACT_AGGRESSIVE);
-            me->SetAttackable(true);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
         else
             me->SetReactState(REACT_PASSIVE);
@@ -142,7 +142,7 @@ struct boss_eadricAI : public BossAI
                 me->getThreatManager().clearReferences();
                 me->SetRegeneratingHealth(false);
                 _EnterEvadeMode();
-                me->SetAttackable(false);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 instance->SetData(BOSS_ARGENT_CHALLENGE, DONE);
             }
         }
@@ -194,7 +194,7 @@ struct boss_paletressAI : public BossAI
         if(instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_ARGENT_CHALLENGE_WITHOUT_SOLDIERS)
         {
             me->SetReactState(REACT_AGGRESSIVE);
-            me->SetAttackable(true);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
         else
             me->SetReactState(REACT_PASSIVE);
@@ -291,7 +291,7 @@ struct boss_paletressAI : public BossAI
                 me->getThreatManager().clearReferences();
                 me->SetRegeneratingHealth(false);
                 _EnterEvadeMode();
-                me->SetAttackable(false);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 instance->SetData(BOSS_ARGENT_CHALLENGE, DONE);
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 68206);
             }
@@ -398,7 +398,7 @@ struct npc_memoryAI : public ScriptedAI
                     _events.ScheduleEvent(EVENT_MEMORY_START_ATTACK, 5000);
                     break;
                 case EVENT_MEMORY_START_ATTACK:
-                    me->SetAttackable(true);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     if (Unit* target = me->SelectNearestTarget(200.0f))
                     {
                         AttackStart(target);

@@ -418,7 +418,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         if (Creature* boss = announcer->SummonCreature(entry, 746.881f, 660.263f, 411.7f, 3 * M_PI / 2))
                         {
                             boss->SetReactState(REACT_AGGRESSIVE);
-                            boss->SetAttackable(true);
+                            boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             NPC_ArgentChampionGUID = boss->GetGUID();
                         }
                         NPC_MemoryEntry = 0;
@@ -981,7 +981,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         if (Creature* creature = instance->GetCreature(NPC_GrandChampionGUID[i]))
                         {
                             creature->SetReactState(REACT_AGGRESSIVE);
-                            creature->SetAttackable(true);
+                            creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         }
                     break;
                 case EVENT_GRATZ_SLAIN_CHAMPIONS:
@@ -1171,7 +1171,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                             bk->SetPosition(745.016f, 631.506f, 411.575f, bk->GetAngle(announcer));
                             bk->SetHomePosition(*bk);
                             announcer->SetFacingToObject(bk);
-                            announcer->SetAttackable(true);
+                            announcer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                             bk->CastSpell(announcer, 66798, false);
                             events.ScheduleEvent(252, 1000);
                             if (Creature* tirion = instance->GetCreature(NPC_TirionGUID))
