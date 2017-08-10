@@ -4549,6 +4549,9 @@ bool Player::resetTalents(bool noResetCost)
     // xinef: remove dual wield if player does not have dual wield spell (shamans)
     if (!HasSpell(674) && m_canDualWield)
         SetCanDualWield(false);
+    // Monich: remove Arcane Potency aura
+    if (HasAura(57531))
+        RemoveAura(57531);
 
     AutoUnequipOffhandIfNeed();
 
@@ -26707,6 +26710,10 @@ void Player::ActivateSpec(uint8 spec)
         //Glyph of Totem of Wrath
         if (HasAura(63283) && !HasAura(63280))
             RemoveAura(63283);
+
+        //Arcane Potency
+        if (HasAura(57531) && !(HasAura(31572) || HasAura(31571)))
+            RemoveAura(57531);
     }
 
     // xinef: optimization, use callback to read the data
