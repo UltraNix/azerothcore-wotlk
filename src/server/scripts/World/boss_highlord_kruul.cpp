@@ -13,6 +13,7 @@ REWRITTEN FROM SCRATCH BY SITDEV, IT OWNS NOW!
 #include "Player.h"
 #include "Group.h"
 #include "Language.h"
+#include "ScriptedEscortAI.h"
 
 enum Spells
 {
@@ -50,9 +51,19 @@ public:
         return new boss_highlord_kruulAI (pCreature);
     }
 
-    struct boss_highlord_kruulAI : public ScriptedAI
+    struct boss_highlord_kruulAI : public npc_escortAI
     {
-        boss_highlord_kruulAI(Creature *c) : ScriptedAI(c) { eventStarted = false; }
+        boss_highlord_kruulAI(Creature *c) : npc_escortAI(c) 
+        {
+            eventStarted = false; 
+
+            //waypoints
+            if (uint32 pathId = GetPathId())
+            {
+                LoadWaypointsFromWaypointData(pathId);
+                Start(true);
+            }
+        }
 
         EventMap events;
         bool doneAnnounce;
@@ -62,6 +73,32 @@ public:
         {
             events.Reset();
             playerRaidGUID = 0;
+
+        }
+
+        uint32 GetPathId()
+        {
+            switch (me->GetZoneId())
+            {
+            case 3:
+                return 999994;
+            case 11:
+                return 999993;
+            case 38:
+                return 999992;
+            case 44:
+                return 999999;
+            case 400:
+                return 999997;
+            case 405:
+                return 999995;
+            case 406:
+                return 999998;
+            case 618:
+                return 999996;
+            default:
+                return 0;
+            }
         }
 
         bool CanCapture(Player* player)
@@ -192,7 +229,7 @@ public:
             return target;
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateEscortAI(uint32 diff)
         {
             if (!UpdateVictim())
             {
@@ -254,6 +291,8 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        void WaypointReached(uint32 id) {}
     private:
         uint64 playerRaidGUID;
     };

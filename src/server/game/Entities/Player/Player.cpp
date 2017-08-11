@@ -2394,7 +2394,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove pet on map change
             if (pet)
-                UnsummonPetTemporaryIfAny();
+            {
+                if (mEntry->IsBattleArena())
+                    RemovePet(pet, PET_SAVE_AS_CURRENT);
+                else UnsummonPetTemporaryIfAny();
+            }
 
             // remove all dyn objects
             RemoveAllDynObjects();
@@ -14236,6 +14240,14 @@ void Player::RemoveAllTmpEnchantmentDurations()
         {
             if (itr->item && itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
             {
+                // Monich: Rogue's poison enchs shouldn`t be removed - continue
+                // For some reason all poisons have aura_id 26, whatever that means
+                if (sSpellItemEnchantmentStore.LookupEntry(itr->item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))->aura_id == 26) 
+                {
+                    next++;
+                    continue;
+                }
+
                 ApplyEnchantment(itr->item, TEMP_ENCHANTMENT_SLOT, false, false);
                 itr->item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
             }

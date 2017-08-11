@@ -448,7 +448,7 @@ public:
                         me->CastSpell((Unit*)NULL, SPELL_HEROISM, true);
                     else
                         me->CastSpell((Unit*)NULL, SPELL_BLOODLUST, true);
-                    events.RepeatEvent(600000);
+                    events.RepeatEvent(300000);
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_HEX:
@@ -623,6 +623,7 @@ enum ePriestSpells
     SPELL_DISPEL            = 65546,
     SPELL_MANA_BURN         = 66100,
     SPELL_PSYCHIC_SCREAM    = 65543,
+    SPELL_PENANCE           = 66098
 };
 
 enum ePriestEvents
@@ -631,6 +632,7 @@ enum ePriestEvents
     EVENT_SPELL_SHIELD,
     EVENT_SPELL_FLASH_HEAL,
     EVENT_SPELL_MANA_BURN,
+    EVENT_SPELL_PENANCE,
     EVENT_SPELL_DISPEL = 100,
     EVENT_SPELL_PSYCHIC_SCREAM = 101,
 };
@@ -654,6 +656,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_RENEW, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_SHIELD, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_FLASH_HEAL, urand(3000,10000));
+            events.RescheduleEvent(EVENT_SPELL_PENANCE, urand(3000, 10000));
             events.RescheduleEvent(EVENT_SPELL_DISPEL, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_MANA_BURN, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_PSYCHIC_SCREAM, 10000);
@@ -685,6 +688,12 @@ public:
                     if( Creature* target = SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_RENEW, 40.0f) )
                         me->CastSpell(target, SPELL_RENEW, false);
                     events.RepeatEvent(urand(10000,15000));
+                    EventMapGCD(events, 1500);
+                    break;
+                case EVENT_SPELL_PENANCE:
+                    if (Creature* target = SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_RENEW, 40.0f))
+                        me->CastSpell(target, SPELL_PENANCE, false);
+                    events.RepeatEvent(urand(10000, 15000));
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_SHIELD:
@@ -822,9 +831,9 @@ public:
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_SW_PAIN:
-                    if( me->GetVictim() )
-                        me->CastSpell(me->GetVictim(), SPELL_SW_PAIN, false);
-                    events.RepeatEvent(urand(10000,15000));
+                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0) )
+                        me->CastSpell(target, SPELL_SW_PAIN, false);
+                    events.RepeatEvent(urand(8000, 10000));
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_MIND_FLAY:
@@ -894,6 +903,7 @@ enum eWarlockSpells
     SPELL_UNSTABLE_AFFLICTION   = 65812,
     SPELL_UNSTABLE_AFFLICTION_DISPEL = 65813,
     SPELL_SUMMON_FELHUNTER      = 67514,
+    SPELL_DEATH_COIL_WARL       = 65820
 };
 
 enum eWarlockEvents
@@ -907,6 +917,7 @@ enum eWarlockEvents
     EVENT_SPELL_SHADOW_BOLT,
     EVENT_SPELL_UNSTABLE_AFFLICTION,
     EVENT_SPELL_SUMMON_FELHUNTER,
+    EVENT_SPELL_DEATH_COIL_WARL
 };
 
 class npc_toc_warlock : public CreatureScript
@@ -934,6 +945,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_SHADOW_BOLT, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_UNSTABLE_AFFLICTION, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_SUMMON_FELHUNTER, 0);
+            events.RescheduleEvent(EVENT_SPELL_DEATH_COIL_WARL, urand(15000, 25000));
         }
 
         EventMap events;
@@ -1019,6 +1031,11 @@ public:
                         me->CastSpell(me->GetVictim(), SPELL_UNSTABLE_AFFLICTION, false);
                     events.RepeatEvent(urand(5000,15000));
                     EventMapGCD(events, 1500);
+                    break;
+                case EVENT_SPELL_DEATH_COIL_WARL:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(target, SPELL_DEATH_COIL_WARL);
+                    events.RepeatEvent(120000);
                     break;
             }
 
@@ -1129,7 +1146,7 @@ public:
                         me->CastSpell((Unit*)NULL, SPELL_FROST_NOVA, false);
                         events.RepeatEvent(15000);
                         EventMapGCD(events, 1500);
-                        // blink disabled, fucking movement shit not working
+                        DoCastSelf(SPELL_BLINK);
                     }
                     else
                         events.RepeatEvent(6000);
@@ -1218,7 +1235,7 @@ public:
             events.Reset();
             events.RescheduleEvent(EVENT_SPELL_AIMED_SHOT, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_DETERRENCE, 10000);
-            //events.RescheduleEvent(EVENT_SPELL_DISENGAGE, 10000);
+            events.RescheduleEvent(EVENT_SPELL_DISENGAGE, 10000);
             events.RescheduleEvent(EVENT_SPELL_EXPLOSIVE_SHOT, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_FROST_TRAP, urand(15000,20000));
             events.RescheduleEvent(EVENT_SPELL_STEADY_SHOT, urand(3000,10000));
@@ -1279,7 +1296,7 @@ public:
                     if( EnemiesInRange(10.0f) >= 3 )
                     {
                         me->CastSpell(me, SPELL_DISENGAGE, false);
-                        events.RepeatEvent(20000);
+                        events.RepeatEvent(30000);
                         EventMapGCD(events, 1500);
                     }
                     else
@@ -1305,7 +1322,7 @@ public:
                 case EVENT_SPELL_WING_CLIP:
                     if( me->GetVictim() && me->GetDistance2d(me->GetVictim()) <= 5.0f )
                         me->CastSpell(me->GetVictim(), SPELL_WING_CLIP, false);
-                    events.RepeatEvent(8000);
+                    events.RepeatEvent(6000);
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_WYVERN_STING:
@@ -1338,7 +1355,7 @@ enum eBoomkinSpells
     SPELL_ENTANGLING_ROOTS  = 65857,
     SPELL_FAERIE_FIRE       = 65863,
     SPELL_CYCLONE           = 65859,
-    SPELL_FORCE_OF_NATURE   = 65861,
+    SPELL_FORCE_OF_NATURE   = 65861
 };
 
 enum eBoomkinEvents
@@ -1768,7 +1785,7 @@ public:
                         me->GetClosePoint(x,y,z,3.0f);
                         pos.Relocate(x, y, z);
                         me->GetVictim()->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 49575, true);
-                        events.RepeatEvent(35000);
+                        events.RepeatEvent(20000);
                         EventMapGCD(events, 2000);
                     }
                     else
@@ -1869,7 +1886,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_BLIND, urand(10000,15000));
             events.RescheduleEvent(EVENT_SPELL_CLOAK, 10000);
             events.RescheduleEvent(EVENT_SPELL_BLADE_FLURRY, urand(20000,40000));
-            //events.RescheduleEvent(EVENT_SPELL_SHADOWSTEP, urand(15000,25000));
+            events.RescheduleEvent(EVENT_SPELL_SHADOWSTEP, urand(15000,25000));
             events.RescheduleEvent(EVENT_SPELL_HEMORRHAGE, urand(3000,5000));
             events.RescheduleEvent(EVENT_SPELL_EVISCERATE, urand(20000,25000));
         }
@@ -1942,10 +1959,10 @@ public:
                     }
                     break;
                 case EVENT_SPELL_SHADOWSTEP:
-                    if( me->GetVictim() && me->GetDistance2d(me->GetVictim()) < 40.0f && me->GetDistance2d(me->GetVictim()) > 10.0f )
+                    if (me->GetVictim() && me->IsInRange(me->GetVictim(), 10.0f, 40.0f))
                     {
                         me->CastSpell(me->GetVictim(), SPELL_SHADOWSTEP, false);
-                        events.RepeatEvent(30000);
+                        events.RepeatEvent(20000);
                         EventMapGCD(events, 1500);
                     }
                     else
@@ -1997,6 +2014,8 @@ enum eEnhShamanSpells
     SPELL_GROUNDING_TOTEM    = 65989,
     SPELL_WINDFURY_TOTEM    = 65990,
     SPELL_TREMOR_TOTEM        = 65992,
+    SPELL_WINDFURY          = 65975,
+    SPELL_MAELSTROM_WEAPON  = 65988
 };
 
 enum eEnhShamanEvents
@@ -2024,6 +2043,8 @@ public:
             SetEquipmentSlots(false, 51803, 48013, EQUIP_NO_CHANGE);
             me->SetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, 1.0f);
             me->UpdateDamagePhysical(OFF_ATTACK);
+            DoCastSelf(SPELL_WINDFURY);
+            DoCastSelf(SPELL_MAELSTROM_WEAPON);
 
             events.Reset();
             events.RescheduleEvent(EVENT_SPELL_HEROISM_OR_BLOODLUST, urand(25000,40000));

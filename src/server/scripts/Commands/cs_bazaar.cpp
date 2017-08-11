@@ -20,6 +20,7 @@
 #include "ObjectMgr.h"
 #include "Chat.h"
 #include "BazaarMgr.h"
+#include "SmartAI.h"
 
 
 class bazaar_commandscript : public CommandScript
@@ -663,6 +664,235 @@ public:
     }
 };
 
+#define NPC_SLAVE_INTERVAL_YELL 600000
+#define NPC_SLAVE_INTERVAL_SAY 120000
+#define NPC_SLAVE_INTERVAL_SCENE 3600000
+#define NPC_SLAVE_INTERVAL_ACTION 30000
+
+enum NpcSlaveEvents
+{
+    NPC_SLAVE_EVENT_SAY_GROUP_0 = 1,
+    NPC_SLAVE_EVENT_SAY_GROUP_1,
+    NPC_SLAVE_EVENT_SAY_GROUP_2,
+    NPC_SLAVE_EVENT_SAY_GROUP_3,
+    NPC_SLAVE_EVENT_SAY_GROUP_4,
+    NPC_SLAVE_EVENT_SAY_GROUP_5,
+    NPC_SLAVE_EVENT_ACTIVATE_SLAVE,
+    NPC_SLAVE_EVENT_SCENE,
+    NPC_SLAVE_EVENT_END_SCENE
+};
+
+enum NpcSlaveEntries
+{
+    NPC_SLAVE_ENTRY_0 = 90010,
+    NPC_SLAVE_ENTRY_1 = 90011,
+    NPC_SLAVE_ENTRY_2 = 90012,
+    NPC_SLAVE_ENTRY_3 = 90013,
+    NPC_SLAVE_ENTRY_4 = 90014,
+    NPC_SLAVE_ENTRY_5 = 90018,
+    NPC_SLAVE_ENTRY_6 = 90019,
+    NPC_SLAVE_ENTRY_7 = 90020,
+    NPC_SLAVE_ENTRY_8 = 90021,
+    NPC_SLAVE_ENTRY_9 = 90022,
+
+    NPC_SLAVE_ENTRY_VALAK = 90015,
+    NPC_SLAVE_ENTRY_ZORK = 90023,
+};
+
+class npc_slaveAI : public CreatureAI
+{
+public:
+    npc_slaveAI(Creature* c) : CreatureAI(c) 
+    {
+        creatureTextEntry = me->GetEntry();
+
+        //if one of slaves - share the creatureText entry
+        if ((creatureTextEntry > NPC_SLAVE_ENTRY_0 && creatureTextEntry <= NPC_SLAVE_ENTRY_4) || (creatureTextEntry >= NPC_SLAVE_ENTRY_5 && creatureTextEntry <= NPC_SLAVE_ENTRY_9))
+            creatureTextEntry = NPC_SLAVE_ENTRY_0;
+    }
+
+    void Reset() override
+    {
+        actionInterval = 0;
+        events.Empty();
+        isEventInAction = false;
+
+        if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK || creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+        {
+            events.ScheduleEvent(NPC_SLAVE_EVENT_ACTIVATE_SLAVE, urand(1000, NPC_SLAVE_INTERVAL_SAY));
+            events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, urand(1000, NPC_SLAVE_INTERVAL_SAY));
+            events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_1, urand(1000, NPC_SLAVE_INTERVAL_YELL));
+            events.ScheduleEvent(NPC_SLAVE_EVENT_SCENE, urand(1000, NPC_SLAVE_INTERVAL_SCENE));
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        //check action interval
+        if (actionInterval < diff)
+            actionInterval = 0;
+        else actionInterval -= diff;
+
+        events.Update(diff);
+
+        if (!me->IsInCombat() && (!actionInterval || isEventInAction))
+        {
+            if (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case NPC_SLAVE_EVENT_SAY_GROUP_0:
+                case NPC_SLAVE_EVENT_SAY_GROUP_1:
+                    if(creatureTextEntry != NPC_SLAVE_ENTRY_0)
+                        events.RescheduleEvent(eventId, GetIntervalFor(eventId));
+                    if (isEventInAction)
+                        break;
+
+                case NPC_SLAVE_EVENT_SAY_GROUP_2:
+                case NPC_SLAVE_EVENT_SAY_GROUP_3:
+                case NPC_SLAVE_EVENT_SAY_GROUP_4:
+                case NPC_SLAVE_EVENT_SAY_GROUP_5:
+                    ExecuteSay(eventId - 1);
+                    break;
+                case NPC_SLAVE_EVENT_ACTIVATE_SLAVE:
+                    if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
+                        slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, 10);
+                    events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SAY);
+                    break;
+                case NPC_SLAVE_EVENT_SCENE:
+                    ExecuteScene();
+                    events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SCENE);
+                    break;
+                case NPC_SLAVE_EVENT_END_SCENE:
+                    isEventInAction = false;
+                    break;
+                }
+
+                actionInterval = NPC_SLAVE_INTERVAL_ACTION;
+            }
+        }
+    }
+
+    uint32 GetIntervalFor(uint32 eventId)
+    {
+        if (eventId == NPC_SLAVE_EVENT_SAY_GROUP_0)
+            return NPC_SLAVE_INTERVAL_SAY;
+
+        if (eventId == NPC_SLAVE_EVENT_SAY_GROUP_1)
+            return NPC_SLAVE_INTERVAL_YELL;
+
+        return 0;
+    }
+
+    npc_slaveAI* GetRandomSlaveAI()
+    {
+        uint32 slaveDB_GUID;
+        uint32 slaveId;
+
+        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+            slaveDB_GUID = urand(250012, 250016);
+        else if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK)
+            slaveDB_GUID = urand(250000, 250004);
+        else return NULL;
+
+        QueryResult res = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
+
+        if (!res)
+            return NULL;
+
+        slaveId = res->operator[](0).GetUInt32();
+
+        uint64 slaveGUID = MAKE_NEW_GUID(slaveDB_GUID, slaveId, HIGHGUID_UNIT);
+
+        Creature* slave = ObjectAccessor::GetCreature(*me, slaveGUID);
+
+        if (!slave)
+            return NULL;
+
+        CreatureAI* c_slaveAI = slave->AI();
+
+        if (!c_slaveAI || slave->GetScriptName() != "npc_slave_slave")
+            return NULL;
+
+        //should be safe, npc_slave_slave always adds npc_slaveAI as AI
+        return dynamic_cast<npc_slaveAI*>(c_slaveAI);
+    }
+
+    void ExecuteSay(uint32 group)
+    {        
+        QueryResult res = WorldDatabase.PQuery("SELECT `text`, `type` FROM `creature_text` WHERE entry = %u AND groupid = %u", creatureTextEntry, group);
+
+        if (res)
+        {
+            uint32 index = urand(0, res->GetRowCount() - 1);
+
+            while (index-- != 0)
+                res->NextRow();
+
+            Field* f = res->Fetch();
+
+            const char* text = f[0].GetCString();
+
+            uint16 textType = f[1].GetInt16();
+
+            if (textType == 12)
+                me->MonsterSay(text, LANG_UNIVERSAL, 0);
+            else if (textType == 14)
+                me->MonsterYell(text, LANG_UNIVERSAL, 0);
+            else if (textType == 16)
+                me->MonsterTextEmote(text, 0, false);
+        }
+    }
+
+    void ExecuteScene()
+    {
+        if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
+        {
+            if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
+            {
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000); // S: If you let us out, we’ll pay you! We have gold!
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000); // Z: Don’t bother, you mercenary scum. 
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); //S: I’ll give everything…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000); // Z: laughs. 
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000); // Z: You surely would.
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); //S: looks at Zork in silence.
+
+                SetEventInAction(30000);
+                slaveAI->SetEventInAction(30000);
+            }
+            else //VALAK
+            {
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000); // S: If you let us out, we…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000); // V: Shut your mouth, maggot, or I will knock out your teeth!
+
+                SetEventInAction(10000);
+                slaveAI->SetEventInAction(10000);
+            }
+        }
+    }
+
+    void AddEvent(uint32 eventId, uint32 time)
+    {
+        events.ScheduleEvent(eventId, time);
+    }
+
+    void SetEventInAction(uint32 time)
+    {
+        events.ScheduleEvent(NPC_SLAVE_EVENT_END_SCENE, time);
+        isEventInAction = true;
+    }
+
+private:
+    // Monich: used for making a pause between says and yells - its better when they are not executed together
+    uint32 actionInterval;
+
+    uint32 creatureTextEntry;
+
+    bool isEventInAction;
+
+    EventMap events;
+};
+
 enum NpcSlaveActions
 {
     // will be used for scrolling
@@ -684,6 +914,7 @@ enum NpcSlaveActions
     NPC_SLAVE_OUTPUT_ARMORY_LINK             = 3000003,
     NPC_SLAVE_ACTION_SEND_ITEM_LIST          = 3000004,
     NPC_SLAVE_ACTION_CONFIRM_OFFER           = 3000005,
+    NPC_SLAVE_ACTION_MORE_INFO               = 3000006,
 };
 
 class npc_slave : public CreatureScript
@@ -699,13 +930,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-
-
+        DisplayMainMenu(player, creature);
         ChatHandler handler(player->GetSession());
         //handler.PSendSysMessage("Tip: Prat lets you copy links not text, http:// and will turn it into a link.");
         handler.PSendSysMessage("Tip: Pobierz addon prat, a swobodnie dostaniesz kopie linku do armory!");
@@ -825,10 +1050,7 @@ public:
         }
         else if (action == NPC_SLAVE_ACTION_RETURN_MAIN)
         {
-            selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Alliance side auctions...", GOSSIP_SENDER_MAIN, TEAM_ALLIANCE);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "View Horde side auctions...", GOSSIP_SENDER_MAIN, TEAM_HORDE);
-            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            DisplayMainMenu(player, creature);
         }
         else if (action == NPC_SLAVE_ACTION_CLOSE)
             player->CLOSE_GOSSIP_MENU();
@@ -872,6 +1094,17 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Return.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         }
+        else if (action == NPC_SLAVE_ACTION_MORE_INFO)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I understand.", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_RETURN_MAIN);
+
+            uint32 textEntry = creature->GetEntry() + 1;
+
+            if (textEntry == 90028)
+                textEntry++;
+
+            player->SEND_GOSSIP_MENU(textEntry, creature->GetGUID());
+        }
         else
         {
             selectedAuctionId = action - NPC_SLAVE_ACTION_SELECTED_AUCTION; type = 0;
@@ -889,6 +1122,40 @@ public:
         }
 
         return true;
+    }
+
+    void DisplayMainMenu(Player* player, Creature* creature)
+    {
+        selectedAuctionId = 0; type = 0; team = TEAM_ALLIANCE;
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warrior auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARRIOR_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Paladin auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PALADIN_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Hunter auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_HUNTER_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Rogue auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_ROGUE_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Priest auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_PRIEST_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Death Knight auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DEATH_KNIGHT_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Shaman auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_SHAMAN_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Mage auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_MAGE_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Warlock auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_WARLOCK_AUCTIONS);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "View Druid auctions...", GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_LIST_CHARACTER_DRUID_AUCTIONS);
+
+        std::string moreInfoString;
+
+        switch (creature->GetEntry())
+        {
+        case NPC_SLAVE_ENTRY_ZORK:
+            moreInfoString = "Zork, why do you hold a slave market in Stormwind? And who are the slaves?";
+            break;
+        case NPC_SLAVE_ENTRY_VALAK:
+            moreInfoString = "Valak, why do you sell slaves? And who are they?";
+            break;
+        default:
+            moreInfoString = "What is this?";
+        }
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, moreInfoString, GOSSIP_SENDER_MAIN, NPC_SLAVE_ACTION_MORE_INFO);
+
+        player->SEND_GOSSIP_MENU(creature->GetEntry(), creature->GetGUID());
     }
 
     void LoadSlaveAuctions(uint32 slave_class, uint32 slave_team)
@@ -1392,6 +1659,26 @@ public:
         if (haveNextPage)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Next page...", GOSSIP_SENDER_MAIN, type + page + 1);
     }
+
+    CreatureAI* GetAI(Creature* c) const override
+    {
+        uint32 entry = c->GetEntry();
+        
+        if(entry == NPC_SLAVE_ENTRY_VALAK || entry == NPC_SLAVE_ENTRY_ZORK)
+            return new npc_slaveAI(c);
+        else return new SmartAI(c);
+    }
+};
+
+class npc_slave_slave : public CreatureScript
+{
+public:
+    npc_slave_slave() : CreatureScript("npc_slave_slave") {};
+
+    CreatureAI* GetAI(Creature* c) const override
+    {
+        return new npc_slaveAI(c);
+    }
 };
 
 void AddSC_bazaar_commandscript()
@@ -1399,4 +1686,5 @@ void AddSC_bazaar_commandscript()
     new bazaar_commandscript();
     new npc_bazaar();
     new npc_slave();
+    new npc_slave_slave();
 }

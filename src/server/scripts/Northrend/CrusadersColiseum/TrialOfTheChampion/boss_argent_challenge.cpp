@@ -307,7 +307,8 @@ struct boss_paletressAI : public BossAI
     void SummonMemory()
     {
         std::vector<uint32> spells = { 66704,66705,66706,66707,66709,66710,66711,66712,66713,66714,66715,66708,66708,66691,66692,66694,66695,66696,66697,66698,66699,66700,66701,66702,66703,66543 };
-        DoCastSelf(Trinity::Containers::SelectRandomContainerElement(spells), true);
+        if (!_memoryGUID)
+            DoCastSelf(Trinity::Containers::SelectRandomContainerElement(spells), true);
     }
 
     void ExecuteEvent(uint32 eventId) override

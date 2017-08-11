@@ -58,6 +58,38 @@ void npc_escortAI::AttackStart(Unit* who)
     }
 }
 
+bool npc_escortAI::LoadWaypointsFromWaypointData(uint32 pathId)
+{
+    PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_WAYPOINT_DATA_BY_ID);
+    stmt->setUInt32(0, pathId);
+
+    PreparedQueryResult result = WorldDatabase.Query(stmt);
+
+    if (!result)
+        return false;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        float x = fields[1].GetFloat();
+        float y = fields[2].GetFloat();
+
+        Trinity::NormalizeMapCoord(x);
+        Trinity::NormalizeMapCoord(y);
+
+        AddWaypoint(
+            fields[0].GetInt32(),
+            x,
+            y,
+            fields[3].GetFloat(),
+            fields[5].GetInt32()
+        );
+    } while (result->NextRow());
+
+    return true;
+}
+
 //see followerAI
 bool npc_escortAI::AssistPlayerInCombat(Unit* who)
 {

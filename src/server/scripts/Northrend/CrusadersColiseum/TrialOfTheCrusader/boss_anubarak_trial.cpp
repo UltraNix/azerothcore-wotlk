@@ -126,6 +126,7 @@ enum AnubEvents
     EVENT_SPELL_SUMMON_SPIKE,
     EVENT_SPELL_SHADOW_STRIKE,
     EVENT_SUMMON_SCARAB,
+    EVENT_SHADOW_STRIKE
 };
 
 #define SUBMERGE_INTERVAL    80000
@@ -194,6 +195,8 @@ public:
             me->setActive(true);
             events.Reset();
             events.RescheduleEvent(EVENT_ENRAGE, 600000);
+            if (IsHeroic())
+                events.RescheduleEvent(EVENT_SHADOW_STRIKE, 30000);
             events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000,15000));
             events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000,20000));
             events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000,10000));
@@ -256,6 +259,17 @@ public:
             {
                 case 0:
                     break;
+                case EVENT_SHADOW_STRIKE:
+                    {
+                        std::list<Creature*> addList;
+                        me->GetCreatureListWithEntryInGrid(addList, NPC_BURROWER, 500.0f);
+                        if (!addList.empty())
+                            for (auto itr : addList)
+                                if (auto victim = itr->GetVictim())
+                                    itr->CastSpell(victim, SPELL_SHADOW_STRIKE);
+                        events.RepeatEvent(30000);
+                    }
+                    break;
                 case EVENT_ENRAGE:
                     {
                         me->CastSpell(me, SPELL_BERSERK, true);
@@ -313,6 +327,7 @@ public:
                         events.CancelEvent(EVENT_SUMMON_NERUBIAN);
                         events.CancelEvent(EVENT_SPELL_FREEZING_SLASH);
                         events.CancelEvent(EVENT_SPELL_PENETRATING_COLD);
+                        events.CancelEvent(EVENT_SHADOW_STRIKE);
                         events.RescheduleEvent(EVENT_EMERGE, EMERGE_INTERVAL);
                         events.RescheduleEvent(EVENT_SPELL_SUMMON_SPIKE, 2500);
                         events.RescheduleEvent(EVENT_SUMMON_SCARAB, 3000);
@@ -343,6 +358,8 @@ public:
                         me->setAttackTimer(BASE_ATTACK, 3000);
                         me->RemoveAura(SPELL_SUBMERGE);
                         me->CastSpell(me, SPELL_EMERGE, false);
+                        
+                        events.RescheduleEvent(EVENT_SHADOW_STRIKE, 30000);
                         events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000,10000));
                         events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000,15000));
                         events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000,20000));
@@ -634,8 +651,6 @@ public:
             me->CastSpell(me, SPELL_SPIDER_FRENZY, true);
             events.Reset();
             events.RescheduleEvent(EVENT_SUBMERGE, 30000);
-            if( IsHeroic() )
-                events.RescheduleEvent(EVENT_SPELL_SHADOW_STRIKE, urand(30000,45000));
             if( Unit* target = me->SelectNearestTarget(250.0f) )
             {
                 AttackStart(target);
@@ -675,11 +690,6 @@ public:
             switch( events.GetEvent() )
             {
                 case 0:
-                    break;
-                case EVENT_SPELL_SHADOW_STRIKE:
-                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 250.0f, true) )
-                        me->CastSpell(target, SPELL_SHADOW_STRIKE, false);
-                    events.RepeatEvent(urand(30000,45000));
                     break;
                 case EVENT_SUBMERGE:
                     if( HealthBelowPct(80) && !me->HasAura(RAID_MODE(66193,67855,67856,67857)) ) // not having permafrost - allow submerge
@@ -886,14 +896,14 @@ class spell_gen_leeching_swarm : public SpellScriptLoader
     {
         PrepareAuraScript(spell_gen_leeching_swarm_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellEntry*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG))
-                    return false;
-                if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_HEAL))
-                    return false;
-                return true;
-            }
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG))
+                return false;
+            if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_HEAL))
+                return false;
+            return true;
+        }
 
         void HandleEffectPeriodic(AuraEffect const* aurEff)
         {
@@ -903,11 +913,6 @@ class spell_gen_leeching_swarm : public SpellScriptLoader
                 if (lifeLeeched < 250)
                     lifeLeeched = 250;
                 // Damage
-                // TODO: Heal effect should be modified:
-                // 10 man - 68% of dmg
-                // 10 man hc - 92% of dmg
-                // 25 man - 155% of dmg
-                // 25 man hc - 230% of dmg  
                 caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
                 // Heal is handled in damage spell. It has to heal the same amount, but some of the dmg can be resisted.
             }
@@ -915,6 +920,7 @@ class spell_gen_leeching_swarm : public SpellScriptLoader
 
         void Register()
         {
+
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_leeching_swarm_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
@@ -934,13 +940,34 @@ class spell_gen_leeching_swarm_dmg : public SpellScriptLoader
     {
         PrepareSpellScript(spell_gen_leeching_swarm_dmg_SpellScript);
 
+        float GetMultiplier()
+        {
+            if (auto caster = GetCaster())
+            {
+                if (auto map = caster->GetMap())
+                {
+                    if (map->Is25ManRaid() && map->IsHeroic())
+                        return 230;
+                    else if (map->Is25ManRaid() && !map->IsHeroic())
+                        return 155;
+                    else if (!map->Is25ManRaid() && map->IsHeroic())
+                        return 92;
+                    else if (!map->Is25ManRaid() && !map->IsHeroic())
+                        return 68;
+                }
+            }
+            
+            return 0;
+        }
+
         void HandleAfterHit()
         {
             if (Unit* caster = GetCaster())
                 if (GetHitDamage() > 0)
                 {
                     int32 damage = GetHitDamage();
-                    caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &damage, 0, 0, true);
+                    int32 value = damage * GetMultiplier() / 100.0f; 
+                    caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
                 }
         }
 

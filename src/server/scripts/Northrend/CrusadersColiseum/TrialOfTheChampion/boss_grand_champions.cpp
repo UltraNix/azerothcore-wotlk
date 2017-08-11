@@ -368,7 +368,7 @@ private:
 
 struct boss_grand_championAI : public npc_escortAI
 {
-    boss_grand_championAI(Creature* pCreature) : npc_escortAI(pCreature)
+    boss_grand_championAI(Creature* pCreature) : npc_escortAI(pCreature), _died(false)
     {
         me->RemoveAllAuras();
         AddCreatureAddonAuras();
@@ -509,6 +509,7 @@ struct boss_grand_championAI : public npc_escortAI
             me->RemoveAurasDueToSpell(67865);
             me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND);
             me->RemoveAurasDueToSpell(SPELL_BOSS_DEFEND_PERIODIC);
+            me->RemoveMovementImpairingAuras(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             AddCreatureAddonAuras();
             _events.Reset();
@@ -594,6 +595,7 @@ struct boss_grand_championAI : public npc_escortAI
         {
             if (damage >= me->GetHealth())
             {
+                _died = true;
                 _events.Reset();
                 damage = me->GetHealth()-1;
                 me->SetReactState(REACT_PASSIVE);
@@ -686,6 +688,9 @@ struct boss_grand_championAI : public npc_escortAI
         _events.Update(diff);
 
         if (me->HasUnitState(UNIT_STATE_CASTING) || ((me->GetEntry() == NPC_JACOB || me->GetEntry() == NPC_MOKRA) && me->HasAura(SPELL_BLADESTORM)))
+            return;
+
+        if (_died)
             return;
 
         while (uint32 eventId = _events.ExecuteEvent())
@@ -965,6 +970,7 @@ private:
     bool _mountPhase;
     uint64 _newMountGUID;
     uint64 _unitTargetGUID;
+    bool _died;
 };
 
 class spell_toc5_mount_SpellScript : public SpellScript
