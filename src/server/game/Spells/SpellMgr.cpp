@@ -5166,6 +5166,11 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// ULDUAR
         //////////////////////////////////////////,
+        // Summon Bomb Bot
+        case 63811:
+            spellInfo->Attributes &= SPELL_ATTR0_HIDE_IN_COMBAT_LOG;
+            spellInfo->AttributesEx |= SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR;
+            break;
         // XT-002 Void Zone
         case 46264:
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
