@@ -1152,14 +1152,20 @@ public:
                         if( Creature* c = instance->GetCreature(NPC_TirionGUID) )
                         {
                             HandleGameObject(GO_MainGateGUID, true);
-                            if( Creature* t = instance->GetCreature(NPC_LightbaneGUID))
-                                t->GetMotionMaster()->MovePoint(0, Locs[LOC_VALKYR_DEST_RIGHT].GetPositionX(), Locs[LOC_VALKYR_DEST_RIGHT].GetPositionY(), Locs[LOC_VALKYR_DEST_RIGHT].GetPositionZ());
-                            if( Creature* t = instance->GetCreature(NPC_DarkbaneGUID))
-                                t->GetMotionMaster()->MovePoint(0, Locs[LOC_VALKYR_DEST_LEFT].GetPositionX(), Locs[LOC_VALKYR_DEST_LEFT].GetPositionY(), Locs[LOC_VALKYR_DEST_LEFT].GetPositionZ());
+                            events.ScheduleEvent(576, 1000);
                         }
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_SCENE_304, 6250);
                     }
+                    break;
+                case 576:
+
+                    if (Creature* t = instance->GetCreature(NPC_LightbaneGUID))
+                        t->GetMotionMaster()->MovePoint(0, Locs[LOC_VALKYR_DEST_RIGHT].GetPositionX(), Locs[LOC_VALKYR_DEST_RIGHT].GetPositionY(), Locs[LOC_VALKYR_DEST_RIGHT].GetPositionZ());
+                    if (Creature* t = instance->GetCreature(NPC_DarkbaneGUID))
+                        t->GetMotionMaster()->MovePoint(0, Locs[LOC_VALKYR_DEST_LEFT].GetPositionX(), Locs[LOC_VALKYR_DEST_LEFT].GetPositionY(), Locs[LOC_VALKYR_DEST_LEFT].GetPositionZ());
+
+                    events.PopEvent();
                     break;
                 case EVENT_SCENE_304:
                     {
