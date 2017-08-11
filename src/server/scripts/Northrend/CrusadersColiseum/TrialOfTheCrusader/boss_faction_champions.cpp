@@ -77,7 +77,7 @@ struct boss_faction_championsAI : public ScriptedAI
         return dist_mod * 30000.0f / eh;*/
 
         // third try:
-        float unimportant_dist = (mAIType == AI_MELEE || mAIType == AI_PET ? 5.0f : 35.0f);
+        float unimportant_dist = (mAIType == AI_MELEE || mAIType == AI_PET ? 10.0f : 35.0f);
         if (dist > unimportant_dist) dist -= unimportant_dist; else dist = 0.0f;
         const float dist_factor = (mAIType == AI_MELEE || mAIType == AI_PET ? 15.0f : 25.0f);
         float mod_dist = dist_factor/(dist_factor + dist); // 0.2 .. 1.0
@@ -169,10 +169,20 @@ struct boss_faction_championsAI : public ScriptedAI
         for( ThreatContainer::StorageType::const_iterator iter = tList.begin(); iter != tList.end(); ++iter )
         {
             target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
+            if (IsNonViableTarget(target))
+                continue;
             if( target && me->GetDistance2d(target) < distance )
                 ++count;
         }
         return count;
+    }
+
+    void HandleVictimChange()
+    {
+        if (Unit* victim = me->GetVictim())
+            if (IsNonViableTarget(victim))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                    AttackStart(target);
     }
 
     Unit* SelectEnemyCaster(bool casting, float range)
@@ -182,10 +192,17 @@ struct boss_faction_championsAI : public ScriptedAI
         for( ThreatContainer::StorageType::const_iterator iter = tList.begin(); iter != tList.end(); ++iter )
         {
             target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
+            if (IsNonViableTarget(target))
+                continue;
             if( target && target->getPowerType() == POWER_MANA && (!casting || target->HasUnitState(UNIT_STATE_CASTING)) && me->GetExactDist(target) <= range )
                 return target;
         }
         return NULL;
+    }
+
+    bool IsNonViableTarget(Unit* target) const
+    {
+        return target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared();
     }
 
     void UpdateAI(uint32 diff)
@@ -347,8 +364,6 @@ public:
                     EventMapGCD(events, 1500);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -470,8 +485,6 @@ public:
                     EventMapGCD(events, 1500);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -533,6 +546,29 @@ public:
             return !(me->HasUnitState(UNIT_STATE_CASTING) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) || IsCCed());
         }
 
+        bool IsViableFreedomTarget(Unit* target)
+        {
+            if (!target->IsFriendlyTo(me))
+                return false;
+
+            static uint32 const MechanicImmunityList =
+                (1 << MECHANIC_SNARE)
+                | (1 << MECHANIC_ROOT);
+
+            if (target->HasAuraWithMechanic(MechanicImmunityList))
+                return true;
+
+            static std::list<AuraType> const AuraImmunityList =
+            {
+                SPELL_AURA_MOD_DECREASE_SPEED,
+                SPELL_AURA_MOD_ROOT
+            };
+
+            for (AuraType type : AuraImmunityList)
+                if (target->HasAuraType(type))
+                    return true;
+        }
+
         void UpdateAI(uint32 diff)
         {
             boss_faction_championsAI::UpdateAI(diff);
@@ -549,11 +585,25 @@ public:
                 case 0:
                     break;
                 case EVENT_SPELL_HAND_OF_FREEDOM:
-                    if( Creature* target = SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_HAND_OF_FREEDOM, 30.0f) )
-                        me->CastSpell(target, SPELL_HAND_OF_FREEDOM, false);
-                    events.RepeatEvent(25000);
-                    EventMapGCD(events, 1500);
-                    break;
+                    {
+                        std::list<Creature*> list = DoFindFriendlyMissingBuff(30.0f, SPELL_HAND_OF_FREEDOM);
+                        std::list<Creature*> viableTargets;
+                        if (!list.empty())
+                            for (auto itr : list)
+                                if (IsViableFreedomTarget(itr))
+                                    viableTargets.push_back(itr);
+
+                        if (!viableTargets.empty())
+                        {
+                            Unit* target = Trinity::Containers::SelectRandomContainerElement(viableTargets);
+                            DoCast(target, SPELL_HAND_OF_FREEDOM);
+                            events.RepeatEvent(25000);
+                            EventMapGCD(events, 1500);
+                        }
+                        else
+                            events.RepeatEvent(2500);
+                        break;
+                    }
                 case EVENT_SPELL_BUBBLE:
                     if( HealthBelowPct(25) )
                     {
@@ -609,8 +659,6 @@ public:
                         events.RepeatEvent(10000);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -735,8 +783,6 @@ public:
                         events.RepeatEvent(6000);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -808,6 +854,8 @@ public:
 
             if( !myCanCast() )
                 return;
+
+            HandleVictimChange();
 
             switch( events.GetEvent() )
             {
@@ -885,8 +933,6 @@ public:
                         events.RepeatEvent(6000);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -972,6 +1018,8 @@ public:
             if( !myCanCast() )
                 return;
 
+            HandleVictimChange();
+
             switch( events.GetEvent() )
             {
                 case 0:
@@ -1038,8 +1086,6 @@ public:
                     events.RepeatEvent(120000);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -1114,6 +1160,8 @@ public:
             if( !myCanCast() )
                 return;
 
+            HandleVictimChange();
+
             switch( events.GetEvent() )
             {
                 case 0:
@@ -1184,8 +1232,6 @@ public:
                     EventMapGCD(events, 1500);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -1267,6 +1313,8 @@ public:
 
             if( !myCanCast() )
                 return;
+
+            HandleVictimChange();
 
             switch( events.GetEvent() )
             {
@@ -1421,6 +1469,8 @@ public:
             if( !myCanCast() )
                 return;
 
+            HandleVictimChange();
+
             switch( events.GetEvent() )
             {
                 case 0:
@@ -1473,7 +1523,12 @@ public:
                     break;
                 case EVENT_SPELL_CYCLONE:
                     if( Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 20.0f, true) )
+                    {
                         me->CastSpell(target, SPELL_CYCLONE, false);
+                        if (target->HasUnitState(UNIT_STATE_ISOLATED))
+                            if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 40.0f, 0.0f, true, -SPELL_CYCLONE))
+                                AttackStart(tar);
+                    }
                     events.RepeatEvent(urand(25000,40000));
                     EventMapGCD(events, 1500);
                     break;
@@ -1483,8 +1538,6 @@ public:
                     EventMapGCD(events, 1500);
                     break;
             }
-
-            DoMeleeAttackIfReady();
         }
     };
 };
@@ -1559,6 +1612,8 @@ public:
 
             if( !myCanCast() )
                 return;
+
+            HandleVictimChange();
 
             switch( events.GetEvent() )
             {
@@ -1752,6 +1807,8 @@ public:
             if( !myCanCast() )
                 return;
 
+            HandleVictimChange();
+
             switch( events.GetEvent() )
             {
                 case 0:
@@ -1908,6 +1965,8 @@ public:
 
             if( !myCanCast() )
                 return;
+
+            HandleVictimChange();
 
             switch( events.GetEvent() )
             {
@@ -2072,6 +2131,8 @@ public:
             if( !myCanCast() )
                 return;
 
+            HandleVictimChange();
+
             switch( events.GetEvent() )
             {
                 case 0:
@@ -2210,6 +2271,8 @@ public:
 
             if( !myCanCast() )
                 return;
+
+            HandleVictimChange();
 
             switch( events.GetEvent() )
             {
@@ -2356,6 +2419,8 @@ public:
             if( !myCanCast() )
                 return;
 
+            HandleVictimChange();
+
             switch( events.GetEvent() )
             {
                 case 0:
@@ -2430,6 +2495,8 @@ public:
 
             if( !myCanCast() )
                 return;
+
+            HandleVictimChange();
 
             switch( events.GetEvent() )
             {
