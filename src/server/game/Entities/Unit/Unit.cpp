@@ -2801,15 +2801,17 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (!spell->IsPositive() && !spell->HasAttribute(SPELL_ATTR4_IGNORE_RESISTANCES))
     {
         bool bNegativeAura = true;
-        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        {
-            // Xinef: Check if effect exists!
-            if (spell->Effects[i].IsEffect() && spell->Effects[i].ApplyAuraName == 0)
+
+        if(!spell->HasAttribute(SPELL_ATTR0_CU_ENABLE_AURA_RESIST))
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
-                bNegativeAura = false;
-                break;
+                // Xinef: Check if effect exists!
+                if (spell->Effects[i].IsEffect() && spell->Effects[i].ApplyAuraName == 0)
+                {
+                    bNegativeAura = false;
+                    break;
+                }
             }
-        }
 
         if (bNegativeAura)
         {

@@ -3263,6 +3263,19 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
 
+        ApplySpellFix
+        ({
+            13218,
+            13222,
+            13223,
+            13224,
+            27189,
+            57974,
+            57975,
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_ENABLE_AURA_RESIST;
+        });
+
         /* ApplySpellFix({ 41105, 70768 }, [](SpellInfo* spellInfo) {
         spellInfo->AttributesCu |= SPELL_ATTR0_CU_CANT_BE_SAVED;
         });*/
