@@ -12053,10 +12053,6 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
             if (eslot == NULL_SLOT)
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
-            // Xinef: dont allow to equip items on disarmed slot
-            if (!CanUseAttackType(GetAttackBySlot(eslot)))
-                return EQUIP_ERR_NOT_WHILE_DISARMED;
-
             res = CanUseItem(pItem, not_loading);
             if (res != EQUIP_ERR_OK)
                 return res;
@@ -12197,10 +12193,6 @@ InventoryResult Player::CanUnequipItem(uint16 pos, bool swap) const
             if (bg->isArena() && bg->GetStatus() == STATUS_IN_PROGRESS)
                 return EQUIP_ERR_NOT_DURING_ARENA_MATCH;
     }
-
-    // Xinef: dont allow to unequip items on disarmed slot
-    if (!CanUseAttackType(GetAttackBySlot(pItem->GetSlot())))
-        return EQUIP_ERR_NOT_WHILE_DISARMED;
 
     if (!swap && pItem->IsNotEmptyBag())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
