@@ -37,7 +37,8 @@ public:
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "account",               SEC_PLAYER,         false, &HandleAccountCommand,             "" }
+            { "account",               SEC_PLAYER,         false, &HandleAccountCommand,             "" },
+            { "money",                 SEC_PLAYER,         false, &HandleAccountMoneyCommand,        "" }
         };
         return commandTable;
     }
@@ -47,6 +48,32 @@ public:
         AccountTypes gmLevel = handler->GetSession()->GetSecurity();
         handler->PSendSysMessage(LANG_ACCOUNT_LEVEL, uint32(gmLevel));
         return true;
+    }
+
+    static bool HandleAccountMoneyCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* target = handler->GetSession()->GetPlayer();
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ACCOUNT_BY_NAME);
+        stmt->setString(0, target->GetName());
+
+        PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+        if (result) 
+        {
+            Field* field = result->Fetch();
+
+            QueryResult lotteryCoins = LoginDatabase.PQuery("SELECT vp FROM account WHERE id = %u", field[0].GetUInt32());
+            if (lotteryCoins)
+                handler->PSendSysMessage("Posiadasz: %u Lottery Coins.", lotteryCoins->Fetch()->GetUInt32());
+
+            QueryResult sunwellCoins = LoginDatabase.PQuery("SELECT dp FROM account WHERE id = %u", field[0].GetUInt32());
+            if (sunwellCoins)
+                handler->PSendSysMessage("Posiadasz: %u Sunwell Coins.", sunwellCoins->Fetch()->GetUInt32());
+
+            return true;
+        }
+        return false;
     }
 };
 
