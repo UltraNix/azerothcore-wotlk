@@ -57,6 +57,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         {
              case 12:   // Elwynn Forest
              case 14:   // Durotar
+             case 41:   // @Gambling
              case 1296: // Durotar
              case 4570: // Dalaran (Circle of Wills)
                  player->DuelMod();
@@ -73,6 +74,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
             {
                 case 12:   // Elwynn Forest
                 case 14:   // Durotar
+                case 41:   // @Gambling
                 case 1296: // Durotar
                 case 4570: // Dalaran (Circle of Wills)
                     player->DuelMod();

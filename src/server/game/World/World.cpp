@@ -1287,6 +1287,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_CROSSFACTION_MAIL] = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
     m_bool_configs[CONFIG_PTR_REALM] = sConfigMgr->GetBoolDefault("PTR.Realm", false);
     m_bool_configs[CONFIG_CROSSFACTION_RDF] = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
+    m_bool_configs[CONFIG_GAMBLING_ENABLE] = sConfigMgr->GetBoolDefault("Gambling.Enable", false);
 
     // Premium Config
     m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);

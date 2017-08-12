@@ -4357,6 +4357,54 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
         return;
     }
 
+    // @Gambling
+    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
+    {
+        if (caster->GetZoneId() == 41 && caster->GetPositionZ() > 4.0f && caster->GetPositionZ() < 6.0f || target->GetZoneId() == 41 && target->GetPositionZ() > 4.0f && target->GetPositionZ() < 6.0f)
+        {
+            if (caster->hasGoldDuelSetting50G())
+            {
+                if (!caster->HasEnoughMoney(50 * GOLD) || !target->HasEnoughMoney(50 * GOLD))
+                {
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] Brak wystarczajcej ilosci golda do zawarcia zakladu.");
+                    return;
+                }
+            }
+            else if (caster->hasGoldDuelSetting100G())
+            {
+                if (!caster->HasEnoughMoney(100 * GOLD) || !target->HasEnoughMoney(100 * GOLD))
+                {
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] Brak wystarczajcej ilosci golda do zawarcia zakladu.");
+                    return;
+                }
+            }
+            else if (caster->hasGoldDuelSetting200G())
+            {
+                if (!caster->HasEnoughMoney(200 * GOLD) || !target->HasEnoughMoney(200 * GOLD))
+                {
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] Brak wystarczajcej ilosci golda do zawarcia zakladu.");
+                    return;
+                }
+            }
+            else if (caster->hasGoldDuelSetting500G())
+            {
+                if (!caster->HasEnoughMoney(500 * GOLD) || !target->HasEnoughMoney(500 * GOLD))
+                {
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] Brak wystarczajcej ilosci golda do zawarcia zakladu.");
+                    return;
+                }
+            }
+            else if (caster->hasGoldDuelSetting1000G())
+            {
+                if (!caster->HasEnoughMoney(1000 * GOLD) || !target->HasEnoughMoney(1000 * GOLD))
+                {
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] Brak wystarczajcej ilosci golda do zawarcia zakladu.");
+                    return;
+                }
+            }
+        }
+    }
+
     //CREATE DUEL FLAG OBJECT
     uint32 gameobject_id = m_spellInfo->Effects[effIndex].MiscValue;
     GameObject* pGameObj = sObjectMgr->IsGameObjectStaticTransport(gameobject_id) ? new StaticTransport() : new GameObject();
