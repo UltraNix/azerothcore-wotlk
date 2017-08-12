@@ -190,8 +190,8 @@ enum LotteryBase
     CELESTIAL_STEED                = 54811,
 };
 
-#define MOUNT_WIN_PERCENT 6.25f
-#define PET_WIN_PERCENT 12.5f
+#define MOUNT_WIN_PERCENT 5.0f
+#define PET_WIN_PERCENT 10.0f
 
 uint32 pets[] = {39286, 49343, 49693, 13584, 54847};
 std::string randomWinQuotes[] = {"W koncu!", "Nie moge w to uwierzyc.", "Dlugo na to czekalem...", "Tylko na to czekalem.", "Tylko o tym marzylem!"};
