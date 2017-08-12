@@ -24,6 +24,10 @@ set(scripts_STAT_SRCS
   Custom/OldScarletMonastery/instance_old_scarlet_monastery.cpp
   Custom/OldScarletMonastery/old_scarlet_Monastery.cpp
   Custom/OldScarletMonastery/old_scarlet_monastery.h
+  
+  Custom/HazardCave/Lottery.cpp
+  Custom/HazardCave/Lottery.h
+  Custom/HazardCave/npc_hazard.cpp
 )
 
 message("  -> Prepared: Custom")

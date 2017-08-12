@@ -3290,4 +3290,12 @@ Premium.Teleport.Enable = 1
 Premium.InstantFlying.Enable = 1
 
 #
+#     Gambling.Enable
+#        Description: Enables or disables Gambling functionality at Deadwind Pass zone
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Gambling.Enable = 0
+
+#
 ###################################################################################################

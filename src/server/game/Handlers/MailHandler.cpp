@@ -28,6 +28,7 @@
 #include "DBCStores.h"
 #include "Item.h"
 #include "AccountMgr.h"
+#include "Chat.h"
 
 bool WorldSession::CanOpenMailBox(uint64 guid)
 {
@@ -104,6 +105,16 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     {
         SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         return;
+    }
+
+    // @Gambling
+    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
+    {
+        if (player->GetZoneId() == 41)
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("You can't send anything at this area.");
+            return;
+        }
     }
 
     uint64 rc = 0;

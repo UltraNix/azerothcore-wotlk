@@ -1272,6 +1272,8 @@ void AddBattlegroundScripts()
     void AddSC_boss_reast();
     void AddSC_boss_madantul_rada();
     void AddSC_boss_dessembrae();
+    // Hazard Cave
+    void AddSC_npcs_hazard();
 #endif
 
 void AddCustomScripts()
@@ -1291,5 +1293,7 @@ void AddCustomScripts()
     AddSC_boss_reast();
     AddSC_boss_madantul_rada();
     AddSC_boss_dessembrae();
+    // Hazard Cave
+    AddSC_npcs_hazard();
 #endif
 }
