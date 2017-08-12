@@ -1123,17 +1123,22 @@ enum TrinityStrings
     LANG_BG_SA_H_GY_WEST                    = 10072, //The Horde captured the West Graveyard!
     LANG_BG_SA_H_GY_EAST                    = 10073, //The Horde captured the East Graveyard!
 
-    // Use for custom patches             11000-11999
-    LANG_AUTO_BROADCAST                 = 11000,
-    LANG_INVALID_REALMID                = 11001,
+    // Use for custom patches               11000-11999
+    LANG_AUTO_BROADCAST                     = 11000,
+    LANG_INVALID_REALMID                    = 11001,
 
-    LANG_POSSIBLE_CHEATER               = 10500,
-    LANG_POSSIBLE_GOLD_CHEATER          = 10501,
+    LANG_POSSIBLE_CHEATER                   = 10500,
+    LANG_POSSIBLE_GOLD_CHEATER              = 10501,
 
-    LANG_ARENA_2V2_ANNOUNCE             = 10502,
-    LANG_ARENA_3V3_ANNOUNCE             = 10503,
-    LANG_ARENA_5V5_ANNOUNCE             = 10504,
-    LANG_EVENT_WINNER                   = 10505,
+    LANG_ARENA_2V2_ANNOUNCE                 = 10502,
+    LANG_ARENA_3V3_ANNOUNCE                 = 10503,
+    LANG_ARENA_5V5_ANNOUNCE                 = 10504,
+    LANG_EVENT_WINNER                       = 10505,
+
+    LANG_LOTTERY_ANNOUNCE                   = 11010,
+    LANG_LOTTERY_ANNOUNCE_JACKPOT           = 11011,
+    LANG_LOTTERY_ANNOUNCE_JACKPOT_M_PLAYERS = 11012,
+    LANG_LOTTERY_PREP                       = 11013
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
