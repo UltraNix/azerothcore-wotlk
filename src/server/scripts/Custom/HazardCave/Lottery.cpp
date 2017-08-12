@@ -425,7 +425,7 @@ void Lottery::modifySunwellPoints(Player * player, int32 amount)
             uint32 amountSC = sunwellCoins->Fetch()->GetUInt32();
             if (amount < 0) 
             {
-                if (abs(amount) >= amountSC)
+                if (abs(amount) > amountSC)
                     return;
                 else 
                     LoginDatabase.PExecute("UPDATE account SET dp = %u WHERE id = %u", amountSC - uint32(abs(amount)), field[0].GetUInt32());
