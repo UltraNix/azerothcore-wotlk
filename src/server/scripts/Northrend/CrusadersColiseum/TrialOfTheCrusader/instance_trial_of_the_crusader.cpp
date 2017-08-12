@@ -1152,7 +1152,7 @@ public:
                         if( Creature* c = instance->GetCreature(NPC_TirionGUID) )
                         {
                             HandleGameObject(GO_MainGateGUID, true);
-                            events.ScheduleEvent(576, 1000);
+                            events.ScheduleEvent(576, 1500);
                         }
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_SCENE_304, 6250);
