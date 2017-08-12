@@ -202,7 +202,7 @@ struct boss_faction_championsAI : public ScriptedAI
 
     bool IsNonViableTarget(Unit* target) const
     {
-        return target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared();
+        return target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared() || target->HasAura(66008) || target->HasAura(65878) || target->HasAura(65877) || target->HasAura(66054);
     }
 
     void UpdateAI(uint32 diff)
@@ -545,8 +545,8 @@ public:
         {
             return !(me->HasUnitState(UNIT_STATE_CASTING) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) || IsCCed());
         }
-
-        bool IsViableFreedomTarget(Unit* target)
+        
+        bool IsViableFreedomTarget(Unit* target) const
         {
             if (!target->IsFriendlyTo(me))
                 return false;
@@ -567,6 +567,8 @@ public:
             for (AuraType type : AuraImmunityList)
                 if (target->HasAuraType(type))
                     return true;
+
+            return false;
         }
 
         void UpdateAI(uint32 diff)
@@ -639,15 +641,30 @@ public:
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_HAND_OF_PROTECTION:
-                    if( Creature* target = SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_HAND_OF_PROTECTION, 40.0f) )
+                {
+                    auto list = DoFindFriendlyMissingBuff(30.0f, SPELL_HAND_OF_PROTECTION);
+                    std::map<Creature*, uint8> info;
+                    if (!list.empty())
+                        for (auto itr : list)
+                            if (!itr->getAttackers().empty())
+                                info.insert(std::make_pair(itr, itr->getAttackers().size()));
+                    if (info.empty())
                     {
-                        me->CastSpell(target, SPELL_HAND_OF_PROTECTION, false);
-                        events.RepeatEvent(300000);
+                        events.RepeatEvent(5000);
+                        break;
+                    }
+                    auto highestAttackerCount = std::max_element(info.begin(), info.end(),
+                        [](const std::pair<Creature*, uint8>& p1, const std::pair<Creature*, uint8>& p2) {
+                        return p1.second < p2.second; });
+                    if (Unit* target = highestAttackerCount->first)
+                    {
                         EventMapGCD(events, 1500);
+                        DoCast(target, SPELL_HAND_OF_PROTECTION);
+                        events.RepeatEvent(300000);
                     }
                     else
-                        events.RepeatEvent(10000);
-                    break;
+                        events.RepeatEvent(5000);
+                }
                 case EVENT_SPELL_HAMMER_OF_JUSTICE:
                     if( Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 15.0f, true) )
                     {
@@ -879,13 +896,15 @@ public:
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_SW_PAIN:
-                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0) )
-                        me->CastSpell(target, SPELL_SW_PAIN, false);
-                    events.RepeatEvent(urand(8000, 10000));
-                    EventMapGCD(events, 1500);
+                    if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, false, -SPELL_SW_PAIN))
+                    {
+                        DoCast(target, SPELL_SW_PAIN);
+                        EventMapGCD(events, 1500);
+                    }
+                    events.RepeatEvent(6000);
                     break;
                 case EVENT_SPELL_MIND_FLAY:
-                    if( me->GetVictim() )
+                    if (me->GetVictim())
                         me->CastSpell(me->GetVictim(), SPELL_MIND_FLAY, false);
                     events.RepeatEvent(urand(10000,15000));
                     EventMapGCD(events, 1500);
@@ -897,17 +916,17 @@ public:
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_HORROR:
-                    if( me->GetVictim() && me->GetExactDist2d(me->GetVictim()) <= 30.0f )
+                    if( me->GetVictim() && me->GetExactDist2d(me->GetVictim()) <= 30.0f && !IsNonViableTarget(me->GetVictim()))
                     {
                         me->CastSpell(me->GetVictim(), SPELL_HORROR, false);
                         events.RepeatEvent(120000);
                         EventMapGCD(events, 1500);
                     }
                     else
-                        events.RepeatEvent(10000);
+                        events.RepeatEvent(4000);
                     break;
                 case EVENT_SPELL_DISPERSION:
-                    if( HealthBelowPct(25) )
+                    if (HealthBelowPct(25) && me->getAttackers().size() > 2)
                     {
                         me->CastSpell(me, SPELL_DISPERSION, false);
                         events.RepeatEvent(180000);
@@ -917,15 +936,20 @@ public:
                         events.RepeatEvent(6000);
                     break;
                 case EVENT_SPELL_DISPEL:
-                    if( Unit* target = (urand(0,1) ? SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 30.0f, true) : SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_DISPEL, 40.0f)) )
-                        me->CastSpell(target, SPELL_DISPEL, false);
+                    if (auto friendlyTarget = SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_DISPEL, 40.0f))
+                    {
+                        if (auto target = roll_chance_f(friendlyTarget->GetHealthPct()) ? SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 30.0f, true) : friendlyTarget)
+                        {
+                            DoCast(target, SPELL_DISPEL);
+                            EventMapGCD(events, 1500);
+                        }
+                    }
                     events.RepeatEvent(urand(10000,15000));
-                    EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_PSYCHIC_SCREAM:
                     if( EnemiesInRange(8.0f) >= 3 )
                     {
-                        me->CastSpell((Unit*)NULL, SPELL_PSYCHIC_SCREAM, false);
+                        DoCastAOE(SPELL_PSYCHIC_SCREAM);
                         events.RepeatEvent(30000);
                         EventMapGCD(events, 1500);
                     }
@@ -1105,11 +1129,9 @@ enum eMageSpells
 
 enum eMageEvents
 {
-    EVENT_SPELL_ARCANE_BARRAGE = 1,
-    EVENT_SPELL_ARCANE_BLAST,
+    EVENT_SPELL_ARCANE_BARRAGE_BLAST = 1,
     EVENT_SPELL_ARCANE_EXPLOSION,
     EVENT_SPELL_BLINK,
-    EVENT_SPELL_BLINK_2,
     EVENT_SPELL_COUNTERSPELL,
     EVENT_SPELL_FROSTBOLT,
     EVENT_SPELL_ICE_BLOCK,
@@ -1132,8 +1154,7 @@ public:
         {
             SetEquipmentSlots(false, 47524, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             events.Reset();
-            events.RescheduleEvent(EVENT_SPELL_ARCANE_BARRAGE, urand(3000,10000));
-            events.RescheduleEvent(EVENT_SPELL_ARCANE_BLAST, urand(3000,10000));
+            events.RescheduleEvent(EVENT_SPELL_ARCANE_BARRAGE_BLAST, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_ARCANE_EXPLOSION, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_BLINK, 10000);
             events.RescheduleEvent(EVENT_SPELL_COUNTERSPELL, urand(10000,20000));
@@ -1166,17 +1187,20 @@ public:
             {
                 case 0:
                     break;
-                case EVENT_SPELL_ARCANE_BARRAGE:
-                    if( me->GetVictim() )
-                        me->CastSpell(me->GetVictim(), SPELL_ARCANE_BARRAGE, false);
-                    events.RepeatEvent(urand(5000,15000));
-                    EventMapGCD(events, 1500);
-                    break;
-                case EVENT_SPELL_ARCANE_BLAST:
-                    if( me->GetVictim() )
-                        me->CastSpell(me->GetVictim(), SPELL_ARCANE_BLAST, false);
-                    events.RepeatEvent(urand(5000,15000));
-                    EventMapGCD(events, 1500);
+                case EVENT_SPELL_ARCANE_BARRAGE_BLAST:
+                    if (auto victim = me->GetVictim())
+                    {
+                        if (auto aura = me->GetAura(36032))
+                        {
+                            auto amount = std::min(aura->GetStackAmount(), static_cast<uint8>(4));
+                            DoCast(victim, roll_chance_i(amount * 25) ? SPELL_ARCANE_BARRAGE : SPELL_ARCANE_BLAST);
+                        }
+                        else
+                            DoCast(victim, SPELL_ARCANE_BLAST);
+
+                        EventMapGCD(events, 1500);
+                    }
+                    events.RepeatEvent(urand(3000, 6000));
                     break;
                 case EVENT_SPELL_ARCANE_EXPLOSION:
                     if( EnemiesInRange(9.0f) >= 3 )
@@ -1226,7 +1250,7 @@ public:
                         events.RepeatEvent(6000);
                     break;
                 case EVENT_SPELL_POLYMORPH:
-                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true) )
+                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true, -SPELL_POLYMORPH) )
                         me->CastSpell(target, SPELL_POLYMORPH, false);
                     events.RepeatEvent(15000);
                     EventMapGCD(events, 1500);
@@ -1374,7 +1398,7 @@ public:
                     EventMapGCD(events, 1500);
                     break;
                 case EVENT_SPELL_WYVERN_STING:
-                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 35.0f, true) )
+                    if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 35.0f, true, -SPELL_WYVERN_STING) )
                     {
                         me->CastSpell(target, SPELL_WYVERN_STING, false);
                         events.RepeatEvent(60000);
@@ -1886,7 +1910,7 @@ public:
                 case EVENT_SPELL_STRANGULATE:
                     if( Unit* target = SelectEnemyCaster(false, 30.0f) )
                     {
-                        me->CastSpell(me->GetVictim(), SPELL_STRANGULATE, false);
+                        me->CastSpell(target, SPELL_STRANGULATE, false);
                         events.RepeatEvent(120000);
                         EventMapGCD(events, 1500);
                     }
@@ -1909,6 +1933,7 @@ enum eRogueSpells
     SPELL_SHADOWSTEP            = 66178,
     SPELL_HEMORRHAGE            = 65954,
     SPELL_EVISCERATE            = 65957,
+    SPELL_WOUND_POISON          = 65962
 };
 
 enum eRogueEvents
@@ -1953,6 +1978,12 @@ public:
         bool myCanCast()
         {
             return !(me->HasUnitState(UNIT_STATE_CASTING) || IsCCed());
+        }
+
+        void DamageDealt(Unit* victim, uint32& /*damage*/, DamageEffectType damageType) override 
+        {
+            if (damageType == DIRECT_DAMAGE && roll_chance_i(65) && me->GetVictim())
+                DoCast(victim, SPELL_WOUND_POISON, true);
         }
 
         void UpdateAI(uint32 diff)
@@ -2334,15 +2365,30 @@ public:
                         events.RepeatEvent(5000);
                     break;
                 case EVENT_SPELL_HAND_OF_PROTECTION_RET:
-                    if( Creature* target = SelectTarget_MostHPLostFriendlyMissingBuff(SPELL_HAND_OF_PROTECTION_RET, 30.0f) )
+                {
+                    auto list = DoFindFriendlyMissingBuff(30.0f, SPELL_HAND_OF_PROTECTION_RET);
+                    std::map<Creature*, uint8> info;
+                    if (!list.empty())
+                        for (auto itr : list)
+                            if (!itr->getAttackers().empty())
+                                info.insert(std::make_pair(itr, itr->getAttackers().size()));
+                    if (info.empty())
                     {
-                        me->CastSpell(target, SPELL_HAND_OF_PROTECTION_RET, false);
-                        events.RepeatEvent(300000);
+                        events.RepeatEvent(5000);
+                        break;
+                    }
+                    auto highestAttackerCount = std::max_element(info.begin(), info.end(),
+                        [](const std::pair<Creature*, uint8>& p1, const std::pair<Creature*, uint8>& p2) {
+                        return p1.second < p2.second; });
+                    if (Unit* target = highestAttackerCount->first)
+                    {
                         EventMapGCD(events, 1500);
+                        DoCast(target, SPELL_HAND_OF_PROTECTION_RET);
+                        events.RepeatEvent(300000);
                     }
                     else
                         events.RepeatEvent(5000);
-                    break;
+                }
                 case EVENT_SPELL_JUDGEMENT_OF_COMMAND:
                     if( Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 20.0f, true) )
                     {
