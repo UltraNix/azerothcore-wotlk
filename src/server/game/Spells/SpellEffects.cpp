@@ -4461,6 +4461,39 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     target->SetUInt64Value(PLAYER_DUEL_ARBITER, pGameObj->GetGUID());
 
     sScriptMgr->OnPlayerDuelRequest(target, caster);
+
+    // @Gambling
+    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
+    {
+        if (caster->GetZoneId() == 41 && caster->GetPositionZ() > 4.0f && caster->GetPositionZ() < 6.0f || target->GetZoneId() == 41 && target->GetPositionZ() > 4.0f && target->GetPositionZ() < 6.0f)
+        {
+            if (caster->hasGoldDuelSetting50G())
+            {
+                caster->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 50 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 50 gold! Akceptujesz?");
+            }
+            else if (caster->hasGoldDuelSetting100G())
+            {
+                caster->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 100 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 100 gold! Akceptujesz?");
+            }
+            else if (caster->hasGoldDuelSetting200G())
+            {
+                caster->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 200 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 200 gold! Akceptujesz?");
+            }
+            else if (caster->hasGoldDuelSetting500G())
+            {
+                caster->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 500 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 500 gold! Akceptujesz?");
+            }
+            else if (caster->hasGoldDuelSetting1000G())
+            {
+                caster->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 1000 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 1000 gold! Akceptujesz?");
+            }
+        }
+    }
 }
 
 void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
