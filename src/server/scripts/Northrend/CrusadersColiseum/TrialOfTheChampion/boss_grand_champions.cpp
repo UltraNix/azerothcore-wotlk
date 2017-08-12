@@ -423,7 +423,7 @@ struct boss_grand_championAI : public npc_escortAI
         if (instance && instance->GetData(DATA_INSTANCE_PROGRESS) == INSTANCE_PROGRESS_CHAMPIONS_UNMOUNTED)
         {
             me->CallForHelp(100.0f);
-            DoAction(2);
+            ScheduleAbilitiesEvents();
             instance->SetData(579, 0);
         }
     }
@@ -656,7 +656,6 @@ struct boss_grand_championAI : public npc_escortAI
                             AttackStart(target);
                         DoZoneInCombat();
                         DoCastSelf(SPELL_TRAMPLE_AURA, true);
-                        me->CastSpell(me, SPELL_TRAMPLE_AURA, true);
                         if (instance)
                             instance->SetData(DATA_REACHED_NEW_MOUNT, 0);
                         _newMountGUID = 0;
@@ -729,7 +728,10 @@ struct boss_grand_championAI : public npc_escortAI
 
                         if (trample)
                         {
-                            _events.Repeat(15100);
+                            if (auto aura = me->GetAura(SPELL_TRAMPLE_STUN))
+                                _events.Repeat(aura->GetDuration() + 100);
+                            else
+                                _events.Repeat(15100);
                             break;
                         }
                     }
