@@ -64,6 +64,7 @@ enum LotteryTeleporter {
     NPC_TEXT_3        = 1000003,
 
     TRANSPARENCY      = 44816,
+    SPOT_LIGHT        = 34126
 };
 
 class npc_lottery_teleporter : public CreatureScript
@@ -76,6 +77,7 @@ public:
         npc_hazard_teleporterAI(Creature* creature) : ScriptedAI(creature)
         {
             creature->CastSpell(creature, TRANSPARENCY);
+            creature->CastSpell(creature, SPOT_LIGHT);
         }
     };
 
