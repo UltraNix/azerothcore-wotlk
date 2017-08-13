@@ -9278,7 +9278,11 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     loot->FillLoot(item->GetTemplate()->DisenchantID, LootTemplates_Disenchant, this, true);
                     break;
                 case LOOT_PROSPECTING:
-                    loot->FillLoot(item->GetEntry(), LootTemplates_Prospecting, this, true);
+                    while (loot->empty())
+                    {
+                        loot->clear();
+                        loot->FillLoot(item->GetEntry(), LootTemplates_Prospecting, this, true);
+                    }
                     break;
                 case LOOT_MILLING:
                     loot->FillLoot(item->GetEntry(), LootTemplates_Milling, this, true);
