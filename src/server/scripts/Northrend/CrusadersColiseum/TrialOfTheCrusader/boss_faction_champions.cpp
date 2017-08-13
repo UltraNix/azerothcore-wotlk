@@ -373,6 +373,14 @@ public:
 
 enum eShamanSpells
 {
+    SPELL_GROUNDING_TOTEM       = 65989,
+    SPELL_WINDFURY_TOTEM        = 65990,
+    SPELL_TREMOR_TOTEM          = 65992,
+    SPELL_STR_OF_EARTH_TOTEM    = 65991,
+    SPELL_HEALING_STREAM_TOTEM  = 65995,
+    SPELL_SEARING_TOTEM         = 65997,
+
+
     SPELL_HEALING_WAVE          = 66055,
     SPELL_RIPTIDE               = 66053,
     SPELL_SPIRIT_CLEANSE        = 66056,
@@ -396,6 +404,19 @@ enum eShamanEvents
     EVENT_SPELL_EARTH_SHOCK,
 };
 
+struct npc_toc_shaman_baseAI : boss_faction_championsAI
+{
+    npc_toc_shaman_baseAI(Creature* creature, bool enh) : boss_faction_championsAI(creature, enh ? AI_MELEE : AI_HEALER) {}
+
+    void HandleTotems()
+    {
+        DoCastAOE(RAND(SPELL_GROUNDING_TOTEM, SPELL_WINDFURY_TOTEM), true); // air
+        DoCastAOE(RAND(SPELL_STR_OF_EARTH_TOTEM, SPELL_TREMOR_TOTEM), true); // earth
+        DoCastAOE(SPELL_HEALING_STREAM_TOTEM, true); // water
+        DoCastAOE(SPELL_SEARING_TOTEM, true); // fire
+    }
+};
+
 class npc_toc_shaman : public CreatureScript
 {
 public:
@@ -406,9 +427,9 @@ public:
         return new npc_toc_shamanAI (pCreature);
     }
 
-    struct npc_toc_shamanAI : public boss_faction_championsAI
+    struct npc_toc_shamanAI : npc_toc_shaman_baseAI
     {
-        npc_toc_shamanAI(Creature *pCreature) : boss_faction_championsAI(pCreature, AI_HEALER)
+        npc_toc_shamanAI(Creature *pCreature) : npc_toc_shaman_baseAI(pCreature, false)
         {
             SetEquipmentSlots(false, 49992, EQUIP_NO_CHANGE, EQUIP_NO_CHANGE);
             events.Reset();
@@ -419,6 +440,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_HEX, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_EARTH_SHIELD, urand(15000,25000));
             events.RescheduleEvent(EVENT_SPELL_EARTH_SHOCK, urand(3000,10000));
+            events.RescheduleEvent(151, urand(1000, 3000));
         }
 
         EventMap events;
@@ -486,6 +508,11 @@ public:
                         me->CastSpell(me->GetVictim(), SPELL_EARTH_SHOCK, false);
                     events.RepeatEvent(urand(5000,10000));
                     EventMapGCD(events, 1500);
+                    break;
+                case 151:
+                    HandleTotems();
+                    EventMapGCD(events, 1500);
+                    events.RepeatEvent(urand(40000, 60000));
                     break;
             }
         }
@@ -2104,9 +2131,6 @@ enum eEnhShamanSpells
     SPELL_EARTH_SHOCK_ENH   = 65973,
     SPELL_LAVA_LASH         = 65974,
     SPELL_STORMSTRIKE       = 65970,
-    SPELL_GROUNDING_TOTEM    = 65989,
-    SPELL_WINDFURY_TOTEM    = 65990,
-    SPELL_TREMOR_TOTEM        = 65992,
     SPELL_WINDFURY          = 65975,
     SPELL_MAELSTROM_WEAPON  = 65988
 };
@@ -2129,9 +2153,9 @@ public:
         return new npc_toc_enh_shamanAI (pCreature);
     }
 
-    struct npc_toc_enh_shamanAI : public boss_faction_championsAI
+    struct npc_toc_enh_shamanAI : npc_toc_shaman_baseAI
     {
-        npc_toc_enh_shamanAI(Creature *pCreature) : boss_faction_championsAI(pCreature, AI_MELEE)
+        npc_toc_enh_shamanAI(Creature *pCreature) : npc_toc_shaman_baseAI(pCreature, true)
         {
             SetEquipmentSlots(false, 51803, 48013, EQUIP_NO_CHANGE);
             me->SetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, 1.0f);
@@ -2145,6 +2169,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_LAVA_LASH, urand(3000,10000));
             events.RescheduleEvent(EVENT_SPELL_STORMSTRIKE, urand(3000,10000));
             events.RescheduleEvent(EVENT_SUMMON_TOTEM, urand(10000,20000));
+            events.RescheduleEvent(151, urand(1000, 3000));
         }
 
         EventMap events;
@@ -2229,7 +2254,11 @@ public:
                     events.RepeatEvent(30000);
                     EventMapGCD(events, 1500);
                     break;
-
+                case 151:
+                    HandleTotems();
+                    EventMapGCD(events, 1500);
+                    events.RepeatEvent(urand(40000, 60000));
+                    break;
             }
 
             DoMeleeAttackIfReady();
