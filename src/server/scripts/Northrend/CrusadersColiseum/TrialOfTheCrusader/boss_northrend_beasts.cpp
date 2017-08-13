@@ -36,6 +36,7 @@ enum GormokEvents
     EVENT_SPELL_SNOBOLLED,
     EVENT_SPELL_BATTER,
     EVENT_SPELL_FIRE_BOMB,
+    EVENT_SPELL_FIRE_BOMB_UNMOUNTED,
     EVENT_SPELL_HEAD_CRACK,
 };
 
@@ -184,6 +185,26 @@ public:
                         events.RepeatEvent(urand(20000,30000));
                     }
                     break;
+                case EVENT_SPELL_FIRE_BOMB_UNMOUNTED:
+                {
+                    std::vector<Player*> validPlayers;
+                    Map::PlayerList const &pl = me->GetMap()->GetPlayers();
+                    for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                    {
+                        if (Player* player = itr->GetSource())
+                            if (player->IsAlive() && !player->IsWithinMeleeRange(me))
+                                validPlayers.push_back(player);
+                    }
+                    if (!validPlayers.empty())
+                        if (Player* target = Trinity::Containers::SelectRandomContainerElement(validPlayers))
+                            if (Creature* trigger = me->SummonCreature(NPC_FIRE_BOMB, *target, TEMPSUMMON_TIMED_DESPAWN, 60000))
+                            {
+                                DoCast(trigger, SPELL_FIRE_BOMB_AURA, true);
+                                DoCast(trigger, SPELL_FIRE_BOMB);
+                            }
+                    events.RepeatEvent(urand(20000, 30000));
+                    break;
+                }
                 case EVENT_SPELL_HEAD_CRACK:
                     if( t->GetTypeId() == TYPEID_PLAYER )
                         me->CastSpell(t, SPELL_HEAD_CRACK);
@@ -212,7 +233,7 @@ public:
                 me->GetRandomNearPosition(pos, 5.0f);
                 me->GetMotionMaster()->MoveJump(pos, 5.0f, 5.0f);
                 events.Reset();
-                events.ScheduleEvent(EVENT_SPELL_FIRE_BOMB, urand(5000, 20000));
+                events.ScheduleEvent(EVENT_SPELL_FIRE_BOMB_UNMOUNTED, urand(5000, 20000));
                 me->SetInCombatWithZone();
             }
             
