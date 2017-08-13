@@ -180,24 +180,27 @@ struct boss_faction_championsAI : public ScriptedAI
     void HandleVictimChange()
     {
         if (Unit* victim = me->GetVictim())
+        {
             if (IsNonViableTarget(victim))
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return tar->IsPlayer() && !IsNonViableTarget(tar); }))
                     AttackStart(target);
+        }
+        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return !IsNonViableTarget(tar); }))
+            AttackStart(target);
     }
 
-    Unit* SelectEnemyCaster(bool casting, float range)
+    Unit* SelectEnemyCaster(bool casting, float range) const
     {
-        ThreatContainer::StorageType const& tList = me->getThreatManager().getThreatList();
-        Unit *target;
-        for( ThreatContainer::StorageType::const_iterator iter = tList.begin(); iter != tList.end(); ++iter )
+        auto const& tList = me->getThreatManager().getThreatList();
+        for (auto iter = tList.begin(); iter != tList.end(); ++iter)
         {
-            target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
+            auto target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
             if (IsNonViableTarget(target))
                 continue;
-            if( target && target->getPowerType() == POWER_MANA && (!casting || target->HasUnitState(UNIT_STATE_CASTING)) && me->GetExactDist(target) <= range )
+            if (target && target->getPowerType() == POWER_MANA && (!casting || target->HasUnitState(UNIT_STATE_CASTING)) && me->GetExactDist(target) <= range)
                 return target;
         }
-        return NULL;
+        return nullptr;
     }
 
     bool IsNonViableTarget(Unit* target) const
