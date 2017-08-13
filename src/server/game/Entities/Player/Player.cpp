@@ -7904,7 +7904,7 @@ void Player::DuelComplete(DuelCompleteType type)
 
     if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
     {
-        if (type != DUEL_INTERRUPTED)
+        if (type != DUEL_INTERRUPTED && duel->startTime != 0)
         {
             if (duel->opponent->GetZoneId() == 41 && duel->opponent->GetPositionZ() > 4.0f && duel->opponent->GetPositionZ() < 6.0f
                 || this->GetZoneId() == 41 && this->GetPositionZ() > 4.0f && this->GetPositionZ() < 6.0f && type == DUEL_WON)
