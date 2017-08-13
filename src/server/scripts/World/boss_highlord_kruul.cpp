@@ -234,8 +234,12 @@ public:
             if (!UpdateVictim())
             {
                 if (!eventStarted)
+                {
                     if (sWorld->getBoolConfig(CONFIG_KRULL_EVENT))
                         RunEvent();
+                }
+                else events.Reset();
+
                 return;
             }
 
