@@ -601,6 +601,49 @@ public:
                 me->SetOrientation(me->GetHomePosition().GetOrientation());
             }
         }
+
+        void Reset() { checkTimer = 1000; }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (checkTimer <= diff)
+            {
+                Map* map = me->GetMap();
+                Map::PlayerList const &PlayerList = map->GetPlayers();
+
+                if (!PlayerList.isEmpty())
+                {
+                    for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+                    {
+                        if (Player* plr = itr->GetSource())
+                            if (plr->IsWithinDist(me, 100.0f, false))
+                                Ressurect(plr);
+                    }
+                }
+                checkTimer = 1000;
+            }
+            else
+                checkTimer -= diff;
+        }
+
+        void Ressurect(Player* player)
+        {
+             if (!player || player->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (player->IsAlive() || !player->IsInWorld())
+                return;
+
+            if (Player* target = player->ToPlayer())
+            {
+                target->ResurrectPlayer(!AccountMgr::IsPlayerAccount(player->GetSession()->GetSecurity()) ? 1.0f : 0.5f);
+                target->SpawnCorpseBones();
+                target->SaveToDB(false, false);
+            }
+        }
+
+   private:
+        uint32 checkTimer;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -796,6 +839,10 @@ public:
                 if (GameObject* flag = creature->FindNearestGameObject(BANNER_ALLIANCE, 5.0f))
                     flag->SendObjectDeSpawnAnim(flag->GetGUID());
 
+                char buffer[100];
+                sprintf(buffer, "|cff00ccff%s spalil flage Alliance.", player->GetName().c_str());
+                sWorld->SendServerMessage(SERVER_MSG_STRING, buffer);
+
                 CAST_AI(npc_burn_flag_horde::npc_burn_flag_hordeAI, creature->AI())->SetFlagResetTimer();
                 break;
         }
@@ -882,6 +929,10 @@ public:
 
                 if (GameObject* flag = creature->FindNearestGameObject(BANNER_HORDE, 5.0f))
                     flag->SendObjectDeSpawnAnim(flag->GetGUID());
+
+                char buffer[100];
+                sprintf(buffer, "|cffff6060%s spalil flage Hordy.", player->GetName().c_str());
+                sWorld->SendServerMessage(SERVER_MSG_STRING, buffer);
 
                 CAST_AI(npc_burn_flag_alliance::npc_burn_flag_allianceAI, creature->AI())->SetFlagResetTimer();
                 break;
