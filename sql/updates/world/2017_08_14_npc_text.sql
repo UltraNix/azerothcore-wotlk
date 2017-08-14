@@ -1,0 +1,1 @@
+UPDATE `sc_world`.`npc_text` SET `text0_0`='The Val\'kyrs\' teamwork is rather astounding. I now see why we had such problems capturing the two of them.' WHERE  `ID`=14820;
