@@ -433,6 +433,100 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 62859:
                         damage = (m_caster->GetMap()->Is25ManRaid() ? urand(9000, 11000) : damage);
                         break;
+                    // ToC 3.2
+                    // Hellfire damage effect
+                    case 65817: 
+                        damage = 5500;
+                        break;
+                    // Wrath 25 hc
+                    case 67953: 
+                        damage = urand(7600, 8600);
+                        break;
+                    case 67988: // shoot 25 n
+                    case 67989: // shoot 10 hc
+                        damage = urand(6100, 8300);
+                        break;
+                    // Shoot 25 hc
+                    case 67990: 
+                        damage = urand(7650, 10350);
+                        break;
+                    case 67947: // starfire 25 n
+                    case 67948: // starfire 10 hc
+                        damage = urand(7400, 8700);
+                        break;
+                    case 67949: // starfire 25 hc
+                        damage = urand(11100, 13100);
+                        break;
+                    case 68094: // eviscerate 25 n
+                        damage = urand(5500, 7100);
+                        break;
+                    case 68095: // eviscerate 10 hc
+                        damage = urand(6300, 8100);
+                        break;
+                    case 68096: // eviscerate 25 hc
+                        damage = urand(7800, 10100);
+                        break;
+                    case 67977: // aimed shot 25 n
+                        damage = 1800;
+                        break;
+                    case 67978: // aimed shot 10 hc
+                        damage = 2700;
+                        break;
+                    case 67979: // aimed shot 25 hc
+                        damage = 5400;
+                        break;
+                    case 68038: // mind blast 25 n
+                    case 68039: // mind blast 10 hc
+                        damage = urand(5100, 5700);
+                        break;
+                    case 68040: // mind blast 25 hc
+                        damage = urand(6400, 7100);
+                        break;
+                    case 68148: // searing pain 25 n
+                    case 68149: // searing pain 10 hc
+                        damage = urand(4100, 4800);
+                        break;
+                    case 68150: // searing pain 25 hc
+                        damage = urand(4900, 5900);
+                        break;
+                    case 68151: // shadow bolt 25 n
+                    case 68152: // shadow bolt 10 hc
+                        damage = urand(8500, 9500);
+                        break;
+                    case 68153: // shadow bolt 25 hc
+                        damage = urand(10600, 11900);
+                        break;
+                    case 67938: // icy touch 25 n
+                        damage = urand(3450, 3750);
+                        break;
+                    case 67939: // icy touch 10 hc
+                        damage = urand(3881, 4219);
+                        break;
+                    case 67940: // icy touch 25 hc
+                        damage = urand(4744, 5156);
+                        break;
+                    case 68017: // judgement of command 25 n
+                        damage = urand(3800, 4200);
+                        break;
+                    case 68018: // judgement of command 10 hc
+                        damage = urand(5900, 6600);
+                        break;
+                    case 68019: // judgement of command 25 hc
+                        damage = urand(7700, 8500);
+                        break;
+                    case 67929: // death coil (dk) 25 n
+                    case 67930: // death coil (dk) 10 hc
+                        damage = urand(5000, 5800);
+                        break;
+                    case 67931: // death coil (dk) 25 hc
+                        damage = urand(5800, 6800);
+                        break;
+                    case 68141: // death coil (warlock) 25 hc
+                        damage = urand(8400, 9500);
+                        break;
+                    case 68140: // death coil (warlock) 10 hc
+                        damage = urand(6700, 7600);
+                        break;
                 }
                 break;
             }
