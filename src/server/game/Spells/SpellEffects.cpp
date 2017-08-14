@@ -436,6 +436,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     // ToC 3.2
                     // Hellfire damage effect
                     case 65817: 
+                    case 68142:
+                    case 68143:
+                    case 68144:
                         damage = 5500;
                         break;
                     // Wrath 25 hc
