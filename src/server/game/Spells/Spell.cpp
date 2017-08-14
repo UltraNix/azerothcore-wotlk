@@ -5669,6 +5669,61 @@ SpellCastResult Spell::CheckCast(bool strict)
         case 66660:
         case 66663:
            return SPELL_FAILED_DONT_REPORT;
+
+           // Ring of Valor
+           // Blizzard
+        case 10:
+        case 6141:
+        case 8427:
+        case 10185:
+        case 10186:
+        case 10187:
+        case 27085:
+        case 42939:
+        case 42940:
+            // Flamestrike
+        case 2120:
+        case 2121:
+        case 8422:
+        case 8423:
+        case 10215:
+        case 10216:
+        case 27086:
+        case 42925:
+        case 42926:
+            // Rain of Fire
+        case 5740:
+        case 6219:
+        case 11677:
+        case 11678:
+        case 27212:
+        case 47819:
+        case 47820:
+            // Volley
+        case 1510:
+        case 14294:
+        case 14295:
+        case 27022:
+        case 58431:
+        case 58434:
+            // Flare
+        case 1543:
+            // Death and Decay
+        case 43265:
+        case 49936:
+        case 49937:
+        case 49938:
+        case 16914:
+        case 17401:
+        case 17402:
+        case 27012:
+        case 48467:
+            if (m_caster->GetMapId() == 618 && m_caster->GetPositionZ() < 28.0f)
+            {
+                ChatHandler(m_caster->ToPlayer()->GetSession()).PSendSysMessage("You need to be on top of arena before you can use this spell.");
+                return SPELL_FAILED_DONT_REPORT;
+            }
+
        default: 
            break;
     }

@@ -516,6 +516,16 @@ void PetAI::HandleReturnMovement()
     if (me->isPossessed())
         return;
 
+    // Ring of Valor    
+    if (me->GetMapId() == 618)
+    {
+        float petZ = me->GetPositionZ();
+        float ownZ = me->GetCharmerOrOwner()->GetPositionZ();
+
+        if (me->GetTransport() != me->GetCharmerOrOwner()->GetTransport() && fabs(petZ - ownZ) > 3.0f)
+            return;
+    }
+
     if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
     {
         if (!me->GetCharmInfo()->IsAtStay() && !me->GetCharmInfo()->IsReturning())

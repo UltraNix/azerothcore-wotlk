@@ -199,6 +199,17 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
                     if (i_target->GetPositionZ() >= 395.0f)
                         return;
 
+                // Ring of Valor
+                if (owner->IsSummon() && owner->GetMapId() == 618)  // pussywizard: 618 Ring of Valor
+                {
+                    float petZ = owner->GetPositionZ();
+                    float tarZ = i_target->GetPositionZ();
+
+                    if (petZ > 32.0f && i_target->IsFalling() || fabs(petZ - tarZ) > 3.0f)
+                        return;
+
+                }
+
                 init.MovebyPath(i_path->GetPath());
                 if (i_angle == 0.f)
                     init.SetFacing(i_target.getTarget());

@@ -2748,6 +2748,21 @@ void WorldObject::MovePositionToFirstCollisionForTotem(Position &pos, float dist
         return;
     }
 
+    // Ring of Valor
+    if (GetMap()->GetId() == 618 && destz < 28.0f)
+    {
+        if (desty > -284.00f)
+        {
+            destx = 763.561f + dist * cos(angle);
+            desty = -273.998f + dist * sin(angle);
+        }
+        else
+        {
+            destx = 763.933f + dist * cos(angle);
+            desty = -295.010f + dist * sin(angle);
+        }
+    }
+
     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ, destx, desty, destz, destx, desty, destz, -0.5f);
 
     // collision occured
