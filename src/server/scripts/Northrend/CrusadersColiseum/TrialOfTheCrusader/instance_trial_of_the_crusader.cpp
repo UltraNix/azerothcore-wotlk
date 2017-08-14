@@ -272,12 +272,15 @@ public:
                         case INSTANCE_PROGRESS_INTRO_DONE:
                             events.RescheduleEvent(EVENT_SCENE_004, 0);
                             break;
+                        case INSTANCE_PROGRESS_JARAXXUS_INTRO_DONE:
                         case INSTANCE_PROGRESS_BEASTS_DEAD:
                             events.RescheduleEvent(EVENT_SCENE_101, 0);
                             break;
+                        case INSTANCE_PROGRESS_FACTION_CHAMPIONS_INTRO_DONE:
                         case INSTANCE_PROGRESS_JARAXXUS_DEAD:
                             events.RescheduleEvent(EVENT_SCENE_201, 0);
                             break;
+                        case INSTANCE_PROGRESS_VALKYR_INTRO_DONE:
                         case INSTANCE_PROGRESS_FACTION_CHAMPIONS_DEAD:
                             events.RescheduleEvent(EVENT_SCENE_301, 0);
                             break;
@@ -1087,6 +1090,7 @@ public:
                     break;
                 case EVENT_CHAMPIONS_ATTACK:
                     {
+                        InstanceProgress = INSTANCE_PROGRESS_FACTION_CHAMPIONS_INTRO_DONE;
                         for( std::vector<uint64>::iterator itr = NPC_ChampionGUIDs.begin(); itr != NPC_ChampionGUIDs.end(); ++itr )
                             if( Creature* c = instance->GetCreature(*itr) )
                             {
@@ -1161,6 +1165,7 @@ public:
                     break;
                 case EVENT_VALKYRIES_ATTACK:
                     {
+                        InstanceProgress = INSTANCE_PROGRESS_VALKYR_INTRO_DONE;
                         if( Creature* c = instance->GetCreature(NPC_LightbaneGUID) )
                         {
                             c->SetReactState(REACT_AGGRESSIVE);
@@ -1301,6 +1306,7 @@ public:
                     {
                         if( Creature* c = instance->GetCreature(NPC_LichKingGUID) )
                         {
+                            InstanceProgress = INSTANCE_PROGRESS_ANUBARAK_INTRO_DONE;
                             if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
                                 floor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);//floor->ModifyHealth(-10000000, c);
                             c->CastSpell((Unit*)NULL, 68193, true);
@@ -1516,6 +1522,7 @@ public:
                         }
                     }
                     break;
+                case INSTANCE_PROGRESS_FACTION_CHAMPIONS_INTRO_DONE:
                 case INSTANCE_PROGRESS_JARAXXUS_DEAD:
                     if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
                         c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1524,6 +1531,7 @@ public:
                             c->DespawnOrUnsummon();
                     NPC_ChampionGUIDs.clear();
                     break;
+                case INSTANCE_PROGRESS_VALKYR_INTRO_DONE:
                 case INSTANCE_PROGRESS_FACTION_CHAMPIONS_DEAD:
                     if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
                         c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1562,6 +1570,19 @@ public:
                     }
                     NPC_AnubarakGUID = 0;
 
+                    break;
+                case INSTANCE_PROGRESS_ANUBARAK_INTRO_DONE:
+                    if (Creature* c = instance->GetCreature(NPC_AnubarakGUID))
+                    {
+                        c->AI()->DoAction(-1);
+                        c->DespawnOrUnsummon();
+                    }
+                    if (Creature* barrett = instance->GetCreature(NPC_BarrettGUID))
+                    {
+                        barrett->SetVisible(false);
+                        barrett->SummonCreature(NPC_ANUBARAK, Locs[LOC_ANUB].GetPositionX(), Locs[LOC_ANUB].GetPositionY(), Locs[LOC_ANUB].GetPositionZ(), Locs[LOC_ANUB].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
+
+                    }
                     break;
                 case INSTANCE_PROGRESS_DONE:
                     if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )

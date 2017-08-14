@@ -31,12 +31,14 @@ struct boss_faction_championsAI : public ScriptedAI
         mAIType = aitype;
         threatTimer = 2000;
         powerTimer = 1000;
+        checkTimer = 5000;
     }
 
     InstanceScript* pInstance;
     uint32 mAIType;
     uint32 threatTimer;
     uint32 powerTimer;
+    uint32 checkTimer;
 
     void EnterCombat(Unit* /*who*/)
     {
@@ -212,6 +214,23 @@ struct boss_faction_championsAI : public ScriptedAI
     {
         if (!me->IsInCombat())
             return;
+
+        if (checkTimer <= diff)
+        {
+            uint8 aliveCount = 0;
+            Map::PlayerList const &pl = pInstance->instance->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                if (Player* plr = itr->GetSource())
+                    if (plr->IsAlive() && !plr->IsGameMaster())
+                        ++aliveCount;
+
+            if (aliveCount == 0)
+                EnterEvadeMode();
+
+            checkTimer = 5000;
+        }
+        else
+            checkTimer -= diff;
 
         if( threatTimer <= diff )
         {
