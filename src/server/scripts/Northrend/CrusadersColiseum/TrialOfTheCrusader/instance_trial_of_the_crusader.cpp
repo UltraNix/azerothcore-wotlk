@@ -277,6 +277,9 @@ public:
                             events.RescheduleEvent(EVENT_SCENE_101, 0);
                             break;
                         case INSTANCE_PROGRESS_FACTION_CHAMPIONS_INTRO_DONE:
+                            events.RescheduleEvent(EVENT_SCENE_205, 5000);
+                            events.RescheduleEvent(EVENT_SUMMON_CHAMPIONS, 2500);
+                            break;
                         case INSTANCE_PROGRESS_JARAXXUS_DEAD:
                             events.RescheduleEvent(EVENT_SCENE_201, 0);
                             break;
