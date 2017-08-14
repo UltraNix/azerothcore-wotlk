@@ -753,6 +753,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
     if (m_player->IsGameMaster())
         return;
 
+    // @toc beta test
+    if (m_player->GetMapId() == 649)
+        return;
+
     AchievementCriteriaEntryList const* achievementCriteriaList = NULL;
 
     switch (type)
