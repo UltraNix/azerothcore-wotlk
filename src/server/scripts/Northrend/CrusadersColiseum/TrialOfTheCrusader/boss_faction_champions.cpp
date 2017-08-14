@@ -399,7 +399,6 @@ enum eShamanSpells
     SPELL_HEALING_STREAM_TOTEM  = 65995,
     SPELL_SEARING_TOTEM         = 65997,
 
-
     SPELL_HEALING_WAVE          = 66055,
     SPELL_RIPTIDE               = 66053,
     SPELL_SPIRIT_CLEANSE        = 66056,
@@ -2238,7 +2237,8 @@ public:
                     }
                     if( Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 5.0f, true) )
                     {
-                        me->CastSpell(target, SPELL_LAVA_LASH, false);
+                        int32 dmg = RAID_MODE(urand(6000, 8000), urand(10000, 12000), urand(10000, 12000), urand(11000, 14000));
+                        me->CastCustomSpell(target, SPELL_LAVA_LASH, &dmg, nullptr, nullptr, false);
                         events.RepeatEvent(urand(6000,8000));
                         EventMapGCD(events, 1500);
                     }

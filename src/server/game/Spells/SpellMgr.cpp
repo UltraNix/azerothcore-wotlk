@@ -5949,6 +5949,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 65976: // windfury effect
             spellInfo->procCharges = 2;
             break;
+        case 65974: // lava lash
+            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_SCHOOL_DAMAGE;
+            break;
+
         //////////////////////////////////////////
         ////////// THE FORGE OF SOULS
         //////////////////////////////////////////
