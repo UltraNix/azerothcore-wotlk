@@ -3828,6 +3828,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Glyph of Holy Light, Damage Class should be magic
         case 54968:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
         // Beacon of Light heal, Damage Class should be magic
         case 53652:
         case 53654:
