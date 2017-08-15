@@ -167,13 +167,14 @@ struct boss_faction_championsAI : public ScriptedAI
     {
         ThreatContainer::StorageType const& tList = me->getThreatManager().getThreatList();
         uint32 count = 0;
-        Unit *target;
-        for( ThreatContainer::StorageType::const_iterator iter = tList.begin(); iter != tList.end(); ++iter )
+        for (ThreatContainer::StorageType::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
         {
-            target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
+            Unit* target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
+            if (!target)
+                return;
             if (IsNonViableTarget(target))
                 continue;
-            if( target && me->GetDistance2d(target) < distance )
+            if (me->IsInRange(target, 0.0f, distance))
                 ++count;
         }
         return count;
@@ -193,14 +194,18 @@ struct boss_faction_championsAI : public ScriptedAI
 
     Unit* SelectEnemyCaster(bool casting, float range) const
     {
-        auto const& tList = me->getThreatManager().getThreatList();
-        for (auto iter = tList.begin(); iter != tList.end(); ++iter)
+        auto const& players = me->GetMap()->GetPlayers();
+        for (auto iter = players.begin(); iter != players.end(); ++iter)
         {
-            auto target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
-            if (IsNonViableTarget(target))
+            auto player = iter->GetSource();
+            if (!player)
                 continue;
-            if (target && target->getPowerType() == POWER_MANA && (!casting || target->HasUnitState(UNIT_STATE_CASTING)) && me->GetExactDist(target) <= range)
-                return target;
+            if (IsNonViableTarget(player))
+                continue;
+            if (player->IsGameMaster())
+                continue;
+            if (player->getPowerType() == POWER_MANA && (!casting || player->HasUnitState(UNIT_STATE_CASTING)) && me->IsInRange(player, 0.0f, range))
+                return player;
         }
         return nullptr;
     }
