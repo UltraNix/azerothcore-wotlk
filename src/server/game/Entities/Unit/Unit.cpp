@@ -16402,7 +16402,7 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
                     loot->FillLoot(lootid, LootTemplates_Creature, looter, false, false, creature->GetLootMode());
                 }
 
-                if (creature->GetLootMode())
+                if (creature->GetLootMode() && creature->GetMapId() != 649) // toc testing
                     loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
             }
             if (group)
