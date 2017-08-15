@@ -560,8 +560,11 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                         if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                         {
                             Counter = urand(0, 1);
-                            if (announcer->IsAIEnabled)
-                                announcer->AI()->Talk(Counter ? TEXT_INTRODUCE_EADRIC : TEXT_INTRODUCE_PALETRESS);
+                            if (Creature* boss = instance->SummonCreature(ChallengeEntry.lastSummon != 0 ? ChallengeEntry.lastSummon : ChallengeEntry.entry, SpawnPosition))
+                            {
+                                if (announcer->IsAIEnabled)
+                                    announcer->AI()->Talk(boss->GetDisplayId() == 29616 ? TEXT_INTRODUCE_EADRIC : TEXT_INTRODUCE_PALETRESS);
+                            }
                         }
                         events.RescheduleEvent(EVENT_START_ARGENT_CHALLENGE_INTRO, 0);
                         break;
@@ -1035,7 +1038,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                 case EVENT_SUMMON_ARGENT_CHALLENGE:
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
                         announcer->GetMotionMaster()->MovePoint(0, 735.81f, 661.92f, 412.39f);
-                    if (Creature* boss = instance->SummonCreature(ChallengeEntry.lastSummon != 0 ? ChallengeEntry.lastSummon : ChallengeEntry.entry, SpawnPosition))
+                    if (Creature* boss = instance->GetCreature(NPC_ArgentChampionGUID))
                     {
                         if (ChallengeEntry.lastSummon == 0)
                             ChallengeEntry.lastSummon = boss->GetEntry();
