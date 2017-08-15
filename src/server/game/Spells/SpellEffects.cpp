@@ -6062,6 +6062,10 @@ void Spell::EffectGameObjectDamage(SpellEffIndex /*effIndex*/)
     if (!caster)
         return;
 
+    // ToC platform
+    if (gameObjTarget->GetEntry() == 195527 && caster->GetTypeId() != TYPEID_UNIT)
+        return;
+
     // To prevent destroy platform at Malygos fight
     if (gameObjTarget->GetEntry() == 193070 && caster->GetTypeId() != TYPEID_UNIT)
         return;
