@@ -1,0 +1,2 @@
+UPDATE `creature_template` SET `ScriptName`="npc_searing_totem_factions", `AIName`="" WHERE `entry`=34687;
+UPDATE `creature_template` SET `ScriptName`="npc_healing_stream_totem_factions", `AIName`="" WHERE `entry`=34686;

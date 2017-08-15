@@ -2679,6 +2679,59 @@ class spell_faction_champion_warl_unstable_affliction : public SpellScriptLoader
         }
 };
 
+struct npc_searing_totem_factionsAI : public ScriptedAI
+{
+    npc_searing_totem_factionsAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void UpdateAI(uint32 diff)
+    {
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f))
+            DoCast(target, 65998);
+    }
+
+    void EnterEvadeMode()
+    {
+        me->DespawnOrUnsummon();
+    }
+};
+
+struct npc_healing_stream_totem_factionsAI : public ScriptedAI
+{
+    npc_healing_stream_totem_factionsAI(Creature* creature) : ScriptedAI(creature)
+    {
+        events.Reset();
+        events.RescheduleEvent(1, 2000);
+    }
+
+    EventMap events;
+
+    void UpdateAI(uint32 diff)
+    {
+        events.Update(diff);
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case 1:
+                    DoCastAOE(65993);
+                    events.Repeat(2000);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    void EnterEvadeMode()
+    {
+        me->DespawnOrUnsummon();
+    }
+};
+
 void AddSC_boss_faction_champions()
 {
     new npc_toc_druid();
@@ -2699,4 +2752,6 @@ void AddSC_boss_faction_champions()
     new npc_toc_pet_hunter();
     new go_toc_champions_cache();
     new spell_faction_champion_warl_unstable_affliction();
+    new CreatureAILoader<npc_searing_totem_factionsAI>("npc_searing_totem_factions");
+    new CreatureAILoader<npc_healing_stream_totem_factionsAI>("npc_healing_stream_totem_factions");
 }

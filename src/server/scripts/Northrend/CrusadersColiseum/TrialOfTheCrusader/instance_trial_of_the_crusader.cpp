@@ -273,6 +273,12 @@ public:
                             events.RescheduleEvent(EVENT_SCENE_004, 0);
                             break;
                         case INSTANCE_PROGRESS_JARAXXUS_INTRO_DONE:
+                            if (Creature* jaraxxus = instance->GetCreature(NPC_JaraxxusGUID))
+                            {
+                                jaraxxus->RemoveAura(67924);
+                                jaraxxus->SetAttackable(true);
+                            }
+                            break;
                         case INSTANCE_PROGRESS_BEASTS_DEAD:
                             events.RescheduleEvent(EVENT_SCENE_101, 0);
                             break;
@@ -421,6 +427,7 @@ public:
                                 }
                                 if (GameObject* go = c->SummonGameObject(cacheEntry, Locs[LOC_CENTER].GetPositionX(), Locs[LOC_CENTER].GetPositionY(), Locs[LOC_CENTER].GetPositionZ(), Locs[LOC_CENTER].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 630000000))
                                 {
+                                    go->EnableCollision(false);
                                     Map::PlayerList const &pl = instance->GetPlayers();
                                     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
                                         if (Player* plr = itr->GetSource())
@@ -1515,12 +1522,13 @@ public:
                         c->DespawnOrUnsummon();
                     if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
                     {
-                        c->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         if( Creature* jaraxxus = c->SummonCreature(NPC_JARAXXUS, Locs[LOC_CENTER].GetPositionX(), Locs[LOC_CENTER].GetPositionY(), Locs[LOC_CENTER].GetPositionZ(), Locs[LOC_CENTER].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000) )
                         {
                             jaraxxus->CastSpell(jaraxxus, 67924, true);
                             jaraxxus->SetReactState(REACT_AGGRESSIVE);
                             jaraxxus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            jaraxxus->SetAttackable(false);
                             jaraxxus->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                         }
                     }

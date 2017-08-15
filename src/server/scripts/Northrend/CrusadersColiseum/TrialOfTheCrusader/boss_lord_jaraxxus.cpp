@@ -127,7 +127,6 @@ public:
             //    events.RescheduleEvent(EVENT_SPELL_TOUCH_OF_JARAXXUS, urand(10000,15000));
             events.RescheduleEvent(EVENT_SUMMON_NETHER_PORTAL, 20000); // it schedules EVENT_SUMMON_VOLCANO
 
-            me->RemoveAura(SPELL_CHAINS);
             Talk(SAY_AGGRO);
             DoZoneInCombat();
             if( pInstance )
