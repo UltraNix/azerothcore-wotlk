@@ -171,7 +171,7 @@ struct boss_faction_championsAI : public ScriptedAI
         {
             Unit* target = ObjectAccessor::GetUnit((*me), (*iter)->getUnitGuid());
             if (!target)
-                return;
+                continue;
             if (IsNonViableTarget(target))
                 continue;
             if (me->IsInRange(target, 0.0f, distance))
