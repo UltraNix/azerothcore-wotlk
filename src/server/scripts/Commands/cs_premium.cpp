@@ -113,8 +113,11 @@ public:
             return false;
         }
         #pragma endregion
-
-        if (std::string("gadgetzan").compare(0, loc.length(), loc) == 0)
+        if (std::string("mordownia").compare(0, loc.length(), loc) == 0)
+        {
+            TeleportPlayerPremium(0, { -11227.59f, -1776.53f, 4.25f, 4.75f });
+        }
+        else if (std::string("gadgetzan").compare(0, loc.length(), loc) == 0)
         {
             if (player->getLevel() < 40)
             {
