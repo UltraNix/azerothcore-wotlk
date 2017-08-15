@@ -149,18 +149,24 @@ struct boss_faction_championsAI : public ScriptedAI
 
     Creature* SelectTarget_MostHPLostFriendlyMissingBuff(uint32 spell, float range)
     {
-        std::list<Creature *> lst = DoFindFriendlyMissingBuff(range, spell);
-        if( lst.empty() )
-            return NULL;
-        std::list<Creature *>::const_iterator iter = lst.begin();
-        uint32 lowestHP = (*iter)->GetMaxHealth() - (*iter)->GetHealth();
-        for( std::list<Creature *>::const_iterator itr = lst.begin(); itr != lst.end(); ++itr )
-            if( ((*itr)->GetMaxHealth() - (*itr)->GetHealth()) > lowestHP )
-            {
-                iter = itr;
-                lowestHP = (*itr)->GetMaxHealth() - (*itr)->GetHealth();
-            }
-        return (*iter);
+        std::list<Creature*> list = DoFindFriendlyMissingBuff(range, spell);
+        std::map<Creature*, float> weightedList;
+        if (list.empty())
+            return nullptr;
+        for (auto itr : list)
+            weightedList.insert(std::make_pair(itr, itr->GetHealthPct()));
+
+        // Select target based on amount of health (for example when target has 25% health the chance for selection is 100%-25%=75%).
+        for (auto itr : weightedList)
+            if (roll_chance_f(100 - itr.second))
+                return itr.first;
+
+        // Selection based on amount of health failed - try to choose random target that has lower hp than 100%.
+        for (auto itr : list)
+            if (itr->GetHealth() < itr->GetMaxHealth())
+                return itr;
+
+        return nullptr;
     }
 
     uint32 EnemiesInRange(float distance)
