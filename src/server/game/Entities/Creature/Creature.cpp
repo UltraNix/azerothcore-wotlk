@@ -1443,6 +1443,14 @@ void Creature::LoadEquipment(int8 id, bool force /*= false*/)
         SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i, einfo->ItemEntry[i]);
 }
 
+void Creature::SetAttackable(bool apply)
+{
+    if (apply)
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+    else
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+}
+
 bool Creature::hasQuest(uint32 quest_id) const
 { 
     QuestRelationBounds qr = sObjectMgr->GetCreatureQuestRelationBounds(GetEntry());

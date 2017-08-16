@@ -449,6 +449,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void SelectLevel(bool changelevel = true);
         void LoadEquipment(int8 id = 1, bool force = false);
 
+        void SetAttackable(bool apply);
+
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
         void Update(uint32 time);                         // overwrited Unit::Update
