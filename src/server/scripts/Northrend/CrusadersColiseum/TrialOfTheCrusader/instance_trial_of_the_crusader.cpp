@@ -1221,7 +1221,7 @@ public:
                         if( Creature* c = instance->GetCreature(TeamIdInInstance == TEAM_ALLIANCE ? NPC_VarianGUID : NPC_GarroshGUID) )
                             c->AI()->Talk((TeamIdInInstance == TEAM_ALLIANCE ? SAY_STAGE_3_03a : SAY_STAGE_3_03h));
                         events.PopEvent();
-                        //events.RescheduleEvent(EVENT_SCENE_401, 60000);
+                        events.RescheduleEvent(EVENT_SCENE_401, 60000);
                     }
                     break;
                 case EVENT_SCENE_401:
