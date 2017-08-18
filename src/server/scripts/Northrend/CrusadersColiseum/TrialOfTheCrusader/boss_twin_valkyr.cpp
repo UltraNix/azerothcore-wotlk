@@ -725,29 +725,9 @@ class spell_valkyr_essence : public SpellScriptLoader
         {
             PrepareAuraScript(spell_valkyr_essence_auraAuraScript)
 
-            float GetDivisionValue() const
-            {
-                if (auto caster = GetCaster())
-                {
-                    if (auto map = caster->GetMap())
-                    {
-                        if (map->Is25ManRaid() && map->IsHeroic())
-                            return 3000;
-                        else if (map->Is25ManRaid() && !map->IsHeroic())
-                            return 1500;
-                        else if (!map->Is25ManRaid() && map->IsHeroic())
-                            return 1800;
-                        else if (!map->Is25ManRaid() && !map->IsHeroic())
-                            return 1000;
-                    }
-                }
-
-                return 0;
-            }
-
             void HandleAfterEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
             {
-                uint16 count = absorbAmount/GetDivisionValue();
+                uint16 count = absorbAmount / 1000;
                 if( !count || !GetOwner() )
                     return;
 
