@@ -1220,8 +1220,10 @@ public:
                         }
                         if( Creature* c = instance->GetCreature(TeamIdInInstance == TEAM_ALLIANCE ? NPC_VarianGUID : NPC_GarroshGUID) )
                             c->AI()->Talk((TeamIdInInstance == TEAM_ALLIANCE ? SAY_STAGE_3_03a : SAY_STAGE_3_03h));
+                        if (Creature* c = instance->GetCreature(NPC_BarrettGUID))
+                            c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         events.PopEvent();
-                        events.RescheduleEvent(EVENT_SCENE_401, 60000);
+                        //events.RescheduleEvent(EVENT_SCENE_401, 60000);
                     }
                     break;
                 case EVENT_SCENE_401:
@@ -1488,25 +1490,34 @@ public:
                         c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     break;
                 case INSTANCE_PROGRESS_INTRO_DONE:
-                    if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
+                {
+                    if (Creature* c = instance->GetCreature(NPC_BarrettGUID))
+                    {
                         c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    if( Creature* c = instance->GetCreature(NPC_GormokGUID) )
+                        std::list<Creature*> list;
+                        c->GetCreatureListWithEntryInGrid(list, 34800, 250.0f);
+                        if (!list.empty())
+                            for (auto itr : list)
+                                itr->DespawnOrUnsummon();
+                    }
+                    if (Creature* c = instance->GetCreature(NPC_GormokGUID))
                     {
                         c->AI()->DoAction(-1); // despawn summons
                         c->DespawnOrUnsummon();
                     }
                     NPC_GormokGUID = 0;
-                    if( Creature* c = instance->GetCreature(NPC_AcidmawGUID) )
+                    if (Creature* c = instance->GetCreature(NPC_AcidmawGUID))
                         c->DespawnOrUnsummon();
                     NPC_AcidmawGUID = 0;
-                    if( Creature* c = instance->GetCreature(NPC_DreadscaleGUID) )
+                    if (Creature* c = instance->GetCreature(NPC_DreadscaleGUID))
                         c->DespawnOrUnsummon();
                     NPC_DreadscaleGUID = 0;
-                    if( Creature* c = instance->GetCreature(NPC_IcehowlGUID) )
+                    if (Creature* c = instance->GetCreature(NPC_IcehowlGUID))
                         c->DespawnOrUnsummon();
                     NPC_IcehowlGUID = 0;
                     northrendBeastsMask = 0;
                     break;
+                }
                 case INSTANCE_PROGRESS_BEASTS_DEAD:
                     if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
                         c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
