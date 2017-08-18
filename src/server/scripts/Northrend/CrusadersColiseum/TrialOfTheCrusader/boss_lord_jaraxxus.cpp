@@ -243,10 +243,19 @@ public:
 
         void JustDied(Unit* /*pKiller*/)
         {
+            std::list<Creature*> flameList;
+            me->GetCreatureListWithEntryInGrid(flameList, NPC_LEGION_FLAME, 250.0f);
+            if (!flameList.empty())
+                for (auto itr : flameList)
+                    itr->DespawnOrUnsummon();
+
             summons.DespawnAll();
             Talk(SAY_DEATH);
-            if( pInstance )
+            if (pInstance)
+            {
                 pInstance->SetData(TYPE_JARAXXUS, DONE);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LEGION_FLAME);
+            }
         }
 
         void JustReachedHome()
