@@ -738,7 +738,7 @@ class spell_valkyr_essence : public SpellScriptLoader
                         else if (!map->Is25ManRaid() && map->IsHeroic())
                             return 1800;
                         else if (!map->Is25ManRaid() && !map->IsHeroic())
-                            return 1500;
+                            return 1000;
                     }
                 }
 
