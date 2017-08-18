@@ -632,8 +632,11 @@ public:
                 case EVENT_SUMMON_GORMOK:
                     {
                         if( Creature* c = instance->GetCreature(NPC_TirionGUID) )
-                            if( Creature* gormok = c->SummonCreature(NPC_GORMOK, Locs[LOC_BEHIND_GATE].GetPositionX(), Locs[LOC_BEHIND_GATE].GetPositionY(), Locs[LOC_BEHIND_GATE].GetPositionZ(), Locs[LOC_BEHIND_GATE].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000) )
+                            if (Creature* gormok = c->SummonCreature(NPC_GORMOK, Locs[LOC_BEHIND_GATE].GetPositionX(), Locs[LOC_BEHIND_GATE].GetPositionY(), Locs[LOC_BEHIND_GATE].GetPositionZ(), Locs[LOC_BEHIND_GATE].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                            {
                                 gormok->GetMotionMaster()->MovePoint(0, Locs[LOC_GATE_FRONT].GetPositionX(), Locs[LOC_GATE_FRONT].GetPositionY(), Locs[LOC_GATE_FRONT].GetPositionZ());
+                                gormok->SetInCombatWithZone();
+                            }
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_GORMOK_ATTACK, 10000);
                         events.RescheduleEvent(EVENT_CLOSE_GATE, 6000);
