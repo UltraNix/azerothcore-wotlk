@@ -7,6 +7,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "ScriptedGossip.h"
 #include "trial_of_the_crusader.h"
 #include "Player.h"
+#include "Group.h"
 
 enum MenuTexts
 {
@@ -44,6 +45,10 @@ public:
     {
         if( !pCreature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) )
             return true;
+
+        if (Group* group = pPlayer->GetGroup())
+            if (!group->IsLeader(pPlayer->GetGUID()))
+                return true;
 
         InstanceScript* pInstance = pCreature->GetInstanceScript();
         if( !pInstance )
