@@ -727,7 +727,22 @@ class spell_valkyr_essence : public SpellScriptLoader
 
             void HandleAfterEffectAbsorb(AuraEffect * /*aurEff*/, DamageInfo & /*dmgInfo*/, uint32 & absorbAmount)
             {
-                uint16 count = absorbAmount / 1000;
+                uint16 divisionAmount = 2300;
+
+                if (auto caster = GetCaster())
+                {
+                    if (auto map = caster->GetMap())
+                    {
+                        if (map->Is25ManRaid() && !map->IsHeroic())
+                            divisionAmount = 1200;
+                        else if (!map->Is25ManRaid() && map->IsHeroic())
+                            divisionAmount = 1500;
+                        else if (!map->Is25ManRaid() && !map->IsHeroic())
+                            divisionAmount = 1200;
+                    }
+                }
+
+                uint16 count = absorbAmount / divisionAmount;
                 if( !count || !GetOwner() )
                     return;
 
