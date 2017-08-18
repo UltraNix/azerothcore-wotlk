@@ -2153,6 +2153,23 @@ public:
 
 };
 
+class spell_fan_of_knives_fc_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_fan_of_knives_fc_SpellScript);
+
+    void HandleOnHit()
+    {
+        if (Unit* target = GetExplTargetUnit())
+            if (roll_chance_i(65))
+                GetCaster()->CastSpell(target, SPELL_WOUND_POISON, false);
+    }
+
+    void Register() override
+    {
+        OnHit += SpellHitFn(spell_fan_of_knives_fc_SpellScript::HandleOnHit);
+    }
+};
+
 enum eEnhShamanSpells
 {
     SPELL_EARTH_SHOCK_ENH   = 65973,
@@ -2755,6 +2772,7 @@ void AddSC_boss_faction_champions()
     new npc_toc_warrior();
     new npc_toc_dk();
     new npc_toc_rogue();
+    new SpellScriptLoaderEx<spell_fan_of_knives_fc_SpellScript>("spell_fan_of_knives_fc");
     new npc_toc_enh_shaman();
     new npc_toc_retro_paladin();
     new npc_toc_pet_warlock();
