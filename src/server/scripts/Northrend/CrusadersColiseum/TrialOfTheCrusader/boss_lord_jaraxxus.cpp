@@ -226,6 +226,9 @@ public:
                     Talk(EMOTE_NETHER_PORTAL);
                     Talk(SAY_MISTRESS_OF_PAIN);
                     me->CastSpell((Unit*)NULL, SPELL_SUMMON_NETHER_PORTAL, false);
+                    if (Unit* portal = me->FindNearestCreature(34825, 250.0f))
+                        if (!portal->IsWithinLOSInMap(me))
+                            portal->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f);
                     events.PopEvent();
                     events.RescheduleEvent(EVENT_SUMMON_VOLCANO, 60000);
                     break;
@@ -233,6 +236,9 @@ public:
                     Talk(EMOTE_INFERNAL_ERUPTION);
                     Talk(SAY_INFERNAL_ERUPTION);
                     me->CastSpell((Unit*)NULL, SPELL_SUMMON_VOLCANO, false);
+                    if (Unit* volcano = me->FindNearestCreature(34813, 250.0f))
+                        if (!volcano->IsWithinLOSInMap(me))
+                            volcano->NearTeleportTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f);
                     events.PopEvent();
                     events.RescheduleEvent(EVENT_SUMMON_NETHER_PORTAL, 60000);
                     break;
