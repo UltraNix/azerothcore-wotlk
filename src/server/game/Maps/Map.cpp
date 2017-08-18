@@ -2442,6 +2442,9 @@ bool InstanceMap::CanEnter(Player* player, bool loginCheck)
     if (player->IsGameMaster())
         return Map::CanEnter(player, loginCheck);
 
+    if (GetSpawnMode() == RAID_DIFFICULTY_10MAN_HEROIC && GetId() == 649) // togc 10 testing
+        return Map::CanEnter(player, loginCheck);
+
     // cannot enter if the instance is full (player cap), GMs don't count
     uint32 maxPlayers = GetMaxPlayers();
     if (GetPlayersCountExceptGMs() >= (loginCheck ? maxPlayers+1 : maxPlayers))

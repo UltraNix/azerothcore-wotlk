@@ -141,6 +141,10 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
 
     Difficulty targetDifficulty, requestedDifficulty;
     targetDifficulty = requestedDifficulty = player->GetDifficulty(entry->IsRaid());
+
+    if (mapid == 649 && player->GetDifficulty(true) == RAID_DIFFICULTY_10MAN_HEROIC) // togc 10 test
+        return true;
+
     // Get the highest available difficulty if current setting is higher than the instance allows
     MapDifficulty const* mapDiff = GetDownscaledMapDifficultyData(entry->MapID, targetDifficulty);
     if (!mapDiff)
