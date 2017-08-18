@@ -126,6 +126,8 @@ struct boss_twin_valkyrAI : public ScriptedAI
     int32 LastSynchroHP;
     uint8 SpecialMask;
 
+    void MoveInLineOfSight(Unit* /*who*/) override {}
+
     void DoAction(int32 a)
     {
         switch( a )
@@ -521,6 +523,8 @@ public:
             if( Creature* c = me->SummonCreature(NPC_DARK_ESSENCE, Locs[LOC_DARKESS_2]) )
                 boss_twin_valkyrAI::JustSummoned(c);
         }
+
+        void MoveInLineOfSight(Unit* /*who*/) override {}
 
         void JustSummoned(Creature* s) {}
     };
