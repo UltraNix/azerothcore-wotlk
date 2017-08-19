@@ -44,17 +44,17 @@ INSERT INTO `creature` VALUES
 (@NPC_GUID + 8,@NPC_ID+8,0,1,1,0,0,-11223.6,-1402.55,-14.7903,4.62015,300,0,0,5342,0,0,0,0,0);
  
 DELETE FROM `creature_equip_template` WHERE `entry` = @NPC_ID + 5;
-INSERT INTO `world`.`creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`) VALUES (@NPC_ID + 5, 1, 51521, 51533);
+INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`) VALUES (@NPC_ID + 5, 1, 51521, 51533);
  
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 1;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 2;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 6;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 8;
-INSERT INTO `world`.`creature_template_addon` (`entry`, `bytes1`, `emote`, `auras`) VALUES
+INSERT INTO `creature_template_addon` (`entry`, `bytes1`, `emote`, `auras`) VALUES
 (@NPC_ID + 6, 1, 13, NULL),(@NPC_ID + 1, 0, 1, NULL), (@NPC_ID + 2, 0, 1, NULL), (@NPC_ID + 8, 7, 0, NULL), (@NPC_ID, 3, 0, '55701'), (@NPC_ID + 7, 0, 0, '16380');
  
-UPDATE `world`.`gameobject_template` SET `data2`=30000 WHERE  `entry`=177248 OR `entry`=177250;
+UPDATE `gameobject_template` SET `data2`=30000 WHERE  `entry`=177248 OR `entry`=177250;
  
 -- Pendu SAI
 SET @ENTRY := @NPC_ID + 6;
@@ -63,4 +63,4 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (@ENTRY,0,0,0,6,0,100,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Pendu - On Just Died - Say Line 0");
 DELETE FROM `creature_text` WHERE entry = @NPC_ID + 6;
-INSERT INTO `world`.`creature_text` (`entry`, `text`, `type`) VALUES (@NPC_ID + 6, 'Widze przed soba... blizzlike.', 12);
+INSERT INTO `creature_text` (`entry`, `text`, `type`) VALUES (@NPC_ID + 6, 'Widze przed soba... blizzlike.', 12);
