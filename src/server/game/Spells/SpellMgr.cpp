@@ -3729,6 +3729,12 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// PALADIN
         /////////////////////////////////
+        case 20111:
+        case 20112:
+        case 20113:
+            spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
+            spellInfo->SpellFamilyFlags[1] = 0x20000;
+            break;
         // Heart of the Crusader
         case 20335:
         case 20336:

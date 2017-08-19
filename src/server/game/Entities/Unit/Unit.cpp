@@ -10595,6 +10595,15 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
                 if (stacks)
                     AddPct(DoneTotalMod, 10 * stacks);
             }
+            else if (spellProto->GetFirstRankSpell()->Id == 20187) {
+                for (Unit::AuraEffectList::const_iterator itr = mModDamagePercentDone.begin(); itr != mModDamagePercentDone.end(); ++itr)
+                {
+                    if ((*itr)->GetSpellInfo()->SpellFamilyFlags[1] == 0x20000)
+                    {
+                        AddPct(DoneTotalMod, (*itr)->GetBaseAmount() + 1);
+                    }
+                }
+            }
             break;
         case SPELLFAMILY_DRUID:
             // Thorns
