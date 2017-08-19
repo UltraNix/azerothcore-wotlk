@@ -1527,10 +1527,19 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
         if (cObj->IsAIEnabled && this->ToPlayer() && !cObj->AI()->CanBeSeen(this->ToPlayer()))
             return false;
 
-    // pussywizard: arena spectator
+    // pussywizard: arena spectator 
     if (obj->GetTypeId() == TYPEID_PLAYER)
         if (((const Player*)obj)->IsSpectator() && ((const Player*)obj)->FindMap()->IsBattleArena())
             return false;
+
+    //Phased duel ~Piootrek & Crackaw
+    if (obj->GetTypeId() == TYPEID_PLAYER)
+        if (Player const* thisPlayer = ToPlayer())
+        {
+            Position pos = thisPlayer->GetPosition();
+            if (thisPlayer->duel && thisPlayer->duel->opponent != obj && thisPlayer->GetZoneId() == 41)
+                return false;
+        }
 
     bool corpseVisibility = false;
     if (distanceCheck)
