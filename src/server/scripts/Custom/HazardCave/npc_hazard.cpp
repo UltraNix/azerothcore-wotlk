@@ -1137,7 +1137,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
+        if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE) && !player->duel)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 50 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 100 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
@@ -1157,7 +1157,7 @@ public:
         player->PlayerTalkClass->ClearMenus();
 
         bool close = true;
-
+        
         switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
@@ -1195,6 +1195,10 @@ public:
 
         if (close)
             player->CLOSE_GOSSIP_MENU();
+
+        // Prevent cheating.
+        if (player->duel)
+            player->SetResetDuelSetting();
 
         return true;
     }
