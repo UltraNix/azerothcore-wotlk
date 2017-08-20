@@ -357,12 +357,12 @@ public:
             switch (creature->GetEntry())
             {
                 case GOLD_LOTERRY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 30", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 25", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_01, creature->GetGUID());
                     break;
                 case SC_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 30", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 25", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wroce pozniej.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_02, creature->GetGUID());
@@ -1137,7 +1137,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
+        if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE) && !player->duel)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 50 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 100 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
@@ -1157,7 +1157,7 @@ public:
         player->PlayerTalkClass->ClearMenus();
 
         bool close = true;
-
+        
         switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
@@ -1195,6 +1195,10 @@ public:
 
         if (close)
             player->CLOSE_GOSSIP_MENU();
+
+        // Prevent cheating.
+        if (player->duel)
+            player->SetResetDuelSetting();
 
         return true;
     }
