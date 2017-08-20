@@ -43,19 +43,9 @@ bool Lottery::AddNumbers(const char * code, Player * player, Creature * pCreatur
     uint32 number[LOTTERY_FIELDS];
     std::stringstream error;
     error << "Wpisales zle liczby. Musisz wpisac " << LOTTERY_FIELDS << " liczby (oddzielone znakami spacji) od 1 - " << LOTTERY_MAXNUMBER << ".";
-    std::string errordub = "Juz przekroczyles limit ilosci losow.";
     std::string duplicateError = "Juz obstawiales takie liczby. ";
     std::string numberDuplicateError = "Twoje liczby sie powatrzaja.";
     std::string sNumbers;
-
-    QueryResult pBetGuid = CharacterDatabase.PQuery("SELECT COUNT(*) FROM %s WHERE guid = %u ", dataBaseNames[type].c_str(), player->GetGUIDLow());
-
-    if (pBetGuid && pBetGuid->Fetch()->GetUInt32() >= LOTTERY_BETCOUNT)
-    {
-        pCreature->MonsterWhisper(errordub.c_str(), player);
-        player->CLOSE_GOSSIP_MENU();
-        return false;
-    }
 
     tmp = strtok(charCode, " ");
     for (int8 n = 0; n < LOTTERY_FIELDS; n++)
