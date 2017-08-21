@@ -569,6 +569,8 @@ public:
 ## ~by Piootrek
 ######*/
 
+#define SPELL_DETECTION    18950
+
 class npc_wypierdalator : public CreatureScript
 {
 public:
@@ -581,6 +583,7 @@ public:
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_NORMAL, true);
             creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
+            creature->CastSpell(creature, SPELL_DETECTION);
             creature->SetVisible(false);
         }
 
