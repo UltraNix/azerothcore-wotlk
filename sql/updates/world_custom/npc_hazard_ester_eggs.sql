@@ -50,6 +50,7 @@ DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 1;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 2;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 6;
+DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 7;
 DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_ID + 8;
 INSERT INTO `creature_template_addon` (`entry`, `bytes1`, `emote`, `auras`) VALUES
 (@NPC_ID + 6, 1, 13, NULL),(@NPC_ID + 1, 0, 1, NULL), (@NPC_ID + 2, 0, 1, NULL), (@NPC_ID + 8, 7, 0, NULL), (@NPC_ID, 3, 0, '55701'), (@NPC_ID + 7, 0, 0, '16380');

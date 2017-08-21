@@ -597,7 +597,7 @@ public:
 
             if (Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
             {
-                if (player->IsGameMaster() || player->IsBeingTeleported() || player->GetPositionZ() > 0.0f || player->GetPositionZ() < -25.0f)
+                if (player->IsGameMaster() || player->IsBeingTeleported() || player->GetPositionZ() > 0.0f || player->GetPositionZ() < -12.0f)
                     return;
 
                 player->TeleportTo(0, -11215.127930f, -1777.774292f, 4.252191f, 4.792066f);
@@ -1183,16 +1183,16 @@ public:
 };
 
 enum PiooRadeData {
-    PIOORADE_EVENT_TALK = 1,
-    PIOORADE_EVENT_RUN = 2,
-    PIOORADE_EVENT_DESPAWN = 3,
-    PIOORADE_EVENT_SUMMON_COINS = 4,
-    PIOORADE_EVENT_RUN_BACK = 5,
-    PIOORADE_EVENT_RUN2 = 6,
-    PIOORADE_EVENT_DESPAWN_COINS = 7,
-    PIOORADE_NPC_PIOO = 91036,
-    PIOORADE_NPC_RADE = 91037,
-    PIOORADE_GOB_COINS = 1000005,
+    PIOORADE_EVENT_TALK				= 1,
+    PIOORADE_EVENT_RUN				= 2,
+    PIOORADE_EVENT_DESPAWN			= 3,
+    PIOORADE_EVENT_SUMMON_COINS		= 4,
+    PIOORADE_EVENT_RUN_BACK			= 5,
+    PIOORADE_EVENT_RUN2				= 6,
+    PIOORADE_EVENT_DESPAWN_COINS	= 7,
+    PIOORADE_NPC_PIOO				= 91036,
+    PIOORADE_NPC_RADE				= 91037,
+    PIOORADE_GOB_COINS				= 1000005,
 };
 class npc_hazard_pioorade : public CreatureScript {
 public:
@@ -1227,11 +1227,11 @@ public:
             Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
 
             if (!player || player->IsGameMaster()) return;
-
+			if (!me->IsWithinDist(who, 30.0f, false) || who->GetPosition().GetPositionZ() > 0.f)
+				return;
             if (!me->FindNearestCreature(me->GetEntry() == PIOORADE_NPC_RADE ? PIOORADE_NPC_PIOO : PIOORADE_NPC_RADE, 10.f)) //script wont start if 2nd npc is dead
                 return;
-            if (!me->IsWithinDist(who, 30.0f, false))
-                return;
+            
             if (!talking) {
                 talking = true;
                 events.ScheduleEvent(PIOORADE_EVENT_TALK, me->GetEntry() == PIOORADE_NPC_RADE ? 1000 : 4000);
@@ -1295,16 +1295,16 @@ public:
 };
 
 enum PswzrdXinefData {
-    PSWZRDXINEF_EVENT_TALK = 1,
-    PSWZRDXINEF_EVENT_MORPH = 2,
-    PSWZRDXINEF_EVENT_TALK2 = 3,
-    PSWZRDXINEF_EVENT_ROTATE = 4,
-    PSWZRDXINEF_EVENT_CRASH = 5,
-    PSWZRDXINEF_EVENT_DESPAWN = 6,
-    PSWZRDXINEF_MORPH_XINEF = 23574,
-    PSWZRDXINEF_MORPH_PSWZRD = 5555,
-    PSWZRDXINEF_NPC_XINEF = 91038,
-    PSWZRDXINEF_NPC_PSWZRD = 91039,
+    PSWZRDXINEF_EVENT_TALK		= 1,
+    PSWZRDXINEF_EVENT_MORPH		= 2,
+    PSWZRDXINEF_EVENT_TALK2		= 3,
+    PSWZRDXINEF_EVENT_ROTATE	= 4,
+    PSWZRDXINEF_EVENT_CRASH		= 5,
+    PSWZRDXINEF_EVENT_DESPAWN	= 6,
+    PSWZRDXINEF_MORPH_XINEF		= 23574,
+    PSWZRDXINEF_MORPH_PSWZRD	= 5555,
+    PSWZRDXINEF_NPC_XINEF		= 91038,
+    PSWZRDXINEF_NPC_PSWZRD		= 91039,
 };
 class npc_hazard_pswzrdxinef : public CreatureScript {
 public:
@@ -1328,10 +1328,12 @@ public:
 
             if (!player || player->IsGameMaster()) return;
 
+			if (!me->IsWithinDist(who, 8.f, false))
+				return;
+
             if (!me->FindNearestCreature(me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? PSWZRDXINEF_NPC_PSWZRD : PSWZRDXINEF_NPC_XINEF, 10.f)) //script wont start if 2nd npc is dead
                 return;
-            if (!me->IsWithinDist(who, 8.f, false))
-                return;
+           
             if (!eventStart) {
                 eventStart = true;
                 events.Reset();
@@ -1386,15 +1388,15 @@ public:
 };
 
 enum SenPenData {
-    SENPEN_EVENT_START = 1,
-    SENPEN_EVENT_SLAM = 2,
-    SENPEN_EVENT_TALK = 3,
-    SENPEN_EVENT_BLIZZLIKE = 4,
-    SENPEN_EVENT_DESPAWN = 5,
-    SENPEN_SPELL_SLAM = 69903,
-    SENPEN_NPC_SENSI = 91040,
-    SENPEN_NPC_PENDU = 91041,
-    SENPEN_NPC_PSWZRD = 91042,
+    SENPEN_EVENT_START		= 1,
+    SENPEN_EVENT_SLAM		= 2,
+    SENPEN_EVENT_TALK		= 3,
+    SENPEN_EVENT_BLIZZLIKE	= 4,
+    SENPEN_EVENT_DESPAWN	= 5,
+    SENPEN_SPELL_SLAM		= 69903,
+    SENPEN_NPC_SENSI		= 91040,
+    SENPEN_NPC_PENDU		= 91041,
+    SENPEN_NPC_PSWZRD		= 91042,
 };
 
 class npc_hazard_senpen : public CreatureScript {
@@ -1418,10 +1420,11 @@ public:
 
             Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (!player || player->IsGameMaster()) return;
-            if (!me->FindNearestCreature(me->GetEntry() == SENPEN_NPC_PENDU ? SENPEN_NPC_SENSI : SENPEN_NPC_PENDU, 10.f)) //script wont start if 2nd npc is dead
-                return;
+            
             if (!me->IsWithinDist(who, 15.f, false))
                 return;
+			if (!me->FindNearestCreature(me->GetEntry() == SENPEN_NPC_PENDU ? SENPEN_NPC_SENSI : SENPEN_NPC_PENDU, 10.f)) //script wont start if 2nd npc is dead
+				return;
             if (!eventStart) {
                 eventStart = true;
                 if (me->GetEntry() == SENPEN_NPC_SENSI)
