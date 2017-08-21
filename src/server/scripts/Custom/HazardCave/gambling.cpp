@@ -128,7 +128,7 @@ public:
 
     void GamblingFail(Player* winner, Player* loser)
     {
-        if (!winner || loser)
+        if (!winner || !loser)
             return;
 
         winner->GetSession()->SendNotification("|cffffffff[PvP] Zaklad przerwany! Przeciwnik stracil swoj majatek w czasie trwania walki!");
