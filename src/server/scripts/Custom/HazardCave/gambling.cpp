@@ -61,8 +61,8 @@ public:
                 {
                     if (loser->HasEnoughMoney(gold_setting_1))
                     {
-                        winner->duel->opponent->ModifyMoney(gold_setting_1 * TAX_RATE);
-                        winner->duel->opponent->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 50 gold! (-10% Podatek)");
+                        winner->ModifyMoney(gold_setting_1 * TAX_RATE);
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 50 gold! (-10% Podatek)");
 
                         loser->ModifyMoney(-gold_setting_1);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 50 gold!");
