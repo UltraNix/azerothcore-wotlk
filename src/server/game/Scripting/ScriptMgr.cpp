@@ -1138,9 +1138,9 @@ void ScriptMgr::OnPlayerDuelStart(Player* player1, Player* player2)
     FOREACH_SCRIPT(PlayerScript)->OnDuelStart(player1, player2);
 }
 
-void ScriptMgr::OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType type)
+void ScriptMgr::OnPlayerDuelEnd(Player* winner, Player* loser, Player* initiator, DuelCompleteType type)
 {
-    FOREACH_SCRIPT(PlayerScript)->OnDuelEnd(winner, loser, type);
+    FOREACH_SCRIPT(PlayerScript)->OnDuelEnd(winner, loser, initiator, type);
 }
 
 void ScriptMgr::OnPlayerEmote(Player* player, uint32 emote)

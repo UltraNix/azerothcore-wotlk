@@ -40,7 +40,7 @@ public:
         }
     }
 
-    void OnDuelEnd(Player* winner, Player* loser, DuelCompleteType type) override
+    void OnDuelEnd(Player* winner, Player* loser, Player* initiator, DuelCompleteType type) override
     {
         if (!sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
             return;
@@ -57,7 +57,7 @@ public:
             if (winner->GetZoneId() == 41 && winner->GetPositionZ() > 4.0f && winner->GetPositionZ() < 6.0f
                 || loser->GetZoneId() == 41 && loser->GetPositionZ() > 4.0f && loser->GetPositionZ() < 6.0f && type == DUEL_WON)
             {
-                if (winner->hasGoldDuelSetting50G())
+                if (initiator->hasGoldDuelSetting50G())
                 {
                     if (loser->HasEnoughMoney(gold_setting_1))
                     {
@@ -70,7 +70,7 @@ public:
                     else
                         GamblingFail(winner, loser);
                 }
-                else if (winner->hasGoldDuelSetting100G())
+                else if (initiator->hasGoldDuelSetting100G())
                 {
                     if (loser->HasEnoughMoney(gold_setting_2))
                     {
@@ -83,7 +83,7 @@ public:
                     else
                         GamblingFail(winner, loser);
                 }
-                else if (winner->hasGoldDuelSetting200G())
+                else if (initiator->hasGoldDuelSetting200G())
                 {
                     if (loser->HasEnoughMoney(gold_setting_3))
                     {
@@ -96,7 +96,7 @@ public:
                     else
                         GamblingFail(winner, loser);
                 }
-                else if (winner->hasGoldDuelSetting500G())
+                else if (initiator->hasGoldDuelSetting500G())
                 {
                     if (loser->HasEnoughMoney(gold_setting_4))
                     {
@@ -109,7 +109,7 @@ public:
                     else
                         GamblingFail(winner, loser);
                 }
-                else if (winner->hasGoldDuelSetting1000G())
+                else if (initiator->hasGoldDuelSetting1000G())
                 {
                     if (loser->HasEnoughMoney(gold_setting_5))
                     {
