@@ -1274,6 +1274,7 @@ void AddBattlegroundScripts()
     void AddSC_boss_dessembrae();
     // Hazard Cave
     void AddSC_npcs_hazard();
+    void AddSC_Gambling();
 #endif
 
 void AddCustomScripts()
@@ -1295,5 +1296,6 @@ void AddCustomScripts()
     AddSC_boss_dessembrae();
     // Hazard Cave
     AddSC_npcs_hazard();
+    AddSC_Gambling();
 #endif
 }

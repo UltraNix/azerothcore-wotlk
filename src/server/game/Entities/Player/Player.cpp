@@ -7897,65 +7897,6 @@ void Player::DuelComplete(DuelCompleteType type)
         SendMessageToSet(&data, true);
     }
 
-    // @Gambling
-    int32 gold_setting_1 = 50 * GOLD;
-    int32 gold_setting_2 = 100 * GOLD;
-    int32 gold_setting_3 = 200 * GOLD;
-    int32 gold_setting_4 = 500 * GOLD;
-    int32 gold_setting_5 = 1000 * GOLD;
-    float TAX_RATE       = 0.9f;
-
-    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
-    {
-        if (type != DUEL_INTERRUPTED && duel->startTime != 0)
-        {
-            if (duel->opponent->GetZoneId() == 41 && duel->opponent->GetPositionZ() > 4.0f && duel->opponent->GetPositionZ() < 6.0f
-                || this->GetZoneId() == 41 && this->GetPositionZ() > 4.0f && this->GetPositionZ() < 6.0f && type == DUEL_WON)
-            {
-                if (duel->initiator->hasGoldDuelSetting50G())
-                {
-                    duel->opponent->ModifyMoney(gold_setting_1 * TAX_RATE);
-                    duel->opponent->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 50 gold! (-10% Podatek)");
-
-                    this->ModifyMoney(-gold_setting_1);
-                    this->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 50 gold!");
-                }
-                else if (duel->initiator->hasGoldDuelSetting100G())
-                {
-                    duel->opponent->ModifyMoney(gold_setting_2 * TAX_RATE);
-                    duel->opponent->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 100 gold (-10% Podatek)!");
-
-                    this->ModifyMoney(-gold_setting_2);
-                    this->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 100 gold!");
-                }
-                else if (duel->initiator->hasGoldDuelSetting200G())
-                {
-                    duel->opponent->ModifyMoney(gold_setting_3 * TAX_RATE);
-                    duel->opponent->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 200 gold! (-10% Podatek)");
-
-                    this->ModifyMoney(-gold_setting_3);
-                    this->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 200 gold!");
-                }
-                else if (duel->initiator->hasGoldDuelSetting500G())
-                {
-                    duel->opponent->ModifyMoney(gold_setting_4 * TAX_RATE);
-                    duel->opponent->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 500 gold! (-10% Podatek)");
-
-                    this->ModifyMoney(-gold_setting_4);
-                    this->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 500 gold!");
-                }
-                else if (duel->initiator->hasGoldDuelSetting1000G())
-                {
-                    duel->opponent->ModifyMoney(gold_setting_5 * TAX_RATE);
-                    duel->opponent->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 1000 gold! (-10% Podatek)");
-
-                    this->ModifyMoney(-gold_setting_5);
-                    this->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 1000 gold!");
-                }
-            }
-        }
-    }
-
     sScriptMgr->OnPlayerDuelEnd(duel->opponent, this, type);
 
     switch (type)

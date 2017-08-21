@@ -1116,92 +1116,6 @@ public:
     {
         return new npc_female_emoteAI(creature);
     }
-
-};
-
-/*######
-## npc_gambler
-## @Gambling
-######*/
-
-enum GamblerEnums 
-{ 
-    GAMBLER_HELLO_TEXT = 1000024, 
-    GAMBLER_INFO_TEXT  = 1000025
-};
-
-class npc_gambler : public CreatureScript
-{
-public:
-    npc_gambler() : CreatureScript("npc_gambler") { }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE) && !player->duel)
-        {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 50 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 100 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 200 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 500 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 1000 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Resetuj stawke.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "O co chodzi z pojedynkami za gold?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
-
-            player->SEND_GOSSIP_MENU(GAMBLER_HELLO_TEXT, creature->GetGUID());
-        }
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-
-        bool close = true;
-        
-        switch (action)
-        {
-            case GOSSIP_ACTION_INFO_DEF + 1:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting50G();
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 2:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting100G();
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 3:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting200G();
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 4:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting500G();
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 5:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting1000G();
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 6:
-                player->SetResetDuelSetting();
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 7:
-                close = false;
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Dziekuje za wyjasnienie.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
-                player->SEND_GOSSIP_MENU(GAMBLER_INFO_TEXT, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF + 8:
-                player->CLOSE_GOSSIP_MENU();
-                break;
-        }
-
-        if (close)
-            player->CLOSE_GOSSIP_MENU();
-
-        // Prevent cheating.
-        if (player->duel)
-            player->SetResetDuelSetting();
-
-        return true;
-    }
 };
 
 void AddSC_npcs_hazard()
@@ -1218,5 +1132,4 @@ void AddSC_npcs_hazard()
     new npc_burn_flag_horde();
     new npc_burn_flag_alliance();
     new npc_female_emote();
-    new npc_gambler();
 }
