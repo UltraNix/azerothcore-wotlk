@@ -1991,9 +1991,9 @@ public:
         if (result)
         {
             Field* fields = result->Fetch();
-            userName      = fields[0].GetString();
-            security      = fields[1].GetUInt8();
-            eMail         = fields[2].GetString();
+            security      = fields[0].GetUInt8();
+            userName      = (security > SEC_PLAYER ? "-" : fields[0].GetString());
+            eMail         = (security > SEC_PLAYER ? "-" : fields[2].GetString());
             muteTime      = fields[5].GetUInt64();
             muteReason    = fields[6].GetString();
             muteBy        = fields[7].GetString();
@@ -2003,7 +2003,7 @@ public:
 
             if (!handler->GetSession() || handler->GetSession()->GetSecurity() >= AccountTypes(security))
             {
-                lastIp = fields[3].GetString();
+                lastIp = (security > SEC_PLAYER ? "-" : fields[3].GetString());
                 lastLogin = fields[4].GetString();
 
                 uint32 ip = inet_addr(lastIp.c_str());
