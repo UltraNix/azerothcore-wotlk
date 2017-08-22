@@ -44,7 +44,8 @@ public:
             { "ip",             SEC_GAMEMASTER,     true,   &HandleLookupPlayerIpCommand,           "" },
             { "account",        SEC_GAMEMASTER,     true,   &HandleLookupPlayerAccountCommand,      "" },
             { "email",          SEC_GAMEMASTER,     true,   &HandleLookupPlayerEmailCommand,        "" },
-            { "acchistory",     SEC_GAMEMASTER,     true,   &HandleLookupPlayerAcchistoryCommand,   "" }
+            { "acchistory",     SEC_GAMEMASTER,     true,   &HandleLookupPlayerAcchistoryCommand,   "" },
+            { "iphistory",      SEC_GAMEMASTER,     true,   &HandleLookupPlayerIphistoryCommand,    "" }
         };
 
         static std::vector<ChatCommand> lookupSpellCommandTable =
@@ -1364,7 +1365,48 @@ public:
             Field* fields = result->Fetch();
             std::string ip = fields[0].GetString();
             std::string date = fields[1].GetString();
-            handler->PSendSysMessage("IP: %s - %s", ip.c_str(), date.c_str());
+            handler->PSendSysMessage("|cff00ccff[%s] | |cffffff00%s", ip.c_str(), date.c_str());
+
+        } while (result->NextRow());
+        return true;
+    }
+
+    static bool HandleLookupPlayerIphistoryCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        std::string ip = strtok((char*)args, " "); 
+    
+        PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_IP);
+        stmt->setString(0, ip);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+       
+        if (!result) 
+        {
+            handler->PSendSysMessage("No history found for this IP address.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        handler->PSendSysMessage("Account history for IP %s:", ip);
+        do 
+        {
+            Field *fields = result->Fetch();
+            uint32 accID = fields[0].GetUInt32();
+            std::string date = fields[1].GetString();
+
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO);
+            stmt->setUInt32(0, accID);
+            PreparedQueryResult result1 = LoginDatabase.Query(stmt);
+            if (!result1) continue;
+
+            Field *fields1 = result1->Fetch();
+            uint8 gmLevel = fields1[2].GetUInt8();
+            if (gmLevel && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //prevents GM stalking
+                continue;
+            std::string accName = fields1[0].GetString();
+
+            handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName.c_str(), accID, date.c_str());
 
         } while (result->NextRow());
         return true;
