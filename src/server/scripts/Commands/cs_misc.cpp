@@ -1992,7 +1992,7 @@ public:
         {
             Field* fields = result->Fetch();
             security      = fields[0].GetUInt8();
-            userName      = (security > SEC_PLAYER ? "-" : fields[0].GetString());
+            userName      = (security > SEC_PLAYER ? "-" : fields[1].GetString());
             eMail         = (security > SEC_PLAYER ? "-" : fields[2].GetString());
             muteTime      = fields[5].GetUInt64();
             muteReason    = fields[6].GetString();
