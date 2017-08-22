@@ -663,7 +663,7 @@ bool AuthSocket::_HandleLogonProof()
         PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF);
         stmt->setString(0, K_hex);
         stmt->setString(1, socket().getRemoteAddress().c_str());
-        stmt->setString(2, localIp_.c_str());
+        stmt->setString(2, _localIp.c_str());
         stmt->setUInt32(3, GetLocaleByName(_localizationName));
         stmt->setString(4, _os);
         stmt->setString(5, _login);
