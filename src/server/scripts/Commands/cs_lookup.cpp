@@ -1388,7 +1388,7 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        handler->PSendSysMessage("Account history for IP %s:", ip);
+        handler->PSendSysMessage("Account history for IP %s:", ip,c_str());
         do 
         {
             Field *fields = result->Fetch();
