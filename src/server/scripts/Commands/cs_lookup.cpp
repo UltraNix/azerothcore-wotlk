@@ -1346,7 +1346,7 @@ public:
 		uint8 gmLvl = fields[1].GetUInt8();
 		if (gmLvl && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //Prevents GM stalking
 		{
-			handler->PSendSysMessage("You can't view history for this account");
+			handler->PSendSysMessage("You can't view history for this account.");
 			handler->SetSentErrorMessage(true);
 			return false;
 		}
@@ -1355,11 +1355,11 @@ public:
 		result = LoginDatabase.Query(stmt);
 		if (!result) 
 		{
-			handler->PSendSysMessage("No history found for this account");
+			handler->PSendSysMessage("No history found for this account.");
 			handler->SetSentErrorMessage(true);
 			return false;
 		}
-		handler->PSendSysMessage("IP history for account %s", account.c_str());
+		handler->PSendSysMessage("IP history for account %s:", account.c_str());
 		do {
 			Field* fields = result->Fetch();
 			std::string ip = fields[0].GetString();
