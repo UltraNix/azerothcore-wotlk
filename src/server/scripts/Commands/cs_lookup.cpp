@@ -41,10 +41,10 @@ public:
     {
         static std::vector<ChatCommand> lookupPlayerCommandTable =
         {
-            { "ip",             SEC_GAMEMASTER,     true,	&HandleLookupPlayerIpCommand,				"" },
-            { "account",        SEC_GAMEMASTER,     true,	&HandleLookupPlayerAccountCommand,			"" },
-            { "email",          SEC_GAMEMASTER,     true,	&HandleLookupPlayerEmailCommand,			"" },
-			{ "acchistory",		SEC_GAMEMASTER,     true,	&HandleLookupPlayerAcchistoryCommand,		"" }
+            { "ip",             SEC_GAMEMASTER,     true,   &HandleLookupPlayerIpCommand,           "" },
+            { "account",        SEC_GAMEMASTER,     true,   &HandleLookupPlayerAccountCommand,      "" },
+            { "email",          SEC_GAMEMASTER,     true,   &HandleLookupPlayerEmailCommand,        "" },
+            { "acchistory",     SEC_GAMEMASTER,     true,   &HandleLookupPlayerAcchistoryCommand,   "" }
         };
 
         static std::vector<ChatCommand> lookupSpellCommandTable =
@@ -1319,56 +1319,56 @@ public:
         return true;
     }
 
-	static bool HandleLookupPlayerAcchistoryCommand(ChatHandler* handler, char const* args)
-	{
-		if (!*args)
-			return false;
+    static bool HandleLookupPlayerAcchistoryCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
 
-		std::string account = strtok((char*)args, " ");
+        std::string account = strtok((char*)args, " ");
 
-		if (!AccountMgr::normalizeString
-		(account))
-			return false;
+        if (!AccountMgr::normalizeString
+        (account))
+            return false;
 
-		PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS);
-		stmt->setString(0, account);
-		PreparedQueryResult result = LoginDatabase.Query(stmt);
-		
-		if (!result)
-		{
-			handler->PSendSysMessage(LANG_NO_PLAYERS_FOUND);
-			handler->SetSentErrorMessage(true);
-			return false;
-		}
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS);
+        stmt->setString(0, account);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+        
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_NO_PLAYERS_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
 
-		Field* fields = result->Fetch();
-		uint32 accountId = fields[0].GetUInt32();
-		uint8 gmLvl = fields[1].GetUInt8();
-		if (gmLvl && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //Prevents GM stalking
-		{
-			handler->PSendSysMessage("You can't view history for this account.");
-			handler->SetSentErrorMessage(true);
-			return false;
-		}
-		stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID);
-		stmt->setInt32(0, accountId);
-		result = LoginDatabase.Query(stmt);
-		if (!result) 
-		{
-			handler->PSendSysMessage("No history found for this account.");
-			handler->SetSentErrorMessage(true);
-			return false;
-		}
-		handler->PSendSysMessage("IP history for account %s:", account.c_str());
-		do {
-			Field* fields = result->Fetch();
-			std::string ip = fields[0].GetString();
-			std::string date = fields[1].GetString();
-			handler->PSendSysMessage("IP: %s - %s", ip.c_str(), date.c_str());
+        Field* fields = result->Fetch();
+        uint32 accountId = fields[0].GetUInt32();
+        uint8 gmLvl = fields[1].GetUInt8();
+        if (gmLvl && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //Prevents GM stalking
+        {
+            handler->PSendSysMessage("You can't view history for this account.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID);
+        stmt->setInt32(0, accountId);
+        result = LoginDatabase.Query(stmt);
+        if (!result) 
+        {
+            handler->PSendSysMessage("No history found for this account.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        handler->PSendSysMessage("IP history for account %s:", account.c_str());
+        do {
+            Field* fields = result->Fetch();
+            std::string ip = fields[0].GetString();
+            std::string date = fields[1].GetString();
+            handler->PSendSysMessage("IP: %s - %s", ip.c_str(), date.c_str());
 
-		} while (result->NextRow());
-		return true;
-	}
+        } while (result->NextRow());
+        return true;
+    }
 
 };
 
