@@ -3734,7 +3734,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 20113:
             spellInfo->SpellFamilyName = SPELLFAMILY_PALADIN;
             spellInfo->SpellFamilyFlags[1] = 0x20000;
-            spellInfo->EffectMiscValue[EFFECT_0] = 2 + 1;
+            spellInfo->EffectMiscValueB[EFFECT_0] = 2;
             break;
         // Heart of the Crusader
         case 20335:

@@ -10372,7 +10372,7 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
         if (!spellProto->ValidateAttribute6SpellDamageMods(this, *i, damagetype == DOT))
             continue;
 
-        if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
+        if ((*i)->GetMiscValue() & spellProto->SchoolMask || (*i)->GetMiscValueB() & spellProto->DmgClass)
         {
             if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
                 AddPct(DoneTotalMod, (*i)->GetAmount());
