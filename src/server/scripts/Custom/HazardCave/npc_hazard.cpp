@@ -1565,7 +1565,6 @@ void AddSC_npcs_hazard()
     new npc_burn_flag_horde();
     new npc_burn_flag_alliance();
     new npc_female_emote();
-    new npc_gambler();
 
     new npc_hazard_masuka();
     new npc_hazard_pioorade();
