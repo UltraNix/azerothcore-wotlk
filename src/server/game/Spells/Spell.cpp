@@ -6306,7 +6306,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_AURA_MOUNTED:
             {
                 // Xinef: disallow casting in water for mounts not increasing water movement speed
-                if (m_caster->IsInWater() && (m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && sWorld->PatchNotes(PATCH_31X)))
+                if (m_caster->IsInWater() && (m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)))
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
