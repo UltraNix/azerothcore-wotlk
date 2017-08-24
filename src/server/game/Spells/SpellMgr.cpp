@@ -3178,7 +3178,8 @@ void SpellMgr::LoadSpellCustomAttr()
             29107, // Disrupting Shout
             55543,
             55550, // Jagged Knife
-            48642 // Launch Harpoon
+            48642, // Launch Harpoon
+            66734, // Trample
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
