@@ -147,6 +147,12 @@ struct boss_faction_championsAI : public ScriptedAI
         return false;
     }
 
+    bool IsPet(Unit* unit) const
+    {
+        return unit->GetEntry() == 35465 || unit->GetEntry() == 35610;
+    }
+
+
     Creature* SelectTarget_MostHPLostFriendlyMissingBuff(uint32 spell, float range)
     {
         std::list<Creature*> list = DoFindFriendlyMissingBuff(range, spell);
@@ -156,14 +162,21 @@ struct boss_faction_championsAI : public ScriptedAI
 
         // Select target based on amount of health (for example when target has 25% health the chance for selection is 100%-25%=75%).
         for (auto itr : list)
-            if (roll_chance_f(100.0f - itr->GetHealthPct()))
-                return itr;
+            if (!IsPet(itr))
+                if (roll_chance_f(100.0f - itr->GetHealthPct()))
+                    return itr;
 
         // Selection based on amount of health failed - try to choose random target that has lower hp than 100%.
         for (auto itr : list)
-            if (itr->GetHealth() < itr->GetMaxHealth())
-                return itr;
+            if (!IsPet(itr))
+                if (itr->GetHealth() < itr->GetMaxHealth())
+                    return itr;
 
+        // All non-pet targets are fully healed - get random pet
+        for (auto itr : list)
+            if (!IsPet(itr))
+                if (itr->GetHealth() < itr->GetMaxHealth())
+                    return itr;
         return nullptr;
     }
 
