@@ -38,9 +38,8 @@ enum LotteryType
 #define LOTTERY_BETCOST       100 * 10000 // 10 Gold
 #define LOTTERY_COINS_BETCOST 50
 #define LOTTERY_SC_BETCOST    10
-#define LOTTERY_MAXNUMBER     30          // 1 - 30
+#define LOTTERY_MAXNUMBER     25          // 1 - 25
 #define LOTTERY_FIELDS        4	          // how many numbers? (e.g. '5 10 22 3 25')
-#define LOTTERY_BETCOUNT      5
 
 class Lottery 
 {

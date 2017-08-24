@@ -113,8 +113,9 @@ public:
             return false;
         }
         #pragma endregion
-
-        if (std::string("gadgetzan").compare(0, loc.length(), loc) == 0)
+        if (std::string("mordownia").compare(0, loc.length(), loc) == 0)
+            player->TeleportTo(0, -11227.59f, -1776.53f, 4.25f, 4.75f);
+        else if (std::string("gadgetzan").compare(0, loc.length(), loc) == 0)
         {
             if (player->getLevel() < 40)
             {
@@ -160,21 +161,13 @@ public:
             {
                 case TEAM_ALLIANCE:
                     if (std::string("stormwind").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(0, -8890.0f, 572.34f, 92.55f, 0.7f);
-                    } 
                     else if (std::string("ironforge").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(0, -4922.89f, -951.81f, 501.54f, 2.25f);
-                    }
                     else if (std::string("darnassus").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(1, 9955.0f, 2205.1f, 1328.67f, 1.6f);
-                    }
                     else if (std::string("exodar").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(530, -3894.5f, -11621.5f, -137.84f, 3.18f);
-                    }
                     else
                     {
                         handler->SendSysMessage(TEXT_NOT_ALLOWED_PLACE);
@@ -184,21 +177,13 @@ public:
                     break;
                 case TEAM_HORDE:
                     if (std::string("orgrimmar").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(1, 1550.0f, -4429.0f, 10.155f, 0.25f);
-                    }
                     else if (std::string("thunderbluff").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(1, -1277.37f, 124.81f, 131.29f, 5.22f);
-                    }
                     else if (std::string("undercity").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(0, 1561.6f, 241.27f, -43.125f, 6.26f);
-                    }
                     else if (std::string("silvermoon").compare(0, loc.length(), loc) == 0)
-                    {
                         player->TeleportTo(530, 9386.5f, -7277.98f, 14.242f, 0.00f);
-                    }
                     else
                     {
                         handler->SendSysMessage(TEXT_NOT_ALLOWED_PLACE);

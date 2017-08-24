@@ -357,12 +357,12 @@ public:
             switch (creature->GetEntry())
             {
                 case GOLD_LOTERRY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 30", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 25", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_01, creature->GetGUID());
                     break;
                 case SC_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 30", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 25", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wroce pozniej.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_02, creature->GetGUID());
@@ -569,6 +569,8 @@ public:
 ## ~by Piootrek
 ######*/
 
+#define SPELL_DETECTION    18950
+
 class npc_wypierdalator : public CreatureScript
 {
 public:
@@ -581,6 +583,7 @@ public:
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_NORMAL, true);
             creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
+            creature->CastSpell(creature, SPELL_DETECTION);
             creature->SetVisible(false);
         }
 
@@ -594,7 +597,7 @@ public:
 
             if (Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
             {
-                if (player->IsGameMaster() || player->IsBeingTeleported() || player->GetPositionZ() > 0.0f || player->GetPositionZ() < -25.0f)
+                if (player->IsGameMaster() || player->IsBeingTeleported() || player->GetPositionZ() > 0.0f || player->GetPositionZ() < -12.0f)
                     return;
 
                 player->TeleportTo(0, -11215.127930f, -1777.774292f, 4.252191f, 4.792066f);
@@ -1116,87 +1119,435 @@ public:
     {
         return new npc_female_emoteAI(creature);
     }
-
 };
 
-/*######
-## npc_gambler
-## @Gambling
-######*/
-
-enum GamblerEnums 
-{ 
-    GAMBLER_HELLO_TEXT = 1000024, 
-    GAMBLER_INFO_TEXT  = 1000025
+enum MasukaData {
+    MASUKA_EVENT_RUN = 1,
+    MASUKA_EVENT_DIE = 2,
 };
 
-class npc_gambler : public CreatureScript
-{
+class npc_hazard_masuka : public CreatureScript {
 public:
-    npc_gambler() : CreatureScript("npc_gambler") { }
-
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
-        {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 50 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 100 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 200 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 500 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 1000 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Resetuj stawke.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "O co chodzi z pojedynkami za gold?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
-
-            player->SEND_GOSSIP_MENU(GAMBLER_HELLO_TEXT, creature->GetGUID());
+    npc_hazard_masuka() : CreatureScript("npc_hazard_masuka") {}
+    struct npc_hazard_masukaAI : public ScriptedAI {
+        bool escaping;
+        EventMap events;
+        npc_hazard_masukaAI(Creature* creature) : ScriptedAI(creature) {}
+        void Reset() {
+            escaping = false;
+            events.Reset();
         }
-        return true;
+
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who || !who->IsInWorld())
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+            if (!player || player->IsGameMaster()) return;
+
+            if (!me->IsWithinDist(who, 5.0f, false))
+                return;
+            if (!escaping) {
+                me->MonsterYell("JESTEM WOLNY!", 0, nullptr);
+                me->SetStandState(UNIT_STAND_STATE_STAND);
+                me->RemoveAllAuras();
+                events.ScheduleEvent(MASUKA_EVENT_RUN, 1500);
+                escaping = true;
+            }
+        }
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+            switch (events.GetEvent()) {
+            case MASUKA_EVENT_RUN:
+                me->MonsterYell("Czas sprzedac troche golda!", 0, nullptr);
+                me->MonsterTextEmote("Masuka laughs.", nullptr);
+                me->MonsterMoveWithSpeed(-11062.98f, -1592.51f, 27.96f, 10.f);
+                events.ScheduleEvent(MASUKA_EVENT_DIE, 5000);
+                events.PopEvent();
+                break;
+            case MASUKA_EVENT_DIE:
+                me->DisappearAndDie();
+                events.PopEvent();
+                break;
+            }
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* creature) const {
+        return new npc_hazard_masukaAI(creature);
     }
+};
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
+enum PiooRadeData {
+    PIOORADE_EVENT_TALK				= 1,
+    PIOORADE_EVENT_RUN				= 2,
+    PIOORADE_EVENT_DESPAWN			= 3,
+    PIOORADE_EVENT_SUMMON_COINS		= 4,
+    PIOORADE_EVENT_RUN_BACK			= 5,
+    PIOORADE_EVENT_RUN2				= 6,
+    PIOORADE_EVENT_DESPAWN_COINS	= 7,
+    PIOORADE_NPC_PIOO				= 91036,
+    PIOORADE_NPC_RADE				= 91037,
+    PIOORADE_GOB_COINS				= 1000005,
+};
+class npc_hazard_pioorade : public CreatureScript {
+public:
+    npc_hazard_pioorade() : CreatureScript("npc_hazard_pioorade") {}
 
-        bool close = true;
-
-        switch (action)
+    struct npc_hazard_piooradeAI : public ScriptedAI {
+        bool talking;
+        EventMap events;
+        uint8 currentTalkID;
+        Position coinsPos;
+        std::string texts[6];
+        GameObject* coins;
+        npc_hazard_piooradeAI(Creature *creature) : ScriptedAI(creature) {
+            texts[0] = "I wtedy powiedzialem mu, ze odbanuje jego postac za 100zl.";
+            texts[1] = "Jasne, pamietam o naszym ukladzie.";
+            texts[2] = "Zauwazyli nas. Uciekamy Pioo!";
+            texts[3] = "Ale pamietasz, ze polowa hajsu do mnie?";
+            texts[4] = "Uwielbiam robic z toba interesy.";
+            texts[5] = "Wiejemy!";
+        }
+        void Reset() {
+            talking = false;
+            coins = nullptr;
+            currentTalkID = 0;
+            events.Reset();
+        }
+        void MoveInLineOfSight(Unit* who)
         {
-            case GOSSIP_ACTION_INFO_DEF + 1:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting50G();
+            if (!who || !who->IsInWorld())
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+            if (!player || player->IsGameMaster()) return;
+			if (!me->IsWithinDist(who, 30.0f, false) || who->GetPosition().GetPositionZ() > 0.f)
+				return;
+            if (!me->FindNearestCreature(me->GetEntry() == PIOORADE_NPC_RADE ? PIOORADE_NPC_PIOO : PIOORADE_NPC_RADE, 10.f)) //script wont start if 2nd npc is dead
+                return;
+            
+            if (!talking) {
+                talking = true;
+                events.ScheduleEvent(PIOORADE_EVENT_TALK, me->GetEntry() == PIOORADE_NPC_RADE ? 1000 : 4000);
+            }
+        }
+        void UpdateAI(uint32 diff) {
+            events.Update(diff);
+            switch (events.GetEvent()) {
+            case PIOORADE_EVENT_TALK:
+                me->MonsterSay(texts[me->GetEntry() == PIOORADE_NPC_RADE ? currentTalkID : currentTalkID + 3].c_str(), 0, nullptr);
+                if (currentTalkID < 2) {
+                    ++currentTalkID;
+                    events.RepeatEvent(8000);
+                }
+                else {
+                    events.ScheduleEvent(PIOORADE_EVENT_RUN, 1000);
+                    events.PopEvent();
+                }
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 2:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting100G();
+            case PIOORADE_EVENT_RUN:
+                me->MonsterMoveWithSpeed(-11144.96f, -1703.38f, -28.5f, 10.f);
+                me->CastSpell(me, 54861); //nitro boots
+                if (me->GetEntry() == PIOORADE_NPC_RADE) events.ScheduleEvent(PIOORADE_EVENT_DESPAWN, 7000);
+                else events.ScheduleEvent(PIOORADE_EVENT_SUMMON_COINS, 3000);
+                events.PopEvent();
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 3:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting200G();
+            case PIOORADE_EVENT_DESPAWN:
+                me->DisappearAndDie();
+                events.PopEvent();
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 4:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting500G();
+            case PIOORADE_EVENT_SUMMON_COINS:
+                me->GetPosition(&coinsPos);
+                coins = me->SummonGameObject(PIOORADE_GOB_COINS, coinsPos.GetPositionX(), coinsPos.GetPositionY(), coinsPos.GetPositionZ(), 0.f, 0.f, 0.f, 0.f, 0.f, 1000);
+                events.ScheduleEvent(PIOORADE_EVENT_RUN_BACK, 1000);
+                events.PopEvent();
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 5:
-                player->SetResetDuelSetting();
-                player->SetDuelSetting1000G();
+            case PIOORADE_EVENT_RUN_BACK:
+                me->MonsterYell("Zgubilem szekle!", 0, nullptr);
+                me->MonsterMoveWithSpeed(coinsPos.GetPositionX(), coinsPos.GetPositionY(), coinsPos.GetPositionZ(), 10.f);
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_WHIRLWIND);
+                events.ScheduleEvent(PIOORADE_EVENT_DESPAWN_COINS, 5000);
+                events.PopEvent();
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 6:
-                player->SetResetDuelSetting();
+            case PIOORADE_EVENT_DESPAWN_COINS:
+                if (coins) coins->Delete();
+                events.ScheduleEvent(PIOORADE_EVENT_RUN2, 2000);
+                events.PopEvent();
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 7:
-                close = false;
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Dziekuje za wyjasnienie.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
-                player->SEND_GOSSIP_MENU(GAMBLER_INFO_TEXT, creature->GetGUID());
+            case PIOORADE_EVENT_RUN2:
+                me->MonsterYell("Rade zaczekaj!", 0, nullptr);
+                me->MonsterMoveWithSpeed(-11144.96f, -1703.38f, -28.5f, 10.f);
+                events.ScheduleEvent(PIOORADE_EVENT_DESPAWN, 5000);
+                events.PopEvent();
                 break;
-            case GOSSIP_ACTION_INFO_DEF + 8:
-                player->CLOSE_GOSSIP_MENU();
-                break;
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const {
+        return new npc_hazard_piooradeAI(creature);
+    }
+};
+
+enum PswzrdXinefData {
+    PSWZRDXINEF_EVENT_TALK		= 1,
+    PSWZRDXINEF_EVENT_MORPH		= 2,
+    PSWZRDXINEF_EVENT_TALK2		= 3,
+    PSWZRDXINEF_EVENT_ROTATE	= 4,
+    PSWZRDXINEF_EVENT_CRASH		= 5,
+    PSWZRDXINEF_EVENT_DESPAWN	= 6,
+    PSWZRDXINEF_MORPH_XINEF		= 23574,
+    PSWZRDXINEF_MORPH_PSWZRD	= 5555,
+    PSWZRDXINEF_NPC_XINEF		= 91038,
+    PSWZRDXINEF_NPC_PSWZRD		= 91039,
+};
+class npc_hazard_pswzrdxinef : public CreatureScript {
+public:
+    npc_hazard_pswzrdxinef() : CreatureScript("npc_hazard_pswzrdxinef") {}
+    struct npc_hazard_pswzrdxinefAI : public ScriptedAI {
+        bool eventStart;
+        EventMap events;
+        npc_hazard_pswzrdxinefAI(Creature *creature) : ScriptedAI(creature) {}
+        void Reset() {
+            events.Reset();
+            eventStart = false;
+            events.ScheduleEvent(PSWZRDXINEF_EVENT_TALK, me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? 4000 : 1000);
         }
 
-        if (close)
-            player->CLOSE_GOSSIP_MENU();
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who || !who->IsInWorld())
+                return;
 
-        return true;
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+            if (!player || player->IsGameMaster()) return;
+
+			if (!me->IsWithinDist(who, 8.f, false))
+				return;
+
+            if (!me->FindNearestCreature(me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? PSWZRDXINEF_NPC_PSWZRD : PSWZRDXINEF_NPC_XINEF, 10.f)) //script wont start if 2nd npc is dead
+                return;
+           
+            if (!eventStart) {
+                eventStart = true;
+                events.Reset();
+                events.ScheduleEvent(PSWZRDXINEF_EVENT_ROTATE, 1000);
+            }
+        }
+
+        void UpdateAI(uint32 diff) {
+            events.Update(diff);
+            switch (events.GetEvent()) {
+            case PSWZRDXINEF_EVENT_TALK: {
+                std::string text;
+                for (uint8 i = 0; i < 16; ++i) {
+                    text += std::to_string(urand(0, 1));
+                }
+                me->MonsterSay(text.c_str(), 0, nullptr);
+                events.RepeatEvent(6000);
+                break;
+            }
+            case PSWZRDXINEF_EVENT_ROTATE:
+                me->SetFacingTo(me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? 1.89f : 1.26f);
+                events.ScheduleEvent(PSWZRDXINEF_EVENT_MORPH, 2000);
+                events.PopEvent();
+                break;
+            case PSWZRDXINEF_EVENT_MORPH:
+                me->CastSpell(me, 12244, false);
+                me->SetDisplayId(me->GetEntry() == PSWZRDXINEF_NPC_PSWZRD ? PSWZRDXINEF_MORPH_PSWZRD : PSWZRDXINEF_MORPH_XINEF);
+                events.ScheduleEvent(PSWZRDXINEF_EVENT_TALK2, me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? 3000 : 2000);
+                events.PopEvent();
+                break;
+            case PSWZRDXINEF_EVENT_TALK2:
+                me->MonsterSay(me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? "Kraa?" : "Meeeow", 0, nullptr);
+                events.ScheduleEvent(PSWZRDXINEF_EVENT_CRASH, 3000);
+                events.PopEvent();
+                break;
+            case PSWZRDXINEF_EVENT_CRASH:
+                me->MonsterYell(me->GetEntry() == PSWZRDXINEF_NPC_XINEF ? "System Failure" : "Access Violation", 0, nullptr);
+                me->CastSpell(me, 62834, false);
+                events.ScheduleEvent(PSWZRDXINEF_EVENT_DESPAWN, 1000);
+                events.PopEvent();
+                break;
+            case PSWZRDXINEF_EVENT_DESPAWN:
+                me->setDeathState(DeathState::JUST_DIED);
+                events.PopEvent();
+                break;
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const {
+        return new npc_hazard_pswzrdxinefAI(creature);
+    }
+};
+
+enum SenPenData {
+    SENPEN_EVENT_START		= 1,
+    SENPEN_EVENT_SLAM		= 2,
+    SENPEN_EVENT_TALK		= 3,
+    SENPEN_EVENT_BLIZZLIKE	= 4,
+    SENPEN_EVENT_DESPAWN	= 5,
+    SENPEN_SPELL_SLAM		= 69903,
+    SENPEN_NPC_SENSI		= 91040,
+    SENPEN_NPC_PENDU		= 91041,
+    SENPEN_NPC_PSWZRD		= 91042,
+};
+
+class npc_hazard_senpen : public CreatureScript {
+public:
+    npc_hazard_senpen() : CreatureScript("npc_hazard_senpen") {}
+
+    struct npc_hazard_senpenAI : public ScriptedAI {
+        bool eventStart;
+        EventMap events;
+        Creature *pendu;
+
+        npc_hazard_senpenAI(Creature *creature) : ScriptedAI(creature) {}
+        void Reset() {
+            eventStart = false;
+            events.Reset();
+        }
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who || !who->IsInWorld())
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player || player->IsGameMaster()) return;
+            
+            if (!me->IsWithinDist(who, 15.f, false))
+                return;
+			if (!me->FindNearestCreature(me->GetEntry() == SENPEN_NPC_PENDU ? SENPEN_NPC_SENSI : SENPEN_NPC_PENDU, 10.f)) //script wont start if 2nd npc is dead
+				return;
+            if (!eventStart) {
+                eventStart = true;
+                if (me->GetEntry() == SENPEN_NPC_SENSI)
+                    events.ScheduleEvent(SENPEN_EVENT_START, 1000);
+            }
+        }
+
+        void UpdateAI(uint32 diff) {
+            events.Update(diff);
+            switch (events.GetEvent()) {
+            case SENPEN_EVENT_START:
+                me->MonsterSay("Dobra, to testujemy.", 0, nullptr);
+                events.ScheduleEvent(SENPEN_EVENT_SLAM, 5000);
+                events.PopEvent();
+                break;
+            case SENPEN_EVENT_SLAM: {
+                if (pendu = me->FindNearestCreature(SENPEN_NPC_PENDU, 10.f)) {
+                    int32 dmg = 63042;
+                    me->CastCustomSpell(pendu, SENPEN_SPELL_SLAM, nullptr, &dmg, nullptr, false);
+                    events.ScheduleEvent(SENPEN_EVENT_TALK, 2000);
+                    if (pendu->isDead())
+                        me->MonsterTextEmote("Sensimilek's Shield Slam hits Pendu for 63042. (Critical)", nullptr);
+                }
+                else
+                    events.ScheduleEvent(SENPEN_EVENT_DESPAWN, 1000);
+                events.PopEvent();
+                break;
+            }
+            case SENPEN_EVENT_TALK:
+                if (pendu->isDead()) {
+                    me->MonsterSay("Przeciez na WotLK nie powinno sie dac zadac tyle damage.", 0, nullptr);
+                    events.ScheduleEvent(SENPEN_EVENT_BLIZZLIKE, 3000);
+                }
+                else {
+                    me->MonsterSay("Miss? Brak hit capa boli. Jeszcze raz Pendu! Siadaj!", 0, nullptr);
+                    pendu->CombatStop();
+                    pendu->SetStandState(UNIT_STAND_STATE_SIT);
+                    pendu->SetFacingTo(pendu->GetHomePosition().GetOrientation());
+                    events.ScheduleEvent(SENPEN_EVENT_SLAM, 3000);
+                }
+                events.PopEvent();
+                break;
+            case SENPEN_EVENT_BLIZZLIKE: {
+                Creature *pswzrd = me->FindNearestCreature(SENPEN_NPC_PSWZRD, 20.f);
+                if (pswzrd) pswzrd->MonsterYell("Blizzlike!", 0, nullptr);
+                events.ScheduleEvent(SENPEN_EVENT_DESPAWN, 1000);
+                events.PopEvent();
+                break;
+            }
+            case SENPEN_EVENT_DESPAWN:
+                me->DisappearAndDie();
+                events.PopEvent();
+                break;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const {
+        return new npc_hazard_senpenAI(creature);
+    }
+};
+
+enum WarmaneData {
+    WARMANE_EVENT_WORMS = 1,
+    WARMANE_EVENT_DESPAWN = 2,
+    WARMANE_WORMS_COUNT = 16,
+    WARMANE_NPC_WORM = 7395,
+};
+class npc_hazard_warmane : public CreatureScript {
+public:
+    npc_hazard_warmane() : CreatureScript("npc_hazard_warmane") {}
+    struct npc_hazard_warmaneAI : public ScriptedAI {
+        uint8 wormsCount;
+        bool eventStart;
+        EventMap events;
+        npc_hazard_warmaneAI(Creature *creature) : ScriptedAI(creature) {}
+        void Reset() {
+            wormsCount = 0;
+            eventStart = false;
+            events.Reset();
+        }
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (!who || !who->IsInWorld())
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+            if (!player || player->IsGameMaster()) return;
+            if (!me->IsWithinDist(who, 15.f, false))
+                return;
+            if (!eventStart) {
+                eventStart = true;
+                events.ScheduleEvent(WARMANE_EVENT_WORMS, 1000);
+                me->MonsterTextEmote("Kaleb the Warmane is being swarmed by bugs!", nullptr);
+            }
+        }
+        void UpdateAI(uint32 diff) {
+            events.Update(diff);
+            switch (events.GetEvent()) {
+            case WARMANE_EVENT_WORMS:
+                if (wormsCount < WARMANE_WORMS_COUNT) {
+                    ++wormsCount;
+                    Position pos;
+                    me->GetRandomNearPosition(pos, (urand(2, 5)));
+                    if (Creature *creature = me->SummonCreature(WARMANE_NPC_WORM, pos, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                        creature->GetMotionMaster()->MoveRandom(5.f);
+                    events.RepeatEvent(300);
+                }
+                else {
+                    events.ScheduleEvent(WARMANE_EVENT_DESPAWN, 3000);
+                    events.PopEvent();
+                }
+                break;
+            case WARMANE_EVENT_DESPAWN:
+                me->DisappearAndDie();
+                events.PopEvent();
+                break;
+            }
+        }
+    };
+    CreatureAI* GetAI(Creature* creature) const {
+        return new npc_hazard_warmaneAI(creature);
     }
 };
 
@@ -1214,5 +1565,10 @@ void AddSC_npcs_hazard()
     new npc_burn_flag_horde();
     new npc_burn_flag_alliance();
     new npc_female_emote();
-    new npc_gambler();
+
+    new npc_hazard_masuka();
+    new npc_hazard_pioorade();
+    new npc_hazard_pswzrdxinef();
+    new npc_hazard_senpen();
+    new npc_hazard_warmane();
 }

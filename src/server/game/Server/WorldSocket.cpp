@@ -152,6 +152,11 @@ const std::string& WorldSocket::GetRemoteAddress (void) const
     return m_Address;
 }
 
+const std::string& WorldSocket::GetRemoteHostname (void) const
+{
+    return m_Hostname;
+}
+
 int WorldSocket::SendPacket(WorldPacket const& pct)
 {
     ACE_GUARD_RETURN (LockType, Guard, m_OutBufferLock, -1);
@@ -238,6 +243,7 @@ int WorldSocket::open (void *a)
     }
 
     m_Address = remote_addr.get_host_addr();
+    m_Hostname = remote_addr.get_host_name();
 
     // Send startup packet.
     WorldPacket packet (SMSG_AUTH_CHALLENGE, 24);
@@ -772,8 +778,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     //            clientSeed);
 
     // Get the account information from the realmd database
-    //         0           1        2       3          4         5       6          7   8
-    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os FROM account WHERE username = ?
+    //         0           1        2       3          4         5       6          7   8              9
+    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os, last_local_ip FROM account WHERE username = ?
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
 
     stmt->setString(0, account);
@@ -841,6 +847,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     uint32 recruiter = fields[7].GetUInt32();
     std::string os = fields[8].GetString();
+    std::string lastLocalIp = fields[9].GetString();
 
     // Must be done before WorldSession is created
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED) && os != "Win" && os != "OSX")
@@ -933,7 +940,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateBigNumbers (&k, NULL);
     sha.Finalize();
 
-    std::string address = (AccountTypes(security) > SEC_PLAYER ? "1.2.3.4" : GetRemoteAddress());
+    std::string address  = GetRemoteAddress();
+    std::string hostname = GetRemoteHostname();
 
     if (memcmp (sha.GetDigest(), digest, 20))
     {
@@ -978,6 +986,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadGlobalAccountData();
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(recvPacket);
+
+    LoginDatabase.EscapeString(lastLocalIp);
+    LoginDatabase.PExecute("INSERT INTO account_history VALUES ('%u', '%s', '%s', '%s', NOW())", id, hostname.c_str(), address.c_str(), lastLocalIp.c_str());
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))

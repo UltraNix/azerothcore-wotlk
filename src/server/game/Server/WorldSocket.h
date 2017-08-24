@@ -105,6 +105,9 @@ class WorldSocket : public WorldHandler
         /// Get address of connected peer.
         const std::string& GetRemoteAddress (void) const;
 
+        /// Get hostname of connected peer.
+        const std::string& GetRemoteHostname (void) const;
+
         /// Send A packet on the socket, this function is reentrant.
         /// @param pct packet to send
         /// @return -1 of failure
@@ -170,6 +173,9 @@ class WorldSocket : public WorldHandler
 
         /// Address of the remote peer
         std::string m_Address;
+
+        /// Hostname of the remote peer
+        std::string m_Hostname;
 
         /// Class used for managing encryption of the headers
         AuthCrypt m_Crypt;

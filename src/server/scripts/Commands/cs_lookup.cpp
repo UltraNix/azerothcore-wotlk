@@ -41,9 +41,11 @@ public:
     {
         static std::vector<ChatCommand> lookupPlayerCommandTable =
         {
-            { "ip",             SEC_GAMEMASTER,     true,  &HandleLookupPlayerIpCommand,        "" },
-            { "account",        SEC_GAMEMASTER,     true,  &HandleLookupPlayerAccountCommand,   "" },
-            { "email",          SEC_GAMEMASTER,     true,  &HandleLookupPlayerEmailCommand,     "" }
+            { "ip",             SEC_GAMEMASTER,     true,   &HandleLookupPlayerIpCommand,           "" },
+            { "account",        SEC_GAMEMASTER,     true,   &HandleLookupPlayerAccountCommand,      "" },
+            { "email",          SEC_GAMEMASTER,     true,   &HandleLookupPlayerEmailCommand,        "" },
+            { "acchistory",     SEC_GAMEMASTER,     true,   &HandleLookupPlayerAcchistoryCommand,   "" },
+            { "iphistory",      SEC_GAMEMASTER,     true,   &HandleLookupPlayerIphistoryCommand,    "" }
         };
 
         static std::vector<ChatCommand> lookupSpellCommandTable =
@@ -1317,6 +1319,99 @@ public:
 
         return true;
     }
+
+    static bool HandleLookupPlayerAcchistoryCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        std::string account = strtok((char*)args, " ");
+
+        if (!AccountMgr::normalizeString
+        (account))
+            return false;
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS);
+        stmt->setString(0, account);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+        
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_NO_PLAYERS_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Field* fields = result->Fetch();
+        uint32 accountId = fields[0].GetUInt32();
+        uint8 gmLvl = fields[1].GetUInt8();
+        if (gmLvl && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //Prevents GM stalking
+        {
+            handler->PSendSysMessage("You can't view history for this account.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID);
+        stmt->setInt32(0, accountId);
+        result = LoginDatabase.Query(stmt);
+        if (!result) 
+        {
+            handler->PSendSysMessage("No history found for this account.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        handler->PSendSysMessage("IP history for account %s:", account.c_str());
+        do {
+            Field* fields = result->Fetch();
+            std::string ip = fields[0].GetString();
+            std::string date = fields[1].GetString();
+            handler->PSendSysMessage("|cff00ccff[%s] | |cffffff00%s", ip.c_str(), date.c_str());
+
+        } while (result->NextRow());
+        return true;
+    }
+
+    static bool HandleLookupPlayerIphistoryCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        std::string ip = strtok((char*)args, " "); 
+    
+        PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_IP);
+        stmt->setString(0, ip);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+       
+        if (!result) 
+        {
+            handler->PSendSysMessage("No history found for this IP address.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        handler->PSendSysMessage("Account history for IP %s:", ip.c_str());
+        do 
+        {
+            Field *fields = result->Fetch();
+            uint32 accID = fields[0].GetUInt32();
+            std::string date = fields[1].GetString();
+
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO);
+            stmt->setUInt32(0, accID);
+            PreparedQueryResult result1 = LoginDatabase.Query(stmt);
+            if (!result1) continue;
+
+            Field *fields1 = result1->Fetch();
+            uint8 gmLevel = fields1[2].GetUInt8();
+            if (gmLevel && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //prevents GM stalking
+                continue;
+            std::string accName = fields1[0].GetString();
+
+            handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName.c_str(), accID, date.c_str());
+
+        } while (result->NextRow());
+        return true;
+    }
+
 };
 
 void AddSC_lookup_commandscript()

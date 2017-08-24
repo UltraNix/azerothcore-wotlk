@@ -693,7 +693,7 @@ class PlayerScript : public ScriptObject
         virtual void OnDuelStart(Player* /*player1*/, Player* /*player2*/) { }
 
         // Called when a duel ends
-        virtual void OnDuelEnd(Player* /*winner*/, Player* /*loser*/, DuelCompleteType /*type*/) { }
+        virtual void OnDuelEnd(Player* /*winner*/, Player* /*loser*/, Player* /*initiator*/, DuelCompleteType /*type*/) { }
 
         // Both of the below are called on emote opcodes.
         virtual void OnEmote(Player* /*player*/, uint32 /*emote*/) { }
@@ -979,7 +979,7 @@ class ScriptMgr
         void OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental);
         void OnPlayerDuelRequest(Player* target, Player* challenger);
         void OnPlayerDuelStart(Player* player1, Player* player2);
-        void OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType type);
+        void OnPlayerDuelEnd(Player* winner, Player* loser, Player* initiator, DuelCompleteType type);
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg);
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Player* receiver);
         void OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Group* group);
