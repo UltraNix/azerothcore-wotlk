@@ -2779,6 +2779,7 @@ std::vector<uint32> partialCorrection =
     67029,  // Fel Lightning 25 man
     67030,  // Fel Lightning 10 man heroic
     67031,  // Fel Lightning 25 man heroic
+    65974,  // Lava Lash
 };
 
 void SpellMgr::LoadSpellCustomAttr()
