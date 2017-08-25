@@ -522,7 +522,7 @@ enum CharacterDatabaseStatements
     // GAMBLING
     CHAR_SEL_GAMBLING_STATS,
     CHAR_REP_GAMBLING_STATS,
-	//
+    //
     MAX_CHARACTERDATABASE_STATEMENTS
 };
 

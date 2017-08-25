@@ -181,7 +181,7 @@ public:
         stmt->setUInt32(0, guidLow);
         stmt->setUInt32(1, (isLoser ? lost_money : 0));
         stmt->setUInt32(2, (isLoser ? 0 : win_money));
-        stmt->setUInt32(3, count + 1); 
+        stmt->setUInt32(3, count); 
         CharacterDatabase.Execute(stmt);
     }
 };
