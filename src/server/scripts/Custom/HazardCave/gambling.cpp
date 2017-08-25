@@ -173,14 +173,14 @@ public:
 
         PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
-        uint32 lost_money = ((result ? (*result)[0].GetUInt32() : 0) + moneyAmount);
-        uint32 win_money  = ((result ? (*result)[1].GetUInt32() : 0) + moneyAmount);
+        uint32 lost_money = ((result ? (*result)[0].GetUInt32() : 0) + (isLoser ? moneyAmount : 0));
+        uint32 win_money  = ((result ? (*result)[1].GetUInt32() : 0) + (isLoser ? 0 : moneyAmount));
         uint32 count      = ((result ? (*result)[2].GetUInt32() : 0) + 1);
                 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GAMBLING_STATS);
         stmt->setUInt32(0, guidLow);
-        stmt->setUInt32(1, (isLoser ? lost_money : 0));
-        stmt->setUInt32(2, (isLoser ? 0 : win_money));
+        stmt->setUInt32(1, lost_money);
+        stmt->setUInt32(2, win_money);
         stmt->setUInt32(3, count); 
         CharacterDatabase.Execute(stmt);
     }
