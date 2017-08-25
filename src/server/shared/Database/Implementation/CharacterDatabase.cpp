@@ -583,5 +583,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK, "SELECT guid FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT name FROM characters WHERE ninjaLooter = 1", CONNECTION_SYNCH);
     PrepareStatement(CHAR_UPD_NINJA_LOOTER, "UPDATE characters SET ninjaLooter = ? WHERE guid = ?", CONNECTION_ASYNC);
-    //
+    // GAMBLING
+    PrepareStatement(CHAR_SEL_GAMBLING_STATS, "SELECT lost_money, win_money, duel_count FROM character_gambling_stats WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_REP_GAMBLING_STATS, "REPLACE INTO character_gambling_stats(guid, lost_money, win_money, duel_count) VALUES(?, ?, ?, ?)", CONNECTION_ASYNC);
 }

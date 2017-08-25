@@ -65,6 +65,11 @@ public:
 
                         loser->ModifyMoney(-gold_setting_1);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 50 gold!");
+
+                        // Update loser stats
+                        UpdateGamblingStats(loser, true, uint32(gold_setting_1));
+                        // Update winner stats
+                        UpdateGamblingStats(winner, false, uint32(gold_setting_1 * TAX_RATE));
                     }
                     else
                         GamblingFail(winner, loser);
@@ -78,6 +83,11 @@ public:
 
                         loser->ModifyMoney(-gold_setting_2);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 100 gold!");
+
+                        // Update loser stats
+                        UpdateGamblingStats(loser, true, uint32(gold_setting_2));
+                        // Update winner stats
+                        UpdateGamblingStats(winner, false, uint32(gold_setting_2 * TAX_RATE));
                     }
                     else
                         GamblingFail(winner, loser);
@@ -91,9 +101,16 @@ public:
 
                         loser->ModifyMoney(-gold_setting_3);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 200 gold!");
+
+                        // Update loser stats
+                        UpdateGamblingStats(loser, true, uint32(gold_setting_3));
+                        // Update winner stats
+                        UpdateGamblingStats(winner, false, uint32(gold_setting_3 * TAX_RATE));
                     }
                     else
                         GamblingFail(winner, loser);
+
+
                 }
                 else if (initiator->hasGoldDuelSetting500G())
                 {
@@ -104,6 +121,11 @@ public:
 
                         loser->ModifyMoney(-gold_setting_4);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 500 gold!");
+
+                        // Update loser stats
+                        UpdateGamblingStats(loser, true, uint32(gold_setting_4));
+                        // Update winner stats
+                        UpdateGamblingStats(winner, false, uint32(gold_setting_4 * TAX_RATE));
                     }
                     else
                         GamblingFail(winner, loser);
@@ -117,6 +139,11 @@ public:
 
                         loser->ModifyMoney(-gold_setting_5);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 1000 gold!");
+
+                        // Update loser stats
+                        UpdateGamblingStats(loser, true, uint32(gold_setting_5));
+                        // Update winner stats
+                        UpdateGamblingStats(winner, false, uint32(gold_setting_5 * TAX_RATE));
                     }
                     else
                         GamblingFail(winner, loser);
@@ -132,6 +159,30 @@ public:
 
         winner->GetSession()->SendNotification("|cffffffff[PvP] Zaklad przerwany! Przeciwnik stracil swoj majatek w czasie trwania walki!");
         loser->GetSession()->SendNotification("|cffffffff[PvP] Zaklad przerwany! Straciles swoj majatek w czasie trwania walki!");
+    }
+
+    void UpdateGamblingStats(Player* gambler, bool isLoser, uint32 moneyAmount)
+    {
+        if (!gambler)
+            return;
+
+        uint32 guidLow = gambler->GetGUIDLow();
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GAMBLING_STATS);
+        stmt->setUInt32(0, guidLow);
+
+        PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+        uint32 lost_money = ((result ? (*result)[0].GetUInt32() : 0) + moneyAmount);
+        uint32 win_money  = ((result ? (*result)[1].GetUInt32() : 0) + moneyAmount);
+        uint32 count      = ((result ? (*result)[2].GetUInt32() : 0) + 1);
+                
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_GAMBLING_STATS);
+        stmt->setUInt32(0, guidLow);
+        stmt->setUInt32(1, (isLoser ? lost_money : 0));
+        stmt->setUInt32(2, (isLoser ? 0 : win_money));
+        stmt->setUInt32(3, count + 1); 
+        CharacterDatabase.Execute(stmt);
     }
 };
 
