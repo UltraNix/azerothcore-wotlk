@@ -10366,7 +10366,7 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
     AuraEffectList const& mModDamagePercentDone = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
     {
-        if (spellProto->EquippedItemClass == -1 && (*i)->GetSpellInfo()->EquippedItemClass != -1 && (*i)->GetMiscValue() == SPELL_SCHOOL_MASK_NORMAL && (*i)->GetSpellInfo()->GetFirstRankSpell()->Id != 20111)    //prevent apply mods from weapon specific case to non weapon specific spells (Example: thunder clap and two-handed weapon specialization)
+        if (spellProto->EquippedItemClass == -1 && (*i)->GetSpellInfo()->EquippedItemClass != -1 && (*i)->GetMiscValue() == SPELL_SCHOOL_MASK_NORMAL && !((*i)->GetSpellInfo()->SpellFamilyFlags[1] & 0x20000))    //prevent apply mods from weapon specific case to non weapon specific spells (Example: thunder clap and two-handed weapon specialization)
             continue;
 
         if (!spellProto->ValidateAttribute6SpellDamageMods(this, *i, damagetype == DOT))
