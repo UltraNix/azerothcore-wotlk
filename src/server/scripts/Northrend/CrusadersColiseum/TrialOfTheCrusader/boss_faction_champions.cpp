@@ -1775,18 +1775,14 @@ public:
                     break;
                 case EVENT_SPELL_DISARM:
                 {
-                    std::map<Player*, uint32> playerData;
+                    std::vector<Player*> targets;
                     auto const &pl = pInstance->instance->GetPlayers();
                     for (auto itr = pl.begin(); itr != pl.end(); ++itr)
                         if (Player* player = itr->GetSource())
                             if (player->getClass() == CLASS_WARRIOR || player->getClass() == CLASS_DEATH_KNIGHT || player->getClass() == CLASS_PALADIN)
-                                playerData.insert(std::make_pair(player, player->GetStat(STAT_STRENGTH)));
+                                targets.push_back(player);
 
-                    auto highestStrengthCount = std::max_element(playerData.begin(), playerData.end(),
-                        [](const std::pair<Player*, uint32>& p1, const std::pair<Player*, uint32>& p2) {
-                        return p1.second < p2.second; });
-
-                    if (Player* target = highestStrengthCount->first)
+                    if (Player* target = Trinity::Containers::SelectRandomContainerElement(targets))
                     {
                         DoCast(target, SPELL_DISARM);
                         events.RepeatEvent(60000);
