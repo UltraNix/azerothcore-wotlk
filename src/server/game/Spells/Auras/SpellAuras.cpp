@@ -742,6 +742,9 @@ void Aura::UpdateOwner(uint32 diff, WorldObject* owner)
 
     Update(diff, caster);
 
+    if (m_duration && m_spellInfo->HasAttribute(SPELL_ATTR0_HEARTBEAT_RESIST_CHECK))
+        HeartbeatResistance(diff);
+
     if (m_updateTargetMapInterval <= int32(diff))
         UpdateTargetMap(caster);
     else
@@ -2177,6 +2180,43 @@ void Aura::TriggerProcOnEvent(AuraApplication* aurApp, ProcEventInfo& eventInfo)
     // Remove aura if we've used last charge to proc
     if (IsUsingCharges() && !GetCharges())
         Remove();
+}
+
+void Aura::HeartbeatResistance(uint32 diff)
+{
+    m_heartBeatTimer += diff;
+
+    if (m_heartBeatTimer < 950)
+        return;
+
+    Unit* target = GetOwner()->ToUnit();
+    Unit* caster = GetCaster();
+
+    if (!target || !caster)
+        return;
+
+    if (target->GetTypeId() == TYPEID_UNIT && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        m_heartBeatTimer = 0;
+
+        uint32 auraTimePassed = time(nullptr) - GetApplyTime();
+
+        if (auraTimePassed == (uint32)std::floor((GetMaxDuration() * 0.25f / IN_MILLISECONDS) + 0.5f) ||
+            auraTimePassed == (uint32)std::floor((GetMaxDuration() * 0.50f / IN_MILLISECONDS) + 0.5f) ||
+            auraTimePassed == (uint32)std::floor((GetMaxDuration() * 0.75f / IN_MILLISECONDS) + 0.5f))
+        {
+            SpellSchoolMask schoolMask = m_spellInfo->GetSchoolMask();
+            uint32 resistance = schoolMask != SPELL_SCHOOL_MASK_NORMAL ? target->GetResistance(GetFirstSchoolInMask(schoolMask)) : 0;
+            uint32 breakChance = urand(0, 100);
+            uint32 breakPct = 5 + uint32((resistance / powf(target->getLevel(), 1.441f) * 0.10f) * 100);
+
+            if (breakChance < breakPct)
+            {
+                Remove();
+                return;
+            }
+        }
+    }
 }
 
 void Aura::_DeleteRemovedApplications()

@@ -210,6 +210,8 @@ class Aura
         float CalcProcChance(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo) const;
         void TriggerProcOnEvent(AuraApplication* aurApp, ProcEventInfo& eventInfo);
 
+        void HeartbeatResistance(uint32 diff);
+
         // AuraScript
         void LoadScripts();
         bool CallScriptCheckAreaTargetHandlers(Unit* target);
@@ -259,6 +261,8 @@ class Aura
         uint8 m_procCharges;                                // Aura charges (0 for infinite)
         time_t m_procCooldown;								// Time when cooldown of proc ends in sec
         uint8 m_stackAmount;                                // Aura stack amount
+
+        uint32 m_heartBeatTimer;                        // Heartbeat resist timer
 
         AuraEffect* m_effects[3];
         ApplicationMap m_applications;
