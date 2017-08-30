@@ -32,6 +32,7 @@ struct boss_faction_championsAI : public ScriptedAI
         threatTimer = 2000;
         powerTimer = 1000;
         checkTimer = 5000;
+        targetChangeTimer = 6000;
     }
 
     InstanceScript* pInstance;
@@ -39,6 +40,7 @@ struct boss_faction_championsAI : public ScriptedAI
     uint32 threatTimer;
     uint32 powerTimer;
     uint32 checkTimer;
+    uint32 targetChangeTimer;
 
     void EnterCombat(Unit* /*who*/)
     {
@@ -177,6 +179,7 @@ struct boss_faction_championsAI : public ScriptedAI
             if (!IsPet(itr))
                 if (itr->GetHealth() < itr->GetMaxHealth())
                     return itr;
+
         return nullptr;
     }
 
@@ -199,6 +202,9 @@ struct boss_faction_championsAI : public ScriptedAI
 
     void HandleVictimChange()
     {
+        if (targetChangeTimer > 1000)
+            return;
+
         if (Unit* victim = me->GetVictim())
         {
             if (IsNonViableTarget(victim))
@@ -207,6 +213,8 @@ struct boss_faction_championsAI : public ScriptedAI
         }
         else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return !IsNonViableTarget(tar); }))
             AttackStart(target);
+
+        targetChangeTimer = 6000;
     }
 
     Unit* SelectEnemyCaster(bool casting, float range) const
@@ -253,6 +261,11 @@ struct boss_faction_championsAI : public ScriptedAI
         }
         else
             checkTimer -= diff;
+
+        if (targetChangeTimer <= diff)
+            targetChangeTimer = 6000;
+        else
+            targetChangeTimer -= diff;
 
         if( threatTimer <= diff )
         {
