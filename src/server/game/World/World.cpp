@@ -1293,6 +1293,10 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);
     m_bool_configs[CONFIG_PREMIUM_INSTANT_FLYING_ENABLE] = sConfigMgr->GetBoolDefault("Premium.InstantFlying.Enable", true);
 
+    //Phased Duels
+    m_bool_configs[CONFIG_PHASED_DUELS_ENABLE] = sConfigMgr->GetBoolDefault("PhasedDuels.Enable", false);
+    SetPhasedDuelsZones(sConfigMgr->GetStringDefault("PhasedDuels.Zones", ""));
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -2643,6 +2647,22 @@ bool World::RemoveBanCharacter(std::string const& name)
     stmt->setUInt32(0, guid);
     CharacterDatabase.Execute(stmt);
     return true;
+}
+
+void World::SetPhasedDuelsZones(std::string zones)
+{
+    m_phasedDuelsZones.clear();
+    if (zones == "") return;
+ 
+    std::stringstream ss(zones);
+    while (!ss.eof()) {
+        std::string buff;
+        ss >> buff;
+        try {
+            m_phasedDuelsZones.push_back(std::stoi(buff));
+        }
+        catch (std::invalid_argument) { m_phasedDuelsZones.clear(); return; }
+    }
 }
 
 bool World::PatchNotes(ContentPatches patchSince, ContentPatches patchTo) const
