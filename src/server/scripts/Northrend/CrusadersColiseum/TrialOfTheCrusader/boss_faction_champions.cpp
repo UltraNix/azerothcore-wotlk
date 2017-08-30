@@ -234,8 +234,18 @@ struct boss_faction_championsAI : public ScriptedAI
 
     bool IsNonViableTarget(Unit* target) const
     {
-        return target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared() || target->HasAura(66008) || target->HasAura(65878) || target->HasAura(65877) || target->HasAura(66054);
+        std::vector<uint32> spellIds = { 66008, 65878, 65877, 66054, 47585, 1022, 5599, 10278, 45438 };
+
+        if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared())
+            return true;
+
+        for (auto spellId : spellIds)
+            if (target->HasAura(spellId))
+                return true;
+
+        return false;
     }
+
 
     void UpdateAI(uint32 diff)
     {
