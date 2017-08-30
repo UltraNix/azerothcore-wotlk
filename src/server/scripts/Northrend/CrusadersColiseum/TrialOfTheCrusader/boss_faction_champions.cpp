@@ -81,10 +81,7 @@ struct boss_faction_championsAI : public ScriptedAI
         return dist_mod * 30000.0f / eh;*/
 
         // third try:
-        float unimportant_dist = (mAIType == AI_MELEE || mAIType == AI_PET ? 10.0f : 35.0f);
-        if (dist > unimportant_dist) dist -= unimportant_dist; else dist = 0.0f;
-        const float dist_factor = (mAIType == AI_MELEE || mAIType == AI_PET ? 15.0f : 25.0f);
-        float mod_dist = dist_factor/(dist_factor + dist); // 0.2 .. 1.0
+        float mod_dist = 1.0f; // 0.2 .. 1.0
         float mod_health = health > 40000 ? 2.0f : (60000-health)/10000.0f; // 2.0 .. 6.0
         float mod_armor = (mAIType == AI_MELEE || mAIType == AI_PET) ? Unit::CalcArmorReducedDamage(me, target, 10000, NULL)/10000.0f : 1.0f;
         return mod_dist * mod_health * mod_armor;
@@ -634,6 +631,9 @@ public:
             if (!target->IsFriendlyTo(me))
                 return false;
 
+            if (IsPet(target))
+                return false;
+
             static uint32 const MechanicImmunityList =
                 (1 << MECHANIC_SNARE)
                 | (1 << MECHANIC_ROOT);
@@ -731,6 +731,7 @@ public:
                         for (auto itr : list)
                             if (!itr->getAttackers().empty())
                                 info.insert(std::make_pair(itr, itr->getAttackers().size()));
+
                     if (info.empty())
                     {
                         events.RepeatEvent(5000);
@@ -1773,15 +1774,28 @@ public:
                         events.RepeatEvent(5000);
                     break;
                 case EVENT_SPELL_DISARM:
-                    if( me->GetVictim() && me->GetDistance2d(me->GetVictim()) < 5.0f  )
+                {
+                    std::map<Player*, uint32> playerData;
+                    auto const &pl = pInstance->instance->GetPlayers();
+                    for (auto itr = pl.begin(); itr != pl.end(); ++itr)
+                        if (Player* player = itr->GetSource())
+                            if (player->getClass() == CLASS_WARRIOR || player->getClass() == CLASS_DEATH_KNIGHT || player->getClass() == CLASS_PALADIN)
+                                playerData.insert(std::make_pair(player, player->GetStat(STAT_STRENGTH)));
+
+                    auto highestStrengthCount = std::max_element(playerData.begin(), playerData.end(),
+                        [](const std::pair<Player*, uint32>& p1, const std::pair<Player*, uint32>& p2) {
+                        return p1.second < p2.second; });
+
+                    if (Player* target = highestStrengthCount->first)
                     {
-                        me->CastSpell(me->GetVictim(), SPELL_DISARM, false);
+                        DoCast(target, SPELL_DISARM);
                         events.RepeatEvent(60000);
                         EventMapGCD(events, 1500);
                     }
                     else
                         events.RepeatEvent(5000);
                     break;
+                }
                 case EVENT_SPELL_OVERPOWER:
                     if( me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) )
                     {
