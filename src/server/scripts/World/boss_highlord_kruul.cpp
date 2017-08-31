@@ -247,16 +247,17 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-
-            switch (events.GetEvent())
+            while(uint32 eventId = events.ExecuteEvent())
             {
+                switch (eventId)
+                {
                 case EVENT_SPELL_CLEAVE:
                     me->CastSpell(me->GetVictim(), SPELL_CLEAVE, false);
-                    events.RepeatEvent(5000);   
+                    events.Repeat(5000);   
                     break;
                 case EVENT_SPELL_SHADOW_CRASH:
                 {
-                    events.RepeatEvent(15000);
+                    events.Repeat(15000);
 
                     if (Unit* target = FindCrashTarget())
                     {
@@ -267,30 +268,31 @@ public:
                 } break;
                 case EVENT_SPELL_SHADOW_BOLT_VOLLEY:
                     me->CastSpell(me, SPELL_SHADOW_BOLT_VOLLEY, false);
-                    events.RepeatEvent(21000);
+                    events.Repeat(21000);
                     break;
                 case EVENT_SPELL_THUNDER_CLAP:
                 {
                     int32 dmg = urand(7000, 7500);
                     me->CastCustomSpell(me, SPELL_THUNDER_CLAP, &dmg, NULL, NULL, false);
-                    events.RepeatEvent(10000);
-                    
+                    events.Repeat(10000);
+
                 } break;
                 case EVENT_SPELL_TWISTED_REFLECTION:
                     me->CastSpell(me->GetVictim(), SPELL_TWISTED_REFLECTION, false);
-                    events.RepeatEvent(30000);
+                    events.Repeat(30000);
                     break;
                 case EVENT_SPELL_VOID_BOLT:
                 {
                     int32 dmg = urand(14800, 15200);
                     me->CastCustomSpell(me->GetVictim(), SPELL_VOID_BOLT, &dmg, NULL, NULL, false);
-                    events.RepeatEvent(10000);
-                   
+                    events.Repeat(10000);
+
                 }  break;
                 case EVENT_SPELL_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, false);
                     events.PopEvent();
                     break;
+                }
             }
 
             DoMeleeAttackIfReady();
