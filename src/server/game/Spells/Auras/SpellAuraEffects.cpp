@@ -5304,6 +5304,18 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
             //    break;
             break;
         }
+        case SPELLFAMILY_WARLOCK:
+            switch (GetId())
+            {
+                //Glyph of Felguard
+                case 56246:
+                {
+                    if (uint64 petGUID = target->GetPetGUID())
+                        if (Unit* pet = ObjectAccessor::GetUnit(*target, petGUID))
+                            if (pet->GetEntry() == NPC_FELGUARD)
+                                pet->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, 20.0f, apply);
+                }
+            }
     }
 }
 
