@@ -290,7 +290,6 @@ public:
                 }  break;
                 case EVENT_SPELL_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, false);
-                    events.PopEvent();
                     break;
                 }
             }
