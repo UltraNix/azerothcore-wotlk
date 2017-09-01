@@ -3298,4 +3298,18 @@ Premium.InstantFlying.Enable = 1
 Gambling.Enable = 0
 
 #
+#     PhasedDuels.Enable
+#        Description: Enables or disables Phased Duels 
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+PhasedDuels.Enable = 0
+
+#
+#     PhasedDuels.Zones
+#        Description: Zones where PhasedDuels are enabled separated with spaces.
+#        Example:     "41 14" (PhasedDuels are enabled in zones 41 and 14)
+#        Default:     "" - (Enabled everywhere)
+
+PhasedDuels.Zones = ""  
 ###################################################################################################

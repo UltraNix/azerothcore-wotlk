@@ -1532,14 +1532,15 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
         if (((const Player*)obj)->IsSpectator() && ((const Player*)obj)->FindMap()->IsBattleArena())
             return false;
 
-    //Phased duel ~Piootrek & Crackaw
-    if (obj->GetTypeId() == TYPEID_PLAYER)
-        if (Player const* thisPlayer = ToPlayer())
-        {
-            Position pos = thisPlayer->GetPosition();
-            if (thisPlayer->duel && thisPlayer->duel->opponent != obj && thisPlayer->GetZoneId() == 41)
-                return false;
-        }
+
+    //Phased duels ~Piootrek
+    if (sWorld->getBoolConfig(CONFIG_PHASED_DUELS_ENABLE))
+        if(sWorld->IsPhasedDuelsZone(obj->GetZoneId()))
+            if (Player const* thisPlayer = ToPlayer())
+                if(Unit const* unit = obj->ToUnit())
+                    if(Unit const* charmerOrOwnerOrPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        if (thisPlayer->duel && charmerOrOwnerOrPlayer != thisPlayer->duel->opponent && charmerOrOwnerOrPlayer != thisPlayer)
+                            return false;
 
     bool corpseVisibility = false;
     if (distanceCheck)

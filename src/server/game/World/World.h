@@ -35,6 +35,7 @@
 #include <set>
 #include <list>
 
+
 class Object;
 class WorldPacket;
 class WorldSession;
@@ -165,6 +166,8 @@ enum WorldBoolConfigs
     CONFIG_PREMIUM_TELEPORT_ENABLE,
     CONFIG_PREMIUM_INSTANT_FLYING_ENABLE,
     CONFIG_GAMBLING_ENABLE,
+    CONFIG_PHASED_DUELS_ENABLE,
+
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -841,6 +844,9 @@ class World
         std::string const& GetWinnerMessageArena() const { return _winnerMessageArena; } // @pvpevent
         void SetWinnerMessageArena(std::string message) { _winnerMessageArena = message; } // @pvpevent
 
+        void SetPhasedDuelsZones(std::string zones);
+        bool IsPhasedDuelsZone(uint32 zone) const { if (m_phasedDuelsZones.empty()) return true; return std::find(m_phasedDuelsZones.begin(), m_phasedDuelsZones.end(), zone) != m_phasedDuelsZones.end(); }
+
         bool PatchNotes(ContentPatches patchSince = PATCH_MIN, ContentPatches patchTo = PATCH_MAX) const; // Maczuga
 
         uint8 roll_kruul_location; // @kruulevent
@@ -948,6 +954,8 @@ class World
         bool doneFlushing;          // @autoflush
         bool eventAnnounce_arena;   // @pvpevent 
         bool eventAnnounce_kruul;   // @kruulevent
+
+        std::list<uint32> m_phasedDuelsZones;
 }; 
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()

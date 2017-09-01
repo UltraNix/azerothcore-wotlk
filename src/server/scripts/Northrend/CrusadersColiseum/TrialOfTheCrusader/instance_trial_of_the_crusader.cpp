@@ -1110,6 +1110,8 @@ public:
                                 c->SetReactState(REACT_AGGRESSIVE);
                                 c->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 c->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                                if (c->IsAIEnabled)
+                                    c->AI()->DoAction(1);
                                 //if( Unit* target = c->SelectNearestTarget(200.0f) )
                                 //    c->AI()->AttackStart(target);
                             }
