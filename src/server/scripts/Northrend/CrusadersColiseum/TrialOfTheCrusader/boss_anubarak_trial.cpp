@@ -207,8 +207,16 @@ struct boss_anubarak_trialAI : public BossAI
         instance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
     }
 
-    void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType /*damagetype*/, SpellSchoolMask /*damageSchoolMask*/) override
+    void UpdateAI(uint32 diff) override
     {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
         if (!_phase3 && HealthBelowPct(30) && !me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) && !me->HasAura(SPELL_SUBMERGE) && !me->HasAura(SPELL_EMERGE))
         {
             _phase3 = true;
@@ -223,105 +231,111 @@ struct boss_anubarak_trialAI : public BossAI
             Talk(EMOTE_LEECHING_SWARM);
             Talk(SAY_LEECHING_SWARM);
         }
-    }
 
-    void ExecuteEvent(uint32 eventId) override
-    {
-        switch (eventId)
+        while (uint32 eventId = events.ExecuteEvent())
         {
-        case EVENT_SHADOW_STRIKE:
-        {
-            std::list<Creature*> addList;
-            me->GetCreatureListWithEntryInGrid(addList, NPC_BURROWER, 500.0f);
-            if (!addList.empty())
-                for (auto itr : addList)
-                    if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                        itr->CastSpell(target, SPELL_SHADOW_STRIKE);
-            events.Repeat(30000);
-            break;
-        }
-        case EVENT_ENRAGE:
-            DoCastSelf(SPELL_BERSERK, true);
-            break;
-        case EVENT_RESPAWN_SPHERE:
-        {
-            uint8 StartAt = urand(0, 5);
-            uint8 i = StartAt;
-            do
+            switch (eventId)
             {
-                if (Creature* c = ObjectAccessor::GetCreature(*me, _sphereGUID[i]))
-                    if (!c->HasAura(SPELL_FROST_SPHERE))
-                    {
-                        if (Creature* c = me->SummonCreature(NPC_FROST_SPHERE, AnubLocs[i + 5]))
-                            _sphereGUID[i] = c->GetGUID();
-                        break;
-                    }
-                i = (i + 1) % 6;
-            } while (i != StartAt);
-            events.RepeatEvent(4000);
-            break;
-        }
-        case EVENT_SPELL_FREEZING_SLASH:
-            DoCastVictim(SPELL_FREEZING_SLASH);
-            events.Repeat(urand(15000, 20000));
-            break;
-        case EVENT_SPELL_PENETRATING_COLD:
-            me->CastCustomSpell(SPELL_PENETRATING_COLD, SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5, 2, 5));
-            events.Repeat(20000);
-            break;
-        case EVENT_SUMMON_NERUBIAN:
-            me->CastCustomSpell(SPELL_SUMMON_BURROWER, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 2, 2, 4));
-            events.Repeat(45000);
-            break;
-        case EVENT_SUBMERGE:
-        {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            bool berserk = me->HasAura(SPELL_BERSERK);
-            me->RemoveAllAuras();
-            if (berserk)
+            case EVENT_SHADOW_STRIKE:
+            {
+                std::list<Creature*> addList;
+                me->GetCreatureListWithEntryInGrid(addList, NPC_BURROWER, 500.0f);
+                if (!addList.empty())
+                    for (auto itr : addList)
+                        if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                            itr->CastSpell(target, SPELL_SHADOW_STRIKE);
+                events.Repeat(30000);
+                break;
+            }
+            case EVENT_ENRAGE:
                 DoCastSelf(SPELL_BERSERK, true);
-            Talk(EMOTE_SUBMERGE);
-            Talk(EMOTE_BURROWER);
-            DoCastSelf(SPELL_SUBMERGE);
-            events.CancelEvent(EVENT_SUMMON_NERUBIAN);
-            events.CancelEvent(EVENT_SPELL_FREEZING_SLASH);
-            events.CancelEvent(EVENT_SPELL_PENETRATING_COLD);
-            events.CancelEvent(EVENT_SHADOW_STRIKE);
-            events.RescheduleEvent(EVENT_EMERGE, EMERGE_INTERVAL);
-            events.RescheduleEvent(EVENT_SPELL_SUMMON_SPIKE, 2500);
-            events.RescheduleEvent(EVENT_SUMMON_SCARAB, 3000);
-            break;
-        }
-        case EVENT_SUMMON_SCARAB:
-            if (Creature* c = ObjectAccessor::GetCreature(*me, _burrowGUID[urand(0, 3)]))
-                DoCast(c, SPELL_SUMMON_SCARAB, true);
-            events.Repeat(4000);
-            break;
-        case EVENT_EMERGE:
-            DoCastSelf(SPELL_SPIKE_TELE, true);
-            summons.DespawnEntry(NPC_SPIKE);
-            events.CancelEvent(EVENT_SUMMON_SCARAB);
-            events.RescheduleEvent(EVENT_EMERGE_2, 2000);
-            break;
-        case EVENT_EMERGE_2:
-            Talk(SAY_EMERGE);
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->setAttackTimer(BASE_ATTACK, 3000);
-            me->RemoveAura(SPELL_SUBMERGE);
-            DoCastSelf(SPELL_EMERGE);
+                break;
+            case EVENT_RESPAWN_SPHERE:
+            {
+                uint8 StartAt = urand(0, 5);
+                uint8 i = StartAt;
+                do
+                {
+                    if (Creature* c = ObjectAccessor::GetCreature(*me, _sphereGUID[i]))
+                        if (!c->HasAura(SPELL_FROST_SPHERE))
+                        {
+                            if (Creature* c = me->SummonCreature(NPC_FROST_SPHERE, AnubLocs[i + 5]))
+                                _sphereGUID[i] = c->GetGUID();
+                            break;
+                        }
+                    i = (i + 1) % 6;
+                } while (i != StartAt);
+                events.Repeat(4000);
+                break;
+            }
+            case EVENT_SPELL_FREEZING_SLASH:
+                DoCastVictim(SPELL_FREEZING_SLASH);
+                events.Repeat(urand(15000, 20000));
+                break;
+            case EVENT_SPELL_PENETRATING_COLD:
+                me->CastCustomSpell(SPELL_PENETRATING_COLD, SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5, 2, 5));
+                events.Repeat(20000);
+                break;
+            case EVENT_SUMMON_NERUBIAN:
+                me->CastCustomSpell(SPELL_SUMMON_BURROWER, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 2, 2, 4));
+                events.Repeat(45000);
+                break;
+            case EVENT_SUBMERGE:
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                bool berserk = me->HasAura(SPELL_BERSERK);
+                me->RemoveAllAuras();
+                if (berserk)
+                    DoCastSelf(SPELL_BERSERK, true);
+                Talk(EMOTE_SUBMERGE);
+                Talk(EMOTE_BURROWER);
+                DoCastSelf(SPELL_SUBMERGE);
+                events.CancelEvent(EVENT_SUMMON_NERUBIAN);
+                events.CancelEvent(EVENT_SPELL_FREEZING_SLASH);
+                events.CancelEvent(EVENT_SPELL_PENETRATING_COLD);
+                events.CancelEvent(EVENT_SHADOW_STRIKE);
+                events.RescheduleEvent(EVENT_EMERGE, EMERGE_INTERVAL);
+                events.RescheduleEvent(EVENT_SPELL_SUMMON_SPIKE, 2500);
+                events.RescheduleEvent(EVENT_SUMMON_SCARAB, 3000);
+                break;
+            }
+            case EVENT_SUMMON_SCARAB:
+                if (Creature* c = ObjectAccessor::GetCreature(*me, _burrowGUID[urand(0, 3)]))
+                    DoCast(c, SPELL_SUMMON_SCARAB, true);
+                events.Repeat(4000);
+                break;
+            case EVENT_EMERGE:
+                DoCastSelf(SPELL_SPIKE_TELE, true);
+                summons.DespawnEntry(NPC_SPIKE);
+                events.CancelEvent(EVENT_SUMMON_SCARAB);
+                events.RescheduleEvent(EVENT_EMERGE_2, 2000);
+                break;
+            case EVENT_EMERGE_2:
+                Talk(SAY_EMERGE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->setAttackTimer(BASE_ATTACK, 3000);
+                me->RemoveAura(SPELL_SUBMERGE);
+                DoCastSelf(SPELL_EMERGE);
 
-            events.RescheduleEvent(EVENT_SHADOW_STRIKE, 30000);
-            events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000, 10000));
-            events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000, 15000));
-            events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000, 20000));
-            events.RescheduleEvent(EVENT_SUBMERGE, SUBMERGE_INTERVAL);
-            break;
-        case EVENT_SPELL_SUMMON_SPIKE:
-            DoCastSelf(SPELL_SUMMON_SPIKE, true);
-            break;
-        default:
-            break;
+                if (IsHeroic())
+                    events.RescheduleEvent(EVENT_SHADOW_STRIKE, 30000);
+                events.RescheduleEvent(EVENT_SUMMON_NERUBIAN, urand(8000, 10000));
+                events.RescheduleEvent(EVENT_SPELL_FREEZING_SLASH, urand(7000, 15000));
+                events.RescheduleEvent(EVENT_SPELL_PENETRATING_COLD, urand(15000, 20000));
+                events.RescheduleEvent(EVENT_SUBMERGE, SUBMERGE_INTERVAL);
+                break;
+            case EVENT_SPELL_SUMMON_SPIKE:
+                DoCastSelf(SPELL_SUMMON_SPIKE, true);
+                break;
+            default:
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
+
+        DoMeleeAttackIfReady();
     }
 
     void JustSummoned(Creature* summon) override
@@ -556,6 +570,11 @@ struct npc_nerubian_burrowerAI : public ScriptedAI
 {
     npc_nerubian_burrowerAI(Creature* creature) : ScriptedAI(creature)
     {
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, true);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHACKLE, true);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, true);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FREEZE, true);
+
         // I am summoned by another npc (SPELL_EFFECT_FORCE_CAST), inform Anub'arak
         if (InstanceScript* pInstance = me->GetInstanceScript())
             if (uint64 guid = pInstance->GetData64(TYPE_ANUBARAK))
@@ -624,7 +643,7 @@ struct npc_nerubian_burrowerAI : public ScriptedAI
                     _events.RescheduleEvent(EVENT_EMERGE, 15000);
                 }
                 else
-                    _events.RepeatEvent(3000);
+                    _events.Repeat(3000);
                 break;
             case EVENT_EMERGE:
                 me->SetHealth(me->GetMaxHealth());

@@ -382,6 +382,14 @@ class spell_warl_generic_scaling : public SpellScriptLoader
                     int32 shadow = owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW);
                     int32 maximum  = (fire > shadow) ? fire : shadow;
                     amount = CalculatePct(std::max<int32>(0, maximum), 57);
+                    //Aura apply for this glyph of Felguard
+                    if (uint64 petGUID = owner->GetPetGUID())
+                        if (Unit* pet = ObjectAccessor::GetUnit(*owner, petGUID))
+                            if (pet->GetEntry() == NPC_FELGUARD)
+                            {
+                                if (owner->HasAura(56246) && !pet->HasAura(56246)) pet->AddAura(56246, pet);
+                                if (!owner->HasAura(56246) && pet->HasAura(56246)) pet->RemoveAura(56246);
+                            }
                 }
             }
 
