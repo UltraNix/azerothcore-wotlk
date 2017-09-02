@@ -400,25 +400,25 @@ public:
                     case EVENT_SPELL_LIFEBLOOM:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_LIFEBLOOM, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_NOURISH:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_NOURISH, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_REGROWTH:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_REGROWTH, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_REJUVENATION:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_REJUVENATION, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     default:
@@ -588,13 +588,13 @@ public:
                     case EVENT_SPELL_HEALING_WAVE:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_HEALING_WAVE, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_RIPTIDE:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_RIPTIDE, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     default:
@@ -773,19 +773,19 @@ public:
                     case EVENT_SPELL_FLASH_OF_LIGHT:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_FLASH_OF_LIGHT, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_HOLY_LIGHT:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_HOLY_LIGHT, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_HOLY_SHOCK:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_HOLY_SHOCK, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     default:
