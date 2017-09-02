@@ -3712,9 +3712,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 60883: // Rock Shards - Archavon the Stone Watcher
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
             break;
-        case 34367:
-            spellInfo->ChannelInterruptFlags = AURA_INTERRUPT_FLAG_MOVE;
-            break;
 
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
