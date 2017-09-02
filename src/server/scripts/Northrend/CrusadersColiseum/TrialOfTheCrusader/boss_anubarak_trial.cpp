@@ -574,6 +574,7 @@ struct npc_nerubian_burrowerAI : public ScriptedAI
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHACKLE, true);
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, true);
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FREEZE, true);
+        me->ApplySpellImmune(0, IMMUNITY_ID, 33786, true); // cyclone
 
         // I am summoned by another npc (SPELL_EFFECT_FORCE_CAST), inform Anub'arak
         if (InstanceScript* pInstance = me->GetInstanceScript())
