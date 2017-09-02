@@ -1549,12 +1549,11 @@ public:
             return true;
         }
 
-        /*
         if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
         {
             handler->PSendSysMessage("You may only remove items. Adding items is available for higher GMLevel.");
             return false;
-        }*/
+        }
 
         // Adding items
         uint32 noSpaceForCount = 0;
