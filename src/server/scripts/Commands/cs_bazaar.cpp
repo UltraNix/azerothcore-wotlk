@@ -724,6 +724,10 @@ public:
             events.ScheduleEvent(NPC_SLAVE_EVENT_SAY_GROUP_1, urand(1000, NPC_SLAVE_INTERVAL_YELL));
             events.ScheduleEvent(NPC_SLAVE_EVENT_SCENE, urand(1000, NPC_SLAVE_INTERVAL_SCENE));
         }
+
+        me->SetAttackable(false);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        me->SetReactState(REACT_PASSIVE);
     }
 
     void UpdateAI(uint32 diff) override
