@@ -96,4 +96,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_PREMIUM_POINTS, "SELECT dp FROM account WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID, "SELECT ip, DATE_FORMAT(MAX(login_date), '%Y-%m-%d | %T') AS `date` FROM account_history WHERE account_id = ? GROUP BY ip ORDER BY `date` DESC LIMIT 15", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_IP, "SELECT account_id, DATE_FORMAT(MAX(login_date), '%Y-%m-%d | %T') AS `date` FROM account_history WHERE ip = ? GROUP BY account_id ORDER BY `date` DESC LIMIT 15", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_INS_INGAME_STATISTICS, "INSERT INTO ingame_stats (connectedPlayers, playersCount, diff, avgDiff, currentTime) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }

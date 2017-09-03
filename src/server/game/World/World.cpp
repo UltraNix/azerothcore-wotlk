@@ -1792,6 +1792,8 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_UPTIME].SetInterval(m_int_configs[CONFIG_UPTIME_UPDATE]*MINUTE*IN_MILLISECONDS);
                                                             //Update "uptime" table based on configuration entry in minutes.
 
+    m_timers[WUPDATE_INGAMESTATS].SetInterval(20 * MINUTE * IN_MILLISECONDS);
+
     m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
                                                             //erase corpses every 20 minutes
     m_timers[WUPDATE_CLEANDB].SetInterval(m_int_configs[CONFIG_LOGDB_CLEARINTERVAL]*MINUTE*IN_MILLISECONDS);
@@ -2122,6 +2124,27 @@ void World::Update(uint32 diff)
         stmt->setUInt16(1, uint16(maxOnlinePlayers));
         stmt->setUInt32(2, realmID);
         stmt->setUInt32(3, uint32(m_startTime));
+
+        LoginDatabase.Execute(stmt);
+    }
+
+    /// <li> Update ingame stats table
+    if (m_timers[WUPDATE_INGAMESTATS].Passed())
+    {
+        m_timers[WUPDATE_INGAMESTATS].Reset();
+
+        uint32 connectedPlayers = sWorld->GetActiveSessionCount();
+        uint32 playersCount     = sWorld->GetPlayerCount();
+        uint32 updateTime       = sWorld->GetUpdateTime();
+        uint32 avgUpdateTime    = avgDiffTracker.getAverage();
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_INGAME_STATISTICS);
+
+        stmt->setUInt32(0, connectedPlayers);
+        stmt->setUInt32(1, playersCount);
+        stmt->setUInt32(2, updateTime);
+        stmt->setUInt32(3, avgUpdateTime);
+        stmt->setString(4, TimeToTimestampStr(sWorld->GetGameTime()));
 
         LoginDatabase.Execute(stmt);
     }
