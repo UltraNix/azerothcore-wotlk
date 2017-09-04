@@ -133,6 +133,7 @@ public:
             { "arenainfo",          SEC_PLAYER,             false, HandleArenaInfoCommand,              "" },
             { "dodge",              SEC_PLAYER,             false, &HandleDodgeModeCommand,             "" },
             { "tocreset",           SEC_PLAYER,             false, &HandleTocResetCommand,               "" },
+            { "hasblizzlike",       SEC_MODERATOR,          false, &HandleHasBlizzlikeCommand,          "" },
         };
         return commandTable;
     }
@@ -3575,6 +3576,22 @@ public:
             sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUIDLow(), trialMapID, Difficulty(i), true, player);
 
         handler->PSendSysMessage("ToC has been successfully reset.");
+        return true;
+    }
+
+    static bool HandleHasBlizzlikeCommand(ChatHandler* handler, char const* arg)
+    {
+        Player *player = handler->getSelectedPlayer();
+        if (!player)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        if (player->BlizzlikeMode())
+            handler->PSendSysMessage("Player %s has |cff00ff00enabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
+        else
+            handler->PSendSysMessage("Player %s has |cffff0000disabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
         return true;
     }
 };
