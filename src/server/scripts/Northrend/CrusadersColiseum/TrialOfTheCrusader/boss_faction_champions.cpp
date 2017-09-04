@@ -1285,6 +1285,13 @@ public:
             }
         }
 
+        void JustDied(Unit* killer) override
+        {
+            boss_faction_championsAI::JustDied(killer);
+            if (Creature* felhunter = GetFelhunter())
+                felhunter->DespawnOrUnsummon();
+        }
+
         void EnterCombat(Unit* who) override
         {
             boss_faction_championsAI::EnterCombat(who);
@@ -1594,6 +1601,13 @@ public:
         bool myCanCast()
         {
             return !(me->HasUnitState(UNIT_STATE_CASTING) || me->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DISARM_RANGED) || IsCCed());
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            boss_faction_championsAI::JustDied(killer);
+            if (Creature* cat = GetCat())
+                cat->DespawnOrUnsummon();
         }
 
         void DoAction(int32 actionId) override
@@ -2749,6 +2763,7 @@ enum eWarlockPetEvents
 {
     EVENT_SPELL_DEVOUR_MAGIC = 1,
     EVENT_SPELL_SPELL_LOCK,
+    EVENT_CHANGE_TARGET_WARL_PET
 };
 
 class npc_toc_pet_warlock : public CreatureScript
@@ -2770,6 +2785,7 @@ public:
             events.Reset();
             events.RescheduleEvent(EVENT_SPELL_DEVOUR_MAGIC, urand(5000, 15000));
             events.RescheduleEvent(EVENT_SPELL_SPELL_LOCK, urand(5000, 15000));
+            events.RescheduleEvent(EVENT_CHANGE_TARGET_WARL_PET, urand(15000, 25000));
         }
 
         EventMap events;
@@ -2808,6 +2824,11 @@ public:
                 events.RepeatEvent(24000);
                 EventMapGCD(events, 1500);
                 break;
+            case EVENT_CHANGE_TARGET_WARL_PET:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) { return tar->IsPlayer() && !IsNonViableTarget(tar); }))
+                    AttackStart(target);
+                events.RepeatEvent(urand(15000, 25000));
+                break;
             }
 
             DoMeleeAttackIfReady();
@@ -2829,6 +2850,7 @@ enum eHunterPetSpells
 enum eHunterPetEvents
 {
     EVENT_SPELL_CLAW = 1,
+    EVENT_CHANGE_TARGET_HUNTER_PET
 };
 
 class npc_toc_pet_hunter : public CreatureScript
@@ -2849,6 +2871,7 @@ public:
             me->SetRegeneratingHealth(false);
             events.Reset();
             events.RescheduleEvent(EVENT_SPELL_CLAW, urand(5000, 15000));
+            events.RescheduleEvent(EVENT_CHANGE_TARGET_HUNTER_PET, urand(15000, 25000));
         }
 
         EventMap events;
@@ -2879,6 +2902,11 @@ public:
                 if (me->GetVictim() && !IsNonViableTarget(me->GetVictim()))
                     me->CastSpell(me->GetVictim(), SPELL_CLAW, false);
                 events.RepeatEvent(urand(8000, 15000));
+                break;
+            case EVENT_CHANGE_TARGET_HUNTER_PET:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) { return tar->IsPlayer() && !IsNonViableTarget(tar); }))
+                    AttackStart(target);
+                events.RepeatEvent(urand(15000, 25000));
                 break;
             }
 
