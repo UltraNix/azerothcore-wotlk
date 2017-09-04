@@ -5932,6 +5932,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Trial of the Crusader, Anub'Arak, Leeching Swarm
         case 66240:
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
         // Trial of the Crusader, Faction Champions:
