@@ -5930,10 +5930,17 @@ void SpellMgr::LoadDbcDataCorrections()
         case 66129:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
-        // Trial of the Crusader, Anub'Arak, Leeching Swarm
+        // Trial of the Crusader, Anub'Arak, Leeching Swarm damage
         case 66240:
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            break;
+        // Trial of the Crusader, Anub'Arak, Leeching Swarm aura
+        case 66118:
+        case 67630:
+        case 68646:
+        case 68647:
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             break;
         // Trial of the Crusader, Faction Champions:
         case 65792: // frost nova
