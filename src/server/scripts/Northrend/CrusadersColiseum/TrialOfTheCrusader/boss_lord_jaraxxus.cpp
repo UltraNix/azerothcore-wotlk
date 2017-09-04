@@ -181,7 +181,7 @@ struct boss_jaraxxusAI : public BossAI
             events.Repeat(urand(25000, 45000));
             break;
         case EVENT_SPELL_LEGION_FLAME:
-            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
             {
                 Talk(EMOTE_LEGION_FLAME, target);
                 DoCast(target, SPELL_LEGION_FLAME);
@@ -216,6 +216,11 @@ struct boss_jaraxxusAI : public BossAI
     {
         std::list<Creature*> flameList;
         me->GetCreatureListWithEntryInGrid(flameList, NPC_LEGION_FLAME, 250.0f);
+        me->GetCreatureListWithEntryInGrid(flameList, NPC_INFERNAL_VOLCANO, 250.0f);
+        me->GetCreatureListWithEntryInGrid(flameList, NPC_NETHER_PORTAL, 250.0f);
+        me->GetCreatureListWithEntryInGrid(flameList, NPC_FEL_INFERNAL, 250.0f);
+        me->GetCreatureListWithEntryInGrid(flameList, NPC_MISTRESS_OF_PAIN, 250.0f);
+
         if (!flameList.empty())
             for (auto itr : flameList)
                 itr->DespawnOrUnsummon();
