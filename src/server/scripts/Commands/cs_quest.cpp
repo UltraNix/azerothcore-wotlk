@@ -52,7 +52,11 @@ public:
 
     static bool HandleQuestAdd(ChatHandler* handler, const char* args)
     {
-        Player* player = handler->getSelectedPlayer();
+        Player *player = nullptr;
+        if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+            player = handler->GetSession()->GetPlayer();
+        else
+            player = handler->getSelectedPlayer();
         if (!player)
         {
             handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -97,7 +101,11 @@ public:
 
     static bool HandleQuestRemove(ChatHandler* handler, const char* args)
     {
-        Player* player = handler->getSelectedPlayer();
+        Player *player = nullptr;
+        if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+            player = handler->GetSession()->GetPlayer();
+        else
+            player = handler->getSelectedPlayer();
         if (!player)
         {
             handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -150,7 +158,11 @@ public:
 
     static bool HandleQuestComplete(ChatHandler* handler, const char* args)
     {
-        Player* player = handler->getSelectedPlayer();
+        Player *player = nullptr;
+        if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+            player = handler->GetSession()->GetPlayer();
+        else
+            player = handler->getSelectedPlayer();
         if (!player)
         {
             handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -243,14 +255,17 @@ public:
 
     static bool HandleQuestReward(ChatHandler* handler, char const* args)
     {
-        Player* player = handler->getSelectedPlayer();
+        Player *player = nullptr;
+        if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+            player = handler->GetSession()->GetPlayer();
+        else
+            player = handler->getSelectedPlayer();
         if (!player)
         {
             handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
             handler->SetSentErrorMessage(true);
             return false;
         }
-
         // .quest reward #entry
         // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
         char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
