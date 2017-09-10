@@ -11848,6 +11848,10 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
     if (!spellInfo || !spellInfo->Effects[index].IsEffect())
         return false;
 
+    // ToC permafrost:
+    if (spellInfo->Id == 66193 || spellInfo->Id == 67855 || spellInfo->Id == 67856 || spellInfo->Id == 67857 && GetEntry() == 34607)
+        return false;
+
     // xinef: pet scaling auras
     if (spellInfo->HasAttribute(SPELL_ATTR4_IS_PET_SCALING))
         return false;
