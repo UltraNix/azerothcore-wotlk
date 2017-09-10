@@ -5783,23 +5783,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
             spellInfo->EffectTriggerSpell[0] = 66064;
             break;
-        // Trial of the Crusader, Faction Champions, Priest - Mana Burn
-        case 66100:
-            spellInfo->EffectBasePoints[0] = 5;
-            spellInfo->EffectDieSides[0] = 0;
-            break;
-        case 68026:
-            spellInfo->EffectBasePoints[0] = 8;
-            spellInfo->EffectDieSides[0] = 0;
-            break;
-        case 68027:
-            spellInfo->EffectBasePoints[0] = 6;
-            spellInfo->EffectDieSides[0] = 0;
-            break;
-        case 68028:
-            spellInfo->EffectBasePoints[0] = 10;
-            spellInfo->EffectDieSides[0] = 0;
-            break;
         case 65724:
         case 67213:
         case 67214:
