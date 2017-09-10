@@ -578,7 +578,6 @@ struct npc_nerubian_burrowerAI : public ScriptedAI
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SPEED_SLOW_ALL, true);
 
         // I am summoned by another npc (SPELL_EFFECT_FORCE_CAST), inform Anub'arak
         if (InstanceScript* pInstance = me->GetInstanceScript())
@@ -839,30 +838,7 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
         return ValidateSpellInfo({ SPELL_LEECHING_SWARM_DMG,SPELL_LEECHING_SWARM_HEAL });
     }
 
-    void HandleEffectPeriodic(AuraEffect const* aurEff)
-    {
-        if (Unit* caster = GetCaster())
-        {
-            int32 lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
-            if (lifeLeeched < 250)
-                lifeLeeched = 250;
-            // Damage
-            caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
-            // Heal is handled in damage spell. It has to heal the same amount, but some of the dmg can be resisted.
-        }
-    }
-
-    void Register() override
-    {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_leeching_swarm_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-    }
-};
-
-class spell_gen_leeching_swarm_dmg_SpellScript : public SpellScript
-{
-    PrepareSpellScript(spell_gen_leeching_swarm_dmg_SpellScript)
-
-        float GetMultiplier()
+    float GetMultiplier()
     {
         if (auto caster = GetCaster())
         {
@@ -882,21 +858,31 @@ class spell_gen_leeching_swarm_dmg_SpellScript : public SpellScript
         return 0;
     }
 
-    void HandleAfterHit()
+    void HandleEffectPeriodic(AuraEffect const* aurEff)
     {
         if (Unit* caster = GetCaster())
-            if (GetHitDamage() > 0)
+        {
+            int32 lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
+            if (lifeLeeched < 250)
+                lifeLeeched = 250;
+            // Damage
+            caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
+            // Heal
+            if (Unit* target = GetTarget())
             {
-                int32 damage = GetHitDamage();
-                int32 value = damage * GetMultiplier() / 100.0f;
-                caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
-            }
-    }
+                if (target->IsPlayer() && !target->IsImmunedToDamage(GetSpellInfo()))
+                {
+                    int32 value = lifeLeeched * GetMultiplier() / 100.0f;
+                    caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
 
+                }
+            }
+        }
+    }
 
     void Register() override
     {
-        AfterHit += SpellHitFn(spell_gen_leeching_swarm_dmg_SpellScript::HandleAfterHit);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_leeching_swarm_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
     }
 };
 
@@ -909,5 +895,4 @@ void AddSC_boss_anubarak_trial()
     new CreatureAILoader<npc_anubarak_spikeAI>("npc_anubarak_spike");
     new AuraScriptLoaderEx<spell_pursuing_spikesAuraScript>("spell_pursuing_spikes");
     new AuraScriptLoaderEx<spell_gen_leeching_swarm_AuraScript>("spell_gen_leeching_swarm");
-    new SpellScriptLoaderEx<spell_gen_leeching_swarm_dmg_SpellScript>("spell_gen_leeching_swarm_dmg");
 }

@@ -10328,9 +10328,10 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellID, uint32 damage, Pow
     SendMessageToSet(&data, true);
 }
 
-void Unit::EnergizeBySpell(Unit* victim, uint32 spellID, uint32 damage, Powers powerType)
+void Unit::EnergizeBySpell(Unit* victim, uint32 spellID, uint32 damage, Powers powerType, bool sendLog)
 { 
-    SendEnergizeSpellLog(victim, spellID, damage, powerType);
+    if(sendLog)
+        SendEnergizeSpellLog(victim, spellID, damage, powerType);
     // needs to be called after sending spell log
     victim->ModifyPower(powerType, damage);
 

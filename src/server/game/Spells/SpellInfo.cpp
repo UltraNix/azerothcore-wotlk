@@ -2345,7 +2345,7 @@ uint32 SpellInfo::GetRecoveryTime() const
     return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
 }
 
-int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, Spell* spell) const
+int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, Spell* spell, uint32 manaPercentCu) const
 {
     // Spell drain all exist power on cast (Only paladin lay of Hands)
     if (AttributesEx & SPELL_ATTR1_DRAIN_ALL_POWER)
@@ -2362,23 +2362,24 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
 
     // Base powerCost
     int32 powerCost = ManaCost;
+    if (manaPercentCu == 0) manaPercentCu = ManaCostPercentage;
     // PCT cost from total amount
-    if (ManaCostPercentage)
+    if (manaPercentCu)
     {
         switch (PowerType)
         {
             // health as power used
             case POWER_HEALTH:
-                powerCost += int32(CalculatePct(caster->GetCreateHealth(), ManaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetCreateHealth(), manaPercentCu));
                 break;
             case POWER_MANA:
-                powerCost += int32(CalculatePct(caster->GetCreateMana(), ManaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetCreateMana(), manaPercentCu));
                 break;
             case POWER_RAGE:
             case POWER_FOCUS:
             case POWER_ENERGY:
             case POWER_HAPPINESS:
-                powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
+                powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), manaPercentCu));
                 break;
             case POWER_RUNE:
             case POWER_RUNIC_POWER:
