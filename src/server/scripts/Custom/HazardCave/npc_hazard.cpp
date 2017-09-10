@@ -357,12 +357,12 @@ public:
             switch (creature->GetEntry())
             {
                 case GOLD_LOTERRY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 25", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 15", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_01, creature->GetGUID());
                     break;
                 case SC_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 25", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 15", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wroce pozniej.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_02, creature->GetGUID());
