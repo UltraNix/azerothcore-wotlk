@@ -30,10 +30,19 @@ enum MenuTexts
     MSG_ANUBARAK_INITIAL              = 14828,
     MSG_ANUBARAK_INITIAL_2            = 14829,
 
+    MSG_NOT_EGLIBLE_FOR_HEROIC        = 14850,
+    MSG_NOT_EGLIBLE_FOR_HEROIC_2      = 500000,
+
     MSG_TESTED                        = 724001,
     MSG_NEXT_STAGE                    = 724002,
     MSG_CRUSADERS                    = 724003,
     MSG_ANUBARAK                    = 724005,
+};
+
+enum Achievements
+{
+    ACHIEVEMENT_CALL_OF_THE_CRUSADE_10 = 3917,
+    ACHIEVEMENT_CALL_OF_THE_CRUSADE_25 = 3916
 };
 
 class npc_announcer_toc10 : public CreatureScript
@@ -53,6 +62,18 @@ public:
         InstanceScript* pInstance = pCreature->GetInstanceScript();
         if( !pInstance )
             return true;
+
+        auto map = pInstance->instance;
+
+        if (map && (map->Is25ManRaid() && map->IsHeroic() && !pPlayer->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_25)) /*|| TESTING (map->IsHeroic() && !pPlayer->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_10)*/)
+        {
+            if (!pPlayer->IsGameMaster())
+            {
+                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I have not completed the Trial of the Crusader.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                pPlayer->SEND_GOSSIP_MENU(MSG_NOT_EGLIBLE_FOR_HEROIC, pCreature->GetGUID());
+                return true;
+            }
+        }
 
         uint32 gossipTextId = 0;
         switch( pInstance->GetData(TYPE_INSTANCE_PROGRESS) )
@@ -111,6 +132,20 @@ public:
         InstanceScript* instance = creature->GetInstanceScript();
         if( !instance )
             return true;
+
+        auto map = instance->instance;
+
+        if (map && (map->Is25ManRaid() && map->IsHeroic() && !player->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_25)) /*TESTING|| (map->IsHeroic() && !player->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_10))*/)
+        {
+            if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            {
+                if (!player->IsGameMaster())
+                {
+                    player->SEND_GOSSIP_MENU(MSG_NOT_EGLIBLE_FOR_HEROIC_2, creature->GetGUID());
+                    return true;
+                }
+            }
+        }
 
         if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
