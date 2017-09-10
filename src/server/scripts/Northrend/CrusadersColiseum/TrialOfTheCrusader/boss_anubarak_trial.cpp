@@ -517,8 +517,14 @@ struct npc_frost_sphereAI : public NullCreatureAI
         me->SetCorpseDelay(15 * 60 * 1000);
     }
 
-    void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType det, SpellSchoolMask) override
     {
+        if (det != DIRECT_DAMAGE && det != SPELL_DIRECT_DAMAGE)
+        {
+            damage = 0;
+            return;
+        }
+
         if (me->GetHealth() <= damage)
         {
             damage = 0;
@@ -578,6 +584,7 @@ struct npc_nerubian_burrowerAI : public ScriptedAI
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
 
         // I am summoned by another npc (SPELL_EFFECT_FORCE_CAST), inform Anub'arak
         if (InstanceScript* pInstance = me->GetInstanceScript())
@@ -874,7 +881,6 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
                 {
                     int32 value = lifeLeeched * GetMultiplier() / 100.0f;
                     caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
-
                 }
             }
         }
