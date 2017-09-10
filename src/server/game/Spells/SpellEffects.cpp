@@ -572,6 +572,11 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_DRUID:
             {
+                // Starfall
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo && m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && (m_spellInfo->SpellIconID == 2854 || m_spellInfo->SpellVisual[0] == 11040))
+                    if (unitTarget && unitTarget->GetEntry() == 34606)
+                        damage = 0;
+
                 // Ferocious Bite
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags[0] & 0x000800000) && m_spellInfo->SpellVisual[0] == 6587)
                 {
