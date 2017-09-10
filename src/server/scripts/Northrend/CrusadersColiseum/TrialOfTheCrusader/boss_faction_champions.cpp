@@ -2934,25 +2934,16 @@ struct npc_searing_totem_factionsAI : public ScriptedAI
 {
     npc_searing_totem_factionsAI(Creature* creature) : ScriptedAI(creature) {}
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 diff) override
     {
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
 
-        auto const& players = me->GetMap()->GetPlayers();
-
-        auto iter = players.getFirst();
-        for (int8 i = urand(0, players.getSize() - 1); i != 0; i--)
-            iter++;
-
-        Player* target = iter->GetSource();
-
-        if (target && !(target->IsGameMaster() || target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared()))
+        if (Player* target = SelectTargetFromPlayerList(15.0f, 0, true))
             DoCast(target, 65998);
     }
 
-
-    void EnterEvadeMode()
+    void EnterEvadeMode() override
     {
         me->DespawnOrUnsummon();
     }
