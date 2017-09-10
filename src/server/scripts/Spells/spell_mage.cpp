@@ -27,6 +27,7 @@
 #include "Player.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include <map>
 
 enum MageSpells
 {
@@ -937,10 +938,41 @@ class spell_mage_mana_shield : public SpellScriptLoader
 class spell_mage_master_of_elements : public SpellScriptLoader
 {
     public:
-        spell_mage_master_of_elements() : SpellScriptLoader("spell_mage_master_of_elements") { }
+        spell_mage_master_of_elements() : SpellScriptLoader("spell_mage_master_of_elements") 
+        { 
+            
+        }
 
         class spell_mage_master_of_elements_AuraScript : public AuraScript
         {
+            std::map<uint32, uint32> percentList = {
+                //Arcane Missile mana cost (Master of Elements)
+                {7268, 6},
+                {7269, 6},
+                {7270, 6},
+                {8418, 6},
+                {8419, 6},
+                {10273, 6},
+                {25346, 6},
+                {27076, 6},
+                {38700, 6},
+                {38703, 6},
+                {42844, 6},
+                {42845, 6},
+                //Blizzard mana cost (Master of Elements)
+                {42208, 9},
+                {42209, 9},
+                {42210, 9},
+                {42211, 9},
+                {42212, 9},
+                {42213, 9},
+                {42198, 9},
+                {42937, 9},
+                {42938, 9},
+                // Living Bomb
+                {44461, 22},
+                {55361, 22},
+                {55362, 22} };
             PrepareAuraScript(spell_mage_master_of_elements_AuraScript);
 
             bool Validate(SpellInfo const* /*spellInfo*/)
@@ -959,7 +991,11 @@ class spell_mage_master_of_elements : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 if (GetTarget()->HasAura(12536)) return; //Clearcasting check
-                int32 mana = int32(eventInfo.GetDamageInfo()->GetSpellInfo()->CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo()->GetSchoolMask()));
+
+                const SpellInfo* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+                std::map<uint32, uint32>::iterator it = percentList.find(spellInfo->Id);
+                const uint32 manaPercent = it == percentList.end() ? 0 : it->second;
+                int32 mana = int32(eventInfo.GetDamageInfo()->GetSpellInfo()->CalcPowerCost(GetTarget(), eventInfo.GetDamageInfo()->GetSchoolMask(), NULL, manaPercent));
                 mana = CalculatePct(mana, aurEff->GetAmount());
 
                 if (mana > 0)
