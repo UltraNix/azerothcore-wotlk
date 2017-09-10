@@ -32,7 +32,6 @@ struct boss_faction_championsAI : public ScriptedAI
         threatTimer = 2000;
         powerTimer = 1000;
         checkTimer = 5000;
-        targetChangeTimer = 6000;
     }
 
     InstanceScript* pInstance;
@@ -40,7 +39,6 @@ struct boss_faction_championsAI : public ScriptedAI
     uint32 threatTimer;
     uint32 powerTimer;
     uint32 checkTimer;
-    uint32 targetChangeTimer;
 
     void EnterCombat(Unit* /*who*/)
     {
@@ -63,24 +61,6 @@ struct boss_faction_championsAI : public ScriptedAI
 
     float GetThreatMod(float dist, float armor, uint32 health, uint32 /*maxhealth*/, Unit* target)
     {
-        /*float mod_health = ((float)health)/maxhealth;
-        if (mod_health < 0.4f) mod_health = 0.4f;
-        float unimportant_dist = (mAIType == AI_MELEE || mAIType == AI_PET ? 5.0f : 20.0f);
-        if (dist > unimportant_dist)
-        dist -= unimportant_dist; // compensate melee range
-        else
-        dist = 0.0f;
-        float mod_dist = 25.0f/(25.0f + dist);
-        float mod_armor = (mAIType == AI_MELEE || mAIType == AI_PET) ? armor / 16635.0f : 0.0f;
-        return mod_dist / ((0.15f+mod_armor)*mod_health);*/
-
-        // TC:
-        /*float dist_mod = (mAIType == AI_MELEE || mAIType == AI_PET) ? 15.0f / (15.0f + dist) : 1.0f;
-        float armor_mod = (mAIType == AI_MELEE || mAIType == AI_PET) ? armor / 16635.0f : 0.0f;
-        float eh = (health + 1) * (1.0f + armor_mod);
-        return dist_mod * 30000.0f / eh;*/
-
-        // third try:
         float mod_dist = 1.0f; // 0.2 .. 1.0
         float mod_health = health > 40000 ? 2.0f : (60000 - health) / 10000.0f; // 2.0 .. 6.0
         float mod_armor = (mAIType == AI_MELEE || mAIType == AI_PET) ? Unit::CalcArmorReducedDamage(me, target, 10000, NULL) / 10000.0f : 1.0f;
@@ -89,16 +69,23 @@ struct boss_faction_championsAI : public ScriptedAI
 
     void RecalculateThreat()
     {
-        ThreatContainer::StorageType const& tList = me->getThreatManager().getThreatList();
-        for (ThreatContainer::StorageType::const_iterator itr = tList.begin(); itr != tList.end(); ++itr)
+        std::vector<Unit*> targets;
+        ThreatContainer::StorageType const& threatList = me->getThreatManager().getThreatList();
+        for (auto itr = threatList.begin(); itr != threatList.end(); ++itr)
         {
-            Unit* pUnit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid());
-            if (pUnit && pUnit->GetTypeId() == TYPEID_PLAYER && me->getThreatManager().getThreat(pUnit))
+            Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid());
+            if (unit && unit->GetTypeId() == TYPEID_PLAYER && me->getThreatManager().getThreat(unit) && !IsNonViableTarget(unit))
+                if (targets.size() <= 2)
+                    targets.push_back(unit);
+        }
+
+        if (!targets.empty())
+        {
+            if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets))
             {
-                float threatMod = GetThreatMod(me->GetDistance2d(pUnit), (float)pUnit->GetArmor(), pUnit->GetHealth(), pUnit->GetMaxHealth(), pUnit);
-                me->getThreatManager().modifyThreatPercent(pUnit, -100);
-                //me->getThreatManager().doAddThreat(pUnit, 10000000.0f * threatMod);
-                if (HostileReference* ref = me->getThreatManager().getOnlineContainer().getReferenceByTarget(pUnit))
+                float threatMod = GetThreatMod(me->GetDistance2d(target), (float)target->GetArmor(), target->GetHealth(), target->GetMaxHealth(), target);
+                me->getThreatManager().modifyThreatPercent(target, -100);
+                if (HostileReference* ref = me->getThreatManager().getOnlineContainer().getReferenceByTarget(target))
                     ref->addThreat(10000000.0f * threatMod);
             }
         }
@@ -151,7 +138,6 @@ struct boss_faction_championsAI : public ScriptedAI
         return unit->GetEntry() == 35465 || unit->GetEntry() == 35610;
     }
 
-
     Creature* SelectTarget_MostHPLostFriendlyMissingBuff(uint32 spell, float range)
     {
         std::list<Creature*> list = DoFindFriendlyMissingBuff(range, spell);
@@ -173,7 +159,7 @@ struct boss_faction_championsAI : public ScriptedAI
 
         // All non-pet targets are fully healed - get random pet
         for (auto itr : list)
-            if (!IsPet(itr))
+            if (IsPet(itr))
                 if (itr->GetHealth() < itr->GetMaxHealth())
                     return itr;
 
@@ -195,26 +181,6 @@ struct boss_faction_championsAI : public ScriptedAI
                 ++count;
         }
         return count;
-    }
-
-    void HandleVictimChange()
-    {
-        if (!me->IsInCombat())
-            return;
-
-        if (targetChangeTimer > 1000)
-            return;
-
-        if (Unit* victim = me->GetVictim())
-        {
-            if (IsNonViableTarget(victim))
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return tar->IsPlayer() && !IsNonViableTarget(tar); }))
-                    AttackStart(target);
-        }
-        else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return !IsNonViableTarget(tar); }))
-            AttackStart(target);
-
-        targetChangeTimer = 6000;
     }
 
     Unit* SelectEnemyCaster(bool casting, float range) const
@@ -289,10 +255,14 @@ struct boss_faction_championsAI : public ScriptedAI
         else
             checkTimer -= diff;
 
-        if (targetChangeTimer <= diff)
-            targetChangeTimer = 6000;
-        else
-            targetChangeTimer -= diff;
+        if (Unit* victim = me->GetVictim())
+        {
+            if (IsNonViableTarget(victim))
+            {
+                RecalculateThreat();
+                threatTimer = urand(8750, 9250);
+            }
+        }
 
         if (threatTimer <= diff)
         {
@@ -909,7 +879,7 @@ enum ePriestSpells
     SPELL_DISPEL = 65546,
     SPELL_MANA_BURN = 66100,
     SPELL_PSYCHIC_SCREAM = 65543,
-    SPELL_PENANCE = 66098
+    SPELL_PENANCE = 66097
 };
 
 enum ePriestEvents
@@ -953,6 +923,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_DISPEL, urand(3000, 10000));
             events.RescheduleEvent(EVENT_SPELL_MANA_BURN, urand(3000, 10000));
             events.RescheduleEvent(EVENT_SPELL_PSYCHIC_SCREAM, 10000);
+            events.RescheduleEvent(EVENT_SPELL_PENANCE, urand(3000, 10000));
         }
 
         bool myCanCast()
@@ -1127,8 +1098,6 @@ public:
 
             if (!myCanCast())
                 return;
-
-            HandleVictimChange();
 
             switch (events.GetEvent())
             {
@@ -1322,8 +1291,6 @@ public:
             if (!myCanCast())
                 return;
 
-            HandleVictimChange();
-
             switch (events.GetEvent())
             {
             case 0:
@@ -1460,8 +1427,6 @@ public:
 
             if (!myCanCast())
                 return;
-
-            HandleVictimChange();
 
             switch (events.GetEvent())
             {
@@ -1645,8 +1610,6 @@ public:
             if (!myCanCast())
                 return;
 
-            HandleVictimChange();
-
             switch (events.GetEvent())
             {
             case 0:
@@ -1800,8 +1763,6 @@ public:
             if (!myCanCast())
                 return;
 
-            HandleVictimChange();
-
             switch (events.GetEvent())
             {
             case 0:
@@ -1938,8 +1899,6 @@ public:
 
             if (!myCanCast())
                 return;
-
-            HandleVictimChange();
 
             switch (events.GetEvent())
             {
@@ -2148,8 +2107,6 @@ public:
             if (!myCanCast())
                 return;
 
-            HandleVictimChange();
-
             switch (events.GetEvent())
             {
             case 0:
@@ -2313,8 +2270,6 @@ public:
 
             if (!myCanCast())
                 return;
-
-            HandleVictimChange();
 
             switch (events.GetEvent())
             {
@@ -2494,8 +2449,6 @@ public:
             if (!myCanCast())
                 return;
 
-            HandleVictimChange();
-
             switch (events.GetEvent())
             {
             case 0:
@@ -2639,8 +2592,6 @@ public:
 
             if (!myCanCast())
                 return;
-
-            HandleVictimChange();
 
             switch (events.GetEvent())
             {
@@ -2806,8 +2757,6 @@ public:
             if (!myCanCast())
                 return;
 
-            HandleVictimChange();
-
             switch (events.GetEvent())
             {
             case 0:
@@ -2891,8 +2840,6 @@ public:
 
             if (!myCanCast())
                 return;
-
-            HandleVictimChange();
 
             switch (events.GetEvent())
             {
@@ -2992,9 +2939,18 @@ struct npc_searing_totem_factionsAI : public ScriptedAI
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
 
-        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f))
+        auto const& players = me->GetMap()->GetPlayers();
+
+        auto iter = players.getFirst();
+        for (int8 i = urand(0, players.getSize() - 1); i != 0; i--)
+            iter++;
+
+        Player* target = iter->GetSource();
+
+        if (target && !(target->IsGameMaster() || target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsPolymorphed() || target->isFeared()))
             DoCast(target, 65998);
     }
+
 
     void EnterEvadeMode()
     {
