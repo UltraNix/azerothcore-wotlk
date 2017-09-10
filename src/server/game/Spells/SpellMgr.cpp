@@ -6742,6 +6742,10 @@ void SpellMgr::LoadDbcDataCorrections()
         // ///////////////////////////////////////////
         // ////////////////ITEMS//////////////////////
         // ///////////////////////////////////////////
+        //Eye of the Broodmother
+        case 65007:
+            spellInfo->procFlags &= ~PROC_FLAG_DONE_PERIODIC;
+            break;
         // enchant Lightweave Embroidery
         case 55637:
             spellInfo->EffectMiscValue[1] = 126;
