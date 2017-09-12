@@ -10,7 +10,7 @@ public:
         if (!sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
             return;
 
-        if (challenger->GetZoneId() == 41 && challenger->GetPositionZ() > 4.0f && challenger->GetPositionZ() < 6.0f || target->GetZoneId() == 41 && target->GetPositionZ() > 4.0f && target->GetPositionZ() < 6.0f)
+        if (challenger->isInGamblingArea() || target->isInGamblingArea())
         {
             if (challenger->hasGoldDuelSetting50G())
             {
@@ -54,15 +54,14 @@ public:
 
         if (type != DUEL_INTERRUPTED && winner->duel->startTime != 0)
         {
-            if (winner->GetZoneId() == 41 && winner->GetPositionZ() > 4.0f && winner->GetPositionZ() < 6.0f
-                || loser->GetZoneId() == 41 && loser->GetPositionZ() > 4.0f && loser->GetPositionZ() < 6.0f && type == DUEL_WON)
+            if (winner->isInGamblingArea() || loser->isInGamblingArea() && type == DUEL_WON)
             {
                 if (initiator->hasGoldDuelSetting50G())
                 {
                     if (loser->HasEnoughMoney(gold_setting_1))
                     {
                         winner->ModifyMoney(gold_setting_1 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 50 gold! (-10% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 50 gold! (-10%% Podatek)");
 
                         loser->ModifyMoney(-gold_setting_1);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 50 gold!");
@@ -75,7 +74,7 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_2))
                     {
                         winner->ModifyMoney(gold_setting_2 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 100 gold (-10% Podatek)!");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 100 gold (-10%% Podatek)!");
 
                         loser->ModifyMoney(-gold_setting_2);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 100 gold!");
@@ -88,7 +87,7 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_3))
                     {
                         winner->ModifyMoney(gold_setting_3 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 200 gold! (-10% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 200 gold! (-10%% Podatek)");
 
                         loser->ModifyMoney(-gold_setting_3);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 200 gold!");
@@ -101,7 +100,7 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_4))
                     {
                         winner->ModifyMoney(gold_setting_4 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 500 gold! (-10% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 500 gold! (-10%% Podatek)");
 
                         loser->ModifyMoney(-gold_setting_4);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 500 gold!");
@@ -114,7 +113,7 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_5))
                     {
                         winner->ModifyMoney(gold_setting_5 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 1000 gold! (-10% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 1000 gold! (-10%% Podatek)");
 
                         loser->ModifyMoney(-gold_setting_5);
                         loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 1000 gold!");

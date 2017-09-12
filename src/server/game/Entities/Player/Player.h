@@ -1237,6 +1237,10 @@ class Player : public Unit, public GridObject<Player>
             else if (hasGoldDuelSetting1000G())
                 m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G;
         }
+        bool isInGamblingArea() const 
+        {
+            return m_last_area_id == 12 || m_last_area_id == 14 || m_last_area_id == 4570;
+        }
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
         void GiveLevel(uint8 level);

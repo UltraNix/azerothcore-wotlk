@@ -107,16 +107,6 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         return;
     }
 
-    // @Gambling
-    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
-    {
-        if (player->GetZoneId() == 41)
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("You can't send anything at this area.");
-            return;
-        }
-    }
-
     uint64 rc = 0;
     if (normalizePlayerName(receiver))
         rc = sObjectMgr->GetPlayerGUIDByName(receiver);

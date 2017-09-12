@@ -4373,7 +4373,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
     // @Gambling
     if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
     {
-        if (caster->GetZoneId() == 41 && caster->GetPositionZ() > 4.0f && caster->GetPositionZ() < 6.0f || target->GetZoneId() == 41 && target->GetPositionZ() > 4.0f && target->GetPositionZ() < 6.0f)
+        if (caster->isInGamblingArea() || target->isInGamblingArea())
         {
             if (caster->hasGoldDuelSetting50G())
             {

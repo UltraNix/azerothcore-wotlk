@@ -381,15 +381,6 @@ void TradeData::SetMoney(uint32 money)
         return;
     }
 
-    // @Gambling
-    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
-    {
-        if (m_player->GetZoneId() == 41)
-        {
-            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_IGNORE_YOU);
-            return;
-        }
-    }
 
     m_money = money;
 
