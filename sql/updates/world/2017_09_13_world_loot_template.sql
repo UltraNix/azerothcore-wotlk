@@ -1,0 +1,33 @@
+ALTER TABLE `creature_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `disenchant_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `fishing_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `item_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `mail_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `milling_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `pickpocketing_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `prospecting_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `reference_loot_template`
+  DROP PRIMARY KEY,
+   ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `skinning_loot_template`
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
+ALTER TABLE `spell_loot_template`
+  DROP PRIMARY KEY,
+  ADD PRIMARY KEY(`entry`,`item`,`lootmode`);
