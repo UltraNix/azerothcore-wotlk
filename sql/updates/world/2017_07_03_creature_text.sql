@@ -1,0 +1,1 @@
+UPDATE `creature_text` SET `language`=0 WHERE `entry` IN (3850, 3849);
