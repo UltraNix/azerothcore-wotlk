@@ -511,6 +511,24 @@ struct npc_frost_sphereAI : public NullCreatureAI
         if (ID)
             me->ApplySpellImmune(0, IMMUNITY_ID, ID, true);
 
+        std::vector<uint32> spells =
+        {
+            53195, // starfall rank 4
+            53194, // starfall rank 3
+            53191, // starfall rank 2
+            50294, // starfall rank 1
+            51429, // pestilence rank 5
+            51428, // pestilence rank 4
+            51427, // pestilence rank 3
+            51426, // pestilence rank 2
+            50842, // pestilence rank 1
+            49271, // chain lightning rank 8 
+            49270, // chain lightning rank 7
+        };
+
+        for (auto spellId : spells)
+            me->ApplySpellImmune(0, IMMUNITY_ID, spellId, true);
+
         _permafrostTimer = 0;
         me->CastSpell(me, SPELL_FROST_SPHERE, true);
         me->GetMotionMaster()->MoveRandom(20.0f);
@@ -881,6 +899,7 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
                 {
                     int32 value = lifeLeeched * GetMultiplier() / 100.0f;
                     caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
+
                 }
             }
         }
