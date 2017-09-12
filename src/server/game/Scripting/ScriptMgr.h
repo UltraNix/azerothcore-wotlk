@@ -723,6 +723,9 @@ class PlayerScript : public ScriptObject
 
         // Called when a player changes to a new map (after moving to new map)
         virtual void OnMapChanged(Player* /*player*/) { }
+
+        // To change behaviour of set visible item slot
+        virtual void OnAfterSetVisibleItemSlot(Player* /*player*/, uint8 /*slot*/, Item* /*item*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -792,6 +795,20 @@ class GroupScript : public ScriptObject
 
         // Called when a group is disbanded.
         virtual void OnDisband(Group* /*group*/) { }
+};
+
+// following hooks can be used anywhere and are not db bounded
+class GlobalScript : public ScriptObject
+{
+protected:
+
+    GlobalScript(const char* name);
+
+public:
+
+    // items
+    virtual void OnItemDelFromDB(SQLTransaction& /*trans*/, uint32 /*itemGuid*/) { }
+    virtual void OnMirrorImageDisplayItem(const Item* /*item*/, uint32& /*display*/) { }
 };
 
 // Placed here due to ScriptRegistry::AddScript dependency.
@@ -994,6 +1011,7 @@ class ScriptMgr
         void OnPlayerDelete(uint64 guid);
         void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);
         void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
+        void OnAfterPlayerSetVisibleItemSlot(Player* player, uint8 /*slot*/, Item *item);
 
     public: /* GuildScript */
 
@@ -1017,6 +1035,10 @@ class ScriptMgr
         void OnGroupRemoveMember(Group* group, uint64 guid, RemoveMethod method, uint64 kicker, const char* reason);
         void OnGroupChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
         void OnGroupDisband(Group* group);
+
+    public: /* GlobalScript */
+        void OnGlobalItemDelFromDB(SQLTransaction& trans, uint32 itemGuid);
+        void OnGlobalMirrorImageDisplayItem(const Item *item, uint32 &display);
 
     public: /* Scheduled scripts */
 

@@ -29,6 +29,8 @@ set(scripts_STAT_SRCS
   Custom/HazardCave/Lottery.h
   Custom/HazardCave/npc_hazard.cpp
   Custom/HazardCave/gambling.cpp
+  
+  Custom/Transmog/Transmog.cpp
 )
 
 message("  -> Prepared: Custom")

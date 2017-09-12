@@ -12913,6 +12913,8 @@ void Player::SetVisibleItemSlot(uint8 slot, Item* pItem)
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), 0);
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0);
     }
+
+    sScriptMgr->OnAfterPlayerSetVisibleItemSlot(this, slot, pItem);
 }
 
 void Player::VisualizeItem(uint8 slot, Item* pItem)

@@ -1275,6 +1275,8 @@ void AddBattlegroundScripts()
     // Hazard Cave
     void AddSC_npcs_hazard();
     void AddSC_Gambling();
+    // Transmog
+    void AddSC_transmog();
 #endif
 
 void AddCustomScripts()
@@ -1297,5 +1299,6 @@ void AddCustomScripts()
     // Hazard Cave
     AddSC_npcs_hazard();
     AddSC_Gambling();
+    AddSC_transmog();
 #endif
 }
