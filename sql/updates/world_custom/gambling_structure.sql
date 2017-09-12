@@ -27,6 +27,7 @@ DELETE FROM creature_template WHERE entry = @NPC_CAVE + 30;
 DELETE FROM creature_template WHERE entry = @NPC_CAVE + 31;
 DELETE FROM creature_template WHERE entry = @NPC_CAVE + 32;
 DELETE FROM creature_template WHERE entry = @NPC_CAVE + 33;
+DELETE FROM creature_template WHERE entry = @NPC_CAVE + 34;
 SET @NPC_GUEST := 92000;
 DELETE FROM creature_template WHERE entry = @NPC_GUEST;
 DELETE FROM creature_template WHERE entry = @NPC_GUEST + 1;
@@ -80,57 +81,70 @@ INSERT INTO creature_template (`entry`, `difficulty_entry_1`, `difficulty_entry_
 (@NPC_CAVE + 34, 0, 0, 0, 0, 0, 26068, 0, 0, 0, 'Seet', 'The Crypt Stalker', '', 0, 80, 80, 0, 35, 1, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_crypt_tele', 12340),
 (@NPC_GUEST + 6, 0, 0, 0, 0, 0, 18217, 18217, 18217, 18217, 'Menora', 'Lottery Coins Seller', '', 0, 70, 70, 0, 35, 3, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 2, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 5, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 'npc_lottery_coins', 12340);
  
-
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 1;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 2;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 3;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 4;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 5;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 6;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 7;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 8;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 9;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 10;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 26;
+DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 30;
+DELETE FROM `creature` WHERE `id` = @NPC_GUEST + 6;
 SET @NPC_GUID := (SELECT MAX(guid) from creature) +100;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@NPC_GUID, @NPC_CAVE, 0, 1, 1, 0, 0, -11136.219727, -2033.110962, 47.075542, 5.395273, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 1, @NPC_CAVE + 1, 0, 1, 1, 0, 0, -11230.036133, -1775.875977, 4.251500 , 5.734866, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 4, @NPC_CAVE + 3  , 0, 1, 1, 0, 0, -11197.725586, -1806.849854, 4.252917, 1.568324, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 5, @NPC_CAVE + 4  , 0, 1, 1, 0, 0, -11210.725586, -1806.817749, 4.252917, 1.568324, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 6, @NPC_CAVE + 5  , 0, 1, 1, 0, 0, -11183.183594, -1796.786133, 4.252190, 3.201950, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 7, @NPC_CAVE + 6  , 0, 1, 1, 0, 0, -11182.701172, -1804.771484, 4.318017, 3.201950, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 8, @NPC_CAVE + 7  , 0, 1, 1, 0, 0, -11238.137695, -1817.581909, 4.252227, 0.028939, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 9, @NPC_CAVE + 8  , 0, 1, 1, 0, 0, -11238.687500, -1798.589844, 4.252227, 0.028939, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 10, @NPC_CAVE + 9  , 0, 1, 1, 0, 0, -11239.208008, -1780.597412, 4.252227, 0.028939, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 11, @NPC_CAVE + 10 , 0, 1, 1, 0, 0, -11183.787109, -1786.804321, 4.341176, 3.201950, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 12, @NPC_CAVE + 11 , 0, 1, 1, 0, 0, -11230.000000, -1775.880005, 4.351553, 5.734870, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 13, @NPC_GUEST , 0, 1, 1, 0, 0, -11203.4,-1758.07,4.25195,3.25578, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 14, @NPC_GUEST + 1, 0, 1, 1, 0, 0, -11210.9,-1803.89,4.253,4.73348, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 15, @NPC_GUEST + 2, 0, 1, 1, 0, 0, -11205.5,-1758.17,4.25217,0.170245, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 16, @NPC_GUEST + 3, 0, 1, 1, 0, 0, -11186.1, -1777.3, 4.33218, 0.929793, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 17, @NPC_GUEST + 4, 0, 1, 1, 0, 0, -11234.694336, -1781.235718, 4.252714, 3.181539, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 18, @NPC_GUEST + 5, 0, 1, 1, 0, 0, -11234.242188, -1815.247437, 4.252110, 2.467611, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 19, @NPC_CAVE + 20, 0,1,1,0,0,-11182.9,-1784.11,4.34743,3.7111,300,0,0,42,0,0,0,0,0),
-(@NPC_GUID + 20, @NPC_CAVE + 21, 0,1,1,0,0,-11183.8,-1785.53,4.33802,3.65634,300,0,0,42,0,0,0,0,0),
-(@NPC_GUID + 21, @NPC_CAVE + 22, 0,1,1,0,0,-11183.5,-1787.74,4.34092,2.88194,300,0,0,42,0,0,0,0,0),
-(@NPC_GUID + 22, @NPC_CAVE + 23,0,1,1,0,0,-11184.9,-1787.77,4.33316,0.906663,300,0,0,42,0,0,0,0,0),
-(@NPC_GUID + 23, @NPC_CAVE + 24,0,1,1,0,0,-11185,-1791.5,4.29666,0.134614,300,0,0,42,0,0,0,0,0),
-(@NPC_GUID + 24, 24004,0,1,1,0,0,-11182,-1791.23,4.30199,3.12076,300,0,0,55,0,0,0,0,0),
-(@NPC_GUID + 25, 32568,0,1,1,0,0,-11242.2,-1817.78,9.58043,0.0855407,300,0,0,5341,0,0,0,0,0),
-(@NPC_GUID + 26, 40165,0,1,1,0,0,-11242.5,-1804.93,10.2991,0.0910375,300,0,0,12600,0,0,0,0,0),
-(@NPC_GUID + 27, 40625,0,1,1,0,0,-11242.5,-1784.9,4.30238,6.28197,300,0,0,5342,0,0,0,0,0),
-(@NPC_GUID + 28, @NPC_CAVE + 19,0,1,1,0,0,-11228.8,-1810.6,4.27607,-0.518407,300,0,0,2500,0,2,0,0,0),
-(@NPC_GUID + 31, 31146,0,1,1,0,0,-11102.1,-1545.49,27.5323,4.71855,300,0,0,24009944,0,0,0,0,0),
-(@NPC_GUID + 37, @NPC_GUEST + 6, 0, 1, 1, 0, 0, -11192.917969, -1776.687744, 4.295313, 4.751176, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 38, @NPC_CAVE + 30, 0, 1, 1, 0, 0, -11215.3, -1776.68, 4.25121, 4.7594, 300, 0, 0, 5342, 0, 0, 0, 0, 0),
-(@NPC_GUID + 39, @NPC_CAVE + 34, 0, 1, 1, 0, 0, -11221.3, -1772.01, 4.25276, 0.514327, 300, 0, 0, 5342, 0, 0, 0, 0, 0),
-(@NPC_GUID + 40, @NPC_CAVE + 32, 0, 1, 1, 28934, 1, -11229.9, -1770.6, 4.25166, 1.56429, 300, 0, 0, 55890, 31550, 0, 0, 0, 0),
-(@NPC_GUID + 41, @NPC_CAVE + 32, 0, 1, 1, 0, 1, -11201.9, -1768.93, 4.25274, 1.76614, 300, 0, 0, 55890, 31550, 0, 0, 0, 0),
-(@NPC_GUID + 42, @NPC_CAVE + 32, 0, 1, 1, 0, 1, -11193.7, -1810.63, 7.94713, 4.74671, 300, 0, 0, 55890, 31550, 0, 0, 0, 0),
-(@NPC_GUID + 43, @NPC_CAVE + 32, 0, 1, 1, 0, 1, -11193.7, -1816.05, 7.95973, 1.58391, 300, 0, 0, 55890, 31550, 0, 0, 0, 0),
-(@NPC_GUID + 44, @NPC_CAVE + 28, 0, 1, 1, 0, 0, -11202, -1760.23, 4.25244, 4.09511, 300, 0, 0, 5342, 0, 0, 0, 0, 0),
-(@NPC_GUID + 45, @NPC_CAVE + 29, 0, 1, 1, 0, 0, -11228.1, -1762.05, 4.25188, 5.9422, 300, 0, 0, 5342, 0, 0, 0, 0, 0),
-(@NPC_GUID + 46, @NPC_CAVE + 26, 0, 1, 1, 0, 0, -11232.4, -1823.26, 4.2525, 1.53535, 300, 0, 0, 3942, 0, 0, 0, 0, 0),
-(@NPC_GUID + 47, @NPC_CAVE + 25, 0, 1, 1, 0, 0, -11223.2, -1809.94, 4.26617, 2.01051, 300, 0, 0, 3942, 0, 0, 0, 0, 0),
-(@NPC_GUID + 48, @NPC_CAVE + 27, 0, 1, 1, 0, 0, -11184.9, -1775.92, 4.32018, 3.88053, 300, 0, 0, 3942, 0, 0, 0, 0, 0),
-(@NPC_GUID + 49, 29534, 0, 1, 1, 0, 0, -11211.8, -1817.46, 7.96921, 1.58482, 300, 0, 0, 10635, 0, 0, 0, 0, 0),
-(@NPC_GUID + 50, 29533, 0, 1, 1, 0, 0, -11207.8, -1817.41, 7.96921, 1.58482, 300, 0, 0, 10635, 0, 0, 0, 0, 0),
-(@NPC_GUID + 51, @NPC_CAVE + 31, 0, 1, 1, 0, 0, -11060.7, -1801.65, 52.6571, 3.83049, 300, 0, 0, 5342, 0, 0, 0, 0, 0),
-(@NPC_GUID + 52, @NPC_CAVE + 33, 0, 1, 1, 0, 0, -11207.6, -1822.09, 4.25196, 3.15137, 300, 0, 0, 5342, 0, 0, 0, 0, 0),
-(@NPC_GUID + 53, 31144, 0, 1, 1, 0, 0, -11226.3, -1757.58, 4.35155, 4.77746, 300, 0, 0, 3, 0, 0, 0, 393216, 0),
-(@NPC_GUID + 54, @NPC_CAVE, 571, 1, 1, 0, 0, 5777.167, 572.331, 613.737, 1.4789, 180, 0, 0, 1, 0, 0, 0, 0, 0),
-(@NPC_GUID + 55, 15711, 0, 1, 1, 0, 0, -11187.4, -1809.18, 4.25168, 1.6183, 300, 0, 0, 55, 0, 0, 0, 0, 0);
+(@NPC_GUID + 2, @NPC_CAVE + 3  , 1, 1, 1, 0, 0, 1271.075562, -4350.240234, 33.095955, 0.406819, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 3, @NPC_CAVE + 4  , 1, 1, 1, 0, 0, 1269.409302, -4341.032715, 33.095955, 0.146067, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 4, @NPC_CAVE + 5  , 1, 1, 1, 0, 0, 1282.338379, -4356.874023, 33.095955, 1.077550, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 5, @NPC_CAVE + 6  , 1, 1, 1, 0, 0, 1292.581787, -4358.854004, 33.098709, 1.707439, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 6, @NPC_CAVE + 7  , 1, 1, 1, 0, 0, 1299.019531, -4354.079102, 33.098709, 2.089143, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 7, @NPC_CAVE + 8  , 1, 1, 1, 0, 0, 1269.673828, -4333.294922, 33.097439, 6.101744, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 8, @NPC_CAVE + 9  , 1, 1, 1, 0, 0, 1274.287720, -4323.011230, 33.097618, 5.347761, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 9, @NPC_GUEST + 6, 1, 1, 1, 0, 0, 1313.885864, -4327.262207, 32.360111, 4.713160, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 11, @NPC_CAVE + 26, 1, 1, 1, 0, 0, 1296.231079, -4326.210938, 33.096249, 4.194011, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 12, @NPC_CAVE + 30, 1, 1, 1, 0, 0, 1319.505493,-4369.537109,27.801524,5.59, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 14, @NPC_CAVE + 3  , 0, 1, 1, 0, 0, -9060.568359,380.749146,93.531425,4.09, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 15, @NPC_CAVE + 4  , 0, 1, 1, 0, 0, -9048.838867,367.262146,93.026871,4.12, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 16, @NPC_CAVE + 5  , 0, 1, 1, 0, 0, -9081.796875,371.080536,92.597969,4.975849, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 17, @NPC_CAVE + 6  , 0, 1, 1, 0, 0, -9072.165039,387.027924,92.702354,4.474762, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 18, @NPC_CAVE + 7  , 0, 1, 1, 0, 0, -9085.712891,356.640594,93.513451,0.53, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 19, @NPC_CAVE + 8  , 0, 1, 1, 0, 0, -9070.969727,333.637756,93.708603,1.01, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 20, @NPC_CAVE + 9  , 0, 1, 1, 0, 0, 1274.287720, -4323.011230, 33.097618, 5.347761, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 21, @NPC_GUEST + 6, 0, 1, 1, 0, 0, -9047.546875, 346.003296, 94.308990, 2.995360, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 23, @NPC_CAVE + 26, 0, 1, 1, 0, 0, -9082.175781, 342.077118, 93.139084, 0.642309, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 24, @NPC_CAVE + 30, 0, 1, 1, 0, 0, -9053.829102, 336.000305, 94.319519, 2.004975, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 25, @NPC_CAVE + 30, 571, 1, 1, 0, 0, 5779.993652, 584.738647, 609.157898, 1.196243, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 26, @NPC_CAVE + 9, 0, 1, 1, 0, 0, -9045.083008, 355.165070, 94.293762, 2.945132, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 27, @NPC_CAVE + 10, 1, 1, 1, 0, 0, 1290.501343,-4318.093750,33.097664,4.234, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 28, @NPC_CAVE + 10, 0, 1, 1, 0, 0, -9091.496094,366.945160,92.440399,6.09, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 29, 91021, 1, 1, 1, 0, 0, 1291.234375,-4319.007324,33.097664,2.678045, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 30, 91021, 0, 1, 1, 0, 0, -9091.426758,368.214874,92.359634,4.85, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 31, 91020, 1, 1, 1, 0, 0, 1290.149658,-4318.773438,33.097664,4.321, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 32, 91020, 0, 1, 1, 0, 0, -9091.538086,365.572479,92.603073,2.78, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 33, 91023, 1, 1, 1, 0, 0, 1289.103882,-4317.983887,33.097664,4.467966, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 34, 91023, 0, 1, 1, 0, 0, -9092.047852,364.835663,92.661385,1.105007, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 35, 91022, 1, 1, 1, 0, 0, 1289.198608,-4320.331055,33.097664,0.959, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 36, 91022, 0, 1, 1, 0, 0, -9090.348633,369.422455,92.305275,4.05, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 37, 91024, 1, 1, 1, 0, 0, 1281.943848,-4353.754395,33.097664,4.99, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+(@NPC_GUID + 38, 91024, 0, 1, 1, 0, 0, -9083.075195,369.661316,92.584457,0.731157, 300, 10, 0, 21760, 0, 0, 0, 0, 0);
 
+
+
+DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_CAVE + 5;
+DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_CAVE + 6;
+DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_CAVE + 7;
+DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_CAVE + 8;
+DELETE FROM `creature_template_addon` WHERE `entry` = @NPC_CAVE + 9;
+
+INSERT INTO `creature_template_addon`(`entry`, `auras`) VALUES
+(@NPC_CAVE + 5, "42777"),
+(@NPC_CAVE + 6, "25863"),
+(@NPC_CAVE + 7, "31700"),
+(@NPC_CAVE + 8, "74854"),
+(@NPC_CAVE + 9, "75617");
 
 SET @TEXT_ID := 1000000;
 DELETE FROM `npc_text` WHERE `npc_text`.`ID` = @TEXT_ID;
@@ -217,278 +231,8 @@ INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES (60004, @GOBJECT_LOCK + 7)
 INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES (60005, 1000008);
 INSERT INTO `gossip_menu` (`entry`, `text_id`) VALUES (60006, @GOBJECT_LOCK + 30);
 
- 
-UPDATE `gameobject_template` SET `type` = 5 WHERE `entry` IN (176901, 177047, 177048, 177049);
-
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK;
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK + 1;
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK + 2;
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK + 3;
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK + 4;
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK + 5;
-DELETE FROM `gameobject_template` WHERE `entry` = @GOBJECT_LOCK + 5;
-INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(@GOBJECT_LOCK, 5, 411, 'Doodad_PortcullisActive08', '', '', '', 0, 32, 6, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_closed_door', 12340),
-(@GOBJECT_LOCK + 1, 5, 411, 'Doodad_PortcullisActive09', '', '', '', 0, 32, 2.97, 0, 0, 0, 0, 0, 0, 0, 0, 3000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_closed_door', 12340),
-(@GOBJECT_LOCK + 2,5,7982,'Apothecary Cage','','','',0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',1),
-(@GOBJECT_LOCK + 3,5,7469,'Gjalerbron Cage','','','',0,32,1.05,0,0,0,0,0,0,0,0,3000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',12340),
-(@GOBJECT_LOCK + 4,5,2614,'Gold Coins','','','',0,0,0.5,0,0,0,0,0,0,0,300,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',11723),
-(@GOBJECT_LOCK + 5,5,2614,'Gold Coins','','','',0,0,1,0,0,0,0,0,0,0,300,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',11723),
-(@GOBJECT_LOCK + 6, 7, 603, 'Wooden Bench', '', '', '', 0, 4, 0.63, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340);
 
 
-SET @GOBJECT_GUID := (SELECT MAX(guid) from gameobject) +100;
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
-(@GOBJECT_GUID + 2,@GOBJECT_LOCK + 5,0,1,1,-11197.8,-1807.93,4.25231,4.3557,0,0,-0.821331,0.570451,300,0,1,0),
-(@GOBJECT_GUID + 3,@GOBJECT_LOCK + 2,0,1,1,-11241.8,-1817.69,8.55792,3.19101,0,0,-0.999695,0.0247046,300,0,1,0),
-(@GOBJECT_GUID + 4,@GOBJECT_LOCK + 2,0,1,1,-11242.4,-1804.71,8.55792,3.19101,0,0,-0.999695,0.0247046,300,0,1,0),
-(@GOBJECT_GUID + 5,@GOBJECT_LOCK + 5,0,1,1,-11200.9,-1819.08,4.2518,0.0116606,0,0,-0.00583241,-0.999983,300,0,1,0),
-(@GOBJECT_GUID + 6,@GOBJECT_LOCK + 5,0,1,1,-11199.9,-1819.85,4.25892,0.423994,0,0,-0.210413,-0.977613,300,0,1,0),
-(@GOBJECT_GUID + 7,@GOBJECT_LOCK + 3,0,1,1,-11181.2,-1791.17,4.30292,0.0797004,0,0,-0.03984,-0.999206,300,0,1,0),
-(@GOBJECT_GUID + 8,@GOBJECT_LOCK + 3,0,1,1,-11242.3,-1785.04,4.29741,3.10977,0,0,-0.999873,-0.0159128,300,0,1,0),
-(@GOBJECT_GUID + 9,@GOBJECT_LOCK + 3,0,1,1,-11187.4,-1809.18,4.25168,1.6183,0,0,-0.723701,-0.690114,300,0,1,0),
-(@GOBJECT_GUID + 10,@GOBJECT_LOCK + 4,0,1,1,-11200.2,-1819.94,4.25221,5.40578,0,0,-0.424767,0.905303,300,0,1,0),
-(@GOBJECT_GUID + 11,@GOBJECT_LOCK + 5,0,1,1,-11198.9,-1819.41,4.25191,3.09121,0,0,-0.999683,-0.0251898,300,0,1,0),
-(@GOBJECT_GUID + 12,@GOBJECT_LOCK + 5,0,1,1,-11199.4,-1807.7,4.25267,3.20509,0,0,-0.999496,0.0317435,300,0,1,0),
-(@GOBJECT_GUID + 13,@GOBJECT_LOCK + 5,0,1,1,-11198.6,-1808.23,4.25656,5.02329,0,0,-0.589101,0.808059,300,0,1,0),
-(@GOBJECT_GUID + 14,@GOBJECT_LOCK + 4,0,1,1,-11197.9,-1819.21,4.25296,3.44621,0,0,-0.988424,0.151719,300,0,1,0),
-(@GOBJECT_GUID + 15,@GOBJECT_LOCK + 4,0,1,1,-11199.1,-1820.6,4.2523,0.230789,0,0,-0.115138,-0.99335,300,0,1,0),
-(@GOBJECT_GUID + 16,@GOBJECT_LOCK + 5,0,1,1,-11200,-1808.19,4.25283,6.13462,0,0,-0.074212,0.997243,300,0,1,0),
-(@GOBJECT_GUID + 17,@GOBJECT_LOCK + 5,0,1,1,-11196.6,-1807.78,4.25195,4.72484,0,0,-0.70269,0.711496,300,0,1,0),
-(@GOBJECT_GUID + 18,@GOBJECT_LOCK + 5,0,1,1,-11195.1,-1807.76,4.25195,4.72484,0,0,-0.70269,0.711496,300,0,1,0),
-(@GOBJECT_GUID + 19,@GOBJECT_LOCK + 5,0,1,1,-11196.1,-1806.94,4.25184,2.14088,0,0,-0.877412,-0.479737,300,0,1,0),
-(@GOBJECT_GUID + 20,@GOBJECT_LOCK + 5,0,1,1,-11195.9,-1808.24,4.29816,4.24182,0,0,-0.852464,0.522785,300,0,1,0),
-(@GOBJECT_GUID + 21,@GOBJECT_LOCK + 4,0,1,1,-11245.3,-1781.44,4.33813,4.8596,0,0,-0.653193,0.757192,300,0,1,0),
-(@GOBJECT_GUID + 22,@GOBJECT_LOCK + 4,0,1,1,-11245.8,-1780.98,4.32178,1.4117,0,0,-0.64868,-0.761061,300,0,1,0),
-(@GOBJECT_GUID + 23,@GOBJECT_LOCK + 5,0,1,1,-11211.1,-1807.62,4.25233,4.17035,0,0,-0.870599,0.491993,300,0,1,0),
-(@GOBJECT_GUID + 24,@GOBJECT_LOCK + 4,0,1,1,-11213.6,-1807.28,4.25218,1.59817,0,0,-0.716717,-0.697364,300,0,1,0),
-(@GOBJECT_GUID + 25,@GOBJECT_LOCK + 5,0,1,1,-11213.7,-1808.16,4.2517,0.141248,0,0,-0.0705652,-0.997507,300,0,1,0),
-(@GOBJECT_GUID + 26,@GOBJECT_LOCK + 5,0,1,1,-11244.9,-1805.2,4.32955,1.71801,0,0,-0.757193,-0.653192,300,0,1,0),
-(@GOBJECT_GUID + 27,@GOBJECT_LOCK + 4,0,1,1,-11213.7,-1808.66,4.25238,0.121613,0,0,-0.0607693,-0.998152,300,0,1,0),
-(@GOBJECT_GUID + 28,@GOBJECT_LOCK + 4,0,1,1,-11210.9,-1808.6,4.34506,3.40851,0,0,-0.991108,0.133064,300,0,1,0),
-(@GOBJECT_GUID + 29,@GOBJECT_LOCK + 5,0,1,1,-11212.4,-1807.11,4.25175,5.749,0,0,-0.26393,0.964542,300,0,1,0),
-(@GOBJECT_GUID + 30,@GOBJECT_LOCK + 5,0,1,1,-11245.2,-1799.84,4.32839,1.43526,0,0,-0.657601,-0.753366,300,0,1,0),
-(@GOBJECT_GUID + 31,@GOBJECT_LOCK + 5,0,1,1,-11244.9,-1817.23,4.25486,1.04257,0,0,-0.497993,-0.867181,300,0,1,0),
-(@GOBJECT_GUID + 32,@GOBJECT_LOCK + 5,0,1,1,-11246,-1781.79,4.30307,0.960094,0,0,-0.461821,-0.886973,300,0,1,0),
-(@GOBJECT_GUID + 33,@GOBJECT_LOCK + 4,0,1,1,-11245,-1818.51,4.25262,5.98665,0,0,-0.147726,0.989028,300,0,1,0),
-(@GOBJECT_GUID + 34,@GOBJECT_LOCK + 4,0,1,1,-11244.6,-1804.57,4.33561,6.15551,0,0,-0.0637952,0.997963,300,0,1,0),
-(@GOBJECT_GUID + 35,@GOBJECT_LOCK + 5,0,1,1,-11178.1,-1786.57,4.31763,4.97505,0,0,-0.608418,0.793617,300,0,1,0),
-(@GOBJECT_GUID + 36,@GOBJECT_LOCK + 4,0,1,1,-11178.2,-1785.87,4.3295,1.71565,0,0,-0.756423,-0.654083,300,0,1,0),
-(@GOBJECT_GUID + 37,@GOBJECT_LOCK + 5,0,1,1,-11178.5,-1787.6,4.33518,4.55879,0,0,-0.759274,0.650771,300,0,1,0),
-(@GOBJECT_GUID + 38,@GOBJECT_LOCK + 5,0,1,1,-11177.6,-1795.34,4.25228,4.78656,0,0,-0.680404,0.732837,300,0,1,0),
-(@GOBJECT_GUID + 39,@GOBJECT_LOCK + 5,0,1,1,-11178,-1796.33,4.26114,4.33495,0,0,-0.827205,0.5619,300,0,1,0),
-(@GOBJECT_GUID + 40,@GOBJECT_LOCK + 4,0,1,1,-11177.1,-1796.19,4.25252,1.00094,0,0,-0.479837,-0.877358,300,0,1,0),
-(@GOBJECT_GUID + 41,@GOBJECT_LOCK + 5,0,1,1,-11178,-1805.37,4.33204,1.77063,0,0,-0.774116,-0.633044,300,0,1,0),
-(@GOBJECT_GUID + 42,@GOBJECT_LOCK + 5,0,1,1,-11177.6,-1804.51,4.31591,1.91593,0,0,-0.818024,-0.575184,300,0,1,0),
-(@GOBJECT_GUID + 43,@GOBJECT_LOCK + 5,0,1,1,-11206.1,-1819.71,4.25219,3.16472,0,0,-0.999933,0.011562,300,0,1,0),
-(@GOBJECT_GUID + 44,@GOBJECT_LOCK + 5,0,1,1,-11207.2,-1819.65,4.25255,3.04298,0,0,-0.998785,-0.0492861,300,0,1,0),
-(@GOBJECT_GUID + 45,@GOBJECT_LOCK + 5,0,1,1,-11206.7,-1819.23,4.32268,1.44862,0,0,-0.662619,-0.748956,300,0,1,0),
-(@GOBJECT_GUID + 46,@GOBJECT_LOCK + 5,0,1,1,-11208,-1820.45,4.25241,2.98015,0,0,-0.996744,-0.0806347,300,0,1,0),
-(@GOBJECT_GUID + 47,@GOBJECT_LOCK + 5,0,1,1,-11209,-1820.15,4.25208,2.50891,0,0,-0.95038,-0.311092,300,0,1,0),
-(@GOBJECT_GUID + 48,@GOBJECT_LOCK + 4,0,1,1,-11208.3,-1819.2,4.25201,0.203765,0,0,-0.101706,-0.994815,300,0,1,0),
-(@GOBJECT_GUID + 49,@GOBJECT_LOCK + 5,0,1,1,-11208.3,-1819.46,4.39414,1.82954,0,0,-0.792422,-0.609973,300,0,1,0),
-(@GOBJECT_GUID + 50,181959,0,1,1,-11209.8,-1757.58,4.25257,2.08561,0,0,-0.86382,-0.5038,300,0,1,0),
-(@GOBJECT_GUID + 51,181959,0,1,1,-11181.7,-1807.51,4.2813,3.19615,0,0,-0.999628,0.0272735,300,0,1,0),
-(@GOBJECT_GUID + 52,181959,0,1,1,-11203.9,-1809.44,4.25135,4.59415,0,0,-0.74765,0.664093,300,0,1,0),
-(@GOBJECT_GUID + 53,181959,0,1,1,-11229.5,-1774.29,4.25217,3.12153,0,0,-0.99995,-0.0100295,300,0,1,0),
-(@GOBJECT_GUID + 54,181959,0,1,1,-11231.8,-1776.66,4.25295,1.68426,0,0,-0.746063,-0.665876,300,0,1,0),
-(@GOBJECT_GUID + 55,181959,0,1,1,-11202.2,-1757.44,4.25195,3.12619,0,0,-0.99997,-0.0077014,300,0,1,0),
-(@GOBJECT_GUID + 56,181959,0,1,1,-11222.2,-1758.36,4.25195,1.0064,0,0,-0.482231,-0.876044,300,0,1,0),
-(@GOBJECT_GUID + 57,181959,0,1,1,-11230.6,-1758.52,4.25214,0.044287,0,0,-0.0221414,-0.999755,300,0,1,0),
-(@GOBJECT_GUID + 58,181959,0,1,1,-11239.5,-1814.41,4.26083,3.11598,0,0,-0.999918,-0.0128044,300,0,1,0),
-(@GOBJECT_GUID + 59,181959,0,1,1,-11239.2,-1800.99,4.34243,3.11598,0,0,-0.999918,-0.0128044,300,0,1,0),
-(@GOBJECT_GUID + 60,181959,0,1,1,-11239.6,-1778.33,4.29893,3.11598,0,0,-0.999918,-0.0128044,300,0,1,0),
-(@GOBJECT_GUID + 61,181959,0,1,1,-11183.6,-1799.38,4.27158,0.00187922,0,0,-0.000951535,-1,300,0,1,0),
-(@GOBJECT_GUID + 62,181959,0,1,1,-11183.3,-1784.96,4.34472,3.06493,0,0,-0.999266,-0.0383205,300,0,1,0),
-(@GOBJECT_GUID + 63,181959,0,1,1,-11192.5,-1808.45,4.25362,4.76218,0,0,-0.689284,0.724491,300,0,1,0),
-(@GOBJECT_GUID + 64,181959,0,1,1,-11215.5,-1809.21,4.25294,4.7347,0,0,-0.699176,0.714949,300,0,1,0),
-(@GOBJECT_GUID + 65,188225,0,1,1,-11212.2,-1808.12,4.25196,1.68299,0,0,-0.74564,-0.666349,300,0,1,0),
-(@GOBJECT_GUID + 66,21680,0,1,1,-11071.8,-1561.28,27.218,5.35581,0,0,-0.447249,0.89441,300,0,1,0),
-(@GOBJECT_GUID + 67, 192289, 0, 1, 1, -11229.9, -1764.1, 4.25198, 0.0445609, -0, -0, -0.0222782, -0.999752, 300, 0, 1, 0),
-(@GOBJECT_GUID + 68, 192423, 0, 1, 1, -11201.8, -1762.96, 4.25153, 3.19163, -0, -0, -0.999687, 0.0250146, 300, 0, 1, 0),
-(@GOBJECT_GUID + 69, 190960, 0, 1, 1, -11202, -1764.98, 4.25249, 3.27959, -0, -0, -0.997621, 0.0689426, 300, 0, 1, 0),
-(@GOBJECT_GUID + 70, 191009, 0, 1, 1, -11229.7, -1767.21, 4.25203, 0.213408, -0, -0, -0.106502, -0.994313, 300, 0, 1, 0),
-(@GOBJECT_GUID + 71, 195682, 0, 1, 1, -11193.6, -1813.65, 7.95612, 3.18151, -0, -0, -0.999801, 0.0199591, 300, 0, 1, 0),
-(@GOBJECT_GUID + 72, @GOBJECT_LOCK + 6, 0, 1, 1, -11202.6, -1813.52, 7.10302, 4.76874, -0, -0, -0.686905, 0.726747, 300, 0, 1, 0),
-(@GOBJECT_GUID + 73, @GOBJECT_LOCK + 6, 0, 1, 1, -11204.6, -1813.63, 7.10302, 4.76874, -0, -0, -0.686905, 0.726747, 300, 0, 1, 0),
-(@GOBJECT_GUID + 74, @GOBJECT_LOCK + 6, 0, 1, 1, -11202.6, -1814.52, 7.10302, 4.76874, -0, -0, -0.686905, 0.726747, 300, 0, 1, 0),
-(@GOBJECT_GUID + 75, @GOBJECT_LOCK + 6, 0, 1, 1, -11204.6, -1814.63, 7.10302, 4.76874, -0, -0, -0.686905, 0.726747, 300, 0, 1, 0),
-(@GOBJECT_GUID + 76, 24388, 0, 1, 1, -11234.7, -1823.66, 4.25296, 1.56206, -0, -0, -0.704013, -0.710187, 300, 0, 1, 0),
-(@GOBJECT_GUID + 77, 24388, 0, 1, 1, -11229.7, -1823.7, 4.25296, 1.56206, -0, -0, -0.704013, -0.710187, 300, 0, 1, 0),
-(@GOBJECT_GUID + 78, 24388, 0, 1, 1, -11218.9, -1776.48, 4.25277, 4.7429, -0, -0, -0.696236, 0.717813, 300, 0, 1, 0),
-(@GOBJECT_GUID + 79, 24388, 0, 1, 1, -11211.9, -1776.26, 4.25277, 4.74291, -0, -0, -0.696236, 0.717813, 300, 0, 1, 0),
-(@GOBJECT_GUID + 80, 24388, 0, 1, 1, -11210.6, -1810.28, 7.97058, 1.60996, -0, -0, -0.720817, -0.693126, 300, 0, 1, 0),
-(@GOBJECT_GUID + 81, 191030, 0, 1, 1, -11209.6, -1822.11, 4.25183, 0.0111008, -0, -0, -0.00555201, -0.999985, 300, 0, 1, 0),
-(@GOBJECT_GUID + 82, 185436, 0, 1, 1, -11213.7, -1810.45, 7.9625, 5.47566, -0, -0, -0.392882, 0.919589, 300, 0, 1, 0),
-(@GOBJECT_GUID + 83, 185436, 0, 1, 1, -11215.7, -1808.16, 4.25377, 2.69295, -0, -0, -0.974946, -0.222442, 300, 0, 1, 0),
-(@GOBJECT_GUID + 84, 190897, 0, 1, 1, -11218.4, -1814.28, 4.25246, 1.58551, -0, -0, -0.712288, -0.701887, 300, 0, 1, 0);
-
-
--- Makhan
-SET @ENTRY := @NPC_GUID + 14;
-DELETE FROM `waypoints` WHERE entry = @ENTRY;
-INSERT INTO `waypoints` VALUES
-(@ENTRY,2,-11186,-1796.95,4.2519,NULL),
-(@ENTRY,1,-11210.8,-1805,4.25227,NULL),
-(@ENTRY,3,-11209.5,-1776.13,4.2527,NULL),
-(@ENTRY,4,-11210.3,-1792.21,4.25,NULL);
- 
--- Ma’khan SAI
-SET @ENTRY := @NPC_GUEST + 1;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,53,0,@NPC_GUID + 14,1,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Respawn - Start Waypoint"),
-(@ENTRY,0,1,0,40,0,100,0,1,@NPC_GUID + 14,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 1 Reached - Pause Waypoint"),
-(@ENTRY,0,2,0,40,0,100,0,1,@NPC_GUID + 14,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 1 Reached - Say Line 0"),
-(@ENTRY,0,3,0,40,0,100,0,2,@NPC_GUID + 14,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 2 Reached - Pause Waypoint"),
-(@ENTRY,0,4,0,40,0,100,0,2,@NPC_GUID + 14,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 2 Reached - Say Line 1"),
-(@ENTRY,0,5,0,40,0,100,0,3,@NPC_GUID + 14,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 3 Reached - Pause Waypoint"),
-(@ENTRY,0,6,0,40,0,100,0,3,@NPC_GUID + 14,0,0,5,18,0,0,0,0,0,1,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 3 Reached - Play Emote 18"),
-(@ENTRY,0,11,0,40,0,100,0,1,@NPC_GUID + 14,0,0,5,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 1 Reached - Play Emote 1"),
-(@ENTRY,0,12,0,40,0,100,0,2,@NPC_GUID + 14,0,0,5,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Ma’khan - On Waypoint 2 Reached - Play Emote 1"),
-(@ENTRY,0,13,0,11,0,100,0,0,0,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Ma’khan - On Respawn - Pause Waypoint");
- 
-DELETE FROM `creature_text` WHERE entry = @ENTRY;
-INSERT INTO `creature_text` VALUES
-(@ENTRY,0,0,'Dzis mi sie uda, stary!',12,0,0,0,0,0,0,''),
-(@ENTRY,1,0,'To moj szczeliwy dzien, ziom.',12,0,0,0,0,0,0,'');
- 
--- Karl Saggan
-SET @ENTRY := @NPC_GUID + 18;
-DELETE FROM waypoints WHERE entry = @ENTRY;
-INSERT INTO waypoints(entry, pointid, position_x, position_y, position_z) VALUES  
-(@ENTRY,1,-11197.7,-1804.97,4.25195),
-(@ENTRY,2,-11197.7,-1805.8,4.25195),
-(@ENTRY,3,-11185.8,-1789.93,4.31922),
-(@ENTRY,4,-11202,-1776.18,4.25149),
-(@ENTRY,5,-11204.8,-1759.65,4.25149),
-(@ENTRY,6,-11206.79,-1775.71,4.251744);
-
--- Karl Saggan SAI
-SET @ENTRY := @NPC_GUEST + 5;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,53,0,@NPC_GUID + 18,1,0,0,0,0,0,0,0,0,0,0,0,"Karl Saggan - On Respawn - Start Waypoint"),
-(@ENTRY,0,1,0,40,0,100,0,2,@NPC_GUID + 18,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 2 Reached - Pause Waypoint"),
-(@ENTRY,0,2,0,40,0,100,0,3,@NPC_GUID + 18,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 3 Reached - Pause Waypoint"),
-(@ENTRY,0,3,0,40,0,100,0,5,@NPC_GUID + 18,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 5 Reached - Pause Waypoint"),
-(@ENTRY,0,4,0,40,0,100,0,2,@NPC_GUID + 18,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 2 Reached - Say Line 0"),
-(@ENTRY,0,5,0,40,0,100,0,3,@NPC_GUID + 18,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 3 Reached - Say Line 1"),
-(@ENTRY,0,6,0,40,0,100,0,5,@NPC_GUID + 18,0,0,5,11,0,0,0,0,0,1,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 5 Reached - Play Emote 11"),
-(@ENTRY,0,7,0,40,0,100,0,2,@NPC_GUID + 18,0,0,5,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 2 Reached - Play Emote 1"),
-(@ENTRY,0,8,0,40,0,100,0,3,@NPC_GUID + 18,0,0,5,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Karl Saggan - On Waypoint 3 Reached - Play Emote 1"),
-(@ENTRY,0,9,0,11,0,100,0,0,0,0,0,54,900000,0,0,0,0,0,0,0,0,0,0,0,0,0,"");
- 
-DELETE FROM `creature_text` WHERE entry = @ENTRY;
-INSERT INTO `creature_text` VALUES
-(@ENTRY,0,0,'Czas zmienic swoje zycie!',12,0,0,0,0,0,0,''),
-(@ENTRY,1,0,'Piekne stworzonka.',12,0,0,0,0,0,0,'');
- 
--- Derek
-SET @ENTRY := @NPC_GUID + 17;
-DELETE FROM waypoints WHERE entry = @ENTRY;
-INSERT INTO waypoints(entry, pointid, position_x, position_y, position_z) VALUES
-(@ENTRY,1,-11238.8,-1785.15,4.25169),
-(@ENTRY,2,-11235.2,-1798.26,4.32745),
-(@ENTRY,3,-11237.1,-1798.56,4.33498),
-(@ENTRY,4,-11233.4,-1816.7,4.25275),
-(@ENTRY,5,-11236,-1817.48,4.25275),
-(@ENTRY,6,-11233.5,-1784.71,4.25139);
- 
--- Derek SAI
-SET @ENTRY := @NPC_GUEST + 4;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,53,0,@NPC_GUID + 17,1,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Respawn - Start Waypoint"),
-(@ENTRY,0,1,0,40,0,100,0,1,@NPC_GUID + 17,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 1 Reached - Pause Waypoint"),
-(@ENTRY,0,2,0,40,0,100,0,3,@NPC_GUID + 17,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 3 Reached - Pause Waypoint"),
-(@ENTRY,0,3,0,40,0,100,0,5,@NPC_GUID + 17,0,0,54,300000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 5 Reached - Pause Waypoint"),
-(@ENTRY,0,4,0,40,0,100,0,1,@NPC_GUID + 17,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 1 Reached - Say Line 0"),
-(@ENTRY,0,5,0,40,0,100,0,3,@NPC_GUID + 17,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 3 Reached - Say Line 1"),
-(@ENTRY,0,6,0,40,0,100,0,5,@NPC_GUID + 17,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 5 Reached - Say Line 2"),
-(@ENTRY,0,7,0,40,0,100,0,1,@NPC_GUID + 17,0,0,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 1 Reached - Play Emote 1"),
-(@ENTRY,0,8,0,40,0,100,0,3,@NPC_GUID + 17,0,0,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 3 Reached - Play Emote 1"),
-(@ENTRY,0,9,0,40,0,100,0,5,@NPC_GUID + 17,0,0,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Waypoint 5 Reached - Play Emote 1"),
-(@ENTRY,0,10,0,11,0,100,0,0,0,0,0,54,600000,0,0,0,0,0,0,0,0,0,0,0,0,0,"Derek - On Respawn - Pause Waypoint");
- 
-DELETE FROM `creature_text` WHERE entry = @ENTRY;
-INSERT INTO `creature_text` VALUES
-(@ENTRY,0,0,'Piekny wierzchowiec. Moze kiedys mi sie uda?',12,0,0,0,0,0,0,''),
-(@ENTRY,1,0,'Wspanialy okaz! Pewnie trudno bylo go zlapac.',12,0,0,0,0,0,0,''),
-(@ENTRY,2,0,'Czyli jednak cos z Ahn\'Qiraj przetrwalo.',12,0,0,0,0,0,0,'');
- 
--- Martha Edwards SAI
-SET @ENTRY := @NPC_GUEST + 2;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,1,0,100,0,4000,4000,8000,8000,5,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Martha Edwards - Out of Combat - Play Emote 1");
- 
--- Narak Longhorn SAI
-SET @ENTRY := @NPC_GUEST;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,1,0,100,0,0,0,8000,8000,5,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Narak Longhorn - Out of Combat - Play Emote 1");
- 
--- Karn Rockwell SAI
-SET @ENTRY := @NPC_CAVE + 19;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,1,0,100,0,0,0,420000,420000,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Karn Rockwell - Out of Combat - Say Line 0");
- 
-DELETE from npc_vendor WHERE entry = @ENTRY;
-INSERT INTO `npc_vendor` VALUES (@ENTRY,0,33443,0,0,0),(@ENTRY,0,33444,0,0,0),(@ENTRY,0,33445,0,0,0),(@ENTRY,0,33449,0,0,0),(@ENTRY,0,33454,0,0,0),(@ENTRY,0,35950,0,0,0),(@ENTRY,0,35952,0,0,0),(@ENTRY,0,35953,0,0,0),(@ENTRY,0,35954,0,0,0),(@ENTRY,0,40035,0,0,0),(@ENTRY,0,40036,0,0,0),(@ENTRY,0,40042,0,0,0);
- 
-DELETE FROM `creature_addon` WHERE guid = @NPC_GUID + 28;
-INSERT INTO `creature_addon` VALUES (@NPC_GUID + 28,@NPC_GUID + 28,0,0,0,0,NULL);
- 
-DELETE FROM `waypoint_data` WHERE id = @NPC_GUID + 28;
-INSERT INTO `waypoint_data` VALUES
-(@NPC_GUID + 28,1,-11226.4,-1765.23,4.2514,0,0,0,0,100,0),
-(@NPC_GUID + 28,2,-11226,-1777.57,4.2514,0,0,0,0,100,0),
-(@NPC_GUID + 28,3,-11229.7,-1784.92,4.2514,0,0,0,0,100,0),
-(@NPC_GUID + 28,4,-11231.3,-1809.64,4.28996,0,0,0,0,100,0),
-(@NPC_GUID + 28,5,-11224.2,-1813.21,4.25179,0,0,0,0,100,0),
-(@NPC_GUID + 28,6,-11219.8,-1796.03,4.26302,0,0,0,0,100,0),
-(@NPC_GUID + 28,7,-11198.7,-1793.83,4.25261,0,0,0,0,100,0),
-(@NPC_GUID + 28,8,-11192,-1782.45,4.29129,0,0,0,0,100,0),
-(@NPC_GUID + 28,9,-11214,-1779.73,4.25181,0,0,0,0,100,0),
-(@NPC_GUID + 28,10,-11226.6,-1776.64,4.25181,0,0,0,0,100,0);
- 
-DELETE FROM `creature_text` WHERE entry = @ENTRY;
-INSERT INTO `creature_text` VALUES
-(@ENTRY,0,1,'Zimne napoje!',12,0,0,0,0,0,0,''),
-(@ENTRY,0,2,'Przekaski w dobrych cenach!',12,0,0,0,0,0,0,''),
-(@ENTRY,0,3,'Granie o suchym pysku przynosi pecha!',12,0,0,0,0,0,0,''),
-(@ENTRY,0,4,'Zapraszam na dobre napoje i wspaniale przekaski!',12,0,0,0,0,0,0,''),
-(@ENTRY,0,5,'Uwazajcie na dziure! Niby magowie to zabezpieczyli, ze sie nie zabijesz, ale ja magom nie ufam.',12,0,0,0,0,0,0,'');
- 
--- Spectral Tiger Cub SAI
-SET @ENTRY := @NPC_CAVE + 24;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,1,0,100,0,0,0,900000,900000,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"Npc - Event - Action (phase) (dungeon difficulty)");
- 
--- Crypt Mage SAI
-SET @ENTRY := @NPC_CAVE + 32;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY, 0, 0, 0, 25, 0, 100, 1, 0, 0, 0, 0, 11, 32783, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Crypt Mage - On Reset - Cast Arcane Channeling'),
-(@ENTRY, 0, 1, 0, 11, 0, 100, 0, 0, 0, 0, 0, 48, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Crypt Mage - On Spawn - Set Active'),
-(@ENTRY, 0, 2, 3, 11, 0, 100, 257, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, -276.43, 1529.1, 0, 0, 'Crypt Mage - On Spawn - Load Grid'),
-(@ENTRY, 0, 3, 4, 61, 0, 100, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, -172.35, 1513.68, 0, 0, 'Crypt Mage - On Spawn - Load Grid'),
-(@ENTRY, 0, 4, 5, 61, 0, 100, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, -99.78, 1892.91, 0, 0, 'Crypt Mage - On Spawn - Load Grid'),
-(@ENTRY, 0, 5, 0, 61, 0, 100, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, -418.51, 1828.48, 0, 0, 'Crypt Mage - On Spawn - Load Grid');
-
-DELETE FROM `creature_text` WHERE entry = @ENTRY;
-INSERT INTO `creature_text` VALUES (@ENTRY,0,0,'Spectral Tiger Cub cries to his mommy.',16,0,0,0,0,0,0,'');
 
 DELETE FROM `trinity_string` where `entry` IN ('11010', '11011', '11012', '11013');
 INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES ('11010', '|cffff0000[Loteria]: Losowanie zakonczone! Lacznie losow bylo: %u. Zwycieskie liczby sa nastepujace: %s. Pula nagrod wynosila %u %s i nikt nie wygral glownej wygranej.|r');
