@@ -734,6 +734,9 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, Spell
     // No extra req need
     uint32 procEvent_procEx = PROC_EX_NONE;
 
+    if (spellProcEvent && spellProcEvent->procEx & PROC_EX_NO_OVERHEAL)
+        return procExtra & PROC_EX_NO_OVERHEAL;
+
     // check prockFlags for condition
     if ((procFlags & EventProcFlag) == 0)
         return false;
@@ -819,6 +822,9 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, Spell
             }
         }
     }
+
+    if(spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK)
+        hasFamilyMask = true;
 
     if (procExtra & (PROC_EX_INTERNAL_REQ_FAMILY))
     {
@@ -3000,6 +3006,18 @@ void SpellMgr::LoadSpellCustomAttr()
         });
 
         ApplySpellFix
+        ({ 
+            64415, // Val'anyr, Hammer of Ancient Kings - proc HOT
+            64411, // Val'anyr, Hammer of Ancient Kings - proc HOT
+            67667, // Coliseum 5 Healer Trinket - proc HOT
+            67726, // Escalating Power - proc HOT
+            67740, // Escalating Power - proc HOT
+            71567, // Item - Icecrown Dungeon Healer Trinket - proc HOT
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK;
+        });
+
+        ApplySpellFix
         ({
             53, // Backstab
             2589,
@@ -3840,7 +3858,6 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Glyph of Holy Light, Damage Class should be magic
         case 54968:
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
         // Beacon of Light heal, Damage Class should be magic
         case 53652:
         case 53654:

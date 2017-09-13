@@ -112,11 +112,19 @@ public:
         uint32 avgUpdateTime = avgDiffTracker.getAverage();
         std::string str2 = TimeToTimestampStr(sWorld->GetGameTime());
 
+        float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
+        if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
+        {
+            activeSessionCount = (activeSessionCount + (activeSessionCount * boostPercentage));
+            playerCount = (playerCount + (playerCount * boostPercentage));
+        }
+
         handler->PSendSysMessage("SunwellCore rev. %s.", _HASH);
         if (!queuedSessionCount)
-            handler->PSendSysMessage("Connected players: %u. Characters in world: %u.", (activeSessionCount + (activeSessionCount / 10)), (playerCount + (playerCount / 10)));
+            handler->PSendSysMessage("Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
         else
             handler->PSendSysMessage("Connected players: %u. Characters in world: %u. Queue: %u.", activeSessionCount, playerCount, queuedSessionCount);
+
         //handler->PSendSysMessage("Connection peak: %u.", connPeak);
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
         handler->PSendSysMessage("Update time diff: %ums, average: %ums.", updateTime, avgUpdateTime);

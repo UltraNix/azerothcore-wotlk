@@ -65,7 +65,7 @@ public:
 
         auto map = pInstance->instance;
 
-        if (map && (map->Is25ManRaid() && map->IsHeroic() && !player->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_25)) || (!map->Is25ManRaid() && map->IsHeroic() && !player->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_10)))
+        if (map && (map->Is25ManRaid() && map->IsHeroic() && !pPlayer->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_25)) || (!map->Is25ManRaid() && map->IsHeroic() && !pPlayer->HasAchieved(ACHIEVEMENT_CALL_OF_THE_CRUSADE_10)))
         {
             if (!pPlayer->IsGameMaster())
             {
