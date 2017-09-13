@@ -1297,6 +1297,10 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PHASED_DUELS_ENABLE] = sConfigMgr->GetBoolDefault("PhasedDuels.Enable", false);
     SetPhasedDuelsZones(sConfigMgr->GetStringDefault("PhasedDuels.Zones", ""));
 
+    //  
+    m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);
+    m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Online", 0.1f);
+    
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
