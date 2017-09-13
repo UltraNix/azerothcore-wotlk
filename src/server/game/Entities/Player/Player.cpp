@@ -381,15 +381,6 @@ void TradeData::SetMoney(uint32 money)
         return;
     }
 
-    // @Gambling
-    if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
-    {
-        if (m_player->GetZoneId() == 41)
-        {
-            m_player->GetSession()->SendTradeStatus(TRADE_STATUS_IGNORE_YOU);
-            return;
-        }
-    }
 
     m_money = money;
 
@@ -18170,8 +18161,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // Dodge mode only for players
     if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
         if (extraflags & PLAYER_EXTRA_DODGE_LOCATION)
-            SetDodgeMode(true);
-
+            if (GetMaxPersonalArenaRatingRequirement(0) > 2000)
+                SetDodgeMode(true);
+			
     // RaF stuff.
     m_grantableLevels = fields[66].GetUInt8();
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))

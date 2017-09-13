@@ -3541,6 +3541,13 @@ public:
         if (!player)
             return false;
 
+        if (player->GetMaxPersonalArenaRatingRequirement(0) < 2000)
+        {
+            handler->PSendSysMessage("2000 personal rating required to use dodge command.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+		
         if (!player->IsInDodgeMode())
         {
             player->SetDodgeMode(true);
