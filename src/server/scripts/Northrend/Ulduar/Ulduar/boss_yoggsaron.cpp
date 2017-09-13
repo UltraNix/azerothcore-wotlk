@@ -1909,7 +1909,10 @@ public:
         void SpellHit(Unit* caster, const SpellInfo* spellInfo)
         {
             if (spellInfo->Id == SPELL_SHADOW_BEACON)
+            {
                 caster->GetAI()->DoAction(ACTION_YOGG_SARON_SHADOW_BEACON);
+                me->UpdateEntry(36064);
+            }
         }
 
         void UpdateAI(uint32 diff)
