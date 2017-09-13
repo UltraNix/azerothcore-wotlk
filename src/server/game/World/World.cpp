@@ -1299,7 +1299,7 @@ void World::LoadConfigSettings(bool reload)
 
     //  
     m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);
-    m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Online", 0.1f);
+    m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Value", 0.1f);
     
     // call ScriptMgr if we're reloading the configuration
     if (reload)
