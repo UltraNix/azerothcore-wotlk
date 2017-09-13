@@ -2748,6 +2748,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!me->SelectNearestPlayer(200.0f))
+                EnterEvadeMode();
+
             boss_faction_championsAI::UpdateAI(diff);
             if (!UpdateVictim())
                 return;
@@ -2832,6 +2835,9 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            if (!me->SelectNearestPlayer(200.0f))
+                EnterEvadeMode();
+
             boss_faction_championsAI::UpdateAI(diff);
             if (!UpdateVictim())
                 return;

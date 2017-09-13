@@ -1658,8 +1658,20 @@ public:
             OUT_SAVE_INST_DATA;
             std::ostringstream saveStream;
             saveStream << "T C " << InstanceProgress;
-            if( instance->IsHeroic() )
+
+            if (instance->IsHeroic())
                 saveStream << ' ' << AttemptsLeft << ' ' << (bDedicatedInsanity ? (uint32)1 : (uint32)0) << ' ' << (bNooneDied ? (uint32)1 : (uint32)0);
+
+            saveStream << ' ' << vHealerEntries.size();
+
+            for (uint32 healID : vHealerEntries)
+                saveStream << ' ' << healID;
+
+            saveStream << ' ' << vOtherEntries.size();
+
+            for (uint32 otherID : vOtherEntries)
+                saveStream << ' ' << otherID;
+
             str_data = saveStream.str();
             OUT_SAVE_INST_DATA_COMPLETE;
             return str_data;
@@ -1671,8 +1683,7 @@ public:
             CLEANED = false;
             events.Reset();
             events.RescheduleEvent(EVENT_CHECK_PLAYERS, 0);
-
-            if( !in )
+            if (!in)
             {
                 OUT_LOAD_INST_DATA_FAIL;
                 return;
@@ -1685,16 +1696,40 @@ public:
             std::istringstream loadStream(in);
             loadStream >> dataHead1 >> dataHead2 >> data0;
 
-            if( dataHead1 == 'T' && dataHead2 == 'C' )
+            if (dataHead1 == 'T' && dataHead2 == 'C')
             {
                 InstanceProgress = data0;
-                if( instance->IsHeroic() )
+                if (instance->IsHeroic())
                 {
                     uint32 data1 = 0, data2 = 0, data3 = 0;
                     loadStream >> data1 >> data2 >> data3;
                     AttemptsLeft = data1;
                     bDedicatedInsanity = data2 ? true : false;
                     bNooneDied = data3 ? true : false;
+                }
+
+                uint32 healersSize = 0;
+                loadStream >> healersSize;
+
+                vHealerEntries.reserve(healersSize);
+                for (uint8 i = 0; i < healersSize; ++i)
+                {
+                    uint32 healerId = 0;
+                    loadStream >> healerId;
+
+                    vHealerEntries.push_back(healerId);
+                }
+
+                uint32 othersSize = 0;
+                loadStream >> othersSize;
+
+                vOtherEntries.reserve(othersSize);
+                for (uint8 i = 0; i < othersSize; ++i)
+                {
+                    uint32 otherId = 0;
+                    loadStream >> otherId;
+
+                    vOtherEntries.push_back(otherId);
                 }
             }
             else
