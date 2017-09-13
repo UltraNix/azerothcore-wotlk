@@ -5543,15 +5543,6 @@ SpellCastResult Spell::CheckCast(bool strict)
              if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED))
                  return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
              break;
-         // Blink
-         case 1953:
-         // Shadowstep
-         case 36554:
-         // Demonic Circle
-         case 48020:
-             if (m_caster->HasAura(63988)) // YOGG Illusion Room
-                 return SPELL_FAILED_DONT_REPORT;
-             break;
          // ulduar shit vezax
          case 27869:
          case 18220:
