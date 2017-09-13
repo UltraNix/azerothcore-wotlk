@@ -834,12 +834,6 @@ int32 Aura::CalcMaxDuration(Unit* caster) const
             maxDuration = (caster->GetMap()->Is25ManRaid() ? 40000 : 15000);
     }
 
-    if (m_spellInfo->Id == 62776)
-    {
-        if (Unit* caster = GetCaster())
-            maxDuration = (caster->GetMap()->Is25ManRaid() ? 12000 : 8000);
-    }
-
     return maxDuration;
 }
 

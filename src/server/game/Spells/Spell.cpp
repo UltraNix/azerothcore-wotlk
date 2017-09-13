@@ -3803,9 +3803,6 @@ void Spell::handle_immediate()
     {
         int32 duration = m_spellInfo->GetDuration();
 
-        if (m_spellInfo->Id == 62776)
-            duration = (m_caster->GetMap()->Is25ManRaid() ? 12000 : 8000);
-
         if (duration > 0)
         {
             // First mod_duration then haste - see Missile Barrage
