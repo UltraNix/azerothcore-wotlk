@@ -865,8 +865,8 @@ public:
         {
             Map::PlayerList const &lPlayers = me->GetMap()->GetPlayers();
             for( Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr )
-                if( Unit* p = itr->GetSource() )
-                    if( p->IsAlive() && p->GetExactDist(me) <= 12.0f )
+                if(Player* p = itr->GetSource() )
+                    if (p->IsAlive() && p->GetExactDist(me) <= 12.0f && !p->IsGameMaster())
                     {
                         DoCastAOE(SPELL_TRAMPLE);
                         return true;
