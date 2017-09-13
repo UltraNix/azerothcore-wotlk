@@ -1254,7 +1254,7 @@ public:
                     break;
                 case EVENT_YS_SHADOW_BEACON:
                 {
-                    uint8 count = me->GetMap()->Is25ManRaid() ? urand(3, 5) : 1;
+                    uint8 count = me->GetMap()->Is25ManRaid() ? 3 : 1;
                     events.RepeatEvent(5000);
                     me->CastCustomSpell(SPELL_SHADOW_BEACON, SPELLVALUE_MAX_TARGETS, count, me, false);
                     break;
