@@ -181,8 +181,9 @@ public:
             playerGUID = guid;
         }
 
-        void CheckSummons()
+        void CheckConditions()
         {
+            // Check Summons
             bool allow = true;
             for (std::list<uint64>::iterator itr = summons.begin(); itr != summons.end(); ++itr)
                 if (Creature* cr = ObjectAccessor::GetCreature(*me, *itr))
@@ -191,37 +192,52 @@ public:
 
             if (allow)
             {
-                uint32 quest = currentQuest;
                 if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
                 {
-                    switch (quest)
+                    // Check player and his group
+                    std::list<Unit*> players;
+                    player->GetPartyMembers(players);
+
+                    allow = false;
+                    for (auto it = players.begin(); it != players.end(); it++)
+                        if ((*it) && (*it)->ToPlayer() && me->GetDistance(*it) < 100.0f) // no need to check if player is alive - this is done in GetPartyMembers
+                        {
+                            allow = true;
+                            break;
+                        }
+
+                    if (allow)
                     {
+                        switch (currentQuest)
+                        {
                         case QUEST_BFV_FALLEN_HEROES:
-                            me->MonsterYell("$N has defeated the fallen heroes of Valhalas battles past. This is only a beginning, but it will suffice.", LANG_UNIVERSAL, ObjectAccessor::GetPlayer(*me, playerGUID));
+                            me->MonsterYell("$N has defeated the fallen heroes of Valhalas battles past. This is only a beginning, but it will suffice.", LANG_UNIVERSAL, player);
                             break;
                         case QUEST_BFV_DARK_MASTER:
-                            me->MonsterYell("Khit'rix the Dark Master has been defeated by $N and his band of companions. Let the next challenge be issued!", LANG_UNIVERSAL, ObjectAccessor::GetPlayer(*me, playerGUID));
+                            me->MonsterYell("Khit'rix the Dark Master has been defeated by $N and his band of companions. Let the next challenge be issued!", LANG_UNIVERSAL, player);
                             break;
                         case QUEST_BFV_SIGRID:
-                            me->MonsterYell("$N has defeated Sigrid Iceborn for a second time. Well, this time he did it with the help of his friends, but a win is a win!", LANG_UNIVERSAL, ObjectAccessor::GetPlayer(*me, playerGUID)); 
+                            me->MonsterYell("$N has defeated Sigrid Iceborn for a second time. Well, this time he did it with the help of his friends, but a win is a win!", LANG_UNIVERSAL, player);
                             break;
                         case QUEST_BFV_CARNAGE:
-                            me->MonsterYell("The horror known as Carnage is no more. Could it be that $N is truly worthy of battle in Valhalas? We shall see.", LANG_UNIVERSAL, ObjectAccessor::GetPlayer(*me, playerGUID));
+                            me->MonsterYell("The horror known as Carnage is no more. Could it be that $N is truly worthy of battle in Valhalas? We shall see.", LANG_UNIVERSAL, player);
                             break;
                         case QUEST_BFV_THANE:
-                            me->MonsterYell("Thane Banahogg the Deathblow has fallen to $N and his fighting companions. He has but one challenge ahead of him. Who will it be?", LANG_UNIVERSAL, ObjectAccessor::GetPlayer(*me, playerGUID));
+                            me->MonsterYell("Thane Banahogg the Deathblow has fallen to $N and his fighting companions. He has but one challenge ahead of him. Who will it be?", LANG_UNIVERSAL, player);
                             break;
                         case QUEST_BFV_FINAL:
-                            me->MonsterYell("The unthinkable has happened... $N has slain Prince Sandoval!", LANG_UNIVERSAL, ObjectAccessor::GetPlayer(*me, playerGUID));
+                            me->MonsterYell("The unthinkable has happened... $N has slain Prince Sandoval!", LANG_UNIVERSAL, player);
                             break;
-                    }
+                        }
 
-                    player->GroupEventHappens(quest, player);
+                        player->GroupEventHappens(currentQuest, player);
+
+                        playerGUID2 = playerGUID;
+                        if (currentQuest == QUEST_BFV_FINAL)
+                            events.ScheduleEvent(EVENT_VALHALAS_THIRD, 7000);
+                    }
+                    EnterEvadeMode();
                 }
-                playerGUID2 = playerGUID;
-                EnterEvadeMode();
-                if (quest == QUEST_BFV_FINAL)
-                    events.ScheduleEvent(EVENT_VALHALAS_THIRD, 7000);
             }
         }
 
@@ -312,13 +328,14 @@ public:
                         if (me->GetDistance(player) < 100.0f)
                         {
                             fail = false;
-                            CheckSummons();
+                            CheckConditions();
                         }
 
                     if (fail)
                         EnterEvadeMode();
-
-                    events.RepeatEvent(5000);
+                    else
+                        events.RepeatEvent(5000);
+                    
                     break;
                 }
             }
