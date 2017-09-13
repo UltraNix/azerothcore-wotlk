@@ -5651,11 +5651,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         case 66587:
         case 66570:
         case 66577:
-        case 66658:
-        case 66662:
-        case 66664:
-        case 66660:
-        case 66663:
            return SPELL_FAILED_DONT_REPORT;
 
            // Ring of Valor
