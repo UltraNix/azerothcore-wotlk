@@ -1312,10 +1312,12 @@ public:
                     me->CastSpell(me, SPELL_TIDAL_WAVE_AURA, true);
                     me->CastSpell(me->GetVictim(), SPELL_TIDAL_WAVE, false);
                     events.RepeatEvent(12000);
-                    events.ScheduleEvent(EVENT_WATER_SPIRIT_DAMAGE, 3000);
+                    // Monich: patch 3.2
+                    //events.ScheduleEvent(EVENT_WATER_SPIRIT_DAMAGE, 3000);
                     break;
                 case EVENT_WATER_SPIRIT_DAMAGE:
-                    me->CastSpell(me, SPELL_TIDAL_WAVE_DAMAGE, false);
+                    // Monich: patch 3.2
+                    //me->CastSpell(me, SPELL_TIDAL_WAVE_DAMAGE, false);
                     events.PopEvent();
                     break;
                 case EVENT_STORM_LASHER_LIGHTNING_LASH:
