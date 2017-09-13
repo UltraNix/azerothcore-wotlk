@@ -3313,4 +3313,19 @@ PhasedDuels.Enable = 0
 
 PhasedDuels.Zones = ""  
 
+#
+#     BoostPercentage.Enable
+#        Description: Enables or disables Boost Percentage count of players in game.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+BoostPercentage.Enable = 0
+
+#
+#    BoostPercentage.Value
+#        Description: Value of percentage 0.1 = 10 %, 0.5 = 50%, 1.0 = 100% etc.
+#        Default:     0.1
+
+BoostPercentage.Value = 0.1
+ 
 ###################################################################################################
