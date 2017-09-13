@@ -2712,6 +2712,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Xinef: if heal acutally healed something, add no overheal flag
         if (m_healing)
             procEx |= PROC_EX_NO_OVERHEAL;
+            
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger)

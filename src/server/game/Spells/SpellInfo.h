@@ -198,6 +198,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC  = 0x00800000,
     SPELL_ATTR0_CU_ENCOUNTER_REWARD              = 0x01000000, // pussywizard
     SPELL_ATTR0_CU_ENABLE_AURA_RESIST            = 0x02000000, // Monich: spells that should be treated like negative auras in resist check
+    SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK      = 0x04000000, // See SpellMgr::IsSpellProcEventCanTriggeredBy
 
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
 };

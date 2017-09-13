@@ -93,6 +93,36 @@ enum PaladinSpellIcons
 };
 
 // Ours
+class spell_pal_lights_beacon: public SpellScriptLoader
+{
+public:
+    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon") { }
+
+    class spell_pal_lights_beacon_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_lights_beacon_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
+                if (procSpell->Id == 54968)
+                    return false;
+            return true;
+        }
+
+        void Register()
+        {
+                DoCheckProc += AuraCheckProcFn(spell_pal_lights_beacon_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pal_lights_beacon_AuraScript();
+    }
+};
+
+// Ours
 class spell_pal_seal_of_command : public SpellScriptLoader
 {
     public:
@@ -1347,6 +1377,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_divine_intervention();
     new spell_pal_seal_of_light();
     new spell_pal_sacred_shield_base();
+    new spell_pal_lights_beacon();
 
     // Theirs
     new spell_pal_ardent_defender();
