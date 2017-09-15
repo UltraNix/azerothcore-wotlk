@@ -1070,7 +1070,16 @@ public:
 
             Player* plr = NULL;
             if( !pInstance->instance->GetPlayers().isEmpty() )
-                plr = pInstance->instance->GetPlayers().begin()->GetSource();
+            {   
+                for(auto itr = pInstance->instance->GetPlayers().begin(); itr != pInstance->instance->GetPlayers().end(); ++itr)
+                {
+                    if (!itr->GetSource()->IsGameMaster())
+                    {
+                        plr = itr->GetSource();
+                        break;
+                    }
+                }
+            }
 
             if( !plr )
                 return;
