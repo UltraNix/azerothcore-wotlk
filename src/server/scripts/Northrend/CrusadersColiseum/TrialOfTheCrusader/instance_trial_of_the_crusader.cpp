@@ -1616,8 +1616,11 @@ public:
                     if (Creature* barrett = instance->GetCreature(NPC_BarrettGUID))
                     {
                         barrett->SetVisible(false);
-                        barrett->SummonCreature(NPC_ANUBARAK, Locs[LOC_ANUB].GetPositionX(), Locs[LOC_ANUB].GetPositionY(), Locs[LOC_ANUB].GetPositionZ(), Locs[LOC_ANUB].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
-
+                        bool canSpawn = false;
+                        if (instance->IsHeroic() && AttemptsLeft > 0) canSpawn = true;
+                        if (!instance->IsHeroic()) canSpawn = true;
+                        if (canSpawn)
+                            barrett->SummonCreature(NPC_ANUBARAK, Locs[LOC_ANUB].GetPositionX(), Locs[LOC_ANUB].GetPositionY(), Locs[LOC_ANUB].GetPositionZ(), Locs[LOC_ANUB].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
                     }
                     break;
                 case INSTANCE_PROGRESS_DONE:
