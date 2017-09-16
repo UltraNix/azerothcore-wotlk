@@ -243,7 +243,8 @@ struct boss_anubarak_trialAI : public BossAI
                 if (!addList.empty())
                     for (auto itr : addList)
                         if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                            itr->CastSpell(target, SPELL_SHADOW_STRIKE);
+                            if (!itr->HasAura(SPELL_SUBMERGE))
+                                itr->CastSpell(target, SPELL_SHADOW_STRIKE);
                 events.Repeat(30000);
                 break;
             }
@@ -354,9 +355,21 @@ struct boss_anubarak_trialAI : public BossAI
 
         instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(66013, 67700, 68509, 68510));
 
+        if (!instance)
+            return;
+
         Player* plr = nullptr;
         if (!instance->instance->GetPlayers().isEmpty())
-            plr = instance->instance->GetPlayers().begin()->GetSource();
+        {
+            for (auto itr = instance->instance->GetPlayers().begin(); itr != instance->instance->GetPlayers().end(); ++itr)
+            {
+                if (!itr->GetSource()->IsGameMaster())
+                {
+                    plr = itr->GetSource();
+                    break;
+                }
+            }
+        }
 
         if (!plr)
             return;
@@ -450,7 +463,20 @@ struct npc_swarm_scarabAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
-        DoZoneInCombat();
+        Creature* anubarak = me->FindNearestCreature(34564, 250.0f);
+
+        if (!anubarak)
+            return;
+
+        if (anubarak->IsInCombat())
+            DoZoneInCombat();
+        else
+        {
+            me->GetMotionMaster()->MoveIdle();
+            me->StopMoving();
+            DoCastSelf(SPELL_SUBMERGE);
+            DoAction(1);
+        }
     }
 
     void UpdateAI(uint32 diff)
@@ -484,7 +510,13 @@ struct npc_swarm_scarabAI : public ScriptedAI
 
     void JustDied(Unit* killer) override
     {
-        DoCastSelf(RAID_MODE(SPELL_TRAITOR_KING_10, SPELL_TRAITOR_KING_25, SPELL_TRAITOR_KING_10, SPELL_TRAITOR_KING_25), true);
+        Creature* anubarak = me->FindNearestCreature(34564, 250.0f);
+
+        if (!anubarak)
+            return;
+
+        if (anubarak->IsInCombat())
+            DoCastSelf(RAID_MODE(SPELL_TRAITOR_KING_10, SPELL_TRAITOR_KING_25, SPELL_TRAITOR_KING_10, SPELL_TRAITOR_KING_25), true);
         me->m_Events.AddEvent(new HideNpcEvent(*me), me->m_Events.CalculateTime(5000));
     }
 
@@ -911,6 +943,21 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
     }
 };
 
+class spell_anubarak_permafrost_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_anubarak_permafrost_SpellScript)
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if(Trinity::UnitAuraCheck(true, 1044)); // hand of freedom
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_anubarak_permafrost_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
+
 void AddSC_boss_anubarak_trial()
 {
     new CreatureAILoader<boss_anubarak_trialAI>("boss_anubarak_trial");
@@ -920,4 +967,5 @@ void AddSC_boss_anubarak_trial()
     new CreatureAILoader<npc_anubarak_spikeAI>("npc_anubarak_spike");
     new AuraScriptLoaderEx<spell_pursuing_spikesAuraScript>("spell_pursuing_spikes");
     new AuraScriptLoaderEx<spell_gen_leeching_swarm_AuraScript>("spell_gen_leeching_swarm");
+    new SpellScriptLoaderEx<spell_anubarak_permafrost_SpellScript>("spell_anubarak_permafrost");
 }

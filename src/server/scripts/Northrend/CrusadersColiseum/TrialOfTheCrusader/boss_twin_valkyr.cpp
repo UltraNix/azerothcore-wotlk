@@ -831,5 +831,6 @@ void AddSC_boss_twin_valkyr()
     new npc_essence_of_twin();
     new CreatureAILoader<npc_concentrated_ballAI>("npc_concentrated_ball");
     new AuraScriptLoaderEx<spell_valkyr_essence_auraAuraScript>("spell_valkyr_essence");
+    new AuraScriptLoaderEx<spell_valkyr_touchAuraScript>("spell_valkyr_touch");
     new AuraScriptLoaderEx<spell_valkyr_ball_periodic_dummyAuraScript>("spell_valkyr_ball_periodic_dummy");
 }
