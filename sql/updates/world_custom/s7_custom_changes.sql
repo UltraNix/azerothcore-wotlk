@@ -45,7 +45,10 @@ INSERT INTO `npc_vendor`(`entry`,`item`,`ExtendedCost`) VALUES
 (@ENTRY, 42607, 131),
 (@ENTRY, 42614, 131),
 (@ENTRY, 42620, 131),
-(@ENTRY, 42852, 131);
+(@ENTRY, 42852, 131),
+(@ENTRY, 42525, 2256),
+(@ENTRY, 42537, 2256),
+(@ENTRY, 42531, 2256);
 
 -- Update shoulders required rating to 1850
 UPDATE `npc_vendor` SET `ExtendedCost` = 2677 WHERE `item` IN (42012, 40871, 41218, 40964, 40872, 41966, 40870, 41684, 41716, 41276, 41282, 41935, 41870, 41212, 41039, 41045);
