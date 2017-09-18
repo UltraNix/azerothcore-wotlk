@@ -1245,7 +1245,6 @@ public:
                 case EVENT_SCENE_402:
                     {
                         HandleGameObject(GO_EnterGateGUID, false);
-                        EncounterStatus = IN_PROGRESS;
                         if( Creature* c = instance->GetCreature(NPC_TirionGUID) )
                             if( Creature* t = c->SummonCreature(NPC_LICH_KING, Locs[LOC_ARTHAS_PORTAL]) )
                             {
