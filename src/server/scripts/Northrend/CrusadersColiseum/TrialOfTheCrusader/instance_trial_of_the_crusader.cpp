@@ -1625,6 +1625,12 @@ public:
                         if (canSpawn)
                             barrett->SummonCreature(NPC_ANUBARAK, Locs[LOC_ANUB].GetPositionX(), Locs[LOC_ANUB].GetPositionY(), Locs[LOC_ANUB].GetPositionZ(), Locs[LOC_ANUB].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
                     }
+                    else
+                    {
+                        if (!instance->GetCreature(NPC_AnubarakGUID))
+                            if (Creature* helper = instance->SummonCreature(NPC_WORLD_TRIGGER, Locs[LOC_CENTER].GetPosition()))
+                                helper->SummonCreature(NPC_ANUBARAK, Locs[LOC_ANUB].GetPositionX(), Locs[LOC_ANUB].GetPositionY(), Locs[LOC_ANUB].GetPositionZ(), Locs[LOC_ANUB].GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 630000000);
+                    }
                     break;
                 case INSTANCE_PROGRESS_DONE:
                     if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
