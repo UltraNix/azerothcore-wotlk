@@ -1609,7 +1609,7 @@ public:
                     break;
                 case INSTANCE_PROGRESS_ANUBARAK_INTRO_DONE:
                     if (GameObject* floor = instance->GetGameObject(GO_FloorGUID))
-                        floor->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, nullptr, true);
+                        floor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
                     if (Creature* c = instance->GetCreature(NPC_AnubarakGUID))
                     {
                         c->AI()->DoAction(-1);
