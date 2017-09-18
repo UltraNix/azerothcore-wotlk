@@ -1608,6 +1608,8 @@ public:
 
                     break;
                 case INSTANCE_PROGRESS_ANUBARAK_INTRO_DONE:
+                    if (GameObject* floor = instance->GetGameObject(GO_FloorGUID))
+                        floor->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, nullptr, true);
                     if (Creature* c = instance->GetCreature(NPC_AnubarakGUID))
                     {
                         c->AI()->DoAction(-1);
@@ -1616,6 +1618,7 @@ public:
                     if (Creature* barrett = instance->GetCreature(NPC_BarrettGUID))
                     {
                         barrett->SetVisible(false);
+                        barrett->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         bool canSpawn = false;
                         if (instance->IsHeroic() && AttemptsLeft > 0) canSpawn = true;
                         if (!instance->IsHeroic()) canSpawn = true;
