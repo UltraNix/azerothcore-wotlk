@@ -948,7 +948,7 @@ class spell_wintergrasp_water : public SpellScriptLoader
             SpellCastResult CheckCast()
             {
                 Unit* target = GetCaster();
-                if (!target || !target->IsVehicle())
+                if (!target || !target->IsVehicle() || target->IsMounted())
                     return SPELL_FAILED_DONT_REPORT;
 
                 return SPELL_CAST_OK;

@@ -240,7 +240,8 @@ INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES ('11011', '|cff
 INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES ('11012', '|cffff0000[Loteria]: Losowanie zakonczone! Lacznie losow bylo: %u. Zwycieskie liczby sa nastepujace: %s.  %u graczy trafilo na szczesliwe liczby i wygrywaja %u %s. Gratulacje!|r');
 INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES ('11013', '|cffff0000[Loteria]: Rozpoczynam losowanie %s|r');
 
+
 REPLACE INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`) VALUES 
-(132, '2017-08-17 20:00:00', '2030-12-31 06:00:00', 1440, 1, 0, 'Lottery Gold', 0);
+(132, '2017-08-13 20:00:00', '2030-12-31 06:00:00', 10080, 1, 0, 'Lottery Gold', 0);
 REPLACE INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`) VALUES 
-(133, '2017-08-17 20:05:00', '2020-12-31 06:00:00', 1440, 1, 0, 'Lottery Sunwell Coins', 0);
+(133, '2017-08-13 20:00:00', '2020-12-31 06:00:00', 10080, 1, 0, 'Lottery Sunwell Coins', 0);

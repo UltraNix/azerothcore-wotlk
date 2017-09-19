@@ -613,14 +613,11 @@ public:
     }
 };
 
-struct npc_concentrated_ballAI : public NullCreatureAI
+struct npc_concentrated_ballAI : public ScriptedAI
 {
-    npc_concentrated_ballAI(Creature* creature) : NullCreatureAI(creature)
+    npc_concentrated_ballAI(Creature* creature) : ScriptedAI(creature)
     {
         me->SetReactState(REACT_PASSIVE);
-        me->SetCanFly(true);
-        me->SetDisableGravity(true);
-        DoCastSelf(100101, true); // custom periodic dummy spell
         _despawning = false;
         me->SetSpeed(MOVE_RUN, 0.5f, true);
     }
@@ -650,6 +647,15 @@ struct npc_concentrated_ballAI : public NullCreatureAI
     {
         if (_despawning)
             return;
+
+        if (Player* target = SelectTargetFromPlayerList(2.75f))
+        {
+            _despawning = true;
+            me->GetMotionMaster()->MoveIdle();
+            DoCastAOE(me->GetEntry() == NPC_CONCENTRATED_LIGHT ? SPELL_UNLEASHED_LIGHT : SPELL_UNLEASHED_DARK);
+            me->SetDisplayId(11686);
+            me->DespawnOrUnsummon(1500);
+        }
 
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
             MoveToNextPoint();
@@ -797,33 +803,6 @@ class spell_valkyr_touchAuraScript : public AuraScript
     }
 };
 
-class spell_valkyr_ball_periodic_dummyAuraScript : public AuraScript
-{
-    PrepareAuraScript(spell_valkyr_ball_periodic_dummyAuraScript)
-
-    void HandleEffectPeriodic(AuraEffect const * aurEff)
-    {
-        if (Unit* target = GetTarget())
-            if (target->GetDisplayId() != 11686)
-                if (Creature* me = target->ToCreature())
-                    if (Player* p = me->SelectNearestPlayer(2.75f))
-                        if (me->GetExactDist2d(p) <= 2.75f)
-                        {
-                            if (me->IsAIEnabled)
-                                me->AI()->DoAction(1); // despawning = true;
-                            me->GetMotionMaster()->MoveIdle();
-                            me->CastSpell((Unit*)nullptr, me->GetEntry() == NPC_CONCENTRATED_LIGHT ? SPELL_UNLEASHED_LIGHT : SPELL_UNLEASHED_DARK, false);
-                            me->SetDisplayId(11686);
-                            me->DespawnOrUnsummon(1500);
-                        }
-    }
-
-    void Register() override
-    {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_valkyr_ball_periodic_dummyAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-    }
-};
-
 void AddSC_boss_twin_valkyr()
 {
     new CreatureAILoader<boss_eydisAI>("boss_eydis");
@@ -831,5 +810,5 @@ void AddSC_boss_twin_valkyr()
     new npc_essence_of_twin();
     new CreatureAILoader<npc_concentrated_ballAI>("npc_concentrated_ball");
     new AuraScriptLoaderEx<spell_valkyr_essence_auraAuraScript>("spell_valkyr_essence");
-    new AuraScriptLoaderEx<spell_valkyr_ball_periodic_dummyAuraScript>("spell_valkyr_ball_periodic_dummy");
+    new AuraScriptLoaderEx<spell_valkyr_touchAuraScript>("spell_valkyr_touch");
 }

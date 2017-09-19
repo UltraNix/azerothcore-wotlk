@@ -5581,79 +5581,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->ToPlayer()->GetAreaId() != 4183 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_FAILED_REQUIRES_AREA;
             break;
-        case 66447:
-        case 66449:
-        case 66448:
-        case 66453:
-        case 66451:
-        case 66450:
-        case 66446:
-        case 66452:
-        case 66500:
-        case 66497:
-        case 66498:
-        case 66499:
-        case 66503:
-        case 66505:
-        case 66506:
-        case 66501:
-        case 66502:
-        case 66504:
-        case 66553:
-        case 66560:
-        case 66555:
-        case 66561:
-        case 66564:
-        case 66562:
-        case 66563:
-        case 66556:
-        case 66559:
-        case 66558:
-        case 66557:
-        case 66554:
-        case 66565:
-        case 66430:
-        case 66338:
-        case 66442:
-        case 66434:
-        case 66440:
-        case 66431:
-        case 66439:
-        case 66435:
-        case 66444:
-        case 66441:
-        case 66433:
-        case 66443:
-        case 66437:
-        case 66428:
-        case 66436:
-        case 66438:
-        case 66445:
-        case 66429:
-        case 66576:
-        case 66579:
-        case 66568:
-        case 66584:
-        case 66571:
-        case 66580:
-        case 66572:
-        case 66583:
-        case 66578:
-        case 66575:
-        case 66567:
-        case 66585:
-        case 66566:
-        case 66569:
-        case 66573:
-        case 66574:
-        case 66586:
-        case 66582:
-        case 66581:
-        case 66587:
-        case 66570:
-        case 66577:
-           return SPELL_FAILED_DONT_REPORT;
-
            // Ring of Valor
            // Blizzard
         case 10:
@@ -6379,7 +6306,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_AURA_MOUNTED:
             {
                 // Xinef: disallow casting in water for mounts not increasing water movement speed
-                if (m_caster->IsInWater() && (m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && sWorld->PatchNotes(PATCH_31X)))
+                if (m_caster->IsInWater() && (m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)))
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
