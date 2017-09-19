@@ -587,14 +587,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     damage += int32(energy * multiple);
                     damage += int32(CalculatePct(m_caster->ToPlayer()->GetComboPoints() * ap, 7));
                 }
-                // Wrath
-                else if (m_spellInfo->SpellFamilyFlags[0] & 0x00000001)
-                {
-                    // Improved Insect Swarm
-                    if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 1771, 0))
-                        if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00200000, 0, 0))
-                            AddPct(damage, aurEff->GetAmount());
-                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
@@ -745,6 +737,14 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             damage = m_originalCaster->SpellDamageBonusDone(unitTarget, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
             damage = unitTarget->SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint32)damage, SPELL_DIRECT_DAMAGE);
         }
+
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
+            // Wrath
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x00000001)
+                // Improved Insect Swarm
+                if (AuraEffect const* aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_DRUID, 1771, 0))
+                    if (unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00200000, 0, 0))
+                        AddPct(damage, aurEff->GetAmount());
 
         m_damage += damage;
     }

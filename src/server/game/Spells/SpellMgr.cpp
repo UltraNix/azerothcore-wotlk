@@ -4326,9 +4326,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 1122:
             spellInfo->SpellFamilyName = SPELLFAMILY_WARLOCK;
             break;
-        case 5697:
-            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_NONE;
-            break;
 
         /////////////////////////////////
         ///// MAGE
