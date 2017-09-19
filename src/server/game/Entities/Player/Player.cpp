@@ -25320,8 +25320,8 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
     //sLog->outDebug("zDiff = %f", z_diff);
 
-    // event only
-    if (GetZoneId() == 268 || GetZoneId() == 616 || GetZoneId() == 3817 || GetZoneId() == 2037)
+    // event only                                                                                           ToC
+    if (GetZoneId() == 268 || GetZoneId() == 616 || GetZoneId() == 3817 || GetZoneId() == 2037 || GetZoneId() == 4722)
         return;
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
