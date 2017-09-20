@@ -853,7 +853,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_ARCTIC_BREATH, 14000);
             events.RescheduleEvent(EVENT_JUMP_MIDDLE, 30000);
             if (IsHeroic())
-                events2.RescheduleEvent(EVENT_BERSERK, 150000);
+                events2.RescheduleEvent(EVENT_BERSERK, Is25ManRaid() ? 150000 : 210000);
         }
 
         void JustReachedHome()
