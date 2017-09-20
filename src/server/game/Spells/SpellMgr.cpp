@@ -2786,6 +2786,10 @@ std::vector<uint32> partialCorrection =
     67030,  // Fel Lightning 10 man heroic
     67031,  // Fel Lightning 25 man heroic
     65974,  // Lava Lash
+    67808,  // Death's Bite normal
+    67875,  // Death's Bite heroic
+    62583,  // Frostbolt
+    62580,  // Frostbolt Volley
 };
 
 void SpellMgr::LoadSpellCustomAttr()
