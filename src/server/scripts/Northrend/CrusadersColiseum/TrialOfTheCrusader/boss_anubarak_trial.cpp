@@ -895,43 +895,50 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
         return ValidateSpellInfo({ SPELL_LEECHING_SWARM_DMG,SPELL_LEECHING_SWARM_HEAL });
     }
 
-    float GetMultiplier()
-    {
-        if (auto caster = GetCaster())
-        {
-            if (auto map = caster->GetMap())
-            {
-                if (map->Is25ManRaid() && map->IsHeroic())
-                    return 230;
-                else if (map->Is25ManRaid() && !map->IsHeroic())
-                    return 155;
-                else if (!map->Is25ManRaid() && map->IsHeroic())
-                    return 92;
-                else if (!map->Is25ManRaid() && !map->IsHeroic())
-                    return 68;
-            }
-        }
-
-        return 0;
-    }
-
     void HandleEffectPeriodic(AuraEffect const* aurEff)
     {
         if (Unit* caster = GetCaster())
         {
+            if (!sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG))
+                return;
+
+            if (!GetTarget()->IsPlayer())
+                return;
+
+            int32 multiplier = 68;
+            if (auto caster = GetCaster())
+            {
+                if (auto map = caster->GetMap())
+                {
+                    if (map->Is25ManRaid() && map->IsHeroic()) // 25 hc
+                        multiplier = 250;
+                    else if (map->Is25ManRaid() && !map->IsHeroic()) // 25 n
+                        multiplier = 155;
+                    else if (!map->Is25ManRaid() && map->IsHeroic()) // 10 hc
+                        multiplier = 92;
+                    else if (!map->Is25ManRaid() && !map->IsHeroic()) // 10 n
+                        multiplier = 68;
+                }
+            }
+
             int32 lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
             if (lifeLeeched < 250)
                 lifeLeeched = 250;
+
             // Damage
             caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
+
             // Heal
+            uint32 resist = 0;
+            uint32 absorb = 0;
+            GetTarget()->CalcAbsorbResist(caster, GetTarget(), sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)->GetSchoolMask(), DIRECT_DAMAGE, lifeLeeched, &absorb, &resist, sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG));
             if (Unit* target = GetTarget())
             {
-                if (target->IsPlayer() && !target->IsImmunedToDamage(GetSpellInfo()))
+                if (!target->IsImmunedToDamage(sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)))
                 {
-                    int32 value = lifeLeeched * GetMultiplier() / 100.0f;
+                    lifeLeeched -= resist;
+                    int32 value = lifeLeeched * multiplier / 100.0f;
                     caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
-
                 }
             }
         }
