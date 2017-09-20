@@ -3292,6 +3292,7 @@ void SpellMgr::LoadSpellCustomAttr()
             67472, // Fire Bomb 25 man
             67473, // Fire Bomb 10 man heroic
             67475, // Fire Bomb 25 man heroic
+            12579, // Winter's Chill
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
