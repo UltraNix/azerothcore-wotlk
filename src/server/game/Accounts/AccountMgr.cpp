@@ -88,6 +88,42 @@ bool CheckPassword(uint32 accountId, std::string password)
     return (result) ? true : false;
 }
 
+bool CheckCountry(uint32 accountId, std::string country, std::string exceptCountry)
+{
+    // No country means international message.
+    if (country.empty() && exceptCountry.empty())
+        return true;
+
+    normalizeString(country);
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_IP2NATION_PLAYER_IP);
+    stmt->setUInt32(0, accountId);
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+    if (result)
+    {
+        std::string lastIp = (*result)[0].GetString();
+        uint32 ip = inet_addr(lastIp.c_str());
+
+        #if TRINITY_ENDIAN == BIGENDIAN
+            EndianConvertReverse(ip);
+        #endif
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP2NATION);
+        stmt->setInt32(0, ip);
+        PreparedQueryResult ip_result = LoginDatabase.Query(stmt);
+
+        if (ip_result)
+        {
+            std::string playerCountry = (*ip_result)[0].GetString();
+            normalizeString(playerCountry);
+
+            return country == playerCountry && exceptCountry != playerCountry ? true : false;
+        }
+    }
+    return false;
+}
+
 uint32 GetCharactersCount(uint32 accountId)
 {
     // check character count

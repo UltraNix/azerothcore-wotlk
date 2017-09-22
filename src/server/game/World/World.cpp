@@ -1238,7 +1238,6 @@ void World::LoadConfigSettings(bool reload)
 
     // AutoBroadcast
     m_bool_configs[CONFIG_AUTOBROADCAST] = sConfigMgr->GetBoolDefault("AutoBroadcast.On", false);
-    m_int_configs[CONFIG_AUTOBROADCAST_CENTER] = sConfigMgr->GetIntDefault("AutoBroadcast.Center", 0);
     m_int_configs[CONFIG_AUTOBROADCAST_INTERVAL] = sConfigMgr->GetIntDefault("AutoBroadcast.Timer", 60000);
     if (reload)
     {
@@ -1984,6 +1983,8 @@ void World::LoadAutobroadcasts()
 
     m_Autobroadcasts.clear();
     m_AutobroadcastsWeights.clear();
+    m_AutobroadcastsCountry.clear();
+    m_AutobroadcastsExceptCountry.clear();
 
     uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0);
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTOBROADCAST);
@@ -2004,7 +2005,9 @@ void World::LoadAutobroadcasts()
         Field* fields = result->Fetch();
         uint8 id = fields[0].GetUInt8();
 
-        m_Autobroadcasts[id] = fields[2].GetString();
+        m_Autobroadcasts[id] = fields[4].GetString();
+        m_AutobroadcastsExceptCountry[id] = fields[3].GetString();
+        m_AutobroadcastsCountry[id] = fields[2].GetString();
         m_AutobroadcastsWeights[id] = fields[1].GetUInt8();
 
         ++count;
@@ -2411,6 +2414,28 @@ void World::SendWorldText(int32 string_id, ...)
     va_end(ap);
 }
 
+/// Send a System Message to all players (except self if mentioned)
+void World::SendWorldTextToCountry(std::string const& country, std::string const& exceptCountry, int32 string_id, ...)
+{
+    va_list ap;
+    va_start(ap, string_id);
+
+    Trinity::WorldWorldTextBuilder wt_builder(string_id, &ap);
+    Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
+            continue;
+
+        if (!AccountMgr::CheckCountry(itr->second->GetAccountId(), country, exceptCountry))
+            continue;
+
+        wt_do(itr->second->GetPlayer());
+    }
+
+    va_end(ap);
+}
+
 /// Send a System Message to all players (except arena announcer option disabled)
 void World::SendArenaWorldText(int32 string_id, ...)
 {
@@ -2701,7 +2726,8 @@ bool World::RemoveBanCharacter(std::string const& name)
 void World::SetPhasedDuelsZones(std::string zones)
 {
     m_phasedDuelsZones.clear();
-    if (zones == "") return;
+    if (zones.empty()) 
+        return;
  
     std::stringstream ss(zones);
     while (!ss.eof()) {
@@ -2927,8 +2953,9 @@ void World::SendAutoBroadcast()
 
     uint32 weight = 0;
     AutobroadcastsWeightMap selectionWeights;
-    std::string msg;
 
+    std::string country, exceptCountry, msg;
+    
     for (AutobroadcastsWeightMap::const_iterator it = m_AutobroadcastsWeights.begin(); it != m_AutobroadcastsWeights.end(); ++it)
     {
         if (it->second)
@@ -2948,35 +2975,22 @@ void World::SendAutoBroadcast()
             if (selectedWeight < weight)
             {
                 msg = m_Autobroadcasts[it->first];
+                country = m_AutobroadcastsCountry[it->first];
+                exceptCountry = m_AutobroadcastsExceptCountry[it->first];
                 break;
             }
         }
     }
     else
-        msg = m_Autobroadcasts[urand(0, m_Autobroadcasts.size())];
-
-    uint32 abcenter = sWorld->getIntConfig(CONFIG_AUTOBROADCAST_CENTER);
-
-    if (abcenter == 0)
-        sWorld->SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
-
-    else if (abcenter == 1)
     {
-        WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
-        data << msg;
-        sWorld->SendGlobalMessage(&data);
+        uint8 broadcastId = urand(0, m_Autobroadcasts.size());
+        msg = m_Autobroadcasts[broadcastId];
+        country = m_AutobroadcastsCountry[broadcastId];
+        exceptCountry = m_AutobroadcastsExceptCountry[broadcastId];
     }
 
-    else if (abcenter == 2)
-    {
-        sWorld->SendWorldText(LANG_AUTO_BROADCAST, msg.c_str());
-
-        WorldPacket data(SMSG_NOTIFICATION, (msg.size()+1));
-        data << msg;
-        sWorld->SendGlobalMessage(&data);
-    }
-
-    sLog->outDetail("AutoBroadcast: '%s'", msg.c_str());
+    sWorld->SendWorldTextToCountry(country.c_str(), exceptCountry.c_str(), LANG_AUTO_BROADCAST, msg.c_str());
+    sLog->outBasic("AutoBroadcast: '%s' to Players from country: '%s' and except country: '%s'", msg.c_str(), (country.empty() ? "Worldwide" : country.c_str()), exceptCountry.empty() ? "None" : exceptCountry.c_str());
 }
 
 void World::UpdateRealmCharCount(uint32 accountId)

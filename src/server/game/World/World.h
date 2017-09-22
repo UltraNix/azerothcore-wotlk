@@ -705,6 +705,7 @@ class World
         void LoadConfigSettings(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
+        void SendWorldTextToCountry(std::string const& country, std::string const& exceptCountry, int32 string_id, ...);
         void SendArenaWorldText(int32 string_id, ...);
         void SendGlobalText(const char* text, WorldSession* self);
         void SendGMText(int32 string_id, ...);
@@ -947,6 +948,12 @@ class World
 
         typedef std::map<uint8, std::string> AutobroadcastsMap;
         AutobroadcastsMap m_Autobroadcasts;
+
+        typedef std::map<uint8, std::string> AutobroadcastsCountryMap;
+        AutobroadcastsCountryMap m_AutobroadcastsCountry;
+
+        typedef std::map<uint8, std::string> AutobroadcastsCountryMap;
+        AutobroadcastsCountryMap m_AutobroadcastsExceptCountry;
 
         typedef std::map<uint8, uint8> AutobroadcastsWeightMap;
         AutobroadcastsWeightMap m_AutobroadcastsWeights;

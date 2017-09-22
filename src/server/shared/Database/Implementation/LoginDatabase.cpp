@@ -85,7 +85,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_REALMLIST_SECURITY_LEVEL, "SELECT allowedSecurityLevel from realmlist WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_DEL_ACCOUNT, "DELETE FROM account WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_UPD_UPTIME_PLAYERS, "UPDATE uptime SET uptime = ?, maxplayers = ? WHERE realmid = ? AND starttime = ?", CONNECTION_ASYNC);
-    PrepareStatement(LOGIN_SEL_AUTOBROADCAST, "SELECT id, weight, text FROM autobroadcast WHERE realmid = ? OR realmid = -1", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_AUTOBROADCAST, "SELECT id, weight, country, exceptCountry, text FROM autobroadcast WHERE realmid = ? OR realmid = -1", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_PREMIUM_TIME, "SELECT premium_type, unset_date FROM account_premium WHERE id = ? AND unset_date > UNIX_TIMESTAMP()", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_PREMIUM_ID, "SELECT id FROM account WHERE username = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_DEL_PREMIUM_ID, "DELETE FROM account_premium WHERE id = ? AND premium_type = ?", CONNECTION_ASYNC);
@@ -99,4 +99,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_INS_INGAME_STATISTICS, "INSERT INTO ingame_stats (connectedPlayers, playersCount, diff, avgDiff, currentTime) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_IP2NATION, "SELECT c.country FROM ip2nationcountries c, ip2nation i WHERE i.ip < ? AND c.code = i.country ORDER BY i.ip DESC LIMIT 0,1", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_IP2NATION_COUNT, "SELECT count(c.code) FROM ip2nationcountries c, ip2nation i WHERE c.code = i.country", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_GET_IP2NATION_PLAYER_IP, "SELECT last_ip FROM account WHERE id = ?", CONNECTION_SYNCH);
 }

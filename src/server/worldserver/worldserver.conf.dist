@@ -2402,15 +2402,6 @@ Die.Command.Mode = 1
 AutoBroadcast.On = 0
 
 #
-#    AutoBroadcast.Center
-#        Description: Auto broadcasting display method.
-#        Default:     0 - (Announce)
-#                     1 - (Notify)
-#                     2 - (Both)
-
-AutoBroadcast.Center = 0
-
-#
 #    AutoBroadcast.Timer
 #        Description: Timer (in milliseconds) for auto broadcasts.
 #        Default:     60000 - (60 seconds)

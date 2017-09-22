@@ -37,10 +37,12 @@ enum AccountOpResult
 namespace AccountMgr
 {
     bool CheckPassword(uint32 accountId, std::string password);
+    bool CheckCountry(uint32 accountId, std::string country, std::string exceptCountry);
 
     uint32 GetId(std::string const& username);
     uint32 GetSecurity(uint32 accountId);
     uint32 GetSecurity(uint32 accountId, int32 realmId);
+
     bool GetName(uint32 accountId, std::string& name);
     uint32 GetCharactersCount(uint32 accountId);
     std::string CalculateShaPassHash(std::string const& name, std::string const& password);
