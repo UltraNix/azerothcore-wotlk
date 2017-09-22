@@ -8,7 +8,7 @@ CREATE TABLE ip2nation (
 
 DROP TABLE IF EXISTS ip2nationountries;
       
-CREATE TABLE ip2nationountries (
+CREATE TABLE ip2nationcountries (
   code varchar(4) NOT NULL default '',
   iso_code_2 varchar(2) NOT NULL default '',
   iso_code_3 varchar(3) default '',
