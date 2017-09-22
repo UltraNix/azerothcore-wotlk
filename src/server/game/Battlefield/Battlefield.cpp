@@ -80,16 +80,32 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
     {
         // If battle is started, 
         // If not full of players > invite player to join the war
-        // If full of players > announce to player that BF is full and kick him after a few second if he desn't leave
+        // If full of players > invite player to join the war if his faction has less players than the other one
         if (IsWarTime())
         {
-            if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer) // Vacant spaces
-                InvitePlayerToWar(player);
-            else // No more vacant places
+            auto GetPlayerCountInWar = [&](TeamId team) -> int32 {return m_PlayersInWar[team].size(); };
+            auto KickAndInviteToQueue = [&](Player* pl) -> void
             {
-                // TODO: Send a packet to announce it to player
-                m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(NULL) + (player->IsGameMaster() ? 30*MINUTE : 10);
-                InvitePlayerToQueue(player);
+                m_PlayersWillBeKick[pl->GetTeamId()][pl->GetGUID()] = time(NULL) + (pl->IsGameMaster() ? 30 * MINUTE : 10);
+                InvitePlayerToQueue(pl);
+            };
+
+            if (GetPlayerCountInWar(player->GetTeamId()) + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer) 
+                InvitePlayerToWar(player);
+            else
+            {
+                bool blockHorde = GetPlayerCountInWar(TEAM_HORDE) - GetPlayerCountInWar(TEAM_ALLIANCE) > 5;
+                bool blockAlliance = GetPlayerCountInWar(TEAM_ALLIANCE) - GetPlayerCountInWar(TEAM_HORDE) > 5;
+
+                if (!blockHorde && !blockAlliance)
+                    InvitePlayerToWar(player);
+                else
+                {
+                    if ((player->GetTeamId() == TEAM_ALLIANCE && blockHorde) || (player->GetTeamId() == TEAM_HORDE && blockAlliance))
+                        InvitePlayerToWar(player);
+                    else
+                        KickAndInviteToQueue(player);
+                }
             }
         }
         else
