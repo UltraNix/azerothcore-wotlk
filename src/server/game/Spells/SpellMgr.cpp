@@ -4562,10 +4562,6 @@ void SpellMgr::LoadDbcDataCorrections()
                                             AURA_INTERRUPT_FLAG_TALK | AURA_INTERRUPT_FLAG_USE |
                                             AURA_INTERRUPT_FLAG_CAST;
             break;
-        // Clearcasting
-        case 16870:
-            spellInfo->DurationIndex = 31; // 8 secs
-            break;
         // Owlkin Frenzy
         case 48391:
             spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFT;
