@@ -75,8 +75,6 @@ public:
                     if (!pPlayer->IsAlive())
                         return;
 
-                    pPlayer->BindToInstance();
-
                     if (Creature* c = pPlayer->SummonCreature(NPC_WYRMREST_SKYTALON, pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ()-20.0f, 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 0))
                     {
                         c->SetCanFly(true);
