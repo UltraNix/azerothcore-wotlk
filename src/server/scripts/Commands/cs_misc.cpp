@@ -38,6 +38,7 @@
 #include "GroupMgr.h"
 #include "BattlegroundMgr.h"
 #include "MapManager.h"
+#include "ace/INET_Addr.h"
 
 class misc_commandscript : public CommandScript
 {
@@ -2011,6 +2012,17 @@ public:
                 EndianConvertReverse(ip);
 #endif
 
+                PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP2NATION);
+                stmt->setInt32(0, ip);
+                PreparedQueryResult ip_result = LoginDatabase.Query(stmt);
+
+                if (ip_result)
+                {
+                    Field* ip_fields = ip_result->Fetch();
+                    lastIp.append(" (|cffffffff");
+                    lastIp.append(ip_fields[0].GetString());
+                    lastIp.append("|cffffff00)");
+                }
             }
             else
             {

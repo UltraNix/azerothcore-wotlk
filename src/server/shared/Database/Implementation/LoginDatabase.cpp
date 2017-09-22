@@ -97,4 +97,6 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID, "SELECT ip, DATE_FORMAT(MAX(login_date), '%Y-%m-%d | %T') AS `date` FROM account_history WHERE account_id = ? GROUP BY ip ORDER BY `date` DESC LIMIT 15", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_IP, "SELECT account_id, DATE_FORMAT(MAX(login_date), '%Y-%m-%d | %T') AS `date` FROM account_history WHERE ip = ? GROUP BY account_id ORDER BY `date` DESC LIMIT 15", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_INS_INGAME_STATISTICS, "INSERT INTO ingame_stats (connectedPlayers, playersCount, diff, avgDiff, currentTime) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_SEL_IP2NATION, "SELECT c.country FROM ip2nationcountries c, ip2nation i WHERE i.ip < ? AND c.code = i.country ORDER BY i.ip DESC LIMIT 0,1", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_IP2NATION_COUNT, "SELECT count(c.code) FROM ip2nationcountries c, ip2nation i WHERE c.code = i.country", CONNECTION_SYNCH);
 }

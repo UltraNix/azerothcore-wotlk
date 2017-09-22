@@ -828,6 +828,7 @@ class World
         char const* GetDBVersion() const { return m_DBVersion.c_str(); }
 
         void LoadAutobroadcasts();
+        void LoadIp2nation();
 
         void UpdateAreaDependentAuras();
 

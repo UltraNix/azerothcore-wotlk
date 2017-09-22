@@ -1748,6 +1748,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Autobroadcasts...");
     LoadAutobroadcasts();
 
+    sLog->outString("Loading Ip2nation...");
+    LoadIp2nation();
+
     ///- Load and initialize scripts
     sObjectMgr->LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
     sObjectMgr->LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
@@ -2009,6 +2012,25 @@ void World::LoadAutobroadcasts()
 
     sLog->outString(">> Loaded %u autobroadcast definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
+}
+
+void World::LoadIp2nation()
+{
+ 	uint32 oldMSTime = getMSTime();
+ 	
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP2NATION_COUNT);
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+ 	uint32 count = 0;
+
+    if (result)
+    {
+        Field* fields = result->Fetch();
+	    count = fields[0].GetUInt32();
+	}
+
+ 	sLog->outString(">> Loaded %u ip2nation definitions", count);
+	sLog->outString();
 }
 
 /// Update the World !
