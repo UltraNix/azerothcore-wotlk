@@ -1,0 +1,1 @@
+DELETE FROM `item_enchantment_template` WHERE `entry`=542 AND `ench`=1714;
