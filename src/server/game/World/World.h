@@ -951,8 +951,8 @@ class World
         typedef std::map<uint8, std::string> AutobroadcastsCountryMap;
         AutobroadcastsCountryMap m_AutobroadcastsCountry;
 
-        typedef std::map<uint8, std::string> AutobroadcastsCountryMap;
-        AutobroadcastsCountryMap m_AutobroadcastsExceptCountry;
+        typedef std::map<uint8, std::string> AutobroadcastsExceptCountryMap;
+        AutobroadcastsExceptCountryMap m_AutobroadcastsExceptCountry;
 
         typedef std::map<uint8, uint8> AutobroadcastsWeightMap;
         AutobroadcastsWeightMap m_AutobroadcastsWeights;
