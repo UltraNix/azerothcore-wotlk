@@ -83,7 +83,7 @@ void RandomMovementGenerator<Creature>::SetRandomLocation(Creature* owner)
 
     _path->SetPathLengthLimit(30.0f);
     bool result = _path->CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
-    if (!result || (_path->GetPathType() & (PATHFIND_NOPATH | PATHFIND_INCOMPLETE)))
+    if (!result || !(_path->GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH)))
     {
         _timer.Reset(100);
         return;
