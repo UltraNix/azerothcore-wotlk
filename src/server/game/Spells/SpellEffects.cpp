@@ -4379,7 +4379,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
             {
                 if (!caster->HasEnoughMoney(50 * GOLD) || !target->HasEnoughMoney(50 * GOLD))
                 {
-                    caster->GetSession()->SendNotification("|cffffffff[PvP] You don't have enough gold to duel.");
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] You or your opponent don't have enough gold to duel.");
                     return;
                 }
             }
@@ -4387,7 +4387,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
             {
                 if (!caster->HasEnoughMoney(100 * GOLD) || !target->HasEnoughMoney(100 * GOLD))
                 {
-                    caster->GetSession()->SendNotification("|cffffffff[PvP] You don't have enough gold to duel.");
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] You or your opponent don't have enough gold to duel.");
                     return;
                 }
             }
@@ -4395,7 +4395,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
             {
                 if (!caster->HasEnoughMoney(200 * GOLD) || !target->HasEnoughMoney(200 * GOLD))
                 {
-                    caster->GetSession()->SendNotification("|cffffffff[PvP] You don't have enough gold to duel.");
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] You or your opponent don't have enough gold to duel.");
                     return;
                 }
             }
@@ -4403,7 +4403,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
             {
                 if (!caster->HasEnoughMoney(500 * GOLD) || !target->HasEnoughMoney(500 * GOLD))
                 {
-                    caster->GetSession()->SendNotification("|cffffffff[PvP] You don't have enough gold to duel.");
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] You or your opponent don't have enough gold to duel.");
                     return;
                 }
             }
@@ -4411,7 +4411,7 @@ void Spell::EffectDuel(SpellEffIndex effIndex)
             {
                 if (!caster->HasEnoughMoney(1000 * GOLD) || !target->HasEnoughMoney(1000 * GOLD))
                 {
-                    caster->GetSession()->SendNotification("|cffffffff[PvP] You don't have enough gold to duel.");
+                    caster->GetSession()->SendNotification("|cffffffff[PvP] You or your opponent don't have enough gold to duel.");
                     return;
                 }
             }
