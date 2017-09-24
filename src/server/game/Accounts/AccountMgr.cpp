@@ -103,14 +103,14 @@ bool CheckCountry(uint32 accountId, std::string country, std::string exceptCount
     if (result)
     {
         std::string lastIp = (*result)[0].GetString();
-        uint32 ip = inet_addr(lastIp.c_str());
+        DWORD ip = inet_addr(lastIp.c_str());
 
         #if TRINITY_ENDIAN == BIGENDIAN
             EndianConvertReverse(ip);
         #endif
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP2NATION);
-        stmt->setInt32(0, ip);
+        stmt->setInt64(0, ip);
         PreparedQueryResult ip_result = LoginDatabase.Query(stmt);
 
         if (ip_result)

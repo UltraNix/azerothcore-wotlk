@@ -2007,13 +2007,13 @@ public:
                 lastIp = (security > SEC_PLAYER ? "-" : fields[3].GetString());
                 lastLogin = fields[4].GetString();
 
-                uint32 ip = inet_addr(lastIp.c_str());
+                DWORD ip = inet_addr(lastIp.c_str());
 #if TRINITY_ENDIAN == BIGENDIAN
                 EndianConvertReverse(ip);
 #endif
 
                 PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP2NATION);
-                stmt->setInt32(0, ip);
+                stmt->setUInt64(0, ip);
                 PreparedQueryResult ip_result = LoginDatabase.Query(stmt);
 
                 if (ip_result)
