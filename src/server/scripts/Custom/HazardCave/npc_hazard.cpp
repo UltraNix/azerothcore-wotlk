@@ -357,7 +357,7 @@ public:
             switch (creature->GetEntry())
             {
                 case GOLD_LOTERRY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "I'\m in. (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Write digits from 1 to 15.", 0, true);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "I\'m in. (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Write digits from 1 to 15.", 0, true);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show me my numbers.", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_01, creature->GetGUID());
                     break;
