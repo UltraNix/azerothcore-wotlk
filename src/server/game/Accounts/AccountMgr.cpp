@@ -103,7 +103,7 @@ bool CheckCountry(uint32 accountId, std::string country, std::string exceptCount
     if (result)
     {
         std::string lastIp = (*result)[0].GetString();
-        unsigned long ip = inet_addr(lastIp.c_str());
+        uint32 ip = inet_addr(lastIp.c_str());
 
         #if TRINITY_ENDIAN == BIGENDIAN
             EndianConvertReverse(ip);

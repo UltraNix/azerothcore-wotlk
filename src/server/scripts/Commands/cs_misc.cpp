@@ -2007,7 +2007,7 @@ public:
                 lastIp = (security > SEC_PLAYER ? "-" : fields[3].GetString());
                 lastLogin = fields[4].GetString();
 
-                unsigned long ip = inet_addr(lastIp.c_str());
+                uint32 ip = inet_addr(lastIp.c_str());
 
                 #if TRINITY_ENDIAN == BIGENDIAN
                     EndianConvertReverse(ip);
