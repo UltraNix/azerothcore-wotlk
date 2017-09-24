@@ -14,28 +14,28 @@ public:
         {
             if (challenger->hasGoldDuelSetting50G())
             {
-                challenger->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 50 gold!");
-                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 50 gold! Akceptujesz?");
+                challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 50 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 50 gold! Do you accept that?");
             }
             else if (challenger->hasGoldDuelSetting100G())
             {
-                challenger->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 100 gold!");
-                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 100 gold! Akceptujesz?");
+                challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 100 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 100 gold! Do you accept that?");
             }
             else if (challenger->hasGoldDuelSetting200G())
             {
-                challenger->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 200 gold!");
-                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 200 gold! Akceptujesz?");
+                challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 200 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 200 gold! Do you accept that?");
             }
             else if (challenger->hasGoldDuelSetting500G())
             {
-                challenger->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 500 gold!");
-                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 500 gold! Akceptujesz?");
+                challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 500 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 500 gold! Do you accept that?");
             }
             else if (challenger->hasGoldDuelSetting1000G())
             {
-                challenger->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 1000 gold!");
-                target->GetSession()->SendNotification("|cffffffff[PvP] Duel bedzie sie toczyc o stawke 1000 gold! Akceptujesz?");
+                challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 1000 gold!");
+                target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 1000 gold! Do you accept that?");
             }
         }
     }
@@ -61,10 +61,10 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_1))
                     {
                         winner->ModifyMoney(gold_setting_1 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 50 gold! (-10%% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] You have won 50 gold! (-10%% Tax)");
 
                         loser->ModifyMoney(-gold_setting_1);
-                        loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 50 gold!");
+                        loser->GetSession()->SendNotification("|cffffffff[PvP] You have lost 50 gold!");
 
                         // Update loser stats
                         UpdateGamblingStats(loser, true, uint32(gold_setting_1));
@@ -79,10 +79,10 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_2))
                     {
                         winner->ModifyMoney(gold_setting_2 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 100 gold (-10%% Podatek)!");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] You have won 100 gold! (-10%% Tax)");
 
                         loser->ModifyMoney(-gold_setting_2);
-                        loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 100 gold!");
+                        loser->GetSession()->SendNotification("|cffffffff[PvP] You have lost 100 gold!");
 
                         // Update loser stats
                         UpdateGamblingStats(loser, true, uint32(gold_setting_2));
@@ -97,10 +97,10 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_3))
                     {
                         winner->ModifyMoney(gold_setting_3 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 200 gold! (-10%% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] You have won 200 gold! (-10%% Tax)");
 
                         loser->ModifyMoney(-gold_setting_3);
-                        loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 200 gold!");
+                        loser->GetSession()->SendNotification("|cffffffff[PvP] You have lost 200 gold!");
 
                         // Update loser stats
                         UpdateGamblingStats(loser, true, uint32(gold_setting_3));
@@ -117,10 +117,10 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_4))
                     {
                         winner->ModifyMoney(gold_setting_4 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 500 gold! (-10%% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] You have won 500 gold! (-10%% Tax)");
 
                         loser->ModifyMoney(-gold_setting_4);
-                        loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 500 gold!");
+                        loser->GetSession()->SendNotification("|cffffffff[PvP] You have lost 500 gold!");
 
                         // Update loser stats
                         UpdateGamblingStats(loser, true, uint32(gold_setting_4));
@@ -135,10 +135,10 @@ public:
                     if (loser->HasEnoughMoney(gold_setting_5))
                     {
                         winner->ModifyMoney(gold_setting_5 * TAX_RATE);
-                        winner->GetSession()->SendNotification("|cffffffff[PvP] Wygrales 1000 gold! (-10%% Podatek)");
+                        winner->GetSession()->SendNotification("|cffffffff[PvP] You have won 1000 gold! (-10%% Tax)");
 
                         loser->ModifyMoney(-gold_setting_5);
-                        loser->GetSession()->SendNotification("|cffffffff[PvP] Przegrales 1000 gold!");
+                        loser->GetSession()->SendNotification("|cffffffff[PvP] You have lost 1000 gold!");
 
                         // Update loser stats
                         UpdateGamblingStats(loser, true, uint32(gold_setting_5));
@@ -157,8 +157,8 @@ public:
         if (!winner || !loser)
             return;
 
-        winner->GetSession()->SendNotification("|cffffffff[PvP] Zaklad przerwany! Przeciwnik stracil swoj majatek w czasie trwania walki!");
-        loser->GetSession()->SendNotification("|cffffffff[PvP] Zaklad przerwany! Straciles swoj majatek w czasie trwania walki!");
+        winner->GetSession()->SendNotification("|cffffffff[PvP] Bet aborted!  Your enemy has lost his gold during the fight!");
+        loser->GetSession()->SendNotification("|cffffffff[PvP] Bet aborted! You have lost your gold during the fight!");
     }
 
     void UpdateGamblingStats(Player* gambler, bool isLoser, uint32 moneyAmount)
@@ -205,13 +205,13 @@ public:
     {
         if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE) && !player->duel)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 50 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 100 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 200 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 500 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Stawka: 1000 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Resetuj stawke.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "O co chodzi z pojedynkami za gold?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bet: 50 gold..", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bet: 100 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bet: 200 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bet: 500 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bet: 1000 gold.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Reset the bet.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What are those duels for gold about?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
 
             player->SEND_GOSSIP_MENU(GAMBLER_HELLO_TEXT, creature->GetGUID());
         }
@@ -251,7 +251,7 @@ public:
                 break;
             case GOSSIP_ACTION_INFO_DEF + 7:
                 close = false;
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Dziekuje za wyjasnienie.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Thanks for clarification.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
                 player->SEND_GOSSIP_MENU(GAMBLER_INFO_TEXT, creature->GetGUID());
                 break;
             case GOSSIP_ACTION_INFO_DEF + 8:
@@ -259,7 +259,7 @@ public:
                 break;
         }
 
-        if (close)
+        if (close)  
             player->CLOSE_GOSSIP_MENU();
 
         // Prevent cheating.

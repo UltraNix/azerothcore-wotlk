@@ -87,20 +87,20 @@ public:
         {
             if (creature->GetEntry() == NPC_WELL)
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Ok, pokaz mi to miejsce. (10 Gold)", GOSSIP_SENDER_MAIN, TELE_TO_CAVE);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Rozmyslilem sie.", GOSSIP_SENDER_MAIN, CLOSE);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Ok, show me this place. (10 Gold)", GOSSIP_SENDER_MAIN, TELE_TO_CAVE);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I\'ve changed my mind.", GOSSIP_SENDER_MAIN, CLOSE);
                 player->SEND_GOSSIP_MENU(NPC_TEXT_0, creature->GetGUID());
             }
             if (creature->GetEntry() == NPC_HAZARD)
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zabierz mnie pod Karazhan.", GOSSIP_SENDER_MAIN, TELE_TO_KARAZAN);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Co to w ogole za miejsce?", GOSSIP_SENDER_MAIN, STORY);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take me under Karazhan.", GOSSIP_SENDER_MAIN, TELE_TO_KARAZAN);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What is this place?", GOSSIP_SENDER_MAIN, STORY);
                 player->SEND_GOSSIP_MENU(NPC_TEXT_1, creature->GetGUID());
             }
             if (creature->GetEntry() == NPC_DUEL)
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zabierz mnie z powrotem do Dziupli.", GOSSIP_SENDER_MAIN, TELE_TO_CAVE_FREE);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zabierz mnie pod Karazhan.", GOSSIP_SENDER_MAIN, TELE_TO_KARAZAN);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take me back to the Den.", GOSSIP_SENDER_MAIN, TELE_TO_CAVE_FREE);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Take me under Karazhan.", GOSSIP_SENDER_MAIN, TELE_TO_KARAZAN);
                 player->SEND_GOSSIP_MENU(NPC_TEXT_3, creature->GetGUID());
             }
         }
@@ -119,7 +119,7 @@ public:
                     player->ModifyMoney(-100000);
                     player->TeleportTo(0, -11227.597656f, -1776.532471f, 4.251500f, 4.754688f);
                 }
-                else creature->MonsterWhisper("Wroc jak bedziesz mial wystarczajaca ilosc zlota!", player);
+                else creature->MonsterWhisper("Return when you will have enough gold!", player);
                 break;
             case TELE_TO_CAVE_FREE:
                 player->TeleportTo(0, -11227.597656f, -1776.532471f, 4.251500f, 4.754688f);
@@ -129,7 +129,7 @@ public:
                 break;
             case STORY:
                 player->SetSelectedAuction(STORY);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Juz wiem wszystko!", GOSSIP_SENDER_MAIN, CLOSE);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I know everything now!", GOSSIP_SENDER_MAIN, CLOSE);
                 player->SEND_GOSSIP_MENU(NPC_TEXT_2, creature->GetGUID());            
                 break;
             case CLOSE:
@@ -196,8 +196,8 @@ enum LotteryBase
 #define PET_WIN_PERCENT 10.0f
 
 uint32 pets[] = {39286, 49343, 49693, 13584, 54847};
-std::string randomWinQuotes[] = {"W koncu!", "Nie moge w to uwierzyc.", "Dlugo na to czekalem...", "Tylko na to czekalem.", "Tylko o tym marzylem!"};
-std::string randomLoseQuotes[] = {"Moze nastepnym razem.", "Kiedys mi sie uda.", "Za kazdym wydanym razem.", "Doszlifuje moje szczesicie.", "Raz sie przegrywa, a raz przegrywa."};
+std::string randomWinQuotes[] = {"Finally!", "I can\'t believe!", "I was waiting for it for so long...", "I was waiting for it.", "This is all I have dreamt about!"};
+std::string randomLoseQuotes[] = {"Maybe the next time.", "Someday I will make it.", "Everytime...", "I need to polish my luck.", "Sometimes we lose and sometimes we... lose."};
 
 class npc_lottery_maker : public CreatureScript
 {
@@ -213,33 +213,33 @@ public:
             switch (creature->GetEntry())
             {
                 case SPECTRAL_TIGER_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Uda mi sie! (250 Lottery Coins)", GOSSIP_SENDER_MAIN, SPECTRAL_TIGER_LOTTERY);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nie jestem pewien...", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "I will make it! (250 Lottery Coins)", GOSSIP_SENDER_MAIN, SPECTRAL_TIGER_LOTTERY);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I\'m not sure...", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_03, creature->GetGUID());
                     break;
                 case BATTLE_TANK_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Lubie ryzyko. (450 Lottery Coins)", GOSSIP_SENDER_MAIN, BATTLE_TANK_LOTTERY);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "To nie dla mnie...", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "I\'ll take the risk. (450 Lottery Coins)", GOSSIP_SENDER_MAIN, BATTLE_TANK_LOTTERY);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "It\'s not for me...", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_04, creature->GetGUID());
                     break;
                 case BATTLE_TANK_FLYING_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Sprobujmy.. (600 Lottery Coins)", GOSSIP_SENDER_MAIN, BATTLE_TANK_FLYING_LOTTERY);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nie teraz...", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Let\'s try. (600 Lottery Coins)", GOSSIP_SENDER_MAIN, BATTLE_TANK_FLYING_LOTTERY);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Not now...", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_05, creature->GetGUID());
                     break;
                 case BLAZING_HIPPOGRYPH_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Oczywiscie, ze mam. (300 Lottery Coins)", GOSSIP_SENDER_MAIN, BLAZING_HIPPOGRYPH_LOTTERY);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nie wiem... Chyba nie.", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Of course I have. (300 Lottery Coins)", GOSSIP_SENDER_MAIN, BLAZING_HIPPOGRYPH_LOTTERY);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I don\'t know. I guess not.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_06, creature->GetGUID());
                     break;
                 case CELESTIAL_STEED_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Zagram o niego. (270 Lottery Coins)", GOSSIP_SENDER_MAIN, CELESTIAL_STEED_LOTTERY);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Poki co podziekuje.", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "I will take my chance. (270 Lottery Coins)", GOSSIP_SENDER_MAIN, CELESTIAL_STEED_LOTTERY);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Thanks for now.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_07, creature->GetGUID());
                     break;
                 case RANDOM_PETS_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Pewnie. (75 Lottery Coins)", GOSSIP_SENDER_MAIN, RANDOM_PETS_LOTTERY);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nie.", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "Sure. (75 Lottery Coins)", GOSSIP_SENDER_MAIN, RANDOM_PETS_LOTTERY);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "No.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_08, creature->GetGUID());
                     break;
             }
@@ -307,7 +307,7 @@ public:
         else
         {
             player->CLOSE_GOSSIP_MENU();
-            creature->MonsterWhisper("Wroc jak bedzie mial wystarczajaca ilosc monet!", player);
+            creature->MonsterWhisper("Return when you will have enough gold!", player);
         }
     }
 };
@@ -357,14 +357,14 @@ public:
             switch (creature->GetEntry())
             {
                 case GOLD_LOTERRY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Gram (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Wpisz liczby od 1 do 15", 0, true);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "I'\m in. (50 Lottery Coins)", GOSSIP_SENDER_MAIN, GOLD_LOTERRY, "Write digits from 1 to 15.", 0, true);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show me my numbers.", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_01, creature->GetGUID());
                     break;
                 case SC_LOTTERY_NPC:
-                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Oczywiscie (10 Sunwell Coins)", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Wpisz liczby od 1 do 15", 0, true);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Pokaz mi moje numery", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wroce pozniej.", GOSSIP_SENDER_MAIN, LEAVE);
+                    player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "Of course (10 Sunwell Coins).", GOSSIP_SENDER_MAIN, SC_LOTTERY, "Write digits from 1 to 15.", 0, true);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show me my numbers.", GOSSIP_SENDER_MAIN, SHOW_NUMBERS);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I will be back.", GOSSIP_SENDER_MAIN, LEAVE);
                     player->SEND_GOSSIP_MENU(NPC_GREETINGS_02, creature->GetGUID());
                     break;
             }
@@ -385,7 +385,7 @@ public:
                     if (!Lottery::hasLotteryPoints(player, LOTTERY_COINS_BETCOST))
                     {
                         player->CLOSE_GOSSIP_MENU();
-                        pCreature->MonsterWhisper("Wroc jak bedzie mial wystarczajaca ilosc monet!", player);
+                        pCreature->MonsterWhisper("Return when you will have enough coins!", player);
                         return false;
                     }
                     if (Lottery::AddNumbers(code, player, pCreature, GOLD_LOTTERY))
@@ -396,7 +396,7 @@ public:
                     if (!Lottery::hasSunwellPoints(player, LOTTERY_SC_BETCOST))
                     {
                         player->CLOSE_GOSSIP_MENU();
-                        pCreature->MonsterWhisper("Wroc jak bedzie mial wystarczajaco Sunwell Coins!", player);
+                        pCreature->MonsterWhisper("Return when you will have enough Sunwell Coins!", player);
                         return false;
                     }
                     if (Lottery::AddNumbers(code, player, pCreature, SUNWELL_COINS_LOTTERY))
@@ -466,9 +466,9 @@ public:
         if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
         {
             player->PlayerTalkClass->ClearMenus();
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tak, za zloto.", GOSSIP_SENDER_MAIN, GOLDY);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tak, za Sunwell Coins.", GOSSIP_SENDER_MAIN, SC);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Jednak nie.", GOSSIP_SENDER_MAIN, LEAVE);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Yes, for gold.", GOSSIP_SENDER_MAIN, GOLDY);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Yes, for Sunwell Coins.", GOSSIP_SENDER_MAIN, SC);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I guess not.", GOSSIP_SENDER_MAIN, LEAVE);
             player->SEND_GOSSIP_MENU(TEXT_WELCOME, creature->GetGUID());
         }
         return true;
@@ -482,10 +482,10 @@ public:
         {
             case GOLDY: 
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<25 Lottery Coins (50 golda)>", GOSSIP_SENDER_MAIN, ADD_25_LC_G);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<75 Lottery Coins (140 golda)>", GOSSIP_SENDER_MAIN, ADD_75_LC_G);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<150 Lottery Coins (270 golda)>", GOSSIP_SENDER_MAIN, ADD_150_LC_G);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<500 Lottery Coins (920 golda)>", GOSSIP_SENDER_MAIN, ADD_500_LC_G);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<25 Lottery Coins (50 gold)>", GOSSIP_SENDER_MAIN, ADD_25_LC_G);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<75 Lottery Coins (140 gold)>", GOSSIP_SENDER_MAIN, ADD_75_LC_G);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<150 Lottery Coins (270 gold)>", GOSSIP_SENDER_MAIN, ADD_150_LC_G);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "<500 Lottery Coins (920 gold)>", GOSSIP_SENDER_MAIN, ADD_500_LC_G);
                 player->SEND_GOSSIP_MENU(TEXT_NEXT, creature->GetGUID());
                 break;
             }
@@ -514,13 +514,13 @@ public:
                     if (action == ADD_500_LC_G) lotteryCoins = 500;
                     Lottery::modifyLotteryPoints(player, lotteryCoins);
 
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Jeszcze chcialbym...>", GOSSIP_SENDER_MAIN, BACK);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<I would also like...>", GOSSIP_SENDER_MAIN, BACK);
                     player->SEND_GOSSIP_MENU(TEXT_END, creature->GetGUID());
                 }
                 else 
                 {
                     player->CLOSE_GOSSIP_MENU();
-                    creature->MonsterWhisper("Wroc jak bedzie mial wystarczajaca ilosc zlota!", player);
+                    creature->MonsterWhisper("Return when you will have enough gold!", player);
                 }
                 break;
             }
@@ -541,13 +541,13 @@ public:
 
                     Lottery::modifyLotteryPoints(player, lotteryCoins);
 
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<Jeszcze chcialbym...>", GOSSIP_SENDER_MAIN, BACK);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "<I would also like...>", GOSSIP_SENDER_MAIN, BACK);
                     player->SEND_GOSSIP_MENU(TEXT_END, creature->GetGUID());
                 }
                 else 
                 {
                     player->CLOSE_GOSSIP_MENU();
-                    creature->MonsterWhisper("Wroc jak bedzie mial wystarczajaca ilosc zlota!", player);
+                    creature->MonsterWhisper("Return when you will have enough gold!", player);
                 }
                 break;
             }
@@ -1028,12 +1028,12 @@ public:
     {
         if (sWorld->getBoolConfig(CONFIG_GAMBLING_ENABLE))
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Napluj na mnie. (1 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Usmiechnij sie! (10 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Przytul... (30 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Kochaj mnie! (50 Gold... ale nawet to nie pomoze)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Kleknij przede mna. (100 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Wyciagnij swoj jezyczek... (250 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Spit on me. (1 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Smile! (10 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Hug me... (30 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Love me! (50 Gold... but it won\'t help)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bend the knee. (100 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show me your tongue... (250 Gold)", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
 
             if (player->getGender() == GENDER_FEMALE)
                 player->SEND_GOSSIP_MENU(FEMALE_HELLO_TEXT, creature->GetGUID());
@@ -1052,7 +1052,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 1:
                 if (!player->HasEnoughMoney(1 * GOLD))
                 {
-                    creature->MonsterWhisper("Widze, ze zawartosc twojej sakiewki jest taka sama, jak twoich spodni... Nic tam nie ma!", player);
+                    creature->MonsterWhisper("I see that you\'re too poor for that! Don\'t make me laugh.", player);
                     break;
                 }
 
@@ -1062,7 +1062,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 2:
                 if (!player->HasEnoughMoney(10 * GOLD))
                 {
-                    creature->MonsterWhisper("Widze, ze zawartosc twojej sakiewki jest taka sama, jak twoich spodni... Nic tam nie ma!", player);
+                    creature->MonsterWhisper("I see that you\'re too poor for that! Don\'t make me laugh.", player);
                     break;
                 }
 
@@ -1072,7 +1072,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 3:
                 if (!player->HasEnoughMoney(30 * GOLD))
                 {
-                    creature->MonsterWhisper("Widze, ze zawartosc twojej sakiewki jest taka sama, jak twoich spodni... Nic tam nie ma!", player);
+                    creature->MonsterWhisper("I see that you\'re too poor for that! Don\'t make me laugh.", player);
                     break;
                 }
 
@@ -1082,7 +1082,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 4:
                 if (!player->HasEnoughMoney(50 * GOLD))
                 {
-                    creature->MonsterWhisper("Widze, ze zawartosc twojej sakiewki jest taka sama, jak twoich spodni... Nic tam nie ma!", player);
+                    creature->MonsterWhisper("I see that you\'re too poor for that! Don\'t make me laugh.", player);
                     break;
                 }
 
@@ -1092,7 +1092,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 5:
                 if (!player->HasEnoughMoney(100 * GOLD))
                 {
-                    creature->MonsterWhisper("Widze, ze zawartosc twojej sakiewki jest taka sama, jak twoich spodni... Nic tam nie ma!", player);
+                    creature->MonsterWhisper("I see that you\'re too poor for that! Don\'t make me laugh.", player);
                     break;
                 }
 
@@ -1102,7 +1102,7 @@ public:
             case GOSSIP_ACTION_INFO_DEF + 6:
                 if (!player->HasEnoughMoney(250 * GOLD))
                 {
-                    creature->MonsterWhisper("Widze, ze zawartosc twojej sakiewki jest taka sama, jak twoich spodni... Nic tam nie ma!", player);
+                    creature->MonsterWhisper("I see that you\'re too poor for that! Don\'t make me laugh.", player);
                     break;
                 }
 

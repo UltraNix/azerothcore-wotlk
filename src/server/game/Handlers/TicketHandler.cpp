@@ -112,7 +112,7 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
 
         {
             ChatHandler chH(this);
-            chH.PSendSysMessage("Ticket zostal utworzony. Prosze pamietac, ze tickety niezgodne z regulaminem zostaja zamkniete bez odpowiedzi.");
+            chH.PSendSysMessage("Ticket has been created. Please remember that tickets that are not specific and do not meet requirements shall be closed without the answer.");
         }
 
         sWorld->SendGMText(LANG_COMMAND_TICKETNEW, GetPlayer()->GetName().c_str(), ticket->GetId());
