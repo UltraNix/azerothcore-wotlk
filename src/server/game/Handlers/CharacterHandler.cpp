@@ -1177,9 +1177,6 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
         if (!sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
             pCurrChar->SetAutoInviteDone(true);
 
-        // Guid of character who gonna 'invite' the player to channel. 2 = Character with name Sunwell.
-        uint64 guidName = 2;
-
         bool International = AccountMgr::CheckCountry(pCurrChar->GetSession()->GetAccountId(), "", "");
 
         std::string channelName;
@@ -1196,7 +1193,7 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
         data.Initialize(SMSG_CHANNEL_NOTIFY, 1 + channelName.size());
         data << uint8(CHAT_INVITE_NOTICE);
         data << channelName;
-        data << guidName;
+        data << uint64(sWorld->getIntConfig(CONFIG_AUTO_GLOBAL_GUID));
         pCurrChar->GetSession()->SendPacket(&data);
     }
 

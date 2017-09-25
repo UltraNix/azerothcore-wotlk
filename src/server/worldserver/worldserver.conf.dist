@@ -3314,6 +3314,14 @@ PhasedDuels.Zones = ""
 AutoGlobalInvite.Enable = 0
 
 #
+#     AutoGlobalInvite.GUID
+#        Description: Guid of character that invites the player to channel. example: 2 (Character in DB with name Sunwell).
+#        Default:     1 
+#
+
+AutoGlobalInvite.GUID = 1
+
+#
 #     AutoGlobalInviteAlways.Enable
 #        Description: When enabled the player will get invite to global every log in to game otherwise just once.
 #        Default:     0 - (Disabled)
