@@ -90,6 +90,7 @@ class boss_anub_arak : public CreatureScript
 
             void JustDied(Unit* killer)
             {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 Talk(SAY_DEATH);
                 BossAI::JustDied(killer);
             }
