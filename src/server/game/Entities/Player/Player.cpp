@@ -5739,9 +5739,6 @@ void Player::UpdateLocalChannels(uint32 newZone)
                     if (channel->flags & CHANNEL_DBC_FLAG_CITY_ONLY && usedChannel)
                         continue;                            // Already on the channel, as city channel names are not changing
 
-                    if (channel->flags & CHANNEL_DBC_FLAG_TRADE)
-                        continue;
-
                     char new_channel_name_buf[100];
                     char const* currentNameExt;
 
