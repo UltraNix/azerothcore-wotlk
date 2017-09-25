@@ -1177,15 +1177,15 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
         if (!sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
             pCurrChar->SetAutoInviteDone(true);
 
-        bool International = AccountMgr::CheckCountry(pCurrChar->GetSession()->GetAccountId(), "", "");
+        bool PolVersion = AccountMgr::CheckCountry(pCurrChar->GetSession()->GetAccountId(), "Poland", "");
 
         std::string channelName;
-        International ? channelName = "global" : channelName = "world";
+        PolVersion ? channelName = "world" : channelName = "global";
 
-        if (International)
-            chH.PSendSysMessage("Dear community, there is a Geolocalization System on Sunwell that automatically invites players to chat channels by their language. Our system detected, that you are based outside of Poland, that's why you are in an English group. If you are Polish and play outside of Poland, write: /join world");
+        if (PolVersion)
+            chH.PSendSysMessage("Drogi graczu, na Sunwellu dziala system geolokalizacji, ktory automatycznie przypisuje graczy do kanalow zalezenie od jezyka. Nasz system wykryl, ze jestes z Polski, dlatego automatycznie przypiszemy Cie do kanalu polskiego. Zyczymy milej gry na Sunwellu!");
         else
-            chH.PSendSysMessage("Drogi graczu, na Sunwellu dziala system geolokalizacji, ktory automatycznie przypisuje graczy do kanalow zalezenie od jezyka. Nasz system wykryl, ze jestes z Polski, dlatego automatycznie przypiszemy Cie do kana³u polskiego. Zyczymy milej gry na Sunwellu!");
+            chH.PSendSysMessage("Dear community, there is a Geolocalization System on Sunwell that automatically invites players to chat channels by their language. Our system detected, that you are based outside of Poland, that's why you are in an English group. If you are Polish and play outside of Poland, write: /join world");
 
         // this will work if at least 1 player is logged in regrdless if he is on the channel or not
         // the first person that login empty server is the one with bad luck and wont be invited,
