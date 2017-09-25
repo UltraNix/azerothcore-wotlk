@@ -3304,6 +3304,23 @@ PhasedDuels.Enable = 0
 
 PhasedDuels.Zones = ""  
 
+
+#
+#     AutoGlobalInvite.Enable
+#        Description: Enables or disables Auto global channels invites.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+AutoGlobalInvite.Enable = 0
+
+#
+#     AutoGlobalInviteAlways.Enable
+#        Description: When enabled the player will get invite to global every log in to game otherwise just once.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+AutoGlobalInviteAlways.Enable = 0
+
 #
 #     BoostPercentage.Enable
 #        Description: Enables or disables Boost Percentage count of players in game.

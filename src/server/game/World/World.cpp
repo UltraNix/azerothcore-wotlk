@@ -1292,9 +1292,13 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);
     m_bool_configs[CONFIG_PREMIUM_INSTANT_FLYING_ENABLE] = sConfigMgr->GetBoolDefault("Premium.InstantFlying.Enable", true);
 
-    //Phased Duels
+    // Phased Duels
     m_bool_configs[CONFIG_PHASED_DUELS_ENABLE] = sConfigMgr->GetBoolDefault("PhasedDuels.Enable", false);
     SetPhasedDuelsZones(sConfigMgr->GetStringDefault("PhasedDuels.Zones", ""));
+
+    // @autoinvite_feature
+    m_bool_configs[CONFIG_AUTO_GLOBAL_INVITE_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInvite.Enable", false);
+    m_bool_configs[CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInviteAlways.Enable", false);
 
     //  
     m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);

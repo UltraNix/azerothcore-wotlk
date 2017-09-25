@@ -2663,6 +2663,10 @@ class Player : public Unit, public GridObject<Player>
         bool BlizzlikeMode() { return m_BlizzlikeMode; }
         void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
    
+        // @autoinvite_feature
+        bool AutoInviteDone() { return m_NeedAutoInvite; }
+        void SetAutoInviteDone(bool val) { m_NeedAutoInvite = val; }
+
         bool ArenaAnnounce() { return m_ArenaAnnounce; }
         void SetArenaAnnounce(bool val) { m_ArenaAnnounce = val; }
 
@@ -2919,6 +2923,7 @@ class Player : public Unit, public GridObject<Player>
         float m_ammoDPS;
 
         bool m_BlizzlikeMode;
+        bool m_NeedAutoInvite; // @autoinvite_feature
         bool m_ArenaAnnounce;
 
         ////////////////////Rest System/////////////////////

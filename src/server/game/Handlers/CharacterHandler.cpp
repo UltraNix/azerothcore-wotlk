@@ -50,6 +50,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Transport.h"
+#include "ChannelMgr.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -1169,7 +1170,38 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
         }
     }
 
+    // @autoinvite_feature
+    if (sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_INVITE_ENABLE) && !pCurrChar->AutoInviteDone() || sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_INVITE_ENABLE) && sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
+    {
+        // No necessary to update value at always option.
+        if (!sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
+            pCurrChar->SetAutoInviteDone(true);
+
+        // Guid of character who gonna 'invite' the player to channel. 2 = Character with name Sunwell.
+        uint64 guidName = 2;
+
+        bool International = AccountMgr::CheckCountry(pCurrChar->GetSession()->GetAccountId(), "", "");
+
+        std::string channelName;
+        International ? channelName = "global" : channelName = "world";
+
+        if (International)
+            chH.PSendSysMessage("Dear community, there is a Geolocalization System on Sunwell that automatically invites players to chat channels by their language. Our system detected, that you are based outside of Poland, that's why you are in an English group. If you are Polish and play outside of Poland, write: /join world");
+        else
+            chH.PSendSysMessage("Drogi graczu, na Sunwellu dziala system geolokalizacji, ktory automatycznie przypisuje graczy do kanalow zalezenie od jezyka. Nasz system wykryl, ze jestes z Polski, dlatego automatycznie przypiszemy Cie do kana³u polskiego. Zyczymy milej gry na Sunwellu!");
+
+        // this will work if at least 1 player is logged in regrdless if he is on the channel or not
+        // the first person that login empty server is the one with bad luck and wont be invited,
+        // if at least 1 player is online the player will be inited to the chanel
+        data.Initialize(SMSG_CHANNEL_NOTIFY, 1 + channelName.size());
+        data << uint8(CHAT_INVITE_NOTICE);
+        data << channelName;
+        data << guidName;
+        pCurrChar->GetSession()->SendPacket(&data);
+    }
+
     sScriptMgr->OnPlayerLogin(pCurrChar);
+
     delete holder;
 }
 

@@ -1,0 +1,1 @@
+ALTER TABLE characters ADD COLUMN autoInvite TINYINT(3) unsigned NOT NULL default '0' AFTER blizzlikeMode;

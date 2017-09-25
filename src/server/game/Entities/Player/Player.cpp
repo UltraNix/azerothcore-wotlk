@@ -921,6 +921,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     // Ours
     m_NeedToSaveGlyphs = false;
     m_BlizzlikeMode = false;
+    m_NeedAutoInvite = false;
     m_ArenaAnnounce = false;
     m_comboPointGain = 0;
     m_MountBlockId = 0;
@@ -5737,6 +5738,9 @@ void Player::UpdateLocalChannels(uint32 newZone)
                 {
                     if (channel->flags & CHANNEL_DBC_FLAG_CITY_ONLY && usedChannel)
                         continue;                            // Already on the channel, as city channel names are not changing
+
+                    if (channel->flags & CHANNEL_DBC_FLAG_TRADE)
+                        continue;
 
                     char new_channel_name_buf[100];
                     char const* currentNameExt;
@@ -18172,8 +18176,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     if (m_grantableLevels > 0)
         SetByteValue(PLAYER_FIELD_BYTES, 1, 0x01);
 
-    m_BlizzlikeMode = fields[67].GetBool();
-    m_ArenaAnnounce = fields[68].GetBool();
+    m_BlizzlikeMode  = fields[67].GetBool();
+    m_NeedAutoInvite = fields[68].GetBool();
+    m_ArenaAnnounce  = fields[69].GetBool();
 
     _LoadDeclinedNames(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES));
 
@@ -26233,6 +26238,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
         stmt->setBool(index++, m_BlizzlikeMode);
+        stmt->setBool(index++, m_NeedAutoInvite);
         stmt->setBool(index++, m_ArenaAnnounce);
     }
     else
@@ -26362,6 +26368,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
         stmt->setBool(index++, m_BlizzlikeMode);
+        stmt->setBool(index++, m_NeedAutoInvite);
         stmt->setBool(index++, m_ArenaAnnounce);
         
         stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
