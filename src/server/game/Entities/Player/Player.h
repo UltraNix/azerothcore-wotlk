@@ -2471,6 +2471,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetPendingBind() const { return _pendingBindId; }
         void SendRaidInfo();
         void SendPremiumInfo();
+        void SendAutoJoin();
         void SendSavedInstances();
         bool Satisfy(AccessRequirement const* ar, uint32 target_map, bool report = false);
         bool CheckInstanceLoginValid();

@@ -1105,6 +1105,10 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
 
     pCurrChar->SendPremiumInfo();
 
+    // show auto invite only for players above level 1 (players with level 1st has auto join at Player::GiveXP())
+    if (pCurrChar->getLevel() > 1)
+        pCurrChar->SendAutoJoin();
+
     std::string IP_str = GetRemoteAddress();
     sLog->outChar("Account: %d (IP: %s) Login Character:[%s] (GUID: %u) Level: %d",
         GetAccountId(), IP_str.c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->getLevel());
@@ -1168,33 +1172,6 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
                 }
             }
         }
-    }
-
-    // @autoinvite_feature
-    if (sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_INVITE_ENABLE) && !pCurrChar->AutoInviteDone() || sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_INVITE_ENABLE) && sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
-    {
-        // No necessary to update value at always option.
-        if (!sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
-            pCurrChar->SetAutoInviteDone(true);
-
-        bool PolVersion = AccountMgr::CheckCountry(pCurrChar->GetSession()->GetAccountId(), "Poland", "");
-
-        std::string channelName;
-        PolVersion ? channelName = "world" : channelName = "global";
-
-        if (PolVersion)
-            chH.PSendSysMessage("Drogi graczu, na Sunwellu dziala system geolokalizacji, ktory automatycznie przypisuje graczy do kanalow zalezenie od jezyka. Nasz system wykryl, ze jestes z Polski, dlatego automatycznie przypiszemy Cie do kanalu polskiego. Zyczymy milej gry na Sunwellu!");
-        else
-            chH.PSendSysMessage("Dear community, there is a Geolocalization System on Sunwell that automatically invites players to chat channels by their language. Our system detected, that you are based outside of Poland, that's why you are in an English group. If you are Polish and play outside of Poland, write: /join world");
-
-        // this will work if at least 1 player is logged in regrdless if he is on the channel or not
-        // the first person that login empty server is the one with bad luck and wont be invited,
-        // if at least 1 player is online the player will be inited to the chanel
-        data.Initialize(SMSG_CHANNEL_NOTIFY, 1 + channelName.size());
-        data << uint8(CHAT_INVITE_NOTICE);
-        data << channelName;
-        data << uint64(sWorld->getIntConfig(CONFIG_AUTO_GLOBAL_GUID));
-        pCurrChar->GetSession()->SendPacket(&data);
     }
 
     sScriptMgr->OnPlayerLogin(pCurrChar);

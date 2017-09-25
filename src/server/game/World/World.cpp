@@ -1301,6 +1301,9 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInviteAlways.Enable", false);
     m_int_configs[CONFIG_AUTO_GLOBAL_GUID] = sConfigMgr->GetIntDefault("AutoGlobalInvite.GUID", 1);
  
+    // Server Country
+    SetCountryName(sConfigMgr->GetStringDefault("Country.Name", "Poland"));
+
     //  
     m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);
     m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Value", 0.1f);

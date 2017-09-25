@@ -846,6 +846,9 @@ class World
         std::string const& GetRealmName() const { return _realmName; } // pussywizard
         void SetRealmName(std::string name) { _realmName = name; } // pussywizard
 
+        std::string const& GetCountryName() const { return _countryName; } // @peypey
+        void SetCountryName(std::string country) { _countryName = country; } // @peypey
+
         std::string const& GetWinnerMessage() const { return _winnerMessage; } // @bgreward
         void SetWinnerMessage(std::string message) { _winnerMessage = message; } // @bgreward
 
@@ -926,6 +929,7 @@ class World
         GlobalPlayerNameMap _globalPlayerNameStore; // xinef
 
         std::string _realmName;
+        std::string _countryName;
         std::string _winnerMessage;
         std::string _winnerMessageArena;
 

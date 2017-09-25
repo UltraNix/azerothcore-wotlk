@@ -3311,7 +3311,7 @@ PhasedDuels.Zones = ""
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-AutoGlobalInvite.Enable = 0
+AutoGlobalInvite.Enable = 1
 
 #
 #     AutoGlobalInvite.GUID
@@ -3319,7 +3319,7 @@ AutoGlobalInvite.Enable = 0
 #        Default:     1 
 #
 
-AutoGlobalInvite.GUID = 1
+AutoGlobalInvite.GUID = 16
 
 #
 #     AutoGlobalInviteAlways.Enable
@@ -3327,7 +3327,16 @@ AutoGlobalInvite.GUID = 1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-AutoGlobalInviteAlways.Enable = 0
+AutoGlobalInviteAlways.Enable = 1
+
+#
+#     Country.Name
+#        Description: Origin country of server. This feature is necessary when you wan't control some aspects for players of your own country.
+#        Like sending message in different languages in functions etc.
+#        Example:     "Finalnd" (Some aspects of core to players from Finland.)
+#        Default:     "Poland"
+
+Country.Name = "Poland"  
 
 #
 #     BoostPercentage.Enable

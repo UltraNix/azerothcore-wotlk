@@ -3181,6 +3181,10 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
 
     sScriptMgr->OnGivePlayerXP(this, xp, victim);
 
+    // Here due to fact that players could cancel cinematic (and auto invite) with ESC button.
+    if (getLevel() == 1)
+        SendAutoJoin();
+
     // Favored experience increase START
     uint32 zone = GetZoneId();
     float favored_exp_mult = 0;
@@ -19338,6 +19342,37 @@ void Player::SendPremiumInfo()
     }
 }
 
+void Player::SendAutoJoin()
+{
+    // @autoinvite_feature
+    // Here due to fact that new player with level 1 could cancel cinematic and also this invite, that's the reason we moving this here.
+    if (sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_INVITE_ENABLE) && !AutoInviteDone() || sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_INVITE_ENABLE) && sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
+    {
+        // No necessary to update value at always option.
+        if (!sWorld->getBoolConfig(CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE))
+            SetAutoInviteDone(true);
+
+        bool CountryVersion = AccountMgr::CheckCountry(GetSession()->GetAccountId(), sWorld->GetCountryName(), "");
+
+        std::string channelName;
+        CountryVersion ? channelName = "world" : channelName = "global";
+
+        if (CountryVersion)
+            ChatHandler(GetSession()).PSendSysMessage("Drogi graczu, na Sunwellu dziala system geolokalizacji, ktory automatycznie przypisuje graczy do kanalow zalezenie od jezyka. Nasz system wykryl, ze jestes z Polski, dlatego automatycznie przypiszemy Cie do kanalu polskiego. Zyczymy milej gry na Sunwellu!");
+        else
+            ChatHandler(GetSession()).PSendSysMessage("Dear community, there is a Geolocalization System on Sunwell that automatically invites players to chat channels by their language. Our system detected, that you are based outside of Poland, that's why you are in an English group. If you are Polish and play outside of Poland, write: /join world");
+
+        // this will work if at least 1 player is logged in regrdless if he is on the channel or not
+        // the first person that login empty server is the one with bad luck and wont be invited,
+        // if at least 1 player is online the player will be inited to the chanel
+        WorldPacket data;
+        data.Initialize(SMSG_CHANNEL_NOTIFY, 1 + channelName.size());
+        data << uint8(CHAT_INVITE_NOTICE);
+        data << channelName;
+        data << uint64(sWorld->getIntConfig(CONFIG_AUTO_GLOBAL_GUID));
+        GetSession()->SendPacket(&data);
+    }
+}
 /*
 - called on every successful teleportation to a map
 */
