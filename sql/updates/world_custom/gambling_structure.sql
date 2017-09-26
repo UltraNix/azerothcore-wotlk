@@ -96,8 +96,8 @@ DELETE FROM `creature` WHERE `id` = @NPC_CAVE + 30;
 DELETE FROM `creature` WHERE `id` = @NPC_GUEST + 6;
 SET @NPC_GUID := (SELECT MAX(guid) from creature) +100;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@NPC_GUID + 2, @NPC_CAVE + 3  , 1, 1, 1, 0, 0, 1271.075562, -4350.240234, 33.095955, 0.406819, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 3, @NPC_CAVE + 4  , 1, 1, 1, 0, 0, 1269.409302, -4341.032715, 33.095955, 0.146067, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+-- (@NPC_GUID + 2, @NPC_CAVE + 3  , 1, 1, 1, 0, 0, 1271.075562, -4350.240234, 33.095955, 0.406819, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+-- (@NPC_GUID + 3, @NPC_CAVE + 4  , 1, 1, 1, 0, 0, 1269.409302, -4341.032715, 33.095955, 0.146067, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 4, @NPC_CAVE + 5  , 1, 1, 1, 0, 0, 1282.338379, -4356.874023, 33.095955, 1.077550, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 5, @NPC_CAVE + 6  , 1, 1, 1, 0, 0, 1292.581787, -4358.854004, 33.098709, 1.707439, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 6, @NPC_CAVE + 7  , 1, 1, 1, 0, 0, 1299.019531, -4354.079102, 33.098709, 2.089143, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
@@ -106,8 +106,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 (@NPC_GUID + 9, @NPC_GUEST + 6, 1, 1, 1, 0, 0, 1313.885864, -4327.262207, 32.360111, 4.713160, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 11, @NPC_CAVE + 26, 1, 1, 1, 0, 0, 1296.231079, -4326.210938, 33.096249, 4.194011, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 12, @NPC_CAVE + 30, 1, 1, 1, 0, 0, 1319.505493,-4369.537109,27.801524,5.59, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 14, @NPC_CAVE + 3  , 0, 1, 1, 0, 0, -9060.568359,380.749146,93.531425,4.09, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
-(@NPC_GUID + 15, @NPC_CAVE + 4  , 0, 1, 1, 0, 0, -9048.838867,367.262146,93.026871,4.12, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+-- (@NPC_GUID + 14, @NPC_CAVE + 3  , 0, 1, 1, 0, 0, -9060.568359,380.749146,93.531425,4.09, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
+-- (@NPC_GUID + 15, @NPC_CAVE + 4  , 0, 1, 1, 0, 0, -9048.838867,367.262146,93.026871,4.12, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 16, @NPC_CAVE + 5  , 0, 1, 1, 0, 0, -9081.796875,371.080536,92.597969,4.975849, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 17, @NPC_CAVE + 6  , 0, 1, 1, 0, 0, -9072.165039,387.027924,92.702354,4.474762, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
 (@NPC_GUID + 18, @NPC_CAVE + 7  , 0, 1, 1, 0, 0, -9085.712891,356.640594,93.513451,0.53, 300, 10, 0, 21760, 0, 0, 0, 0, 0),
@@ -242,6 +242,6 @@ INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES ('11013', '|cff
 
 
 REPLACE INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`) VALUES 
-(132, '2017-08-13 20:00:00', '2030-12-31 06:00:00', 10080, 1, 0, 'Lottery Gold', 0);
+(132, '2017-08-13 20:00:00', '2017-08-13 20:00:00', 10080, 1, 0, 'Lottery Gold', 0);
 REPLACE INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`) VALUES 
-(133, '2017-08-13 20:00:00', '2020-12-31 06:00:00', 10080, 1, 0, 'Lottery Sunwell Coins', 0);
+(133, '2017-08-13 20:00:00', '2017-08-13 20:00:00', 10080, 1, 0, 'Lottery Sunwell Coins', 0);
