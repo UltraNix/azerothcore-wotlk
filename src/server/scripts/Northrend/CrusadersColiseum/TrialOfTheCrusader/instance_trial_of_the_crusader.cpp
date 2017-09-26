@@ -214,7 +214,10 @@ public:
                     NPC_LichKingGUID = creature->GetGUID();
                     break;
                 case NPC_ANUBARAK:
-                    NPC_AnubarakGUID = creature->GetGUID();
+                    if (InstanceProgress == INSTANCE_PROGRESS_DONE)
+                        creature->DespawnOrUnsummon();
+                    else
+                        NPC_AnubarakGUID = creature->GetGUID();
                     break;
             }
         }
