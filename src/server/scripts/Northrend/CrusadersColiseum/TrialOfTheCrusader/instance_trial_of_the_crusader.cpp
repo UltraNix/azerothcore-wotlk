@@ -235,7 +235,10 @@ public:
                     HandleGameObject(GO_WebDoorGUID, true, go);
                     break;
                 case GO_ARGENT_COLISEUM_FLOOR:
-                    GO_FloorGUID = go->GetGUID();
+                    if (InstanceProgress == INSTANCE_PROGRESS_ANUBARAK_INTRO_DONE || InstanceProgress == INSTANCE_PROGRESS_DONE)
+                        go->AddObjectToRemoveList();
+                    else
+                        GO_FloorGUID = go->GetGUID();
                     break;
                 case GO_SOUTH_PORTCULLIS:
                 case GO_NORTH_PORTCULLIS:
