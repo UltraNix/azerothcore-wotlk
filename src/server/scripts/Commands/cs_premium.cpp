@@ -84,8 +84,6 @@ public:
             errors.push_back("Can't be on a vehicle.");
         if (player->IsInCombat())
             errors.push_back("Can't be in combat.");
-        if (player->isUsingLfg())
-            errors.push_back("Can't spectate while using LFG system.");
         if (player->InBattlegroundQueue())
             errors.push_back("Can't be queued for arena or bg.");
         if (player->GetMap()->IsBattlegroundOrArena())
