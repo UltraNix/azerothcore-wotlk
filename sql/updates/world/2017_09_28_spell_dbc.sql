@@ -1,0 +1,1 @@
+UPDATE spell_dbc SET Effect1 = 5 WHERE Id IN(45367, 45370);

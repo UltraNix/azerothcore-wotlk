@@ -1244,6 +1244,14 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     // Pre effects
     switch (m_spellInfo->Id)
     {
+        case 45367:
+            if (Player* target = unitTarget->ToPlayer()) 
+                target->TeleportTo(uint32(530), 12782.93f, -6879.83f, 23.35f, 2.18f, TELE_TO_GM_MODE);
+            return;
+        case 45370:
+            if (Player* target = unitTarget->ToPlayer())
+                target->TeleportTo(530, 12793.61f, -6894.41f, 30.89f, 2.25f, TELE_TO_GM_MODE);
+            return;
         case 70746: // Teleport Into Sunwell (for Battered Hilt)
             if (Player* target = unitTarget->ToPlayer())
             {
