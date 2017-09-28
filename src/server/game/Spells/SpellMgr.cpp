@@ -3023,6 +3023,24 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
+            1978,   // - Serpent Sting(Rank 1)
+            13549,  //- Serpent Sting(Rank 2)
+            13550,  //- Serpent Sting(Rank 3)
+            13551,  //- Serpent Sting(Rank 4)
+            13552,  //- Serpent Sting(Rank 5)
+            13553,  //- Serpent Sting(Rank 6)
+            13554,  //- Serpent Sting(Rank 7)
+            13555,  //- Serpent Sting(Rank 8)
+            25295,  //- Serpent Sting(Rank 9)
+            27016,  //- Serpent Sting(Rank 10)
+            49000,  //- Serpent Sting(Rank 11)
+            49001,  //- Serpent Sting(Rank 12)
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_FORCE_DOT_DONUS;
+        });
+        
+        ApplySpellFix
+        ({
             53, // Backstab
             2589,
             2590,
@@ -3873,6 +3891,19 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// HUNTER
         /////////////////////////////////
+            break;
+        // Item - Hunter T9 2P Bonus
+        case 67150:
+            spellInfo->Effect[EFFECT_1] = 0; //No sense in this core
+            break;
+        // Mortal Shots
+        case 19485:
+        case 19487:
+        case 19488:
+        case 19489:
+        case 19490:
+            spellInfo->Effect[EFFECT_1] = 0; //Another one
+            spellInfo->EffectSpellClassMask[0] |= 0x00004000;
         // Flare
         case 1543:
             spellInfo->speed = 0;

@@ -11276,7 +11276,7 @@ uint32 Unit::SpellCriticalDamageBonus(Unit const* caster, SpellInfo const* spell
 
         crit_bonus -= damage;
 
-        if (damage > uint32(crit_bonus))
+        if (damage > uint32(crit_bonus) || spellProto->AttributesCu & SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS)
         {
             // adds additional damage to critBonus (from talents)
             if (Player* modOwner = caster->GetSpellModOwner())
