@@ -3036,7 +3036,7 @@ void SpellMgr::LoadSpellCustomAttr()
             49000,  //- Serpent Sting(Rank 11)
             49001,  //- Serpent Sting(Rank 12)
         }, [](SpellInfo* spellInfo) {
-            spellInfo->AttributesCu |= SPELL_ATTR0_CU_FORCE_DOT_DONUS;
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS;
         });
         
         ApplySpellFix
