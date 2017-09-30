@@ -427,7 +427,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
 
     // pussywizard: randomize for all arena
     if (bgTypeId == BATTLEGROUND_AA)
-        bgTypeId = RAND<BattlegroundTypeId>(BATTLEGROUND_NA, BATTLEGROUND_BE, BATTLEGROUND_RL, BATTLEGROUND_DS, /*BATTLEGROUND_RV*/);
+        bgTypeId = RAND<BattlegroundTypeId>(BATTLEGROUND_NA, BATTLEGROUND_BE, BATTLEGROUND_RL, BATTLEGROUND_DS/*, BATTLEGROUND_RV*/);
 
     // get the template BG
     Battleground* bg_template = GetBattlegroundTemplate(bgTypeId);
