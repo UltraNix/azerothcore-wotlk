@@ -1,7 +1,3 @@
-/*
-REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
@@ -9,156 +5,155 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 
 enum Spells
 {
-    SPELL_CARRION_SWARM_N                        = 52720,
-    SPELL_CARRION_SWARM_H                        = 58852,
-    SPELL_MIND_BLAST_N                            = 52722,
-    SPELL_MIND_BLAST_H                            = 58850,
-    SPELL_SLEEP_N                                = 52721,
-    SPELL_SLEEP_H                                = 58849,
-    SPELL_VAMPIRIC_TOUCH                        = 52723,
+    SPELL_CARRION_SWARM                             = 52720,
+    SPELL_MIND_BLAST                                = 52722,
+    SPELL_SLEEP                                     = 52721,
+    SPELL_VAMPIRIC_TOUCH                            = 52723,
 };
 
 enum Events
 {
-    EVENT_SPELL_CARRION_SWARM                    = 1,
-    EVENT_SPELL_MIND_BLAST                        = 2,
-    EVENT_SPELL_SLEEP                            = 3,
-    EVENT_SPELL_VAMPIRIC_TOUCH                    = 4,
+    EVENT_SPELL_CARRION_SWARM                       = 1,
+    EVENT_SPELL_MIND_BLAST,
+    EVENT_SPELL_SLEEP,
+    EVENT_SPELL_VAMPIRIC_TOUCH,
+    EVENT_KILL_TALK
 };
 
 enum Yells
 {
-    SAY_AGGRO                                   = 2,
-    SAY_KILL                                    = 3,
-    SAY_SLAY                                    = 4,
-    SAY_SLEEP                                   = 5,
-    SAY_30HEALTH                                = 6,
-    SAY_15HEALTH                                = 7,
-    SAY_ESCAPE_SPEECH_1                         = 8,
-    SAY_ESCAPE_SPEECH_2                         = 9,
-    SAY_OUTRO                                   = 10
+    SAY_AGGRO                                       = 2,
+    SAY_KILL,
+    SAY_SLAY,
+    SAY_SLEEP,
+    SAY_30HEALTH,
+    SAY_15HEALTH,
+    SAY_ESCAPE_SPEECH_1,
+    SAY_ESCAPE_SPEECH_2,
+    SAY_OUTRO
 };
 
-class boss_mal_ganis : public CreatureScript
+struct boss_mal_ganisAI : public ScriptedAI
 {
-public:
-    boss_mal_ganis() : CreatureScript("boss_mal_ganis") { }
-
-    CreatureAI* GetAI(Creature* creature) const
+    boss_mal_ganisAI(Creature* creature) : ScriptedAI(creature)
     {
-        return new boss_mal_ganisAI (creature);
+        _finished = false;
     }
 
-    struct boss_mal_ganisAI : public ScriptedAI
+    void Reset() override
     {
-        boss_mal_ganisAI(Creature* c) : ScriptedAI(c)
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+        events.Reset();
+        if (_finished)
         {
-            finished = false;
+            Talk(SAY_OUTRO);
+            me->DespawnOrUnsummon(20000);
         }
+    }
 
-        EventMap events;
-        bool finished;
+    void EnterCombat(Unit* /*who*/)
+    {
+        Talk(SAY_AGGRO);
+        events.ScheduleEvent(EVENT_SPELL_CARRION_SWARM, 6000);
+        events.ScheduleEvent(EVENT_SPELL_MIND_BLAST, 11000);
+        events.ScheduleEvent(EVENT_SPELL_SLEEP, 20000);
+        events.ScheduleEvent(EVENT_SPELL_VAMPIRIC_TOUCH, 15000);
+    }
 
-        void Reset() 
+    void JustDied(Unit* /*killer*/) override {}
+
+    void KilledUnit(Unit* /*victim*/) override
+    {
+        if (events.GetNextEventTime(EVENT_KILL_TALK) == 0)
         {
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
-            events.Reset();
-            if (finished)
+            Talk(RAND(SAY_KILL, SAY_SLAY));
+            events.ScheduleEvent(EVENT_KILL_TALK, 6000);
+        }
+    }
+
+    void DamageTaken(Unit* who, uint32 &damage, DamageEffectType, SpellSchoolMask)
+    {
+        if (!_finished && damage >= me->GetHealth())
+        {
+            damage = 0;
+            _finished = true;
+            me->SetRegeneratingHealth(false);
+            me->SetAttackable(false);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_PASSIVE);
+            if (InstanceScript* instance = me->GetInstanceScript())
             {
-                Talk(SAY_OUTRO);
-                me->DespawnOrUnsummon(20000);
+                if (Creature* cr = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ARTHAS)))
+                    cr->AI()->DoAction(ACTION_KILLED_MALGANIS);
+
+                // give credit to players
+                DoCastSelf(58630, true);
             }
+
+            // quest completion
+            if (who)
+                if (Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    player->RewardPlayerAndGroupAtEvent(31006, player); // Royal Escort quest, Mal'ganis bunny
+
+            EnterEvadeMode();
         }
+    }
 
-        void EnterCombat(Unit* /*who*/)
+    void UpdateAI(uint32 diff) override
+    {
+        if (_finished)
+            return;
+
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = events.ExecuteEvent())
         {
-            Talk(SAY_AGGRO);
-            events.ScheduleEvent(EVENT_SPELL_CARRION_SWARM, 6000);
-            events.ScheduleEvent(EVENT_SPELL_MIND_BLAST, 11000);
-            events.ScheduleEvent(EVENT_SPELL_SLEEP, 20000);
-            events.ScheduleEvent(EVENT_SPELL_VAMPIRIC_TOUCH, 15000);
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (!urand(0,1))
-                return;
-
-            Talk(SAY_SLAY);
-        }
-
-        void DamageTaken(Unit* who, uint32 &damage, DamageEffectType, SpellSchoolMask)
-        {
-            if (!finished && damage >= me->GetHealth())
-            {
-                damage = 0;
-                finished = true;
-                me->SetRegeneratingHealth(false);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->SetReactState(REACT_PASSIVE);
-                if (InstanceScript* pInstance = me->GetInstanceScript())
-                {
-                    if (Creature* cr = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_ARTHAS)))
-                        cr->AI()->DoAction(ACTION_KILLED_MALGANIS);
-
-                    // give credit to players
-                    me->CastSpell(me, 58630, true);
-                }
-
-                // quest completion
-                if (who)
-                    if (Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself())
-                        player->RewardPlayerAndGroupAtEvent(31006, player); // Royal Escort quest, Mal'ganis bunny
-
-                EnterEvadeMode();
-            }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.GetEvent())
+            switch (eventId)
             {
                 case EVENT_SPELL_CARRION_SWARM:
-                    me->CastSpell(me->GetVictim(), DUNGEON_MODE(SPELL_CARRION_SWARM_N, SPELL_CARRION_SWARM_H), false);
-                    events.RepeatEvent(7000);
+                    DoCastVictim(SPELL_CARRION_SWARM);
+                    events.Repeat(7000);
                     break;
                 case EVENT_SPELL_MIND_BLAST:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                        me->CastSpell(target, DUNGEON_MODE(SPELL_MIND_BLAST_N, SPELL_MIND_BLAST_H), false);
-                    events.RepeatEvent(6000);
+                        DoCast(target, SPELL_MIND_BLAST);
+                    events.Repeat(6000);
                     break;
                 case EVENT_SPELL_SLEEP:
                     Talk(SAY_SLEEP);
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
-                        me->CastSpell(target, DUNGEON_MODE(SPELL_SLEEP_N, SPELL_SLEEP_H), false);
-                    events.RepeatEvent(17000);
+                        DoCast(target, SPELL_SLEEP);
+                    events.Repeat(17000);
                     break;
                 case EVENT_SPELL_VAMPIRIC_TOUCH:
-                    me->CastSpell(me, SPELL_VAMPIRIC_TOUCH, true);
-                    events.RepeatEvent(30000);
+                    DoCastSelf(SPELL_VAMPIRIC_TOUCH, true);
+                    events.Repeat(30000);
+                    break;
+                default:
                     break;
             }
 
-            DoMeleeAttackIfReady();
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
-    };
 
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        EventMap events;
+        bool _finished;
 };
+
 
 void AddSC_boss_mal_ganis()
 {
-    new boss_mal_ganis();
+    new CreatureAILoader<boss_mal_ganisAI>("boss_mal_ganis");
 }
