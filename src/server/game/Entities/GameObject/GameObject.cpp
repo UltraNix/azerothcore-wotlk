@@ -578,7 +578,7 @@ void GameObject::Update(uint32 diff)
                     // search unfriendly creature
                     if (owner)                    // hunter trap
                     {
-                        if (owner->IsInSanctuary())
+                        if (owner->IsInSanctuary() && owner->GetTypeId() == TYPEID_PLAYER && !owner->ToPlayer()->duel)
                             return;
 
                         Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
