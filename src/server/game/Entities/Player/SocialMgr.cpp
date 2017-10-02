@@ -237,6 +237,8 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo &fri
             friendInfo.Status = FRIEND_STATUS_AFK;
         if (pFriend->isDND())
             friendInfo.Status = FRIEND_STATUS_DND;
+        if (pFriend->GetSession()->GetRecruiterId() == player->GetSession()->GetAccountId() || pFriend->GetSession()->GetAccountId() == player->GetSession()->GetRecruiterId())
+            friendInfo.Status = FriendStatus(uint32(friendInfo.Status) | FRIEND_STATUS_RAF);
 
         // .dodge command
         if (pFriend->IsInDodgeMode())
