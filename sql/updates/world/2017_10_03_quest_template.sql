@@ -1,0 +1,1 @@
+UPDATE quest_template SET LimitTime = 18000 WHERE Id = 8730;
