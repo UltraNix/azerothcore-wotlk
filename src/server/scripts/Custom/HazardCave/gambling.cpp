@@ -16,26 +16,31 @@ public:
             {
                 challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 50 gold!");
                 target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 50 gold! Do you accept that?");
+                ChatHandler(target->GetSession()).PSendSysMessage("|cffff0000[PvP] You will be dueling for 50 gold with %s! Do you accept that?", target->GetName().c_str());
             }
             else if (challenger->hasGoldDuelSetting100G())
             {
                 challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 100 gold!");
                 target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 100 gold! Do you accept that?");
+                ChatHandler(target->GetSession()).PSendSysMessage("|cffff0000[PvP] You will be dueling for 100 gold with %s! Do you accept that?", target->GetName().c_str());
             }
             else if (challenger->hasGoldDuelSetting200G())
             {
                 challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 200 gold!");
                 target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 200 gold! Do you accept that?");
+                ChatHandler(target->GetSession()).PSendSysMessage("|cffff0000[PvP] You will be dueling for 200 gold with %s! Do you accept that?", target->GetName().c_str());
             }
             else if (challenger->hasGoldDuelSetting500G())
             {
                 challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 500 gold!");
                 target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 500 gold! Do you accept that?");
+                ChatHandler(target->GetSession()).PSendSysMessage("|cffff0000[PvP] You will be dueling for 500 gold with %s! Do you accept that?", target->GetName().c_str());
             }
             else if (challenger->hasGoldDuelSetting1000G())
             {
                 challenger->GetSession()->SendNotification("|cffffffff[PvP] You will duel for 1000 gold!");
                 target->GetSession()->SendNotification("|cffffffff[PvP] You will be dueling for 1000 gold! Do you accept that?");
+                ChatHandler(target->GetSession()).PSendSysMessage("|cffff0000[PvP] You will be dueling for 1000 gold with %s! Do you accept that?", target->GetName().c_str());
             }
         }
     }
