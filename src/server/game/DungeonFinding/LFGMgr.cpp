@@ -1560,7 +1560,7 @@ void LFGMgr::MakeNewGroup(LfgProposal const& proposal)
             if ((randomDungeon || selectedRandomLfgDungeon(player->GetGUID())) && !player->HasAura(LFG_SPELL_DUNGEON_COOLDOWN))
             {
                 randomDungeon = true;
-                player->AddAura(LFG_SPELL_DUNGEON_COOLDOWN, player);
+                //player->AddAura(LFG_SPELL_DUNGEON_COOLDOWN, player);
             }
             TeleportPlayer(player, false);
         }
