@@ -14935,7 +14935,9 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         // Xinef: Shaman in ghost wolf form cant proc anything melee based
         if (!isVictim && GetShapeshiftForm() == FORM_GHOSTWOLF)
             return;
-
+        // Can't proc enchant while is on cooldown
+        if (procSpell && procSpell->AttributesCu & SPELL_ATTR0_CU_ENCHANT_PROC && HasSpellCooldown(procSpell->Id))
+            return;
         // Update skills here for players
         if (GetTypeId() == TYPEID_PLAYER)
         {

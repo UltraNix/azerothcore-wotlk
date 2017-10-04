@@ -23199,6 +23199,16 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
 
 void Player::ApplyEquipCooldown(Item* pItem)
 { 
+
+    if (uint32 enchant_id = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT))
+    {
+        SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if (pEnchant)
+            for (uint8 i = 0; i < MAX_ITEM_ENCHANTMENT_EFFECTS; i++)
+                if (uint32 spellEnchId = pEnchant->spellid[i])
+                    AddSpellCooldown(spellEnchId, uint32(-1), 30 * IN_MILLISECONDS);
+    }
+
     if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_PROTO_FLAG_NO_EQUIP_COOLDOWN))
         return;
 
@@ -23209,7 +23219,7 @@ void Player::ApplyEquipCooldown(Item* pItem)
         // no spell
         if (!spellData.SpellId)
             continue;
-
+        
         // xinef: apply hidden cooldown for procs
         if (spellData.SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP)
         {
