@@ -537,6 +537,11 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_GOLD_DUEL_SETTING_200G   = 0x4000,         // Win or lose: 200  gold
     PLAYER_EXTRA_GOLD_DUEL_SETTING_500G   = 0x8000,         // Win or lose: 500  gold
     PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G  = 0x10000,        // Win or lose: 1000 gold
+
+    PLAYER_EXTRA_MODEL_PVE = 0x20000,
+    PLAYER_EXTRA_MODEL_PVP = 0x30000,
+    PLAYER_EXTRA_MODEL_MIX = 0x40000,
+    PLAYER_EXTRA_MODEL_TWK = 0x50000
 };
 
 // 2^n values
@@ -1237,6 +1242,30 @@ class Player : public Unit, public GridObject<Player>
             else if (hasGoldDuelSetting1000G())
                 m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G;
         }
+
+        // @Transmog
+        bool hasTransmogModelPvE()   const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVE; }
+        bool hasTransmogModelPvP()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVP; }
+        bool hasTransmogModelMIX()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_MIX; }
+        bool hasTransmogModelTWK()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_TWK; }
+
+        void SetTransmogModelPvE() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_PVE; }
+        void SetTransmogModelPvP() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_PVP; }
+        void SetTransmogModelMIX() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_MIX; }
+        void SetTransmogModelTWK() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_TWK; }
+
+        void SetResetModelMix()
+        {
+            if (hasTransmogModelPvE())
+                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_PVE;
+            else if (hasTransmogModelPvP())
+                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_PVP;
+            else if (hasTransmogModelMIX())
+                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_MIX;
+            else if (hasTransmogModelTWK())
+                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_TWK;
+        }
+
         bool isInGamblingArea() const 
         {
             return m_last_area_id == 12 || m_last_area_id == 14 || m_last_area_id == 4570;

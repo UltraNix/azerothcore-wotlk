@@ -32,25 +32,37 @@ public:
     bool OnGossipHello(Player* player, Creature* creature)
     {
         WorldSession* session = player->GetSession();
-        if (sT->GetEnableTransmogInfo())
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Book_11:30:30:-18:0|tHow transmogrification works", EQUIPMENT_SLOT_END + 9, 0);
-        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+
+        if ((player->hasTransmogModelPvE() || player->hasTransmogModelPvP() || player->hasTransmogModelMIX() || player->hasTransmogModelTWK() && sT->CustomModelCost) || !sT->CustomModelCost)
         {
-            if (const char* slotName = sT->GetSlotName(slot, session))
+            if (sT->GetEnableTransmogInfo())
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Misc_Book_11:30:30:-18:0|tHow transmogrification works", EQUIPMENT_SLOT_END + 9, 0);
+            for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
             {
-                Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-                uint32 entry = newItem ? sT->GetFakeEntry(newItem->GetGUID()) : 0;
-                std::string icon = entry ? sT->GetItemIcon(entry, 30, 30, -18, 0) : sT->GetSlotIcon(slot, 30, 30, -18, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, icon + std::string(slotName), EQUIPMENT_SLOT_END, slot);
+                if (const char* slotName = sT->GetSlotName(slot, session))
+                {
+                    Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+                    uint32 entry = newItem ? sT->GetFakeEntry(newItem->GetGUID()) : 0;
+                    std::string icon = entry ? sT->GetItemIcon(entry, 30, 30, -18, 0) : sT->GetSlotIcon(slot, 30, 30, -18, 0);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, icon + std::string(slotName), EQUIPMENT_SLOT_END, slot);
+                }
             }
-        }
 #ifdef PRESETS
-        if (sT->GetEnableSets())
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/RAIDFRAME/UI-RAIDFRAME-MAINASSIST:30:30:-18:0|tManage sets", EQUIPMENT_SLOT_END + 4, 0);
+            if (sT->GetEnableSets())
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/RAIDFRAME/UI-RAIDFRAME-MAINASSIST:30:30:-18:0|tManage sets", EQUIPMENT_SLOT_END + 4, 0);
 #endif
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove all transmogrifications", EQUIPMENT_SLOT_END + 2, 0, "Remove transmogrifications from all equipped items?", 0, false);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END + 1, 0);
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove all transmogrifications", EQUIPMENT_SLOT_END + 2, 0, "Remove transmogrifications from all equipped items?", 0, false);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END + 1, 0);
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        }
+        else
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tThrough PvE model.", EQUIPMENT_SLOT_END + 500, 0);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tThrough PvP model.", EQUIPMENT_SLOT_END + 501, 0);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tThrough Mixed model.", EQUIPMENT_SLOT_END + 502, 0);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tThrough Twink model.", EQUIPMENT_SLOT_END + 503, 0);
+            player->SEND_GOSSIP_MENU(sT->GetTransmogModelText(), creature->GetGUID());
+        }
         return true;
     }
 
@@ -212,6 +224,30 @@ public:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(sT->GetTransmogNpcText(), creature->GetGUID());
             } break;
+            case EQUIPMENT_SLOT_END + 500:
+            {
+                player->SetTransmogModelPvE();
+                OnGossipHello(player, creature);
+                return true;
+            }
+            case EQUIPMENT_SLOT_END + 501:
+            {
+                player->SetTransmogModelPvP();
+                OnGossipHello(player, creature);
+                return true;
+            }
+            case EQUIPMENT_SLOT_END + 502:
+            {
+                player->SetTransmogModelMIX();
+                OnGossipHello(player, creature);
+                return true;
+            }
+            case EQUIPMENT_SLOT_END + 503:
+            {
+                player->SetTransmogModelTWK();
+                OnGossipHello(player, creature);
+                return true;
+            }
             default: // Transmogrify
             {
                 if (!sender && !action)
