@@ -36,22 +36,21 @@ enum TransmogTrinityStrings // Language.h might have same entries, appears when 
 
 enum TransmogTokens
 {
-    TOKEN_ENTRY_RDF      = 50000,
-    TOKEN_ENTRY_BG       = 50001,
-    TOKEN_ENTRY_WG       = 50002,
-    TOKEN_ENTRY_2V2      = 50003,
-    TOKEN_ENTRY_3V3      = 50003,
-    TOKEN_ENTRY_BG_TWINK = 50004,
-    CRUSADER_ORB_ENTRY   = 50005,
-    EPIC_GEM_ENTRY       = 50006
+    TOKEN_ENTRY_RDF      = 70000,
+    TOKEN_ENTRY_BG       = 70001,
+    TOKEN_ENTRY_WG       = 43589,
+    TOKEN_ENTRY_2V2      = 70002,
+    TOKEN_ENTRY_3V3      = 70003,
+    CRUSADER_ORB_ENTRY   = 47556,
+    EPIC_GEM_ENTRY       = 36919
 };
 
 enum TransmogModels
 {
-    MODEL_PVE = 0, // PvE Model
-    MODEL_PVP = 1, // PvP Model
-    MODEL_MIX = 2, // Mix Model
-    MODEL_TWK = 3  // Twink Model
+    MODEL_PVE = 1, // PvE Model
+    MODEL_PVP = 2, // PvP Model
+    MODEL_MIX = 3, // Mix Model
+    MODEL_TWK = 4  // Twink Model
 };
 
 class Transmogrification

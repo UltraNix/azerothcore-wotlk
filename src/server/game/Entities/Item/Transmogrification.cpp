@@ -336,29 +336,29 @@ TransmogTrinityStrings Transmogrification::Transmogrify(Player* player, uint64 i
         {
             if (player->hasTransmogModelPvE())
             {
-                if (EffortModel(player, MODEL_PVE, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
-                    ChargeModelCost(player, MODEL_PVE, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
+                if (EffortModel(player, MODEL_PVE, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
+                    ChargeModelCost(player, MODEL_PVE, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
                 else
                     return LANG_ERR_TRANSMOG_NOT_ENOUGH_TOKENS;
             }
             else if (player->hasTransmogModelPvP())
             {
-                if (EffortModel(player, MODEL_PVP, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
-                    ChargeModelCost(player, MODEL_PVP, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
+                if (EffortModel(player, MODEL_PVP, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
+                    ChargeModelCost(player, MODEL_PVP, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
                 else
                     return LANG_ERR_TRANSMOG_NOT_ENOUGH_TOKENS;
             }
             else if (player->hasTransmogModelMIX())
             {
-                if (EffortModel(player, MODEL_MIX, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
-                    ChargeModelCost(player, MODEL_MIX, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
+                if (EffortModel(player, MODEL_MIX, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
+                    ChargeModelCost(player, MODEL_MIX, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
                 else
                     return LANG_ERR_TRANSMOG_NOT_ENOUGH_TOKENS;
             }
             else if (player->hasTransmogModelTWK())
             {
-                if (EffortModel(player, MODEL_TWK, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
-                    ChargeModelCost(player, MODEL_TWK, itemTransmogrified->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
+                if (EffortModel(player, MODEL_TWK, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false))
+                    ChargeModelCost(player, MODEL_TWK, itemTransmogrifier->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY ? true : false);
                 else
                     return LANG_ERR_TRANSMOG_NOT_ENOUGH_TOKENS;
             }
@@ -691,7 +691,7 @@ void Transmogrification::LoadConfig(bool reload)
 
     // Legendary PvE
     pve_token_rdf_legendary = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.PvE.Legendary.Count", 1));
-    pve_token_bg_legendary  = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.PvE.Count", 1));
+    pve_token_bg_legendary  = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.PvE.Legendary.Count", 1));
     pve_token_wg_legendary  = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenWG.PvE.Legendary.Count", 1));
     pve_token_2v2_legendary = uint8(sConfigMgr->GetIntDefault("Transmogrification.Token2V2.PvE.Legendary.Count", 1));
     pve_token_3v3_legendary = uint8(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.PvE.Legendary.Count", 1));
@@ -707,6 +707,7 @@ void Transmogrification::LoadConfig(bool reload)
     pvp_token_3v3 = uint8(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.PvP.Count", 1));
     pvp_token_orb = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.PvP.Count", 1));
     pvp_token_gem = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.PvP.Count", 1));
+    pvp_money_amount = uint32(sConfigMgr->GetIntDefault("Transmogrification.MoneyAmount.PvP", 1));
 
     // Legendary PvP
     pvp_token_rdf_legendary = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.PvP.Legendary.Count", 1));
@@ -726,6 +727,7 @@ void Transmogrification::LoadConfig(bool reload)
     mix_token_3v3 = uint8(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.Mix.Count", 1));
     mix_token_orb = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.Mix.Count", 1));
     mix_token_gem = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.Mix.Count", 1));
+    mix_money_amount = uint32(sConfigMgr->GetIntDefault("Transmogrification.MoneyAmount.Mix", 1));
     // Legendary Mix
     mix_token_rdf_legendary = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.Mix.Legendary.Count", 1));
     mix_token_bg_legendary  = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.Mix.Legendary.Count", 1));
@@ -744,6 +746,7 @@ void Transmogrification::LoadConfig(bool reload)
     twink_token_3v3 = uint8(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.Twink.Count", 1));
     twink_token_orb = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.Twink.Count", 1));
     twink_token_gem = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.Twink.Count", 1));
+    twink_money_amount = uint32(sConfigMgr->GetIntDefault("Transmogrification.MoneyAmount.Twink", 1));
 
     // Legendary Twink
     twink_token_rdf_legendary = uint8(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.Twink.Legendary.Count", 1));
@@ -1196,7 +1199,7 @@ bool Transmogrification::EffortModel(Player* player, uint8 model, bool Legendary
                 && player->HasEnoughMoney(GetLegendaryMoneyAmount_Twink());
         }
     }
-
+    return false;
 }
 
 void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legendary) const
@@ -1215,8 +1218,8 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetAmountTokenWG_PvE(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetAmountToken2V2_PvE(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetAmountToken3V3_PvE(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetAmountTokenORB_PvE(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenGEM_PvE(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenORB_PvE(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetAmountTokenGEM_PvE(), true, false);
                 player->ModifyMoney(-GetMoneyAmount_PvE(), false);
             }
             else
@@ -1226,11 +1229,11 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetLegendaryAmountTokenWG_PvE(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetLegendaryAmountToken2V2_PvE(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetLegendaryAmountToken3V3_PvE(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetLegendaryAmountTokenORB_PvE(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenGEM_PvE(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenORB_PvE(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetLegendaryAmountTokenGEM_PvE(), true, false);
                 player->ModifyMoney(-GetLegendaryMoneyAmount_PvE(), false);
             }
-        }
+        }break;
         case MODEL_PVP:
         {
             if (!Legendary)
@@ -1240,8 +1243,8 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetAmountTokenWG_PvP(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetAmountToken2V2_PvP(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetAmountToken3V3_PvP(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetAmountTokenORB_PvP(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenGEM_PvP(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenORB_PvP(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetAmountTokenGEM_PvP(), true, false);
                 player->ModifyMoney(-GetMoneyAmount_PvP(), false);
             }
             else
@@ -1251,11 +1254,11 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetLegendaryAmountTokenWG_PvP(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetLegendaryAmountToken2V2_PvP(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetLegendaryAmountToken3V3_PvP(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetLegendaryAmountTokenORB_PvP(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenGEM_PvP(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenORB_PvP(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetLegendaryAmountTokenGEM_PvP(), true, false);
                 player->ModifyMoney(-GetLegendaryMoneyAmount_PvP(), false);
             }
-        }
+        }break;
         case MODEL_MIX:
         {
             if (!Legendary)
@@ -1265,8 +1268,8 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetAmountTokenWG_Mix(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetAmountToken2V2_Mix(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetAmountToken3V3_Mix(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetAmountTokenORB_Mix(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenGEM_Mix(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenORB_Mix(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetAmountTokenGEM_Mix(), true, false);
                 player->ModifyMoney(-GetMoneyAmount_Mix(), false);
             }
             else
@@ -1276,11 +1279,11 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetLegendaryAmountTokenWG_Mix(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetLegendaryAmountToken2V2_Mix(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetLegendaryAmountToken3V3_Mix(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetLegendaryAmountTokenORB_Mix(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenGEM_Mix(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenORB_Mix(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetLegendaryAmountTokenGEM_Mix(), true, false);
                 player->ModifyMoney(-GetLegendaryMoneyAmount_Mix(), false);
             }
-        }
+        }break;
         case MODEL_TWK:
         {
             if (!Legendary)
@@ -1290,8 +1293,8 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetAmountTokenWG_Twink(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetAmountToken2V2_Twink(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetAmountToken3V3_Twink(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetAmountTokenORB_Twink(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenGEM_Twink(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetAmountTokenORB_Twink(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetAmountTokenGEM_Twink(), true, false);
                 player->ModifyMoney(-GetMoneyAmount_Twink(), false);
             }
             else
@@ -1301,10 +1304,10 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                 player->DestroyItemCount(TOKEN_ENTRY_WG, GetLegendaryAmountTokenWG_Twink(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_2V2, GetLegendaryAmountToken2V2_Twink(), true, false);
                 player->DestroyItemCount(TOKEN_ENTRY_3V3, GetLegendaryAmountToken3V3_Twink(), true, false);
-                player->DestroyItemCount(TOKEN_ENTRY_BG_TWINK, GetLegendaryAmountTokenORB_Twink(), true, false);
-                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenGEM_Twink(), true, false);
+                player->DestroyItemCount(CRUSADER_ORB_ENTRY, GetLegendaryAmountTokenORB_Twink(), true, false);
+                player->DestroyItemCount(EPIC_GEM_ENTRY, GetLegendaryAmountTokenGEM_Twink(), true, false);
                 player->ModifyMoney(-GetLegendaryMoneyAmount_Twink(), false);
             }
-        }
+        }break;
     }
 }
