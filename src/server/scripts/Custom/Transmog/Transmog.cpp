@@ -224,7 +224,7 @@ public:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tYes, I am sure.", EQUIPMENT_SLOT_END + 901, 0);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tNo, go back.", EQUIPMENT_SLOT_END + 1, 0);
-                player->SEND_GOSSIP_MENU((TRANMOG_TEXT_ENTRY_12, sT->GetResetCost()), creature->GetGUID());
+                player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_12, creature->GetGUID());
                 return true;
             } break;
             case EQUIPMENT_SLOT_END + 901:
