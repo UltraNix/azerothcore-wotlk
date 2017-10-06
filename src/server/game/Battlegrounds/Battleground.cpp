@@ -949,7 +949,10 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                     }
                 }
                 else
-                    player->AddItem(sTransmogrification->GetTokenEntryBG(), sTransmogrification->GetTokenRewardCountBG());
+                {
+                    bool noXPGain = player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
+                    noXPGain ? player->AddItem(sTransmogrification->GetTokenEntryTwink(), sTransmogrification->GetTokenRewardCountTwink()) : player->AddItem(sTransmogrification->GetTokenEntryBG(), sTransmogrification->GetTokenRewardCountBG());
+                }
             }
 
             // @bgreward

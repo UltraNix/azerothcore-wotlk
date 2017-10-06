@@ -48,7 +48,10 @@ public:
                 }
             }
 
-            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove all transmogrifications", EQUIPMENT_SLOT_END + 2, 0, "Remove transmogrifications from all equipped items?", 0, false);
+            std::ostringstream ss;
+            ss << (sT->GetFullRemoveCost() / GOLD)<< " gold." << std::endl;
+            player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove all transmogrifications", EQUIPMENT_SLOT_END + 2, 0, "Remove transmogrifications from all equipped items?\n\nAre you sure you want to reset all transmog?\nIt will cost you: " + ss.str(), 0, false);
+
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tReset the Model.", EQUIPMENT_SLOT_END + 900, 0);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END + 1, 0);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
@@ -99,6 +102,7 @@ public:
                 }
                 if (removed)
                 {
+                    player->ModifyMoney(-sT->GetFullRemoveCost());
                     session->SendAreaTriggerMessage(GTS(LANG_ERR_UNTRANSMOG_OK));
                     CharacterDatabase.CommitTransaction(trans);
                 }
@@ -112,6 +116,7 @@ public:
                 {
                     if (sT->GetFakeEntry(newItem->GetGUID()))
                     {
+                        player->ModifyMoney(-sT->GetRemoveCost());
                         sT->DeleteFakeEntry(player, action, newItem);
                         session->SendAreaTriggerMessage(GTS(LANG_ERR_UNTRANSMOG_OK));
                     }
@@ -223,7 +228,9 @@ public:
             // Model Reset
             case EQUIPMENT_SLOT_END + 900:
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tYes, I am sure.", EQUIPMENT_SLOT_END + 901, 0);
+                std::ostringstream ss;
+                ss << "Model Reset\n\n" << "It will cost you:\n\n " << sT->GetResetCoinCost() << " Sunwell Coins and " << (sT->GetResetGoldCost() / GOLD) <<  " gold." << std::endl;
+                player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tYes, I am sure.", EQUIPMENT_SLOT_END + 901, 0,  ss.str(), 0, false);
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tNo, go back.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_12, creature->GetGUID());
                 return true;
@@ -231,14 +238,15 @@ public:
             case EQUIPMENT_SLOT_END + 901:
             {
                 uint32 accId = session->GetAccountId();
-                if (!sBazaarMgr->CheckPremiumAmount(accId, sT->GetResetCost()))
+                if (!sBazaarMgr->CheckPremiumAmount(accId, sT->GetResetCoinCost()) || !player->HasEnoughMoney(sT->GetResetGoldCost()))
                 {
                     session->SendNotification(LANG_ERR_TRANSMOG_MISSING_COINS);
                     OnGossipHello(player, creature);
                     return true;
                 }
 
-                sBazaarMgr->TakeRequiredAmount(player, sT->GetResetCost(), AUCTION_SELL_PREMIUM);
+                sBazaarMgr->TakeRequiredAmount(player, sT->GetResetCoinCost(), AUCTION_SELL_PREMIUM);
+                player->ModifyMoney(-sT->GetResetGoldCost());
                 player->ResetTransmogModel();
                 player->SaveToDB(false, false);
                 OnGossipHello(player, creature);
@@ -416,12 +424,120 @@ public:
                     if (sT->GetFakeEntry(oldItem->GetGUID()) == newItem->GetEntry())
                         continue;
                     ++limit;
+
+                    if (sT->GetCustomModelCost())
+                    {
+                        if (player->HasTransmogModelPvE())
+                        {
+                            if (newItem->GetTemplate()->Quality != ITEM_QUALITY_LEGENDARY)
+                            {
+                                sT->GetAmountTokenRDF_PvE() != 0 ? (ss << std::endl << sT->GetAmountTokenRDF_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetAmountTokenBG_PvE()  != 0 ? (ss << std::endl << sT->GetAmountTokenBG_PvE()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetAmountTokenWG_PvE()  != 0 ? (ss << std::endl << sT->GetAmountTokenWG_PvE()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetAmountToken2V2_PvE() != 0 ? (ss << std::endl << sT->GetAmountToken2V2_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetAmountToken3V3_PvE() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetAmountTokenORB_PvE() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetAmountTokenGEM_PvE() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetMoneyAmount_PvE()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_PvE() / GOLD) << " gold. ") : ss << "";
+                            }
+                            else
+                            {
+                                sT->GetLegendaryAmountTokenRDF_PvE() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenRDF_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenBG_PvE()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenBG_PvE()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenWG_PvE()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenWG_PvE()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken2V2_PvE() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken2V2_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken3V3_PvE() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken3V3_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenORB_PvE() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenORB_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenGEM_PvE() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenGEM_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetLegendaryMoneyAmount_PvE()    != 0 ? (ss << std::endl << (sT->GetLegendaryMoneyAmount_PvE() / GOLD) << " gold. ") : ss << "";
+                            }
+                        }
+                        else if (player->HasTransmogModelPvP())
+                        {
+                            if (newItem->GetTemplate()->Quality != ITEM_QUALITY_LEGENDARY)
+                            {
+                                sT->GetAmountTokenRDF_PvP() != 0 ? (ss << std::endl << sT->GetAmountTokenRDF_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetAmountTokenBG_PvP()  != 0 ? (ss << std::endl << sT->GetAmountTokenBG_PvP()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetAmountTokenWG_PvP()  != 0 ? (ss << std::endl << sT->GetAmountTokenWG_PvP()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetAmountToken2V2_PvP() != 0 ? (ss << std::endl << sT->GetAmountToken2V2_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetAmountToken3V3_PvP() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetAmountTokenORB_PvP() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetAmountTokenGEM_PvP() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetMoneyAmount_PvP()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_PvP() / GOLD) << " gold. ") : ss << "";
+                            }
+                            else
+                            {
+
+                                sT->GetLegendaryAmountTokenRDF_PvP() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenRDF_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenBG_PvP()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenBG_PvP()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenWG_PvP()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenWG_PvP()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken2V2_PvP() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken2V2_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken3V3_PvP() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken3V3_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenORB_PvP() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenORB_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenGEM_PvP() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenGEM_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetLegendaryMoneyAmount_PvP()    != 0 ? (ss << std::endl << (sT->GetLegendaryMoneyAmount_PvP() / GOLD) << " gold. ") : ss << "";
+                            }
+                        }
+                        else if (player->HasTransmogModelMIX())
+                        {
+                            if (newItem->GetTemplate()->Quality != ITEM_QUALITY_LEGENDARY)
+                            {
+                                sT->GetAmountTokenRDF_Mix() != 0 ? (ss << std::endl << sT->GetAmountTokenRDF_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetAmountTokenBG_Mix()  != 0 ? (ss << std::endl << sT->GetAmountTokenBG_Mix()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetAmountTokenWG_Mix()  != 0 ? (ss << std::endl << sT->GetAmountTokenWG_Mix()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetAmountToken2V2_Mix() != 0 ? (ss << std::endl << sT->GetAmountToken2V2_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetAmountToken3V3_Mix() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetAmountTokenORB_Mix() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetAmountTokenGEM_Mix() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetMoneyAmount_Mix()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_Mix() / GOLD) << " gold. ") : ss << "";
+                            }
+                            else
+                            {
+                                sT->GetLegendaryAmountTokenRDF_Mix() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenRDF_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenBG_Mix()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenBG_Mix()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenWG_Mix()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenWG_Mix()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken2V2_Mix() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken2V2_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken3V3_Mix() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken3V3_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenORB_Mix() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenORB_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenGEM_Mix() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenGEM_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetLegendaryMoneyAmount_Mix()    != 0 ? (ss << std::endl << (sT->GetLegendaryMoneyAmount_Mix() / GOLD) << " gold. ") : ss << "";
+                            }
+                        }
+                        else if (player->HasTransmogModelTWK())
+                        {
+                            if (newItem->GetTemplate()->Quality != ITEM_QUALITY_LEGENDARY)
+                            {
+                                sT->GetAmountTokenRDF_Twink() != 0 ? (ss << std::endl << sT->GetAmountTokenRDF_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetAmountTokenBG_Twink()  != 0 ? (ss << std::endl << sT->GetAmountTokenBG_Twink()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetAmountTokenWG_Twink()  != 0 ? (ss << std::endl << sT->GetAmountTokenWG_Twink()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetAmountToken2V2_Twink() != 0 ? (ss << std::endl << sT->GetAmountToken2V2_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetAmountToken3V3_Twink() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetAmountTokenORB_Twink() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetAmountTokenGEM_Twink() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetMoneyAmount_Twink()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_Twink() / GOLD) << " gold. ") : ss << "";
+                            }
+                            else
+                            {
+                                sT->GetLegendaryAmountTokenRDF_Twink() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenRDF_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryRDF(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenBG_Twink()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenBG_Twink()  << " x " << sT->GetItemLink(sT->GetTokenEntryBG(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenWG_Twink()  != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenWG_Twink()  << " x " << sT->GetItemLink(sT->GetTokenEntryWG(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken2V2_Twink() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken2V2_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntry2V2(), session)) : ss << "";
+                                sT->GetLegendaryAmountToken3V3_Twink() != 0 ? (ss << std::endl << sT->GetLegendaryAmountToken3V3_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenORB_Twink() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenORB_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
+                                sT->GetLegendaryAmountTokenGEM_Twink() != 0 ? (ss << std::endl << sT->GetLegendaryAmountTokenGEM_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
+                                sT->GetLegendaryMoneyAmount_Twink()    != 0 ? (ss << std::endl << (sT->GetLegendaryMoneyAmount_Twink() / GOLD) << " gold. ") : ss << "";
+                            }
+                        }
+                    }
                     player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, sT->GetItemIcon(newItem->GetEntry(), 30, 30, -18, 0) + sT->GetItemLink(newItem, session), slot, newItem->GetGUIDLow(), "Using this item for transmogrify will bind it to you and make it non-refundable and non-tradeable.\nDo you wish to continue?\n\n" + sT->GetItemIcon(newItem->GetEntry(), 40, 40, -15, -10) + sT->GetItemLink(newItem, session) + ss.str(), 0, false);
                 }
             }
         }
 
-        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove transmogrification", EQUIPMENT_SLOT_END + 3, slot, "Remove transmogrification from the slot?\n\nRemoving the transmog from this item will cost you: 50 gold.", 0, false);
+        std::ostringstream ss;
+        ss << (sT->GetRemoveCost() / GOLD) << " gold." << std::endl;
+
+        player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove transmogrification", EQUIPMENT_SLOT_END + 3, slot, "Remove transmogrification from the slot?\n\nAre you sure you want to reset transmog?\nIt will cost you: " + ss.str(), 0, false);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END, slot);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
@@ -482,7 +598,7 @@ class WS_Transmogrification : public WorldScript
 public:
     WS_Transmogrification() : WorldScript("WS_Transmogrification") { }
 
-    void OnAfterConfigLoad(bool reload)
+    void OnConfigLoad(bool reload)
     {
         if (reload)
             sT->LoadConfig(reload);

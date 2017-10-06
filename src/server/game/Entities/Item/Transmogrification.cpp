@@ -530,15 +530,18 @@ void Transmogrification::LoadConfig(bool reload)
     TokenEntryWG     = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenEntryWG", 43589));
     TokenEntry2V2    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenEntry2V2", 92002));
     TokenEntry3v3    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenEntry3V3", 92003));
+    TokenEntryTwink  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenEntryTwink", 92004));
+
     TokenEntryExtra1 = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenEntryExtra1", 47556));
     TokenEntryExtra2 = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenEntryExtra2", 36919));
 
     // Rewards
-    IsTokenRewardEnabled = sConfigMgr->GetBoolDefault("Transmogrification.Rewards.Enable", false);
-    TokenRewardCountRDF  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRewardRDF.Count", 1));
-    TokenRewardCountBG   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRewardBG.Count", 1));
-    TokenRewardCount2V2  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenReward2V2.Count", 1));
-    TokenRewardCount3V3  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenReward3V3.Count", 1));
+    IsTokenRewardEnabled  = sConfigMgr->GetBoolDefault("Transmogrification.Rewards.Enable", false);
+    TokenRewardCountRDF   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRewardRDF.Count", 1));
+    TokenRewardCountBG    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRewardBG.Count", 1));
+    TokenRewardCount2V2   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenReward2V2.Count", 1));
+    TokenRewardCount3V3   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenReward3V3.Count", 1));
+    TokenRewardCountTwink = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRewardTwink.Count", 1));
 
     // Model PvE
     pve_token_rdf = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.PvE.Count", 12));
@@ -601,29 +604,34 @@ void Transmogrification::LoadConfig(bool reload)
     mix_money_amount_legendary = int32(sConfigMgr->GetIntDefault("Transmogrification.MoneyAmount.Legendary.Mix", 3500));
 
     // Model Twink
-    twink_token_rdf = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.Twink.Count", 0));
-    twink_token_bg  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.Twink.Count", 30));
-    twink_token_wg  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenWG.Twink.Count", 0));
-    twink_token_2v2 = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token2V2.Twink.Count", 0));
-    twink_token_3v3 = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.Twink.Count", 0));
-    twink_token_orb = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.Twink.Count", 0));
-    twink_token_gem = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.Twink.Count", 0));
+    twink_token_rdf    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.Twink.Count", 0));
+    twink_token_bg     = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.Twink.Count", 30));
+    twink_token_wg     = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenWG.Twink.Count", 0));
+    twink_token_2v2    = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token2V2.Twink.Count", 0));
+    twink_token_3v3    = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.Twink.Count", 0));
+    twink_token_twink  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenTwink.Twink.Count", 0));
+    twink_token_orb    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.Twink.Count", 0));
+    twink_token_gem    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.Twink.Count", 0));
     twink_money_amount = int32(sConfigMgr->GetIntDefault("Transmogrification.MoneyAmount.Twink", 500));
 
     // Legendary Twink
-    twink_token_rdf_legendary = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.Twink.Legendary.Count", 0));
-    twink_token_bg_legendary  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.Twink.Legendary.Count", 180));
-    twink_token_wg_legendary  = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenWG.Twink.Legendary.Count", 0));
-    twink_token_2v2_legendary = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token2V2.Twink.Legendary.Count", 0));
-    twink_token_3v3_legendary = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.Twink.Legendary.Count", 0));
-    twink_token_orb_legendary = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.Twink.Legendary.Count", 4));
-    twink_token_gem_legendary = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.Twink.Legendary.Count", 0));
+    twink_token_rdf_legendary   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenRDF.Twink.Legendary.Count", 0));
+    twink_token_bg_legendary    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenBG.Twink.Legendary.Count", 180));
+    twink_token_wg_legendary    = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenWG.Twink.Legendary.Count", 0));
+    twink_token_2v2_legendary   = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token2V2.Twink.Legendary.Count", 0));
+    twink_token_3v3_legendary   = uint32(sConfigMgr->GetIntDefault("Transmogrification.Token3V3.Twink.Legendary.Count", 0));
+    twink_token_twink_legendary = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenTwink.Twink.Legendary.Count", 0));
+    twink_token_orb_legendary   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenORB.Twink.Legendary.Count", 4));
+    twink_token_gem_legendary   = uint32(sConfigMgr->GetIntDefault("Transmogrification.TokenGEM.Twink.Legendary.Count", 0));
     twink_money_amount_legendary = int32(sConfigMgr->GetIntDefault("Transmogrification.MoneyAmount.Legendary.Twink", 4000));
 
     // Model Reset
-    model_reset_cost = uint32(sConfigMgr->GetIntDefault("Transmogrification.ModelReset.Cost", 100));
+    model_reset_coin_cost = uint32(sConfigMgr->GetIntDefault("Transmogrification.ModelReset.CoinCost", 100));
+    model_reset_gold_cost = int32(sConfigMgr->GetIntDefault("Transmogrification.ModelReset.GoldCost", 500));
+
     // Model Remove
-    model_remove_cost = uint32(sConfigMgr->GetIntDefault("Transmogrification.ModelRemove.Cost", 50));
+    model_remove_cost      = int32(sConfigMgr->GetIntDefault("Transmogrification.ModelRemove.Cost", 50));
+    model_full_remove_cost = int32(sConfigMgr->GetIntDefault("Transmogrification.FullModelRemove.Cost", 500));
 
 }
 
@@ -670,6 +678,10 @@ uint32 Transmogrification::GetTokenEntry3V3() const
 {
     return TokenEntry3v3;
 }
+uint32 Transmogrification::GetTokenEntryTwink() const
+{
+    return TokenEntryTwink;
+}
 uint32 Transmogrification::GetTokenEntryExtra1() const
 {
     return TokenEntryExtra1;
@@ -698,6 +710,10 @@ uint32 Transmogrification::GetTokenRewardCount2V2() const
 uint32 Transmogrification::GetTokenRewardCount3V3() const
 {
     return TokenRewardCount3V3;
+}
+uint32 Transmogrification::GetTokenRewardCountTwink() const
+{
+    return TokenRewardCountTwink;
 }
 // Model PvE
 uint32 Transmogrification::GetAmountTokenRDF_PvE() const
@@ -918,6 +934,10 @@ uint32 Transmogrification::GetAmountToken3V3_Twink() const
 {
     return twink_token_3v3;
 }
+uint32 Transmogrification::GetAmountTokenTwink_Twink() const
+{
+    return twink_token_twink;
+}
 uint32 Transmogrification::GetAmountTokenORB_Twink() const
 {
     return twink_token_orb;
@@ -951,6 +971,10 @@ uint32 Transmogrification::GetLegendaryAmountToken3V3_Twink() const
 {
     return twink_token_3v3_legendary;
 }
+uint32 Transmogrification::GetLegendaryAmountTokenTwink_Twink() const
+{
+    return twink_token_twink_legendary;
+}
 uint32 Transmogrification::GetLegendaryAmountTokenORB_Twink() const
 {
     return twink_token_orb_legendary;
@@ -964,14 +988,22 @@ int32 Transmogrification::GetLegendaryMoneyAmount_Twink() const
     return twink_money_amount_legendary * GOLD;
 }
 // Model Reset
-uint32 Transmogrification::GetResetCost() const
+uint32 Transmogrification::GetResetCoinCost() const
 {
-    return model_reset_cost;
+    return model_reset_coin_cost;
+}
+int32 Transmogrification::GetResetGoldCost() const
+{
+    return model_reset_gold_cost * GOLD;
 }
 // Model Remove
-uint32 Transmogrification::GetRemoveCost() const
+int32 Transmogrification::GetRemoveCost() const
 {
     return model_remove_cost * GOLD;
+}
+int32 Transmogrification::GetFullRemoveCost() const
+{
+    return model_full_remove_cost * GOLD;
 }
 bool Transmogrification::GetAllowMixedArmorTypes() const
 {
@@ -1063,14 +1095,15 @@ bool Transmogrification::EffortModel(Player* player, uint8 model, bool Legendary
         {
             if (!Legendary)
                 return 
-                   (GetAmountTokenRDF_Twink() != 0 ? player->HasItemCount(GetTokenEntryRDF(), GetAmountTokenRDF_Twink()) : true)
-                && (GetAmountTokenBG_Twink()  != 0 ? player->HasItemCount(GetTokenEntryBG(), GetAmountTokenBG_Twink()) : true)
-                && (GetAmountTokenWG_Twink()  != 0 ? player->HasItemCount(GetTokenEntryWG(), GetAmountTokenWG_Twink()) : true)
-                && (GetAmountToken2V2_Twink() != 0 ? player->HasItemCount(GetTokenEntry2V2(), GetAmountToken2V2_Twink()) : true)
-                && (GetAmountToken3V3_Twink() != 0 ? player->HasItemCount(GetTokenEntry3V3(), GetAmountToken3V3_Twink()) : true)
-                && (GetAmountTokenORB_Twink() != 0 ? player->HasItemCount(GetTokenEntryExtra1(), GetAmountTokenORB_Twink()) : true)
-                && (GetAmountTokenGEM_Twink() != 0 ? player->HasItemCount(GetTokenEntryExtra2(), GetAmountTokenGEM_Twink()) : true)
-                && (GetMoneyAmount_Twink()    != 0 ? player->HasEnoughMoney(GetMoneyAmount_Twink()) : true);
+                   (GetAmountTokenRDF_Twink()   != 0 ? player->HasItemCount(GetTokenEntryRDF(), GetAmountTokenRDF_Twink()) : true)
+                && (GetAmountTokenBG_Twink()    != 0 ? player->HasItemCount(GetTokenEntryBG(), GetAmountTokenBG_Twink()) : true)
+                && (GetAmountTokenWG_Twink()    != 0 ? player->HasItemCount(GetTokenEntryWG(), GetAmountTokenWG_Twink()) : true)
+                && (GetAmountToken2V2_Twink()   != 0 ? player->HasItemCount(GetTokenEntry2V2(), GetAmountToken2V2_Twink()) : true)
+                && (GetAmountToken3V3_Twink()   != 0 ? player->HasItemCount(GetTokenEntry3V3(), GetAmountToken3V3_Twink()) : true)
+                && (GetAmountTokenTwink_Twink() != 0 ? player->HasItemCount(GetTokenEntryTwink(), GetAmountTokenTwink_Twink()) : true)
+                && (GetAmountTokenORB_Twink()   != 0 ? player->HasItemCount(GetTokenEntryExtra1(), GetAmountTokenORB_Twink()) : true)
+                && (GetAmountTokenGEM_Twink(  ) != 0 ? player->HasItemCount(GetTokenEntryExtra2(), GetAmountTokenGEM_Twink()) : true)
+                && (GetMoneyAmount_Twink()      != 0 ? player->HasEnoughMoney(GetMoneyAmount_Twink()) : true);
             else
                 return 
                    (GetLegendaryAmountTokenRDF_Twink() != 0 ? player->HasItemCount(GetTokenEntryRDF(), GetLegendaryAmountTokenRDF_Twink()) : true)
@@ -1078,6 +1111,7 @@ bool Transmogrification::EffortModel(Player* player, uint8 model, bool Legendary
                 && (GetLegendaryAmountTokenWG_Twink()  != 0 ? player->HasItemCount(GetTokenEntryWG(), GetLegendaryAmountTokenWG_Twink()) : true)
                 && (GetLegendaryAmountToken2V2_Twink() != 0 ? player->HasItemCount(GetTokenEntry2V2(), GetLegendaryAmountToken2V2_Twink()) : true)
                 && (GetLegendaryAmountToken3V3_Twink() != 0 ? player->HasItemCount(GetTokenEntry3V3(), GetLegendaryAmountToken3V3_Twink()) : true)
+                && (GetLegendaryAmountTokenTwink_Twink() != 0 ? player->HasItemCount(GetTokenEntryTwink(), GetLegendaryAmountTokenTwink_Twink()) : true)
                 && (GetLegendaryAmountTokenORB_Twink() != 0 ? player->HasItemCount(GetTokenEntryExtra1(), GetLegendaryAmountTokenORB_Twink()) : true)
                 && (GetLegendaryAmountTokenGEM_Twink() != 0 ? player->HasItemCount(GetTokenEntryExtra2(), GetLegendaryAmountTokenGEM_Twink()) : true)
                 && (GetLegendaryMoneyAmount_Twink()    != 0 ? player->HasEnoughMoney(GetLegendaryMoneyAmount_Twink()) : true);
@@ -1238,6 +1272,8 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                     player->DestroyItemCount(GetTokenEntry2V2(), GetAmountToken2V2_Twink(), true, false);
                 if (GetAmountToken3V3_Twink() != 0)
                     player->DestroyItemCount(GetTokenEntry3V3(), GetAmountToken3V3_Twink(), true, false);
+                if (GetAmountTokenTwink_Twink() != 0)
+                    player->DestroyItemCount(GetTokenEntryTwink(), GetAmountTokenTwink_Twink(), true, false);
                 if (GetAmountTokenORB_Twink() != 0)
                     player->DestroyItemCount(GetTokenEntryExtra1(), GetAmountTokenORB_Twink(), true, false);
                 if (GetAmountTokenGEM_Twink() != 0)
@@ -1257,6 +1293,8 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model, bool Legen
                     player->DestroyItemCount(GetTokenEntry2V2(), GetLegendaryAmountToken2V2_Twink(), true, false);
                 if (GetLegendaryAmountToken3V3_Twink() != 0)
                     player->DestroyItemCount(GetTokenEntry3V3(), GetLegendaryAmountToken3V3_Twink(), true, false);
+                if (GetLegendaryAmountTokenTwink_Twink() != 0)
+                    player->DestroyItemCount(GetTokenEntryTwink(), GetLegendaryAmountTokenTwink_Twink(), true, false);
                 if (GetLegendaryAmountTokenORB_Twink() != 0)
                     player->DestroyItemCount(GetTokenEntryExtra1(), GetLegendaryAmountTokenORB_Twink(), true, false);
                 if (GetLegendaryAmountTokenGEM_Twink() != 0)

@@ -97,6 +97,7 @@ public:
     uint32 TokenEntryWG;
     uint32 TokenEntry2V2;
     uint32 TokenEntry3v3;
+    uint32 TokenEntryTwink;
     uint32 TokenEntryExtra1;
     uint32 TokenEntryExtra2;
 
@@ -105,6 +106,7 @@ public:
     uint32 TokenRewardCountBG;
     uint32 TokenRewardCount2V2;
     uint32 TokenRewardCount3V3;
+    uint32 TokenRewardCountTwink;
 
     // Model PvE
     uint32 pve_token_rdf;
@@ -169,6 +171,7 @@ public:
     uint32 twink_token_wg;
     uint32 twink_token_2v2;
     uint32 twink_token_3v3;
+    uint32 twink_token_twink;
     uint32 twink_token_orb;
     uint32 twink_token_gem;
     int32 twink_money_amount;
@@ -178,14 +181,17 @@ public:
     uint32 twink_token_wg_legendary;
     uint32 twink_token_2v2_legendary;
     uint32 twink_token_3v3_legendary;
+    uint32 twink_token_twink_legendary;
     uint32 twink_token_orb_legendary;
     uint32 twink_token_gem_legendary;
     int32 twink_money_amount_legendary;
 
     // Model Reset
-    uint32 model_reset_cost;
+    uint32 model_reset_coin_cost;
+    int32 model_reset_gold_cost;
     // Model Remove
-    uint32 model_remove_cost;
+    int32 model_remove_cost;
+    int32 model_full_remove_cost;
 
     bool AllowPoor;
     bool AllowCommon;
@@ -242,6 +248,7 @@ public:
     uint32 GetTokenEntryWG() const;
     uint32 GetTokenEntry2V2() const;
     uint32 GetTokenEntry3V3() const;
+    uint32 GetTokenEntryTwink() const;
     uint32 GetTokenEntryExtra1() const;
     uint32 GetTokenEntryExtra2() const;
 
@@ -250,7 +257,8 @@ public:
     uint32 GetTokenRewardCountBG() const;
     uint32 GetTokenRewardCount2V2() const;
     uint32 GetTokenRewardCount3V3() const;
-    
+    uint32 GetTokenRewardCountTwink() const;
+
     // Model PvE
     uint32 GetAmountTokenRDF_PvE() const;
     uint32 GetAmountTokenBG_PvE() const;
@@ -317,24 +325,29 @@ public:
     uint32 GetAmountTokenWG_Twink() const;
     uint32 GetAmountToken2V2_Twink() const;
     uint32 GetAmountToken3V3_Twink() const;
+    uint32 GetAmountTokenTwink_Twink() const;
     uint32 GetAmountTokenORB_Twink() const;
     uint32 GetAmountTokenGEM_Twink() const;
     int32 GetMoneyAmount_Twink() const;
 
-    // Legendary Mix
+    // Legendary Twink
     uint32 GetLegendaryAmountTokenRDF_Twink() const;
     uint32 GetLegendaryAmountTokenBG_Twink() const;
     uint32 GetLegendaryAmountTokenWG_Twink() const;
     uint32 GetLegendaryAmountToken2V2_Twink() const;
     uint32 GetLegendaryAmountToken3V3_Twink() const;
+    uint32 GetLegendaryAmountTokenTwink_Twink() const;
     uint32 GetLegendaryAmountTokenORB_Twink() const;
     uint32 GetLegendaryAmountTokenGEM_Twink() const;
     int32 GetLegendaryMoneyAmount_Twink() const;
 
     // Model Reset
-    uint32 GetResetCost() const;
+    uint32 GetResetCoinCost() const;
+    int32  GetResetGoldCost() const;
+
     // Model Remove
-    uint32 GetRemoveCost() const;
+    int32 GetRemoveCost() const;
+    int32 GetFullRemoveCost() const;
 
     bool GetAllowMixedArmorTypes() const;
     bool GetAllowMixedWeaponTypes() const;
