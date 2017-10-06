@@ -38,7 +38,7 @@ INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `
 
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71992;
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(71992, 3811, 0, 1, 1, 1, 1),
+(71992, 38311, 0, 1, 1, 1, 1),
 (71992, 45037, 0, 1, 1, 1, 1),
 (71992, 45063, 0, 1, 1, 1, 1),
 (71992, 46780, 0, 1, 1, 1, 1),
