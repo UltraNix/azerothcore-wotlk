@@ -121,90 +121,90 @@ public:
             } break;
             case EQUIPMENT_SLOT_END + 4: // Transmog info
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_1, creature->GetGUID());
             } break;
             // PvE Model
             case EQUIPMENT_SLOT_END + 500:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tUse PvE model.", EQUIPMENT_SLOT_END + 501, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_4, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 501:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tConfirm PvE model.", EQUIPMENT_SLOT_END + 502, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_8, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 502:
             {
                 player->SaveToDB(false, true);
                 player->SetTransmogModelPvE();
                 OnGossipHello(player, creature);
                 return true;
-            }
+            } break;
             // PvP Model
             case EQUIPMENT_SLOT_END + 600:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tUse PvP model.", EQUIPMENT_SLOT_END + 601, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_3, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 601:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tConfirm PvP model.", EQUIPMENT_SLOT_END + 602, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_7, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 602:
             {
                 player->SetTransmogModelPvP();
                 player->SaveToDB(false, false);
                 OnGossipHello(player, creature);
                 return true;
-            }
+            } break;
             // Mixed Model
             case EQUIPMENT_SLOT_END + 700:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tUse Mixed model.", EQUIPMENT_SLOT_END + 701, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_6, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 701:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tConfirm Mixed model.", EQUIPMENT_SLOT_END + 702, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_10, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 702:
             {
                 player->SetTransmogModelMIX();
                 player->SaveToDB(false, false);
                 OnGossipHello(player, creature);
                 return true;
-            }
+            } break;
             // Twink Model
             case EQUIPMENT_SLOT_END + 800:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tUse Twink model.", EQUIPMENT_SLOT_END + 801, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_5, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 801:
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Gizmo_02:30:30:-18:0|tConfirm Twink model.", EQUIPMENT_SLOT_END + 802, 0);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_9, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 802:
             {
                 if (!noXPGain)
@@ -218,7 +218,7 @@ public:
                 player->SaveToDB(false, false);
                 OnGossipHello(player, creature);
                 return true;
-            }
+            } break;
             // Model Reset
             case EQUIPMENT_SLOT_END + 900:
             {
@@ -226,7 +226,7 @@ public:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tNo, go back.", EQUIPMENT_SLOT_END + 1, 0);
                 player->SEND_GOSSIP_MENU(TRANMOG_TEXT_ENTRY_13, creature->GetGUID());
                 return true;
-            }
+            } break;
             case EQUIPMENT_SLOT_END + 901:
             {
                 uint32 accId = session->GetAccountId();
@@ -242,7 +242,7 @@ public:
                 player->SaveToDB(false, false);
                 OnGossipHello(player, creature);
                 return true;
-            }
+            } break;
             default: // Transmogrify
             {
                 if (!sender && !action)
@@ -288,7 +288,7 @@ public:
                     sT->GetAmountToken3V3_PvE() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
                     sT->GetAmountTokenORB_PvE() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
                     sT->GetAmountTokenGEM_PvE() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_PvE() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
-                    sT->GetMoneyAmount_PvE()    != 0 ? (ss << std::endl << sT->GetMoneyAmount_PvE() << " gold. ") : ss << "";
+                    sT->GetMoneyAmount_PvE()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_PvE() / GOLD) << " gold. ") : ss << "";
                 }
                 else if (player->HasTransmogModelPvP())
                 {
@@ -299,7 +299,7 @@ public:
                     sT->GetAmountToken3V3_PvP() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
                     sT->GetAmountTokenORB_PvP() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
                     sT->GetAmountTokenGEM_PvP() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_PvP() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
-                    sT->GetMoneyAmount_PvP()    != 0 ? (ss << std::endl << sT->GetMoneyAmount_PvP() << " gold. ") : ss << "";
+                    sT->GetMoneyAmount_PvP()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_PvP() / GOLD) << " gold. ") : ss << "";
                 }
                 else if (player->HasTransmogModelMIX())
                 {
@@ -310,7 +310,7 @@ public:
                     sT->GetAmountToken3V3_Mix() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
                     sT->GetAmountTokenORB_Mix() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
                     sT->GetAmountTokenGEM_Mix() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_Mix() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
-                    sT->GetMoneyAmount_Mix()    != 0 ? (ss << std::endl << sT->GetMoneyAmount_Mix() << " gold. ") : ss << "";
+                    sT->GetMoneyAmount_Mix()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_Mix() / GOLD) << " gold. ") : ss << "";
                 }
                 else if (player->HasTransmogModelTWK())
                 {
@@ -321,7 +321,7 @@ public:
                     sT->GetAmountToken3V3_Twink() != 0 ? (ss << std::endl << sT->GetAmountToken3V3_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntry3V3(), session)) : ss << "";
                     sT->GetAmountTokenORB_Twink() != 0 ? (ss << std::endl << sT->GetAmountTokenORB_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra1(), session)) : ss << "";
                     sT->GetAmountTokenGEM_Twink() != 0 ? (ss << std::endl << sT->GetAmountTokenGEM_Twink() << " x " << sT->GetItemLink(sT->GetTokenEntryExtra2(), session)) : ss << "";
-                    sT->GetMoneyAmount_Twink()    != 0 ? (ss << std::endl << sT->GetMoneyAmount_Twink() << " gold. ") : ss << "";
+                    sT->GetMoneyAmount_Twink()    != 0 ? (ss << std::endl << (sT->GetMoneyAmount_Twink() / GOLD) << " gold. ") : ss << "";
                 }
             }
 
@@ -364,7 +364,7 @@ public:
 
         player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tRemove transmogrification", EQUIPMENT_SLOT_END + 3, slot, "Remove transmogrification from the slot?", 0, false);
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/PaperDollInfoFrame/UI-GearManager-Undo:30:30:-18:0|tUpdate menu", EQUIPMENT_SLOT_END, slot);
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack..", EQUIPMENT_SLOT_END + 1, 0);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/Ability_Spy:30:30:-18:0|tBack.", EQUIPMENT_SLOT_END + 1, 0);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
     }
 };
