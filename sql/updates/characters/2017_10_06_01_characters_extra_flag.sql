@@ -1,0 +1,1 @@
+ALTER TABLE `characters` CHANGE `extra_flags` `extra_flags` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0';
