@@ -9,8 +9,9 @@ INSERT INTO `item_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootm
 (71999, 3, 2, 1, 0, -71992, 1),
 (71999, 4, 1, 1, 0, -71993, 1),
 (71999, 5, 0.5, 1, 0, -71994, 1),
-(71999, 6, 0.01, 1, 0, -71995, 1),
-(71999, 45706, 50, 1, 0, 1, 1);
+(71999, 6, 0.1, 1, 0, -71995, 1),
+(71999, 6, 0.01, 1, 0, -71996, 1),
+(71999, 45706, 10, 1, 0, 1, 1);
 
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71990;
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
@@ -31,31 +32,37 @@ DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (71991, 38233, 0, 1, 1, 3, 3),
 (71991, 46779, 0, 1, 1, 3, 3),
-(71991, 9312, 0, 1, 1, 5, 5),
-(71991, 9313, 0, 1, 1, 5, 5),
-(71991, 9315, 0, 1, 1, 5, 5);
+(71991, 41427, 0, 1, 1, 5, 5),
+(71991, 9317, 0, 1, 1, 5, 5),
+(71991, 19026, 0, 1, 1, 5, 5);
 
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71992;
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(71992, 38301, 0, 1, 1, 1, 1),
-(71992, 32566, 0, 1, 1, 1, 1),
-(71992, 38578, 0, 1, 1, 1, 1),
+(71992, 3811, 0, 1, 1, 1, 1),
+(71992, 45037, 0, 1, 1, 1, 1),
+(71992, 45063, 0, 1, 1, 1, 1),
 (71992, 46780, 0, 1, 1, 1, 1),
 (71992, 34499, 0, 1, 1, 1, 1);
 
 
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71993;
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(71993, 39286, 0, 1, 1, 1, 1),
-(71993, 37297, 0, 1, 1, 1, 1),
 (71993, 38050, 0, 1, 1, 1, 1),
-(71993, 34492, 0, 1, 1, 1, 1);
+(71993, 39656, 0, 1, 1, 1, 1),
+(71993, 49287, 0, 1, 1, 1, 1),
+(71993, 49646, 0, 1, 1, 1, 1);
 
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71994;
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(71994, 8628, 0, 1, 1, 1, 1);
+(71994, 54068, 0, 1, 1, 1, 1),
+(71994, 54069, 0, 1, 1, 1, 1),
+(71994, 35226, 0, 1, 1, 1, 1);
 
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71995;
 INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(71995, 13317, 0, 1, 1, 1, 1),
-(71995, 12302, 0, 1, 1, 1, 1);
+(71995, 8628, 0, 1, 1, 1, 1);
+
+DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 71996;
+INSERT INTO `reference_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(71996, 13317, 0, 1, 1, 1, 1),
+(71996, 12302, 0, 1, 1, 1, 1);
