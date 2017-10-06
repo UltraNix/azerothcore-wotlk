@@ -39,13 +39,11 @@ enum TransmogTrinityStrings // Language.h might have same entries, appears when 
     LANG_ERR_TRANSMOG_MISSING_SRC_ITEM   = 12002,
     LANG_ERR_TRANSMOG_MISSING_DEST_ITEM  = 12003,
     LANG_ERR_TRANSMOG_INVALID_ITEMS      = 12004,
-    LANG_ERR_TRANSMOG_NOT_ENOUGH_MONEY   = 12005,
-
-    LANG_ERR_UNTRANSMOG_OK               = 12006,
-    LANG_ERR_UNTRANSMOG_NO_TRANSMOGS     = 12007,
-    LANG_ERR_TRANSMOG_TWINK_EXPERIENCE   = 12008,
-    LANG_ERR_TRANSMOG_MISSING_MATERIAL   = 12009,
-    LANG_ERR_TRANSMOG_MISSING_COINS      = 12010
+    LANG_ERR_UNTRANSMOG_OK               = 12005,
+    LANG_ERR_UNTRANSMOG_NO_TRANSMOGS     = 12006,
+    LANG_ERR_TRANSMOG_TWINK_EXPERIENCE   = 12007,
+    LANG_ERR_TRANSMOG_MISSING_MATERIAL   = 12008,
+    LANG_ERR_TRANSMOG_MISSING_COINS      = 12009
 };
 
 enum TransmogTexts
@@ -61,8 +59,7 @@ enum TransmogTexts
     TRANMOG_TEXT_ENTRY_9     = 1000508, // Are you sure you want to use Twink Model ...
     TRANMOG_TEXT_ENTRY_10    = 1000509, // Are you sure you want to use Mixed Model ...
     TRANMOG_TEXT_ENTRY_11    = 1000510, // Hello, $n. What do you want to transmogrify? ..
-    TRANMOG_TEXT_ENTRY_12    = 1000511, // Are you sure you want to change the model of earning tokens? ...
-    TRANMOG_TEXT_ENTRY_13    = 1000512, // Are you sure you want to change the model of acquiring ...
+    TRANMOG_TEXT_ENTRY_12    = 1000511, // Are you sure you want to change the model of acquiring ...
 };
 
 enum TransmogModels
