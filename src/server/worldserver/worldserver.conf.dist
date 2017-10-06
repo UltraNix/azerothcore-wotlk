@@ -3376,21 +3376,21 @@ BoostPercentage.Value = 0.1
 #        Description: A list of item entries that are NOT allowed for transmogrification
 #                     Example: "25 35674 5623"
 #        Default:    ""
-
+ 
 Transmogrification.EnableTransmogInfo = 1
 Transmogrification.Allowed = ""
 Transmogrification.NotAllowed = ""
-
+ 
 ###################################################################################################
 # Custom Model
 ###################################################################################################
-	
+   
 Transmogrification.CustomModelCost = 1
-
+ 
 ###################################################################################################
 # Tokens entries
 ###################################################################################################
-	
+   
 Transmogrification.TokenEntryRDF = 92000
 Transmogrification.TokenEntryBG = 92001
 Transmogrification.TokenEntryWG = 43589
@@ -3399,22 +3399,22 @@ Transmogrification.TokenEntry3V3 = 92003
 Transmogrification.TokenEntryTwink = 92004
 Transmogrification.TokenEntryExtra1 = 47556
 Transmogrification.TokenEntryExtra2 = 36919
-
+ 
 ###################################################################################################
 # Rewards
 ###################################################################################################
-
+ 
 Transmogrification.Rewards.Enable = 0
 Transmogrification.TokenRewardRDF.Count = 1
 Transmogrification.TokenRewardBG.Count = 1
 Transmogrification.TokenReward2V2.Count = 1
 Transmogrification.TokenReward3V3.Count = 1
 Transmogrification.TokenRewardTwink.Count = 1
-
+ 
 ###################################################################################################
 # PvE Model
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.PvE.Count = 12
 Transmogrification.TokenBG.PvE.Count = 5
 Transmogrification.TokenWG.PvE.Count = 9
@@ -3422,12 +3422,12 @@ Transmogrification.Token2V2.PvE.Count = 0
 Transmogrification.Token3V3.PvE.Count = 0
 Transmogrification.TokenORB.PvE.Count = 0
 Transmogrification.TokenGEM.PvE.Count = 1
-Transmogrification.MoneyAmount.PvE = 1500
-
+Transmogrification.MoneyAmount.PvE = 150
+ 
 ###################################################################################################
 # PvE Legendary
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.PvE.Legendary.Count = 60
 Transmogrification.TokenBG.PvE.Legendary.Count = 30
 Transmogrification.TokenWG.PvE.Legendary.Count = 40
@@ -3436,11 +3436,11 @@ Transmogrification.Token3V3.PvE.Legendary.Count = 0
 Transmogrification.TokenORB.PvE.Legendary.Count = 5
 Transmogrification.TokenGEM.PvE.Legendary.Count = 5
 Transmogrification.MoneyAmount.Legendary.PvE = 5000
-
+ 
 ###################################################################################################
 # PvP Model
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.PvP.Count = 3
 Transmogrification.TokenBG.PvP.Count = 12
 Transmogrification.TokenWG.PvP.Count = 9
@@ -3448,12 +3448,12 @@ Transmogrification.Token2V2.PvP.Count = 0
 Transmogrification.Token3V3.PvP.Count = 15
 Transmogrification.TokenORB.PvP.Count = 0
 Transmogrification.TokenGEM.PvP.Count = 1
-Transmogrification.MoneyAmount.PvP = 1500
-
+Transmogrification.MoneyAmount.PvP = 150
+ 
 ###################################################################################################
 # PvP Legendary
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.PvP.Legendary.Count = 18
 Transmogrification.TokenBG.PvP.Legendary.Count = 48
 Transmogrification.TokenWG.PvP.Legendary.Count = 40
@@ -3462,11 +3462,11 @@ Transmogrification.Token3V3.PvP.Legendary.Count = 75
 Transmogrification.TokenORB.PvP.Legendary.Count = 5
 Transmogrification.TokenGEM.PvP.Legendary.Count = 5
 Transmogrification.MoneyAmount.Legendary.PvP = 5000
-
+ 
 ###################################################################################################
 # Mix Model
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.Mix.Count = 5
 Transmogrification.TokenBG.Mix.Count = 6
 Transmogrification.TokenWG.Mix.Count = 6
@@ -3474,12 +3474,12 @@ Transmogrification.Token2V2.Mix.Count = 20
 Transmogrification.Token3V3.Mix.Count = 10
 Transmogrification.TokenORB.Mix.Count = 0
 Transmogrification.TokenGEM.Mix.Count = 0
-Transmogrification.MoneyAmount.Mix = 500
-
+Transmogrification.MoneyAmount.Mix = 50
+ 
 ###################################################################################################
 # Mix Legendary
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.Mix.Legendary.Count = 25
 Transmogrification.TokenBG.Mix.Legendary.Count = 30
 Transmogrification.TokenWG.Mix.Legendary.Count = 30
@@ -3488,11 +3488,11 @@ Transmogrification.Token3V3.Mix.Legendary.Count = 60
 Transmogrification.TokenORB.Mix.Legendary.Count = 3
 Transmogrification.TokenGEM.Mix.Legendary.Count = 5
 Transmogrification.MoneyAmount.Legendary.Mix = 3500
-
+ 
 ###################################################################################################
 # Twink Model
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.Twink.Count = 0
 Transmogrification.TokenBG.Twink.Count = 0
 Transmogrification.TokenWG.Twink.Count = 0
@@ -3502,11 +3502,11 @@ Transmogrification.TokenTwink.Twink.Count = 30
 Transmogrification.TokenORB.Twink.Count = 0
 Transmogrification.TokenGEM.Twink.Count = 0
 Transmogrification.MoneyAmount.Twink = 500
-
+ 
 ###################################################################################################
 # Twink Legendary
 ###################################################################################################
-
+ 
 Transmogrification.TokenRDF.Twink.Legendary.Count = 0
 Transmogrification.TokenBG.Twink.Legendary.Count = 0
 Transmogrification.TokenWG.Twink.Legendary.Count = 0
@@ -3516,21 +3516,21 @@ Transmogrification.TokenTwink.Twink.Legendary.Count = 180
 Transmogrification.TokenORB.Twink.Legendary.Count = 4
 Transmogrification.TokenGEM.Twink.Legendary.Count = 0
 Transmogrification.MoneyAmount.Legendary.Twink = 4000
-
+ 
 ###################################################################################################
 # Model Reset
 ###################################################################################################
-
-Transmogrification.ModelReset.CoinCost = 100
-Transmogrification.ModelReset.GoldCost = 500
-
+ 
+Transmogrification.ModelReset.CoinCost = 500
+Transmogrification.ModelReset.GoldCost = 3000
+ 
 ###################################################################################################
 # Model Remove
 ###################################################################################################
-
+ 
 Transmogrification.ModelRemove.Cost = 50
 Transmogrification.FullModelRemove.Cost = 500
-
+ 
 ###################################################################################################
 #
 #    REQUIREMENTS
@@ -3606,20 +3606,20 @@ Transmogrification.FullModelRemove.Cost = 500
 #    Transmogrification.IgnoreReqStats
 #        Description: Ignore stat count > 0 requirement for source items
 #        Default:    0
-
+ 
 Transmogrification.AllowPoor = 0
 Transmogrification.AllowCommon = 0
 Transmogrification.AllowUncommon = 1
 Transmogrification.AllowRare = 1
 Transmogrification.AllowEpic = 1
-Transmogrification.AllowLegendary = 0
-Transmogrification.AllowArtifact = 0
+Transmogrification.AllowLegendary = 1
+Transmogrification.AllowArtifact = 1
 Transmogrification.AllowHeirloom = 1
-
+ 
 Transmogrification.AllowMixedArmorTypes = 0
 Transmogrification.AllowMixedWeaponTypes = 0
 Transmogrification.AllowFishingPoles = 0
-
+ 
 Transmogrification.IgnoreReqRace = 0
 Transmogrification.IgnoreReqClass = 0
 Transmogrification.IgnoreReqSkill = 0
@@ -3627,6 +3627,6 @@ Transmogrification.IgnoreReqSpell = 0
 Transmogrification.IgnoreReqLevel = 0
 Transmogrification.IgnoreReqEvent = 0
 Transmogrification.IgnoreReqStats = 0
-
+ 
 #
 ###################################################################################################
