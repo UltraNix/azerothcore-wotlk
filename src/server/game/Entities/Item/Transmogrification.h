@@ -184,6 +184,8 @@ public:
 
     // Model Reset
     uint32 model_reset_cost;
+    // Model Remove
+    uint32 model_remove_cost;
 
     bool AllowPoor;
     bool AllowCommon;
@@ -331,7 +333,9 @@ public:
 
     // Model Reset
     uint32 GetResetCost() const;
-    
+    // Model Remove
+    uint32 GetRemoveCost() const;
+
     bool GetAllowMixedArmorTypes() const;
     bool GetAllowMixedWeaponTypes() const;
 
