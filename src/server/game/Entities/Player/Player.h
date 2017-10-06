@@ -520,16 +520,16 @@ enum MirrorTimerType
 enum PlayerExtraFlags
 {
     // gm abilities
-    PLAYER_EXTRA_GM_ON              = 0x0001,
-    PLAYER_EXTRA_ACCEPT_WHISPERS    = 0x0004,
-    PLAYER_EXTRA_TAXICHEAT          = 0x0008,
-    PLAYER_EXTRA_GM_INVISIBLE       = 0x0010,
-    PLAYER_EXTRA_GM_CHAT            = 0x0020,               // Show GM badge in chat messages
-    PLAYER_EXTRA_HAS_310_FLYER      = 0x0040,               // Marks if player already has 310% speed flying mount
-    PLAYER_EXTRA_SPECTATOR_ON       = 0x0080,               // Marks if player is spectactor
-    PLAYER_EXTRA_PVP_DEATH          = 0x0100,               // store PvP death status until corpse creating.
-    PLAYER_EXTRA_SHOW_DK_PET        = 0x0400,               // Marks if player should see ghoul on login screen
-    PLAYER_EXTRA_DODGE_LOCATION     = 0x0800,               // Marks if player should hide own location at who list
+    PLAYER_EXTRA_GM_ON                    = 0x0001,
+    PLAYER_EXTRA_ACCEPT_WHISPERS          = 0x0004,
+    PLAYER_EXTRA_TAXICHEAT                = 0x0008,
+    PLAYER_EXTRA_GM_INVISIBLE             = 0x0010,
+    PLAYER_EXTRA_GM_CHAT                  = 0x0020,         // Show GM badge in chat messages
+    PLAYER_EXTRA_HAS_310_FLYER            = 0x0040,         // Marks if player already has 310% speed flying mount
+    PLAYER_EXTRA_SPECTATOR_ON             = 0x0080,         // Marks if player is spectactor
+    PLAYER_EXTRA_PVP_DEATH                = 0x0100,         // store PvP death status until corpse creating.
+    PLAYER_EXTRA_SHOW_DK_PET              = 0x0400,         // Marks if player should see ghoul on login screen
+    PLAYER_EXTRA_DODGE_LOCATION           = 0x0800,         // Marks if player should hide own location at who list
 
     // @Gambling
     PLAYER_EXTRA_GOLD_DUEL_SETTING_50G    = 0x1000,         // Win or lose: 50   gold
@@ -538,10 +538,11 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_GOLD_DUEL_SETTING_500G   = 0x8000,         // Win or lose: 500  gold
     PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G  = 0x10000,        // Win or lose: 1000 gold
 
-    PLAYER_EXTRA_MODEL_PVE = 0x20000,
-    PLAYER_EXTRA_MODEL_PVP = 0x40000,
-    PLAYER_EXTRA_MODEL_MIX = 0x80000,
-    PLAYER_EXTRA_MODEL_TWK = 0x100000
+    // @Transmog
+    PLAYER_EXTRA_MODEL_PVE                = 0x20000,
+    PLAYER_EXTRA_MODEL_PVP                = 0x40000,
+    PLAYER_EXTRA_MODEL_MIX                = 0x80000,
+    PLAYER_EXTRA_MODEL_TWK                = 0x100000
 };
 
 // 2^n values
@@ -1244,25 +1245,25 @@ class Player : public Unit, public GridObject<Player>
         }
 
         // @Transmog
-        bool hasTransmogModelPvE()   const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVE; }
-        bool hasTransmogModelPvP()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVP; }
-        bool hasTransmogModelMIX()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_MIX; }
-        bool hasTransmogModelTWK()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_TWK; }
+        bool HasTransmogModelPvE()   const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVE; }
+        bool HasTransmogModelPvP()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVP; }
+        bool HasTransmogModelMIX()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_MIX; }
+        bool HasTransmogModelTWK()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_TWK; }
 
         void SetTransmogModelPvE() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_PVE; }
         void SetTransmogModelPvP() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_PVP; }
         void SetTransmogModelMIX() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_MIX; }
         void SetTransmogModelTWK() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_TWK; }
 
-        void SetResetModelMix()
+        void ResetTransmogModel()
         {
-            if (hasTransmogModelPvE())
+            if (HasTransmogModelPvE())
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_PVE;
-            else if (hasTransmogModelPvP())
+            else if (HasTransmogModelPvP())
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_PVP;
-            else if (hasTransmogModelMIX())
+            else if (HasTransmogModelMIX())
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_MIX;
-            else if (hasTransmogModelTWK())
+            else if (HasTransmogModelTWK())
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_TWK;
         }
 

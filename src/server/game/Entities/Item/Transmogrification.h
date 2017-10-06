@@ -1,3 +1,21 @@
+/*
+* Copyright (C)
+* Copyright (C)
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef DEF_TRANSMOGRIFICATION_H
 #define DEF_TRANSMOGRIFICATION_H
 
@@ -7,7 +25,6 @@
 #include "Language.h"
 #include "Config.h"
 
-#define PRESETS // comment this line to disable preset feature totally
 #define MAX_OPTIONS 25 // do not alter
 
 class Item;
@@ -17,40 +34,44 @@ struct ItemTemplate;
 
 enum TransmogTrinityStrings // Language.h might have same entries, appears when executing SQL, change if needed
 {
-    LANG_ERR_TRANSMOG_OK = 11100, // change this
-    LANG_ERR_TRANSMOG_INVALID_SLOT,
-    LANG_ERR_TRANSMOG_INVALID_SRC_ENTRY,
-    LANG_ERR_TRANSMOG_MISSING_SRC_ITEM,
-    LANG_ERR_TRANSMOG_MISSING_DEST_ITEM,
-    LANG_ERR_TRANSMOG_INVALID_ITEMS,
-    LANG_ERR_TRANSMOG_NOT_ENOUGH_MONEY,
-    LANG_ERR_TRANSMOG_NOT_ENOUGH_TOKENS,
+    LANG_ERR_TRANSMOG_OK                 = 12000,
+    LANG_ERR_TRANSMOG_INVALID_SLOT       = 12001,
+    LANG_ERR_TRANSMOG_MISSING_SRC_ITEM   = 12002,
+    LANG_ERR_TRANSMOG_MISSING_DEST_ITEM  = 12003,
+    LANG_ERR_TRANSMOG_INVALID_ITEMS      = 12004,
+    LANG_ERR_TRANSMOG_NOT_ENOUGH_MONEY   = 12005,
 
-    LANG_ERR_UNTRANSMOG_OK,
-    LANG_ERR_UNTRANSMOG_NO_TRANSMOGS,
-
-#ifdef PRESETS
-    LANG_PRESET_ERR_INVALID_NAME,
-#endif
+    LANG_ERR_UNTRANSMOG_OK               = 12006,
+    LANG_ERR_UNTRANSMOG_NO_TRANSMOGS     = 12007,
+    LANG_ERR_TRANSMOG_TWINK_EXPERIENCE   = 12008,
+    LANG_ERR_TRANSMOG_MISSING_MATERIAL   = 12009,
+    LANG_ERR_TRANSMOG_MISSING_COINS      = 12010
 };
 
-enum TransmogTokens
+enum TransmogTexts
 {
-    TOKEN_ENTRY_RDF      = 70000,
-    TOKEN_ENTRY_BG       = 70001,
-    TOKEN_ENTRY_WG       = 43589,
-    TOKEN_ENTRY_2V2      = 70002,
-    TOKEN_ENTRY_3V3      = 70003,
-    CRUSADER_ORB_ENTRY   = 47556,
-    EPIC_GEM_ENTRY       = 36919
+    TRANMOG_TEXT_ENTRY_1     = 1000500, // Transmogrification allows you to change how your items ...
+    TRANMOG_TEXT_ENTRY_2     = 1000503, // Hello, $n. I can change the appearance of your armor for you ... 
+    TRANMOG_TEXT_ENTRY_3     = 1000504, // PvP Model requires you to gather the following tokens: 3 Heroic Tokens ...
+    TRANMOG_TEXT_ENTRY_4     = 1000505, // PvE Model requires you to gather the following tokens: 12 Heroic Tokens ...
+    TRANMOG_TEXT_ENTRY_5     = 1000506, // Twink model requires you to gather the following tokens: 30 Twink ...
+    TRANMOG_TEXT_ENTRY_6     = 1000507, // Mixed model requires you to gather the following tokens: 5 Heroic Tokens ...
+    TRANMOG_TEXT_ENTRY_7     = 1000508, // Are you sure you want to use PvP Model ...
+    TRANMOG_TEXT_ENTRY_8     = 1000509, // Are you sure you want to use PvE Model ...
+    TRANMOG_TEXT_ENTRY_9     = 1000510, // Are you sure you want to use Twink Model ...
+    TRANMOG_TEXT_ENTRY_10    = 1000511, // Are you sure you want to use Mixed Model ...
+    TRANMOG_TEXT_ENTRY_11    = 1000512, // Hello, $n. What do you want to transmogrify? ..
+    TRANMOG_TEXT_ENTRY_12    = 1000513, // Are you sure you want to change the model of earning tokens? ...
+    TRANMOG_TEXT_ENTRY_13    = 1000515, // Are you sure you want to change the model of acquiring ...
 };
 
 enum TransmogModels
 {
-    MODEL_PVE = 1, // PvE Model
-    MODEL_PVP = 2, // PvP Model
-    MODEL_MIX = 3, // Mix Model
-    MODEL_TWK = 4  // Twink Model
+    MODEL_PVE = 0x01,  // PvE Model
+    MODEL_PVP = 0x02,  // PvP Model
+    MODEL_MIX = 0x03,  // Mix Model
+    MODEL_TWK = 0x04,  // Twink Model
+    MODEL_MAX = 0x05,
 };
 
 class Transmogrification
@@ -61,34 +82,6 @@ public:
     transmogMap entryMap; // entryMap[pGUID][iGUID] = entry
     transmogData dataMap; // dataMap[iGUID] = pGUID
 
-#ifdef PRESETS
-    bool EnableSetInfo;
-    uint32 SetNpcText;
-
-    typedef std::map<uint8, uint32> slotMap;
-    typedef std::map<uint8, slotMap> presetData;
-    typedef std::unordered_map<uint64, presetData> presetDataMap;
-    presetDataMap presetById; // presetById[pGUID][presetID][slot] = entry
-    typedef std::map<uint8, std::string> presetIdMap;
-    typedef std::unordered_map<uint64, presetIdMap> presetNameMap;
-    presetNameMap presetByName; // presetByName[pGUID][presetID] = presetName
-
-    void PresetTransmog(Player* player, Item* itemTransmogrified, uint32 fakeEntry, uint8 slot);
-
-    bool EnableSets;
-    uint8 MaxSets;
-    float SetCostModifier;
-    int32 SetCopperCost;
-
-    bool GetEnableSets() const;
-    uint8 GetMaxSets() const;
-    float GetSetCostModifier() const;
-    int32 GetSetCopperCost() const;
-
-    void LoadPlayerSets(uint64 pGUID);
-    void UnloadPlayerSets(uint64 pGUID);
-#endif
-
     bool EnableTransmogInfo;
     uint32 TransmogNpcText;
     uint32 TransmogModelText;
@@ -98,90 +91,102 @@ public:
     std::set<uint32> Allowed;
     std::set<uint32> NotAllowed;
 
-    float ScaledCostModifier;
-    int32 CopperCost;
-
-    bool RequireToken;
-    uint32 TokenEntry;
-    uint32 TokenAmount;
-
     bool CustomModelCost;
+    bool IsTokenRewardEnabled;
+
+    // Token entries
+    uint32 TokenEntryRDF;
+    uint32 TokenEntryBG;
+    uint32 TokenEntryWG;
+    uint32 TokenEntry2V2;
+    uint32 TokenEntry3v3;
+    uint32 TokenEntryExtra1;
+    uint32 TokenEntryExtra2;
+
+    // Rewards
+    uint32 TokenRewardCountRDF;
+    uint32 TokenRewardCountBG;
+    uint32 TokenRewardCount2V2;
+    uint32 TokenRewardCount3V3;
 
     // Model PvE
-    uint8 pve_token_rdf;
-    uint8 pve_token_bg;
-    uint8 pve_token_wg;
-    uint8 pve_token_2v2;
-    uint8 pve_token_3v3;
-    uint8 pve_token_orb;
-    uint8 pve_token_gem;
+    uint32 pve_token_rdf;
+    uint32 pve_token_bg;
+    uint32 pve_token_wg;
+    uint32 pve_token_2v2;
+    uint32 pve_token_3v3;
+    uint32 pve_token_orb;
+    uint32 pve_token_gem;
     int32 pve_money_amount;
 
-    uint8 pve_token_rdf_legendary;
-    uint8 pve_token_bg_legendary;
-    uint8 pve_token_wg_legendary;
-    uint8 pve_token_2v2_legendary;
-    uint8 pve_token_3v3_legendary;
-    uint8 pve_token_orb_legendary;
-    uint8 pve_token_gem_legendary;
+    uint32 pve_token_rdf_legendary;
+    uint32 pve_token_bg_legendary;
+    uint32 pve_token_wg_legendary;
+    uint32 pve_token_2v2_legendary;
+    uint32 pve_token_3v3_legendary;
+    uint32 pve_token_orb_legendary;
+    uint32 pve_token_gem_legendary;
     int32 pve_money_amount_legendary;
 
     // Model PvP
-    uint8 pvp_token_rdf;
-    uint8 pvp_token_bg;
-    uint8 pvp_token_wg;
-    uint8 pvp_token_2v2;
-    uint8 pvp_token_3v3;
-    uint8 pvp_token_orb;
-    uint8 pvp_token_gem;
+    uint32 pvp_token_rdf;
+    uint32 pvp_token_bg;
+    uint32 pvp_token_wg;
+    uint32 pvp_token_2v2;
+    uint32 pvp_token_3v3;
+    uint32 pvp_token_orb;
+    uint32 pvp_token_gem;
     int32 pvp_money_amount;
 
-    uint8 pvp_token_rdf_legendary;
-    uint8 pvp_token_bg_legendary;
-    uint8 pvp_token_wg_legendary;
-    uint8 pvp_token_2v2_legendary;
-    uint8 pvp_token_3v3_legendary;
-    uint8 pvp_token_orb_legendary;
-    uint8 pvp_token_gem_legendary;
+    uint32 pvp_token_rdf_legendary;
+    uint32 pvp_token_bg_legendary;
+    uint32 pvp_token_wg_legendary;
+    uint32 pvp_token_2v2_legendary;
+    uint32 pvp_token_3v3_legendary;
+    uint32 pvp_token_orb_legendary;
+    uint32 pvp_token_gem_legendary;
     int32 pvp_money_amount_legendary;
 
     // Model Mix
-    uint8 mix_token_rdf;
-    uint8 mix_token_bg;
-    uint8 mix_token_wg;
-    uint8 mix_token_2v2;
-    uint8 mix_token_3v3;
-    uint8 mix_token_orb;
-    uint8 mix_token_gem;
+    uint32 mix_token_rdf;
+    uint32 mix_token_bg;
+    uint32 mix_token_wg;
+    uint32 mix_token_2v2;
+    uint32 mix_token_3v3;
+    uint32 mix_token_orb;
+    uint32 mix_token_gem;
     int32 mix_money_amount;
 
-    uint8 mix_token_rdf_legendary;
-    uint8 mix_token_bg_legendary;
-    uint8 mix_token_wg_legendary;
-    uint8 mix_token_2v2_legendary;
-    uint8 mix_token_3v3_legendary;
-    uint8 mix_token_orb_legendary;
-    uint8 mix_token_gem_legendary;
+    uint32 mix_token_rdf_legendary;
+    uint32 mix_token_bg_legendary;
+    uint32 mix_token_wg_legendary;
+    uint32 mix_token_2v2_legendary;
+    uint32 mix_token_3v3_legendary;
+    uint32 mix_token_orb_legendary;
+    uint32 mix_token_gem_legendary;
     int32 mix_money_amount_legendary;
 
     // Model Twink
-    uint8 twink_token_rdf;
-    uint8 twink_token_bg;
-    uint8 twink_token_wg;
-    uint8 twink_token_2v2;
-    uint8 twink_token_3v3;
-    uint8 twink_token_orb;
-    uint8 twink_token_gem;
+    uint32 twink_token_rdf;
+    uint32 twink_token_bg;
+    uint32 twink_token_wg;
+    uint32 twink_token_2v2;
+    uint32 twink_token_3v3;
+    uint32 twink_token_orb;
+    uint32 twink_token_gem;
     int32 twink_money_amount;
 
-    uint8 twink_token_rdf_legendary;
-    uint8 twink_token_bg_legendary;
-    uint8 twink_token_wg_legendary;
-    uint8 twink_token_2v2_legendary;
-    uint8 twink_token_3v3_legendary;
-    uint8 twink_token_orb_legendary;
-    uint8 twink_token_gem_legendary;
+    uint32 twink_token_rdf_legendary;
+    uint32 twink_token_bg_legendary;
+    uint32 twink_token_wg_legendary;
+    uint32 twink_token_2v2_legendary;
+    uint32 twink_token_3v3_legendary;
+    uint32 twink_token_orb_legendary;
+    uint32 twink_token_gem_legendary;
     int32 twink_money_amount_legendary;
+
+    // Model Reset
+    uint32 model_reset_cost;
 
     bool AllowPoor;
     bool AllowCommon;
@@ -221,114 +226,120 @@ public:
     void DeleteFakeEntry(Player* player, uint8 slot, Item* itemTransmogrified, SQLTransaction* trans = NULL);
     void SetFakeEntry(Player* player, uint32 newEntry, uint8 slot, Item* itemTransmogrified);
 
-    TransmogTrinityStrings Transmogrify(Player* player, uint64 itemGUID, uint8 slot, /*uint32 newEntry, */bool no_cost = false);
+    TransmogTrinityStrings Transmogrify(Player* player, uint64 itemGUID, uint8 slot /*uint32 newEntry*/);
     bool CanTransmogrifyItemWithItem(Player* player, ItemTemplate const* destination, ItemTemplate const* source) const;
     bool SuitableForTransmogrification(Player* player, ItemTemplate const* proto) const;
     bool EffortModel(Player* player, uint8 model, bool Legendary) const;
     void ChargeModelCost(Player* player, uint8 model, bool Legendary) const;
-    // bool CanBeTransmogrified(Item const* item);
-    // bool CanTransmogrify(Item const* item);
-    uint32 GetSpecialPrice(ItemTemplate const* proto) const;
 
     void DeleteFakeFromDB(uint64 itemGUID, SQLTransaction* trans = NULL);
-    float GetScaledCostModifier() const;
-    int32 GetCopperCost() const;
 
-    bool GetRequireToken() const;
     bool GetCustomModelCost() const;
-    
-    uint32 GetTokenEntry() const;
-    uint32 GetTokenAmount() const;
+    bool TokenRewardEnabled() const;
 
+    // Token entries
+    uint32 GetTokenEntryRDF() const;
+    uint32 GetTokenEntryBG() const;
+    uint32 GetTokenEntryWG() const;
+    uint32 GetTokenEntry2V2() const;
+    uint32 GetTokenEntry3V3() const;
+    uint32 GetTokenEntryExtra1() const;
+    uint32 GetTokenEntryExtra2() const;
+
+    // Rewards
+    uint32 GetTokenRewardCountRDF() const;
+    uint32 GetTokenRewardCountBG() const;
+    uint32 GetTokenRewardCount2V2() const;
+    uint32 GetTokenRewardCount3V3() const;
+    
     // Model PvE
-    uint8 GetAmountTokenRDF_PvE() const;
-    uint8 GetAmountTokenBG_PvE() const;
-    uint8 GetAmountTokenWG_PvE() const;
-    uint8 GetAmountToken2V2_PvE() const;
-    uint8 GetAmountToken3V3_PvE() const;
-    uint8 GetAmountTokenORB_PvE() const;
-    uint8 GetAmountTokenGEM_PvE() const;
+    uint32 GetAmountTokenRDF_PvE() const;
+    uint32 GetAmountTokenBG_PvE() const;
+    uint32 GetAmountTokenWG_PvE() const;
+    uint32 GetAmountToken2V2_PvE() const;
+    uint32 GetAmountToken3V3_PvE() const;
+    uint32 GetAmountTokenORB_PvE() const;
+    uint32 GetAmountTokenGEM_PvE() const;
     int32 GetMoneyAmount_PvE() const;
 
     // Legendary PvE
-    uint8 GetLegendaryAmountTokenRDF_PvE() const;
-    uint8 GetLegendaryAmountTokenBG_PvE() const;
-    uint8 GetLegendaryAmountTokenWG_PvE() const;
-    uint8 GetLegendaryAmountToken2V2_PvE() const;
-    uint8 GetLegendaryAmountToken3V3_PvE() const;
-    uint8 GetLegendaryAmountTokenORB_PvE() const;
-    uint8 GetLegendaryAmountTokenGEM_PvE() const;
+    uint32 GetLegendaryAmountTokenRDF_PvE() const;
+    uint32 GetLegendaryAmountTokenBG_PvE() const;
+    uint32 GetLegendaryAmountTokenWG_PvE() const;
+    uint32 GetLegendaryAmountToken2V2_PvE() const;
+    uint32 GetLegendaryAmountToken3V3_PvE() const;
+    uint32 GetLegendaryAmountTokenORB_PvE() const;
+    uint32 GetLegendaryAmountTokenGEM_PvE() const;
     int32 GetLegendaryMoneyAmount_PvE() const;
 
     // Model PvP
-    uint8 GetAmountTokenRDF_PvP() const;
-    uint8 GetAmountTokenBG_PvP() const;
-    uint8 GetAmountTokenWG_PvP() const;
-    uint8 GetAmountToken2V2_PvP() const;
-    uint8 GetAmountToken3V3_PvP() const;
-    uint8 GetAmountTokenORB_PvP() const;
-    uint8 GetAmountTokenGEM_PvP() const;
+    uint32 GetAmountTokenRDF_PvP() const;
+    uint32 GetAmountTokenBG_PvP() const;
+    uint32 GetAmountTokenWG_PvP() const;
+    uint32 GetAmountToken2V2_PvP() const;
+    uint32 GetAmountToken3V3_PvP() const;
+    uint32 GetAmountTokenORB_PvP() const;
+    uint32 GetAmountTokenGEM_PvP() const;
     int32 GetMoneyAmount_PvP() const;
 
     // Legendary PvP
-    uint8 GetLegendaryAmountTokenRDF_PvP() const;
-    uint8 GetLegendaryAmountTokenBG_PvP() const;
-    uint8 GetLegendaryAmountTokenWG_PvP() const;
-    uint8 GetLegendaryAmountToken2V2_PvP() const;
-    uint8 GetLegendaryAmountToken3V3_PvP() const;
-    uint8 GetLegendaryAmountTokenORB_PvP() const;
-    uint8 GetLegendaryAmountTokenGEM_PvP() const;
+    uint32 GetLegendaryAmountTokenRDF_PvP() const;
+    uint32 GetLegendaryAmountTokenBG_PvP() const;
+    uint32 GetLegendaryAmountTokenWG_PvP() const;
+    uint32 GetLegendaryAmountToken2V2_PvP() const;
+    uint32 GetLegendaryAmountToken3V3_PvP() const;
+    uint32 GetLegendaryAmountTokenORB_PvP() const;
+    uint32 GetLegendaryAmountTokenGEM_PvP() const;
     int32 GetLegendaryMoneyAmount_PvP() const;
 
     // Model Mix
-    uint8 GetAmountTokenRDF_Mix() const;
-    uint8 GetAmountTokenBG_Mix() const;
-    uint8 GetAmountTokenWG_Mix() const;
-    uint8 GetAmountToken2V2_Mix() const;
-    uint8 GetAmountToken3V3_Mix() const;
-    uint8 GetAmountTokenORB_Mix() const;
-    uint8 GetAmountTokenGEM_Mix() const;
+    uint32 GetAmountTokenRDF_Mix() const;
+    uint32 GetAmountTokenBG_Mix() const;
+    uint32 GetAmountTokenWG_Mix() const;
+    uint32 GetAmountToken2V2_Mix() const;
+    uint32 GetAmountToken3V3_Mix() const;
+    uint32 GetAmountTokenORB_Mix() const;
+    uint32 GetAmountTokenGEM_Mix() const;
     int32 GetMoneyAmount_Mix() const;
 
     // Legendary Mix
-    uint8 GetLegendaryAmountTokenRDF_Mix() const;
-    uint8 GetLegendaryAmountTokenBG_Mix() const;
-    uint8 GetLegendaryAmountTokenWG_Mix() const;
-    uint8 GetLegendaryAmountToken2V2_Mix() const;
-    uint8 GetLegendaryAmountToken3V3_Mix() const;
-    uint8 GetLegendaryAmountTokenORB_Mix() const;
-    uint8 GetLegendaryAmountTokenGEM_Mix() const;
+    uint32 GetLegendaryAmountTokenRDF_Mix() const;
+    uint32 GetLegendaryAmountTokenBG_Mix() const;
+    uint32 GetLegendaryAmountTokenWG_Mix() const;
+    uint32 GetLegendaryAmountToken2V2_Mix() const;
+    uint32 GetLegendaryAmountToken3V3_Mix() const;
+    uint32 GetLegendaryAmountTokenORB_Mix() const;
+    uint32 GetLegendaryAmountTokenGEM_Mix() const;
     int32 GetLegendaryMoneyAmount_Mix() const;
 
     // Model Twink
-    uint8 GetAmountTokenRDF_Twink() const;
-    uint8 GetAmountTokenBG_Twink() const;
-    uint8 GetAmountTokenWG_Twink() const;
-    uint8 GetAmountToken2V2_Twink() const;
-    uint8 GetAmountToken3V3_Twink() const;
-    uint8 GetAmountTokenORB_Twink() const;
-    uint8 GetAmountTokenGEM_Twink() const;
+    uint32 GetAmountTokenRDF_Twink() const;
+    uint32 GetAmountTokenBG_Twink() const;
+    uint32 GetAmountTokenWG_Twink() const;
+    uint32 GetAmountToken2V2_Twink() const;
+    uint32 GetAmountToken3V3_Twink() const;
+    uint32 GetAmountTokenORB_Twink() const;
+    uint32 GetAmountTokenGEM_Twink() const;
     int32 GetMoneyAmount_Twink() const;
 
     // Legendary Mix
-    uint8 GetLegendaryAmountTokenRDF_Twink() const;
-    uint8 GetLegendaryAmountTokenBG_Twink() const;
-    uint8 GetLegendaryAmountTokenWG_Twink() const;
-    uint8 GetLegendaryAmountToken2V2_Twink() const;
-    uint8 GetLegendaryAmountToken3V3_Twink() const;
-    uint8 GetLegendaryAmountTokenORB_Twink() const;
-    uint8 GetLegendaryAmountTokenGEM_Twink() const;
+    uint32 GetLegendaryAmountTokenRDF_Twink() const;
+    uint32 GetLegendaryAmountTokenBG_Twink() const;
+    uint32 GetLegendaryAmountTokenWG_Twink() const;
+    uint32 GetLegendaryAmountToken2V2_Twink() const;
+    uint32 GetLegendaryAmountToken3V3_Twink() const;
+    uint32 GetLegendaryAmountTokenORB_Twink() const;
+    uint32 GetLegendaryAmountTokenGEM_Twink() const;
     int32 GetLegendaryMoneyAmount_Twink() const;
 
+    // Model Reset
+    uint32 GetResetCost() const;
+    
     bool GetAllowMixedArmorTypes() const;
     bool GetAllowMixedWeaponTypes() const;
 
     // Config
     bool GetEnableTransmogInfo() const;
-    uint32 GetTransmogNpcText() const;
-    uint32 GetTransmogModelText() const;
-    bool GetEnableSetInfo() const;
-    uint32 GetSetNpcText() const;
 };
 #define sTransmogrification ACE_Singleton<Transmogrification, ACE_Null_Mutex>::instance()
 

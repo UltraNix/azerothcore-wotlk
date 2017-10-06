@@ -43,6 +43,7 @@
 #include "BattlegroundRL.h"
 #include "BattlegroundRV.h"
 #include "Transport.h"
+#include "Transmogrification.h"
 
 namespace Trinity
 {
@@ -930,6 +931,25 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
 
                 if (!player->GetRandomWinner())
                     player->SetRandomWinner(true);
+            }
+
+            // @Transmog
+            if (sTransmogrification->TokenRewardEnabled())
+            {
+                if (isArena())
+                {
+                    switch (GetArenaType())
+                    {
+                        case ARENA_TYPE_2v2:
+                            player->AddItem(sTransmogrification->GetTokenEntry2V2(), sTransmogrification->GetTokenRewardCount2V2());
+                            break;
+                        case ARENA_TYPE_3v3:
+                            player->AddItem(sTransmogrification->GetTokenEntry3V3(), sTransmogrification->GetTokenRewardCount3V3());
+                            break;
+                    }
+                }
+                else
+                    player->AddItem(sTransmogrification->GetTokenEntryBG(), sTransmogrification->GetTokenRewardCountBG());
             }
 
             // @bgreward

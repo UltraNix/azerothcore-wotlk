@@ -18168,7 +18168,20 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         if (extraflags & PLAYER_EXTRA_DODGE_LOCATION)
             if (GetMaxPersonalArenaRatingRequirement(0) > 2000)
                 SetDodgeMode(true);
-			
+
+    // @transmog
+    // if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
+    {
+        if (extraflags & PLAYER_EXTRA_MODEL_PVE)
+            SetTransmogModelPvE();
+        else if (extraflags & PLAYER_EXTRA_MODEL_PVP)
+            SetTransmogModelPvP();
+        else if (extraflags & PLAYER_EXTRA_MODEL_MIX)
+            SetTransmogModelMIX();
+        else if (extraflags & PLAYER_EXTRA_MODEL_TWK)
+            SetTransmogModelTWK();
+    }
+
     // RaF stuff.
     m_grantableLevels = fields[66].GetUInt8();
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
