@@ -18169,7 +18169,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
             if (GetMaxPersonalArenaRatingRequirement(0) > 2000)
                 SetDodgeMode(true);
 
-    // @transmog
+    // @Transmog
     // if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
     {
         if (extraflags & PLAYER_EXTRA_MODEL_PVE)
