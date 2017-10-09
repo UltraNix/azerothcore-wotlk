@@ -1065,15 +1065,6 @@ class spell_item_oracle_ablutions : public SpellScriptLoader
                         caster->CastSpell(caster, SPELL_ABLUTION_ENERGY, true);
                         break;
                 }
-                if (Player* player = caster->ToPlayer())
-                {
-                    std::string name = player->GetName();
-                    player->TextEmote("casually flips his Titanium Seal of Dalaran");
-                    if (urand(0,1))
-                        player->TextEmote("finds the coin face down for tails!");
-                    else
-                        player->TextEmote("catches the coin heads up!");
-                }
             }
 
             void Register()
