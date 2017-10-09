@@ -95,7 +95,7 @@ class spell_rog_combat_potency : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return eventInfo.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS);
+                return eventInfo.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK);
             }
 
             void Register()
