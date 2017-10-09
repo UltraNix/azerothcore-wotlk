@@ -924,7 +924,7 @@ public:
                         break;
                     // After waypoint 22
                     case EVENT_ACTION_PHASE3:
-                        //me->SetReactState(REACT_AGGRESSIVE);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         if (Creature* cr = GetEventNpc(NPC_CITY_MAN3))
                             cr->SetTarget(me->GetGUID());
                         if (Creature* cr = GetEventNpc(NPC_CITY_MAN4))
@@ -934,7 +934,7 @@ public:
                         ScheduleNextEvent(currentEvent, 1000);
                         break;
                     case EVENT_ACTION_PHASE3+1:
-                        //me->SetReactState(REACT_AGGRESSIVE);
+                        me->SetReactState(REACT_AGGRESSIVE);
                         if (Creature* cr = GetEventNpc(NPC_CITY_MAN3))
                             cr->AI()->Talk(SAY_PHASE302);
 
