@@ -354,7 +354,74 @@ public:
 
 };
 
+enum Runecaster
+{
+    SPELL_RUNE_OF_PROTECTION = 42740,
+    SPELL_RUNE_OF_FLAME      = 54965,
+
+    EVENT_RUNE_OF_PROTECTION = 1,
+    EVENT_RUNE_OF_FLAME,
+};
+
+struct npc_dragonflayer_runecasterAI : public ScriptedAI
+{
+    npc_dragonflayer_runecasterAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_RUNE_OF_PROTECTION, urand(5000, 7000));
+        _events.ScheduleEvent(EVENT_RUNE_OF_FLAME, urand(1000, 2000));
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_RUNE_OF_PROTECTION:
+                {
+                    auto targets = DoFindFriendlyMissingBuff(25.0f, SPELL_RUNE_OF_PROTECTION);
+                    if (!targets.empty())
+                        if (Unit* target = Trinity::Containers::SelectRandomContainerElement(targets))
+                            DoCast(target, SPELL_RUNE_OF_PROTECTION);
+                    _events.Repeat(urand(14000, 17000));
+                    break;
+                }
+                case EVENT_RUNE_OF_FLAME:
+                    DoCastSelf(SPELL_RUNE_OF_FLAME);
+                    _events.Repeat(urand(15000, 18000));
+                    break;
+                default:
+                    break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    EventMap _events;
+};
+
 void AddSC_instance_utgarde_keep()
 {
     new instance_utgarde_keep();
+    new CreatureAILoader<npc_dragonflayer_runecasterAI>("npc_dragonflayer_runecaster");
 }
