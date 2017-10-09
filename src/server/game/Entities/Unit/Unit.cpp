@@ -16433,7 +16433,7 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         if (Unit* owner = killer->GetOwner())
             owner->ProcDamageAndSpell(victim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0, attackType, spellProto);
 
-    if (killer != victim && !victim->IsCritter())
+    if (killer != victim)
         killer->ProcDamageAndSpell(victim, killer ? PROC_FLAG_KILL : 0, PROC_FLAG_KILLED, PROC_EX_NONE, 0, attackType, spellProto);
 
     // Proc auras on death - must be before aura/combat remove
