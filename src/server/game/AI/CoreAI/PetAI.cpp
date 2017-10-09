@@ -66,6 +66,12 @@ bool PetAI::_needToStop()
     if (me->isTargetNotAcceptableByMMaps(me->GetVictim()->GetGUID(), sWorld->GetGameTime(), me->GetVictim()))
         return true;
 
+    // Hack for Anub'arak Spheres
+    if (me->GetMapId() == 649)
+        if (me->GetVictim() && me->GetVictim()->GetEntry() == 34606)
+            return true;
+
+
     // Hack fix for naxxramas pet pull
     if (me->GetMapId() == 533)
     {
