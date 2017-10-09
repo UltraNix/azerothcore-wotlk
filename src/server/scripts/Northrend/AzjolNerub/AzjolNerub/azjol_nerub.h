@@ -10,7 +10,10 @@ enum ANData
     DATA_KRIKTHIR_THE_GATEWATCHER_EVENT    = 0,
     DATA_HADRONOX_EVENT                    = 1,
     DATA_ANUBARAK_EVENT                    = 2,
-    MAX_ENCOUNTERS                        = 3
+
+    DATA_WATCHER_NARJIL,
+    DATA_WATCHER_GASHRA,
+    DATA_WATCHER_SILTHIK,
 };
 
 enum ANIds
@@ -20,15 +23,20 @@ enum ANIds
     NPC_KRIKTHIR_THE_GATEWATCHER        = 28684,
     NPC_HADRONOX                        = 28921,
     NPC_ANUB_AR_CHAMPION                = 29062,
-    NPC_ANUB_AR_NECROMANCER                = 29063,
-    NPC_ANUB_AR_CRYPTFIEND                = 29064,
+    NPC_ANUB_AR_NECROMANCER             = 29063,
+    NPC_ANUB_AR_CRYPTFIEND              = 29064,
+    NPC_ANUBARAK                        = 29120,
 
-    GO_KRIKTHIR_DOORS                    = 192395,
-    GO_ANUBARAK_DOORS1                    = 192396,
-    GO_ANUBARAK_DOORS2                    = 192397,
-    GO_ANUBARAK_DOORS3                    = 192398,
+    NPC_WATCHER_NARJIL                  = 28729,
+    NPC_WATCHER_GASHRA                  = 28730,
+    NPC_WATCHER_SILTHIK                 = 28731,
 
-    SPELL_WEB_WRAP_TRIGGER                = 52087
+    GO_KRIKTHIR_DOORS                   = 192395,
+    GO_ANUBARAK_DOORS1                  = 192396,
+    GO_ANUBARAK_DOORS2                  = 192397,
+    GO_ANUBARAK_DOORS3                  = 192398,
+
+    SPELL_WEB_WRAP_TRIGGER              = 52087
 };
 
 #endif

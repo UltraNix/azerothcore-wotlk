@@ -16,6 +16,17 @@ DoorData const doorData[] =
     { 0,                    0,                        DOOR_TYPE_ROOM,     BOUNDARY_NONE }
 };
 
+ObjectData const creatureData[] =
+{
+    { NPC_KRIKTHIR_THE_GATEWATCHER,        DATA_KRIKTHIR_THE_GATEWATCHER_EVENT },
+    { NPC_HADRONOX,        DATA_HADRONOX_EVENT },
+    { NPC_ANUBARAK,        DATA_ANUBARAK_EVENT },
+    { NPC_WATCHER_NARJIL,  DATA_WATCHER_GASHRA },
+    { NPC_WATCHER_GASHRA,  DATA_WATCHER_SILTHIK },
+    { NPC_WATCHER_SILTHIK, DATA_WATCHER_NARJIL },
+    { 0,                   0 } // END
+};
+
 class instance_azjol_nerub : public InstanceMapScript
 {
     public:
@@ -25,10 +36,11 @@ class instance_azjol_nerub : public InstanceMapScript
         {
             instance_azjol_nerub_InstanceScript(Map* map) : InstanceScript(map)
             {
-                SetBossNumber(MAX_ENCOUNTERS);
+                SetBossNumber(3);
                 LoadDoorData(doorData);
                 _krikthirGUID = 0;
                 _hadronoxGUID = 0;
+                LoadObjectData(creatureData, nullptr);
             };
 
             void OnCreatureCreate(Creature* creature)
@@ -54,6 +66,8 @@ class instance_azjol_nerub : public InstanceMapScript
                         break;
 
                 }
+
+                InstanceScript::OnCreatureCreate(creature);
             }                    
 
             void OnGameObjectCreate(GameObject* go)
@@ -104,7 +118,7 @@ class instance_azjol_nerub : public InstanceMapScript
                 loadStream >> dataHead1 >> dataHead2;
                 if (dataHead1 == 'A' && dataHead2 == 'N')
                 {
-                    for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
+                    for (uint8 i = 0; i < 3; ++i)
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;
@@ -126,65 +140,7 @@ class instance_azjol_nerub : public InstanceMapScript
         }
 };
 
-class spell_azjol_nerub_fixate : public SpellScriptLoader
-{
-    public:
-        spell_azjol_nerub_fixate() : SpellScriptLoader("spell_azjol_nerub_fixate") { }
-
-        class spell_azjol_nerub_fixate_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_azjol_nerub_fixate_SpellScript);
-
-            void HandleScriptEffect(SpellEffIndex effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-                if (Unit* target = GetHitUnit())
-                    target->CastSpell(GetCaster(), GetEffectValue(), true);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_azjol_nerub_fixate_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_azjol_nerub_fixate_SpellScript();
-        }
-};
-
-class spell_azjol_nerub_web_wrap : public SpellScriptLoader
-{
-    public:
-        spell_azjol_nerub_web_wrap() : SpellScriptLoader("spell_azjol_nerub_web_wrap") { }
-
-        class spell_azjol_nerub_web_wrap_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_azjol_nerub_web_wrap_AuraScript);
-
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* target = GetTarget();
-                if (!target->HasAura(SPELL_WEB_WRAP_TRIGGER))
-                    target->CastSpell(target, SPELL_WEB_WRAP_TRIGGER, true);
-            }
-
-            void Register()
-            {
-                OnEffectRemove += AuraEffectRemoveFn(spell_azjol_nerub_web_wrap_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_ROOT, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_azjol_nerub_web_wrap_AuraScript();
-        }
-};
-
 void AddSC_instance_azjol_nerub()
 {
    new instance_azjol_nerub();
-   new spell_azjol_nerub_fixate();
-   new spell_azjol_nerub_web_wrap();
 }
