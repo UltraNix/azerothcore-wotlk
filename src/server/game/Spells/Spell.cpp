@@ -1597,9 +1597,12 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplici
         default:
         {
             float angle = targetType.CalcDirectionAngle();
-            float dist = m_spellInfo->Effects[effIndex].CalcRadius(nullptr);
-            if (targetType.GetTarget() == TARGET_DEST_TARGET_RANDOM)
-                dist *= float(rand_norm());
+            float objSize = target->GetObjectSize();
+            float dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
+            if (dist < objSize)
+                dist = objSize;
+            else if (targetType.GetTarget() == TARGET_DEST_TARGET_RANDOM)
+                dist = objSize + (dist - objSize) * (float)rand_norm();
 
             Position pos;
             if (m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_LEAP || m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_TELEPORT_UNITS || m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_JUMP_DEST || (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Effects[effIndex].Effect == SPELL_EFFECT_SUMMON))

@@ -2665,14 +2665,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     float selfAddition = 1.5f;
     float allowedDiff = 6.0f;
     float newDist = dist;
-    if (GetMapId() == 617)
-    {
-        allowedDiff = 3.5f;
-        selfAddition = 1.0f;
-        destz = pos.m_positionZ + 1.0f;
-    }
-    else
-        UpdateAllowedPositionZ(destx, desty, destz);
+    UpdateAllowedPositionZ(destx, desty, destz);
 
     bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+selfAddition, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
     // collision occured
