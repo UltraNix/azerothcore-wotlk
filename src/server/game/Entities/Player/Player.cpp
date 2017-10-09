@@ -17943,7 +17943,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     m_taxi.LoadTaxiMask(fields[17].GetCString());            // must be before InitTaxiNodesForLevel
 
-    uint32 extraflags = fields[31].GetUInt16();
+    uint32 extraflags = fields[31].GetUInt32();
 
     m_stableSlots = fields[32].GetUInt8();
     if (m_stableSlots > MAX_PET_STABLES)
@@ -18168,7 +18168,20 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         if (extraflags & PLAYER_EXTRA_DODGE_LOCATION)
             if (GetMaxPersonalArenaRatingRequirement(0) > 2000)
                 SetDodgeMode(true);
-			
+
+    // @Transmog
+    // if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
+    {
+        if (extraflags & PLAYER_EXTRA_MODEL_PVE)
+            SetTransmogModelPvE();
+        else if (extraflags & PLAYER_EXTRA_MODEL_PVP)
+            SetTransmogModelPvP();
+        else if (extraflags & PLAYER_EXTRA_MODEL_MIX)
+            SetTransmogModelMIX();
+        else if (extraflags & PLAYER_EXTRA_MODEL_TWK)
+            SetTransmogModelTWK();
+    }
+
     // RaF stuff.
     m_grantableLevels = fields[66].GetUInt8();
     if (GetSession()->IsARecruiter() || (GetSession()->GetRecruiterId() != 0))
@@ -26218,7 +26231,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         //save, but in tavern/city
         stmt->setUInt32(index++, m_resetTalentsCost);
         stmt->setUInt32(index++, uint32(m_resetTalentsTime));
-        stmt->setUInt16(index++, (uint16)m_ExtraFlags);
+        stmt->setUInt32(index++, (uint32)m_ExtraFlags);
         stmt->setUInt8(index++,  m_stableSlots);
         stmt->setUInt16(index++, (uint16)m_atLoginFlags);
         stmt->setUInt16(index++, GetZoneId(true));
@@ -26348,7 +26361,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         //save, but in tavern/city
         stmt->setUInt32(index++, m_resetTalentsCost);
         stmt->setUInt32(index++, uint32(m_resetTalentsTime));
-        stmt->setUInt16(index++, (uint16)m_ExtraFlags);
+        stmt->setUInt32(index++, (uint32)m_ExtraFlags);
         stmt->setUInt8(index++,  m_stableSlots);
         stmt->setUInt16(index++, (uint16)m_atLoginFlags);
         stmt->setUInt16(index++, GetZoneId(true));

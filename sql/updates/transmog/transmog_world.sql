@@ -1,28 +1,52 @@
 SET
 @Entry = 190010,
-@Name = "Warpweaver";
+@Name = "Shazaar";
 DELETE FROM `creature_template` WHERE `entry` = 190010;
 
 INSERT INTO `creature_template` (`entry`, `modelid1`, `modelid2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `scale`, `rank`, `dmgschool`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`) VALUES
 (@Entry, 19646, 0, @Name, "Transmogrifier", NULL, 0, 80, 80, 2, 35, 1, 1, 0, 0, 2000, 0, 1, 0, 7, 138936390, 0, 0, 0, '', 0, 3, 1, 0, 0, 1, 0, 0, 'npc_transmogrifier');
 
-SET @TEXT_ID := 50000;
-DELETE FROM `npc_text` WHERE `ID` IN  (@TEXT_ID,@TEXT_ID+1);
+SET @TEXT_ID := 1000500;
+DELETE FROM `npc_text` WHERE `ID` IN  (@TEXT_ID,@TEXT_ID+1,@TEXT_ID+2,@TEXT_ID+3,@TEXT_ID+4,@TEXT_ID+5,@TEXT_ID+6,@TEXT_ID+7,@TEXT_ID+8,@TEXT_ID+9,@TEXT_ID+10,@TEXT_ID+11,@TEXT_ID+12,@TEXT_ID+13,@TEXT_ID+14);
 INSERT INTO `npc_text` (`ID`, `text0_0`) VALUES
-(@TEXT_ID, 'Transmogrification allows you to change how your items look like without changing the stats of the items.\r\nItems used in transmogrification are no longer refundable, tradeable and are bound to you.\r\nUpdating a menu updates the view and prices.\r\n\r\nNot everything can be transmogrified with eachother.\r\nRestrictions include but are not limited to:\r\nOnly armor and weapons can be transmogrified\r\nGuns, bows and crossbows can be transmogrified with eachother\r\nFishing poles can not be transmogrified\r\nYou must be able to equip both items used in the process.\r\n\r\nTransmogrifications stay on your items as long as you own them.\r\nIf you try to put the item in guild bank or mail it to someone else, the transmogrification is stripped.\r\n\r\nYou can also remove transmogrifications for free at the transmogrifier.'),
-(@TEXT_ID+1, 'You can save your own transmogrification sets.\r\n\r\nTo save, first you must transmogrify your equipped items.\r\nThen when you go to the set management menu and go to save set menu,\r\nall items you have transmogrified are displayed so you see what you are saving.\r\nIf you think the set is fine, you can click to save the set and name it as you wish.\r\n\r\nTo use a set you can click the saved set in the set management menu and then select use set.\r\nIf the set has a transmogrification for an item that is already transmogrified, the old transmogrification is lost.\r\nNote that same transmogrification restrictions apply when trying to use a set as in normal transmogrification.\r\n\r\nTo delete a set you can go to the set\'s menu and select delete set.');
+(@TEXT_ID+0, 'Transmogrification allows you to change how your items look like without changing the stats of the items.\r\nItems used in transmogrification are no longer refundable, tradeable and are bound to you.\r\nUpdating a menu updates the view and prices.\r\n\r\nNot everything can be transmogrified with eachother.\r\nRestrictions include but are not limited to:\r\nOnly armor and weapons can be transmogrified\r\nGuns, bows and crossbows can be transmogrified with eachother\r\nFishing poles can not be transmogrified\r\nYou must be able to equip both items used in the process.\r\n\r\nTransmogrifications stay on your items as long as you own them.\r\nIf you try to put the item in guild bank or mail it to someone else, the transmogrification is stripped.\r\n\r\nYou can also remove transmogrifications for free at the transmogrifier.'),
+(@TEXT_ID+1, 'Hello, $n. I can change the appearance of your armor for you… But first, you have to give me transmogrification tokens. First, tell me - how do you want to earn your transmog tokens? Remember: Heroic tokens are awarded after completing a Random Heroic Dungeon, Battleground Tokens are awarded after winning a battleground, Arena Tokens are awarded after winning an arena match and Twink Tokens are awarded after winning a battleground, after your experience gain is disabled.'),
+(@TEXT_ID+2, 'PvP Model requires you to gather the following tokens: 3 Heroic Tokens, 12 Battleground Tokens, 9 Marks of Wintergrasp, 15 3v3 Arena Tokens, 150 Gold and Cardinal Ruby. If you want to transmog an item with appearance of a legendary item, you need to gather 18 Heroic Tokens, 48 Battleground Tokens, 40 Marks of Wintergrasp, 75 3v3 Arena Tokens, 5 Crusader Orbs, 5000 Gold and 5 Cardinal Rubies.'),
+(@TEXT_ID+3, 'PvE Model requires you to gather the following tokens: 12 Heroic Tokens, 5 Battleground Tokens, 9 Marks of Wintergrasp, 150 Gold and Cardinal Ruby. If you want to transmog an item with appearance of a legendary item, you need to gather 60 Heroic Tokens, 30 Battleground Tokens, 40 Marks of Wintergrasp, 5 Crusader Orbs, 5000 Gold and 1 of epic uncut gem of each color.'),
+(@TEXT_ID+4, 'Twink model requires you to gather the following tokens: 30 Battlegroundtokens and 50 Gold. If you want to transmog an item with appearance of a legendary item, you need to gather 180 Battleground Tokens, 4 Crusader Orbs and 4000 Gold.'),
+(@TEXT_ID+5, 'Mixed model requires you to gather the following tokens: 5 Heroic Tokens, 6 Battleground Tokens, 6 Marks of Wintergrasp, 20 2v2 Arena Tokens, 10 3v3 Arena Tokens and 50 Gold. If you want to transmog an item with appearance of a legendary item, you need to gather 25 Heroic Tokens, 30 Battleground Tokens, 30 Marks of Wintergrasp, 100 2v2 Arena Tokens, 60 3v3 Arena Tokens, 3 Crusader Orbs, 3500 Gold and 1 of epic uncut gem of each color.'),
+(@TEXT_ID+6, 'Are you sure you want to use PvP  Model? You will be able to switch the modes using Sunwell Coins.'),
+(@TEXT_ID+7, 'Are you sure you want to use PvE  Model? You will be able to switch the modes using Sunwell Coins.'),
+(@TEXT_ID+8, 'Are you sure you want to use Twink  Model? You will be able to switch the modes using Sunwell Coins.'),
+(@TEXT_ID+9, 'Are you sure you want to use Mixed Model? You will be able to switch the modes using Sunwell Coins.'),
+(@TEXT_ID+10, 'Hello, $n. What do you want to transmogrify?'),
+(@TEXT_ID+11, 'Are you sure you want to change the model of acquiring transmogrification tokens?');
 
-SET @STRING_ENTRY := 11100;
-DELETE FROM `trinity_string` WHERE `entry` IN  (@STRING_ENTRY+0,@STRING_ENTRY+1,@STRING_ENTRY+2,@STRING_ENTRY+3,@STRING_ENTRY+4,@STRING_ENTRY+5,@STRING_ENTRY+6,@STRING_ENTRY+7,@STRING_ENTRY+8,@STRING_ENTRY+9,@STRING_ENTRY+10);
+SET @STRING_ENTRY := 12000;
+DELETE FROM `trinity_string` WHERE `entry` IN  (@STRING_ENTRY+0,@STRING_ENTRY+1,@STRING_ENTRY+2,@STRING_ENTRY+3,@STRING_ENTRY+4,@STRING_ENTRY+5,@STRING_ENTRY+6,@STRING_ENTRY+7,@STRING_ENTRY+8,@STRING_ENTRY+9,@STRING_ENTRY+10,@STRING_ENTRY+11,@STRING_ENTRY+12);
 INSERT INTO `trinity_string` (`entry`, `content_default`) VALUES
 (@STRING_ENTRY+0, 'Item transmogrified'),
 (@STRING_ENTRY+1, 'Equipment slot is empty'),
-(@STRING_ENTRY+2, 'Invalid source item selected'),
-(@STRING_ENTRY+3, 'Source item does not exist'),
-(@STRING_ENTRY+4, 'Destination item does not exist'),
-(@STRING_ENTRY+5, 'Selected items are invalid'),
-(@STRING_ENTRY+6, 'Not enough money'),
-(@STRING_ENTRY+7, 'You don\'t have enough tokens'),
-(@STRING_ENTRY+8, 'Transmogrifications removed'),
-(@STRING_ENTRY+9, 'There are no transmogrifications'),
-(@STRING_ENTRY+10, 'Invalid name inserted');
+(@STRING_ENTRY+2, 'Source item does not exist'),
+(@STRING_ENTRY+3, 'Destination item does not exist'),
+(@STRING_ENTRY+4, 'Selected items are invalid'),
+(@STRING_ENTRY+5, 'Transmogrifications removed'),
+(@STRING_ENTRY+6, 'There are no transmogrifications'),
+(@STRING_ENTRY+7, 'You cannot use Twink Model when your experience gain is enabled.'),
+(@STRING_ENTRY+8, 'You have not enough tokens, materials or gold!'),
+(@STRING_ENTRY+9, 'You don\'t have enough Gold or Sunwell Coins');
+
+
+SET @ITEM_ENTRY := 92000;
+DELETE FROM `item_template` WHERE `entry` IN  (@ITEM_ENTRY+0,@ITEM_ENTRY+1,@ITEM_ENTRY+2,@ITEM_ENTRY+3,@ITEM_ENTRY+4);
+INSERT INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `FlagsExtra`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `AllowableClass`, `AllowableRace`, `ItemLevel`, `RequiredLevel`, `RequiredSkill`, `RequiredSkillRank`, `requiredspell`, `requiredhonorrank`, `RequiredCityRank`, `RequiredReputationFaction`, `RequiredReputationRank`, `maxcount`, `stackable`, `ContainerSlots`, `StatsCount`, `stat_type1`, `stat_value1`, `stat_type2`, `stat_value2`, `stat_type3`, `stat_value3`, `stat_type4`, `stat_value4`, `stat_type5`, `stat_value5`, `stat_type6`, `stat_value6`, `stat_type7`, `stat_value7`, `stat_type8`, `stat_value8`, `stat_type9`, `stat_value9`, `stat_type10`, `stat_value10`, `ScalingStatDistribution`, `ScalingStatValue`, `dmg_min1`, `dmg_max1`, `dmg_type1`, `dmg_min2`, `dmg_max2`, `dmg_type2`, `armor`, `holy_res`, `fire_res`, `nature_res`, `frost_res`, `shadow_res`, `arcane_res`, `delay`, `ammo_type`, `RangedModRange`, `spellid_1`, `spelltrigger_1`, `spellcharges_1`, `spellppmRate_1`, `spellcooldown_1`, `spellcategory_1`, `spellcategorycooldown_1`, `spellid_2`, `spelltrigger_2`, `spellcharges_2`, `spellppmRate_2`, `spellcooldown_2`, `spellcategory_2`, `spellcategorycooldown_2`, `spellid_3`, `spelltrigger_3`, `spellcharges_3`, `spellppmRate_3`, `spellcooldown_3`, `spellcategory_3`, `spellcategorycooldown_3`, `spellid_4`, `spelltrigger_4`, `spellcharges_4`, `spellppmRate_4`, `spellcooldown_4`, `spellcategory_4`, `spellcategorycooldown_4`, `spellid_5`, `spelltrigger_5`, `spellcharges_5`, `spellppmRate_5`, `spellcooldown_5`, `spellcategory_5`, `spellcategorycooldown_5`, `bonding`, `description`, `PageText`, `LanguageID`, `PageMaterial`, `startquest`, `lockid`, `Material`, `sheath`, `RandomProperty`, `RandomSuffix`, `block`, `itemset`, `MaxDurability`, `area`, `Map`, `BagFamily`, `TotemCategory`, `socketColor_1`, `socketContent_1`, `socketColor_2`, `socketContent_2`, `socketColor_3`, `socketContent_3`, `socketBonus`, `GemProperties`, `RequiredDisenchantSkill`, `ArmorDamageModifier`, `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`, `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`, `flagsCustom`, `VerifiedBuild`) VALUES
+(@ITEM_ENTRY+0, 10, 0, -1, 'Heroic Token', 54474, 3, 1, 0, 1, 0, 0, 0, 32767, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2147483647, 2147483647, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Transmogrification token awarded for completing a random heroic dungeon', 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 8192, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 12340),
+(@ITEM_ENTRY+1, 10, 0, -1, 'Battleground Token', 54474, 3, 1, 0, 1, 0, 0, 0, 32767, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2147483647, 2147483647, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Transmogrification token awarded for winning a battleground', 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 8192, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 12340),
+(@ITEM_ENTRY+2, 10, 0, -1, '2v2 Arena Token', 54474, 3, 1, 0, 1, 0, 0, 0, 32767, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2147483647, 2147483647, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Transmogrification token awarded for winning a 2v2 arena match', 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 8192, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 12340),
+(@ITEM_ENTRY+3, 10, 0, -1, '3v3 Arena Token', 54474, 3, 1, 0, 1, 0, 0, 0, 32767, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2147483647, 2147483647, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Transmogrification token awarded for winning a 3v3 arena match', 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 8192, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 12340),
+(@ITEM_ENTRY+4, 10, 0, -1, 'Twink Token', 54474, 3, 1, 0, 1, 0, 0, 0, 32767, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2147483647, 2147483647, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2000, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, -1, 0, -1, 1, 'Transmogrification token awarded for winning a battleground as a twink', 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 8192, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, '', 0, 0, 0, 0, 0, 12340);
+
+DELETE FROM `creature` WHERE `id` = 190010;
+INSERT INTO `creature` VALUES
+(null, 190010, 1, 1, 1, 0, 0, 1562.77, -4352.28, 1.08, 5.76, 300, 0, 0, 12600, 0, 0, 0, 0, 0),
+(null, 190010, 0, 1, 1, 0, 0, -8819.65, 823.24, 98.83, 3.19, 300, 0, 0, 12600, 0, 0, 0, 0, 0);
