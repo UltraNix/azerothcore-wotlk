@@ -5623,6 +5623,21 @@ void Player::RepopAtGraveyard()
         return;
     }
 
+    if (GetMapId() == 530 && GetZoneId() == 3522 && GetAreaId() == 3785)
+    {
+        TeleportTo(530, 2296.352295f, 7023.231445f, 364.117401f, 2.836073f);
+        if (isDead())                                        // not send if alive, because it used in TeleportTo()
+        {
+            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);  // show spirit healer position on minimap
+            data << 530;
+            data << 2296.352295f;
+            data << 7023.231445f;
+            data << 364.117401f;
+            GetSession()->SendPacket(&data);
+        }
+        return;
+    }
+
     WorldSafeLocsEntry const* ClosestGrave = NULL;
 
     // Special handle for battleground maps
