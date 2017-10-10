@@ -340,6 +340,9 @@ struct boss_hadronoxAI : public BossAI
     // Safeguard to prevent Hadronox dying to NPCs
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
+        if (!attacker)
+            return;
+
         if (!attacker->IsControlledByPlayer() && me->HealthBelowPct(70))
         {
             if (me->HealthBelowPctDamaged(5, damage))
