@@ -7046,6 +7046,13 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 64042: // Lasser barrage right missile (Mimiron)
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_DEST_NEARBY_ENTRY;
+        /////////////////////////////////////////////
+        /////////////////// CUSTOM //////////////////
+        /////////////////////////////////////////////
+        case 581:    // Horn of the Winter Wolf
+        case 10788:  // Reins of the Leopard
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
