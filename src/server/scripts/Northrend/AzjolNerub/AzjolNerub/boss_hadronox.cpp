@@ -137,11 +137,7 @@ static const Position hadronoxStep[NUM_STEPS] =
 
 struct boss_hadronoxAI : public BossAI
 {
-    boss_hadronoxAI(Creature* creature) : BossAI(creature, DATA_HADRONOX_EVENT), _enteredCombat(false), _doorsWebbed(false), _lastPlayerCombatState(false), _step(0) 
-    { 
-        SetCombatMovement(true);
-        SummonCrusherPack(SUMMON_GROUP_CRUSHER_1);
-    }
+    boss_hadronoxAI(Creature* creature) : BossAI(creature, DATA_HADRONOX_EVENT), _enteredCombat(false), _doorsWebbed(false), _lastPlayerCombatState(false), _step(0) { }
 
     bool IsInCombatWithPlayer() const
     {
@@ -152,6 +148,29 @@ struct boss_hadronoxAI : public BossAI
                 if (target->IsControlledByPlayer())
                     return true;
         }
+        return false;
+    }
+
+    void Reset()
+    {
+        _Reset();
+        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 9.0f);
+        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 9.0f);
+        _enteredCombat = false;
+        _doorsWebbed = false;
+        _lastPlayerCombatState = false;
+        SetStep(0);
+        SummonCrusherPack(SUMMON_GROUP_CRUSHER_1);
+        SetCombatMovement(true);
+    }
+
+    bool AnyPlayerValid() const
+    {
+        Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+            if (me->GetDistance(itr->GetSource()) < 130.0f && itr->GetSource()->IsAlive() && !itr->GetSource()->IsGameMaster() && me->CanCreatureAttack(itr->GetSource()) && me->_CanDetectFeignDeathOf(itr->GetSource()))
+                return true;
+
         return false;
     }
 
@@ -208,6 +227,9 @@ struct boss_hadronoxAI : public BossAI
         if (!target->IsControlledByPlayer() && target->GetDistance(me->GetHomePosition()) > 20.0f)
             return false;
 
+        if (target->GetPositionZ() < 650.0f)
+            return false;
+
         return BossAI::CanAIAttack(target);
     }
 
@@ -262,17 +284,6 @@ struct boss_hadronoxAI : public BossAI
         _anubar.push_back(guid);
     }
 
-    void InitializeAI() override
-    {
-        BossAI::InitializeAI();
-        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 9.0f);
-        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 9.0f);
-        _enteredCombat = false;
-        _doorsWebbed = false;
-        _lastPlayerCombatState = false;
-        SetStep(0);
-    }
-
     void UpdateAI(uint32 diff) override
     {
         if (!UpdateVictim())
@@ -305,6 +316,9 @@ struct boss_hadronoxAI : public BossAI
                     events.Repeat(urand(10000, 15000));
                     break;
                 case EVENT_PLAYER_CHECK:
+                    if (!AnyPlayerValid())
+                        EnterEvadeMode();
+
                     if (IsInCombatWithPlayer() != _lastPlayerCombatState)
                     {
                         _lastPlayerCombatState = !_lastPlayerCombatState;
@@ -853,10 +867,23 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
             return ValidateSpellInfo({ _topSpellId, _bottomSpellId });
         }
 
+        int16 GetFirstTimer()
+        {
+            switch (m_scriptSpellId)
+            {
+                case 53035: // champion
+                    return 0;
+                case 53037: // fiend
+                    return 5000;
+                case 53036: // necromancer
+                    return 8000;
+            }
+        }
+
         void HandleApply(AuraEffect const* /*eff*/, AuraEffectHandleModes /*mode*/)
         {
             if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_0))
-                effect->SetPeriodicTimer(urand(2, 17));
+                effect->SetPeriodicTimer(GetFirstTimer());
         }
 
         void HandlePeriodic(AuraEffect const* /*eff*/)
@@ -877,6 +904,9 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
                     caster->CastSpell(caster, _topSpellId, true);
                 else
                     caster->CastSpell(caster, _bottomSpellId, true);
+
+                if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_0))
+                    effect->SetPeriodicTimer(15000);
             }
         }
 
@@ -924,6 +954,10 @@ class spell_hadronox_leeching_poison_AuraScript : public AuraScript
 
         if (GetTarget()->IsGuardian())
             return;
+
+        if (GetTarget()->GetTypeId() == TYPEID_UNIT)
+            if (GetTarget()->GetEntry() == 29153)
+                return;
 
         if (Unit* caster = GetCaster())
             caster->CastSpell(caster, SPELL_LEECH_POISON_HEAL, true);
