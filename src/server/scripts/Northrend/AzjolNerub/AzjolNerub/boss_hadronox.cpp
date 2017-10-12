@@ -139,14 +139,17 @@ struct boss_hadronoxAI : public BossAI
 {
     boss_hadronoxAI(Creature* creature) : BossAI(creature, DATA_HADRONOX_EVENT), _enteredCombat(false), _doorsWebbed(false), _lastPlayerCombatState(false), _step(0) { }
 
-    bool IsInCombatWithPlayer() const
+    bool IsInCombatWithPlayer() 
     {
         std::list<HostileReference*> const& refs = me->getThreatManager().getThreatList();
         for (HostileReference const* hostileRef : refs)
         {
             if (Unit const* target = hostileRef->getTarget())
                 if (target->IsControlledByPlayer())
+                {
+                    SetCombatMovement(true);
                     return true;
+                }
         }
         return false;
     }
@@ -161,7 +164,7 @@ struct boss_hadronoxAI : public BossAI
         _lastPlayerCombatState = false;
         SetStep(0);
         SummonCrusherPack(SUMMON_GROUP_CRUSHER_1);
-        SetCombatMovement(true);
+        SetCombatMovement(false);
     }
 
     bool AnyPlayerValid() const
@@ -202,7 +205,7 @@ struct boss_hadronoxAI : public BossAI
     {
         if (type != POINT_MOTION_TYPE)
             return;
-        SetCombatMovement(true);
+        //SetCombatMovement(true);
         AttackStart(me->GetVictim());
         if (_step < NUM_STEPS - 1)
             return;
@@ -223,10 +226,6 @@ struct boss_hadronoxAI : public BossAI
 
     bool CanAIAttack(Unit const* target) const override
     {
-        // Prevent Hadronox from going too far from her current home position
-        if (!target->IsControlledByPlayer() && target->GetDistance(me->GetHomePosition()) > 20.0f)
-            return false;
-
         if (target->GetPositionZ() < 650.0f)
             return false;
 
@@ -328,13 +327,6 @@ struct boss_hadronoxAI : public BossAI
                             {
                                 EnterEvadeMode();
                                 return;
-                            }
-                            // cancel current point movement if engaged by players
-                            if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
-                            {
-                                me->GetMotionMaster()->Clear();
-                                SetCombatMovement(true);
-                                AttackStart(me->GetVictim());
                             }
                         }
                         else // we are no longer in combat with players - reset the encounter
