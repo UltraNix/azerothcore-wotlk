@@ -7050,7 +7050,7 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////// CUSTOM //////////////////
         /////////////////////////////////////////////
         case 581:    // Horn of the Winter Wolf
-        case 10788:  // Reins of the Leopard
+            spellInfo->EffectMiscValue[EFFECT_0] = 90029;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
         }
