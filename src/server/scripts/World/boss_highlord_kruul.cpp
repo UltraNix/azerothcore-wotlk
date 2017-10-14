@@ -141,6 +141,7 @@ public:
             if (who && who->GetTypeId() == TYPEID_PLAYER)
                 playerRaidGUID = who->GetGUID();
 
+            events.Reset();
             events.ScheduleEvent(EVENT_SPELL_CLEAVE, 3000);
             events.ScheduleEvent(EVENT_SPELL_SHADOW_CRASH, 15000);
             events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT_VOLLEY, 21000);
