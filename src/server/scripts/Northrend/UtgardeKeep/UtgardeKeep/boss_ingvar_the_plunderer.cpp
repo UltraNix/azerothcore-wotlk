@@ -74,10 +74,7 @@ enum IngvarEvents
 
 struct boss_ingvar_the_plundererAI : BossAI
 {
-    explicit boss_ingvar_the_plundererAI(Creature* creature) : BossAI(creature, DATA_INGVAR) {}
-
-    uint64 _valkyrGUID;
-    uint64 _throwGUID;
+    explicit boss_ingvar_the_plundererAI(Creature* creature) : BossAI(creature, DATA_INGVAR), _valkyrGUID(0), _throwGUID(0), _said(false) {}
 
     bool IsInFirstPhase() const
     {
@@ -92,6 +89,7 @@ struct boss_ingvar_the_plundererAI : BossAI
     void Reset() override
     {
         _Reset();
+        _said = false;
         _valkyrGUID = 0;
         _throwGUID = 0;
         me->SetDisplayId(DISPLAYID_DEFAULT);
@@ -106,8 +104,9 @@ struct boss_ingvar_the_plundererAI : BossAI
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
     {
-        if (IsInFirstPhase() && damage >= me->GetHealth())
+        if (IsInFirstPhase() && !_said && damage >= me->GetHealth())
         {
+            _said = true;
             damage = 0;
             me->InterruptNonMeleeSpells(true);
             me->RemoveAllAuras();
@@ -342,6 +341,11 @@ struct boss_ingvar_the_plundererAI : BossAI
                 break;
         }
     }
+
+    private:
+        uint64 _valkyrGUID;
+        uint64 _throwGUID;
+        bool _said;
 };
 
 void AddSC_boss_ingvar_the_plunderer()
