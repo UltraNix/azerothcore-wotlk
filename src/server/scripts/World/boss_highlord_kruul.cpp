@@ -76,7 +76,6 @@ public:
                 LoadWaypointsFromWaypointData(pathId);
                 Start(true);
             }
-            onSpawnList = false;
         }
 
         EventMap events;
@@ -208,19 +207,14 @@ public:
  
         void RunEvent()
         {
-            if (RollZone() && !sCustomEventMgr->WasKruulSpawned(me->GetGUID()))
+            if (RollZone() && !sCustomEventMgr->KruulListCheck(me->GetGUID()))
             {
                 if (!me->GetMap()->IsGridLoaded(me->GetPositionX(), me->GetPositionY()))
                     me->GetMap()->LoadGrid(me->GetPositionX(), me->GetPositionY());
 
                 me->SetPhaseMask(1, true);
-                sCustomEventMgr->KruulList.insert(me->GetGUID());
+                sCustomEventMgr->KruulListInsert(me->GetGUID());
             }
-        }
-
-        bool WasSpawned(uint64 guid)
-        {
-            return sCustomEventMgr->KruulList.count(guid) != 0;
         }
 
         Unit* FindCrashTarget()
@@ -322,7 +316,6 @@ public:
 
         private:
             uint64 playerRaidGUID;
-            bool onSpawnList;
     };
 };
 

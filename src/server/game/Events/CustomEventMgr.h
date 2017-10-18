@@ -60,8 +60,8 @@ class CustomEventMgr
         std::string GetKruulAnnounceEN() const;
         bool   GetKruulEventState() const;
         void   SetKruulEventState(bool started) { KruulState = started; }
-        bool   WasKruulSpawned(uint64 guid) const;
-        KruulGuidSet KruulList;
+        void   KruulListInsert(uint64 guid);
+        bool   KruulListCheck(uint64 guid) const;
 
         ///////////////////////
         // Arena Autoflush
@@ -96,7 +96,9 @@ class CustomEventMgr
         ///////////////////////
         // Arena PvP Event 
         ///////////////////////
-        bool ArenaEventStatus = false;     
+        bool ArenaEventStatus = false;  
+    protected:
+        KruulGuidSet KruulList;
 };
 
 #define sCustomEventMgr CustomEventMgr::instance()

@@ -145,7 +145,8 @@ uint32 CustomEventMgr::GetKruulSpawnLoc() const { return KruulSpawnLoc; }
 std::string CustomEventMgr::GetKruulAnnouncePL() const { return "Highlord Kruul stapa po Azeroth. Czy znajda sie smialkowie ktorzy stawia mu czola?"; }
 std::string CustomEventMgr::GetKruulAnnounceEN() const { return "Highlord Kruul has appeared in Azeroth. Will you choose to face him?"; }
 bool CustomEventMgr::GetKruulEventState() const { return KruulState; }
-bool CustomEventMgr::WasKruulSpawned(uint64 guid) const { return KruulList.count(guid) != 0; }
+void CustomEventMgr::KruulListInsert(uint64 guid) { KruulList.insert(guid); }
+bool CustomEventMgr::KruulListCheck(uint64 guid) const { return KruulList.count(guid) != 0; }
 
 ///////////////////////
 // Arena Autoflush
