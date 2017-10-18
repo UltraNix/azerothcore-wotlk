@@ -88,6 +88,7 @@
 #include "WhoListCache.h"
 #include "AsyncAuctionListing.h"
 #include "SavingSystem.h"
+#include "CustomEventMgr.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1202,6 +1203,9 @@ void World::LoadConfigSettings(bool reload)
     SetWinnerMessage(sConfigMgr->GetStringDefault("BattleGroundReward.Message", "You have been awarded for winning the battleground."));
 
     m_bool_configs[CONFIG_ARENA_REWARD_ENABLE] = sConfigMgr->GetBoolDefault("ArenaReward.Enable", 0);
+    m_int_configs[CONFIG_ARENA_EVENT_DAY] = sConfigMgr->GetIntDefault("ArenaRewardEvent.Day", DAY_FRIDAY);
+    m_int_configs[CONFIG_ARENA_EVENT_HOUR] = sConfigMgr->GetIntDefault("ArenaRewardEvent.Hour", 15);
+    m_int_configs[CONFIG_ARENA_EVENT_MINUTE] = sConfigMgr->GetIntDefault("ArenaRewardEvent.Minute", 0);
     m_int_configs[CONFIG_ARENA_ITEM_REWARD_ID_2V2] = sConfigMgr->GetIntDefault("ArenaReward2v2.ItemID", 29434);
     m_int_configs[CONFIG_ARENA_ITEM_REWARD_ID_3V3] = sConfigMgr->GetIntDefault("ArenaReward3v3.ItemID", 29434);
     m_int_configs[CONFIG_ARENA_ITEM_REWARD_ID_5V5] = sConfigMgr->GetIntDefault("ArenaReward5v5.ItemID", 29434);
@@ -1253,7 +1257,11 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowOverwrite", true);
     m_bool_configs[CONFIG_FREE_DUAL_SPEC] = sConfigMgr->GetBoolDefault("FreeDualTalentSpecialization", false);
     m_bool_configs[CONFIG_ENABLE_MMAPS] = sConfigMgr->GetBoolDefault("MoveMaps.Enable", true);
-    m_bool_configs[CONFIG_KRULL_EVENT] = sConfigMgr->GetBoolDefault("KruulEvent.Enable", true);
+    m_bool_configs[CONFIG_KRUUL_EVENT] = sConfigMgr->GetBoolDefault("KruulEvent.Enable", true);
+    m_int_configs[CONFIG_KRUUL_EVENT_DAY] = sConfigMgr->GetIntDefault("KruulEvent.Day", DAY_SATURDAY);
+    m_int_configs[CONFIG_KRUUL_EVENT_HOUR] = sConfigMgr->GetIntDefault("KruulEvent.Hour", 14);
+    m_int_configs[CONFIG_KRUUL_EVENT_MINUTE] = sConfigMgr->GetIntDefault("KruulEvent.Minute", 30);
+
     MMAP::MMapFactory::InitializeDisabledMaps();
 
     
@@ -1918,43 +1926,7 @@ void World::SetInitialWorldSettings()
         sLog->SetLogDB(true);
     }
 
-    doneFlushing = false;              // @autoflush
-    eventAnnounce_arena = false;       // @pvpevent
-    eventAnnounce_kruul = false;       // @kruulevent
-    krull_spawn = false;               // @kruulevent
-    roll_kruul_location = urand(0, 8); // @kruulevent
-
-    // @kruulevent
-    switch (roll_kruul_location)
-    {
-        case 0:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Stonetalon Mountains and Redridge Mountains", sWorld->roll_kruul_location);
-            break;
-        case 1:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Thousand Needles and Badlands", sWorld->roll_kruul_location);
-            break;
-        case 2:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Winterspring and Wetlands", sWorld->roll_kruul_location);
-            break;
-        case 3:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Desolace and Lochmodan ", sWorld->roll_kruul_location);
-            break;
-        case 4:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Stonetalon Mountains and Lochmodan", sWorld->roll_kruul_location);
-            break;
-        case 5:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Thousand Needles and Wetlands", sWorld->roll_kruul_location);
-            break;
-        case 6:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Winterspring  and Redridge Mountains", sWorld->roll_kruul_location);
-            break;
-        case 7:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Desolace and Badlands", sWorld->roll_kruul_location);
-            break;
-        case 8:
-            sLog->outBasic("Kruul Event - next spawn at locations of roll: %u - Durotar and Elwynn Forest", sWorld->roll_kruul_location);
-            break;
-    }
+    sCustomEventMgr->InitCustomEventMgr();
 }
 
 void World::DetectDBCLang()
@@ -2048,13 +2020,6 @@ void World::LoadIp2nation()
 void World::Update(uint32 diff)
 {
     m_updateTime = diff;
-
-    ///////////////////////
-    // For custom things
-    ///////////////////////
-    time_t now = time(NULL);
-    tm* aTm = localtime(&now);
-    ///////////////////////
 
     if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE])
     {
@@ -2199,74 +2164,6 @@ void World::Update(uint32 diff)
         }
     }
 
-    // @autoflush
-    if (sWorld->getBoolConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE))
-    {
-        uint8 flush_day    = sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_DAY);
-        uint8 flush_hour   = sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_HOUR);
-        uint8 flush_minute = sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_MINUTE);
-
-        if (aTm->tm_wday == flush_day && aTm->tm_hour == flush_hour && aTm->tm_min == flush_minute && !doneFlushing)
-        {
-            doneFlushing = true; // sitdev: No need to overwrite since the false is return after world init and server is restarted once per week.
-            sArenaTeamMgr->DistributeArenaPoints();
-        }
-
-        if (aTm->tm_wday != flush_day && doneFlushing)
-            doneFlushing = false;
-    }
-
-    // @pvpevent
-    if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE))
-    {
-        ///////////////////////
-        // Arena Event announce
-        ///////////////////////
-        uint8 event_arena_day    = DAY_FRIDAY;
-        uint8 event_arena_hour   = 15;
-        uint8 event_arena_minute = 0;
-
-        std::string announce_arenaPL = "Event PvP wlasnie wystartowal! Do wygrania sa miedzy innymi epickie companiony oraz Swift Nether Drake - mount 310%";
-        std::string announce_arenaEN = "Event PvP has just launched! Play 2v2 or 3v3 and win fantastic rewards like epic companions or Swift Nether Drake - mount 310%.";
-
-        if (aTm->tm_wday == event_arena_day && aTm->tm_hour == event_arena_hour && aTm->tm_min == event_arena_minute && !eventAnnounce_arena)
-        {
-            eventAnnounce_arena = true;
-            sWorld->SendWorldText(LANG_AUTO_BROADCAST, announce_arenaPL.c_str());
-            sWorld->SendWorldText(LANG_AUTO_BROADCAST, announce_arenaEN.c_str());
-        }
-
-        if (aTm->tm_wday != event_arena_day && eventAnnounce_arena)
-            eventAnnounce_arena = false;
-    }
-
-    // @kruulevent
-    if (sWorld->getBoolConfig(CONFIG_KRULL_EVENT))
-    {
-        ///////////////////////
-        // Kruul Event announce
-        ///////////////////////
-        uint8 event_kruul_day    = DAY_SATURDAY;
-        uint8 event_kruul_hour   = 14;
-        uint8 event_kruul_minute = 30;
-
-        std::string announce_kruulPL = "Highlord Kruul stapa po Azeroth. Czy znajda sie smialkowie ktorzy stawia mu czola?";
-        std::string announce_kruulEN = "Highlord Kruul has appeared in Azeroth. Will you choose to face him?";
-
-        if (aTm->tm_wday == event_kruul_day && aTm->tm_hour == event_kruul_hour && aTm->tm_min == event_kruul_minute && !eventAnnounce_kruul)
-        {
-            eventAnnounce_kruul = true;
-            sWorld->SendWorldText(LANG_AUTO_BROADCAST, announce_kruulPL.c_str());
-            sWorld->SendWorldText(LANG_AUTO_BROADCAST, announce_kruulEN.c_str());
-
-            // allow to spawn kruul
-            krull_spawn = true;
-        }
-
-        if (aTm->tm_wday != event_kruul_day && eventAnnounce_kruul)
-            eventAnnounce_kruul = false;
-    }
-
     sBattlegroundMgr->Update(diff);
 
     sOutdoorPvPMgr->Update(diff);
@@ -2274,6 +2171,10 @@ void World::Update(uint32 diff)
     sBattlefieldMgr->Update(diff);
 
     sLFGMgr->Update(diff, 2); // pussywizard: handle created proposals
+
+    sCustomEventMgr->Update(diff, CUSTOM_EVENT_KRUUL);
+    sCustomEventMgr->Update(diff, CUSTOM_EVENT_FLUSH);
+    sCustomEventMgr->Update(diff, CUSTOM_EVENT_PVP);
 
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();

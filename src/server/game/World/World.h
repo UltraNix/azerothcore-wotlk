@@ -157,7 +157,7 @@ enum WorldBoolConfigs
     CONFIG_DUEL_MOD,
     CONFIG_DUEL_FULL_POWER,
     CONFIG_DUEL_CD_RESET,
-    CONFIG_KRULL_EVENT,
+    CONFIG_KRUUL_EVENT,
     CONFIG_SAVE_LOOT_SYSTEM,
     CONFIG_EXTRA_CHANCE_EVENT,
     CONFIG_HK_REWARDS_ENABLE,
@@ -354,6 +354,12 @@ enum WorldIntConfigs
     CONFIG_CROSSFACTION_RDF_MINLVL,
     CONFIG_CROSSFACTION_RDF_MAXLVL,
     CONFIG_AUTO_GLOBAL_GUID,
+    CONFIG_ARENA_EVENT_DAY,
+    CONFIG_ARENA_EVENT_HOUR,
+    CONFIG_ARENA_EVENT_MINUTE,
+    CONFIG_KRUUL_EVENT_DAY,
+    CONFIG_KRUUL_EVENT_HOUR,
+    CONFIG_KRUUL_EVENT_MINUTE,
 
     INT_CONFIG_VALUE_COUNT
 };
@@ -859,9 +865,6 @@ class World
         bool IsPhasedDuelsZone(uint32 zone) const { if (m_phasedDuelsZones.empty()) return true; return std::find(m_phasedDuelsZones.begin(), m_phasedDuelsZones.end(), zone) != m_phasedDuelsZones.end(); }
 
         bool PatchNotes(ContentPatches patchSince = PATCH_MIN, ContentPatches patchTo = PATCH_MAX) const; // Maczuga
-
-        uint8 roll_kruul_location; // @kruulevent
-        bool krull_spawn;          // @kruulevent
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -967,11 +970,6 @@ class World
 
         void ProcessQueryCallbacks();
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
-
-        // sitdev
-        bool doneFlushing;          // @autoflush
-        bool eventAnnounce_arena;   // @pvpevent 
-        bool eventAnnounce_kruul;   // @kruulevent
 
         std::list<uint32> m_phasedDuelsZones;
 }; 

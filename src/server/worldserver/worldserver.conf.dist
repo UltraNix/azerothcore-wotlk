@@ -2970,7 +2970,10 @@ BattleGroundReward.Message = "You have been awarded for winning the battleground
 #                     1 - (Enabled)
 
 ArenaReward.Enable = 0
-
+ArenaRewardEvent.Day = 5
+ArenaRewardEvent.Hour = 15
+ArenaRewardEvent.Minute = 0
+	
 #
 #    ArenaReward2v2.ItemID
 #        Description: Item characters will receive after winning arena
@@ -3172,6 +3175,9 @@ CurrentBuild = 12340
 #
 
 KruulEvent.Enable = 0
+KruulEvent.Day = 6
+KruulEvent.Hour = 14
+KruulEvent.Minute = 30
 
 #   DuelMod.Enable
 #       Description: Allows players cooldowns/mana/hp to reset before each duel.
