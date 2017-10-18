@@ -27,6 +27,7 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
   ../game/Bazaar/BazaarMgr.cpp
   ../game/Entities/Item/Transmogrification.cpp
+  ../game/Events/CustomEventMgr.cpp
 )
 
 if(SCRIPTS)
