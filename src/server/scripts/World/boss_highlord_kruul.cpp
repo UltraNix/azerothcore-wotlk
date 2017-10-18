@@ -76,6 +76,7 @@ public:
                 LoadWaypointsFromWaypointData(pathId);
                 Start(true);
             }
+            onSpawnList = false;
         }
 
         EventMap events;
@@ -160,9 +161,9 @@ public:
             events.ScheduleEvent(EVENT_SPELL_BERSERK, 600000);
         }
 
-        bool RollZone(uint32 zoneRolled)
+        bool RollZone()
         {
-            switch (zoneRolled)
+            switch (sCustomEventMgr->GetKruulSpawnLoc())
             {
                 case 0:
                     if (me->GetZoneId() == 406 || me->GetZoneId() == 44)
@@ -179,6 +180,7 @@ public:
                 case 3:
                     if (me->GetZoneId() == 405 || me->GetZoneId() == 38)
                         return true;
+                    break;
                 case 4:
                     if (me->GetZoneId() == 406 || me->GetZoneId() == 38)
                         return true;
@@ -198,28 +200,27 @@ public:
                 case 8:
                     if (me->GetZoneId() == 14 || me->GetZoneId() == 1519)
                         return true;
-                    break;
             }
 
             return false;
         }
 
+ 
         void RunEvent()
         {
-            time_t now = time(NULL);
-            tm* aTm = localtime(&now);
-
-            if (aTm->tm_wday == sCustomEventMgr->GetKruulDay() 
-                && aTm->tm_hour == sCustomEventMgr->GetKruulHour() 
-                && aTm->tm_min == sCustomEventMgr->GetKruulMinute() 
-                && !sCustomEventMgr->GetKruulScriptSpawn())
+            if (RollZone() && !sCustomEventMgr->WasKruulSpawned(me->GetGUID()))
             {
-                sCustomEventMgr->SetKruulScriptSpawn(true);
-                if (RollZone(sCustomEventMgr->GetKruulSpawnLoc()) && sCustomEventMgr->GetKruulScriptSpawn())
-                    me->SetPhaseMask(1, true);
-            } 
-            else if (aTm->tm_wday != sCustomEventMgr->GetKruulDay())
-                sCustomEventMgr->SetKruulScriptSpawn(false);
+                if (!me->GetMap()->IsGridLoaded(me->GetPositionX(), me->GetPositionY()))
+                    me->GetMap()->LoadGrid(me->GetPositionX(), me->GetPositionY());
+
+                me->SetPhaseMask(1, true);
+                sCustomEventMgr->KruulList.insert(me->GetGUID());
+            }
+        }
+
+        bool WasSpawned(uint64 guid)
+        {
+            return sCustomEventMgr->KruulList.count(guid) != 0;
         }
 
         Unit* FindCrashTarget()
@@ -241,9 +242,16 @@ public:
         {
             if (!UpdateVictim())
             {
-                if (sWorld->getBoolConfig(CONFIG_KRUUL_EVENT) && !sCustomEventMgr->GetKruulScriptSpawn() && sCustomEventMgr->GetKruulDay() && sCustomEventMgr->GetKruulHour() && sCustomEventMgr->GetKruulMinute())
-                    RunEvent();
-
+                if (sWorld->getBoolConfig(CONFIG_KRUUL_EVENT))
+                {
+                    time_t now = time(NULL);
+                    tm* aTm = localtime(&now);
+             
+                    if (aTm->tm_wday == sCustomEventMgr->GetKruulDay()
+                        && aTm->tm_hour == sCustomEventMgr->GetKruulHour()
+                        && aTm->tm_min >= sCustomEventMgr->GetKruulMinute())                  
+                        RunEvent();
+                }
                 return;
             }
 
@@ -314,6 +322,7 @@ public:
 
         private:
             uint64 playerRaidGUID;
+            bool onSpawnList;
     };
 };
 

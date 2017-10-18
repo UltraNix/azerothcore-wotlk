@@ -31,6 +31,8 @@ enum CustomEvents
     CUSTOM_EVENT_PVP   = 2
 };
 
+typedef std::unordered_set<uint64> KruulGuidSet;
+
 class CustomEventMgr
 {
     CustomEventMgr();
@@ -49,44 +51,44 @@ class CustomEventMgr
         ///////////////////////
         // Highlord Kruul
         ///////////////////////
-        uint32 GetKruulDay() const;
-        uint32 GetKruulHour() const;
-        uint32 GetKruulMinute() const;
+        int32 GetKruulDay() const;
+        int32 GetKruulHour() const;
+        int32 GetKruulMinute() const;
         uint32 GetKruulSpawnLoc() const;
         void   SetKruulSpawnLoc(uint32 location) { KruulSpawnLoc = location; }
         std::string GetKruulAnnouncePL() const;
         std::string GetKruulAnnounceEN() const;
-        bool   GetKruulSpawn() const;
-        void   SetKruulSpawn(bool spawn) { KruulSpawn = spawn; }
-        bool   GetKruulScriptSpawn() const;
-        void   SetKruulScriptSpawn(bool spawn) { KruulScriptSpawn = spawn; }
-
+        bool   GetKruulEventState() const;
+        void   SetKruulEventState(bool started) { KruulState = started; }
+        bool   WasKruulSpawned(uint64 guid) const;
+        KruulGuidSet KruulList;
 
         ///////////////////////
         // Arena Autoflush
         ///////////////////////
-        uint32 GetFlushDay() const;
-        uint32 GetFlushHour() const;
-        uint32 GetFlushMinute() const;
+        int32 GetFlushDay() const;
+        int32 GetFlushHour() const;
+        int32 GetFlushMinute() const;
         bool   GetFlushStatus() const;
         void   SetFlushStatus(bool flushed) { FlushStatus = flushed; }
+
         ///////////////////////
         // Arena PvP Event 
         ///////////////////////
-        uint32 GetArenaEventDay() const;
-        uint32 GetArenaEventHour() const;
-        uint32 GetArenaEventMinute() const;
+        int32 GetArenaEventDay() const;
+        int32 GetArenaEventHour() const;
+        int32 GetArenaEventMinute() const;
         std::string GetEventPvPAnnouncePL() const;
         std::string GetEventPvPAnnounceEN() const;
         bool GetArenaEventStatus() const;
         void SetArenaEventStatus(bool started) { ArenaEventStatus = started; }
+
     private:
         ///////////////////////
         // Highlord Kruul
         //////////////////////
         uint32 KruulSpawnLoc = 0;
-        bool KruulSpawn = false;
-        bool KruulScriptSpawn = false;
+        bool KruulState = false;
         ///////////////////////
         // Arena Autoflush
         ///////////////////////

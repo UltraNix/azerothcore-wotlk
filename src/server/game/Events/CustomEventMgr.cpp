@@ -30,6 +30,7 @@ CustomEventMgr::~CustomEventMgr() {}
 void CustomEventMgr::InitCustomEventMgr()
 {
     SetKruulSpawnLoc(urand(0, 8));
+    KruulList.clear();
 
     switch (GetKruulSpawnLoc())
     {
@@ -76,15 +77,18 @@ void CustomEventMgr::Update(uint32 diff, uint8 eventUpdate)
         {
             if (sWorld->getBoolConfig(CONFIG_KRUUL_EVENT))
             {
-                if (aTm->tm_wday == GetKruulDay() && aTm->tm_hour == GetKruulHour() && aTm->tm_min == GetKruulMinute() && !GetKruulSpawn())
+                if (aTm->tm_wday == GetKruulDay() && aTm->tm_hour == GetKruulHour() && aTm->tm_min == GetKruulMinute() && !GetKruulEventState())
                 {
-                    SetKruulSpawn(true);
+                    SetKruulEventState(true);
                     sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetKruulAnnouncePL().c_str());
                     sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetKruulAnnounceEN().c_str());
                 }
 
-                if (aTm->tm_wday != GetKruulDay() && GetKruulSpawn())
-                    SetKruulSpawn(false);
+                if (aTm->tm_wday != GetKruulDay() && GetKruulEventState())
+                {
+                    SetKruulEventState(false);
+                    KruulList.clear();
+                }
             }
 
         } 
@@ -133,31 +137,32 @@ void CustomEventMgr::Update(uint32 diff, uint8 eventUpdate)
 ///////////////////////
 // Highlord Kruul
 ///////////////////////
-uint32 CustomEventMgr::GetKruulDay() const { return uint32(sWorld->getIntConfig(CONFIG_KRUUL_EVENT_DAY)); }
-uint32 CustomEventMgr::GetKruulHour() const { return uint32(sWorld->getIntConfig(CONFIG_KRUUL_EVENT_HOUR)); }
-uint32 CustomEventMgr::GetKruulMinute() const { return uint32(sWorld->getIntConfig(CONFIG_KRUUL_EVENT_MINUTE)); }
+
+int32 CustomEventMgr::GetKruulDay() const { return uint32(sWorld->getIntConfig(CONFIG_KRUUL_EVENT_DAY)); }
+int32 CustomEventMgr::GetKruulHour() const { return uint32(sWorld->getIntConfig(CONFIG_KRUUL_EVENT_HOUR)); }
+int32 CustomEventMgr::GetKruulMinute() const { return uint32(sWorld->getIntConfig(CONFIG_KRUUL_EVENT_MINUTE)); }
 uint32 CustomEventMgr::GetKruulSpawnLoc() const { return KruulSpawnLoc; }
 std::string CustomEventMgr::GetKruulAnnouncePL() const { return "Highlord Kruul stapa po Azeroth. Czy znajda sie smialkowie ktorzy stawia mu czola?"; }
 std::string CustomEventMgr::GetKruulAnnounceEN() const { return "Highlord Kruul has appeared in Azeroth. Will you choose to face him?"; }
-bool CustomEventMgr::GetKruulSpawn() const { return KruulSpawn; }
-bool CustomEventMgr::GetKruulScriptSpawn() const { return KruulScriptSpawn; }
+bool CustomEventMgr::GetKruulEventState() const { return KruulState; }
+bool CustomEventMgr::WasKruulSpawned(uint64 guid) const { return KruulList.count(guid) != 0; }
 
 ///////////////////////
 // Arena Autoflush
 ///////////////////////
 
-uint32 CustomEventMgr::GetFlushDay() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_DAY)); }
-uint32 CustomEventMgr::GetFlushHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_HOUR)); }
-uint32 CustomEventMgr::GetFlushMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_MINUTE)); }
+int32 CustomEventMgr::GetFlushDay() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_DAY)); }
+int32 CustomEventMgr::GetFlushHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_HOUR)); }
+int32 CustomEventMgr::GetFlushMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_MINUTE)); }
 bool CustomEventMgr::GetFlushStatus() const { return FlushStatus; }
 
 ///////////////////////
 // Arena PvP Event 
 ///////////////////////
 
-uint32 CustomEventMgr::GetArenaEventDay() const {  return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_DAY)); }
-uint32 CustomEventMgr::GetArenaEventHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_HOUR)); }
-uint32 CustomEventMgr::GetArenaEventMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_MINUTE)); }
+int32 CustomEventMgr::GetArenaEventDay() const {  return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_DAY)); }
+int32 CustomEventMgr::GetArenaEventHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_HOUR)); }
+int32 CustomEventMgr::GetArenaEventMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_MINUTE)); }
 std::string CustomEventMgr::GetEventPvPAnnouncePL() const { return  "Event PvP wlasnie wystartowal! Do wygrania sa miedzy innymi epickie companiony oraz Swift Nether Drake - mount 310%"; }
 std::string CustomEventMgr::GetEventPvPAnnounceEN() const { return  "Event PvP has just launched! Play 2v2 or 3v3 and win fantastic rewards like epic companions or Swift Nether Drake - mount 310%."; }
 bool CustomEventMgr::GetArenaEventStatus() const { return ArenaEventStatus; }
