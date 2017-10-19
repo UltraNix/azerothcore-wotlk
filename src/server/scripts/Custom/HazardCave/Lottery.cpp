@@ -368,7 +368,7 @@ void Lottery::modifyLotteryPoints(Player *player, int32 amount)
             uint32 amountLC = lotteryCoins->Fetch()->GetUInt32();
             if (amount < 0) 
             {
-                if (abs(amount) > amountLC)
+                if (abs(amount) > int32(amountLC))
                     return;
                 else
                     LoginDatabase.PExecute("UPDATE account SET vp = %u WHERE id = %u", amountLC - uint32(abs(amount)), field[0].GetUInt32());
@@ -415,7 +415,7 @@ void Lottery::modifySunwellPoints(Player * player, int32 amount)
             uint32 amountSC = sunwellCoins->Fetch()->GetUInt32();
             if (amount < 0) 
             {
-                if (abs(amount) > amountSC)
+                if (abs(amount) > int32(amountSC))
                     return;
                 else 
                     LoginDatabase.PExecute("UPDATE account SET dp = %u WHERE id = %u", amountSC - uint32(abs(amount)), field[0].GetUInt32());
@@ -441,7 +441,7 @@ void Lottery::modifySunwellPoints(std::string name, int32 amount)
             uint32 amountSC = sunwellCoins->Fetch()->GetUInt32();
             if (amount < 0)
             {
-                if (abs(amount) > amountSC)
+                if (abs(amount) > int32(amountSC))
                     return;
                 else 
                     LoginDatabase.PExecute("UPDATE account SET dp = %u WHERE id = %u", amountSC - uint32(abs(amount)), field[0].GetUInt32());

@@ -1080,7 +1080,7 @@ PVOID pAddress)
         switch (basicType)
         {
             case btChar:
-                pszCurrBuffer += sprintf(pszCurrBuffer, " = \" %s\"", pAddress);
+                pszCurrBuffer += sprintf(pszCurrBuffer, " = \" %s\"", (char*)pAddress);
                 break;
             case btStdString:
                 pszCurrBuffer += sprintf(pszCurrBuffer, " = \" %s\"", static_cast<std::string*>(pAddress)->c_str());
@@ -1125,7 +1125,7 @@ PVOID pAddress)
                 else
                 {
     #if _WIN64
-                    pszCurrBuffer += sprintf(pszCurrBuffer, " = %I64X", (DWORD64*)pAddress);
+                    pszCurrBuffer += sprintf(pszCurrBuffer, " = %I64X", (DWORD64)pAddress);
     #else
                     pszCurrBuffer += sprintf(pszCurrBuffer, " = %X", (PDWORD)pAddress);
     #endif
@@ -1136,7 +1136,7 @@ PVOID pAddress)
     __except (EXCEPTION_EXECUTE_HANDLER)
     {
 #if _WIN64
-        pszCurrBuffer += sprintf(pszCurrBuffer, " <Unable to read memory> = %I64X", (DWORD64*)pAddress);
+        pszCurrBuffer += sprintf(pszCurrBuffer, " <Unable to read memory> = %I64X", (DWORD64)pAddress);
 #else
         pszCurrBuffer += sprintf(pszCurrBuffer, " <Unable to read memory> = %X", (PDWORD)pAddress);
 #endif

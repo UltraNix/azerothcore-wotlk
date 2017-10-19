@@ -859,9 +859,12 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
             return ValidateSpellInfo({ _topSpellId, _bottomSpellId });
         }
 
-        int16 GetFirstTimer()
+        int16 GetFirstTimer(uint32 effectId)
         {
-            switch (m_scriptSpellId)
+            if (!effectId)
+                return 0;
+
+            switch (effectId)
             {
                 case 53035: // champion
                     return 0;
@@ -875,7 +878,7 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
         void HandleApply(AuraEffect const* /*eff*/, AuraEffectHandleModes /*mode*/)
         {
             if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_0))
-                effect->SetPeriodicTimer(GetFirstTimer());
+                effect->SetPeriodicTimer(GetFirstTimer(effect->GetId()));
         }
 
         void HandlePeriodic(AuraEffect const* /*eff*/)

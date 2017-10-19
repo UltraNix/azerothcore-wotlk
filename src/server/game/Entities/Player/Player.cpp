@@ -19289,84 +19289,35 @@ void Player::SendRaidInfo()
     GetSession()->SendPacket(&data);
 }
 
+// Premium services
+inline const char* PremiumName(PremiumServiceTypes serviceId)
+{
+    switch (serviceId)
+    {
+        case 0: return "Teleport";
+        case 1: return "No Sickness";
+        case 2: return "Exp Boost";
+        case 3: return "No Durability";
+        case 4: return "Instant Flying";
+        case 5: return "Exp Boost X4";
+        default: 
+            return "Unknown";
+    }
+}
+
 void Player::SendPremiumInfo()
 {
     char buff[20];
-
-    bool isActiveTeleport   = GetSession()->IsPremiumServiceActive(PREMIUM_TELEPORT);
-    bool isActiveSickness   = GetSession()->IsPremiumServiceActive(PREMIUM_NO_RESSURECTION_SICKNESS);
-    bool isActiveExpBoost   = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
-    bool isActiveNoDurLoss  = GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS);
-    bool isActiveInstantFly = GetSession()->IsPremiumServiceActive(PREMIUM_INSTANT_FLIGHT_PATHS);
-    bool isActiveBoostX4    = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
-
-    if (isActiveTeleport)
+    for (uint8 i = 0; i < MAX_PREMIUM_SERVICES; i++)
     {
-        time_t now = GetSession()->GetPremiumService(PREMIUM_TELEPORT);
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Teleport' - is |cff00ff00Enabled|r and expire at: %s", buff);
-    }
-    else {
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Teleport' - is |cffff0000Disabled", buff);
-    }
-
-    if (isActiveSickness)
-    {
-        time_t now = GetSession()->GetPremiumService(PREMIUM_NO_RESSURECTION_SICKNESS);
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'No Sickness' - is |cff00ff00Enabled|r and expire at: %s", buff);
-    }
-    else {
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'No Sickness' - is |cffff0000Disabled");
-    }
-
-    if (isActiveExpBoost)
-    {
-        char buff[20];
-        time_t now = GetSession()->GetPremiumService(PREMIUM_EXP_BOOST);
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Exp Boost' - is |cff00ff00Enabled|r and expire at: %s", buff);
-    }
-    else {
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Exp Boost' - is |cffff0000Disabled");
-    }
-
-    if (isActiveBoostX4)
-    {
-        char buff[20];
-        time_t now = GetSession()->GetPremiumService(PREMIUM_EXP_BOOST_X4);
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Exp Boost X4' - is |cff00ff00Enabled|r and expire at: %s", buff);
-    }
-    else {
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Exp Boost X4' - is |cffff0000Disabled");
-    }
-
-
-    if (isActiveNoDurLoss)
-    {
-        time_t now = GetSession()->GetPremiumService(PREMIUM_NO_DURABILITY_LOSS);
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'No Durability' - is |cff00ff00Enabled|r and expire at: %s", buff);
-    }
-    else {
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'No Durability' - is |cffff0000Disabled");
-    }
-
-    if (isActiveInstantFly)
-    {
-        time_t now = GetSession()->GetPremiumService(PREMIUM_INSTANT_FLIGHT_PATHS);
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Instant Flying' - is |cff00ff00Enabled|r and expire at: %s", buff);
-    }
-    else {
-        ChatHandler(GetSession()).PSendSysMessage("Premium 'Instant Flying' - is |cffff0000Disabled");
+        if (GetSession()->IsPremiumServiceActive(PremiumServiceTypes(i)))
+        {
+            time_t now = GetSession()->GetPremiumService(PremiumServiceTypes(i));
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            ChatHandler(GetSession()).PSendSysMessage("Premium '%s' - is |cff00ff00Enabled|r and expire at: %s", PremiumName(PremiumServiceTypes(i)), buff);
+        }
+        else
+            ChatHandler(GetSession()).PSendSysMessage("Premium '%s' - is |cffff0000Disabled", PremiumName(PremiumServiceTypes(i)));
     }
 }
 
