@@ -19172,7 +19172,7 @@ void Player::_LoadSeasonalQuestStatus(PreparedQueryResult result)
         {
             Field* fields = result->Fetch();
             uint32 quest_id = fields[0].GetUInt32();
-            uint32 event_id = fields[1].GetUInt32();
+            uint16 event_id = fields[1].GetUInt16();
             Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
             if (!quest)
                 continue;
@@ -20116,10 +20116,10 @@ void Player::_SaveSeasonalQuestStatus(SQLTransaction& trans)
         {
             uint32 quest_id = (*itr);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHARACTER_SEASONALQUESTSTATUS);
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHARACTER_SEASONALQUESTSTATUS);
             stmt->setUInt32(0, GetGUIDLow());
             stmt->setUInt32(1, quest_id);
-            stmt->setUInt32(2, event_id);
+            stmt->setUInt16(2, event_id);
             trans->Append(stmt);
         }
     }
@@ -27228,11 +27228,11 @@ void Player::_LoadInstanceTimeRestrictions(PreparedQueryResult result)
 
 void Player::_LoadBrewOfTheMonth(PreparedQueryResult result)
 {
-    uint32 lastEventId = 0;
+    uint16 lastEventId = 0;
     if (result)
     {
         Field* fields = result->Fetch();
-        lastEventId = fields[0].GetUInt32();
+        lastEventId = fields[0].GetUInt16();
     }
 
     time_t curtime = time(NULL);
@@ -27260,7 +27260,7 @@ void Player::_LoadBrewOfTheMonth(PreparedQueryResult result)
         // Update Event Id
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_BREW_OF_THE_MONTH);
         stmt->setUInt32(0, GetGUIDLow());
-        stmt->setUInt32(1, uint32(eventId));
+        stmt->setUInt16(1, eventId);
         trans->Append(stmt);
 
         CharacterDatabase.CommitTransaction(trans);
