@@ -28,6 +28,8 @@
 
 // Bazaar Tax Rate 10%
 #define TAX_RATE 10
+// Account ID where characters are stored
+#define BAZAAR_ACCOUNT 1
 
 enum BazarAuctionTypes
 {

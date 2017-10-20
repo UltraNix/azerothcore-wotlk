@@ -587,8 +587,8 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetString();
-            auctionList[1] = fields[1].GetString();
+            auctionList[0] = fields[0].GetUInt32();
+            auctionList[1] = fields[1].GetUInt32();
             auctionList[2] = fields[2].GetString();
         }
 
@@ -618,8 +618,8 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetString();
-            auctionList[1] = fields[1].GetString();
+            auctionList[0] = fields[0].GetUInt32();
+            auctionList[1] = fields[1].GetUInt32();
         }
 
         std::string data = gold ? ("Accept Offer: " + auctionList[0] + "g for " + auctionList[1] + "sc") : ("Accept Offer: " + auctionList[1] + "sc for " + auctionList[0] + "g");
@@ -664,22 +664,22 @@ public:
     }
 };
 
-#define NPC_SLAVE_INTERVAL_YELL 600000
-#define NPC_SLAVE_INTERVAL_SAY 120000
-#define NPC_SLAVE_INTERVAL_SCENE 3600000
+#define NPC_SLAVE_INTERVAL_YELL   600000
+#define NPC_SLAVE_INTERVAL_SAY    120000
+#define NPC_SLAVE_INTERVAL_SCENE  3600000
 #define NPC_SLAVE_INTERVAL_ACTION 30000
 
 enum NpcSlaveEvents
 {
-    NPC_SLAVE_EVENT_SAY_GROUP_0 = 1,
-    NPC_SLAVE_EVENT_SAY_GROUP_1,
-    NPC_SLAVE_EVENT_SAY_GROUP_2,
-    NPC_SLAVE_EVENT_SAY_GROUP_3,
-    NPC_SLAVE_EVENT_SAY_GROUP_4,
-    NPC_SLAVE_EVENT_SAY_GROUP_5,
-    NPC_SLAVE_EVENT_ACTIVATE_SLAVE,
-    NPC_SLAVE_EVENT_SCENE,
-    NPC_SLAVE_EVENT_END_SCENE
+    NPC_SLAVE_EVENT_SAY_GROUP_0    = 1,
+    NPC_SLAVE_EVENT_SAY_GROUP_1    = 2,
+    NPC_SLAVE_EVENT_SAY_GROUP_2    = 3,
+    NPC_SLAVE_EVENT_SAY_GROUP_3    = 4,
+    NPC_SLAVE_EVENT_SAY_GROUP_4    = 5,
+    NPC_SLAVE_EVENT_SAY_GROUP_5    = 6,
+    NPC_SLAVE_EVENT_ACTIVATE_SLAVE = 7,
+    NPC_SLAVE_EVENT_SCENE          = 8,
+    NPC_SLAVE_EVENT_END_SCENE      = 9
 };
 
 enum NpcSlaveEntries
@@ -696,7 +696,7 @@ enum NpcSlaveEntries
     NPC_SLAVE_ENTRY_9 = 90022,
 
     NPC_SLAVE_ENTRY_VALAK = 90015,
-    NPC_SLAVE_ENTRY_ZORK = 90023,
+    NPC_SLAVE_ENTRY_ZORK  = 90023
 };
 
 class npc_slaveAI : public CreatureAI
@@ -732,10 +732,11 @@ public:
 
     void UpdateAI(uint32 diff) override
     {
-        //check action interval
+        // Check action interval
         if (actionInterval < diff)
             actionInterval = 0;
-        else actionInterval -= diff;
+        else 
+            actionInterval -= diff;
 
         events.Update(diff);
 
@@ -745,31 +746,30 @@ public:
             {
                 switch (eventId)
                 {
-                case NPC_SLAVE_EVENT_SAY_GROUP_0:
-                case NPC_SLAVE_EVENT_SAY_GROUP_1:
-                    if(creatureTextEntry != NPC_SLAVE_ENTRY_0)
-                        events.RescheduleEvent(eventId, GetIntervalFor(eventId));
-                    if (isEventInAction)
+                    case NPC_SLAVE_EVENT_SAY_GROUP_0:
+                    case NPC_SLAVE_EVENT_SAY_GROUP_1:
+                        if (creatureTextEntry != NPC_SLAVE_ENTRY_0)
+                            events.RescheduleEvent(eventId, GetIntervalFor(eventId));
+                        if (isEventInAction)
+                            break;
+                    case NPC_SLAVE_EVENT_SAY_GROUP_2:
+                    case NPC_SLAVE_EVENT_SAY_GROUP_3:
+                    case NPC_SLAVE_EVENT_SAY_GROUP_4:
+                    case NPC_SLAVE_EVENT_SAY_GROUP_5:
+                        ExecuteSay(eventId - 1);
                         break;
-
-                case NPC_SLAVE_EVENT_SAY_GROUP_2:
-                case NPC_SLAVE_EVENT_SAY_GROUP_3:
-                case NPC_SLAVE_EVENT_SAY_GROUP_4:
-                case NPC_SLAVE_EVENT_SAY_GROUP_5:
-                    ExecuteSay(eventId - 1);
-                    break;
-                case NPC_SLAVE_EVENT_ACTIVATE_SLAVE:
-                    if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
-                        slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, 10);
-                    events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SAY);
-                    break;
-                case NPC_SLAVE_EVENT_SCENE:
-                    ExecuteScene();
-                    events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SCENE);
-                    break;
-                case NPC_SLAVE_EVENT_END_SCENE:
-                    isEventInAction = false;
-                    break;
+                    case NPC_SLAVE_EVENT_ACTIVATE_SLAVE:
+                        if (npc_slaveAI* slaveAI = GetRandomSlaveAI())
+                            slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_0, 10);
+                        events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SAY);
+                        break;
+                    case NPC_SLAVE_EVENT_SCENE:
+                        ExecuteScene();
+                        events.RescheduleEvent(eventId, NPC_SLAVE_INTERVAL_SCENE);
+                        break;
+                    case NPC_SLAVE_EVENT_END_SCENE:
+                        isEventInAction = false;
+                        break;
                 }
 
                 actionInterval = NPC_SLAVE_INTERVAL_ACTION;
@@ -790,61 +790,69 @@ public:
 
     npc_slaveAI* GetRandomSlaveAI()
     {
-        uint32 slaveDB_GUID;
-        uint32 slaveId;
+        uint32 slaveDB_GUID = 0;
 
-        if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
-            slaveDB_GUID = urand(250012, 250016);
-        else if (creatureTextEntry == NPC_SLAVE_ENTRY_VALAK)
-            slaveDB_GUID = urand(250000, 250004);
-        else return NULL;
+        switch (creatureTextEntry)
+        {
+            case NPC_SLAVE_ENTRY_ZORK:
+                slaveDB_GUID = urand(250012, 250016);
+                break;
+            case NPC_SLAVE_ENTRY_VALAK:
+                slaveDB_GUID = urand(250000, 250004);
+                break;
+            default:
+                return nullptr;
+        }
 
-        QueryResult res = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
+        QueryResult result = WorldDatabase.PQuery("SELECT `id` FROM `creature` WHERE `guid` = %u", slaveDB_GUID);
 
-        if (!res)
-            return NULL;
+        if (!result)
+            return nullptr;
 
-        slaveId = res->operator[](0).GetUInt32();
-
+        uint32 slaveId   = (*result)[0].GetUInt32();
         uint64 slaveGUID = MAKE_NEW_GUID(slaveDB_GUID, slaveId, HIGHGUID_UNIT);
 
         Creature* slave = ObjectAccessor::GetCreature(*me, slaveGUID);
 
         if (!slave)
-            return NULL;
+            return nullptr;
 
         CreatureAI* c_slaveAI = slave->AI();
 
         if (!c_slaveAI || slave->GetScriptName() != "npc_slave_slave")
-            return NULL;
+            return nullptr;
 
-        //should be safe, npc_slave_slave always adds npc_slaveAI as AI
+        // Should be safe, npc_slave_slave always adds npc_slaveAI as AI
         return dynamic_cast<npc_slaveAI*>(c_slaveAI);
     }
 
     void ExecuteSay(uint32 group)
     {        
-        QueryResult res = WorldDatabase.PQuery("SELECT `text`, `type` FROM `creature_text` WHERE entry = %u AND groupid = %u", creatureTextEntry, group);
+        QueryResult result = WorldDatabase.PQuery("SELECT `text`, `type` FROM `creature_text` WHERE entry = %u AND groupid = %u", creatureTextEntry, group);
 
-        if (res)
+        if (!result)
+            return;
+
+        uint32 index = urand(0, result->GetRowCount() - 1);
+
+        while (index-- != 0)
+            result->NextRow();
+         
+        Field* fields = result->Fetch();
+        std::string text = fields[0].GetString();
+        uint16 textType  = fields[1].GetUInt16();
+
+        switch (textType)
         {
-            uint32 index = urand(0, res->GetRowCount() - 1);
-
-            while (index-- != 0)
-                res->NextRow();
-
-            Field* f = res->Fetch();
-
-            const char* text = f[0].GetCString();
-
-            uint16 textType = f[1].GetInt16();
-
-            if (textType == 12)
-                me->MonsterSay(text, LANG_UNIVERSAL, 0);
-            else if (textType == 14)
-                me->MonsterYell(text, LANG_UNIVERSAL, 0);
-            else if (textType == 16)
-                me->MonsterTextEmote(text, 0, false);
+            case 12:
+                me->MonsterSay(text.c_str(), LANG_UNIVERSAL, 0);
+                break;
+            case 14:
+                me->MonsterYell(text.c_str(), LANG_UNIVERSAL, 0);
+                break;
+            case 16:
+                me->MonsterTextEmote(text.c_str(), 0, false);
+                break;
         }
     }
 
@@ -854,20 +862,20 @@ public:
         {
             if (creatureTextEntry == NPC_SLAVE_ENTRY_ZORK)
             {
-                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000); // S: If you let us out, we’ll pay you! We have gold!
-                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000); // Z: Don’t bother, you mercenary scum. 
-                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); //S: I’ll give everything…
-                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000); // Z: laughs. 
-                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000); // Z: You surely would.
-                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); //S: looks at Zork in silence.
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 1000);  // S: If you let us out, we’ll pay you! We have gold!
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 6000);     // Z: Don’t bother, you mercenary scum. 
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 11000); // S: I’ll give everything…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_3, 16000);    // Z: laughs. 
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 20000);    // Z: You surely would.
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_4, 25000); // S: looks at Zork in silence.
 
                 SetEventInAction(30000);
                 slaveAI->SetEventInAction(30000);
             }
-            else //VALAK
+            else // Valak
             {
-                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000); // S: If you let us out, we…
-                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000); // V: Shut your mouth, maggot, or I will knock out your teeth!
+                slaveAI->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_5, 1000);  // S: If you let us out, we…
+                this->AddEvent(NPC_SLAVE_EVENT_SAY_GROUP_2, 3000);     // V: Shut your mouth, maggot, or I will knock out your teeth!
 
                 SetEventInAction(10000);
                 slaveAI->SetEventInAction(10000);
@@ -886,15 +894,12 @@ public:
         isEventInAction = true;
     }
 
-private:
-    // Monich: used for making a pause between says and yells - its better when they are not executed together
-    uint32 actionInterval;
-
-    uint32 creatureTextEntry;
-
-    bool isEventInAction;
-
-    EventMap events;
+    private:
+        // Monich: used for making a pause between says and yells - its better when they are not executed together
+        uint32 actionInterval;
+        uint32 creatureTextEntry;
+        bool isEventInAction;
+        EventMap events;
 };
 
 enum NpcSlaveActions
@@ -936,8 +941,9 @@ public:
     {
         DisplayMainMenu(player, creature);
         ChatHandler handler(player->GetSession());
-        //handler.PSendSysMessage("Tip: Prat lets you copy links not text, http:// and will turn it into a link.");
-        handler.PSendSysMessage("Tip: Pobierz addon prat, a swobodnie dostaniesz kopie linku do armory!");
+
+        handler.PSendSysMessage("Tip: Prat lets you copy links not text, http:// and will turn it into a link.");
+        //handler.PSendSysMessage("Tip: Pobierz addon prat, a swobodnie dostaniesz kopie linku do armory!");
         return true;
     }
 
@@ -1196,7 +1202,7 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetString();
+            auctionList[0] = fields[0].GetUInt32();
             auctionList[1] = fields[1].GetString();
         }
 
@@ -1250,7 +1256,7 @@ public:
         {
             Field *fields = result->Fetch();
             name = fields[0].GetString();
-            avg = fields[1].GetUInt32();
+            avg = fields[1].GetUInt16();
         }
 
         ChatHandler handler(player->GetSession());
@@ -1619,7 +1625,7 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetString();
+            auctionList[0] = fields[0].GetUInt32();
             auctionList[1] = fields[1].GetString();
         }
 
