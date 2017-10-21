@@ -251,7 +251,7 @@ public:
             return false;
         }
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_NINJA_LOOTER);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_NINJA_LOOTER);
         stmt->setUInt8(0, 1);
         stmt->setUInt32(1, ninjaGuid);
         CharacterDatabase.Execute(stmt);
@@ -292,7 +292,7 @@ public:
             return false;
         }
 
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_NINJA_LOOTER);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_NINJA_LOOTER);
         stmt->setUInt8(0, 0);
         stmt->setUInt32(1, ninjaGuid);
         CharacterDatabase.Execute(stmt);
