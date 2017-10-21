@@ -587,8 +587,8 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetUInt32();
-            auctionList[1] = fields[1].GetUInt32();
+            auctionList[0] = fields[0].GetString();
+            auctionList[1] = fields[1].GetString();
             auctionList[2] = fields[2].GetString();
         }
 
@@ -618,8 +618,8 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetUInt32();
-            auctionList[1] = fields[1].GetUInt32();
+            auctionList[0] = fields[0].GetString();
+            auctionList[1] = fields[1].GetString();
         }
 
         std::string data = gold ? ("Accept Offer: " + auctionList[0] + "g for " + auctionList[1] + "sc") : ("Accept Offer: " + auctionList[1] + "sc for " + auctionList[0] + "g");
@@ -1202,7 +1202,7 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetUInt32();
+            auctionList[0] = fields[0].GetString();
             auctionList[1] = fields[1].GetString();
         }
 
@@ -1625,7 +1625,7 @@ public:
         {
             Field *fields = result->Fetch();
 
-            auctionList[0] = fields[0].GetUInt32();
+            auctionList[0] = fields[0].GetString();
             auctionList[1] = fields[1].GetString();
         }
 
