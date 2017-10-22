@@ -20628,7 +20628,7 @@ void Player::UpdateAfkReport(time_t currTime)
         else if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
             ToggleAFK();
         else if(isMoving())
-            m_bgData.bgAfkReportedTimer = currTime + 1 * MINUTE;
+            m_bgData.bgAfkReportedTimer = currTime + 2 * MINUTE;
     }
 }
 
