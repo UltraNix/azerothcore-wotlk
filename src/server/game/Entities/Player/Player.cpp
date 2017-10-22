@@ -20623,10 +20623,12 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 ///checks the 15 afk reports per 5 minutes limit
 void Player::UpdateAfkReport(time_t currTime)
 { 
-    if (m_bgData.bgAfkReportedTimer <= currTime)
-    {
-        m_bgData.bgAfkReportedCount = 0;
-        m_bgData.bgAfkReportedTimer = currTime+5*MINUTE;
+    if (InBattleground()) {
+        if (!GetBattleground()->GetStartDelayTime()) return;
+        else if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
+            ToggleAFK();
+        else if(isMoving())
+            m_bgData.bgAfkReportedTimer = currTime + 1 * MINUTE;
     }
 }
 
