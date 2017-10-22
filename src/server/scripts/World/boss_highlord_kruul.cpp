@@ -1,5 +1,19 @@
 /*
-REWRITTEN FROM SCRATCH BY SITDEV, IT OWNS NOW!
+* Copyright (C)
+* Copyright (C)
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "ObjectMgr.h"
@@ -14,6 +28,7 @@ REWRITTEN FROM SCRATCH BY SITDEV, IT OWNS NOW!
 #include "Group.h"
 #include "Language.h"
 #include "ScriptedEscortAI.h"
+#include "CustomEventMgr.h"
 
 enum Spells
 {
@@ -30,13 +45,13 @@ enum Spells
 
 enum Events
 {
-    EVENT_SPELL_CLEAVE             = 1,
-    EVENT_SPELL_SHADOW_CRASH       = 2,
-    EVENT_SPELL_SHADOW_BOLT_VOLLEY = 3,
-    EVENT_SPELL_THUNDER_CLAP       = 4,
-    EVENT_SPELL_TWISTED_REFLECTION = 5,
-    EVENT_SPELL_VOID_BOLT          = 6,
-    EVENT_SPELL_BERSERK            = 7,
+    EVENT_SPELL_CLEAVE                = 1,
+    EVENT_SPELL_SHADOW_CRASH          = 2,
+    EVENT_SPELL_SHADOW_BOLT_VOLLEY    = 3,
+    EVENT_SPELL_THUNDER_CLAP          = 4,
+    EVENT_SPELL_TWISTED_REFLECTION    = 5,
+    EVENT_SPELL_VOID_BOLT             = 6,
+    EVENT_SPELL_BERSERK               = 7
 };
 
 
@@ -55,9 +70,7 @@ public:
     {
         boss_highlord_kruulAI(Creature *c) : npc_escortAI(c) 
         {
-            eventStarted = false; 
-
-            //waypoints
+            // Waypoints
             if (uint32 pathId = GetPathId())
             {
                 LoadWaypointsFromWaypointData(pathId);
@@ -66,38 +79,35 @@ public:
         }
 
         EventMap events;
-        bool doneAnnounce;
-        bool eventStarted;
-
+        
         void Reset()
         {
             events.Reset();
             playerRaidGUID = 0;
-
         }
 
         uint32 GetPathId()
         {
             switch (me->GetZoneId())
             {
-            case 3:
-                return 999994;
-            case 11:
-                return 999993;
-            case 38:
-                return 999992;
-            case 44:
-                return 999999;
-            case 400:
-                return 999997;
-            case 405:
-                return 999995;
-            case 406:
-                return 999998;
-            case 618:
-                return 999996;
-            default:
-                return 0;
+                case 3:
+                    return 999994;
+                case 11:
+                    return 999993;
+                case 38:
+                    return 999992;
+                case 44:
+                    return 999999;
+                case 400:
+                    return 999997;
+                case 405:
+                    return 999995;
+                case 406:
+                    return 999998;
+                case 618:
+                    return 999996;
+                default:
+                    return 0;
             }
         }
 
@@ -134,14 +144,13 @@ public:
             }
         }
 
-        void JustDied(Unit* Killer) { me->MonsterYell("Ha! This place is not yet worthy of my infliction.", LANG_UNIVERSAL, 0); }
+        void JustDied(Unit* /*Killer*/) { me->MonsterYell("Ha! This place is not yet worthy of my infliction.", LANG_UNIVERSAL, 0); }
 
-        void EnterCombat(Unit *who)
+        void EnterCombat(Unit* who)
         {
             if (who && who->GetTypeId() == TYPEID_PLAYER)
                 playerRaidGUID = who->GetGUID();
 
-            events.Reset();
             events.ScheduleEvent(EVENT_SPELL_CLEAVE, 3000);
             events.ScheduleEvent(EVENT_SPELL_SHADOW_CRASH, 15000);
             events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT_VOLLEY, 21000);
@@ -151,9 +160,9 @@ public:
             events.ScheduleEvent(EVENT_SPELL_BERSERK, 600000);
         }
 
-        bool RollZone(uint8 roll)
+        bool RollZone()
         {
-            switch (roll)
+            switch (sCustomEventMgr->GetKruulSpawnLoc())
             {
                 case 0:
                     if (me->GetZoneId() == 406 || me->GetZoneId() == 44)
@@ -170,6 +179,7 @@ public:
                 case 3:
                     if (me->GetZoneId() == 405 || me->GetZoneId() == 38)
                         return true;
+                    break;
                 case 4:
                     if (me->GetZoneId() == 406 || me->GetZoneId() == 38)
                         return true;
@@ -189,30 +199,22 @@ public:
                 case 8:
                     if (me->GetZoneId() == 14 || me->GetZoneId() == 1519)
                         return true;
-                    break;
             }
 
             return false;
         }
 
+ 
         void RunEvent()
         {
-            time_t now = time(NULL);
-            tm* aTm = localtime(&now);
-
-            uint8 event_kruul_day = DAY_SATURDAY;
-            uint8 event_kruul_hour = 14;
-            uint8 event_kruul_minute = 30;
-
-            if (aTm->tm_wday == event_kruul_day && aTm->tm_hour == event_kruul_hour && aTm->tm_min == event_kruul_minute && !eventStarted)
+            if (RollZone() && !sCustomEventMgr->KruulListCheck(me->GetGUID()))
             {
-                eventStarted = true;
+                if (!me->GetMap()->IsGridLoaded(me->GetPositionX(), me->GetPositionY()))
+                    me->GetMap()->LoadGrid(me->GetPositionX(), me->GetPositionY());
 
-                if (RollZone(sWorld->roll_kruul_location) && sWorld->krull_spawn == true)
-                    me->SetPhaseMask(1, true);
-            } 
-            else if (aTm->tm_wday != event_kruul_day)
-                eventStarted = false;
+                me->SetPhaseMask(1, true);
+                sCustomEventMgr->KruulListInsert(me->GetGUID());
+            }
         }
 
         Unit* FindCrashTarget()
@@ -234,13 +236,16 @@ public:
         {
             if (!UpdateVictim())
             {
-                if (!eventStarted)
+                if (sWorld->getBoolConfig(CONFIG_KRUUL_EVENT))
                 {
-                    if (sWorld->getBoolConfig(CONFIG_KRULL_EVENT))
+                    time_t now = time(NULL);
+                    tm* aTm = localtime(&now);
+             
+                    if (aTm->tm_wday == sCustomEventMgr->GetKruulDay()
+                        && aTm->tm_hour == sCustomEventMgr->GetKruulHour()
+                        && aTm->tm_min >= sCustomEventMgr->GetKruulMinute())                  
                         RunEvent();
                 }
-                else events.Reset();
-
                 return;
             }
 
@@ -248,50 +253,59 @@ public:
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            while(uint32 eventId = events.ExecuteEvent())
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
-                case EVENT_SPELL_CLEAVE:
-                    me->CastSpell(me->GetVictim(), SPELL_CLEAVE, false);
-                    events.Repeat(5000);   
-                    break;
-                case EVENT_SPELL_SHADOW_CRASH:
-                {
-                    events.Repeat(15000);
-
-                    if (Unit* target = FindCrashTarget())
+                    case EVENT_SPELL_CLEAVE:
                     {
-                        me->SetUInt64Value(UNIT_FIELD_TARGET, target->GetGUID());
-                        me->CastSpell(target, SPELL_SHADOW_CRASH, false);
+                        me->CastSpell(me->GetVictim(), SPELL_CLEAVE, false);
+                        events.Repeat(5000);
+                        break;
                     }
+                    case EVENT_SPELL_SHADOW_CRASH:
+                    {
+                        events.Repeat(15000);
 
-                } break;
-                case EVENT_SPELL_SHADOW_BOLT_VOLLEY:
-                    me->CastSpell(me, SPELL_SHADOW_BOLT_VOLLEY, false);
-                    events.Repeat(21000);
-                    break;
-                case EVENT_SPELL_THUNDER_CLAP:
-                {
-                    int32 dmg = urand(7000, 7500);
-                    me->CastCustomSpell(me, SPELL_THUNDER_CLAP, &dmg, NULL, NULL, false);
-                    events.Repeat(10000);
-
-                } break;
-                case EVENT_SPELL_TWISTED_REFLECTION:
-                    me->CastSpell(me->GetVictim(), SPELL_TWISTED_REFLECTION, false);
-                    events.Repeat(30000);
-                    break;
-                case EVENT_SPELL_VOID_BOLT:
-                {
-                    int32 dmg = urand(14800, 15200);
-                    me->CastCustomSpell(me->GetVictim(), SPELL_VOID_BOLT, &dmg, NULL, NULL, false);
-                    events.Repeat(10000);
-
-                }  break;
-                case EVENT_SPELL_BERSERK:
-                    me->CastSpell(me, SPELL_BERSERK, false);
-                    break;
+                        if (Unit* target = FindCrashTarget())
+                        {
+                            me->SetUInt64Value(UNIT_FIELD_TARGET, target->GetGUID());
+                            me->CastSpell(target, SPELL_SHADOW_CRASH, false);
+                        }
+                        break;
+                    }
+                    case EVENT_SPELL_SHADOW_BOLT_VOLLEY:
+                    {
+                        me->CastSpell(me, SPELL_SHADOW_BOLT_VOLLEY, false);
+                        events.Repeat(21000);
+                        break;
+                    }
+                    case EVENT_SPELL_THUNDER_CLAP:
+                    {
+                        int32 dmg = urand(7000, 7500);
+                        me->CastCustomSpell(me, SPELL_THUNDER_CLAP, &dmg, NULL, NULL, false);
+                        events.Repeat(10000);
+                        break;
+                    }
+                    case EVENT_SPELL_TWISTED_REFLECTION:
+                    {
+                        me->CastSpell(me->GetVictim(), SPELL_TWISTED_REFLECTION, false);
+                        events.Repeat(30000);
+                        break;
+                    }
+                    case EVENT_SPELL_VOID_BOLT:
+                    {
+                        int32 dmg = urand(14800, 15200);
+                        me->CastCustomSpell(me->GetVictim(), SPELL_VOID_BOLT, &dmg, NULL, NULL, false);
+                        events.Repeat(10000);
+                        break;
+                    } 
+                    case EVENT_SPELL_BERSERK:
+                    {
+                        me->CastSpell(me, SPELL_BERSERK, false);
+                        break;
+                    }
                 }
             }
 
@@ -299,8 +313,9 @@ public:
         }
 
         void WaypointReached(uint32 id) {}
-    private:
-        uint64 playerRaidGUID;
+
+        private:
+            uint64 playerRaidGUID;
     };
 };
 

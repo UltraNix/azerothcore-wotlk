@@ -610,9 +610,9 @@ uint32 ArenaTeam::GetAverageMMR(Group* group) const
         if (!group->IsMember(itr->Guid))
             continue;
 
-        //Monich: MMR Abuse
+        // Monich: MMR Abuse
         uint16 rating = itr->MatchMakerRating;
-        if (GetRating() > rating + MMR_ABUSE_MAX_DIFFERENCE)
+        if (int32(GetRating()) > rating + MMR_ABUSE_MAX_DIFFERENCE)
             rating = GetRating();
 
         matchMakerRating += rating;

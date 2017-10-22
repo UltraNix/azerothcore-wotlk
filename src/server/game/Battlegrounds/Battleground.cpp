@@ -966,7 +966,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                     ChatHandler(player->GetSession()).PSendSysMessage(winnerMessage.c_str());
             }
 
-            // @pvpevent
+            // @TODO: Move this to CustomEventMgr
             if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE) && isArena() && isRated())
             {
                 time_t now = time(NULL);
