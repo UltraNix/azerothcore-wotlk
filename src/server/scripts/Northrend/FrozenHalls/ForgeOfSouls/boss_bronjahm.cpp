@@ -381,6 +381,29 @@ public:
     }
 };
 
+class spell_bronjahm_corrupt_soul_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_bronjahm_corrupt_soul_AuraScript)
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_CONSUME_SOUL,  });
+    }
+
+    void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+        if (removeMode != AURA_REMOVE_BY_EXPIRE)
+            return;
+
+        GetTarget()->CastSpell(GetTarget(), 68848, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_bronjahm_corrupt_soul_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
 
 void AddSC_boss_bronjahm()
 {
@@ -391,4 +414,5 @@ void AddSC_boss_bronjahm()
     new spell_bronjahm_soulstorm_channel_ooc();
     new spell_bronjahm_soulstorm_visual();
     new spell_bronjahm_soulstorm_targeting();
+    new AuraScriptLoaderEx<spell_bronjahm_corrupt_soul_AuraScript>("spell_bronjahm_corrupt_soul");
 }
