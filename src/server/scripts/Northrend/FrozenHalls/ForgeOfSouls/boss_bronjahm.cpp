@@ -27,6 +27,7 @@ enum eSpells
     SPELL_FEAR                        = 68950,
     SPELL_MAGICS_BANE                = 68793,
     SPELL_CORRUPT_SOUL                = 68839,
+    SPELL_KNOCK_DOWN                 = 68848,
     SPELL_CONSUME_SOUL                = 68861,
     //SPELL_CONSUME_SOUL_HEAL        = 68858,
 
@@ -387,7 +388,7 @@ class spell_bronjahm_corrupt_soul_AuraScript : public AuraScript
 
     bool Validate(SpellInfo const* /*spellInfo*/) override
     {
-        return ValidateSpellInfo({ SPELL_CONSUME_SOUL,  });
+        return ValidateSpellInfo({ SPELL_CONSUME_SOUL, SPELL_KNOCK_DOWN });
     }
 
     void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -396,7 +397,7 @@ class spell_bronjahm_corrupt_soul_AuraScript : public AuraScript
         if (removeMode != AURA_REMOVE_BY_EXPIRE)
             return;
 
-        GetTarget()->CastSpell(GetTarget(), 68848, true);
+        GetTarget()->CastSpell(GetTarget(), SPELL_KNOCK_DOWN, true);
     }
 
     void Register() override
