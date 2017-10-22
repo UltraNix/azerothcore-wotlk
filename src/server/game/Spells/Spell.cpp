@@ -5397,35 +5397,43 @@ SpellCastResult Spell::CheckCast(bool strict)
             (IsAutoRepeat() || (m_spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0))
             return SPELL_FAILED_MOVING;
     }
-
+    //if you casting something in vechicle and don't move you are not afk
+    if(sWorld->getBoolConfig(CONFIG_ANTI_AFK_SYSTEM_ENABLE))
+        if (m_caster->IsVehicle())
+            if(Unit *orginalCaster = m_caster->GetVehicleKit()->GetPassenger(0))
+                if(Player *player = orginalCaster->ToPlayer())
+                    if(player->InBattleground())
+                        player->UpdateAfkTime(time(NULL));
 
     Vehicle* vehicle = m_caster->GetVehicle();
-    if (vehicle && !(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE))
+    if (vehicle)
     {
-        uint16 checkMask = 0;
-        for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
-        {
-            SpellEffectInfo const* effInfo = &m_spellInfo->Effects[effIndex];
-            if (effInfo->ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE)) {
+            uint16 checkMask = 0;
+            for (uint8 effIndex = EFFECT_0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
             {
-                SpellShapeshiftEntry const* shapeShiftEntry = sSpellShapeshiftStore.LookupEntry(effInfo->MiscValue);
-                if (shapeShiftEntry && (shapeShiftEntry->flags1 & 1) == 0)  // unk flag
-                    checkMask |= VEHICLE_SEAT_FLAG_UNCONTROLLED;
-                break;
+                SpellEffectInfo const* effInfo = &m_spellInfo->Effects[effIndex];
+                if (effInfo->ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
+                {
+                    SpellShapeshiftEntry const* shapeShiftEntry = sSpellShapeshiftStore.LookupEntry(effInfo->MiscValue);
+                    if (shapeShiftEntry && (shapeShiftEntry->flags1 & 1) == 0)  // unk flag
+                        checkMask |= VEHICLE_SEAT_FLAG_UNCONTROLLED;
+                    break;
+                }
             }
+
+            if (m_spellInfo->HasAura(SPELL_AURA_MOUNTED))
+                checkMask |= VEHICLE_SEAT_FLAG_CAN_CAST_MOUNT_SPELL;
+
+            if (!checkMask)
+                checkMask = VEHICLE_SEAT_FLAG_CAN_ATTACK;
+
+            // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
+            VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(m_caster);
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE) && !m_spellInfo->HasAttribute(SPELL_ATTR0_CASTABLE_WHILE_MOUNTED)
+                && (vehicleSeat->m_flags & checkMask) != checkMask && m_caster->GetTypeId() == TYPEID_PLAYER)
+                return SPELL_FAILED_DONT_REPORT;
         }
-
-        if (m_spellInfo->HasAura(SPELL_AURA_MOUNTED))
-            checkMask |= VEHICLE_SEAT_FLAG_CAN_CAST_MOUNT_SPELL;
-
-        if (!checkMask)
-            checkMask = VEHICLE_SEAT_FLAG_CAN_ATTACK;
-
-        // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
-        VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(m_caster);
-        if (!m_spellInfo->HasAttribute(SPELL_ATTR6_CASTABLE_WHILE_ON_VEHICLE) && !m_spellInfo->HasAttribute(SPELL_ATTR0_CASTABLE_WHILE_MOUNTED)
-            && (vehicleSeat->m_flags & checkMask) != checkMask && m_caster->GetTypeId() == TYPEID_PLAYER)
-            return SPELL_FAILED_DONT_REPORT;
     }
 
     // check spell cast conditions from database

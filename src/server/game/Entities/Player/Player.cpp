@@ -20623,11 +20623,39 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 ///checks the 15 afk reports per 5 minutes limit
 void Player::UpdateAfkReport(time_t currTime)
 { 
-    if (m_bgData.bgAfkReportedTimer <= currTime)
+    if (sWorld->getBoolConfig(CONFIG_ANTI_AFK_SYSTEM_ENABLE))
     {
-        m_bgData.bgAfkReportedCount = 0;
-        m_bgData.bgAfkReportedTimer = currTime+5*MINUTE;
+
+        if (InBattleground()) {
+            if (GetBattleground()->GetStartDelayTime())
+            {
+                m_bgData.bgAfkReportedTimer = INT_MAX;
+                return;
+            }
+            else if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
+            {
+                ToggleAFK();
+                m_bgData.bgAfkReportedTimer = INT_MAX;
+            }
+            else if (isMoving() || isTurning())
+                UpdateAfkTime(currTime);
+        }
+        else if (IsInWintergrasp() && sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_ACTIVE))
+        {
+            if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
+            {
+                ToggleAFK();
+                m_bgData.bgAfkReportedTimer = INT_MAX;
+            }
+            else if (isMoving())
+                UpdateAfkTime(currTime);
+        }
     }
+}
+//Acces for other classes 
+void Player::UpdateAfkTime(time_t currTime)
+{
+    m_bgData.bgAfkReportedTimer = currTime + sWorld->getIntConfig(CONFIG_MAX_AFK_TIME_ON_BG_MINUTE) * MINUTE;
 }
 
 void Player::UpdateContestedPvP(uint32 diff)

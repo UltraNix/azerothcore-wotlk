@@ -1315,6 +1315,10 @@ void World::LoadConfigSettings(bool reload)
     //  
     m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);
     m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Value", 0.1f);
+
+    // Kick player from BG/WG if doesn't move
+    m_bool_configs[CONFIG_ANTI_AFK_SYSTEM_ENABLE] = sConfigMgr->GetBoolDefault("AntiAfkSystem.Enable", true); 
+    m_int_configs[CONFIG_MAX_AFK_TIME_ON_BG_MINUTE] = sConfigMgr->GetIntDefault("AntiAfkSystem.Time", 2);
     
     // call ScriptMgr if we're reloading the configuration
     if (reload)
