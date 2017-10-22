@@ -22909,7 +22909,7 @@ void Player::SendComboPoints()
     if (combotarget)
     {
         WorldPacket data;
-        if (m_mover != this)
+        if (m_mover != this && this->m_movedByPlayer != this)
         {
             data.Initialize(SMSG_PET_UPDATE_COMBO_POINTS, m_mover->GetPackGUID().size()+combotarget->GetPackGUID().size()+1);
             data.append(m_mover->GetPackGUID());
