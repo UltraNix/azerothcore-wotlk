@@ -1,187 +1,133 @@
-/*
-REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
-#include "SpellScript.h"
 
-enum Spells
+enum SalrammSpells
 {
-    SPELL_SHADOW_BOLT_N                            = 57725,
-    SPELL_SHADOW_BOLT_H                            = 58827,
-    SPELL_STEAL_FLESH_CHANNEL                    = 52708,
-    SPELL_STEAL_FLESH_TARGET                    = 52711,
-    SPELL_STEAL_FLESH_CASTER                    = 52712,
-    SPELL_SUMMON_GHOULS                            = 52451,
-    SPELL_EXPLODE_GHOUL_N                        = 52480,
-    SPELL_EXPLODE_GHOUL_H                        = 58825,
-    SPELL_CURSE_OF_TWISTED_FAITH                = 58845,
+    SPELL_CURSE_OF_TWISTED_FLESH    = 58845,
+    SPELL_EXPLODE_GHOUL             = 52480,
+    SPELL_SHADOW_BOLT               = 57725,
+    SPELL_STEAL_FLESH               = 52708,
+    SPELL_STEAL_FLESH_DEBUFF        = 52711,
+    SPELL_STEAL_FLESH_BUFF          = 52712,
+    SPELL_SUMMON_GHOULS             = 52451
 };
 
-enum Events
+enum SalrammYells
 {
-    EVENT_SPELL_SHADOW_BOLT                        = 1,
-    EVENT_SPELL_STEAL_FLESH                        = 2,
-    EVENT_SPELL_SUMMON_GHOULS                    = 3,
-    EVENT_EXPLODE_GHOUL                            = 4,
-    EVENT_SPELL_CURSE                            = 5,
+    SAY_AGGRO                       = 0,
+    SAY_SPAWN,
+    SAY_SLAY,
+    SAY_DEATH,
+    SAY_EXPLODE_GHOUL,
+    SAY_STEAL_FLESH,
+    SAY_SUMMON_GHOULS
 };
 
-enum Yells
+enum SalrammEvents
 {
-    SAY_AGGRO                                   = 0,
-    SAY_SPAWN                                   = 1,
-    SAY_SLAY                                    = 2,
-    SAY_DEATH                                   = 3,
-    SAY_EXPLODE_GHOUL                           = 4,
-    SAY_STEAL_FLESH                             = 5,
-    SAY_SUMMON_GHOULS                           = 6
+    EVENT_CURSE_FLESH               = 1,
+    EVENT_EXPLODE_GHOUL1,
+    EVENT_EXPLODE_GHOUL2,
+    EVENT_SHADOW_BOLT,
+    EVENT_STEAL_FLESH,
+    EVENT_SUMMON_GHOULS,
+    EVENT_KILL_TALK
 };
 
-class boss_salramm : public CreatureScript
+struct boss_salrammAI : public BossAI
 {
-public:
-    boss_salramm() : CreatureScript("boss_salramm") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new boss_salrammAI (creature);
+    boss_salrammAI(Creature* creature) : BossAI(creature, DATA_SALRAMM) 
+    { 
+        Talk(SAY_SPAWN);
     }
 
-    struct boss_salrammAI : public ScriptedAI
+    void EnterCombat(Unit* /*who*/) override
     {
-        boss_salrammAI(Creature* c) : ScriptedAI(c), summons(me)
+        Talk(SAY_AGGRO);
+        _EnterCombat();
+
+        events.ScheduleEvent(EVENT_SUMMON_GHOULS, urand(19000, 24000));
+        events.ScheduleEvent(EVENT_SHADOW_BOLT, 2000);
+        events.ScheduleEvent(EVENT_STEAL_FLESH, urand(25000, 35000));
+        if (IsHeroic())
+            events.ScheduleEvent(EVENT_CURSE_FLESH, 40000);
+    }
+
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
         {
-            Talk(SAY_SPAWN);
+            case EVENT_CURSE_FLESH:
+                DoCastVictim(SPELL_CURSE_OF_TWISTED_FLESH);
+                events.Repeat(37000);
+                break;
+            case EVENT_SUMMON_GHOULS:
+                Talk(SAY_SUMMON_GHOULS);
+                DoCastAOE(SPELL_SUMMON_GHOULS);
+                events.ScheduleEvent(EVENT_EXPLODE_GHOUL1, urand(20000, 24000));
+                events.ScheduleEvent(EVENT_EXPLODE_GHOUL2, urand(25000, 29000));
+                break;
+            case EVENT_SHADOW_BOLT:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                    DoCast(target, SPELL_SHADOW_BOLT);
+                events.Repeat(3000);
+                break;
+            case EVENT_STEAL_FLESH:
+                Talk(SAY_STEAL_FLESH);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 50.0f, true))
+                    DoCast(target, SPELL_STEAL_FLESH);
+                events.Repeat(urand(15000, 20000));
+                break;
+            case EVENT_EXPLODE_GHOUL2:
+                events.ScheduleEvent(EVENT_SUMMON_GHOULS, 4000);
+                // intentional missing break
+            case EVENT_EXPLODE_GHOUL1:
+                Talk(SAY_EXPLODE_GHOUL);
+                DoCastAOE(SPELL_EXPLODE_GHOUL, true);
+                break;
+            default:
+                break;
         }
+    }
 
-        EventMap events;
-        SummonList summons;
-        void Reset() 
-        { 
-            events.Reset();
-            summons.DespawnAll();
-        }
+    void JustDied(Unit* /*killer*/) override
+    {
+        Talk(SAY_DEATH);
+        _JustDied();
+    }
 
-        void JustSummoned(Creature* cr) { summons.Summon(cr); }
-
-        void EnterCombat(Unit* /*who*/)
+    void KilledUnit(Unit* victim) override
+    {
+        if (events.GetNextEventTime(EVENT_KILL_TALK) == 0)
         {
-            Talk(SAY_AGGRO);
-            events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT, 7000);
-            events.ScheduleEvent(EVENT_SPELL_STEAL_FLESH, 11000);
-            events.ScheduleEvent(EVENT_SPELL_SUMMON_GHOULS, 16000);
-            events.ScheduleEvent(EVENT_EXPLODE_GHOUL, 22000);
-            if (IsHeroic())
-                events.ScheduleEvent(EVENT_SPELL_CURSE, 25000);
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            summons.DespawnAll();
-            Talk(SAY_DEATH);
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (!urand(0,1))
-                return;
-
             Talk(SAY_SLAY);
+            events.ScheduleEvent(EVENT_KILL_TALK, 6000);
         }
-
-        void ExplodeGhoul()
-        {
-            for (SummonList::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
-                if (Creature* cr = ObjectAccessor::GetCreature(*me, (*itr)))
-                    if (cr->IsAlive())
-                    {
-                        me->CastSpell(cr, DUNGEON_MODE(SPELL_EXPLODE_GHOUL_N, SPELL_EXPLODE_GHOUL_H), false);
-                        return;
-                    }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.GetEvent())
-            {
-                case EVENT_SPELL_SHADOW_BOLT:
-                    me->CastSpell(me->GetVictim(), DUNGEON_MODE(SPELL_SHADOW_BOLT_N, SPELL_SHADOW_BOLT_H), false);
-                    events.RepeatEvent(10000);
-                    break;
-                case EVENT_SPELL_STEAL_FLESH:
-                    if (!urand(0,2))
-                        Talk(SAY_STEAL_FLESH);
-                    me->CastSpell(me->GetVictim(), SPELL_STEAL_FLESH_CHANNEL, false);
-                    events.RepeatEvent(12000);
-                    break;
-                case EVENT_SPELL_SUMMON_GHOULS:
-                    if (!urand(0,2))
-                        Talk(SAY_SUMMON_GHOULS);
-                    me->CastSpell(me, SPELL_SUMMON_GHOULS, false);
-                    events.RepeatEvent(10000);
-                    break;
-                case EVENT_EXPLODE_GHOUL:
-                    if (!urand(0,2))
-                        Talk(SAY_EXPLODE_GHOUL);
-                    ExplodeGhoul();
-                    events.RepeatEvent(15000);
-                    break;
-                case EVENT_SPELL_CURSE:
-                    me->CastSpell(me->GetVictim(), SPELL_CURSE_OF_TWISTED_FAITH, false);
-                    events.RepeatEvent(30000);
-                    break;
-            }
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
+    }
 };
 
-class spell_boss_salramm_steal_flesh : public SpellScriptLoader
+class spell_salramm_steal_flesh_AuraScript : public AuraScript
 {
-    public:
-        spell_boss_salramm_steal_flesh() : SpellScriptLoader("spell_boss_salramm_steal_flesh") { }
+    PrepareAuraScript(spell_salramm_steal_flesh_AuraScript)
 
-        class spell_boss_salramm_steal_flesh_AuraScript : public AuraScript
+    void HandlePeriodic(AuraEffect const* /*eff*/)
+    {
+        if (Unit* caster = GetCaster())
         {
-            PrepareAuraScript(spell_boss_salramm_steal_flesh_AuraScript);
-
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* caster = GetCaster();
-                Unit* target = GetUnitOwner();
-                if (caster)
-                {
-                    caster->CastSpell(caster, SPELL_STEAL_FLESH_CASTER, true);
-                    caster->CastSpell(target, SPELL_STEAL_FLESH_TARGET, true);
-                }
-            }
-
-            void Register()
-            {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_boss_salramm_steal_flesh_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_boss_salramm_steal_flesh_AuraScript();
+            caster->CastSpell(caster, SPELL_STEAL_FLESH_BUFF, true);
+            caster->CastSpell(GetTarget(), SPELL_STEAL_FLESH_DEBUFF, true);
         }
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_salramm_steal_flesh_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+    }
 };
 
 void AddSC_boss_salramm()
 {
-    new boss_salramm();
-    new spell_boss_salramm_steal_flesh();
+    new CreatureAILoader<boss_salrammAI>("boss_salramm");
+    new AuraScriptLoaderEx<spell_salramm_steal_flesh_AuraScript>("spell_salramm_steal_flesh");
 }
