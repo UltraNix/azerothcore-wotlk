@@ -3360,6 +3360,21 @@ BoostPercentage.Enable = 0
 BoostPercentage.Value = 0.1
 
 #
+#     AntiAfkSystem.Enable
+#        Description: Enables or disables AntiAfkSystem on BG or WG.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+AntiAfkSystem.Enable = 0
+
+#
+#    AntiAfkSystem.Time
+#        Description: Time (in minutes) after player is kicked from BG or WG if he's staying in place.
+#        Default:     2
+
+AntiAfkSystem.Time = 2
+
+#
 ###################################################################################################
 
 ###################################################################################################
