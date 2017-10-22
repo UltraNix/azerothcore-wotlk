@@ -24,6 +24,10 @@ enum Data64
     DATA_INFINITE,
     DATA_SHKAF_GATE,
     DATA_EXIT_GATE,
+
+    DATA_MEATHOOK,
+    DATA_SALRAMM,
+    DATA_EPOCH
 };
 
 enum Creatures

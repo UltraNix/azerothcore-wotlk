@@ -530,7 +530,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 else if (mainSpec == 3)
                     mainSpecStr = "Survival";
                 else
-                    mainSpecStr = "Unknown or None";
+                    mainSpecStr = "None";
 
                 if (offSpec == 1)
                     offSpecStr = "Beast Mastery";
@@ -550,7 +550,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                 else if (mainSpec == 3)
                     mainSpecStr = "Subtlety";
                 else
-                    mainSpecStr = "Unknown or None";
+                    mainSpecStr = "None";
 
                 if (offSpec == 1)
                     offSpecStr = "Assassination";
@@ -708,26 +708,26 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
             stmt->setUInt32(2, guidLow);
             stmt->setUInt32(3, moneyAmount);
             stmt->setUInt32(4, dpAmount);
-            stmt->setUInt32(5, AUCTION_SELL_PREMIUM);
+            stmt->setUInt8(5, AUCTION_SELL_PREMIUM);
             stmt->setString(6, name);
-            stmt->setUInt32(7, slave_race);
-            stmt->setUInt32(8, slave_class);
-            stmt->setUInt32(9, slave_gender);
-            stmt->setUInt32(10, slave_level);
+            stmt->setUInt8(7, slave_race);
+            stmt->setUInt8(8, slave_class);
+            stmt->setUInt8(9, slave_gender);
+            stmt->setUInt8(10, slave_level);
             stmt->setUInt32(11, slave_money);
             stmt->setUInt32(12, slave_arena);
             stmt->setUInt32(13, slave_honor);
             stmt->setUInt32(14, slave_riding);
             stmt->setString(15, mainSpecStr);
             stmt->setString(16, offSpecStr);
-            stmt->setUInt32(17, 0);
+            stmt->setUInt16(17, 0);
 
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, slave_team);
-            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
+            stmt->setUInt8(38, slave_team);
+            stmt->setUInt32(39, sWorld->GetGameTime());
             break;
         }
         case AUCTION_SELL_MONEY:
@@ -738,26 +738,26 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
             stmt->setUInt32(2, guidLow);
             stmt->setUInt32(3, moneyAmount);
             stmt->setUInt32(4, dpAmount);
-            stmt->setUInt32(5, AUCTION_SELL_MONEY);
+            stmt->setUInt8(5, AUCTION_SELL_MONEY);
             stmt->setString(6, name);
-            stmt->setUInt32(7, slave_race);
-            stmt->setUInt32(8, slave_class);
-            stmt->setUInt32(9, slave_gender);
-            stmt->setUInt32(10, slave_level);
+            stmt->setUInt8(7, slave_race);
+            stmt->setUInt8(8, slave_class);
+            stmt->setUInt8(9, slave_gender);
+            stmt->setUInt8(10, slave_level);
             stmt->setUInt32(11, slave_money);
             stmt->setUInt32(12, slave_arena);
             stmt->setUInt32(13, slave_honor);
             stmt->setUInt32(14, slave_riding);
             stmt->setString(15, mainSpecStr);
             stmt->setString(16, offSpecStr);
-            stmt->setUInt32(17, 0);
+            stmt->setUInt16(17, 0);
 
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, slave_team);
-            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
+            stmt->setUInt8(38, slave_team);
+            stmt->setUInt32(39, sWorld->GetGameTime());
             break;
         }
         case AUCTION_SELL_CHARACTER:
@@ -766,21 +766,21 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
             stmt->setUInt32(0, auctionId);
             stmt->setUInt32(1, accId);
             stmt->setUInt32(2, guidLow);
-            stmt->setUInt32(3, 0);
+            stmt->setUInt32(3, moneyAmount);
             stmt->setUInt32(4, dpAmount);
-            stmt->setUInt32(5, AUCTION_SELL_CHARACTER);
+            stmt->setUInt8(5, AUCTION_SELL_CHARACTER);
             stmt->setString(6, name);
-            stmt->setUInt32(7, slave_race);
-            stmt->setUInt32(8, slave_class);
-            stmt->setUInt32(9, slave_gender);
-            stmt->setUInt32(10, slave_level);
+            stmt->setUInt8(7, slave_race);
+            stmt->setUInt8(8, slave_class);
+            stmt->setUInt8(9, slave_gender);
+            stmt->setUInt8(10, slave_level);
             stmt->setUInt32(11, slave_money);
             stmt->setUInt32(12, slave_arena);
             stmt->setUInt32(13, slave_honor);
             stmt->setUInt32(14, slave_riding);
             stmt->setString(15, mainSpecStr);
             stmt->setString(16, offSpecStr);
-            stmt->setUInt32(17, player->GetAverageItemLevel());
+            stmt->setUInt16(17, player->GetAverageItemLevel());
 
             for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 if (player->GetItemIdForSlaveMarket(i) != 0)
@@ -789,8 +789,8 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
                     stmt->setUInt32(18 + i, 0);
 
             stmt->setString(37, description);
-            stmt->setUInt32(38, slave_team);
-            stmt->setString(39, TimeToTimestampStr(sWorld->GetGameTime()));
+            stmt->setUInt8(38, slave_team);
+            stmt->setUInt32(39, sWorld->GetGameTime());
             break;
         }
     }
@@ -800,7 +800,7 @@ bool BazaarMgr::CreateBazaarAuction(Player* player, uint32 moneyAmount, uint32 d
     if (type == AUCTION_SELL_CHARACTER)
     {
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_SLAVE_ACCOUNT_ID);
-        stmt->setUInt32(0, 1);
+        stmt->setUInt32(0, BAZAAR_ACCOUNT);
         stmt->setUInt32(1, guidLow);
         CharacterDatabase.Execute(stmt);
         sLog->outSlave("[DETAILS] Id: %u, Player: %s (ACC ID: %u), Description: [%s]", auctionId, player->GetName().c_str(), player->GetSession()->GetAccountId(), description.c_str());
@@ -865,7 +865,7 @@ uint32 BazaarMgr::GetAuctionCount(uint32 accountId, uint8 type)
 
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
-    return (result) ? (*result)[0].GetInt64() : 0;
+    return (result) ? (*result)[0].GetUInt32() : 0;
 }
 
 bool BazaarMgr::AuctionTime(Player* player)

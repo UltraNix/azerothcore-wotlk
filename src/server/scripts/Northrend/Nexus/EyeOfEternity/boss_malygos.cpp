@@ -1219,6 +1219,7 @@ public:
             {
                 if (who->GetTypeId() == TYPEID_PLAYER)
                 {
+                    who->m_movedByPlayer = who->ToPlayer();
                     who->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ARCANE_OVERLOAD_DMG, true);
                     who->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SURGE_OF_POWER_DMG, true);
                     me->SetSpeed(MOVE_RUN, 1.5f);

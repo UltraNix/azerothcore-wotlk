@@ -27,6 +27,7 @@ enum eSpells
     SPELL_FEAR                        = 68950,
     SPELL_MAGICS_BANE                = 68793,
     SPELL_CORRUPT_SOUL                = 68839,
+    SPELL_KNOCK_DOWN                 = 68848,
     SPELL_CONSUME_SOUL                = 68861,
     //SPELL_CONSUME_SOUL_HEAL        = 68858,
 
@@ -381,6 +382,29 @@ public:
     }
 };
 
+class spell_bronjahm_corrupt_soul_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_bronjahm_corrupt_soul_AuraScript)
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_CONSUME_SOUL, SPELL_KNOCK_DOWN });
+    }
+
+    void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+        if (removeMode != AURA_REMOVE_BY_EXPIRE)
+            return;
+
+        GetTarget()->CastSpell(GetTarget(), SPELL_KNOCK_DOWN, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_bronjahm_corrupt_soul_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
 
 void AddSC_boss_bronjahm()
 {
@@ -391,4 +415,5 @@ void AddSC_boss_bronjahm()
     new spell_bronjahm_soulstorm_channel_ooc();
     new spell_bronjahm_soulstorm_visual();
     new spell_bronjahm_soulstorm_targeting();
+    new AuraScriptLoaderEx<spell_bronjahm_corrupt_soul_AuraScript>("spell_bronjahm_corrupt_soul");
 }

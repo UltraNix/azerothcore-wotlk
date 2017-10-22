@@ -1,110 +1,89 @@
-/*
-REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
 
-enum Spells
+enum MeathookSpells
 {
-    SPELL_CONSTRICTING_CHAINS_N                    = 52696,
-    SPELL_CONSTRICTING_CHAINS_H                    = 58823,
-    SPELL_DISEASE_EXPULSION_N                    = 52666,
-    SPELL_DISEASE_EXPULSION_H                    = 58824,
-    SPELL_FRENZY                                = 58841,
+    SPELL_CONSTRICTING_CHAINS   = 52696,
+    SPELL_DISEASE_EXPULSION     = 52666,
+    SPELL_FRENZY                = 58841
 };
 
-enum Events
+enum MeathookEvents
 {
-    EVENT_SPELL_CONSTRICTING_CHAINS                = 1,
-    EVENT_SPELL_DISEASE_EXPULSION                = 2,
-    EVENT_SPELL_FRENZY                            = 3,
+    EVENT_CONSTRICTING_CHAINS   = 1,
+    EVENT_DISEASE_EXPULSION,
+    EVENT_FRENZY,
+    EVENT_KILL_TALK
 };
 
-enum Yells
+enum MeathookYells
 {
-    SAY_AGGRO                                   = 0,
-    SAY_SLAY                                    = 1,
-    SAY_SPAWN                                   = 2,
-    SAY_DEATH                                   = 3
+    SAY_AGGRO,
+    SAY_SLAY,
+    SAY_SPAWN,
+    SAY_DEATH
 };
 
-class boss_meathook : public CreatureScript
+struct boss_meathookAI : public BossAI
 {
-public:
-    boss_meathook() : CreatureScript("boss_meathook") { }
-
-    CreatureAI* GetAI(Creature* creature) const
+    boss_meathookAI(Creature* creature) : BossAI(creature, DATA_MEATHOOK)
     {
-        return new boss_meathookAI (creature);
+        Talk(SAY_SPAWN);
     }
 
-    struct boss_meathookAI : public ScriptedAI
+    void EnterCombat(Unit* /*who*/) override
     {
-        boss_meathookAI(Creature* c) : ScriptedAI(c)
+        Talk(SAY_AGGRO);
+        _EnterCombat();
+        events.RescheduleEvent(EVENT_CONSTRICTING_CHAINS, urand(7000, 11000));
+        events.RescheduleEvent(EVENT_DISEASE_EXPULSION, 2000);
+        events.RescheduleEvent(EVENT_FRENZY, urand(13000, 17000));
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        _JustDied();
+        Talk(SAY_DEATH);
+    }
+
+    void KilledUnit(Unit* /*victim*/) override
+    {
+        if (events.GetNextEventTime(EVENT_KILL_TALK) == 0)
         {
-            Talk(SAY_SPAWN);
-        }
-
-        EventMap events;
-        void Reset() { events.Reset(); }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            Talk(SAY_AGGRO);
-            events.RescheduleEvent(EVENT_SPELL_CONSTRICTING_CHAINS, 15000);
-            events.RescheduleEvent(EVENT_SPELL_DISEASE_EXPULSION, 4000);
-            events.RescheduleEvent(EVENT_SPELL_FRENZY, 20000);
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            Talk(SAY_DEATH);
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (!urand(0,1))
-                return;
-
             Talk(SAY_SLAY);
+            events.ScheduleEvent(EVENT_KILL_TALK, 6000);
         }
+    }
 
-        void UpdateAI(uint32 diff)
+    void ExecuteEvent(uint32 eventId) override
+    {
+        switch (eventId)
         {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.GetEvent())
-            {
-                case EVENT_SPELL_DISEASE_EXPULSION:
-                    me->CastSpell(me, DUNGEON_MODE(SPELL_DISEASE_EXPULSION_N, SPELL_DISEASE_EXPULSION_H), false);
-                    events.RepeatEvent(6000);
-                    break;
-                case EVENT_SPELL_FRENZY:
-                    me->CastSpell(me, SPELL_FRENZY, false);
-                    events.RepeatEvent(20000);
-                    break;
-                case EVENT_SPELL_CONSTRICTING_CHAINS:
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 0, 50.0f, true))
-                        me->CastSpell(pTarget, DUNGEON_MODE(SPELL_CONSTRICTING_CHAINS_N, SPELL_CONSTRICTING_CHAINS_H), false);
-                    events.RepeatEvent(14000);
-                    break;
-            }
-
-            DoMeleeAttackIfReady();
+            case EVENT_CONSTRICTING_CHAINS:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, -20.0f, true))
+                    DoCast(target, SPELL_CONSTRICTING_CHAINS);
+                else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+                    DoCast(target, SPELL_CONSTRICTING_CHAINS);
+                else
+                    DoCastVictim(SPELL_CONSTRICTING_CHAINS);
+                events.Repeat(urand(10000, 15000));
+                break;
+            case EVENT_DISEASE_EXPULSION:
+                DoCastAOE(SPELL_DISEASE_EXPULSION);
+                events.Repeat(3500);
+                break;
+            case EVENT_FRENZY:
+                DoCastSelf(SPELL_FRENZY);
+                events.Repeat(urand(13000, 17000));
+                break;
+            default:
+                break;
         }
-    };
-
+    }
 };
 
 void AddSC_boss_meathook()
 {
-    new boss_meathook();
+    new CreatureAILoader<boss_meathookAI>("boss_meathook");
 }

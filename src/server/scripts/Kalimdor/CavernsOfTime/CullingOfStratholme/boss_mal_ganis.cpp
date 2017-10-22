@@ -8,7 +8,7 @@ enum Spells
     SPELL_CARRION_SWARM                             = 52720,
     SPELL_MIND_BLAST                                = 52722,
     SPELL_SLEEP                                     = 52721,
-    SPELL_VAMPIRIC_TOUCH                            = 52723,
+    SPELL_VAMPIRIC_TOUCH                            = 52723
 };
 
 enum Events
@@ -55,10 +55,10 @@ struct boss_mal_ganisAI : public ScriptedAI
     void EnterCombat(Unit* /*who*/)
     {
         Talk(SAY_AGGRO);
-        events.ScheduleEvent(EVENT_SPELL_CARRION_SWARM, 6000);
-        events.ScheduleEvent(EVENT_SPELL_MIND_BLAST, 11000);
-        events.ScheduleEvent(EVENT_SPELL_SLEEP, 20000);
-        events.ScheduleEvent(EVENT_SPELL_VAMPIRIC_TOUCH, 15000);
+        events.ScheduleEvent(EVENT_SPELL_CARRION_SWARM, 5000);
+        events.ScheduleEvent(EVENT_SPELL_MIND_BLAST, urand(6000, 8000));
+        events.ScheduleEvent(EVENT_SPELL_SLEEP, urand(17000, 21000));
+        events.ScheduleEvent(EVENT_SPELL_VAMPIRIC_TOUCH, 4000);
     }
 
     void JustDied(Unit* /*killer*/) override {}
@@ -119,21 +119,25 @@ struct boss_mal_ganisAI : public ScriptedAI
             {
                 case EVENT_SPELL_CARRION_SWARM:
                     DoCastVictim(SPELL_CARRION_SWARM);
-                    events.Repeat(7000);
+                    events.Repeat(6000);
                     break;
                 case EVENT_SPELL_MIND_BLAST:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true, -int32(sSpellMgr->GetSpellIdForDifficulty(SPELL_SLEEP, me))))
                         DoCast(target, SPELL_MIND_BLAST);
-                    events.Repeat(6000);
+                    else
+                        DoCastVictim(SPELL_MIND_BLAST);
+                    events.Repeat(urand(8000, 12000));
                     break;
                 case EVENT_SPELL_SLEEP:
                     Talk(SAY_SLEEP);
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f))
                         DoCast(target, SPELL_SLEEP);
-                    events.Repeat(17000);
+                    else
+                        DoCastVictim(SPELL_SLEEP);
+                    events.Repeat(urand(10000, 15000));
                     break;
                 case EVENT_SPELL_VAMPIRIC_TOUCH:
-                    DoCastSelf(SPELL_VAMPIRIC_TOUCH, true);
+                    DoCastSelf(SPELL_VAMPIRIC_TOUCH);
                     events.Repeat(30000);
                     break;
                 default:

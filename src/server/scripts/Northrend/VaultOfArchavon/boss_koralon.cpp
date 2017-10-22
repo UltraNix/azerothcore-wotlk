@@ -13,7 +13,7 @@ enum Events
     // Koralon
     EVENT_BURNING_BREATH            = 1,
     EVENT_FLAME_CINDER                = 2,
-    EVENT_METEOR_FISTS                = 3,
+    EVENT_METEOR_FISTS                = 3
 };
 
 enum Spells
@@ -39,20 +39,18 @@ class boss_koralon : public CreatureScript
         {
             boss_koralonAI(Creature* creature) : ScriptedAI(creature)
             {
-                pInstance = me->GetInstanceScript();
+                instance = me->GetInstanceScript();
             }
 
-            InstanceScript* pInstance;
+            InstanceScript* instance;
             EventMap events;
-            uint32 rotateTimer;
 
-            void Reset()
+            void Reset() override
             {
-                rotateTimer = 0;
                 events.Reset();
-                if (pInstance)
+                if (instance)
                 {
-                    if (pInstance->GetData(DATA_STONED))
+                    if (instance->GetData(DATA_STONED))
                     {
                         if (Aura* aur = me->AddAura(SPELL_STONED_AURA, me))
                         {
@@ -60,11 +58,11 @@ class boss_koralon : public CreatureScript
                             aur->SetDuration(60 * MINUTE* IN_MILLISECONDS);
                         }
                     }
-                    pInstance->SetData(EVENT_KORALON, NOT_STARTED);
+                    instance->SetData(EVENT_KORALON, NOT_STARTED);
                 }
             }
 
-            void AttackStart(Unit* who)
+            void AttackStart(Unit* who) override
             {
                 if (me->HasAura(SPELL_STONED_AURA))
                     return;
@@ -72,72 +70,56 @@ class boss_koralon : public CreatureScript
                 ScriptedAI::AttackStart(who);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) override
             {
-                me->CastSpell(me, SPELL_BURNING_FURY, true);
+                DoCastSelf(SPELL_BURNING_FURY, true);
 
                 events.ScheduleEvent(EVENT_BURNING_BREATH, 10000);
                 events.ScheduleEvent(EVENT_METEOR_FISTS, 30000);
                 events.ScheduleEvent(EVENT_FLAME_CINDER, 20000);
 
-                if (pInstance)
-                    pInstance->SetData(EVENT_KORALON, IN_PROGRESS);
+                if (instance)
+                    instance->SetData(EVENT_KORALON, IN_PROGRESS);
             }
 
-            void JustDied(Unit* )
+            void JustDied(Unit* /*who*/) override
             {
-                if (pInstance)
-                    pInstance->SetData(EVENT_KORALON, DONE);
+                if (instance)
+                    instance->SetData(EVENT_KORALON, DONE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) override
             {
-                if (rotateTimer)
-                {
-                    rotateTimer += diff;
-                    if (rotateTimer >= 3000)
-                    {
-                        if (!me->HasUnitMovementFlag(MOVEMENTFLAG_LEFT))
-                        {
-                            me->SetUnitMovementFlags(MOVEMENTFLAG_LEFT);
-                            me->SendMovementFlagUpdate();
-                            rotateTimer = 1;
-                            return;
-                        }
-                        else
-                        {
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEFT);
-                            me->SendMovementFlagUpdate();
-                            rotateTimer = 0;
-                            return;
-                        }
-                    }
-                }
-
                 if (!UpdateVictim())
                     return;
 
                 events.Update(diff);
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                switch (events.GetEvent())
+                while (uint32 eventId = events.ExecuteEvent())
                 {
-                    case EVENT_BURNING_BREATH:
-                        rotateTimer = 1500;
-                        me->CastSpell(me, SPELL_BURNING_BREATH, false);
-                        events.RepeatEvent(45000);
-                        break;
-                    case EVENT_METEOR_FISTS:
-                        me->CastSpell(me, SPELL_METEOR_FISTS, true);
-                        events.RepeatEvent(45000);
-                        break;
-                    case EVENT_FLAME_CINDER:
-                        me->CastSpell(me, SPELL_FLAMING_CINDER, true);
-                        events.RepeatEvent(30000);
-                        break;
-                    default:
-                        break;
+                    switch (eventId)
+                    {
+                        case EVENT_BURNING_BREATH:
+                            DoCastSelf(SPELL_BURNING_BREATH);
+                            events.Repeat(45000);
+                            break;
+                        case EVENT_METEOR_FISTS:
+                            DoCastSelf(SPELL_METEOR_FISTS, true);
+                            events.Repeat(45000);
+                            break;
+                        case EVENT_FLAME_CINDER:
+                            DoCastSelf(SPELL_FLAMING_CINDER, true);
+                            events.Repeat(30000);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (me->HasUnitState(UNIT_STATE_CASTING))
+                        return;
                 }
 
                 DoMeleeAttackIfReady();
@@ -245,10 +227,78 @@ class spell_flame_warder_meteor_fists : public SpellScriptLoader
         }
 };
 
+// 66665, 67328 - Burning Breath
+class spell_koralon_burning_breath : public SpellScriptLoader
+{
+    public:
+        spell_koralon_burning_breath() : SpellScriptLoader("spell_koralon_burning_breath") { }
+
+        class spell_koralon_burning_breath_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_koralon_burning_breath_AuraScript)
+
+            bool Load() override
+            {
+                side = urand(0, 1) ? true : false;
+                return true;
+            }
+
+            void HandleApplyEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                    caster->ToCreature()->SetReactState(REACT_PASSIVE);
+
+                // channel - unlock rotate
+                caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
+
+                caster->GetMotionMaster()->MoveRotate(1000, side ? ROTATE_DIRECTION_RIGHT : ROTATE_DIRECTION_LEFT);
+            }
+
+            void HandleRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                if (caster->GetTypeId() == TYPEID_UNIT)
+                    caster->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+            }
+
+            void PeriodicTick(AuraEffect const* /*aurEff*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster)
+                    return;
+
+                caster->GetMotionMaster()->MoveRotate(1000, side ? ROTATE_DIRECTION_RIGHT : ROTATE_DIRECTION_LEFT);
+            }
+
+            void Register() override
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_koralon_burning_breath_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectRemove += AuraEffectRemoveFn(spell_koralon_burning_breath_AuraScript::HandleRemoveEffect, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_koralon_burning_breath_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            }
+
+        private:
+            bool side;
+        };
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new spell_koralon_burning_breath_AuraScript();
+        }
+};
+
 void AddSC_boss_koralon()
 {
     new boss_koralon();
     new spell_voa_flaming_cinder();
     new spell_koralon_meteor_fists();
     new spell_flame_warder_meteor_fists();
+    new spell_koralon_burning_breath();
 }

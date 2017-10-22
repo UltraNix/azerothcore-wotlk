@@ -127,7 +127,7 @@ public:
                     break;
             }
 
-            if ((uiHopelessnessCount == 0 && HealthBelowPct(67)) || (uiHopelessnessCount == 1 && HealthBelowPct(34)) || (uiHopelessnessCount == 2 && HealthBelowPct(11)))
+            if ((uiHopelessnessCount == 0 && HealthBelowPct(75)) || (uiHopelessnessCount == 1 && HealthBelowPct(50)) || (uiHopelessnessCount == 2 && HealthBelowPct(25)))
             {
                 if (uiHopelessnessCount)
                     me->RemoveOwnedAura(hopelessnessId[uiHopelessnessCount-1][DUNGEON_MODE(0, 1)]);
