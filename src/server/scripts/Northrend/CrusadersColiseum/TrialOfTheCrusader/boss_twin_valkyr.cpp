@@ -10,8 +10,8 @@
 enum Yells
 {
     SAY_AGGRO,
-    SAY_NIGHT,
     SAY_LIGHT,
+    SAY_NIGHT,
     EMOTE_VORTEX,
     EMOTE_TWINK_PACT,
     SAY_TWINK_PACT,
