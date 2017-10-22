@@ -14,6 +14,7 @@ enum Events
     EVENT_BURNING_BREATH            = 1,
     EVENT_FLAME_CINDER                = 2,
     EVENT_METEOR_FISTS                = 3,
+    EVENT_RESTORE_ORIENTATION         = 4
 };
 
 enum Spells
@@ -39,20 +40,19 @@ class boss_koralon : public CreatureScript
         {
             boss_koralonAI(Creature* creature) : ScriptedAI(creature)
             {
-                pInstance = me->GetInstanceScript();
+                instance = me->GetInstanceScript();
             }
 
-            InstanceScript* pInstance;
+            InstanceScript* instance;
             EventMap events;
-            uint32 rotateTimer;
 
-            void Reset()
+            void Reset() override
             {
-                rotateTimer = 0;
+                me->DisableRotate(false);
                 events.Reset();
-                if (pInstance)
+                if (instance)
                 {
-                    if (pInstance->GetData(DATA_STONED))
+                    if (instance->GetData(DATA_STONED))
                     {
                         if (Aura* aur = me->AddAura(SPELL_STONED_AURA, me))
                         {
@@ -60,11 +60,11 @@ class boss_koralon : public CreatureScript
                             aur->SetDuration(60 * MINUTE* IN_MILLISECONDS);
                         }
                     }
-                    pInstance->SetData(EVENT_KORALON, NOT_STARTED);
+                    instance->SetData(EVENT_KORALON, NOT_STARTED);
                 }
             }
 
-            void AttackStart(Unit* who)
+            void AttackStart(Unit* who) override
             {
                 if (me->HasAura(SPELL_STONED_AURA))
                     return;
@@ -72,72 +72,61 @@ class boss_koralon : public CreatureScript
                 ScriptedAI::AttackStart(who);
             }
 
-            void EnterCombat(Unit* /*who*/)
+            void EnterCombat(Unit* /*who*/) override
             {
-                me->CastSpell(me, SPELL_BURNING_FURY, true);
+                DoCastSelf(SPELL_BURNING_FURY, true);
 
                 events.ScheduleEvent(EVENT_BURNING_BREATH, 10000);
                 events.ScheduleEvent(EVENT_METEOR_FISTS, 30000);
                 events.ScheduleEvent(EVENT_FLAME_CINDER, 20000);
 
-                if (pInstance)
-                    pInstance->SetData(EVENT_KORALON, IN_PROGRESS);
+                if (instance)
+                    instance->SetData(EVENT_KORALON, IN_PROGRESS);
             }
 
-            void JustDied(Unit* )
+            void JustDied(Unit* /*who*/) override
             {
-                if (pInstance)
-                    pInstance->SetData(EVENT_KORALON, DONE);
+                if (instance)
+                    instance->SetData(EVENT_KORALON, DONE);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) override
             {
-                if (rotateTimer)
-                {
-                    rotateTimer += diff;
-                    if (rotateTimer >= 3000)
-                    {
-                        if (!me->HasUnitMovementFlag(MOVEMENTFLAG_LEFT))
-                        {
-                            me->SetUnitMovementFlags(MOVEMENTFLAG_LEFT);
-                            me->SendMovementFlagUpdate();
-                            rotateTimer = 1;
-                            return;
-                        }
-                        else
-                        {
-                            me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEFT);
-                            me->SendMovementFlagUpdate();
-                            rotateTimer = 0;
-                            return;
-                        }
-                    }
-                }
-
                 if (!UpdateVictim())
                     return;
 
                 events.Update(diff);
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                switch (events.GetEvent())
+                while (uint32 eventId = events.ExecuteEvent())
                 {
-                    case EVENT_BURNING_BREATH:
-                        rotateTimer = 1500;
-                        me->CastSpell(me, SPELL_BURNING_BREATH, false);
-                        events.RepeatEvent(45000);
-                        break;
-                    case EVENT_METEOR_FISTS:
-                        me->CastSpell(me, SPELL_METEOR_FISTS, true);
-                        events.RepeatEvent(45000);
-                        break;
-                    case EVENT_FLAME_CINDER:
-                        me->CastSpell(me, SPELL_FLAMING_CINDER, true);
-                        events.RepeatEvent(30000);
-                        break;
-                    default:
-                        break;
+                    switch (eventId)
+                    {
+                        case EVENT_BURNING_BREATH:
+                            if (auto spellInfo = sSpellMgr->GetSpellInfo(SPELL_BURNING_BREATH))
+                            {
+                                me->DisableRotate(true);
+                                DoCastAOE(SPELL_BURNING_BREATH);
+                                events.ScheduleEvent(EVENT_RESTORE_ORIENTATION, spellInfo->CastTimeEntry->CastTime);
+                            }
+                            events.Repeat(45000);
+                            break;
+                        case EVENT_RESTORE_ORIENTATION:
+                            me->DisableRotate(false);
+                            break;
+                        case EVENT_METEOR_FISTS:
+                            DoCastSelf(SPELL_METEOR_FISTS, true);
+                            events.Repeat(45000);
+                            break;
+                        case EVENT_FLAME_CINDER:
+                            DoCastSelf(SPELL_FLAMING_CINDER, true);
+                            events.Repeat(30000);
+                            break;
+                        default:
+                            break;
+                    }
                 }
 
                 DoMeleeAttackIfReady();
