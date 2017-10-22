@@ -1385,7 +1385,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         damage = target->SpellHealingBonusTaken(caster, GetSpellInfo(), damage, DOT);
 
                         int32 basepoints0 = damage;
-                        caster->CastCustomSpell(target, 64801, &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
+                        basepoints0 /= 2; // Druid Tier-8 Healer 4-Piece Set Bonus: The amount of healing this set bonus grants on the initial cast of Rejuvenation has been reduced by 50%.
+                        caster->CastCustomSpell(target, 64801, &basepoints0, nullptr, nullptr, true, nullptr, GetEffect(0));
                     }
                 }
                 break;
