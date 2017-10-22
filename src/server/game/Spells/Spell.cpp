@@ -2830,7 +2830,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
-    if (caster && unitTarget)
+    if (caster && unitTarget && caster->IsInWorld() && unitTarget->IsInWorld())
         if (missInfo == SPELL_MISS_NONE)
             if (caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
                 if (!caster->IsInCombat() && m_caster->IsFriendlyTo(unitTarget) && unitTarget->IsInCombat() && m_spellInfo->IsPositive())
