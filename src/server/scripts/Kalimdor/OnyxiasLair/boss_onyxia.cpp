@@ -341,7 +341,8 @@ struct boss_onyxiaAI : public BossAI
                     events.ScheduleEvent(EVENT_SUMMON_LAIR_GUARD, 30000);
                     break;
                 case EVENT_SUMMON_LAIR_GUARD:
-                    me->CastSpell(-101.654f, -214.491f, -80.70f, SPELL_SUMMON_LAIR_GUARD, true);
+                    for (uint8 i = 0; i<RAID_MODE(1, 2); ++i)
+                        me->CastSpell(-101.654f + frand(-2.0f, 2.0f), -214.491f + frand(-2.0f, 2.0f), -80.70f, SPELL_SUMMON_LAIR_GUARD, true);
                     events.Repeat(30000);
                     break;
                 case EVENT_WHELP_SPAM:
