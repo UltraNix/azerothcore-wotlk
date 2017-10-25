@@ -2910,7 +2910,10 @@ class Player : public Unit, public GridObject<Player>
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
-        ItemDurationList m_itemSoulboundTradeable;
+
+        typedef std::unordered_set<uint64> ItemSoulboundGUIDs;
+        ItemSoulboundGUIDs m_itemSoulboundTradeable;
+
         ACE_Thread_Mutex m_soulboundTradableLock;
 
         void ResetTimeSync();

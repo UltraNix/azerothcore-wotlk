@@ -14141,38 +14141,28 @@ void Player::TradeCancel(bool sendback)
 void Player::UpdateSoulboundTradeItems()
 {  
     TRINITY_GUARD(ACE_Thread_Mutex, m_soulboundTradableLock);
-    if (m_itemSoulboundTradeable.empty())
-        return;
 
     // also checks for garbage data
-    for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
+    for (ItemSoulboundGUIDs::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
-        ASSERT(*itr);
-        if ((*itr)->GetOwnerGUID() != GetGUID())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        if ((*itr)->CheckSoulboundTradeExpire())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        ++itr;
+        Item* item = GetItemByGuid(*itr);
+        if (!item || item->GetOwnerGUID() != GetGUID() || item->CheckSoulboundTradeExpire())
+            itr = m_itemSoulboundTradeable.erase(itr);
+        else
+            ++itr;
     }
 }
 
 void Player::AddTradeableItem(Item* item)
 {  
     TRINITY_GUARD(ACE_Thread_Mutex, m_soulboundTradableLock);
-    m_itemSoulboundTradeable.push_back(item);
+    m_itemSoulboundTradeable.insert(item->GetGUID());
 }
 
-//TODO: should never allow an item to be added to m_itemSoulboundTradeable twice
 void Player::RemoveTradeableItem(Item* item)
 {  
     TRINITY_GUARD(ACE_Thread_Mutex, m_soulboundTradableLock);
-    m_itemSoulboundTradeable.remove(item);
+    m_itemSoulboundTradeable.erase(item->GetGUID());
 }
 
 void Player::UpdateItemDuration(uint32 time, bool realtimeonly)

@@ -150,7 +150,7 @@ struct boss_hadronoxAI : public BossAI
                     AttackStart(me->GetVictim());
                     SetCombatMovement(true);
                     if (_step < NUM_STEPS - 1)
-                        return;
+                        return true;
                     DoCastAOE(SPELL_WEB_FRONT_DOORS);
                     DoCastAOE(SPELL_WEB_SIDE_DOORS);
                     _doorsWebbed = true;
