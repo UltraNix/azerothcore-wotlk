@@ -2461,5 +2461,5 @@ void GameObject::SetVisible(bool visible)
 
 bool GameObject::IsVisible()
 {
-    return m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM)  == SEC_PLAYER ? true : false ;
+    return m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM) == SEC_PLAYER ? true : false;
 }

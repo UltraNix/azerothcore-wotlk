@@ -67,53 +67,6 @@ public:
     }
 };
 
-#define EVENT_SCARAB_LORD  135
-#define EVENT_SCARAB_LORD_LOCK  136
-#define BANG_A_GONG 8743
-#define EVENT_ANNOUNCE_PL 11030
-#define EVENT_ANNOUNCE_ENG 11031
-class go_the_scarab_gong : public GameObjectScript
-{
-public:
-    go_the_scarab_gong() : GameObjectScript("go_the_scarab_gong") { }
-
-    bool OnQuestReward(Player* player, GameObject* /*go*/, Quest const* quest, uint32 /*opt*/)
-    {
-        if (!IsEventActive(EVENT_SCARAB_LORD_LOCK) && !IsEventActive(EVENT_SCARAB_LORD) && quest->GetQuestId() == BANG_A_GONG)
-        {
-            WorldDatabase.PExecute("UPDATE `game_event` SET `start_time`= CURRENT_TIMESTAMP() WHERE  `eventEntry`=135");
-            WorldDatabase.PExecute("UPDATE `game_event` SET `start_time`= CURRENT_TIMESTAMP() WHERE  `eventEntry`=136");
-            sGameEventMgr->StartEvent(EVENT_SCARAB_LORD);
-            sGameEventMgr->StartEvent(EVENT_SCARAB_LORD_LOCK);
-            sWorld->SendWorldText(EVENT_ANNOUNCE_PL, player->GetName().c_str());
-            sWorld->SendWorldText(EVENT_ANNOUNCE_ENG, player->GetName().c_str());
-        }
-        return true;
-    }
-
-    struct go_the_scarab_gongAI : public GameObjectAI
-    {
-        go_the_scarab_gongAI(GameObject* gameObject) : GameObjectAI(gameObject){}
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!IsEventActive(EVENT_SCARAB_LORD) && IsEventActive(EVENT_SCARAB_LORD_LOCK) )
-            {
-                if (go->IsVisible())go->SetVisible(false);
-            }
-            else
-            {
-                if(go->IsVisible())go->SetVisible(true);
-            }
-        }
-    };
-
-    GameObjectAI* GetAI(GameObject* go) const
-    {
-        return new go_the_scarab_gongAI(go);
-    }
-};
-
 class go_seer_of_zebhalak : public GameObjectScript
 {
 public:
@@ -1264,7 +1217,6 @@ void AddSC_go_scripts()
     new go_war_horn_of_jotunheim();
     new go_dirt_mound();
 	new go_huge_seaforium_bombs();
-    new go_the_scarab_gong();
 
     // Theirs
     new go_cat_figurine();
