@@ -1922,8 +1922,9 @@ class Player : public Unit, public GridObject<Player>
         void UpdateZoneDependentAuras(uint32 zone_id);    // zones
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
-        void UpdateAfkReport(time_t currTime);
         void UpdateAfkTime(time_t currTime);
+        void UpdateAfkReport(time_t currTime);
+
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}

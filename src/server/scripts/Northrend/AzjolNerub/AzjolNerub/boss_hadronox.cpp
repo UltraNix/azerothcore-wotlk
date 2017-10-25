@@ -879,8 +879,8 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
                     return 5000;
                 case 53036: // necromancer
                     return 8000; 
-				default:
-					return 0;
+                default:
+                    return 0;
             }
         }
 

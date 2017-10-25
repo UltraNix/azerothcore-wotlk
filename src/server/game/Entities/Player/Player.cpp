@@ -20610,42 +20610,44 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 /***              Update timers                        ***/
 /*********************************************************/
 
-///checks the 15 afk reports per 5 minutes limit
-void Player::UpdateAfkReport(time_t currTime)
-{ 
-    if (sWorld->getBoolConfig(CONFIG_ANTI_AFK_SYSTEM_ENABLE))
-    {
-
-        if (InBattleground()) {
-            if (GetBattleground()->GetStartDelayTime())
-            {
-                m_bgData.bgAfkReportedTimer = INT_MAX;
-                return;
-            }
-            else if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
-            {
-                ToggleAFK();
-                m_bgData.bgAfkReportedTimer = INT_MAX;
-            }
-            else if (isMoving() || isTurning())
-                UpdateAfkTime(currTime);
-        }
-        else if (IsInWintergrasp() && sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_ACTIVE))
-        {
-            if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
-            {
-                ToggleAFK();
-                m_bgData.bgAfkReportedTimer = INT_MAX;
-            }
-            else if (isMoving())
-                UpdateAfkTime(currTime);
-        }
-    }
-}
-//Acces for other classes 
+// For access in other classes 
 void Player::UpdateAfkTime(time_t currTime)
 {
-    m_bgData.bgAfkReportedTimer = currTime + sWorld->getIntConfig(CONFIG_MAX_AFK_TIME_ON_BG_MINUTE) * MINUTE;
+    m_bgData.bgAfkReportedCount = 0;
+    m_bgData.bgAfkReportedTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+}
+
+// Checks the 15 afk reports per 5 minutes limit
+void Player::UpdateAfkReport(time_t currTime)
+{
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT))
+    {
+        if (Battleground* bg = GetBattleground())
+        {
+            if (bg->isArena() || bg->GetStatus() != STATUS_IN_PROGRESS)
+                return;
+
+            if (isMoving() || isTurning())
+                UpdateAfkTime(currTime);
+            else if (currTime >= m_bgData.bgAfkReportedTimer)
+                ToggleAFK();
+        }
+        else if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
+        {
+            if (!bf->IsWarTime())
+                return;
+
+            if (isMoving() || isTurning())
+                UpdateAfkTime(currTime);
+            else if (currTime >= m_bgData.bgAfkReportedTimer)
+                ToggleAFK();
+        }
+    }
+    else if (m_bgData.bgAfkReportedTimer <= currTime)
+    {	
+        m_bgData.bgAfkReportedCount = 0;
+        m_bgData.bgAfkReportedTimer = currTime + 5 * MINUTE;
+    }
 }
 
 void Player::UpdateContestedPvP(uint32 diff)

@@ -3360,19 +3360,19 @@ BoostPercentage.Enable = 0
 BoostPercentage.Value = 0.1
 
 #
-#     AntiAfkSystem.Enable
-#        Description: Enables or disables AntiAfkSystem on BG or WG.
+#     Custom.AFK.Report
+#        Description: Enables or disables Custom AFK reports at battlegrounds and battlefields.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-AntiAfkSystem.Enable = 0
+Custom.AFK.Report = 0
 
 #
-#    AntiAfkSystem.Time
-#        Description: Time (in minutes) after player is kicked from BG or WG if he's staying in place.
+#    Custom.AFK.Report.Timer
+#        Description: Time (in minutes) after player is kicked from battlegrounds or battlefields if he's staying in place.
 #        Default:     2
 
-AntiAfkSystem.Time = 2
+Custom.AFK.Report.Timer = 2
 
 #
 ###################################################################################################
