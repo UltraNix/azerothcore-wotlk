@@ -86,6 +86,14 @@ public:
             playerRaidGUID = 0;
         }
 
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (who && who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+ 
         uint32 GetPathId()
         {
             switch (me->GetZoneId())
