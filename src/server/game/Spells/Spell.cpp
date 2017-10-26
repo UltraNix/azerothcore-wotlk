@@ -5398,12 +5398,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_MOVING;
     }
 
-    // If you casting something in vechicle and don't move you are not afk
-    if (sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT) && m_caster->IsVehicle())
-        if (Unit* player = m_caster->GetVehicleKit()->GetPassenger(0))
-            if (player->ToPlayer()->InBattleground())
-                player->ToPlayer()->UpdateAfkTime(time(NULL));
-
     Vehicle* vehicle = m_caster->GetVehicle();
     if (vehicle && !(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE))
     {

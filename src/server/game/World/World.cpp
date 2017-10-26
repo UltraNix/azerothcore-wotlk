@@ -1318,8 +1318,8 @@ void World::LoadConfigSettings(bool reload)
 
     // Kick player from BG/WG if doesn't move
     m_bool_configs[CONFIG_CUSTOM_AFK_REPORT] = sConfigMgr->GetBoolDefault("Custom.AFK.Report", true);
-    m_int_configs[CONFIG_CUSTOM_AFK_REPORT_TIMER] = sConfigMgr->GetIntDefault("Custom.AFK.Report.Timer", 2);
-    
+    m_int_configs[CONFIG_CUSTOM_AFK_REPORT_TIMER] = sConfigMgr->GetIntDefault("Custom.AFK.Report.PvP.Timer", 120000);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

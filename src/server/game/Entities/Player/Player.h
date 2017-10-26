@@ -1283,6 +1283,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
+        uint32 m_afkTimer;
 
         void setDeathState(DeathState s, bool despawn = false);                   // overwrite Unit::setDeathState
 
@@ -1922,7 +1923,6 @@ class Player : public Unit, public GridObject<Player>
         void UpdateZoneDependentAuras(uint32 zone_id);    // zones
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
-        void UpdateAfkTime(time_t currTime);
         void UpdateAfkReport(time_t currTime);
 
         void UpdatePvPFlag(time_t currTime);
@@ -2717,6 +2717,7 @@ class Player : public Unit, public GridObject<Player>
         SpellModList const& GetSpellModList(uint32 type) const { return m_spellMods[type]; }
 
         uint32 GetItemIdForSlaveMarket(uint8 slot);
+        void BgAfkTimer(uint32 diff);
 
     protected:
         // Gamemaster whisper whitelist
