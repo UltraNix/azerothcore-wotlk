@@ -20657,6 +20657,9 @@ void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
                 if (currTime > m_afkTimer)
                     ToggleAFK();
             }
+            else  // Battleground was not found we should update the timer anyway ...
+                UpdateAutoAfkKick(time(NULL), true);
+
         } break;
         // Player in Battlefield
         case CHECK_BATTLEFIELD:
@@ -20672,6 +20675,8 @@ void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
                     bf->KickPlayerFromBattlefield(GetGUID());
                 }
             }
+            else // Battlefield was not found we should update the timer anyway ...
+                UpdateAutoAfkKick(time(NULL), true);
 
         } break;
     }
