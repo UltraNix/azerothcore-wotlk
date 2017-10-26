@@ -1283,7 +1283,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
-        uint32 m_afkTimer;
+        time_t m_afkTimer;
 
         void setDeathState(DeathState s, bool despawn = false);                   // overwrite Unit::setDeathState
 
@@ -1924,7 +1924,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
         void UpdateAfkReport(time_t currTime);
-
+        void UpdateAutoAfkKick(time_t currTime, bool updateTimer = false);    // Custom.AFK.Report
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}

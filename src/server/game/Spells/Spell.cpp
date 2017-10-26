@@ -3995,6 +3995,10 @@ void Spell::SendSpellCooldown()
     // xinef: properly add creature cooldowns
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
     {
+        // Custom.AFK.Report
+        if (Player* plr = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+            plr->UpdateAutoAfkKick(time(NULL), true);
+
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD))
         {
             // xinef: this should be added here

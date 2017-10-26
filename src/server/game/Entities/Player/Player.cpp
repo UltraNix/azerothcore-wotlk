@@ -1614,9 +1614,8 @@ void Player::Update(uint32 p_time)
 
     UpdateAfkReport(now);
 
-    if (sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT))
-        if (InBattleground() || IsInWintergrasp())
-            BgAfkTimer(p_time);
+    // Custom.AFK.Report
+    UpdateAutoAfkKick(now);
 
     // Xinef: update charm AI only if we are controlled by creature or non-posses player charm
     if (IsCharmed() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
@@ -20614,6 +20613,70 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 /***              Update timers                        ***/
 /*********************************************************/
 
+enum AFKcheck
+{
+    CHECK_NULL         = 0,
+    CHECK_BATTLEGROUND = 1,
+    CHECK_BATTLEFIELD  = 2
+};
+
+// Custom.AFK.Report
+void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
+{
+    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT))
+        return;
+
+    // Function is called only for update timer see: Spell.cpp
+    if (updateTimer)
+    {
+        m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+        return;
+    }
+
+    uint8 checkType = CHECK_NULL;
+
+    if (InBattleground() && !InArena())
+        checkType = CHECK_BATTLEGROUND;
+    else if (IsInWintergrasp())
+        checkType = CHECK_BATTLEFIELD;
+
+    switch (checkType)
+    {
+        // None just update afk timer.
+        case CHECK_NULL:
+            m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+            break;
+        // Player in Battleground
+        case CHECK_BATTLEGROUND:
+        {
+            if (Battleground* bg = GetBattleground())
+            {
+                if (isMoving() || isTurning() || bg->GetStatus() != STATUS_IN_PROGRESS)
+                    m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+
+                if (currTime > m_afkTimer)
+                    ToggleAFK();
+            }
+        } break;
+        // Player in Battlefield
+        case CHECK_BATTLEFIELD:
+        {
+            if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
+            {
+                if (isMoving() || isTurning() || !bf->IsWarTime())
+                    m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+
+                if (currTime > m_afkTimer)
+                {
+                    ToggleAFK();
+                    bf->KickPlayerFromBattlefield(GetGUID());
+                }
+            }
+
+        } break;
+    }
+}
+
 // Checks the 15 afk reports per 5 minutes limit
 void Player::UpdateAfkReport(time_t currTime)
 {
@@ -27405,44 +27468,4 @@ uint32 Player::GetItemIdForSlaveMarket(uint8 slot)
         id = m_items[slot]->GetTemplate()->ItemId;
 
     return id;
-}
-
-void Player::BgAfkTimer(uint32 diff)
-{
-    if (Battleground* bg = GetBattleground())
-    {
-        if (GetVehicle() || isMoving() || isTurning() || bg->isArena())
-        {
-            m_afkTimer = 0;
-            return;
-        }
-
-        if (bg->GetStatus() == STATUS_IN_PROGRESS)
-            m_afkTimer += diff;
-
-        if (m_afkTimer >= sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER))
-        {
-            m_afkTimer = 0;
-            ToggleAFK();
-        }
-    }
-
-    if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
-    {
-        if (GetVehicle() || isMoving() || isTurning())
-        {
-            m_afkTimer = 0;
-            return;
-        }
-
-        if (bf->IsWarTime())
-            m_afkTimer += diff;
-
-        if (m_afkTimer >= sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER))
-        {
-            m_afkTimer = 0;
-            ToggleAFK();
-            bf->KickPlayerFromBattlefield(GetGUID());
-        }
-    }
 }
