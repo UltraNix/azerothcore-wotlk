@@ -1615,7 +1615,8 @@ void Player::Update(uint32 p_time)
     UpdateAfkReport(now);
 
     if (sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT))
-        BgAfkTimer(p_time);
+        if (InBattleground() || IsInWintergrasp())
+            BgAfkTimer(p_time);
 
     // Xinef: update charm AI only if we are controlled by creature or non-posses player charm
     if (IsCharmed() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
