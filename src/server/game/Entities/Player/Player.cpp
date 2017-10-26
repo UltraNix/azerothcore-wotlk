@@ -27410,7 +27410,7 @@ void Player::BgAfkTimer(uint32 diff)
 {
     if (Battleground* bg = GetBattleground())
     {
-        if (GetVehicle())
+        if (GetVehicle() || isMoving() || isTurning() || bg->isArena())
         {
             m_afkTimer = 0;
             return;
@@ -27428,7 +27428,7 @@ void Player::BgAfkTimer(uint32 diff)
 
     if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
     {
-        if (GetVehicle())
+        if (GetVehicle() || isMoving() || isTurning())
         {
             m_afkTimer = 0;
             return;
