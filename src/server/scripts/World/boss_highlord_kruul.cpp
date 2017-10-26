@@ -83,6 +83,14 @@ public:
         void Reset()
         {
             events.Reset();
+            events.ScheduleEvent(EVENT_SPELL_CLEAVE, 3000);
+            events.ScheduleEvent(EVENT_SPELL_SHADOW_CRASH, 15000);
+            events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT_VOLLEY, 21000);
+            events.ScheduleEvent(EVENT_SPELL_THUNDER_CLAP, 5000);
+            events.ScheduleEvent(EVENT_SPELL_TWISTED_REFLECTION, 30000);
+            events.ScheduleEvent(EVENT_SPELL_VOID_BOLT, 30000);
+            events.ScheduleEvent(EVENT_SPELL_BERSERK, 600000);
+
             playerRaidGUID = 0;
         }
 
@@ -158,14 +166,6 @@ public:
         {
             if (who && who->GetTypeId() == TYPEID_PLAYER)
                 playerRaidGUID = who->GetGUID();
-
-            events.ScheduleEvent(EVENT_SPELL_CLEAVE, 3000);
-            events.ScheduleEvent(EVENT_SPELL_SHADOW_CRASH, 15000);
-            events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT_VOLLEY, 21000);
-            events.ScheduleEvent(EVENT_SPELL_THUNDER_CLAP, 5000);
-            events.ScheduleEvent(EVENT_SPELL_TWISTED_REFLECTION, 30000);
-            events.ScheduleEvent(EVENT_SPELL_VOID_BOLT, 30000);
-            events.ScheduleEvent(EVENT_SPELL_BERSERK, 600000);
         }
 
         bool RollZone()
@@ -269,49 +269,49 @@ public:
                     case EVENT_SPELL_CLEAVE:
                     {
                         me->CastSpell(me->GetVictim(), SPELL_CLEAVE, false);
-                        events.Repeat(5000);
+                        events.ScheduleEvent(EVENT_SPELL_CLEAVE, 5000);
                         break;
                     }
                     case EVENT_SPELL_SHADOW_CRASH:
                     {
-                        events.Repeat(15000);
-
                         if (Unit* target = FindCrashTarget())
                         {
                             me->SetUInt64Value(UNIT_FIELD_TARGET, target->GetGUID());
                             me->CastSpell(target, SPELL_SHADOW_CRASH, false);
                         }
+                        events.ScheduleEvent(EVENT_SPELL_SHADOW_CRASH, 15000);
                         break;
                     }
                     case EVENT_SPELL_SHADOW_BOLT_VOLLEY:
                     {
                         me->CastSpell(me, SPELL_SHADOW_BOLT_VOLLEY, false);
-                        events.Repeat(21000);
+                        events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT_VOLLEY, 21000);
                         break;
                     }
                     case EVENT_SPELL_THUNDER_CLAP:
                     {
                         int32 dmg = urand(7000, 7500);
                         me->CastCustomSpell(me, SPELL_THUNDER_CLAP, &dmg, NULL, NULL, false);
-                        events.Repeat(10000);
+                        events.ScheduleEvent(EVENT_SPELL_THUNDER_CLAP, 10000);
                         break;
                     }
                     case EVENT_SPELL_TWISTED_REFLECTION:
                     {
                         me->CastSpell(me->GetVictim(), SPELL_TWISTED_REFLECTION, false);
-                        events.Repeat(30000);
+                        events.ScheduleEvent(EVENT_SPELL_TWISTED_REFLECTION, 30000);
                         break;
                     }
                     case EVENT_SPELL_VOID_BOLT:
                     {
                         int32 dmg = urand(14800, 15200);
                         me->CastCustomSpell(me->GetVictim(), SPELL_VOID_BOLT, &dmg, NULL, NULL, false);
-                        events.Repeat(10000);
+                        events.ScheduleEvent(EVENT_SPELL_VOID_BOLT, 10000);
                         break;
                     } 
                     case EVENT_SPELL_BERSERK:
                     {
                         me->CastSpell(me, SPELL_BERSERK, false);
+                        events.PopEvent();
                         break;
                     }
                 }
