@@ -1614,9 +1614,6 @@ void Player::Update(uint32 p_time)
 
     UpdateAfkReport(now);
 
-    // Custom.AFK.Report
-    UpdateAutoAfkKick(now);
-
     // Xinef: update charm AI only if we are controlled by creature or non-posses player charm
     if (IsCharmed() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
@@ -1941,6 +1938,9 @@ void Player::Update(uint32 p_time)
         m_delayed_unit_relocation_timer = 0;
         RemoveFromNotify(NOTIFY_VISIBILITY_CHANGED);
     }
+
+    // Custom.AFK.Report
+    UpdateAutoAfkKick(now);
 
     if (m_unstuckCooldown > p_time)
         m_unstuckCooldown -= p_time;
@@ -20623,7 +20623,7 @@ enum AFKcheck
 // Custom.AFK.Report
 void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
 {
-    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT))
+    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT) || !IsInWorld())
         return;
 
     // Function is called only for update timer see: Spell.cpp
