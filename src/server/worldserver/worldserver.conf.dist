@@ -3365,14 +3365,14 @@ BoostPercentage.Value = 0.1
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-Custom.AFK.Report = 0
+Custom.AFK.Report = 1
 
 #
 #    Custom.AFK.Report.Timer
 #        Description: Time (in minutes) after player is kicked from battlegrounds or battlefields if he's staying in place.
 #        Default:     2
 
-Custom.AFK.Report.Timer = 2
+Custom.AFK.Report.PvP.Timer = 2
 
 #
 ###################################################################################################
