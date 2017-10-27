@@ -1939,6 +1939,9 @@ void Player::Update(uint32 p_time)
         RemoveFromNotify(NOTIFY_VISIBILITY_CHANGED);
     }
 
+    // Custom.AFK.Report
+    UpdateAutoAfkKick(now);
+
     if (m_unstuckCooldown > p_time)
         m_unstuckCooldown -= p_time;
 }
@@ -14141,38 +14144,28 @@ void Player::TradeCancel(bool sendback)
 void Player::UpdateSoulboundTradeItems()
 {  
     TRINITY_GUARD(ACE_Thread_Mutex, m_soulboundTradableLock);
-    if (m_itemSoulboundTradeable.empty())
-        return;
 
     // also checks for garbage data
-    for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
+    for (ItemSoulboundGUIDs::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
-        ASSERT(*itr);
-        if ((*itr)->GetOwnerGUID() != GetGUID())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        if ((*itr)->CheckSoulboundTradeExpire())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        ++itr;
+        Item* item = GetItemByGuid(*itr);
+        if (!item || item->GetOwnerGUID() != GetGUID() || item->CheckSoulboundTradeExpire())
+            itr = m_itemSoulboundTradeable.erase(itr);
+        else
+            ++itr;
     }
 }
 
 void Player::AddTradeableItem(Item* item)
 {  
     TRINITY_GUARD(ACE_Thread_Mutex, m_soulboundTradableLock);
-    m_itemSoulboundTradeable.push_back(item);
+    m_itemSoulboundTradeable.insert(item->GetGUID());
 }
 
-//TODO: should never allow an item to be added to m_itemSoulboundTradeable twice
 void Player::RemoveTradeableItem(Item* item)
 {  
     TRINITY_GUARD(ACE_Thread_Mutex, m_soulboundTradableLock);
-    m_itemSoulboundTradeable.remove(item);
+    m_itemSoulboundTradeable.erase(item->GetGUID());
 }
 
 void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
@@ -20620,42 +20613,83 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 /***              Update timers                        ***/
 /*********************************************************/
 
-///checks the 15 afk reports per 5 minutes limit
-void Player::UpdateAfkReport(time_t currTime)
-{ 
-    if (sWorld->getBoolConfig(CONFIG_ANTI_AFK_SYSTEM_ENABLE))
-    {
+enum AFKcheck
+{
+    CHECK_NULL         = 0,
+    CHECK_BATTLEGROUND = 1,
+    CHECK_BATTLEFIELD  = 2
+};
 
-        if (InBattleground()) {
-            if (GetBattleground()->GetStartDelayTime())
-            {
-                m_bgData.bgAfkReportedTimer = INT_MAX;
-                return;
-            }
-            else if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
-            {
-                ToggleAFK();
-                m_bgData.bgAfkReportedTimer = INT_MAX;
-            }
-            else if (isMoving() || isTurning())
-                UpdateAfkTime(currTime);
-        }
-        else if (IsInWintergrasp() && sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_ACTIVE))
+// Custom.AFK.Report
+void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
+{
+    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT) || !IsInWorld())
+        return;
+
+    // Function is called only for update timer see: Spell.cpp
+    if (updateTimer)
+    {
+        m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+        return;
+    }
+
+    uint8 checkType = CHECK_NULL;
+
+    if (InBattleground() && !InArena())
+        checkType = CHECK_BATTLEGROUND;
+    else if (IsInWintergrasp())
+        checkType = CHECK_BATTLEFIELD;
+
+    switch (checkType)
+    {
+        // None just update afk timer.
+        case CHECK_NULL:
+            m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+            break;
+        // Player in Battleground
+        case CHECK_BATTLEGROUND:
         {
-            if (m_bgData.bgAfkReportedTimer && currTime >= m_bgData.bgAfkReportedTimer)
+            if (Battleground* bg = GetBattleground())
             {
-                ToggleAFK();
-                m_bgData.bgAfkReportedTimer = INT_MAX;
+                if (isMoving() || isTurning() || bg->GetStatus() != STATUS_IN_PROGRESS)
+                    m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+
+                if (currTime > m_afkTimer)
+                    ToggleAFK();
             }
-            else if (isMoving())
-                UpdateAfkTime(currTime);
-        }
+            else  // Battleground was not found we should update the timer anyway ...
+                UpdateAutoAfkKick(time(NULL), true);
+
+        } break;
+        // Player in Battlefield
+        case CHECK_BATTLEFIELD:
+        {
+            if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
+            {
+                if (isMoving() || isTurning() || !bf->IsWarTime())
+                    m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
+
+                if (currTime > m_afkTimer)
+                {
+                    ToggleAFK();
+                    bf->KickPlayerFromBattlefield(GetGUID());
+                }
+            }
+            else // Battlefield was not found we should update the timer anyway ...
+                UpdateAutoAfkKick(time(NULL), true);
+
+        } break;
     }
 }
-//Acces for other classes 
-void Player::UpdateAfkTime(time_t currTime)
+
+// Checks the 15 afk reports per 5 minutes limit
+void Player::UpdateAfkReport(time_t currTime)
 {
-    m_bgData.bgAfkReportedTimer = currTime + sWorld->getIntConfig(CONFIG_MAX_AFK_TIME_ON_BG_MINUTE) * MINUTE;
+    if (m_bgData.bgAfkReportedTimer <= currTime)
+    {	
+        m_bgData.bgAfkReportedCount = 0;
+        m_bgData.bgAfkReportedTimer = currTime + 5 * MINUTE;
+    }
 }
 
 void Player::UpdateContestedPvP(uint32 diff)

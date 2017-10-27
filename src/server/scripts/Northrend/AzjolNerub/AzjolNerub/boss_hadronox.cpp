@@ -150,7 +150,7 @@ struct boss_hadronoxAI : public BossAI
                     AttackStart(me->GetVictim());
                     SetCombatMovement(true);
                     if (_step < NUM_STEPS - 1)
-                        return;
+                        return true;
                     DoCastAOE(SPELL_WEB_FRONT_DOORS);
                     DoCastAOE(SPELL_WEB_SIDE_DOORS);
                     _doorsWebbed = true;
@@ -878,7 +878,9 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
                 case 53037: // fiend
                     return 5000;
                 case 53036: // necromancer
-                    return 8000;
+                    return 8000; 
+                default:
+                    return 0;
             }
         }
 

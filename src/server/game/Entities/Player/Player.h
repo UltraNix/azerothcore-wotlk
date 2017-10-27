@@ -1283,6 +1283,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
+        time_t m_afkTimer;
 
         void setDeathState(DeathState s, bool despawn = false);                   // overwrite Unit::setDeathState
 
@@ -1923,7 +1924,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
         void UpdateAfkReport(time_t currTime);
-        void UpdateAfkTime(time_t currTime);
+        void UpdateAutoAfkKick(time_t currTime, bool updateTimer = false);    // Custom.AFK.Report
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
@@ -2716,6 +2717,7 @@ class Player : public Unit, public GridObject<Player>
         SpellModList const& GetSpellModList(uint32 type) const { return m_spellMods[type]; }
 
         uint32 GetItemIdForSlaveMarket(uint8 slot);
+        void BgAfkTimer(uint32 diff);
 
     protected:
         // Gamemaster whisper whitelist
@@ -2910,7 +2912,10 @@ class Player : public Unit, public GridObject<Player>
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
-        ItemDurationList m_itemSoulboundTradeable;
+
+        typedef std::unordered_set<uint64> ItemSoulboundGUIDs;
+        ItemSoulboundGUIDs m_itemSoulboundTradeable;
+
         ACE_Thread_Mutex m_soulboundTradableLock;
 
         void ResetTimeSync();
