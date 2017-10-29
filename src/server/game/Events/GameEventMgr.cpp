@@ -783,7 +783,7 @@ void GameEventMgr::LoadFromDB()
                 Field* fields = result->Fetch();
 
                 uint32 questId  = fields[0].GetUInt32();
-                uint32 eventEntry = fields[1].GetUInt16();
+                uint16 eventEntry = fields[1].GetUInt16();
 
                 Quest* questTemplate = const_cast<Quest*>(sObjectMgr->GetQuestTemplate(questId));
 
@@ -798,6 +798,8 @@ void GameEventMgr::LoadFromDB()
                     sLog->outErrorDb("`game_event_seasonal_questrelation` event id (%u) is out of range compared to max event in `game_event`", eventEntry);
                     continue;
                 }
+
+                sLog->outReleaseDebug("EventMgr Loading - Quest Id: %u, Event Entry: %u, Event Entry as uint32: %u", questId, eventEntry, uint32(eventEntry));
 
                 questTemplate->SetEventIdForQuest(eventEntry);
                 ++count;
