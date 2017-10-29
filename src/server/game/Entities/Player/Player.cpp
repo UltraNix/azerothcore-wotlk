@@ -20107,7 +20107,11 @@ void Player::_SaveSeasonalQuestStatus(SQLTransaction& trans)
     for (SeasonalEventQuestMap::const_iterator iter = m_seasonalquests.begin(); iter != m_seasonalquests.end(); ++iter)
     {
         uint16 event_id = iter->first;
+
         sLog->outReleaseDebug("Player::_SaveSeasonalQuestStatus - event_id value: %u, player guid: %u", event_id, GetGUIDLow());
+
+        if (event_id == 0)
+            event_id = 12;
 
         for (SeasonalQuestSet::const_iterator itr = iter->second.begin(); itr != iter->second.end(); ++itr)
         {
