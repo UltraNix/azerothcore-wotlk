@@ -20120,7 +20120,7 @@ void Player::_SaveSeasonalQuestStatus(SQLTransaction& trans)
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHARACTER_SEASONALQUESTSTATUS);
             stmt->setUInt32(0, GetGUIDLow());
             stmt->setUInt32(1, quest_id);
-            stmt->setUInt16(2, 12); // stmt->setUInt16(2, event_id);
+            stmt->setUInt16(2, event_id);
             trans->Append(stmt);
         }
     }
