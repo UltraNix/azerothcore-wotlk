@@ -16341,6 +16341,8 @@ bool Player::SatisfyQuestSeasonal(Quest const* qInfo, bool /*msg*/) const
 
     Player::SeasonalEventQuestMap::iterator itr = ((Player*)this)->m_seasonalquests.find(qInfo->GetEventIdForQuest());
 
+    sLog->outReleaseDebug("Player::SatisfyQuestSeasonal - GetEventIdForQuest value: %u", qInfo->GetEventIdForQuest());
+
     if (itr == m_seasonalquests.end() || itr->second.empty())
         return true;
 
@@ -20105,6 +20107,12 @@ void Player::_SaveSeasonalQuestStatus(SQLTransaction& trans)
     for (SeasonalEventQuestMap::const_iterator iter = m_seasonalquests.begin(); iter != m_seasonalquests.end(); ++iter)
     {
         uint16 event_id = iter->first;
+
+        sLog->outReleaseDebug("Player::_SaveSeasonalQuestStatus - event_id value: %u, player guid: %u", event_id, GetGUIDLow());
+
+        if (event_id == 0)
+            event_id = 12;
+
         for (SeasonalQuestSet::const_iterator itr = iter->second.begin(); itr != iter->second.end(); ++itr)
         {
             uint32 quest_id = (*itr);
