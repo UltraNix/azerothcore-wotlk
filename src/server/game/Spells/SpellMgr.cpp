@@ -5981,6 +5981,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67630:
         case 68646:
         case 68647:
+            spellInfo->InterruptFlags = 0;
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             break;
         // Trial of the Crusader, Faction Champions:

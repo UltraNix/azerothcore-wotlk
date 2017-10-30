@@ -336,7 +336,8 @@ struct boss_anubarak_trialAI : public BossAI
                 return;
         }
 
-        DoMeleeAttackIfReady();
+        if (!me->HasUnitState(UNIT_STATE_CASTING))
+            DoMeleeAttackIfReady();
     }
 
     void JustSummoned(Creature* summon) override
