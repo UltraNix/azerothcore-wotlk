@@ -21,7 +21,6 @@ public:
         instance_onyxias_lair_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
 
         uint64 m_uiOnyxiasGUID;
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string str_data;
         uint16 ManyWhelpsCounter;
         std::vector<uint64> minions;
@@ -29,19 +28,24 @@ public:
 
         void Initialize()
         {
-            memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
             m_uiOnyxiasGUID = 0;
             ManyWhelpsCounter = 0;
             bDeepBreath = true;
         }
 
-        bool IsEncounterInProgress() const
+        bool SetBossState(uint32 type, EncounterState state) override
         {
-            for( uint8 i=0; i<MAX_ENCOUNTER; ++i )
-                if( m_auiEncounter[i] == IN_PROGRESS )
-                    return true;
+            ManyWhelpsCounter = 0;
+            bDeepBreath = true;
+            if (state == NOT_STARTED || state == TO_BE_DECIDED)
+            {
+                for (std::vector<uint64>::iterator itr = minions.begin(); itr != minions.end(); ++itr)
+                    if (Creature* c = instance->GetCreature(*itr))
+                        c->DespawnOrUnsummon();
+                minions.clear();
+            }
 
-            return false;
+            return true;
         }
 
         void OnCreatureCreate(Creature* pCreature)
@@ -74,18 +78,6 @@ public:
         {
             switch(uiType)
             {
-                case DATA_ONYXIA:
-                    m_auiEncounter[0] = uiData;
-                    ManyWhelpsCounter = 0;
-                    bDeepBreath = true;
-                    if( uiData == NOT_STARTED )
-                    {
-                        for( std::vector<uint64>::iterator itr = minions.begin(); itr != minions.end(); ++itr )
-                            if( Creature* c = instance->GetCreature(*itr) )
-                                c->DespawnOrUnsummon();
-                        minions.clear();
-                    }
-                    break;
                 case DATA_WHELP_SUMMONED:
                     ++ManyWhelpsCounter;
                     break;
@@ -96,17 +88,6 @@ public:
 
             if (uiType < MAX_ENCOUNTER && uiData == DONE)
                 SaveToDB();
-        }
-
-        uint32 GetData(uint32 uiType) const
-        {
-            switch(uiType)
-            {
-                case DATA_ONYXIA:
-                    return m_auiEncounter[0];
-            }
-
-            return 0;
         }
 
         uint64 GetData64(uint32 uiData) const
@@ -120,38 +101,47 @@ public:
             return 0;
         }
 
-        std::string GetSaveData()
+        std::string GetSaveData() override
         {
             OUT_SAVE_INST_DATA;
+
             std::ostringstream saveStream;
-            saveStream << "O L " << m_auiEncounter[0];
-            str_data = saveStream.str();
+            saveStream << "O L " << GetBossSaveData();
+
             OUT_SAVE_INST_DATA_COMPLETE;
-            return str_data;
+            return saveStream.str();
         }
 
-        void Load(const char* in)
+        void Load(char const* data) override
         {
-            if( !in )
+            if (!data)
             {
                 OUT_LOAD_INST_DATA_FAIL;
                 return;
             }
 
-            OUT_LOAD_INST_DATA(in);
+            OUT_LOAD_INST_DATA(data);
 
             char dataHead1, dataHead2;
-            uint16 data0;
-            std::istringstream loadStream(in);
-            loadStream >> dataHead1 >> dataHead2 >> data0;
 
-            if( dataHead1 == 'O' && dataHead2 == 'L' )
+            std::istringstream loadStream(data);
+            loadStream >> dataHead1 >> dataHead2;
+
+            if (dataHead1 == 'O' && dataHead2 == 'L')
             {
-                m_auiEncounter[0] = data0;
+                EncounterState states[MAX_ENCOUNTER];
 
-                for( uint8 i = 0; i < MAX_ENCOUNTER; ++i )
-                    if( m_auiEncounter[i] == IN_PROGRESS )
-                        m_auiEncounter[i] = NOT_STARTED;
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                {
+                    uint32 tmpState;
+                    loadStream >> tmpState;
+                    if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
+                        tmpState = NOT_STARTED;
+                    states[i] = EncounterState(tmpState);
+                }
+
+                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                    SetBossState(i, states[i]);
             }
             else
                 OUT_LOAD_INST_DATA_FAIL;

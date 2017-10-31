@@ -159,11 +159,6 @@ struct boss_onyxiaAI : public BossAI
         _DespawnAtEvade();
     }
 
-    void BindPlayers() const
-    {
-        me->GetMap()->ToInstanceMap()->PermBindAllPlayers();
-    }
-
     void EnterCombat(Unit* /*who*/) override
     {
         _EnterCombat();
@@ -172,8 +167,6 @@ struct boss_onyxiaAI : public BossAI
 
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT); // just in case at reset some players already left the instance
         instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
-
-        BindPlayers();
     }
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
@@ -437,6 +430,8 @@ struct boss_onyxiaAI : public BossAI
                     events.ScheduleEvent(EVENT_ERUPTION, 0);
                     break;
                 case EVENT_ERUPTION:
+                    if (_phase == 3)
+                        break;
                     if (Creature* trigger = me->SummonCreature(12758, *me, TEMPSUMMON_TIMED_DESPAWN, 1000))
                         trigger->CastSpell(trigger, 17731, false);
                     break;
