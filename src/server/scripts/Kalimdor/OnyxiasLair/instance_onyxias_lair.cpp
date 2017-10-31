@@ -35,6 +35,9 @@ public:
 
         bool SetBossState(uint32 type, EncounterState state) override
         {
+            if (!InstanceScript::SetBossState(type, state))
+                return false;
+
             ManyWhelpsCounter = 0;
             bDeepBreath = true;
             if (state == NOT_STARTED)
