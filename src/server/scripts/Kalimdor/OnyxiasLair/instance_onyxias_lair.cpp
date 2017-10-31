@@ -37,7 +37,7 @@ public:
         {
             ManyWhelpsCounter = 0;
             bDeepBreath = true;
-            if (state == NOT_STARTED || state == TO_BE_DECIDED)
+            if (state == NOT_STARTED)
             {
                 for (std::vector<uint64>::iterator itr = minions.begin(); itr != minions.end(); ++itr)
                     if (Creature* c = instance->GetCreature(*itr))
