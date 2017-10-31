@@ -1,7 +1,3 @@
-/*
-REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "onyxias_lair.h"
@@ -18,20 +14,19 @@ public:
 
     struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
     {
-        instance_onyxias_lair_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_onyxias_lair_InstanceMapScript(Map* pMap) : InstanceScript(pMap) 
+        {
+            m_uiOnyxiasGUID = 0;
+            ManyWhelpsCounter = 0;
+            bDeepBreath = true;
+            SetBossNumber(1);
+        };
 
         uint64 m_uiOnyxiasGUID;
         std::string str_data;
         uint16 ManyWhelpsCounter;
         std::vector<uint64> minions;
         bool bDeepBreath;
-
-        void Initialize()
-        {
-            m_uiOnyxiasGUID = 0;
-            ManyWhelpsCounter = 0;
-            bDeepBreath = true;
-        }
 
         bool SetBossState(uint32 type, EncounterState state) override
         {
@@ -88,9 +83,6 @@ public:
                     bDeepBreath = false;
                     break;
             }
-
-            if (uiType < MAX_ENCOUNTER && uiData == DONE)
-                SaveToDB();
         }
 
         uint64 GetData64(uint32 uiData) const
