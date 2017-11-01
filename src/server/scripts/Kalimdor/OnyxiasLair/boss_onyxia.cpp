@@ -3,7 +3,7 @@
 #include "onyxias_lair.h"
 #include "SpellInfo.h"
 
-enum Spells
+enum OnyxiaSpells
 {
     SPELL_WINGBUFFET                 = 18500,
     SPELL_FLAMEBREATH                = 18435,
@@ -30,7 +30,7 @@ enum Spells
     SPELL_BREATH_NE_TO_SW            = 18617
 };
 
-enum Events 
+enum OnyxiaEvents 
 {
     EVENT_SPELL_WINGBUFFET           = 1,
     EVENT_SPELL_FLAMEBREATH,
@@ -60,14 +60,14 @@ enum Events
     EVENT_END_MANY_WHELPS_TIME
 };
 
-struct sOnyxMove
+struct OnyxiaData
 {
     uint8 CurrId, DestId;
     uint32 spellId;
     float x, y, z, o;
 };
 
-static sOnyxMove OnyxiaMoveData[] =
+static OnyxiaData OnyxiaMoveData[] =
 {
     {0, 0, 0, -64.496f, -214.906f, -84.4f, 0.0f}, // south ground
     {1, 5, SPELL_BREATH_S_TO_N, -64.496f, -214.906f, -60.0f, 0.0f}, // south
@@ -80,7 +80,7 @@ static sOnyxMove OnyxiaMoveData[] =
     {8, 4, SPELL_BREATH_SE_TO_NW, -63.5156f, -240.096f, -60.0f, M_PI/4}, // south-east
 };
 
-enum Yells
+enum OnyxiaYells
 {
     // Say
     SAY_AGGRO                   = 0,
@@ -92,9 +92,17 @@ enum Yells
     EMOTE_BREATH
 };
 
+enum OnyxiaMisc
+{
+    ACHIEVEMENT_MORE_DOTS    = 6601, // Timed event for achievement 4402, 4005: More Dots! (10,25 player) 5 min kill
+
+    DATA_DEEP_BREATH         = 1,
+    DATA_MANY_WHELPS
+};
+
 struct boss_onyxiaAI : public BossAI
 {
-    explicit boss_onyxiaAI(Creature* creature) : BossAI(creature, DATA_ONYXIA), _phase(0), _currentWP(0), _whelpSpam(false), _whelpCount(0), _whelpSpamTimer(0), _manyWhelpsAvailable(false) { }
+    explicit boss_onyxiaAI(Creature* creature) : BossAI(creature, DATA_ONYXIA), _deepBreath(true), _phase(0), _currentWP(0), _whelpSpam(false), _whelpCount(0), _whelpSpamTimer(0), _manyWhelpsAvailable(false), _manyWhelpsCounter(0) { }
 
     void SetPhase(uint8 ph)
     {
@@ -122,6 +130,7 @@ struct boss_onyxiaAI : public BossAI
     void Reset() override
     {
         _Reset();
+        _deepBreath = true;
         _currentWP = 0;
         SetPhase(0);
         me->SetReactState(REACT_AGGRESSIVE);
@@ -134,8 +143,9 @@ struct boss_onyxiaAI : public BossAI
         _whelpCount = 0;
         _whelpSpamTimer = 0;
         _manyWhelpsAvailable = false;
+        _manyWhelpsCounter;
 
-        instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+        instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MORE_DOTS);
     }
 
     void MoveInLineOfSight(Unit* who) override
@@ -151,7 +161,7 @@ struct boss_onyxiaAI : public BossAI
     {
         if (param == -1)
             if (_manyWhelpsAvailable)
-                instance->SetData(DATA_WHELP_SUMMONED, 1);
+                ++_manyWhelpsCounter;
     }
 
     void EnterEvadeMode() override
@@ -165,8 +175,21 @@ struct boss_onyxiaAI : public BossAI
         Talk(SAY_AGGRO);
         SetPhase(1);
 
-        instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT); // just in case at reset some players already left the instance
-        instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+        instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MORE_DOTS); // just in case at reset some players already left the instance
+        instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MORE_DOTS);
+    }
+
+    uint32 GetData(uint32 type) const override
+    {
+        switch (type)
+        {
+            case DATA_DEEP_BREATH:
+                return static_cast<uint32>(_deepBreath);
+            case DATA_MANY_WHELPS:
+                return static_cast<uint32>(_manyWhelpsCounter >= 50);
+        }
+
+        return 0;
     }
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
@@ -457,17 +480,19 @@ struct boss_onyxiaAI : public BossAI
 
     void SpellHitTarget(Unit* target, const SpellInfo* spell) override
     {
-        if (target->GetTypeId() == TYPEID_PLAYER && spell->DurationEntry && spell->DurationEntry->ID == 328 && spell->Effects[EFFECT_1].TargetA.GetTarget() == 1 && (spell->Effects[EFFECT_1].Amplitude == 50 || spell->Effects[EFFECT_1].Amplitude == 215)) // Deep Breath
-            instance->SetData(DATA_DEEP_BREATH_FAILED, 1);
+        if (target->GetTypeId() == TYPEID_PLAYER && spell->DurationEntry && spell->DurationEntry->ID == 328 && spell->Effects[EFFECT_1].TargetA.GetTarget() == 1 && (spell->Effects[EFFECT_1].Amplitude == 50 || spell->Effects[EFFECT_1].Amplitude == 150)) // Deep Breath
+            _deepBreath = false;
     }
 
 private:
+    bool _deepBreath;
     uint8 _phase;
     int8 _currentWP;
     bool _whelpSpam;
     uint8 _whelpCount;
     int32 _whelpSpamTimer;
     bool _manyWhelpsAvailable;
+    uint32 _manyWhelpsCounter;
 };
 
 struct npc_onyxian_lair_guardAI : public ScriptedAI
@@ -546,7 +571,7 @@ struct npc_onyxia_whelpAI : public ScriptedAI
 {
     explicit npc_onyxia_whelpAI(Creature* creature) : ScriptedAI(creature) {}
 
-    void MoveInLineOfSight(Unit *who) override
+    void MoveInLineOfSight(Unit* who) override
     {
         if (me->GetVictim() || me->GetDistance(who) > 20.0f)
             return;
@@ -558,10 +583,38 @@ struct npc_onyxia_whelpAI : public ScriptedAI
 
 struct npc_onyxia_triggerAI : public ScriptedAI
 {
-    explicit npc_onyxia_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+    explicit npc_onyxia_triggerAI(Creature* creature) : ScriptedAI(creature) {}
 
     void MoveInLineOfSight(Unit* who) override {}
     void UpdateAI(uint32 diff) override {}
+};
+
+class achievement_onyxia_deep_breath : public AchievementCriteriaScript
+{
+    public:
+        achievement_onyxia_deep_breath() : AchievementCriteriaScript("achievement_onyxia_deep_breath") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target) override
+        {
+            if (target && target->ToCreature())
+                return target->ToCreature()->AI()->GetData(DATA_DEEP_BREATH);
+
+            return false;
+        }
+};
+
+class achievement_onyxia_many_whelps : public AchievementCriteriaScript
+{
+    public:
+        achievement_onyxia_many_whelps() : AchievementCriteriaScript("achievement_onyxia_many_whelps") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target) override
+        {
+            if (target && target->ToCreature())
+                return target->ToCreature()->AI()->GetData(DATA_MANY_WHELPS);
+
+            return false;
+        }
 };
 
 void AddSC_boss_onyxia()
@@ -570,4 +623,6 @@ void AddSC_boss_onyxia()
     new CreatureAILoader<npc_onyxian_lair_guardAI>("npc_onyxian_lair_guard");
     new CreatureAILoader<npc_onyxia_whelpAI>("npc_onyxia_whelp");
     new CreatureAILoader<npc_onyxia_triggerAI>("npc_onyxia_trigger");
+    new achievement_onyxia_deep_breath();
+    new achievement_onyxia_many_whelps();
 }

@@ -2,165 +2,113 @@
 #include "ScriptedCreature.h"
 #include "onyxias_lair.h"
 
-class instance_onyxias_lair : public InstanceMapScript
+ObjectData const creatureData[] =
 {
-public:
-    instance_onyxias_lair() : InstanceMapScript("instance_onyxias_lair", 249) { }
+    { DATA_ONYXIA, NPC_ONYXIA },
+    { 0          ,          0 } // END
+};
 
-    InstanceScript* GetInstanceScript(InstanceMap* pMap) const
+struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
+{
+    instance_onyxias_lair_InstanceMapScript(Map* map) : InstanceScript(map) 
     {
-        return new instance_onyxias_lair_InstanceMapScript(pMap);
+        LoadObjectData(creatureData, nullptr);
+        SetBossNumber(MAX_ENCOUNTER);
+    };
+
+    bool SetBossState(uint32 type, EncounterState state) override
+    {
+        if (!InstanceScript::SetBossState(type, state))
+            return false;
+
+        if (state == NOT_STARTED)
+        {
+            for (std::vector<uint64>::iterator itr = _minions.begin(); itr != _minions.end(); ++itr)
+                if (Creature* minion = instance->GetCreature(*itr))
+                    minion->DespawnOrUnsummon();
+            _minions.clear();
+        }
+
+        return true;
     }
 
-    struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
+    void OnCreatureCreate(Creature* creature) override
     {
-        instance_onyxias_lair_InstanceMapScript(Map* pMap) : InstanceScript(pMap) 
+        switch (creature->GetEntry())
         {
-            m_uiOnyxiasGUID = 0;
-            ManyWhelpsCounter = 0;
-            bDeepBreath = true;
-            SetBossNumber(1);
-        };
-
-        uint64 m_uiOnyxiasGUID;
-        std::string str_data;
-        uint16 ManyWhelpsCounter;
-        std::vector<uint64> minions;
-        bool bDeepBreath;
-
-        bool SetBossState(uint32 type, EncounterState state) override
-        {
-            if (!InstanceScript::SetBossState(type, state))
-                return false;
-
-            ManyWhelpsCounter = 0;
-            bDeepBreath = true;
-            if (state == NOT_STARTED)
-            {
-                for (std::vector<uint64>::iterator itr = minions.begin(); itr != minions.end(); ++itr)
-                    if (Creature* c = instance->GetCreature(*itr))
-                        c->DespawnOrUnsummon();
-                minions.clear();
-            }
-
-            return true;
+            case NPC_ONYXIAN_WHELP:
+            case NPC_ONYXIAN_LAIR_GUARD:
+                _minions.push_back(creature->GetGUID());
+                break;
         }
+    }
 
-        void OnCreatureCreate(Creature* pCreature)
+    void OnGameObjectCreate(GameObject* go) override
+    {
+        switch (go->GetEntry())
         {
-            switch( pCreature->GetEntry() )
-            {
-                case NPC_ONYXIA:
-                    m_uiOnyxiasGUID = pCreature->GetGUID();
-                    break;
-                case NPC_ONYXIAN_WHELP:
-                case NPC_ONYXIAN_LAIR_GUARD:
-                    minions.push_back(pCreature->GetGUID());
-                    break;
-            }
-        }
-
-        void OnGameObjectCreate(GameObject* go)
-        {
-            switch( go->GetEntry() )
-            {
-                case GO_WHELP_SPAWNER:
-                    go->CastSpell((Unit*)NULL, 17646);
-                    if( Creature* onyxia = instance->GetCreature(m_uiOnyxiasGUID) )
+            case GO_WHELP_SPAWNER:
+                go->CastSpell((Unit*)nullptr, 17646);
+                if (Creature* onyxia = GetCreature(DATA_ONYXIA))
+                    if (onyxia->IsAIEnabled)
                         onyxia->AI()->DoAction(-1);
-                    break;
-            }
+                break;
         }
+    }
 
-        void SetData(uint32 uiType, uint32 uiData)
+    std::string GetSaveData() override
+    {
+        OUT_SAVE_INST_DATA;
+
+        std::ostringstream saveStream;
+        saveStream << "O L " << GetBossSaveData();
+
+        OUT_SAVE_INST_DATA_COMPLETE;
+        return saveStream.str();
+    }
+
+    void Load(char const* data) override
+    {
+        if (!data)
         {
-            switch(uiType)
-            {
-                case DATA_WHELP_SUMMONED:
-                    ++ManyWhelpsCounter;
-                    break;
-                case DATA_DEEP_BREATH_FAILED:
-                    bDeepBreath = false;
-                    break;
-            }
+            OUT_LOAD_INST_DATA_FAIL;
+            return;
         }
 
-        uint64 GetData64(uint32 uiData) const
+        OUT_LOAD_INST_DATA(data);
+
+        char dataHead1, dataHead2;
+
+        std::istringstream loadStream(data);
+        loadStream >> dataHead1 >> dataHead2;
+
+        if (dataHead1 == 'O' && dataHead2 == 'L')
         {
-            switch(uiData)
+            EncounterState states[MAX_ENCOUNTER];
+
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
             {
-                case DATA_ONYXIA:
-                    return m_uiOnyxiasGUID;
+                uint32 tmpState;
+                loadStream >> tmpState;
+                if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
+                    tmpState = NOT_STARTED;
+                states[i] = EncounterState(tmpState);
             }
 
-            return 0;
+            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                SetBossState(i, states[i]);
         }
+        else
+            OUT_LOAD_INST_DATA_FAIL;
 
-        std::string GetSaveData() override
-        {
-            OUT_SAVE_INST_DATA;
+        OUT_LOAD_INST_DATA_COMPLETE;
+    }
 
-            std::ostringstream saveStream;
-            saveStream << "O L " << GetBossSaveData();
-
-            OUT_SAVE_INST_DATA_COMPLETE;
-            return saveStream.str();
-        }
-
-        void Load(char const* data) override
-        {
-            if (!data)
-            {
-                OUT_LOAD_INST_DATA_FAIL;
-                return;
-            }
-
-            OUT_LOAD_INST_DATA(data);
-
-            char dataHead1, dataHead2;
-
-            std::istringstream loadStream(data);
-            loadStream >> dataHead1 >> dataHead2;
-
-            if (dataHead1 == 'O' && dataHead2 == 'L')
-            {
-                EncounterState states[MAX_ENCOUNTER];
-
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                {
-                    uint32 tmpState;
-                    loadStream >> tmpState;
-                    if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
-                        tmpState = NOT_STARTED;
-                    states[i] = EncounterState(tmpState);
-                }
-
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                    SetBossState(i, states[i]);
-            }
-            else
-                OUT_LOAD_INST_DATA_FAIL;
-
-            OUT_LOAD_INST_DATA_COMPLETE;
-        }
-
-        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0)
-        {
-            switch(criteria_id)
-            {
-                case ACHIEV_CRITERIA_MANY_WHELPS_10_PLAYER:
-                case ACHIEV_CRITERIA_MANY_WHELPS_25_PLAYER:
-                    return ManyWhelpsCounter>=50;
-                case ACHIEV_CRITERIA_DEEP_BREATH_10_PLAYER:
-                case ACHIEV_CRITERIA_DEEP_BREATH_25_PLAYER:
-                    return bDeepBreath;
-            }
-            return false;
-        }
-    };
+private:
+    std::vector<uint64> _minions;
 };
 
 void AddSC_instance_onyxias_lair()
 {
-    new instance_onyxias_lair();
+    new InstanceMapScriptLoader<instance_onyxias_lair_InstanceMapScript>("instance_onyxias_lair", 249);
 }
