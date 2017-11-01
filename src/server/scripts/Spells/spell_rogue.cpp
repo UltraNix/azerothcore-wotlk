@@ -96,7 +96,9 @@ class spell_rog_combat_potency : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                if (eventInfo.GetSpellInfo()->Id == SPELL_ROGUE_FAN_OF_KNIFES) return true;
+                if(eventInfo.GetSpellInfo())
+                    if (eventInfo.GetSpellInfo()->Id == SPELL_ROGUE_FAN_OF_KNIFES)
+                        return true;
                 return eventInfo.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK);
             }
 
