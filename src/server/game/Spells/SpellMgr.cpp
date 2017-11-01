@@ -5717,6 +5717,15 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// TRIAL OF THE CRUSADER
         //////////////////////////////////////////
+        // Anub'arak, Nerubian Burrower, Expose Weakness 10
+        case 67721:
+        // Anub'arak, Nerubian Burrower, Expose Weakness 25
+        case 67847:
+            spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT;
+            spellInfo->EffectBasePoints[EFFECT_1] = 39;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ENEMY;
+            break;
         // Trial of the Crusader, Icehowl damage corrections
         case 67345: // Whirl 10 man
             spellInfo->EffectBasePoints[EFFECT_0] = urand(9200, 10700);
