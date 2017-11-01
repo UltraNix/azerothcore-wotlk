@@ -3736,11 +3736,8 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
                         value = val;
                 }
 
-                if (value)
-                {
-                    addhealth *= -value;
-                    addhealth /= 100;
-                }
+                if (value < 0)
+                    AddPct(addhealth, value);
             }
         }
     }
