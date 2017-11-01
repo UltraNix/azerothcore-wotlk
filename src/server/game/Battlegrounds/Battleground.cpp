@@ -1257,6 +1257,11 @@ void Battleground::AddPlayer(Player* player)
     if (player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         player->ToggleAFK();
 
+    //If player was in group (from WG) and doesn't leave
+    if (Group *group = player->GetGroup())
+        if(group->isRaidGroup())
+            player->RemoveFromGroup();
+
     // score struct must be created in inherited class
 
     uint64 guid = player->GetGUID();
