@@ -68,6 +68,24 @@ void InstanceScript::LoadObjectData(ObjectData const* data, ObjectInfoMap& objec
     }
 }
 
+void InstanceScript::LoadTrashMapInfoData()
+{
+    if (!instance)
+        return;
+
+    auto instanceId = instance->GetId();
+    if (auto result = WorldDatabase.PQuery("SELECT BossDataId, TrashGUID FROM instance_trash_map_data WHERE InstanceId='%u'", instanceId))
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 BossDataId = fields[0].GetUInt32();
+            uint32 TrashGUID = fields[1].GetUInt32();
+            _trashMapData.insert(std::make_pair(BossDataId, TrashGUID));
+        } while (result->NextRow());
+    }
+}
+
 void InstanceScript::AddObject(Creature* obj, bool add)
 {
     ObjectInfoMap::const_iterator j = _creatureInfo.find(obj->GetEntry());
@@ -96,6 +114,19 @@ void InstanceScript::AddObject(WorldObject* obj, uint32 type, bool add)
 
 void InstanceScript::OnCreatureCreate(Creature* creature)
 {
+    if (!_trashMapData.empty())
+    {
+        for (auto itr : _trashMapData)
+        {
+            if (creature->GetDBTableGUIDLow() == itr.second)
+                if (GetBossState(itr.first) == DONE)
+                {
+                    creature->AddObjectToRemoveList();
+                    return;
+                }
+        }
+    }
+
     AddObject(creature, true);
     AddMinion(creature, true);
 }

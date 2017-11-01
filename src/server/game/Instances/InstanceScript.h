@@ -235,6 +235,7 @@ class InstanceScript : public ZoneScript
         virtual void FillInitialWorldStates(WorldPacket& /*data*/) {}
 
     protected:
+        void LoadTrashMapInfoData();
         void AddObject(Creature* obj, bool add);
         void AddObject(GameObject* obj, bool add);
         void AddObject(WorldObject* obj, uint32 type, bool add);
@@ -259,6 +260,8 @@ class InstanceScript : public ZoneScript
         MinionInfoMap minions;
         uint32 completedEncounters; // completed encounter mask, bit indexes are DungeonEncounter.dbc boss numbers, used for packets
         GuidMap _objectGuids;
+        // Trash mapping system
+        std::multimap<uint32, uint32> _trashMapData; // <bossDataId, trashGUID>
 };
 
 template<class AI, class T>
