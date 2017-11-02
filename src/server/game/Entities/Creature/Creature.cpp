@@ -2609,6 +2609,11 @@ TrainerSpellData const* Creature::GetTrainerSpells() const
 // overwrite WorldObject function for proper name localization
 std::string const& Creature::GetNameForLocaleIdx(LocaleConstant loc_idx) const
 { 
+    if (loc_idx != DEFAULT_LOCALE)
+        if (CreatureLocale const* cl = sObjectMgr->GetCreatureLocale(GetEntry()))
+            if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
+                return cl->Name[loc_idx];
+
     return GetName();
 }
 

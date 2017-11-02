@@ -304,7 +304,7 @@ void Quest::InitializeQueryData()
     queryData << uint32(GetRewSpell());                   // reward spell, this spell will display (icon) (casted if RewSpellCast == 0)
     queryData << int32(GetRewSpellCast());                // casted spell
 
-    // rewarded honor points
+                                                          // rewarded honor points
     queryData << uint32(GetRewHonorAddition());
     queryData << float(GetRewHonorMultiplier());
     queryData << uint32(GetSrcItemId());                  // source item id

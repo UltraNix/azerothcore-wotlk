@@ -1949,6 +1949,11 @@ void GameObject::EventInform(uint32 eventId)
 // overwrite WorldObject function for proper name localization
 std::string const& GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
 { 
+    if (loc_idx != DEFAULT_LOCALE)
+        if (GameObjectLocale const* cl = sObjectMgr->GetGameObjectLocale(GetEntry()))
+            if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
+                return cl->Name[loc_idx];
+
     return GetName();
 }
 

@@ -1057,7 +1057,60 @@ class ObjectMgr
             if (itr == _linkedRespawnStore.end()) return 0;
             return itr->second;
         }
-
+        CreatureLocale const* GetCreatureLocale(uint32 entry) const
+        {
+            CreatureLocaleContainer::const_iterator itr = _creatureLocaleStore.find(entry);
+            if (itr == _creatureLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        GameObjectLocale const* GetGameObjectLocale(uint32 entry) const
+        {
+            GameObjectLocaleContainer::const_iterator itr = _gameObjectLocaleStore.find(entry);
+            if (itr == _gameObjectLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        ItemLocale const* GetItemLocale(uint32 entry) const
+        {
+            ItemLocaleContainer::const_iterator itr = _itemLocaleStore.find(entry);
+            if (itr == _itemLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        ItemSetNameLocale const* GetItemSetNameLocale(uint32 entry) const
+        {
+            ItemSetNameLocaleContainer::const_iterator itr = _itemSetNameLocaleStore.find(entry);
+            if (itr == _itemSetNameLocaleStore.end())return NULL;
+            return &itr->second;
+        }
+        QuestLocale const* GetQuestLocale(uint32 entry) const
+        {
+            QuestLocaleContainer::const_iterator itr = _questLocaleStore.find(entry);
+            if (itr == _questLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        NpcTextLocale const* GetNpcTextLocale(uint32 entry) const
+        {
+            NpcTextLocaleContainer::const_iterator itr = _npcTextLocaleStore.find(entry);
+            if (itr == _npcTextLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        PageTextLocale const* GetPageTextLocale(uint32 entry) const
+        {
+            PageTextLocaleContainer::const_iterator itr = _pageTextLocaleStore.find(entry);
+            if (itr == _pageTextLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        GossipMenuItemsLocale const* GetGossipMenuItemsLocale(uint32 entry) const
+        {
+            GossipMenuItemsLocaleContainer::const_iterator itr = _gossipMenuItemsLocaleStore.find(entry);
+            if (itr == _gossipMenuItemsLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
+        PointOfInterestLocale const* GetPointOfInterestLocale(uint32 poi_id) const
+        {
+            PointOfInterestLocaleContainer::const_iterator itr = _pointOfInterestLocaleStore.find(poi_id);
+            if (itr == _pointOfInterestLocaleStore.end()) return NULL;
+            return &itr->second;
+        }
         GameObjectData const* GetGOData(uint32 guid) const
         {
             GameObjectDataContainer::const_iterator itr = _gameObjectDataStore.find(guid);
@@ -1168,6 +1221,11 @@ class ObjectMgr
         GraveyardContainer GraveyardStore;
 
         static void AddLocaleString(std::string const& s, LocaleConstant locale, StringVector& data);
+        static inline void GetLocaleString(const StringVector& data, int loc_idx, std::string& value)
+        {
+            if (data.size() > size_t(loc_idx) && !data[loc_idx].empty())
+                value = data[loc_idx];
+        }
 
         CharacterConversionMap FactionChangeAchievements;
         CharacterConversionMap FactionChangeItems;
