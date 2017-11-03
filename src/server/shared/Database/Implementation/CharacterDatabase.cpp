@@ -586,4 +586,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     // GAMBLING
     PrepareStatement(CHAR_SEL_GAMBLING_STATS, "SELECT lost_money, win_money, duel_count FROM character_gambling_stats WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_REP_GAMBLING_STATS, "REPLACE INTO character_gambling_stats(guid, lost_money, win_money, duel_count) VALUES(?, ?, ?, ?)", CONNECTION_ASYNC);
+    // Armory Stats
+    PrepareStatement(CHAR_INS_ARMORY_STATS, "INSERT INTO characters_armory_stats VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);   
 }

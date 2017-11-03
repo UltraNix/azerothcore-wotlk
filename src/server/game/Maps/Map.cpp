@@ -3049,6 +3049,8 @@ void Map::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Uni
 
     // pussywizard:
     LogEncounterFinished(type, creditEntry);
+    //
+    // PrepareEncounterData
 
     if (dungeonId)
     {

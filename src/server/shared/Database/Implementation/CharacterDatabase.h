@@ -522,6 +522,8 @@ enum CharacterDatabaseStatements
     // GAMBLING
     CHAR_SEL_GAMBLING_STATS,
     CHAR_REP_GAMBLING_STATS,
+    // Armory Stats
+    CHAR_INS_ARMORY_STATS,
     //
     MAX_CHARACTERDATABASE_STATEMENTS
 };
