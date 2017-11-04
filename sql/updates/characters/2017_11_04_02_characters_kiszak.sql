@@ -1,1 +1,1 @@
-ALTER TABLE characters ADD COLUMN kiszakMode TINYINT(3) unsigned NOT NULL default '0' AFTER autoInvite;
+ALTER TABLE characters ADD COLUMN kiszakMode TINYINT(3) unsigned NOT NULL default '0' AFTER arenaAnnounce;

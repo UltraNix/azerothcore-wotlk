@@ -9,6 +9,6 @@ CREATE TABLE `characters_armory_stats` (
   `difficulity` int(10) unsigned NOT NULL DEFAULT '0',
   `groupCount` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `fightLength` varchar(30) NOT NULL DEFAULT '',
-  `fightDate` int(10) unsigned NOT NULL DEFAULT '0'
+  `fightDate` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

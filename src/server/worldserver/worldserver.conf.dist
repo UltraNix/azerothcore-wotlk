@@ -3374,6 +3374,14 @@ Custom.AFK.Report = 1
 
 Custom.AFK.Report.PvP.Timer = 2
 
+#		
+#     ArmoryStats.Enable
+#        Description: Enables or disables save stats for armory encounters progress.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+	
+ArmoryStats.Enable = 0
+
 #
 ###################################################################################################
 
