@@ -113,7 +113,7 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/, float maxRangeToN
 
     // @armory stats
     if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-        creature->SetBossFightTime(time(NULL));
+        creature->SetBossFightTime(getMSTime());
 }
 
 // scripts does not take care about MoveInLineOfSight loops

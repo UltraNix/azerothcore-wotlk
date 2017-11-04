@@ -22,13 +22,10 @@
 ArmoryMgr::ArmoryMgr() { }
 ArmoryMgr::~ArmoryMgr() { }
 
-void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 playersCount, time_t fightTime)
+void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 groupCount, uint32 fightTime)
 {
     if (!player)
         return;
-
-    time_t now = time(NULL);
-    time_t fightLength = fightTime - now;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ARMORY_STATS);
     stmt->setUInt32(0, guid);
@@ -36,13 +33,13 @@ void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, u
     stmt->setUInt32(2, creatureEntry);
     stmt->setUInt32(3, mapId);
     stmt->setUInt32(4, difficulity);
-    stmt->setUInt32(5, playersCount);
-    stmt->setUInt32(6, fightLength);
-    stmt->setUInt32(7, now);
+    stmt->setUInt32(5, groupCount);
+    stmt->setUInt32(6, uint32(GetMSTimeDiffToNow(fightTime) / IN_MILLISECONDS));
+    stmt->setUInt32(7, time(NULL));
     CharacterDatabase.Execute(stmt);
 }
 
-void ArmoryMgr::PrepareEncounterData(Map* map, Creature* creature, time_t fightTime)
+void ArmoryMgr::PrepareEncounterData(Map* map, Creature* creature, uint32 fightTime)
 {
     if (!sWorld->getBoolConfig(CONFIG_ARMORY_STATS))
         return;

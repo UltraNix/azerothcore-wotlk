@@ -731,8 +731,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
 
         // @armory stats
-        time_t GetBossFightTime() const { return _bossFightTime; }
-        void   SetBossFightTime(time_t val) { _bossFightTime = val; }
+        uint32 GetBossFightTime() const { return _bossFightTime; }
+        void   SetBossFightTime(uint32 val) { _bossFightTime = val; }
 
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = NULL);
@@ -800,7 +800,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool TriggerJustRespawned;
 
         time_t _lastDamagedTime;  // Part of Evade mechanics
-        time_t _bossFightTime;    // @armory stats
+        uint32 _bossFightTime;    // @armory stats
 
         Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
 };

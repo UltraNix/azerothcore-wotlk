@@ -462,8 +462,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
         return;
     }
 
-    if (mover->IsVehicle())
-
     // pussywizard: previously always mover->UpdatePosition(movementInfo.pos);
     if (movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT && mover->GetTransport())
     {

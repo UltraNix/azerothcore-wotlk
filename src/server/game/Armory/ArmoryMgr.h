@@ -28,8 +28,6 @@ class ArmoryMgr
     ArmoryMgr();
     ~ArmoryMgr();
 
-    time_t encounterStart;
-
     public:
         static ArmoryMgr* instance()
         {
@@ -37,9 +35,8 @@ class ArmoryMgr
             return instance;
         }
         
-        void PrepareEncounterData(Map* map, Creature* creature, time_t fightTime);
-        void InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 playersCount, time_t fightTime);
-        void SetEnounterStartTime(time_t startTime) { encounterStart = startTime; }
+        void PrepareEncounterData(Map* map, Creature* creature, uint32 fightTime);
+        void InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 groupCount, uint32 fightTime);
 };
 
 #define sArmoryMgr ArmoryMgr::instance()
