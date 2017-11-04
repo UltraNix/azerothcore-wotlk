@@ -499,6 +499,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         }
 
         bool IsDungeonBoss() const;
+        bool IsInstanceBind() const;
         bool IsImmuneToKnockback() const;
         bool IsAvoidingAOE() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_AVOID_AOE; }
 

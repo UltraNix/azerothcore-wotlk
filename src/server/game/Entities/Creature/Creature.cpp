@@ -53,6 +53,7 @@
 #include "WorldPacket.h"
 
 #include "Transport.h"
+#include "ArmoryMgr.h"
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
@@ -1582,6 +1583,10 @@ void Creature::setDeathState(DeathState s, bool despawn)
         if (GetMap()->IsDungeon() || isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)
             SaveRespawnTime();
 
+        // Armory
+        if (GetMap()->IsDungeon() && IsInstanceBind() || IsDungeonBoss())
+            sArmoryMgr->PrepareEncounterData(GetMap(), this, GetBossFightTime());
+
         SetTarget(0);                // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
@@ -1616,6 +1621,7 @@ void Creature::setDeathState(DeathState s, bool despawn)
         SetFullHealth();
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
+        SetBossFightTime(0); // Armory
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         // Xinef: npc run by default
         //SetWalk(true);
@@ -2333,6 +2339,10 @@ void Creature::SetInCombatWithZone()
             }
         }
     }
+
+    // Armory
+    if (this->IsDungeonBoss() || this->IsInstanceBind())
+        this->SetBossFightTime(getMSTime());
 }
 
 void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
@@ -2633,6 +2643,16 @@ bool Creature::IsDungeonBoss() const
     CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(GetEntry());
     return cinfo && (cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS);
 }
+
+bool Creature::IsInstanceBind() const
+{
+    if (IS_PLAYER_GUID(GetOwnerGUID()))
+        return false;
+
+    CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(GetEntry());
+    return cinfo && (cinfo->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND);
+}
+
 
 bool Creature::IsImmuneToKnockback() const
 { 

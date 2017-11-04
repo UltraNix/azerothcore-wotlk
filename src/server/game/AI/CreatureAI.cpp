@@ -110,10 +110,6 @@ void CreatureAI::DoZoneInCombat(Creature* creature /*= NULL*/, float maxRangeToN
             }*/
         }
     }
-
-    // @armory stats
-    if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-        creature->SetBossFightTime(getMSTime());
 }
 
 // scripts does not take care about MoveInLineOfSight loops
@@ -244,8 +240,7 @@ bool CreatureAI::_EnterEvadeMode()
     me->SetLootRecipient(NULL);
     me->ResetPlayerDamageReq();
     me->SetLastDamagedTime(0);
-    // @armory stats
-    me->SetBossFightTime(0);
+    me->SetBossFightTime(0); // Armory
 
     if (me->IsInEvadeMode())
         return false;

@@ -27,6 +27,8 @@ void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, u
     if (!player)
         return;
 
+    uint32 encounterTime = GetMSTimeDiffToNow(fightTime) / IN_MILLISECONDS;
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ARMORY_STATS);
     stmt->setUInt32(0, guid);
     stmt->setUInt32(1, guildId);
@@ -34,7 +36,7 @@ void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, u
     stmt->setUInt32(3, mapId);
     stmt->setUInt32(4, difficulity);
     stmt->setUInt32(5, groupCount);
-    stmt->setUInt32(6, uint32(GetMSTimeDiffToNow(fightTime) / IN_MILLISECONDS));
+    stmt->setUInt32(6, encounterTime);
     stmt->setUInt32(7, time(NULL));
     CharacterDatabase.Execute(stmt);
 }

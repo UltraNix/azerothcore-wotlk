@@ -64,7 +64,6 @@
 #include "WorldSession.h"
 #include "ArenaSpectator.h"
 #include "DynamicVisibility.h"
-#include "ArmoryMgr.h"
 #include <math.h>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -12414,7 +12413,6 @@ void Unit::Dismount()
 
 void Unit::SetInCombatWith(Unit* enemy, uint32 duration)
 { 
-    
     // Xinef: Dont allow to start combat with triggers
     if (enemy->GetTypeId() == TYPEID_UNIT && enemy->ToCreature()->IsTrigger())
         return;
@@ -12436,6 +12434,7 @@ void Unit::SetInCombatWith(Unit* enemy, uint32 duration)
             return;
         }
     }
+
     SetInCombatState(false, enemy, duration);
 }
 
@@ -16563,14 +16562,9 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
             //Player* creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
             // TODO: do instance binding anyway if the charmer/owner is offline
 
-            if (instanceMap->IsDungeon() && player)
-                if (instanceMap->IsRaidOrHeroicDungeon())
-                    if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-                    {
-                        instanceMap->ToInstanceMap()->PermBindAllPlayers();
-                        // @armory stats
-                        sArmoryMgr->PrepareEncounterData(instanceMap, creature, creature->GetBossFightTime());
-                    }
+            if (instanceMap->IsDungeon() && player && instanceMap->IsRaidOrHeroicDungeon())
+                if (creature->IsInstanceBind())
+                    instanceMap->ToInstanceMap()->PermBindAllPlayers();
         }
     }
 
