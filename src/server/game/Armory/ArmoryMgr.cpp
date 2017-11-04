@@ -22,37 +22,40 @@
 ArmoryMgr::ArmoryMgr() { }
 ArmoryMgr::~ArmoryMgr() { }
 
-void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guild, uint32 bossEntry, uint32 mapId, uint32 difficulityMap, uint32 playersCount, time_t time, time_t eventTime)
+void ArmoryMgr::InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 playersCount, time_t fightTime)
 {
     if (!player)
         return;
 
-    time_t encounterProgress = time - encounterStart;
+    time_t now = time(NULL);
+    time_t fightLength = fightTime - now;
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_BAZAR_AUCTION);
-    stmt->setUInt32(0, NULL);
-    stmt->setUInt32(1, player->GetGUIDLow());
-    stmt->setUInt32(2, guild);
-    stmt->setUInt32(3, bossEntry);
-    stmt->setUInt32(4, mapId);
-    stmt->setUInt32(5, difficulityMap);
-    stmt->setUInt32(6, playersCount);
-    stmt->setUInt32(7, encounterProgress);
-    stmt->setUInt32(8, eventTime);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ARMORY_STATS);
+    stmt->setUInt32(0, guid);
+    stmt->setUInt32(1, guildId);
+    stmt->setUInt32(2, creatureEntry);
+    stmt->setUInt32(3, mapId);
+    stmt->setUInt32(4, difficulity);
+    stmt->setUInt32(5, playersCount);
+    stmt->setUInt32(6, fightLength);
+    stmt->setUInt32(7, now);
     CharacterDatabase.Execute(stmt);
 }
 
-void ArmoryMgr::PrepareEncounterData(Map* map, EncounterCreditType type, uint32 creditEntry)
+void ArmoryMgr::PrepareEncounterData(Map* map, Creature* creature, time_t fightTime)
 {
-    if (!map->IsRaid() || !map->GetEntry())
+    if (!sWorld->getBoolConfig(CONFIG_ARMORY_STATS))
         return;
 
-    InstanceMap* map = map->ToInstanceMap();
-    if (!map)
+    if (!map || !creature)
         return;
 
-    Map::PlayerList const& pl = map->GetPlayers();
+    InstanceMap* playersMap = map->ToInstanceMap();
+    if (!playersMap)
+        return;
+
+    Map::PlayerList const& pl = playersMap->GetPlayers();
     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
         if (Player* p = itr->GetSource())
-            //InsertArmoryStats(p, p->GetGUIDLow(), p->GetGuildId(), creditEntry, map->GetId(), uint32(map->GetDifficulty());
+            InsertArmoryStats(p, p->GetGUIDLow(), p->GetGuildId(), creature->GetEntry(), playersMap->GetId(), uint32(map->GetDifficulty()), playersMap->GetPlayersCountExceptGMs(), creature->GetBossFightTime());
 }

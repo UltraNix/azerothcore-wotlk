@@ -20,11 +20,8 @@
 #define SC_ARMGR_H
 
 #include "Common.h"
-#include "SharedDefines.h"
-#include "ScriptMgr.h"
 #include "Player.h"
-#include "Chat.h"
-#include "AccountMgr.h"
+#include "Map.h"
 
 class ArmoryMgr
 {
@@ -40,8 +37,8 @@ class ArmoryMgr
             return instance;
         }
         
-        void PrepareEncounterData(Map* map, EncounterCreditType type, uint32 creditEntry);
-        void InsertArmoryStats(Player* player, uint32 guid, uint32 guild, uint32 bossEntry, uint32 mapId, uint32 difficulityMap, uint32 playersCount, time_t time, time_t eventTime);
+        void PrepareEncounterData(Map* map, Creature* creature, time_t fightTime);
+        void InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 playersCount, time_t fightTime);
         void SetEnounterStartTime(time_t startTime) { encounterStart = startTime; }
 };
 

@@ -64,7 +64,7 @@
 #include "WorldSession.h"
 #include "ArenaSpectator.h"
 #include "DynamicVisibility.h"
-
+#include "ArmoryMgr.h"
 #include <math.h>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -16566,7 +16566,11 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
             if (instanceMap->IsDungeon() && player)
                 if (instanceMap->IsRaidOrHeroicDungeon())
                     if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
+                    {
                         instanceMap->ToInstanceMap()->PermBindAllPlayers();
+                        // @armory stats
+                        sArmoryMgr->PrepareEncounterData(instanceMap, creature, creature->GetBossFightTime());
+                    }
         }
     }
 
