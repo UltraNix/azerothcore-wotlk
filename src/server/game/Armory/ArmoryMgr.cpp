@@ -57,5 +57,5 @@ void ArmoryMgr::PrepareEncounterData(Map* map, Creature* creature, time_t fightT
     Map::PlayerList const& pl = playersMap->GetPlayers();
     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
         if (Player* p = itr->GetSource())
-            InsertArmoryStats(p, p->GetGUIDLow(), p->GetGuildId(), creature->GetEntry(), playersMap->GetId(), uint32(map->GetDifficulty()), playersMap->GetPlayersCountExceptGMs(), creature->GetBossFightTime());
+            InsertArmoryStats(p, p->GetGUIDLow(), p->GetGuildId(), creature->GetEntry(), playersMap->GetId(), uint32(playersMap->GetDifficulty()), playersMap->GetPlayersCountExceptGMs(), creature->GetBossFightTime());
 }

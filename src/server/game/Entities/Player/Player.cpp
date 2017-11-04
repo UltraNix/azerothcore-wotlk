@@ -921,6 +921,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     // Ours
     m_NeedToSaveGlyphs = false;
     m_BlizzlikeMode = false;
+    m_KiszakMode = false;
     m_NeedAutoInvite = false;
     m_ArenaAnnounce = false;
     m_comboPointGain = 0;
@@ -17583,7 +17584,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // 39           40                41                 42                    43          44          45              46           47               48              49
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
     // 50      51      52      53      54      55      56      57      58           59         60          61             62              63      64           65          66
-    //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, blizzlikeMode, arenaAnnounce FROM characters WHERE guid = '%u'", guid);
+    //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, blizzlikeMode, arenaAnnounce, kiszakMode FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
 
     if (!result)
@@ -18203,6 +18204,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     m_BlizzlikeMode  = fields[67].GetBool();
     m_NeedAutoInvite = fields[68].GetBool();
     m_ArenaAnnounce  = fields[69].GetBool();
+    m_KiszakMode     = fields[70].GetBool();
 
     _LoadDeclinedNames(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES));
 
@@ -26331,6 +26333,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
         stmt->setBool(index++, m_ArenaAnnounce);
+        stmt->setBool(index++, m_KiszakMode);
     }
     else
     {
@@ -26461,7 +26464,8 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
         stmt->setBool(index++, m_ArenaAnnounce);
-        
+        stmt->setBool(index++, m_KiszakMode);
+
         stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
         // Index
         stmt->setUInt32(index++, GetGUIDLow());
