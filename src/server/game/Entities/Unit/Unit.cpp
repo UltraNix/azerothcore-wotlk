@@ -9476,6 +9476,11 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
         ToCreature()->SendAIReaction(AI_REACTION_HOSTILE);
         ToCreature()->CallAssistance();
+
+        // Armory
+        if (Creature* creature = ToCreature())
+            if (creature->GetMap()->IsDungeon() && creature->IsInstanceBind() || creature->IsDungeonBoss())
+                creature->SetBossFightTime(getMSTime());
     }
 
     // delay offhand weapon attack to next attack time

@@ -642,8 +642,8 @@ void SmartAI::EnterEvadeMode()
     me->LoadCreaturesAddon(true);
     me->SetLootRecipient(NULL);
     me->ResetPlayerDamageReq();
-    me->SetLastDamagedTime(0); // Armory
-    me->SetBossFightTime(0);
+    me->SetLastDamagedTime(0);
+    me->SetBossFightTime(0); // Armory
     GetScript()->ProcessEventsFor(SMART_EVENT_EVADE);//must be after aura clear so we can cast spells from db
 
     SetRun(mRun);

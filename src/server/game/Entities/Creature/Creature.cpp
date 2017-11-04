@@ -51,7 +51,6 @@
 #include "WaypointMovementGenerator.h"
 #include "World.h"
 #include "WorldPacket.h"
-
 #include "Transport.h"
 #include "ArmoryMgr.h"
 
@@ -2339,10 +2338,6 @@ void Creature::SetInCombatWithZone()
             }
         }
     }
-
-    // Armory
-    if (this->IsDungeonBoss() || this->IsInstanceBind())
-        this->SetBossFightTime(getMSTime());
 }
 
 void Creature::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
