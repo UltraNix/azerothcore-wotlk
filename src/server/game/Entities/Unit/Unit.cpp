@@ -9407,10 +9407,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     {
         if (victim->ToPlayer()->IsGameMaster())
             return false;
-		
-        // nobody can attack Kiszak in World when streaming		
-        if (!victim->GetMap()->IsDungeon() && victim->ToPlayer()->KiszakMode())
-            return false;
     }
     else
     {

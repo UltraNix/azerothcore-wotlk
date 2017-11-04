@@ -7704,6 +7704,7 @@ void Player::UpdateArea(uint32 newArea)
     bool isInn = area->IsInn(GetTeamId());
     // @Gambling
     bool isGamblingZone = (area->ID == 41 || area->ID == 2562);
+    bool isKiszakAllowed = (!GetMap()->Instanceable() && KiszakMode());
     if (zone)
     {
         areaFlags |= zone->flags;
@@ -7712,7 +7713,7 @@ void Player::UpdateArea(uint32 newArea)
     }
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
-    if (isSanctuary || isGamblingZone)    // in sanctuary
+    if (isSanctuary || isGamblingZone || isKiszakAllowed)    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.IsInNoPvPArea = true;
