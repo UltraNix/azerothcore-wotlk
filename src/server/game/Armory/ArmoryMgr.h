@@ -29,11 +29,7 @@ class ArmoryMgr
     ~ArmoryMgr();
 
     public:
-        static ArmoryMgr* instance()
-        {
-            static ArmoryMgr* instance = new ArmoryMgr();
-            return instance;
-        }
+        static ArmoryMgr* instance();
         
         void PrepareEncounterData(Map* map, Creature* creature, uint32 fightTime);
         void InsertArmoryStats(Player* player, uint32 guid, uint32 guildId, uint32 creatureEntry, uint32 mapId, uint32 difficulity, uint32 groupCount, uint32 fightTime);
