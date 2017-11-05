@@ -20662,7 +20662,8 @@ void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
         {
             if (Battleground* bg = GetBattleground())
             {
-                if (isMoving() || isTurning() || bg->GetStatus() != STATUS_IN_PROGRESS)
+                // We check that player is moving or turning in Unit class, check Unit::UpdatePosition
+                if (bg->GetStatus() != STATUS_IN_PROGRESS) // If battleground has wait phase we don't care about what player is doing.
                     m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
 
                 if (currTime > m_afkTimer)
@@ -20677,7 +20678,8 @@ void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
         {
             if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG))
             {
-                if (isMoving() || isTurning() || !bf->IsWarTime())
+                // We check that player is moving or turning in Unit class, check Unit::UpdatePosition
+                if (!bf->IsWarTime()) // If battlefield is without war flag we don't care about what player is doing.
                     m_afkTimer = currTime + sWorld->getIntConfig(CONFIG_CUSTOM_AFK_REPORT_TIMER) * MINUTE;
 
                 if (currTime > m_afkTimer)

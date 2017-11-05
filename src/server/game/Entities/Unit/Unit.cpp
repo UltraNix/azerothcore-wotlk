@@ -18427,7 +18427,7 @@ void Unit::SendTeleportPacket(Position& pos)
 }
 
 bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool teleport)
-{ 
+{
     if (!Trinity::IsValidMapCoord(x, y, z, orientation))
         return false;
 
@@ -18444,6 +18444,11 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
         if (mask)
             RemoveAurasWithInterruptFlags(mask);
     }
+
+    // Custom.AFK.Report
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->UpdateAutoAfkKick(time(NULL), true);
+
 
     if (relocated)
     {
