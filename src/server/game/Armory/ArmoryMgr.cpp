@@ -53,8 +53,16 @@ void ArmoryMgr::PrepareEncounterData(Map* map, Creature* creature, uint32 fightT
     if (!map || !creature)
         return;
 
-    // only for wotlk raids, because logs take up tons of mysql memory
-    if (map->GetEntry()->Expansion() < 2)
+    // Only for WotLK dungeons or raids content, because logs take up tons of mysql memory.
+    if (!map->IsDungeon() || map->GetEntry()->Expansion() < 2)
+        return;
+
+    // We don't care about summons or pets.
+    if (creature->IsSummon() || creature->IsPet() || !creature->GetDBTableGUIDLow())
+        return;
+
+    // We care only about creatures with dungeon boss or instance bind flag.
+    if (!creature->IsInstanceBind() || !creature->IsDungeonBoss())
         return;
 
     InstanceMap* playersMap = map->ToInstanceMap();
