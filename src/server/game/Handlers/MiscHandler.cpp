@@ -353,7 +353,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
 
     if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
-        matchcount = (matchcount + (matchcount * boostPercentage));
+        if (matchcount >= 50)  // ;-)
+            matchcount = (matchcount + (matchcount * boostPercentage));
 
     data.put(0, displaycount);                            // insert right count, count displayed
     data.put(4, matchcount);                              // insert right count, count of matches
