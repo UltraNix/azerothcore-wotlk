@@ -24,9 +24,6 @@
 #include "ArenaTeamMgr.h"
 #include "Language.h"
 
-CustomEventMgr::CustomEventMgr() {}
-CustomEventMgr::~CustomEventMgr() {}
-
 CustomEventMgr* CustomEventMgr::instance()
 {
     static CustomEventMgr instance;

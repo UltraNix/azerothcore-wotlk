@@ -35,8 +35,8 @@ typedef std::unordered_set<uint64> KruulGuidSet;
 
 class CustomEventMgr
 {
-    CustomEventMgr();
-    ~CustomEventMgr();
+    CustomEventMgr() {}
+    ~CustomEventMgr() {}
 
     ///////////////////////
     // Highlord Kruul
