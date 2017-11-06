@@ -53,6 +53,10 @@ void ArmoryMgr::PrepareEncounterData(Map* map, Creature* creature, uint32 fightT
     if (!map || !creature)
         return;
 
+    // only for wotlk raids, because logs take up tons of mysql memory
+    if (map->GetEntry()->Expansion() < 2)
+        return;
+
     InstanceMap* playersMap = map->ToInstanceMap();
     if (!playersMap)
         return;
