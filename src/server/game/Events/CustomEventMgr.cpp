@@ -27,6 +27,12 @@
 CustomEventMgr::CustomEventMgr() {}
 CustomEventMgr::~CustomEventMgr() {}
 
+CustomEventMgr* CustomEventMgr::instance()
+{
+    static CustomEventMgr instance;
+    return &instance;
+}
+
 void CustomEventMgr::InitCustomEventMgr()
 {
     SetKruulSpawnLoc(urand(0, 8));
@@ -35,31 +41,31 @@ void CustomEventMgr::InitCustomEventMgr()
     switch (GetKruulSpawnLoc())
     {
         case 0:
-            sLog->outBasic("Kruul Event - Rolled Locations: Stonetalon Mountains, Redridge Mountains");
+            sLog->outMisc("Kruul Event - Rolled Locations: Stonetalon Mountains, Redridge Mountains");
             break;
         case 1:
-            sLog->outBasic("Kruul Event - Rolled Locations: Thousand Needles, Badlands");
+            sLog->outMisc("Kruul Event - Rolled Locations: Thousand Needles, Badlands");
             break;
         case 2:
-            sLog->outBasic("Kruul Event - Rolled Locations: Winterspring, Wetlands");
+            sLog->outMisc("Kruul Event - Rolled Locations: Winterspring, Wetlands");
             break;
         case 3:
-            sLog->outBasic("Kruul Event - Rolled Locations: Desolace, Lochmodan");
+            sLog->outMisc("Kruul Event - Rolled Locations: Desolace, Lochmodan");
             break;
         case 4:
-            sLog->outBasic("Kruul Event - Rolled Locations: Stonetalon Mountains, Lochmodan");
+            sLog->outMisc("Kruul Event - Rolled Locations: Stonetalon Mountains, Lochmodan");
             break;
         case 5:
-            sLog->outBasic("Kruul Event - Rolled Locations: Thousand Needles, Wetlands");
+            sLog->outMisc("Kruul Event - Rolled Locations: Thousand Needles, Wetlands");
             break;
         case 6:
-            sLog->outBasic("Kruul Event - Rolled Locations: Winterspring, Redridge Mountains");
+            sLog->outMisc("Kruul Event - Rolled Locations: Winterspring, Redridge Mountains");
             break;
         case 7:
-            sLog->outBasic("Kruul Event - Rolled Locations: Desolace, Badlands");
+            sLog->outMisc("Kruul Event - Rolled Locations: Desolace, Badlands");
             break;
         case 8:
-            sLog->outBasic("Kruul Event - Rolled Locations: Durotar, Elwynn Forest");
+            sLog->outMisc("Kruul Event - Rolled Locations: Durotar, Elwynn Forest");
             break;
     }
 }

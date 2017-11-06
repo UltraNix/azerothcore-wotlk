@@ -39,11 +39,7 @@ class CustomEventMgr
     ~CustomEventMgr();
 
     public:
-        static CustomEventMgr* instance()
-        {
-            static CustomEventMgr* instance = new CustomEventMgr();
-            return instance;
-        }
+        static CustomEventMgr* instance();
 
         void InitCustomEventMgr();
         void Update(uint32, uint8);
