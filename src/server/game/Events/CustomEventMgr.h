@@ -38,6 +38,25 @@ class CustomEventMgr
     CustomEventMgr();
     ~CustomEventMgr();
 
+    ///////////////////////
+    // Highlord Kruul
+    //////////////////////
+    uint32 KruulSpawnLoc = 0;
+    bool KruulState = false;
+    ///////////////////////
+    // Arena Autoflush
+    ///////////////////////
+    bool FlushStatus = false;
+    ///////////////////////
+    // Arena PvP Event 
+    ///////////////////////
+    bool ArenaEventStatus = false;
+    ///////////////////////
+    // Arena PvP Event 
+    ///////////////////////
+
+    KruulGuidSet KruulList;
+
     public:
         static CustomEventMgr* instance();
 
@@ -78,23 +97,6 @@ class CustomEventMgr
         std::string GetEventPvPAnnounceEN() const;
         bool GetArenaEventStatus() const;
         void SetArenaEventStatus(bool started) { ArenaEventStatus = started; }
-
-    private:
-        ///////////////////////
-        // Highlord Kruul
-        //////////////////////
-        uint32 KruulSpawnLoc = 0;
-        bool KruulState = false;
-        ///////////////////////
-        // Arena Autoflush
-        ///////////////////////
-        bool FlushStatus = false;
-        ///////////////////////
-        // Arena PvP Event 
-        ///////////////////////
-        bool ArenaEventStatus = false;  
-    protected:
-        KruulGuidSet KruulList;
 };
 
 #define sCustomEventMgr CustomEventMgr::instance()
