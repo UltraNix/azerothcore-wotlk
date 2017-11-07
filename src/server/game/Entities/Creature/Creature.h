@@ -731,7 +731,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
 
-        // @armory stats
+        // Armory
         uint32 GetBossFightTime() const { return _bossFightTime; }
         void   SetBossFightTime(uint32 val) { _bossFightTime = val; }
 
@@ -801,7 +801,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool TriggerJustRespawned;
 
         time_t _lastDamagedTime;  // Part of Evade mechanics
-        uint32 _bossFightTime;    // @armory stats
+        uint32 _bossFightTime;    // Armory
 
         Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
 };

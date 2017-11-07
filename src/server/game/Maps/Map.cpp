@@ -3068,11 +3068,16 @@ void Map::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Uni
 
 void Map::LogEncounterFinished(EncounterCreditType type, uint32 creditEntry)
 {
+    if (!sWorld->getBoolConfig(CONFIG_ENCOUNTER_LOG))
+        return;
+
     if (!IsRaid() || !GetEntry() || GetEntry()->Expansion() < 2) // only for wotlk raids, because logs take up tons of mysql memory
         return;
+
     InstanceMap* map = ToInstanceMap();
     if (!map)
         return;
+
     std::string playersInfo;
     char buffer[16384], buffer2[255];
     Map::PlayerList const& pl = map->GetPlayers();

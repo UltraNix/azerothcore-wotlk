@@ -3382,6 +3382,14 @@ Custom.AFK.Report.PvP.Timer = 2
 	
 ArmoryStats.Enable = 0
 
+#		
+#     EncounterLog.Enable
+#        Description: Enables or disables encounter logs with aura list from combat.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+	
+EncounterLog.Enable = 0
+
 #
 ###################################################################################################
 
