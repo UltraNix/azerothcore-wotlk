@@ -2642,7 +2642,8 @@ bool Creature::IsInstanceBind() const
     if (IS_PLAYER_GUID(GetOwnerGUID()))
         return false;
 
-    return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND;
+    CreatureTemplate const* cinfo = GetCreatureTemplate();
+    return cinfo && (cinfo->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND);
 }
 
 
