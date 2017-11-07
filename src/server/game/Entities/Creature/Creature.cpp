@@ -1619,7 +1619,6 @@ void Creature::setDeathState(DeathState s, bool despawn)
         SetFullHealth();
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
-        SetBossFightTime(0); // Armory
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         // Xinef: npc run by default
         //SetWalk(true);
@@ -2643,8 +2642,7 @@ bool Creature::IsInstanceBind() const
     if (IS_PLAYER_GUID(GetOwnerGUID()))
         return false;
 
-    CreatureTemplate const* cinfo = sObjectMgr->GetCreatureTemplate(GetEntry());
-    return cinfo && (cinfo->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND);
+    return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND;
 }
 
 
