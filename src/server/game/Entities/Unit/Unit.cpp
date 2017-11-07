@@ -9476,11 +9476,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
         ToCreature()->SendAIReaction(AI_REACTION_HOSTILE);
         ToCreature()->CallAssistance();
-
-        // Armory
-        if (Creature* creature = ToCreature())
-            if (creature->GetMap()->IsDungeon() && creature->IsInstanceBind() || creature->IsDungeonBoss())
-                creature->SetBossFightTime(getMSTime());
     }
 
     // delay offhand weapon attack to next attack time
@@ -12588,6 +12583,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
             Dismount();
         if (!IsStandState()) // pussywizard: already done in CombatStart(target, initialAggro) for the target, but when aggro'ing from MoveInLOS CombatStart is not called!
             SetStandState(UNIT_STAND_STATE_STAND);
+
+        // Armory
+        if (creature->GetMap()->IsDungeon() && creature->IsInstanceBind() || creature->IsDungeonBoss())
+            creature->SetBossFightTime(getMSTime());
     }
 
     for (Unit::ControlSet::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)

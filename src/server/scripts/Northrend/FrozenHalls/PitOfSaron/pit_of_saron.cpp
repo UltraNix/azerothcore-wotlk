@@ -1114,6 +1114,7 @@ public:
             me->SetLootRecipient(NULL);
             me->ResetPlayerDamageReq();
             me->SetLastDamagedTime(0);
+            me->SetBossFightTime(0);
         }
     };
 
