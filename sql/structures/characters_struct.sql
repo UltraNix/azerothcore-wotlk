@@ -1374,43 +1374,6 @@ LOCK TABLES `characters` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `cheaters`
---
-
-DROP TABLE IF EXISTS `cheaters`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `cheaters` (
-  `entry` bigint(20) NOT NULL AUTO_INCREMENT,
-  `player` varchar(30) NOT NULL,
-  `acctid` int(11) NOT NULL,
-  `reason` varchar(255) NOT NULL DEFAULT 'unknown',
-  `speed` float NOT NULL DEFAULT '0',
-  `Val1` float NOT NULL DEFAULT '0',
-  `Val2` int(10) unsigned NOT NULL DEFAULT '0',
-  `count` int(11) NOT NULL DEFAULT '0',
-  `Map` smallint(5) NOT NULL DEFAULT '-1',
-  `Pos` varchar(255) NOT NULL DEFAULT '0',
-  `Level` mediumint(9) NOT NULL DEFAULT '0',
-  `first_date` datetime NOT NULL,
-  `last_date` datetime NOT NULL,
-  `Op` varchar(255) NOT NULL DEFAULT 'unknown',
-  PRIMARY KEY (`entry`),
-  KEY `idx_Count` (`count`),
-  KEY `idx_Player` (`player`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cheaters`
---
-
-LOCK TABLES `cheaters` WRITE;
-/*!40000 ALTER TABLE `cheaters` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cheaters` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `corpse`
 --
 
@@ -2554,32 +2517,6 @@ CREATE TABLE `reserved_name` (
 LOCK TABLES `reserved_name` WRITE;
 /*!40000 ALTER TABLE `reserved_name` DISABLE KEYS */;
 /*!40000 ALTER TABLE `reserved_name` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `uptime`
---
-
-DROP TABLE IF EXISTS `uptime`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `uptime` (
-  `realmid` int(10) unsigned NOT NULL,
-  `starttime` int(10) unsigned NOT NULL DEFAULT '0',
-  `uptime` int(10) unsigned NOT NULL DEFAULT '0',
-  `maxplayers` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `revision` varchar(255) NOT NULL DEFAULT 'Trinitycore',
-  PRIMARY KEY (`realmid`,`starttime`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Uptime system';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `uptime`
---
-
-LOCK TABLES `uptime` WRITE;
-/*!40000 ALTER TABLE `uptime` DISABLE KEYS */;
-/*!40000 ALTER TABLE `uptime` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
