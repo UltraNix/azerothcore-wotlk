@@ -7066,6 +7066,18 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectMiscValue[EFFECT_0] = 90029;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
+        case 17458:    // Fluroescent Green Mechanostrider
+            spellInfo->EffectMiscValue[EFFECT_0] = 90030;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
+        case 10798:    // Whistle of the Obsidian Raptor
+            spellInfo->EffectMiscValue[EFFECT_0] = 90031;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
+        case 16055:    // Reins of the Nightsaber
+            spellInfo->EffectMiscValue[EFFECT_0] = 90032;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
