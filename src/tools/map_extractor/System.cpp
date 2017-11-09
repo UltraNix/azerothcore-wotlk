@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,11 +61,9 @@ typedef struct
 } map_id;
 
 map_id *map_ids;
-uint16 *areas;
 uint16 *LiqType;
 char output_path[128] = ".";
 char input_path[128] = ".";
-uint32 maxAreaId = 0;
 
 // **************************************************
 // Extractor options
@@ -256,30 +254,6 @@ uint32 ReadMapDBC()
     return map_count;
 }
 
-void ReadAreaTableDBC()
-{
-    printf("Read AreaTable.dbc file...");
-    DBCFile dbc("DBFilesClient\\AreaTable.dbc");
-
-    if(!dbc.open())
-    {
-        printf("Fatal error: Invalid AreaTable.dbc file format!\n");
-        exit(1);
-    }
-
-    size_t area_count = dbc.getRecordCount();
-    size_t maxid = dbc.getMaxId();
-    areas = new uint16[maxid + 1];
-    memset(areas, 0xff, (maxid + 1) * sizeof(uint16));
-
-    for(uint32 x = 0; x < area_count; ++x)
-        areas[dbc.getRecord(x).getUInt(0)] = dbc.getRecord(x).getUInt(3);
-
-    maxAreaId = dbc.getMaxId();
-
-    printf("Done! (%u areas loaded)\n", (uint32)area_count);
-}
-
 void ReadLiquidTypeTableDBC()
 {
     printf("Read LiquidType.dbc file...");
@@ -383,7 +357,7 @@ float selectUInt16StepStore(float maxDiff)
     return 65535 / maxDiff;
 }
 // Temporary grid data store
-uint16 area_flags[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];
+uint16 area_ids[ADT_CELLS_PER_GRID][ADT_CELLS_PER_GRID];
 
 float V8[ADT_GRID_SIZE][ADT_GRID_SIZE];
 float V9[ADT_GRID_SIZE+1][ADT_GRID_SIZE+1];
@@ -422,34 +396,20 @@ bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/,
     map.buildMagic = build;
 
     // Get area flags data
-    for (int i=0;i<ADT_CELLS_PER_GRID;i++)
-    {
-        for(int j=0;j<ADT_CELLS_PER_GRID;j++)
-        {
-            adt_MCNK * cell = cells->getMCNK(i,j);
-            uint32 areaid = cell->areaid;
-            if(areaid && areaid <= maxAreaId)
-            {
-                if(areas[areaid] != 0xffff)
-                {
-                    area_flags[i][j] = areas[areaid];
-                    continue;
-                }
-                printf("File: %s\nCan't find area flag for areaid %u [%d, %d].\n", filename, areaid, cell->ix, cell->iy);
-            }
-            area_flags[i][j] = 0xffff;
-        }
-    }
+    for (int i = 0; i < ADT_CELLS_PER_GRID; i++)
+        for (int j = 0; j < ADT_CELLS_PER_GRID; j++)
+            area_ids[i][j] = cells->getMCNK(i, j)->areaid;
+
     //============================================
     // Try pack area data
     //============================================
     bool fullAreaData = false;
-    uint32 areaflag = area_flags[0][0];
-    for (int y=0;y<ADT_CELLS_PER_GRID;y++)
+    uint32 areaId = area_ids[0][0];
+    for (int y = 0; y < ADT_CELLS_PER_GRID; ++y)
     {
-        for(int x=0;x<ADT_CELLS_PER_GRID;x++)
+        for (int x = 0; x < ADT_CELLS_PER_GRID; x++)
         {
-            if(area_flags[y][x]!=areaflag)
+            if (area_ids[y][x] != areaId)
             {
                 fullAreaData = true;
                 break;
@@ -466,12 +426,12 @@ bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/,
     if (fullAreaData)
     {
         areaHeader.gridArea = 0;
-        map.areaMapSize+=sizeof(area_flags);
+        map.areaMapSize += sizeof(area_ids);
     }
     else
     {
         areaHeader.flags |= MAP_AREA_NO_AREA;
-        areaHeader.gridArea = (uint16)areaflag;
+        areaHeader.gridArea = static_cast<uint16>(areaId);
     }
 
     //
@@ -898,8 +858,8 @@ bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/,
     fwrite(&map, sizeof(map), 1, output);
     // Store area data
     fwrite(&areaHeader, sizeof(areaHeader), 1, output);
-    if (!(areaHeader.flags&MAP_AREA_NO_AREA))
-        fwrite(area_flags, sizeof(area_flags), 1, output);
+    if (!(areaHeader.flags & MAP_AREA_NO_AREA))
+        fwrite(area_ids, sizeof(area_ids), 1, output);
 
     // Store height data
     fwrite(&heightHeader, sizeof(heightHeader), 1, output);
@@ -957,7 +917,6 @@ void ExtractMapsFromMpq(uint32 build)
 
     uint32 map_count = ReadMapDBC();
 
-    ReadAreaTableDBC();
     ReadLiquidTypeTableDBC();
 
     std::string path = output_path;
@@ -992,7 +951,6 @@ void ExtractMapsFromMpq(uint32 build)
         }
     }
     printf("\n");
-    delete [] areas;
     delete [] map_ids;
 }
 
@@ -1052,7 +1010,7 @@ void ExtractDBCFiles(int locale, bool basicLocale)
     {
         string filename = path;
         filename += (iter->c_str() + strlen("DBFilesClient\\"));
-        
+
         if(FileExists(filename.c_str()))
             continue;
 
