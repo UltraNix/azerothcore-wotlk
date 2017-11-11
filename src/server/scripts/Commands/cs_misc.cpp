@@ -127,7 +127,7 @@ public:
             { "mailbox",            SEC_ADMINISTRATOR,      false, &HandleMailBoxCommand,               "" },      
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
             { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
-            { "sthhide",            SEC_PLAYER,             false, &HandleSthHideCommand,               "" },
+            { "hide",               SEC_PLAYER,             false, &HandleSthHideCommand,               "" },
         };
         return commandTable;
     }
