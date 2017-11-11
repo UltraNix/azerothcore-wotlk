@@ -936,7 +936,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
             // @Transmog
             if (sTransmogrification->TokenRewardEnabled())
             {
-                if (isArena())
+                if (isArena() && isRated())
                 {
                     switch (GetArenaType())
                     {
