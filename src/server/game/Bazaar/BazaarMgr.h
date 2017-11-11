@@ -40,15 +40,11 @@ enum BazarAuctionTypes
 
 class BazaarMgr
 {
-    BazaarMgr();
-    ~BazaarMgr();
+    BazaarMgr() {}
+    ~BazaarMgr() {}
 
     public:
-        static BazaarMgr* instance()
-        {
-            static BazaarMgr* instance = new BazaarMgr();
-            return instance;
-        }
+        static BazaarMgr* instance();
 
         bool CheckPremiumAmount(uint32 accountId, uint32 sellAmount);
         bool CheckMoneyAmount(Player* player, uint32 sellAmount);
@@ -73,7 +69,6 @@ class BazaarMgr
 
         // Slave Market
         void LogoutCharacterAfterAuction(Player* player);
-    private:
 };
 
 #define sBazaarMgr BazaarMgr::instance()

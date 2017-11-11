@@ -64,7 +64,6 @@
 #include "WorldSession.h"
 #include "ArenaSpectator.h"
 #include "DynamicVisibility.h"
-
 #include <math.h>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -12414,7 +12413,6 @@ void Unit::Dismount()
 
 void Unit::SetInCombatWith(Unit* enemy, uint32 duration)
 { 
-    
     // Xinef: Dont allow to start combat with triggers
     if (enemy->GetTypeId() == TYPEID_UNIT && enemy->ToCreature()->IsTrigger())
         return;
@@ -12436,6 +12434,7 @@ void Unit::SetInCombatWith(Unit* enemy, uint32 duration)
             return;
         }
     }
+
     SetInCombatState(false, enemy, duration);
 }
 
@@ -12584,6 +12583,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
             Dismount();
         if (!IsStandState()) // pussywizard: already done in CombatStart(target, initialAggro) for the target, but when aggro'ing from MoveInLOS CombatStart is not called!
             SetStandState(UNIT_STAND_STATE_STAND);
+
+        // Armory
+        if (creature->GetMap()->IsDungeon() && creature->IsInstanceBind() || creature->IsDungeonBoss())
+            creature->SetBossFightTime(getMSTime());
     }
 
     for (Unit::ControlSet::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)
@@ -16563,10 +16566,9 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
             //Player* creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
             // TODO: do instance binding anyway if the charmer/owner is offline
 
-            if (instanceMap->IsDungeon() && player)
-                if (instanceMap->IsRaidOrHeroicDungeon())
-                    if (creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-                        instanceMap->ToInstanceMap()->PermBindAllPlayers();
+            if (instanceMap->IsDungeon() && player && instanceMap->IsRaidOrHeroicDungeon())
+                if (creature->IsInstanceBind())
+                    instanceMap->ToInstanceMap()->PermBindAllPlayers();
         }
     }
 
@@ -18424,7 +18426,7 @@ void Unit::SendTeleportPacket(Position& pos)
 }
 
 bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool teleport)
-{ 
+{
     if (!Trinity::IsValidMapCoord(x, y, z, orientation))
         return false;
 
@@ -18441,6 +18443,11 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
         if (mask)
             RemoveAurasWithInterruptFlags(mask);
     }
+
+    // Custom.AFK.Report
+    if (GetTypeId() == TYPEID_PLAYER)
+        ToPlayer()->UpdateAutoAfkKick(time(NULL), true);
+
 
     if (relocated)
     {

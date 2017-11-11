@@ -1085,7 +1085,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
             if (!player)
                 return false;
 
-            AreaTableEntry const* pArea = GetAreaEntryByAreaID(player->GetAreaId());
+            AreaTableEntry const* pArea = sAreaTableStore.LookupEntry(player->GetAreaId());
             if (!(pArea && pArea->flags & AREA_FLAG_NO_FLY_ZONE))
                 return false;
             if (!player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY))
@@ -2533,7 +2533,7 @@ void SpellMgr::LoadSpellAreas()
             }
         }
 
-        if (spellArea.areaId && !GetAreaEntryByAreaID(spellArea.areaId))
+        if (spellArea.areaId && !sAreaTableStore.LookupEntry(spellArea.areaId))
         {
             sLog->outErrorDb("Spell %u listed in `spell_area` have wrong area (%u) requirement", spell, spellArea.areaId);
             continue;
@@ -2985,7 +2985,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
         ApplySpellFix
-        ({ 
+        ({
             1776, // Gouge
             1777,
             8629,
@@ -3010,7 +3010,7 @@ void SpellMgr::LoadSpellCustomAttr()
         });
 
         ApplySpellFix
-        ({ 
+        ({
             64415, // Val'anyr, Hammer of Ancient Kings - proc HOT
             64411, // Val'anyr, Hammer of Ancient Kings - proc HOT
             67667, // Coliseum 5 Healer Trinket - proc HOT
@@ -3038,7 +3038,7 @@ void SpellMgr::LoadSpellCustomAttr()
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS;
         });
-        
+
         ApplySpellFix
         ({
             53, // Backstab
@@ -3106,10 +3106,10 @@ void SpellMgr::LoadSpellCustomAttr()
 
 
         ApplySpellFix
-        ({ 
+        ({
             26029, // Dark Glare
             43140, // Flame Breath
-            43215, 
+            43215,
             70461, // Coldflame Trap
             72133, // Pain and Suffering
             73788,
@@ -3125,9 +3125,9 @@ void SpellMgr::LoadSpellCustomAttr()
 
 
         ApplySpellFix
-        ({ 
+        ({
             58690, // Cyanigosa, Tail Sweep
-            59283 
+            59283
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
         });
@@ -3153,7 +3153,7 @@ void SpellMgr::LoadSpellCustomAttr()
             72373, // Shared Suffering
             71904, // Chaos Bane
             70492, // Ooze Eruption
-            72505, 
+            72505,
             72624,
             72625,
             66809, // Meteor Fists
@@ -3167,7 +3167,7 @@ void SpellMgr::LoadSpellCustomAttr()
         ApplySpellFix
         ({
             18500, // Wing Buffet
-            69293, 
+            69293,
             33086, // Wild Bite
             49749, // Piercing Blow
             52890, // Penetrating Strike
@@ -3227,10 +3227,10 @@ void SpellMgr::LoadSpellCustomAttr()
         ApplySpellFix({ 64422 /*Sonic Screech (Auriaya)*/}, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
-        }); 
+        });
 
         ApplySpellFix
-        ({ 
+        ({
             72293, // Mark of the Fallen Champion (Deathbringer Saurfang)
             72347  // Lock Players and Tap Chest (Gunship Battle)
         }, [](SpellInfo* spellInfo) {
@@ -3265,7 +3265,7 @@ void SpellMgr::LoadSpellCustomAttr()
             64638, // Ulduar, Winter Jormungar, Acidic Bite
             71157, // Icecrown Citadel, Plagued Zombie, Infected Wound
             72963, // Icecrown Citadel, Valithria Dreamwalker, Flesh Rot (Rot Worm)
-            72964, 
+            72964,
             72965,
             72966,
             72465, // Icecrown Citadel, Sindragosa, Respite for a Tormented Soul (weekly quest)
@@ -3288,7 +3288,7 @@ void SpellMgr::LoadSpellCustomAttr()
             11971, // Sunder Armor
             58567, // Player Sunder Armor
             61920, // Assembly of Iron Supercharge
-            66320, // Fire Bomb 10 man 
+            66320, // Fire Bomb 10 man
             67472, // Fire Bomb 25 man
             67473, // Fire Bomb 10 man heroic
             67475, // Fire Bomb 25 man heroic
@@ -4292,7 +4292,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 16312: //Flametongue Weapon rank 6 - Passive
             spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
             break;
-        case 3600:  //Earthbind totem 
+        case 3600:  //Earthbind totem
         case 64695: //Storm, Earth and Fire talent
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
@@ -4369,7 +4369,7 @@ void SpellMgr::LoadDbcDataCorrections()
         ///// MAGE
         /////////////////////////////////
         // Winter's Chill
-        case 12579: 
+        case 12579:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
         // Combustion, make this passive
@@ -4590,7 +4590,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->SpellFamilyFlags = flag96(0, 0x10, 0);
             break;
         // Pounce Bleed
-        case 9007: 
+        case 9007:
         case 9824:
         case 9826:
         case 27007:
@@ -4711,7 +4711,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 10790: // Tiger
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
-            break;		
+            break;
         case 31700: // Black Qiraji Battle Tank
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[EFFECT_2] = 99;
@@ -4925,7 +4925,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[0] = 0;
             spellInfo->Attributes |= SPELL_ATTR0_HIDDEN_CLIENTSIDE | SPELL_ATTR0_HIDE_IN_COMBAT_LOG | SPELL_ATTR0_PASSIVE;
             spellInfo->AttributesEx |= SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR;
-            spellInfo->DurationIndex = 21; 
+            spellInfo->DurationIndex = 21;
             break;
         case 20545: // Lightning shield
             spellInfo->AttributesEx4 |= SPELL_ATTR4_NOT_STEALABLE;
@@ -5790,7 +5790,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
-        case 66320: // Fire Bomb 10 man 
+        case 66320: // Fire Bomb 10 man
         case 67472: // Fire Bomb 25 man
         case 67473: // Fire Bomb 10 man heroic
         case 67475: // Fire Bomb 25 man heroic
@@ -7066,6 +7066,18 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectMiscValue[EFFECT_0] = 90029;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
+        case 17458:    // Fluroescent Green Mechanostrider
+            spellInfo->EffectMiscValue[EFFECT_0] = 90030;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
+        case 10798:    // Whistle of the Obsidian Raptor
+            spellInfo->EffectMiscValue[EFFECT_0] = 90031;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
+        case 16055:    // Reins of the Nightsaber
+            spellInfo->EffectMiscValue[EFFECT_0] = 90032;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
@@ -7085,8 +7097,9 @@ void SpellMgr::LoadDbcDataCorrections()
     }
 
     // Xinef: The Veiled Sea area in outlands (Draenei zone), client blocks casting flying mounts
-    for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)
-        if (AreaTableEntry* areaEntry = const_cast<AreaTableEntry*>(sAreaStore.LookupEntry(i)))
+    for (uint32 i = 0; i < sAreaTableStore.GetNumRows(); ++i)
+    {
+        if (AreaTableEntry* areaEntry = const_cast<AreaTableEntry*>(sAreaTableStore.LookupEntry(i)))
         {
             if (areaEntry->ID == 3479)
                 areaEntry->flags |= AREA_FLAG_NO_FLY_ZONE;
@@ -7094,6 +7107,7 @@ void SpellMgr::LoadDbcDataCorrections()
             else if (areaEntry->ID == 2102)
                 areaEntry->flags |= AREA_FLAG_REST_ZONE_ALLIANCE;
         }
+    }
 
     //Fix for missing stamina for Dr. Whitherlimb's drops
     ItemRandomSuffixEntry* rSuffix = const_cast<ItemRandomSuffixEntry*>(sItemRandomSuffixStore.LookupEntry(79));

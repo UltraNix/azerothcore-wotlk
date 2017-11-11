@@ -99,7 +99,52 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recvData)
 
     CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(entry);
     if (ci)
-        SendPacket(&ci->queryData);
+    {
+        LocaleConstant loc_idx = GetSessionDbLocaleIndex();
+
+        // If locale not default load packet here and overwrite data with locale one.
+        if (loc_idx != LOCALE_enUS)
+        {
+            std::string Name, SubName;
+            Name = ci->Name;
+            SubName = ci->SubName;
+
+            if (CreatureLocale const* cl = sObjectMgr->GetCreatureLocale(entry))
+            {
+                ObjectMgr::GetLocaleString(cl->Name, loc_idx, Name);
+                ObjectMgr::GetLocaleString(cl->SubName, loc_idx, SubName);
+            }
+
+            WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 1);
+
+            data << uint32(ci->Entry);                              // creature entry
+            data << Name;
+            data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4, always empty
+            data << SubName;
+            data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
+            data << uint32(ci->type_flags);                     // flags
+            data << uint32(ci->type);                           // CreatureType.dbc
+            data << uint32(ci->family);                         // CreatureFamily.dbc
+            data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)
+            data << uint32(ci->KillCredit[0]);                  // new in 3.1, kill credit
+            data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
+            data << uint32(ci->Modelid1);                       // Modelid1
+            data << uint32(ci->Modelid2);                       // Modelid2
+            data << uint32(ci->Modelid3);                       // Modelid3
+            data << uint32(ci->Modelid4);                       // Modelid4
+            data << float(ci->ModHealth);                       // dmg/hp modifier
+            data << float(ci->ModMana);                         // dmg/mana modifier
+            data << uint8(ci->RacialLeader);
+            for (uint32 i = 0; i < MAX_CREATURE_QUEST_ITEMS; ++i)
+                data << uint32(ci->questItems[i]);              // itemId[6], quest drop
+            data << uint32(ci->movementId);                     // CreatureMovementInfo.dbc
+
+            SendPacket(&data);
+        }
+        // Default locale we can load packet from queryData.
+        else
+            SendPacket(&ci->queryData);
+    }
     else
     {
         ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CREATURE_QUERY - NO CREATURE INFO! (GUID: %u, ENTRY: %u)",
@@ -122,15 +167,31 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recvData)
     const GameObjectTemplate* info = sObjectMgr->GetGameObjectTemplate(entry);
     if (info)
     {
+        std::string Name;
+        std::string IconName;
+        std::string CastBarCaption;
+
+        Name = info->name;
+        IconName = info->IconName;
+        CastBarCaption = info->castBarCaption;
+
+        LocaleConstant loc_idx = GetSessionDbLocaleIndex();
+        if (loc_idx >= LOCALE_enUS)
+            if (GameObjectLocale const* gameObjectLocale = sObjectMgr->GetGameObjectLocale(entry))
+            {
+                ObjectMgr::GetLocaleString(gameObjectLocale->Name, loc_idx, Name);
+                ObjectMgr::GetLocaleString(gameObjectLocale->CastBarCaption, loc_idx, CastBarCaption);
+            }
+
         ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
         data << uint32(entry);
         data << uint32(info->type);
         data << uint32(info->displayId);
-        data << info->name;
+        data << Name;
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
-        data << info->IconName;                                   // 2.0.3, string. Icon name to use instead of default icon for go's (ex: "Attack" makes sword)
-        data << info->castBarCaption;                             // 2.0.3, string. Text will appear in Cast Bar when using GO (ex: "Collecting")
+        data << IconName;                                   // 2.0.3, string. Icon name to use instead of default icon for go's (ex: "Attack" makes sword)
+        data << CastBarCaption;                             // 2.0.3, string. Text will appear in Cast Bar when using GO (ex: "Collecting")
         data << info->unk1;                                 // 2.0.3, string
         data.append(info->raw.data, MAX_GAMEOBJECT_DATA);
         data << float(info->size);                          // go size
@@ -287,7 +348,14 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recvData)
         }
         else
         {
-            data << pageText->Text;
+            std::string Text = pageText->Text;
+
+            LocaleConstant loc_idx = GetSessionDbLocaleIndex();
+            if (loc_idx >= LOCALE_enUS)
+                if (PageTextLocale const* player = sObjectMgr->GetPageTextLocale(pageID))
+                    ObjectMgr::GetLocaleString(player->Text, loc_idx, Text);
+
+            data << Text;
             data << uint32(pageText->NextPage);
             pageID = pageText->NextPage;
         }

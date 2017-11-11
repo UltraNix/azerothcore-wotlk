@@ -2696,6 +2696,10 @@ class Player : public Unit, public GridObject<Player>
         bool BlizzlikeMode() { return m_BlizzlikeMode; }
         void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
    
+        // @kiszak
+        bool KiszakMode() { return m_KiszakMode; }
+        void SetKiszakMode(bool val) { m_KiszakMode = val; }
+
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
         void SetAutoInviteDone(bool val) { m_NeedAutoInvite = val; }
@@ -2961,6 +2965,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool m_BlizzlikeMode;
         bool m_NeedAutoInvite; // @autoinvite_feature
+        bool m_KiszakMode;     // @kiszak
         bool m_ArenaAnnounce;
 
         ////////////////////Rest System/////////////////////

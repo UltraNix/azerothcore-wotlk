@@ -18,12 +18,10 @@
 
 #include "BazaarMgr.h"
 
-BazaarMgr::BazaarMgr() 
-{ 
-}
-
-BazaarMgr::~BazaarMgr() 
-{ 
+BazaarMgr* BazaarMgr::instance()
+{
+    static BazaarMgr instance;
+    return &instance;
 }
 
 bool BazaarMgr::CheckPremiumAmount(uint32 accountId, uint32 sellAmount)

@@ -1320,6 +1320,12 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_CUSTOM_AFK_REPORT] = sConfigMgr->GetBoolDefault("Custom.AFK.Report", false);
     m_int_configs[CONFIG_CUSTOM_AFK_REPORT_TIMER] = sConfigMgr->GetIntDefault("Custom.AFK.Report.PvP.Timer", 2);
 
+    // Armory
+    m_bool_configs[CONFIG_ARMORY_STATS] = sConfigMgr->GetBoolDefault("ArmoryStats.Enable", false);
+
+    // Encounter logs
+    m_bool_configs[CONFIG_ENCOUNTER_LOG] = sConfigMgr->GetBoolDefault("EncounterLog.Enable", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

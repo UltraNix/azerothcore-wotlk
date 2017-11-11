@@ -46,6 +46,7 @@ public:
             { "dodge",              SEC_PLAYER,             false, HandleDodgeModeCommand,              "" },
             { "tocreset",           SEC_PLAYER,             false, HandleTocResetCommand,               "" },
             { "hasblizzlike",       SEC_MODERATOR,          false, HandleHasBlizzlikeCommand,           "" },
+            { "setkiszak",          SEC_ADMINISTRATOR,      false, HandleSetKiszakCommand,              "" },
         };
         return commandTable;
     }
@@ -452,6 +453,36 @@ public:
             handler->PSendSysMessage("Player %s has |cff00ff00enabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
         else
             handler->PSendSysMessage("Player %s has |cffff0000disabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
+
+        return true;
+    }
+
+
+    static bool HandleSetKiszakCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        Player *target = handler->getSelectedPlayer();
+
+        if (!player)
+            return false;
+
+        if (!target)
+        {
+            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!target->KiszakMode())
+        {
+            target->SetKiszakMode(true);
+            handler->PSendSysMessage("Successfully updated Player: %s to 'Kiszak Mode'.", player->GetName().c_str());
+        }
+        else
+        {
+            target->SetKiszakMode(false);
+            handler->PSendSysMessage("Successfully removed 'Kiszak Mode' from Player: %s.", player->GetName().c_str());
+        }
 
         return true;
     }

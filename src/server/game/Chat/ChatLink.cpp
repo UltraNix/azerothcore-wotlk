@@ -186,6 +186,16 @@ bool ItemChatLink::ValidateName(char* buffer, const char* context)
 
     bool res = (FormatName(LOCALE_enUS, NULL, suffixStrings) == buffer);
 
+    if (!res)
+    {
+        ItemLocale const* il = sObjectMgr->GetItemLocale(_item->ItemId);
+        for (uint8 index = LOCALE_koKR; index < TOTAL_LOCALES; ++index)
+            if (FormatName(index, il, suffixStrings) == buffer)
+            {
+                res = true;
+                break;
+            }
+    }
     //if (!res)
         ;//sLog->outDebug(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): linked item (id: %u) name wasn't found in any localization", context, _item->ItemId);
     return res;
@@ -233,6 +243,16 @@ bool QuestChatLink::ValidateName(char* buffer, const char* context)
 
     bool res = (_quest->GetTitle() == buffer);
 
+    if (!res)
+    {
+        if (QuestLocale const* ql = sObjectMgr->GetQuestLocale(_quest->GetQuestId()))
+            for (uint8 i = 0; i < ql->Title.size(); i++)
+                if (ql->Title[i] == buffer)
+                {
+                    res = true;
+                    break;
+                }
+    }
     //if (!res)
         ;//sLog->outDebug(LOG_FILTER_CHATSYS, "ChatHandler::isValidChatMessage('%s'): linked quest (id: %u) title wasn't found in any localization", context, _quest->GetQuestId());
     return res;

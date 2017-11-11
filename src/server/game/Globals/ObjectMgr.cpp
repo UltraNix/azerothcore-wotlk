@@ -309,7 +309,8 @@ void ObjectMgr::LoadCreatureLocales()
 
     _creatureLocaleStore.clear();                              // need for reload case
 
-    QueryResult result = WorldDatabase.Query("SELECT entry, name_loc1, subname_loc1, name_loc2, subname_loc2, name_loc3, subname_loc3, name_loc4, subname_loc4, name_loc5, subname_loc5, name_loc6, subname_loc6, name_loc7, subname_loc7, name_loc8, subname_loc8 FROM locales_creature");
+    //                                               0      1       2     3
+    QueryResult result = WorldDatabase.Query("SELECT entry, locale, Name, Title FROM creature_template_locale");
 
     if (!result)
         return;
@@ -318,19 +319,24 @@ void ObjectMgr::LoadCreatureLocales()
     {
         Field* fields = result->Fetch();
 
-        uint32 entry = fields[0].GetUInt32();
+        uint32 id = fields[0].GetUInt32();
+        std::string localeName = fields[1].GetString();
 
-        CreatureLocale& data = _creatureLocaleStore[entry];
+        std::string name = fields[2].GetString();
+        std::string title = fields[3].GetString();
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
-        {
-            LocaleConstant locale = (LocaleConstant) i;
-            AddLocaleString(fields[1 + 2 * (i - 1)].GetString(), locale, data.Name);
-            AddLocaleString(fields[1 + 2 * (i - 1) + 1].GetString(), locale, data.SubName);
-        }
-    } while (result->NextRow());
+        CreatureLocale& data = _creatureLocaleStore[id];
+        LocaleConstant locale = GetLocaleByName(localeName);
+        if (locale == LOCALE_enUS)
+            continue;
 
-    sLog->outString(">> Loaded %lu creature locale strings in %u ms", (unsigned long)_creatureLocaleStore.size(), GetMSTimeDiffToNow(oldMSTime));
+        AddLocaleString(name, locale, data.Name);
+        AddLocaleString(title, locale, data.SubName);
+
+    }
+    while (result->NextRow());
+
+    sLog->outString(">> Loaded %lu creature locale strings in %u ms", (uint32)_creatureLocaleStore.size(), GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
 }
 
@@ -2730,7 +2736,7 @@ void ObjectMgr::LoadItemTemplates()
             itemTemplate.ItemSet = 0;
         }
 
-        if (itemTemplate.Area && !GetAreaEntryByAreaID(itemTemplate.Area))
+        if (itemTemplate.Area && !sAreaTableStore.LookupEntry(itemTemplate.Area))
             sLog->outErrorDb("Item (Entry: %u) has wrong Area (%u)", entry, itemTemplate.Area);
 
         if (itemTemplate.Map && !sMapStore.LookupEntry(itemTemplate.Map))
@@ -4006,7 +4012,7 @@ void ObjectMgr::LoadQuests()
         // client quest log visual (area case)
         if (qinfo->ZoneOrSort > 0)
         {
-            if (!GetAreaEntryByAreaID(qinfo->ZoneOrSort))
+            if (!sAreaTableStore.LookupEntry(qinfo->ZoneOrSort))
             {
                 sLog->outErrorDb("Quest %u has `ZoneOrSort` = %u (zone case) but zone with this id does not exist.",
                     qinfo->GetQuestId(), qinfo->ZoneOrSort);
@@ -5829,7 +5835,7 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(zoneId);
+        AreaTableEntry const* areaEntry = sAreaTableStore.LookupEntry(zoneId);
         if (!areaEntry)
         {
             sLog->outErrorDb("Table `game_graveyard_zone` has a record for not existing zone id (%u), skipped.", zoneId);
@@ -6462,11 +6468,8 @@ void ObjectMgr::LoadGameObjectLocales()
 
     _gameObjectLocaleStore.clear();                           // need for reload case
 
-    QueryResult result = WorldDatabase.Query("SELECT entry, "
-        "name_loc1, name_loc2, name_loc3, name_loc4, name_loc5, name_loc6, name_loc7, name_loc8, "
-        "castbarcaption_loc1, castbarcaption_loc2, castbarcaption_loc3, castbarcaption_loc4, "
-        "castbarcaption_loc5, castbarcaption_loc6, castbarcaption_loc7, castbarcaption_loc8 FROM locales_gameobject");
-
+    //                                               0      1       2     3
+    QueryResult result = WorldDatabase.Query("SELECT entry, locale, name, castBarCaption FROM gameobject_template_locale");
     if (!result)
         return;
 
@@ -6474,18 +6477,25 @@ void ObjectMgr::LoadGameObjectLocales()
     {
         Field* fields = result->Fetch();
 
-        uint32 entry = fields[0].GetUInt32();
+        uint32 id                   = fields[0].GetUInt32();
+        std::string localeName      = fields[1].GetString();
 
-        GameObjectLocale& data = _gameObjectLocaleStore[entry];
+        std::string name            = fields[2].GetString();
+        std::string castBarCaption  = fields[3].GetString();
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
-            AddLocaleString(fields[i].GetString(), LocaleConstant(i), data.Name);
+        GameObjectLocale& data = _gameObjectLocaleStore[id];
+        LocaleConstant locale = GetLocaleByName(localeName);
+        if (locale == LOCALE_enUS)
+            continue;
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
-            AddLocaleString(fields[i + (TOTAL_LOCALES - 1)].GetString(), LocaleConstant(i), data.CastBarCaption);
-    } while (result->NextRow());
+        AddLocaleString(name, locale, data.Name);
+        AddLocaleString(castBarCaption, locale, data.CastBarCaption);
 
-    sLog->outString(">> Loaded %lu gameobject locale strings in %u ms", (unsigned long)_gameObjectLocaleStore.size(), GetMSTimeDiffToNow(oldMSTime));
+    }
+    while (result->NextRow());
+
+
+    sLog->outString(">> Loaded %lu gameobject locale strings in %u ms", (uint32)_gameObjectLocaleStore.size(), GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
 }
 
@@ -7891,7 +7901,7 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
         uint32 entry  = fields[0].GetUInt32();
         int32 skill   = fields[1].GetInt16();
 
-        AreaTableEntry const* fArea = GetAreaEntryByAreaID(entry);
+        AreaTableEntry const* fArea = sAreaTableStore.LookupEntry(entry);
         if (!fArea)
         {
             sLog->outErrorDb("AreaId %u defined in `skill_fishing_base_level` does not exist", entry);
