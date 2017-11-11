@@ -126,6 +126,8 @@ public:
             { "skirmish",           SEC_ADMINISTRATOR,      false, HandleSkirmishCommand,               "" },
             { "mailbox",            SEC_ADMINISTRATOR,      false, &HandleMailBoxCommand,               "" },      
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
+            { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
+            { "sthhide",            SEC_PLAYER,             false, &HandleSthHideCommand,               "" },
         };
         return commandTable;
     }
@@ -3238,6 +3240,119 @@ public:
 
         return true;
     }
+
+    static bool HandleEventGoCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        Pet* pet = player->GetPet();
+
+        if (player->GetMap()->IsBattlegroundOrArena())
+        {
+            handler->PSendSysMessage("You can't do that while character is in battleground or arena.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->IsAlive() && player->IsInCombat())
+        {
+            handler->PSendSysMessage("You can't do that while character is in combat.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->IsMounted())
+        {
+            handler->PSendSysMessage("You can't do that while character is mounted.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player && pet)
+        {
+            handler->PSendSysMessage("You can't do that while pet is summoned.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!*args)
+            return false;
+
+        char* loc = strtok((char*)args, " ");
+        if (!loc || !atoi(loc) && loc != "0")
+            return false;
+
+        switch (atoi(loc))
+        {
+        case 1:
+            player->TeleportTo(1, 16232.267578f, 16301.253906f, 45.449554f, player->GetOrientation());
+            break;
+        case 2:
+            if (player->HasItemCount(86001))
+                player->TeleportTo(1, 5249.313965f, -1473.966064f, 1360.240723f, player->GetOrientation());
+            else
+            {
+                handler->PSendSysMessage("You don't have required entry ticket to enter this stage.");
+                handler->SetSentErrorMessage(true);
+            }
+            break;
+        case 3:
+            if (player->HasItemCount(86002))
+                player->TeleportTo(0, 4241.554199f, -2741.025879f, 9.378314f, player->GetOrientation());
+            else
+            {
+                handler->PSendSysMessage("You don't have required token to enter this stage.");
+                handler->SetSentErrorMessage(true);
+            }
+            break;
+        case 4:
+            if (player->HasItemCount(86003))
+                player->TeleportTo(0, -1858.023071f, -4262.541992f, 12.328624f, player->GetOrientation());
+            else
+            {
+                handler->PSendSysMessage("You don't have required token to enter this stage.");
+                handler->SetSentErrorMessage(true);
+            }
+            break;
+        case 5:
+            if (player->HasItemCount(86004))
+                player->TeleportTo(1, 5262.578125f, -2170.639160f, 1259.369141f, player->GetOrientation());
+            else
+            {
+                handler->PSendSysMessage("You don't have required token to enter this stage.");
+                handler->SetSentErrorMessage(true);
+            }
+            break;
+        default:
+            handler->PSendSysMessage("Wrong location. Write number from 1 to 5.");
+            handler->SetSentErrorMessage(true);
+            break;
+        }
+
+        return true;
+    }
+
+    static bool HandleSthHideCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (player->hasSthHide()) {
+            player->SetSthHide(false);
+            handler->PSendSysMessage("Players in Stairways to Heaven zones are now visible.");
+        }
+        else {
+            player->SetSthHide(true);
+            handler->PSendSysMessage("Players in Stairways to Heaven zones are now hidden.");
+        }
+        return true;
+    }
+
 };
 
 void AddSC_misc_commandscript()

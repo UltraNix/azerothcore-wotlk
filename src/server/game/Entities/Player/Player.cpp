@@ -7699,7 +7699,7 @@ void Player::UpdateArea(uint32 newArea)
     // Xinef: area should inherit zone flags
     AreaTableEntry const* zone = sAreaTableStore.LookupEntry(area->zone);
     uint32 areaFlags = area->flags;
-    bool isSanctuary = (area->IsSanctuary() || area->ID == 268 || area->ID == 616 || area->ID == 3817 || area->ID == 2037);
+    bool isSanctuary = (area->IsSanctuary() || area->ID == 876 || area->ID == 616 || area->ID == 3817 || area->ID == 2037 || area->ID == 2401);
     bool isInn = area->IsInn(GetTeamId());
     // @Gambling
     bool isGamblingZone = (area->ID == 41 || area->ID == 2562);
@@ -25420,8 +25420,14 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
     //sLog->outDebug("zDiff = %f", z_diff);
 
-    // event only                                                                                           ToC
-    if (GetZoneId() == 268 || GetZoneId() == 616 || GetZoneId() == 3817 || GetZoneId() == 2037 || GetZoneId() == 4722)
+    // event only                                                   ToC
+    if (GetZoneId() == 268 || GetZoneId() == 3817 || GetZoneId() == 4722)
+        return;
+    // event only  
+    if(GetZoneId() == 876 /*GM Island*/ ||
+        GetZoneId() == 616 /*Hyjal*/ ||
+        GetZoneId() == 2037 /*Quel'thalas*/ ||
+        (GetZoneId() == 45 /*Arathi Highlands*/ && GetAreaId() == 2401 /*The Forbidding Sea*/))
         return;
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored

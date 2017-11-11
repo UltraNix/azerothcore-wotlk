@@ -542,7 +542,9 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_MODEL_PVE                = 0x20000,
     PLAYER_EXTRA_MODEL_PVP                = 0x40000,
     PLAYER_EXTRA_MODEL_MIX                = 0x80000,
-    PLAYER_EXTRA_MODEL_TWK                = 0x100000
+    PLAYER_EXTRA_MODEL_TWK                = 0x100000,
+
+    PLAYER_EXTRA_STH_HIDE                 = 0x200000,
 };
 
 // 2^n values
@@ -1243,6 +1245,15 @@ class Player : public Unit, public GridObject<Player>
             else if (hasGoldDuelSetting1000G())
                 m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G;
         }
+
+        // Stairways to heaven
+        void SetSthHide(bool hide)
+        {
+            if (hide) m_ExtraFlags |= PLAYER_EXTRA_STH_HIDE;
+            else m_ExtraFlags &= ~PLAYER_EXTRA_STH_HIDE;
+        }
+        bool hasSthHide() const { return m_ExtraFlags & PLAYER_EXTRA_STH_HIDE; }
+
 
         // @Transmog
         bool HasTransmogModelPvE()   const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVE; }

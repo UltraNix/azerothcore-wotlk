@@ -6911,6 +6911,20 @@ void SpellMgr::LoadDbcDataCorrections()
         // ///////////////////////////////////////////
 
         //////////////////////////////////////////
+        ////////// STAIRWAYS TO HEAVEN ///////////
+        //////////////////////////////////////////
+        // Knockup
+        case 53024:
+            spellInfo->EffectRadiusIndex[EFFECT_0] = 13;
+            spellInfo->EffectBasePoints[EFFECT_0] = 120;
+            spellInfo->EffectMiscValue[EFFECT_0] = 120;
+            break;
+        // Burning Winds
+        case 57562:
+            spellInfo->EffectBasePoints[EFFECT_0] = 0;
+            break;
+
+        //////////////////////////////////////////
         ////////// BREWFEST
         //////////////////////////////////////////
         // Apple Trap

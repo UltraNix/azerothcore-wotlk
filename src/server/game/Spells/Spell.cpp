@@ -5351,6 +5351,15 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    // Event schody
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_caster->ToPlayer()->GetZoneId() == 876 /*GM Island*/ || 
+            m_caster->ToPlayer()->GetZoneId() == 616 /*Hyjal*/ || 
+            m_caster->ToPlayer()->GetZoneId() == 2037 /*Quel'thalas*/ ||
+            (m_caster->ToPlayer()->GetZoneId() == 45 /*Arathi Highlands*/ && m_caster->ToPlayer()->GetAreaId() == 2401 /*The Forbidding Sea*/))
+                if (m_spellInfo->Id != 8690)
+                    return SPELL_FAILED_DONT_REPORT;
+
     // caster state requirements
     // not for triggered spells (needed by execute)
     if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE))
