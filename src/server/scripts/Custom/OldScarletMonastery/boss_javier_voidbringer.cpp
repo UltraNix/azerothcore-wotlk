@@ -81,6 +81,7 @@ enum Events
     EVENT_CLONE_START_ATTACK = 1,
     EVENT_IMMOLATE = 2,
     EVENT_SPELL_LOCK = 3,
+    EVENT_KNOCBACK   = 4,
 
     EVENT_SOLDIER_START_ATTACK = 1,
     EVENT_MORTAL_STRIKE = 2,
@@ -159,6 +160,7 @@ enum Spells
     SPELL_RED_BEAM = 72594,
     SPELL_BLUE_BEAM = 72598,
     SPELL_BLACK_BEAM = 72735,
+    SPELL_KNOCKBACK = 10689
 };
 
 class boss_javier_voidbringer : public CreatureScript
@@ -183,7 +185,10 @@ class boss_javier_voidbringer : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
                 me->RemoveAurasDueToSpell(SPELL_HARDENED);
                 me->RemoveAura(SPELL_AURA_BLACK);
-                //me->SetInhabitType(INHABIT_GROUND);
+                me->SetCanFly(false);
+                me->SetDisableGravity(false);
+                me->SendMovementFlagUpdate();
+                me->SetInhabitType(INHABIT_GROUND);
             }
 
             void EnterCombat(Unit* target) override
@@ -455,7 +460,10 @@ class boss_javier_voidbringer : public CreatureScript
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
                         me->RemoveAurasDueToSpell(SPELL_HARDENED);
                         me->RemoveAura(SPELL_KNEEL);
-                        //me->SetInhabitType(INHABIT_AIR);
+                        me->SetInhabitType(INHABIT_AIR);
+                        me->SetCanFly(true);
+                        me->SetDisableGravity(true);
+                        me->SendMovementFlagUpdate();
                         me->NearTeleportTo(CenterPos.GetPositionX(), CenterPos.GetPositionY(), CenterPos.GetPositionZ() + 20.0f, CenterPos.GetOrientation());
                         DoCast(SPELL_TELEPORT_VISUAL);
                         SetPhase(PHASE_FIVE);
@@ -548,6 +556,9 @@ class boss_javier_voidbringer : public CreatureScript
                     events.CancelEvent(EVENT_DEATH_COIL);
                     break;
                 case PHASE_SIX:
+                    me->SetCanFly(false);
+                    me->SetDisableGravity(false);
+                    me->SendMovementFlagUpdate();
                     me->GetMotionMaster()->MoveFall(0, CenterPos.GetPositionZ());
                     DoCast(me, SPELL_KNEEL, true);
                     me->RemoveAura(SPELL_AURA_BLACK);
@@ -674,7 +685,6 @@ class npc_void : public CreatureScript
                 Movement::MoveSplineInit init(me);
                 FillCirclePath(CenterPos, homePos.GetExactDist2d(CenterPos.GetPositionX(), CenterPos.GetPositionY()), me->GetPositionZ(), init.Path(), true);
                 init.SetWalk(false);
-                init.SetSmooth();
                 init.SetCyclic();
                 init.Launch();
             }
@@ -790,11 +800,12 @@ class npc_javier_clone : public CreatureScript
                             DoZoneInCombat();
                             events.ScheduleEvent(EVENT_IMMOLATE, 3000);
                             events.ScheduleEvent(EVENT_SPELL_LOCK, urand(5000, 9000));
+                            events.ScheduleEvent(EVENT_KNOCBACK, urand(5000, 15000));
                             break;
                         case EVENT_IMMOLATE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 0.0f, true))
                                 DoCast(target, SPELL_IMMOLATE, false);
-                            events.ScheduleEvent(EVENT_IMMOLATE, 6000);
+                            events.ScheduleEvent(EVENT_IMMOLATE, urand(6000, 12000));
                             break;
                         case EVENT_SPELL_LOCK:
                             interrupted = false;
@@ -814,6 +825,27 @@ class npc_javier_clone : public CreatureScript
                             if (!interrupted)
                                 events.ScheduleEvent(EVENT_SPELL_LOCK, urand(1000, 2000));
                             break;
+                        case EVENT_KNOCBACK:
+                        {
+                            std::vector<uint64> playerGUIDs;
+                            for (auto threat : me->getThreatManager().getThreatList())
+                            {
+                                if (Player* player = ObjectAccessor::GetPlayer(*me, threat->getUnitGuid()))
+                                    if (player && me->IsWithinDist2d(player, 7.0f))
+                                        playerGUIDs.push_back(player->GetGUID());
+                            }
+
+                            if (!playerGUIDs.empty())
+                            {
+                                if (Player* target = ObjectAccessor::GetPlayer(*me, Trinity::Containers::SelectRandomContainerElement(playerGUIDs)))
+                                    DoCast(target, SPELL_KNOCKBACK, true);
+                                events.Repeat(urand(15000, 25000));
+                                break;
+                            }
+                            else
+                                events.Repeat(1000);
+                            break;
+                        }
                         default:
                             break;
                     }
