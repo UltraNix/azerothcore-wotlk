@@ -3145,7 +3145,11 @@ public:
             !player->HasItemCount(86002) &&
             !player->HasItemCount(86003) &&
             !player->HasItemCount(86004))
+        {
             player->TeleportTo(571, 5804.149902f, 624.770996f, 647.767029f, 1.640000f);
+            return true;
+        }
+        return false;
     }
 };
 
