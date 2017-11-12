@@ -76,7 +76,7 @@ Position protectorsAndWellsPositions[25] =
     { 386.53f, -87.10f, 31.68f, 1.91f },
     { 353.55f, -76.29f, 30.82f, 1.55f },
     { 353.93f, -64.92f, 30.82f, 1.53f },
-    { 354.55f, -48.22f, 30.82f, 1.53f },
+    { 354.55f, -48.22f, 30.82f, 1.53f }
 };
 
 Position ChannelTriggerPositions[5] =
@@ -85,7 +85,7 @@ Position ChannelTriggerPositions[5] =
     { 368.33f, -140.55f, 29.53f, 0.0f },
     { 363.51f, -153.37f, 29.53f, 0.0f },
     { 376.67f, -160.68f, 29.53f, 0.0f },
-    { 384.70f, -145.30f, 29.53f, 0.0f },
+    { 384.70f, -145.30f, 29.53f, 0.0f }
 };
 
 enum Says
@@ -269,25 +269,25 @@ public:
 
             switch (unit->getClass())
             {
-            case CLASS_MAGE:
-            case CLASS_WARLOCK:
-            case CLASS_ROGUE:
-            case CLASS_HUNTER:
-                return true;
-            case CLASS_PRIEST:
-                return unit->HasAura(SPELL_SHADOWFORM);
-            case CLASS_DRUID:
-                return unit->HasAura(SPELL_MOONKIN_FORM) || unit->HasAura(SPELL_CAT_FORM);
-            case CLASS_SHAMAN:
-                return unit->HasAura(SPELL_ELEMENTAL_MASTERY) || unit->HasAura(SPELL_DUAL_WIELD);
-            case CLASS_PALADIN:
-                return unit->HasAura(SPELL_THE_ART_OF_WAR);
-            case CLASS_WARRIOR:
-                return unit->HasAura(SPELL_TITANS_GRIP) || unit->HasAura(SPELL_ENDLESS_RAGE);
-            case CLASS_DEATH_KNIGHT:
-                return unit->HasAura(SPELL_BLOOD_PRESENCE);
-            default:
-                return false;
+                case CLASS_MAGE:
+                case CLASS_WARLOCK:
+                case CLASS_ROGUE:
+                case CLASS_HUNTER:
+                    return true;
+                case CLASS_PRIEST:
+                    return unit->HasAura(SPELL_SHADOWFORM);
+                case CLASS_DRUID:
+                    return unit->HasAura(SPELL_MOONKIN_FORM) || unit->HasAura(SPELL_CAT_FORM);
+                case CLASS_SHAMAN:
+                    return unit->HasAura(SPELL_ELEMENTAL_MASTERY) || unit->HasAura(SPELL_DUAL_WIELD);
+                case CLASS_PALADIN:
+                    return unit->HasAura(SPELL_THE_ART_OF_WAR);
+                case CLASS_WARRIOR:
+                    return unit->HasAura(SPELL_TITANS_GRIP) || unit->HasAura(SPELL_ENDLESS_RAGE);
+                case CLASS_DEATH_KNIGHT:
+                    return unit->HasAura(SPELL_BLOOD_PRESENCE);
+                default:
+                    return false;
             }
         }
         return false;
@@ -320,6 +320,7 @@ class boss_dessembrae : public CreatureScript
 
             void Reset() override
             {
+                MovePlayersOutsidePrison();
                 _Reset();
                 if (GameObject* gate = ObjectAccessor::GetGameObject(*me, gateGUID))
                     gate->Delete();
@@ -331,9 +332,7 @@ class boss_dessembrae : public CreatureScript
                 me->RestoreDisplayId();
                 talkDone = false;
                 memset(playersInRoomGUIDs, 0, sizeof(playersInRoomGUIDs));
-                //memset(playerNames, 0, sizeof(playerNames));
                 channelerGUID = 0;
-                //me->SetInhabitType(INHABIT_GROUND);
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->SetObjectScale(1.0f);
                 gateGUID = 0;
@@ -611,23 +610,7 @@ class boss_dessembrae : public CreatureScript
                         float angle = 0.0f;
                         if (roomFailed)
                             me->AddAura(SPELL_BURNING_RAGE, me);
-                        //memset(playerNames, 0, sizeof(playerNames));
-                        for (int i = 0; i < 3; ++i)
-                        {
-                            if (Player* player = ObjectAccessor::GetPlayer(*me, playersInRoomGUIDs[i]))
-                            {
-                                if (!player->IsAlive())
-                                    continue;
-                                playersInRoomGUIDs[i] = 0;
-                                float x, y, z;
-                                me->GetNearPoint2D(x, y, 5.0f, angle);
-                                z = me->GetPositionZ() + 0.5f;
-                                player->DealDamage(player, me, me->GetMaxHealth() * 0.035f);
-                                player->NearTeleportTo(x, y, z, angle);
-                                angle += M_PI * 2.0f / 3.0f;
-                                player->CastCustomSpell(SPELL_POST_ROOM_ABSORB, SPELLVALUE_BASE_POINT0, 500000, player, true);
-                            }
-                        }
+                        MovePlayersOutsidePrison();
                         break;
                     }
                     case EVENT_CHECK_ROOM:
@@ -677,10 +660,10 @@ class boss_dessembrae : public CreatureScript
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetCanDualWield(true);
 
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 1000);
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1400);
-                        me->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, 400);
-                        me->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, 600);
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 1200);
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1800);
+                        me->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, 500);
+                        me->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, 700);
                         me->UpdateDamagePhysical(BASE_ATTACK);
                         me->UpdateDamagePhysical(OFF_ATTACK);
                         me->setAttackTimer(BASE_ATTACK, 1500);
@@ -700,14 +683,14 @@ class boss_dessembrae : public CreatureScript
                         break;
                     case EVENT_BEHEMOTH_CHARGE:
                         // charge w gracza ktory zadaje 80% hp
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, 50.f, true))
                             me->CastCustomSpell(SPELL_BEHEMOTH_CHARGE, SPELLVALUE_BASE_POINT1, target->GetMaxHealth() * 0.80f, target, TRIGGERED_FULL_MASK);
 
                         events.ScheduleEvent(EVENT_BEHEMOTH_CHARGE, 8000, 0, PHASE_PHYSICAL);
                         break;
                     case EVENT_WORGENS_CALL:
                         // zamienia gracza w wilka, gracz moze wtedy bic tylko melee atakami
-                        if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, worgensCallSelector()))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 1U, worgensCallSelector()))
                             target->CastSpell(target, SPELL_WORGENS_CALL);
 
                         events.ScheduleEvent(EVENT_WORGENS_CALL, 40000, 0, PHASE_PHYSICAL);
@@ -917,6 +900,26 @@ class boss_dessembrae : public CreatureScript
                     }
                 }
                 DoMeleeAttackIfReady();
+            }
+
+            void MovePlayersOutsidePrison()
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, playersInRoomGUIDs[i]))
+                    {
+                        if (!player->IsAlive())
+                            continue;
+                        playersInRoomGUIDs[i] = 0;
+                        float x, y, z;
+                        me->GetNearPoint2D(x, y, 5.0f, angle);
+                        z = me->GetPositionZ() + 0.5f;
+                        player->DealDamage(player, me, me->GetMaxHealth() * 0.035f);
+                        player->NearTeleportTo(x, y, z, angle);
+                        angle += M_PI * 2.0f / 3.0f;
+                        player->CastCustomSpell(SPELL_POST_ROOM_ABSORB, SPELLVALUE_BASE_POINT0, 500000, player, true);
+                    }
+                }
             }
 
             void SummonBall(uint32 entry)
@@ -1176,11 +1179,16 @@ class npc_channel_trigger_OLDSM : public CreatureScript
 
         struct npc_channel_trigger_OLDSMAI : public ScriptedAI
         {
-            npc_channel_trigger_OLDSMAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_channel_trigger_OLDSMAI(Creature* creature) : ScriptedAI(creature)
+            {
+                instance = me->GetInstanceScript();
+            }
 
             void Reset() override
             {
                 me->SetReactState(REACT_PASSIVE);
+                if (Creature* dessem = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_DESSEMBRAE)))
+                    dessem->AI()->JustSummoned(me);
             }
 
             void IsSummonedBy(Unit* summoner) override
@@ -1195,7 +1203,7 @@ class npc_channel_trigger_OLDSM : public CreatureScript
                 Movement::MoveSplineInit init(me);
                 FillCirclePath(ChannelerSpawnPosition, 6.0f, ChannelerSpawnPosition.m_positionZ, init.Path(), clockwise);
                 init.SetWalk(false);
-                init.SetSmooth();
+                //init.SetSmooth();
                 init.SetCyclic();
                 init.Launch();
             }
@@ -1235,6 +1243,7 @@ class npc_channel_trigger_OLDSM : public CreatureScript
 
         private:
             uint32 timer;
+            InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -1359,10 +1368,14 @@ class npc_protector_bomb_OLDSM : public CreatureScript
             npc_protector_bomb_OLDSMAI(Creature* creature) : ScriptedAI(creature)
             {
                 SetCombatMovement(false);
-
+                natureBombGUID = 0;
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 explosionTimer = 10000;
-                DoCast(SPELL_BOMB_OBJECT);
+                //DoCast(SPELL_BOMB_OBJECT);
+                if (GameObject* natureBomb = me->SummonGameObject(194902, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.f, 0.f, 0.f, 0.f, 0.f, 0, false))
+                {
+                    natureBombGUID = natureBomb->GetGUID();
+                }
                 exploded = false;
             }
 
@@ -1379,7 +1392,7 @@ class npc_protector_bomb_OLDSM : public CreatureScript
             {
                 if (!exploded && me->IsWithinDistInMap(who, 0.6f) && who->ToPlayer())
                 {
-                    if (GameObject* bomb = me->GetGameObject(SPELL_BOMB_OBJECT))
+                    if (GameObject* bomb = ObjectAccessor::GetGameObject(*me, natureBombGUID))
                     {
                         exploded = true;
                         me->CastCustomSpell(SPELL_NATURE_EXPLOSION, SPELLVALUE_RADIUS_MOD, 5000, (Unit*)nullptr, TRIGGERED_FULL_MASK);
@@ -1394,7 +1407,7 @@ class npc_protector_bomb_OLDSM : public CreatureScript
             {
                 if (explosionTimer <= diff && !exploded)
                 {
-                    if (GameObject* bomb = me->GetGameObject(SPELL_BOMB_OBJECT))
+                    if (GameObject* bomb = ObjectAccessor::GetGameObject(*me, natureBombGUID))
                     {
                         exploded = true;
                         me->CastCustomSpell(SPELL_NATURE_EXPLOSION, SPELLVALUE_RADIUS_MOD, 3000, (Unit*)nullptr, TRIGGERED_FULL_MASK);
@@ -1408,6 +1421,7 @@ class npc_protector_bomb_OLDSM : public CreatureScript
         private:
             uint32 explosionTimer;
             bool exploded;
+            uint64 natureBombGUID;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -1719,7 +1733,7 @@ class spell_arcane_orb_damage : public SpellScriptLoader
             void CalculateDamage(SpellEffIndex effIndex)
             {
                 if (GetHitUnit() && GetHitUnit()->GetMapId() == 44)
-                    SetHitDamage(25000);
+                    SetHitDamage(15000);
             }
 
             void Register() override

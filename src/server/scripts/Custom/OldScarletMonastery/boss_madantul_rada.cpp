@@ -200,7 +200,7 @@ public:
                         {
                             return me->GetVictim() != pred && !pred->HasAura(SPELL_SAM_TEST_AURA) &&
                                 // guid check is just to make sure we're not casting storm on a person that just dropped area debuff
-                                pred->IsPlayer() && previousStormcallGUID != pred->GetGUID();
+                                pred->IsPlayer() && previousstormcallguid != pred->getguid();
                         }))
                             me->CastSpell(target, SPELL_ELECTRICAL_STORM, TriggerCastFlags(TRIGGERED_IGNORE_POWER_AND_REAGENT_COST | TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS));
 
@@ -225,7 +225,7 @@ public:
                             break;
                         }
 
-                        me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + 50);
+                        me->SetPower(POWER_ENERGY, me->GetPower(POWER_ENERGY) + 10);
                         if (me->GetPower(POWER_ENERGY) >= 100)
                         {
                             events.SetPhase(PHASE_TWO);
@@ -321,7 +321,7 @@ public:
         void Reset() override
         {
             me->SetReactState(REACT_PASSIVE);
-            events.ScheduleEvent(1, 3500);
+            events.ScheduleEvent(1, 3500); // remove magic numbers
             me->AddAura(SPELL_EXPLODING_AURA, me);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         }
@@ -342,10 +342,9 @@ public:
         {
             events.Update(diff);
 
-            if (events.ExecuteEvent() == 1)
+            if (events.ExecuteEvent() == 1)// remove magic numbers
             {
-                Position pos;
-                me->GetPosition(&pos);
+                Position pos = me->GetPosition();
                 me->GetMotionMaster()->MoveCharge(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() - 10.0f, 25.0f, 10000);
             }
         }
@@ -431,7 +430,7 @@ class npc_arrow_marker_OLDSM : public CreatureScript
             {
                 me->SetWalk(true);
                 me->SetObjectScale(2.0f);
-                me->AddAura(42171, me); // marker aura
+                me->AddAura(42171, me); // marker aura // remove magic numbers
                 me->GetMotionMaster()->MovePoint(1, markerMovePos);
             }
         };
@@ -449,7 +448,7 @@ class spell_electrical_storm_damage_SpellScript : public SpellScript
     void HandleHit(SpellEffIndex /*effIndex*/)
     {
         if (GetHitUnit() && GetHitUnit()->GetMapId() == 44)
-            SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.2);
+            SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.15);
     }
 
     void Register() override
@@ -527,7 +526,7 @@ class spell_lightning_discharge_osm_SpellScript : public SpellScript
         //! osm
         if (GetCaster()->GetMapId() == 44)
             if (GetHitUnit())
-                SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.8);
+                SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.65);
     }
 
     void Register() override
