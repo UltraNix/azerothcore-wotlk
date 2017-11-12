@@ -200,7 +200,7 @@ public:
                         {
                             return me->GetVictim() != pred && !pred->HasAura(SPELL_SAM_TEST_AURA) &&
                                 // guid check is just to make sure we're not casting storm on a person that just dropped area debuff
-                                pred->IsPlayer() && previousstormcallguid != pred->getguid();
+                                pred->IsPlayer() && previousStormcallGUID != pred->GetGUID();
                         }))
                             me->CastSpell(target, SPELL_ELECTRICAL_STORM, TriggerCastFlags(TRIGGERED_IGNORE_POWER_AND_REAGENT_COST | TRIGGERED_IGNORE_AURA_INTERRUPT_FLAGS));
 

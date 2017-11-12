@@ -454,8 +454,8 @@ class boss_dessembrae : public CreatureScript
                 {
                     Talk(SAY_PHEONIX);
                     events.SetPhase(PHASE_FIRE);
-                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 200);
-                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 300);
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 1200);
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1300);
                     me->UpdateDamagePhysical(BASE_ATTACK);
                     me->setAttackTimer(BASE_ATTACK, 2000);
                     me->SetCanDualWield(false);
@@ -475,6 +475,9 @@ class boss_dessembrae : public CreatureScript
                 if (me->HealthBelowPctDamaged(40, damage) && events.IsInPhase(PHASE_FIRE))
                 {
                     Talk(SAY_ARCANE);
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, 300);
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 400);
+                    me->UpdateDamagePhysical(BASE_ATTACK);
                     summons.DespawnEntry(NPC_FLAME_TRIGGER);
                     summons.DespawnEntry(NPC_LITTLE_PHEONIX);
                     events.SetPhase(PHASE_ARCANE);
