@@ -149,12 +149,17 @@ public:
         uint32 activeSessionCount = sWorld->GetActiveSessionCount();
         uint32 connPeak = sWorld->GetMaxActiveSessionCount();
 
-        float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
-
         handler->PSendSysMessage("# # # Underground begin # # #");
         handler->PSendSysMessage("NO BOOST: Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
+
         if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
-            handler->PSendSysMessage("WITH BOOST: Connected players: %u. Characters in world: %u.", (activeSessionCount + (activeSessionCount * boostPercentage)), (playerCount + (playerCount * boostPercentage)));
+        {
+            float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
+            activeSessionCount = (activeSessionCount + (activeSessionCount * boostPercentage));
+            playerCount = (playerCount + (playerCount * boostPercentage));
+
+            handler->PSendSysMessage("WITH BOOST: Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
+        }
         handler->PSendSysMessage("# # # Underground end # # #");
 
         return true;

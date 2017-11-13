@@ -11,6 +11,7 @@ UPDATE `item_template` SET `name` = 'Horn of the Winter Wolf',
 `AllowableRace` = '2147483647',
 `RequiredSkill` = '762',
 `RequiredSkillRank` = '150',
+`RequiredSkillRank` = '150',
 `description` = 'Three Sunwell developers died while they were trying to tame him.'  WHERE `item_template`.`entry` = 1133;
 
 -- Fluroescent Green Mechanostrider
