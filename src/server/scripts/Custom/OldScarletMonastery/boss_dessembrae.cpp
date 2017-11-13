@@ -315,7 +315,8 @@ class boss_dessembrae : public CreatureScript
             boss_dessembraeAI(Creature* creature) : BossAI(creature, DATA_DESSEMBRAE)
             {
                 instance = me->GetInstanceScript();
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void Reset() override
@@ -816,7 +817,7 @@ class boss_dessembrae : public CreatureScript
                         break;
                     case EVENT_PLASMA_BALL:
                         if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1, 0.0f, true))
-                            me->CastCustomSpell(SPELL_PLASMA_BALL, SPELLVALUE_BASE_POINT0, 40000, target);
+                            me->CastCustomSpell(SPELL_PLASMA_BALL, SPELLVALUE_BASE_POINT0, 20000, target);
                         events.ScheduleEvent(EVENT_PLASMA_BALL, ++plasmaCount >= 3 ? 12000 : 1000, 0, PHASE_ARCANE);
                         if (plasmaCount >= 3)
                             plasmaCount = 0;
@@ -1004,7 +1005,8 @@ class npc_dessembraes_ball : public CreatureScript
         {
             npc_dessembraes_ballAI(Creature* creature) : ScriptedAI(creature)
             {
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void Reset() override
@@ -1086,7 +1088,8 @@ class npc_arcane_channeler : public CreatureScript
         {
             npc_arcane_channelerAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void Reset() override
@@ -1184,6 +1187,8 @@ class npc_channel_trigger_OLDSM : public CreatureScript
         {
             npc_channel_trigger_OLDSMAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
                 instance = me->GetInstanceScript();
             }
 
@@ -1262,7 +1267,11 @@ class npc_protector_OLDSM : public CreatureScript
 
         struct npc_protector_OLDSMAI : public ScriptedAI
         {
-            npc_protector_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
+            npc_protector_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void Reset() override
             {
@@ -1374,7 +1383,8 @@ class npc_protector_bomb_OLDSM : public CreatureScript
                 natureBombGUID = 0;
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 explosionTimer = 10000;
-                //DoCast(SPELL_BOMB_OBJECT);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
                 if (GameObject* natureBomb = me->SummonGameObject(194902, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.f, 0.f, 0.f, 0.f, 0.f, 0, false))
                 {
                     natureBombGUID = natureBomb->GetGUID();
@@ -1507,7 +1517,11 @@ class npc_little_phoenix_OLDSM : public CreatureScript
 
         struct npc_little_phoenix_OLDSMAI : public ScriptedAI
         {
-            npc_little_phoenix_OLDSMAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_little_phoenix_OLDSMAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void Reset() override
             {
@@ -1586,6 +1600,8 @@ class npc_arcane_orb_OLDSM : public CreatureScript
             {
                 invert = false;
                 hitCounter = 0;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void SpellHitTarget(Unit* victim, const SpellInfo* spellInfo) override
@@ -1736,7 +1752,7 @@ class spell_arcane_orb_damage : public SpellScriptLoader
             void CalculateDamage(SpellEffIndex effIndex)
             {
                 if (GetHitUnit() && GetHitUnit()->GetMapId() == 44)
-                    SetHitDamage(15000);
+                    SetHitDamage(10000);
             }
 
             void Register() override

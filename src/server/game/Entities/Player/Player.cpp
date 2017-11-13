@@ -5190,6 +5190,12 @@ void Player::BuildPlayerRepop()
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
+    if (GetInstanceScript() && GetInstanceScript()->IsResurrectionPrevented())
+    {
+        GetSession()->SendNotification("You cannot be resurrected right now.");
+        return;
+    }
+
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
     data << uint32(-1);
     data << float(0);
@@ -25432,7 +25438,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     // event only                                                   ToC
     if (GetZoneId() == 268 || GetZoneId() == 3817 || GetZoneId() == 4722)
         return;
-    // event only  
+    // event only
     if(GetZoneId() == 876 /*GM Island*/ ||
         GetZoneId() == 616 /*Hyjal*/ ||
         GetZoneId() == 2037 /*Quel'thalas*/ ||

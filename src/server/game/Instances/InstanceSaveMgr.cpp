@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -458,6 +458,10 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
     lock_instLists = true;
 
     InstanceSave::PlayerListType &pList = itr->second->m_playerList;
+
+    if (itr->second->GetMapId() == 44) // osm event
+        return;
+
     for (InstanceSave::PlayerListType::iterator iter = pList.begin(), iter2; iter != pList.end(); )
     {
         iter2 = iter++;
@@ -720,7 +724,7 @@ InstancePlayerBind* InstanceSaveManager::PlayerGetBoundInstance(uint32 guidLow, 
 }
 
 bool InstanceSaveManager::PlayerIsPermBoundToInstance(uint32 guidLow, uint32 mapid, Difficulty difficulty)
-{ 
+{
     if (InstancePlayerBind* bind = PlayerGetBoundInstance(guidLow, mapid, difficulty))
         if (bind->perm)
             return true;

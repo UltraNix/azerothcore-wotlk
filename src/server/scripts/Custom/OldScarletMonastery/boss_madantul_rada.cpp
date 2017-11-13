@@ -96,7 +96,8 @@ public:
     {
         boss_madantul_radaAI(Creature* creature) : BossAI(creature, DATA_MADANTUL_RADA)
         {
-            //SetImmuneToPushPullEffects(true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             me->setPowerType(POWER_ENERGY);
             me->SetMaxPower(POWER_ENERGY, 100);
         }
@@ -230,6 +231,8 @@ public:
                         {
                             events.SetPhase(PHASE_TWO);
                             events.ScheduleEvent(EVENT_PHASE_TRANSITION, 3000, 0U);
+                            events.CancelEvent(EVENT_LIGHTNING_AREA_DEBUFF);
+                            break;
                         }
 
                         events.ScheduleEvent(EVENT_LIGHTNING_AREA_DEBUFF, 5000, 0U, PHASE_ONE);
@@ -273,6 +276,7 @@ public:
                             AttackStart(target);
                         events.SetPhase(PHASE_ONE);
                         summons.DespawnEntry(NPC_STORM_CALL_TRIGGER);
+                        events.ScheduleEvent(EVENT_LIGHTNING_AREA_DEBUFF, 5000, 0U, PHASE_ONE);
                         break;
                     }
                     case EVENT_LIGHTNING_FURY:
@@ -316,7 +320,11 @@ public:
 
     struct npc_kamikaze_OLDSMAI : public ScriptedAI
     {
-        npc_kamikaze_OLDSMAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_kamikaze_OLDSMAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+        }
 
         void Reset() override
         {
@@ -324,6 +332,7 @@ public:
             events.ScheduleEvent(1, 3500); // remove magic numbers
             me->AddAura(SPELL_EXPLODING_AURA, me);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -368,6 +377,8 @@ public:
         npc_storm_call_trigger_OSM_AI(Creature* creature) : ScriptedAI(creature)
         {
             instance = me->GetInstanceScript();
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
         }
 
         void Reset() override

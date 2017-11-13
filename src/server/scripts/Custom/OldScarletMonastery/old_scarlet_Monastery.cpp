@@ -22,6 +22,9 @@
 #include "SpellScript.h"
 #include "Spell.h"
 
+#include <utility>
+#include <array>
+
 enum Spells
 {
     // Risen Dark Stalker
@@ -159,6 +162,12 @@ class npc_dark_risen_stalker : public CreatureScript
                 _events.ScheduleEvent(EVENT_STALKER_VANISH_VISUAL, 8000);
             }
 
+            void MoveInLineOfSight(Unit* who) override
+            {
+                if (who->IsWithinDist(me, 10.0f, true))
+                    ScriptedAI::MoveInLineOfSight(who);
+            }
+
             void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim())
@@ -246,6 +255,12 @@ class npc_trash_tank_OLDSM : public CreatureScript
                 }
             }
 
+            void MoveInLineOfSight(Unit* who) override
+            {
+                if (who->IsWithinDist(me, 10.0f, true))
+                    ScriptedAI::MoveInLineOfSight(who);
+            }
+
             void EnterCombat(Unit* target) override
             {
                 events.ScheduleEvent(EVENT_THROW_SHIELD, 6000);
@@ -297,7 +312,7 @@ class npc_trash_tank_OLDSM : public CreatureScript
                         break;
                     }
                     case EVENT_SHOCKWAVE:
-                        me->CastCustomSpell(SPELL_SHOCKWAVE, SPELLVALUE_BASE_POINT1, urand(12000, 18000), me->GetVictim(), TRIGGERED_FULL_MASK);
+                        me->CastCustomSpell(SPELL_SHOCKWAVE, SPELLVALUE_BASE_POINT1, urand(12000, 15000), me->GetVictim(), TRIGGERED_FULL_MASK);
 
                         events.ScheduleEvent(EVENT_SHOCKWAVE, urand(13000, 20000));
                         break;
@@ -342,6 +357,12 @@ class npc_trash_healer_OLDSM : public CreatureScript
             {
                 events.Reset();
                 me->RemoveAurasDueToSpell(SPELL_PROTECTION);
+            }
+
+            void MoveInLineOfSight(Unit* who) override
+            {
+                if (who->IsWithinDist(me, 10.0f, true))
+                    ScriptedAI::MoveInLineOfSight(who);
             }
 
             void EnterCombat(Unit* target) override
@@ -404,7 +425,7 @@ class npc_trash_healer_OLDSM : public CreatureScript
                         break;
                     case EVENT_LIGHT_CONSUMPTION:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                            me->CastCustomSpell(SPELL_LIGHT_CONSUMPTION, SPELLVALUE_BASE_POINT0, urand(4000, 6000), target, TRIGGERED_NONE);
+                            me->CastCustomSpell(SPELL_LIGHT_CONSUMPTION, SPELLVALUE_BASE_POINT0, urand(3000, 5000), target, TRIGGERED_NONE);
                         events.ScheduleEvent(EVENT_LIGHT_CONSUMPTION, 15000);
                         break;
                     default:
@@ -439,6 +460,12 @@ class npc_trash_caster_OLDSM : public CreatureScript
                 eventsDelayed = false;
             }
 
+            void MoveInLineOfSight(Unit* who) override
+            {
+                if (who->IsWithinDist(me, 10.0f, true))
+                    ScriptedAI::MoveInLineOfSight(who);
+            }
+
             void EnterCombat(Unit* target) override
             {
                 events.ScheduleEvent(EVENT_FLAME_STRIKE, 3000, 1);
@@ -469,14 +496,14 @@ class npc_trash_caster_OLDSM : public CreatureScript
                     case EVENT_FLAME_STRIKE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_BOTTOMAGGRO))
                         {
-                            int32 bp0 = urand(300, 400);
-                            int32 bp1 = urand(200, 300);
+                            int32 bp0 = urand(150, 250);
+                            int32 bp1 = urand(100, 150);
                             me->CastCustomSpell(target, SPELL_FLAME_STRIKE, &bp0, &bp1, NULL, true);
                         }
                         events.ScheduleEvent(EVENT_FLAME_STRIKE, urand(18000, 22000), 1);
                         break;
                     case EVENT_FEL_FIREBALL:
-                        me->CastCustomSpell(SPELL_FEL_FIREBALL, SPELLVALUE_BASE_POINT0, urand(16000, 20000), me->GetVictim(), TRIGGERED_NONE);
+                        me->CastCustomSpell(SPELL_FEL_FIREBALL, SPELLVALUE_BASE_POINT0, urand(13000, 17000), me->GetVictim(), TRIGGERED_NONE);
 
                         events.ScheduleEvent(EVENT_FEL_FIREBALL, 8000, 1);
                         break;
@@ -484,7 +511,7 @@ class npc_trash_caster_OLDSM : public CreatureScript
                         if (emberCounter <= 10)
                         {
                             ++emberCounter;
-                            me->CastCustomSpell(SPELL_EMBER_SHOWER, SPELLVALUE_BASE_POINT0, urand(1000, 1300), (Unit*)NULL, TRIGGERED_FULL_MASK);
+                            me->CastCustomSpell(SPELL_EMBER_SHOWER, SPELLVALUE_BASE_POINT0, urand(500, 800), (Unit*)NULL, TRIGGERED_FULL_MASK);
                             events.ScheduleEvent(EVENT_EMBER_SHOWER, 500);
                             if (!eventsDelayed)
                             {
@@ -501,7 +528,7 @@ class npc_trash_caster_OLDSM : public CreatureScript
                         break;
                     case EVENT_SPELL_SHADOWRAY:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                            me->CastCustomSpell(SPELL_SHADOW_RAY, SPELLVALUE_BASE_POINT1, 3000, target, TRIGGERED_NONE);
+                            me->CastCustomSpell(SPELL_SHADOW_RAY, SPELLVALUE_BASE_POINT1, 2000, target, TRIGGERED_NONE);
 
                         events.ScheduleEvent(EVENT_SPELL_SHADOWRAY, 45000, 1);
                         break;
@@ -551,164 +578,426 @@ class spell_aoe_reflect_OLDSM : public SpellScriptLoader
             return new spell_aoe_reflect_OLDSM_SpellScript();
         }
 };
+/*#################################
+SIMON SAYS - OLD SCARLET MONASTERY
+##################################*/
+
+struct SimonSays
+{
+    std::string const talk;
+    uint32 emoteId;
+};
+
+std::vector<SimonSays> const vProperSimon
+{
+    { "Let the rhythm flow through your bones, dance to win the frozen scones!", 34 },
+    { "Cry for your husbands, cry for your wives! When you lose - nobody survives!", 65 },
+    { "The world will fall beneath the blight, cower, your scum, before our might!", 28 },
+    { "For our cries the world was deaf - now greet your friend, the eternal death!", 48 },
+    { "I have given you a chance, you ungrateful brat! Why won't you thank me for that?!", 97 },
+    { "There is a great power for you to embrace! Now laugh, laugh in the death's face!", 60 },
+    { "The hate and rage make me sick... Put your lips on my cheek!", 58 },
+    { "Poison is in your mouth, fools! Spit it out or become mindless tools!", 89 },
+    { "Doesn't it tire you, all that death? Lay on the ground to catch some breath.", 61 },
+    { "You can die in any minute now... Or in this very second if you don't bow!", 17 },
+    { "When she is here to take out your breath... What do we say to her, what do we say to death?", 66 }
+};
+
+std::vector<std::string> const vScamSimon =
+{
+    "Move your body with the rhythm, dance like you never did before!",
+    "Cry for your husbands, cry for your wives! When you lose it - nobody lives!",
+    "The world will fall beneath the blight, cower, you scum, before our power!",
+    "For our cries the world was blind - now greet your friend, the eternal death!",
+    "I have given you a chance, you ungrateful scum! Why won't you thank me for that?!",
+    "There is a great power for you to get! Now laugh, laugh in the death's face!",
+    "The hate and rage make me sick... Now kiss me, on my lips!",
+    "Poison is in your mouth, idiots! Spit it out or become mindless tools!",
+    "Doesn't it tire you, all that bloodshed? Lay on the ground to catch some breath.",
+    "You can die in any minute... Or in this very second if you don't bow!",
+    "When she is here to take out your life... What do we say to her, what do we say to death?"
+};
+
+std::array<Position const, 10> playerPositions =
+{
+    {
+        { 250.539734f, -38.383926f, 31.493990f, 2.292578f },
+        { 252.019638f, -37.069260f, 31.493746f, 2.398607f },
+        { 253.439621f, -35.212593f, 31.493746f, 2.536052f },
+        { 254.467316f, -32.894466f, 31.493746f, 2.818795f },
+        { 254.818634f, -30.777582f, 31.493746f, 3.074050f },
+        { 254.523270f, -29.145168f, 31.493746f, 3.297888f },
+        { 254.097214f, -27.133762f, 31.493746f, 3.415698f },
+        { 252.861954f, -25.401718f, 31.493000f, 3.798187f },
+        { 251.194778f, -23.733984f, 31.493000f, 4.002391f },
+        { 248.934662f, -22.435266f, 31.493000f, 4.269422f }
+    }
+};
+
+std::string const failureQuote = "The death has come to strangle your necks! Beg for mercy or you might be next!"; // id 8
+std::string const eventBeginQuote = "Come here, children - don't you worry! Sit down now and hear my story!";
+
+std::string const eventStartingRhyme_1 = "The dead arrived, cold and still. I was living then in Tarren Mill.";
+std::string const eventStartingRhyme_2 = "My family dead, laying on the floor, when the prince opened the door.";
+std::string const eventStartingRhyme_3 = "He saw me crying - and afraid I was, for I have taken a terrible loss.";
+std::string const eventStartingRhyme_4 = "My heart he pierced and left for dead, everything was stained in the bloody red.";
+std::string const eventStartingRhyme_5 = "I have arisen, cold and still. Unliving in the dead Tarren Mill.";
+std::string const eventStartingRhyme_6 = "Death is the answer, so who's to blame? You will play my special game!";
+
+enum simonSaysEvents
+{
+    //! rp stuff
+    EVENT_BEGIN_EVENT               = 1,
+    EVENT_TALK_1                    = 2,
+    EVENT_TALK_2                    = 3,
+    EVENT_TALK_3                    = 4,
+    EVENT_TALK_4                    = 5,
+    EVENT_TALK_5                    = 6,
+    EVENT_TALK_6                    = 7,
+
+    //! like in simon says game, if there is prepend 'simon says' and someone properly answers
+    //! then he succeeded else if there wasnt simon says and he did answer then he lost
+    //! if he didnt say anything then he succeeded
+    //! first we have to decide if we use a talk from 'simon says' list or not
+    EVENT_ROLL                     = 8,
+    EVENT_WAIT_FOR_RESPONSE        = 9,
+    EVENT_WAIT_FOR_BEG_RESPONSOE   = 10
+};
+
+enum simonSaysMisc
+{
+    EMOTE_BEG_ID                 = 8
+};
 
 class npc_devaleth : public CreatureScript
 {
-    public:
-        npc_devaleth() : CreatureScript("npc_devaleth") { }
+public:
+    npc_devaleth() : CreatureScript("npc_devaleth") { }
 
-        struct npc_devalethAI : public BossAI
+    struct npc_devalethAI : public BossAI
+    {
+        npc_devalethAI(Creature* creature) : BossAI(creature, DATA_DEVALETH) { }
+
+        void Reset() override
         {
-            npc_devalethAI(Creature* creature) : BossAI(creature, DATA_DEVALETH) { }
+            _Reset();
+            me->SetHealth(me->GetMaxHealth());
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            properVectorIndex = 0;
+            scamVectorIndex = 0;
+            simonSays = false;
+            eventStarted = false;
+            waitingForEmote = false;
+            waitingForBeg = false;
+            eventParticipants.clear();
+            playerRespondedVector.clear();
+            simonGUID = 0;
+            arthurGUID = 0;
+            me->SetRegeneratingHealth(false);
+        }
 
-            void Reset() override
+        void AttackStart(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) override { }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if (!who->IsWithinDist(me, 3.0f))
+                return;
+
+            if (who->ToPlayer()->IsGameMaster())
+                return;
+
+            if (eventStarted)
+                return;
+
+            if (Map* map = me->GetMap())
             {
-                _Reset();
-            }
-
-            void EnterCombat(Unit* target) override
-            {
-                _EnterCombat();
-                events.ScheduleEvent(EVENT_MORTAL_STRIKE, 6000);
-                events.ScheduleEvent(EVENT_CLEAVE, 8000);
-                events.ScheduleEvent(EVENT_WITHERING_ROAR, 10000);
-                events.ScheduleEvent(EVENT_FEARSOME_ROAR, 20000);
-                events.ScheduleEvent(EVENT_DEAFENING_ROAR, 30000);
-                events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 40000);
-                events.ScheduleEvent(EVENT_SUMMON_EAGLES, 35000);
-                Talk(1);
-            }
-
-            void MoveInLineOfSight(Unit* who) override { }
-
-            void JustDied(Unit* killer) override
-            {
-                instance->SetData(DATA_DEVALETH_DEATH, 1);
-                BossAI::JustDied(killer);
-            }
-
-            void UpdateAI(uint32 diff) override
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
+                Map::PlayerList const& players = map->GetPlayers();
+                if (players.getSize() >= 7)
                 {
-                    switch (eventId)
+                    eventStarted = true;
+                    events.ScheduleEvent(EVENT_BEGIN_EVENT, 1000);
+                    auto j = 0;
+                    for (auto const& i : players)
                     {
-                    case EVENT_MORTAL_STRIKE:
-                        DoCastVictim(SPELL_MORTAL_STRIKE, true);
-                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10000);
-                        break;
-                    case EVENT_CLEAVE:
-                        DoCastVictim(SPELL_CLEAVE, true);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(7000, 12000));
-                        break;
-                    case EVENT_WITHERING_ROAR:
-                        me->CastCustomSpell(SPELL_WITHERING_ROAR, SPELLVALUE_BASE_POINT1, -1000, me, TRIGGERED_FULL_MASK);
-                        events.ScheduleEvent(EVENT_WITHERING_ROAR, 40000);
-                        break;
-                    case EVENT_FEARSOME_ROAR:
+                        if (Player* player = i.GetSource())
+                        {
+                            if (player->IsGameMaster())
+                                continue;
+
+                            eventParticipants.push_back(player->GetGUID());
+                            if (player->GetMapId() == me->GetMapId())
+                                player->NearTeleportTo(playerPositions.at(j).GetPositionX(), playerPositions.at(j).GetPositionY(),
+                                    playerPositions.at(j).GetPositionZ(), playerPositions.at(j).GetOrientation());
+
+                            ++j;
+                        }
+                    }
+                }
+            }
+        }
+
+        void ReceiveEmote(Player* player, uint32 emoteId) override
+        {
+            if (!waitingForEmote && !waitingForBeg)
+                return;
+
+            if (IsInRespondedVector(player->GetGUID()))
+                return;
+
+            if (waitingForEmote)
+            {
+                if (simonSays && emoteId == vProperSimon.at(properVectorIndex).emoteId)
+                    playerRespondedVector.push_back(player->GetGUID());
+                else if (!simonSays)
+                    playerRespondedVector.push_back(player->GetGUID());
+            }
+            else if (waitingForBeg && emoteId == EMOTE_BEG_ID)
+                playerRespondedVector.push_back(player->GetGUID());
+        }
+
+        bool IsInRespondedVector(uint64 guid)
+        {
+            return std::find(playerRespondedVector.begin(), playerRespondedVector.end(), guid) != playerRespondedVector.end();
+        }
+
+        void RemoveFromParticipantsVector(uint64 guid)
+        {
+            eventParticipants.erase(std::remove(eventParticipants.begin(), eventParticipants.end(), guid), eventParticipants.end());
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!eventStarted)
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_BEGIN_EVENT:
                     {
-                        int32 bp0 = -12000, bp1 = -50;
-                        me->CastCustomSpell(me->GetVictim(), SPELL_FEARSOME_ROAR, &bp0, &bp1, nullptr, true);
-                        events.ScheduleEvent(EVENT_FEARSOME_ROAR, 40000);
+                        _EnterCombat();
+                        DoZoneInCombat();
+                        Creature* simon = me->SummonCreature(NPC_SIMON, me->GetPosition());
+                        Creature* arthur = me->SummonCreature(NPC_ARTHUR, me->GetPosition());
+                        if (!simon || !arthur)
+                        {
+                            sLog->outError("[Old scarlet monastery]: Either simon or arthur returns null, something went wrong. Shutting down event and despawning.");
+                            _DespawnAtEvade(30, me);
+                            return;
+                        }
+                        simon->SetReactState(REACT_PASSIVE);
+                        simon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        arthur->SetReactState(REACT_PASSIVE);
+                        arthur->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+                        arthurGUID = arthur->GetGUID();
+                        simonGUID = simon->GetGUID();
+
+                        me->MonsterSay(eventBeginQuote.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_TALK_1, 5000);
                         break;
                     }
-                    case EVENT_DEAFENING_ROAR:
-                        DoCast(me, SPELL_DEAFENING_ROAR, true);
-                        events.ScheduleEvent(EVENT_DEAFENING_ROAR, 40000);
-                        break;
-                    case EVENT_TERRIFYING_ROAR:
-                        DoCast(me, SPELL_TERRIFYING_ROAR, true);
-                        events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 40000);
-                        break;
-                    case EVENT_SUMMON_EAGLES:
+                    case EVENT_TALK_1:
                     {
-                        Position pos = *me;
-                        Talk(0);
-                        for (int i = -1; i < 2; ++i)
+                        me->MonsterSay(eventStartingRhyme_1.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_TALK_2, 5000);
+                        break;
+                    }
+                    case EVENT_TALK_2:
+                    {
+                        me->MonsterSay(eventStartingRhyme_2.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_TALK_3, 5000);
+                        break;
+                    }
+                    case EVENT_TALK_3:
+                    {
+                        me->MonsterSay(eventStartingRhyme_3.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_TALK_4, 5000);
+                        break;
+                    }
+                    case EVENT_TALK_4:
+                    {
+                        me->MonsterSay(eventStartingRhyme_4.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_TALK_5, 5000);
+                        break;
+                    }
+                    case EVENT_TALK_5:
+                    {
+                        me->MonsterSay(eventStartingRhyme_5.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_TALK_6, 5000);
+                        break;
+                    }
+                    case EVENT_TALK_6:
+                    {
+                        me->MonsterSay(eventStartingRhyme_6.c_str(), LANG_NEUTRAL, nullptr);
+                        events.ScheduleEvent(EVENT_ROLL, 8000);
+                        break;
+                    }
+                    case EVENT_ROLL:
+                    {
+                        simonSays = roll_chance_i(50) ? true : false;
+                        //! if simonSays returns true then we prepend "simon says" and players have to
+                        //! answer creature question with an emote
+                        if (simonSays)
+                            properVectorIndex = urand(0, vProperSimon.size() - 1);
+                        else
+                            scamVectorIndex = urand(0, vScamSimon.size() - 1);
+
+                        //! Wheter we will scam players or play properly is now decided
+                        //! also vector positions are also decided
+                        //! Do the talk and enable gathering responoses
+                        if (simonSays)
                         {
-                            me->GetNearPosition(pos, 3.0f, -M_PI / 3.0f * i);
-                            if (Creature* eagle = me->SummonCreature(NPC_RISEN_EAGLE, pos, TEMPSUMMON_TIMED_DESPAWN, 30000))
-                                eagle->SetInCombatWithZone();
+                            if (Creature* simon = ObjectAccessor::GetCreature(*me, simonGUID))
+                                simon->MonsterSay(vProperSimon.at(properVectorIndex).talk.c_str(), LANG_NEUTRAL, nullptr);
+                        }
+                        else
+                        {
+                            if (Creature* arthur = ObjectAccessor::GetCreature(*me, arthurGUID))
+                                arthur->MonsterSay(vScamSimon.at(scamVectorIndex).c_str(), LANG_NEUTRAL, nullptr);
                         }
 
-                        events.ScheduleEvent(EVENT_SUMMON_EAGLES, 40000);
+                        waitingForEmote = true;
+                        events.ScheduleEvent(EVENT_WAIT_FOR_RESPONSE, 8000);
                         break;
                     }
-                    default:
-                        break;
-                    }
-                }
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
-        {
-            return GetOldScarletMonasteryAI<npc_devalethAI>(creature);
-        }
-};
-
-class npc_risen_eagle : public CreatureScript
-{
-    public:
-        npc_risen_eagle() : CreatureScript("npc_risen_eagle") { }
-
-        struct npc_risen_eagleAI : public ScriptedAI
-        {
-            npc_risen_eagleAI(Creature* creature) : ScriptedAI(creature) { }
-
-            void Reset() override
-            {
-                events.Reset();
-            }
-
-            void EnterCombat(Unit* target) override
-            {
-                events.ScheduleEvent(EVENT_FEATHER_BURST, urand(2000, 4000));
-                events.ScheduleEvent(EVENT_RESET_THREAT, urand(4000, 5000));
-            }
-
-            void UpdateAI(uint32 diff) override
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
+                    case EVENT_WAIT_FOR_RESPONSE:
                     {
-                    case EVENT_FEATHER_BURST:
-                        me->CastCustomSpell(SPELL_FEATHER_BURST, SPELLVALUE_BASE_POINT0, 300, me->GetVictim(), TRIGGERED_FULL_MASK);
-                        events.ScheduleEvent(EVENT_FEATHER_BURST, urand(6000, 17500));
+                        //! Wait time is over, disable gathering responoses
+                        waitingForEmote = false;
+                        //! proper round
+                        if (simonSays)
+                        {
+                            for (auto const& guid : eventParticipants)
+                            {
+                                //! its proper round, player has responoded and responded correctly - he is safe
+                                if (IsInRespondedVector(guid))
+                                {
+                                    if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                                        player->SetStandState(UNIT_STAND_STATE_STAND);
+                                    continue;
+                                }
+
+                                //! he is not in responoded vector, could be that he responoded but with wrong emote or didnt respond at all
+                                if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                                    me->Kill(me, player, true);
+
+                                RemoveFromParticipantsVector(guid);
+                                waitingForBeg = true;
+                            }
+                        }
+                        else // scam round
+                        {
+                            for (auto const& guid : eventParticipants)
+                            {
+                                //! player has responded to creature during scam round
+                                //! he has failed the event
+                                if (IsInRespondedVector(guid))
+                                {
+                                    if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                                        me->Kill(me, player, true);
+
+                                    RemoveFromParticipantsVector(guid);
+                                    waitingForBeg = true;
+                                }
+                            }
+                        }
+
+                        //! check if anyone is left in the event, else no point going further
+                        //! we will check that multiple times
+                        if (eventParticipants.empty())
+                        {
+                            _DespawnAtEvade(30, me);
+                            return;
+                        }
+
+                        //! deal damage to boss now
+                        //! yeah we've got to iterate instead of calculating based on vector count
+                        //! because we need all the players to be eligable for loot
+                        for (auto const& guid : eventParticipants)
+                        {
+                            if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                                player->DealDamage(player, me, me->GetMaxHealth() * 0.01f);
+                        }
+
+                        if (waitingForBeg)
+                        {
+                            me->MonsterSay(failureQuote.c_str(), LANG_NEUTRAL, nullptr);
+                            events.ScheduleEvent(EVENT_WAIT_FOR_BEG_RESPONSOE, 5000);
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_ROLL, 1500);
+
+                        playerRespondedVector.clear();
                         break;
-                    case EVENT_RESET_THREAT:
-                        DoResetThreat();
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
-                            me->AddThreat(target, 200000.0f);
-                        events.ScheduleEvent(EVENT_RESET_THREAT, urand(3000, 9000));
-                        break;
-                    default:
+                    }
+                    case EVENT_WAIT_FOR_BEG_RESPONSOE:
+                    {
+                        for (auto const& guid : eventParticipants)
+                        {
+                            //! if he is in vector, he begged for his life and he is fine, skip
+                            if (IsInRespondedVector(guid))
+                            {
+                                if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                                    player->SetStandState(UNIT_STAND_STATE_STAND);
+                                continue;
+                            }
+
+                            //! he is not in responoded vector, could be that he responoded but with wrong emote or didnt respond at all
+                            if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                                me->Kill(me, player, true);
+
+                            RemoveFromParticipantsVector(guid);
+                        }
+
+                        playerRespondedVector.clear();
+
+                        if (eventParticipants.empty())
+                        {
+                            _DespawnAtEvade(30, me);
+                            return;
+                        }
+
+                        waitingForBeg = false;
+                        events.ScheduleEvent(EVENT_ROLL, 1500);
                         break;
                     }
                 }
-                DoMeleeAttackIfReady();
             }
-
-        private:
-            EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
-        {
-            return GetOldScarletMonasteryAI<npc_risen_eagleAI>(creature);
         }
+
+        void JustDied(Unit* killer) override
+        {
+            events.Reset();
+            eventStarted = false;
+            instance->SetData(DATA_DEVALETH_DEATH, 1);
+            BossAI::JustDied(killer);
+        }
+
+    private:
+        std::vector<uint64> eventParticipants;
+        std::vector<uint64> playerRespondedVector;
+        uint32 properVectorIndex;
+        uint32 scamVectorIndex;
+        uint64 simonGUID;
+        uint64 arthurGUID;
+        //! false = do not prepend anything else prepend 'simon says'
+        bool simonSays;
+        bool eventStarted;
+        bool waitingForEmote;
+        bool waitingForBeg;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return GetOldScarletMonasteryAI<npc_devalethAI>(creature);
+    }
 };
 
 class npc_risen_construct : public CreatureScript
@@ -796,6 +1085,5 @@ void AddSC_old_scarlet_monastery()
     new npc_trash_caster_OLDSM();
     new spell_aoe_reflect_OLDSM();
     new npc_devaleth();
-    new npc_risen_eagle();
     new npc_risen_construct();
 }

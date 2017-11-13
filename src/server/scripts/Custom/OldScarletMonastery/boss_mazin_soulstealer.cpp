@@ -235,7 +235,8 @@ class boss_mazin_soulstealer : public CreatureScript
             boss_mazin_soulstealerAI(Creature* creature) : BossAI(creature, DATA_MAZIN_SOULSTEALER), summons(me)
             {
                 instance = creature->GetInstanceScript();
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
                 intro = false;
                 orient = 0;
                 deathCount = 0;
@@ -610,7 +611,11 @@ class npc_thrall_OLDSM : public CreatureScript
 
         struct npc_thrall_OLDSMAI : public ScriptedAI
         {
-            npc_thrall_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
+            npc_thrall_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void Reset() override
             {
@@ -649,7 +654,7 @@ class npc_thrall_OLDSM : public CreatureScript
                 {
                     spawnedFirstElementals = true;
                     for (uint8 i = 0; i < 4; ++i)
-                        if (Creature* elemental = me->SummonCreature(NPC_AIR_ELEMENTAL, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        if (Creature* elemental = me->SummonCreature(NPC_AIR_ELEMENTAL_MAZIN, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             elemental->AddAura(SPELL_AOE_AVOIDANCE, elemental);
                 }
 
@@ -657,7 +662,7 @@ class npc_thrall_OLDSM : public CreatureScript
                 {
                     spawnedSecondElementals = true;
                     for (uint8 i = 0; i < 4; ++i)
-                        if (Creature* elemental = me->SummonCreature(NPC_EARTH_ELEMENTAL, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        if (Creature* elemental = me->SummonCreature(NPC_EARTH_ELEMENTAL_MAZIN, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             elemental->AddAura(SPELL_AOE_AVOIDANCE, elemental);
                 }
 
@@ -665,7 +670,7 @@ class npc_thrall_OLDSM : public CreatureScript
                 {
                     spawnedThirdElementals = true;
                     for (uint8 i = 0; i < 4; ++i)
-                        if (Creature* elemental = me->SummonCreature(NPC_FIRE_ELEMENTAL, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        if (Creature* elemental = me->SummonCreature(NPC_FIRE_ELEMENTAL_MAZIN, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             elemental->AddAura(SPELL_AOE_AVOIDANCE, elemental);
                 }
             }
@@ -745,7 +750,11 @@ class npc_elementals_generic : public CreatureScript
 
         struct npc_elementals_genericAI : public ScriptedAI
         {
-            npc_elementals_genericAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_elementals_genericAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void IsSummonedBy(Unit* summoner) override
             {
@@ -760,13 +769,13 @@ class npc_elementals_generic : public CreatureScript
             {
                 switch (me->GetEntry())
                 {
-                case NPC_AIR_ELEMENTAL:
+                case NPC_AIR_ELEMENTAL_MAZIN:
                     events.ScheduleEvent(EVENT_AIR_ELE_SPELLS, urand(4000, 8000));
                     break;
-                case NPC_FIRE_ELEMENTAL:
+                case NPC_FIRE_ELEMENTAL_MAZIN:
                     events.ScheduleEvent(EVENT_FIRE_ELE_SPELLS, urand(4000, 8000));
                     break;
-                case NPC_EARTH_ELEMENTAL:
+                case NPC_EARTH_ELEMENTAL_MAZIN:
                     events.ScheduleEvent(EVENT_EARTH_ELE_SPELLS, urand(4000, 8000));
                     break;
                 default:
@@ -832,6 +841,9 @@ class npc_sylvanas_OLDSM : public CreatureScript
         {
             npc_sylvanas_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+
                 for (uint8 i = 0; i < 9; ++i)
                     arrowTriggerGUIDs[i] = 0;
             }
@@ -996,6 +1008,8 @@ class npc_kel_thuzad_OLDSM : public CreatureScript
             npc_kel_thuzad_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void DoAction(int32 param) override
@@ -1094,7 +1108,7 @@ class npc_kel_thuzad_OLDSM : public CreatureScript
                         break;
                     }
                 }
-                DoSpellAttackIfReady(SPELL_FROST_BOLT, me->GetVictim(), 12000, 16000);
+                DoSpellAttackIfReady(SPELL_FROST_BOLT, me->GetVictim(), 8000, 13000);
             }
 
         private:
@@ -1115,7 +1129,11 @@ class npc_raging_skeleton_OLDSM : public CreatureScript
 
         struct npc_raging_skeleton_OLDSMAI : public ScriptedAI
         {
-            npc_raging_skeleton_OLDSMAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_raging_skeleton_OLDSMAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void Reset() override
             {
@@ -1175,6 +1193,9 @@ class npc_void_zone_OLDSM : public CreatureScript
         {
             npc_void_zone_OLDSMAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+
                 SetCombatMovement(false);
                 creature->AddAura(SPELL_ZONE_VISUAL, creature);
                 events.ScheduleEvent(1, 4000);
@@ -1217,6 +1238,9 @@ class npc_purple_lightning_orb_OLDSM : public CreatureScript
         {
             npc_purple_lightning_orb_OLDSMAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+
                 events.ScheduleEvent(1, 1000); // event move
                 events.ScheduleEvent(2, 1500); // explosion event
                 me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
@@ -1289,6 +1313,8 @@ class npc_death_orb_OLDSM : CreatureScript
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 0.2f);
                 playerGUID = 0;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void MovementInform(uint32 type, uint32 id) override
