@@ -2670,7 +2670,7 @@ public:
     bool OnGossipHello(Player* player, Creature* creature)
     {
         if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
-            return;
+            return false;
 
         if (creature->GetEntry() != 99004 && creature->GetEntry() < 99006)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Entry ticket, please!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
