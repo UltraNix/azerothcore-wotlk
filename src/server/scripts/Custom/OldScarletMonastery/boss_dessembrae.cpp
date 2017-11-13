@@ -783,6 +783,9 @@ class boss_dessembrae : public CreatureScript
                     }
                     case EVENT_SUMMON_ARCANE_ORBS:
                         Talk(SAY_ORBS);
+                        me->StopMovingOnCurrentPos();
+                        me->StopMoving();
+                        me->GetMotionMaster()->Clear();
                         DoStopAttack();
                         me->SetReactState(REACT_PASSIVE);
                         me->NearTeleportTo(ArcanePhaseCenter.m_positionX, ArcanePhaseCenter.m_positionY, ArcanePhaseCenter.m_positionZ, 0.0f);
