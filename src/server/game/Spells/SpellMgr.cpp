@@ -7088,7 +7088,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectMiscValue[EFFECT_0] = 90031;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
-        case 16055:    // Reins of the Nightsaber
+        case 10787:    // Reins of the Nightsaber
             spellInfo->EffectMiscValue[EFFECT_0] = 90032;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
