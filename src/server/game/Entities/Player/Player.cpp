@@ -11960,6 +11960,15 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
     dest = 0;
     if (pItem)
     {
+        if (sWorld->getBoolConfig(CONFIG_EXPERIMENTAL_FEATURE))
+        {
+            if (uint32 enchant_id = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT))
+            {
+                SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                if (pEnchant && getLevel() < pEnchant->requiredLevel)
+                    return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
+            }
+        }
         ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
         ItemTemplate const* pProto = pItem->GetTemplate();
         if (pProto)

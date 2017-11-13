@@ -1326,6 +1326,9 @@ void World::LoadConfigSettings(bool reload)
     // Encounter logs
     m_bool_configs[CONFIG_ENCOUNTER_LOG] = sConfigMgr->GetBoolDefault("EncounterLog.Enable", false);
 
+    // Experimental feature
+    m_bool_configs[CONFIG_EXPERIMENTAL_FEATURE] = sConfigMgr->GetBoolDefault("Experimental.Enable", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
