@@ -249,3 +249,7 @@ INSERT INTO reference_loot_template VALUES
 (@LOOT_ID, 22631, 100, 0, 1, 1, 1),
 (@LOOT_ID, 22632, 100, 0, 1, 1, 1);
 
+UPDATE `creature` SET `position_x` = 2890.915527, `position_y` = -808.266846, `position_z` = 160.332977, `orientation` = 5.091118 WHERE `guid` = 400007;
+
+UPDATE `creature_template` SET `name` = "Caleb Runehold", `subname` = "Kirin Tor" WHERE `entry` = 400007;
+
