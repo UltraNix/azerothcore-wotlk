@@ -314,7 +314,7 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
     if (source->DisplayInfoID == target->DisplayInfoID)
         return false;
 
-    if (source->Class != target->Class && !(isWarglaive && player->getClass() == CLASS_DEATH_KNIGHT))
+    if (source->Class != target->Class)
         return false;
 
     if (source->InventoryType == INVTYPE_BAG ||
@@ -335,7 +335,7 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
         target->InventoryType == INVTYPE_QUIVER)
         return false;
 
-    if (!SuitableForTransmogrification(player, target) || !SuitableForTransmogrification(player, source)) // if (!transmogrified->CanTransmogrify() || !transmogrifier->CanBeTransmogrified())
+    if ((!SuitableForTransmogrification(player, target) && !(isWarglaive && player->getClass() == CLASS_DEATH_KNIGHT)) || (!SuitableForTransmogrification(player, source) && !(isWarglaive && player->getClass() == CLASS_DEATH_KNIGHT))) // if (!transmogrified->CanTransmogrify() || !transmogrifier->CanBeTransmogrified())
         return false;
 
     if (IsRangedWeapon(source->Class, source->SubClass) != IsRangedWeapon(target->Class, target->SubClass))
