@@ -128,6 +128,7 @@ public:
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
             { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
             { "hide",               SEC_PLAYER,             false, &HandleSthHideCommand,               "" },
+            { "checkpoint",         SEC_PLAYER,             false, &HandleCheckPointCommand,            "" },
         };
         return commandTable;
     }
@@ -3243,6 +3244,13 @@ public:
 
     static bool HandleEventGoCommand(ChatHandler* handler, char const* args)
     {
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        {
+            handler->PSendSysMessage("You can't do that while event is disabled.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
         Player* player = handler->GetSession()->GetPlayer();
 
         if (!player)
@@ -3337,6 +3345,13 @@ public:
 
     static bool HandleSthHideCommand(ChatHandler* handler, char const* args)
     {
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        {
+            handler->PSendSysMessage("You can't do that while event is disabled.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
         Player* player = handler->GetSession()->GetPlayer();
 
         if (!player)
@@ -3352,6 +3367,70 @@ public:
         }
         return true;
     }
+
+
+    static bool HandleCheckPointCommand(ChatHandler* handler, char const* args)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        {
+            handler->PSendSysMessage("You can't do that while event is disabled.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        Pet* pet = player->GetPet();
+
+        if (player->GetMap()->IsBattlegroundOrArena())
+        {
+            handler->PSendSysMessage("You can't do that while character is in battleground or arena.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->IsAlive() && player->IsInCombat())
+        {
+            handler->PSendSysMessage("You can't do that while character is in combat.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->IsMounted())
+        {
+            handler->PSendSysMessage("You can't do that while character is mounted.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player && pet)
+        {
+            handler->PSendSysMessage("You can't do that while pet is summoned.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (player->HasItemCount(86008))
+            player->TeleportTo(1, 5168.235352f, -2146.421875f, 1469.553711f, player->GetOrientation());
+        else if (player->HasItemCount(86007))
+            player->TeleportTo(1, 4322.602051f, -2747.558594f, 152.527390f, player->GetOrientation());
+        else if (player->HasItemCount(86006))
+            player->TeleportTo(1, -1648.537354f, -4170.267090f, 153.271378f, player->GetOrientation());
+        else if (player->HasItemCount(86005))
+            player->TeleportTo(1, -1708.539429f, -4193.820801f, 117.195877, player->GetOrientation());
+        else
+        {
+            handler->PSendSysMessage("You don't have any check points.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        return true;
+    }
+
 
 };
 

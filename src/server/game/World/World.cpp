@@ -1329,6 +1329,9 @@ void World::LoadConfigSettings(bool reload)
     // Experimental feature
     m_bool_configs[CONFIG_EXPERIMENTAL_FEATURE] = sConfigMgr->GetBoolDefault("Experimental.Enable", false);
 
+    // Custom Event
+    m_bool_configs[CONFIG_CUSTOM_EVENT_ENABLE] = sConfigMgr->GetBoolDefault("CustomEvent.Enable", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

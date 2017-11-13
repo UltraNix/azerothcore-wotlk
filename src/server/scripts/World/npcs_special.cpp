@@ -2669,8 +2669,13 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->GetEntry() != 99004)
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+            return;
+
+        if (creature->GetEntry() != 99004 && creature->GetEntry() < 99006)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Entry ticket, please!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        else if (creature->GetEntry() != 99004 && creature->GetEntry() >= 99006)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Check point ticket, please!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
         if (creature->GetEntry() == 99000 && player->HasItemCount(86001))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, PASS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
@@ -2719,6 +2724,14 @@ public:
                     player->AddItem(86003, 1);
                 else if (creature->GetEntry() == 99003 && player->HasItemCount(86003))
                     player->AddItem(86004, 1);
+                else if (creature->GetEntry() == 99006)
+                    player->AddItem(86005, 1);
+                else if (creature->GetEntry() == 99007)
+                    player->AddItem(86006, 1);
+                else if (creature->GetEntry() == 99008)
+                    player->AddItem(86007, 1);
+                else if (creature->GetEntry() == 99009)
+                    player->AddItem(86008, 1);
             }
             break;
             // Teleport player

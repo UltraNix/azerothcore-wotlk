@@ -3398,6 +3398,14 @@ EncounterLog.Enable = 0
 	
 Experimental.Enable = 0
 
+#		
+#     CustomEvent.Enable
+#        Description: Enables or disables custom events.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+	
+CustomEvent.Enable = 0
+
 #
 ###################################################################################################
 
