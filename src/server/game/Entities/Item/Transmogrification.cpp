@@ -303,9 +303,10 @@ TransmogTrinityStrings Transmogrification::Transmogrify(Player* player, uint64 i
 
 bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplate const* target, ItemTemplate const* source) const
 {
-
     if (!target || !source)
         return false;
+
+    bool isWarglaive = source->ItemId == 32837 || source->ItemId == 32838;
 
     if (source->ItemId == target->ItemId)
         return false;
@@ -313,7 +314,7 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
     if (source->DisplayInfoID == target->DisplayInfoID)
         return false;
 
-    if (source->Class != target->Class)
+    if (source->Class != target->Class && !(isWarglaive && player->getClass() == CLASS_DEATH_KNIGHT))
         return false;
 
     if (source->InventoryType == INVTYPE_BAG ||
@@ -344,7 +345,7 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
     {
         if (source->Class == ITEM_CLASS_ARMOR && !AllowMixedArmorTypes)
             return false;
-        if (source->Class == ITEM_CLASS_WEAPON && !AllowMixedWeaponTypes)
+        if (source->Class == ITEM_CLASS_WEAPON && !AllowMixedWeaponTypes && !isWarglaive)
             return false;
     }
 
@@ -352,9 +353,14 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
     {
         if (source->Class == ITEM_CLASS_WEAPON && !(IsRangedWeapon(target->Class, target->SubClass) ||
             (
-                // [AZTH] Yehonal: fixed weapon check
-                (target->InventoryType == INVTYPE_WEAPON || target->InventoryType == INVTYPE_2HWEAPON || target->InventoryType == INVTYPE_WEAPONMAINHAND || target->InventoryType == INVTYPE_WEAPONOFFHAND)
-                && (source->InventoryType == INVTYPE_WEAPON || source->InventoryType == INVTYPE_2HWEAPON || source->InventoryType == INVTYPE_WEAPONMAINHAND || source->InventoryType == INVTYPE_WEAPONOFFHAND)
+                (target->InventoryType == INVTYPE_WEAPON 
+                    || target->InventoryType == INVTYPE_2HWEAPON 
+                    || target->InventoryType == INVTYPE_WEAPONMAINHAND 
+                    || target->InventoryType == INVTYPE_WEAPONOFFHAND)
+                && (source->InventoryType == INVTYPE_WEAPON 
+                    || source->InventoryType == INVTYPE_2HWEAPON 
+                    || source->InventoryType == INVTYPE_WEAPONMAINHAND 
+                    || source->InventoryType == INVTYPE_WEAPONOFFHAND)
             )
         ))
             return false;
