@@ -195,6 +195,12 @@ class boss_javier_voidbringer : public CreatureScript
 
             void EnterCombat(Unit* target) override
             {
+                if (!instance->CheckRequiredBosses(DATA_JAVIER_VOIDBRINGER))
+                {
+                    _DespawnAtEvade(30, me);
+                    return;
+                }
+
                 _EnterCombat();
                 SetPhase(PHASE_ONE);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TAG_ARROW);
@@ -206,26 +212,23 @@ class boss_javier_voidbringer : public CreatureScript
 
             void EnterEvadeMode() override
             {
-                if (!_EnterEvadeMode())
-                    return;
-
-                me->SetHomePosition(StartPos);
-                DoCast(SPELL_TELEPORT_VISUAL);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TAG_ARROW);
-                me->NearTeleportTo(StartPos.GetPositionX(), StartPos.GetPositionY(), StartPos.GetPositionZ(), StartPos.GetOrientation());
-                Reset();
+                _DespawnAtEvade(30, me);
             }
 
             void MoveInLineOfSight(Unit* who) override
             {
+                //! all checks split for clarity and for debugging purposes
                 if (!instance->CheckRequiredBosses(DATA_JAVIER_VOIDBRINGER))
                     return;
 
-                if (phase == PHASE_NONE && who->GetTypeId() == TYPEID_PLAYER && me->GetDistance(who) < 30.0f)
-                {
-                    if (who->ToPlayer()->IsGameMaster())
-                        return;
+                if (who->GetTypeId() == TYPEID_UNIT)
+                    return;
 
+                if (who->ToPlayer()->IsGameMaster())
+                    return;
+
+                if (phase == PHASE_NONE && me->GetDistance(who) < 30.0f)
+                {
                     SetPhase(PHASE_INTRO);
 
                     events.ScheduleEvent(EVENT_INTRO_1, 5000);

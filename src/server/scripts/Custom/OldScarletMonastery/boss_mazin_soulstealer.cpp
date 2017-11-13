@@ -253,10 +253,10 @@ class boss_mazin_soulstealer : public CreatureScript
 
             void MoveInLineOfSight(Unit* who) override
             {
-                if (who->ToPlayer() && who->ToPlayer()->IsGameMaster())
+                if (intro)
                     return;
 
-                if (intro)
+                if (who->ToPlayer() && who->ToPlayer()->IsGameMaster())
                     return;
 
                 if (who->IsWithinDist(me, 5.0f))

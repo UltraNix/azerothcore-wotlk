@@ -70,7 +70,22 @@ INSERT INTO `gossip_menu` VALUES
 
 UPDATE `gossip_menu_option` SET `option_text` = "We are ready. Teleport us in." WHERE `menu_id` = 65006;
 
-UPDATE `creature_text` SET `text` = "Uhh.. strangers.. I''m Prince Val’sameth, are you here to fight me?" WHERE `entry` = 400022;
+SET @MAZIN:= 400022;
+DELETE FROM `creature_text` WHERE `entry` = @MAZIN;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(@MAZIN, 0, 0, 'What is that smell!? eww!', 12, 0, 100, 0, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 1, 0, "Uhh.. strangers.. I''m Prince Val’sameth, are you here to fight me?", 12, 0, 100, 11, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 2, 0, 'Fine, we will fight but first let me show you my collection... my collection of souls.', 12, 0, 100, 0, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 3, 0, 'My powers allow me to steal part of someone soul without killing him, they''re not the real deal, but strong enough to kill you!', 12, 0, 100, 11, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 4, 0, 'Go''el also known as Thrall. Warchief of the Orcish Horde!', 12, 0, 100, 0, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 5, 0, 'Dark Ranger, Mistress Sylvanas!', 12, 0, 100, 0, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 6, 0, 'Founder of the Cult of the Damned, Kel''Thuzad!', 12, 0, 100, 0, 0, 0, 'OLD SM boss 1'),
+(@MAZIN, 7, 0, 'The end is near!', 12, 0, 100, 0, 0, 0, 'Old SM boss 1'),
+(@MAZIN, 8, 0, 'Killing is not so easy as the innocent believe $n', 12, 0, 100, 0, 0, 0, 'Old SM boss1'),
+(@MAZIN, 8, 1, 'There will be killing till the score is paid $n', 12, 0, 100, 0, 0, 0, 'Old SM boss 1'),
+(@MAZIN, 8, 2, 'Killing makes me feel good $n', 12, 0, 100, 0, 0, 0, 'Old SM boss 1'),
+(@MAZIN, 9, 0, 'The death of the soul is more painful than that of the body. Javier.. Matar! MATARLOS A TODOS!', 14, 0, 100, 0, 0, 0, 'Old SM boss 1');
+
 DELETE FROM `creature_equip_template` WHERE `entry` = 400043;
 
 UPDATE `creature_template` SET `health_mod` = 40 WHERE `entry` = 400009;
