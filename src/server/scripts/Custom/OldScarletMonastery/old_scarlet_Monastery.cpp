@@ -855,12 +855,12 @@ public:
                         if (simonSays)
                         {
                             if (Creature* simon = ObjectAccessor::GetCreature(*me, simonGUID))
-                                simon->MonsterSay(vProperSimon.at(properVectorIndex).talk.c_str(), LANG_NEUTRAL, nullptr);
+                                simon->MonsterSay(vProperSimon.at(properVectorIndex).talk.c_str(), 0, nullptr);
                         }
                         else
                         {
                             if (Creature* arthur = ObjectAccessor::GetCreature(*me, arthurGUID))
-                                arthur->MonsterSay(vScamSimon.at(scamVectorIndex).c_str(), LANG_NEUTRAL, nullptr);
+                                arthur->MonsterSay(vScamSimon.at(scamVectorIndex).c_str(), 0, nullptr);
                         }
 
                         waitingForEmote = true;
@@ -928,7 +928,7 @@ public:
 
                         if (waitingForBeg)
                         {
-                            me->MonsterSay(failureQuote.c_str(), LANG_NEUTRAL, nullptr);
+                            me->MonsterSay(failureQuote.c_str(), 0, nullptr);
                             events.ScheduleEvent(EVENT_WAIT_FOR_BEG_RESPONSOE, 5000);
                         }
                         else
