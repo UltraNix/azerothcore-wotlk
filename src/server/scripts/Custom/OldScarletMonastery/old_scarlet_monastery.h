@@ -18,7 +18,7 @@
 #ifndef OLD_SCARLET_MONASTRY_H_
 #define OLD_SCARLET_MONASTRY_H_
 
-uint32 const EncounterCount = 6;
+uint32 const EncounterCount = 5;
 
 enum DataTypes
 {
@@ -27,9 +27,8 @@ enum DataTypes
     DATA_REAST = 2,
     DATA_MADANTUL_RADA = 3,
     DATA_DESSEMBRAE = 4,
-    DATA_DEVALETH   = 5,
 
-    DATA_DEVALETH_DEATH = 6
+    DATA_DEVALETH_DEATH = 5,
 };
 
 enum OLDSMCreatureIds
@@ -88,7 +87,7 @@ enum OLDSMCreatureIds
     // Madantul
     NPC_MADANTUL_RADA = 400043,
     NPC_RISEN_OVERLORD = 400044,
-    NPC_STORM_CALL_TRIGGER = 400045,
+    NPC_DERAGOTH = 400045,
     NPC_MEMORY_OF_ICE = 400046,
     NPC_KAMIKAZE = 400047,
     NPC_ARROW_MARKER = 400048,
@@ -159,3 +158,4 @@ GameObjectAI* GetOldScarletMonasteryAI(GameObject* go)
 }
 
 #endif // OLD_SCARLET_MONASTRY_H_
+

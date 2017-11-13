@@ -55,14 +55,13 @@ class instance_old_scarlet_monastery : public InstanceMapScript
                 reastGUID = 0;
                 madanGUID = 0;
                 dessembraeGUID = 0;
-                devalethGUID = 0;
                 resetTimer = 2000;
             }
 
             void OnPlayerEnter(Player* player) override
             {
                 // 15% ICC buff
-                //player->AddAura(player->GetTeamId() == TEAM_ALLIANCE ? 73825 : 73819, player);
+                player->AddAura(player->GetTeamId() == TEAM_ALLIANCE ? 73825 : 73819, player);
             }
 
             void OnCreatureCreate(Creature* creature) override
@@ -92,9 +91,6 @@ class instance_old_scarlet_monastery : public InstanceMapScript
                         break;
                     case NPC_DESSEMBRAE:
                         dessembraeGUID = creature->GetGUID();
-                        break;
-                    case NPC_DEVALETH:
-                        devalethGUID = creature->GetGUID();
                         break;
                     default:
                         break;
@@ -159,6 +155,11 @@ class instance_old_scarlet_monastery : public InstanceMapScript
 
             void OnUnitDeath(Unit* unit) override { }
 
+            uint32 GetData(uint32 type) const override
+            {
+                return 0;
+            }
+
             uint64 GetData64(uint32 type) const override
             {
                 switch (type)
@@ -199,10 +200,6 @@ class instance_old_scarlet_monastery : public InstanceMapScript
                     case DATA_MAZIN_SOULSTEALER:
                         if (state == DONE || state == NOT_STARTED)
                             HandleGameObject(gardenDoorsGUID, false);
-                        break;
-                    case DATA_DEVALETH:
-                        if (state == DONE)
-                            HandleGameObject(backHallDoorsGUID, true);
                         break;
                     default:
                         break;
@@ -315,7 +312,6 @@ class instance_old_scarlet_monastery : public InstanceMapScript
             uint64 reastGUID;
             uint64 madanGUID;
             uint64 dessembraeGUID;
-            uint64 devalethGUID;
             bool devalethKilled;
             uint32 resetTimer;
         };

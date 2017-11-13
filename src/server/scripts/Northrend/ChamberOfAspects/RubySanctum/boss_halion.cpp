@@ -1036,21 +1036,13 @@ class spell_halion_damage_aoe_summon : public SpellScriptLoader
                     bool raid = summon->GetMap()->Is25ManRaid();
 
                     if (heroic)
-                        summon->SetPhaseMask(0x01 | 0x20, true);
+                        summon->SetPhaseMask(0x01|0x20, true);
                     else if (summon->GetEntry() == NPC_COMBUSTION)
-                        summon->SetPhaseMask(0x01, true);
-                    else if (caster->GetMapId() == 44) // osm
                         summon->SetPhaseMask(0x01, true);
                     else
                         summon->SetPhaseMask(0x20, true);
 
-                    //! this code is wrong, GetSpellValue()->EffectBasePoints[EFFECT_1] returns -1
-                    //! meaning trigger will get max stacks aura right from the bat, it should detect how many people got pulled and then scale according do that value
-                    ///! also used in OSM custom event hence this if below
-                    if (caster->GetMapId() == 44) // osm
-                        summon->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, static_cast<int32>(1), summon);
-                    else
-                        summon->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, GetSpellValue()->EffectBasePoints[EFFECT_1], summon);
+                    summon->CastCustomSpell(SPELL_SCALE_AURA, SPELLVALUE_AURA_STACK, GetSpellValue()->EffectBasePoints[EFFECT_1], summon);
                     summon->CastSpell(summon, _auraSpell, true);
 
                     int32 damage = int32((1500 + (GetSpellValue()->EffectBasePoints[EFFECT_1] * 1250)) * (heroic ? 1.25f : 1.0f) * (raid ? 1.5f : 1.0f));
@@ -1192,7 +1184,7 @@ class spell_halion_twilight_realm : public SpellScriptLoader
                 if (!target)
                     return;
 
-                target->RemoveAurasDueToSpell(SPELL_FIERY_COMBUSTION, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);
+                target->RemoveAurasDueToSpell(SPELL_FIERY_COMBUSTION, 0, 0, AURA_REMOVE_BY_ENEMY_SPELL);                
                 if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
                     return;
                 GetTarget()->m_Events.AddEvent(new SendEncounterUnit(GetTarget()->ToPlayer()), GetTarget()->m_Events.CalculateTime(500));
@@ -1393,7 +1385,7 @@ class spell_halion_twilight_division : public SpellScriptLoader
                 halion->RemoveAurasDueToSpell(SPELL_TWILIGHT_PHASING);
                 if (GameObject* gobject = halion->FindNearestGameObject(GO_HALION_PORTAL_1, 100.0f))
                     gobject->Delete();
-
+                
                 instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_TOGGLE, 1);
                 instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_MATERIAL, 50);
                 instance->DoUpdateWorldState(WORLDSTATE_CORPOREALITY_TWILIGHT, 50);

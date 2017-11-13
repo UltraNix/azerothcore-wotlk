@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -462,9 +462,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool IsCivilian() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
         bool IsTrigger() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
         bool IsGuard() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
-        bool CanWalk() const { return m_inhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return m_inhabitType || IS_PLAYER_GUID(GetOwnerGUID()); }
-        bool CanFly()  const { return m_inhabitType & INHABIT_AIR; }
+        bool CanWalk() const { return GetCreatureTemplate()->InhabitType & INHABIT_GROUND; }
+        bool CanSwim() const { return (GetCreatureTemplate()->InhabitType & INHABIT_WATER) || IS_PLAYER_GUID(GetOwnerGUID()); }
+        bool CanFly()  const { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
 
         void SetReactState(ReactStates st) { m_reactState = st; }
         ReactStates GetReactState() const { return m_reactState; }
@@ -519,9 +519,6 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool SetWaterWalking(bool enable, bool packetOnly = false);
         bool SetFeatherFall(bool enable, bool packetOnly = false);
         bool SetHover(bool enable, bool packetOnly = false);
-
-        void SetInhabitType(InhabitTypeValues inhabitType) { m_inhabitType = inhabitType; }
-        InhabitTypeValues GetInhabitType() const { return m_inhabitType; }
 
         uint32 GetShieldBlockValue() const
         {
@@ -775,7 +772,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
-
+        
         bool m_moveInLineOfSightDisabled;
         bool m_moveInLineOfSightStrictlyDisabled;
 
@@ -788,8 +785,6 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         CreatureData const* m_creatureData;
 
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
-
-        InhabitTypeValues m_inhabitType;
 
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;
