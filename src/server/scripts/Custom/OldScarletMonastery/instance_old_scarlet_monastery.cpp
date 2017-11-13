@@ -101,13 +101,13 @@ class instance_old_scarlet_monastery : public InstanceMapScript
                 }
             }
 
-            bool IsResurrectionPrevented() override
-            {
-                if (GetBossState(DATA_DEVALETH) == IN_PROGRESS)
-                    return true;
+            //bool IsResurrectionPrevented() override
+            //{
+            //    if (GetBossState(DATA_DEVALETH) == IN_PROGRESS)
+            //        return true;
 
-                return false;
-            }
+            //    return false;
+            //}
 
             void OnCreatureRemove(Creature* creature) override
             {
