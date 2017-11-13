@@ -1114,7 +1114,6 @@ public:
         }
 
     private:
-        EventMap events;
         InstanceScript* instance;
     };
 
