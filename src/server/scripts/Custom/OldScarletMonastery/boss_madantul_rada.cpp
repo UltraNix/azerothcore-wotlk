@@ -384,7 +384,7 @@ public:
         void Reset() override
         {
             _events.Reset();
-            _events.ScheduleEvent(EVENT_BEGIN_STORM_CALL, 100);
+            _events.ScheduleEvent(EVENT_BEGIN_STORM_CALL, 1000);
             DoCastSelf(SPELL_LIGHTNING_SKYDOME, true);
             if (Creature* madan = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MADANTUL_RADA)))
             {
@@ -459,7 +459,7 @@ class spell_electrical_storm_damage_SpellScript : public SpellScript
     void HandleHit(SpellEffIndex /*effIndex*/)
     {
         if (GetHitUnit() && GetHitUnit()->GetMapId() == 44)
-            SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.15);
+            SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.08);
     }
 
     void Register() override
@@ -537,7 +537,7 @@ class spell_lightning_discharge_osm_SpellScript : public SpellScript
         //! osm
         if (GetCaster()->GetMapId() == 44)
             if (GetHitUnit())
-                SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.65);
+                SetHitDamage(GetHitUnit()->GetMaxHealth() * 0.5);
     }
 
     void Register() override
