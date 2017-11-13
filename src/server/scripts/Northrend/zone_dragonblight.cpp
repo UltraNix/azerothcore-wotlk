@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -356,7 +356,7 @@ public:
         {
             return NPC_INFINITE_ASSAILANT+urand(0,2);
         }
-        
+
         void UpdateAI(uint32 diff)
         {
             events.Update(diff);
@@ -475,15 +475,15 @@ public:
     struct npc_future_youAI : public ScriptedAI
     {
         npc_future_youAI(Creature* c) : ScriptedAI(c) {}
-        
-        void EnterEvadeMode() 
+
+        void EnterEvadeMode()
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             me->ClearUnitState(UNIT_STATE_EVADE);
         }
 
-        void Reset() 
-        { 
+        void Reset()
+        {
             if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
                 me->setFaction(me->ToTempSummon()->GetSummoner()->getFaction());
         }
@@ -2027,7 +2027,7 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
             Position const exitPos = { frand(-2.f, 2.f), frand(-2.f, 2.f), 0.f };
             summon->ExitVehicle(&exitPos);
             me->CombatStop();
-            
+
             me->setFaction(35);
             me->SetReactState(REACT_PASSIVE);
         }
@@ -2097,7 +2097,7 @@ private:
 struct npc_onslaught_knightAI : public ScriptedAI
 {
     npc_onslaught_knightAI(Creature* creature) : ScriptedAI(creature) { }
-    
+
     void EnterCombat(Unit* attacker) override
     {
         if (attacker)
@@ -2112,6 +2112,53 @@ struct npc_onslaught_knightAI : public ScriptedAI
     {
         if (spell->Id == 48268)
             me->DespawnOrUnsummon();
+    }
+};
+
+enum mysticalBolt
+{
+    SPELL_MYSTICAL_BOLT         = 51787,
+    SPELL_LOST_SOUL             = 51788
+};
+
+class spell_mystical_bolt : public SpellScriptLoader
+{
+public:
+    spell_mystical_bolt() : SpellScriptLoader("spell_mystical_bolt") { }
+
+    class spell_mystical_bolt_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mystical_bolt_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                if (Aura* aur = target->GetAura(SPELL_MYSTICAL_BOLT))
+                {
+                    if (aur->GetStackAmount() >= 5)
+                    {
+                        target->CastSpell(target, SPELL_LOST_SOUL);
+                        target->RemoveAurasDueToSpell(SPELL_MYSTICAL_BOLT);
+                        if (GetCaster()->GetMapId() == 44)
+                        {
+                            if (Creature* madan = GetCaster()->ToCreature())
+                                madan->getThreatManager().modifyThreatPercent(target, -100);
+                        }
+                    }
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mystical_bolt_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mystical_bolt_SpellScript();
     }
 };
 
@@ -2136,6 +2183,7 @@ void AddSC_dragonblight()
     new npc_spiritual_insight();
     new CreatureAILoader<npc_onslaught_warhorseAI>("npc_onslaught_warhorse");
     new CreatureAILoader<npc_onslaught_knightAI>("npc_onslaught_knight");
+    new spell_mystical_bolt();
 
     // Theirs
     new npc_commander_eligor_dawnbringer();

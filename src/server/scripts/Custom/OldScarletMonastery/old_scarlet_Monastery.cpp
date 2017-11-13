@@ -233,7 +233,6 @@ class npc_trash_tank_OLDSM : public CreatureScript
             void Reset() override
             {
                 events.Reset();
-                didIntervene = false;
                 didWall = false;
                 me->SetControlled(false, UNIT_STATE_ROOT);
             }
@@ -249,9 +248,8 @@ class npc_trash_tank_OLDSM : public CreatureScript
 
             void EnterCombat(Unit* target) override
             {
-                events.ScheduleEvent(EVENT_INTERVENE, 15000);
                 events.ScheduleEvent(EVENT_THROW_SHIELD, 6000);
-                //events.ScheduleEvent(EVENT_AOE_REFLECT, 3000);
+                events.ScheduleEvent(EVENT_AOE_REFLECT, 3000);
                 events.ScheduleEvent(EVENT_SHOCKWAVE, 20000);
                 events.ScheduleEvent(EVENT_ICY_TORRENT, 1000);
                 events.ScheduleEvent(EVENT_DEVESTATE, 3500);
@@ -280,20 +278,6 @@ class npc_trash_tank_OLDSM : public CreatureScript
                     case EVENT_SHIELD_WALL:
                         DoCast(SPELL_SHIELD_WALL);
                         break;
-                    case EVENT_INTERVENE:
-                        if (Unit* target = DoSelectLowestHpFriendly(100.0f))
-                        {
-                            if (target->HealthBelowPct(50) && !didIntervene && target->GetEntry() != me->GetEntry())
-                            {
-                                didIntervene = true;
-                                me->GetMotionMaster()->MoveCharge(target->GetPositionX() + 2.0f, target->GetPositionY(), target->GetPositionZ(), 60.0f, 10000);
-                                me->AddAura(SPELL_PROTECTION, target);
-                                events.ScheduleEvent(EVENT_CANCLE_PROTECTION, 7000);
-                            }
-                            else
-                                events.ScheduleEvent(EVENT_INTERVENE, 5000);
-                        }
-                        break;
                     case EVENT_CANCLE_PROTECTION:
                         me->SetControlled(false, UNIT_STATE_ROOT);
                         break;
@@ -303,11 +287,15 @@ class npc_trash_tank_OLDSM : public CreatureScript
 
                         events.ScheduleEvent(EVENT_THROW_SHIELD, 8000);
                         break;
-                        /* case EVENT_AOE_REFLECT:
-                        DoCast(SPELL_AOE_REFLECT);
+                    case EVENT_AOE_REFLECT:
+                    {
+                        CustomSpellValues val;
+                        val.AddSpellMod(SPELLVALUE_MAX_TARGETS, 2);
+                        me->CastCustomSpell(SPELL_AOE_REFLECT, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
 
                         events.ScheduleEvent(EVENT_AOE_REFLECT, 30000);
-                        break;*/
+                        break;
+                    }
                     case EVENT_SHOCKWAVE:
                         me->CastCustomSpell(SPELL_SHOCKWAVE, SPELLVALUE_BASE_POINT1, urand(12000, 18000), me->GetVictim(), TRIGGERED_FULL_MASK);
 
@@ -332,7 +320,6 @@ class npc_trash_tank_OLDSM : public CreatureScript
 
         private:
             EventMap events;
-            bool didIntervene;
             bool didWall;
         };
 
@@ -536,18 +523,6 @@ class npc_trash_caster_OLDSM : public CreatureScript
         }
 };
 
-class isPlayerCheck
-{
-    public:
-        bool operator()(WorldObject* object) const
-        {
-            if (object->GetTypeId() == TYPEID_PLAYER)
-                return true;
-
-            return false;
-        }
-};
-
 class spell_aoe_reflect_OLDSM : public SpellScriptLoader
 {
     public:
@@ -559,7 +534,10 @@ class spell_aoe_reflect_OLDSM : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                unitList.remove_if(isPlayerCheck());
+                unitList.remove_if([&](WorldObject* object)
+                {
+                    return object->GetTypeId() == TYPEID_PLAYER || object->ToUnit()->HasAura(GetSpellInfo()->Id);
+                });
             }
 
             void Register() override
@@ -579,20 +557,18 @@ class npc_devaleth : public CreatureScript
     public:
         npc_devaleth() : CreatureScript("npc_devaleth") { }
 
-        struct npc_devalethAI : public ScriptedAI
+        struct npc_devalethAI : public BossAI
         {
-            npc_devalethAI(Creature* creature) : ScriptedAI(creature)
-            {
-                instance = me->GetInstanceScript();
-            }
+            npc_devalethAI(Creature* creature) : BossAI(creature, DATA_DEVALETH) { }
 
             void Reset() override
             {
-                events.Reset();
+                _Reset();
             }
 
             void EnterCombat(Unit* target) override
             {
+                _EnterCombat();
                 events.ScheduleEvent(EVENT_MORTAL_STRIKE, 6000);
                 events.ScheduleEvent(EVENT_CLEAVE, 8000);
                 events.ScheduleEvent(EVENT_WITHERING_ROAR, 10000);
@@ -608,7 +584,7 @@ class npc_devaleth : public CreatureScript
             void JustDied(Unit* killer) override
             {
                 instance->SetData(DATA_DEVALETH_DEATH, 1);
-                CreatureAI::JustDied(killer);
+                BossAI::JustDied(killer);
             }
 
             void UpdateAI(uint32 diff) override
@@ -628,7 +604,7 @@ class npc_devaleth : public CreatureScript
                         break;
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE, true);
-                        events.ScheduleEvent(EVENT_CLEAVE, 10000);
+                        events.ScheduleEvent(EVENT_CLEAVE, urand(7000, 12000));
                         break;
                     case EVENT_WITHERING_ROAR:
                         me->CastCustomSpell(SPELL_WITHERING_ROAR, SPELLVALUE_BASE_POINT1, -1000, me, TRIGGERED_FULL_MASK);
@@ -663,17 +639,12 @@ class npc_devaleth : public CreatureScript
                         events.ScheduleEvent(EVENT_SUMMON_EAGLES, 40000);
                         break;
                     }
-
                     default:
                         break;
                     }
                 }
                 DoMeleeAttackIfReady();
             }
-
-        private:
-            EventMap events;
-            InstanceScript* instance;
         };
 
         CreatureAI* GetAI(Creature* creature) const override
@@ -715,13 +686,13 @@ class npc_risen_eagle : public CreatureScript
                     {
                     case EVENT_FEATHER_BURST:
                         me->CastCustomSpell(SPELL_FEATHER_BURST, SPELLVALUE_BASE_POINT0, 300, me->GetVictim(), TRIGGERED_FULL_MASK);
-                        events.ScheduleEvent(EVENT_FEATHER_BURST, urand(6000, 7500));
+                        events.ScheduleEvent(EVENT_FEATHER_BURST, urand(6000, 17500));
                         break;
                     case EVENT_RESET_THREAT:
                         DoResetThreat();
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                             me->AddThreat(target, 200000.0f);
-                        events.ScheduleEvent(EVENT_RESET_THREAT, urand(3000, 5000));
+                        events.ScheduleEvent(EVENT_RESET_THREAT, urand(3000, 9000));
                         break;
                     default:
                         break;
