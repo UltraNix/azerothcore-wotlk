@@ -5190,11 +5190,11 @@ void Player::BuildPlayerRepop()
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
-    if (GetInstanceScript() && GetInstanceScript()->IsResurrectionPrevented())
-    {
-        GetSession()->SendNotification("You cannot be resurrected right now.");
-        return;
-    }
+    //if (GetInstanceScript() && GetInstanceScript()->IsResurrectionPrevented())
+    //{
+    //    GetSession()->SendNotification("You cannot be resurrected right now.");
+    //    return;
+    //}
 
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
     data << uint32(-1);
