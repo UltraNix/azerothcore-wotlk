@@ -53,3 +53,10 @@ UPDATE `creature_template` SET `name` = "Prince Val’sameth", `subname` = "<The
 UPDATE `creature_template` SET `subname` = "<The Unforseen>" WHERE `entry` = 400000;
 UPDATE `creature_template` SET `subname` = "<The Gatekeeper>" WHERE `entry` = 400008;
 UPDATE `creature_template` SET `name` = "Va’Thanui", `subname` = "<Void Lord>" WHERE `entry` = 400041;
+
+UPDATE `creature_template` SET `lootid` = 100007 WHERE `entry` = 400022;
+UPDATE `creature_template` SET `lootid` = 100008 WHERE `entry` = 400000;
+UPDATE `creature_template` SET `lootid` = 100009 WHERE `entry` = 400008;
+UPDATE `creature_template` SET `lootid` = 100010 WHERE `entry` = 400041;
+UPDATE `creature_template` SET `lootid` = 100011 WHERE `entry` = 400043;
+UPDATE `creature_template` SET `lootid` = 100012 WHERE `entry` = 400010;

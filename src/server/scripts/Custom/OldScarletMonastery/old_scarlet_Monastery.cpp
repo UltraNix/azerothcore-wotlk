@@ -799,43 +799,43 @@ public:
                         arthurGUID = arthur->GetGUID();
                         simonGUID = simon->GetGUID();
 
-                        me->MonsterSay(eventBeginQuote.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventBeginQuote.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_TALK_1, 5000);
                         break;
                     }
                     case EVENT_TALK_1:
                     {
-                        me->MonsterSay(eventStartingRhyme_1.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventStartingRhyme_1.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_TALK_2, 5000);
                         break;
                     }
                     case EVENT_TALK_2:
                     {
-                        me->MonsterSay(eventStartingRhyme_2.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventStartingRhyme_2.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_TALK_3, 5000);
                         break;
                     }
                     case EVENT_TALK_3:
                     {
-                        me->MonsterSay(eventStartingRhyme_3.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventStartingRhyme_3.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_TALK_4, 5000);
                         break;
                     }
                     case EVENT_TALK_4:
                     {
-                        me->MonsterSay(eventStartingRhyme_4.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventStartingRhyme_4.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_TALK_5, 5000);
                         break;
                     }
                     case EVENT_TALK_5:
                     {
-                        me->MonsterSay(eventStartingRhyme_5.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventStartingRhyme_5.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_TALK_6, 5000);
                         break;
                     }
                     case EVENT_TALK_6:
                     {
-                        me->MonsterSay(eventStartingRhyme_6.c_str(), LANG_NEUTRAL, nullptr);
+                        me->MonsterSay(eventStartingRhyme_6.c_str(), 0, nullptr);
                         events.ScheduleEvent(EVENT_ROLL, 8000);
                         break;
                     }
