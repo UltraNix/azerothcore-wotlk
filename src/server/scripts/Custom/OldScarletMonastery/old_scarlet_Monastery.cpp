@@ -1010,10 +1010,7 @@ public:
 
     struct npc_devalethAI : public BossAI
     {
-        npc_devalethAI(Creature* creature) : BossAI(creature, DATA_DEVALETH)
-        {
-            instance = me->GetInstanceScript();
-        }
+        npc_devalethAI(Creature* creature) : BossAI(creature, DATA_DEVALETH) { }
 
         void Reset() override
         {
@@ -1024,12 +1021,12 @@ public:
         {
             events.ScheduleEvent(EVENT_MORTAL_STRIKE, 6000);
             events.ScheduleEvent(EVENT_CLEAVE, 8000);
-            events.ScheduleEvent(EVENT_WITHERING_ROAR, 10000);
+            events.ScheduleEvent(EVENT_WITHERING_ROAR, 13000);
             events.ScheduleEvent(EVENT_FEARSOME_ROAR, 20000);
             events.ScheduleEvent(EVENT_DEAFENING_ROAR, 30000);
             events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 40000);
             events.ScheduleEvent(EVENT_SUMMON_EAGLES, 35000);
-            events.ScheduleEvent(EVENT_REPETENCE, 15000);
+            events.ScheduleEvent(EVENT_REPETENCE, 7000);
             Talk(1);
         }
 
@@ -1055,15 +1052,15 @@ public:
                     case EVENT_MORTAL_STRIKE:
                     {
                         CustomSpellValues val;
-                        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 150);
-                        val.AddSpellMod(SPELLVALUE_BASE_POINT1, -100);
+                        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 110);
+                        val.AddSpellMod(SPELLVALUE_BASE_POINT1, -75);
                         me->CastCustomSpell(SPELL_MORTAL_STRIKE, val, me->GetVictim(), TRIGGERED_FULL_MASK);
-                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10000);
+                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 17000);
                         break;
                     }
                     case EVENT_CLEAVE:
-                        me->CastCustomSpell(SPELL_CLEAVE, SPELLVALUE_BASE_POINT0, 100, me->GetVictim(), TRIGGERED_FULL_MASK);
-                        events.ScheduleEvent(EVENT_CLEAVE, 10000);
+                        me->CastCustomSpell(SPELL_CLEAVE, SPELLVALUE_BASE_POINT0, 80, me->GetVictim(), TRIGGERED_FULL_MASK);
+                        events.ScheduleEvent(EVENT_CLEAVE, 13000);
                         break;
                     case EVENT_WITHERING_ROAR:
                         me->CastCustomSpell(SPELL_WITHERING_ROAR, SPELLVALUE_BASE_POINT1, -1000, me, TRIGGERED_FULL_MASK);
@@ -1078,11 +1075,11 @@ public:
                     }
                     case EVENT_DEAFENING_ROAR:
                         DoCast(me, SPELL_DEAFENING_ROAR, true);
-                        events.ScheduleEvent(EVENT_DEAFENING_ROAR, 40000);
+                        events.ScheduleEvent(EVENT_DEAFENING_ROAR, urand(40000, 60000));
                         break;
                     case EVENT_TERRIFYING_ROAR:
                         DoCast(me, SPELL_TERRIFYING_ROAR, true);
-                        events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 40000);
+                        events.ScheduleEvent(EVENT_TERRIFYING_ROAR, 45000);
                         break;
                     case EVENT_SUMMON_EAGLES:
                     {
@@ -1095,7 +1092,7 @@ public:
                                 eagle->SetInCombatWithZone();
                         }
 
-                        events.ScheduleEvent(EVENT_SUMMON_EAGLES, 40000);
+                        events.ScheduleEvent(EVENT_SUMMON_EAGLES, 50000);
                         break;
                     }
                     case EVENT_REPETENCE:
@@ -1103,7 +1100,7 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, 20.f, true))
                             DoCast(target, SPELL_REPETENCE, true);
 
-                        events.ScheduleEvent(EVENT_REPETENCE, 10000);
+                        events.ScheduleEvent(EVENT_REPETENCE, 25000);
                         break;
                     }
                     default:
@@ -1112,9 +1109,6 @@ public:
             }
             DoMeleeAttackIfReady();
         }
-
-    private:
-        InstanceScript* instance;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
