@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -650,7 +650,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             if (m_amplitude)
             {
                 if (!GetSpellInfo()->HasAttribute(SPELL_ATTR5_START_PERIODIC_AT_APPLY))
-                    m_periodicTimer += m_amplitude; 
+                    m_periodicTimer += m_amplitude;
                 else if (caster && caster->IsTotem()) // for totems only ;d
                 {
                     m_periodicTimer = 100; // make it ALMOST instant
@@ -1441,13 +1441,13 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                 break;
             }
         }
-        
+
         // Use the new aura to see on what stance the target will be
         uint32 newStance = (1<<((newAura ? newAura->GetMiscValue() : 0)-1));
 
         Unit::AuraApplicationMap& tAuras = target->GetAppliedAuras();
         for (Unit::AuraApplicationMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
-        {           
+        {
             // If the stances are not compatible with the spell, remove it
             // Xinef: Remove all passive auras, they will be added if needed
             if (itr->second->GetBase()->IsRemovedOnShapeLost(target) && (!(itr->second->GetBase()->GetSpellInfo()->Stances & newStance) || itr->second->GetBase()->IsPassive()))
@@ -2816,11 +2816,11 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode
         //           Outland Map                    Northrend Map                 Cold Weather Flying
         if (apply && !(target->GetMapId() == 530 || (target->GetMapId() == 571 && target->HasSpell(54197))))
             return;
-        //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar 
+        //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar
         if (apply && target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
             return;
 
-        //           Dalaran City  
+        //           Dalaran City
         if (apply && target->GetZoneId() == 4395 && target->GetAreaId() != 4564)
             return;
     }
@@ -3234,18 +3234,18 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
         return;
 
     Unit* target = aurApp->GetTarget();
- 
+
     // Flying Black Qiraji Battle Tank
     if (GetId() == 31700)
     {
         //           Outland Map                    Northrend Map                 Cold Weather Flying
         if (apply && !(target->GetMapId() == 530 || (target->GetMapId() == 571 && target->HasSpell(54197))))
             return;
-        //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar 
+        //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar
         if (apply && target->GetMapId() == 530 && target->GetZoneId() == 3430 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
             return;
 
-        //           Dalaran City  
+        //           Dalaran City
         if (apply && target->GetZoneId() == 4395 && target->GetAreaId() != 4564)
             return;
     }
@@ -3583,7 +3583,7 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
             mechanic_immunity_list = (1 << MECHANIC_SNARE);
 
             target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
-            aura_immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED); 
+            aura_immunity_list.push_back(SPELL_AURA_MOD_DECREASE_SPEED);
         }
         // Charm auras?, 90%
         if ((GetMiscValue() & (1<<7)))
@@ -4220,6 +4220,7 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
         return;
 
     Unit* target = aurApp->GetTarget();
+    uint32 healthDifference = target->GetMaxHealth() - target->GetHealth();
 
     if (apply)
     {
@@ -4228,11 +4229,9 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
     }
     else
     {
-        if (int32(target->GetHealth()) > GetAmount())
-            target->ModifyHealth(-GetAmount());
-        else
-            target->SetHealth(1);
         target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+
+        target->SetHealth(target->GetMaxHealth() - std::min(target->GetMaxHealth() - 1, healthDifference));
     }
 }
 
@@ -4959,7 +4958,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         // AT APPLY
         if (apply)
         {
-            
+
             switch (GetId())
             {
                 case 1515: // Tame beast
@@ -6070,7 +6069,7 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
             if (GetSpellInfo()->Effects[GetEffIndex()].TargetA.GetCheckType() == TARGET_CHECK_ENTRY || GetSpellInfo()->Effects[GetEffIndex()].TargetB.GetCheckType() == TARGET_CHECK_ENTRY)
                 triggerFlags = TriggerCastFlags(TRIGGERED_FULL_MASK&~TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
 
-            triggerCaster->CastSpell(targets, triggeredSpellInfo, NULL, triggerFlags, NULL, this); 
+            triggerCaster->CastSpell(targets, triggeredSpellInfo, NULL, triggerFlags, NULL, this);
             ;//sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "AuraEffect::HandlePeriodicTriggerSpellAuraTick: Spell %u Trigger %u", GetId(), triggeredSpellInfo->Id);
         }
     }
@@ -6090,11 +6089,11 @@ void AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick(Unit* target, Unit*
                 targets.SetDstChannel(m_channelData->spellDst);
                 targets.SetObjectTargetChannel(m_channelData->channelGUID);
             }
-                
+
             CustomSpellValues values;
             values.AddSpellMod(SPELLVALUE_BASE_POINT0, GetAmount());
 
-            triggerCaster->CastSpell(targets, triggeredSpellInfo, &values, TRIGGERED_FULL_MASK, NULL, this); 
+            triggerCaster->CastSpell(targets, triggeredSpellInfo, &values, TRIGGERED_FULL_MASK, NULL, this);
             ;//sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick: Spell %u Trigger %u", GetId(), triggeredSpellInfo->Id);
         }
     }
@@ -6328,7 +6327,7 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     if (caster)
         caster->SendSpellNonMeleeDamageLog(target, GetId(), damage+absorb+resist, GetSpellInfo()->GetSchoolMask(), absorb, resist, false, 0, crit);
 
-    
+
     int32 new_damage;
 
     new_damage = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), false);
@@ -6565,7 +6564,7 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
     }
 
     target->AddThreat(caster, float(gainedAmount) * 0.5f, GetSpellInfo()->GetSchoolMask(), GetSpellInfo());
-    
+
     // remove CC auras
     target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE);
 
