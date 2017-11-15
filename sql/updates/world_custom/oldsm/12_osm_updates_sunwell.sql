@@ -89,7 +89,7 @@ INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language
 DELETE FROM `creature_equip_template` WHERE `entry` = 400043;
 
 UPDATE `creature_template` SET `health_mod` = 40 WHERE `entry` = 400009;
-UPDATE `creature_template` SET `mindmg` = 750, `maxdmg` = 800, `dmg_multiplier` = 90, `health_mod` = 1000 WHERE `entry` = 400008;
+UPDATE `creature_template` SET `mindmg` = 638, `maxdmg` = 680, `dmg_multiplier` = 90, `health_mod` = 1000 WHERE `entry` = 400008;
 
 UPDATE `creature_template` SET `subname` = "" WHERE `subname` LIKE "%The risen%";
 

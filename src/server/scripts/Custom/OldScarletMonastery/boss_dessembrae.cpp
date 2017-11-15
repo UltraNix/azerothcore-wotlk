@@ -1704,7 +1704,7 @@ class ForceFieldCheck
 
         bool operator()(WorldObject* object) const
         {
-            if (object->IsWithinDist2d(&ArcanePhaseCenter, 14.0f))
+            if (object->IsWithinDist2d(&ArcanePhaseCenter, 10.0f))
                 return true;
 
             return false;

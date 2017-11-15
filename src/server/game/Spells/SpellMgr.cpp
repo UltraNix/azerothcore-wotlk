@@ -4884,7 +4884,9 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// Old Scarlet Monastery
         //////////////////////////////////////////
-
+        case 29973: // arcane explosion, remove this after event
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
         case 51103: // Frostbomb
         case 34172: // Arcane Orb
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // OLDSM
