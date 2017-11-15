@@ -127,7 +127,7 @@ INSERT INTO creature_loot_template VALUES
 (@LOOT_ID + 2, 33809, 14, 1, 8, 1, 1),
 (@LOOT_ID + 2, 43651, 10, 1, 9, 1, 1),
 (@LOOT_ID + 2, 22951, 4, 1, 10, 1, 1), 
-(@LOOT_ID + 2, 1, 4, 1, 11, -@LOOT_ID, 1),
+(@LOOT_ID + 2, 1, 2, 1, 11, -@LOOT_ID, 1),
 
 (@LOOT_ID + 3, 38309, 100, 1, 1, 1, 1),
 (@LOOT_ID + 3, 38233, 100, 1, 2, 10, 10),
@@ -151,7 +151,7 @@ INSERT INTO creature_loot_template VALUES
 (@LOOT_ID + 4, 22691, 9, 1, 9, 1, 1),
 (@LOOT_ID + 4, 13262, 5, 1, 10, 1, 1),
 (@LOOT_ID + 4, 25596, 3, 1, 11, 1, 1), 
-(@LOOT_ID + 4, 1, 4, 1, 12, -@LOOT_ID, 1),
+(@LOOT_ID + 4, 1, 6, 1, 12, -@LOOT_ID, 1),
 
 (@LOOT_ID + 5, 38313, 100, 1, 1, 1, 1),
 (@LOOT_ID + 5, 38233, 100, 1, 2, 10, 10),
@@ -162,7 +162,8 @@ INSERT INTO creature_loot_template VALUES
 (@LOOT_ID + 5, 22691, 25, 1, 7, 1, 1),
 (@LOOT_ID + 5, 13262, 20, 1, 8, 1, 1),
 (@LOOT_ID + 5, 25596, 15, 1, 9, 1, 1), 
-(@LOOT_ID + 5, 1, 4, 1, 12, -@LOOT_ID, 1),
+(@LOOT_ID + 5, 43599, 100, 1, 10, 10, 10),
+(@LOOT_ID + 5, 1, 20, 1, 11, -@LOOT_ID, 1),
 
 (@LOOT_ID + 6, 37701, 6, 1, 1, 1, 2),
 (@LOOT_ID + 6, 33470, 6, 1, 2, 2, 7),
@@ -259,10 +260,10 @@ INSERT INTO creature_loot_template VALUES
 
 DELETE FROM reference_loot_template WHERE entry = @LOOT_ID;
 INSERT INTO reference_loot_template VALUES
-(@LOOT_ID, 22589, 100, 0, 1, 1, 1),
-(@LOOT_ID, 22630, 100, 0, 1, 1, 1),
-(@LOOT_ID, 22631, 100, 0, 1, 1, 1),
-(@LOOT_ID, 22632, 100, 0, 1, 1, 1);
+(@LOOT_ID, 22589, 0, 0, 1, 1, 1),
+(@LOOT_ID, 22630, 0, 0, 1, 1, 1),
+(@LOOT_ID, 22631, 0, 0, 1, 1, 1),
+(@LOOT_ID, 22632, 0, 0, 1, 1, 1);
 
 UPDATE `creature` SET `position_x` = 2890.915527, `position_y` = -808.266846, `position_z` = 160.332977, `orientation` = 5.091118 WHERE `guid` = 400007;
 
