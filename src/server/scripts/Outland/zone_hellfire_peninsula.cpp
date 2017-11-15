@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -522,6 +522,178 @@ public:
     }
 };
 
+enum colonelSpells
+{
+    SPELL_COL_FEIGN_DEATH           = 39283,
+    SPELL_JULES_THREATENS           = 39284,
+    SPELL_JULES_UPRIGHT             = 39294,
+    SPELL_JULES_VOMIT               = 39295,
+    SPELL_JULES_PRONE               = 39283
+};
+
+enum colonelEvents
+{
+    EVENT_COL_BEGIN                 = 1,
+    EVENT_COL_1                     = 2,
+    EVENT_COL_2                     = 3,
+    EVENT_COL_3                     = 4,
+    EVENT_COL_4                     = 5,
+    EVENT_COL_5                     = 6,
+    EVENT_COL_6                     = 7,
+    EVENT_COL_7                     = 8,
+    EVENT_COL_8                     = 9,
+    EVENT_COL_9                     = 10,
+    EVENT_COL_10                    = 11,
+    EVENT_COL_11                    = 12,
+    EVENT_COL_12                    = 13,
+    EVENT_COL_13                    = 14,
+    EVENT_SPAWN_COL_ADDS            = 15
+};
+
+enum colonelMisc
+{
+    SAY_COL_1                       = 0,
+    SAY_COL_2                       = 1,
+
+    NPC_FLYING_SKULL                = 22507,
+    QUEST_EXORCISM_OF_COLONEL       = 10935
+};
+
+Position const colonelSummonPosition = { -710.0f, 2754.28f, 104.3f, 4.7f };
+
+struct npc_colonel_julesAI : public npc_escortAI
+{
+    npc_colonel_julesAI(Creature* creature) : npc_escortAI(creature), summons(me) { }
+
+    void sGossipHello(Player* player) override
+    {
+        if (player->GetQuestStatus(QUEST_EXORCISM_OF_COLONEL) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+        }
+    }
+
+    void Reset() override
+    {
+        _eventInProgress = false;
+        me->SetUInt32Value(UNIT_NPC_FLAGS, 0); // override all flags
+        me->SetReactState(REACT_PASSIVE);
+        DoCastSelf(SPELL_COL_FEIGN_DEATH);
+        me->SetCanFly(false);
+        _events.Reset();
+    }
+
+    void SetData(uint32 type, uint32 data) override
+    {
+        if (type == 1 && data == 1 && !_eventInProgress)
+        {
+            _eventInProgress = true;
+            _events.ScheduleEvent(EVENT_COL_BEGIN, 14000);
+            Talk(SAY_COL_1);
+        }
+    }
+
+    void JustSummoned(Creature* creature) override
+    {
+        summons.Summon(creature);
+    }
+
+    void WaypointReached(uint32 waypointId) override
+    {
+        if (waypointId == 44)
+        {
+            me->SetCanFly(false);
+            me->RemoveAllAuras();
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            DoCastSelf(SPELL_COL_FEIGN_DEATH);
+            _events.ScheduleEvent(EVENT_COL_12, 25000);
+            _events.CancelEvent(EVENT_SPAWN_COL_ADDS);
+            summons.DespawnAll();
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!_eventInProgress)
+            return;
+
+        npc_escortAI::UpdateAI(diff);
+
+        _events.Update(diff);
+
+        while (auto eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_COL_BEGIN:
+                    me->SetCanFly(true);
+                    Talk(SAY_COL_2);
+                    _events.ScheduleEvent(EVENT_COL_1, 9000);
+                    break;
+                case EVENT_COL_1:
+                    me->RemoveAurasDueToSpell(SPELL_COL_FEIGN_DEATH);
+                    DoCastSelf(SPELL_JULES_UPRIGHT);
+                    Start(true, false, 0, nullptr);
+                    SetDespawnAtEnd(false);
+                    _events.ScheduleEvent(EVENT_SPAWN_COL_ADDS, 3000);
+                    _events.ScheduleEvent(EVENT_COL_2, 4000);
+                    break;
+                case EVENT_SPAWN_COL_ADDS:
+                    me->SummonCreature(NPC_FLYING_SKULL, colonelSummonPosition, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 60000);
+                    _events.Repeat(urand(5000, 8000));
+                    break;
+                case EVENT_COL_2:
+                    DoCastSelf(SPELL_JULES_THREATENS, true);
+                    DoCastSelf(SPELL_JULES_UPRIGHT);
+                    _events.ScheduleEvent(EVENT_COL_3, 9000);
+                    break;
+                case EVENT_COL_3:
+                    Talk(SAY_COL_2);
+                    _events.ScheduleEvent(EVENT_COL_4, 25000);
+                    break;
+                case EVENT_COL_4:
+                    Talk(SAY_COL_2);
+                    _events.ScheduleEvent(EVENT_COL_5, 30000);
+                    break;
+                case EVENT_COL_5:
+                    _events.ScheduleEvent(EVENT_COL_6, 4000);
+                    break;
+                case EVENT_COL_6:
+                    DoCastSelf(SPELL_JULES_UPRIGHT, true);
+                    _events.ScheduleEvent(EVENT_COL_7, 3500);
+                    break;
+                case EVENT_COL_7:
+                    DoCastSelf(SPELL_JULES_VOMIT, true);
+                    _events.ScheduleEvent(EVENT_COL_8, 8500);
+                    break;
+                case EVENT_COL_8:
+                    Talk(SAY_COL_2);
+                    _events.ScheduleEvent(EVENT_COL_9, 18000);
+                    break;
+                case EVENT_COL_9:
+                    Talk(SAY_COL_2);
+                    _events.ScheduleEvent(EVENT_COL_10, 18000);
+                    break;
+                case EVENT_COL_10:
+                    Talk(SAY_COL_2);
+                    _events.ScheduleEvent(EVENT_COL_11, 18000);
+                    break;
+                case EVENT_COL_11:
+                    Talk(SAY_COL_2);
+                    break;
+                case EVENT_COL_12:
+                    Reset();
+                    break;
+            }
+        }
+
+    }
+private:
+    bool _eventInProgress;
+    EventMap _events;
+    SummonList summons;
+};
+
 void AddSC_hellfire_peninsula()
 {
     // Ours
@@ -534,4 +706,5 @@ void AddSC_hellfire_peninsula()
     new npc_ancestral_wolf();
     new npc_wounded_blood_elf();
     new npc_fel_guard_hound();
+    new CreatureAILoader<npc_colonel_julesAI>("npc_colonel_jules");
 }
