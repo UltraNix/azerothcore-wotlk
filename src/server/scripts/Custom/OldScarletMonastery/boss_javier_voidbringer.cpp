@@ -81,6 +81,7 @@ enum Events
     EVENT_CLONE_START_ATTACK = 1,
     EVENT_IMMOLATE = 2,
     EVENT_SPELL_LOCK = 3,
+    EVENT_KNOCBACK   = 4,
 
     EVENT_SOLDIER_START_ATTACK = 1,
     EVENT_MORTAL_STRIKE = 2,
@@ -159,6 +160,7 @@ enum Spells
     SPELL_RED_BEAM = 72594,
     SPELL_BLUE_BEAM = 72598,
     SPELL_BLACK_BEAM = 72735,
+    SPELL_KNOCKBACK = 10689
 };
 
 class boss_javier_voidbringer : public CreatureScript
@@ -171,6 +173,8 @@ class boss_javier_voidbringer : public CreatureScript
             boss_javier_voidbringerAI(Creature* creature) : BossAI(creature, DATA_JAVIER_VOIDBRINGER)
             {
                 instance = me->GetInstanceScript();
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void Reset() override
@@ -183,11 +187,20 @@ class boss_javier_voidbringer : public CreatureScript
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
                 me->RemoveAurasDueToSpell(SPELL_HARDENED);
                 me->RemoveAura(SPELL_AURA_BLACK);
-                //me->SetInhabitType(INHABIT_GROUND);
+                me->SetCanFly(false);
+                me->SetDisableGravity(false);
+                me->SendMovementFlagUpdate();
+                me->SetInhabitType(INHABIT_GROUND);
             }
 
             void EnterCombat(Unit* target) override
             {
+                if (!instance->CheckRequiredBosses(DATA_JAVIER_VOIDBRINGER))
+                {
+                    _DespawnAtEvade(30, me);
+                    return;
+                }
+
                 _EnterCombat();
                 SetPhase(PHASE_ONE);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TAG_ARROW);
@@ -199,26 +212,23 @@ class boss_javier_voidbringer : public CreatureScript
 
             void EnterEvadeMode() override
             {
-                if (!_EnterEvadeMode())
-                    return;
-
-                me->SetHomePosition(StartPos);
-                DoCast(SPELL_TELEPORT_VISUAL);
-                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TAG_ARROW);
-                me->NearTeleportTo(StartPos.GetPositionX(), StartPos.GetPositionY(), StartPos.GetPositionZ(), StartPos.GetOrientation());
-                Reset();
+                _DespawnAtEvade(30, me);
             }
 
             void MoveInLineOfSight(Unit* who) override
             {
+                //! all checks split for clarity and for debugging purposes
                 if (!instance->CheckRequiredBosses(DATA_JAVIER_VOIDBRINGER))
                     return;
 
-                if (phase == PHASE_NONE && who->GetTypeId() == TYPEID_PLAYER && me->GetDistance(who) < 30.0f)
-                {
-                    if (who->ToPlayer()->IsGameMaster())
-                        return;
+                if (who->GetTypeId() == TYPEID_UNIT)
+                    return;
 
+                if (who->ToPlayer()->IsGameMaster())
+                    return;
+
+                if (phase == PHASE_NONE && me->GetDistance(who) < 30.0f)
+                {
                     SetPhase(PHASE_INTRO);
 
                     events.ScheduleEvent(EVENT_INTRO_1, 5000);
@@ -256,9 +266,12 @@ class boss_javier_voidbringer : public CreatureScript
                 if (me->HealthBelowPctDamaged(10, damage) && events.IsInPhase(PHASE_THREE))
                 {
                     DoCast(SPELL_TELEPORT_VISUAL);
-                    me->NearTeleportTo(CenterPos.GetPositionX(), CenterPos.GetPositionY(), CenterPos.GetPositionZ(), CenterPos.GetOrientation());
+                    me->StopMovingOnCurrentPos();
+                    me->StopMoving();
+                    me->GetMotionMaster()->Clear();
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
+                    me->NearTeleportTo(CenterPos.GetPositionX(), CenterPos.GetPositionY(), CenterPos.GetPositionZ(), CenterPos.GetOrientation());
                     SetPhase(PHASE_FOUR);
                     instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TAG_ARROW);
                     DoCast(me, SPELL_KNEEL, true);
@@ -455,10 +468,18 @@ class boss_javier_voidbringer : public CreatureScript
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NON_ATTACKABLE);
                         me->RemoveAurasDueToSpell(SPELL_HARDENED);
                         me->RemoveAura(SPELL_KNEEL);
-                        //me->SetInhabitType(INHABIT_AIR);
+                        me->SetInhabitType(INHABIT_AIR);
+                        me->SetCanFly(true);
+                        me->SetDisableGravity(true);
+                        me->StopMoving();
+                        me->StopMovingOnCurrentPos();
+                        me->GetMotionMaster()->Clear();
                         me->NearTeleportTo(CenterPos.GetPositionX(), CenterPos.GetPositionY(), CenterPos.GetPositionZ() + 20.0f, CenterPos.GetOrientation());
+                        me->SendMovementFlagUpdate();
                         DoCast(SPELL_TELEPORT_VISUAL);
                         SetPhase(PHASE_FIVE);
+                        if (Player* player = me->SelectNearestPlayer(80.0f))
+                            AttackStartCaster(player, 80.0f);
                         events.ScheduleEvent(EVENT_FALLING_ORBS, 3000, 0, PHASE_FIVE);
                         events.ScheduleEvent(EVENT_SHADOW_BOLT, 2000, 0, PHASE_FIVE);
                         summonAddsTimer = 30000;
@@ -548,6 +569,9 @@ class boss_javier_voidbringer : public CreatureScript
                     events.CancelEvent(EVENT_DEATH_COIL);
                     break;
                 case PHASE_SIX:
+                    me->SetCanFly(false);
+                    me->SetDisableGravity(false);
+                    me->SendMovementFlagUpdate();
                     me->GetMotionMaster()->MoveFall(0, CenterPos.GetPositionZ());
                     DoCast(me, SPELL_KNEEL, true);
                     me->RemoveAura(SPELL_AURA_BLACK);
@@ -647,7 +671,8 @@ class npc_void : public CreatureScript
         {
             npc_voidAI(Creature *creature) : ScriptedAI(creature)
             {
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
                 instance = creature->GetInstanceScript();
                 homePos = creature->GetHomePosition();
                 me->SetReactState(REACT_PASSIVE);
@@ -674,7 +699,6 @@ class npc_void : public CreatureScript
                 Movement::MoveSplineInit init(me);
                 FillCirclePath(CenterPos, homePos.GetExactDist2d(CenterPos.GetPositionX(), CenterPos.GetPositionY()), me->GetPositionZ(), init.Path(), true);
                 init.SetWalk(false);
-                init.SetSmooth();
                 init.SetCyclic();
                 init.Launch();
             }
@@ -759,6 +783,8 @@ class npc_javier_clone : public CreatureScript
         {
             npc_javier_cloneAI(Creature *creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
                 me->SetReactState(REACT_PASSIVE);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 interrupted = false;
@@ -790,11 +816,12 @@ class npc_javier_clone : public CreatureScript
                             DoZoneInCombat();
                             events.ScheduleEvent(EVENT_IMMOLATE, 3000);
                             events.ScheduleEvent(EVENT_SPELL_LOCK, urand(5000, 9000));
+                            events.ScheduleEvent(EVENT_KNOCBACK, urand(5000, 15000));
                             break;
                         case EVENT_IMMOLATE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 0.0f, true))
                                 DoCast(target, SPELL_IMMOLATE, false);
-                            events.ScheduleEvent(EVENT_IMMOLATE, 6000);
+                            events.ScheduleEvent(EVENT_IMMOLATE, urand(6000, 12000));
                             break;
                         case EVENT_SPELL_LOCK:
                             interrupted = false;
@@ -814,6 +841,27 @@ class npc_javier_clone : public CreatureScript
                             if (!interrupted)
                                 events.ScheduleEvent(EVENT_SPELL_LOCK, urand(1000, 2000));
                             break;
+                        case EVENT_KNOCBACK:
+                        {
+                            std::vector<uint64> playerGUIDs;
+                            for (auto threat : me->getThreatManager().getThreatList())
+                            {
+                                if (Player* player = ObjectAccessor::GetPlayer(*me, threat->getUnitGuid()))
+                                    if (player && me->IsWithinDist2d(player, 7.0f))
+                                        playerGUIDs.push_back(player->GetGUID());
+                            }
+
+                            if (!playerGUIDs.empty())
+                            {
+                                if (Player* target = ObjectAccessor::GetPlayer(*me, Trinity::Containers::SelectRandomContainerElement(playerGUIDs)))
+                                    DoCast(target, SPELL_KNOCKBACK, true);
+                                events.Repeat(urand(15000, 25000));
+                                break;
+                            }
+                            else
+                                events.Repeat(1000);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -842,7 +890,8 @@ class npc_javier_helper : public CreatureScript
             npc_javier_helperAI(Creature *creature) : ScriptedAI(creature)
             {
                 me->SetReactState(REACT_PASSIVE);
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void IsSummonedBy(Unit* summoner) override

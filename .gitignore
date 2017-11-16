@@ -1,0 +1,6 @@
+
+*.BACKUP.*
+*.orig
+*.LOCAL.*
+*.patch
+build*/

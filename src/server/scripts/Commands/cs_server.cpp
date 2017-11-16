@@ -78,6 +78,7 @@ public:
             { "idlerestart",    SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleRestartCommandTable },
             { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleShutdownCommandTable },
             { "info",           SEC_PLAYER,         true,  &HandleServerInfoCommand,                "" },
+            { "underground",    SEC_ADMINISTRATOR,  true,  &HandleServerUnderGroundCommand,         "" },
             { "motd",           SEC_PLAYER,         true,  &HandleServerMotdCommand,                "" },
             { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverRestartCommandTable },
             { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverShutdownCommandTable },
@@ -141,6 +142,29 @@ public:
 
         return true;
     }
+
+    static bool HandleServerUnderGroundCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        uint32 playerCount = sWorld->GetPlayerCount();
+        uint32 activeSessionCount = sWorld->GetActiveSessionCount();
+        uint32 connPeak = sWorld->GetMaxActiveSessionCount();
+
+        handler->PSendSysMessage("# # # Underground begin # # #");
+        handler->PSendSysMessage("NO BOOST: Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
+
+        if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
+        {
+            float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
+            activeSessionCount = (activeSessionCount + (activeSessionCount * boostPercentage));
+            playerCount = (playerCount + (playerCount * boostPercentage));
+
+            handler->PSendSysMessage("WITH BOOST: Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
+        }
+        handler->PSendSysMessage("# # # Underground end # # #");
+
+        return true;
+    }
+
     // Display the 'Message of the day' for the realm
     static bool HandleServerMotdCommand(ChatHandler* handler, char const* /*args*/)
     {

@@ -91,7 +91,8 @@ class boss_reast : public CreatureScript
             boss_reastAI(Creature* creature) : BossAI(creature, DATA_REAST)
             {
                 instance = me->GetInstanceScript();
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void Reset() override
@@ -231,7 +232,10 @@ class boss_reast : public CreatureScript
                         SelectTargetList(targets, NonTankTargetSelector(me, true), 10, SELECT_TARGET_NEAREST);
                         targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SWARMING_PASSIVE));
                         for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                        {
                             DoCast(*itr, SPELL_GRIP_OF_DARKNESS, true);
+                            (*itr)->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 57604, true);
+                        }
                         novaTargets.clear();
                         SelectTargetList(novaTargets, NonTankTargetSelector(me, true), 2, SELECT_TARGET_RANDOM);
                         novaTargets.remove_if(Trinity::UnitAuraCheck(true, SPELL_SWARMING_PASSIVE));
@@ -327,7 +331,8 @@ class npc_reast_orb : public CreatureScript
             npc_reast_orbAI(Creature *creature) : ScriptedAI(creature)
             {
                 me->SetReactState(REACT_AGGRESSIVE);
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void IsSummonedBy(Unit* summoner) override

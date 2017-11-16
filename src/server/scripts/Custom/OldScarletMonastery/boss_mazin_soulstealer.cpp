@@ -166,14 +166,14 @@ Position const soulPositions[3] =
 {
     { 208.95f, -83.61f, 18.67f, 3.12f },
     { 192.27f, -59.37f, 18.67f, 4.73f },
-    { 167.77f, -75.39f, 18.67f, 6.27f },
+    { 167.77f, -75.39f, 18.67f, 6.27f }
 };
 
 Position enterFightPos[3] =
 {
     { 197.27f, -83.66f, 18.02f, 3.16f },
     { 192.70f, -71.30f, 18.02f, 4.77f },
-    { 181.05f, -75.71f, 18.02f, 0.06f },
+    { 181.05f, -75.71f, 18.02f, 0.06f }
 };
 
 Position spawnElementals[4] =
@@ -181,7 +181,7 @@ Position spawnElementals[4] =
     { 188.89f, -72.05f, 18.02f, 4.73f },
     { 197.37f, -79.64f, 18.02f, 3.17f },
     { 188.85f, -88.67f, 18.02f, 1.62f },
-    { 180.29f, -79.04f, 18.02f, 6.24f },
+    { 180.29f, -79.04f, 18.02f, 6.24f }
 };
 
 Position arrowPos[9] =
@@ -194,14 +194,14 @@ Position arrowPos[9] =
     { 201.69f, -81.82f, 33.31f },
     { 200.12f, -67.99f, 33.31f },
     { 190.95f, -67.08f, 32.13f },
-    { 179.12f, -67.23f, 31.47f },
+    { 179.12f, -67.23f, 31.47f }
 };
 
 Position teleMiddlePos[3] =
 {
     { 184.00f, -79.47f, 18.02f, 4.72f },
     { 192.69f, -79.67f, 18.02f, 4.76f },
-    { 188.75f, -84.58f, 18.02f, 4.75f },
+    { 188.75f, -84.58f, 18.02f, 4.75f }
 };
 
 Position posIntro1 = { 184.18f, -84.50f, 18.02f };
@@ -235,7 +235,8 @@ class boss_mazin_soulstealer : public CreatureScript
             boss_mazin_soulstealerAI(Creature* creature) : BossAI(creature, DATA_MAZIN_SOULSTEALER), summons(me)
             {
                 instance = creature->GetInstanceScript();
-                //SetImmuneToPushPullEffects(true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
                 intro = false;
                 orient = 0;
                 deathCount = 0;
@@ -253,6 +254,9 @@ class boss_mazin_soulstealer : public CreatureScript
             void MoveInLineOfSight(Unit* who) override
             {
                 if (intro)
+                    return;
+
+                if (who->ToPlayer() && who->ToPlayer()->IsGameMaster())
                     return;
 
                 if (who->IsWithinDist(me, 5.0f))
@@ -344,6 +348,25 @@ class boss_mazin_soulstealer : public CreatureScript
                 _JustReachedHome();
                 Reset();
                 summons.DespawnAll();
+                if (Map* map = me->GetMap())
+                {
+                    Map::PlayerList const& players = map->GetPlayers();
+                    for (auto const& i : players)
+                    {
+                        if (Player* player = i.GetSource())
+                        {
+                            //! player has an aura which means he is stuck in death orb room
+                            //! lets remove stun auras, visual auras and teleport him outside the room
+                            if (player->HasAura(SPELL_ROOM_DUMMY))
+                            {
+                                player->CastSpell(player, SPELL_EVIL_TP);
+                                player->RemoveAurasDueToSpell(SPELL_ROOM_DUMMY);
+                                player->RemoveAurasDueToSpell(SPELL_ROOM_STUN);
+                                player->ToPlayer()->TeleportTo(44, spawnDeathOrb.GetPositionX(), spawnDeathOrb.GetPositionY(), spawnDeathOrb.GetPositionZ(), player->GetOrientation());
+                            }
+                        }
+                    }
+                }
             }
 
             void EnterCombat(Unit* target) override
@@ -393,28 +416,14 @@ class boss_mazin_soulstealer : public CreatureScript
                         me->SetWalk(false);
                         me->SetReactState(REACT_DEFENSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                        Position pos;
-                        me->GetPosition(&pos);
+                        Position pos = me->GetPosition();
+                        pos.SetOrientation(1.65f);
                         me->SetHomePosition(pos);
+                        break;
                     }
-                    break;
                     default:
                         break;
                 }
-            }
-
-            void DoTeleport(float x, float y, float z, float o, uint32 ignorePlayerWithAura/*spell*/)
-            {
-                Map* map = me->GetMap();
-                if (!map->IsDungeon())
-                    return;
-
-                Map::PlayerList const& PlayerList = map->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
-                    if (Player* player = itr->GetSource())
-                        if (player->IsAlive())
-                            if (!player->HasAura(ignorePlayerWithAura))
-                                player->TeleportTo(me->GetMapId(), x, y, z, o, TELE_TO_NOT_LEAVE_COMBAT);
             }
 
             void UpdateAI(uint32 diff) override
@@ -435,142 +444,140 @@ class boss_mazin_soulstealer : public CreatureScript
                     switch (eventId)
                     {
                         // ####### INTRO #########
-                    case EVENT_INTRO_2:
-                        Talk(SAY_BOSS_0);
+                        case EVENT_INTRO_2:
+                            Talk(SAY_BOSS_0);
 
-                        events.ScheduleEvent(EVENT_INTRO_3, 6000);
-                        break;
-                    case EVENT_INTRO_3:
-                        Talk(SAY_BOSS_1);
-                        me->SetFacingTo(orient);
+                            events.ScheduleEvent(EVENT_INTRO_3, 6000);
+                            break;
+                        case EVENT_INTRO_3:
+                            Talk(SAY_BOSS_1);
+                            me->SetFacingTo(orient);
 
-                        events.ScheduleEvent(EVENT_INTRO_4, 6000);
-                        break;
-                    case EVENT_INTRO_4:
-                        Talk(SAY_BOSS_2);
-                        me->GetMotionMaster()->MovePoint(1, walkFirstSoul);
-                        break;
-                    case EVENT_INTRO_5:
-                        Talk(SAY_BOSS_3);
+                            events.ScheduleEvent(EVENT_INTRO_4, 6000);
+                            break;
+                        case EVENT_INTRO_4:
+                            Talk(SAY_BOSS_2);
+                            me->GetMotionMaster()->MovePoint(1, walkFirstSoul);
+                            break;
+                        case EVENT_INTRO_5:
+                            Talk(SAY_BOSS_3);
 
-                        events.ScheduleEvent(EVENT_INTRO_6, 4000);
-                        break;
-                    case EVENT_INTRO_6:
-                        Talk(SAY_BOSS_4);
-                        if (Creature* thrall = me->SummonCreature(NPC_SOUL_THRALL, soulPositions[0], TEMPSUMMON_MANUAL_DESPAWN))
-                            thrall->DespawnOrUnsummon(8000);
+                            events.ScheduleEvent(EVENT_INTRO_6, 4000);
+                            break;
+                        case EVENT_INTRO_6:
+                            Talk(SAY_BOSS_4);
+                            if (Creature* thrall = me->SummonCreature(NPC_SOUL_THRALL, soulPositions[0], TEMPSUMMON_MANUAL_DESPAWN))
+                                thrall->DespawnOrUnsummon(8000);
 
-                        me->HandleEmoteCommand(25); // ONESHOT_POINT
+                            me->HandleEmoteCommand(25); // ONESHOT_POINT
 
-                        events.ScheduleEvent(EVENT_INTRO_7, 2500);
-                        break;
-                    case EVENT_INTRO_7:
-                        me->GetMotionMaster()->MovePoint(2, walkSecondSoul);
-                        break;
-                    case EVENT_INTRO_8:
-                        Talk(SAY_BOSS_5);
-                        if (Creature* sylvanas = me->SummonCreature(NPC_SOUL_SYLVANAS, soulPositions[1], TEMPSUMMON_MANUAL_DESPAWN))
-                            sylvanas->DespawnOrUnsummon(8000);
+                            events.ScheduleEvent(EVENT_INTRO_7, 2500);
+                            break;
+                        case EVENT_INTRO_7:
+                            me->GetMotionMaster()->MovePoint(2, walkSecondSoul);
+                            break;
+                        case EVENT_INTRO_8:
+                            Talk(SAY_BOSS_5);
+                            if (Creature* sylvanas = me->SummonCreature(NPC_SOUL_SYLVANAS, soulPositions[1], TEMPSUMMON_MANUAL_DESPAWN))
+                                sylvanas->DespawnOrUnsummon(8000);
 
-                        me->HandleEmoteCommand(25); // ONESHOT_POINT
+                            me->HandleEmoteCommand(25); // ONESHOT_POINT
 
-                        events.ScheduleEvent(EVENT_INTRO_9, 2500);
-                        break;
-                    case EVENT_INTRO_9:
-                        me->GetMotionMaster()->MovePoint(3, walkThirdSoul);
-                        break;
-                    case EVENT_INTRO_10:
-                        Talk(SAY_BOSS_6);
-                        if (Creature* kel = me->SummonCreature(NPC_SOUL_KELTHUZAD, soulPositions[2], TEMPSUMMON_MANUAL_DESPAWN))
-                            kel->DespawnOrUnsummon(6000);
+                            events.ScheduleEvent(EVENT_INTRO_9, 2500);
+                            break;
+                        case EVENT_INTRO_9:
+                            me->GetMotionMaster()->MovePoint(3, walkThirdSoul);
+                            break;
+                        case EVENT_INTRO_10:
+                            Talk(SAY_BOSS_6);
+                            if (Creature* kel = me->SummonCreature(NPC_SOUL_KELTHUZAD, soulPositions[2], TEMPSUMMON_MANUAL_DESPAWN))
+                                kel->DespawnOrUnsummon(6000);
 
-                        me->HandleEmoteCommand(25); // ONESHOT_POINT
-                        events.ScheduleEvent(EVENT_INTRO_11, 3000);
-                        break;
-                    case EVENT_INTRO_11:
-                        me->GetMotionMaster()->MovePoint(4, posStartFight);
-                        // ######## END OF INTRO ##########
-                        break;
-                    case EVENT_P1_1:
-                        if (Creature* thrall = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SOUL_THRALL)))
-                            thrall->AI()->DoAction(ACTION_ENTER_FIGHT);
-                        break;
-                    case EVENT_SOULSTEALER_BARRAGE:
-                        me->CastCustomSpell(SPELL_FIRE_BARRAGE, SPELLVALUE_BASE_POINT0, urand(2000, 3000), (Unit*)NULL, TRIGGERED_FULL_MASK);
+                            me->HandleEmoteCommand(25); // ONESHOT_POINT
+                            events.ScheduleEvent(EVENT_INTRO_11, 3000);
+                            break;
+                        case EVENT_INTRO_11:
+                            me->GetMotionMaster()->MovePoint(4, posStartFight);
+                            // ######## END OF INTRO ##########
+                            break;
+                        case EVENT_P1_1:
+                            if (Creature* thrall = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_SOUL_THRALL)))
+                                thrall->AI()->DoAction(ACTION_ENTER_FIGHT);
+                            break;
+                        case EVENT_SOULSTEALER_BARRAGE:
+                            me->CastCustomSpell(SPELL_FIRE_BARRAGE, SPELLVALUE_BASE_POINT0, urand(2000, 3000), (Unit*)NULL, TRIGGERED_FULL_MASK);
 
-                        if (events.IsInPhase(PHASE_ONE))
-                            events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(8000, 12000), 1);
-                        else if (events.IsInPhase(PHASE_TWO))
-                            events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(8000, 10000), 1);
-                        else if (events.IsInPhase(PHASE_THREE))
-                            events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(6000, 7500), 1);
-                        else if (events.IsInPhase(PHASE_FOUR))
-                            events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(5000, 6000), 1);
-                        else if (events.IsInPhase(PHASE_FIVE))
-                            events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(4000, 5000), 1);
-                        break;
-                    case EVENT_SOULSTEALER_MGC_DBF:
-                        DoCast(SPELL_MAGIC_DEBUFF);
+                            if (events.IsInPhase(PHASE_ONE))
+                                events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(8000, 12000), 1);
+                            else if (events.IsInPhase(PHASE_TWO))
+                                events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(8000, 10000), 1);
+                            else if (events.IsInPhase(PHASE_THREE))
+                                events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(6000, 7500), 1);
+                            else if (events.IsInPhase(PHASE_FOUR))
+                                events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(5000, 6000), 1);
+                            else if (events.IsInPhase(PHASE_FIVE))
+                                events.ScheduleEvent(EVENT_SOULSTEALER_BARRAGE, urand(4000, 5000), 1);
+                            break;
+                        case EVENT_SOULSTEALER_MGC_DBF:
+                            DoCast(SPELL_MAGIC_DEBUFF);
 
-                        events.ScheduleEvent(EVENT_SOULSTEALER_MGC_DBF, 30000, 1);
-                        break;
-                    case EVENT_SOULSTEALER_FEL_FIRE:
-                        if (Unit* target = me->GetVictim())
-                            //DoCast(target, SPELL_FEL_FIREBALL, true);
-                            me->CastCustomSpell(SPELL_FEL_FIREBALL, SPELLVALUE_BASE_POINT0, urand(15000, 18000), target, TRIGGERED_FULL_MASK);
+                            events.ScheduleEvent(EVENT_SOULSTEALER_MGC_DBF, 30000, 1);
+                            break;
+                        case EVENT_SOULSTEALER_FEL_FIRE:
+                            if (Unit* target = me->GetVictim())
+                                me->CastCustomSpell(SPELL_FEL_FIREBALL, SPELLVALUE_BASE_POINT0, urand(15000, 18000), target, TRIGGERED_FULL_MASK);
 
-                        events.ScheduleEvent(EVENT_SOULSTEALER_FEL_FIRE, 32200, 1);
-                        break;
-                    case EVENT_SOULSTEALER_BARREL:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, demonWingSelector()))
-                            me->CastCustomSpell(SPELL_PLAGUE_BARREL, SPELLVALUE_BASE_POINT1, urand(1500, 3000), target, TRIGGERED_FULL_MASK);
+                            events.ScheduleEvent(EVENT_SOULSTEALER_FEL_FIRE, 32200, 1);
+                            break;
+                        case EVENT_SOULSTEALER_BARREL:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, demonWingSelector()))
+                                me->CastCustomSpell(SPELL_PLAGUE_BARREL, SPELLVALUE_BASE_POINT1, urand(1500, 3000), target, TRIGGERED_FULL_MASK);
 
-                        events.ScheduleEvent(EVENT_SOULSTEALER_BARREL, 25000, 1);
-                        break;
-                    case EVENT_SOULSTEALER_VOIDZONE:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 0.0f, true))
-                            if (Creature* voidZone = me->SummonCreature(NPC_VOID_ZONE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 0.3f, 0.0f))
-                                voidZone->AI()->IsSummonedBy(me);
+                            events.ScheduleEvent(EVENT_SOULSTEALER_BARREL, 25000, 1);
+                            break;
+                        case EVENT_SOULSTEALER_VOIDZONE:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 0.0f, true))
+                                if (Creature* voidZone = me->SummonCreature(NPC_VOID_ZONE, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 0.3f, 0.0f))
+                                    voidZone->AI()->IsSummonedBy(me);
 
-                        events.ScheduleEvent(EVENT_SOULSTEALER_VOIDZONE, 15000, 1);
-                        break;
-                    case EVENT_SOULSTEALER_ROOM:
-                        if (Creature* orb = me->SummonCreature(NPC_DEATH_ORB, spawnDeathOrb))
-                            orb->AI()->IsSummonedBy(me);
+                            events.ScheduleEvent(EVENT_SOULSTEALER_VOIDZONE, 15000, 1);
+                            break;
+                        case EVENT_SOULSTEALER_ROOM:
+                            if (Creature* orb = me->SummonCreature(NPC_DEATH_ORB, spawnDeathOrb))
+                                orb->AI()->IsSummonedBy(me);
 
-                        events.ScheduleEvent(EVENT_SOULSTEALER_ROOM, 30000, 1);
-                        break;
-                    case EVENT_SOULSTEALER_WINGS:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, demonWingSelector()))
-                        {
-                            Position pos = teleMiddlePos[urand(0, 2)];
-                            target->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
-                            me->AddAura(SPELL_DARK_WINGS, target);
-                        }
+                            events.ScheduleEvent(EVENT_SOULSTEALER_ROOM, 30000, 1);
+                            break;
+                        case EVENT_SOULSTEALER_WINGS:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, demonWingSelector()))
+                            {
+                                Position pos = teleMiddlePos[urand(0, 2)];
+                                target->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+                                me->AddAura(SPELL_DARK_WINGS, target);
+                            }
 
-                        events.ScheduleEvent(EVENT_SOULSTEALER_WINGS, 30000, 1);
-                        break;
-                    case EVENT_SOULSTEALER_BERSERK:
-                        Talk(SAY_BOSS_7);
-                        DoCast(SPELL_BERSERK);
-                        break;
-                    case EVENT_SOULSTEALER_DEATH:
-                        events.CancelEventGroup(1);
-                        SetCombatMovement(false);
-                        canMelee = false;
-                        DoCast(me, SPELL_KNEEL, true);
-                        if (deathCount < 4)
-                        {
-                            ++deathCount;
-                            DoCast(SPELL_DEATH_SHOCK);
-                            events.ScheduleEvent(EVENT_SOULSTEALER_DEATH, 1500);
-                        }
-                        else
-                            if (Unit* victim = me->SelectVictim())
+                            events.ScheduleEvent(EVENT_SOULSTEALER_WINGS, 30000, 1);
+                            break;
+                        case EVENT_SOULSTEALER_BERSERK:
+                            Talk(SAY_BOSS_7);
+                            DoCast(SPELL_BERSERK);
+                            break;
+                        case EVENT_SOULSTEALER_DEATH:
+                            events.CancelEventGroup(1);
+                            SetCombatMovement(false);
+                            canMelee = false;
+                            DoCast(me, SPELL_KNEEL, true);
+                            if (deathCount < 4)
+                            {
+                                ++deathCount;
+                                DoCast(SPELL_DEATH_SHOCK);
+                                events.ScheduleEvent(EVENT_SOULSTEALER_DEATH, 1500);
+                            }
+                            else if (Unit* victim = me->SelectVictim())
                                 victim->DealDamage(victim, me, me->GetHealth());
-                        break;
-                    default:
-                        break;
+                            break;
+                        default:
+                            break;
                     }
                 }
                 if (canMelee)
@@ -604,7 +611,11 @@ class npc_thrall_OLDSM : public CreatureScript
 
         struct npc_thrall_OLDSMAI : public ScriptedAI
         {
-            npc_thrall_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
+            npc_thrall_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void Reset() override
             {
@@ -643,7 +654,7 @@ class npc_thrall_OLDSM : public CreatureScript
                 {
                     spawnedFirstElementals = true;
                     for (uint8 i = 0; i < 4; ++i)
-                        if (Creature* elemental = me->SummonCreature(NPC_AIR_ELEMENTAL, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        if (Creature* elemental = me->SummonCreature(NPC_AIR_ELEMENTAL_MAZIN, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             elemental->AddAura(SPELL_AOE_AVOIDANCE, elemental);
                 }
 
@@ -651,7 +662,7 @@ class npc_thrall_OLDSM : public CreatureScript
                 {
                     spawnedSecondElementals = true;
                     for (uint8 i = 0; i < 4; ++i)
-                        if (Creature* elemental = me->SummonCreature(NPC_EARTH_ELEMENTAL, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        if (Creature* elemental = me->SummonCreature(NPC_EARTH_ELEMENTAL_MAZIN, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             elemental->AddAura(SPELL_AOE_AVOIDANCE, elemental);
                 }
 
@@ -659,7 +670,7 @@ class npc_thrall_OLDSM : public CreatureScript
                 {
                     spawnedThirdElementals = true;
                     for (uint8 i = 0; i < 4; ++i)
-                        if (Creature* elemental = me->SummonCreature(NPC_FIRE_ELEMENTAL, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
+                        if (Creature* elemental = me->SummonCreature(NPC_FIRE_ELEMENTAL_MAZIN, spawnElementals[i], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000))
                             elemental->AddAura(SPELL_AOE_AVOIDANCE, elemental);
                 }
             }
@@ -739,7 +750,11 @@ class npc_elementals_generic : public CreatureScript
 
         struct npc_elementals_genericAI : public ScriptedAI
         {
-            npc_elementals_genericAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_elementals_genericAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void IsSummonedBy(Unit* summoner) override
             {
@@ -754,13 +769,13 @@ class npc_elementals_generic : public CreatureScript
             {
                 switch (me->GetEntry())
                 {
-                case NPC_AIR_ELEMENTAL:
+                case NPC_AIR_ELEMENTAL_MAZIN:
                     events.ScheduleEvent(EVENT_AIR_ELE_SPELLS, urand(4000, 8000));
                     break;
-                case NPC_FIRE_ELEMENTAL:
+                case NPC_FIRE_ELEMENTAL_MAZIN:
                     events.ScheduleEvent(EVENT_FIRE_ELE_SPELLS, urand(4000, 8000));
                     break;
-                case NPC_EARTH_ELEMENTAL:
+                case NPC_EARTH_ELEMENTAL_MAZIN:
                     events.ScheduleEvent(EVENT_EARTH_ELE_SPELLS, urand(4000, 8000));
                     break;
                 default:
@@ -826,6 +841,9 @@ class npc_sylvanas_OLDSM : public CreatureScript
         {
             npc_sylvanas_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+
                 for (uint8 i = 0; i < 9; ++i)
                     arrowTriggerGUIDs[i] = 0;
             }
@@ -917,7 +935,6 @@ class npc_sylvanas_OLDSM : public CreatureScript
                             if (Creature* arrowTrigger = ObjectAccessor::GetCreature(*me, arrowTriggerGUIDs[urand(0, 8)]))
                             {
                                 arrowTrigger->SetFacingTo(arrowTrigger->GetAngle(target->GetPositionX(), target->GetPositionY()));
-                                //arrowTrigger->AI()->DoCast(target, SPELL_THROW_SPEAR, true);
                                 arrowTrigger->CastCustomSpell(SPELL_THROW_SPEAR, SPELLVALUE_BASE_POINT0, urand(20, 25), target, TRIGGERED_FULL_MASK);
                             }
                         }
@@ -991,6 +1008,8 @@ class npc_kel_thuzad_OLDSM : public CreatureScript
             npc_kel_thuzad_OLDSMAI(Creature* creature) : ScriptedAI(creature), summons(me)
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void DoAction(int32 param) override
@@ -1089,7 +1108,7 @@ class npc_kel_thuzad_OLDSM : public CreatureScript
                         break;
                     }
                 }
-                DoSpellAttackIfReady(SPELL_FROST_BOLT, me->GetVictim(), 12000, 16000);
+                DoSpellAttackIfReady(SPELL_FROST_BOLT, me->GetVictim(), 8000, 13000);
             }
 
         private:
@@ -1110,7 +1129,11 @@ class npc_raging_skeleton_OLDSM : public CreatureScript
 
         struct npc_raging_skeleton_OLDSMAI : public ScriptedAI
         {
-            npc_raging_skeleton_OLDSMAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_raging_skeleton_OLDSMAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+            }
 
             void Reset() override
             {
@@ -1170,6 +1193,9 @@ class npc_void_zone_OLDSM : public CreatureScript
         {
             npc_void_zone_OLDSMAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+
                 SetCombatMovement(false);
                 creature->AddAura(SPELL_ZONE_VISUAL, creature);
                 events.ScheduleEvent(1, 4000);
@@ -1212,8 +1238,11 @@ class npc_purple_lightning_orb_OLDSM : public CreatureScript
         {
             npc_purple_lightning_orb_OLDSMAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
+
                 events.ScheduleEvent(1, 1000); // event move
-                events.ScheduleEvent(2, 1000); // explosion event
+                events.ScheduleEvent(2, 1500); // explosion event
                 me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 0.6f);
@@ -1284,6 +1313,8 @@ class npc_death_orb_OLDSM : CreatureScript
                 me->SetWalk(true);
                 me->SetSpeed(MOVE_WALK, 0.2f);
                 playerGUID = 0;
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true);
             }
 
             void MovementInform(uint32 type, uint32 id) override
@@ -1365,14 +1396,16 @@ class spell_demon_wings_OLDSM : public SpellScriptLoader
                 if (Unit* target = GetTarget())
                 {
                     float angle[3];
-                    angle[0] = target->GetAngle(target->GetPositionX(), target->GetPositionY());
-                    angle[1] = target->GetAngle(target->GetPositionX(), target->GetPositionY()) - (-M_PI / 2);
-                    angle[2] = target->GetAngle(target->GetPositionX(), target->GetPositionY()) - (M_PI / 2);
+                    float pi = (-M_PI / 2);
+                    //! find proper position angles
+                    for (uint8 i = 0; i < 3; ++i, pi += (M_PI / 2))
+                        angle[i] = target->GetAngle(target->GetPositionX(), target->GetPositionY()) - pi;
 
+                    pi = (-M_PI / 2);
                     float spawnOrientation[3];
-                    spawnOrientation[0] = target->GetOrientation();
-                    spawnOrientation[1] = target->GetOrientation() - (-M_PI / 2);
-                    spawnOrientation[2] = target->GetOrientation() - (M_PI / 2);
+                    //! find 3 orientation values and set orbs facing to that value
+                    for (auto i = 0; i < 3; ++i, pi += (M_PI / 2))
+                        spawnOrientation[i] = target->GetOrientation() - pi;
 
                     for (uint8 i = 0; i < 3; ++i)
                     {

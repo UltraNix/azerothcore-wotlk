@@ -5190,6 +5190,12 @@ void Player::BuildPlayerRepop()
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
+    //if (GetInstanceScript() && GetInstanceScript()->IsResurrectionPrevented())
+    //{
+    //    GetSession()->SendNotification("You cannot be resurrected right now.");
+    //    return;
+    //}
+
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
     data << uint32(-1);
     data << float(0);
@@ -6966,7 +6972,7 @@ void Player::CheckAreaExploreAndOutdoor()
     {
         SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
-        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA, GetAreaId());
+        UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA, areaId);
 
         if (areaEntry->area_level > 0)
         {
@@ -11960,11 +11966,14 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, Item* pItem, bool
     dest = 0;
     if (pItem)
     {
-        if (uint32 enchant_id = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT))
+        if (sWorld->getBoolConfig(CONFIG_EXPERIMENTAL_FEATURE))
         {
-            SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-            if (pEnchant && getLevel() < pEnchant->requiredLevel)
-                return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
+            if (uint32 enchant_id = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT))
+            {
+                SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                if (pEnchant && getLevel() < pEnchant->requiredLevel)
+                    return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
+            }
         }
         ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
         ItemTemplate const* pProto = pItem->GetTemplate();
@@ -25429,7 +25438,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     // event only                                                   ToC
     if (GetZoneId() == 268 || GetZoneId() == 3817 || GetZoneId() == 4722)
         return;
-    // event only  
+    // event only
     if(GetZoneId() == 876 /*GM Island*/ ||
         GetZoneId() == 616 /*Hyjal*/ ||
         GetZoneId() == 2037 /*Quel'thalas*/ ||

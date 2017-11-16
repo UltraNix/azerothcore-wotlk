@@ -4884,7 +4884,9 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// Old Scarlet Monastery
         //////////////////////////////////////////
-
+        case 29973: // arcane explosion, remove this after event
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
         case 51103: // Frostbomb
         case 34172: // Arcane Orb
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // OLDSM
@@ -4915,7 +4917,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 29324: // test Sapper Charge || nieuzywany w swiecie || teraz OLD SM
             spellInfo->EffectBasePoints[0] = urand(30000, 45000);
-            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
             spellInfo->Effect[1] = 0;
             break;
         case 23951: // bloodlust || nieuzywany w swiecie || teraz OLD SM
@@ -4929,23 +4931,6 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 20545: // Lightning shield
             spellInfo->AttributesEx4 |= SPELL_ATTR4_NOT_STEALABLE;
-            break;
-        case 26659: // Sam's test aura || OLD SM
-            spellInfo->DurationIndex = 245;
-            spellInfo->Effect[0] = 0;
-            spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
-            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
-            spellInfo->procCharges = 13;
-            spellInfo->procChance = 100;
-            spellInfo->procFlags |= PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
-            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
-            break;
-        case 30944: // red beam drops
-            spellInfo->ChannelInterruptFlags = 0;
-            spellInfo->AuraInterruptFlags = 0;
-            break;
-        case 23278: // shadow scythe
-            spellInfo->rangeIndex = RANGE_INDEX_MEDIUM_LONG_RANGE_35YD;
             break;
         case 65112: // Cone Spell
             spellInfo->EffectBasePoints[0] = 6000;
@@ -4968,6 +4953,16 @@ void SpellMgr::LoadDbcDataCorrections()
         case 49204: // Dark Mending
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
             spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            break;
+        case 26659: // sam test aura
+            spellInfo->Effect[EFFECT_0] = 0;
+            spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_DUMMY;
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            spellInfo->DurationIndex = 28;
+            break;
+        case 39028:
+            spellInfo->EffectRadiusIndex[EFFECT_0] = 28;
             break;
 
         //////////////////////////////////////////
@@ -7089,7 +7084,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectMiscValue[EFFECT_0] = 90031;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
-        case 16055:    // Reins of the Nightsaber
+        case 10787:    // Reins of the Nightsaber
             spellInfo->EffectMiscValue[EFFECT_0] = 90032;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;

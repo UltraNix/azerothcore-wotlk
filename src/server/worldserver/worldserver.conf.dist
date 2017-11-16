@@ -3390,6 +3390,22 @@ ArmoryStats.Enable = 0
 	
 EncounterLog.Enable = 0
 
+#		
+#     Experimental.Enable
+#        Description: Enables or disables experimental features.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+	
+Experimental.Enable = 0
+
+#		
+#     CustomEvent.Enable
+#        Description: Enables or disables custom events.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+	
+CustomEvent.Enable = 0
+
 #
 ###################################################################################################
 
