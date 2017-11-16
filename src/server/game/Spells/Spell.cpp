@@ -8506,6 +8506,8 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
             case TARGET_CHECK_PARTY:
                 if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
                     return false;
+                if (unitTarget->IsVehicle() && unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
                 if (!_referer->IsInPartyWith(unitTarget))
