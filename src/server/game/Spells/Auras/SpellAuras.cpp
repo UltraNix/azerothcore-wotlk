@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -878,7 +878,7 @@ void Aura::RefreshTimersWithMods()
     m_maxDuration = CalcMaxDuration();
     if (caster && caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellInfo) || m_spellInfo->HasAttribute(SPELL_ATTR5_HASTE_AFFECT_DURATION))
         m_maxDuration = int32(m_maxDuration * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
-    
+
     // xinef: we should take ModSpellDuration into account, but none of the spells using this function is affected by contents of ModSpellDuration
     RefreshDuration();
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -1912,7 +1912,7 @@ bool Aura::CanStackWith(Aura const* existingAura, bool remove) const
     if (stackFlags)
     {
         // xinef: same caster rule is bounded by spellfamily
-        if (sameCaster && m_spellInfo->SpellFamilyName == existingSpellInfo->SpellFamilyName && 
+        if (sameCaster && m_spellInfo->SpellFamilyName == existingSpellInfo->SpellFamilyName &&
             (stackFlags & SPELL_GROUP_STACK_FLAG_NOT_SAME_CASTER))
             return false;
 

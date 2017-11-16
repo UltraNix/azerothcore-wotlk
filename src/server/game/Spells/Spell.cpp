@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1414,7 +1414,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
                         if (inwater && (fabs(tstZ - ground) < 2.0f))
                         {
                             wcol = true;
-                        }                
+                        }
                     }
 
                     if ((!map->IsInWater(tstX, tstY, tstZ) && tstZ != beforewaterz) || wcol)  // second safety check z for blink way if on the ground
@@ -1499,7 +1499,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
                             destz = destz2;
 
                         if (inwater && destz < prevZ && !wcol)
-                            destz = prevZ;                        
+                            destz = prevZ;
 
                         break;
                     }
@@ -1546,7 +1546,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
                 // xinef: give the summon some space (eg. totems)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Effects[effIndex].IsEffect(SPELL_EFFECT_SUMMON))
                     dist += objSize;
-            }        
+            }
             else if (targetType.GetTarget() == TARGET_DEST_CASTER_RANDOM)
                 dist = objSize + (dist - objSize) * (float)rand_norm();
 
@@ -1844,7 +1844,7 @@ void Spell::SelectImplicitTrajTargets(SpellEffIndex effIndex, SpellImplicitTarge
                 bestDist = dist;
                 break;
             }
-                
+
             continue;
         }
 
@@ -2141,7 +2141,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     std::list<WorldObject*> tempTargets;
     SearchAreaTargets(tempTargets, searchRadius, (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE ? m_caster : target), m_caster, objectType, selectType, condList);
     tempTargets.remove(target);
-    
+
     // Thorim
     if (ThorimChain)
         if (target->GetTypeId() != TYPEID_PLAYER)
@@ -2558,7 +2558,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         return;
 
     // Xinef: absorb delayed projectiles for 500ms
-    if (getState() == SPELL_STATE_DELAYED && !m_spellInfo->IsTargetingArea() && !m_spellInfo->IsPositive() && 
+    if (getState() == SPELL_STATE_DELAYED && !m_spellInfo->IsTargetingArea() && !m_spellInfo->IsPositive() &&
         (World::GetGameTimeMS() - target->timeDelay) <= effectUnit->m_lastSanctuaryTime && World::GetGameTimeMS() < (effectUnit->m_lastSanctuaryTime + 500) &&
         effectUnit->FindMap() && !effectUnit->FindMap()->IsDungeon()
         )
@@ -2709,7 +2709,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Xinef: if heal acutally healed something, add no overheal flag
         if (m_healing)
             procEx |= PROC_EX_NO_OVERHEAL;
-            
+
 
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger)
@@ -2980,7 +2980,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         // Increase Diminishing on unit, current informations for actually casts will use values above
         if ((type == DRTYPE_PLAYER && (
                                                                                                            // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
-                                                                                                           // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all. 
+                                                                                                           // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
                                                                                                            // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
             unit->GetCharmerOrOwnerPlayerOrPlayerItself() || flagsExtra & CREATURE_FLAG_EXTRA_ALL_DIMINISH /*|| (m_diminishGroup == DIMINISHING_TAUNT && (flagsExtra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))*/
             )) || type == DRTYPE_ALL)
@@ -3015,7 +3015,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         if (m_originalCaster)
         {
             bool refresh = false;
-            m_spellAura = Aura::TryRefreshStackOrCreate(aurSpellInfo, effectMask, unit,    m_originalCaster, 
+            m_spellAura = Aura::TryRefreshStackOrCreate(aurSpellInfo, effectMask, unit,    m_originalCaster,
                 (aurSpellInfo == m_spellInfo)? &m_spellValue->EffectBasePoints[0] : &basePoints[0], m_CastItem, 0, &refresh, !(_triggeredCastFlags & TRIGGERED_NO_PERIODIC_RESET));
 
             // xinef: if aura was not refreshed, add proc ex
@@ -3050,9 +3050,9 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                     m_spellAura->Remove();
                     bool found = false;
                     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                        if (effectMask & (1 << i) && m_spellInfo->Effects[i].Effect != SPELL_EFFECT_APPLY_AURA 
+                        if (effectMask & (1 << i) && m_spellInfo->Effects[i].Effect != SPELL_EFFECT_APPLY_AURA
                             // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
-                            // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all. 
+                            // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
                             // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
                             && !(m_spellInfo->Effects[i].Effect == SPELL_EFFECT_ATTACK_ME))
                             found = true;
@@ -3398,7 +3398,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     prepareDataForTriggerSystem(triggeredByAura);
 
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
-    m_casttime = (_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY) ? 0 : m_spellInfo->CalcCastTime(m_caster, this); 
+    m_casttime = (_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY) ? 0 : m_spellInfo->CalcCastTime(m_caster, this);
 
     switch (m_spellInfo->Id)
     {
@@ -3430,7 +3430,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         {
             if (!m_spellInfo->Effects[i].IsEffect())
                 continue;
-            
+
             if (m_spellInfo->Effects[i].TargetA.GetSelectionCategory() != TARGET_SELECT_CATEGORY_NEARBY || m_spellInfo->Effects[i].TargetA.GetCheckType() != TARGET_CHECK_ENTRY)
             {
                 selectTargets = false;
@@ -3481,7 +3481,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         // set target for proper facing
         if ((m_casttime || m_spellInfo->IsChanneled()) && !(_triggeredCastFlags & TRIGGERED_IGNORE_SET_FACING))
         {
-            if (m_caster->GetTypeId() == TYPEID_UNIT && !m_caster->ToCreature()->IsInEvadeMode() && 
+            if (m_caster->GetTypeId() == TYPEID_UNIT && !m_caster->ToCreature()->IsInEvadeMode() &&
                 ((m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget()) || m_spellInfo->IsPositive()))
             {
                 // Xinef: Creature should focus to cast target if there is explicit target or self if casting positive spell
@@ -3626,7 +3626,7 @@ void Spell::_cast(bool skipCheck)
                 for (Unit::ControlSet::iterator itr = playerCaster->m_Controlled.begin(); itr != playerCaster->m_Controlled.end(); ++itr)
                     if (Unit* pet = *itr)
                         if (pet->IsAlive() && pet->GetTypeId() == TYPEID_UNIT)
-                            pet->ToCreature()->AI()->OwnerAttacked(m_targets.GetUnitTarget());     
+                            pet->ToCreature()->AI()->OwnerAttacked(m_targets.GetUnitTarget());
     }
 
     SetExecutedCurrently(true);
@@ -4250,10 +4250,10 @@ void Spell::WriteCastResultInfo(WorldPacket& data, Player* caster, SpellInfo con
                 case 56001:                                 // Moonshroud - Emerald Dragonshire w Dragonblight
                     data << uint32(4179);
                     break;
-                case 56002:                                 //  Ebonweave - Obsidian Dragonshire w Dragonblight                                               
+                case 56002:                                 //  Ebonweave - Obsidian Dragonshire w Dragonblight
                     data << uint32(4167);
                     break;
-                case 56003:                                 // Spellweave - Azure Dragonshrine w Dragonblight           
+                case 56003:                                 // Spellweave - Azure Dragonshrine w Dragonblight
                     data << uint32(4183);
                     break;
                 default:                                    // default case (don't must be)
@@ -5353,8 +5353,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Event schody
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        if (m_caster->ToPlayer()->GetZoneId() == 876 /*GM Island*/ || 
-            m_caster->ToPlayer()->GetZoneId() == 616 /*Hyjal*/ || 
+        if (m_caster->ToPlayer()->GetZoneId() == 876 /*GM Island*/ ||
+            m_caster->ToPlayer()->GetZoneId() == 616 /*Hyjal*/ ||
             m_caster->ToPlayer()->GetZoneId() == 2037 /*Quel'thalas*/ ||
             (m_caster->ToPlayer()->GetZoneId() == 45 /*Arathi Highlands*/ && m_caster->ToPlayer()->GetAreaId() == 2401 /*The Forbidding Sea*/))
                 if (m_spellInfo->Id != 8690)
@@ -5555,7 +5555,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 m_spellInfo->RecoveryTime >= 10 * MINUTE * IN_MILLISECONDS) //cooldown longer than 10 minutes
             )
             return SPELL_FAILED_NOT_HERE;
-
     }
 
     switch (m_spellInfo->Id)
@@ -5599,11 +5598,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->ToPlayer()->GetAreaId() != 4179 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_FAILED_REQUIRES_AREA;
             break;
-        case 56002: // Ebonweave - Obsidian Dragonshire w Dragonblight 
+        case 56002: // Ebonweave - Obsidian Dragonshire w Dragonblight
             if (m_caster->ToPlayer()->GetAreaId() != 4167 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_FAILED_REQUIRES_AREA;
             break;
-        case 56003: // Spellweave - Azure Dragonshrine w Dragonblight  
+        case 56003: // Spellweave - Azure Dragonshrine w Dragonblight
             if (m_caster->ToPlayer()->GetAreaId() != 4183 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_FAILED_REQUIRES_AREA;
             break;
@@ -5661,7 +5660,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_DONT_REPORT;
             }
 
-       default: 
+       default:
            break;
     }
 
@@ -5818,7 +5817,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     Pet *pet = m_caster->ToPlayer()->GetPet();
                     if (!target || !pet || pet->isDead() || target->isDead())
                         return SPELL_FAILED_BAD_TARGETS;
-                    
+
                     if (!pet->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
                 }
@@ -6118,7 +6117,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_ALREADY_HAVE_CHARM;
                 }
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK && strict)                  
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK && strict)
                     if (Pet* pet = m_caster->ToPlayer()->GetPet())
                         pet->CastSpell(pet, 32752, true, NULL, NULL, pet->GetGUID()); //starting cast, trigger pet stun (cast by pet so it doesn't attack player)
                 break;
@@ -6315,7 +6314,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     if (target->GetCharmerGUID())
                         return SPELL_FAILED_CHARMED;
-                        
+
                     if (target->GetOwnerGUID() && IS_PLAYER_GUID(target->GetOwnerGUID()))
                         return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
 
@@ -7899,13 +7898,13 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier,
     }
     else if (m_originalCaster)
         caster = m_originalCaster;
-    
+
     float critChance = caster->SpellDoneCritChance(unit, m_spellInfo, m_spellSchoolMask, m_attackType, false);
     critChance = unit->SpellTakenCritChance(caster, m_spellInfo, m_spellSchoolMask, critChance, m_attackType, false);
     targetInfo.crit = roll_chance_f(std::max(0.0f, critChance));
 
     // Sweeping strikes wtf shit ;d
-    if (m_caster->getClass() == CLASS_WARRIOR && ssEffect < MAX_SPELL_EFFECTS && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && 
+    if (m_caster->getClass() == CLASS_WARRIOR && ssEffect < MAX_SPELL_EFFECTS && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR &&
         ((m_spellInfo->Id != 50622 && m_spellInfo->Id != 44949) || firstTarget))
     {
         if (Aura* aur = m_caster->GetAura(12328))
@@ -8281,7 +8280,7 @@ bool Spell::CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToC
             if (((*targetSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && !(*targetSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
                 (!(*targetSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && (*targetSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)))
                 return false;
-        
+
         std::list<SpellScript::ObjectAreaTargetSelectHandler>::iterator areaTargetSelectHookEnd = (*itr)->OnObjectAreaTargetSelect.end(), areaTargetSelectHookItr = (*itr)->OnObjectAreaTargetSelect.begin();
         for (; areaTargetSelectHookItr != areaTargetSelectHookEnd; ++areaTargetSelectHookItr)
             if (((*areaTargetSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && !(*areaTargetSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
@@ -8518,6 +8517,8 @@ bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
                 // nobreak;
             case TARGET_CHECK_RAID:
                 if (unitTarget->IsTotem() || unitTarget->IsNonPetGuardian())
+                    return false;
+                if (unitTarget->IsVehicle() && unitTarget->GetTypeId() != TYPEID_PLAYER)
                     return false;
                 if (!_caster->_IsValidAssistTarget(unitTarget, _spellInfo))
                     return false;
