@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -135,8 +135,8 @@ public:
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         }
 
-        void JustSummoned(Creature* creature) 
-        { 
+        void JustSummoned(Creature* creature)
+        {
             summons.Summon(creature);
             if (creature->GetEntry() != NPC_PRINCE)
                 if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
@@ -335,7 +335,7 @@ public:
                         EnterEvadeMode();
                     else
                         events.RepeatEvent(5000);
-                    
+
                     break;
                 }
             }
@@ -397,7 +397,7 @@ public:
             CombatAI::Reset();
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 diff)
         {
             attackTimer += diff;
             if (attackTimer >= 1500)
@@ -488,7 +488,7 @@ class npc_lord_arete : public CreatureScript
             {
                 _landgrenGUID = 0;
                 _landgrenSoulGUID = 0;
-                
+
                 events.Reset();
                 events.RescheduleEvent(EVENT_START, 1000);
                 me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
@@ -646,7 +646,7 @@ class npc_boneguard_footman : public CreatureScript
                         }
                     }
                 }
-                
+
                 ScriptedAI::UpdateAI(diff);
             }
         };
@@ -1152,7 +1152,7 @@ class spell_charge_shield_bomber : public SpellScriptLoader
                 Aura* aura = ship->GetAura(SPELL_INFRA_GREEN_SHIELD);
                 if (!aura)
                     return;
-                
+
                 aura->ModStackAmount(GetEffectValue() - 1);
             }
 
@@ -1333,7 +1333,7 @@ class npc_infra_green_bomber_generic : public CreatureScript
                         me->MonsterTextEmote("Your Vehicle is burning!", GetSummoner(), true);
                         passenger->AddAura(SPELL_BURNING, passenger);
                     }
-                    
+
                 for (uint8 seat = 3; seat <= 5; ++seat)
                     if (Unit* banner = kit->GetPassenger(seat))
                         if (!banner->HasAura(SPELL_COSMETIC_FIRE))
@@ -1402,7 +1402,7 @@ class npc_infra_green_bomber_generic : public CreatureScript
                                 if (Unit* banner = kit->GetPassenger(seat))
                                     if (banner->HasAura(SPELL_COSMETIC_FIRE))
                                         fireCount++;
-                        
+
                         if (fireCount)
                             Unit::DealDamage(me, me, 3000*fireCount, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
                         else // Heal
@@ -2127,6 +2127,288 @@ class npc_frostbrood_skytalon : public CreatureScript
         }
 };
 
+enum BasicChemistry
+{
+    QUEST_BASIC_CHEMISTRY_1         = 13279,
+    QUEST_BASIC_CHEMISTRY_2         = 13295,
+
+    SPELL_ITEM_SPELL_DOSE           = 59659,
+    SPELL_GREEN_SPLASH              = 60059,
+    SPELL_SUMMON_PC_BUNNY           = 61026,
+
+    //! misc data
+    NPC_KC_BUNNY                    = 31773, // closer to entrance
+    NPC_KC_BUNNY_2                  = 32442, // further into the room
+    NPC_PC_BUNNY_CHEM               = 32445,
+    NPC_GHOUL_CHEMISTRY             = 32178,
+    NPC_LIVING_PLAGUE_CHEMISTRY     = 32181,
+    SPELL_SUMMON_LIVING_PLAGUE_CHEM = 60058,
+    SPELL_SUMMON_GHOUL_CHEM         = 60056,
+    NPC_CHEM_CREDIT                 = 31767,
+    SPELL_AURA_RADIATION            = 45797
+};
+
+enum BasicChemistryEvents
+{
+    EVENT_CHEM_1                    = 1,
+    EVENT_CHEM_2                    = 2,
+    EVENT_CHEM_3                    = 3,
+    EVENT_CHEM_4                    = 4,
+    EVENT_REMOVE_RADIATION          = 5,
+    EVENT_CHECK_IF_DOSED            = 6,
+    EVENT_CHEM_5                    = 7,
+    EVENT_CHEM_6                    = 8,
+    EVENT_CHEM_7                    = 9,
+    EVENT_CHEM_8                    = 10,
+    EVENT_CHEM_9                    = 11,
+    EVENT_CHEM_10                   = 12,
+    EVENT_CHEM_11                   = 13,
+    EVENT_CHEM_12                   = 14,
+    EVENT_CHEM_13                   = 15,
+    EVENT_CHEM_14                   = 16
+};
+
+enum BasicChemistryTalks
+{
+    SAY_PC_BUNNY_0                  = 0, // Something emerges from the cauldron!
+    SAY_PC_BUNNY_1                  = 1, // The cauldron continues to boil...
+    SAY_PC_BUNNY_2                  = 2, // Neutralizing agent failing!$bAdd fluid soon!
+    SAY_PC_BUNNY_3                  = 3, // Neutralizing agent failing!$bAdd fluid NOW!!
+    SAY_PC_BUNNY_4                  = 4, // Plague batch neutralized!
+    SAY_KC_TRIGGER_CHEM             = 0, // The plague cauldron begins to boil vigorously!
+};
+
+class npc_cauldron_target_basic_chemistry : public CreatureScript
+{
+public:
+    npc_cauldron_target_basic_chemistry() : CreatureScript("npc_cauldron_target_basic_chemistry") { }
+
+    struct npc_cauldron_target_basic_chemistry_AI : public ScriptedAI
+    {
+        npc_cauldron_target_basic_chemistry_AI(Creature* creature) : ScriptedAI(creature), _summons(me) { }
+
+        void Reset() override
+        {
+            _summons.DespawnAll();
+            _playerGUID = 0;
+            _pcBunnyGUID = 0;
+            _eventInProgress = false;
+            _waitingForDose = false;
+            _events.Reset();
+            _phase = 0;
+            me->RemoveAllAuras();
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell) override
+        {
+            if (_waitingForDose && caster->GetGUID() != _playerGUID)
+                return;
+
+            if (spell->Id == SPELL_ITEM_SPELL_DOSE && caster->GetTypeId() == TYPEID_PLAYER && (caster->ToPlayer()->GetQuestStatus(QUEST_BASIC_CHEMISTRY_1) == QUEST_STATUS_INCOMPLETE ||
+                caster->ToPlayer()->GetQuestStatus(QUEST_BASIC_CHEMISTRY_2) == QUEST_STATUS_INCOMPLETE))
+            {
+                if (!_eventInProgress)
+                {
+                    _eventInProgress = true;
+                    _playerGUID = caster->GetGUID();
+                    me->CastSpell(caster, SPELL_SUMMON_PC_BUNNY, true);
+                    Talk(SAY_KC_TRIGGER_CHEM, caster);
+                    DoCastSelf(SPELL_AURA_RADIATION, true);
+                    _events.ScheduleEvent(EVENT_CHEM_1, 6000);
+                }
+                else if (_waitingForDose)
+                {
+                    _waitingForDose = false;
+                    _events.CancelEvent(EVENT_CHECK_IF_DOSED);
+                    if (Creature* bunny = ObjectAccessor::GetCreature(*me, _pcBunnyGUID))
+                        bunny->AI()->Talk(SAY_PC_BUNNY_1);
+                    switch (_phase)
+                    {
+                        case 0:
+                            _events.ScheduleEvent(EVENT_CHEM_5, 13000);
+                            break;
+                        case 1:
+                            _events.ScheduleEvent(EVENT_CHEM_8, 13000);
+                            break;
+                        case 2:
+                            _events.ScheduleEvent(EVENT_CHEM_12, 13000);
+                            break;
+                    }
+                    ++_phase;
+                }
+            }
+        }
+
+        void JustSummoned(Creature* summon) override
+        {
+            if (summon->GetEntry() == NPC_PC_BUNNY_CHEM)
+            {
+                _pcBunnyGUID = summon->GetGUID();
+            }
+            _summons.Summon(summon);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_eventInProgress)
+                return;
+
+            _events.Update(diff);
+
+            Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID);
+            Creature* bunny = ObjectAccessor::GetCreature(*me, _pcBunnyGUID);
+
+            if (!player || !bunny)
+                return;
+
+            if (!IsEventStarterNearby())
+            {
+                Reset();
+                return;
+            }
+
+            while (auto eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHEM_1:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_0, player);
+
+                        bunny->AI()->DoCast(SPELL_GREEN_SPLASH);
+                        for (auto i = 0; i < 5; ++i)
+                            bunny->AI()->DoCastAOE(SPELL_SUMMON_LIVING_PLAGUE_CHEM, true);
+                        _events.ScheduleEvent(EVENT_CHEM_2, 13000);
+                        break;
+                    }
+                    case EVENT_CHEM_2:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_1);
+                        _events.ScheduleEvent(EVENT_CHEM_3, 13000);
+                        break;
+                    }
+                    case EVENT_CHEM_3:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_2, player);
+                        _events.ScheduleEvent(EVENT_CHEM_4, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_4:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_3);
+                        _waitingForDose = true;
+                        _events.ScheduleEvent(EVENT_CHECK_IF_DOSED, 14000);
+                        break;
+                    }
+                    case EVENT_CHECK_IF_DOSED:
+                    {
+                        if (_waitingForDose)
+                            Reset();
+                        break;
+                    }
+                    case EVENT_CHEM_5:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_0);
+                        bunny->AI()->DoCast(SPELL_GREEN_SPLASH);
+                        for (auto i = 0; i < 5; ++i)
+                            bunny->AI()->DoCastAOE(SPELL_SUMMON_LIVING_PLAGUE_CHEM, true);
+                        _events.ScheduleEvent(EVENT_CHEM_6, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_6:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_2, player);
+                        _events.ScheduleEvent(EVENT_CHEM_7, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_7:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_3);
+                        _waitingForDose = true;
+                        _events.ScheduleEvent(EVENT_CHECK_IF_DOSED, 15000);
+                        break;
+                    }
+                    case EVENT_CHEM_8:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_0);
+                        bunny->AI()->DoCastAOE(SPELL_GREEN_SPLASH);
+                        for (auto i = 0; i < 5; ++i)
+                            bunny->AI()->DoCastAOE(SPELL_SUMMON_LIVING_PLAGUE_CHEM, true);
+                        bunny->AI()->DoCastAOE(SPELL_SUMMON_GHOUL_CHEM, true);
+                        _events.ScheduleEvent(EVENT_CHEM_9, 13000);
+                        break;
+                    }
+                    case EVENT_CHEM_9:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_1);
+                        _events.ScheduleEvent(EVENT_CHEM_10, 15000);
+                        break;
+                    }
+                    case EVENT_CHEM_10:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_2);
+                        _events.ScheduleEvent(EVENT_CHEM_11, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_11:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_3);
+                        _waitingForDose = true;
+                        _events.ScheduleEvent(EVENT_CHECK_IF_DOSED, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_12:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_0);
+                        bunny->AI()->DoCastAOE(SPELL_GREEN_SPLASH);
+                        bunny->AI()->DoCastAOE(SPELL_SUMMON_GHOUL_CHEM, true);
+                        _events.ScheduleEvent(EVENT_CHEM_13, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_13:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_0);
+                        bunny->AI()->DoCastAOE(SPELL_GREEN_SPLASH);
+                        for (auto i = 0; i < 5; ++i)
+                            bunny->AI()->DoCastAOE(SPELL_SUMMON_LIVING_PLAGUE_CHEM, true);
+                        _events.ScheduleEvent(EVENT_CHEM_14, 14000);
+                        break;
+                    }
+                    case EVENT_CHEM_14:
+                    {
+                        bunny->AI()->Talk(SAY_PC_BUNNY_4);
+                        player->KilledMonsterCredit(NPC_CHEM_CREDIT, 0);
+                        Reset();
+                        break;
+                    }
+                }
+            }
+        }
+
+        bool IsEventStarterNearby()
+        {
+            Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID);
+            if (!player)
+                return false;
+
+            return player->IsWithinDist(me, 35.0f);
+        }
+    private:
+        SummonList _summons;
+        uint64 _playerGUID;
+        uint64 _pcBunnyGUID;
+        bool _eventInProgress;
+        bool _waitingForDose;
+        EventMap _events;
+        uint8 _phase;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_cauldron_target_basic_chemistry_AI(creature);
+    }
+};
+
 void AddSC_icecrown()
 {
     // Ours
@@ -2141,6 +2423,7 @@ void AddSC_icecrown()
     new spell_fight_fire_bomber();
     new spell_anti_air_rocket_bomber();
     new npc_infra_green_bomber_generic();
+    new npc_cauldron_target_basic_chemistry();
 
     // Theirs
     new npc_guardian_pavilion();
