@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -201,6 +201,7 @@ class SmartAI : public CreatureAI
         void SetForcedCombatMove(float dist);
 
     private:
+        bool mIsCharmed;
         uint32 mFollowCreditType;
         uint32 mFollowArrivedTimer;
         uint32 mFollowCredit;

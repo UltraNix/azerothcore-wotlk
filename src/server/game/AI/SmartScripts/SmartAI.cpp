@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -33,6 +33,7 @@
 
 SmartAI::SmartAI(Creature* c) : CreatureAI(c)
 {
+    mIsCharmed = false;
     // copy script to local (protection for table reload)
 
     mWayPoints = NULL;
@@ -627,7 +628,7 @@ void SmartAI::EnterEvadeMode()
     // xinef: fixes strange jumps when charming SmartAI npc
     if (!me->IsAlive() || me->IsInEvadeMode())
         return;
-    
+
     if (IS_PLAYER_GUID(me->GetCharmerGUID()) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
         me->AttackStop();
@@ -665,7 +666,7 @@ void SmartAI::EnterEvadeMode()
     else
     {
         me->GetMotionMaster()->MoveTargetedHome();
-        
+
         // xinef: do not forget to reset scripts as we wont call reached home
         if (!me->HasUnitState(UNIT_STATE_EVADE))
             GetScript()->OnReset();
@@ -691,7 +692,7 @@ void SmartAI::MoveInLineOfSight(Unit* who)
 
 bool SmartAI::CanAIAttack(const Unit* /*who*/) const
 {
-    if (me->GetReactState() == REACT_PASSIVE)
+    if (me->GetReactState() == REACT_PASSIVE && !mIsCharmed)
         return false;
     return true;
 }
@@ -893,6 +894,7 @@ void SmartAI::InitializeAI()
 
 void SmartAI::OnCharmed(bool apply)
 {
+    mIsCharmed = apply;
     GetScript()->ProcessEventsFor(SMART_EVENT_CHARMED, NULL, 0, 0, apply);
 }
 
@@ -1032,7 +1034,7 @@ void SmartAI::StopFollow(bool complete)
     mFollowArrivedTimer = 1000;
     mFollowArrivedEntry = 0;
     mFollowCreditType = 0;
-    
+
     me->GetMotionMaster()->Clear(false);
     me->StopMoving();
     me->GetMotionMaster()->MoveIdle();
