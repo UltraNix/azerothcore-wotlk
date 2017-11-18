@@ -22,7 +22,6 @@ mysql-installer-community-5.7.11.0
 https://trinitycore.atlassian.net/wiki/display/tc/Requirements
 
 
-
 ---- 
 
 # 2016-02-16
