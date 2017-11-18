@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,6 +39,8 @@ EndContentData */
 #include "WaypointManager.h"
 #include "PassiveAI.h"
 #include "CombatAI.h"
+
+#include <array>
 
 // Ours
 enum songOfWindandWater
@@ -155,7 +157,7 @@ public:
             events.RescheduleEvent(EVENT_ARTRUIS_HP_CHECK, 1000);
             events.RescheduleEvent(EVENT_ARTRUIS_TALK1, 6000);
         }
-        
+
         void JustDied(Unit* /*killer*/)
         {
             if (GameObject* go = me->SummonGameObject(GO_ARTRUIS_PHYLACTERY, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 600000))
@@ -312,7 +314,7 @@ public:
         uint8 playeraction;
 
         npc_still_at_it_triggerAI(Creature* pCreature) : NullCreatureAI(pCreature) {}
-        
+
         void Reset()
         {
             running = false;
@@ -357,7 +359,7 @@ public:
             {
                 currentstep++;
                 uint8 s = urand(0,2);
-                
+
                 if (Creature* th = ObjectAccessor::GetCreature(*me, thunderbrewGUID))
                     th->HandleEmoteCommand(EMOTE_ONESHOT_CHEER_NO_SHEATHE);
 
@@ -1492,6 +1494,168 @@ public:
     }
 };
 
+enum rejekSpells
+{
+    SPELL_SUMMON_STORM_HEAD     = 53171,
+    SPELL_RIDE_REJEK            = 53170,
+
+    //! npcs
+    NPC_FRENZYHEART_PUP         = 28139,
+    NPC_STORMWATCHER_HEAD       = 29116,
+
+    SAY_REJEK_0                 = 0,
+    SAY_REJEK_1                 = 1,
+    SAY_REJEK_2                 = 2,
+
+    SAY_PUP_0                   = 0,
+    SAY_PUP_1                   = 1,
+    SAY_PUP_2                   = 2
+};
+
+enum rejekEvents
+{
+    EVENT_REJEK_1               = 1,
+    EVENT_REJEK_2               = 2,
+    EVENT_REJEK_3               = 3,
+    EVENT_REJEK_4               = 4,
+    EVENT_REJEK_5               = 5,
+    EVENT_REJEK_6               = 6
+};
+
+std::array<Position, 2> pupSummPos =
+{
+    {
+        { 5256.386230f, 4505.823242f, -85.360985f, 6.100787f },
+        { 5267.518555f, 4520.523926f, -84.308357f, 4.561409f }
+    }
+};
+
+std::array<Position, 2> pupMovePos =
+{
+    {
+        { 5262.424805f, 4503.819824f, -85.097725f, 5.884785f },
+        { 5265.885742f, 4506.870117f, -84.721313f, 5.303601f }
+    }
+};
+
+std::array<Position, 2> pupRunPos =
+{
+    {
+        { 5249.390625f, 4507.220215f, -85.340279f, 2.857079f },
+        { 5267.375977f, 4524.758301f, -83.815033f, 1.491272f }
+    }
+};
+
+class npc_rejek_sholazar_event : public CreatureScript
+{
+public:
+    npc_rejek_sholazar_event() : CreatureScript("npc_rejek_sholazar_event") { }
+
+    struct npc_rejek_sholazar_event_AI : public ScriptedAI
+    {
+        npc_rejek_sholazar_event_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            _eventInProgress = false;
+            _events.Reset();
+            pupOneGUID = 0;
+            pupTwoGUID = 0;
+        }
+
+        void sQuestReward(Player* player, Quest const* quest, uint32 opt) override
+        {
+            if (!_eventInProgress)
+            {
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                _eventInProgress = true;
+                Talk(SAY_REJEK_0);
+                for (auto i = 0; i < 2; ++i)
+                {
+                    if (Creature* pup = me->SummonCreature(NPC_FRENZYHEART_PUP, pupSummPos.at(i)))
+                    {
+                        pup->GetMotionMaster()->MovePoint(1, pupMovePos.at(i));
+                        !i ? pupOneGUID = pup->GetGUID() : pupTwoGUID = pup->GetGUID();
+                    }
+                }
+                _events.ScheduleEvent(EVENT_REJEK_1, 1000);
+            }
+        }
+
+        void JustSummoned(Creature* creature) override
+        {
+            if (creature->GetEntry() == NPC_STORMWATCHER_HEAD)
+                creature->CastSpell(me, SPELL_RIDE_REJEK, true);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_eventInProgress)
+                return;
+
+            _events.Update(diff);
+
+            while (auto eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_REJEK_1:
+                        if (Creature* pup = ObjectAccessor::GetCreature(*me, pupOneGUID))
+                            pup->AI()->Talk(SAY_PUP_0);
+
+                        if (Creature* pup = ObjectAccessor::GetCreature(*me, pupTwoGUID))
+                            pup->AI()->Talk(SAY_PUP_1);
+                        _events.ScheduleEvent(EVENT_REJEK_2, 2500);
+                        break;
+                    case EVENT_REJEK_2:
+                        Talk(SAY_REJEK_1);
+                        _events.ScheduleEvent(EVENT_REJEK_3, 2500);
+                        break;
+                    case EVENT_REJEK_3:
+                        me->SetFacingTo(5.21f);
+                        _events.ScheduleEvent(EVENT_REJEK_4, 2500);
+                        break;
+                    case EVENT_REJEK_4:
+                        DoCastSelf(SPELL_SUMMON_STORM_HEAD);
+                        _events.ScheduleEvent(EVENT_REJEK_5, 2500);
+                        break;
+                    case EVENT_REJEK_5:
+                        me->SetFacingTo(me->GetHomePosition().GetOrientation());
+                        Talk(SAY_REJEK_2);
+                        _events.ScheduleEvent(EVENT_REJEK_6, 3500);
+                        break;
+                    case EVENT_REJEK_6:
+                        if (Creature* pup = ObjectAccessor::GetCreature(*me, pupOneGUID))
+                        {
+                            pup->AI()->Talk(SAY_PUP_2);
+                            pup->GetMotionMaster()->MovePoint(2, pupRunPos.at(0));
+                            pup->DespawnOrUnsummon(2500);
+                        }
+
+                        if (Creature* pup = ObjectAccessor::GetCreature(*me, pupTwoGUID))
+                        {
+                            pup->GetMotionMaster()->MovePoint(2, pupRunPos.at(1));
+                            pup->DespawnOrUnsummon(2500);
+                        }
+                        Reset();
+                        break;
+                }
+            }
+        }
+    private:
+        bool _eventInProgress;
+        EventMap _events;
+        uint64 pupOneGUID;
+        uint64 pupTwoGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_rejek_sholazar_event_AI(creature);
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     // Ours
@@ -1502,6 +1666,7 @@ void AddSC_sholazar_basin()
     new go_pressure_valve();
     new go_brazier();
     new spell_q12915_mending_fences();
+    new npc_rejek_sholazar_event();
 
     // Theirs
     new npc_vekjik();
