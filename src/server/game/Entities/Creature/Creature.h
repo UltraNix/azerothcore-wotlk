@@ -501,6 +501,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool IsDungeonBoss() const;
         bool IsInstanceBind() const;
         bool IsImmuneToKnockback() const;
+        bool IsTrainingDummy() const;
         bool IsAvoidingAOE() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_AVOID_AOE; }
 
         uint8 getLevelForTarget(WorldObject const* target) const; // overwrite Unit::getLevelForTarget for boss level support

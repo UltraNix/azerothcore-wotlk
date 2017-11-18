@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -85,7 +85,7 @@ public:
 
     struct npc_elder_clearwaterAI : public ScriptedAI
     {
-        npc_elder_clearwaterAI(Creature *c) : ScriptedAI(c) 
+        npc_elder_clearwaterAI(Creature *c) : ScriptedAI(c)
         {
             events.Reset();
             events.ScheduleEvent(EVENT_CLEARWATER_ANNOUNCE, 1000, 1, 0);
@@ -232,7 +232,7 @@ public:
 
     struct npc_riggle_bassbaitAI : public ScriptedAI
     {
-        npc_riggle_bassbaitAI(Creature *c) : ScriptedAI(c) 
+        npc_riggle_bassbaitAI(Creature *c) : ScriptedAI(c)
         {
             events.Reset();
             events.ScheduleEvent(EVENT_RIGGLE_ANNOUNCE, 1000, 1, 0);
@@ -340,7 +340,7 @@ public:
 
     struct npc_short_john_mirthilAI : public NullCreatureAI
     {
-        npc_short_john_mirthilAI(Creature *c) : NullCreatureAI(c) 
+        npc_short_john_mirthilAI(Creature *c) : NullCreatureAI(c)
         {
             pathPoint = 0;
             startWarning = false;
@@ -2980,7 +2980,7 @@ public:
                 handler.PSendSysMessage(message.c_str());
                 sWorld->SendWorldText(LANG_EVENT_WINNER, player->GetName().c_str(), s.c_str());
                 sLog->outRewards("Player: %s GUID: %u has complete event 'LORE'", player->GetName().c_str(), player->GetGUIDLow());
-               
+
             } break;
             default:
                 player->CLOSE_GOSSIP_MENU();
@@ -3076,7 +3076,7 @@ public:
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "B) Kaldorei i Shen'dralar.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "C) Kaldorei i Kaplanki Elune.", GOSSIP_SENDER_MAIN, QUESTION_WRONG_ANSWER);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "D) Kaplanki Elune i Shen'dralar.", GOSSIP_SENDER_MAIN, QUESTION_CORRECT_ANSWER);
-            
+
             player->SEND_GOSSIP_MENU(NPC_QUESTION_TEXT_4, creature->GetGUID());
         } break;
         case QUESTION_5:

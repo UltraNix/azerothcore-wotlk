@@ -2660,6 +2660,31 @@ bool Creature::IsImmuneToKnockback() const
     return cinfo && (cinfo->flags_extra & CREATURE_FLAG_EXTRA_KNOCKBACK_IMMUNE);
 }
 
+bool Creature::IsTrainingDummy() const
+{
+    switch (GetEntry())
+    {
+        case 32667:
+        case 32666:
+        case 32547:
+        case 32546:
+        case 32545:
+        case 32543:
+        case 32542:
+        case 32541:
+        case 31146:
+        case 31144:
+        case 31143:
+        case 30527:
+        case 24792:
+        case 17578:
+        case 16111:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool Creature::SetWalk(bool enable)
 {
     if (!Unit::SetWalk(enable))
