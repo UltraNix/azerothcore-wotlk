@@ -459,9 +459,6 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
 
     InstanceSave::PlayerListType &pList = itr->second->m_playerList;
 
-    if (itr->second->GetMapId() == 44) // osm event
-        return;
-
     for (InstanceSave::PlayerListType::iterator iter = pList.begin(), iter2; iter != pList.end(); )
     {
         iter2 = iter++;
