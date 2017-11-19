@@ -7679,7 +7679,7 @@ void Player::UpdateArea(uint32 newArea)
 
     AreaTableEntry const* area = sAreaTableStore.LookupEntry(newArea);
     bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-    pvpInfo.IsInFFAPvPArea = area && (area->flags & AREA_FLAG_ARENA);
+    pvpInfo.IsInFFAPvPArea = area && ((area->flags & AREA_FLAG_ARENA) || area->ID == 268);
     UpdatePvPState(true);
 
     // xinef: check if we were in ffa arena and we left
