@@ -300,6 +300,8 @@ bool Group::AddInvite(Player* player)
 {
     if (!player || player->GetGroupInvite())
         return false;
+    if (player->GetMapId() == 37) //Hunger Games Event
+        return false;
     Group* group = player->GetGroup();
     if (group && (group->isBGGroup() || group->isBFGroup()))
         group = player->GetOriginalGroup();

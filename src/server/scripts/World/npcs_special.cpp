@@ -62,6 +62,7 @@ EndContentData */
 #include "SmartAI.h"
 #include "DBCStructure.h"
 #include "Language.h"
+#include "CustomEventMgr.h"
 
 enum elderClearwater
 {
@@ -3166,6 +3167,318 @@ public:
     }
 };
 
+////////////////////////////
+// Hunger Games Event
+///////////////////////////
+enum HungerGames {
+    ACTION_ADD_TO_QUEUE = 1,
+    ACTION_QUIT = 2,
+    ACTION_INFO = 3,
+    ACTION_LEAVE_QUEUE = 4,
+    ACTION_ADD_TO_GMLIST = 5,
+    ACTION_REMOVE_FROM_GMLIST = 6,
+
+    CACTION_START_EVENT = 100,
+    CACTION_PLAYERS_COUNT = 101,
+    CACTION_REVIVE_PLAYERS = 102,
+    CACTION_RESET_EVENT = 103,
+    CACTION_FREEZE_PLAYERS = 104,
+    CACTION_UNFREEZE_PLAYERS = 105,
+    CACTION_ADD_DEBUFF = 106,
+    CACTION_REMOVE_DEBUFF = 107,
+    CACTION_TELEPORT_TO_HORDE = 108,
+    CACTION_SPAWN_ELITE = 109,
+    CACTION_SPAWN_ELITE_ALLY = 110,
+    CACTION_SPAWN_ELITE_HORDE = 111,
+    CACTION_SPAWN_ELITE_MIDDLE = 112,
+    CACTION_PLAYERS_NAMES = 113,
+    CACTION_GM_NAMES = 114,
+    CACTION_PLAYERS_STEALTH = 115,
+
+    NPC_ELITE = 190103,
+
+    GOSSIP_MAIN = 1000600,
+    GOSSIP_INFO = 1000601,
+    GOSSIP_PROGRESS = 1000602,
+    GOSSIP_FULL = 1000603,
+    GOSSIP_LVL = 1000604,
+};
+
+Position const elitePos[3] =
+{
+    { 691.f, 103.f, 279.f },
+    { 37.f, 507.f, 294.f },
+    { 305.65f, 183.96f, 235.7f }
+};
+
+class npc_hunger_games : public CreatureScript {
+public:
+    npc_hunger_games() : CreatureScript("npc_hunger_games") {}
+    bool OnGossipHello(Player* player, Creature* creature) override {
+        if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE)) return false;
+        if (player->IsGameMaster())
+        {
+            if (!sCustomEventMgr->isGmInHungerGames(player->GetGUID()))
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Dodaj mnie do GM listy.", GOSSIP_SENDER_MAIN, ACTION_ADD_TO_GMLIST);
+            else
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Usun mnie z GM listy.", GOSSIP_SENDER_MAIN, ACTION_REMOVE_FROM_GMLIST);
+        }
+        if (player->getLevel() < 80) {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me more about Hunger Games", GOSSIP_SENDER_MAIN, ACTION_INFO);
+            player->SEND_GOSSIP_MENU(GOSSIP_LVL, creature->GetGUID());
+            return true;
+        }
+        else if (sCustomEventMgr->getHungerGamesState() != HUNGER_GAMES_NOT_STARTED) {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me more about Hunger Games", GOSSIP_SENDER_MAIN, ACTION_INFO);
+            player->SEND_GOSSIP_MENU(GOSSIP_PROGRESS, creature->GetGUID());
+            return true;
+        }
+        else if (sCustomEventMgr->isHungerGamesFull() && !sCustomEventMgr->isPlayerInHungerGames(player->GetGUID())) {
+            player->SEND_GOSSIP_MENU(GOSSIP_FULL, creature->GetGUID());
+            return true;
+        }
+        if (!sCustomEventMgr->isPlayerInHungerGames(player->GetGUID()))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Yes. I am sure. Nothing is beyond me!", GOSSIP_SENDER_MAIN, ACTION_ADD_TO_QUEUE);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Well... I have some things to do...", GOSSIP_SENDER_MAIN, ACTION_QUIT);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me more about Hunger Games", GOSSIP_SENDER_MAIN, ACTION_INFO);
+        }
+        else
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I've changed my mind, I don't want to participate in the Games anymore!", GOSSIP_SENDER_MAIN, ACTION_LEAVE_QUEUE);
+
+        player->SEND_GOSSIP_MENU(GOSSIP_MAIN, creature->GetGUID());
+        return true;
+    }
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override {
+        switch (action) {
+        case ACTION_ADD_TO_QUEUE:
+            sCustomEventMgr->addPlayerToHungerGames(player->GetGUID());
+            ChatHandler(player->GetSession()).PSendSysMessage("You have been added to Hunger Games queue!");
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case ACTION_LEAVE_QUEUE:
+            sCustomEventMgr->removePlayerFromHungerGames(player->GetGUID());
+            ChatHandler(player->GetSession()).PSendSysMessage("You have been removed from Hunger Games queue!");
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case ACTION_QUIT:
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case ACTION_INFO:
+            player->PlayerTalkClass->ClearMenus();
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Understood", GOSSIP_SENDER_MAIN, ACTION_QUIT);
+            player->SEND_GOSSIP_MENU(GOSSIP_INFO, creature->GetGUID());
+            break;
+        case ACTION_ADD_TO_GMLIST:
+            sCustomEventMgr->addGmToHungerGames(player->GetGUID());
+            ChatHandler(player->GetSession()).PSendSysMessage("Zostales dodany do listy GMow monitorujacych event");
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case ACTION_REMOVE_FROM_GMLIST:
+            sCustomEventMgr->removeGmFromHungerGames(player->GetGUID());
+            ChatHandler(player->GetSession()).PSendSysMessage("Juz nie monitoruejsz eventu. Piootrek jest zawiedziony twoja postawa :(");
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        }
+        return true;
+    }
+};
+
+class npc_hunger_games_control : public CreatureScript {
+public:
+    npc_hunger_games_control() : CreatureScript("npc_hunger_games_control") {}
+    bool OnGossipHello(Player* player, Creature* creature) override {
+        if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE)) return false;
+        if (player->GetSession()->GetSecurity() < 4) return false;
+        if (sCustomEventMgr->isHungerGamesEventInProgress()) {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "****Event w trakcie****", GOSSIP_SENDER_MAIN, ACTION_QUIT);
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            return true;
+        }
+        switch (sCustomEventMgr->getHungerGamesState())
+        {
+        case HUNGER_GAMES_NOT_STARTED:
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Rozpocznij event", GOSSIP_SENDER_MAIN, CACTION_START_EVENT);
+            break;
+        case HUNGER_GAMES_PREPARATION:
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Resnij ludzi", GOSSIP_SENDER_MAIN, CACTION_REVIVE_PLAYERS);
+            break;
+        case HUNGER_GAMES_STARTED:
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zfreezuj graczy", GOSSIP_SENDER_MAIN, CACTION_FREEZE_PLAYERS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Unfreezuj graczy", GOSSIP_SENDER_MAIN, CACTION_UNFREEZE_PLAYERS);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Daj debuffa +50% dmg taken", GOSSIP_SENDER_MAIN, CACTION_ADD_DEBUFF);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zabierz debuffa +50% dmg taken", GOSSIP_SENDER_MAIN, CACTION_REMOVE_DEBUFF);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleportuj wszystkich do bazy Hordy", GOSSIP_SENDER_MAIN, CACTION_TELEPORT_TO_HORDE);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zespawnuj elite", GOSSIP_SENDER_MAIN, CACTION_SPAWN_ELITE);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Kto ukrywa sie w stealth?", GOSSIP_SENDER_MAIN, CACTION_PLAYERS_STEALTH);
+            break;
+        }
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ile osob zostalo?", GOSSIP_SENDER_MAIN, CACTION_PLAYERS_COUNT);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Kto zostal?", GOSSIP_SENDER_MAIN, CACTION_PLAYERS_NAMES);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Lista Gmow monitorujacych event", GOSSIP_SENDER_MAIN, CACTION_GM_NAMES);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Resetuj stan eventu", GOSSIP_SENDER_MAIN, CACTION_RESET_EVENT);
+
+
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        return true;
+    }
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override {
+        switch (action) {
+        case CACTION_START_EVENT:
+            sCustomEventMgr->startHungerGamesEvent(HUNGER_GAMES_EVENT_TELE);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_REVIVE_PLAYERS:
+            sCustomEventMgr->startHungerGamesEvent(HUNGER_GAMES_EVENT_REV);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_PLAYERS_COUNT:
+        {
+            std::string s = "Zostalo " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount()) + " osob";
+            ChatHandler(player->GetSession()).PSendSysMessage(s.c_str());
+            player->CLOSE_GOSSIP_MENU();
+        }
+        break;
+        case CACTION_RESET_EVENT:
+            sCustomEventMgr->resetHungerGamesState();
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_FREEZE_PLAYERS:
+            sCustomEventMgr->startHungerGamesEvent(HUNGER_GAMES_EVENT_FR);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_UNFREEZE_PLAYERS:
+            sCustomEventMgr->startHungerGamesEvent(HUNGER_GAMES_EVENT_UNFR);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_ADD_DEBUFF:
+            sCustomEventMgr->startHungerGamesEvent(HUNGER_GAMES_EVENT_DEBUFF);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_REMOVE_DEBUFF:
+            sCustomEventMgr->applyHungerGamesDebuff(false);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case ACTION_QUIT:
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_TELEPORT_TO_HORDE:
+            sCustomEventMgr->startHungerGamesEvent(HUNGER_GAMES_EVENT_TELE_HORDE);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_SPAWN_ELITE:
+            player->PlayerTalkClass->ClearMenus();
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zespawnuj elite pod baza Alliance", GOSSIP_SENDER_MAIN, CACTION_SPAWN_ELITE_ALLY);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zespawnuj elite pod baza Hordy", GOSSIP_SENDER_MAIN, CACTION_SPAWN_ELITE_HORDE);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Zespawnuj elite po srodku", GOSSIP_SENDER_MAIN, CACTION_SPAWN_ELITE_MIDDLE);
+            player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+            break;
+        case CACTION_SPAWN_ELITE_ALLY:
+            CAST_AI(npc_hunger_games_control::npc_hunger_games_controlAI, creature->GetAI())->spawnElite(0);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_SPAWN_ELITE_HORDE:
+            CAST_AI(npc_hunger_games_control::npc_hunger_games_controlAI, creature->GetAI())->spawnElite(1);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_SPAWN_ELITE_MIDDLE:
+            CAST_AI(npc_hunger_games_control::npc_hunger_games_controlAI, creature->GetAI())->spawnElite(2);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_PLAYERS_NAMES:
+            sCustomEventMgr->printHungerGamesPlayers(player);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_GM_NAMES:
+            sCustomEventMgr->printHungerGamesGms(player);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case CACTION_PLAYERS_STEALTH:
+            sCustomEventMgr->printHungerGamesStealthedPlayers(player);
+            player->CLOSE_GOSSIP_MENU();
+            break;
+
+        }
+
+        return true;
+    }
+
+    struct npc_hunger_games_controlAI : public ScriptedAI {
+        npc_hunger_games_controlAI(Creature *creature) : ScriptedAI(creature) {}
+        void spawnElite(uint8 loc) {
+            if (me->GetMapId() != 37) return;
+            if (loc >= 3) return;
+            Creature *c = me->SummonCreature(NPC_ELITE, elitePos[loc].m_positionX, elitePos[loc].m_positionY, elitePos[loc].m_positionZ, 0.f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 600000);
+            if (!c) return;
+            std::string msg = "Kozrum, the Hunger Giant, has emerged from the depths! He is under the ";
+            switch (loc)
+            {
+            case 0: //Alliance
+                msg += "Alliance base!";
+                break;
+            case 1: //Horde
+                msg += "Horde base!";
+                break;
+            case 2: //Middle
+                msg += "middle of Azshara Crater!";
+                break;
+            }
+            msg += " Get him quickly!";
+            sCustomEventMgr->sendAnnounceToHungerGamesPlayers(msg);
+            sCustomEventMgr->setPoiToHungerGamesPlayers(loc);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const {
+        return new npc_hunger_games_controlAI(creature);
+    }
+
+};
+
+class player_script_hunger_games : public PlayerScript {
+public:
+    player_script_hunger_games() : PlayerScript("player_script_hunger_games") {}
+
+    void OnPVPKill(Player* killer, Player* killed) override {
+        if (sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || !killer || !killed || killed->GetMapId() != 37 || !sCustomEventMgr->isPlayerInHungerGames(killer->GetGUID())) return;
+        std::string msg = "Player " + killed->GetName() + " has been killed by player " + killer->GetName() + ". " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount() - 1) + " left!";
+        sCustomEventMgr->sendAnnounceToHungerGamesPlayers(msg, true);
+        sCustomEventMgr->removePlayerFromHungerGames(killed->GetGUID());
+    }
+    void OnPlayerKilledByCreature(Creature* killer, Player* killed) override {
+        if (sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || !killer || !killed || !sCustomEventMgr->isPlayerInHungerGames(killed->GetGUID()) || killed->GetMapId() != 37) return;
+        std::string msg = "Player " + killed->GetName() + " has been killed by creature " + killer->GetName() + ". " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount() - 1) + " left!";
+        sCustomEventMgr->sendAnnounceToHungerGamesPlayers(msg, true);
+        sCustomEventMgr->removePlayerFromHungerGames(killed->GetGUID());
+
+    }
+    void OnLogin(Player* player) override {
+        if (!player || sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED) return;
+        if (player->GetMapId() == 37)
+            player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY, player->m_homebindZ, 0.f);
+    }
+    void OnLogout(Player* player) override {
+        if (!player) return;
+        if (sCustomEventMgr->isPlayerInHungerGames(player->GetGUID()))
+        {
+            if (sCustomEventMgr->getHungerGamesState() != HUNGER_GAMES_NOT_STARTED) {
+                std::string msg = "Player " + player->GetName() + " has left Hunger Games. " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount() - 1) + " left!";
+                sCustomEventMgr->sendAnnounceToHungerGamesPlayers(msg, true);
+            }
+            sCustomEventMgr->removePlayerFromHungerGames(player->GetGUID());
+        }
+        if (sCustomEventMgr->isGmInHungerGames(player->GetGUID()))
+            sCustomEventMgr->removeGmFromHungerGames(player->GetGUID());
+    }
+    void OnMapChanged(Player* player) override {
+        if (!player || sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || player->GetMapId() == 37 || !sCustomEventMgr->isPlayerInHungerGames(player->GetGUID())) return;
+        std::string msg = "Player " + player->GetName() + " has left Hunger Games. " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount() - 1) + " left!";
+        sCustomEventMgr->sendAnnounceToHungerGamesPlayers(msg, true);
+        sCustomEventMgr->removePlayerFromHungerGames(player->GetGUID());
+    }
+};
+
 void AddSC_npcs_special()
 {
     // Ours
@@ -3177,6 +3490,9 @@ void AddSC_npcs_special()
     new npc_schody();
     new npc_lore();
     new npc_dala_tele();
+    new npc_hunger_games();
+    new npc_hunger_games_control();
+    new player_script_hunger_games();
     // Theirs
     new npc_air_force_bots();
     new npc_lunaclaw_spirit();

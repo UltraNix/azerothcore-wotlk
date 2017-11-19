@@ -1331,6 +1331,8 @@ void World::LoadConfigSettings(bool reload)
 
     // Custom Event
     m_bool_configs[CONFIG_CUSTOM_EVENT_ENABLE] = sConfigMgr->GetBoolDefault("CustomEvent.Enable", false);
+    m_bool_configs[CONFIG_HUNGER_GAMES_ENABLE] = sConfigMgr->GetBoolDefault("HungerGames.Enable", false);
+    m_int_configs[CONFIG_HUNGER_GAMES_LIMIT] = sConfigMgr->GetIntDefault("HungerGames.Limit", 500);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)
@@ -2191,6 +2193,7 @@ void World::Update(uint32 diff)
     sCustomEventMgr->Update(diff, CUSTOM_EVENT_KRUUL);
     sCustomEventMgr->Update(diff, CUSTOM_EVENT_FLUSH);
     sCustomEventMgr->Update(diff, CUSTOM_EVENT_PVP);
+    sCustomEventMgr->Update(diff, CUSTOM_EVENT_HUNGER_GAMES);
 
     // execute callbacks from sql queries that were queued recently
     ProcessQueryCallbacks();

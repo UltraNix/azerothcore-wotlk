@@ -3405,7 +3405,20 @@ Experimental.Enable = 0
 #                     1 - (Enabled)
 	
 CustomEvent.Enable = 0
+#		
+#     HungerGames.Enable
+#        Description: Enables or disables Hunger Games event.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
 
+HungerGames.Enable = 0
+
+#		
+#     HungerGames.Limit
+#        Description: Limit of players on Hunger Games event.
+#        Default:     500
+
+HungerGames.Limit = 500
 #
 ###################################################################################################
 

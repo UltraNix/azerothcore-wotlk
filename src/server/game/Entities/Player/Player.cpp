@@ -7670,7 +7670,7 @@ void Player::UpdateArea(uint32 newArea)
 
     AreaTableEntry const* area = sAreaTableStore.LookupEntry(newArea);
     bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-    pvpInfo.IsInFFAPvPArea = area && (area->flags & AREA_FLAG_ARENA);
+    pvpInfo.IsInFFAPvPArea = area && (area->flags & AREA_FLAG_ARENA) || area->ID == 268;
     UpdatePvPState(true);
 
     // xinef: check if we were in ffa arena and we left
@@ -25436,7 +25436,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     //sLog->outDebug("zDiff = %f", z_diff);
 
     // event only                                                   ToC
-    if (GetZoneId() == 268 || GetZoneId() == 3817 || GetZoneId() == 4722)
+    if (GetZoneId() == 3817 || GetZoneId() == 4722)
         return;
     // event only
     if(GetZoneId() == 876 /*GM Island*/ ||
