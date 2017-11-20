@@ -1320,8 +1320,9 @@ class spell_putricide_unbound_plague_dmg : public SpellScriptLoader
 
             void HandlePeriodic(AuraEffect* aurEff)
             {
-                int32 baseAmt = aurEff->GetSpellInfo()->Effects[0].CalcValue();
-                int32 dmg = int32(baseAmt * pow(1.25f, float(aurEff->GetTickNumber())));
+                int32 dmg = int32(aurEff->GetAmount() * frand(1.24f, 1.26f));
+                if (aurEff->GetTickNumber() == 1)
+                    dmg = aurEff->GetSpellInfo()->Effects[0].CalcValue() * frand(1.20f, 1.30f);
                 if (dmg <= 0) // safety check, impossible
                     return;
                 aurEff->SetAmount(dmg);
