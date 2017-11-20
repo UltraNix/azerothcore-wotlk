@@ -4541,6 +4541,17 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// PRIEST
         /////////////////////////////////
+
+        // Item - Priest T9 Healing 4P Bonus (Divine Aegis and Empowered Renew)
+        case 67202:
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_ADD_PCT_MODIFIER;
+            spellInfo->EffectMiscValue[EFFECT_0] = SPELLMOD_EFFECT1;
+            spellInfo->EffectSpellClassMask[EFFECT_0] = flag96(0x00000000, 0x00000000, 0x00000020);
+            break;
+            // Divine Aegis
+        case 47753:
+            spellInfo->EffectBasePoints[EFFECT_0] = 0;
+            break;
         // Shadow Weaving
         case 15257:
         case 15331:
