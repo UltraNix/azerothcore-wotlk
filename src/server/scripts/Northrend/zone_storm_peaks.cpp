@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -202,7 +202,7 @@ public:
         uint32 hpTimer;
         bool charging;
 
-        void Reset() 
+        void Reset()
         {
             spellTimer = 0;
             hpTimer = 0;
@@ -324,12 +324,12 @@ public:
         {
             events.Reset();
             if (me->GetEntry() == NPC_TIME_LOST_PROTO_DRAKE)
-            {    
+            {
                 events.ScheduleEvent(SPELL_TIME_SHIFT, 10000);
                 events.ScheduleEvent(SPELL_TIME_LAPSE, 5000);
             }
             else
-            {    
+            {
                 events.ScheduleEvent(SPELL_FROST_BREATH, 8000);
                 events.ScheduleEvent(SPELL_FROST_CLEAVE, 5000);
             }
@@ -424,7 +424,7 @@ public:
             ScriptedAI::EnterEvadeMode();
         }
 
-        void Reset() 
+        void Reset()
         {
             me->SetRegeneratingHealth(true);
             me->SetSpeed(MOVE_RUN, 1.14f, true); // ZOMG!
@@ -552,7 +552,7 @@ public:
             if (setCharm)
             {
                 setCharm = false;
-                
+
                 if (Player* charmer = GetValidPlayer())
                 {
                     me->setFaction(16);
@@ -765,6 +765,121 @@ public:
     };
 };
 
+enum thorimScriptCast
+{
+    SPELL_JOKKUM_SUMMON                 = 56541,
+    SPELL_SUMMON_VERANUS_AND_THORIM     = 56649,
+    SPELL_RIDING_JOKKUM                 = 56606,
+
+    SPELL_EJECT_ALL_PASS_THORIM         = 50630
+};
+
+class spell_jokkum_scriptcast : public SpellScriptLoader
+{
+public:
+    spell_jokkum_scriptcast() : SpellScriptLoader("spell_jokkum_scriptcast") { }
+
+    class spell_jokkum_scriptcast_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_jokkum_scriptcast_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo({ SPELL_JOKKUM_SUMMON });
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* target = GetTarget())
+                target->CastSpell(target, SPELL_JOKKUM_SUMMON, true);
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_jokkum_scriptcast_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_jokkum_scriptcast_AuraScript();
+    }
+};
+
+class spell_jokum_summon : public SpellScriptLoader
+{
+public:
+    spell_jokum_summon() : SpellScriptLoader("spell_jokum_summon") { }
+
+    class spell_jokum_summon_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_jokum_summon_SpellScript);
+
+        void HandleSummon(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            uint32 entry = GetSpellInfo()->Effects[effIndex].MiscValue;
+            SummonPropertiesEntry const* properties = sSummonPropertiesStore.LookupEntry(GetSpellInfo()->Effects[effIndex].MiscValueB);
+            int32 duration = GetSpellInfo()->GetDuration();
+            if (!GetOriginalCaster() || !properties)
+                return;
+
+            if (TempSummon* summon = GetCaster()->GetMap()->SummonCreature(entry, *GetHitDest(), properties, duration, GetOriginalCaster(), GetSpellInfo()->Id))
+            {
+                summon->SetCreatorGUID(GetOriginalCaster()->GetGUID());
+                GetCaster()->CastSpell(summon, SPELL_RIDING_JOKKUM, true);
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHit += SpellEffectFn(spell_jokum_summon_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_jokum_summon_SpellScript();
+    }
+};
+
+class npc_veranus_stormpeaks : public CreatureScript
+{
+public:
+    npc_veranus_stormpeaks() : CreatureScript("npc_veranus_stormpeaks") { }
+
+    struct npc_veranus_stormpeaks_AI : public npc_escortAI
+    {
+        npc_veranus_stormpeaks_AI(Creature* creature) : npc_escortAI(creature) { }
+
+        void WaypointReached(uint32 pointId) override
+        {
+            if (pointId == 2)
+                DoCastSelf(SPELL_EJECT_ALL_PASS_THORIM);
+        }
+
+        void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
+        {
+            if (!apply)
+                who->GetMotionMaster()->MoveFall(0);
+        }
+
+        void Reset() override
+        {
+            me->setActive(true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetReactState(REACT_PASSIVE);
+            Start(false, true, 0, nullptr);
+            SetDespawnAtEnd(true);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_veranus_stormpeaks_AI(creature);
+    }
+};
 
 // Theirs
 /////////////////////
@@ -1213,6 +1328,9 @@ void AddSC_storm_peaks()
     new npc_roaming_jormungar();
     new spell_q13003_thursting_hodirs_spear();
     new spell_q13007_iron_colossus();
+    new spell_jokkum_scriptcast();
+    new spell_jokum_summon();
+    new npc_veranus_stormpeaks();
 
     // Theirs
     new npc_injured_goblin();
