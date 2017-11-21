@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -321,7 +321,7 @@ class spell_warl_demonic_knowledge : public SpellScriptLoader
                 isPeriodic = true;
                 amplitude = 5*IN_MILLISECONDS;
             }
-            
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
@@ -414,7 +414,7 @@ class spell_warl_generic_scaling : public SpellScriptLoader
                 isPeriodic = true;
                 amplitude = 2*IN_MILLISECONDS;
             }
-            
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
@@ -1400,6 +1400,33 @@ class spell_warl_glyph_of_shadowflame : public SpellScriptLoader
         }
 };
 
+class spell_wrl_fire_bolt : public SpellScriptLoader
+{
+public:
+    spell_wrl_fire_bolt() : SpellScriptLoader("spell_wrl_fire_bolt") { }
+
+    class spell_wrl_fire_bolt_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_wrl_fire_bolt_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (GetCaster()->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
+                GetCaster()->RemoveAurasByType(SPELL_AURA_MOD_UNATTACKABLE);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_wrl_fire_bolt_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_wrl_fire_bolt_SpellScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     // Ours
@@ -1412,6 +1439,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_knowledge();
     new spell_warl_generic_scaling();
     new spell_warl_infernal_scaling();
+    new spell_wrl_fire_bolt();
 
     // Theirs
     new spell_warl_banish();
