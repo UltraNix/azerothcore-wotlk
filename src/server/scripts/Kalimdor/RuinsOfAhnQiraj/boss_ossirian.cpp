@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -112,7 +112,7 @@ struct boss_ossirianAI : public BossAI
         if (action == ACTION_TRIGGER_WEAKNESS)
             if (Creature* Trigger = me->GetMap()->GetCreature(_triggerGUID))
                 if (!Trigger->HasUnitState(UNIT_STATE_CASTING))
-                    Trigger->CastSpell(Trigger, SpellWeakness[urand(0, 4)], false);
+                    Trigger->CastSpell(Trigger, SpellWeakness[urand(0, 4)], true);
     }
 
     void EnterCombat(Unit* /*who*/) override
@@ -184,6 +184,7 @@ struct boss_ossirianAI : public BossAI
                                                 0, 0, 0, 0, 0, uint32(-1)))
             {
                 _crystalGUID = Crystal->GetGUID();
+                Crystal->RemoveFromOwner();
                 ++_crystalIterator;
             }
         }
@@ -267,7 +268,7 @@ class go_ossirian_crystal : public GameObjectScript
     public:
         go_ossirian_crystal() : GameObjectScript("go_ossirian_crystal") { }
 
-        bool OnGossipHello(Player* player, GameObject* /*go*/)
+        bool OnGossipHello(Player* player, GameObject* go)
         {
             InstanceScript* Instance = player->GetInstanceScript();
             if (!Instance)
@@ -278,6 +279,7 @@ class go_ossirian_crystal : public GameObjectScript
                 return false;
 
             Ossirian->AI()->DoAction(ACTION_TRIGGER_WEAKNESS);
+            go->SetLootState(GO_ACTIVATED);
             return true;
         }
 };
