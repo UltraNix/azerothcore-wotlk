@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -103,6 +103,34 @@ class spell_q11065_wrangle_some_aether_rays : public SpellScriptLoader
         {
             return new spell_q11065_wrangle_some_aether_rays_AuraScript();
         }
+};
+
+class spell_aura_wrangling_rope_channel_despawner : public SpellScriptLoader
+{
+public:
+    spell_aura_wrangling_rope_channel_despawner() : SpellScriptLoader("spell_aura_wrangling_rope_channel_despawner") { }
+
+    class spell_aura_wrangling_rope_channel_despawner_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_aura_wrangling_rope_channel_despawner_AuraScript);
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Creature* creature = GetCaster()->ToCreature())
+                creature->DespawnOrUnsummon();
+        }
+
+        void Register() override
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_aura_wrangling_rope_channel_despawner_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        // dodac do sc i db
+        return new spell_aura_wrangling_rope_channel_despawner_AuraScript();
+    }
 };
 
 enum eDrakuru
@@ -318,7 +346,7 @@ public:
     class spell_q11322_q11317_the_cleansing_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_q11322_q11317_the_cleansing_AuraScript)
-        
+
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             Unit* ar = GetCaster();
@@ -326,7 +354,7 @@ public:
             {
                 if (ar->ToPlayer()->GetQuestStatus(11317) == QUEST_STATUS_INCOMPLETE || ar->ToPlayer()->GetQuestStatus(11322) == QUEST_STATUS_INCOMPLETE)
                     ar->SummonCreature(27959, 3032.0f, -5095.0f, 723.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
-                
+
                 ar->SetStandState(UNIT_STAND_STATE_SIT);
             }
         }
@@ -506,7 +534,7 @@ public:
     class spell_q10769_dissension_amongst_the_ranks_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_q10769_dissension_amongst_the_ranks_AuraScript)
-        
+
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             Unit* ar = GetTarget();
@@ -617,7 +645,7 @@ class spell_quest_dragonmaw_race_generic : public SpellScriptLoader
         class spell_quest_dragonmaw_race_generic_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_quest_dragonmaw_race_generic_SpellScript);
-            
+
             bool Load()
             {
                 _x = _y = _z = 0.0f;
@@ -852,14 +880,14 @@ public:
         }
 
         void HandleScript(SpellEffIndex  /*effIndex*/)
-        {            
+        {
             if(Unit* target = GetHitUnit())
             {
                 if(Player* p = target->ToPlayer())
                 {
                     p->CastSpell(p, p->getGender() == GENDER_FEMALE ? SPELL_SCARLET_RAVEN_PRIEST_IMAGE_FEMALE : SPELL_SCARLET_RAVEN_PRIEST_IMAGE_MALE, false);
                 }
-            }     
+            }
         }
 
         void Register()
@@ -886,7 +914,7 @@ public:
         void HandleScript(SpellEffIndex effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            GetCaster()->CastSpell(GetCaster(), GetEffectValue(), true);   
+            GetCaster()->CastSpell(GetCaster(), GetEffectValue(), true);
         }
 
         SpellCastResult CheckRequirement()
@@ -926,7 +954,7 @@ public:
             if (Unit* unit = GetHitUnit())
                 if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
                     return;
-            GetCaster()->CastCustomSpell(42576 /*SPELL_CANNON_BLAST*/, SPELLVALUE_BASE_POINT0, GetEffectValue(), GetCaster(), true);   
+            GetCaster()->CastCustomSpell(42576 /*SPELL_CANNON_BLAST*/, SPELLVALUE_BASE_POINT0, GetEffectValue(), GetCaster(), true);
         }
 
         void Register()
@@ -2052,7 +2080,7 @@ enum RedSnapperVeryTasty
 
     SPELL_CAST_NET               = 29866,
     //SPELL_NEW_SUMMON_TEST      = 49214,
-    
+
     CREATURE_ANGRY_MURLOC        = 17102,
     GO_SCHOOL_OF_RED_SNAPPER     = 181616
 };
@@ -2086,7 +2114,7 @@ class spell_q9452_cast_net: public SpellScriptLoader
                 Player* caster = GetCaster()->ToPlayer();
                 if (roll_chance_i(66))
                     caster->AddItem(ITEM_RED_SNAPPER, 1);
-                else 
+                else
                 {
                     _x = caster->GetPositionX();
                     _y = caster->GetPositionY();
@@ -3043,7 +3071,7 @@ class spell_q12919_gymers_throw : public SpellScriptLoader
 
 #define QUEST_CROW_TRANSFORM 9718
 
-// spell 38776 
+// spell 38776
 class spell_q9718_crow_transform : public SpellScriptLoader
 {
 public:
@@ -3053,7 +3081,7 @@ public:
     {
         PrepareAuraScript(spell_q9718_crow_transform_AuraScript)
 
-       
+
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (GetOwner())
@@ -3085,7 +3113,7 @@ enum RecoverTheCargo
     ITEM_SALVAGE_KIT        = 33044,
     SPELL_SALVAGE_WRECKAGE  = 42287,
 
-    GO_SHIPWRECK_DEBRIS = 186283, 
+    GO_SHIPWRECK_DEBRIS = 186283,
     GO_BURNING_WRECKAGE = 186278,
 
     CREATURE_MIREFIN_AMBUSHER = 23701
@@ -3129,7 +3157,7 @@ public:
             if (Creature* Mirefin = caster->SummonCreature(CREATURE_MIREFIN_AMBUSHER, _x, _y, _z, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000))
                 Mirefin->AI()->AttackStart(caster);
 
-            
+
             if (GameObject* go = GetCaster()->FindNearestGameObject(GO_BURNING_WRECKAGE, 10.0f))
             {
                 go->SetRespawnTime(5 * MINUTE);
@@ -3189,6 +3217,7 @@ void AddSC_quest_spell_scripts()
     new spell_q10985_light_of_the_naaru();
     new spell_q9718_crow_transform();
     new spell_q11140_salvage_wreckage();
+    new spell_aura_wrangling_rope_channel_despawner();
 
     // Theirs
     new spell_q55_sacred_cleansing();
