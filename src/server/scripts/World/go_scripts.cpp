@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -94,7 +94,7 @@ public:
                 cr->MonsterYell("My treasure! You no steal from Tartek, dumb big-tongue traitor thing. Tartek and nasty dragon going to kill you! You so dumb.", LANG_UNIVERSAL, 0);
                 cr->AI()->AttackStart(pPlayer);
             }
-        }        
+        }
         return false;
     }
 };
@@ -151,7 +151,7 @@ public:
 		{
 			go->SetVisible(false);
 			isTimed = true;
-			return false; 
+			return false;
 		}
 
 		void UpdateAI(uint32 diff)
@@ -188,7 +188,7 @@ public:
     {
         if (Battleground* bg = player->GetBattleground())
             bg->ReadyMarkerClicked(player);
-        
+
         return false;
     }
 };
@@ -1195,7 +1195,7 @@ public:
             return true;
 
 		if (!go->FindNearestGameObject(NPC_HEAD, 5.0f))
-			go->SummonGameObject(NPC_HEAD, -7944.65f, -2639.17f, 218.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10000, false);		
+			go->SummonGameObject(NPC_HEAD, -7944.65f, -2639.17f, 218.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 10000, false);
 
 		return false;
 	}

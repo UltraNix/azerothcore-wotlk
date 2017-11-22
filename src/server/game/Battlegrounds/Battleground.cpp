@@ -187,9 +187,9 @@ Battleground::Battleground()
 
     m_HonorMode = BG_NORMAL;
 
-    StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_2M;
-    StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_1M;
-    StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_30S;
+    StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_NONE;
+    StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_NONE;
+    StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_NONE;
     StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
     //we must set to some default existing values
     StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_WS_START_TWO_MINUTES;
@@ -1621,11 +1621,16 @@ void Battleground::SpawnBGObject(uint32 type, uint32 respawntime)
         if (GameObject* obj = map->GetGameObject(BgObjects[type]))
         {
             if (respawntime)
+            {
+                obj->SendObjectDeSpawnAnim(obj->GetGUID());
                 obj->SetLootState(GO_JUST_DEACTIVATED);
+            }
             else
                 if (obj->getLootState() == GO_JUST_DEACTIVATED)
+                {
                     // Change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
                     obj->SetLootState(GO_READY);
+                }
             obj->SetRespawnTime(respawntime);
             map->AddToMap(obj);
         }

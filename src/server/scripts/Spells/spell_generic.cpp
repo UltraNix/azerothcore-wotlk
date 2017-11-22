@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -61,7 +61,7 @@ public:
             _hasFlag = false;
             return true;
         }
-        
+
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             _modelId = GetUnitOwner()->GetDisplayId();
@@ -182,7 +182,7 @@ public:
     class spell_gen_have_item_auras_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_gen_have_item_auras_AuraScript)
-        
+
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             Unit* target = GetTarget();
@@ -202,7 +202,7 @@ public:
                 }
 
                 if (entry)
-                    target->ToPlayer()->KilledMonsterCredit(entry, 0);            
+                    target->ToPlayer()->KilledMonsterCredit(entry, 0);
             }
         }
 
@@ -273,7 +273,7 @@ class spell_gen_reduced_above_60 : public SpellScriptLoader
             void RecalculateDamage()
             {
                 if (Unit* target = GetHitUnit())
-                    if (target->getLevel() > 60) 
+                    if (target->getLevel() > 60)
                     {
                         int32 damage = GetHitDamage();
                         AddPct(damage, -4*int8(std::min(target->getLevel(), uint8(85))-60)); // prevents reduce by more than 100%
@@ -299,7 +299,7 @@ class spell_gen_reduced_above_60 : public SpellScriptLoader
             void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & canBeRecalculated)
             {
                 if (Unit* owner = GetUnitOwner())
-                    if (owner->getLevel() > 60) 
+                    if (owner->getLevel() > 60)
                         AddPct(amount, -4*int8(std::min(owner->getLevel(), uint8(85))-60)); // prevents reduce by more than 100%
             }
 
@@ -326,7 +326,7 @@ class spell_gen_relocaste_dest : public SpellScriptLoader
             PrepareSpellScript(spell_gen_relocaste_dest_SpellScript);
             public:
                 spell_gen_relocaste_dest_SpellScript(float x, float y, float z, float o) : _x(x), _y(y), _z(z), _o(o) { }
-            
+
             void RelocateDest()
             {
                 Position const offset = {_x, _y, _z, _o};
@@ -337,7 +337,7 @@ class spell_gen_relocaste_dest : public SpellScriptLoader
             {
                 OnCast += SpellCastFn(spell_gen_relocaste_dest_SpellScript::RelocateDest);
             }
-            
+
             private:
                 float _x, _y, _z, _o;
         };
@@ -346,7 +346,7 @@ class spell_gen_relocaste_dest : public SpellScriptLoader
         {
             return new spell_gen_relocaste_dest_SpellScript(_x, _y, _z, _o);
         }
-        
+
     private:
         float _x, _y, _z, _o;
 };
@@ -398,7 +398,7 @@ public:
     class spell_gen_bg_preparation_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_gen_bg_preparation_AuraScript)
-        
+
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             GetTarget()->ApplySpellImmune(GetId(), IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
@@ -455,7 +455,7 @@ class spell_gen_disabled_above_level : public SpellScriptLoader
         public:
             spell_gen_disabled_above_level_SpellScript(uint8 level) : SpellScript(), _level(level) { }
 
-            
+
             SpellCastResult CheckRequirement()
             {
                 if (Unit* target = GetExplTargetUnit())
@@ -496,7 +496,7 @@ class spell_pet_hit_expertise_scalling : public SpellScriptLoader
             {
                 return (hitChance / cap) * maxChance;
             }
-            
+
             void CalculateHitAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Player* modOwner = GetUnitOwner()->GetSpellModOwner())
@@ -549,7 +549,7 @@ class spell_pet_hit_expertise_scalling : public SpellScriptLoader
                 isPeriodic = true;
                 amplitude = 3*IN_MILLISECONDS;
             }
-                
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
@@ -1013,7 +1013,7 @@ class spell_gen_baby_murloc : public SpellScriptLoader
         class spell_gen_baby_murloc_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_gen_baby_murloc_AuraScript)
-            
+
             void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 GetTarget()->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DANCE);
@@ -4759,7 +4759,7 @@ class spell_gen_whisper_gulch_yogg_saron_whisper : public SpellScriptLoader
             return new spell_gen_whisper_gulch_yogg_saron_whisper_AuraScript();
         }
 };
-  
+
 class spell_gen_eject_all_passengers : public SpellScriptLoader
 {
     public:
@@ -4900,6 +4900,50 @@ public:
     }
 };
 
+enum
+{
+    SPELL_BATTLEGROUND_NODE_VISUAL      = 24390
+};
+
+class spell_opening_battleground_nodes : public SpellScriptLoader
+{
+public:
+    spell_opening_battleground_nodes() : SpellScriptLoader("spell_opening_battleground_nodes") { }
+
+    class spell_opening_battleground_nodes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_opening_battleground_nodes_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster() && !GetCaster()->IsPlayer())
+                return SPELL_FAILED_DONT_REPORT;
+
+            if (!GetExplTargetGObj())
+                return SPELL_FAILED_BAD_TARGETS;
+
+            if (!GetCaster()->ToPlayer()->CanUseBattlegroundObject(GetExplTargetGObj()))
+                return SPELL_FAILED_BAD_TARGETS;
+
+            //! Right now (2017-11-22) there is other way to do it
+            //! in the future, if there is need for it, we could implement PreCast (Spell::SpellGo)
+            //! which will handle stuff like that, but i cant think of any other use so its a little bit of overkill for one use case
+            GetCaster()->CastSpell(GetCaster(), SPELL_BATTLEGROUND_NODE_VISUAL, true);
+            return SPELL_CAST_OK;
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_opening_battleground_nodes_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_opening_battleground_nodes_SpellScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     // ours:
@@ -4950,6 +4994,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_throw_back();
     new spell_sleep_magic_dust();
     new spell_gen_cleansing_vial();
+    new spell_opening_battleground_nodes();
 
     // theirs:
     new spell_gen_absorb0_hitlimit1();

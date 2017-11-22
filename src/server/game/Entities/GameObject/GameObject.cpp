@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -79,7 +79,7 @@ GameObject::~GameObject()
 }
 
 bool GameObject::AIM_Initialize()
-{ 
+{
     if (m_AI)
         delete m_AI;
 
@@ -93,12 +93,12 @@ bool GameObject::AIM_Initialize()
 }
 
 std::string GameObject::GetAIName() const
-{ 
+{
     return sObjectMgr->GetGameObjectTemplate(GetEntry())->AIName;
 }
 
 void GameObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
-{ 
+{
     if (GetTransport() && !ToTransport())
     {
         GetTransport()->RemovePassenger(this);
@@ -115,7 +115,7 @@ void GameObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
 }
 
 void GameObject::RemoveFromOwner()
-{ 
+{
     uint64 ownerGUID = GetOwnerGUID();
     if (!ownerGUID)
         return;
@@ -140,7 +140,7 @@ void GameObject::RemoveFromOwner()
 }
 
 void GameObject::AddToWorld()
-{ 
+{
     ///- Register the gameobject for guid lookup
     if (!IsInWorld())
     {
@@ -162,7 +162,7 @@ void GameObject::AddToWorld()
 }
 
 void GameObject::RemoveFromWorld()
-{ 
+{
     ///- Remove the gameobject from the accessor
     if (IsInWorld())
     {
@@ -181,7 +181,7 @@ void GameObject::RemoveFromWorld()
 }
 
 void GameObject::CheckRitualList()
-{ 
+{
     if (m_unique_users.empty())
         return;
     for (std::set<uint64>::iterator itr = m_unique_users.begin(); itr != m_unique_users.end();)
@@ -205,7 +205,7 @@ void GameObject::CheckRitualList()
 }
 
 void GameObject::ClearRitualList()
-{ 
+{
     uint32 animSpell = GetGOInfo()->summoningRitual.animSpell;
     if (!animSpell || m_unique_users.empty())
         return;
@@ -223,7 +223,7 @@ void GameObject::ClearRitualList()
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, G3D::Quat const& rotation, uint32 animprogress, GOState go_state, uint32 artKit)
-{ 
+{
     ASSERT(map);
     SetMap(map);
 
@@ -263,7 +263,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     }
 
     GameObjectAddon const* addon = sObjectMgr->GetGameObjectAddon(guidlow);
-    // xinef: hackfix - but make it possible to use original WorldRotation (using special gameobject addon data) 
+    // xinef: hackfix - but make it possible to use original WorldRotation (using special gameobject addon data)
     // pussywizard: temporarily calculate WorldRotation from orientation, do so until values in db are correct
     if (addon && addon->invisibilityType == INVISIBILITY_GENERAL && addon->InvisibilityValue == 0)
         SetWorldRotation(rotation);
@@ -339,7 +339,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 }
 
 void GameObject::Update(uint32 diff)
-{ 
+{
     if (AI())
         AI()->UpdateAI(diff);
     else if (!AIM_Initialize())
@@ -724,7 +724,7 @@ void GameObject::Update(uint32 diff)
 }
 
 void GameObject::Refresh()
-{ 
+{
     // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
     if (m_respawnTime > 0 && m_spawnedByDefault)
         return;
@@ -734,13 +734,13 @@ void GameObject::Refresh()
 }
 
 void GameObject::AddUniqueUse(Player* player)
-{ 
+{
     AddUse();
     m_unique_users.insert(player->GetGUID());
 }
 
 void GameObject::Delete()
-{ 
+{
     SetLootState(GO_NOT_READY);
     RemoveFromOwner();
 
@@ -761,7 +761,7 @@ void GameObject::Delete()
 }
 
 void GameObject::getFishLoot(Loot* fishloot, Player* loot_owner)
-{ 
+{
     fishloot->clear();
 
     uint32 zone, subzone;
@@ -774,7 +774,7 @@ void GameObject::getFishLoot(Loot* fishloot, Player* loot_owner)
     {
         //subzone no result,use zone loot
         fishloot->FillLoot(zone, LootTemplates_Fishing, loot_owner, true, true);
-        //use zone 1 as default, somewhere fishing got nothing,becase subzone and zone not set, like Off the coast of Storm Peaks. 
+        //use zone 1 as default, somewhere fishing got nothing,becase subzone and zone not set, like Off the coast of Storm Peaks.
         if (fishloot->empty())
             fishloot->FillLoot(defaultzone, LootTemplates_Fishing, loot_owner, true, true);
     }
@@ -801,7 +801,7 @@ void GameObject::getFishLootJunk(Loot* fishloot, Player* loot_owner)
 }
 
 void GameObject::SaveToDB()
-{ 
+{
     // this should only be used when the gameobject has already been loaded
     // preferably after adding to map, because mapid may not be valid otherwise
     GameObjectData const* data = sObjectMgr->GetGOData(m_DBTableGuid);
@@ -815,7 +815,7 @@ void GameObject::SaveToDB()
 }
 
 void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
-{ 
+{
     return;
 
     const GameObjectTemplate* goI = GetGOInfo();
@@ -875,7 +875,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 }
 
 bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
-{ 
+{
     GameObjectData const* data = sObjectMgr->GetGOData(guid);
 
     if (!data)
@@ -941,7 +941,7 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
 }
 
 void GameObject::DeleteFromDB()
-{ 
+{
     GetMap()->RemoveGORespawnTime(m_DBTableGuid);
     sObjectMgr->DeleteGOData(m_DBTableGuid);
 
@@ -962,7 +962,7 @@ void GameObject::DeleteFromDB()
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 bool GameObject::hasQuest(uint32 quest_id) const
-{ 
+{
     QuestRelationBounds qr = sObjectMgr->GetGOQuestRelationBounds(GetEntry());
     for (QuestRelations::const_iterator itr = qr.first; itr != qr.second; ++itr)
     {
@@ -973,7 +973,7 @@ bool GameObject::hasQuest(uint32 quest_id) const
 }
 
 bool GameObject::hasInvolvedQuest(uint32 quest_id) const
-{ 
+{
     QuestRelationBounds qir = sObjectMgr->GetGOQuestInvolvedRelationBounds(GetEntry());
     for (QuestRelations::const_iterator itr = qir.first; itr != qir.second; ++itr)
     {
@@ -989,19 +989,19 @@ bool GameObject::IsTransport() const
 }
 
 bool GameObject::IsDestructibleBuilding() const
-{ 
+{
     GameObjectTemplate const* gInfo = GetGOInfo();
     if (!gInfo) return false;
     return gInfo->type == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING;
 }
 
 Unit* GameObject::GetOwner() const
-{ 
+{
     return ObjectAccessor::GetUnit(*this, GetOwnerGUID());
 }
 
 void GameObject::SaveRespawnTime()
-{ 
+{
     if (m_goData && m_goData->dbData && m_respawnTime > time(NULL) && m_spawnedByDefault)
         GetMap()->SaveGORespawnTime(m_DBTableGuid, m_respawnTime);
 }
@@ -1018,7 +1018,7 @@ bool GameObject::IsNeverVisible() const
 }
 
 bool GameObject::IsAlwaysVisibleFor(WorldObject const* seer) const
-{ 
+{
     if (WorldObject::IsAlwaysVisibleFor(seer))
         return true;
 
@@ -1046,7 +1046,7 @@ bool GameObject::IsAlwaysVisibleFor(WorldObject const* seer) const
 }
 
 bool GameObject::IsInvisibleDueToDespawn() const
-{ 
+{
     if (WorldObject::IsInvisibleDueToDespawn())
         return true;
 
@@ -1058,7 +1058,7 @@ bool GameObject::IsInvisibleDueToDespawn() const
 }
 
 void GameObject::Respawn()
-{ 
+{
     if (m_spawnedByDefault && m_respawnTime > 0)
     {
         m_respawnTime = time(NULL);
@@ -1067,7 +1067,7 @@ void GameObject::Respawn()
 }
 
 bool GameObject::ActivateToQuest(Player* target) const
-{ 
+{
     if (target->HasQuestForGO(GetEntry()))
         return true;
 
@@ -1154,7 +1154,7 @@ void GameObject::TriggeringLinkedGameObject(uint32 trapEntry, Unit* target)
 }
 
 GameObject* GameObject::LookupFishingHoleAround(float range)
-{ 
+{
     GameObject* ok = NULL;
 
     CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
@@ -1169,7 +1169,7 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
 }
 
 void GameObject::ResetDoorOrButton()
-{ 
+{
     if (m_lootState == GO_READY || m_lootState == GO_JUST_DEACTIVATED)
         return;
 
@@ -1179,7 +1179,7 @@ void GameObject::ResetDoorOrButton()
 }
 
 void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = false */, Unit* user /*=NULL*/)
-{ 
+{
     if (m_lootState != GO_READY)
         return;
 
@@ -1193,7 +1193,7 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore, bool alternative /* = f
 }
 
 void GameObject::SetGoArtKit(uint8 kit)
-{ 
+{
     SetByteValue(GAMEOBJECT_BYTES_1, 2, kit);
     GameObjectData* data = const_cast<GameObjectData*>(sObjectMgr->GetGOData(m_DBTableGuid));
     if (data)
@@ -1216,7 +1216,7 @@ void GameObject::SetGoArtKit(uint8 artkit, GameObject* go, uint32 lowguid)
 }
 
 void GameObject::SwitchDoorOrButton(bool activate, bool alternative /* = false */)
-{ 
+{
     if (activate)
         SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
     else
@@ -1438,7 +1438,7 @@ void GameObject::Use(Unit* user)
             // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
             if (info->goober.customAnim)
                 SendCustomAnim(GetGoAnimProgress());
-                
+
             m_cooldownTime = World::GetGameTimeMS()+info->GetAutoCloseTime();
 
             // cast this spell later if provided
@@ -1830,7 +1830,7 @@ void GameObject::Use(Unit* user)
 }
 
 void GameObject::CastSpell(Unit* target, uint32 spellId)
-{ 
+{
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
         return;
@@ -1890,7 +1890,7 @@ void GameObject::CastSpell(Unit* target, uint32 spellId)
 }
 
 void GameObject::SendCustomAnim(uint32 anim)
-{ 
+{
     WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8+4);
     data << GetGUID();
     data << uint32(anim);
@@ -1898,7 +1898,7 @@ void GameObject::SendCustomAnim(uint32 anim)
 }
 
 bool GameObject::IsInRange(float x, float y, float z, float radius) const
-{ 
+{
     GameObjectDisplayInfoEntry const* info = sGameObjectDisplayInfoStore.LookupEntry(m_goInfo->displayId);
     if (!info)
         return IsWithinDist3d(x, y, z, radius);
@@ -1926,7 +1926,7 @@ bool GameObject::IsInRange(float x, float y, float z, float radius) const
 
 // pussywizard!
 void GameObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*self*/, bool includeMargin, Player const* skipped_rcvr)
-{ 
+{
     dist += GetObjectSize();
     if (includeMargin)
         dist += VISIBILITY_COMPENSATION * 2.0f; // pussywizard: to ensure everyone receives all important packets
@@ -1935,7 +1935,7 @@ void GameObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*s
 }
 
 void GameObject::EventInform(uint32 eventId)
-{ 
+{
     if (!eventId)
         return;
 
@@ -1948,7 +1948,7 @@ void GameObject::EventInform(uint32 eventId)
 
 // overwrite WorldObject function for proper name localization
 std::string const& GameObject::GetNameForLocaleIdx(LocaleConstant loc_idx) const
-{ 
+{
     if (loc_idx != DEFAULT_LOCALE)
         if (GameObjectLocale const* cl = sObjectMgr->GetGameObjectLocale(GetEntry()))
             if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
@@ -1998,7 +1998,7 @@ void GameObject::SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
 }
 
 void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, uint32 spellId /*= 0*/)
-{ 
+{
     if (!IsDestructibleBuilding())
         return;
 
@@ -2054,7 +2054,7 @@ void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, u
 }
 
 void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player* eventInvoker /*= NULL*/, bool setHealth /*= false*/)
-{ 
+{
     // the user calling this must know he is already operating on destructible gameobject
     ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
 
@@ -2152,12 +2152,12 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, Player*
 }
 
 void GameObject::SetLootState(LootState state, Unit* unit)
-{ 
+{
     m_lootState = state;
     AI()->OnStateChanged(state, unit);
     sScriptMgr->OnGameObjectLootStateChanged(this, state, unit);
     // pussywizard: lootState has nothing to do with collision, it depends entirely on GOState. Loot state is for timed close/open door and respawning, which then sets GOState
-    /*if (m_model) 
+    /*if (m_model)
     {
         // startOpen determines whether we are going to add or remove the LoS on activation
         bool startOpen = (GetGoType() == GAMEOBJECT_TYPE_DOOR || GetGoType() == GAMEOBJECT_TYPE_BUTTON ? GetGOInfo()->door.startOpen : false);
@@ -2174,7 +2174,7 @@ void GameObject::SetLootState(LootState state, Unit* unit)
 }
 
 void GameObject::SetGoState(GOState state)
-{ 
+{
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
     sScriptMgr->OnGameObjectStateChanged(this, state);
     if (m_model)
@@ -2200,13 +2200,13 @@ void GameObject::SetGoState(GOState state)
 }
 
 void GameObject::SetDisplayId(uint32 displayid)
-{ 
+{
     SetUInt32Value(GAMEOBJECT_DISPLAYID, displayid);
     UpdateModel();
 }
 
 void GameObject::SetPhaseMask(uint32 newPhaseMask, bool update)
-{ 
+{
     WorldObject::SetPhaseMask(newPhaseMask, update);
 
     if (m_model && m_model->isEnabled())
@@ -2214,7 +2214,7 @@ void GameObject::SetPhaseMask(uint32 newPhaseMask, bool update)
 }
 
 void GameObject::EnableCollision(bool enable)
-{ 
+{
     if (!m_model)
         return;
 
@@ -2229,7 +2229,7 @@ void GameObject::EnableCollision(bool enable)
 }
 
 void GameObject::UpdateModel()
-{ 
+{
     if (!IsInWorld())
         return;
     if (m_model)
@@ -2242,21 +2242,21 @@ void GameObject::UpdateModel()
 }
 
 Player* GameObject::GetLootRecipient() const
-{ 
+{
     if (!m_lootRecipient)
         return NULL;
     return ObjectAccessor::FindPlayerInOrOutOfWorld(m_lootRecipient);
 }
 
 Group* GameObject::GetLootRecipientGroup() const
-{ 
+{
     if (!m_lootRecipientGroup)
         return NULL;
     return sGroupMgr->GetGroupByGUID(m_lootRecipientGroup);
 }
 
 void GameObject::SetLootRecipient(Unit* unit)
-{ 
+{
     // set the player whose group should receive the right
     // to loot the creature after it dies
     // should be set to NULL after the loot disappears
@@ -2281,7 +2281,7 @@ void GameObject::SetLootRecipient(Unit* unit)
 }
 
 bool GameObject::IsLootAllowedFor(Player const* player) const
-{ 
+{
     if (!m_lootRecipient && !m_lootRecipientGroup)
         return true;
 
@@ -2299,7 +2299,7 @@ bool GameObject::IsLootAllowedFor(Player const* player) const
 }
 
 void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
-{ 
+{
     if (!target)
         return;
 
@@ -2393,7 +2393,7 @@ void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* t
 }
 
 void GameObject::GetRespawnPosition(float &x, float &y, float &z, float* ori /* = NULL*/) const
-{ 
+{
     if (m_DBTableGuid)
     {
         if (GameObjectData const* data = sObjectMgr->GetGOData(GetDBTableGUIDLow()))
@@ -2415,7 +2415,7 @@ void GameObject::GetRespawnPosition(float &x, float &y, float &z, float* ori /* 
 }
 
 void GameObject::SetPosition(float x, float y, float z, float o)
-{ 
+{
     // pussywizard: do not call for MotionTransport and other gobjects not in grid
 
     if (!Trinity::IsValidMapCoord(x, y, z, o))
@@ -2425,7 +2425,7 @@ void GameObject::SetPosition(float x, float y, float z, float o)
 }
 
 float GameObject::GetInteractionDistance()
-{ 
+{
     switch (GetGoType())
     {
         /// @todo find out how the client calculates the maximal usage distance to spellless working

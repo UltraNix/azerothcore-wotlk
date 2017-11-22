@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -417,7 +417,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 63482:
                         damage = (m_caster->GetMap()->Is25ManRaid() ? urand(7000, 7900) : damage);
                         break;
-                    // Eye Beam 
+                    // Eye Beam
                     case 63976:
                         damage = (m_caster->GetMap()->Is25ManRaid() ? urand(4100, 4900) : damage);
                         break;
@@ -435,7 +435,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         break;
                     // ToC 3.2
                     // Hellfire damage effect
-                    case 65817: 
+                    case 65817:
                     case 68142:
                     case 68143:
                     case 68144:
@@ -518,7 +518,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         pdamage = unitTarget->SpellDamageBonusTaken(m_caster, aura->GetSpellInfo(), pdamage, DOT, aura->GetBase()->GetStackAmount());
                         uint32 pct_dir = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 1));
                         uint8 baseTotalTicks = uint8(m_caster->CalcSpellDuration(aura->GetSpellInfo()) / aura->GetSpellInfo()->Effects[EFFECT_0].Amplitude);
-                        
+
                         damage += int32(CalculatePct(pdamage * baseTotalTicks, pct_dir));
 
                         float pct_dot = float(m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, (effIndex + 2))) / 3.0f;
@@ -955,8 +955,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                     if (spell->DmgClass == SPELL_DAMAGE_CLASS_NONE && spell->SpellFamilyName == SPELLFAMILY_GENERIC)
                         for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
                         {
-                            if ((iter->second->GetEffectMask() & (1<<i)) && 
-                                spell->Effects[i].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE && 
+                            if ((iter->second->GetEffectMask() & (1<<i)) &&
+                                spell->Effects[i].ApplyAuraName != SPELL_AURA_PERIODIC_DAMAGE &&
                                 spell->Effects[i].ApplyAuraName != SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
                                 spell->Effects[i].ApplyAuraName != SPELL_AURA_DUMMY)
                             {
@@ -1245,7 +1245,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     switch (m_spellInfo->Id)
     {
         case 45367:
-            if (Player* target = unitTarget->ToPlayer()) 
+            if (Player* target = unitTarget->ToPlayer())
                 target->TeleportTo(uint32(530), 12782.93f, -6879.83f, 23.35f, 2.18f, TELE_TO_GM_MODE);
             return;
         case 45370:
@@ -3638,7 +3638,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     {
         if (Unit* owner = m_caster->GetOwner())
             weaponDamage = owner->CalculateDamage(m_attackType, normalized, true);
-    }            
+    }
     else
         weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
@@ -3720,7 +3720,7 @@ void Spell::EffectHealMaxHealth(SpellEffIndex /*effIndex*/)
     {
         addhealth = m_caster->GetMaxHealth();
 
-        // Lay on Hands 
+        // Lay on Hands
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_PALADIN_LAY_ON_HANDS)
         {
             if (unitTarget->HasAura(55593)) //Fix for Necrotic Aura
@@ -3928,7 +3928,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                         case 3:
                         case 4:
                             itemId = 23585;
-                            break;            // Stouthammer Lite          
+                            break;            // Stouthammer Lite
                     }
                     DoCreateItem(effIndex, itemId);
                     break;
@@ -5154,7 +5154,7 @@ void Spell::EffectChargeDest(SpellEffIndex /*effIndex*/)
     {
         Position pos;
         destTarget->GetPosition(&pos);
-        
+
         if (!m_caster->IsWithinLOS(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
         {
             float angle = m_caster->GetRelativeAngle(pos.GetPositionX(), pos.GetPositionY());
@@ -5173,7 +5173,7 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
 
     if (!unitTarget)
         return;
-    
+
     // Xinef: allow entry specific spells to skip those checks                                                                                                     // @ulduar Flame Leviathan
     if (m_spellInfo->Effects[effIndex].TargetA.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Effects[effIndex].TargetB.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Id != 62376)
     {
@@ -5374,7 +5374,7 @@ void Spell::EffectResurrectPet(SpellEffIndex /*effIndex*/)
         player->SummonPet(0, x, y, z, player->GetOrientation(), SUMMON_PET, 0, 0, (uint64)damage, PET_LOAD_SUMMON_DEAD_PET);
         return;
     }
- 
+
     pet->SetPosition(x, y, z, player->GetOrientation());
 
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
@@ -6154,7 +6154,7 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
             {
                 mm->Clear(false);
                 mm->MoveFollow(caster, PET_FOLLOW_DIST, summon->GetFollowAngle(), MOTION_SLOT_ACTIVE);
-            }        
+            }
         }
 
         if (properties && properties->Category == SUMMON_CATEGORY_ALLY)

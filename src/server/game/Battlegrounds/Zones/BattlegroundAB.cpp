@@ -277,7 +277,7 @@ void BattlegroundAB::EventPlayerClickedOnFlag(Player* player, GameObject* gameOb
         if (player->GetDistance2d(BG_AB_NodePositions[node][0], BG_AB_NodePositions[node][1]) < 10.0f)
             break;
 
-    if (node == BG_AB_DYNAMIC_NODES_COUNT || _capturePointInfo[node]._ownerTeamId == player->GetTeamId() || 
+    if (node == BG_AB_DYNAMIC_NODES_COUNT || _capturePointInfo[node]._ownerTeamId == player->GetTeamId() ||
         (_capturePointInfo[node]._state == BG_AB_NODE_STATE_ALLY_CONTESTED && player->GetTeamId() == TEAM_ALLIANCE) ||
         (_capturePointInfo[node]._state == BG_AB_NODE_STATE_HORDE_CONTESTED && player->GetTeamId() == TEAM_HORDE))
         return;
