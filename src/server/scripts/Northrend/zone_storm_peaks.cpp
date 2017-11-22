@@ -1123,6 +1123,12 @@ public:
                 events.ScheduleEvent(EVENT_REACHED_HOME, 2000);
         }
 
+        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) override
+        {
+            me->SetSpeed(MOVE_RUN, 2.0f);
+            me->SetSpeed(MOVE_FLIGHT, 2.0f);
+        }
+
         void UpdateAI(uint32 diff)
         {
             events.Update(diff);
