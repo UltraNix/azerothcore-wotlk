@@ -9372,7 +9372,7 @@ Unit* Unit::getAttackerForHelper() const
         return nullptr;
 
     if (Unit* victim = GetVictim())
-        if ((!IsPet() && !GetOwner()) || IsInCombatWith(victim) || victim->IsInCombatWith(this))
+        if ((!IsPet() && !GetCharmerOrOwnerPlayerOrPlayerItself()) || IsInCombatWith(victim) || victim->IsInCombatWith(this))
             return victim;
 
     if (!m_attackers.empty())

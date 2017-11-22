@@ -2023,16 +2023,15 @@ void Creature::CallForHelp(float radius)
 
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
+    if (IsInEvadeMode())
+        return false;
+
     // is it true?
     if (!HasReactState(REACT_AGGRESSIVE))
         return false;
 
     // we don't need help from zombies :)
     if (!IsAlive())
-        return false;
-
-    // Xinef: we cannot assist in evade mode
-    if (IsInEvadeMode())
         return false;
 
     // pussywizard: or if enemy is in evade mode
@@ -2092,12 +2091,14 @@ bool Creature::_IsTargetAcceptable(const Unit* target) const
             return false;
     }
 
-    const Unit* myVictim = getAttackerForHelper();
-    const Unit* targetVictim = target->getAttackerForHelper();
+    Unit const* targetVictim = target->getAttackerForHelper();
 
     // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
-    if (myVictim == target || targetVictim == this || IsHostileTo(target))
+    if (IsInCombatWith(target) || IsHostileTo(target))
         return true;
+
+    if (target->GetTypeId() == TYPEID_PLAYER && targetVictim == this)
+        return false;
 
     // if the target's victim is friendly, and the target is neutral, the target is acceptable
     if (targetVictim && !IsNeutralToAll() && IsFriendlyTo(targetVictim))
