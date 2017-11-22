@@ -187,9 +187,9 @@ Battleground::Battleground()
 
     m_HonorMode = BG_NORMAL;
 
-    StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_NONE;
-    StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_NONE;
-    StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_NONE;
+    StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_2M;
+    StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_1M;
+    StartDelayTimes[BG_STARTING_EVENT_THIRD] = BG_START_DELAY_30S;
     StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
     //we must set to some default existing values
     StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_WS_START_TWO_MINUTES;
