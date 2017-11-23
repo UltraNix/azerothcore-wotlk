@@ -2538,6 +2538,17 @@ void Player::ProcessDelayedOperations()
 
     if (m_DelayedOperations & DELAYED_BG_GROUP_RESTORE)
     {
+        //! hooking it up to this delayed group
+        bool disablePvP = false;
+        if (!HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
+        {
+            SetPvP(true);
+            disablePvP = true;
+        }
+
+        if (disablePvP)
+            UpdatePvP(true, false);
+
         if (Group *g = GetGroup())
             g->SendUpdateToPlayer(GetGUID());
     }
