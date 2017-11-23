@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -106,7 +106,7 @@ public:
     class spell_q10563_q10596_to_legion_hold_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_q10563_q10596_to_legion_hold_AuraScript)
-        
+
         void HandleEffectRemove(AuraEffect const * /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Player* player = GetTarget()->ToPlayer())
@@ -1781,11 +1781,99 @@ public:
     }
 };
 
+enum karsius
+{
+    EMOTE_STATE_KARSIUS         = 333,
+    SPELL_KARSIUS_TERON_GORE    = 37748,
+    SPELL_KARSIUS_FORCE_REACT   = 37782,
+    NPC_KARS_TERON              = 21867,
+    NPC_KARS_ANCIENT_SHADOW     = 21797,
+    NPC_KARS_CHAINS             = 21876,
+
+    EVENT_CHECK_FLAGS           = 1
+};
+
+class npc_karsius_the_ancient : public CreatureScript
+{
+public:
+    npc_karsius_the_ancient() : CreatureScript("npc_karsius_the_ancient") { }
+
+    struct npc_karsius_the_ancient_AI : public ScriptedAI
+    {
+        npc_karsius_the_ancient_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            if (Creature* ancient = me->FindNearestCreature(NPC_KARS_TERON, 100.0f, true))
+                ancient->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void SetData(uint32 type, uint32 value) override
+        {
+            if (type == 2 && value == 2)
+                me->DespawnOrUnsummon();
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            std::list<Creature*> tempList;
+            me->GetCreatureListWithEntryInGrid(tempList, NPC_KARS_CHAINS, 100.0f);
+            for (auto i : tempList)
+                if (Creature* chain = i)
+                    chain->DespawnOrUnsummon();
+
+            if (Creature* ancient = me->FindNearestCreature(NPC_KARS_TERON, 100.0f, true))
+            {
+                ancient->RemoveAurasDueToSpell(SPELL_KARSIUS_TERON_GORE);
+                ancient->AI()->SetData(1, 1);
+            }
+
+            if (Player* player = me->SelectNearestPlayer(100.0f))
+                if (player->HasAura(SPELL_KARSIUS_FORCE_REACT))
+                    player->RemoveAurasDueToSpell(SPELL_KARSIUS_FORCE_REACT);
+            Talk(1);
+        }
+
+        void EnterEvadeMode() override
+        {
+            if (Player* player = me->SelectNearestPlayer(100.0f))
+                if (player->HasAura(SPELL_KARSIUS_FORCE_REACT))
+                    player->RemoveAurasDueToSpell(SPELL_KARSIUS_FORCE_REACT);
+
+            std::list<Creature*> tempList;
+            me->GetCreatureListWithEntryInGrid(tempList, NPC_KARS_CHAINS, 100.0f);
+            for (auto i : tempList)
+                if (Creature* chain = i)
+                    chain->DespawnOrUnsummon();
+
+            if (Creature* ancient = me->FindNearestCreature(NPC_KARS_TERON, 100.0f, true))
+                ancient->DespawnOrUnsummon();
+
+            if (Creature* teron = me->FindNearestCreature(NPC_KARS_ANCIENT_SHADOW, 100.0f, true))
+                teron->DespawnOrUnsummon();
+
+            me->DespawnOrUnsummon();
+        }
+
+        bool CanAIAttack(Unit const* target) const override
+        {
+            return target->GetTypeId() == TYPEID_UNIT;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_karsius_the_ancient_AI(creature);
+    }
+};
+
 void AddSC_shadowmoon_valley()
 {
     // Ours
     new spell_q10612_10613_the_fel_and_the_furious();
     new spell_q10563_q10596_to_legion_hold();
+    new npc_karsius_the_ancient();
 
     // Theirs
     new npc_invis_infernal_caster();
