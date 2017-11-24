@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -96,9 +96,6 @@ class spell_rog_combat_potency : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                if(eventInfo.GetSpellInfo())
-                    if (eventInfo.GetSpellInfo()->Id == SPELL_ROGUE_FAN_OF_KNIFES)
-                        return true;
                 return eventInfo.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK);
             }
 
@@ -817,7 +814,7 @@ class spell_rog_tricks_of_the_trade_proc : public SpellScriptLoader
 };
 
 // 1856 - Vanish
-class spell_rog_vanish : public SpellScriptLoader 
+class spell_rog_vanish : public SpellScriptLoader
 {
     public:
         spell_rog_vanish() : SpellScriptLoader("spell_rog_vanish") { }
