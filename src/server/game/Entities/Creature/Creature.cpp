@@ -1613,6 +1613,13 @@ void Creature::setDeathState(DeathState s, bool despawn)
 
         if (!despawn && (CanFly() || IsFlying()) && !HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING)) // pussywizard: added MOVEMENTFLAG_SWIMMING check because IsFlying() returns true when swimming creatures have MOVEMENTFLAG_DISABLE_GRAVITY
             GetMotionMaster()->MoveFall(0, true);
+        else if (!despawn && !HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+        {
+            float ground = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ());
+
+            if (G3D::fuzzyGt(GetPositionZ(), ground + 0.05f))
+                GetMotionMaster()->MoveFall(0, true);
+        }
 
         Unit::setDeathState(CORPSE, despawn);
     }
