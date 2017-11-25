@@ -4742,7 +4742,14 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// Generic NPC Spells
         /////////////////////////////////
-
+        case 56900: // Power of the Lorehammer
+            //! this causes issues when player dies with said aura
+            //! player repops and corpse is created in phases + 256 phaseMask and then loses this aura
+            //! and when he comes back to reclaim his body, he is no longer in same phase and 'accept' fails
+            spellInfo->Attributes &= ~SPELL_ATTR0_CASTABLE_WHILE_DEAD;
+            spellInfo->AttributesEx3 &= ~SPELL_ATTR3_DEATH_PERSISTENT;
+            spellInfo->AttributesEx2 &= ~SPELL_ATTR2_CAN_TARGET_DEAD;
+            break;
         // Throw Proximity Bomb
         case 34095:
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_TARGET_ENEMY;

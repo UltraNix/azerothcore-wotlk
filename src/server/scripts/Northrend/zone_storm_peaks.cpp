@@ -1324,6 +1324,142 @@ class spell_close_rift : public SpellScriptLoader
         }
 };
 
+enum northwindEnum
+{
+    SPELL_NORTHWIND_CYCLONE         = 61662,
+    SPELL_NORTHWIND_GUST_OF_WIND    = 61663,
+    SPELL_NORTHWIND_STUN            = 46957,
+    SPELL_ELEMENTAL_HORN_FURY       = 56892,
+    SPELL_AURA_VEH_TAUREHE          = 46598,
+
+    NPC_TAUREHE_VEH                 = 30388,
+    NPC_NORTH_WIND                  = 30474,
+
+    SAY_NORTHWIND_0                 = 0,
+    SAY_NORTHWIND_1                 = 1,
+
+    SAY_TAUREHE_0                   = 0,
+    SAY_TAUREHE_1                   = 1,
+
+    EVENT_NORTHWIND_CYCLONE         = 1,
+    EVENT_NORTHWIND_GUST_OF_WIND    = 2,
+    EVENT_NORTHWIND_HORN            = 3,
+    EVENT_NORTHWIND_HORN_2          = 4,
+    EVENT_HORTHWIND_HORN_3          = 5
+};
+
+class npc_northwind_stormpeaks : public CreatureScript
+{
+public:
+    npc_northwind_stormpeaks() : CreatureScript("npc_northwind_stormpeaks") { }
+
+    struct npc_northwind_stormpeaks_AI : public ScriptedAI
+    {
+        npc_northwind_stormpeaks_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            waitingForDeath = false;
+            me->RestoreFaction();
+            me->SetRegeneratingHealth(true);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            Talk(SAY_NORTHWIND_0);
+            ScriptedAI::EnterCombat(who);
+            events.ScheduleEvent(EVENT_NORTHWIND_CYCLONE, urand(1000, 3000));
+            events.ScheduleEvent(EVENT_NORTHWIND_GUST_OF_WIND, urand(1000, 8000));
+        }
+
+        void SetData(uint32 type, uint32 value) override
+        {
+            if (type == 0 && value == 2)
+                Unit::Kill(me, me);
+        }
+
+        void DamageTaken(Unit * /*attacker*/, uint32 & damage, DamageEffectType, SpellSchoolMask) override
+        {
+            if (me->HealthBelowPctDamaged(20, damage))
+            {
+                damage = 0;
+                if (!waitingForDeath)
+                {
+                    waitingForDeath = true;
+                    me->setFaction(35);
+                    me->SetRegeneratingHealth(false);
+                    DoCastSelf(SPELL_NORTHWIND_STUN);
+                    Talk(SAY_NORTHWIND_1);
+                    me->DespawnOrUnsummon(60000);
+                    events.ScheduleEvent(EVENT_NORTHWIND_HORN, 2000);
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!waitingForDeath && !UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (auto eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_NORTHWIND_CYCLONE:
+                        DoCastVictim(SPELL_NORTHWIND_CYCLONE);
+                        events.Repeat(urand(8000, 11000));
+                        break;
+                    case EVENT_NORTHWIND_GUST_OF_WIND:
+                        DoCastVictim(SPELL_NORTHWIND_GUST_OF_WIND);
+                        events.Repeat(urand(12000, 16000));
+                        break;
+                    case EVENT_NORTHWIND_HORN:
+                        if (Creature* veh = me->FindNearestCreature(NPC_TAUREHE_VEH, 50.0f, true))
+                        {
+                            veh->AI()->Talk(SAY_TAUREHE_0);
+                            veh->AI()->Talk(SAY_TAUREHE_1);
+                            veh->RemoveAurasDueToSpell(SPELL_AURA_VEH_TAUREHE);
+                        }
+                        DoCastAOE(SPELL_ELEMENTAL_HORN_FURY, true);
+                        events.ScheduleEvent(EVENT_NORTHWIND_HORN_2, 2000);
+                        break;
+                }
+            }
+        }
+    private:
+        bool waitingForDeath;
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_northwind_stormpeaks_AI(creature);
+    }
+};
+
+class npc_stormpeaks_stormhoof : public CreatureScript
+{
+public:
+    npc_stormpeaks_stormhoof() : CreatureScript("npc_stormpeaks_stormhoof") { }
+
+    struct npc_stormpeaks_stormhoof_AI : public ScriptedAI
+    {
+        npc_stormpeaks_stormhoof_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool CanAIAttack(const Unit* target) const override
+        {
+            return target->GetEntry() == NPC_NORTH_WIND;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_stormpeaks_stormhoof_AI(creature);
+    }
+};
+
 void AddSC_storm_peaks()
 {
     // Ours
@@ -1337,6 +1473,8 @@ void AddSC_storm_peaks()
     new spell_jokkum_scriptcast();
     new spell_jokum_summon();
     new npc_veranus_stormpeaks();
+    new npc_stormpeaks_stormhoof();
+    new npc_northwind_stormpeaks();
 
     // Theirs
     new npc_injured_goblin();
