@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -550,7 +550,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     if ((e.action.cast.flags & SMARTCAST_COMBAT_MOVE) && GetCasterMaxDist() > 0.0f && me->GetMaxPower(GetCasterPowerType()) > 0)
                     {
                         // Xinef: check mana case only and operate movement accordingly, LoS and range is checked in targetet movement generator
-                        if (me->GetPowerPct(GetCasterPowerType()) < 15.0f)
+                        if (me->GetPowerPct(GetCasterPowerType()) < 15.0f || me->HasAuraType(SPELL_AURA_MOD_SILENCE) || me->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE))
                         {
                             SetCasterActualDist(0);
                             CAST_AI(SmartAI, me->AI())->SetForcedCombatMove(0);
@@ -796,7 +796,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 if (IsCreature((*itr)))
                     if ((*itr)->ToCreature()->IsAIEnabled)
                         (*itr)->ToCreature()->AI()->EnterEvadeMode();
-            
+
             delete targets;
             break;
         }
@@ -842,7 +842,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     //    (*itr)->GetGUIDLow(), e.action.quest.quest);
                 }
             }
-            
+
             delete targets;
             break;
         }
@@ -2281,7 +2281,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                         }
                         else
                             (*itr)->ToCreature()->SetHomePosition((*itr)->GetPositionX(), (*itr)->GetPositionY(), (*itr)->GetPositionZ(), (*itr)->GetOrientation());
-                        
+
                     }
                 delete targets;
             }
