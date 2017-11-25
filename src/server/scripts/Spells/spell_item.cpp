@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1001,7 +1001,7 @@ class spell_item_fetch_ball : public SpellScriptLoader
                 for (std::list<WorldObject*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
                     if (Creature* creature = (*itr)->ToCreature())
                     {
-                        if (creature->GetOwnerGUID() == GetCaster()->GetOwnerGUID() && !creature->IsNonMeleeSpellCast(false) && 
+                        if (creature->GetOwnerGUID() == GetCaster()->GetOwnerGUID() && !creature->IsNonMeleeSpellCast(false) &&
                             creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
                         {
                             target = creature;
@@ -3533,7 +3533,7 @@ class spell_item_nitro_boots : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                caster->CastSpell(caster, caster->GetMap()->IsDungeon() || roll_chance_i(95) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
+                caster->CastSpell(caster, roll_chance_i(95) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
             }
 
             void Register()
@@ -3546,6 +3546,56 @@ class spell_item_nitro_boots : public SpellScriptLoader
         {
             return new spell_item_nitro_boots_SpellScript();
         }
+};
+
+enum goblinRocketBoots
+{
+    SPELL_GOBLIN_ROCKET_BOOTS       = 8892,
+    SPELL_GOBLIN_ROCKET_BOOTS_MALU  = 8893,
+    SPELL_DESTROY_ROCKET_BOOTS      = 8897,
+
+    ITEM_GOBLIN_ROCKET_BOOTS        = 7189
+};
+
+class spell_item_goblin_rocket_boots : public SpellScriptLoader
+{
+public:
+    spell_item_goblin_rocket_boots() : SpellScriptLoader("spell_item_goblin_rocket_boots") { }
+
+    class spell_item_goblin_rocket_boots_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_goblin_rocket_boots_SpellScript);
+
+        bool Validate(SpellInfo const* /*spell*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_GOBLIN_ROCKET_BOOTS) || !sSpellMgr->GetSpellInfo(SPELL_GOBLIN_ROCKET_BOOTS_MALU) || !sSpellMgr->GetSpellInfo(SPELL_DESTROY_ROCKET_BOOTS))
+                return false;
+            return true;
+        }
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                if (roll_chance_i(10))
+                {
+                    caster->CastSpell(caster, SPELL_DESTROY_ROCKET_BOOTS);
+                    caster->CastSpell(caster, SPELL_GOBLIN_ROCKET_BOOTS_MALU, true);
+                    caster->RemoveAurasDueToSpell(SPELL_GOBLIN_ROCKET_BOOTS);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_item_goblin_rocket_boots_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_item_goblin_rocket_boots_SpellScript();
+    }
 };
 
 enum TeachLanguage
@@ -3921,6 +3971,7 @@ void AddSC_item_spell_scripts()
     new spell_item_summon_or_dismiss();
     new spell_item_draenic_pale_ale();
     new spell_item_direbrew_remote();
+    new spell_item_goblin_rocket_boots();
 
     // Theirs
     // 23074 Arcanite Dragonling
