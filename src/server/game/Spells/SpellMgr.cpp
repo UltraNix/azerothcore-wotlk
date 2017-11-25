@@ -3342,6 +3342,16 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->_requireCooldownInfo = true;
         });
 
+        ApplySpellFix
+        ({
+            56513,
+            56524
+        }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->RecoveryTime = (spellInfo->Id == 56524 ? 6000 : 2000);
+            spellInfo->StartRecoveryTime = (spellInfo->Id == 56524 ? 6000 : 2000);
+            spellInfo->_requireCooldownInfo = true;
+        });
         // Jotunheim Rapid-Fire Harpoon: Rapid-Fire Harpoon
         ApplySpellFix({ 56570 }, [](SpellInfo* spellInfo) {
             spellInfo->RecoveryTime = 200;
@@ -6713,11 +6723,6 @@ void SpellMgr::LoadDbcDataCorrections()
         // Ridding the red rocket
         case 49177:
             spellInfo->EffectBasePoints[0] = 1; // corrects seat id (points - 1 = seatId)
-            break;
-        // The Iron Colossus (13007)
-        case 56513:
-        case 56524:
-            spellInfo->RecoveryTime = (spellInfo->Id == 56524 ? 6000 : 2000);
             break;
         // Kaw the Mammoth Destroyer (11879)
         case 46260:
