@@ -7110,6 +7110,16 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 64042: // Lasser barrage right missile (Mimiron)
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_DEST_NEARBY_ENTRY;
+            break;
+        // Mangletooth buffs, he is inside a LoS cage, spells should ignore los in this case
+        case 17013:
+        case 16612:
+        case 16610:
+        case 10767:
+        case 16618:
+        case 7764:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
         /////////////////////////////////////////////
         /////////////////// CUSTOM //////////////////
         /////////////////////////////////////////////
