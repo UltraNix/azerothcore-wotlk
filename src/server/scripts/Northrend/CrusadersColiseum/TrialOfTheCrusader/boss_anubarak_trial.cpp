@@ -230,6 +230,7 @@ struct boss_anubarak_trialAI : public BossAI
             DoCastAOE(SPELL_LEECHING_SWARM);
             Talk(EMOTE_LEECHING_SWARM);
             Talk(SAY_LEECHING_SWARM);
+            return;
         }
 
         while (uint32 eventId = events.ExecuteEvent())
