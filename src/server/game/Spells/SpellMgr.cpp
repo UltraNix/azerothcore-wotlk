@@ -3776,9 +3776,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 8983:  // Druid - Bash  - R3
             spellInfo->AttributesEx7 |= SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER;
             break;
-        case 28730: // Arcane Torrent
-            spellInfo->Attributes |= SPELL_ATTR3_IGNORE_HIT_RESULT;
-            break;
         /////////////////////////////////
         ///// PALADIN
         /////////////////////////////////
