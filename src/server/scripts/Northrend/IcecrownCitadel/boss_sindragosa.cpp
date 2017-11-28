@@ -913,10 +913,10 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
                 healList.remove_if(UnchainedMagicTargetSelector(false));
                 if (healList.size() > maxSize)
-                    Trinity::Containers::RandomResizeList(healList, maxSize);
+                    Trinity::Containers::RandomResize(healList, maxSize);
                 dpsList.remove_if(UnchainedMagicTargetSelector(true));
                 if (dpsList.size() > maxSize)
-                    Trinity::Containers::RandomResizeList(dpsList, maxSize);
+                    Trinity::Containers::RandomResize(dpsList, maxSize);
                 unitList.splice(unitList.begin(), healList);
                 unitList.splice(unitList.begin(), dpsList);
             }

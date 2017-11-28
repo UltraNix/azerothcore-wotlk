@@ -28,40 +28,67 @@ namespace Trinity
 {
     namespace Containers
     {
-        template<class T>
-        void RandomResizeList(std::list<T> &list, uint32 size)
+        // replace with std::size in C++17
+        template<class C>
+        constexpr inline std::size_t Size(C const& container)
         {
-            size_t list_size = list.size();
-
-            while (list_size > size)
-            {
-                typename std::list<T>::iterator itr = list.begin();
-                std::advance(itr, urand(0, list_size - 1));
-                list.erase(itr);
-                --list_size;
-            }
+            return container.size();
         }
 
-        template<class T, class Predicate>
-        void RandomResizeList(std::list<T> &list, Predicate& predicate, uint32 size)
+        template<class T, std::size_t size>
+        constexpr inline std::size_t Size(T const(&)[size]) noexcept
+        {
+            return size;
+        }
+
+        // resizes <container> to have at most <requestedSize> elements
+        // if it has more than <requestedSize> elements, the elements to keep are selected randomly
+        template<class C>
+        void RandomResize(C& container, std::size_t requestedSize)
+        {
+            static_assert(std::is_base_of<std::forward_iterator_tag, typename std::iterator_traits<typename C::iterator>::iterator_category>::value, "Invalid container passed to Trinity::Containers::RandomResize");
+            if (Size(container) <= requestedSize)
+                return;
+            auto keepIt = std::begin(container), curIt = std::begin(container);
+            uint32 elementsToKeep = requestedSize, elementsToProcess = Size(container);
+            while (elementsToProcess)
+            {
+                // this element has chance (elementsToKeep / elementsToProcess) of being kept
+                if (urand(1, elementsToProcess) <= elementsToKeep)
+                {
+                    *keepIt = std::move(*curIt);
+                    ++keepIt;
+                    --elementsToKeep;
+                }
+                ++curIt;
+                --elementsToProcess;
+            }
+            container.erase(keepIt, std::end(container));
+        }
+
+        template<class C, class Predicate>
+        void RandomResize(C& container, Predicate&& predicate, std::size_t requestedSize)
         {
             //! First use predicate filter
-            std::list<T> listCopy;
-            for (typename std::list<T>::iterator itr = list.begin(); itr != list.end(); ++itr)
-                if (predicate(*itr))
-                    listCopy.push_back(*itr);
+            C containerCopy;
+            std::copy_if(std::begin(container), std::end(container), std::inserter(containerCopy, std::end(containerCopy)), predicate);
 
-            if (size)
-                RandomResizeList(listCopy, size);
+            if (requestedSize)
+                RandomResize(containerCopy, requestedSize);
 
-            list = listCopy;
+            container = std::move(containerCopy);
         }
 
-        /* Select a random element from a container. Note: make sure you explicitly empty check the container */
-        template <class C> typename C::value_type const& SelectRandomContainerElement(C const& container)
+        /*
+        * Select a random element from a container.
+        *
+        * Note: container cannot be empty
+        */
+        template<class C>
+        inline auto SelectRandomContainerElement(C const& container) -> typename std::add_const<decltype(*std::begin(container))>::type&
         {
-            typename C::const_iterator it = container.begin();
-            std::advance(it, urand(0, container.size() - 1));
+            auto it = std::begin(container);
+            std::advance(it, urand(0, uint32(Size(container)) - 1));
             return *it;
         }
     }

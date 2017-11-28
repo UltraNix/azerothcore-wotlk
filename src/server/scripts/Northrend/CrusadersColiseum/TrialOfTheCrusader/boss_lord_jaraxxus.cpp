@@ -433,7 +433,7 @@ class spell_mistress_kiss_area_SpellScript : public SpellScript
         if (targets.empty())
             return;
 
-        Trinity::Containers::RandomResizeList(targets, is25ManRaid ? 5 : 1);
+        Trinity::Containers::RandomResize(targets, is25ManRaid ? 5 : 1);
     }
 
     void HandleScript(SpellEffIndex /*effIndex*/)

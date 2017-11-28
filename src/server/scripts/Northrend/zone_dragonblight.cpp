@@ -1198,7 +1198,7 @@ class spell_q24545_aod_special : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(GhoulTargetCheck(GetSpellInfo()->Id == 70790));
-                Trinity::Containers::RandomResizeList(targets, 2);
+                Trinity::Containers::RandomResize(targets, 2);
             }
 
             void HandleScript(SpellEffIndex effIndex)

@@ -702,7 +702,7 @@ class spell_pal_divine_storm_dummy : public SpellScriptLoader
 
             void CountTargets(std::list<WorldObject*>& targetList)
             {
-                Trinity::Containers::RandomResizeList(targetList, GetSpellValue()->MaxAffectedTargets);
+                Trinity::Containers::RandomResize(targetList, GetSpellValue()->MaxAffectedTargets);
                 _targetCount = targetList.size();
             }
 

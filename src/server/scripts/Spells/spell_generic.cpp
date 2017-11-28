@@ -777,7 +777,7 @@ class spell_gen_select_target_count : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& targets)
             {
                 targets.remove(GetCaster());
-                Trinity::Containers::RandomResizeList(targets, _count);
+                Trinity::Containers::RandomResize(targets, _count);
             }
 
             void Register()

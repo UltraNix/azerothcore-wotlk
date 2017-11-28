@@ -2203,7 +2203,7 @@ class spell_igb_explosion : public SpellScriptLoader
             void SelectTarget(std::list<WorldObject*>& targets)
             {
                 targets.remove_if(IgbExplosionCheck(GetCaster()));
-                Trinity::Containers::RandomResizeList(targets, 1);
+                Trinity::Containers::RandomResize(targets, 1);
             }
 
             void Register()

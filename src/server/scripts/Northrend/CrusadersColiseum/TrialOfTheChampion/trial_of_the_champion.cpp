@@ -347,12 +347,12 @@ public:
                                             if (spectatorEntry == NPC_SPECTATOR_HORDE || spectatorEntry == NPC_SPECTATOR_ALLIANCE)
                                             {
                                                 GetSpectators(spectators, id);
-                                                Trinity::Containers::RandomResizeList(spectators, urand(6, 10));
+                                                Trinity::Containers::RandomResize(spectators, urand(6, 10));
                                             }
                                             else
                                             {
                                                 me->GetCreatureListWithEntryInGrid(spectators, SpectatorData[plr->getRace()].spectatorForAnim, 250.0f);
-                                                Trinity::Containers::RandomResizeList(spectators, urand(2, 5));
+                                                Trinity::Containers::RandomResize(spectators, urand(2, 5));
                                             }
 
                                             if (!spectators.empty())

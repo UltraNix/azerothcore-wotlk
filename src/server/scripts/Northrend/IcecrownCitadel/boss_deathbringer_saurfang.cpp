@@ -1311,7 +1311,7 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                     targets.push_back(target);
                 }
                 else
-                    Trinity::Containers::RandomResizeList(targets, 3);
+                    Trinity::Containers::RandomResize(targets, 3);
             }
 
             void Register()
