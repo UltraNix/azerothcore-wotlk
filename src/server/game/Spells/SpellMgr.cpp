@@ -3134,6 +3134,19 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
+            12317,
+            13045,
+            13046,
+            13047,
+            13048,
+            29593,
+            29594,
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_CHECK_STRONGEST_AURA_FOR_PROC;
+        });
+
+        ApplySpellFix
+        ({
             24340, // Meteor
             26558,
             28884,

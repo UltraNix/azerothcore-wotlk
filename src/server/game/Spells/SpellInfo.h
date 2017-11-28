@@ -199,7 +199,8 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_ENCOUNTER_REWARD              = 0x01000000, // pussywizard
     SPELL_ATTR0_CU_ENABLE_AURA_RESIST            = 0x02000000, // Monich: spells that should be treated like negative auras in resist check
     SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK      = 0x04000000, // See SpellMgr::IsSpellProcEventCanTriggeredBy
-    SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS          = 0x08000000, //Force bonus from talents to crit
+    SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS          = 0x08000000, // Force bonus from talents to crit
+    SPELL_ATTR0_CU_CHECK_STRONGEST_AURA_FOR_PROC = 0x10000000, // Check if there is more powerfull aura on target while proc
 
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
 };

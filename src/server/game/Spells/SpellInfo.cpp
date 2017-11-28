@@ -1634,7 +1634,7 @@ bool SpellInfo::IsStrongerAuraActive(Unit const* caster, Unit const* target) con
             }
 
             // xinef: check aura effect equal auras only, some auras have different effects on different ranks - check rank also
-            if (!IsAuraEffectEqual((*iter)->GetSpellInfo()) && !IsRankOf((*iter)->GetSpellInfo()))
+            if (IsAuraEffectEqual((*iter)->GetSpellInfo()) && !IsRankOf((*iter)->GetSpellInfo()))
                 continue;
 
             // xinef: misc value mismatches

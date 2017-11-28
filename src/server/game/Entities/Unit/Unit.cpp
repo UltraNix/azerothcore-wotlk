@@ -16093,6 +16093,26 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
     // Check spellProcEvent data requirements
     if (!sSpellMgr->IsSpellProcEventCanTriggeredBy(spellProto, spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
         return false;
+
+    if(spellProto->HasAttribute(SPELL_ATTR0_CU_CHECK_STRONGEST_AURA_FOR_PROC))
+        if (Player* player = ToPlayer())
+        {
+            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            {
+                if (spellProto->Effects[j].ApplyAuraName && spellProto->Effects[j].TriggerSpell)
+                {
+                    switch (spellProto->Effects[j].ApplyAuraName)
+                    {
+                    case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+                    case SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE:
+                    case SPELL_AURA_PROC_TRIGGER_SPELL:
+                        if (SpellInfo const* triggerSpell = sSpellMgr->GetSpellInfo(spellProto->Effects[j].TriggerSpell))
+                            if (triggerSpell->IsStrongerAuraActive(player, player))
+                                return false;
+                    }
+                }
+            }
+        }
     // In most cases req get honor or XP from kill
     if (EventProcFlag & PROC_FLAG_KILL && GetTypeId() == TYPEID_PLAYER)
     {
