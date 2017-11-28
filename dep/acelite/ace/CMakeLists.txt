@@ -343,6 +343,10 @@ add_library(ace SHARED
   ${ace_PCH_SRC}
 )
 
+if(WITH_VS_FOLDERS)
+set_target_properties(ace PROPERTIES FOLDER Dep)
+endif()
+
 if (MINGW) # GCC ignores "#prama comment"
   target_link_libraries(ace ws2_32 iphlpapi netapi32 mswsock)
 endif()

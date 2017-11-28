@@ -55,6 +55,10 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+if(WITH_VS_FOLDERS)
+set_target_properties(jemalloc PROPERTIES FOLDER Dep)
+endif()
+
 add_definitions(-D_GNU_SOURCE -D_REENTRANT)
 
 add_library(jemalloc STATIC ${jemalloc_STAT_SRC})

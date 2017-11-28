@@ -43,6 +43,10 @@ target_link_libraries(MeshExtractor
   ${ACE_LIBRARY}
 )
 
+if(WITH_VS_FOLDERS)
+set_target_properties(mesh_extractor PROPERTIES FOLDER Tools)
+endif()
+
 if( UNIX )
   install(TARGETS MeshExtractor DESTINATION bin)
 elseif( WIN32 )

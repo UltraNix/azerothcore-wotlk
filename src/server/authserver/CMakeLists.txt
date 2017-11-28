@@ -66,6 +66,8 @@ add_executable(authserver
   ${authserver_PCH_SRC}
 )
 
+GroupSources(${CMAKE_CURRENT_SOURCE_DIR})
+
 add_dependencies(authserver revision.h)
 
 if( NOT WIN32 )

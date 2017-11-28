@@ -53,6 +53,10 @@ include(CheckIncludeFiles)
 # set default buildoptions and print them
 include(cmake/options.cmake)
 
+if(WITH_VS_FOLDERS)
+    set_property(GLOBAL PROPERTY USE_FOLDERS On)
+endif()
+
 # turn off PCH totally if enabled (hidden setting, mainly for devs)
 if( NOPCH )
   set(USE_COREPCH 0)
@@ -60,6 +64,7 @@ if( NOPCH )
 endif()
 
 include(CheckPlatform)
+include(GroupSources)
 
 # basic packagesearching and setup (further support will be needed, this is a preliminary release!)
 set(OPENSSL_EXPECTED_VERSION 1.0.0)

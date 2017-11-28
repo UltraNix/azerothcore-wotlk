@@ -115,6 +115,10 @@ if( WIN32 )
     )
 endif()
 
+if(WITH_VS_FOLDERS)
+set_target_properties(mmap_extractor PROPERTIES FOLDER Tools)
+endif()
+
 include_directories(${mmap_gen_Includes})
 
 add_executable(mmaps_generator ${mmap_gen_sources})

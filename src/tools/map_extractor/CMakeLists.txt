@@ -37,6 +37,10 @@ target_link_libraries(mapextractor
   ${ZLIB_LIBRARIES}
 )
 
+if(WITH_VS_FOLDERS)
+set_target_properties(map_extractor PROPERTIES FOLDER Tools)
+endif()
+
 if( UNIX )
   install(TARGETS mapextractor DESTINATION bin)
 elseif( WIN32 )

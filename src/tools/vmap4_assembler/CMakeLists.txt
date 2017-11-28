@@ -22,6 +22,10 @@ include_directories(
 
 add_executable(vmap4assembler VMapAssembler.cpp)
 
+if(WITH_VS_FOLDERS)
+set_target_properties(vmap_assembler PROPERTIES FOLDER Tools)
+endif()
+
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   set_target_properties(vmap4assembler PROPERTIES LINK_FLAGS "-framework Carbon")
 endif()
