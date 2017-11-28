@@ -3499,6 +3499,9 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+            case 46221: // Animal Blood
+                spellInfo->EffectBasePoints[EFFECT_1] = 0;
+                break;
             case 63026: // Force Cast (HACK: Target shouldn't be changed)
             case 63137: // Force Cast (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                 spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_DB;
