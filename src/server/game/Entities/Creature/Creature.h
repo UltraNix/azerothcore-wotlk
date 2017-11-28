@@ -646,6 +646,11 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         void RemoveCorpse(bool setSpawnTime = true, bool skipVisibility = false);
 
+        template<class Rep, class Period>
+        void DespawnOrUnsummon(const std::chrono::duration<Rep, Period>& timeToDespawn, const std::chrono::duration<Rep, Period>& forceRespawnTime = 0s)
+        {
+            DespawnOrUnsummon(std::chrono::duration_cast<Milliseconds>(timeToDespawn).count(), std::chrono::duration_cast<Milliseconds>(forceRespawnTime).count());
+        }
         void DespawnOrUnsummon(uint32 msTimeToDespawn = 0, uint32 forceRespawnTime = 0);
 
         time_t const& GetRespawnTime() const { return m_respawnTime; }
