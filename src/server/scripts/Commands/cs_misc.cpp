@@ -3418,7 +3418,7 @@ public:
         else if (player->HasItemCount(86007))
             player->TeleportTo(0, -1648.537354f, -4170.267090f, 153.271378f, player->GetOrientation());
         else if (player->HasItemCount(86006))
-            player->TeleportTo(0, -1708.539429f, -4193.820801f, 117.195877, player->GetOrientation());
+            player->TeleportTo(0, -1708.539429f, -4193.820801f, 117.195877f, player->GetOrientation());
         else if (player->HasItemCount(86005))
             player->TeleportTo(0, 4322.602051f, -2747.558594f, 152.527390f, player->GetOrientation());
         else
