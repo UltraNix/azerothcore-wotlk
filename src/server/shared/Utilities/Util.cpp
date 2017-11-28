@@ -19,44 +19,47 @@
 #include "Util.h"
 #include "Common.h"
 #include "utf8.h"
-#include "SFMT.h"
 #include "Errors.h" // for ASSERT
 #include <ace/TSS_T.h>
+#include <random>
 
-typedef ACE_TSS<SFMTRand> SFMTRandTSS;
-static SFMTRandTSS sfmtRand;
+std::mt19937& GetGenerator()
+{
+    static thread_local std::mt19937 s_generator;
+    return s_generator;
+}
 
 int32 irand(int32 min, int32 max)
 {
     ASSERT(max >= min);
-    return int32(sfmtRand->IRandom(min, max));
+    return std::uniform_int_distribution<int32>(min, max)(GetGenerator());
 }
 
 uint32 urand(uint32 min, uint32 max)
 {
     ASSERT(max >= min);
-    return sfmtRand->URandom(min, max);
+    return std::uniform_int_distribution<uint32>(min, max)(GetGenerator());
 }
 
 float frand(float min, float max)
 {
     ASSERT(max >= min);
-    return float(sfmtRand->Random() * (max - min) + min);
+    return std::uniform_real_distribution<float>(min, max)(GetGenerator());
 }
 
 uint32 rand32()
 {
-    return int32(sfmtRand->BRandom());
+    return urand(std::numeric_limits<uint32>::lowest(), std::numeric_limits<uint32>::max());
 }
 
 double rand_norm()
 {
-    return sfmtRand->Random();
+    return std::generate_canonical<double, 5>(GetGenerator());
 }
 
 double rand_chance()
 {
-    return sfmtRand->Random() * 100.0;
+    return std::generate_canonical<double, 2>(GetGenerator()) * 100.0f;
 }
 
 Tokenizer::Tokenizer(const std::string &src, const char sep, uint32 vectorReserve)
