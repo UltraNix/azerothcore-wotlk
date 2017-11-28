@@ -1571,7 +1571,7 @@ public:
             return true;
         }
 
-        if (handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+        if (handler->GetSession()->GetSecurity() < 10)
         {
             handler->PSendSysMessage("You may only remove items. Adding items is available for higher GMLevel.");
             return false;
