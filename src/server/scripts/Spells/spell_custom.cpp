@@ -15,108 +15,65 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Scripts for spells with SPELLFAMILY_GENERIC which cannot be included in AI script file
- * of creature using it or can't be bound to any player class.
- * Ordered alphabetically using scriptname.
- * Scriptnames of files in this file should be prefixed with "spell_gen_"
- */
-
 #include "ScriptMgr.h"
-#include "Battlefield.h"
-#include "BattlefieldMgr.h"
-#include "Battleground.h"
-#include "BattlegroundMgr.h"
-#include "Cell.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "Group.h"
-#include "InstanceScript.h"
-#include "LFGMgr.h"
-#include "Pet.h"
-#include "ReputationMgr.h"
-#include "SkillDiscovery.h"
 #include "SpellScript.h"
-#include "SpellAuraEffects.h"
-#include "Chat.h"
-#include "Vehicle.h"
-
 
 // @kruulevent
-class spell_cust_shadow_crash : public SpellScriptLoader
+class spell_cust_shadow_crash_SpellScript : public SpellScript
 {
-public:
-    spell_cust_shadow_crash() : SpellScriptLoader("spell_cust_shadow_crash") { }
+    PrepareSpellScript(spell_cust_shadow_crash_SpellScript)
 
-    class spell_cust_shadow_crash_SpellScript : public SpellScript
+    void HandleSchoolDMG(SpellEffIndex effIndex)
     {
-        PrepareSpellScript(spell_cust_shadow_crash_SpellScript)
-
-        void HandleSchoolDMG(SpellEffIndex effIndex)
-        {
-           Player* target = GetHitPlayer();
+        Player* target = GetHitPlayer();
            
-           if (!target || target->GetMap()->Instanceable())
-               return;
+        if (!target)
+            return;
 
-           float horizontalSpeed = 20.0f + (40.0f - GetCaster()->GetDistance(target));
-           float verticalSpeed = 8.0f;
-           // This method relies on the Dalaran Sewer map disposition and Water Spout position
-           // What we do is knock the player from a position exactly behind him and at the end of the pipe
-           target->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), horizontalSpeed, verticalSpeed);
-        }
+        if (target->GetMap()->Instanceable())
+            return;
 
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_cust_shadow_crash_SpellScript::HandleSchoolDMG, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_cust_shadow_crash_SpellScript();
+        float horizontalSpeed = 20.0f + (40.0f - GetCaster()->GetDistance(target));
+        float verticalSpeed = 8.0f;
+        // This method relies on the Dalaran Sewer map disposition and Water Spout position
+        // What we do is knock the player from a position exactly behind him and at the end of the pipe
+        target->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), horizontalSpeed, verticalSpeed);
     }
 
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_cust_shadow_crash_SpellScript::HandleSchoolDMG, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
 };
 
 // @kruulevent
-class spell_cust_thunder_clap : public SpellScriptLoader
+class spell_cust_thunder_clap_SpellScript : public SpellScript
 {
-public:
-    spell_cust_thunder_clap() : SpellScriptLoader("spell_cust_thunder_clap") { }
+    PrepareSpellScript(spell_cust_thunder_clap_SpellScript)
 
-    class spell_cust_thunder_clap_SpellScript : public SpellScript
+    void HandleSchoolDMG(SpellEffIndex effIndex)
     {
-        PrepareSpellScript(spell_cust_thunder_clap_SpellScript)
+        Player* target = GetHitPlayer();
 
-        void HandleSchoolDMG(SpellEffIndex effIndex)
-        {
-            Player* target = GetHitPlayer();
+        if (!target)
+            return;
 
-            if (!target || target->GetMap()->Instanceable())
-                return;
+        if (target->GetMap()->Instanceable())
+            return;
             
-            // Silence
-            target->AddAura(29943, target);
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_cust_thunder_clap_SpellScript::HandleSchoolDMG, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_cust_thunder_clap_SpellScript();
+        // Silence
+        target->AddAura(29943, target);
     }
 
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_cust_thunder_clap_SpellScript::HandleSchoolDMG, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
 };
 
 void AddSC_custom_spell_scripts()
 {
     // ours:
-    new spell_cust_shadow_crash();
-    new spell_cust_thunder_clap();
+    new SpellScriptLoaderEx<spell_cust_shadow_crash_SpellScript>("spell_cust_shadow_crash");
+    new SpellScriptLoaderEx<spell_cust_thunder_clap_SpellScript>("spell_cust_thunder_clap");
 }
