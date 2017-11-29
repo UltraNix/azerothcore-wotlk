@@ -75,9 +75,9 @@ class spell_q11065_wrangle_some_aether_rays : public SpellScriptLoader
                     {
                         Player* player = GetCaster()->ToPlayer();
 
-                        player->KilledMonsterCredit(23343, 0);
                         if (Creature *cr = GetCaster()->SummonCreature(23343, ar->GetPositionX(), ar->GetPositionY(), ar->GetPositionZ(), ar->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 180000))
                         {
+                            player->KilledMonsterCredit(cr->GetEntry(), cr->GetGUID());
                             cr->CastSpell(player, 40926, true);
                             cr->GetMotionMaster()->MoveFollow(player, 5.0f, 2*M_PI*rand_norm());
                             ar->ToCreature()->DespawnOrUnsummon(500);
@@ -116,12 +116,12 @@ public:
 
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-        	if (!GetCaster())
-            	return;
-            
-            if (!GetCaster()->ToCreature())
-            	return;
-                
+            if (!GetCaster())
+                return;
+
+            if (GetCaster()->GetTypeId() != TYPEID_UNIT)
+                return;
+
             if (Creature* creature = GetCaster()->ToCreature())
                 creature->DespawnOrUnsummon();
         }
