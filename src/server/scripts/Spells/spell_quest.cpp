@@ -116,6 +116,12 @@ public:
 
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
+        	if (!GetCaster())
+            	return;
+            
+            if (!GetCaster()->ToCreature())
+            	return;
+                
             if (Creature* creature = GetCaster()->ToCreature())
                 creature->DespawnOrUnsummon();
         }
