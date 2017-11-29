@@ -4922,7 +4922,7 @@ public:
             if (!GetExplTargetGObj())
                 return SPELL_FAILED_BAD_TARGETS;
 
-            if (!GetCaster()->ToPlayer()->CanUseBattlegroundObject(GetExplTargetGObj()))
+            if (!GetCaster()->ToPlayer()->CanUseBattlegroundObject(GetCaster()->ToPlayer()->InBattleground() ? GetExplTargetGObj() : nullptr))
                 return SPELL_FAILED_BAD_TARGETS;
 
             //! Right now (2017-11-22) there is other way to do it
