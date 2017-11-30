@@ -1633,14 +1633,10 @@ bool SpellInfo::IsStrongerAuraActive(Unit const* caster, Unit const* target) con
                     return true;
             }
 
-            // xinef: check aura effect equal auras only, some auras have different effects on different ranks - check rank also
-            if (IsAuraEffectEqual((*iter)->GetSpellInfo()) && !IsRankOf((*iter)->GetSpellInfo()))
-                continue;
-
             // xinef: misc value mismatches
-            // xinef: commented, checked above
-            //if (Effects[i].MiscValue != (*iter)->GetMiscValue())
-            //    continue;
+            // xinef: commented, checked above  
+            if (Effects[i].MiscValue != (*iter)->GetMiscValue())
+                continue;
 
             // xinef: should not happen, or effect is not active - stronger one is present
             AuraApplication* aurApp = (*iter)->GetBase()->GetApplicationOfTarget(target->GetGUID());
@@ -1663,7 +1659,6 @@ bool SpellInfo::IsStrongerAuraActive(Unit const* caster, Unit const* target) con
             int32 auraValue = (sFlag & SPELL_GROUP_SPECIAL_FLAG_BASE_AMOUNT_CHECK) ?
                 abs((*iter)->GetSpellInfo()->Effects[(*iter)->GetEffIndex()].CalcValue((*iter)->GetCaster())) :
                 abs((*iter)->GetAmount());
-
             // xinef: for same spells, divide amount by stack amount
             if (Id == (*iter)->GetId())
                 auraValue /= (*iter)->GetBase()->GetStackAmount();
