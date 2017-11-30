@@ -25480,7 +25480,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
         float damageperc = 0.018f*(z_diff-safe_fall)-0.2426f;
         uint32 original_health = GetHealth(), final_damage = 0;
 
-        if (damageperc > 0 && !IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_NORMAL))
+        if (damageperc > 0 && !IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL))
         {
             uint32 damage = (uint32)(damageperc * GetMaxHealth()*sWorld->getRate(RATE_DAMAGE_FALL));
 

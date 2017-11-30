@@ -476,7 +476,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* player) const;
         bool CanCreatureAttack(Unit const* victim, bool skipDistCheck = false) const;
-        bool IsImmunedToSpell(SpellInfo const* spellInfo);
+        bool IsImmunedToSpell(SpellInfo const* spellInfo) const override;
 
         bool HasMechanicTemplateImmunity(uint32 mask) const;
                                                             // redefine Unit::IsImmunedToSpell

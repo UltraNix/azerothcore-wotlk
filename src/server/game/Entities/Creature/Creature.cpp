@@ -1773,7 +1773,7 @@ bool Creature::HasMechanicTemplateImmunity(uint32 mask) const
     return !IS_PLAYER_GUID(GetOwnerGUID()) && (GetCreatureTemplate()->MechanicImmuneMask & mask);
 }
 
-bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo)
+bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo) const
 {
     if (!spellInfo)
         return false;

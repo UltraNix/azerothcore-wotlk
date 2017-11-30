@@ -6105,7 +6105,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 {
     if (!target->IsAlive())return;
 
-    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamageOrSchool(GetSpellInfo()) || target->IsTotem())
+    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamage(GetSpellInfo()) || target->IsTotem())
     {
         SendTickImmune(target, caster);
         return;
@@ -6269,7 +6269,7 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     if (!target->IsAlive())
         return;
 
-    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamageOrSchool(GetSpellInfo()))
+    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamage(GetSpellInfo()))
     {
         SendTickImmune(target, caster);
         return;
@@ -6517,7 +6517,7 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
     if (!caster || !caster->IsAlive() || !target->IsAlive() || target->getPowerType() != powerType)
         return;
 
-    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamageOrSchool(GetSpellInfo()))
+    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamage(GetSpellInfo()))
     {
         SendTickImmune(target, caster);
         return;
@@ -6665,7 +6665,7 @@ void AuraEffect::HandlePeriodicPowerBurnAuraTick(Unit* target, Unit* caster) con
     if (!caster || !target->IsAlive() || target->getPowerType() != powerType)
         return;
 
-    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamageOrSchool(GetSpellInfo()))
+    if (target->HasUnitState(UNIT_STATE_ISOLATED) || target->IsImmunedToDamage(GetSpellInfo()))
     {
         SendTickImmune(target, caster);
         return;

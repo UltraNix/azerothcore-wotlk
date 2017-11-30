@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -669,7 +669,7 @@ enum NPCFlags
     UNIT_NPC_FLAG_GUILD_BANKER          = 0x00800000,       // cause client to send 997 opcode
     UNIT_NPC_FLAG_SPELLCLICK            = 0x01000000,       // cause client to send 1015 opcode (spell click)
     UNIT_NPC_FLAG_PLAYER_VEHICLE        = 0x02000000,       // players with mounts that have vehicle data should have it set
-    UNIT_NPC_FLAG_MAILBOX               = 0x04000000        // 
+    UNIT_NPC_FLAG_MAILBOX               = 0x04000000        //
 };
 
 enum MovementFlags
@@ -2215,16 +2215,15 @@ class Unit : public WorldObject
 
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply, SpellImmuneBlockType blockType = SPELL_BLOCK_TYPE_ALL);
         void ApplySpellDispelImmunity(const SpellInfo* spellProto, DispelType type, bool apply);
-        virtual bool IsImmunedToSpell(SpellInfo const* spellInfo);
-                                                            // redefined in Creature
+        virtual bool IsImmunedToSpell(SpellInfo const* spellInfo) const; // redefined in Creature
+        uint32 GetSchoolImmunityMask() const;
+        uint32 GetDamageImmunityMask() const;
+        uint32 GetMechanicImmunityMask() const;
+
         bool IsImmunedToDamage(SpellSchoolMask meleeSchoolMask) const;
         bool IsImmunedToDamage(SpellInfo const* spellInfo) const;
-        bool IsImmunedToSchool(SpellSchoolMask meleeSchoolMask) const;
-        bool IsImmunedToSchool(SpellInfo const* spellInfo) const;
-        bool IsImmunedToDamageOrSchool(SpellSchoolMask meleeSchoolMask) const;
-        bool IsImmunedToDamageOrSchool(SpellInfo const* spellInfo) const;
-        virtual bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const;
-                                                            // redefined in Creature
+        virtual bool IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const; // redefined in Creature
+
         static bool IsDamageReducedByArmor(SpellSchoolMask damageSchoolMask, SpellInfo const* spellInfo = NULL, uint8 effIndex = MAX_SPELL_EFFECTS);
         static uint32 CalcArmorReducedDamage(Unit const* attacker, Unit const* victim, const uint32 damage, SpellInfo const* spellInfo, uint8 attackerLevel = 0, WeaponAttackType attackType=MAX_ATTACK);
         static void CalcAbsorbResist(Unit* attacker, Unit* victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellInfo const* spellInfo = NULL, bool Splited = false);
