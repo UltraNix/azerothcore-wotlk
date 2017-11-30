@@ -117,6 +117,7 @@ enum GameObjectsIds
     GO_PORTCULLIS_TOBOSSROOMS       = 175186,
     // Urok Doomhowl
     GO_UROK_PILE                    = 175621,
+    GO_PORTCULLIS_ENTRANCE_ARENA    = 164726
 };
 
 #endif

@@ -65,7 +65,7 @@ enum Misc
     REND_PATH_2                     = 1379681,
 };
 
-/*
+
 struct Wave
 {
     uint32 entry;
@@ -73,6 +73,14 @@ struct Wave
     float  y_pos;
     float  z_pos;
     float  o_pos;
+};
+
+static Wave Wave1[]= //start
+{
+    { 10447, 202.511f, -421.307f, 110.987f, 3.12414f },
+    { 10442, 204.015f, -418.443f, 110.989f, 3.19395f },
+    { 10442, 203.142f, -423.999f, 110.986f, 3.07178f },
+    { 10442, 201.008f, -416.648f, 110.974f, 3.22886f }
 };
 
 static Wave Wave2[]= // 22 sec
@@ -115,7 +123,7 @@ static Wave Wave6[]= // 27 sec
     { 10442, 210.8935f, -423.913f,  111.0125f, 5.969026f  },
     { 10442, 212.2642f, -430.7648f, 110.9807f, 5.934119f  }
 };
-*/
+
 
 Position const GythLoc =      { 211.762f,  -397.5885f, 111.1817f,  4.747295f   };
 Position const Teleport1Loc = { 194.2993f, -474.0814f, 121.4505f, -0.01225555f };
@@ -203,6 +211,10 @@ public:
                     if (GameObject* portcullis = me->FindNearestGameObject(GO_DR_PORTCULLIS, 50.0f))
                         portcullisGUID = portcullis->GetGUID();
 
+                    if (GameObject* portcullis2 = me->FindNearestGameObject(GO_PORTCULLIS_ENTRANCE_ARENA, 100.0f))
+                        portcullis2->UseDoorOrButton();
+
+
                     events.ScheduleEvent(EVENT_TURN_TO_PLAYER, 0);
                     events.ScheduleEvent(EVENT_START_1, 1000);
                 }
@@ -219,7 +231,7 @@ public:
                         events.ScheduleEvent(EVENT_TELEPORT_1, 2000);
                         break;
                     case 11:
-                        if (Creature* gyth = me->FindNearestCreature(NPC_GYTH, 10.0f, true))
+                        if (Creature* gyth = me->SummonCreature(NPC_GYTH, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()))
                             gyth->AI()->SetData(1, 1);
                         me->DespawnOrUnsummon(1000);
                         break;
@@ -363,34 +375,64 @@ public:
                         case EVENT_WAVE_1:
                             if (GameObject* portcullis = me->GetMap()->GetGameObject(portcullisGUID))
                                 portcullis->UseDoorOrButton();
-                            // move wave
+
+                            for (auto i = 0; i < 4; ++i)
+                            {
+                                if (Creature* add = me->SummonCreature(Wave1[i].entry, Wave1[i].x_pos, Wave1[i].y_pos, Wave1[i].z_pos, Wave1[i].o_pos))
+                                    MoveWave(add);
+                            }
                             break;
                         case EVENT_WAVE_2:
-                            // spawn wave
+                            for (auto i = 0; i < 3; ++i)
+                            {
+                                if (Creature* add = me->SummonCreature(Wave2[i].entry, Wave2[i].x_pos, Wave2[i].y_pos, Wave2[i].z_pos, Wave2[i].o_pos))
+                                    MoveWave(add);
+                            }
+
                             if (GameObject* portcullis = me->GetMap()->GetGameObject(portcullisGUID))
                                 portcullis->UseDoorOrButton();
                             // move wave
                             break;
                         case EVENT_WAVE_3:
-                            // spawn wave
+                            for (auto i = 0; i < 4; ++i)
+                            {
+                                if (Creature* add = me->SummonCreature(Wave3[i].entry, Wave3[i].x_pos, Wave3[i].y_pos, Wave3[i].z_pos, Wave3[i].o_pos))
+                                    MoveWave(add);
+                            }
+
                             if (GameObject* portcullis = me->GetMap()->GetGameObject(portcullisGUID))
                                 portcullis->UseDoorOrButton();
                             // move wave
                             break;
                         case EVENT_WAVE_4:
-                            // spawn wave
+                            for (auto i = 0; i < 4; ++i)
+                            {
+                                if (Creature* add = me->SummonCreature(Wave4[i].entry, Wave4[i].x_pos, Wave4[i].y_pos, Wave4[i].z_pos, Wave4[i].o_pos))
+                                    MoveWave(add);
+                            }
+
                             if (GameObject* portcullis = me->GetMap()->GetGameObject(portcullisGUID))
                                 portcullis->UseDoorOrButton();
                             // move wave
                             break;
                         case EVENT_WAVE_5:
-                            // spawn wave
+                            for (auto i = 0; i < 5; ++i)
+                            {
+                                if (Creature* add = me->SummonCreature(Wave5[i].entry, Wave5[i].x_pos, Wave5[i].y_pos, Wave5[i].z_pos, Wave5[i].o_pos))
+                                    MoveWave(add);
+                            }
+
                             if (GameObject* portcullis = me->GetMap()->GetGameObject(portcullisGUID))
                                 portcullis->UseDoorOrButton();
                             // move wave
                             break;
                         case EVENT_WAVE_6:
-                            // spawn wave
+                            for (auto i = 0; i < 5; ++i)
+                            {
+                                if (Creature* add = me->SummonCreature(Wave6[i].entry, Wave6[i].x_pos, Wave6[i].y_pos, Wave6[i].z_pos, Wave6[i].o_pos))
+                                    MoveWave(add);
+                            }
+
                             if (GameObject* portcullis = me->GetMap()->GetGameObject(portcullisGUID))
                                 portcullis->UseDoorOrButton();
                             // move wave
@@ -429,7 +471,13 @@ public:
             }
             DoMeleeAttackIfReady();
         }
-
+        void MoveWave(Creature* creature)
+        {
+            Position centerPos = { 150.216385f, -420.57189f, 110.472267f, 6.272081f };
+            Position movePos;
+            me->GetRandomPoint(centerPos, 10.0f, movePos);
+            creature->GetMotionMaster()->MovePoint(1, movePos, true);
+        }
         private:
             bool   gythEvent;
             uint64 victorGUID;

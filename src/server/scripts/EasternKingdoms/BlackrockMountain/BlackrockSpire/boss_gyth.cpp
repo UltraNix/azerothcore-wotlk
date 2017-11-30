@@ -80,6 +80,9 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             instance->SetBossState(DATA_GYTH, DONE);
+            if (GameObject* gate = me->FindNearestGameObject(GO_PORTCULLIS_ENTRANCE_ARENA, 150.0f))
+                gate->ResetDoorOrButton();
+
         }
 
         void SetData(uint32 /*type*/, uint32 data)
