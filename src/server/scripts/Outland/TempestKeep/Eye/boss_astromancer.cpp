@@ -73,6 +73,8 @@ class boss_high_astromancer_solarian : public CreatureScript
             {
                 BossAI::Reset();
                 me->SetModelVisible(true);
+                if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
             void AttackStart(Unit* who)
@@ -133,6 +135,8 @@ class boss_high_astromancer_solarian : public CreatureScript
                             events.ScheduleEvent(EVENT_SPELL_PSYCHIC_SCREAM, 7000);
                             me->CastSpell(me, SPELL_SOLARIAN_TRANSFORM, true);
                             me->GetMotionMaster()->MoveChase(me->GetVictim());
+                            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             break;
                         }
                         events.ScheduleEvent(EVENT_CHECK_HEALTH, 1000);
@@ -206,6 +210,8 @@ class boss_high_astromancer_solarian : public CreatureScript
                             me->SetModelVisible(true);
                             me->SummonCreature(NPC_SOLARIUM_PRIEST, me->GetPositionX()+frand(-3.0f, 3.0f), me->GetPositionY()+frand(-3.0f, 3.0f), me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                             me->SummonCreature(NPC_SOLARIUM_PRIEST, me->GetPositionX()+frand(-3.0f, 3.0f), me->GetPositionY()+frand(-3.0f, 3.0f), me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                            if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         }
                         break;
                     case EVENT_SPELL_VOID_BOLT:
@@ -222,7 +228,7 @@ class boss_high_astromancer_solarian : public CreatureScript
                 DoMeleeAttackIfReady();
                 EnterEvadeIfOutOfCombatArea();
             }
-                    
+
             bool CheckEvadeIfOutOfCombatArea() const
             {
                 return me->GetDistance2d(432.59f, -371.93f) > 105.0f;
