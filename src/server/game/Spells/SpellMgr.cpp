@@ -7155,6 +7155,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectMiscValue[EFFECT_0] = 90032;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
+        case 17456:    // Red and Blue Mechanostrider
+            spellInfo->EffectMiscValue[EFFECT_0] = 90033;
+            spellInfo->EffectBasePoints[EFFECT_1] = 99;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
