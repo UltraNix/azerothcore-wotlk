@@ -2162,6 +2162,96 @@ public:
     }
 };
 
+Position const SarathstraHomePos = { 4374.94775f, 940.279053f, 82.077591f, 2.241324f };
+Position const SaraPoint1 = { 4386.030762f, 932.452759f, 117.045372f, 2.213827f };
+Position const SaraPoint2 = { 4360.164551f, 958.477295f, 88.657043f, 2.233462f };
+
+enum SarathstraEvents
+{
+    ACTION_SARATHSTRA_1           = 1,
+    ACTION_SARATHSTRA_2           = 2,
+};
+
+class npc_sarathstra_dragonblight : public CreatureScript
+{
+public:
+    npc_sarathstra_dragonblight() : CreatureScript("npc_sarathstra_dragonblight") { }
+
+    struct npc_sarathstra_dragonblight_AI : public ScriptedAI
+    {
+        npc_sarathstra_dragonblight_AI(Creature* creature) : ScriptedAI(creature)
+        {
+            _spawned = false;
+        }
+
+        void Reset() override
+        {
+            me->setActive(true);
+            ScriptedAI::Reset();
+            me->SetHover(true);
+            me->SetCanFly(true);
+            me->SetHomePosition(SarathstraHomePos);
+            if (!_spawned)
+            {
+                me->GetMotionMaster()->MovePoint(1, SaraPoint1);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                _spawned = true;
+            }
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            ScriptedAI::EnterCombat(who);
+            me->SetCanFly(false);
+        }
+
+        void DoAction(int32 action) override
+        {
+            if (action == ACTION_SARATHSTRA_1)
+            {
+                me->GetMotionMaster()->MovePoint(2, SaraPoint2);
+            }
+            else if (action == ACTION_SARATHSTRA_2)
+            {
+                me->SetHover(false);
+                Position pos = me->GetPosition();
+                pos.m_positionZ = me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), false, 100.0f);
+                me->GetMotionMaster()->MoveLand(3, pos, 5.0f);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type == POINT_MOTION_TYPE)
+            {
+                if (id == 1)
+                {
+                    DoAction(ACTION_SARATHSTRA_1);
+                }
+                else if (id == 2)
+                {
+                    DoAction(ACTION_SARATHSTRA_2);
+                }
+            }
+            else if (type == EFFECT_MOTION_TYPE)
+            {
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                if (Player* player = GetPlayerAtMinimumRange(50.0f))
+                    AttackStart(player);
+            }
+        }
+    private:
+        bool _spawned;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_sarathstra_dragonblight_AI(creature);
+    }
+};
+
 void AddSC_dragonblight()
 {
     // Ours
@@ -2184,6 +2274,7 @@ void AddSC_dragonblight()
     new CreatureAILoader<npc_onslaught_warhorseAI>("npc_onslaught_warhorse");
     new CreatureAILoader<npc_onslaught_knightAI>("npc_onslaught_knight");
     new spell_mystical_bolt();
+    new npc_sarathstra_dragonblight();
 
     // Theirs
     new npc_commander_eligor_dawnbringer();
