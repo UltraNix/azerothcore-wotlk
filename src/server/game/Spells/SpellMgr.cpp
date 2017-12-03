@@ -5917,7 +5917,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 65767: // light surge 0
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 65686;
@@ -5927,7 +5926,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67274: // light surge 1
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 67222;
@@ -5937,7 +5935,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67275: // light surge 2
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 67223;
@@ -5947,7 +5944,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67276: // light surge 3
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 67224;
@@ -5957,7 +5953,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 65769: // dark surge 0
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 65684;
@@ -5967,7 +5962,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67265: // dark surge 1
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 67176;
@@ -5977,7 +5971,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67266: // dark surge 2
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 67177;
@@ -5987,7 +5980,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[0] = 6;
             spellInfo->EffectImplicitTargetB[0] = 0;
             spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67267: // dark surge 3
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             spellInfo->excludeTargetAuraSpell = 67178;
