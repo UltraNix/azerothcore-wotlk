@@ -1922,13 +1922,17 @@ void Pet::HandleAsynchLoadSucceed()
 
     // xinef: We are summoned in arena / battleground, remove all positive auras
     // xinef: and set health to full if in preparation phase
+    // if map is arena, remove arena auras and if its preperation phase remove all cooldowns
+    // this fixes issue where pet cooldowns werent properly removed if pet was dismissed before entering arena
     if (GetMap()->IsBattlegroundOrArena())
     {
         if (GetMap()->IsBattleArena())
             RemoveArenaAuras();
 
         if (Player* player = owner->ToPlayer())
+        {
             if (Battleground* bg = player->GetBattleground())
+            {
                 if (bg->GetStatus() == STATUS_WAIT_JOIN)
                 {
                     if (IsAlive())
@@ -1936,7 +1940,16 @@ void Pet::HandleAsynchLoadSucceed()
 
                     if (GetMap()->IsBattleground())
                         CastSpell(this, SPELL_PREPARATION, true);
+                    else
+                    {
+                        for (CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.begin(); itr != m_CreatureSpellCooldowns.end(); ++itr)
+                            player->SendClearCooldown(itr->first, this);
+                        //! actually clear cooldown map
+                        m_CreatureSpellCooldowns.clear();
+                    }
                 }
+            }
+        }
     }
 
     // Fix aurastate auras, depending on health!

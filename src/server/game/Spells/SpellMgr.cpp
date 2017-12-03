@@ -3914,6 +3914,8 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// HUNTER
         /////////////////////////////////
+        case 55711:
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_REMOVE_ON_ARENA_ENTER;
             break;
         // Item - Hunter T9 2P Bonus
         case 67150:
