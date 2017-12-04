@@ -6673,6 +6673,9 @@ void SpellMgr::LoadDbcDataCorrections()
         // ///////////////////////////////////////////
         // ////////////////QUESTS/////////////////////
         // ///////////////////////////////////////////
+        case 47938: // Twisting blade
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ENEMY;
+            break;
         case 42968: // Rescuing the rescuers
             spellInfo->rangeIndex = RANGE_INDEX_INTERACT_RANGE_5YD;
             break;
