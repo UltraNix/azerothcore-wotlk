@@ -6673,6 +6673,9 @@ void SpellMgr::LoadDbcDataCorrections()
         // ///////////////////////////////////////////
         // ////////////////QUESTS/////////////////////
         // ///////////////////////////////////////////
+        case 42968: // Rescuing the rescuers
+            spellInfo->rangeIndex = RANGE_INDEX_INTERACT_RANGE_5YD;
+            break;
         // Going Bearback (12851)
         case 54897:
             spellInfo->Effect[1] = SPELL_EFFECT_DUMMY;
