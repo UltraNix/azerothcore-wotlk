@@ -1929,6 +1929,7 @@ enum Onslaught_warhorse
     EVENT_RUN_OFF,
     EVENT_DESPAWN_HORSE,
     EVENT_MOUNT_KNIGHT,
+    EVENT_CHECK_IF_MOUNTED,
 
     SPELL_HAND_OVER_REINS = 48297,
     SPELL_RIDE_VEH_HARDCODED = 43671,
@@ -2017,7 +2018,10 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
         if (apply)
             _playerMounted = true;
         else
+        {
             _playerMounted = false;
+            me->DespawnOrUnsummon(2000);
+        }
     }
 
     void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
@@ -2030,6 +2034,7 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
 
             me->setFaction(35);
             me->SetReactState(REACT_PASSIVE);
+            _events.ScheduleEvent(EVENT_CHECK_IF_MOUNTED, 10000);
         }
     }
 
@@ -2039,10 +2044,6 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
-        // attacks or process endevent only if player isn't mounted on horse
-        if (_playerMounted)
-            return;
-
         _events.Update(diff);
 
         while (uint32 eventId = _events.ExecuteEvent())
@@ -2076,10 +2077,17 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
                     if (Creature *knight = ObjectAccessor::GetCreature(*me, _knightGUID))
                         knight->CastSpell(me, SPELL_RIDE_VEH_HARDCODED);
                     break;
+                case EVENT_CHECK_IF_MOUNTED:
+                    if (!_playerMounted)
+                        me->DespawnOrUnsummon(2000);
+                    break;
                 default:
                     break;
             }
         }
+
+        if (_playerMounted)
+            return;
 
         if (!UpdateVictim())
             return;
