@@ -254,52 +254,53 @@ public:
             me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
 
             if (Unit* owner = me->GetCharmerOrOwner())
+            {
                 if (Player* player = owner->ToPlayer())
-                    if (player->HasAchieved(ACHIEVEMENT_PONY_UP))
+                {
+                    _state = ARGENT_PONY_STATE_ENCH;
+
+                    aura = (player->GetTeamId() == TEAM_ALLIANCE ? SPELL_AURA_TIRED_S : SPELL_AURA_TIRED_G);
+                    duration = player->GetSpellCooldownDelay(aura);
+                    me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                    for (uint8 i = 0; i < 3; ++i)
                     {
-                        _state = ARGENT_PONY_STATE_ENCH;
-
-                        aura = (player->GetTeamId() == TEAM_ALLIANCE ? SPELL_AURA_TIRED_S : SPELL_AURA_TIRED_G);
-                        duration = player->GetSpellCooldownDelay(aura);
-                        me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-
-                        for (uint8 i = 0; i < 3; ++i)
+                        if (player->GetTeamId() == TEAM_ALLIANCE)
                         {
-                            if (player->GetTeamId() == TEAM_ALLIANCE)
+                            if (uint32 cooldown = player->GetSpellCooldownDelay(SPELL_AURA_POSTMAN_S + i))
                             {
-                                if (uint32 cooldown = player->GetSpellCooldownDelay(SPELL_AURA_POSTMAN_S+i))
-                                {
-                                    duration = cooldown;
-                                    aura = SPELL_AURA_POSTMAN_S+i;
-                                    _state = argentPonyService[TEAM_ALLIANCE][i];
-                                    me->ToTempSummon()->UnSummon(duration);
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                if (uint32 cooldown = player->GetSpellCooldownDelay(SPELL_AURA_BANK_G+i))
-                                {
-                                    duration = cooldown*IN_MILLISECONDS;
-                                    aura = SPELL_AURA_BANK_G+i;
-                                    _state = argentPonyService[TEAM_HORDE][i];
-                                    me->ToTempSummon()->UnSummon(duration);
-                                    break;
-                                }
+                                duration = cooldown;
+                                aura = SPELL_AURA_POSTMAN_S + i;
+                                _state = argentPonyService[TEAM_ALLIANCE][i];
+                                me->ToTempSummon()->UnSummon(duration);
+                                break;
                             }
                         }
-
-                        // Generate Banners
-                        uint32 mask = player->GetTeamId() ? RACEMASK_HORDE : RACEMASK_ALLIANCE;
-                        for (uint8 i = 1; i < MAX_RACES; ++i)
-                            if (mask & (1 << (i-1)) && player->HasAchieved(argentBanners[i].achievement))
-                                _banners[i] = true;
+                        else
+                        {
+                            if (uint32 cooldown = player->GetSpellCooldownDelay(SPELL_AURA_BANK_G + i))
+                            {
+                                duration = cooldown*IN_MILLISECONDS;
+                                aura = SPELL_AURA_BANK_G + i;
+                                _state = argentPonyService[TEAM_HORDE][i];
+                                me->ToTempSummon()->UnSummon(duration);
+                                break;
+                            }
+                        }
                     }
 
-            if (duration && aura)
-            {
-                if (Aura* aur = me->AddAura(aura, me))
-                    aur->SetDuration(duration);
+                    // Generate Banners
+                    uint32 mask = player->GetTeamId() ? RACEMASK_HORDE : RACEMASK_ALLIANCE;
+                    for (uint8 i = 1; i < MAX_RACES; ++i)
+                        if (mask & (1 << (i - 1)) && player->HasAchieved(argentBanners[i].achievement))
+                            _banners[i] = true;
+                }
+
+                if (duration && aura)
+                {
+                    if (Aura* aur = me->AddAura(aura, me))
+                        aur->SetDuration(duration);
+                }
             }
         }
 
