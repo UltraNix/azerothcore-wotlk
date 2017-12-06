@@ -237,9 +237,13 @@ struct boss_majordomoAI : public BossAI
                         events.ScheduleEvent(EVENT_TELE_TO_RAGNAROS_EFFECT, 1000);
                         break;
                     case EVENT_TELE_TO_RAGNAROS_EFFECT:
+                        if (Map* map = me->GetMap())
+                            map->LoadGrid(854.16f, -818.87f);
+                        me->setActive(true);
                         DoCast(me, SPELL_TELEPORT_EFFECT, true);
                         break;
                     case EVENT_RAG_SUMMON_1:
+                        me->setActive(false);
                         Talk(SAY_SUMMON_MAJ_1);
                         events.ScheduleEvent(EVENT_RAG_SUMMON_2, 1000);
                         break;
