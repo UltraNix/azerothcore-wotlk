@@ -194,7 +194,11 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
 
         data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
         data << uint8(state == TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
-        data << uint32(floor(tSpell->spellCost * fDiscountMod));
+        
+        if(sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+            data << uint32(0);
+        else
+            data << uint32(floor(tSpell->spellCost * fDiscountMod));
 
         data << uint32(primary_prof_first_rank && can_learn_primary_prof ? 1 : 0);
                                                             // primary prof. learn confirmation dialog
@@ -276,10 +280,15 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recvData)
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
-    if (!_player->HasEnoughMoney(nSpellCost))
+
+
+    if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE) && !_player->HasEnoughMoney(nSpellCost))
         return;
 
-    _player->ModifyMoney(-int32(nSpellCost));
+    if(sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+        _player->ModifyMoney(0);
+    else
+        _player->ModifyMoney(-int32(nSpellCost));
 
     unit->SendPlaySpellVisual(179); // 53 SpellCastDirected
     unit->SendPlaySpellImpact(_player->GetGUID(), 362); // 113 EmoteSalute

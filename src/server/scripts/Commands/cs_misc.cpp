@@ -3431,7 +3431,6 @@ public:
         return true;
     }
 
-
 };
 
 void AddSC_misc_commandscript()

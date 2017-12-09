@@ -1334,6 +1334,8 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_HUNGER_GAMES_ENABLE] = sConfigMgr->GetBoolDefault("HungerGames.Enable", false);
     m_int_configs[CONFIG_HUNGER_GAMES_LIMIT] = sConfigMgr->GetIntDefault("HungerGames.Limit", 500);
 
+    m_bool_configs[CONFIG_TEST_SERVER_ENABLE] = sConfigMgr->GetBoolDefault("TestServer.Enable", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

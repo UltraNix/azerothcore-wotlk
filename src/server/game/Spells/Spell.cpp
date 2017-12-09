@@ -5351,14 +5351,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
-    // Event schody
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        if (m_caster->ToPlayer()->GetZoneId() == 876 /*GM Island*/ ||
-            m_caster->ToPlayer()->GetZoneId() == 616 /*Hyjal*/ ||
-            m_caster->ToPlayer()->GetZoneId() == 2037 /*Quel'thalas*/ ||
-            (m_caster->ToPlayer()->GetZoneId() == 45 /*Arathi Highlands*/ && m_caster->ToPlayer()->GetAreaId() == 2401 /*The Forbidding Sea*/))
-                if (m_spellInfo->Id != 8690)
-                    return SPELL_FAILED_DONT_REPORT;
 
     // caster state requirements
     // not for triggered spells (needed by execute)
@@ -5538,18 +5530,10 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!m_caster->ToPlayer()->InBattleground())
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
-    // Event schody
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if (m_caster->ToPlayer()->GetZoneId() == 616
-            || m_caster->ToPlayer()->GetZoneId() == 3817
-            || m_caster->ToPlayer()->GetZoneId() == 2037)
-        {
-            if (m_spellInfo->Id != 8690)
-                return SPELL_FAILED_DONT_REPORT;
-        }
         //Hunger Games Event
-        else if (m_caster->ToPlayer()->GetZoneId() == 268 &&
+        if (m_caster->ToPlayer()->GetZoneId() == 268 &&
             (m_spellInfo->Id == 21169 || //soulstone
                 m_spellInfo->Id == 47882 || //reincarnation
                 m_spellInfo->RecoveryTime >= 10 * MINUTE * IN_MILLISECONDS) //cooldown longer than 10 minutes

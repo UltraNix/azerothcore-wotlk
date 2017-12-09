@@ -3419,6 +3419,15 @@ HungerGames.Enable = 0
 #        Default:     500
 
 HungerGames.Limit = 500
+
+#		
+#     TestServer.Enable
+#        Description: Enables or disables TestServer.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+
+TestServer.Enable = 0
+
 #
 ###################################################################################################
 

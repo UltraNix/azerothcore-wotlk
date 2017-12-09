@@ -3479,6 +3479,376 @@ public:
     }
 };
 
+class npc_gmisl_teleporter : public CreatureScript {
+public:
+    npc_gmisl_teleporter() : CreatureScript("npc_gmisl_teleporter"){}
+    bool OnGossipHello(Player* player, Creature* creature) 
+    {
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to GM Island.", GOSSIP_SENDER_MAIN, 1);
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        return true;
+    }
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) 
+    {
+        switch (action) {
+            case 1:
+                player->TeleportTo(1, 16226.20f, 16257.f, 13.2f, 1.65f);
+                player->CLOSE_GOSSIP_MENU();
+                break;
+        }
+        return true;
+    }
+};
+
+const uint32 DeathKnightQuests[46] =
+{
+    12593,  // [In Service Of The Lich King]
+    12619,  // [The Emblazoned Runeblade]
+    12842,  // [Runeforging: Preparation For Battle]
+    12848,  // [The Endless Hunger]
+    12636,  // [The Eye Of Acherus]
+    12641,  // [Death Comes From On High]
+    12657,  // [The Might Of The Scourge]
+    12850,  // [Report To Scourge Commander Thalanor]
+    12670,  // [The Scarlet Harvest]
+    12678,  // [If Chaos Drives, Let Suffering Hold The Reins]
+    12680,  // [Grand Theft Palomino]
+    12687,  // [Into the Realm of Shadows]
+    12679,  // [Tonight We Dine In Havenshire]
+    12733,  // [Death's Challenge]
+    12711,  // [Abandoned Mail]
+    12697,  // [Gothik the Harvester]
+    12698,  // [The Gift That Keeps On Giving]
+    12700,  // [An Attack Of Opportunity]
+    12701,  // [Massacre At Light's Point]
+    12706,  // [Victory At Death's Breach!]
+    12714,  // [The Will Of The Lich King]
+    12849,  // [The Power Of Blood, Frost And Unholy]
+    12715,  // [The Crypt of Remembrance]
+    12716,  // [The Plaguebringer's Request]
+    12717,  // [Noth's Special Brew]
+    12718,  // [More Skulls For Brew]
+    12719,  // [Nowhere To Run And Nowhere To Hide]
+    12722,  // [Lambs To The Slaughter]
+    12720,  // [How To Win Friends And Influence Enemies]
+    12723,  // [Behind Scarlet Lines]
+    12724,  // [The Path Of The Righteous Crusader]
+    12725,  // [Brothers In Death]
+    12727,  // [Bloody Breakout]
+    12738,  // [A Cry For Vengeance!]
+    12743,  // [A Special Surprise]
+    12751,  // [A Sort Of Homecoming]
+    12754,  // [Ambush At The Overlook]
+    12755,  // [A Meeting With Fate]
+    12756,  // [The Scarlet Onslaught Emerges]
+    12757,  // [Scarlet Armies Approach...]
+    12778,  // [The Scarlet Apocalypse]
+    12779,  // [An End To All Things...]
+    12800,  // [The Lich King's Command]
+    12801,  // [The Light of Dawn]
+    13165,  // [Taking Back Acherus]
+    13166   // [The Battle For The Ebon Hold]
+};
+
+enum TestNpcData {
+    COMPLETE_DK_CHAIN,
+    TEACH_WEAPON_SKILLS,
+    TEACH_RIDING,
+};
+
+enum skills
+{
+    CHECK_SKILL_ONE_HAND_AXE = 196,
+    CHECK_SKILL_TWO_HAND_AXE = 197,
+    CHECK_SKILL_ONE_HAND_MACE = 198,
+    CHECK_SKILL_TWO_HAND_MACE = 199,
+    CHECK_SKILL_POLEARMS = 200,
+    CHECK_SKILL_ONE_HAND_SWORD = 201,
+    CHECK_SKILL_TWO_HAND_SWORD = 202,
+    CHECK_SKILL_STAVES = 227,
+    CHECK_SKILL_BOWS = 264,
+    CHECK_SKILL_GUNS = 266,
+    CHECK_SKILL_DAGGERS = 1180,
+    CHECK_SKILL_THROWNS = 2567,
+    CHECK_SKILL_WANDS = 5009,
+    CHECK_SKILL_CROSSBOWS = 5011,
+    CHECK_SKILL_FIST = 15590,
+    CHECK_SKILL_PLATE = 750,
+    CHECK_SKILL_MAIL = 8737
+};
+enum riding
+{
+    MOUNT = 38576,
+    MOUNT_FLY_HORDE = 25476,
+    MOUNT_FLY_ALLIANCE = 25472,
+    RIDING_1 = 33388,
+    RIDING_2 = 33391,
+    RIDING_3 = 34090,
+    COLD_WEATHER = 54197
+};
+
+class npc_test_server : CreatureScript {
+public:
+    npc_test_server() : CreatureScript("npc_test_server"){}
+    bool OnGossipHello(Player* player, Creature* creature) override {
+        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
+        if (player->getClass() == CLASS_DEATH_KNIGHT && !player->GetQuestRewardStatus(13166))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Complete Death Knight Chain (you will be kicked)", GOSSIP_SENDER_MAIN, COMPLETE_DK_CHAIN);
+        }
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teach me weapon skills.", GOSSIP_SENDER_MAIN, TEACH_WEAPON_SKILLS);
+        if(!player->HasSpell(RIDING_1))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teach me riding", GOSSIP_SENDER_MAIN, TEACH_RIDING);
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        return true;
+    }
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override {
+        switch (action) {
+            case COMPLETE_DK_CHAIN:
+                CompleteDeathKnightChain(player);
+                player->GetSession()->KickPlayer(true);
+            break;
+            case TEACH_WEAPON_SKILLS:
+                TeachWeaponSkills(player);
+                player->CLOSE_GOSSIP_MENU();
+                break;
+            case TEACH_RIDING:
+                player->learnSpell(RIDING_1);
+                player->learnSpell(RIDING_2);
+                player->learnSpell(RIDING_3);
+                player->learnSpell(COLD_WEATHER);
+                player->AddItem(MOUNT, 1);
+                player->AddItem((player->GetTeamId() == TEAM_ALLIANCE) ? MOUNT_FLY_ALLIANCE : MOUNT_FLY_HORDE, 1);
+                player->CLOSE_GOSSIP_MENU();
+                break;
+        }
+        return true;
+    }
+private:
+    bool CompleteDeathKnightChain(Player *player) {
+        {
+            if (!player)
+                return false;
+
+            if (player->getClass() != CLASS_DEATH_KNIGHT)
+                return false;
+
+            PreparedStatement* stmt = NULL;
+            SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+            for (int i = 0; i < 47; i++)
+            {
+                stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_QUESTSTATUS_REWARDED);
+                stmt->setUInt32(0, player->GetGUIDLow());
+
+                if (i < 46)
+                    stmt->setUInt32(1, DeathKnightQuests[i]);
+                else if (i == 46)
+                {
+                    if (player->GetTeamId() == TEAM_ALLIANCE)
+                        stmt->setUInt32(1, 13188);
+                    else
+                        stmt->setUInt32(1, 13189);
+                }
+
+                trans->Append(stmt);
+            }
+
+            CharacterDatabase.CommitTransaction(trans);
+
+            // Runeforging
+            player->CastSpell(player, 53431, true);
+
+            return true;
+        }
+    }
+
+    bool TeachWeaponSkills(Player* player)
+    {
+        if (!player)
+            return false;
+
+        switch (player->getClass())
+        {
+        case CLASS_DRUID:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_POLEARMS))
+                player->learnSpell(CHECK_SKILL_POLEARMS);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_STAVES))
+                player->learnSpell(CHECK_SKILL_STAVES);
+
+        } break;
+        case CLASS_HUNTER:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_POLEARMS))
+                player->learnSpell(CHECK_SKILL_POLEARMS);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_BOWS))
+                player->learnSpell(CHECK_SKILL_BOWS);
+            if (!player->HasSpell(CHECK_SKILL_GUNS))
+                player->learnSpell(CHECK_SKILL_GUNS);
+            if (!player->HasSpell(CHECK_SKILL_CROSSBOWS))
+                player->learnSpell(CHECK_SKILL_CROSSBOWS);
+            if (!player->HasSpell(CHECK_SKILL_STAVES))
+                player->learnSpell(CHECK_SKILL_STAVES);
+            if (!player->HasSpell(CHECK_SKILL_MAIL))
+                player->learnSpell(CHECK_SKILL_MAIL);
+        } break;
+        case CLASS_MAGE:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_STAVES))
+                player->learnSpell(CHECK_SKILL_STAVES);
+            if (!player->HasSpell(CHECK_SKILL_WANDS))
+                player->learnSpell(CHECK_SKILL_WANDS);
+        } break;
+        case CLASS_PALADIN:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_POLEARMS))
+                player->learnSpell(CHECK_SKILL_POLEARMS);
+            if (!player->HasSpell(CHECK_SKILL_PLATE))
+                player->learnSpell(CHECK_SKILL_PLATE);
+        } break;
+        case CLASS_PRIEST:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_STAVES))
+                player->learnSpell(CHECK_SKILL_STAVES);
+            if (!player->HasSpell(CHECK_SKILL_WANDS))
+                player->learnSpell(CHECK_SKILL_WANDS);
+        } break;
+        case CLASS_ROGUE:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_THROWNS))
+                player->learnSpell(CHECK_SKILL_THROWNS);
+            if (!player->HasSpell(CHECK_SKILL_CROSSBOWS))
+                player->learnSpell(CHECK_SKILL_CROSSBOWS);
+        } break;
+        case CLASS_SHAMAN:
+        {
+            if (!player->HasSpell(CHECK_SKILL_FIST))
+                player->learnSpell(CHECK_SKILL_FIST);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_STAVES))
+                player->learnSpell(CHECK_SKILL_STAVES);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_MAIL))
+                player->learnSpell(CHECK_SKILL_MAIL);
+        } break;
+        case CLASS_WARLOCK:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_DAGGERS))
+                player->learnSpell(CHECK_SKILL_DAGGERS);
+            if (!player->HasSpell(CHECK_SKILL_STAVES))
+                player->learnSpell(CHECK_SKILL_STAVES);
+            if (!player->HasSpell(CHECK_SKILL_WANDS))
+                player->learnSpell(CHECK_SKILL_WANDS);
+        } break;
+        case CLASS_WARRIOR:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_POLEARMS))
+                player->learnSpell(CHECK_SKILL_POLEARMS);
+            if (!player->HasSpell(CHECK_SKILL_BOWS))
+                player->learnSpell(CHECK_SKILL_BOWS);
+            if (!player->HasSpell(CHECK_SKILL_THROWNS))
+                player->learnSpell(CHECK_SKILL_THROWNS);
+            if (!player->HasSpell(CHECK_SKILL_GUNS))
+                player->learnSpell(CHECK_SKILL_GUNS);
+            if (!player->HasSpell(CHECK_SKILL_CROSSBOWS))
+                player->learnSpell(CHECK_SKILL_CROSSBOWS);
+            if (!player->HasSpell(CHECK_SKILL_PLATE))
+                player->learnSpell(CHECK_SKILL_PLATE);
+
+        } break;
+        case CLASS_DEATH_KNIGHT:
+        {
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_ONE_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_ONE_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_AXE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_AXE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_MACE))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_MACE);
+            if (!player->HasSpell(CHECK_SKILL_TWO_HAND_SWORD))
+                player->learnSpell(CHECK_SKILL_TWO_HAND_SWORD);
+            if (!player->HasSpell(CHECK_SKILL_POLEARMS))
+                player->learnSpell(CHECK_SKILL_POLEARMS);
+
+        } break;
+        }
+        player->UpdateSkillsToMaxSkillsForLevel();
+        return true;
+    }
+
+};
+
 void AddSC_npcs_special()
 {
     // Ours
@@ -3492,6 +3862,9 @@ void AddSC_npcs_special()
     new npc_dala_tele();
     new npc_hunger_games();
     new npc_hunger_games_control();
+    new npc_gmisl_teleporter();
+    new npc_test_server();
+
     new player_script_hunger_games();
     // Theirs
     new npc_air_force_bots();
