@@ -244,7 +244,7 @@ struct LastPhaseIceTombTargetSelector : public std::unary_function<Unit*, bool>
             if (target->GetTypeId() != TYPEID_PLAYER)
                 return false;
 
-            if (target->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL) || target->HasAura(SPELL_ICE_TOMB_UNTARGETABLE) || target->HasAura(SPELL_ICE_TOMB_DAMAGE) || target->HasAura(SPELL_TANK_MARKER_AURA) || target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+            if (target->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_ALL) || target->HasAura(SPELL_ICE_TOMB_UNTARGETABLE) || target->HasAura(SPELL_ICE_TOMB_DAMAGE) || target->HasAura(SPELL_TANK_MARKER_AURA) || target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
                 return false;
 
             return target != _source->GetVictim();
@@ -368,7 +368,7 @@ class boss_sindragosa : public CreatureScript
                     const Map::PlayerList &pl = me->GetMap()->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
                         if (Player* p = itr->GetSource())
-                            if (p->IsAlive() && !p->IsGameMaster() && p->GetExactDist(&SindragosaLandPos) < 200.0f && !p->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL))
+                            if (p->IsAlive() && !p->IsGameMaster() && p->GetExactDist(&SindragosaLandPos) < 200.0f && !p->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_ALL))
                                 Unit::Kill(me, p);
                 }
                 me->DisableRotate(false);
@@ -640,7 +640,7 @@ class boss_sindragosa : public CreatureScript
                             if (ok)
                                 break;
                         } while (--triesLeft);
-
+                                
                         me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
                         if (_bombCount >= 4)
                             events.ScheduleEvent(EVENT_LAND, 5500);
@@ -1156,12 +1156,12 @@ class SindragosaIceTombCheck
     public:
         bool operator()(Unit* unit) const
         {
-            return unit->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL);
+            return unit->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_ALL);
         }
 
         bool operator()(WorldObject* object) const
         {
-            return object->ToUnit() && object->ToUnit()->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL);
+            return object->ToUnit() && object->ToUnit()->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_ALL);
         }
 };
 
@@ -1278,7 +1278,7 @@ class MysticBuffetTargetFilter
         explicit MysticBuffetTargetFilter(Unit* caster) : _caster(caster) { }
 
         bool operator()(WorldObject* unit) const
-        {
+        {    
             if (!unit->IsInMap(_caster))
                 return true;
 

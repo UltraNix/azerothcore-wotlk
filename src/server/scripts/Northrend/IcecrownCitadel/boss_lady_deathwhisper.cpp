@@ -1013,7 +1013,7 @@ public:
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            if (_canShatter && me->GetVictim() && me->GetVictim()->IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL))
+            if (_canShatter && me->GetVictim() && me->GetVictim()->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_NORMAL))
             {
                 me->CastSpell(me->GetVictim(), SPELL_SHATTERING_THROW, false);
                 _canShatter = false;

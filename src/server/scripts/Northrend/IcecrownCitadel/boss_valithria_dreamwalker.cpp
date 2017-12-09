@@ -577,7 +577,7 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                     if (!threatList.empty())
                         for (ThreatContainer::StorageType::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
                             if (Unit* target = (*itr)->getTarget())
-                                if (target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER && me->GetExactDist(target) < 200.0f && !target->IsImmunedToDamage(SPELL_SCHOOL_MASK_ALL))
+                                if (target->IsAlive() && target->GetTypeId() == TYPEID_PLAYER && me->GetExactDist(target) < 200.0f && !target->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_ALL))
                                     return;
                     EnterEvadeMode();
                 }
