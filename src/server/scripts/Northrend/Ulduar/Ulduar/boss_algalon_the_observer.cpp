@@ -737,12 +737,7 @@ class boss_algalon_the_observer : public CreatureScript
                         break;
                     case EVENT_OUTRO_3:
                         me->CastSpell((Unit*)NULL, SPELL_KILL_CREDIT);
-                        // Summon Chest
-                        if (GameObject* go = me->SummonGameObject(RAID_MODE(GO_ALGALON_CHEST, GO_ALGALON_CHEST_HERO), 1632.1f, -306.561f, 417.321f, 4.69494f, 0, 0, 0, 1, 0))
-                        {
-                            //go->RemoveFromOwner();
-                            go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
-                        }
+                        m_pInstance->SetData(DATA_GIFT_OF_THE_OBSERVER, DATA_GIFT_OF_THE_OBSERVER);
                         events.PopEvent();
                         break;
                     case EVENT_OUTRO_4:

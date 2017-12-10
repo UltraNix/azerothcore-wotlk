@@ -89,6 +89,7 @@ public:
         uint64 m_algalonTrapdoorGUID;
         uint64 m_brannBronzebeardAlgGUID;
         uint32 m_algalonTimer;
+        uint64 m_chestGUID;
 
         // Shared
         EventMap _events;
@@ -163,6 +164,7 @@ public:
             m_algalonTrapdoorGUID    = 0;
             m_brannBronzebeardAlgGUID    = 0;
             m_algalonTimer            = 0;
+            m_chestGUID               = 0;
 
             // Shared
             _events.Reset();
@@ -553,6 +555,11 @@ public:
                 case GO_DOODAD_UL_ULDUAR_TRAPDOOR_03:
                     m_algalonTrapdoorGUID = gameObject->GetGUID();
                     break;
+                case GO_ALGALON_CHEST:
+                case GO_ALGALON_CHEST_HERO:
+                    gameObject->SetVisible(false);
+                    m_chestGUID = gameObject->GetGUID();
+                    break;
                 // Herbs
                 case 191019: // Adder's Tongue
                 case 190176: // Frost Lotus
@@ -679,7 +686,15 @@ public:
                         go->EnableCollision(false);
                     }
                     break;
-
+                case DATA_GIFT_OF_THE_OBSERVER:
+                {
+                    if (GameObject* go = instance->GetGameObject(m_chestGUID))
+                    {
+                        go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                        go->SetVisible(true);
+                    }
+                    break;
+                }
                 // Achievement
                 case DATA_DWARFAGEDDON:
                     DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, SPELL_DWARFAGEDDON);
