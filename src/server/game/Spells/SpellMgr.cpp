@@ -5913,78 +5913,48 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67311:
             spellInfo->procCharges = 10;
             break;
-        // Trial of the Crusader, Twin Valkyr, Touch of Light/Darkness, Light/Dark Surge
-        case 65950: // light 0
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
+        // Trial of the Crusader, Twin Valkyr, Light/Dark Surge
         case 65767: // light surge 0
             spellInfo->excludeTargetAuraSpell = 65686;
-            break;
-        case 67296: // light 1
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
             break;
         case 67274: // light surge 1
             spellInfo->excludeTargetAuraSpell = 67222;
             break;
-        case 67297: // light 2
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67275: // light surge 2
             spellInfo->excludeTargetAuraSpell = 67223;
-            break;
-        case 67298: // light 3
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
             break;
         case 67276: // light surge 3
             spellInfo->excludeTargetAuraSpell = 67224;
             break;
-        case 66001: // dark 0
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 65769: // dark surge 0
             spellInfo->excludeTargetAuraSpell = 65684;
-            break;
-        case 67281: // dark 1
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
             break;
         case 67265: // dark surge 1
             spellInfo->excludeTargetAuraSpell = 67176;
             break;
-        case 67282: // dark 2
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67266: // dark surge 2
             spellInfo->excludeTargetAuraSpell = 67177;
             break;
-        case 67283: // dark 3
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
         case 67267: // dark surge 3
             spellInfo->excludeTargetAuraSpell = 67178;
+            break;
+
+        //! Touch of light/darkness
+        case 65950: // Touch of light 10 normal
+        case 67297: // Touch of light 10 heroic
+            spellInfo->MaxAffectedTargets = 1;
+            break;
+        case 67296: // touch of light 25 normal
+        case 67298: // Touch of light 25 heroic
+            spellInfo->MaxAffectedTargets = 2;
+            break;
+        case 66001: // Touch of darkness 10 normal
+        case 67282: // Touch of darkness 10 heroic
+            spellInfo->MaxAffectedTargets = 1;
+            break;
+        case 67281: // Touch of darkness 25 normal
+        case 67283: // Touch of darkness 25 heroic
+            spellInfo->MaxAffectedTargets = 2;
             break;
 
         // Trial of the Crusader, Twin Valkyr, Twin's Pact
