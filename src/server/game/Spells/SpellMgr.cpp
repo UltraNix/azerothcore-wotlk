@@ -5940,21 +5940,32 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
 
         //! Touch of light/darkness
+        //! Removed EFFECT_1 (didnt exist anyway, just making sure) and EFFECT_2 because
+        //! it caused more visuals to be sent even when targets were filtered
+        //! i suspected its caused by effect execution order which is messed up
         case 65950: // Touch of light 10 normal
         case 67297: // Touch of light 10 heroic
             spellInfo->MaxAffectedTargets = 1;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
         case 67296: // touch of light 25 normal
         case 67298: // Touch of light 25 heroic
             spellInfo->MaxAffectedTargets = 2;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
         case 66001: // Touch of darkness 10 normal
         case 67282: // Touch of darkness 10 heroic
             spellInfo->MaxAffectedTargets = 1;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
         case 67281: // Touch of darkness 25 normal
         case 67283: // Touch of darkness 25 heroic
             spellInfo->MaxAffectedTargets = 2;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
 
         // Trial of the Crusader, Twin Valkyr, Twin's Pact
