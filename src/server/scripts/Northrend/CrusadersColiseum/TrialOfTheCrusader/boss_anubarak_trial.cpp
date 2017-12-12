@@ -207,6 +207,14 @@ struct boss_anubarak_trialAI : public BossAI
         instance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
     }
 
+    bool CanSeeAlways(WorldObject const* /*obj*/) override
+    {
+        //! If phase 3 is active meaning leeching swarm was activated
+        //! lets set canSeeAlways to true so players do not drop auras with invisibility auras
+        //! due to how visibility systems work on SunwellCore
+        return _phase3;
+    }
+
     void UpdateAI(uint32 diff) override
     {
         if (!UpdateVictim())
