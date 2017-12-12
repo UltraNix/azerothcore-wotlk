@@ -4531,7 +4531,7 @@ void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, ui
     }
 }
 
-void Unit::RemoveMovementImpairingAuras(bool withRoot)
+void Unit::RemoveMovementImpairingAuras(bool withRoot, bool removeTargetingAreaAuras /*default true*/)
 {
     if (withRoot)
         RemoveAurasWithMechanic(1<<MECHANIC_ROOT);
@@ -4540,6 +4540,13 @@ void Unit::RemoveMovementImpairingAuras(bool withRoot)
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
     {
         Aura const* aura = iter->second->GetBase();
+
+        if (!aura || !aura->GetSpellInfo())
+            continue;
+
+        if (!removeTargetingAreaAuras && aura->GetSpellInfo()->IsTargetingArea())
+            continue;
+
         if (aura->GetSpellInfo()->Mechanic == MECHANIC_SNARE)
         {
             RemoveAura(iter);
