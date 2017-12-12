@@ -729,7 +729,7 @@ class spell_valkyr_touch_light_SpellScript : public SpellScript
                 target->ToPlayer()->HasAura(SPELL_VALKYR_HITTING_YA_PROC);
         });
 
-        Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
+        Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
     }
 
     void Register() override
@@ -750,7 +750,7 @@ class spell_valkyr_touch_dark_SpellScript : public SpellScript
                 target->ToPlayer()->HasAura(SPELL_VALKYR_HITTING_YA_PROC);
         });
 
-        Trinity::Containers::RandomResizeList(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
+        Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
     }
 
     void Register() override
