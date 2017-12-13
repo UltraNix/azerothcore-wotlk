@@ -4531,7 +4531,7 @@ void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, ui
     }
 }
 
-void Unit::RemoveMovementImpairingAuras(bool withRoot, bool removeTargetingAreaAuras /*default true*/)
+void Unit::RemoveMovementImpairingAuras(bool withRoot)
 {
     if (withRoot)
         RemoveAurasWithMechanic(1<<MECHANIC_ROOT);
@@ -4541,12 +4541,6 @@ void Unit::RemoveMovementImpairingAuras(bool withRoot, bool removeTargetingAreaA
     {
         Aura const* aura = iter->second->GetBase();
 
-        if (!aura || !aura->GetSpellInfo())
-            continue;
-
-        if (!removeTargetingAreaAuras && aura->GetSpellInfo()->IsTargetingArea())
-            continue;
-
         if (aura->GetSpellInfo()->Mechanic == MECHANIC_SNARE)
         {
             RemoveAura(iter);
@@ -4555,7 +4549,7 @@ void Unit::RemoveMovementImpairingAuras(bool withRoot, bool removeTargetingAreaA
 
         // Xinef: turn off snare auras by setting amount to 0 :)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            if (((1 << i) & iter->second->GetEffectMask()) && aura->GetSpellInfo()->Effects[i].Mechanic == MECHANIC_SNARE)
+            if (((1 << i) & iter->second->GetEffectMask()) && aura->GetSpellInfo()->Effects[i].Mechanic == MECHANIC_SNARE && aura->GetSpellInfo()->Effects[i].Effect != SPELL_EFFECT_PERSISTENT_AREA_AURA)
                 aura->GetEffect(i)->ChangeAmount(0);
 
         ++iter;
