@@ -393,9 +393,40 @@ class spell_ahn_kahet_swarmer_aura : public SpellScriptLoader
         }
 };
 
+class spell_aura_of_lost_hope: public SpellScriptLoader
+{
+public:
+    spell_aura_of_lost_hope() : SpellScriptLoader("spell_aura_of_lost_hope") { }
+
+    class spell_aura_of_lost_hope_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_aura_of_lost_hope_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (!caster->IsInCombat())
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_aura_of_lost_hope_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_aura_of_lost_hope_SpellScript();
+    }
+};
+
 void AddSC_boss_elder_nadox()
 {
     new boss_elder_nadox();
     new npc_ahnkahar_nerubian();
     new spell_ahn_kahet_swarmer_aura();
+    new spell_aura_of_lost_hope();
 }
