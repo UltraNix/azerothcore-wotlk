@@ -4084,6 +4084,30 @@ bool Player::IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const
 
 }
 
+bool Player::IsSpellInBothSpeccs(uint32 spellId, uint8 currentSpec)
+{
+    /*
+        Check wheter spell we're learning, in most cases its ranked spell
+        is also in second specc. Lets say we have druid with dual specc
+        both specs are feral, both have mangle specced. Now druid gets rank 3 or whatever
+        of said spell, and it used to be updated for CurrentSpecc only - which caused mangle
+        to disappear when druid respecced into second feral build due to difference between active spells, because only one spell was updated
+        So in function Player::learnSpell, aside of checks made by xinef & pussy we also check wheter that spell
+        is in second build. If so then force update for both specMask instead of just currentOne
+    */
+    uint32 firstRankSpellId = sSpellMgr->GetFirstSpellInChain(spellId);
+
+    PlayerSpellMap::iterator itr = m_spells.find(firstRankSpellId);
+    if (itr != m_spells.end())
+    {
+        // spec 0 = default spec
+        // spec 1 = second spec we learn from trainer for 1000g
+        // if currentSpec is 0 then check in specc 1 else check in specc 0
+        return !currentSpec ? itr->second->IsInSpec(1) : itr->second->IsInSpec(0);
+    }
+    return false;
+}
+
 void Player::learnSpell(uint32 spellId)
 {
     // Xinef: don't allow to learn active spell once more
@@ -4094,8 +4118,13 @@ void Player::learnSpell(uint32 spellId)
     }
 
     uint32 firstRankSpellId = sSpellMgr->GetFirstSpellInChain(spellId);
+    bool IsInOppositeSpec = IsSpellInBothSpeccs(spellId, GetActiveSpec());
+
     bool thisSpec = GetTalentSpellCost(firstRankSpellId) > 0 || sSpellMgr->IsAdditionalTalentSpell(firstRankSpellId);
-    bool added = addSpell(spellId, thisSpec ? GetActiveSpecMask() : SPEC_MASK_ALL, true);
+    //! if ^ returns true and IsInOppositeSpec returns false, then updateSingleSpec will return true
+    //! if IsInoppositeSpec returns true then updateSingleSpec will be false and we will update both speccMasks
+    bool updateSingleSpec = (thisSpec && !IsInOppositeSpec);
+    bool added = addSpell(spellId, updateSingleSpec ? GetActiveSpecMask() : SPEC_MASK_ALL, true);
     if (added && IsInWorld())
     {
         // pussywizard: a system message "you have learnt spell X (rank Y)"

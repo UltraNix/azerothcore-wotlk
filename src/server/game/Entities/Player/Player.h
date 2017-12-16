@@ -1772,6 +1772,7 @@ class Player : public Unit, public GridObject<Player>
         void SendLearnPacket(uint32 spellId, bool learn);
         bool addSpell(uint32 spellId, uint8 addSpecMask, bool updateActive, bool temporary = false);
         bool _addSpell(uint32 spellId, uint8 addSpecMask, bool temporary);
+        bool IsSpellInBothSpeccs(uint32 spellId, uint8 currentSpec);
         void learnSpell(uint32 spellId);
         void removeSpell(uint32 spellId, uint8 removeSpecMask, bool onlyTemporary);
         void resetSpells();
