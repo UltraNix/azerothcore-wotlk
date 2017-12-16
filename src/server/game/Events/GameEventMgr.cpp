@@ -207,7 +207,7 @@ void GameEventMgr::LoadFromDB()
     {
         uint32 oldMSTime = getMSTime();
                                                 //       1           2                           3                         4          5       6        7            8
-        QueryResult result = WorldDatabase.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, description, world_event FROM game_event");
+        QueryResult result = WorldDatabase.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, holidayStage, description, world_event FROM game_event");
         if (!result)
         {
             mGameEvent.clear();
@@ -236,10 +236,13 @@ void GameEventMgr::LoadFromDB()
             pGameEvent.occurence    = fields[3].GetUInt64();
             pGameEvent.length       = fields[4].GetUInt64();
             pGameEvent.holiday_id   = HolidayIds(fields[5].GetUInt32());
+            pGameEvent.holidayStage = fields[6].GetUInt8();
 
             pGameEvent.state        = (GameEventState)(fields[7].GetUInt8());
             pGameEvent.nextstart    = 0;
+            pGameEvent.description  = fields[6].GetString();
 
+            ++count;
             if (pGameEvent.length == 0 && pGameEvent.state == GAMEEVENT_NORMAL)                            // length>0 is validity check
             {
                 sLog->outErrorDb("`game_event` game event id (%i) isn't a world event and has length = 0, thus it can't be used.", event_id);
@@ -252,12 +255,17 @@ void GameEventMgr::LoadFromDB()
                 {
                     sLog->outErrorDb("`game_event` game event id (%i) have not existed holiday id %u.", event_id, pGameEvent.holiday_id);
                     pGameEvent.holiday_id = HOLIDAY_NONE;
+                    continue;
                 }
             }
+            if (pGameEvent.holidayStage > MAX_HOLIDAY_DURATIONS)
+            {
+                sLog->outErrorDb("`game_event` game event id(%i) has out of range holidayStage %u.", event_id, pGameEvent.holidayStage);
+                pGameEvent.holidayStage = 0;
+                continue;
+            }
 
-            pGameEvent.description  = fields[6].GetString();
-
-            ++count;
+            SetHolidayEventTime(pGameEvent);
         }
         while (result->NextRow());
 
@@ -963,6 +971,47 @@ void GameEventMgr::LoadFromDB()
             sLog->outString();
         }
     }
+}
+
+void GameEventMgr::LoadHolidayDates()
+{
+    uint32 oldMSTime = getMSTime();
+
+    //                                               0   1         2
+    QueryResult result = WorldDatabase.Query("SELECT id, date_id, date_value FROM holiday_dates");
+
+    if (!result)
+    {
+        sLog->outString(">> Loaded 0 holiday dates. DB table `holiday_dates` is empty.");
+        sLog->outString();
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 holidayId = fields[0].GetUInt32();
+        HolidaysEntry* entry = const_cast<HolidaysEntry*>(sHolidaysStore.LookupEntry(holidayId));
+        if (!entry)
+        {
+            sLog->outErrorDb("holiday_dates entry has invalid holiday id %u.", holidayId);
+            continue;
+        }
+        uint8 dateId = fields[1].GetUInt8();
+        if (dateId >= MAX_HOLIDAY_DATES)
+        {
+            sLog->outErrorDb("holiday_dates entry has out of range date_id %u.", dateId);
+            continue;
+        }
+        entry->Date[dateId] = fields[2].GetUInt32();
+        modifiedHolidays.insert(entry->Id);
+        ++count;
+
+    } while (result->NextRow());
+
+    sLog->outString(">> Loaded %u holiday dates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
 }
 
 uint32 GameEventMgr::GetNPCFlag(Creature* cr)
@@ -1674,6 +1723,84 @@ void GameEventMgr::RunSmartAIScripts(uint16 event_id, bool activate)
             if (iter->second->IsInWorld() && iter->second->FindMap() && iter->second->AI())
                 iter->second->AI()->OnGameEvent(activate, event_id);
     }
+}
+
+void GameEventMgr::SetHolidayEventTime(GameEventData& event)
+{
+    if (!event.holidayStage) // Ignore holiday
+        return;
+
+    const HolidaysEntry* holiday = sHolidaysStore.LookupEntry(event.holiday_id);
+
+    if (!holiday->Date[0] || !holiday->Duration[0]) // Invalid definitions
+    {
+        sLog->outErrorDb("sql.sql", "Missing date or duration for holiday %u.", event.holiday_id);
+        return;
+    }
+
+    uint8 stageIndex = event.holidayStage - 1;
+    event.length = holiday->Duration[stageIndex] * HOUR / MINUTE;
+
+    time_t stageOffset = 0;
+    for (int i = 0; i < stageIndex; ++i)
+        stageOffset += holiday->Duration[i] * HOUR;
+
+    switch (holiday->CalendarFilterType)
+    {
+        case -1: // Yearly
+            event.occurence = YEAR / MINUTE; // Not all too useful
+            break;
+        case 0: // Weekly
+            event.occurence = WEEK / MINUTE;
+            break;
+        case 1: // Defined dates only (Darkmoon Faire)
+            break;
+        case 2: // Only used for looping events (Call to Arms)
+            break;
+    }
+
+    if (holiday->Looping)
+    {
+        event.occurence = 0;
+        for (int i = 0; i < MAX_HOLIDAY_DURATIONS && holiday->Duration[i]; ++i)
+            event.occurence += holiday->Duration[i] * HOUR / MINUTE;
+    }
+
+    bool singleDate = ((holiday->Date[0] >> 24) & 0x1F) == 31; // Events with fixed date within year have - 1
+
+    time_t curTime = time(NULL);
+    for (int i = 0; i < MAX_HOLIDAY_DATES && holiday->Date[i]; ++i)
+    {
+        uint32 date = holiday->Date[i];
+
+        tm timeInfo;
+        if (singleDate)
+            timeInfo.tm_year = localtime(&curTime)->tm_year - 1; // First try last year (event active through New Year)
+        else
+            timeInfo.tm_year = ((date >> 24) & 0x1F) + 100;
+
+        timeInfo.tm_mon = (date >> 20) & 0xF;
+        timeInfo.tm_mday = ((date >> 14) & 0x3F) + 1;
+        timeInfo.tm_hour = (date >> 6) & 0x1F;
+        timeInfo.tm_min = date & 0x3F;
+        timeInfo.tm_sec = 0;
+        timeInfo.tm_isdst = -1;
+        tm tmCopy = timeInfo;
+
+        time_t startTime = mktime(&timeInfo);
+        if (curTime < startTime + event.length * MINUTE)
+        {
+            event.start = startTime + stageOffset;
+            return;
+        }
+        else if (singleDate)
+        {
+            tmCopy.tm_year = localtime(&curTime)->tm_year; // This year
+            event.start = mktime(&tmCopy) + stageOffset;
+            return;
+        }
+    }
+    sLog->outErrorDb("No suitable start date found for holiday %u.", event.holiday_id);
 }
 
 bool IsHolidayActive(HolidayIds id)
