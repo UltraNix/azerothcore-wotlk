@@ -3889,8 +3889,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 20185:
         case 20186:
         case 68055:
-        case 20267: // Judgment of light & wisdom heal and energize effects should not proc any effects
-        case 20268: // Judgment of light & wisdom heal and energize effects should not proc any effects
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             break;
         // Blessing of sanctuary stats
