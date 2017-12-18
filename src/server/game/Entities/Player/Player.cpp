@@ -20671,7 +20671,8 @@ enum AFKcheck
 // Custom.AFK.Report
 void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
 {
-    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT) || !IsInWorld())
+    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT) 
+        || !IsInWorld() || IsBeingTeleported() || IsBeingTeleportedFar())
         return;
 
     // Function is called only for update timer see: Spell.cpp
