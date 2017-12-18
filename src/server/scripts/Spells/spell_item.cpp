@@ -3933,6 +3933,47 @@ public:
     }
 };
 
+class spell_item_meteorite_crystal : public SpellScriptLoader
+{
+public:
+    spell_item_meteorite_crystal() : SpellScriptLoader("spell_item_meteorite_crystal") { }
+
+    class spell_item_meteorite_crystal_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_item_meteorite_crystal_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+            if (!spellInfo)
+                return false;
+
+            //! if power type different than mana, it shouldnt proc
+            if (spellInfo->PowerType != POWER_MANA)
+                return false;
+
+            //! if it doesnt cost mana then it shouldnt proc
+            if (!spellInfo->ManaCostPercentage && !spellInfo->ManaCost)
+                return false;
+
+            if (spellInfo->HasAttribute(SPELL_ATTR3_DISABLE_PROC) || spellInfo->HasAttribute(SPELL_ATTR3_CANT_TRIGGER_PROC))
+                return false;
+
+            return true;
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_item_meteorite_crystal_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_item_meteorite_crystal_AuraScript();
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // Ours
@@ -3972,6 +4013,7 @@ void AddSC_item_spell_scripts()
     new spell_item_draenic_pale_ale();
     new spell_item_direbrew_remote();
     new spell_item_goblin_rocket_boots();
+    new spell_item_meteorite_crystal();
 
     // Theirs
     // 23074 Arcanite Dragonling
