@@ -403,7 +403,7 @@ struct boss_ignisAI : public BossAI
                         }
                     }
 
-                    events.Repeat(24000); // +6000 below
+                    events.Repeat(me->GetMap()->Is25ManRaid() ? 9000 : 24000); // +6000 below
                     events.DelayEvents(6000);
                 }
                 break;
@@ -474,7 +474,11 @@ class spell_ignis_slag_pot_AuraScript : public AuraScript
     {
         if (Unit* caster = GetCaster())
             if (Unit* target = GetTarget())
+            {
                 caster->CastSpell(target, (GetId() == 62717 ? 65722 : 65723), true);
+                if (target->HasUnitState(UNIT_STATE_CASTING))
+                    target->InterruptNonMeleeSpells(true);
+            }
     }
 
     void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
