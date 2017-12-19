@@ -558,6 +558,7 @@ public:
                 case GO_ALGALON_CHEST:
                 case GO_ALGALON_CHEST_HERO:
                     gameObject->SetVisible(false);
+                    gameObject->EnableCollision(false);
                     m_chestGUID = gameObject->GetGUID();
                     break;
                 // Herbs
@@ -690,6 +691,7 @@ public:
                 {
                     if (GameObject* go = instance->GetGameObject(m_chestGUID))
                     {
+                        go->EnableCollision(true);
                         go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
                         go->SetVisible(true);
                     }

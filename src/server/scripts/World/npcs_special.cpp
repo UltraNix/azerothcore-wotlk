@@ -3579,11 +3579,11 @@ enum skills
 enum riding
 {
     MOUNT = 38576,
-    MOUNT_FLY_HORDE = 25476,
-    MOUNT_FLY_ALLIANCE = 25472,
+    MOUNT_FLY = 32458,
     RIDING_1 = 33388,
     RIDING_2 = 33391,
     RIDING_3 = 34090,
+    RIDING_4 = 34091,
     COLD_WEATHER = 54197
 };
 
@@ -3617,9 +3617,10 @@ public:
                 player->learnSpell(RIDING_1);
                 player->learnSpell(RIDING_2);
                 player->learnSpell(RIDING_3);
+                player->learnSpell(RIDING_4);
                 player->learnSpell(COLD_WEATHER);
                 player->AddItem(MOUNT, 1);
-                player->AddItem((player->GetTeamId() == TEAM_ALLIANCE) ? MOUNT_FLY_ALLIANCE : MOUNT_FLY_HORDE, 1);
+                player->AddItem(MOUNT_FLY, 1);
                 player->CLOSE_GOSSIP_MENU();
                 break;
         }
