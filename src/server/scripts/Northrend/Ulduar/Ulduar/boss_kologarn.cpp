@@ -420,12 +420,13 @@ public:
                     return;
                 case EVENT_FOCUSED_EYEBEAM:
                 {
+                    //! ToDo: This is not correct for sunwell v2
                     events.RepeatEvent(13000+rand()%5000);
                     Unit* target = NULL;
                     Map::PlayerList const& pList = me->GetMap()->GetPlayers();
                     for(Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
                     {
-                        if (itr->GetSource()->GetPositionZ() < 420 || itr->GetSource()->GetPositionX() >= 1772)
+                        if (itr->GetSource()->GetPositionZ() < 420 || itr->GetSource()->GetPositionX() >= 1772 || itr->GetSource()->IsGameMaster())
                             continue;
 
                         target = itr->GetSource();
@@ -437,7 +438,7 @@ public:
                     {
                         for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
                         {
-                            if (itr->GetSource()->GetPositionZ() < 420)
+                            if (itr->GetSource()->GetPositionZ() < 420 || itr->GetSource()->IsGameMaster())
                                 continue;
 
                             target = itr->GetSource();
