@@ -117,16 +117,19 @@ public:
             {
                 if (unmounted)
                 {
+                    //! Incorrect, rewrite this for sunwell v2
                     std::vector<Player*> validPlayers;
                     std::vector<Player*> allPlayers;
                     auto const &pl = me->GetMap()->GetPlayers();
                     for (auto itr = pl.begin(); itr != pl.end(); ++itr)
-                        if (auto player = itr->GetSource())
-                        {
-                            allPlayers.push_back(player);
-                            if (player->IsAlive() && !player->IsWithinMeleeRange(me))
-                                validPlayers.push_back(player);
-                        }
+                    {
+                        if (itr->GetSource()->IsGameMaster())
+                            continue;
+
+                        allPlayers.push_back(itr->GetSource());
+                        if (itr->GetSource()->IsAlive() && !itr->GetSource()->IsWithinMeleeRange(me))
+                            validPlayers.push_back(itr->GetSource());
+                    }
 
                     auto DoSpawnFireBombTrigger = [&](Position& pos)
                     {
@@ -143,7 +146,7 @@ public:
                             DoSpawnFireBombTrigger(*target);
                     }
                     else if (auto target = Trinity::Containers::SelectRandomContainerElement(allPlayers))
-                            DoSpawnFireBombTrigger(*target);
+                        DoSpawnFireBombTrigger(*target);
 
                 }
                 bombTimer = urand(20000, 30000);
