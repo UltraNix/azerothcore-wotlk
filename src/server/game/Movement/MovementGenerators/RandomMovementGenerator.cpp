@@ -62,9 +62,13 @@ void RandomMovementGenerator<Creature>::SetRandomLocation(Creature* owner)
     if (!owner)
         return;
 
-    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE) || owner->HasUnitState(UNIT_STATE_CASTING))
-    {
+    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
         _interrupt = true;
+    else if (owner->IsMovementPreventedByCasting())
+        _interrupt = true;
+
+    if (_interrupt)
+    {
         owner->StopMoving();
         return;
     }
@@ -76,7 +80,7 @@ void RandomMovementGenerator<Creature>::SetRandomLocation(Creature* owner)
     float angle = Position::RandomOrientation();
     owner->MovePositionToFirstCollision(position, distance, angle);
 
-    uint32 resetTimer = urand(0, 1) ? urand(5000, 10000) : urand(1000, 2000);
+    uint32 resetTimer = urand(0, 1) ? urand(5000, 10000) : urand(250, 500);
 
     if (!_path)
         _path = new PathGenerator(owner);
@@ -108,14 +112,12 @@ bool RandomMovementGenerator<Creature>::DoUpdate(Creature* owner, uint32 diff)
     if (!owner || !owner->IsAlive())
         return false;
 
-    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE) || owner->HasUnitState(UNIT_STATE_CASTING))
-    {
+    _interrupt = false;
+
+    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
         _interrupt = true;
-        owner->StopMoving();
-        return true;
-    }
-    else
-        _interrupt = false;
+    else if (owner->IsMovementPreventedByCasting())
+        _interrupt = true;
 
     _timer.Update(diff);
     if (!_interrupt && _timer.Passed() && owner->movespline->Finalized())

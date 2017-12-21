@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -191,7 +191,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER      = 0x00010000,
     SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET      = 0x00020000,
     SPELL_ATTR0_CU_ALLOW_INFLIGHT_TARGET         = 0x00040000,
-    SPELL_ATTR0_CU_NOT_BINARY_SPELL              = 0x00080000,  
+    SPELL_ATTR0_CU_NOT_BINARY_SPELL              = 0x00080000,
     SPELL_ATTR0_CU_BINARY_SPELL                  = 0x00100000,
     SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS       = 0x00200000,
     SPELL_ATTR0_CU_SINGLE_AURA_STACK             = 0x00400000, // pussywizard
@@ -448,6 +448,7 @@ public:
     bool IsPositive() const;
     bool IsPositiveEffect(uint8 effIndex) const;
     bool IsChanneled() const;
+    bool IsMoveAllowedChannel() const;
     bool NeedsComboPoints() const;
     bool IsBreakingStealth() const;
     bool IsRangedWeaponSpell() const;
