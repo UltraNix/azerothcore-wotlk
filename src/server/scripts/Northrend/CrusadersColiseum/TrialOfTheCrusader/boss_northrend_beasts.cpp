@@ -212,6 +212,9 @@ public:
 
                             for( Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr )
                             {
+                                if (itr->GetSource()->IsGameMaster())
+                                    continue;
+
                                 if( Player* p = itr->GetSource() )
                                     if( p->IsAlive() && p->GetGUID()!=TargetGUID && (!gormok || !p->IsWithinMeleeRange(gormok)) )
                                         validPlayers.push_back(p->GetGUID());
@@ -261,7 +264,7 @@ public:
                 DoZoneInCombat();
                 events.Reset();
             }
-            
+
             if( param == 1 && !TargetGUID )
                 me->DespawnOrUnsummon();
         }
@@ -998,7 +1001,7 @@ public:
                         destZ = Locs[LOC_CENTER].GetPositionZ()+1.0f;
                         me->StopMoving();
                         me->GetMotionMaster()->MoveJump(Locs[LOC_CENTER].GetPositionX()+cos(jumpangle)*35.0f, Locs[LOC_CENTER].GetPositionY()+sin(jumpangle)*35.0f, Locs[LOC_CENTER].GetPositionZ()+1.0f, 40.0f, 12.0f);
-                        
+
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_TRAMPLE, 1500);
 
@@ -1073,7 +1076,7 @@ public:
 
             Player* plr = NULL;
             if( !pInstance->instance->GetPlayers().isEmpty() )
-            {   
+            {
                 for(auto itr = pInstance->instance->GetPlayers().begin(); itr != pInstance->instance->GetPlayers().end(); ++itr)
                 {
                     if (!itr->GetSource()->IsGameMaster())
