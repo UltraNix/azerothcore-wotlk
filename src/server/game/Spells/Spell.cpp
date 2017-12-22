@@ -6521,6 +6521,8 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
                     mask |= 1<<MECHANIC_SAPPED;
                 if (m_spellInfo->Id == 47585)
                     mask |= 1 << MECHANIC_HORROR;
+                if (m_spellInfo->Id == 33206)
+                    mask |= 1 << MECHANIC_FREEZE;
                 Unit::AuraEffectList const& stunAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
                 for (Unit::AuraEffectList::const_iterator i = stunAuras.begin(); i != stunAuras.end(); ++i)
                 {
