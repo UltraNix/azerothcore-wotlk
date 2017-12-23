@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,9 @@ enum DataTypes
     DATA_HALL_RUNE_4                = 19,
     DATA_HALL_RUNE_5                = 20,
     DATA_HALL_RUNE_6                = 21,
-    DATA_HALL_RUNE_7                = 22
+    DATA_HALL_RUNE_7                = 22,
+    DATA_FATHER_FLAME_EVENT         = 23,
+    DATA_FATHER_FLAME_EVENT_BEGIN   = 24
 };
 
 enum CreaturesIds
@@ -70,7 +72,11 @@ enum CreaturesIds
     NPC_BLACKHAND_SUMMONER          = 9818,
     NPC_BLACKHAND_VETERAN           = 9819,
     NPC_BLACKHAND_INCARCERATOR      = 10316,
-    NPC_LORD_VICTOR_NEFARIUS        = 10162
+    NPC_LORD_VICTOR_NEFARIUS        = 10162,
+    NPC_ROOKERY_HATCHER             = 10683,
+    NPC_ROOKERY_GUARDIAN            = 10258,
+    NPC_SOLAKAR_FLAMEWREATH         = 10264,
+    NPC_ROOKERY_WHELP               = 10161
 };
 
 enum AdditionalData
@@ -86,6 +92,7 @@ enum AdditionalData
 enum GameObjectsIds
 {
     GO_WHELP_SPAWNER                = 175622, // trap spawned by go id 175124
+    GO_ROOKERY_EGG                  = 175124,
     // Doors
     GO_EMBERSEER_IN                 = 175244, // First door to Pyroguard Emberseer
     GO_DOORS                        = 175705, // Second door to Pyroguard Emberseer

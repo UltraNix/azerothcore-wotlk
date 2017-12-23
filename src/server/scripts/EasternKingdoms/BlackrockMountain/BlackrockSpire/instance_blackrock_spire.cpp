@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,7 +39,8 @@ enum EventIds
     EVENT_UROK_DOOMHOWL_SPAWNS_3           = 5,
     EVENT_UROK_DOOMHOWL_SPAWNS_4           = 6,
     EVENT_UROK_DOOMHOWL_SPAWNS_5           = 7,
-    EVENT_UROK_DOOMHOWL_SPAWN_IN           = 8
+    EVENT_UROK_DOOMHOWL_SPAWN_IN           = 8,
+    EVENT_FATHER_FLAME_WAVE                = 9
 };
 
 class instance_blackrock_spire : public InstanceMapScript
@@ -74,6 +75,8 @@ public:
             go_portcullis_active      = 0;
             go_portcullis_tobossrooms = 0;
             go_urok_pile              = 0;
+            _fatherFlameWaveCounter   = 0;
+            _flameEventStarted        = false;
             memset(go_roomrunes, 0, sizeof(go_roomrunes));
             memset(go_emberseerrunes, 0, sizeof(go_emberseerrunes));
         }
@@ -82,6 +85,9 @@ public:
         {
             switch (creature->GetEntry())
             {
+                case NPC_ROOKERY_WHELP:
+                    creature->AI()->DoZoneInCombat(creature, 60.0f);
+                    break;
                 case NPC_HIGHLORD_OMOKK:
                     HighlordOmokk = creature->GetGUID();
                     break;
@@ -309,9 +315,24 @@ public:
                         if (GetBossState(DATA_DRAGONSPIRE_ROOM) != DONE)
                             Events.ScheduleEvent(EVENT_DARGONSPIRE_ROOM_STORE, 1000);
                     }
+                    break;
+                case DATA_FATHER_FLAME_EVENT_BEGIN:
+                    if (!_flameEventStarted)
+                    {
+                        _flameEventStarted = true;
+                        Events.ScheduleEvent(EVENT_FATHER_FLAME_WAVE, 1500);
+                        break;
+                    }
                 default:
                     break;
             }
+        }
+
+        uint32 GetData(uint32 type) const override
+        {
+            if (type == DATA_FATHER_FLAME_EVENT)
+                return uint32(_flameEventStarted);
+            return 0;
         }
 
         uint64 GetData64(uint32 type) const
@@ -407,6 +428,26 @@ public:
                         if ((GetBossState(DATA_DRAGONSPIRE_ROOM) != DONE))
                             Events.ScheduleEvent(EVENT_DARGONSPIRE_ROOM_CHECK, 3000);
                         break;
+                    case EVENT_FATHER_FLAME_WAVE:
+                    {
+                        if (++_fatherFlameWaveCounter < 6)
+                        {
+                            Position hatcherSpawn = { 84.300163f, -254.041504f, 91.469330f, 5.146335f };
+                            Position guardianSpawn = { 69.925400f, -272.678406f, 92.347771f, 6.269454f };
+
+                            instance->SummonCreature(NPC_ROOKERY_HATCHER, hatcherSpawn);
+                            instance->SummonCreature(NPC_ROOKERY_GUARDIAN, guardianSpawn);
+                        }
+                        else
+                        {
+                            Position flameSpawn = { 59.027981f, -261.290680f, 95.093216f, 5.146335f };
+                            if (Creature* solakar = instance->SummonCreature(NPC_SOLAKAR_FLAMEWREATH, flameSpawn))
+                                solakar->AI()->DoZoneInCombat(solakar, 100.0f);
+                        }
+                        if (_fatherFlameWaveCounter < 6)
+                            Events.Repeat(20000);
+                        break;
+                    }
                     default:
                          break;
                 }
@@ -578,6 +619,8 @@ public:
             uint64 go_portcullis_active;
             uint64 go_portcullis_tobossrooms;
             uint64 go_urok_pile;
+            uint32 _flameEventStarted;
+            uint32 _fatherFlameWaveCounter;
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const
@@ -638,9 +681,227 @@ public:
     }
 };
 
+class go_father_flame_event_ubrs : public GameObjectScript
+{
+public:
+    go_father_flame_event_ubrs() : GameObjectScript("go_father_flame_event_ubrs") { }
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (InstanceScript* instance = player->GetInstanceScript())
+        {
+            if (!instance->GetData(DATA_FATHER_FLAME_EVENT))
+            {
+                instance->SetData(DATA_FATHER_FLAME_EVENT_BEGIN, DATA_FATHER_FLAME_EVENT_BEGIN);
+                return false;
+            }
+        }
+        return false;
+    }
+};
+
+enum FatherFlameEvent
+{
+    SPELL_SUNDER_ARMOR_GUARDIAN     = 15572,
+    SPELL_STRIKE_GUARDIAN           = 15580,
+
+    EVENT_SUNDER_ARMOR_GUARDIAN     = 1,
+    EVENT_STRIKE_GUARDIAN           = 2,
+    EVENT_HATCH_DRAGONKIN           = 3,
+    EVENT_HATCH_ANIM                = 4
+};
+
+Position hatcherSpawnPos = { 84.300163f, -254.041504f, 91.469330f, 5.146335f };
+Position guardianSpawnPos = { 69.925400f, -272.678406f, 92.347771f, 6.269454f };
+
+class npc_rookery_guardian : public CreatureScript
+{
+public:
+    npc_rookery_guardian() : CreatureScript("npc_rookery_guardian") { }
+
+    struct npc_rookery_guardian_AI : public ScriptedAI
+    {
+        npc_rookery_guardian_AI(Creature* creature) : ScriptedAI(creature)
+        {
+            Position homePos;
+            me->GetRandomNearPosition(homePos, 10.0f);
+            me->SetHomePosition(homePos);
+            me->GetMotionMaster()->MovePoint(1, me->GetHomePosition(), true);
+        }
+
+        void Reset() override
+        {
+            events.Reset();
+        }
+
+        void MovementInform(uint32 type, uint32 pointID) override
+        {
+            if (type == POINT_MOTION_TYPE && pointID == 1)
+                DoZoneInCombat(me, 100.0f);
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            events.ScheduleEvent(EVENT_SUNDER_ARMOR_GUARDIAN, 5000);
+            events.ScheduleEvent(EVENT_STRIKE_GUARDIAN, 2500);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (auto eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SUNDER_ARMOR_GUARDIAN:
+                        DoCastVictim(SPELL_SUNDER_ARMOR_GUARDIAN);
+                        events.Repeat(6000);
+                        break;
+                    case EVENT_STRIKE_GUARDIAN:
+                        DoCastVictim(SPELL_STRIKE_GUARDIAN);
+                        events.Repeat(urand(5000, 14000));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_rookery_guardian_AI(creature);
+    }
+};
+
+class npc_rookery_hatcher : public CreatureScript
+{
+public:
+    npc_rookery_hatcher() : CreatureScript("npc_rookery_hatcher") { }
+
+    struct npc_rookery_hatcher_AI : public ScriptedAI
+    {
+        npc_rookery_hatcher_AI(Creature* creature) : ScriptedAI(creature)
+        {
+            Position homePos;
+            me->GetRandomNearPosition(homePos, 10.0f);
+            me->SetHomePosition(homePos);
+            me->GetMotionMaster()->MovePoint(1, me->GetHomePosition(), true);
+        }
+
+        void Reset() override
+        {
+            events.Reset();
+            eggGUID = 0;
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            events.ScheduleEvent(EVENT_HATCH_DRAGONKIN, 1000);
+        }
+
+        void MovementInform(uint32 type, uint32 pointID) override
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (pointID)
+            {
+                case 1:
+                    DoZoneInCombat(me, 150.0f);
+                    break;
+                case 2:
+                    me->HandleEmoteCommand(36);
+                    events.ScheduleEvent(EVENT_HATCH_ANIM, 1000);
+                    events.ScheduleEvent(EVENT_HATCH_DRAGONKIN, 10000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            while (auto eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_HATCH_DRAGONKIN:
+                    {
+                        std::list<GameObject*> rookeryEgg;
+                        me->GetGameObjectListWithEntryInGrid(rookeryEgg, GO_ROOKERY_EGG, 15.f);
+                        if (!rookeryEgg.empty())
+                        {
+                            if (GameObject* egg = Trinity::Containers::SelectRandomContainerElement(rookeryEgg))
+                            {
+                                me->StopMovingOnCurrentPos();
+                                me->DisableSpline();
+                                me->GetMotionMaster()->Clear();
+                                if (me->GetVictim())
+                                    victimGUID = me->GetVictim()->GetGUID();
+                                DoStopAttack();
+                                me->SetReactState(REACT_PASSIVE);
+                                me->GetMotionMaster()->MovePoint(2, egg->GetPosition(), true);
+                                eggGUID = egg->GetGUID();
+                            }
+                        }
+                        else
+                            events.Repeat(3000);
+                        break;
+                    }
+                    case EVENT_HATCH_ANIM:
+                    {
+                        if (Unit* unit = ObjectAccessor::GetUnit(*me, victimGUID))
+                        {
+                            me->SetReactState(REACT_AGGRESSIVE);
+                            AttackStart(unit);
+                        }
+                        if (GameObject* egg = ObjectAccessor::GetGameObject(*me, eggGUID))
+                        {
+                            egg->Use(me);
+                            eggGUID = 0;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    private:
+        EventMap events;
+        uint64 eggGUID;
+        uint64 victimGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_rookery_hatcher_AI(creature);
+    }
+};
+
 void AddSC_instance_blackrock_spire()
 {
     new instance_blackrock_spire();
     new at_dragonspire_hall();
     new at_blackrock_stadium();
+    new go_father_flame_event_ubrs();
+    new npc_rookery_guardian();
+    new npc_rookery_hatcher();
 }
