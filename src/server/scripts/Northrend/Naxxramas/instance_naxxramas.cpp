@@ -757,7 +757,7 @@ public:
                 if (Encounters[i] == DONE)
                     ++bossCount;
 
-            if (BoostVersion && bossCount >= 13)
+            if (BoostVersion && bossCount >= 12)
                 if (GameObject* go = instance->GetGameObject(_naxxramasOrbGUID))
                     go->SetPhaseMask(1, true);
         }
