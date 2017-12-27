@@ -281,13 +281,12 @@ public:
 
             switch (events.GetEvent())
             {
-                if (BoostVersion)
-                {
-                    case EVENT_STOMP_BOOST:
-                        me->CastSpell(me->GetVictim(), SPELL_STOMP_BOOST, false);
-                        me->GetMap()->Is25ManRaid() ? events.RepeatEvent(10000) : events.PopEvent();
+                case EVENT_STOMP_BOOST:
+                    if (!BoostVersion)
                         break;
-                }
+                    me->CastSpell(me->GetVictim(), SPELL_STOMP_BOOST, false);
+                    me->GetMap()->Is25ManRaid() ? events.RepeatEvent(10000) : events.PopEvent();
+                    break;
                 case EVENT_BERSERK:
                     Talk(EMOTE_ENRAGE);
                     me->CastSpell(me, SPELL_BERSERK, true);

@@ -190,7 +190,7 @@ public:
                     events.RepeatEvent(3000);
                     break;
                 case EVENT_HEALTH_CHECK:
-                    if (me->GetHealthPct() <= (BoostVersion ? (me->GetMap()->Is25ManRaid() ? 10 : 5) : 5))
+                    if (me->GetHealthPct() <= (BoostVersion ? (me->GetMap()->Is25ManRaid() ? 10 : 5) : 5)
                     {
                         Talk(EMOTE_ENRAGE);
                         me->CastSpell(me, SPELL_FRENZY, true);

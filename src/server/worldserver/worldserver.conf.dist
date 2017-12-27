@@ -3428,6 +3428,14 @@ HungerGames.Limit = 500
 
 TestServer.Enable = 0
 
+#		
+#     Naxxramas.Boost
+#        Description: Enables or disables Boost version of Naxxramas.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+
+Naxxramas.Boost = 0
+
 #
 ###################################################################################################
 
