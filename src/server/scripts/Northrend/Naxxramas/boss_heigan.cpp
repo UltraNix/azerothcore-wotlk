@@ -21,6 +21,7 @@ enum Spells
     SPELL_DECREPIT_FEVER_10            = 29998,
     SPELL_DECREPIT_FEVER_25            = 55011,
     SPELL_PLAGUE_CLOUD                 = 29350,
+    SPELL_CUSTOM_MORTAL_STRIKE         = 25646 /* !Boost only! */
 };
 
 enum Events
@@ -30,6 +31,7 @@ enum Events
     EVENT_ERUPT_SECTION                = 3,
     EVENT_SWITCH_PHASE                 = 4,
     EVENT_SAFETY_DANCE                 = 5,
+    EVENT_BOOST_MORTAL_STRIKE          = 6 /* !Boost only! */
 };
 
 enum Misc
@@ -123,6 +125,9 @@ public:
                 events.ScheduleEvent(EVENT_SPELL_DECEPIT_FEVER, 12000);
                 events.ScheduleEvent(EVENT_ERUPT_SECTION, 10000);
                 events.ScheduleEvent(EVENT_SWITCH_PHASE, 90000);
+
+                if (BoostVersion && me->GetMap()->Is25ManRaid())
+                    events.ScheduleEvent(EVENT_BOOST_MORTAL_STRIKE, 10000);
             }
             else // if (phase == PHASE_FAST_DANCE)
             {
@@ -166,6 +171,13 @@ public:
 
             switch (events.GetEvent())
             {
+                case EVENT_BOOST_MORTAL_STRIKE:
+                    if (!BoostVersion)
+                        break;
+
+                    me->CastSpell(me->GetVictim(), SPELL_CUSTOM_MORTAL_STRIKE, false);
+                    events.RepeatEvent(8000);
+                    break;
                 case EVENT_SPELL_SPELL_DISRUPTION:
                     me->CastSpell(me, SPELL_SPELL_DISRUPTION, false);
                     events.RepeatEvent(10000);

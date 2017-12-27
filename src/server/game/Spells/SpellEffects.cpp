@@ -350,11 +350,27 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     }
                     // Consumption (Creature: Horseman)
                     case 28865:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? 2750 : 4250);
+                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                            damage = (m_caster->GetMap()->Is25ManRaid() ? 8500 : 2750);
+                        else
+                            damage = (m_caster->GetMap()->Is25ManRaid() ? 2750 : 4250);
+                        break;
+                    // Eruption (Creature: Heigan)
+                    case 29371:
+                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                            damage = (m_caster->GetMap()->Is25ManRaid() ? damage += damage * 10 : damage);
                         break;
                     // Void Zone Effect
                     case 46264:
-                        damage = 4250;
+                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                            damage = (m_caster->GetMap()->Is25ManRaid() ? 7500 : 5000);
+                        else
+                            damage = 4250; // Blizzlike
+                        break;
+                    // Disease Cloud (Creature: Grobbulus)
+                    case 54368:
+                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                            damage = (m_caster->GetMap()->Is25ManRaid() ? 3000 : 550);
                         break;
                     // percent from health with min
                     case 25599:                             // Thundercrash
@@ -1260,6 +1276,11 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                 destTarget->GetPosition(x, y, z, orientation);
                 target->TeleportTo(mapid, x, y, z, orientation, TELE_TO_GM_MODE); // skip CanPlayerEnter check
             }
+            return;
+        case 72617: // Naxxramas Teleport - Sapphiron Entry
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                if (Player* target = unitTarget->ToPlayer())
+                    target->TeleportTo(533, 3498.3f, -5349.49f, 144.968f, 1.36891f, TELE_TO_GM_MODE);
             return;
     }
 

@@ -28,6 +28,7 @@ enum Spells
     SPELL_LIFE_DRAIN_10                = 28542,
     SPELL_LIFE_DRAIN_25                = 55665,
     SPELL_BERSERK                      = 26662,
+    SPELL_STOMP_BOOST                  = 45185,
 
     // Ice block
     SPELL_ICEBOLT_CAST                 = 28526,
@@ -36,13 +37,15 @@ enum Spells
     SPELL_FROST_EXPLOSION              = 28524,
 
     // Visuals
-    SPELL_SAPPHIRON_DIES               = 29357,
+    SPELL_SAPPHIRON_DIES               = 29357
 };
 
 enum Misc
 {
     GO_ICE_BLOCK                       = 181247,
+
     NPC_BLIZZARD                       = 16474,
+    NPC_BLIZZARD_BOOST                 = 30000,
 
     POINT_CENTER                       = 1,
     FAKE_POINTER                       = 1
@@ -64,7 +67,8 @@ enum Events
     EVENT_FLIGHT_START_LAND            = 12,
     EVENT_LAND                         = 13,
     EVENT_GROUND                       = 14,
-    EVENT_HUNDRED_CLUB                 = 15
+    EVENT_HUNDRED_CLUB                 = 15,
+    EVENT_STOMP_BOOST                  = 16
 };
 
 class boss_sapphiron : public CreatureScript
@@ -175,6 +179,10 @@ public:
 
             events.ScheduleEvent(EVENT_BERSERK, 15 * 60000);
             events.ScheduleEvent(EVENT_SPELL_CLEAVE, 5000);
+
+            if (BoostVersion && me->GetMap()->Is25ManRaid())
+                events.ScheduleEvent(EVENT_STOMP_BOOST, 8000);
+
             events.ScheduleEvent(EVENT_SPELL_TAIL_SWEEP, 10000);
             events.ScheduleEvent(EVENT_SPELL_LIFE_DRAIN, 17000);
             events.ScheduleEvent(EVENT_SPELL_BLIZZARD, 21000);
@@ -208,7 +216,18 @@ public:
         {
             if (spellInfo->Id == SPELL_ICEBOLT_CAST)
             {
-                me->CastSpell(target, SPELL_ICEBOLT_TRIGGER, true);
+                if (BoostVersion)
+                {
+                    if (me->GetMap()->Is25ManRaid())
+                    {
+                        int32 dmg = urand(9400, 10200);
+                        me->CastCustomSpell(target, SPELL_ICEBOLT_TRIGGER, &dmg, nullptr, nullptr, false);
+                    }
+                    else
+                        me->CastSpell(target, SPELL_ICEBOLT_TRIGGER, true);
+                }
+                else
+                    me->CastSpell(target, SPELL_ICEBOLT_TRIGGER, true);
             }
         }
 
@@ -262,6 +281,13 @@ public:
 
             switch (events.GetEvent())
             {
+                if (BoostVersion)
+                {
+                    case EVENT_STOMP_BOOST:
+                        me->CastSpell(me->GetVictim(), SPELL_STOMP_BOOST, false);
+                        me->GetMap()->Is25ManRaid() ? events.RepeatEvent(10000) : events.PopEvent();
+                        break;
+                }
                 case EVENT_BERSERK:
                     Talk(EMOTE_ENRAGE);
                     me->CastSpell(me, SPELL_BERSERK, true);
@@ -280,15 +306,20 @@ public:
                     events.RepeatEvent(24000);
                     return;
                 case EVENT_SPELL_BLIZZARD:
-				{
-					Creature* cr;
-					if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-						cr = me->SummonCreature(NPC_BLIZZARD, *target, TEMPSUMMON_TIMED_DESPAWN, 16000);
-					else
-						cr = me->SummonCreature(NPC_BLIZZARD, *me, TEMPSUMMON_TIMED_DESPAWN, 16000);
-						
-					if (cr)
-						cr->GetMotionMaster()->MoveRandom(40);
+                {
+                    uint8 count = BoostVersion ? (me->GetMap()->Is25ManRaid() ? 3 : 1) : 1;
+                    for (uint8 i = 0; i < count; ++i)
+                    {
+                        Creature* cr = nullptr;
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                            cr = me->SummonCreature(BoostVersion ? RAID_MODE(NPC_BLIZZARD, NPC_BLIZZARD_BOOST) : NPC_BLIZZARD, *target, TEMPSUMMON_TIMED_DESPAWN, 16000);
+                        else
+                            cr = me->SummonCreature(BoostVersion ? RAID_MODE(NPC_BLIZZARD, NPC_BLIZZARD_BOOST) : NPC_BLIZZARD, *me, TEMPSUMMON_TIMED_DESPAWN, 16000);
+
+                        if (cr)
+                            cr->GetMotionMaster()->MoveRandom(40);
+                    }
+
 					events.RepeatEvent(RAID_MODE(8000, 6500));
 					return;
                 }

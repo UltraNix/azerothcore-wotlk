@@ -155,7 +155,7 @@ public:
                     break;
                 case EVENT_SPELL_POISON_SHOCK:
                     me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_POISON_SHOCK_10, SPELL_POISON_SHOCK_25), false);
-                    events.RepeatEvent(40000);
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(40000, 10000) : 40000);
                     break;
                 case EVENT_SPELL_NECROTIC_POISON:
                     me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_NECROTIC_POISON_10, SPELL_NECROTIC_POISON_25), false);
@@ -179,7 +179,7 @@ public:
                     break;
                 case EVENT_WEB_WRAP:
                     me->MonsterTextEmote("%s spins her web into a cocoon!", 0, true);
-                    for (uint8 i = 0; i < RAID_MODE(1, 2); ++i)
+                    for (uint8 i = 0; i < RAID_MODE(1, BoostVersion ? 4 : 2); ++i)
                     {
                         if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true, -SPELL_WEB_WRAP))
                         {
@@ -193,7 +193,7 @@ public:
                             }
                         }
                     }
-                    events.RepeatEvent(40000);
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(40000, 25000) : 40000);
                     break;
             }
 

@@ -78,6 +78,7 @@ public:
             _loathebPortalEyeGUID  = 0;
             _maexxnaPortalEyeGUID  = 0;
             _thaddiusPortalEyeGUID = 0;
+            _naxxramasOrbGUID      = 0;
 
             // NPCs
             _thaddiusGUID  = 0;
@@ -136,6 +137,7 @@ public:
         uint64 _loathebPortalEyeGUID;
         uint64 _maexxnaPortalEyeGUID;
         uint64 _thaddiusPortalEyeGUID;
+        uint64 _naxxramasOrbGUID;
 
         // NPCs
         uint64 _thaddiusGUID;
@@ -357,6 +359,9 @@ public:
                     _horsemanPortalEyeGUID = pGo->GetGUID();
                     if (Encounters[EVENT_HORSEMAN] == DONE)
                         pGo->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_NAXXRAMAS_ORB:
+                    _naxxramasOrbGUID = pGo->GetGUID();
                     break;
             }
             CheckInstanceStatus();
@@ -751,6 +756,10 @@ public:
             for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                 if (Encounters[i] == DONE)
                     ++bossCount;
+
+            if (BoostVersion && bossCount >= 13)
+                if (GameObject* go = instance->GetGameObject(_naxxramasOrbGUID))
+                    go->SetPhaseMask(1, true);
         }
 
         std::string GetSaveData()

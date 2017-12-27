@@ -76,8 +76,9 @@ struct boss_loathebAI : public BossAI
         events.ScheduleEvent(EVENT_SPELL_NECROTIC_AURA, 12000);
         events.ScheduleEvent(EVENT_SPELL_DEATHBLOOM, 5000);
         events.ScheduleEvent(EVENT_SPELL_SPORE, 18000);
-        events.ScheduleEvent(EVENT_SPELL_INEVITABLE_DOOM, 120000);
-        events.ScheduleEvent(EVENT_SPELL_BERSERK, 720000);
+
+        events.ScheduleEvent(EVENT_SPELL_INEVITABLE_DOOM, BoostVersion ? RAID_MODE(120000, 20000) : 120000);
+        events.ScheduleEvent(EVENT_SPELL_BERSERK, BoostVersion ? RAID_MODE(720000, 480000) : 720000);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -101,7 +102,7 @@ struct boss_loathebAI : public BossAI
                 break;
             case EVENT_SPELL_DEATHBLOOM:
                 DoCastSelf(RAID_MODE(SPELL_DEATHBLOOM_10, SPELL_DEATHBLOOM_25));
-                events.Repeat(30000);
+                events.Repeat(BoostVersion ? (me->GetMap()->Is25ManRaid() ? 20000 : 30000) : 30000);
                 break;
             case EVENT_SPELL_SPORE:
                 DoCastSelf(SPELL_SUMMON_SPORE, true);
@@ -109,7 +110,10 @@ struct boss_loathebAI : public BossAI
                 break;
             case EVENT_SPELL_INEVITABLE_DOOM:
                 DoCastSelf(RAID_MODE(SPELL_INEVITABLE_DOOM_10, SPELL_INEVITABLE_DOOM_25));
-                events.Repeat(events.GetTimer() < 5 * MINUTE*IN_MILLISECONDS ? 30000 : 15000);
+                if (BoostVersion)
+                    me->GetMap()->Is25ManRaid() ? events.RepeatEvent(20000) : events.RepeatEvent(events.GetTimer() < 5 * MINUTE * IN_MILLISECONDS ? 30000 : 15000);
+                else
+                    events.Repeat(events.GetTimer() < 5 * MINUTE*IN_MILLISECONDS ? 30000 : 15000);
                 break;
             case EVENT_SPELL_BERSERK:
                 DoCastSelf(SPELL_BERSERK, true);

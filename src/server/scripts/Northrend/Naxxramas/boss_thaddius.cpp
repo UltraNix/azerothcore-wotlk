@@ -60,6 +60,7 @@ enum Spells
     SPELL_NEGATIVE_CHARGE_STACK        = 29660,
     SPELL_POSITIVE_POLARITY            = 28059,
     SPELL_NEGATIVE_POLARITY            = 28084,
+    SPELL_STOMP_BOOST                  = 45185
 };
 
 enum Events
@@ -73,7 +74,8 @@ enum Events
     EVENT_THADDIUS_SPELL_CHAIN_LIGHTNING         = 11,
     EVENT_THADDIUS_SPELL_BERSERK                 = 12,
     EVENT_THADDIUS_POLARITY_SHIFT                = 13,
-    EVENT_THADDIUS_START_2                       = 14
+    EVENT_THADDIUS_START_2                       = 14,
+    EVENT_STOMP_BOOST                            = 15
 };
 
 enum Misc
@@ -214,6 +216,18 @@ public:
                 pInstance->SetData(EVENT_THADDIUS, IN_PROGRESS);
         }
 
+        void PolarityDamage()
+        {
+            if (!BoostVersion)
+                return;
+
+            uint32 polarDamage = urand(4200, 5000);
+
+            Map::PlayerList const &pl = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                Unit::DealDamage(itr->GetSource(), itr->GetSource(), polarDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (resetTimer)
@@ -270,10 +284,19 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->setAttackTimer(BASE_ATTACK, 4000);
                     
+                    if (BoostVersion && me->GetMap()->Is25ManRaid())
+                        events.ScheduleEvent(EVENT_STOMP_BOOST, 10000);
+
                     events.ScheduleEvent(EVENT_THADDIUS_SPELL_CHAIN_LIGHTNING, 14000);
-                    events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, 360000);
+                    events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, BoostVersion ? RAID_MODE(360000, 480000) : 360000);
                     events.ScheduleEvent(EVENT_THADDIUS_POLARITY_SHIFT, 30000);
                     return;
+                case EVENT_STOMP_BOOST:
+                    if (!BoostVersion)
+                        break;
+                    me->CastSpell(me->GetVictim(), SPELL_STOMP_BOOST, false);
+                    me->GetMap()->Is25ManRaid() ? events.RepeatEvent(10000) : events.PopEvent();
+                    break;
                 case EVENT_THADDIUS_SPELL_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, true);
                     events.PopEvent();
@@ -284,7 +307,8 @@ public:
                     break;
                 case EVENT_THADDIUS_POLARITY_SHIFT:
                     me->CastSpell(me, SPELL_POLARITY_SHIFT, false);
-                    events.RepeatEvent(30000);
+                    PolarityDamage();
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(30000, 20000) : 30000);
                     break;
             }
 
@@ -445,7 +469,19 @@ public:
                     events.RepeatEvent(19000);
                     break;
                 case EVENT_MINION_SPELL_STATIC_FIELD:
-                    me->CastSpell(me, RAID_MODE(SPELL_STATIC_FIELD_10, SPELL_STATIC_FIELD_25), false);
+                    if (BoostVersion)
+                    {
+                        if (me->GetMap()->Is25ManRaid())
+                        {
+                            int32 dmg = urand(5000, 5400);
+                            me->CastCustomSpell(me, SPELL_STATIC_FIELD_25, &dmg, nullptr, nullptr, false);
+                        }
+                        else
+                            me->CastSpell(me, SPELL_STATIC_FIELD_10, false);
+                    }
+                    else
+                        me->CastSpell(me, RAID_MODE(SPELL_STATIC_FIELD_10, SPELL_STATIC_FIELD_25), false);
+
                     events.RepeatEvent(3000);
                     break;
                 case EVENT_MINION_SPELL_MAGNETIC_PULL:

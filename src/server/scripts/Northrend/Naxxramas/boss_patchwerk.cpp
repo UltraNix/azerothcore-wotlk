@@ -17,6 +17,7 @@ enum Yells
 
 enum Spells
 {
+    SPELL_HATEFUL_STRIKE_BOOST         = 28308,
 	SPELL_HATEFUL_STRIKE_10			   = 41926,
     SPELL_HATEFUL_STRIKE_25            = 59192,
     SPELL_FRENZY                       = 28131,
@@ -101,7 +102,7 @@ public:
             PatchwerkFormation();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_HATEFUL_STRIKE, 1200);
-            events.ScheduleEvent(EVENT_SPELL_BERSERK, 360000);
+            events.ScheduleEvent(EVENT_SPELL_BERSERK, BoostVersion ? RAID_MODE(360000, 300000) : 360000);
             events.ScheduleEvent(EVENT_HEALTH_CHECK, 1000);
 
             if (pInstance)
@@ -162,7 +163,18 @@ public:
                     }
 
                     if (finalTarget)
-                        me->CastSpell(finalTarget, RAID_MODE(SPELL_HATEFUL_STRIKE_10, SPELL_HATEFUL_STRIKE_25), false);
+                        if (BoostVersion)
+                        {
+                            if (me->GetMap()->Is25ManRaid())
+                            {
+                                int32 dmg = urand(65625, 75000);
+                                me->CastCustomSpell(finalTarget, SPELL_HATEFUL_STRIKE_BOOST, &dmg, nullptr, nullptr, false);
+                            }
+                            else
+                                me->CastSpell(finalTarget, SPELL_HATEFUL_STRIKE_BOOST, false);
+                        }
+                        else
+                            me->CastSpell(finalTarget, RAID_MODE(SPELL_HATEFUL_STRIKE_10, SPELL_HATEFUL_STRIKE_25), false);
 
                     events.RepeatEvent(1000);
                     break;
@@ -178,7 +190,7 @@ public:
                     events.RepeatEvent(3000);
                     break;
                 case EVENT_HEALTH_CHECK:
-                    if (me->GetHealthPct() <= 5)
+                    if (me->GetHealthPct() <= (BoostVersion ? (me->GetMap()->Is25ManRaid() ? 10 : 5) : 5))
                     {
                         Talk(EMOTE_ENRAGE);
                         me->CastSpell(me, SPELL_FRENZY, true);

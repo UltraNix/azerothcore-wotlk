@@ -5,6 +5,8 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
+const bool BoostVersion = sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS);
+
 enum NXEncounter
 {
     EVENT_PATCHWERK                    = 0,
@@ -85,6 +87,7 @@ enum NXGOs
     GO_THADDIUS_PORTAL_EYE             = 181232, // Thadius  portal eye
     GO_MAEXXNA_PORTAL_EYE              = 181233, // Maexxna  portal eye 
     GO_HORSEMAN_PORTAL_EYE             = 181230, // Horseman portal eye
+    GO_NAXXRAMAS_ORB                   = 202277  // Sapphiron teleport
 };
 
 enum NXNPCs

@@ -386,16 +386,16 @@ class spell_four_horsemen_mark : public SpellScriptLoader
                     switch (GetStackAmount())
                     {
                         case 1:
-                            damage = 0;
+                            damage = (BoostVersion && caster->GetMap()->Is25ManRaid() ? 2000 : 0);
                             break;
                         case 2:
-                            damage = 500;
+                            damage = (BoostVersion && caster->GetMap()->Is25ManRaid() ? 4000 : 500);
                             break;
                         case 3:
-                            damage = 1500;
+                            damage = (BoostVersion && caster->GetMap()->Is25ManRaid() ? 6000 : 1500);
                             break;
                         case 4:
-                            damage = 4000;
+                            damage = (BoostVersion && caster->GetMap()->Is25ManRaid() ? 100000 : 4000);
                             break;
                         case 5:
                             damage = 12500;

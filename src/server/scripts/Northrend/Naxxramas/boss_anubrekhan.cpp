@@ -146,8 +146,8 @@ public:
 
             events.ScheduleEvent(EVENT_SPELL_IMPALE, 15000);
             events.ScheduleEvent(EVENT_SPELL_LOCUST_SWARM, 70000 + urand(0, 50000));
-            events.ScheduleEvent(EVENT_SPELL_BERSERK, 600000);
-            
+            events.ScheduleEvent(EVENT_SPELL_BERSERK, BoostVersion ? RAID_MODE(600000, 300000) : 600000);
+
             if (!summons.HasEntry(NPC_CRYPT_GUARD))
                 SummonCryptGuards();
         }

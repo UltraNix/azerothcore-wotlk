@@ -324,10 +324,11 @@ public:
                     events.ScheduleEvent(EVENT_SPELL_FROST_BOLT_MULTI, 15000);
                     events.ScheduleEvent(EVENT_SPELL_DETONATE_MANA, 20000);
                     events.ScheduleEvent(EVENT_SECOND_PHASE_HEALTH_CHECK, 1000);
-                    events.ScheduleEvent(EVENT_SPELL_SHADOW_FISSURE, 25000);
-                    events.ScheduleEvent(EVENT_SPELL_FROST_BLAST, 45000);
+                    events.ScheduleEvent(EVENT_SPELL_SHADOW_FISSURE, BoostVersion ? RAID_MODE(25000, 15000) : 25000);
+                    events.ScheduleEvent(EVENT_SPELL_FROST_BLAST, BoostVersion ?  RAID_MODE(45000, 22000) : 45000);
+
                     if (Is25ManRaid())
-                        events.ScheduleEvent(EVENT_SPELL_CHAINS, 50000);
+                        events.ScheduleEvent(EVENT_SPELL_CHAINS, BoostVersion ? 90000 : 50000);
                     break;
                 case EVENT_SPELL_FROST_BOLT_SINGLE:
                     me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_FROST_BOLT_SINGLE_10, SPELL_FROST_BOLT_SINGLE_25), false);
@@ -340,7 +341,7 @@ public:
                 case EVENT_SPELL_SHADOW_FISSURE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                         me->CastSpell(target, SPELL_SHADOW_FISURE, false);
-                    events.RepeatEvent(25000);
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(25000, 15000) : 25000);
                     break;
                 case EVENT_SPELL_FROST_BLAST:
                     if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, RAID_MODE(1,0), 0, true))
@@ -348,14 +349,28 @@ public:
                     
                     if (!urand(0,2))
                         Talk(SAY_FROST_BLAST);
-                    events.RepeatEvent(45000);
+                        
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(45000, 30000) : 45000);
                     break;
                 case EVENT_SPELL_CHAINS:
                 {
-                    for (uint8 i = 0; i < 3; ++i)
+                    for (uint8 i = 0; i < (BoostVersion ? 4 : 3); ++i)
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 200, true, -SPELL_CHAINS_OF_KELTHUZAD))
                             me->CastSpell(target, SPELL_CHAINS_OF_KELTHUZAD, true);
+                    }
+
+                    if (BoostVersion)
+                    {
+                        // reset threat
+                        ThreatContainer::StorageType const& threatlist = me->getThreatManager().getThreatList();
+                        for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+                        {
+                            Unit* unit = ObjectAccessor::GetUnit((*me), (*itr)->getUnitGuid());
+
+                            if (unit && DoGetThreat(unit))
+                                DoModifyThreatPercent(unit, -100);
+                        }
                     }
 
                     if (!urand(0, 2))
@@ -389,7 +404,7 @@ public:
                     break;
                 }
                 case EVENT_SECOND_PHASE_HEALTH_CHECK:
-                    if (me->HealthBelowPct(45))
+                    if (me->HealthBelowPct(BoostVersion ? (me->GetMap()->Is25ManRaid() ? 90 : 45) : 45))
                     {
                         events.PopEvent();
                         Talk(SAY_REQUEST_AID);
@@ -528,7 +543,7 @@ public:
             {
                 case EVENT_MINION_SPELL_MORTAL_WOUND:
                     me->CastSpell(me->GetVictim(), SPELL_MORTAL_WOUND, false);
-                    events.RepeatEvent(15000);
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(15000, 7000) : 15000);
                     break;
                 case EVENT_MINION_SPELL_FRENZY:
                     if (me->HealthBelowPct(35))

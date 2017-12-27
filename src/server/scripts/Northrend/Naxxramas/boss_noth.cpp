@@ -202,8 +202,8 @@ public:
             {
                 // GROUND
                 case EVENT_SPELL_CURSE:
-                    me->CastCustomSpell(RAID_MODE(SPELL_CURSE_OF_THE_PLAGUEBRINGER_10, SPELL_CURSE_OF_THE_PLAGUEBRINGER_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(3, 10), me, false);
-                    events.RepeatEvent(25000);
+                    me->CastCustomSpell(RAID_MODE(SPELL_CURSE_OF_THE_PLAGUEBRINGER_10, SPELL_CURSE_OF_THE_PLAGUEBRINGER_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(3, BoostVersion ? 15 : 10), me, false);
+                    events.RepeatEvent(BoostVersion ? RAID_MODE(25000, 30000) : 25000);
                     break;
                 case EVENT_SUMMON_PLAGUED_WARRIOR_ANNOUNCE:
                     me->MonsterTextEmote("Noth the Plaguebringer summons forth Skeletal Warriors!", 0, true);
