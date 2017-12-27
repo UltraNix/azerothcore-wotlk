@@ -368,6 +368,9 @@ public:
 
     static bool HandleSlaveSellCommand(ChatHandler* handler, char const* args)
     {
+        handler->PSendSysMessage("Slave Market has been moved to our website (http://beta.sunwell.pl). Please cancel your auctions.");
+        return true; 
+
         Player* player = handler->GetSession()->GetPlayer();
 
         if (!player)
