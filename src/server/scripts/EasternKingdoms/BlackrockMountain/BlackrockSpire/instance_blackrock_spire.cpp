@@ -86,7 +86,7 @@ public:
             switch (creature->GetEntry())
             {
                 case NPC_ROOKERY_WHELP:
-                    creature->AI()->DoZoneInCombat(creature, 60.0f);
+                    //creature->AI()->DoZoneInCombat(creature, 60.0f);
                     break;
                 case NPC_HIGHLORD_OMOKK:
                     HighlordOmokk = creature->GetGUID();
@@ -819,7 +819,7 @@ public:
             switch (pointID)
             {
                 case 1:
-                    DoZoneInCombat(me, 150.0f);
+                    DoZoneInCombat(nullptr, 150.0f);
                     break;
                 case 2:
                     me->HandleEmoteCommand(36);
