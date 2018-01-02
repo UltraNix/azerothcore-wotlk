@@ -2405,13 +2405,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
     if (targetInfo.missCondition == SPELL_MISS_REFLECT)
     {
         // Calculate reflected spell result on caster
-        targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, m_canReflect);
-
-        //! Call CheckCast again, caster might be unit type immune (seduction reflected back on succubus)
-        //! if so then deflect the spell
-        SpellCastResult result = CheckCast(true);
-        if (result != SPELL_CAST_OK)
-            targetInfo.reflectResult = SPELL_MISS_DEFLECT;
+        targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, false/*can't reflect twice*/);
 
         if (targetInfo.reflectResult == SPELL_MISS_REFLECT)     // Impossible reflect again, so simply deflect spell
             targetInfo.reflectResult = SPELL_MISS_PARRY;

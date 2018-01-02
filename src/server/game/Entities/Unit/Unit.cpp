@@ -2875,6 +2875,11 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
     if (victim->IsImmunedToSchool(spell))
         return SPELL_MISS_IMMUNE;
 
+    //! Do a type creature type check in case of reflect
+    //! fixes succubus casting seduce on self when reflected
+    if (victim->GetTypeId() == TYPEID_UNIT && !spell->CheckTargetCreatureType(victim))
+        return SPELL_MISS_DEFLECT;
+
     if (this == victim)
         return SPELL_MISS_NONE;
 
