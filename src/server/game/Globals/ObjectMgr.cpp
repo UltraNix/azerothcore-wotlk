@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -290,6 +290,8 @@ ObjectMgr::~ObjectMgr()
 
     for (AccessRequirementContainer::iterator itr = _accessRequirementStore.begin(); itr != _accessRequirementStore.end(); ++itr)
         delete itr->second;
+
+    _creatureRecordStore.clear();
 }
 
 void ObjectMgr::AddLocaleString(std::string const& s, LocaleConstant locale, StringVector& data)
@@ -1341,6 +1343,150 @@ void ObjectMgr::LoadCreatureModelInfo()
 
     sLog->outString(">> Loaded %u creature model based info in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
+}
+
+
+void ObjectMgr::LoadCreatureRecords()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _creatureRecordStore.clear();
+
+    //                                                   0             1                2              3                  4
+    QueryResult result = CharacterDatabase.Query("SELECT entry, BestKillTime, RealmFirstGuild, BestTimeGuild, PrevBestTimeGuild FROM creature_records");
+
+    if (!result)
+    {
+        sLog->outError("Loaded 0 creature records. DB table `creature_records` is empty.");
+        return;
+    }
+
+    _creatureRecordStore.reserve(result->GetRowCount());
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        CreatureRecordData& recordData = _creatureRecordStore[entry];
+
+        recordData.bestKillTime = fields[1].GetUInt32();
+        recordData.realmFirstGuild = fields[2].GetString();
+        recordData.bestTimeGuild = fields[3].GetString();
+        recordData.prevBestTimeGuild = fields[4].GetString();
+
+        if (entry == 0)
+            sLog->outError("Table `creature_records` has wrong entry (%u).", entry);
+
+        if (recordData.bestKillTime == 0)
+            sLog->outError("Table `creature_records` has wrong bestKillTime (%u) for entry (%u).", recordData.bestKillTime, entry);
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog->outError("Loaded %u creature records in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+CreatureRecordData const* ObjectMgr::GetCreatureRecordData(uint32 entry) const
+{
+    CreatureRecordContainer::const_iterator itr = _creatureRecordStore.find(entry);
+    if (itr != _creatureRecordStore.end())
+        return &itr->second;
+    return nullptr;
+}
+
+void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* killer, std::string creatureName)
+{
+    CreatureRecordContainer::iterator itr = _creatureRecordStore.find(entry);
+    if (itr == _creatureRecordStore.end())
+    {
+        CreatureRecordData &recordData = _creatureRecordStore[entry];
+
+        std::string guildName = "";
+        std::string leaderName = killer->GetName();
+        if (Group* group = killer->GetGroup())
+        {
+            uint32 halfCount = group->GetMembersCount() / 2;
+            std::map<uint32, uint32> guildCounts;
+            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                Player* target = itr->GetSource();
+                if (uint32 guildId = target->GetGuildId())
+                {
+                    if (++guildCounts[guildId] > halfCount)
+                    {
+                        guildName = sGuildMgr->GetGuildById(guildId)->GetName();
+                        break;
+                    }
+                }
+            }
+            leaderName = group->GetLeaderName();
+        }
+        else
+        {
+            sLog->outString("Boss [%s] has been killed by [%s] without group or raid group. Possible cheater!", creatureName, killer->GetName().c_str());
+            return;
+        }
+
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CREATURE_RECORD);
+        stmt->setUInt32(0, entry);
+        stmt->setString(1, creatureName);
+        stmt->setUInt32(2, recordData.bestKillTime = time);
+        stmt->setString(3, recordData.realmFirstGuild = (guildName != "" ? guildName : leaderName + std::string("'s group")));
+        stmt->setString(4, recordData.bestTimeGuild = (guildName != "" ? guildName : leaderName + std::string("'s group")));
+        stmt->setString(5, recordData.prevBestTimeGuild = "");
+        CharacterDatabase.Execute(stmt);
+
+        std::ostringstream msg;
+        msg << creatureName << " has been killed for the first time " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+            << " in " << time / 1000 << "." << time % 1000 << " seconds!";
+        sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
+
+        sLog->outError("Creature %u has been killed %s in %u seconds", entry, (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group")).c_str(), time);
+        return;
+    }
+
+    CreatureRecordData &recordData = _creatureRecordStore[entry];
+    if (time >= recordData.bestKillTime)
+        return;
+
+    std::string guildName = "";
+    std::string leaderName = killer->GetName();
+    if (Group* group = killer->GetGroup())
+    {
+        uint32 halfCount = group->GetMembersCount() / 2;
+        std::map<uint32, uint32> guildCounts;
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            Player* target = itr->GetSource();
+            if (uint32 guildId = target->GetGuildId())
+                if (++guildCounts[guildId] > halfCount)
+                {
+                    guildName = sGuildMgr->GetGuildById(guildId)->GetName();
+                    break;
+                }
+        }
+        leaderName = group->GetLeaderName();
+    }
+    else return;
+
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CREATURE_RECORD);
+    uint32 oldTime = recordData.bestKillTime;
+    std::string oldGuild = recordData.bestTimeGuild;
+    stmt->setUInt32(3, entry);
+    stmt->setString(2, recordData.prevBestTimeGuild = recordData.bestTimeGuild);
+    stmt->setString(1, recordData.bestTimeGuild = (guildName != "" ? guildName : leaderName + std::string("'s group")));
+    stmt->setUInt32(0, recordData.bestKillTime = time);
+
+    std::ostringstream msg;
+    msg << creatureName << " has been " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+        << " in " << time / 1000 << "." << time % 1000 << " seconds! Previous record: " << oldTime / 1000 << "." << oldTime % 1000 << " seconds." << " (Previous record holder: " << oldGuild << ")";
+    sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
+
+    sLog->outError("Creature %u was killed by guild %s in record time of %u seconds. Previous record time: %u, guild: %s.", entry, (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group")).c_str(), time, oldTime, oldGuild.c_str());
+    CharacterDatabase.Execute(stmt);
 }
 
 void ObjectMgr::LoadLinkedRespawn()
@@ -6332,7 +6478,7 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query("SELECT MAX(auctionId) FROM bazar_auction");
     if (result)
         _bazaarId = (*result)[0].GetUInt32()+1;
-    
+
     result = CharacterDatabase.Query("SELECT MAX(id) FROM mail");
     if (result)
         _mailId = (*result)[0].GetUInt32()+1;

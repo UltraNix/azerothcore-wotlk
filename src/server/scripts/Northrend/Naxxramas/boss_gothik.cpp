@@ -118,7 +118,7 @@ struct NotOnSameSide : public std::unary_function<Unit *, bool>
 {
     bool m_inLiveSide;
     NotOnSameSide(Unit *pSource) : m_inLiveSide(IN_LIVE_SIDE(pSource)) {}
-    
+
     bool operator() (const Unit *pTarget)
     {
         return (m_inLiveSide != IN_LIVE_SIDE(pTarget));
@@ -148,6 +148,7 @@ public:
         bool secondPhase;
         bool gateOpened;
         uint8 waveCount;
+        uint32 _fightTimer;
 
         bool IsInRoom()
         {
@@ -162,6 +163,7 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_DISABLE_MOVE);
@@ -185,15 +187,16 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             me->SetInCombatWithZone();
-            
+
             Talk(SAY_SPEECH);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
             me->NearTeleportTo(PosPlatform.GetPositionX(), PosPlatform.GetPositionY(), PosPlatform.GetPositionZ(), PosPlatform.GetOrientation());
-            
+
             events.ScheduleEvent(EVENT_SUMMON_ADDS, 30000);
             events.ScheduleEvent(EVENT_CHECK_PLAYERS, 120000);
-            
+
             if (pInstance)
             {
                 pInstance->SetData(EVENT_GOTHIK, IN_PROGRESS);
@@ -209,7 +212,7 @@ public:
         {
             if (gateOpened)
                 summon->AI()->DoAction(ACTION_GATE_OPEN);
-                
+
             summons.Summon(summon);
             summon->SetInCombatWithZone();
         }
@@ -228,7 +231,7 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             Talk(SAY_DEATH);
             summons.DespawnAll();
@@ -244,6 +247,9 @@ public:
                 if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_GOTHIK_EXIT_GATE)))
                     go->SetGoState(GO_STATE_ACTIVE);
             }
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 1 * MINUTE * IN_MILLISECONDS, _fightTimer);
         }
 
         void SummonHelpers(uint32 entry)
@@ -388,7 +394,7 @@ public:
                         me->NearTeleportTo(PosGroundLivingSide.GetPositionX(), PosGroundLivingSide.GetPositionY(), PosGroundLivingSide.GetPositionZ(), PosGroundLivingSide.GetOrientation());
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_DISABLE_MOVE);
-                        
+
                         summons.DoAction(ACTION_GATE_OPEN);
                         summons.DoZoneInCombat();
                         events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT, 1000);
@@ -445,12 +451,12 @@ public:
 
         void Reset() { events.Reset(); }
 
-        void EnterCombat(Unit* who) 
-        { 
+        void EnterCombat(Unit* who)
+        {
             me->SetInCombatWithZone();
             CombatAI::EnterCombat(who);
         }
-        
+
         void DamageTaken(Unit* attacker, uint32 &damage, DamageEffectType, SpellSchoolMask)
         {
             if (!attacker || (!gateOpened && !IsOnSameSide(attacker)))

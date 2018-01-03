@@ -196,6 +196,18 @@ void BattlegroundAB::CreateBanner(uint8 node, bool delay)
 
     SpawnBGObject(node*BG_AB_OBJECTS_PER_NODE + _capturePointInfo[node]._state, RESPAWN_IMMEDIATELY);
     SpawnBGObject(node*BG_AB_OBJECTS_PER_NODE + BG_AB_OBJECT_AURA_ALLY + _capturePointInfo[node]._ownerTeamId, RESPAWN_IMMEDIATELY);
+
+    //! award exp for taking over base
+    if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+    {
+        TeamId team = _capturePointInfo[node]._ownerTeamId;
+        const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+        for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+        {
+            if (itr->second->GetTeamId() == team)
+                itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+        }
+    }
 }
 
 void BattlegroundAB::DeleteBanner(uint8 node)

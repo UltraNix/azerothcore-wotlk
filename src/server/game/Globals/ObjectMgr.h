@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -593,6 +593,7 @@ typedef std::pair<GraveyardContainer::iterator, GraveyardContainer::iterator> Gr
 
 typedef std::unordered_map<uint32, VendorItemData> CacheVendorItemContainer;
 typedef std::unordered_map<uint32, TrainerSpellData> CacheTrainerSpellContainer;
+typedef std::unordered_map<uint32, CreatureRecordData> CreatureRecordContainer;
 
 enum SkillRangeType
 {
@@ -909,6 +910,7 @@ class ObjectMgr
         void LoadCreatureAddons();
         void LoadGameObjectAddons();
         void LoadCreatureModelInfo();
+        void LoadCreatureRecords();
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
         void LoadGameobjects();
@@ -1039,9 +1041,13 @@ class ObjectMgr
             TempSummonDataContainer::const_iterator itr = _tempSummonDataStore.find(TempSummonGroupKey(summonerId, summonerType, group));
             if (itr != _tempSummonDataStore.end())
                 return &itr->second;
-                   
+
             return NULL;
         }
+
+        //! boss kill records
+        CreatureRecordData const* GetCreatureRecordData(uint32 entry) const;
+        void UpdateCreatureRecordData(uint32 entry, uint32 time, Player* killer, std::string creatureName);
 
         CreatureData const* GetCreatureData(uint32 guid) const
         {
@@ -1385,6 +1391,7 @@ class ObjectMgr
 
         CacheVendorItemContainer _cacheVendorItemStore;
         CacheTrainerSpellContainer _cacheTrainerSpellStore;
+        CreatureRecordContainer _creatureRecordStore;
 
         std::set<uint32> _difficultyEntries[MAX_DIFFICULTY - 1]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
         std::set<uint32> _hasDifficultyEntries[MAX_DIFFICULTY - 1]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate

@@ -67,7 +67,7 @@ struct npc_escortAI : public ScriptedAI
 
         //this will set the current position to WP start position (if setPosition == true),
         //and the current WP to pointId
-        bool SetNextWaypoint(uint32 pointId, bool setPosition = true);
+        bool SetNextWaypoint(uint32 pointId, bool setPosition = true, bool resetWaypointsOnFail = true);
 
         bool GetWaypointPosition(uint32 pointId, float& x, float& y, float& z);
 

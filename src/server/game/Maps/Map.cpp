@@ -245,6 +245,11 @@ void Map::InitVisibilityDistance()
         case 25: // Scott Test (box map)
             m_VisibleDistance = 200.0f;
             break;
+        case 658: // pit of saron
+        case 668: // halls of reflection
+        case 632: // forge of souls
+            m_VisibleDistance = 200.0f;
+            break;
     }
 }
 

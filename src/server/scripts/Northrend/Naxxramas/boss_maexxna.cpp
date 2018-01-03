@@ -63,6 +63,7 @@ public:
         InstanceScript* pInstance;
         EventMap events;
         SummonList summons;
+        uint32 _fightTimer;
 
         bool IsInRoom()
         {
@@ -77,6 +78,7 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
 
@@ -92,6 +94,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             me->SetInCombatWithZone();
 
             events.ScheduleEvent(EVENT_WEB_WRAP, 20000);
@@ -109,10 +112,13 @@ public:
             }
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             if (pInstance)
                 pInstance->SetData(EVENT_MAEXXNA, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void JustSummoned(Creature* cr)

@@ -151,6 +151,7 @@ public:
 
         uint16 marksCount;
         bool hasEnrage;
+        uint32 _fightTimer;
 
         void MoveToCorner()
         {
@@ -254,15 +255,25 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit* killer)
+        void JustDied(Unit* killer) override
         {
             if (pInstance)
             {
                 pInstance->SetData(EVENT_HORSEMAN, DONE);
                 if (pInstance->GetData(EVENT_HORSEMAN) == DONE)
+                {
                     if (!me->GetMap()->GetPlayers().isEmpty())
                         if (Player* player = me->GetMap()->GetPlayers().getFirst()->GetSource())
                             player->SummonGameObject(RAID_MODE(GO_HORSEMEN_CHEST_10, GO_HORSEMEN_CHEST_25), 2514.8f, -2944.9f, 245.55f, 5.51f, 0, 0, 0, 0, 0);
+
+                    if (Map* map = me->GetMap())
+                    {
+                        if (map->GetDifficulty() > RAID_DIFFICULTY_10MAN_NORMAL)
+                            CheckCreatureRecord(killer, sObjectMgr->GetCreatureTemplate(16065)->DifficultyEntry[map->GetDifficulty() - 1], map->GetDifficulty(), "Four Horsemen", 30000, _fightTimer);
+                        else
+                            CheckCreatureRecord(killer, 16065, map->GetDifficulty(), "Four Horsemen", 30000, _fightTimer);
+                    }
+                }
             }
 
             Talk(SAY_DEATH);
@@ -270,6 +281,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             if (pInstance)
                 pInstance->SetData(EVENT_HORSEMAN, IN_PROGRESS);
 
@@ -286,7 +298,7 @@ public:
 
         void checkMarksToEnrage()
         {
-            marksCount = 0; // Reset previous mark count 
+            marksCount = 0; // Reset previous mark count
 
             Map::PlayerList const &pl = me->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
@@ -317,12 +329,12 @@ public:
 
             if (movementPhase < MOVE_PHASE_FINISHED || !UpdateVictim())
                 return;
-            
+
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             if (!hasEnrage && marksCount >= 100)
             {
                 hasEnrage = true;

@@ -96,6 +96,7 @@ public:
         uint64 currentTarget;
 
         std::list<uint64> blockList;
+        uint32 _fightTimer;
 
         void InitializeAI()
         {
@@ -131,6 +132,7 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             if (me->IsVisible())
                 me->SetReactState(REACT_AGGRESSIVE);
 
@@ -139,7 +141,7 @@ public:
             spawnTimer = 0;
             currentTarget = 0;
             blockList.clear();
-            
+
             DespawnIceBlocks();
             me->SetDisableGravity(false);
 
@@ -173,6 +175,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             EnterCombatSelfFunction();
 
             me->CastSpell(me, RAID_MODE(SPELL_FROST_AURA_10, SPELL_FROST_AURA_25), true);
@@ -193,11 +196,14 @@ public:
                 pInstance->SetData(EVENT_SAPPHIRON, IN_PROGRESS);
         }
 
-        void JustDied(Unit* who)
+        void JustDied(Unit* killer)
         {
             me->CastSpell(me, SPELL_SAPPHIRON_DIES, true);
             if (pInstance)
                 pInstance->SetData(EVENT_SAPPHIRON, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 1 * MINUTE * IN_MILLISECONDS, _fightTimer);
         }
 
         void DoAction(int32 param)
@@ -352,7 +358,7 @@ public:
                     if (currentTarget)
                         if (Unit* target = ObjectAccessor::GetUnit(*me, currentTarget))
                             me->SummonGameObject(GO_ICE_BLOCK, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
-            
+
                     std::vector<Unit*> targets;
                     ThreatContainer::StorageType::const_iterator i = me->getThreatManager().getThreatList().begin();
                     for (; i != me->getThreatManager().getThreatList().end(); ++i)
@@ -366,7 +372,7 @@ public:
                                         inList = true;
                                         break;
                                     }
-                            
+
                             if (!inList)
                                 targets.push_back((*i)->getTarget());
                         }

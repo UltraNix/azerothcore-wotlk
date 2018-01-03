@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -354,7 +354,7 @@ void BattlegroundSA::PostUpdateImpl(uint32 diff)
             DemolisherStartState(false);
             Status = BG_SA_ROUND_TWO;
             StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, (Attackers == TEAM_ALLIANCE)?23748:21702);
-            
+
             // status was set to STATUS_WAIT_JOIN manually for Preparation, set it back now
             SetStatus(STATUS_IN_PROGRESS);
             for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
@@ -581,7 +581,7 @@ void BattlegroundSA::TeleportToEntrancePosition(Player* player)
 
 void BattlegroundSA::DefendersPortalTeleport(GameObject* portal, Player* plr)
 {
-    if (plr->GetTeamId() == Attackers) 
+    if (plr->GetTeamId() == Attackers)
         return;
 
     uint32 portal_num = 0;
@@ -715,7 +715,7 @@ void BattlegroundSA::DemolisherStartState(bool start)
 
     // xinef: enable first gates damaging at start
     if (!start)
-    {    
+    {
         if (GameObject* go = GetBGObject(BG_SA_GREEN_GATE))
             go->SetDestructibleBuildingModifyState(true);
         if (GameObject* go = GetBGObject(BG_SA_BLUE_GATE))
@@ -736,6 +736,16 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
             GateStatus[i] = BG_SA_GATE_DESTROYED;
             if (uint32 uws = GetWorldStateFromGateID(i))
                 UpdateWorldState(uws, GateStatus[i]);
+
+            if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+            {
+                const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+                for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+                {
+                    if (itr->second->GetTeamId() == player->GetTeamId())
+                        itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                }
+            }
 
             bool rewardHonor = true;
             switch (i)
@@ -788,7 +798,7 @@ WorldSafeLocsEntry const* BattlegroundSA::GetClosestGraveyard(Player* player)
             continue;
 
         WorldSafeLocsEntry const* ret = sWorldSafeLocsStore.LookupEntry(BG_SA_GYEntries[i]);
-        
+
         // if on beach
         if (i == BG_SA_BEACH_GY)
         {
@@ -917,8 +927,18 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player *Source)
         m_ReviveQueue[BgCreatures[BG_SA_MAXNPC + i]].clear();
     }
 
+    if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+    {
+        const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+        for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+        {
+            if (itr->second->GetTeamId() == Source->GetTeamId())
+                itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+        }
+    }
+
     DelCreature(BG_SA_MAXNPC + i);
-    
+
     WorldSafeLocsEntry const* sg = sWorldSafeLocsStore.LookupEntry(BG_SA_GYEntries[i]);
     if (!sg)
     {

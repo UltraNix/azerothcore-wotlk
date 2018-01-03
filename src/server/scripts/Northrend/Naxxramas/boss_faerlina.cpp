@@ -61,7 +61,7 @@ struct boss_faerlinaAI : public ScriptedAI
     }
 
     void JustSummoned(Creature* creature) override
-    { 
+    {
         if (creature)
             creature->setFaction(me->getFaction());
 
@@ -70,6 +70,7 @@ struct boss_faerlinaAI : public ScriptedAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         events.Reset();
         summons.DespawnAll();
         SummonHelpers();
@@ -80,6 +81,7 @@ struct boss_faerlinaAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        _fightTimer = getMSTime();
         me->SetInCombatWithZone();
         summons.DoZoneInCombat();
 
@@ -113,11 +115,14 @@ struct boss_faerlinaAI : public ScriptedAI
             instance->SetData(DATA_IMMORTAL_FAIL, 0);
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* killer) override
     {
         Talk(SAY_DEATH);
         if (instance)
             instance->SetData(EVENT_FAERLINA, DONE);
+
+        if (Map* map = me->GetMap())
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
     }
 
     void SpellHit(Unit* /*caster*/, const SpellInfo *spell) override
@@ -190,6 +195,7 @@ private:
     EventMap events;
     SummonList summons;
     bool _greet;
+    uint32 _fightTimer;
 };
 
 void AddSC_boss_faerlina()

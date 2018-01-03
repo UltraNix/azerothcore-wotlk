@@ -137,6 +137,50 @@ ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
     _difficulty = Difficulty(me->GetMap()->GetSpawnMode());
 }
 
+void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty difficulty, std::string creatureName/* =""*/, uint32 minTimer/* = 0*/, uint32 _fightTimer/* = 0*/) const
+{
+    if (!sWorld->getBoolConfig(CONFIG_BOSS_RECORDS))
+        return;
+
+    if (!killer || !entry)
+        return;
+
+    if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+    {
+        if (player->GetSession()->GetSecurity() == SEC_PLAYER)
+        {
+            if (creatureName == "")
+                creatureName = me->GetName();
+            Map* map = me->GetMap();
+            if (map && map->IsRaid())
+            {
+                switch (difficulty)
+                {
+                    case RAID_DIFFICULTY_10MAN_NORMAL:
+                        creatureName += " 10 normal";
+                        break;
+                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                        creatureName += " 10 heroic";
+                        break;
+                    case RAID_DIFFICULTY_25MAN_NORMAL:
+                        creatureName += " 25 normal";
+                        break;
+                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                        creatureName += " 25 heroic";
+                        break;
+                    default:
+                        return;
+                }
+                uint32 time = GetMSTimeDiffToNow(_fightTimer);
+                if (minTimer && time < minTimer)
+                    return;
+
+                sObjectMgr->UpdateCreatureRecordData(entry, time, player, creatureName);
+            }
+        }
+    }
+}
+
 void ScriptedAI::AttackStartNoMove(Unit* who)
 {
     if (!who)

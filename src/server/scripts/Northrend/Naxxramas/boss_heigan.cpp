@@ -62,9 +62,11 @@ public:
         uint8 currentPhase;
         uint8 currentSection;
         bool moveRight;
+        uint32 _fightTimer;
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             currentPhase = 0;
             currentSection = 3;
@@ -90,16 +92,20 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             Talk(SAY_DEATH);
 
             if (pInstance)
                 pInstance->SetData(EVENT_HEIGAN, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 1 * MINUTE * IN_MILLISECONDS, _fightTimer);
         }
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             Talk(SAY_AGGRO);
 

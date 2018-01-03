@@ -23,13 +23,13 @@ enum Sounds
 enum Spells
 {
     SPELL_UNBALANCING_STRIKE           = 26613,
-    SPELL_DISRUPTING_SHOUT_10          = 29107, 
+    SPELL_DISRUPTING_SHOUT_10          = 29107,
     SPELL_DISRUPTING_SHOUT_25          = 55543,
     SPELL_JAGGED_KNIFE                 = 55550,
     SPELL_HOPELESS                     = 29125,
 
     SPELL_BONE_BARRIER                 = 29061,
-    SPELL_BLOOD_STRIKE                 = 61696 
+    SPELL_BLOOD_STRIKE                 = 61696
 };
 
 
@@ -72,6 +72,7 @@ public:
         SummonList summons;
         InstanceScript* pInstance;
         bool introTalk;
+        uint32 _fightTimer;
 
         void SpawnHelpers()
         {
@@ -89,6 +90,7 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             summons.DespawnAll();
             events.Reset();
             SpawnHelpers();
@@ -126,10 +128,13 @@ public:
         {
             DoPlaySoundToSet(me, SOUND_DEATH);
             me->MonsterYell("An honorable... death...", LANG_UNIVERSAL, 0);
-            
+
             me->CastSpell(me, SPELL_HOPELESS, true);
             if (pInstance)
                 pInstance->SetData(EVENT_RAZUVIOUS, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void AttackStart(Unit *who)
@@ -139,12 +144,13 @@ public:
                 me->StopMovingOnCurrentPos();
                 me->SetFacingToObject(who);
                 ScriptedAI::AttackStartNoMove(who);
-            } else 
+            } else
                 ScriptedAI::AttackStart(who);
         }
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             switch (urand(0,2))
             {
                 case 0:
@@ -184,7 +190,7 @@ public:
                 return;
 
             switch (events.GetEvent())
-            { 
+            {
                 case EVENT_SPELL_UNBALANCING_STRIKE:
                     me->CastSpell(me->GetVictim(), SPELL_UNBALANCING_STRIKE, false);
                     events.RepeatEvent(30000);

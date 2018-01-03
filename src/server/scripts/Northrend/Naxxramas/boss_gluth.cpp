@@ -63,9 +63,11 @@ public:
         SummonList summons;
         InstanceScript* pInstance;
         uint64 gazeTarget;
-        
+        uint32 _fightTimer;
+
         void Reset()
         {
+            _fightTimer = 0;
             me->ApplySpellImmune(29306, IMMUNITY_ID, 29306, true);
             events.Reset();
             summons.DespawnAll();
@@ -89,6 +91,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_MORTAL_WOUND, 10000);
             events.ScheduleEvent(EVENT_SPELL_ENRAGE, 30000);
@@ -120,12 +123,15 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit*)
+        void JustDied(Unit* killer)
         {
             summons.DespawnAll();
 
             if (pInstance)
                 pInstance->SetData(EVENT_GLUTH, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         bool IsInRoom()

@@ -3436,6 +3436,23 @@ TestServer.Enable = 0
 
 Naxxramas.Boost = 0
 
+
+#
+#     Angrathar.Enable
+#     Description: Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70
+#     Default:     0 - (Disabled)
+#                  1 - (Enabled)
+				   
+Angrathar.Enable = 0
+
+#
+#     CreatureBossRecords.Enable
+#     Description: Enables or disables announcing boss records to the world and saving them to db
+#     Default:     0 - (Disabled)
+#                  1 - (Enabled)
+				   
+CreatureBossRecords.Enable = 0
+
 #
 ###################################################################################################
 

@@ -61,16 +61,14 @@ public:
 
     struct boss_patchwerkAI : public ScriptedAI
     {
-        boss_patchwerkAI(Creature *c) : ScriptedAI(c) 
+        boss_patchwerkAI(Creature *c) : ScriptedAI(c)
         {
             pInstance = me->GetInstanceScript();
         }
 
-        EventMap events;
-        InstanceScript* pInstance;
-
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             if (pInstance)
                 pInstance->SetData(EVENT_PATCHWERK, NOT_STARTED);
@@ -88,17 +86,21 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             Talk(SAY_DEATH);
             if (pInstance)
                 pInstance->SetData(EVENT_PATCHWERK, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             Talk(SAY_AGGRO);
-            
+
             PatchwerkFormation();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_HATEFUL_STRIKE, 1200);
@@ -131,7 +133,7 @@ public:
                     std::list<Unit*> meleeRangeTargets;
                     Unit* finalTarget = NULL;
                     uint8 counter = 0;
-                    
+
                     ThreatContainer::StorageType::const_iterator i = me->getThreatManager().getThreatList().begin();
                     for (; i != me->getThreatManager().getThreatList().end(); ++i, ++counter)
                     {
@@ -232,6 +234,10 @@ public:
                 }
             }
         }
+    private:
+        EventMap events;
+        InstanceScript* pInstance;
+        uint32 _fightTimer;
     };
 };
 

@@ -110,6 +110,7 @@ public:
         uint32 summonTimer;
         uint32 reviveTimer;
         uint32 resetTimer;
+        uint32 _fightTimer;
 
         void StartEvent()
         {
@@ -147,8 +148,9 @@ public:
             }
         }
 
-        void Reset() 
+        void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -157,7 +159,7 @@ public:
             resetTimer = 1;
             me->SetPosition(me->GetHomePosition());
 
-            if (pInstance) 
+            if (pInstance)
                 pInstance->SetData(EVENT_THADDIUS, NOT_STARTED);
 
             me->SummonCreature(NPC_STALAGG, 3450.45f, -2931.42f, 312.091f, 5.49779f);
@@ -192,7 +194,7 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             Talk(SAY_DEATH);
 
@@ -202,12 +204,16 @@ public:
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(28059);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(28084);
             }
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void JustSummoned(Creature* cr) { summons.Summon(cr); }
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             summons.DoZoneInCombat(NPC_FEUGEN);
             summons.DoZoneInCombat(NPC_STALAGG);
@@ -283,7 +289,7 @@ public:
                     me->SetControlled(false, UNIT_STATE_STUNNED);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->setAttackTimer(BASE_ATTACK, 4000);
-                    
+
                     if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
                         events.ScheduleEvent(EVENT_STOMP_BOOST, 10000);
 
@@ -335,7 +341,7 @@ public:
 
     struct boss_thaddius_summonAI : public ScriptedAI
     {
-        boss_thaddius_summonAI(Creature *c) : ScriptedAI(c) 
+        boss_thaddius_summonAI(Creature *c) : ScriptedAI(c)
         {
            pInstance = me->GetInstanceScript();
         }
@@ -349,7 +355,7 @@ public:
         {
             pullTimer = 0;
             visualTimer = 1;
-            
+
             events.Reset();
             me->SetControlled(false, UNIT_STATE_STUNNED);
             if (Creature* cr = me->FindNearestCreature(NPC_TESLA_COIL, 150.0f))
@@ -376,7 +382,7 @@ public:
                 events.ScheduleEvent(EVENT_MINION_SPELL_STATIC_FIELD, 5000);
                 Talk(SAY_FEUG_AGGRO);
             }
-            
+
             events.ScheduleEvent(EVENT_MINION_CHECK_DISTANCE, 5000);
 
             // This event needs synchronisation, called for stalagg only
@@ -507,7 +513,7 @@ public:
                             me->CastSpell(tankFeugen, SPELL_MAGNETIC_PULL, true);
                             DoAction(ACTION_MAGNETIC_PULL);
                         }
-                    
+
                     break;
                 case EVENT_MINION_CHECK_DISTANCE:
                     if (Creature* cr = me->FindNearestCreature(NPC_TESLA_COIL, 150.0f))

@@ -74,7 +74,7 @@ enum Spells
     SPELL_SARTHARION_PYROBUFFET                   = 56916,
     SPELL_SARTHARION_BERSERK                      = 61632,
     SPELL_SARTHARION_TWILIGHT_REVENGE             = 60639,
-    
+
     // Sartharion with drakes
     SPELL_WILL_OF_SARTHARION                      = 61254,
     SPELL_POWER_OF_TENEBRON                       = 61248,
@@ -142,14 +142,14 @@ enum Events
     EVENT_SARTHARION_LAVA_STRIKE                  = 16,
     EVENT_SARTHARION_HEALTH_CHECK                 = 17,
     EVENT_SARTHARION_BERSERK                      = 18,
-    
+
     // Drake abilities called by sartharion
     EVENT_SARTHARION_CALL_TENEBRON                = 30,
     EVENT_SARTHARION_CALL_SHADRON                 = 31,
     EVENT_SARTHARION_CALL_VESPERON                = 32,
 };
 
-const Position portalPos[4] = 
+const Position portalPos[4] =
 {
     {3247.29f, 529.804f, 58.9595f},
     {3248.62f, 646.739f, 85.2939f},
@@ -157,14 +157,14 @@ const Position portalPos[4] =
     {3351.78f, 517.138f, 99.1620f},
 };
 
-const Position EggsPos[24] = 
+const Position EggsPos[24] =
 {
     // Tenebron
     {3253.09f, 657.439f, 86.9921f, 3.16334f},
     {3247.76f, 662.413f, 87.7281f, 4.12938f},
     {3246.01f, 656.606f, 86.8737f, 4.12938f},
     {3246.7f, 649.558f, 85.8179f, 4.12938f},
-    {3238.72f, 650.386f, 85.9625f, 0.897469f}, 
+    {3238.72f, 650.386f, 85.9625f, 0.897469f},
     {3257.89f, 651.323f, 85.9177f, 0.897469f},
 
     { 3255.09f, 659.439f, 86.9921f, 3.16334f },
@@ -219,6 +219,7 @@ public:
         uint8 dragonsCount;
         bool usedBerserk;
         std::list<uint32> volcanoBlows;
+        uint32 _fightTimer;
 
         void HandleSartharionAbilities();
         void HandleDrakeAbilities();
@@ -230,7 +231,7 @@ public:
             me->SummonCreature(NPC_FIRE_CYCLONE, 3281.57f, 507.984f, 57.0833f, 5.54346f);
             me->SummonCreature(NPC_FIRE_CYCLONE, 3210.11f, 531.957f, 57.0833f, 3.76777f);
             me->SummonCreature(NPC_FIRE_CYCLONE, 3286.42f, 585.010f, 57.0833f, 4.10307f);
-            
+
             me->SummonCreature(NPC_SAFE_AREA_TRIGGER, 3244.14f, 512.597f, 58.6534f, 0.0f);
             me->SummonCreature(NPC_SAFE_AREA_TRIGGER, 3242.84f, 553.979f, 58.8272f, 0.0f);
         }
@@ -266,7 +267,7 @@ public:
                     continue;
 
                 if (start)
-                    cr->GetMotionMaster()->MovePoint(0, ((cr->GetPositionX() < 3250.0f) ? 3283.44f : 3208.44f), cr->GetPositionY(), cr->GetPositionZ());
+                    cr->GetMotionMaster()->MovePoint(0, ((cr->GetPositionX() < 3250.0f) ? 3283.44f : 3208.44f), cr->GetPositionY(), cr->GetPositionZ(), false);
                 else
                     cr->SetObjectScale(0.1f);
             }
@@ -369,6 +370,7 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             me->ResetLootMode();
@@ -392,6 +394,7 @@ public:
 
         void EnterCombat(Unit* pWho)
         {
+            _fightTimer = getMSTime();
             me->CastSpell(me, SPELL_SARTHARION_PYROBUFFET, true);
             me->SetInCombatWithZone();
             Talk(SAY_SARTHARION_AGGRO);
@@ -411,8 +414,11 @@ public:
             me->CallForHelp(500.0f);
         }
 
-        void JustDied(Unit* pKiller)
+        void JustDied(Unit* killer)
         {
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + uint32(dragonsCount == 3), Difficulty(map->GetDifficulty()), dragonsCount == 3 ? "Sartharion with 3 drakes alive" : "", 30000, _fightTimer);
+
             RespawnDragons(true);
             SetDragons(true);
             summons.DespawnAll();
@@ -677,7 +683,7 @@ public:
         {
             summons2.DespawnAll();
             ClearInstance();
-            
+
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             me->SetDisableGravity(false);
             me->SetSpeed(MOVE_FLIGHT, 1.0f);
@@ -789,7 +795,7 @@ public:
                 case EVENT_MINIBOSS_OPEN_PORTAL:
                     Talk(WHISPER_OPEN_PORTAL);
                     Talk(SAY_TENEBRON_SPECIAL);
-                    
+
                     if (!isSartharion)
                     {
                         if (GameObject* Portal = me->GetVictim()->SummonGameObject(GO_TWILIGHT_PORTAL, portalPos[BOSS_TENEBRON_EVENT].GetPositionX(), portalPos[BOSS_TENEBRON_EVENT].GetPositionY(), portalPos[BOSS_TENEBRON_EVENT].GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0))
@@ -798,7 +804,7 @@ public:
                     else if (pInstance)
                         pInstance->SetData(DATA_ADD_PORTAL, 0);
 
-                        
+
                     events.ScheduleEvent(EVENT_MINIBOSS_SPAWN_HELPERS, 2000);
                     events.RepeatEvent(60000);
                     break;
@@ -957,7 +963,7 @@ public:
             events.ScheduleEvent(EVENT_MINIBOSS_SHADOW_FISSURE, 20000);
             events.ScheduleEvent(EVENT_MINIBOSS_SHADOW_BREATH, 10000);
             events.ScheduleEvent(EVENT_MINIBOSS_OPEN_PORTAL, 15000);
-            
+
             if (pInstance && !isSartharion)
                 pInstance->SetData(BOSS_SHADRON_EVENT, IN_PROGRESS);
 
@@ -1063,7 +1069,7 @@ public:
                     }
                     else if (pInstance)
                         pInstance->SetData(DATA_ADD_PORTAL, 0);
-                        
+
                     events.ScheduleEvent(EVENT_MINIBOSS_SPAWN_HELPERS, 2000);
                     events.PopEvent();
                     break;
@@ -1289,7 +1295,7 @@ public:
                     }
                     else if (pInstance)
                         pInstance->SetData(DATA_ADD_PORTAL, 0);
-                        
+
                     events.ScheduleEvent(EVENT_MINIBOSS_SPAWN_HELPERS, 2000);
                     events.PopEvent();
                     break;
@@ -1342,7 +1348,7 @@ public:
         void DoAction(int32 param)
         {
             if (param == ACTION_SWITCH_PHASE)
-            {        
+            {
                 me->DespawnOrUnsummon(1);
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -523,7 +523,10 @@ enum CharacterDatabaseStatements
     CHAR_REP_GAMBLING_STATS,
     // Armory Stats
     CHAR_INS_ARMORY_STATS,
-    //
+    // boss records
+    CHAR_UPD_CREATURE_RECORD,
+    CHAR_INS_CREATURE_RECORD,
+
     MAX_CHARACTERDATABASE_STATEMENTS
 };
 

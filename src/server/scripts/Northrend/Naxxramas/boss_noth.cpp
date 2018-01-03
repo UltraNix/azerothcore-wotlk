@@ -78,6 +78,7 @@ public:
         EventMap events;
         SummonList summons;
         uint8 totalPhase;
+        uint32 _fightTimer;
 
         void StartGroundPhase()
         {
@@ -125,6 +126,7 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -149,6 +151,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             Talk(SAY_AGGRO);
 
             if (pInstance)
@@ -168,7 +171,7 @@ public:
             summon->SetInCombatWithZone();
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             Talk(SAY_DEATH);
 
@@ -185,6 +188,9 @@ public:
                     go->SetGoState(GO_STATE_ACTIVE);
                 
                 pInstance->SetData(EVENT_NOTH, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
             }
         }
 
@@ -277,7 +283,7 @@ public:
             if (me->HasReactState(REACT_AGGRESSIVE))
                 DoMeleeAttackIfReady();
         }
-    };    
+    };
 };
 
 void AddSC_boss_noth()

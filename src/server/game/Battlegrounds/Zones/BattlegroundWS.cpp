@@ -5,6 +5,7 @@ REWRITTEN BY XINEF
 #include "BattlegroundWS.h"
 #include "Creature.h"
 #include "GameObject.h"
+#include "Group.h"
 #include "Language.h"
 #include "Object.h"
 #include "ObjectMgr.h"
@@ -151,6 +152,18 @@ void BattlegroundWS::EventPlayerCapturedFlag(Player* player)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
+
+    //! award exp for capturing flag if there is enough players for proper bg
+    if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+    {
+        TeamId team = player->GetTeamId();
+        const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+        for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+        {
+            if (itr->second->GetTeamId() == team)
+                itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+        }
+    }
 
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
     RemoveAssaultAuras();
@@ -401,7 +414,7 @@ bool BattlegroundWS::SetupBattleground()
     AddObject(BG_WS_OBJECT_DOOR_H_2, BG_OBJECT_DOOR_H_2_WS_ENTRY, 953.0507f, 1459.842f, 340.6526f, -1.99662f, -0.1971825f, 0.1575096f, -0.8239487f, 0.5073641f, RESPAWN_IMMEDIATELY);
     AddObject(BG_WS_OBJECT_DOOR_H_3, BG_OBJECT_DOOR_H_3_WS_ENTRY, 949.9523f, 1422.751f, 344.9273f, 0.0f, 0, 0, 0, 1, RESPAWN_IMMEDIATELY);
     AddObject(BG_WS_OBJECT_DOOR_H_4, BG_OBJECT_DOOR_H_4_WS_ENTRY, 950.7952f, 1459.583f, 342.1523f, 0.05235988f, 0, 0, 0.02617695f, 0.9996573f, RESPAWN_IMMEDIATELY);
-    
+
 
     WorldSafeLocsEntry const* sg = sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_ALLIANCE);
     AddSpiritGuide(WS_SPIRIT_MAIN_ALLIANCE, sg->x, sg->y, sg->z, 3.124139f, TEAM_ALLIANCE);
@@ -528,8 +541,8 @@ TeamId BattlegroundWS::GetPrematureWinner()
 
 uint32 BattlegroundWS::GetAssaultSpellId() const
 {
-    if ((GetFlagPickerGUID(TEAM_ALLIANCE) == 0 && GetFlagState(TEAM_ALLIANCE) != BG_WS_FLAG_STATE_ON_GROUND) || 
-        (GetFlagPickerGUID(TEAM_HORDE) == 0 && GetFlagState(TEAM_HORDE) != BG_WS_FLAG_STATE_ON_GROUND) || 
+    if ((GetFlagPickerGUID(TEAM_ALLIANCE) == 0 && GetFlagState(TEAM_ALLIANCE) != BG_WS_FLAG_STATE_ON_GROUND) ||
+        (GetFlagPickerGUID(TEAM_HORDE) == 0 && GetFlagState(TEAM_HORDE) != BG_WS_FLAG_STATE_ON_GROUND) ||
         _bgEvents.GetNextEventTime(BG_WS_EVENT_BOTH_FLAGS_KEPT10) > 0)
         return 0;
 

@@ -20,6 +20,7 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "CreatureAI.h"
+#include "CreatureGroups.h"
 #include "World.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
@@ -72,6 +73,11 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
     if (speed > 0.0f)
         init.SetVelocity(speed);
     init.Launch();
+
+    if (Creature* creature = unit->ToCreature())
+        if (creature->GetFormation() && creature->GetFormation()->getLeader() == creature)
+            creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z, unit->IsWalking() ? false : true);
+
 }
 
 template<class T>

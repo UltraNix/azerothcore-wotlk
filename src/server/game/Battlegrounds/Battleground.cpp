@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -380,7 +380,7 @@ TeamId Battleground::GetPrematureWinner()
         return TEAM_ALLIANCE;
     else if (GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
         return TEAM_HORDE;
-        
+
     return TEAM_NEUTRAL;
 }
 
@@ -933,6 +933,11 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                     player->SetRandomWinner(true);
             }
 
+            if (!isArena() && (GetBgTypeID() == BATTLEGROUND_AV || GetBgTypeID() == BATTLEGROUND_IC) && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+                player->GiveXP(0.07 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+            else if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+                player->GiveXP(0.05 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+
             // @Transmog
             if (sTransmogrification->TokenRewardEnabled())
             {
@@ -1079,7 +1084,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                         player->AreaExploredOrEventHappens(14164);
                 } break;
 
-                default: 
+                default:
                     break;
             }
 
@@ -1090,6 +1095,9 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
             if (player->IsCurrentBattlegroundRandom() || BattlegroundMgr::IsBGWeekend(GetBgTypeID()))
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
         }
+
+        if (!isArena() /*&& GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam()*/)
+            player->GiveXP(0.04 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);

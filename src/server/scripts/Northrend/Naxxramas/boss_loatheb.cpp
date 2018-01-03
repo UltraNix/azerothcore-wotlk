@@ -43,6 +43,7 @@ struct boss_loathebAI : public BossAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         _Reset();
         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FUNGAL_CREEP);
         instance->SetData(EVENT_LOATHEB, NOT_STARTED);
@@ -50,7 +51,7 @@ struct boss_loathebAI : public BossAI
             go->SetGoState(GO_STATE_ACTIVE);
     }
 
-    void JustSummoned(Creature* summon) override 
+    void JustSummoned(Creature* summon) override
     {
         summon->SetInCombatWithZone();
     }
@@ -68,6 +69,7 @@ struct boss_loathebAI : public BossAI
 
     void EnterCombat(Unit* /*who*/)
     {
+        _fightTimer = getMSTime();
         _EnterCombat();
         instance->SetData(EVENT_LOATHEB, IN_PROGRESS);
         if (GameObject* go = me->GetMap()->GetGameObject(instance->GetData64(DATA_LOATHEB_GATE)))
@@ -81,9 +83,12 @@ struct boss_loathebAI : public BossAI
         events.ScheduleEvent(EVENT_SPELL_BERSERK, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(720000, 480000) : 720000);
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* killer) override
     {
         instance->SetData(EVENT_LOATHEB, DONE);
+
+        if (Map* map = me->GetMap())
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
     }
 
     void ExecuteEvent(uint32 eventId) override
@@ -128,6 +133,8 @@ struct boss_loathebAI : public BossAI
                 break;
         }
     }
+private:
+    uint32 _fightTimer;
 };
 
 void AddSC_boss_loatheb()

@@ -2835,11 +2835,18 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
-    if (caster && unitTarget && caster->IsInWorld() && unitTarget->IsInWorld())
-        if (missInfo == SPELL_MISS_NONE)
-            if (caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                if (!caster->IsInCombat() && m_caster->IsFriendlyTo(unitTarget) && unitTarget->IsInCombat() && m_spellInfo->IsPositive())
-                    caster->SetInCombatState(true);
+    if (caster && unitTarget && caster->IsInWorld() && unitTarget->IsInWorld() && missInfo == SPELL_MISS_NONE)
+    {
+        if (caster->GetTypeId() == TYPEID_PLAYER && (unitTarget->GetTypeId() == TYPEID_PLAYER || unitTarget->IsPet()))
+        {
+            if (!caster->IsInCombat() && m_caster->IsFriendlyTo(unitTarget) && unitTarget->IsInCombat()
+                && m_spellInfo->IsPositive() && !m_spellInfo->HasAttribute(SPELL_ATTR1_NO_THREAT) &&
+                !m_spellInfo->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO))
+            {
+                caster->SetInCombatState(true);
+            }
+        }
+    }
 
     // Interrupt Spell casting
     if (m_spellInfo->HasAttribute(SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER) && unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -2860,7 +2867,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Needs to be called after dealing damage/healing to not remove breaking on damage auras
         DoTriggersOnSpellHit(spellHitTarget, mask);
 
-        // if target is fallged for pvp also flag caster if a player
+        // if target is flagged for pvp also flag caster if a player
         // xinef: do not flag spells with aura bind sight (no special attribute)
         if (effectUnit->IsPvP() && effectUnit != m_caster && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAura(SPELL_AURA_BIND_SIGHT))
             m_caster->ToPlayer()->UpdatePvP(true);

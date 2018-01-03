@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -179,6 +179,8 @@ enum WorldBoolConfigs
     CONFIG_HUNGER_GAMES_ENABLE,
     CONFIG_TEST_SERVER_ENABLE,
     CONFIG_BOOST_NAXXRAMAS,
+    CONFIG_EXP_BOOST_ANGRATHAR, // exp is 2x below 70 and 1x above level 70
+    CONFIG_BOSS_RECORDS,
 
     BOOL_CONFIG_VALUE_COUNT
 };
@@ -982,7 +984,7 @@ class World
         ACE_Future_Set<PreparedQueryResult> m_realmCharCallbacks;
 
         std::list<uint32> m_phasedDuelsZones;
-}; 
+};
 
 #define sWorld ACE_Singleton<World, ACE_Null_Mutex>::instance()
 #endif

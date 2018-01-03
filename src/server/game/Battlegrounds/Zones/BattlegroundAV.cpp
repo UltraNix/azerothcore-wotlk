@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -109,6 +109,18 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
             sLog->outError("Killed a Captain twice, please report this bug, if you haven't done \".respawn\"");
             return;
         }
+
+        if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+        {
+            TeamId team = killer->GetTeamId();
+            const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+            for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+            {
+                if (itr->second->GetTeamId() == team)
+                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+            }
+        }
+
         m_CaptainAlive[0]=false;
         RewardReputationToTeam(729, BG_AV_REP_CAPTAIN, TEAM_HORDE);
         RewardHonorToTeam(GetBonusHonorFromKill(BG_AV_KILL_CAPTAIN), TEAM_HORDE);
@@ -128,6 +140,18 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
             sLog->outError("Killed a Captain twice, please report this bug, if you haven't done \".respawn\"");
             return;
         }
+
+        if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+        {
+            TeamId team = killer->GetTeamId();
+            const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+            for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+            {
+                if (itr->second->GetTeamId() == team)
+                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+            }
+        }
+
         m_CaptainAlive[1]=false;
         RewardReputationToTeam(730, BG_AV_REP_CAPTAIN, TEAM_ALLIANCE);
         RewardHonorToTeam(GetBonusHonorFromKill(BG_AV_KILL_CAPTAIN), TEAM_ALLIANCE);
@@ -1354,7 +1378,7 @@ bool BattlegroundAV::SetupBattleground()
         SpawnBGObject(i, RESPAWN_IMMEDIATELY);
 
     SpawnBGObject(BG_AV_OBJECT_AURA_N_SNOWFALL_GRAVE, RESPAWN_IMMEDIATELY);
-    
+
     // Handpacked snowdrift, only during holiday
     if (IsHolidayActive(HOLIDAY_FEAST_OF_WINTER_VEIL))
         for (i = BG_AV_OBJECT_HANDPACKED_SNOWDRIFT_MIN ; i <= BG_AV_OBJECT_HANDPACKED_SNOWDRIFT_MAX; i++)
@@ -1453,6 +1477,16 @@ void BattlegroundAV::DestroyNode(BG_AV_Nodes node)
     m_Nodes[node].PrevState  = m_Nodes[node].State;
     m_Nodes[node].State      = (m_Nodes[node].Tower)? POINT_DESTROYED : POINT_CONTROLED;
     m_Nodes[node].Timer      = 0;
+
+    if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+    {
+        const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+        for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+        {
+            if ((itr->second->GetTeamId() == m_Nodes[node].OwnerId) && m_Nodes[node].Tower)
+                itr->second->GiveXP(0.01 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+        }
+    }
 }
 
 void BattlegroundAV::InitNode(BG_AV_Nodes node, TeamId teamId, bool tower)

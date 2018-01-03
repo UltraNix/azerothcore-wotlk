@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1264,7 +1264,7 @@ void World::LoadConfigSettings(bool reload)
 
     MMAP::MMapFactory::InitializeDisabledMaps();
 
-    
+
     // Wintergrasp
     m_bool_configs[CONFIG_WINTERGRASP_ENABLE] = sConfigMgr->GetBoolDefault("Wintergrasp.Enable", true);
     m_int_configs[CONFIG_WINTERGRASP_PLR_MAX] = sConfigMgr->GetIntDefault("Wintergrasp.PlayerMax", 100);
@@ -1308,11 +1308,11 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_AUTO_GLOBAL_INVITE_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInvite.Enable", false);
     m_bool_configs[CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInviteAlways.Enable", false);
     m_int_configs[CONFIG_AUTO_GLOBAL_GUID] = sConfigMgr->GetIntDefault("AutoGlobalInvite.GUID", 1);
- 
+
     // Server Country
     SetCountryName(sConfigMgr->GetStringDefault("Country.Name", "Poland"));
 
-    //  
+    //
     m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);
     m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Value", 0.1f);
 
@@ -1336,7 +1336,10 @@ void World::LoadConfigSettings(bool reload)
 
     m_bool_configs[CONFIG_TEST_SERVER_ENABLE] = sConfigMgr->GetBoolDefault("TestServer.Enable", false);
     m_bool_configs[CONFIG_BOOST_NAXXRAMAS] = sConfigMgr->GetBoolDefault("Naxxramas.Boost", false);
-    
+
+    m_bool_configs[CONFIG_EXP_BOOST_ANGRATHAR] = sConfigMgr->GetBoolDefault("Angrathar.Enable", false);
+    m_bool_configs[CONFIG_BOSS_RECORDS] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Enable", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -1772,6 +1775,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading client addons...");
     AddonMgr::LoadFromDB();
 
+    sLog->outString("Loading creature records...");
+    sObjectMgr->LoadCreatureRecords();
+
     // pussywizard:
     sLog->outString("Deleting invalid mail items...\n");
     CharacterDatabase.Query("DELETE mi FROM mail_items mi LEFT JOIN item_instance ii ON mi.item_guid = ii.guid WHERE ii.guid IS NULL");
@@ -1977,7 +1983,7 @@ void World::DetectDBCLang()
     sLog->outString();
 }
 
- 
+
 
 void World::LoadAutobroadcasts()
 {
@@ -2022,7 +2028,7 @@ void World::LoadAutobroadcasts()
 void World::LoadIp2nation()
 {
  	uint32 oldMSTime = getMSTime();
- 	
+
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_IP2NATION_COUNT);
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
@@ -2103,7 +2109,7 @@ void World::Update(uint32 diff)
     // so we don't have to do it in every packet that modifies auctions
     AsyncAuctionListingMgr::SetAuctionListingAllowed(false);
     {
-        TRINITY_GUARD(ACE_Thread_Mutex, AsyncAuctionListingMgr::GetLock()); 
+        TRINITY_GUARD(ACE_Thread_Mutex, AsyncAuctionListingMgr::GetLock());
 
         // pussywizard: handle auctions when the timer has passed
         if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -2123,7 +2129,7 @@ void World::Update(uint32 diff)
         }
 
         UpdateSessions(diff);
-    } 
+    }
     // end of section with mutex
     AsyncAuctionListingMgr::SetAuctionListingAllowed(true);
 
@@ -2658,9 +2664,9 @@ bool World::RemoveBanCharacter(std::string const& name)
 void World::SetPhasedDuelsZones(std::string zones)
 {
     m_phasedDuelsZones.clear();
-    if (zones.empty()) 
+    if (zones.empty())
         return;
- 
+
     std::stringstream ss(zones);
     while (!ss.eof()) {
         std::string buff;
@@ -2887,7 +2893,7 @@ void World::SendAutoBroadcast()
     AutobroadcastsWeightMap selectionWeights;
 
     std::string country, exceptCountry, msg;
-    
+
     for (AutobroadcastsWeightMap::const_iterator it = m_AutobroadcastsWeights.begin(); it != m_AutobroadcastsWeights.end(); ++it)
     {
         if (it->second)

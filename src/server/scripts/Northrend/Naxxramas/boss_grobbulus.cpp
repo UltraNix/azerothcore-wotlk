@@ -56,9 +56,11 @@ public:
         SummonList summons;
         InstanceScript* pInstance;
         uint32 dropSludgeTimer;
+        uint32 _fightTimer;
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             dropSludgeTimer = 0;
@@ -69,6 +71,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_POISON_CLOUD, 15000);
             events.ScheduleEvent(EVENT_SPELL_MUTATING_INJECTION, 20000);
@@ -95,12 +98,15 @@ public:
 
         void SummonedCreatureDespawn(Creature* summon){ summons.Despawn(summon); }
 
-        void JustDied(Unit*)
+        void JustDied(Unit* killer)
         {
             summons.DespawnAll();
 
             if (pInstance)
                 pInstance->SetData(EVENT_GROBBULUS, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void KilledUnit(Unit* who)
@@ -188,7 +194,7 @@ public:
             sizeTimer = 0;
             auraVisualTimer = 1;
             me->SetFloatValue(UNIT_FIELD_COMBATREACH, 2.0f);
-            me->setFaction(21); // Grobbulus one    
+            me->setFaction(21); // Grobbulus one
         }
 
         void KilledUnit(Unit* who)

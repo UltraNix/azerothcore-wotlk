@@ -12506,13 +12506,6 @@ void Unit::CombatStart(Unit* target, bool initialAggro)
 
         SetInCombatWith(target);
         target->SetInCombatWith(this);
-
-        // Xinef: If pet started combat - put owner in combat
-        if (Unit* owner = GetOwner())
-        {
-            owner->SetInCombatWith(target);
-            target->SetInCombatWith(owner);
-        }
     }
 
     Unit* who = target->GetCharmerOrOwnerOrSelf();
@@ -12534,13 +12527,7 @@ void Unit::CombatStartOnCast(Unit* target, bool initialAggro, uint32 duration)
         return;
 
     if (initialAggro)
-    {
         SetInCombatWith(target, duration);
-
-        // Xinef: If pet started combat - put owner in combat
-        if (Unit* owner = GetOwner())
-            owner->SetInCombatWith(target, duration);
-    }
 
     Unit* who = target->GetCharmerOrOwnerOrSelf();
     if (who->GetTypeId() == TYPEID_PLAYER)

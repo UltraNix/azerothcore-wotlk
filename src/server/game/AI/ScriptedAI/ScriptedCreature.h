@@ -180,6 +180,8 @@ struct ScriptedAI : public CreatureAI
     //CreatureAI Functions
     // *************
 
+    void CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty difficulty, std::string creatureName/* =""*/, uint32 minTimer/* = 0*/, uint32 _fightTimer/* = 0*/) const;
+
     void AttackStartNoMove(Unit* target);
 
     // Called at any Damage from any attacker (before damage apply)

@@ -3221,19 +3221,31 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     bool eventBonusX3   = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP_X3);
     bool IsBlizzlike    = BlizzlikeMode();
 
-    // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
-    if (premiumBonusX4 && !IsBlizzlike)
-        bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (premiumBonus && !IsBlizzlike)
-        bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (eventBonusX3 && !IsBlizzlike)
-        bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (eventBonusX2 && !IsBlizzlike)
-        bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (recruitAFriend && !IsBlizzlike)
-        bonus_xp = 1 * xp; // RaF does NOT stack with rested experience
+    if (sWorld->getBoolConfig(CONFIG_EXP_BOOST_ANGRATHAR))
+    {
+        if (recruitAFriend && !IsBlizzlike)
+            bonus_xp = 2 * xp; // RaF does NOT stack with rested experience
+        else if (getLevel() < 70 && !IsBlizzlike)
+            bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        else
+            bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
+    }
     else
-       bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
+    {
+        // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
+        if (premiumBonusX4 && !IsBlizzlike)
+            bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        else if (premiumBonus && !IsBlizzlike)
+            bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        else if (eventBonusX3 && !IsBlizzlike)
+            bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        else if (eventBonusX2 && !IsBlizzlike)
+            bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        else if (recruitAFriend && !IsBlizzlike)
+            bonus_xp = 1 * xp; // RaF does NOT stack with rested experience
+        else
+            bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
+    }
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
 
@@ -7481,9 +7493,9 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
         if (Battleground* bg = GetBattleground())
         {
             bg->UpdatePlayerScore(this, SCORE_BONUS_HONOR, honor, false); //false: prevent looping
-            // Xinef: Only for BG activities
-            if (!uVictim)
-                GiveXP(uint32(honor*(3+getLevel()*0.30f)), NULL);
+            // award xp for pvp kills
+            if (uVictim)
+                GiveXP(0.001 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
         }
 
     return true;
@@ -20700,7 +20712,7 @@ enum AFKcheck
 // Custom.AFK.Report
 void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
 {
-    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT) 
+    if (!sWorld->getBoolConfig(CONFIG_CUSTOM_AFK_REPORT)
         || !IsInWorld() || IsBeingTeleported() || IsBeingTeleportedFar())
         return;
 

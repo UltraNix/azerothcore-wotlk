@@ -3797,6 +3797,9 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// PALADIN
         /////////////////////////////////
+        case 58597: // sacred shield
+            spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            break;
         case 20111:
         case 20112:
         case 20113:
@@ -4568,7 +4571,7 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// PRIEST
         /////////////////////////////////
-        
+
         // Item - Priest T9 Healing 4P Bonus (Divine Aegis and Empowered Renew)
         case 67202:
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_ADD_PCT_MODIFIER;

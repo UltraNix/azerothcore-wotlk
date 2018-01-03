@@ -4,6 +4,7 @@ REWRITTEN BY XINEF
 
 #include "BattlegroundEY.h"
 #include "ObjectMgr.h"
+#include "Group.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "BattlegroundMgr.h"
@@ -149,7 +150,7 @@ void BattlegroundEY::UpdatePointsState()
             pointOwnerTeamId = TEAM_HORDE;
         else if (_capturePointInfo[point]._barStatus >= BG_EY_PROGRESS_BAR_NEUTRAL_HIGH)
             pointOwnerTeamId = TEAM_ALLIANCE;
-        
+
         if (pointOwnerTeamId != _capturePointInfo[point]._ownerTeamId)
         {
             if (_capturePointInfo[point].IsUncontrolled())
@@ -500,6 +501,18 @@ void BattlegroundEY::EventTeamCapturedPoint(TeamId teamId, uint32 point)
 
 void BattlegroundEY::EventPlayerCapturedFlag(Player* player, uint32 BgObjectType)
 {
+    //! award exp for capturing flag if there is enough players for proper bg
+    if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+    {
+        TeamId team = player->GetTeamId();
+        const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
+        for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
+        {
+            if (itr->second->GetTeamId() == team)
+                itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+        }
+    }
+
     SetFlagPicker(0);
     _flagState = BG_EY_FLAG_STATE_ON_BASE;
     player->RemoveAurasDueToSpell(BG_EY_NETHERSTORM_FLAG_SPELL);

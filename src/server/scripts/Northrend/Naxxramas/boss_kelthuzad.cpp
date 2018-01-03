@@ -125,6 +125,7 @@ public:
         EventMap events;
         SummonList summons;
         InstanceScript* pInstance;
+        uint32 _fightTimer;
 
         float NormalizeOrientation(float o)
         {
@@ -168,11 +169,12 @@ public:
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
             me->SetReactState(REACT_AGGRESSIVE);
-            
+
             if (pInstance)
             {
                 pInstance->SetData(EVENT_KELTHUZAD, NOT_STARTED);
@@ -204,7 +206,7 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer)
         {
             if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_KELTHUZAD_GATE)))
                 go->SetGoState(GO_STATE_ACTIVE);
@@ -214,6 +216,9 @@ public:
 
             if (pInstance)
                 pInstance->SetData(EVENT_KELTHUZAD, DONE);
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void MoveInLineOfSight(Unit* who)
@@ -224,6 +229,7 @@ public:
 
         void EnterCombat(Unit* who)
         {
+            _fightTimer = getMSTime();
             Talk(SAY_SUMMON_MINIONS);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
             me->RemoveAllAttackers();
@@ -346,10 +352,10 @@ public:
                 case EVENT_SPELL_FROST_BLAST:
                     if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, RAID_MODE(1,0), 0, true))
                         me->CastSpell(target, SPELL_FROST_BLAST, false);
-                    
+
                     if (!urand(0,2))
                         Talk(SAY_FROST_BLAST);
-                        
+
                     events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(45000, 30000) : 45000);
                     break;
                 case EVENT_SPELL_CHAINS:

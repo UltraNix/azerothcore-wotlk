@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -586,5 +586,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_GAMBLING_STATS, "SELECT lost_money, win_money, duel_count FROM character_gambling_stats WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_REP_GAMBLING_STATS, "REPLACE INTO character_gambling_stats(guid, lost_money, win_money, duel_count) VALUES(?, ?, ?, ?)", CONNECTION_ASYNC);
     // Armory Stats
-    PrepareStatement(CHAR_INS_ARMORY_STATS, "INSERT INTO characters_armory_stats (guid, guildId, creatureEntry, mapId, difficulity, groupCount, fightLength, fightDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);   
+    PrepareStatement(CHAR_INS_ARMORY_STATS, "INSERT INTO characters_armory_stats (guid, guildId, creatureEntry, mapId, difficulity, groupCount, fightLength, fightDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+
+    //! boss records
+    PrepareStatement(CHAR_UPD_CREATURE_RECORD, "UPDATE creature_records SET BestKillTime = ?, BestTimeGuild = ?, PrevBestTimeGuild = ? WHERE entry = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_CREATURE_RECORD, "INSERT INTO creature_records VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }

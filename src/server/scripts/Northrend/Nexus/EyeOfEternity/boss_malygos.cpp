@@ -160,7 +160,7 @@ public:
         {
             pInstance = me->GetInstanceScript();
         }
-        
+
         InstanceScript* pInstance;
         EventMap events;
         SummonList summons;
@@ -168,9 +168,11 @@ public:
         uint32 timer1, timer2;
         uint8 IntroCounter;
         bool bLockHealthCheck;
+        uint32 _fightTimer;
 
         void Reset()
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
 
@@ -263,7 +265,7 @@ public:
 
         void SpellHit(Unit *caster, const SpellInfo *spell)
         {
-            if (spell->Id == SPELL_POWER_SPARK_MALYGOS_BUFF) 
+            if (spell->Id == SPELL_POWER_SPARK_MALYGOS_BUFF)
             {
                 if (!bLockHealthCheck)
                 {
@@ -277,6 +279,7 @@ public:
 
         void EnterCombat(Unit* who)
         {
+            _fightTimer = getMSTime();
             events.Reset();
             DoZoneInCombat();
 
@@ -554,7 +557,7 @@ public:
                     events.RescheduleEvent(EVENT_SPELL_ARCANE_OVERLOAD, 8000, 1);
                     events.RescheduleEvent(EVENT_MOVE_TO_SURGE_OF_POWER, 55000, 1);
                     events.RescheduleEvent(EVENT_CHECK_TRASH_DEAD, 3000, 1);
-                    
+
                     for (int i=0; i<MAX_NEXUS_LORDS; i++)
                     {
                         float dist = 22.0f;
@@ -749,6 +752,9 @@ public:
                 pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_MALYGOS, 1);
                 pInstance->SetData(DATA_ENCOUNTER_STATUS, DONE);
             }
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
         void KilledUnit(Unit *victim)
@@ -939,7 +945,7 @@ public:
             CheckTimer = 1000;
             MoveTimer = 0;
         }
-     
+
         InstanceScript* pInstance;
         uint16 CheckTimer;
         uint16 MoveTimer;
@@ -1439,15 +1445,15 @@ public:
 
 
 class go_the_focusing_iris : public GameObjectScript
-{ 
-public: 
+{
+public:
     go_the_focusing_iris() : GameObjectScript("go_the_focusing_iris") { }
 
     bool OnGossipHello(Player* user, GameObject* go)
     {
         if (!user || !go)
             return true;
-        
+
         if (InstanceScript* pInstance = go->GetInstanceScript())
             pInstance->SetData(DATA_IRIS_ACTIVATED, 0);
 

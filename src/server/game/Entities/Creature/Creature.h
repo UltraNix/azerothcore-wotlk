@@ -423,6 +423,14 @@ struct TrainerSpellData
     TrainerSpell const* Find(uint32 spell_id) const;
 };
 
+struct CreatureRecordData
+{
+    uint32 bestKillTime;
+    std::string realmFirstGuild;
+    std::string bestTimeGuild;
+    std::string prevBestTimeGuild;
+};
+
 typedef std::map<uint32, time_t> CreatureSpellCooldowns;
 
 // max different by z coordinate for creature aggro reaction

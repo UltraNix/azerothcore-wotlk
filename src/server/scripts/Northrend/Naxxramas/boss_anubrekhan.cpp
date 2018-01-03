@@ -57,11 +57,6 @@ public:
             sayGreet = false;
         }
 
-        InstanceScript* pInstance;
-        EventMap events;
-        SummonList summons;
-        bool sayGreet;
-
         void SummonCryptGuards()
         {
             me->SummonCreature(NPC_CRYPT_GUARD, 3308.590f, -3466.29f, 287.16f, M_PI, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
@@ -70,8 +65,9 @@ public:
                 me->SummonCreature(NPC_CRYPT_GUARD, 3308.590f, -3486.29f, 287.16f, M_PI, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
         }
 
-        void Reset() 
+        void Reset() override
         {
+            _fightTimer = 0;
             events.Reset();
             summons.DespawnAll();
             SummonCryptGuards();
@@ -84,7 +80,7 @@ public:
             }
         }
 
-        void JustSummoned(Creature* cr)
+        void JustSummoned(Creature* cr) override
         {
             if (me->IsInCombat())
                 cr->SetInCombatWithZone();
@@ -99,15 +95,15 @@ public:
             summons.Summon(cr);
         }
 
-        void SummonedCreatureDies(Creature* cr, Unit*)
+        void SummonedCreatureDies(Creature* cr, Unit*) override
         {
             if (cr->GetEntry() == NPC_CRYPT_GUARD)
                 cr->CastSpell(cr, SPELL_SUMMON_CORPSE_SCRABS_10, true, NULL, NULL, me->GetGUID());
         }
 
-        void SummonedCreatureDespawn(Creature* cr) { summons.Despawn(cr); }
+        void SummonedCreatureDespawn(Creature* cr) override { summons.Despawn(cr); }
 
-        void JustDied(Unit* Killer)
+        void JustDied(Unit* killer) override
         {
             summons.DespawnAll();
 
@@ -116,9 +112,12 @@ public:
                 pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
                 pInstance->SetData(EVENT_ANUB, DONE);
             }
+
+            if (Map* map = me->GetMap())
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
-        void KilledUnit(Unit* victim)
+        void KilledUnit(Unit* victim) override
         {
             if (victim->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -133,8 +132,9 @@ public:
                 pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void EnterCombat(Unit *who)
+        void EnterCombat(Unit *who) override
         {
+            _fightTimer = getMSTime();
             me->CallForHelp(30.0f); // catch helpers
             Talk(SAY_AGGRO);
             if (pInstance)
@@ -152,7 +152,7 @@ public:
                 SummonCryptGuards();
         }
 
-        void MoveInLineOfSight(Unit *who)
+        void MoveInLineOfSight(Unit *who) override
         {
             if (!sayGreet && who->GetTypeId() == TYPEID_PLAYER)
             {
@@ -163,7 +163,7 @@ public:
             ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -195,6 +195,12 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript * pInstance;
+        EventMap events;
+        SummonList summons;
+        bool sayGreet;
+        uint32 _fightTimer;
     };
 };
 
