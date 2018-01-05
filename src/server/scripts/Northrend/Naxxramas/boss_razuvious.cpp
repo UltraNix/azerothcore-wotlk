@@ -162,8 +162,8 @@ public:
             }
 
             events.ScheduleEvent(EVENT_SPELL_UNBALANCING_STRIKE, 30000);
-            events.ScheduleEvent(EVENT_SPELL_DISRUPTING_SHOUT, BoostVersion ? RAID_MODE(25000, 15000) : 25000);
-            events.ScheduleEvent(EVENT_SPELL_JAGGED_KNIFE, BoostVersion ? RAID_MODE(15000, 35000) : 15000);
+            events.ScheduleEvent(EVENT_SPELL_DISRUPTING_SHOUT, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(25000, 15000) : 25000);
+            events.ScheduleEvent(EVENT_SPELL_JAGGED_KNIFE, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(15000, 35000) : 15000);
             events.ScheduleEvent(EVENT_PLAY_COMMAND, 40000);
             events.ScheduleEvent(EVENT_PLAY_EMOTE, 5000);
 
@@ -190,7 +190,7 @@ public:
                     events.RepeatEvent(30000);
                     break;
                 case EVENT_SPELL_DISRUPTING_SHOUT:
-                    if (BoostVersion)
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                     {
                         if (me->GetMap()->Is25ManRaid())
                         {
@@ -203,12 +203,12 @@ public:
                     else
                         me->CastSpell(me, RAID_MODE(SPELL_DISRUPTING_SHOUT_10, SPELL_DISRUPTING_SHOUT_25), false);
 
-                    events.RepeatEvent(BoostVersion ? RAID_MODE(25000, 12000) :25000);
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(25000, 12000) :25000);
                     break;
                 case EVENT_SPELL_JAGGED_KNIFE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f))
                         me->CastSpell(target, SPELL_JAGGED_KNIFE, false);
-                    events.RepeatEvent(BoostVersion ? RAID_MODE(25000, 8000) : 25000);
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(25000, 8000) : 25000);
                     break;
                 case EVENT_PLAY_COMMAND:
                     switch (urand(0,2))

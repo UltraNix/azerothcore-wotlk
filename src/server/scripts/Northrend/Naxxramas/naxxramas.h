@@ -5,8 +5,6 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
-const bool BoostVersion = sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS);
-
 enum NXEncounter
 {
     EVENT_PATCHWERK                    = 0,

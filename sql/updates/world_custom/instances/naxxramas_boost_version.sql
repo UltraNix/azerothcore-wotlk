@@ -52,7 +52,7 @@ DELETE FROM `areatrigger_teleport` WHERE `areatrigger_teleport`.`id` = 4156;
 
 UPDATE `gameobject` SET  `phaseMask` = '2', `position_x` = '3005.51', `position_y` = '-3434.63', `position_z` = '304.195', `orientation` = '5.810410' WHERE `gameobject`.`guid` = 5216;
 
-UPDATE `gameobject_template` SET `data10` = '72617' WHERE `gameobject_template`.`entry` = 202277;
-UPDATE `gameobject_template` SET `data10` = '72613' WHERE `gameobject_template`.`entry` = 202278;
+UPDATE `gameobject_template` SET `data3` = '0', `data10` = '72617' WHERE `gameobject_template`.`entry` = 202277;
+UPDATE `gameobject_template` SET `data3` = '0', `data10` = '72613' WHERE `gameobject_template`.`entry` = 202278;
 
 DELETE FROM `gameobject` WHERE `gameobject`.`guid` = 65853; /* Delete portal from 3.3.0 */

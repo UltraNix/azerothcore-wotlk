@@ -160,7 +160,7 @@ struct boss_faerlinaAI : public ScriptedAI
             {
                 case EVENT_SPELL_POISON_BOLT:
                     if (!me->HasAura(SPELL_WIDOWS_EMBRACE))
-                        me->CastCustomSpell(RAID_MODE(SPELL_POISON_BOLT_VOLLEY_10, SPELL_POISON_BOLT_VOLLEY_25), SPELLVALUE_MAX_TARGETS, BoostVersion ? RAID_MODE(3, 25) : 3, me, false);
+                        me->CastCustomSpell(RAID_MODE(SPELL_POISON_BOLT_VOLLEY_10, SPELL_POISON_BOLT_VOLLEY_25), SPELLVALUE_MAX_TARGETS, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(3, 25) : 3, me, false);
 
                     events.Repeat(14000);
                     break;

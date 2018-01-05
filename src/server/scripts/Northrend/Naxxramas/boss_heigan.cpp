@@ -126,7 +126,7 @@ public:
                 events.ScheduleEvent(EVENT_ERUPT_SECTION, 10000);
                 events.ScheduleEvent(EVENT_SWITCH_PHASE, 90000);
 
-                if (BoostVersion && me->GetMap()->Is25ManRaid())
+                if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
                     events.ScheduleEvent(EVENT_BOOST_MORTAL_STRIKE, 10000);
             }
             else // if (phase == PHASE_FAST_DANCE)
@@ -172,7 +172,7 @@ public:
             switch (events.GetEvent())
             {
                 case EVENT_BOOST_MORTAL_STRIKE:
-                    if (!BoostVersion)
+                    if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                         break;
 
                     me->CastSpell(me->GetVictim(), SPELL_CUSTOM_MORTAL_STRIKE, false);

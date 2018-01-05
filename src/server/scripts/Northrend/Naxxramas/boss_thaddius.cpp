@@ -218,7 +218,7 @@ public:
 
         void PolarityDamage()
         {
-            if (!BoostVersion)
+            if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                 return;
 
             uint32 polarDamage = urand(4200, 5000);
@@ -284,15 +284,15 @@ public:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->setAttackTimer(BASE_ATTACK, 4000);
                     
-                    if (BoostVersion && me->GetMap()->Is25ManRaid())
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
                         events.ScheduleEvent(EVENT_STOMP_BOOST, 10000);
 
                     events.ScheduleEvent(EVENT_THADDIUS_SPELL_CHAIN_LIGHTNING, 14000);
-                    events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, BoostVersion ? RAID_MODE(360000, 480000) : 360000);
+                    events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(360000, 480000) : 360000);
                     events.ScheduleEvent(EVENT_THADDIUS_POLARITY_SHIFT, 30000);
                     return;
                 case EVENT_STOMP_BOOST:
-                    if (!BoostVersion)
+                    if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                         break;
                     me->CastSpell(me->GetVictim(), SPELL_STOMP_BOOST, false);
                     me->GetMap()->Is25ManRaid() ? events.RepeatEvent(10000) : events.PopEvent();
@@ -308,7 +308,7 @@ public:
                 case EVENT_THADDIUS_POLARITY_SHIFT:
                     me->CastSpell(me, SPELL_POLARITY_SHIFT, false);
                     PolarityDamage();
-                    events.RepeatEvent(BoostVersion ? RAID_MODE(30000, 20000) : 30000);
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(30000, 20000) : 30000);
                     break;
             }
 
@@ -469,7 +469,7 @@ public:
                     events.RepeatEvent(19000);
                     break;
                 case EVENT_MINION_SPELL_STATIC_FIELD:
-                    if (BoostVersion)
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                     {
                         if (me->GetMap()->Is25ManRaid())
                         {

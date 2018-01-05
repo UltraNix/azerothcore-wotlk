@@ -180,7 +180,7 @@ public:
             events.ScheduleEvent(EVENT_BERSERK, 15 * 60000);
             events.ScheduleEvent(EVENT_SPELL_CLEAVE, 5000);
 
-            if (BoostVersion && me->GetMap()->Is25ManRaid())
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
                 events.ScheduleEvent(EVENT_STOMP_BOOST, 8000);
 
             events.ScheduleEvent(EVENT_SPELL_TAIL_SWEEP, 10000);
@@ -216,7 +216,7 @@ public:
         {
             if (spellInfo->Id == SPELL_ICEBOLT_CAST)
             {
-                if (BoostVersion)
+                if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                 {
                     if (me->GetMap()->Is25ManRaid())
                     {
@@ -282,7 +282,7 @@ public:
             switch (events.GetEvent())
             {
                 case EVENT_STOMP_BOOST:
-                    if (!BoostVersion)
+                    if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                         break;
                     me->CastSpell(me->GetVictim(), SPELL_STOMP_BOOST, false);
                     me->GetMap()->Is25ManRaid() ? events.RepeatEvent(10000) : events.PopEvent();
@@ -306,14 +306,14 @@ public:
                     return;
                 case EVENT_SPELL_BLIZZARD:
                 {
-                    uint8 count = BoostVersion ? (me->GetMap()->Is25ManRaid() ? 3 : 1) : 1;
+                    uint8 count = sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (me->GetMap()->Is25ManRaid() ? 3 : 1) : 1;
                     for (uint8 i = 0; i < count; ++i)
                     {
                         Creature* cr = nullptr;
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                            cr = me->SummonCreature(BoostVersion ? RAID_MODE(NPC_BLIZZARD, NPC_BLIZZARD_BOOST) : NPC_BLIZZARD, *target, TEMPSUMMON_TIMED_DESPAWN, 16000);
+                            cr = me->SummonCreature(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(NPC_BLIZZARD, NPC_BLIZZARD_BOOST) : NPC_BLIZZARD, *target, TEMPSUMMON_TIMED_DESPAWN, 16000);
                         else
-                            cr = me->SummonCreature(BoostVersion ? RAID_MODE(NPC_BLIZZARD, NPC_BLIZZARD_BOOST) : NPC_BLIZZARD, *me, TEMPSUMMON_TIMED_DESPAWN, 16000);
+                            cr = me->SummonCreature(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(NPC_BLIZZARD, NPC_BLIZZARD_BOOST) : NPC_BLIZZARD, *me, TEMPSUMMON_TIMED_DESPAWN, 16000);
 
                         if (cr)
                             cr->GetMotionMaster()->MoveRandom(40);
