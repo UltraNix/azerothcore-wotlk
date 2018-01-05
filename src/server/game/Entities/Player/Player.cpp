@@ -12904,6 +12904,13 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
                     GetGlobalCooldownMgr().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
 
+                    if (pProto->Class == ITEM_CLASS_WEAPON)
+                    {
+                        resetAttackTimer(BASE_ATTACK);
+                        if (haveOffhandWeapon())
+                            resetAttackTimer(OFF_ATTACK);
+                    }
+
                     WorldPacket data;
                     BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_INCLUDE_GCD, cooldownSpell, 0);
                     GetSession()->SendPacket(&data);
