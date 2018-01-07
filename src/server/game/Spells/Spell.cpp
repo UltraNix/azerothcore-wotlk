@@ -2410,6 +2410,11 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (targetInfo.reflectResult == SPELL_MISS_REFLECT)     // Impossible reflect again, so simply deflect spell
             targetInfo.reflectResult = SPELL_MISS_PARRY;
 
+        //! let's check if unit is proper unit type for spell
+        //! for example: banish requires demons, seduce requires humanoids and so on
+        if (!m_spellInfo->CheckTargetCreatureType(m_caster))
+            targetInfo.reflectResult = SPELL_MISS_IMMUNE;
+
         // Increase time interval for reflected spells by 1.5
         m_caster->m_Events.AddEvent(new ReflectEvent(m_caster->GetGUID(), targetInfo.targetGUID, m_spellInfo), m_caster->m_Events.CalculateTime(targetInfo.timeDelay));
         targetInfo.timeDelay += targetInfo.timeDelay >> 1;
