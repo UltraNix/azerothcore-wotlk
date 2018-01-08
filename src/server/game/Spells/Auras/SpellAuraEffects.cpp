@@ -3008,30 +3008,6 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
     Unit* target = aurApp->GetTarget();
 
     target->SetControlled(apply, UNIT_STATE_STUNNED);
-
-    if (apply && GetId() == 7922)
-    {
-        if (Unit* caster = GetCaster())
-        {
-            if (target->GetTypeId() == TYPEID_PLAYER  && caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                float angle = caster->GetAngle(target) - M_PI;
-                float destx = target->GetPositionX() + target->GetObjectSize() * cos(angle);
-                float desty = target->GetPositionY() + target->GetObjectSize() * sin(angle);
-                float destz = target->GetPositionZ();
-
-                PathGenerator* m_pathFinder;
-                m_pathFinder = new PathGenerator(caster);
-                m_pathFinder->CalculatePath(destx, desty, destz + 0.15f, false);
-
-                if (m_pathFinder)
-                {
-                    caster->GetMotionMaster()->Clear(false);
-                    caster->GetMotionMaster()->MoveCharge(m_pathFinder->GetEndPosition().x, m_pathFinder->GetEndPosition().y, m_pathFinder->GetEndPosition().z, 42.0f, EVENT_CHARGE, &m_pathFinder->GetPath());
-                }
-            }
-        }
-    }
 }
 
 void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bool apply) const

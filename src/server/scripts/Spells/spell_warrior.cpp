@@ -355,6 +355,67 @@ class spell_warr_charge : public SpellScriptLoader
         }
 };
 
+// 7922 - Charge Stun
+// Recalculate charge dest again on stun apply to be sure caster reach correction position of target.
+class spell_warr_charge_stun : public SpellScriptLoader
+{
+    public:
+        spell_warr_charge_stun() : SpellScriptLoader("spell_warr_charge_stun") { }
+
+        class spell_warr_charge_stun_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_warr_charge_stun_AuraScript);
+
+            bool Load()
+            {
+                if (Unit* caster = GetCaster())
+                    m_pathFinder = new PathGenerator(caster);
+
+                return true;
+            }
+
+            void OnApply(AuraEffect const* /*AuraEff*/, AuraEffectHandleModes /*AuraEff*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetTarget();
+
+                if (!caster || !target || !m_pathFinder)
+                    return;
+
+                float angle = caster->GetAngle(target) - M_PI;
+                float destx = target->GetPositionX() + target->GetObjectSize() * cos(angle);
+                float desty = target->GetPositionY() + target->GetObjectSize() * sin(angle);
+                float destz = target->GetPositionZ();
+                 
+                m_pathFinder->CalculatePath(destx, desty, destz + 0.15f, false);
+
+                caster->GetMotionMaster()->Clear(false);
+                caster->GetMotionMaster()->MoveCharge(m_pathFinder->GetEndPosition().x, m_pathFinder->GetEndPosition().y, m_pathFinder->GetEndPosition().z, 42.0f, EVENT_CHARGE, &m_pathFinder->GetPath());
+            }
+
+            void OnRemove(AuraEffect const* /*AuraEff*/, AuraEffectHandleModes /*AuraEff*/)
+            {
+                if (m_pathFinder)
+                    delete m_pathFinder;
+            }
+
+            void Register() override
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_warr_charge_stun_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_warr_charge_stun_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+
+            }
+
+            private:
+                PathGenerator* m_pathFinder;
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_warr_charge_stun_AuraScript();
+        }
+};
+
 // -1464 - Slam
 class spell_warr_slam : public SpellScriptLoader
 {
@@ -1024,6 +1085,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_improved_spell_reflection();
     new spell_warr_improved_spell_reflection_trigger();
     new spell_warr_victory_rush();
+    new spell_warr_charge_stun();
 
     // Theirs
     new spell_warr_bloodthirst();
