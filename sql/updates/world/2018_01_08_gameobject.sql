@@ -1,0 +1,1 @@
+UPDATE gameobject SET phaseMask = 129 WHERE id = 192536;
