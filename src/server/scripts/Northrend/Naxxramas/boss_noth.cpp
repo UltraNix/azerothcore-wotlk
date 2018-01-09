@@ -133,7 +133,12 @@ public:
             totalPhase = 0;
 
             if (pInstance)
+            {
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_NOTH_ENTRANCE_GATE)))
+                    go->SetGoState(GO_STATE_ACTIVE);
+
                 pInstance->SetData(EVENT_NOTH, NOT_STARTED);
+            }
         }
 
         void EnterEvadeMode()
@@ -147,7 +152,12 @@ public:
             Talk(SAY_AGGRO);
 
             if (pInstance)
+            {
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_NOTH_ENTRANCE_GATE)))
+                    go->SetGoState(GO_STATE_READY);
+
                 pInstance->SetData(EVENT_NOTH, IN_PROGRESS);
+            }
 
             StartGroundPhase();
         }

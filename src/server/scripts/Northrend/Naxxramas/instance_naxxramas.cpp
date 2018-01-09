@@ -139,6 +139,7 @@ public:
         uint64 _maexxnaPortalEyeGUID;
         uint64 _thaddiusPortalEyeGUID;
         uint64 _naxxramasOrbGUID;
+        uint64 _nothEntranceGateGUID;
 
         // NPCs
         uint64 _thaddiusGUID;
@@ -365,6 +366,9 @@ public:
                 case GO_NAXXRAMAS_ORB:
                     _naxxramasOrbGUID = pGo->GetGUID();
                     CheckSapphironStatus();
+                    break;
+                case GO_NOTH_ENTRANCE_GATE:
+                    _nothEntranceGateGUID = pGo->GetGUID();
                     break;
             }
 
@@ -739,6 +743,8 @@ public:
                     return _kelthuzadfloorGUID;
                 case DATA_KELTHUZAD_GATE:
                     return _kelthuzadgateGUID;
+                case DATA_NOTH_ENTRANCE_GATE:
+                    return _nothEntranceGateGUID;
                          
                 // NPCs
                 case DATA_THADDIUS_BOSS:

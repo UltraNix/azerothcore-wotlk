@@ -47,13 +47,15 @@ enum NXData
     DATA_HUNDRED_CLUB                  = 117,
     DATA_DANCE_FAIL                    = 118,
     DATA_IMMORTAL_FAIL                 = 119,
-    DATA_KELTHUZAD_GATE				   = 120
+    DATA_KELTHUZAD_GATE                = 120,
+    DATA_NOTH_ENTRANCE_GATE            = 121
 };
 
 enum NXGOs
 {
     GO_PATCHWERK_GATE                  = 181123,
     GO_GLUTH_GATE                      = 181120,
+    GO_NOTH_ENTRANCE_GATE              = 181200,
     GO_NOTH_GATE                       = 181201,
     GO_HEIGAN_ENTERANCE_GATE           = 181202,
     GO_HEIGAN_EXIT_GATE                = 181203,
