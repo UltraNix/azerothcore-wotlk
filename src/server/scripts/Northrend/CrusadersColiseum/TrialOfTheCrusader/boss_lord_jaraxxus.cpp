@@ -249,7 +249,14 @@ struct boss_jaraxxusAI : public BossAI
 
 struct npc_fel_infernalAI : public ScriptedAI
 {
-    npc_fel_infernalAI(Creature* creature) : ScriptedAI(creature) {}
+    npc_fel_infernalAI(Creature* creature) : ScriptedAI(creature) 
+    {
+        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+        {
+            me->SetMaxHealth(410000);
+            me->SetFullHealth();
+        }
+    }
 
     void Reset() override
     {
