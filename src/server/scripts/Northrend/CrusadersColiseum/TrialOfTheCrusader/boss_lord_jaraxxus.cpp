@@ -253,12 +253,6 @@ struct npc_fel_infernalAI : public ScriptedAI
 
     void Reset() override
     {
-        if (IsHeroic() && Is25ManRaid())
-        {
-            me->SetMaxHealth(519000);
-            me->SetFullHealth();
-        }
-
         if (Unit* target = me->SelectNearestTarget(200.0f))
         {
             AttackStart(target);
