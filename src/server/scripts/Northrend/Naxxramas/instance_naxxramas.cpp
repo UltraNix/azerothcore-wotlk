@@ -883,8 +883,135 @@ public:
     };
 };
 
+enum StoneskinGargoyle
+{
+    SPELL_ACID_VOLLEY_10 = 29325,
+    SPELL_ACID_VOLLEY_25 = 54714,
+    SPELL_STONESKIN_10   = 28995,
+    SPELL_STONESKIN_25   = 54722,
+
+    EVENT_ACID_VOLLEY    = 1,
+    EVENT_STONESKIN,
+
+    ACTION_RESET_STONESKIN = 1
+};
+
+struct npc_stoneskin_gargoyleAI : public ScriptedAI
+{
+    npc_stoneskin_gargoyleAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _canUseStoneskin = false;
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_ACID_VOLLEY, 1s);
+    }
+
+    void DoAction(int32 actionId) override
+    {
+        if (actionId == ACTION_RESET_STONESKIN)
+            _canUseStoneskin = false;
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32 &damage, DamageEffectType /*damageType*/, SpellSchoolMask /*schoolMask*/) override
+    {
+        if (!_canUseStoneskin && me->HealthBelowPctDamaged(30, damage))
+        {
+            _canUseStoneskin = true;
+            _events.ScheduleEvent(EVENT_STONESKIN, 0s);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->HasAura(RAID_MODE(SPELL_STONESKIN_10, SPELL_STONESKIN_25)))
+            return;
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_ACID_VOLLEY:
+                    DoCastSelf(RAID_MODE(SPELL_ACID_VOLLEY_10, SPELL_ACID_VOLLEY_25));
+                    _events.Repeat(2s, 3s);
+                    break;
+                case EVENT_STONESKIN:
+                    DoCastSelf(RAID_MODE(SPELL_STONESKIN_10, SPELL_STONESKIN_25));
+                    break;
+                default:
+                    break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+
+    private:
+        EventMap _events;
+        bool _canUseStoneskin;
+};
+
+class spell_gargoyle_stoneskin_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_gargoyle_stoneskin_AuraScript);
+
+    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetCaster())
+        {
+            if (Creature* caster = GetCaster()->ToCreature())
+            {
+                caster->SetControlled(true, UNIT_STATE_ROOT);
+                caster->SetReactState(REACT_PASSIVE);
+                caster->SetByteValue(UNIT_FIELD_BYTES_1, 0, 9);
+            }
+        }
+    }
+
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetCaster())
+        {
+            if (Creature* caster = GetCaster()->ToCreature())
+            {
+                if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                    if (caster->IsAIEnabled)
+                        caster->AI()->DoAction(ACTION_RESET_STONESKIN);
+
+                caster->SetControlled(false, UNIT_STATE_ROOT);
+                caster->SetReactState(REACT_AGGRESSIVE);
+                caster->SetByteValue(UNIT_FIELD_BYTES_1, 0, 0);
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_gargoyle_stoneskin_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(spell_gargoyle_stoneskin_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_instance_naxxramas()
 {
     new instance_naxxramas();
     new boss_naxxramas_misc();
+    new CreatureAILoader<npc_stoneskin_gargoyleAI>("npc_stoneskin_gargoyle");
+    new AuraScriptLoaderEx<spell_gargoyle_stoneskin_AuraScript>("spell_gargoyle_stoneskin");
 }

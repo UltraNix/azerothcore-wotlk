@@ -3267,6 +3267,8 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
+            29325, // Naxxramas, Acid Volley
+            54714, // Naxxramas, Acid Volley Heroic
             29306, // Naxxramas, Infected Wound
             65280, // Ulduar, Hodir, Singed
             65775, // Anub'arak, Swarm Scarab, Acid-Drenched Mandibles
@@ -5030,9 +5032,9 @@ void SpellMgr::LoadDbcDataCorrections()
         ////////// Naxxramas
         //////////////////////////////////////////
         // Acid Volley
-        case 54714:
         case 29325:
-            spellInfo->MaxAffectedTargets = 1;
+        case 54714:
+            spellInfo->StackAmount = 30;
             break;
         // Summon Plagued Warrior
         case 29237:
