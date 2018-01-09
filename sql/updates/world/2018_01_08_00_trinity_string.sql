@@ -1,0 +1,1 @@
+DELETE FROM `trinity_string` WHERE `trinity_string`.`entry` = 1025;

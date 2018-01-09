@@ -141,21 +141,21 @@ public:
                 case EVENT_SPELL_SLIME_SPRAY:
                     me->MonsterTextEmote("Grobbulus sprays slime across the room!", 0, true);
 
-                    if (BoostVersion && me->GetMap()->Is25ManRaid())
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
                     {
                         int32 dmg = urand(19000, 21000);
                         me->CastCustomSpell(me->GetVictim(), SPELL_SLIME_SPRAY_25, &dmg, NULL, NULL, false);
                     }
                     else
-                        me->CastSpell(me->GetVictim(), BoostVersion ? RAID_MODE(SPELL_SLIME_SPRAY_10, SPELL_SLIME_SPRAY_25) : SPELL_SLIME_SPRAY_10, true);
+                        me->CastSpell(me->GetVictim(), sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(SPELL_SLIME_SPRAY_10, SPELL_SLIME_SPRAY_25) : SPELL_SLIME_SPRAY_10, true);
 
-                    events.RepeatEvent(BoostVersion ? RAID_MODE(20000, 15000) : 20000);
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(20000, 15000) : 20000);
                     break;
                 case EVENT_SPELL_MUTATING_INJECTION:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true, -SPELL_MUTATING_INJECTION))
                         me->CastSpell(target, SPELL_MUTATING_INJECTION, false);
 
-                    events.RepeatEvent(BoostVersion ? (RAID_MODE(8000 + uint32(120 * me->GetHealthPct()), (8000 + uint32(120 * me->GetHealthPct()) / 2))) : (8000 + uint32(120 * me->GetHealthPct())));
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (RAID_MODE(8000 + uint32(120 * me->GetHealthPct()), (8000 + uint32(120 * me->GetHealthPct()) / 2))) : (8000 + uint32(120 * me->GetHealthPct())));
                     break;
             }
 
@@ -205,13 +205,13 @@ public:
                 auraVisualTimer += diff;
                 if (auraVisualTimer >= 1000)
                 {
-                    if (BoostVersion && me->GetMap()->Is25ManRaid())
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
                     {
                         int32 dmg = urand(7900, 8000);
                         me->CastCustomSpell(me, SPELL_POISON_CLOUD_DAMAGE_AURA_25, &dmg, nullptr, nullptr, false);
                     }
                     else
-                        me->CastSpell(me, BoostVersion ? SPELL_POISON_CLOUD_DAMAGE_AURA_10 : (me->GetMap()->Is25ManRaid() ? SPELL_POISON_CLOUD_DAMAGE_AURA_25 : SPELL_POISON_CLOUD_DAMAGE_AURA_10), true);
+                        me->CastSpell(me, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? SPELL_POISON_CLOUD_DAMAGE_AURA_10 : (me->GetMap()->Is25ManRaid() ? SPELL_POISON_CLOUD_DAMAGE_AURA_25 : SPELL_POISON_CLOUD_DAMAGE_AURA_10), true);
 
                     auraVisualTimer = 0;
                 }

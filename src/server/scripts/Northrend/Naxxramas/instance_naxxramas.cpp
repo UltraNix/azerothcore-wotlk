@@ -104,6 +104,7 @@ public:
             loathebAchievement   = true;
             sapphironAchievement = true;
             heiganAchievement    = true;
+            sapphironAllowed     = false;
             immortalAchievement  = 1;
         }
 
@@ -163,6 +164,7 @@ public:
         bool loathebAchievement;
         bool sapphironAchievement;
         bool heiganAchievement;
+        bool sapphironAllowed;
 
         uint32 immortalAchievement;
 
@@ -362,9 +364,10 @@ public:
                     break;
                 case GO_NAXXRAMAS_ORB:
                     _naxxramasOrbGUID = pGo->GetGUID();
+                    CheckSapphironStatus();
                     break;
             }
-            CheckInstanceStatus();
+
         }
 
         void OnGameObjectRemove(GameObject* pGo)
@@ -576,7 +579,7 @@ public:
             // Save instance and open gates
             if (data == DONE)
             {
-                CheckInstanceStatus();
+                CheckSapphironStatus();
                 SaveToDB();
              
                 switch (id)
@@ -750,16 +753,23 @@ public:
             return 0;
         }
 
-        void CheckInstanceStatus()
+        void CheckSapphironStatus()
         {
+            // No reason to check encountres again ... orb already spawned.
+            if (sapphironAllowed)
+                return;
+
             uint8 bossCount = 0;
             for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
                 if (Encounters[i] == DONE)
                     ++bossCount;
 
-            if (BoostVersion && bossCount >= 12)
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && bossCount == 13)
                 if (GameObject* go = instance->GetGameObject(_naxxramasOrbGUID))
+                {
+                    sapphironAllowed = true;
                     go->SetPhaseMask(1, true);
+                }
         }
 
         std::string GetSaveData()

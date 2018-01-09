@@ -2875,10 +2875,6 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
     if (victim->IsImmunedToSchool(spell))
         return SPELL_MISS_IMMUNE;
 
-    //! do a target check in case of reflect
-    if (!spell->CheckTargetCreatureType(victim))
-        return SPELL_MISS_IMMUNE;
-
     if (this == victim)
         return SPELL_MISS_NONE;
 

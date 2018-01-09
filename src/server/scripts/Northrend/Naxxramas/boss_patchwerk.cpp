@@ -102,7 +102,7 @@ public:
             PatchwerkFormation();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_HATEFUL_STRIKE, 1200);
-            events.ScheduleEvent(EVENT_SPELL_BERSERK, BoostVersion ? RAID_MODE(360000, 300000) : 360000);
+            events.ScheduleEvent(EVENT_SPELL_BERSERK, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(360000, 300000) : 360000);
             events.ScheduleEvent(EVENT_HEALTH_CHECK, 1000);
 
             if (pInstance)
@@ -163,7 +163,7 @@ public:
                     }
 
                     if (finalTarget)
-                        if (BoostVersion)
+                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                         {
                             if (me->GetMap()->Is25ManRaid())
                             {
@@ -190,7 +190,7 @@ public:
                     events.RepeatEvent(3000);
                     break;
                 case EVENT_HEALTH_CHECK:
-                    if (me->GetHealthPct() <= (BoostVersion ? (me->GetMap()->Is25ManRaid() ? 10 : 5) : 5))
+                    if (me->GetHealthPct() <= (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (me->GetMap()->Is25ManRaid() ? 10 : 5) : 5))
                     {
                         Talk(EMOTE_ENRAGE);
                         me->CastSpell(me, SPELL_FRENZY, true);
