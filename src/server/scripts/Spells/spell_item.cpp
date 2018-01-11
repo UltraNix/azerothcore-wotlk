@@ -3946,17 +3946,24 @@ public:
         {
             SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
             if (!spellInfo)
+            {
+                std::cout << "weszlo 1\n";
+                return false;
+            }
+
+            //! beacon healing, it doesnt cost mana but its supposed to trigger
+            if (spellInfo->Id == 53652 || spellInfo->Id == 53654)
+                return true;
+
+            if (spellInfo->HasAttribute(SPELL_ATTR3_DISABLE_PROC) || spellInfo->HasAttribute(SPELL_ATTR3_CANT_TRIGGER_PROC))
                 return false;
 
             //! if power type different than mana, it shouldnt proc
             if (spellInfo->PowerType != POWER_MANA)
                 return false;
 
-            //! if it doesnt cost mana then it shouldnt proc
+            // if it doesnt cost mana then it shouldnt proc
             if (!spellInfo->ManaCostPercentage && !spellInfo->ManaCost)
-                return false;
-
-            if (spellInfo->HasAttribute(SPELL_ATTR3_DISABLE_PROC) || spellInfo->HasAttribute(SPELL_ATTR3_CANT_TRIGGER_PROC))
                 return false;
 
             return true;
