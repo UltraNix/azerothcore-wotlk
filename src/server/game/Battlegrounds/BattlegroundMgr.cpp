@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -51,7 +51,7 @@
 /***            BATTLEGROUND MANAGER                   ***/
 /*********************************************************/
 
-BattlegroundMgr::BattlegroundMgr() : m_ArenaTesting(false), m_Testing(false), 
+BattlegroundMgr::BattlegroundMgr() : m_ArenaTesting(false), m_Testing(false),
     m_lastClientVisibleInstanceId(0), m_NextAutoDistributionTime(0), m_NextPeriodicQueueUpdateTime(5*IN_MILLISECONDS), randomBgDifficultyEntry(999, 0, 80, 80, 0)
 {
     for (uint32 qtype = BATTLEGROUND_QUEUE_NONE; qtype < MAX_BATTLEGROUND_QUEUE_TYPES; ++qtype)
@@ -730,7 +730,7 @@ void BattlegroundMgr::BuildBattlegroundListPacket(WorldPacket* data, uint64 guid
         *data << uint32(winner_kills);                          // 3.3.3 winHonor
         *data << uint32(winner_arena);                          // 3.3.3 winArena
         *data << uint32(loser_kills);                           // 3.3.3 lossHonor
-    } 
+    }
     else
     {
         *data << uint8(0);                          // 3.3.3 hasWin
@@ -1115,6 +1115,10 @@ void RandomBattlegroundSystem::Update(uint32 diff)
     {
         if (m_BgOrder.empty())
         {
+            /*
+
+                ## Commented out by riztazz, we're making BG selection random ##
+
             // order it like: big, small, big, small, small, small (stored backwards, actually)
 
             std::vector<BattlegroundTypeId> big, small;
@@ -1134,6 +1138,10 @@ void RandomBattlegroundSystem::Update(uint32 diff)
             m_BgOrder.push_back(big.back()); big.pop_back();
             m_BgOrder.push_back(small.back()); small.pop_back();
             m_BgOrder.push_back(big.back()); big.pop_back();
+            */
+            m_BgOrder.clear(); // just making sure?
+            m_BgOrder = { BATTLEGROUND_AV, BATTLEGROUND_IC, BATTLEGROUND_WS, BATTLEGROUND_EY, BATTLEGROUND_AB, BATTLEGROUND_SA };
+            std::random_shuffle(m_BgOrder.begin(), m_BgOrder.end());
         }
 
         m_CurrentRandomBg = m_BgOrder.back();
