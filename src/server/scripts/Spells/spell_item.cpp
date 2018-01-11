@@ -3946,10 +3946,7 @@ public:
         {
             SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
             if (!spellInfo)
-            {
-                std::cout << "weszlo 1\n";
                 return false;
-            }
 
             //! beacon healing, it doesnt cost mana but its supposed to trigger
             if (spellInfo->Id == 53652 || spellInfo->Id == 53654)
