@@ -7453,7 +7453,7 @@ bool Spell::UpdatePointers()
     else
         m_CastItem = NULL;
 
-    if (m_spellInfo->Id == 45927/*summon a RAF friend*/)
+    if (m_spellInfo->Id != 45927/*summon a RAF friend*/)
         m_targets.Update(m_caster);
 
     // further actions done only for dest targets
