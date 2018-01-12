@@ -6158,19 +6158,20 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return SPELL_FAILED_BAD_TARGETS;
 
-                Player* playerCaster = m_caster->ToPlayer();
-                    //
-                if (!(playerCaster->GetTarget()))
+                Unit* target = m_targets.GetUnitTarget();
+
+                if (!target)
                     return SPELL_FAILED_BAD_TARGETS;
 
-                Player* target = ObjectAccessor::FindPlayer(m_caster->ToPlayer()->GetTarget());
+                if (!target->ToPlayer())
+                    return SPELL_FAILED_BAD_TARGETS;
 
-                if (!target ||
-                    !(target->GetSession()->GetRecruiterId() == playerCaster->GetSession()->GetAccountId() || target->GetSession()->GetAccountId() == playerCaster->GetSession()->GetRecruiterId()))
+                if (target->ToPlayer()->GetSession()->GetRecruiterId() != m_caster->ToPlayer()->GetSession()->GetAccountId() &&
+                    target->ToPlayer()->GetSession()->GetAccountId() != m_caster->ToPlayer()->GetSession()->GetRecruiterId())
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // Xinef: Implement summon pending error
-                if (target->GetSummonExpireTimer() > time(NULL))
+                if (target->ToPlayer()->GetSummonExpireTimer() > time(NULL))
                     return SPELL_FAILED_SUMMON_PENDING;
 
                 break;
