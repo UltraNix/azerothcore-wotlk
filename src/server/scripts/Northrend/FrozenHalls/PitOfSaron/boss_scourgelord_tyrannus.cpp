@@ -42,6 +42,7 @@ struct boss_tyrannusAI : public BossAI
     boss_tyrannusAI(Creature* creature) : BossAI(creature, DATA_TYRANNUS)
     {
         me->SetReactState(REACT_PASSIVE);
+        me->SetAttackable(false);
         if (Creature* rimefang = instance->GetCreature(DATA_RIMEFANG_GUID))
             rimefang->SetCanFly(true);
     }
@@ -67,6 +68,7 @@ struct boss_tyrannusAI : public BossAI
                 if (Vehicle* vehicle = rimefang->GetVehicleKit())
                     vehicle->InstallAllAccessories(false);
             }
+            me->SetAttackable(true);
         }
     }
 
