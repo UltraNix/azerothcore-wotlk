@@ -42,7 +42,7 @@ struct boss_tyrannusAI : public BossAI
     boss_tyrannusAI(Creature* creature) : BossAI(creature, DATA_TYRANNUS)
     {
         me->SetReactState(REACT_PASSIVE);
-        me->SetAttackable(false);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
         if (Creature* rimefang = instance->GetCreature(DATA_RIMEFANG_GUID))
             rimefang->SetCanFly(true);
     }
@@ -68,7 +68,6 @@ struct boss_tyrannusAI : public BossAI
                 if (Vehicle* vehicle = rimefang->GetVehicleKit())
                     vehicle->InstallAllAccessories(false);
             }
-            me->SetAttackable(true);
         }
     }
 
@@ -90,7 +89,7 @@ struct boss_tyrannusAI : public BossAI
 
         // start real fight
         _EnterCombat();
-        me->SetAttackable(true);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
         Talk(SAY_AGGRO);
         events.RescheduleEvent(EVENT_FORCEFUL_SMASH, 14s, 16s);
         events.RescheduleEvent(EVENT_OVERLORDS_BRAND, 4s, 6s);
