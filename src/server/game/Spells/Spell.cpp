@@ -2146,7 +2146,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
 
     // Xinef: the distance should be increased by caster size, it is neglected in latter calculations
     std::list<WorldObject*> tempTargets;
-    SearchAreaTargets(tempTargets, searchRadius, (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE ? m_caster : target), m_caster, objectType, selectType, condList);
+    SearchAreaTargets(tempTargets, searchRadius, (target), m_caster, objectType, selectType, condList);
     tempTargets.remove(target);
 
     // Thorim
