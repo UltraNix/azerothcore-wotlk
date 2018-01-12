@@ -7259,6 +7259,14 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
         }
 
+        if (spellInfo->Id == 45927/*summon a RAF friend*/)
+        {
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->rangeIndex = 1;
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+        }
+
     }
 
     // Xinef: The Veiled Sea area in outlands (Draenei zone), client blocks casting flying mounts

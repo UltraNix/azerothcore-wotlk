@@ -718,14 +718,21 @@ void Spell::InitExplicitTargets(SpellCastTargets const& targets)
         // try to select correct unit target if not provided by client or by serverside cast
         if (neededTargets & (TARGET_FLAG_UNIT_MASK))
         {
-            Unit* unit = NULL;
+            Unit* unit = nullptr;
             // try to use player selection as a target
             if (Player* playerCaster = m_caster->ToPlayer())
             {
                 // selection has to be found and to be valid target for the spell
-                if (Unit* selectedUnit = ObjectAccessor::GetUnit(*m_caster, playerCaster->GetTarget()))
+                Unit* selectedUnit = nullptr;
+                if (m_spellInfo->Id == 45927/*summon a RAF friend*/)
+                    selectedUnit = ObjectAccessor::FindUnit(playerCaster->GetTarget());
+                else
+                    selectedUnit = ObjectAccessor::GetUnit(*m_caster, playerCaster->GetTarget());
+                if (selectedUnit)
+                {
                     if (m_spellInfo->CheckExplicitTarget(m_caster, selectedUnit) == SPELL_CAST_OK)
                         unit = selectedUnit;
+                }
             }
             // try to use attacked unit as a target
             else if ((m_caster->GetTypeId() == TYPEID_UNIT) && neededTargets & (TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT))
@@ -1931,7 +1938,7 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
     // TODO: this is a workaround - target shouldn't be stored in target map for those spells
     switch (m_spellInfo->Effects[effIndex].Effect)
     {
-        case SPELL_EFFECT_SUMMON_RAF_FRIEND:
+        //case SPELL_EFFECT_SUMMON_RAF_FRIEND:
         case SPELL_EFFECT_SUMMON_PLAYER:
             if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->ToPlayer()->GetTarget())
             {
@@ -6155,7 +6162,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             // RETURN HERE
             case SPELL_EFFECT_SUMMON_RAF_FRIEND:
             {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                if (!m_caster->IsPlayer())
                     return SPELL_FAILED_BAD_TARGETS;
 
                 Unit* target = m_targets.GetUnitTarget();
@@ -6163,7 +6170,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!target)
                     return SPELL_FAILED_BAD_TARGETS;
 
-                if (!target->ToPlayer())
+                if (!target->IsPlayer())
                     return SPELL_FAILED_BAD_TARGETS;
 
                 if (target->ToPlayer()->GetSession()->GetRecruiterId() != m_caster->ToPlayer()->GetSession()->GetAccountId() &&
@@ -7446,7 +7453,8 @@ bool Spell::UpdatePointers()
     else
         m_CastItem = NULL;
 
-    m_targets.Update(m_caster);
+    if (m_spellInfo->Id == 45927/*summon a RAF friend*/)
+        m_targets.Update(m_caster);
 
     // further actions done only for dest targets
     if (!m_targets.HasDst())
