@@ -164,6 +164,7 @@ struct boss_garfrostAI : public BossAI
                 if (Aura* aura = target->GetAura(70336))
                     if (aura->GetStackAmount() >= 11)
                         _goToEleven = false;
+                break;
             default:
                 break;
         }

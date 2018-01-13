@@ -386,10 +386,6 @@ struct npc_pos_deathwhisper_necrolyteAI : public ScriptedAI
         _events.Reset();
         _events.RescheduleEvent(EVENT_SHADOW_BOLT, 0s);
         _events.RescheduleEvent(EVENT_CONVERSION_BEAM, 5s, 9s);
-
-        if (Creature* leader = _instance->GetCreature(DATA_LEADER_FIRST_GUID))
-            if (leader->IsAIEnabled)
-                leader->AI()->SetData(DATA_START_INTRO, 0);
     }
 
     void DamageTaken(Unit* /*doneBy*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
@@ -1463,6 +1459,28 @@ class at_tyrannus_event_starter : public AreaTriggerScript
         }
 };
 
+class at_fos_entrance_intro : public AreaTriggerScript
+{
+public:
+    at_fos_entrance_intro() : AreaTriggerScript("at_fos_entrance_intro") {}
+
+    bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/)
+    {
+        InstanceScript* instance = player->GetInstanceScript();
+        if (!instance)
+            return false;
+
+        if (player->IsGameMaster())
+            return false;
+
+        if (Creature* leader = instance->GetCreature(DATA_LEADER_FIRST_GUID))
+            if (leader->IsAIEnabled)
+                leader->AI()->SetData(DATA_START_INTRO, 0);
+
+        return false;
+    }
+};
+
 void AddSC_pit_of_saron()
 {
     new CreatureAILoader<npc_pos_leaderAI>("npc_pos_leader");
@@ -1483,4 +1501,5 @@ void AddSC_pit_of_saron()
     new AuraScriptLoaderEx<spell_pos_glacial_strike_AuraScript>("spell_pos_glacial_strike");
 
     new at_tyrannus_event_starter();
+    new at_fos_entrance_intro();
 }
