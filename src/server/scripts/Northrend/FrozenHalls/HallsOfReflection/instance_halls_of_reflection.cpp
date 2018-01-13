@@ -444,6 +444,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
                     WaveNumber = 0;
                     DoUpdateWorldState(WORLD_STATE_HOR_COUNTER, 0);
 
+                    //! refactor this crap to use spell ID - 72900 Start Halls of Reflection Quest AE
                     // give quest
                     Map::PlayerList const& pl = instance->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
