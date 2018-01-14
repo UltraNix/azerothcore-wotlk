@@ -742,8 +742,9 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
                 const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
                 for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
                 {
-                    if (itr->second->GetTeamId() == player->GetTeamId())
-                        itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                    if (player)
+                        if (itr->second->GetTeamId() == player->GetTeamId())
+                            itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
                 }
             }
 
