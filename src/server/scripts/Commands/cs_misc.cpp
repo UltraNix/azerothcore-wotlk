@@ -129,6 +129,9 @@ public:
             { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
             { "hide",               SEC_PLAYER,             false, &HandleSthHideCommand,               "" },
             { "checkpoint",         SEC_PLAYER,             false, &HandleCheckPointCommand,            "" },
+            { "buff",               SEC_ADMINISTRATOR,      false, &HandleBuffCommand,                  "" },
+            { "unbuff",             SEC_ADMINISTRATOR,      false, &HandleUnbuffCommand,                "" },
+
         };
         return commandTable;
     }
@@ -3431,6 +3434,38 @@ public:
         return true;
     }
 
+    static bool HandleBuffCommand(ChatHandler* handler, char const* args)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
+        Unit* player = handler->GetSession()->GetPlayer();
+        if (!player)
+        {
+            return false;
+        }
+
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(68378);
+        SpellInfo const* spellInfo2 = sSpellMgr->GetSpellInfo(1908);
+        if (!spellInfo || !spellInfo2)
+        {
+            return false;
+        }
+        Aura::TryRefreshStackOrCreate(spellInfo, MAX_EFFECT_MASK, player, player);
+        Aura::TryRefreshStackOrCreate(spellInfo2, MAX_EFFECT_MASK, player, player);
+
+        return true;
+    }
+
+    static bool HandleUnbuffCommand(ChatHandler* handler, char const* args)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
+        Unit* player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
+        player->RemoveAurasDueToSpell(68378);
+        player->RemoveAurasDueToSpell(1908);
+
+        return true;
+    }
 };
 
 void AddSC_misc_commandscript()
