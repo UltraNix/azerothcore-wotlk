@@ -718,7 +718,7 @@ struct npc_pos_tyrannus_eventsAI : public NullCreatureAI
                 case 60:
                 {
                     Position startPos[6] = { { 927.11f, -72.60f, 592.2f, 1.52f },{ 922.92f, -72.64f, 592.3f, 1.52f },{ 930.46f, -72.57f, 592.1f, 1.52f },{ 934.52f, -72.52f, 592.1f, 1.52f },{ 934.57f, -77.66f, 592.20f, 1.52f },{ 927.15f, -77.07f, 592.20f, 1.52f } };
-                    Position endPos = { 926.10f, -46.63f, 591.2f, 1.52f };
+                    Position endPos = { 928.121521f, -32.295609f, 589.260620f, 1.467854f };
                     for (uint8 i = 0; i<6; ++i)
                         if (Creature* summon = me->SummonCreature(i < 4 ? NPC_FALLEN_WARRIOR : NPC_WRATHBONE_COLDWRAITH, startPos[i]))
                         {
