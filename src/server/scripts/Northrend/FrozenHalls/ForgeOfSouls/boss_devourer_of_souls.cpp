@@ -74,7 +74,7 @@ struct boss_devourer_of_soulsAI : public BossAI
     uint32 GetData(uint32 id) const override
     {
         if (id == DATA_THREE_FACED)
-            return _threeFaced;
+            return IsHeroic() ? _threeFaced : 0;
 
         return 0;
     }

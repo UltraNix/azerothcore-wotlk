@@ -73,7 +73,7 @@ struct boss_bronjahmAI : public BossAI
 
     void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
-        if (!IsInPhase2() && me->HealthBelowPctDamaged(35, damage))
+        if (!IsInPhase2() && me->HealthBelowPctDamaged(35, damage) && !me->HasUnitState(UNIT_STATE_CASTING))
         {
             SetCombatMovement(false);
             me->GetMotionMaster()->Clear();
