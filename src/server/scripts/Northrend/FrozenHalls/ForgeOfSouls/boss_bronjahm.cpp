@@ -80,7 +80,6 @@ struct boss_bronjahmAI : public BossAI
             me->GetMotionMaster()->MoveIdle();
             DoCastSelf(SPELL_TELEPORT);
             events.CancelEvent(EVENT_CORRUPT_SOUL);
-            events.ScheduleEvent(EVENT_FEAR, 1, 1);
             events.DelayEvents(6000, 1); // bronjahm should still heal with souls
         }
     }
@@ -91,6 +90,7 @@ struct boss_bronjahmAI : public BossAI
         {
             DoCastSelf(SPELL_TELEPORT_VISUAL, true);
             events.ScheduleEvent(EVENT_START_SOULSTORM, 1, 1);
+            events.ScheduleEvent(EVENT_FEAR, 5s, 1);
         }
     }
 

@@ -220,6 +220,66 @@ struct npc_fos_leader_secondAI : public ScriptedAI
     }
 };
 
+enum SpitefulApparition
+{
+    SPELL_HORROR_VISUAL_SPITEFUL    = 69105,
+    SPELL_SPITEFUL_APPARITION_VIS   = 69136,
+    SPELL_GREATER_INVIS_APPAR       = 41253,
+    SPELL_SPITE_NORMAL              = 68895,
+    SPELL_SPITE_HEROIC              = 70212,
+
+    EVENT_SPITEFUL_SPITE            = 1
+};
+
+struct npc_spitefula_apparition_kamikazeAI : public ScriptedAI
+{
+    npc_spitefula_apparition_kamikazeAI(Creature* creature ) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _events.Reset();
+        _spited = false;
+        DoCastSelf(SPELL_GREATER_INVIS_APPAR, true);
+        DoCastSelf(SPELL_HORROR_VISUAL_SPITEFUL, true);
+        DoCastSelf(SPELL_SPITEFUL_APPARITION_VIS, true);
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (who->IsPlayer() && who->IsWithinDist(me, 10.0f) && !_spited && !who->ToPlayer()->IsGameMaster())
+        {
+            _events.ScheduleEvent(EVENT_SPITEFUL_SPITE, 3s);
+            _spited = true;
+            me->RemoveAurasDueToSpell(SPELL_GREATER_INVIS_APPAR);
+            AttackStart(who);
+        }
+    }
+
+    bool CanSeeAlways(WorldObject const* /*obj*/) override { return true; }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        if (_events.ExecuteEvent() == EVENT_SPITEFUL_SPITE)
+        {
+            DoCastAOE(IsHeroic() ? SPELL_SPITE_HEROIC : SPELL_SPITE_NORMAL);
+            _events.Repeat(5s, 7s);
+        }
+
+        DoMeleeAttackIfReady();
+    }
+private:
+    bool _spited;
+    EventMap _events;
+};
+
 class spell_shield_of_bones_AuraScript : public AuraScript
 {
     PrepareAuraScript(spell_shield_of_bones_AuraScript)
@@ -261,4 +321,5 @@ void AddSC_forge_of_souls()
     new npc_fos_leader();
     new CreatureAILoader<npc_fos_leader_secondAI>("npc_fos_leader_second");
     new AuraScriptLoaderEx<spell_shield_of_bones_AuraScript>("spell_shield_of_bones");
+    new CreatureAILoader<npc_spitefula_apparition_kamikazeAI>("npc_spitefula_apparition_kamikaze");
 }

@@ -737,7 +737,7 @@ struct npc_pos_tyrannus_eventsAI : public NullCreatureAI
                     if (Difficulty(me->GetMap()->GetSpawnMode()) == DUNGEON_DIFFICULTY_HEROIC)
                     {
                         Position startPos[6] = { { 925.485f, -65.67f, 592.5f, 1.4f },{ 921.77f, -65.10f, 592.5f, 1.4f },{ 929.19f, -66.24f, 592.5f, 1.4f },{ 932.46f, -66.74f, 592.5f, 1.4f },{ 924.66f, -71.03f, 592.5f, 1.4f },{ 928.81f, -71.66f, 592.5f, 1.4f } };
-                        Position middlePos = { 928.43f, -29.31f, 589.0f, 1.4f };
+                        Position middlePos = { 929.746460f, -17.711798f, 585.285095f, 1.4f };
                         Position endPos = { 937.8f, 21.20f, 574.6f, 1.4f };
                         for (uint8 i = 0; i<6; ++i)
                             if (Creature* summon = me->SummonCreature(i < 4 ? NPC_FALLEN_WARRIOR : NPC_WRATHBONE_COLDWRAITH, startPos[i]))
