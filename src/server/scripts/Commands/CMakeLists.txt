@@ -14,7 +14,6 @@ set(scripts_STAT_SRCS
   Commands/cs_achievement.cpp
   Commands/cs_anticheat.cpp
   Commands/cs_ban.cpp
-  Commands/cs_bazaar.cpp
   Commands/cs_bf.cpp
   Commands/cs_cast.cpp
   Commands/cs_character.cpp

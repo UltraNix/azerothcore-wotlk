@@ -239,6 +239,7 @@ public:
 
     void DeleteFakeFromDB(uint64 itemGUID, SQLTransaction* trans = NULL);
 
+	void TakeRequiredAmount(Player* player, int32 amount);
     bool GetCustomModelCost() const;
     bool TokenRewardEnabled() const;
 

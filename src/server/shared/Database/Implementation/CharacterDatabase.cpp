@@ -560,24 +560,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_CREATURE_LOOT, "DELETE FROM group_saved_loot WHERE creatureId = ? AND instanceId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_ITEM, "DELETE FROM group_saved_loot WHERE instanceId = ? AND itemId = ? AND creatureId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_LOOT, "DELETE FROM group_saved_loot WHERE instanceId = ?", CONNECTION_ASYNC);
-    // BAZARCHAR_SEL_BAZAR_AUCTION_AMOUNT_OFFER
-    PrepareStatement(CHAR_UPD_MONEY_AMOUNT, "UPDATE characters SET money = money + ? WHERE guid = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_DEL_BAZAR_AUCTION, "DELETE FROM bazar_auction WHERE auctionId = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_DEL_BAZAR_AUCTION_BY_GUID, "DELETE FROM bazar_auction WHERE char_guid = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_BAZAR_AUCTION, "INSERT INTO bazar_auction (auctionId, account_id, char_guid, mo_amount, dp_amount, auction_type, owner_name, slave_race, slave_class, slave_gender, slave_level, slave_money, slave_arena, slave_honor, slave_riding, slave_mainspec, slave_offspec, slave_avgitemlevel, slave_level_slot1, slave_level_slot2, slave_level_slot3, slave_level_slot4, slave_level_slot5,"
-        "slave_level_slot6, slave_level_slot7, slave_level_slot8, slave_level_slot9, slave_level_slot10, slave_level_slot11, slave_level_slot12, slave_level_slot13, slave_level_slot14, slave_level_slot15, slave_level_slot16, slave_level_slot17, slave_level_slot18, slave_level_slot19, slave_description, slave_team, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_COUNT, "SELECT COUNT(account_id) FROM bazar_auction WHERE account_id = ? AND auction_type = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_TIME, "SELECT create_time FROM bazar_auction WHERE char_guid = ? ORDER BY auctionId DESC LIMIT 1", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_OWNER, "SELECT account_id FROM bazar_auction WHERE auctionId = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_OWNER_AUCTIONS, "SELECT auctionId, mo_amount, dp_amount, auction_type, owner_name FROM bazar_auction WHERE account_id = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_AMOUNT, "SELECT char_guid, mo_amount, dp_amount, auction_type, owner_name FROM bazar_auction WHERE auctionId = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_AMOUNT_EFFORT, "SELECT mo_amount, dp_amount, auction_type FROM bazar_auction WHERE auctionId = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_AMOUNT_OFFER, "SELECT account_id, char_guid, mo_amount, dp_amount, auction_type, owner_name FROM bazar_auction WHERE auctionId = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_UPD_BAZAR_AUCTION_OWNER_NAME, "UPDATE bazar_auction set owner_name = ? WHERE char_guid = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_SEL_BAZAR_AUCTION_TYPE, "SELECT auction_type FROM bazar_auction WHERE auctionId = ?", CONNECTION_SYNCH);
-    // SLAVE MARKET
-    PrepareStatement(CHAR_UPD_SLAVE_ACCOUNT_ID, "UPDATE characters SET account = ? WHERE guid = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_DEL_SLAVE_CHAR_ACHIEVEMENT, "DELETE FROM character_achievement WHERE guid = ? AND achievement NOT BETWEEN '6' AND '13'", CONNECTION_ASYNC);
     // NINJA LOOTERS
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK, "SELECT guid FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT name FROM characters WHERE ninjaLooter = 1", CONNECTION_SYNCH);

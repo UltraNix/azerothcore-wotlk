@@ -1502,13 +1502,6 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
 
     CharacterDatabase.Execute(stmt);
 
-    // @Bazaar
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_BAZAR_AUCTION_OWNER_NAME);
-    stmt->setString(0, newName);
-    stmt->setUInt32(1, guidLow);
-
-    CharacterDatabase.Execute(stmt);
-
     // Removed declined name from db
     if (sWorld->getBoolConfig(CONFIG_DECLINED_NAMES_USED))
     {

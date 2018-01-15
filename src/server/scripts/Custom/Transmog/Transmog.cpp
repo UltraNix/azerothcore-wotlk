@@ -17,7 +17,7 @@
 */
 
 #include "Transmogrification.h"
-#include "BazaarMgr.h"
+
 
 #define sT  sTransmogrification
 #define GTS session->GetTrinityString // dropped translation support, no one using?
@@ -237,15 +237,14 @@ public:
             } break;
             case EQUIPMENT_SLOT_END + 901:
             {
-                uint32 accId = session->GetAccountId();
-                if (!sBazaarMgr->CheckPremiumAmount(accId, sT->GetResetCoinCost()) || !player->HasEnoughMoney(sT->GetResetGoldCost()))
+                if (!player->CheckPremiumAmount(sT->GetResetCoinCost()) || !player->HasEnoughMoney(sT->GetResetGoldCost()))
                 {
                     session->SendNotification(LANG_ERR_TRANSMOG_MISSING_COINS);
                     OnGossipHello(player, creature);
                     return true;
                 }
 
-                sBazaarMgr->TakeRequiredAmount(player, sT->GetResetCoinCost(), AUCTION_SELL_PREMIUM);
+                sT->TakeRequiredAmount(player, sT->GetResetCoinCost());
                 player->ModifyMoney(-sT->GetResetGoldCost());
                 player->ResetTransmogModel();
                 player->SaveToDB(false, false);

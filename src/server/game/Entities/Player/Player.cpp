@@ -5102,10 +5102,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_BAZAR_AUCTION_BY_GUID);
-            stmt->setUInt32(0, guid);
-            trans->Append(stmt);
-
             CharacterDatabase.CommitTransaction(trans);
             break;
         }
@@ -27572,12 +27568,20 @@ void Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     Pet::LoadPetFromDB(this, asynchLoadType, entry, 0, false, asynchPetInfo);
 }
 
-uint32 Player::GetItemIdForSlaveMarket(uint8 slot)
+bool Player::CheckPremiumAmount(uint32 amount)
 {
-    uint32 id = 0;
+	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PREMIUM_POINTS);
+	stmt->setUInt32(0, GetSession()->GetAccountId());
 
-    if (m_items[slot] && m_items[slot]->GetTemplate())
-        id = m_items[slot]->GetTemplate()->ItemId;
+	PreparedQueryResult result = LoginDatabase.Query(stmt);
 
-    return id;
+	if (!result)
+		return false;
+
+	uint32 accountAmount = (*result)[0].GetUInt32();
+
+	if (amount > accountAmount)
+		return false;
+
+	return true;
 }

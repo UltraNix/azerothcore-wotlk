@@ -138,12 +138,10 @@ class Log
         void outRemote(const char * str, ...)                   ATTR_PRINTF(2, 3);
         void outSQLDriver(const char* str, ...)                 ATTR_PRINTF(2, 3);
         void outMisc(const char * str, ...)                     ATTR_PRINTF(2, 3); // pussywizard
-        void outPremium(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitdev
-        void outLoot(const char * str, ...)                     ATTR_PRINTF(2, 3); // sitdev
-        void outBazaar(const char * str, ...)                   ATTR_PRINTF(2, 3); // sitdev
-        void outSlave(const char * str, ...)                    ATTR_PRINTF(2, 3); // sitdev
-        void outRewards(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitdev
-        void outReleaseDebug(const char * str, ...)             ATTR_PRINTF(2, 3); // sitdev
+        void outPremium(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitowsky
+        void outLoot(const char * str, ...)                     ATTR_PRINTF(2, 3); // sitowsky
+        void outRewards(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitowsky
+        void outReleaseDebug(const char * str, ...)             ATTR_PRINTF(2, 3); // sitowsky
         void outCharDump(const char * str, uint32 account_id, uint32 guid, const char * name);
 
         static void outTimestamp(FILE* file);
@@ -174,8 +172,6 @@ class Log
         FILE* miscLogFile;
         FILE* premiumLogFile;
         FILE* lootLogFile;
-        FILE* bazaarLogFile;
-        FILE* slaveLogFile;
         FILE* rewardsLogFile;
         FILE* releaseDebugLogFile;
 

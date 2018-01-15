@@ -655,6 +655,17 @@ void Transmogrification::DeleteFakeFromDB(uint64 itemGUID, SQLTransaction* trans
         CharacterDatabase.PExecute("DELETE FROM custom_transmogrification WHERE GUID = %u", GUID_LOPART(itemGUID));
 }
 
+void Transmogrification::TakeRequiredAmount(Player* player, int32 amount)
+{
+    if (!player)
+        return;
+
+	PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PREMIUM_POINTS);
+	stmt->setInt32(0, -(amount));
+	stmt->setUInt32(1, player->GetSession()->GetAccountId());
+	LoginDatabase.Execute(stmt);
+}
+
 bool Transmogrification::GetEnableTransmogInfo() const
 {
     return EnableTransmogInfo;

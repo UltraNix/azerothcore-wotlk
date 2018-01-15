@@ -986,7 +986,6 @@ class ObjectMgr
         uint32 GenerateAuctionID();
         uint64 GenerateEquipmentSetGuid();
         uint32 GenerateMailID();
-        uint32 GenerateBazaarID();
         uint32 GeneratePetNumber();
 
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
@@ -1254,7 +1253,6 @@ class ObjectMgr
     private:
         // first free id for selected id type
         uint32 _auctionId; // pussywizard: accessed by a single thread
-        uint32 _bazaarId;  // sitdev: accessed by a single thread
         uint64 _equipmentSetGuid; // pussywizard: accessed by a single thread
         uint32 _itemTextId; // pussywizard: unused? xD
         uint32 _mailId; ACE_Thread_Mutex _mailIdMutex;

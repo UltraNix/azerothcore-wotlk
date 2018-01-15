@@ -32,7 +32,7 @@ extern LoginDatabaseWorkerPool LoginDatabase;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), bazaarLogFile(NULL), slaveLogFile(NULL) , rewardsLogFile(NULL), releaseDebugLogFile(NULL),
+    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), releaseDebugLogFile(NULL),
     m_gmlog_per_account(false), m_enableLogDB(false), m_colored(false)
 {
     Initialize();
@@ -79,14 +79,6 @@ Log::~Log()
     if (lootLogFile != NULL)
         fclose(lootLogFile);
     lootLogFile = NULL;
-
-    if (bazaarLogFile != NULL)
-        fclose(bazaarLogFile);
-    bazaarLogFile = NULL;
-
-    if (slaveLogFile != NULL)
-        fclose(slaveLogFile);
-    slaveLogFile = NULL;
 
     if (rewardsLogFile != NULL)
         fclose(rewardsLogFile);
@@ -178,8 +170,6 @@ void Log::Initialize()
     miscLogFile = fopen((m_logsDir+"Misc.log").c_str(), "a");
     premiumLogFile = openLogFile("PremiumLogFile", "PremiumLogTimestamp", "a");
     lootLogFile = openLogFile("LootLogFile", "LootLogTimestamp", "a");
-    bazaarLogFile = openLogFile("BazaarLogFile", "BazaarLogTimestamp", "a");
-    slaveLogFile = openLogFile("SlaveLogFile", "SlaveLogTimestamp", "a");
     rewardsLogFile = openLogFile("RewardsLogFile", "RewardsLogTimestamp", "a");
     releaseDebugLogFile = openLogFile("ReleaseDebugLogFile", "ReleaseDebugLogTimestamp", "a");
 
@@ -1066,60 +1056,6 @@ void Log::outLoot(const char * str, ...)
         vfprintf(lootLogFile, str, ap);
         fprintf(lootLogFile, "\n");
         fflush(lootLogFile);
-        va_end(ap);
-    }
-}
-
-void Log::outBazaar(const char * str, ...)
-{
-    if (!str)
-        return;
-
-    if (m_enableLogDB)
-    {
-        va_list ap2;
-        va_start(ap2, str);
-        char nnew_str[MAX_QUERY_LEN];
-        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
-        outDB(LOG_TYPE_PERF, nnew_str);
-        va_end(ap2);
-    }
-
-    if (bazaarLogFile)
-    {
-        outTimestamp(bazaarLogFile);
-        va_list ap;
-        va_start(ap, str);
-        vfprintf(bazaarLogFile, str, ap);
-        fprintf(bazaarLogFile, "\n");
-        fflush(bazaarLogFile);
-        va_end(ap);
-    }
-}
-
-void Log::outSlave(const char * str, ...)
-{
-    if (!str)
-        return;
-
-    if (m_enableLogDB)
-    {
-        va_list ap2;
-        va_start(ap2, str);
-        char nnew_str[MAX_QUERY_LEN];
-        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
-        outDB(LOG_TYPE_PERF, nnew_str);
-        va_end(ap2);
-    }
-
-    if (slaveLogFile)
-    {
-        outTimestamp(slaveLogFile);
-        va_list ap;
-        va_start(ap, str);
-        vfprintf(slaveLogFile, str, ap);
-        fprintf(slaveLogFile, "\n");
-        fflush(slaveLogFile);
         va_end(ap);
     }
 }

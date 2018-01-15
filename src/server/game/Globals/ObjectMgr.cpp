@@ -229,7 +229,6 @@ bool SpellClickInfo::IsFitToRequirements(Unit const* clicker, Unit const* clicke
 
 ObjectMgr::ObjectMgr():
     _auctionId(1),
-    _bazaarId(1),
     _equipmentSetGuid(1),
     _itemTextId(1),
     _mailId(1),
@@ -6475,10 +6474,6 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         _auctionId = (*result)[0].GetUInt32()+1;
 
-    result = CharacterDatabase.Query("SELECT MAX(auctionId) FROM bazar_auction");
-    if (result)
-        _bazaarId = (*result)[0].GetUInt32()+1;
-
     result = CharacterDatabase.Query("SELECT MAX(id) FROM mail");
     if (result)
         _mailId = (*result)[0].GetUInt32()+1;
@@ -6533,16 +6528,6 @@ uint32 ObjectMgr::GenerateMailID()
     }
     TRINITY_GUARD(ACE_Thread_Mutex, _mailIdMutex);
     return _mailId++;
-}
-
-uint32 ObjectMgr::GenerateBazaarID()
-{
-    if (_bazaarId >= 0xFFFFFFFE)
-    {
-        sLog->outError("Mail ids overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
-    }
-    return _bazaarId++;
 }
 
 uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
