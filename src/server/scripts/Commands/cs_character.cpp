@@ -520,6 +520,11 @@ public:
         if (newlevel > STRONG_MAX_LEVEL)                         // hardcoded maximum level
             newlevel = STRONG_MAX_LEVEL;
 
+        //If player isn't a gm, allow him to change level only for himself (for test server)
+        if (!handler->GetSession()->GetSecurity()) {
+            target = handler->GetSession()->GetPlayer();
+            targetGuid = target->GetGUID();
+        }
         HandleCharacterLevel(target, targetGuid, oldlevel, newlevel, handler);
         if (!handler->GetSession() || handler->GetSession()->GetPlayer() != target)      // including player == NULL
         {
