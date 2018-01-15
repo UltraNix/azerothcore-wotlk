@@ -1096,7 +1096,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                 UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loser_kills));
         }
 
-        if (!isArena() /*&& GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam()*/)
+        if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
             player->GiveXP(0.04 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
 
         player->ResetAllPowers();
