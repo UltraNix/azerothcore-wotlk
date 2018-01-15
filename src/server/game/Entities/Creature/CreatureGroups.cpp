@@ -271,9 +271,7 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z, bool run)
         UnitMoveType mtype = Movement::SelectSpeedType(member->GetUnitMovementFlags());
         member->SetSpeedRate(mtype, m_leader->GetSpeedRate(mtype) * member->GetExactDist(dx, dy, dz) / pathDist);
 
-        bool transportPath = member->HasUnitMovementFlag(MOVEMENTFLAG_ONTRANSPORT) && member->GetTransGUID();
-
-        member->GetMotionMaster()->MovePoint(0, dx, dy, dz, transportPath ? false : true);
+        member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
         member->SetHomePosition(dx, dy, dz, pathAngle);
     }
 }

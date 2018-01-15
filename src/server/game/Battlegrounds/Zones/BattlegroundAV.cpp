@@ -141,13 +141,12 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
             return;
         }
 
-        if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
+        if (killer && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
         {
-            TeamId team = killer->GetTeamId();
             const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
-                if (itr->second->GetTeamId() == team)
+                if (itr->second->GetTeamId() == killer->GetTeamId())
                     itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
             }
         }

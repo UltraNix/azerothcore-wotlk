@@ -1114,7 +1114,8 @@ public:
         {
             if (GetCaster()->ToTempSummon())
                 if (Unit* owner = GetCaster()->ToTempSummon()->GetSummoner())
-                    owner->GetAI()->SetGUID(GetCaster()->GetGUID());
+                    if (owner->GetAI())
+                        owner->GetAI()->SetGUID(GetCaster()->GetGUID());
 
             if (Creature* caster = GetCaster()->ToCreature())
                 caster->AI()->DoAction(-1);
