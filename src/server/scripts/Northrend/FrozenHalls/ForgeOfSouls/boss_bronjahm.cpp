@@ -199,6 +199,7 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
     npc_corrupted_soul_fragmentAI(Creature* creature) : ScriptedAI(creature)
     {
         _instance = me->GetInstanceScript();
+        _casted = false;
     }
 
     void IsSummonedBy(Unit* /*summoner*/) override
@@ -210,6 +211,9 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
 
     void MovementInform(uint32 type, uint32 id) override
     {
+        if (_casted)
+            return;
+
         if (type != FOLLOW_MOTION_TYPE)
             return;
 
@@ -217,11 +221,13 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
             return;
 
         DoCastAOE(SPELL_CONSUME_SOUL, true);
+        _casted = true;
         me->DespawnOrUnsummon();
     }
 
     private:
         InstanceScript* _instance;
+        bool _casted;
 };
 
 
