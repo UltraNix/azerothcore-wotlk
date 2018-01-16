@@ -39,7 +39,6 @@
 #include "BattlegroundMgr.h"
 #include "MapManager.h"
 #include "ace/INET_Addr.h"
-#include ""
 
 class misc_commandscript : public CommandScript
 {
