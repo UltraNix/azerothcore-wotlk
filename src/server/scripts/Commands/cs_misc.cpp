@@ -39,6 +39,7 @@
 #include "BattlegroundMgr.h"
 #include "MapManager.h"
 #include "ace/INET_Addr.h"
+#include ""
 
 class misc_commandscript : public CommandScript
 {
@@ -2393,6 +2394,9 @@ public:
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
             if (handler->HasLowerSecurity(target->ToPlayer(), 0, false))
+                return false;
+
+            if (handler->GetSession()->GetSecurity() == SEC_PLAYER)
                 return false;
         }
 
