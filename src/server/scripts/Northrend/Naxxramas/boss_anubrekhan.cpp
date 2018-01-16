@@ -114,7 +114,7 @@ public:
             }
 
             if (Map* map = me->GetMap())
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
         }
 
         void KilledUnit(Unit* victim) override

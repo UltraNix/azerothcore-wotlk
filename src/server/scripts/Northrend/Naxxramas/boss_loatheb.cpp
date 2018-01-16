@@ -88,7 +88,7 @@ struct boss_loathebAI : public BossAI
         instance->SetData(EVENT_LOATHEB, DONE);
 
         if (Map* map = me->GetMap())
-            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
     }
 
     void ExecuteEvent(uint32 eventId) override

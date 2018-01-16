@@ -269,7 +269,7 @@ public:
                     if (Map* map = me->GetMap())
                     {
                         if (map->GetDifficulty() > RAID_DIFFICULTY_10MAN_NORMAL)
-                            CheckCreatureRecord(killer, sObjectMgr->GetCreatureTemplate(16065)->DifficultyEntry[map->GetDifficulty() - 1], map->GetDifficulty(), "Four Horsemen", 30000, _fightTimer);
+                            CheckCreatureRecord(killer, sObjectMgr->GetCreatureTemplate(16065)->DifficultyEntry[map->GetDifficulty() - 1], map->GetDifficulty(), "Four Horsemen", 15000, _fightTimer);
                         else
                             CheckCreatureRecord(killer, 16065, map->GetDifficulty(), "Four Horsemen", 30000, _fightTimer);
                     }

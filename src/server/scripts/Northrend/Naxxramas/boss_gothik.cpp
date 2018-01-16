@@ -249,7 +249,7 @@ public:
             }
 
             if (Map* map = me->GetMap())
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 1 * MINUTE * IN_MILLISECONDS, _fightTimer);
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
         }
 
         void SummonHelpers(uint32 entry)

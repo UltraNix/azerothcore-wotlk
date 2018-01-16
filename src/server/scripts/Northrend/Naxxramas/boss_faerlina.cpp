@@ -122,7 +122,7 @@ struct boss_faerlinaAI : public ScriptedAI
             instance->SetData(EVENT_FAERLINA, DONE);
 
         if (Map* map = me->GetMap())
-            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
     }
 
     void SpellHit(Unit* /*caster*/, const SpellInfo *spell) override

@@ -134,7 +134,7 @@ public:
                 pInstance->SetData(EVENT_RAZUVIOUS, DONE);
 
             if (Map* map = me->GetMap())
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
         }
 
         void AttackStart(Unit *who)

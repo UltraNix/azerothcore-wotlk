@@ -186,11 +186,11 @@ public:
             {
                 if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_NOTH_ENTRANCE_GATE)))
                     go->SetGoState(GO_STATE_ACTIVE);
-                
+
                 pInstance->SetData(EVENT_NOTH, DONE);
 
             if (Map* map = me->GetMap())
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
             }
         }
 
