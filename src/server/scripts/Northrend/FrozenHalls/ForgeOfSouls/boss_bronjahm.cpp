@@ -41,7 +41,6 @@ enum BronjahmEvents
     EVENT_MAGICS_BANE,
     EVENT_CORRUPT_SOUL,
     EVENT_START_SOULSTORM,
-    EVENT_SCAN_FOR_SOULS,
     EVENT_KILL_TALK
 };
 
@@ -61,9 +60,8 @@ struct boss_bronjahmAI : public BossAI
         _EnterCombat();
         Talk(SAY_AGGRO);
         me->RemoveAurasDueToSpell(SPELL_SOULSTORM_CHANNEL_OOC);
-        events.ScheduleEvent(EVENT_MAGICS_BANE, urand(7000, 12000), 1);
-        events.ScheduleEvent(EVENT_CORRUPT_SOUL, urand(14000, 20000), 1);
-        events.ScheduleEvent(EVENT_SCAN_FOR_SOULS, 100);
+        events.ScheduleEvent(EVENT_MAGICS_BANE, 7s, 12s);
+        events.ScheduleEvent(EVENT_CORRUPT_SOUL, 14s, 20s);
     }
 
     bool IsInPhase2() const
@@ -80,7 +78,6 @@ struct boss_bronjahmAI : public BossAI
             me->GetMotionMaster()->MoveIdle();
             DoCastSelf(SPELL_TELEPORT);
             events.CancelEvent(EVENT_CORRUPT_SOUL);
-            events.DelayEvents(6000, 1); // bronjahm should still heal with souls
         }
     }
 
@@ -89,8 +86,8 @@ struct boss_bronjahmAI : public BossAI
         if (spell->Id == SPELL_TELEPORT)
         {
             DoCastSelf(SPELL_TELEPORT_VISUAL, true);
-            events.ScheduleEvent(EVENT_START_SOULSTORM, 1, 1);
-            events.ScheduleEvent(EVENT_FEAR, 5s, 1);
+            events.ScheduleEvent(EVENT_START_SOULSTORM, 1ms);
+            events.ScheduleEvent(EVENT_FEAR, 5s);
         }
     }
 
@@ -128,11 +125,11 @@ struct boss_bronjahmAI : public BossAI
                 case EVENT_FEAR:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10.0f, true))
                         me->CastCustomSpell(SPELL_FEAR, SPELLVALUE_MAX_TARGETS, 1, target, false);
-                    events.Repeat(urand(8000, 12000));
+                    events.Repeat(8s, 12s);
                     break;
                 case EVENT_MAGICS_BANE:
                     DoCastAOE(SPELL_MAGICS_BANE);
-                    events.Repeat(urand(7000, 20000));
+                    events.Repeat(7s, 20s);
                     break;
                 case EVENT_CORRUPT_SOUL:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
@@ -140,24 +137,12 @@ struct boss_bronjahmAI : public BossAI
                         Talk(SAY_CORRUPT_SOUL);
                         DoCast(target, SPELL_CORRUPT_SOUL);
                     }
-                    events.Repeat(urand(18000, 25000));
+                    events.Repeat(18s, 25s);
                     break;
                 case EVENT_START_SOULSTORM:
                     Talk(SAY_SOUL_STORM);
                     DoCastSelf(SPELL_SOULSTORM);
                     DoCastSelf(SPELL_SOULSTORM_VISUAL, true);
-                    break;
-                case EVENT_SCAN_FOR_SOULS:
-                    for (auto guid : summons)
-                        if (auto soul = instance->instance->GetCreature(guid))
-                            if (me->IsInRange(soul, 0.0f, 2.0f))
-                            {
-                                soul->GetMotionMaster()->MoveIdle();
-                                soul->CastSpell(me, SPELL_CONSUME_SOUL, true);
-                                soul->DespawnOrUnsummon(1);
-                            }
-
-                    events.Repeat(100);
                     break;
                 default:
                     break;
@@ -188,7 +173,7 @@ struct boss_bronjahmAI : public BossAI
         if (events.GetNextEventTime(EVENT_KILL_TALK) == 0)
         {
             Talk(SAY_SLAY);
-            events.ScheduleEvent(EVENT_KILL_TALK, 6000);
+            events.ScheduleEvent(EVENT_KILL_TALK, 6s);
         }
     }
 
@@ -208,6 +193,37 @@ struct boss_bronjahmAI : public BossAI
         _DespawnAtEvade();
     }
 };
+
+struct npc_corrupted_soul_fragmentAI : public ScriptedAI
+{
+    npc_corrupted_soul_fragmentAI(Creature* creature) : ScriptedAI(creature)
+    {
+        _instance = me->GetInstanceScript();
+    }
+
+    void IsSummonedBy(Unit* /*summoner*/) override
+    {
+        if (Creature* bronjahm = _instance->GetCreature(DATA_BRONJAHM))
+            if (bronjahm->IsAIEnabled)
+                bronjahm->AI()->JustSummoned(me);
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type != FOLLOW_MOTION_TYPE)
+            return;
+
+        if (_instance->GetCreature(DATA_BRONJAHM)->GetGUIDLow() != id)
+            return;
+
+        DoCastAOE(SPELL_CONSUME_SOUL, true);
+        me->DespawnOrUnsummon();
+    }
+
+    private:
+        InstanceScript* _instance;
+};
+
 
 class spell_bronjahm_magic_bane_SpellScript : public SpellScript
 {
@@ -330,6 +346,7 @@ public:
 void AddSC_boss_bronjahm()
 {
     new CreatureAILoader<boss_bronjahmAI>("boss_bronjahm");
+    new CreatureAILoader<npc_corrupted_soul_fragmentAI>("npc_corrupted_soul_fragment");
     new SpellScriptLoaderEx<spell_bronjahm_magic_bane_SpellScript>("spell_bronjahm_magic_bane");
     new AuraScriptLoaderEx<spell_bronjahm_soulstorm_channel_ooc_AuraScript>("spell_bronjahm_soulstorm_channel_ooc");
     new AuraScriptLoaderEx<spell_bronjahm_soulstorm_visual_AuraScript>("spell_bronjahm_soulstorm_visual");
