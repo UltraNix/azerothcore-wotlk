@@ -5090,6 +5090,12 @@ void SpellMgr::LoadDbcDataCorrections()
         case 54364:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+            // Jagged Knife (Encounter: Razuvious)
+        case 55550:
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
+            spellInfo->Attributes |= SPELL_ATTR0_REQ_AMMO;
+            break;
 
         //////////////////////////////////////////
         ////////// Naxxramas - BOOST - ONLY 25 MAN!
@@ -5141,10 +5147,6 @@ void SpellMgr::LoadDbcDataCorrections()
             // Poison Shock (Encounter: Maexxna)
             case 54122:
                 spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
-                break;
-            // Jagged Knife (Encounter: Razuvious)
-            case 55550:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
                 break;
             // Frost Aura (Encounter: Sapphiron)
             case 55799:
@@ -5256,6 +5258,10 @@ void SpellMgr::LoadDbcDataCorrections()
         // Ingvar the Plunderer, Ingvar transform
         case 42796:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+            break;
+        case 42772:
+        case 59685:
+            spellInfo->Attributes |= SPELL_ATTR0_REQ_AMMO;
             break;
 
         //////////////////////////////////////////

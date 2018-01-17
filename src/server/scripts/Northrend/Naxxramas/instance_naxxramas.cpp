@@ -123,6 +123,7 @@ public:
         uint64 _faerlinaGateGUID;
         uint64 _maexxnaGateGUID;
         uint64 _thaddiusGateGUID;
+        uint64 _gothikGUID;
         uint64 _gothikEnterGateGUID;
         uint64 _gothikInnerGateGUID;
         uint64 _gothikExitGateGUID;
@@ -228,6 +229,9 @@ public:
                 case NPC_LICH_KING:
                     _lichkingGUID = creature->GetGUID();
                     return;
+                case NPC_GOTHIK:
+                    _gothikGUID = creature->GetGUID();
+                    return;
             }
         }
 
@@ -323,7 +327,7 @@ public:
                     if (Encounters[EVENT_SAPPHIRON] == DONE)
                         pGo->SetGoState(GO_STATE_ACTIVE);
                     break;
-                case GO_DEATHKNIGHT_WING: 
+                case GO_DEATHKNIGHT_WING:
                     _loathebPortalGUID = pGo->GetGUID();
                     if (Encounters[EVENT_LOATHEB] == DONE)
                          pGo->SetPhaseMask(1, true);
@@ -585,7 +589,7 @@ public:
             {
                 CheckSapphironStatus();
                 SaveToDB();
-             
+
                 switch (id)
                 {
                     case EVENT_PATCHWERK:
@@ -745,7 +749,7 @@ public:
                     return _kelthuzadgateGUID;
                 case DATA_NOTH_ENTRANCE_GATE:
                     return _nothEntranceGateGUID;
-                         
+
                 // NPCs
                 case DATA_THADDIUS_BOSS:
                     return _thaddiusGUID;
@@ -755,6 +759,8 @@ public:
                     return _feugenGUID;
                 case DATA_LICH_KING_BOSS:
                     return _lichkingGUID;
+                case DATA_GOTHIK:
+                    return _gothikGUID;
             }
             return 0;
         }
@@ -784,7 +790,7 @@ public:
 
             std::ostringstream saveStream;
             saveStream << "N X X " << Encounters[0] << ' ' << Encounters[1] << ' ' << Encounters[2] << ' ' << Encounters[3]
-                 << ' ' << Encounters[4] << ' ' << Encounters[5] << ' ' << Encounters[6] << ' ' << Encounters[7] 
+                 << ' ' << Encounters[4] << ' ' << Encounters[5] << ' ' << Encounters[6] << ' ' << Encounters[7]
                  << ' ' << Encounters[8] << ' ' << Encounters[9] << ' ' << Encounters[10] << ' ' << Encounters[11]
                  << ' ' << Encounters[12] << ' ' << Encounters[13] << ' ' << Encounters[14] << ' ' << immortalAchievement;
 
@@ -821,7 +827,7 @@ public:
             else
                 OUT_LOAD_INST_DATA_FAIL;
         }
-            
+
     };
 };
 class boss_naxxramas_misc : public CreatureScript

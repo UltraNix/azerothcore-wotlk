@@ -48,7 +48,8 @@ enum NXData
     DATA_DANCE_FAIL                    = 118,
     DATA_IMMORTAL_FAIL                 = 119,
     DATA_KELTHUZAD_GATE                = 120,
-    DATA_NOTH_ENTRANCE_GATE            = 121
+    DATA_NOTH_ENTRANCE_GATE            = 121,
+    DATA_GOTHIK                        = 122
 };
 
 enum NXGOs
@@ -70,7 +71,7 @@ enum NXGOs
     GO_GOTHIK_EXIT_GATE                = 181125,
     GO_HORSEMAN_GATE                   = 181119,
     GO_SAPPHIRON_GATE                  = 181225,
-    
+
     GO_HORSEMEN_CHEST_10               = 181366,
     GO_HORSEMEN_CHEST_25               = 193426,
 
@@ -85,7 +86,7 @@ enum NXGOs
 
     GO_DEATHKNIGHT_WING_EYE            = 181231, // Loatheb  portal eye
     GO_THADDIUS_PORTAL_EYE             = 181232, // Thadius  portal eye
-    GO_MAEXXNA_PORTAL_EYE              = 181233, // Maexxna  portal eye 
+    GO_MAEXXNA_PORTAL_EYE              = 181233, // Maexxna  portal eye
     GO_HORSEMAN_PORTAL_EYE             = 181230, // Horseman portal eye
     GO_NAXXRAMAS_ORB                   = 202277  // Sapphiron teleport
 };
@@ -113,7 +114,9 @@ enum NXNPCs
     // Frogger
     NPC_LIVING_POISON                  = 16027,
     NPC_NAXXRAMAS_TRIGGER              = 16082,
-    NPC_MR_BIGGLESWORTH                = 16998
+    NPC_MR_BIGGLESWORTH                = 16998,
+
+    NPC_GOTHIK                         = 16060
 };
 
 enum NXMisc

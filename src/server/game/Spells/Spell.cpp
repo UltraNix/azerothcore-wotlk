@@ -4608,6 +4608,7 @@ void Spell::WriteAmmoToPacket(WorldPacket* data)
                         switch (itemEntry->SubClass)
                         {
                             case ITEM_SUBCLASS_WEAPON_THROWN:
+                            case ITEM_SUBCLASS_WEAPON_DAGGER:
                                 ammoDisplayID = itemEntry->DisplayId;
                                 ammoInventoryType = itemEntry->InventoryType;
                                 break;
