@@ -5582,21 +5582,6 @@ SpellCastResult Spell::CheckCast(bool strict)
              if (m_caster->HasAura(64848)) // Aura of Despair
                  return SPELL_FAILED_DONT_REPORT;
              break;
-         case 31700:
-         {
-             if (m_caster->IsMounted())
-                 return SPELL_FAILED_NOT_MOUNTED;
-
-             if (m_caster->ToPlayer()->GetZoneId() == 4395 && m_caster->GetTypeId() == TYPEID_PLAYER)
-                 return SPELL_CAST_OK;
-
-             if (MapEntry const* mapEntry = sMapStore.LookupEntry(m_caster->GetMapId()))
-                 if (mapEntry->IsBattleground())
-                     return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                 else if (mapEntry->IsBattleArena())
-                     return SPELL_FAILED_NOT_IN_ARENA;
-             break;
-        }
         case 56001: // Moonshroud - Emerald Dragonshire w Dragonblight
             if (m_caster->ToPlayer()->GetAreaId() != 4179 && m_caster->GetTypeId() == TYPEID_PLAYER)
                 return SPELL_FAILED_REQUIRES_AREA;

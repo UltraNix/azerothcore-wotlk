@@ -2810,21 +2810,6 @@ void AuraEffect::HandleAuraAllowFlight(AuraApplication const* aurApp, uint8 mode
 
     Unit* target = aurApp->GetTarget();
 
-    // Flying Black Qiraji Battle Tank
-    if (GetId() == 31700)
-    {
-        //           Outland Map                    Northrend Map                 Cold Weather Flying
-        if (apply && !(target->GetMapId() == 530 || (target->GetMapId() == 571 && target->HasSpell(54197))))
-            return;
-        //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar
-        if (apply && target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
-            return;
-
-        //           Dalaran City
-        if (apply && target->GetZoneId() == 4395 && target->GetAreaId() != 4564)
-            return;
-    }
-
     if (!apply)
     {
         // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -3210,21 +3195,6 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
         return;
 
     Unit* target = aurApp->GetTarget();
-
-    // Flying Black Qiraji Battle Tank
-    if (GetId() == 31700)
-    {
-        //           Outland Map                    Northrend Map                 Cold Weather Flying
-        if (apply && !(target->GetMapId() == 530 || (target->GetMapId() == 571 && target->HasSpell(54197))))
-            return;
-        //           Outland Map                  Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar
-        if (apply && target->GetMapId() == 530 && target->GetZoneId() == 3430 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
-            return;
-
-        //           Dalaran City
-        if (apply && target->GetZoneId() == 4395 && target->GetAreaId() != 4564)
-            return;
-    }
 
     if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK)
         target->UpdateSpeed(MOVE_FLIGHT, true);

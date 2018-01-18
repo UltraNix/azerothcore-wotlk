@@ -71,9 +71,109 @@ class spell_cust_thunder_clap_SpellScript : public SpellScript
     }
 };
 
+class spell_cust_black_qiraji_battle_tank : public SpellScriptLoader
+{
+public:
+    spell_cust_black_qiraji_battle_tank() : SpellScriptLoader("spell_cust_black_qiraji_battle_tank") { }
+
+    class spell_cust_black_qiraji_battle_tank_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_cust_black_qiraji_battle_tank_SpellScript);
+
+        SpellCastResult CheckRequirement()
+        {
+            Player* player = GetCaster()->ToPlayer();
+
+            // Fix for use this mount on mount due to instant cast.
+            if (player->IsMounted())
+                return SPELL_FAILED_NOT_MOUNTED;
+
+            // Fix for use this mount on falling or moving due to instant cast.
+            if (player->isMoving() || player->IsFalling())
+                return SPELL_FAILED_MOVING;
+
+            // Disallow to use on Battlegrounds due to instant cast.
+            if (player->GetMap()->IsBattleground())
+                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+
+            // Disallow to use on Arenas due to instant cast.
+            if (player->GetMap()->IsBattleArena())
+                return SPELL_FAILED_NOT_IN_ARENA;
+
+            // Disallow to use on Wintergrasp due to instant cast.
+            if (player->GetZoneId() == 4197)
+                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+
+            // Allow to use in Dalaran.
+            if (player->GetZoneId() == 4395)
+                 return SPELL_CAST_OK;
+
+            return SPELL_CAST_OK;
+        }
+
+        void Register()
+        {
+            OnCheckCast += SpellCheckCastFn(spell_cust_black_qiraji_battle_tank_SpellScript::CheckRequirement);
+        }
+    };
+
+    class spell_cust_black_qiraji_battle_tank_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_cust_black_qiraji_battle_tank_AuraScript);
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+
+            // Normal Case: Flying only on fly maps.
+            //          Outland Map                  Northrend Map
+            if (target->GetMapId() != 530 && target->GetMapId() != 571)
+                HandleScript(target);
+
+            // Special Case: Disallow to fly on Outland non-flying zones.
+            //                                       Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar
+            if (target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
+                HandleScript(target);
+
+            // Special Case: Allow to fly on Northrend map with Cold Weather Flying.
+            if (target->GetMapId() == 571 && !target->HasSpell(54197))
+                HandleScript(target);
+
+            // Special Case: Allow to fly in Dalaran Krasus' Landing.
+            if (target->GetZoneId() == 4395 && target->GetAreaId() != 4564)
+                HandleScript(target);
+        }
+
+        void HandleScript(Unit* caster)
+        {
+            WorldPacket data(12);
+            data.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
+            data.append(caster->GetPackGUID());
+            data << uint32(0);                                      // unknown
+            caster->SendMessageToSet(&data, true);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_cust_black_qiraji_battle_tank_AuraScript::OnApply, EFFECT_2, SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_cust_black_qiraji_battle_tank_SpellScript();
+    }
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_cust_black_qiraji_battle_tank_AuraScript();
+    }
+};
+
 void AddSC_custom_spell_scripts()
 {
     // ours:
     new SpellScriptLoaderEx<spell_cust_shadow_crash_SpellScript>("spell_cust_shadow_crash");
     new SpellScriptLoaderEx<spell_cust_thunder_clap_SpellScript>("spell_cust_thunder_clap");
+    new spell_cust_black_qiraji_battle_tank();
 }
