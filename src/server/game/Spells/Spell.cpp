@@ -6361,6 +6361,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->IsInWater())
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
+                // Sitowsky: Black Qiraji Battle Tank.
+                // Special case: Allow to use in Dalaran.
+                if (m_spellInfo->Id == 31700 && m_caster->GetZoneId() == 4395)
+                    return SPELL_CAST_OK;
+
                 // not allow cast fly spells if not have req. skills  (all spells is self target)
                 // allow always ghost flight spells
                 if (m_originalCaster && m_originalCaster->GetTypeId() == TYPEID_PLAYER && m_originalCaster->IsAlive())

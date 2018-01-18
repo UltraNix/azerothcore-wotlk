@@ -84,7 +84,7 @@ public:
         {
             Player* player = GetCaster()->ToPlayer();
 
-            // Fix for use this mount on mount due to instant cast.
+            // Fix for bug that player could use this mount on another mount.
             if (player->IsMounted())
                 return SPELL_FAILED_NOT_MOUNTED;
 
@@ -104,10 +104,7 @@ public:
             if (player->GetZoneId() == 4197)
                 return SPELL_FAILED_NOT_IN_BATTLEGROUND;
 
-            // Allow to use in Dalaran.
-            if (player->GetZoneId() == 4395)
-                 return SPELL_CAST_OK;
-
+            // Dalaran usage at Spell.cpp due to lack of CheckCast hook.
             return SPELL_CAST_OK;
         }
 
@@ -131,8 +128,8 @@ public:
                 HandleScript(target);
 
             // Special Case: Disallow to fly on Outland non-flying zones.
-            //                                       Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar
-            if (target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557)
+            //                                       Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar                     // Isle of Quel'Danas
+            if (target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557 || target->GetZoneId() == 4080)
                 HandleScript(target);
 
             // Special Case: Allow to fly on Northrend map with Cold Weather Flying.
