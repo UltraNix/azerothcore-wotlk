@@ -457,6 +457,13 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 68144:
                         damage = 5500;
                         break;
+                    // ICC 3.3
+                    case 72548: // Malleable Goo 10 man heroic
+                        damage = urand(17550, 18450);
+                        break;
+                    case 72550: // Malleable Goo 25 man heroic
+                        damage = urand(21060, 22140);
+                        break;
                 }
                 break;
             }
