@@ -17,6 +17,7 @@ enum Spells
     SPELL_POISON_CLOUD_DAMAGE_AURA_10  = 28158,
     SPELL_POISON_CLOUD_DAMAGE_AURA_25  = 54362,
     SPELL_BERSERK                      = 26662,
+    SPELL_MUTAGEN_EXPLOSION            = 28206,
 
     SPELL_BOMBARD_SLIME                = 28280 // Spawn slime when hit by slime spray
 };
@@ -76,7 +77,7 @@ public:
             events.ScheduleEvent(EVENT_SPELL_POISON_CLOUD, 15000);
             events.ScheduleEvent(EVENT_SPELL_MUTATING_INJECTION, 20000);
             events.ScheduleEvent(EVENT_SPELL_SLIME_SPRAY, 10000);
-            events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(12 * MINUTE * IN_MILLISECONDS, 9 * MINUTE * IN_MILLISECONDS));
+            events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(12 * MINUTE * IN_MILLISECONDS, 8 * MINUTE * IN_MILLISECONDS));
 
             if (pInstance)
                 pInstance->SetData(EVENT_GROBBULUS, IN_PROGRESS);
@@ -211,13 +212,7 @@ public:
                 auraVisualTimer += diff;
                 if (auraVisualTimer >= 1000)
                 {
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
-                    {
-                        int32 dmg = urand(7900, 8000);
-                        me->CastCustomSpell(me, SPELL_POISON_CLOUD_DAMAGE_AURA_25, &dmg, nullptr, nullptr, false);
-                    }
-                    else
-                        me->CastSpell(me, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? SPELL_POISON_CLOUD_DAMAGE_AURA_10 : (me->GetMap()->Is25ManRaid() ? SPELL_POISON_CLOUD_DAMAGE_AURA_25 : SPELL_POISON_CLOUD_DAMAGE_AURA_10), true);
+                    me->CastSpell(me, (me->GetMap()->Is25ManRaid() ? SPELL_POISON_CLOUD_DAMAGE_AURA_25 : SPELL_POISON_CLOUD_DAMAGE_AURA_10), true);
 
                     auraVisualTimer = 0;
                 }
@@ -264,9 +259,49 @@ class spell_grobbulus_poison : public SpellScriptLoader
         }
 };
 
+class spell_grobbulus_mutating_injection : public SpellScriptLoader
+{
+public:
+    spell_grobbulus_mutating_injection() : SpellScriptLoader("spell_grobbulus_mutating_injection") { }
+
+    class spell_grobbulus_mutating_injection_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_grobbulus_mutating_injection_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo({ SPELL_MUTAGEN_EXPLOSION, SPELL_POISON_CLOUD });
+        }
+
+        void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+            if (removeMode != AURA_REMOVE_BY_ENEMY_SPELL && removeMode != AURA_REMOVE_BY_EXPIRE)
+                return;
+
+            if (Unit* caster = GetCaster())
+            {
+                caster->CastSpell(GetTarget(), SPELL_MUTAGEN_EXPLOSION, true);
+                GetTarget()->CastSpell(GetTarget(), SPELL_POISON_CLOUD, true, nullptr, aurEff, GetCasterGUID());
+            }
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_grobbulus_mutating_injection_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_grobbulus_mutating_injection_AuraScript();
+    }
+};
+
 void AddSC_boss_grobbulus()
 {
     new boss_grobbulus();
     new boss_grobbulus_poison_cloud();
     new spell_grobbulus_poison();
+    new spell_grobbulus_mutating_injection();
 }

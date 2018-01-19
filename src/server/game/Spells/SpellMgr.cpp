@@ -5102,6 +5102,9 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
         {
+            case 54363: // Poison cloud - Grobbulus
+                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
+                break;
             // Locust Swarm (Encounter: Anubrekhan)
             case 54021:
                 spellInfo->DurationIndex = 64; // 40 seconds
