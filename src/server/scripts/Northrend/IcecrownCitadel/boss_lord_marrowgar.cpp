@@ -92,7 +92,6 @@ class boss_lord_marrowgar : public CreatureScript
         {
             boss_lord_marrowgarAI(Creature* creature) : BossAI(creature, DATA_LORD_MARROWGAR)
             {
-                me->SetCorrection(true);
                 _introDone = false;
                 _boneSlice = false;
             }
