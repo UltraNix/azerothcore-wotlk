@@ -53,11 +53,13 @@ struct boss_loathebAI : public BossAI
 
     void JustSummoned(Creature* summon) override
     {
+        BossAI::JustSummoned(summon);
         summon->SetInCombatWithZone();
     }
 
-    void SummonedCreatureDies(Creature*, Unit*) override
+    void SummonedCreatureDies(Creature* who, Unit* killer) override
     {
+        BossAI::SummonedCreatureDies(who, killer);
         instance->SetData(DATA_SPORE_KILLED, 0);
     }
 
