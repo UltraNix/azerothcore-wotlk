@@ -5192,7 +5192,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // Arcane Explosion (Encounter: Noth)
             case 54891:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 6;
+                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 8;
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
                 break;
         }
