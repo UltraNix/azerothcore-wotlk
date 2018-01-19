@@ -777,7 +777,7 @@ class npc_putricide_oozeAI : public ScriptedAI
                 else if (targetGUID)
                 {
                     Unit* target = ObjectAccessor::GetUnit(*me, targetGUID);
-                    if (me->GetVictim()->GetGUID() != targetGUID || !target || !me->IsValidAttackTarget(target) || target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) || target->GetExactDist2dSq(4356.0f, 3211.0f) > 80.0f*80.0f || target->GetPositionZ() < 380.0f || target->GetPositionZ() > 405.0f)
+                    if (!target || !me->IsValidAttackTarget(target) || target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) || target->GetExactDist2dSq(4356.0f, 3211.0f) > 80.0f*80.0f || target->GetPositionZ() < 380.0f || target->GetPositionZ() > 405.0f)
                         SelectNewTarget();
                 }
             }
