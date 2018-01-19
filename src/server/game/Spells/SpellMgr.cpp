@@ -5127,9 +5127,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 54096:
                 spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
                 break;
-            // Shadow Shock (Encounter: Faerlina)
+            // Shadow Shock (Encounter: Noth)
             case 54889:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
+                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 6;
                 break;
             // Disease Cloud (Encounter: Grobbulus)
             case 54368:
