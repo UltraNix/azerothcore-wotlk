@@ -921,9 +921,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     // Ours
     m_NeedToSaveGlyphs = false;
     m_BlizzlikeMode = false;
-    m_KiszakMode = false;
     m_NeedAutoInvite = false;
-    m_ArenaAnnounce = false;
+    m_PvPAnnounces = false;
     m_comboPointGain = 0;
     m_MountBlockId = 0;
     m_selectedAuction = 0;
@@ -7767,9 +7766,7 @@ void Player::UpdateArea(uint32 newArea)
     uint32 areaFlags = area->flags;
     bool isSanctuary = (area->IsSanctuary() || area->ID == 876 || area->ID == 616 || area->ID == 3817 || area->ID == 2037 || area->ID == 2401);
     bool isInn = area->IsInn(GetTeamId());
-    // @Gambling
-    bool isGamblingZone = (area->ID == 41 || area->ID == 2562);
-    bool isKiszakAllowed = (!GetMap()->Instanceable() && KiszakMode());
+
     if (zone)
     {
         areaFlags |= zone->flags;
@@ -7778,7 +7775,7 @@ void Player::UpdateArea(uint32 newArea)
     }
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
-    if (isSanctuary || isGamblingZone || isKiszakAllowed)    // in sanctuary
+    if (isSanctuary)    // in sanctuary
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.IsInNoPvPArea = true;
@@ -17666,7 +17663,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // 39           40                41                 42                    43          44          45              46           47               48              49
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
     // 50      51      52      53      54      55      56      57      58           59         60          61             62              63      64           65          66
-    //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, blizzlikeMode, arenaAnnounce, kiszakMode FROM characters WHERE guid = '%u'", guid);
+    //"health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, blizzlikeMode, pvpAnnounces FROM characters WHERE guid = '%u'", guid);
     PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_FROM);
 
     if (!result)
@@ -18285,8 +18282,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     m_BlizzlikeMode  = fields[67].GetBool();
     m_NeedAutoInvite = fields[68].GetBool();
-    m_ArenaAnnounce  = fields[69].GetBool();
-    m_KiszakMode     = fields[70].GetBool();
+    m_PvPAnnounces    = fields[69].GetBool();
 
     _LoadDeclinedNames(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES));
 
@@ -26423,8 +26419,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt32(index++, m_grantableLevels);
         stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
-        stmt->setBool(index++, m_ArenaAnnounce);
-        stmt->setBool(index++, m_KiszakMode);
+        stmt->setBool(index++, m_PvPAnnounces);
     }
     else
     {
@@ -26554,8 +26549,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt32(index++, m_grantableLevels);
         stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
-        stmt->setBool(index++, m_ArenaAnnounce);
-        stmt->setBool(index++, m_KiszakMode);
+        stmt->setBool(index++, m_PvPAnnounces);
 
         stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
         // Index

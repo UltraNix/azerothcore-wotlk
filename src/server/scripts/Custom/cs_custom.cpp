@@ -42,11 +42,10 @@ public:
             { "removeninja",        SEC_GAMEMASTER,         false, &HandleRemoveNinjaCommand,           "" },
             { "listninja",          SEC_PLAYER,             false, HandleListNinjaCommand,              "" },
             { "blizzlike",          SEC_PLAYER,             false, HandleBlizzlikeCommand,              "" },
-            { "arenainfo",          SEC_PLAYER,             false, HandleArenaInfoCommand,              "" },
+            { "pvpinfo",            SEC_PLAYER,             false, HandlePvPInfoCommand,                "" },
             { "dodge",              SEC_PLAYER,             false, HandleDodgeModeCommand,              "" },
             { "tocreset",           SEC_PLAYER,             false, HandleTocResetCommand,               "" },
             { "hasblizzlike",       SEC_MODERATOR,          false, HandleHasBlizzlikeCommand,           "" },
-            { "setkiszak",          SEC_ADMINISTRATOR,      false, HandleSetKiszakCommand,              "" },
         };
         return commandTable;
     }
@@ -363,23 +362,23 @@ public:
         return true;
     }
 
-    static bool HandleArenaInfoCommand(ChatHandler* handler, char const* /*args*/)
+    static bool HandlePvPInfoCommand(ChatHandler* handler, char const* /*args*/)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
         if (!player)
             return false;
 
-        if (!player->ArenaAnnounce())
+        if (!player->PvPAnnounces())
         {
-            player->SetArenaAnnounce(true);
-            handler->PSendSysMessage("Arena queue announce are enabled, please relog to take effect.");
+            player->SetPvPAnnounces(true);
+            handler->PSendSysMessage("PvP announces are enabled, please relog to take effect.");
             handler->SetSentErrorMessage(true);
         }
         else
         {
-            player->SetArenaAnnounce(false);
-            handler->PSendSysMessage("Arena queue announce are disabled, please relog to take effect.");
+            player->SetPvPAnnounces(false);
+            handler->PSendSysMessage("PvP announces are disabled, please relog to take effect.");
             handler->SetSentErrorMessage(true);
         }
 
@@ -453,36 +452,6 @@ public:
             handler->PSendSysMessage("Player %s has |cff00ff00enabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
         else
             handler->PSendSysMessage("Player %s has |cffff0000disabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
-
-        return true;
-    }
-
-
-    static bool HandleSetKiszakCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-        Player *target = handler->getSelectedPlayer();
-
-        if (!player)
-            return false;
-
-        if (!target)
-        {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (!target->KiszakMode())
-        {
-            target->SetKiszakMode(true);
-            handler->PSendSysMessage("Successfully updated Player: %s to 'Kiszak Mode'.", player->GetName().c_str());
-        }
-        else
-        {
-            target->SetKiszakMode(false);
-            handler->PSendSysMessage("Successfully removed 'Kiszak Mode' from Player: %s.", player->GetName().c_str());
-        }
 
         return true;
     }

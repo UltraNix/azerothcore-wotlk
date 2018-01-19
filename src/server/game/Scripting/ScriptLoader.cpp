@@ -89,7 +89,6 @@ void AddSC_generic_creature();
 void AddSC_go_scripts();
 void AddSC_guards();
 void AddSC_item_scripts();
-void AddSC_npc_beta();
 void AddSC_npc_professions();
 void AddSC_npc_innkeeper();
 void AddSC_npcs_special();
@@ -722,7 +721,6 @@ void AddWorldScripts()
     AddSC_go_scripts();
     AddSC_guards();
     AddSC_item_scripts();
-    AddSC_npc_beta();
     AddSC_npc_professions();
     AddSC_npc_innkeeper();
     AddSC_npcs_special();

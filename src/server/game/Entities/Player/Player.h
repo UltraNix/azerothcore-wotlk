@@ -2708,16 +2708,12 @@ class Player : public Unit, public GridObject<Player>
         bool BlizzlikeMode() { return m_BlizzlikeMode; }
         void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
    
-        // @kiszak
-        bool KiszakMode() { return m_KiszakMode; }
-        void SetKiszakMode(bool val) { m_KiszakMode = val; }
-
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
         void SetAutoInviteDone(bool val) { m_NeedAutoInvite = val; }
 
-        bool ArenaAnnounce() { return m_ArenaAnnounce; }
-        void SetArenaAnnounce(bool val) { m_ArenaAnnounce = val; }
+        bool PvPAnnounces() { return m_PvPAnnounces; }
+        void SetPvPAnnounces(bool val) { m_PvPAnnounces = val; }
 
         uint32 GetSelectedAuction() { return m_selectedAuction; }
         void SetSelectedAuction(uint32 val) { m_selectedAuction = val; }
@@ -2976,8 +2972,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool m_BlizzlikeMode;
         bool m_NeedAutoInvite; // @autoinvite_feature
-        bool m_KiszakMode;     // @kiszak
-        bool m_ArenaAnnounce;
+        bool m_PvPAnnounces;
 
         ////////////////////Rest System/////////////////////
         time_t _restTime;

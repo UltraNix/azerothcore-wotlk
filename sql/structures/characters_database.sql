@@ -1,8 +1,8 @@
--- MySQL dump 10.14  Distrib 5.5.50-MariaDB, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.57, for Win64 (AMD64)
 --
--- Host: localhost    Database: clean_characters
+-- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version	5.5.50-MariaDB
+-- Server version	5.5.57
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -1239,7 +1239,7 @@ CREATE TABLE `character_stats` (
   `attackPower` int(10) unsigned NOT NULL DEFAULT '0',
   `rangedAttackPower` int(10) unsigned NOT NULL DEFAULT '0',
   `spellPower` int(10) unsigned NOT NULL DEFAULT '0',
-  `resilience` int(10) unsigned NOT NULL DEFAULT '0', 
+  `resilience` int(10) unsigned NOT NULL DEFAULT '0',
   `achievementPoints` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1320,7 +1320,7 @@ CREATE TABLE `characters` (
   `trans_z` float NOT NULL DEFAULT '0',
   `trans_o` float NOT NULL DEFAULT '0',
   `transguid` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `extra_flags` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `extra_flags` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `stable_slots` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `at_login` smallint(5) unsigned NOT NULL DEFAULT '0',
   `zone` smallint(5) unsigned NOT NULL DEFAULT '0',
@@ -1354,6 +1354,10 @@ CREATE TABLE `characters` (
   `knownTitles` longtext,
   `actionBars` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `grantableLevels` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `blizzlikeMode` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `autoInvite` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `ninjaLooter` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `pvpAnnounces` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `deleteInfos_Account` int(10) unsigned DEFAULT NULL,
   `deleteInfos_Name` varchar(12) DEFAULT NULL,
   `deleteDate` int(10) unsigned DEFAULT NULL,
@@ -1417,6 +1421,33 @@ LOCK TABLES `corpse` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `creature_records`
+--
+
+DROP TABLE IF EXISTS `creature_records`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `creature_records` (
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `CreatureName` varchar(100) NOT NULL DEFAULT '',
+  `BestKillTime` mediumint(10) unsigned NOT NULL DEFAULT '0',
+  `RealmFirstGuild` varchar(24) NOT NULL DEFAULT '',
+  `BestTimeGuild` varchar(24) NOT NULL DEFAULT '',
+  `PrevBestTimeGuild` varchar(24) NOT NULL DEFAULT '',
+  PRIMARY KEY (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `creature_records`
+--
+
+LOCK TABLES `creature_records` WRITE;
+/*!40000 ALTER TABLE `creature_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_records` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `creature_respawn`
 --
 
@@ -1441,6 +1472,37 @@ LOCK TABLES `creature_respawn` WRITE;
 /*!40000 ALTER TABLE `creature_respawn` DISABLE KEYS */;
 INSERT INTO `creature_respawn` VALUES (40270,1454189252,571,0);
 /*!40000 ALTER TABLE `creature_respawn` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `daily_players_reports`
+--
+
+DROP TABLE IF EXISTS `daily_players_reports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `daily_players_reports` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `creation_time` int(10) unsigned NOT NULL DEFAULT '0',
+  `average` float NOT NULL DEFAULT '0',
+  `total_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `speed_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `fly_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `jump_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `waterwalk_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `teleportplane_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `climb_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `daily_players_reports`
+--
+
+LOCK TABLES `daily_players_reports` WRITE;
+/*!40000 ALTER TABLE `daily_players_reports` DISABLE KEYS */;
+/*!40000 ALTER TABLE `daily_players_reports` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1632,6 +1694,38 @@ CREATE TABLE `group_member` (
 LOCK TABLES `group_member` WRITE;
 /*!40000 ALTER TABLE `group_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `group_member` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `group_saved_loot`
+--
+
+DROP TABLE IF EXISTS `group_saved_loot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `group_saved_loot` (
+  `creatureId` int(11) NOT NULL DEFAULT '0',
+  `instanceId` int(11) NOT NULL DEFAULT '0',
+  `mapId` int(11) NOT NULL DEFAULT '0',
+  `difficultyId` int(11) NOT NULL DEFAULT '0',
+  `itemId` int(11) NOT NULL DEFAULT '0',
+  `itemCount` int(11) DEFAULT NULL,
+  `summoned` tinyint(1) DEFAULT '0',
+  `position_x` float DEFAULT NULL,
+  `position_y` float DEFAULT NULL,
+  `position_z` float DEFAULT NULL,
+  `playerGuids` varchar(1024) DEFAULT NULL,
+  PRIMARY KEY (`creatureId`,`instanceId`,`itemId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `group_saved_loot`
+--
+
+LOCK TABLES `group_saved_loot` WRITE;
+/*!40000 ALTER TABLE `group_saved_loot` DISABLE KEYS */;
+/*!40000 ALTER TABLE `group_saved_loot` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2359,7 +2453,7 @@ CREATE TABLE `pet_aura` (
   `maxduration` int(11) NOT NULL DEFAULT '0',
   `remaintime` int(11) NOT NULL DEFAULT '0',
   `remaincharges` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`,`spell`,`effect_mask`)
+  PRIMARY KEY (`guid`,`caster_guid`,`spell`,`effect_mask`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Pet System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2475,6 +2569,37 @@ LOCK TABLES `petition_sign` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `players_reports_status`
+--
+
+DROP TABLE IF EXISTS `players_reports_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `players_reports_status` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `creation_time` int(10) unsigned NOT NULL DEFAULT '0',
+  `average` float NOT NULL DEFAULT '0',
+  `total_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `speed_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `fly_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `jump_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `waterwalk_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `teleportplane_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `climb_reports` bigint(20) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `players_reports_status`
+--
+
+LOCK TABLES `players_reports_status` WRITE;
+/*!40000 ALTER TABLE `players_reports_status` DISABLE KEYS */;
+/*!40000 ALTER TABLE `players_reports_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pool_quest_save`
 --
 
@@ -2516,6 +2641,7 @@ CREATE TABLE `reserved_name` (
 
 LOCK TABLES `reserved_name` WRITE;
 /*!40000 ALTER TABLE `reserved_name` DISABLE KEYS */;
+INSERT INTO `reserved_name` VALUES ('Default');
 /*!40000 ALTER TABLE `reserved_name` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2576,4 +2702,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-23 19:03:56
+-- Dump completed on 2018-01-19  3:26:21

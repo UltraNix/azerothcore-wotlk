@@ -138,8 +138,8 @@ class CustomEventMgr
         int32 GetArenaEventDay() const;
         int32 GetArenaEventHour() const;
         int32 GetArenaEventMinute() const;
-        std::string GetEventPvPAnnouncePL() const;
-        std::string GetEventPvPAnnounceEN() const;
+        std::string GetEventPvPAnnouncesPL() const;
+        std::string GetEventPvPAnnouncesEN() const;
         bool GetArenaEventStatus() const;
         void SetArenaEventStatus(bool started) { ArenaEventStatus = started; }
 

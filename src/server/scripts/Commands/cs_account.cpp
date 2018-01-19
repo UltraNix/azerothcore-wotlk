@@ -63,10 +63,6 @@ public:
         {
             Field* field = result->Fetch();
 
-            QueryResult lotteryCoins = LoginDatabase.PQuery("SELECT vp FROM account WHERE id = %u", field[0].GetUInt32());
-            if (lotteryCoins)
-                handler->PSendSysMessage("Posiadasz: %u Lottery Coins.", lotteryCoins->Fetch()->GetUInt32());
-
             QueryResult sunwellCoins = LoginDatabase.PQuery("SELECT dp FROM account WHERE id = %u", field[0].GetUInt32());
             if (sunwellCoins)
                 handler->PSendSysMessage("Posiadasz: %u Sunwell Coins.", sunwellCoins->Fetch()->GetUInt32());

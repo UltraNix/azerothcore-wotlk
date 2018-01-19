@@ -213,20 +213,19 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
         if (Battleground* bgt = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
         {
             if (bgt->isArena())
+            {
                 switch (m_arenaType)
                 {
-                    //case 2: // 2v2
-                    //    sWorld->SendArenaWorldText(LANG_ARENA_2V2_ANNOUNCE, ArenaRating, MatchmakerRating);
-                    //    break;
-                    case 3: // 3v3
-                        sWorld->SendArenaWorldText(LANG_ARENA_3V3_ANNOUNCE);
-                        sLog->outReleaseDebug("Arena Team Id: %u has been added to queue and pass info to world", arenateamid);
-                        break;
-                    case 5: // 5v5
-                        sWorld->SendArenaWorldText(LANG_ARENA_5V5_ANNOUNCE);
-                        sLog->outReleaseDebug("Arena Team Id: %u has been added to queue and pass info to world", arenateamid);
-                        break;
+                case 3: // 3v3
+                    sWorld->SendPvPWorldText(LANG_ARENA_3V3_ANNOUNCE);
+                    sLog->outReleaseDebug("Arena Team Id: %u has been added to queue and pass info to world", arenateamid);
+                    break;
+                case 5: // 5v5
+                    sWorld->SendPvPWorldText(LANG_ARENA_5V5_ANNOUNCE);
+                    sLog->outReleaseDebug("Arena Team Id: %u has been added to queue and pass info to world", arenateamid);
+                    break;
                 }
+            }
         }
 
     return ginfo;
