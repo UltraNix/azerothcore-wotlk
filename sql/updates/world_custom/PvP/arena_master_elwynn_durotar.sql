@@ -1,0 +1,3 @@
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(NULL, 32332, 1, 1, 1, 0, 0, 1324.14, -4399.027, 27.1148, 1.79, 300, 0, 0, 0, 0, 0, 0, 0, 0),
+(NULL, 32332, 0, 1, 1, 0, 0, -9100.24, 361.265, 92.6675, 2.27, 300, 0, 0, 0, 0, 0, 0, 0, 0);

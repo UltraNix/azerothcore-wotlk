@@ -1,2 +1,0 @@
-UPDATE `creature` SET `phaseMask` = '128' WHERE `creature`.`guid` = 302165;
-UPDATE `creature_questender` SET `id` = '31412' WHERE `creature_questender`.`id` = 32363 AND `creature_questender`.`quest` =13257;

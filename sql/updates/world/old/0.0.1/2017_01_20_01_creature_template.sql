@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `faction` = '794' WHERE `creature_template`.`entry` = 4787;

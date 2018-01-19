@@ -1,1 +1,0 @@
-UPDATE `item_template` SET `bonding`='1' WHERE  `entry` IN(54069, 54068);

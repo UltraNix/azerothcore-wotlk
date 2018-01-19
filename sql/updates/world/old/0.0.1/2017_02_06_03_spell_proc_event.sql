@@ -1,1 +1,0 @@
-REPLACE INTO spell_proc_event VALUES (34477, 0, 9, 0, 0, 0, 4+16+64+256+1024+4096+65536, 0, 0, 100, 0);

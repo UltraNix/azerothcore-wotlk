@@ -1,0 +1,1 @@
+UPDATE `trinity_string` SET `content_default` = '|cff77a5c4%s|r' WHERE `trinity_string`.`entry` = 11000;

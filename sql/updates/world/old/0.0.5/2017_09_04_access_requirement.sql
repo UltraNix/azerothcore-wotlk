@@ -1,1 +1,0 @@
-UPDATE `access_requirement` SET completed_achievement = 0 WHERE `mapId`=649 AND `difficulty` IN (2, 3);
