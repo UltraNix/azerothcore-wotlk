@@ -163,6 +163,11 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/boss_servant_quarters.cpp
   EasternKingdoms/Karazhan/karazhan.h
   EasternKingdoms/TheStockade/instance_the_stockade.cpp
+  EasternKingdoms/BattleForUndercity/battle_for_undercity_alliance.cpp
+  EasternKingdoms/BattleForUndercity/battle_for_undercity_horde.cpp
+  EasternKingdoms/BattleForUndercity/battle_for_undercity.cpp
+  EasternKingdoms/BattleForUndercity/worldzone_trisfal_glades.cpp
+  EasternKingdoms/BattleForUndercity/battle_for_undercity.h
 )
 
 message("  -> Prepared: Eastern Kingdoms")

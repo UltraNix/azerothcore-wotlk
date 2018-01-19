@@ -273,26 +273,6 @@ public:
     }
 };
 
-/*#####
-# item_mysterious_time_pack
-#####*/
-
-class item_mysterious_time_pack : public ItemScript
-{
-public:
-	item_mysterious_time_pack() : ItemScript("item_mysterious_time_pack") { }
-
-	bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/)
-	{
-		ItemPosCountVec dest;
-		uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 82000, 1); // Mysterious Time Pack
-		if (msg == EQUIP_ERR_OK)
-			player->StoreNewItem(dest, 82000, true, Item::GenerateItemRandomPropertyId(82000));
-
-		return true;
-	}
-};
-
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -304,5 +284,4 @@ void AddSC_item_scripts()
     new item_petrov_cluster_bombs();
     new item_trident_of_nazjan();
     new item_captured_frog();
-	new item_mysterious_time_pack();
 }

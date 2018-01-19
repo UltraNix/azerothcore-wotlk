@@ -18,7 +18,6 @@ set(scripts_STAT_SRCS
   World/guards.cpp
   World/item_scripts.cpp
   World/mob_generic_creature.cpp
-  World/npc_beta.cpp
   World/npc_innkeeper.cpp
   World/npc_professions.cpp
   World/npc_taxi.cpp

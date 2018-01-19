@@ -78,8 +78,7 @@ void AddSC_tele_commandscript();
 void AddSC_ticket_commandscript();
 void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
-// Custom
-void AddSC_custom_commandscript();
+
 
 #ifdef SCRIPTS
 //world
@@ -245,6 +244,12 @@ void AddSC_undercity();
 void AddSC_western_plaguelands();
 void AddSC_westfall();
 void AddSC_wetlands();
+
+// Battle for the Undercity
+void AddSC_battle_for_undercity_alliance();
+void AddSC_battle_for_undercity_horde();
+void AddSC_battle_for_undercity();
+void AddSC_worldzone_trisfal_glades();
 
 //kalimdor     
 void AddSC_instance_blackfathom_deeps();     //Blackfathom Depths
@@ -704,8 +709,6 @@ void AddCommandScripts()
     AddSC_ticket_commandscript();
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
-    // Custom
-    AddSC_custom_commandscript();
     sAnticheatMgr->StartScripts();
 }
 
@@ -882,6 +885,11 @@ void AddEasternKingdomsScripts()
     AddSC_western_plaguelands();
     AddSC_westfall();
     AddSC_wetlands();
+    // Battle for the Undercity
+    AddSC_battle_for_undercity_alliance();
+    AddSC_battle_for_undercity_horde();
+    AddSC_battle_for_undercity();
+    AddSC_worldzone_trisfal_glades();
 #endif
 }
 
@@ -1259,13 +1267,13 @@ void AddBattlegroundScripts()
 
 #ifdef SCRIPTS
 /* This is where custom scripts' loading functions should be declared. */
-
-    // Battle for the Undercity
-    void AddSC_battle_for_undercity_alliance();
-    void AddSC_battle_for_undercity_horde();
-    void AddSC_battle_for_undercity();
-    void AddSC_worldzone_trisfal_glades();
+    void AddSC_custom_commandscript();
+    void AddSC_transmog();
+    void AddSC_npcs_custom();
+    void AddSC_item_custom();
     // Old Scarlet Monastery Event
+    // Disabled
+    /*
     void AddSC_instance_old_scarlet_monastery();
     void AddSC_old_scarlet_monastery();
     void AddSC_boss_mazin_soulstealer();
@@ -1273,23 +1281,20 @@ void AddBattlegroundScripts()
     void AddSC_boss_reast();
     void AddSC_boss_madantul_rada();
     void AddSC_boss_dessembrae();
-    // Hazard Cave
-    void AddSC_npcs_hazard();
-    void AddSC_Gambling();
-    // Transmog
-    void AddSC_transmog();
+    */
 #endif
 
 void AddCustomScripts()
 {
 #ifdef SCRIPTS
     /* This is where custom scripts should be added. */
-    // Battle for the Undercity
-    AddSC_battle_for_undercity_alliance();
-    AddSC_battle_for_undercity_horde();
-    AddSC_battle_for_undercity();
-    AddSC_worldzone_trisfal_glades();
+    AddSC_custom_commandscript();
+    AddSC_transmog();
+    AddSC_npcs_custom();
+    AddSC_item_custom();
     // Old Scarlet Monastery Event
+    // Disabled
+    /*
     AddSC_instance_old_scarlet_monastery();
     AddSC_old_scarlet_monastery();
     AddSC_boss_mazin_soulstealer();
@@ -1297,9 +1302,6 @@ void AddCustomScripts()
     AddSC_boss_reast();
     AddSC_boss_madantul_rada();
     AddSC_boss_dessembrae();
-    // Hazard Cave
-    AddSC_npcs_hazard();
-    AddSC_Gambling();
-    AddSC_transmog();
+    */
 #endif
 }
