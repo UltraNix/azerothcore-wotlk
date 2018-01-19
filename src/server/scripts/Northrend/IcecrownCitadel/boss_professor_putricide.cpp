@@ -722,6 +722,7 @@ class npc_putricide_oozeAI : public ScriptedAI
         npc_putricide_oozeAI(Creature* creature, uint32 hitTargetSpellId) : ScriptedAI(creature),
             _hitTargetSpellId(hitTargetSpellId), _newTargetSelectTimer(0)
         {
+            _stopped = false;
             targetGUID = 0;
             me->SetReactState(REACT_PASSIVE);
         }
@@ -790,7 +791,10 @@ class npc_putricide_oozeAI : public ScriptedAI
                         me->StopMoving();
                     }
                     else if (_stopped)
+                    {
                         me->GetMotionMaster()->MoveChase(target);
+                        _stopped = false;
+                    }
 
             DoMeleeAttackIfReady();
 
