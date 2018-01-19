@@ -3279,6 +3279,11 @@ public:
     {
         if (creature->GetEntry() == NPC_GARROSH_HELLSCREAM && player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 11206 || creature->GetEntry() == NPC_KING_VARIAN_WRYNN && player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 11204)
         {
+            // OPEN BETA
+            player->CLOSE_GOSSIP_MENU();
+            ChatHandler(player->GetSession()).PSendSysMessage("You can't turn off the buff in beta!");
+            return true;
+
             if (!player->GetGroup() || !player->GetGroup()->isRaidGroup() || !player->GetGroup()->IsLeader(player->GetGUID()))
             {
                 player->CLOSE_GOSSIP_MENU();
@@ -3751,6 +3756,106 @@ class at_icc_spire_frostwyrm : public AreaTriggerScript
         }
 };
 
+enum PlagueScientist
+{
+    SPELL_COMBOBULATING_SPRAY   = 71103,
+    SPELL_PLAGUE_BLAST          = 73079,
+    SPELL_PLAGUE_STREAM         = 69871,
+
+    EVENT_SPRAY                 = 1,
+    EVENT_BLAST,
+    EVENT_STREAM
+};
+
+struct npc_plague_scientistAI : public ScriptedAI
+{
+    npc_plague_scientistAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_SPRAY, 10s, 20s);
+        _events.ScheduleEvent(EVENT_BLAST, 2s, 3s);
+        _events.ScheduleEvent(EVENT_STREAM, 15s, 40s);
+    }
+
+    Unit* GetStreamTarget()
+    {
+        std::list<Creature*> list = DoFindFriendlyMissingBuff(80.0f, SPELL_PLAGUE_STREAM);
+        if (list.empty())
+            return nullptr;
+        return Trinity::Containers::SelectRandomContainerElement(list);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_SPRAY:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true, -SPELL_COMBOBULATING_SPRAY))
+                        DoCast(target, SPELL_COMBOBULATING_SPRAY);
+                    _events.Repeat(20s, 30s);
+                    break;
+                case EVENT_BLAST:
+                    DoCastVictim(SPELL_PLAGUE_BLAST);
+                    _events.Repeat(3s, 4s);
+                    break;
+                case EVENT_STREAM:
+                    if (Unit* target = GetStreamTarget())
+                        DoCast(target, SPELL_PLAGUE_STREAM);
+                    _events.Repeat(1min);
+                    break;
+                default:
+                    break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        EventMap _events;
+};
+
+enum WebWrap
+{
+    SPELL_WEB_WRAP = 71010
+};
+
+struct npc_icc_web_wrapAI : public ScriptedAI
+{
+    npc_icc_web_wrapAI(Creature* creature) : ScriptedAI(creature) 
+    { 
+        me->SetReactState(REACT_PASSIVE);
+        SetCombatMovement(false);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (Unit* summoner = me->ToTempSummon()->GetSummoner())
+            summoner->RemoveAurasDueToSpell(SPELL_WEB_WRAP);
+    }
+};
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -3803,4 +3908,6 @@ void AddSC_icecrown_citadel()
     new at_icc_gauntlet_event();
     new at_icc_putricide_trap();
     new at_icc_spire_frostwyrm();
+    new CreatureAILoader<npc_plague_scientistAI>("npc_plague_scientist");
+    new CreatureAILoader<npc_icc_web_wrapAI>("npc_icc_web_wrap");
 }

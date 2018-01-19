@@ -414,7 +414,7 @@ class boss_lady_deathwhisper : public CreatureScript
                                 for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
                                     me->CastSpell(*itr, SPELL_SUMMON_SHADE, true);
                         }
-                        events.RepeatEvent(urand(18000, 23000));
+                        events.RepeatEvent(12000);
                         break;
                 }
 
@@ -875,6 +875,7 @@ public:
 
         void Reset()
         {
+            me->SetSpeed(MOVE_RUN, 0.8f);
             me->setAttackTimer(BASE_ATTACK, 2000);
             me->AddAura(SPELL_VENGEFUL_BLAST_PASSIVE, me);
         }

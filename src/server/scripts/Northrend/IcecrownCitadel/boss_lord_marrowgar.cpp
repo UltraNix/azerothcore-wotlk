@@ -92,6 +92,7 @@ class boss_lord_marrowgar : public CreatureScript
         {
             boss_lord_marrowgarAI(Creature* creature) : BossAI(creature, DATA_LORD_MARROWGAR)
             {
+                me->SetCorrection(true);
                 _introDone = false;
                 _boneSlice = false;
             }
@@ -490,7 +491,7 @@ public:
         {
             Unit* caster = GetCaster();
             float angle = caster->GetAngle(GetHitUnit());
-            float dist = caster->GetObjectSize()/2.0f;
+            float dist = caster->GetObjectSize() * 0.75f;
             float z = caster->GetPositionZ()+2.5f;
             float nx = caster->GetPositionX()+dist*cos(angle);
             float ny = caster->GetPositionY()+dist*sin(angle);

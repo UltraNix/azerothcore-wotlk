@@ -1391,6 +1391,8 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const
             {
+                return true; // TESTING
+
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:

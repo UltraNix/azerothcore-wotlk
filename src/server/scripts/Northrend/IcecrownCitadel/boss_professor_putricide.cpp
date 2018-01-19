@@ -781,6 +781,16 @@ class npc_putricide_oozeAI : public ScriptedAI
                         SelectNewTarget();
                 }
             }
+            
+            if (me->GetEntry() == NPC_VOLATILE_OOZE)
+                if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
+                    if (target->HasAura(45438) || target->HasAura(642))
+                    {
+                        _stopped = true;
+                        me->StopMoving();
+                    }
+                    else if (_stopped)
+                        me->GetMotionMaster()->MoveChase(target);
 
             DoMeleeAttackIfReady();
 
@@ -802,6 +812,7 @@ class npc_putricide_oozeAI : public ScriptedAI
         virtual void CastMainSpell() = 0;
 
     private:
+        bool _stopped;
         uint32 _hitTargetSpellId;
         uint32 _newTargetSelectTimer;
 };

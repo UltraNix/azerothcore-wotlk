@@ -2790,6 +2790,15 @@ std::vector<uint32> partialCorrection =
     67875,  // Death's Bite heroic
     62583,  // Frostbolt
     62580,  // Frostbolt Volley
+    71029,  // Glacial Blast
+    69789,  // Ooze Flood 10 man
+    71215,  // Ooze Flood 25 man
+    71587,  // Ooze Flood 10 man heroic
+    71588,  // Ooze Flood 25 man heroic
+    70853,  // Malleable Goo 10 man
+    72458,  // Malleable Goo 25 man
+    72873,  // Malleable Goo 10 man heroic
+    72874,  // Malleable Goo 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
@@ -6378,6 +6387,8 @@ void SpellMgr::LoadDbcDataCorrections()
         case 70897: // Dark Martyrdom (Lady Deathwhisper)
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_DEAD;
             break;
+        case 71161: // Plague Stench (Stinky)
+            spellInfo->EffectBasePoints[EFFECT_0] = 3000; // no break intended
         case 69075: // Bone Storm (Lord Marrowgar)
         case 70834: // Bone Storm (Lord Marrowgar)
         case 70835: // Bone Storm (Lord Marrowgar)
@@ -6390,7 +6401,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 72442: // Boiling Blood (Deathbringer Saurfang)
         case 72443: // Boiling Blood (Deathbringer Saurfang)
         case 71160: // Plague Stench (Stinky)
-        case 71161: // Plague Stench (Stinky)
         case 71123: // Decimate (Stinky & Precious)
         case 71464: // Divine Surge (Sister Svalna)
             spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
