@@ -5130,9 +5130,9 @@ void SpellMgr::LoadDbcDataCorrections()
             case 54096:
                 spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
                 break;
-            // Shadow Shock (Encounter: Noth)
+            // Shadow Shock (Encounter: Faerlina)
             case 54889:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 6;
+                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
                 break;
             // Disease Cloud (Encounter: Grobbulus)
             case 54368:
@@ -5192,7 +5192,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // Arcane Explosion (Encounter: Noth)
             case 54891:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 4;
+                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 6;
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
                 break;
         }
