@@ -87,6 +87,7 @@ struct boss_loathebAI : public BossAI
 
     void JustDied(Unit* killer) override
     {
+        _JustDied();
         instance->SetData(EVENT_LOATHEB, DONE);
 
         if (Map* map = me->GetMap())
