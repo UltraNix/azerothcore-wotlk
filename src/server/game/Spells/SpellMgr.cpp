@@ -5096,6 +5096,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
             spellInfo->Attributes |= SPELL_ATTR0_REQ_AMMO;
             break;
+        case 28206:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
 
         //////////////////////////////////////////
         ////////// Naxxramas - BOOST - ONLY 25 MAN!
