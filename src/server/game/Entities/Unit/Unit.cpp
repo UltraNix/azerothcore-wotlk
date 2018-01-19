@@ -12595,10 +12595,6 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
             Dismount();
         if (!IsStandState()) // pussywizard: already done in CombatStart(target, initialAggro) for the target, but when aggro'ing from MoveInLOS CombatStart is not called!
             SetStandState(UNIT_STAND_STATE_STAND);
-
-        // Armory
-        if (creature->GetMap()->IsDungeon() && creature->IsInstanceBind() || creature->IsDungeonBoss())
-            creature->SetBossFightTime(getMSTime());
     }
 
     for (Unit::ControlSet::iterator itr = m_Controlled.begin(); itr != m_Controlled.end();)

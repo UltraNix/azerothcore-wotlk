@@ -1,1 +1,0 @@
-UPDATE smart_scripts SET action_param3 = 5000 WHERE entryorguid = 1555200 AND source_type = 9 AND id = 6 AND link = 0;

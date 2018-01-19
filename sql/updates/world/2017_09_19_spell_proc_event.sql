@@ -1,1 +1,0 @@
-UPDATE spell_proc_event SET procFlags = 139944, SchoolMask = 0 WHERE entry IN(20185, 20186);

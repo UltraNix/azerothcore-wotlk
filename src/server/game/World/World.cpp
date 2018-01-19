@@ -1294,7 +1294,6 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_CROSSFACTION_MAIL] = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
     m_bool_configs[CONFIG_PTR_REALM] = sConfigMgr->GetBoolDefault("PTR.Realm", false);
     m_bool_configs[CONFIG_CROSSFACTION_RDF] = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
-    m_bool_configs[CONFIG_GAMBLING_ENABLE] = sConfigMgr->GetBoolDefault("Gambling.Enable", false);
 
     // Premium Config
     m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);
@@ -1319,9 +1318,6 @@ void World::LoadConfigSettings(bool reload)
     // Kick player from BG / WG if doesn't move
     m_bool_configs[CONFIG_CUSTOM_AFK_REPORT] = sConfigMgr->GetBoolDefault("Custom.AFK.Report", false);
     m_int_configs[CONFIG_CUSTOM_AFK_REPORT_TIMER] = sConfigMgr->GetIntDefault("Custom.AFK.Report.PvP.Timer", 2);
-
-    // Armory
-    m_bool_configs[CONFIG_ARMORY_STATS] = sConfigMgr->GetBoolDefault("ArmoryStats.Enable", false);
 
     // Encounter logs
     m_bool_configs[CONFIG_ENCOUNTER_LOG] = sConfigMgr->GetBoolDefault("EncounterLog.Enable", false);
@@ -2374,8 +2370,8 @@ void World::SendWorldTextToCountry(std::string const& country, std::string const
     va_end(ap);
 }
 
-/// Send a System Message to all players (except arena announcer option disabled)
-void World::SendArenaWorldText(int32 string_id, ...)
+/// Send a System Message to all players (except pvp announcer option disabled)
+void World::SendPvPWorldText(int32 string_id, ...)
 {
     va_list ap;
     va_start(ap, string_id);
@@ -2384,7 +2380,7 @@ void World::SendArenaWorldText(int32 string_id, ...)
     Trinity::LocalizedPacketListDo<Trinity::WorldWorldTextBuilder> wt_do(wt_builder);
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->ArenaAnnounce())
+        if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->PvPAnnounces())
             continue;
 
         wt_do(itr->second->GetPlayer());

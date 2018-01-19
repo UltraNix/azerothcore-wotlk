@@ -67,7 +67,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
                      "position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, "
                      "resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, instance_mode_mask, "
                      "arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, "
-                     "health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, autoInvite, blizzlikeMode, arenaAnnounce, kiszakMode "
+                     "health, power1, power2, power3, power4, power5, power6, power7, instance_id, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, autoInvite, blizzlikeMode, pvpAnnounces "
                      "FROM characters WHERE guid = ?", CONNECTION_ASYNC);
 
     PrepareStatement(CHAR_SEL_CHARACTER_AURAS, "SELECT caster_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, "
@@ -324,14 +324,14 @@ void CharacterDatabaseConnection::DoPrepareStatements()
                      "extra_flags, stable_slots, at_login, zone, "
                      "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, "
                      "todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, health, power1, power2, power3, "
-                     "power4, power5, power6, power7, latency, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, autoInvite, blizzlikeMode, arenaAnnounce, kiszakMode) VALUES "
-                     "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
+                     "power4, power5, power6, power7, latency, speccount, activespec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels, autoInvite, blizzlikeMode, pvpAnnounces) VALUES "
+                     "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_CHARACTER, "UPDATE characters SET name=?,race=?,class=?,gender=?,level=?,xp=?,money=?,playerBytes=?,playerBytes2=?,playerFlags=?,"
                      "map=?,instance_id=?,instance_mode_mask=?,position_x=?,position_y=?,position_z=?,orientation=?,trans_x=?,trans_y=?,trans_z=?,trans_o=?,transguid=?,taximask=?,cinematic=?,totaltime=?,leveltime=?,rest_bonus=?,"
                      "logout_time=?,is_logout_resting=?,resettalents_cost=?,resettalents_time=?,extra_flags=?,stable_slots=?,at_login=?,zone=?,death_expire_time=?,taxi_path=?,"
                      "arenaPoints=?,totalHonorPoints=?,todayHonorPoints=?,yesterdayHonorPoints=?,totalKills=?,todayKills=?,yesterdayKills=?,chosenTitle=?,knownCurrencies=?,"
                      "watchedFaction=?,drunk=?,health=?,power1=?,power2=?,power3=?,power4=?,power5=?,power6=?,power7=?,latency=?,speccount=?,activespec=?,exploredZones=?,"
-                     "equipmentCache=?,ammoId=?,knownTitles=?,actionBars=?,grantableLevels=?,autoInvite=?,blizzlikeMode=?,arenaAnnounce=?,kiszakMode=?,online=? WHERE guid=?", CONNECTION_ASYNC);
+                     "equipmentCache=?,ammoId=?,knownTitles=?,actionBars=?,grantableLevels=?,autoInvite=?,blizzlikeMode=?,pvpAnnounces=?,online=? WHERE guid=?", CONNECTION_ASYNC);
 
     PrepareStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG, "UPDATE characters SET at_login = at_login | ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_REM_AT_LOGIN_FLAG, "UPDATE characters set at_login = at_login & ~ ? WHERE guid = ?", CONNECTION_ASYNC);
@@ -564,12 +564,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK, "SELECT guid FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT name FROM characters WHERE ninjaLooter = 1", CONNECTION_SYNCH);
     PrepareStatement(CHAR_UPD_NINJA_LOOTER, "UPDATE characters SET ninjaLooter = ? WHERE guid = ?", CONNECTION_ASYNC);
-    // GAMBLING
-    PrepareStatement(CHAR_SEL_GAMBLING_STATS, "SELECT lost_money, win_money, duel_count FROM character_gambling_stats WHERE guid = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_REP_GAMBLING_STATS, "REPLACE INTO character_gambling_stats(guid, lost_money, win_money, duel_count) VALUES(?, ?, ?, ?)", CONNECTION_ASYNC);
-    // Armory Stats
-    PrepareStatement(CHAR_INS_ARMORY_STATS, "INSERT INTO characters_armory_stats (guid, guildId, creatureEntry, mapId, difficulity, groupCount, fightLength, fightDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
-
     //! boss records
     PrepareStatement(CHAR_UPD_CREATURE_RECORD, "UPDATE creature_records SET BestKillTime = ?, BestTimeGuild = ?, PrevBestTimeGuild = ? WHERE entry = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_CREATURE_RECORD, "INSERT INTO creature_records VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);

@@ -279,7 +279,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recvData)
 
     if (!pGossip)
     {
-        for (uint32 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+        for (uint8 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             data << float(0);
             data << "Greetings $N";
@@ -295,23 +295,43 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recvData)
     }
     else
     {
-        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+        std::string Text_0[MAX_LOCALES], Text_1[MAX_LOCALES];
+        for (uint8 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+        {
+            Text_0[i]=pGossip->Options[i].Text_0;
+            Text_1[i]=pGossip->Options[i].Text_1;
+        }
+
+        LocaleConstant loc_idx = GetSessionDbLocaleIndex();
+        if (loc_idx >= LOCALE_enUS)
+        {
+            if (NpcTextLocale const* nl = sObjectMgr->GetNpcTextLocale(textID))
+            {
+                for (int i = 0; i < MAX_LOCALES; ++i)
+                {
+                    ObjectMgr::GetLocaleString(nl->Text_0[i], loc_idx, Text_0[i]);
+                    ObjectMgr::GetLocaleString(nl->Text_1[i], loc_idx, Text_1[i]);
+                }
+            }
+        }
+
+        for (uint8 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
         {
             data << pGossip->Options[i].Probability;
 
-            if (pGossip->Options[i].Text_0.empty())
-                data << pGossip->Options[i].Text_1;
+            if (Text_0[i].empty())
+                data << Text_1[i];
             else
-                data << pGossip->Options[i].Text_0;
+                data << Text_0[i];
 
-            if (pGossip->Options[i].Text_1.empty())
-                data << pGossip->Options[i].Text_0;
+            if (Text_1[i].empty())
+                data << Text_0[i];
             else
-                data << pGossip->Options[i].Text_1;
+                data << Text_1[i];
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < MAX_GOSSIP_TEXT_EMOTES; ++j)
+            for (uint8 j = 0; j < MAX_GOSSIP_TEXT_EMOTES; ++j)
             {
                 data << pGossip->Options[i].Emotes[j]._Delay;
                 data << pGossip->Options[i].Emotes[j]._Emote;

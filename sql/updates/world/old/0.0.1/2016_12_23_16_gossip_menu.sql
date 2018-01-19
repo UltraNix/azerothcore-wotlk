@@ -1,1 +1,0 @@
-DELETE FROM `gossip_menu` WHERE `gossip_menu`.`entry` = 4861 AND `gossip_menu`.`text_id` = 5935;

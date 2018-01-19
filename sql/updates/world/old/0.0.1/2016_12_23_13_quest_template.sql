@@ -1,1 +1,0 @@
-UPDATE `quest_template` SET `RequiredRaces` = '0' WHERE `quest_template`.`ID` = 1486;

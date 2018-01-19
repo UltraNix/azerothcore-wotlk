@@ -1,0 +1,1 @@
+UPDATE creature SET position_x = 7448.242188, position_y = -534.872009, position_z = 1896.850342, orientation = 3.096891 WHERE id = 29445;

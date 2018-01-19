@@ -1,1 +1,0 @@
-UPDATE item_template SET AllowableClass = 32767, flags = 36864, TotemCategory = 21 WHERE entry IN (42596, 42601, 42606);

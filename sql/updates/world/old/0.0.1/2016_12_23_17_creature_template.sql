@@ -1,1 +1,0 @@
-UPDATE `creature_template` SET `flags_extra` = '0' WHERE `creature_template`.`entry` = 10928;

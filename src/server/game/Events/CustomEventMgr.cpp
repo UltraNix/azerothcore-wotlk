@@ -128,8 +128,8 @@ void CustomEventMgr::Update(uint32 diff, uint8 eventUpdate)
                 if (aTm->tm_wday == GetArenaEventDay() && aTm->tm_hour == GetArenaEventHour() && aTm->tm_min == GetArenaEventMinute() && !GetArenaEventStatus())
                 {
                     SetArenaEventStatus(true);
-                    sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetEventPvPAnnouncePL().c_str());
-                    sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetEventPvPAnnounceEN().c_str());
+                    sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetEventPvPAnnouncesPL().c_str());
+                    sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetEventPvPAnnouncesEN().c_str());
                 }
 
                 if (aTm->tm_wday != GetArenaEventDay() && GetArenaEventStatus())
@@ -217,8 +217,8 @@ bool CustomEventMgr::GetFlushStatus() const { return FlushStatus; }
 int32 CustomEventMgr::GetArenaEventDay() const {  return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_DAY)); }
 int32 CustomEventMgr::GetArenaEventHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_HOUR)); }
 int32 CustomEventMgr::GetArenaEventMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_MINUTE)); }
-std::string CustomEventMgr::GetEventPvPAnnouncePL() const { return  "Event PvP wlasnie wystartowal! Do wygrania sa miedzy innymi epickie companiony oraz Swift Nether Drake - mount 310%"; }
-std::string CustomEventMgr::GetEventPvPAnnounceEN() const { return  "Event PvP has just launched! Play 2v2 or 3v3 and win fantastic rewards like epic companions or Swift Nether Drake - mount 310%."; }
+std::string CustomEventMgr::GetEventPvPAnnouncesPL() const { return  "Event PvP wlasnie wystartowal! Do wygrania sa miedzy innymi epickie companiony oraz Swift Nether Drake - mount 310%"; }
+std::string CustomEventMgr::GetEventPvPAnnouncesEN() const { return  "Event PvP has just launched! Play 2v2 or 3v3 and win fantastic rewards like epic companions or Swift Nether Drake - mount 310%."; }
 bool CustomEventMgr::GetArenaEventStatus() const { return ArenaEventStatus; }
 
 ///////////////////////

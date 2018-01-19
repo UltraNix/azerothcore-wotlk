@@ -1,0 +1,1 @@
+UPDATE game_event SET holiday = 301, holidayStage = 0 WHERE eventEntry = 62;

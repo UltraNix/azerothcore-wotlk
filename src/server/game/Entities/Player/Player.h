@@ -531,13 +531,6 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_SHOW_DK_PET              = 0x0400,         // Marks if player should see ghoul on login screen
     PLAYER_EXTRA_DODGE_LOCATION           = 0x0800,         // Marks if player should hide own location at who list
 
-    // @Gambling
-    PLAYER_EXTRA_GOLD_DUEL_SETTING_50G    = 0x1000,         // Win or lose: 50   gold
-    PLAYER_EXTRA_GOLD_DUEL_SETTING_100G   = 0x2000,         // Win or lose: 100  gold
-    PLAYER_EXTRA_GOLD_DUEL_SETTING_200G   = 0x4000,         // Win or lose: 200  gold
-    PLAYER_EXTRA_GOLD_DUEL_SETTING_500G   = 0x8000,         // Win or lose: 500  gold
-    PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G  = 0x10000,        // Win or lose: 1000 gold
-
     // @Transmog
     PLAYER_EXTRA_MODEL_PVE                = 0x20000,
     PLAYER_EXTRA_MODEL_PVP                = 0x40000,
@@ -1220,32 +1213,6 @@ class Player : public Unit, public GridObject<Player>
         void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
-        // @Gambling 
-        bool hasGoldDuelSetting50G()   const { return m_ExtraFlags & PLAYER_EXTRA_GOLD_DUEL_SETTING_50G; }
-        bool hasGoldDuelSetting100G()  const { return m_ExtraFlags & PLAYER_EXTRA_GOLD_DUEL_SETTING_100G; }
-        bool hasGoldDuelSetting200G()  const { return m_ExtraFlags & PLAYER_EXTRA_GOLD_DUEL_SETTING_200G; }
-        bool hasGoldDuelSetting500G()  const { return m_ExtraFlags & PLAYER_EXTRA_GOLD_DUEL_SETTING_500G; }
-        bool hasGoldDuelSetting1000G() const { return m_ExtraFlags & PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G; }
-
-        void SetDuelSetting50G()   { m_ExtraFlags |= PLAYER_EXTRA_GOLD_DUEL_SETTING_50G; }
-        void SetDuelSetting100G()  { m_ExtraFlags |= PLAYER_EXTRA_GOLD_DUEL_SETTING_100G; }
-        void SetDuelSetting200G()  { m_ExtraFlags |= PLAYER_EXTRA_GOLD_DUEL_SETTING_200G; }
-        void SetDuelSetting500G()  { m_ExtraFlags |= PLAYER_EXTRA_GOLD_DUEL_SETTING_500G; }
-        void SetDuelSetting1000G() { m_ExtraFlags |= PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G; }
-        void SetResetDuelSetting()
-        {
-            if (hasGoldDuelSetting50G())
-                m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_50G;
-            else if (hasGoldDuelSetting100G())
-                m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_100G;
-            else if (hasGoldDuelSetting200G())
-                m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_200G;
-            else if (hasGoldDuelSetting500G())
-                m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_500G;
-            else if (hasGoldDuelSetting1000G())
-                m_ExtraFlags &= ~PLAYER_EXTRA_GOLD_DUEL_SETTING_1000G;
-        }
-
         // Stairways to heaven
         void SetSthHide(bool hide)
         {
@@ -1276,11 +1243,6 @@ class Player : public Unit, public GridObject<Player>
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_MIX;
             else if (HasTransmogModelTWK())
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_TWK;
-        }
-
-        bool isInGamblingArea() const 
-        {
-            return m_last_area_id == 12 || m_last_area_id == 14 || m_last_area_id == 4570;
         }
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f);
@@ -2708,16 +2670,12 @@ class Player : public Unit, public GridObject<Player>
         bool BlizzlikeMode() { return m_BlizzlikeMode; }
         void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
    
-        // @kiszak
-        bool KiszakMode() { return m_KiszakMode; }
-        void SetKiszakMode(bool val) { m_KiszakMode = val; }
-
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
         void SetAutoInviteDone(bool val) { m_NeedAutoInvite = val; }
 
-        bool ArenaAnnounce() { return m_ArenaAnnounce; }
-        void SetArenaAnnounce(bool val) { m_ArenaAnnounce = val; }
+        bool PvPAnnounces() { return m_PvPAnnounces; }
+        void SetPvPAnnounces(bool val) { m_PvPAnnounces = val; }
 
         uint32 GetSelectedAuction() { return m_selectedAuction; }
         void SetSelectedAuction(uint32 val) { m_selectedAuction = val; }
@@ -2976,8 +2934,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool m_BlizzlikeMode;
         bool m_NeedAutoInvite; // @autoinvite_feature
-        bool m_KiszakMode;     // @kiszak
-        bool m_ArenaAnnounce;
+        bool m_PvPAnnounces;
 
         ////////////////////Rest System/////////////////////
         time_t _restTime;
