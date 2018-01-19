@@ -2799,6 +2799,10 @@ std::vector<uint32> partialCorrection =
     72458,  // Malleable Goo 25 man
     72873,  // Malleable Goo 10 man heroic
     72874,  // Malleable Goo 25 man heroic
+    72905,  // Frostbolt Volley 10 man
+    72906,  // Frostbolt Volley 25 man
+    72907,  // Frostbolt Volley 10 man heroic
+    72908,  // Frostbolt Volley 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
