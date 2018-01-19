@@ -290,7 +290,7 @@ void npc_escortAI::UpdateAI(uint32 diff)
 
             if (!HasEscortState(STATE_ESCORT_PAUSED))
             {
-                me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z);
+                me->GetMotionMaster()->MovePoint(CurrentWP->id, CurrentWP->x, CurrentWP->y, CurrentWP->z, false);
 
                 WaypointStart(CurrentWP->id);
                 m_uiWPWaitTimer = 0;
