@@ -1,6 +1,19 @@
 /*
-REWRITTEN BY XINEF
-*/
+ * Copyright (C) 
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -9,42 +22,42 @@ REWRITTEN BY XINEF
 
 enum Yells
 {
-    SAY_AGGRO                    = 0,
-    SAY_SPECIAL                    = 1,
+    SAY_AGGRO                   = 0,
+    SAY_SPECIAL                 = 1,
     SAY_KILL                    = 2,
-    SAY_DEATH                    = 3,
-    SAY_OUT_OF_COMBAT            = 4,
+    SAY_DEATH                   = 3,
+    SAY_OUT_OF_COMBAT           = 4,
 
-    SAY_GUEST                    = 0
+    SAY_GUEST                   = 0
 };
 
 enum Spells
 {
     SPELL_VANISH                = 29448,
     SPELL_GARROTE_DUMMY         = 29433,
-    SPELL_GARROTE                = 37066,
+    SPELL_GARROTE               = 37066,
     SPELL_BLIND                 = 34694,
     SPELL_GOUGE                 = 29425,
     SPELL_FRENZY                = 37023,
     SPELL_DUAL_WIELD            = 29651,
-    SPELL_BERSERK                = 26662,
-    SPELL_VANISH_TELEPORT        = 29431,
+    SPELL_BERSERK               = 26662,
+    SPELL_VANISH_TELEPORT       = 29431,
 };
 
 enum Misc
 {
     EVENT_GUEST_TALK            = 1,
-    EVENT_GUEST_TALK2            = 2,
-    EVENT_SPELL_VANISH            = 3,
-    EVENT_SPELL_GARROTE            = 4,
-    EVENT_SPELL_BLIND            = 5,
-    EVENT_SPELL_GOUGE            = 6,
-    EVENT_CHECK_HEALTH            = 7,
-    EVENT_SPELL_ENRAGE            = 8,
-    EVENT_KILL_TALK                = 9,
+    EVENT_GUEST_TALK2           = 2,
+    EVENT_SPELL_VANISH          = 3,
+    EVENT_SPELL_GARROTE         = 4,
+    EVENT_SPELL_BLIND           = 5,
+    EVENT_SPELL_GOUGE           = 6,
+    EVENT_CHECK_HEALTH          = 7,
+    EVENT_SPELL_ENRAGE          = 8,
+    EVENT_KILL_TALK             = 9,
 
-    ACTIVE_GUEST_COUNT            = 4,
-    MAX_GUEST_COUNT                = 6
+    ACTIVE_GUEST_COUNT          = 4,
+    MAX_GUEST_COUNT             = 6
 };
 
 const Position GuestsPosition[4] =
@@ -62,7 +75,7 @@ const uint32 GuestEntries[6]=
     19873,
     19874,
     19875,
-    19876,
+    19876
 };
 
 class boss_moroes : public CreatureScript
@@ -72,10 +85,13 @@ class boss_moroes : public CreatureScript
 
         struct boss_moroesAI : public BossAI
         {
-            boss_moroesAI(Creature* creature) : BossAI(creature, TYPE_MOROES)
+            boss_moroesAI(Creature* creature) : BossAI(creature, DATA_MOROES)
             {
                 _activeGuests = 0;
+                instance = creature->GetInstanceScript();
             }
+
+            InstanceScript* instance;
 
             void InitializeAI()
             {
@@ -129,6 +145,7 @@ class boss_moroes : public CreatureScript
 
                 _events2.Reset();
                 me->CallForHelp(20.0f);
+                DoZoneInCombat();
             }
 
             void KilledUnit(Unit* /*victim*/)
@@ -145,7 +162,7 @@ class boss_moroes : public CreatureScript
                 summons.clear();
                 BossAI::JustDied(killer);
                 Talk(SAY_DEATH);
-
+                instance->SetBossState(DATA_MOROES, DONE);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_GARROTE);
             }
 
@@ -217,7 +234,11 @@ class boss_moroes : public CreatureScript
                         events.ScheduleEvent(EVENT_SPELL_GARROTE, urand(5000, 7000));
                         return;
                     case EVENT_SPELL_GARROTE:
+                        Talk(SAY_SPECIAL);
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                            target->CastSpell(target, SPELL_GARROTE, true);
                         me->CastSpell(me, SPELL_VANISH_TELEPORT, false);
+                        events.SetPhase(0);
                         break;
                 }
 

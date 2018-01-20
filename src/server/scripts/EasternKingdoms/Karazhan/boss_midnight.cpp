@@ -1,69 +1,82 @@
 /*
-REWRITTEN BY XINEF
-*/
+ * Copyright (C) 
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
-#include "karazhan.h"
 #include "SpellScript.h"
+#include "karazhan.h"
 
 enum eSay
 {
-    SAY_ATTUMEN1_APPEAR                = 0,
-    SAY_ATTUMEN1_MOUNT                = 2,
+    SAY_ATTUMEN1_APPEAR             = 0,
+    SAY_ATTUMEN1_MOUNT              = 2,
 
-    SAY_ATTUMEN2_DEATH                = 0,
+    SAY_ATTUMEN2_DEATH              = 0,
 
     SAY_ATTUMEN_KILL                = 1,
-    SAY_ATTUMEN_DISARM                = 3,
-    SAY_ATTUMEN_RANDOM                = 4,
-    SAY_ATTUMEN_MIDNIGHT_KILL        = 5,
+    SAY_ATTUMEN_DISARM              = 3,
+    SAY_ATTUMEN_RANDOM              = 4,
+    SAY_ATTUMEN_MIDNIGHT_KILL       = 5,
 
-    SAY_MIDNIGHT_EMOTE                = 0
+    SAY_MIDNIGHT_EMOTE              = 0
 };
 
 enum eSpells
 {
     // Midnight
-    SPELL_KNOCKDOWN                    = 29711,
+    SPELL_KNOCKDOWN                 = 29711,
     SPELL_SUMMON_ATTUMEN            = 29714,
     SPELL_SUMMON_ATTUMEN_MOUNTED    = 29799,
 
     // Attumen
-    SPELL_SHADOW_CLEAVE                = 29832,
-    SPELL_INTANGIBLE_PRESENCE        = 29833,
-    SPELL_SPAWN_SMOKE1                = 29802,
+    SPELL_SHADOW_CLEAVE             = 29832,
+    SPELL_INTANGIBLE_PRESENCE       = 29833,
+    SPELL_SPAWN_SMOKE1              = 29802,
 
     // Attumen 2
-    SPELL_CHARGE_MIDNIGHT            = 29847,
-    SPELL_SPAWN_SMOKE2                = 10389,
+    SPELL_CHARGE_MIDNIGHT           = 29847,
+    SPELL_SPAWN_SMOKE2              = 10389,
 
     // Generic
-    SPELL_MOUNT_TARGET_ATTUMEN        = 29769,
-    SPELL_MOUNT_TARGET_MIDNIGHT        = 29770
+    SPELL_MOUNT_TARGET_ATTUMEN      = 29769,
+    SPELL_MOUNT_TARGET_MIDNIGHT     = 29770
 };
 
 enum eEvents
 {
-    EVENT_CHECK_HEALTH_95            = 1,
-    EVENT_CHECK_HEALTH_25            = 2,
-    EVENT_SPELL_KNOCKDOWN            = 3,
+    EVENT_CHECK_HEALTH_95           = 1,
+    EVENT_CHECK_HEALTH_25           = 2,
+    EVENT_SPELL_KNOCKDOWN           = 3,
     EVENT_SUMMON_ATTUMEN_MOUNTED    = 4,
 
-    EVENT_SPELL_SHADOW_CLEAVE        = 10,
-    EVENT_SPELL_INTANGIBLE_PRESENCE    = 11,
-    EVENT_RANDOM_YELL                = 12,
+    EVENT_SPELL_SHADOW_CLEAVE       = 10,
+    EVENT_SPELL_INTANGIBLE_PRESENCE = 11,
+    EVENT_RANDOM_YELL               = 12,
 
-    EVENT_SPELL_CHARGE                = 20,
+    EVENT_SPELL_CHARGE              = 20,
 
-    EVENT_KILL_TALK                    = 30
+    EVENT_KILL_TALK                 = 30
 };
 
 enum eMisc
 {
-    POINT_MOVE_TO_MIDNIGHT            = 1,
-    DATA_ATTUMEN_READY                = 1
+    POINT_MOVE_TO_MIDNIGHT          = 1,
+    DATA_ATTUMEN_READY              = 1
 };
 
 class boss_midnight : public CreatureScript
@@ -73,7 +86,7 @@ class boss_midnight : public CreatureScript
 
         struct boss_midnightAI : public BossAI
         {
-            boss_midnightAI(Creature* creature) : BossAI(creature, TYPE_ATTUMEN) { }
+            boss_midnightAI(Creature* creature) : BossAI(creature, DATA_ATTUMEN) { }
 
             void Reset()
             {
@@ -87,6 +100,7 @@ class boss_midnight : public CreatureScript
                 BossAI::EnterCombat(who);
                 events.ScheduleEvent(EVENT_CHECK_HEALTH_95, 0);
                 events.ScheduleEvent(EVENT_SPELL_KNOCKDOWN, 6000);
+                DoZoneInCombat();
             }
 
             void KilledUnit(Unit* /*victim*/)
@@ -171,6 +185,7 @@ class boss_midnight : public CreatureScript
 
                 if (me->IsVisible())
                     DoMeleeAttackIfReady();
+
                 EnterEvadeIfOutOfCombatArea();
             }
                     
@@ -196,14 +211,9 @@ class boss_attumen : public CreatureScript
 
         struct boss_attumenAI : public ScriptedAI
         {
-            boss_attumenAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
+            boss_attumenAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void Reset()
-            {
-                _events.Reset();
-            }
+            void Reset() { _events.Reset(); }
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -223,7 +233,7 @@ class boss_attumen : public CreatureScript
                 }
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spellInfo)
+            void SpellHit(Unit*  /*caster*/, const SpellInfo* spellInfo)
             {
                 if (spellInfo->Mechanic == MECHANIC_DISARM && _events.GetNextEventTime(EVENT_KILL_TALK) == 0)
                 {
@@ -309,14 +319,9 @@ class boss_attumen_midnight : public CreatureScript
 
         struct boss_attumen_midnightAI : public ScriptedAI
         {
-            boss_attumen_midnightAI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
+            boss_attumen_midnightAI(Creature* creature) : ScriptedAI(creature) { }
 
-            void Reset()
-            {
-                _events.Reset();
-            }
+            void Reset() { _events.Reset(); }
 
             void EnterCombat(Unit* /*who*/)
             {
@@ -341,7 +346,7 @@ class boss_attumen_midnight : public CreatureScript
                 Talk(SAY_ATTUMEN2_DEATH);
             }
 
-            void SpellHit(Unit* caster, const SpellInfo* spellInfo)
+            void SpellHit(Unit*  /*caster*/, const SpellInfo* spellInfo)
             {
                 if (spellInfo->Mechanic == MECHANIC_DISARM && _events.GetNextEventTime(EVENT_KILL_TALK) == 0)
                 {
@@ -418,16 +423,16 @@ class spell_midnight_fixate : public SpellScriptLoader
 
             void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Unit* target = GetTarget();
                 if (Unit* caster = GetCaster())
-                    caster->TauntApply(target);
+                    if (Unit* target = GetTarget())
+                        caster->TauntApply(target);
             }
 
             void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                Unit* target = GetTarget();
                 if (Unit* caster = GetCaster())
-                    caster->TauntFadeOut(target);
+                    if (Unit* target = GetTarget())
+                        caster->TauntFadeOut(target);
             }
 
             void Register()
@@ -449,4 +454,5 @@ void AddSC_boss_attumen()
     new boss_midnight();
     new boss_attumen();
     new boss_attumen_midnight();
+    new spell_midnight_fixate();
 }

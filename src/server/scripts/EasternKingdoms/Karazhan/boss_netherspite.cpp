@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 
- * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -15,13 +14,6 @@
  * You should have received a copy of the GNU General Public License along
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-/* ScriptData
-SDName: Boss_Netherspite
-SD%Complete: 90
-SDComment: Not sure about timing and portals placing
-SDCategory: Karazhan
-EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -40,7 +32,7 @@ enum Netherspite
     SPELL_BANISH_VISUAL         = 39833,
     SPELL_BANISH_ROOT           = 42716,
     SPELL_EMPOWERMENT           = 38549,
-    SPELL_NETHERSPITE_ROAR      = 38684,
+    SPELL_NETHERSPITE_ROAR      = 38684
 };
 
 
@@ -51,17 +43,18 @@ const float PortalCoord[3][3] =
     {-11094.493164f, -1591.969238f, 279.949188f}  // Back side
 };
 
-enum Netherspite_Portal{
-    RED_PORTAL = 0, // Perseverence
-    GREEN_PORTAL = 1, // Serenity
-    BLUE_PORTAL = 2 // Dominance
+enum Netherspite_Porta
+{
+    RED_PORTAL    = 0, // Perseverence
+    GREEN_PORTAL  = 1, // Serenity
+    BLUE_PORTAL   = 2  // Dominance
 };
 
-const uint32 PortalID[3] = {17369, 17367, 17368};
+const uint32 PortalID[3]     = {17369, 17367, 17368};
 const uint32 PortalVisual[3] = {30487, 30490, 30491};
-const uint32 PortalBeam[3] = {30465, 30464, 30463};
-const uint32 PlayerBuff[3] = {30421, 30422, 30423};
-const uint32 NetherBuff[3] = {30466, 30467, 30468};
+const uint32 PortalBeam[3]   = {30465, 30464, 30463};
+const uint32 PlayerBuff[3]   = {30421, 30422, 30423};
+const uint32 NetherBuff[3]   = {30466, 30467, 30468};
 const uint32 PlayerDebuff[3] = {38637, 38638, 38639};
 
 class boss_netherspite : public CreatureScript
@@ -80,7 +73,7 @@ public:
         {
             instance = creature->GetInstanceScript();
 
-            for (int i=0; i<3; ++i)
+            for (uint8 i = 0; i < 3; ++i)
             {
                 PortalGUID[i] = 0;
                 BeamTarget[i] = 0;
@@ -92,15 +85,15 @@ public:
 
         bool PortalPhase;
         bool Berserk;
-        uint32 PhaseTimer; // timer for phase switching
+        uint32 PhaseTimer;          // timer for phase switching
         uint32 VoidZoneTimer;
         uint32 NetherInfusionTimer; // berserking timer
         uint32 NetherbreathTimer;
         uint32 EmpowermentTimer;
-        uint32 PortalTimer; // timer for beam checking
-        uint64 PortalGUID[3]; // guid's of portals
-        uint64 BeamerGUID[3]; // guid's of auxiliary beaming portals
-        uint64 BeamTarget[3]; // guid's of portals' current targets
+        uint32 PortalTimer;         // timer for beam checking
+        uint64 PortalGUID[3];       // guid's of portals
+        uint64 BeamerGUID[3];       // guid's of auxiliary beaming portals
+        uint64 BeamTarget[3];       // guid's of portals' current targets
 
         bool IsBetween(WorldObject* u1, WorldObject* target, WorldObject* u2) // the in-line checker
         {
@@ -129,10 +122,10 @@ public:
 
         void Reset()
         {
-            Berserk = false;
+            Berserk             = false;
             NetherInfusionTimer = 540000;
-            VoidZoneTimer = 15000;
-            NetherbreathTimer = 3000;
+            VoidZoneTimer       = 15000;
+            NetherbreathTimer   = 3000;
 
             HandleDoors(true);
             DestroyPortals();
@@ -146,7 +139,7 @@ public:
             pos[GREEN_PORTAL] = ((r % 2) ? 0 : (r > 1 ? 2 : 1));
             pos[BLUE_PORTAL] = (r > 1 ? 1 : 2); // Blue Portal not on the left side (0)
 
-            for (int i=0; i<3; ++i)
+            for (uint8 i = 0;  i < 3; ++i)
                 if (Creature* portal = me->SummonCreature(PortalID[i], PortalCoord[pos[i]][0], PortalCoord[pos[i]][1], PortalCoord[pos[i]][2], 0, TEMPSUMMON_TIMED_DESPAWN, 60000))
                 {
                     PortalGUID[i] = portal->GetGUID();
@@ -156,12 +149,13 @@ public:
 
         void DestroyPortals()
         {
-            for (int i=0; i<3; ++i)
+            for (uint8 i = 0; i < 3; ++i)
             {
                 if (Creature* portal = ObjectAccessor::GetCreature(*me, PortalGUID[i]))
                     portal->DisappearAndDie();
                 if (Creature* portal = ObjectAccessor::GetCreature(*me, BeamerGUID[i]))
                     portal->DisappearAndDie();
+
                 PortalGUID[i] = 0;
                 BeamTarget[i] = 0;
             }
@@ -169,7 +163,7 @@ public:
 
         void UpdatePortals() // Here we handle the beams' behavior
         {
-            for (int j=0; j<3; ++j) // j = color
+            for (uint8 j = 0; j < 3; ++j) // j = color
                 if (Creature* portal = ObjectAccessor::GetCreature(*me, PortalGUID[j]))
                 {
                     // the one who's been cast upon before
@@ -261,6 +255,7 @@ public:
         {
             HandleDoors(false);
             SwitchToPortalPhase();
+            DoZoneInCombat();
         }
 
         void JustDied(Unit* /*killer*/)
@@ -279,7 +274,8 @@ public:
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1, 45, true), SPELL_VOIDZONE, true);
                 VoidZoneTimer = 15000;
-            } else VoidZoneTimer -= diff;
+            } else 
+                VoidZoneTimer -= diff;
 
             // NetherInfusion Berserk
             if (!Berserk && NetherInfusionTimer <= diff)
@@ -287,7 +283,8 @@ public:
                 me->AddAura(SPELL_NETHER_INFUSION, me);
                 DoCast(me, SPELL_NETHERSPITE_ROAR);
                 Berserk = true;
-            } else NetherInfusionTimer -= diff;
+            } else 
+                NetherInfusionTimer -= diff;
 
             if (PortalPhase) // PORTAL PHASE
             {
@@ -296,7 +293,8 @@ public:
                 {
                     UpdatePortals();
                     PortalTimer = 1000;
-                } else PortalTimer -= diff;
+                } else 
+                    PortalTimer -= diff;
 
                 // Empowerment & Nether Burn
                 if (EmpowermentTimer <= diff)
@@ -304,7 +302,8 @@ public:
                     DoCast(me, SPELL_EMPOWERMENT);
                     me->AddAura(SPELL_NETHERBURN_AURA, me);
                     EmpowermentTimer = 90000;
-                } else EmpowermentTimer -= diff;
+                } else 
+                    EmpowermentTimer -= diff;
 
                 if (PhaseTimer <= diff)
                 {
@@ -313,7 +312,8 @@ public:
                         SwitchToBanishPhase();
                         return;
                     }
-                } else PhaseTimer -= diff;
+                } else 
+                    PhaseTimer -= diff;
             }
             else // BANISH PHASE
             {
@@ -323,7 +323,8 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                         DoCast(target, SPELL_NETHERBREATH);
                     NetherbreathTimer = urand(5000, 7000);
-                } else NetherbreathTimer -= diff;
+                } else 
+                    NetherbreathTimer -= diff;
 
                 if (PhaseTimer <= diff)
                 {
@@ -332,7 +333,8 @@ public:
                         SwitchToPortalPhase();
                         return;
                     }
-                } else PhaseTimer -= diff;
+                } else 
+                    PhaseTimer -= diff;
             }
 
             DoMeleeAttackIfReady();

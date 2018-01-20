@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 
- * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,12 +15,6 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* ScriptData
-SDName: Boss_Terestian_Illhoof
-SD%Complete: 95
-SDComment: Complete! Needs adjustments to use spell though.
-SDCategory: Karazhan
-EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -39,29 +32,28 @@ enum TerestianIllhoof
 
 enum Spells
 {
-    SPELL_SUMMON_DEMONCHAINS    = 30120,               // Summons demonic chains that maintain the ritual of sacrifice.
-    SPELL_DEMON_CHAINS          = 30206,                   // Instant - Visual Effect
-    SPELL_ENRAGE                = 23537,                   // Increases the caster's attack speed by 50% and the Physical damage it deals by 219 to 281 for 10 min.
-    SPELL_SHADOW_BOLT           = 30055,                   // Hurls a bolt of dark magic at an enemy, inflicting Shadow damage.
-    SPELL_SACRIFICE             = 30115,                   // Teleports and adds the debuff
-    SPELL_BERSERK               = 32965,                   // Increases attack speed by 75%. Periodically casts Shadow Bolt Volley.
-    SPELL_SUMMON_FIENDISIMP     = 30184,                   // Summons a Fiendish Imp.
-    SPELL_SUMMON_IMP            = 30066,                   // Summons Kil'rek
+    SPELL_SUMMON_DEMONCHAINS    = 30120,    // Summons demonic chains that maintain the ritual of sacrifice.
+    SPELL_DEMON_CHAINS          = 30206,    // Instant - Visual Effect
+    SPELL_ENRAGE                = 23537,    // Increases the caster's attack speed by 50% and the Physical damage it deals by 219 to 281 for 10 min.
+    SPELL_SHADOW_BOLT           = 30055,    // Hurls a bolt of dark magic at an enemy, inflicting Shadow damage.
+    SPELL_SACRIFICE             = 30115,    // Teleports and adds the debuff
+    SPELL_BERSERK               = 32965,    // Increases attack speed by 75%. Periodically casts Shadow Bolt Volley.
+    SPELL_SUMMON_FIENDISIMP     = 30184,    // Summons a Fiendish Imp.
+    SPELL_SUMMON_IMP            = 30066,    // Summons Kil'rek
 
-    SPELL_FIENDISH_PORTAL       = 30171,                   // Opens portal and summons Fiendish Portal, 2 sec cast
-    SPELL_FIENDISH_PORTAL_1     = 30179,                   // Opens portal and summons Fiendish Portal, instant cast
+    SPELL_FIENDISH_PORTAL       = 30171,    // Opens portal and summons Fiendish Portal, 2 sec cast
+    SPELL_FIENDISH_PORTAL_1     = 30179,    // Opens portal and summons Fiendish Portal, instant cast
 
-    SPELL_FIREBOLT              = 30050,                   // Blasts a target for 150 Fire damage.
-    SPELL_BROKEN_PACT           = 30065,                   // All damage taken increased by 25%.
-    SPELL_AMPLIFY_FLAMES        = 30053,                   // Increases the Fire damage taken by an enemy by 500 for 25 sec.
+    SPELL_FIREBOLT              = 30050,    // Blasts a target for 150 Fire damage.
+    SPELL_BROKEN_PACT           = 30065,    // All damage taken increased by 25%.
+    SPELL_AMPLIFY_FLAMES        = 30053     // Increases the Fire damage taken by an enemy by 500 for 25 sec.
 };
 
 enum Creatures
 {
     NPC_DEMONCHAINS             = 17248,
     NPC_FIENDISHIMP             = 17267,
-    NPC_PORTAL                  = 17265,
-    NPC_KILREK                  = 17229
+    NPC_PORTAL                  = 17265
 };
 
 
@@ -83,9 +75,7 @@ public:
         }
 
         InstanceScript* instance;
-
         uint64 TerestianGUID;
-
         uint32 AmplifyTimer;
 
         void Reset()
@@ -94,9 +84,7 @@ public:
             AmplifyTimer = 2000;
         }
 
-        void EnterCombat(Unit* /*who*/)
-        {
-        }
+        void EnterCombat(Unit* /*who*/) { }
 
         void JustDied(Unit* /*killer*/)
         {
@@ -111,7 +99,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            //Return since we have no target
+            // Return since we have no target.
             if (!UpdateVictim())
                 return;
 
@@ -121,7 +109,8 @@ public:
                 DoCastVictim(SPELL_AMPLIFY_FLAMES);
 
                 AmplifyTimer = urand(10000, 20000);
-            } else AmplifyTimer -= diff;
+            } else 
+                AmplifyTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -144,10 +133,7 @@ public:
 
         uint64 SacrificeGUID;
 
-        void Reset()
-        {
-            SacrificeGUID = 0;
-        }
+        void Reset() { SacrificeGUID = 0; }
 
         void EnterCombat(Unit* /*who*/) { }
         void AttackStart(Unit* /*who*/) { }
@@ -182,10 +168,7 @@ public:
 
         SummonList summons;
 
-        void Reset()
-        {
-            DespawnAllImp();
-        }
+        void Reset() { DespawnAllImp();}
 
         void JustSummoned(Creature* summon)
         {
@@ -219,7 +202,6 @@ public:
         void Reset()
         {
             FireboltTimer = 2000;
-
             me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         }
 
@@ -227,7 +209,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            //Return since we have no target
+            // Return since we have no target.
             if (!UpdateVictim())
                 return;
 
@@ -235,7 +217,8 @@ public:
             {
                 DoCastVictim(SPELL_FIREBOLT);
                 FireboltTimer = 2200;
-            } else FireboltTimer -= diff;
+            } else 
+                FireboltTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -258,6 +241,7 @@ public:
         {
             for (uint8 i = 0; i < 2; ++i)
                 PortalGUID[i] = 0;
+
             instance = creature->GetInstanceScript();
         }
 
@@ -270,6 +254,7 @@ public:
         uint32 ShadowboltTimer;
         uint32 SummonTimer;
         uint32 BerserkTimer;
+        uint32 SummonKilrekTimer;
 
         bool SummonedPortals;
         bool Berserk;
@@ -290,16 +275,17 @@ public:
                 }
             }
 
-            PortalsCount        =     0;
-            SacrificeTimer      = 30000;
-            ShadowboltTimer     =  5000;
-            SummonTimer         = 10000;
-            BerserkTimer        = 600000;
+            PortalsCount = 0;
+            SacrificeTimer = 30000;
+            ShadowboltTimer = 5000;
+            SummonTimer = 10000;
+            BerserkTimer = 600000;
+            SummonKilrekTimer = 0;
 
-            SummonedPortals     = false;
-            Berserk             = false;
+            SummonedPortals = false;
+            Berserk = false;
 
-            instance->SetData(TYPE_TERESTIAN, NOT_STARTED);
+            instance->SetData(DATA_TERESTIAN, NOT_STARTED);
 
             me->RemoveAurasDueToSpell(SPELL_BROKEN_PACT);
 
@@ -311,12 +297,14 @@ public:
                     DoCast(me, SPELL_SUMMON_IMP, true);
                 }
             }
-            else DoCast(me, SPELL_SUMMON_IMP, true);
+            else 
+                DoCast(me, SPELL_SUMMON_IMP, true);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             Talk(SAY_AGGRO);
+            DoZoneInCombat();
         }
 
         void JustSummoned(Creature* summoned)
@@ -353,8 +341,7 @@ public:
             }
 
             Talk(SAY_DEATH);
-
-            instance->SetData(TYPE_TERESTIAN, DONE);
+            instance->SetData(DATA_TERESTIAN, DONE);
         }
 
         void UpdateAI(uint32 diff)
@@ -362,6 +349,23 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (Minion* Kilrek = me->GetFirstMinion())
+            {
+                if (!Kilrek->IsAlive())
+                {
+                    Kilrek->UnSummon();
+                    SummonKilrekTimer = 45000;
+                }
+            }
+
+            if (SummonKilrekTimer <= diff)
+            { 
+                DoCast(me, SPELL_SUMMON_IMP, true);
+                me->RemoveAura(SPELL_BROKEN_PACT);
+            }
+            else 
+                SummonKilrekTimer -= diff;
+         
             if (SacrificeTimer <= diff)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 100, true);
@@ -374,17 +378,20 @@ public:
                     {
                         CAST_AI(npc_demon_chain::npc_demon_chainAI, Chains->AI())->SacrificeGUID = target->GetGUID();
                         Chains->CastSpell(Chains, SPELL_DEMON_CHAINS, true);
+
                         Talk(SAY_SACRIFICE);
                         SacrificeTimer = 30000;
                     }
                 }
-            } else SacrificeTimer -= diff;
+            } else 
+                SacrificeTimer -= diff;
 
             if (ShadowboltTimer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_TOPAGGRO, 0), SPELL_SHADOW_BOLT);
                 ShadowboltTimer = 10000;
-            } else ShadowboltTimer -= diff;
+            } else 
+                ShadowboltTimer -= diff;
 
             if (SummonTimer <= diff)
             {
@@ -400,7 +407,8 @@ public:
                         pPortal->CastSpell(me->GetVictim(), SPELL_SUMMON_FIENDISIMP, false);
                     SummonTimer = 5000;
                 }
-            } else SummonTimer -= diff;
+            } else 
+                SummonTimer -= diff;
 
             if (!Berserk)
             {
@@ -408,7 +416,8 @@ public:
                 {
                     DoCast(me, SPELL_BERSERK);
                     Berserk = true;
-                } else BerserkTimer -= diff;
+                } else 
+                    BerserkTimer -= diff;
             }
 
             DoMeleeAttackIfReady();
