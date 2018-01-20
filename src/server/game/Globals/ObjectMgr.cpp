@@ -1480,7 +1480,7 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
     stmt->setUInt32(0, recordData.bestKillTime = time);
 
     std::ostringstream msg;
-    msg << creatureName << " has been " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+    msg << creatureName << " has been killed " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
         << " in " << time / 1000 << "." << time % 1000 << " seconds! Previous record: " << oldTime / 1000 << "." << oldTime % 1000 << " seconds." << " (Previous record holder: " << oldGuild << ")";
     sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
 
