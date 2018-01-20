@@ -12,6 +12,7 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "Opcodes.h"
 #include "Player.h"
 #include "Chat.h"
+#include "MoveSplineInit.h"
 
 enum YoggSpells
 {
@@ -939,13 +940,12 @@ public:
         return new boss_yoggsaron_cloudAI (pCreature);
     }
 
-    struct boss_yoggsaron_cloudAI : public npc_escortAI
+    struct boss_yoggsaron_cloudAI : public ScriptedAI
     {
-        boss_yoggsaron_cloudAI(Creature* pCreature) : npc_escortAI(pCreature)
+        boss_yoggsaron_cloudAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            InitWaypoint();
             Reset();
-            Start(false, true, 0, 0, false, true);
+            //Start(false, true, 0, 0, false, true);
         }
 
         uint32 _checkTimer;
@@ -963,10 +963,10 @@ public:
 
         void MoveInLineOfSight(Unit* who) {}
         void AttackStart(Unit* who) {}
-        void WaypointReached(uint32 point) {}
 
         void Reset()
         {
+            InitWaypoint();
             me->CastSpell(me, SPELL_CLOUD_VISUAL, true);
             _checkTimer = 0;
             _isSummoning = false;
@@ -985,28 +985,37 @@ public:
             }
         }
 
-        void InitWaypoint()
+        void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path, bool clockwise)
         {
-            float dist = Middle.GetExactDist(me);
-            if (me->GetPositionX() > Middle.GetPositionX())
+            float step = clockwise ? -M_PI / 4.0f : M_PI / 4.0f;
+            float angle = centerPos.GetAngle(me->GetPositionX(), me->GetPositionY());
+
+            for (uint8 i = 0; i < 8; angle += step, ++i)
             {
-                for (uint8 i = 0; i <= dist; ++i)
-                {
-                    float angle = M_PI*2/dist*i;
-                    AddWaypoint(i, Middle.GetPositionX()+dist*cos(angle), Middle.GetPositionY()+dist*sin(angle), me->GetPositionZ(), 0);
-                }
-            }
-            else
-            {
-                for (uint8 i = 0; i <= dist; ++i)
-                {
-                    float angle = M_PI*2-(M_PI*2/dist*i);
-                    AddWaypoint(i, Middle.GetPositionX()+dist*cos(angle), Middle.GetPositionY()+dist*sin(angle), me->GetPositionZ(), 0);
-                }
+                G3D::Vector3 point;
+                point.x = centerPos.GetPositionX() + radius * cosf(angle);
+                point.y = centerPos.GetPositionY() + radius * sinf(angle);
+                point.z = z;
+                path.push_back(point);
             }
         }
 
-        void UpdateEscortAI(uint32 diff)
+        void InitWaypoint()
+        {
+            float dist = Middle.GetExactDist(me);
+            Movement::MoveSplineInit init(me);
+            if (me->GetPositionX() > Middle.GetPositionX())
+                FillCirclePath(Middle, dist, me->GetPositionZ(), init.Path(), true);
+            else
+                FillCirclePath(Middle, dist, me->GetPositionZ(), init.Path(), false);
+
+            init.SetWalk(false);
+            init.SetSmooth();
+            init.SetCyclic();
+            init.Launch();
+        }
+
+        void UpdateAI(uint32 diff)
         {
             _checkTimer += diff;
             if (_checkTimer >= 500 && !_isSummoning)
