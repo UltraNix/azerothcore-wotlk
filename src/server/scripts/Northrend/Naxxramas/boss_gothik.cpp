@@ -446,7 +446,7 @@ class boss_gothik : public CreatureScript
                 }
 
                 events.Update(diff);
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
+
                 if (!_gateIsOpen && HealthBelowPct(30) && events.IsInPhase(PHASE_TWO))
                     OpenGate();
 
