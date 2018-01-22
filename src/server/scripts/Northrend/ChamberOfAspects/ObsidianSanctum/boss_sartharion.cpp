@@ -1605,6 +1605,35 @@ public:
     }
 };
 
+class spell_vesperon_shadow_fissure : public SpellScriptLoader
+{
+public:
+    spell_vesperon_shadow_fissure() : SpellScriptLoader("spell_vesperon_shadow_fissure") { }
+
+    class spell_vesperon_shadow_fissure_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_vesperon_shadow_fissure_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if([&](WorldObject* target)
+            {
+                return GetCaster()->GetExactDist2d(target) > 4.0f;
+            });
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vesperon_shadow_fissure_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_vesperon_shadow_fissure_SpellScript();
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     new boss_sartharion();
@@ -1616,6 +1645,7 @@ void AddSC_boss_sartharion()
     new spell_sartharion_lava_strike();
     new spell_summon_flame_orb_mistress();
     new spell_onyx_brood_avenging_fury();
+    new spell_vesperon_shadow_fissure();
 
     new CreatureAILoader<npc_blaze_mistress_sarthrionAI>("npc_blaze_mistress_sarthrion");
     new CreatureAILoader<npc_flame_orb_mistressAI>("npc_flame_orb_mistress");
