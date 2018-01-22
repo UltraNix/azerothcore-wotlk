@@ -1430,6 +1430,148 @@ class spell_sartharion_lava_strike : public SpellScriptLoader
     }
 };
 
+enum mistressMisc
+{
+    SPELL_MIST_FLAME_SHOCK_10           = 39529,
+    SPELL_MIST_FLAME_SHOCK_25           = 58940,
+
+    SPELL_MIST_RAIN_OF_FIRE25           = 58936,
+    SPELL_MIST_RAIN_OF_FIRE10           = 57757,
+
+    SPELL_MIST_CONJURE_FLAME_ORB        = 57753,
+    SPELL_MIST_SUMMON_FLAME_ORB         = 57752,
+    SPELL_MIST_FLAME_ORB_PERIODIC_25    = 58937,
+    SPELL_MIST_FLAME_ORB_PERIDIOC_10    = 57750,
+    SPELL_MIST_FLAME_ORB_VISUAL         = 55928,
+
+    NPC_FLAME_ORB_MIST                  = 30702,
+    FLAME_ORB_DISPLAY_ID                = 26767
+};
+
+enum mistressEvents
+{
+    EVENT_MIST_FLAME_SHOCK          = 1,
+    EVENT_MIST_RAIN_OF_FIRE         = 2,
+    EVENT_MIST_FLAME_ORB            = 3
+};
+
+struct npc_blaze_mistress_sarthrionAI : public ScriptedAI
+{
+    npc_blaze_mistress_sarthrionAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
+
+    void Reset() override
+    {
+        events.Reset();
+        ScriptedAI::Reset();
+    }
+
+    void EnterCombat(Unit* who) override
+    {
+        ScriptedAI::EnterCombat(who);
+        events.ScheduleEvent(EVENT_MIST_FLAME_SHOCK, 5s, 7s);
+        events.ScheduleEvent(EVENT_MIST_RAIN_OF_FIRE, 15s);
+        events.ScheduleEvent(EVENT_MIST_FLAME_ORB, 5s, 10s);
+    }
+
+    void SpellHit(Unit* caster, const SpellInfo* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_MIST_CONJURE_FLAME_ORB && caster == me)
+            DoCastSelf(SPELL_MIST_SUMMON_FLAME_ORB, true);
+    }
+
+    void JustSummoned(Creature* summon) override
+    {
+        summons.Summon(summon);
+        if (summon->GetEntry() == NPC_FLAME_ORB_MIST)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 60.f, true))
+                summon->GetMotionMaster()->MoveFollow(target, 0.f, 0.f);
+            summon->DespawnOrUnsummon(10s);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        while (auto eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_MIST_FLAME_SHOCK:
+                    DoCastVictim(Is25ManRaid() ? SPELL_MIST_FLAME_SHOCK_25 : SPELL_MIST_FLAME_SHOCK_10);
+                    events.Repeat(7s, 8s);
+                    break;
+                case EVENT_MIST_RAIN_OF_FIRE:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 40.f, true))
+                        DoCast(target, Is25ManRaid() ? SPELL_MIST_RAIN_OF_FIRE25 : SPELL_MIST_RAIN_OF_FIRE10);
+                    events.Repeat(20s);
+                    break;
+                case EVENT_MIST_FLAME_ORB:
+                    DoCastAOE(SPELL_MIST_CONJURE_FLAME_ORB);
+                    events.Repeat(40s);
+                    break;
+            }
+        }
+        DoMeleeAttackIfReady();
+    }
+private:
+    EventMap events;
+    SummonList summons;
+};
+
+struct npc_flame_orb_mistressAI : public ScriptedAI
+{
+    npc_flame_orb_mistressAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        me->SetDisableGravity(true);
+        me->SetHover(true);
+        DoCastSelf(SPELL_MIST_FLAME_ORB_VISUAL);
+        DoCastSelf(Is25ManRaid() ? SPELL_MIST_FLAME_ORB_PERIODIC_25 : SPELL_MIST_FLAME_ORB_PERIDIOC_10);
+    }
+
+    void EnterEvadeMode() override { }
+    void EnterCombat(Unit* /*who*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
+};
+
+class spell_summon_flame_orb_mistress : public SpellScriptLoader
+{
+public:
+    spell_summon_flame_orb_mistress() : SpellScriptLoader("spell_summon_flame_orb_mistress") {}
+
+    class spell_summon_flame_orb_mistress_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_summon_flame_orb_mistress_SpellScript);
+
+        void ModDestHeight(SpellEffIndex effIndex)
+        {
+            static Position const offset = { 0.0f, 0.0f, 7.0f, 0.0f };
+            WorldLocation* dest = const_cast<WorldLocation*>(GetExplTargetDest());
+            dest->RelocateOffset(offset);
+            GetHitDest()->RelocateOffset(offset);
+        }
+
+        void Register() override
+        {
+            OnEffectHit += SpellEffectFn(spell_summon_flame_orb_mistress_SpellScript::ModDestHeight, EFFECT_0, SPELL_EFFECT_SUMMON);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_summon_flame_orb_mistress_SpellScript();
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     new boss_sartharion();
@@ -1439,4 +1581,8 @@ void AddSC_boss_sartharion()
     new npc_twilight_summon();
 
     new spell_sartharion_lava_strike();
+    new spell_summon_flame_orb_mistress();
+
+    new CreatureAILoader<npc_blaze_mistress_sarthrionAI>("npc_blaze_mistress_sarthrion");
+    new CreatureAILoader<npc_flame_orb_mistressAI>("npc_flame_orb_mistress");
 }
