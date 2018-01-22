@@ -79,6 +79,7 @@ public:
             _maexxnaPortalEyeGUID  = 0;
             _thaddiusPortalEyeGUID = 0;
             _naxxramasOrbGUID      = 0;
+            _mChestGUID            = 0;
 
             // NPCs
             _thaddiusGUID  = 0;
@@ -141,6 +142,7 @@ public:
         uint64 _thaddiusPortalEyeGUID;
         uint64 _naxxramasOrbGUID;
         uint64 _nothEntranceGateGUID;
+        uint64 _mChestGUID;
 
         // NPCs
         uint64 _thaddiusGUID;
@@ -245,6 +247,12 @@ public:
 
             switch(pGo->GetEntry())
             {
+                case GO_HORSEMEN_CHEST_10:
+                case GO_HORSEMEN_CHEST_25:
+                    pGo->SetVisible(false);
+                    pGo->EnableCollision(false);
+                    _mChestGUID = pGo->GetGUID();
+                    break;
                 case GO_PATCHWERK_GATE:
                     _patchwerkGateGUID = pGo->GetGUID();
                     if (Encounters[EVENT_PATCHWERK] == DONE)
@@ -517,6 +525,13 @@ public:
                 case DATA_IMMORTAL_FAIL:
                     immortalAchievement = 0;
                     SaveToDB();
+                    return;
+                case DATA_HORSEMAN_CHEST:
+                    if (GameObject* chest = instance->GetGameObject(_mChestGUID))
+                    {
+                        chest->SetVisible(true);
+                        chest->EnableCollision(true);
+                    }
                     return;
             }
 
