@@ -12645,6 +12645,35 @@ void Unit::ClearInPetCombat()
         owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
 
+void Unit::SetImmuneToPC(bool apply)
+{
+    if (apply)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+    else
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+}
+
+void Unit::SetImmuneToNPC(bool apply)
+{
+    if (apply)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+    else
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+}
+
+bool Unit::IsCasting() const
+{
+    return HasUnitState(UNIT_STATE_CASTING);
+}
+
+void Unit::SetSelectable(bool apply)
+{
+    if (apply)
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    else
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+}
+
 bool Unit::isTargetableForAttack(bool checkFakeDeath, Unit const* byWho) const
 {
     if (!IsAlive())

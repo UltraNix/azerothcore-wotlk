@@ -1694,6 +1694,16 @@ class Unit : public WorldObject
         void ClearInPetCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
 
+        void SetImmuneToAll(bool apply) { SetImmuneToPC(apply); SetImmuneToNPC(apply); }
+        bool IsImmuneToAll() const { return IsImmuneToPC() && IsImmuneToNPC(); }
+        void SetImmuneToPC(bool apply);
+        bool IsImmuneToPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC); }
+        void SetImmuneToNPC(bool apply);
+        bool IsImmuneToNPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
+        bool IsCasting() const;
+        void SetSelectable(bool apply);
+        bool IsSelectable() const { return !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); }
+
         bool HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName, uint32 familyFlags) const;
         bool virtual HasSpell(uint32 /*spellID*/) const { return false; }
         bool HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura = 0) const;
