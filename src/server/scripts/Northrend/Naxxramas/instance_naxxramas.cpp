@@ -951,7 +951,7 @@ struct npc_stoneskin_gargoyleAI : public ScriptedAI
             {
                 case EVENT_ACID_VOLLEY:
                     DoCastSelf(RAID_MODE(SPELL_ACID_VOLLEY_10, SPELL_ACID_VOLLEY_25));
-                    _events.Repeat(2s, 3s);
+                    _events.Repeat(10s, 15s);
                     break;
                 case EVENT_STONESKIN:
                     DoCastSelf(RAID_MODE(SPELL_STONESKIN_10, SPELL_STONESKIN_25));
