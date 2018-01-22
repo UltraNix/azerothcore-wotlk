@@ -131,7 +131,15 @@ public:
                 pInstance->SetData(EVENT_GLUTH, DONE);
 
             if (Map* map = me->GetMap())
+            {
                 CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
+
+
+                //! Load grids around marauding geists so they start pathing, love sunwellcore
+                map->LoadGrid(3073.399f, -2985.840f);
+                map->LoadGrid(3457.850f, -3365.479f);
+            }
+
         }
 
         bool IsInRoom()
