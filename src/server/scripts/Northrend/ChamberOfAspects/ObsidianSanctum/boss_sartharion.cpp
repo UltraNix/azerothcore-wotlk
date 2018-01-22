@@ -1445,7 +1445,10 @@ enum mistressMisc
     SPELL_MIST_FLAME_ORB_VISUAL         = 55928,
 
     NPC_FLAME_ORB_MIST                  = 30702,
-    FLAME_ORB_DISPLAY_ID                = 26767
+    FLAME_ORB_DISPLAY_ID                = 26767,
+    NPC_BROOD_MISTRESS                  = 30681,
+    NPC_BROOD_CAPTAIN                   = 30682,
+    NPC_BROOD_GENERAL                   = 30680
 };
 
 enum mistressEvents
@@ -1572,6 +1575,36 @@ public:
     }
 };
 
+class spell_onyx_brood_avenging_fury : public SpellScriptLoader
+{
+public:
+    spell_onyx_brood_avenging_fury() : SpellScriptLoader("spell_onyx_brood_avenging_fury") { }
+
+    class spell_onyx_brood_avenging_fury_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_onyx_brood_avenging_fury_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if([](WorldObject* target)
+            {
+                return !target->IsCreature() && target->GetEntry() != NPC_BROOD_CAPTAIN && target->GetEntry() != NPC_BROOD_MISTRESS && target->GetEntry() != NPC_BROOD_GENERAL;
+            });
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_onyx_brood_avenging_fury_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_onyx_brood_avenging_fury_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_onyx_brood_avenging_fury_SpellScript();
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     new boss_sartharion();
@@ -1582,6 +1615,7 @@ void AddSC_boss_sartharion()
 
     new spell_sartharion_lava_strike();
     new spell_summon_flame_orb_mistress();
+    new spell_onyx_brood_avenging_fury();
 
     new CreatureAILoader<npc_blaze_mistress_sarthrionAI>("npc_blaze_mistress_sarthrion");
     new CreatureAILoader<npc_flame_orb_mistressAI>("npc_flame_orb_mistress");
