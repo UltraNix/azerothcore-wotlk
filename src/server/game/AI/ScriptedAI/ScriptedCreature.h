@@ -421,6 +421,7 @@ class BossAI : public ScriptedAI
 
         EventMap events;
         SummonList summons;
+        TaskScheduler scheduler;
 
     private:
         BossBoundaryMap const* const _boundary;
