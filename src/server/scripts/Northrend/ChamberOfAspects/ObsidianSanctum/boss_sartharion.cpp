@@ -1588,7 +1588,7 @@ public:
         {
             targets.remove_if([](WorldObject* target)
             {
-                return !target->IsCreature() && target->GetEntry() != NPC_BROOD_CAPTAIN && target->GetEntry() != NPC_BROOD_MISTRESS && target->GetEntry() != NPC_BROOD_GENERAL;
+                return target->GetEntry() != NPC_BROOD_CAPTAIN && target->GetEntry() != NPC_BROOD_MISTRESS && target->GetEntry() != NPC_BROOD_GENERAL;
             });
         }
 
