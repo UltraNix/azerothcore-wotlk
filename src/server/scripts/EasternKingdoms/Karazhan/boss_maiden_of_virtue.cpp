@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,106 +16,115 @@
  */
 
 #include "ScriptMgr.h"
-#include "ScriptedCreature.h"
 #include "karazhan.h"
+#include "ScriptedCreature.h"
 
-enum MaidenOfVirtue
+enum Spells
 {
-    SAY_AGGRO                   = 0,
-    SAY_SLAY                    = 1,
-    SAY_REPENTANCE              = 2,
-    SAY_DEATH                   = 3,
+    SPELL_REPENTANCE    = 29511,
+    SPELL_HOLYFIRE      = 29522,
+    SPELL_HOLYWRATH     = 32445,
+    SPELL_HOLYGROUND    = 29523,
+    SPELL_BERSERK       = 26662
+};
 
-    SPELL_REPENTANCE            = 29511,
-    SPELL_HOLY_FIRE             = 29522,
-    SPELL_HOLY_WRATH            = 32445,
-    SPELL_HOLY_GROUND           = 29523,
-    SPELL_BERSERK               = 26662,
+enum Yells
+{
+    SAY_AGGRO           = 0,
+    SAY_SLAY            = 1,
+    SAY_REPENTANCE      = 2,
+    SAY_DEATH           = 3
+};
 
-    EVENT_SPELL_REPENTANCE      = 1,
-    EVENT_SPELL_HOLY_FIRE       = 2,
-    EVENT_SPELL_HOLY_WRATH      = 3,
-    EVENT_SPELL_ENRAGE          = 4,
-    EVENT_KILL_TALK             = 5
+enum Events
+{
+    EVENT_REPENTANCE    = 1,
+    EVENT_HOLYFIRE      = 2,
+    EVENT_HOLYWRATH     = 3,
+    EVENT_ENRAGE        = 4
 };
 
 class boss_maiden_of_virtue : public CreatureScript
 {
-    public:
-        boss_maiden_of_virtue() : CreatureScript("boss_maiden_of_virtue") { }
+public:
+    boss_maiden_of_virtue() : CreatureScript("boss_maiden_of_virtue") { }
 
-        struct boss_maiden_of_virtueAI : public BossAI
+    struct boss_maiden_of_virtueAI : public BossAI
+    {
+        boss_maiden_of_virtueAI(Creature* creature) : BossAI(creature, DATA_MAIDEN_OF_VIRTUE) { }
+
+        void KilledUnit(Unit* /*Victim*/) override
         {
-            boss_maiden_of_virtueAI(Creature* creature) : BossAI(creature, DATA_MAIDEN) { }
+            if (roll_chance_i(50))
+                Talk(SAY_SLAY);
+        }
 
-            void Reset() { BossAI::Reset(); }
+        void JustDied(Unit* /*killer*/) override
+        {
+            Talk(SAY_DEATH);
+            _JustDied();
+        }
 
-            void KilledUnit(Unit* /*victim*/)
+        void EnterCombat(Unit* /*attacker*/) override
+        {
+            _EnterCombat();
+            Talk(SAY_AGGRO);
+
+            DoCastSelf(SPELL_HOLYGROUND, true);
+            events.ScheduleEvent(EVENT_REPENTANCE, Seconds(33), Seconds(45));
+            events.ScheduleEvent(EVENT_HOLYFIRE, Seconds(8));
+            events.ScheduleEvent(EVENT_HOLYWRATH, Seconds(15), Seconds(25));
+            events.ScheduleEvent(EVENT_ENRAGE, Minutes(10));
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                if (events.GetNextEventTime(EVENT_KILL_TALK) == 0)
+                switch (eventId)
                 {
-                    Talk(SAY_SLAY);
-                    events.ScheduleEvent(EVENT_KILL_TALK, 5000);
+                    case EVENT_REPENTANCE:
+                        DoCastVictim(SPELL_REPENTANCE);
+                        Talk(SAY_REPENTANCE);
+                        events.Repeat(Seconds(35));
+                        break;
+                    case EVENT_HOLYFIRE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50, true))
+                            DoCast(target, SPELL_HOLYFIRE);
+                        events.Repeat(Seconds(8), Seconds(19));
+                        break;
+                    case EVENT_HOLYWRATH:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80, true))
+                            DoCast(target, SPELL_HOLYWRATH);
+                        events.Repeat(Seconds(15), Seconds(25));
+                        break;
+                    case EVENT_ENRAGE:
+                        DoCastSelf(SPELL_BERSERK, true);
+                        break;
+                    default:
+                        break;
                 }
-            }
 
-            void JustDied(Unit* killer)
-            {
-                BossAI::JustDied(killer);
-                Talk(SAY_DEATH);
-            }
-
-            void EnterCombat(Unit* who)
-            {
-                BossAI::EnterCombat(who);
-                Talk(SAY_AGGRO);
-
-                me->CastSpell(me, SPELL_HOLY_GROUND, true);
-                events.ScheduleEvent(EVENT_SPELL_REPENTANCE, 25000);
-                events.ScheduleEvent(EVENT_SPELL_HOLY_FIRE, 8000);
-                events.ScheduleEvent(EVENT_SPELL_HOLY_WRATH, 15000);
-                events.ScheduleEvent(EVENT_SPELL_ENRAGE, 600000);
-                DoZoneInCombat();
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-
-                switch (events.ExecuteEvent())
-                {
-                    case EVENT_SPELL_REPENTANCE:
-                        me->CastSpell(me, SPELL_REPENTANCE, true);
-                        events.ScheduleEvent(EVENT_SPELL_REPENTANCE, urand(25000, 35000));
-                        break;
-                    case EVENT_SPELL_HOLY_FIRE:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                            me->CastSpell(target, SPELL_HOLY_FIRE, true);
-                        events.ScheduleEvent(EVENT_SPELL_HOLY_FIRE, urand(8000, 18000));
-                        break;
-                    case EVENT_SPELL_HOLY_WRATH:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                            me->CastSpell(target, SPELL_HOLY_WRATH, true);
-                        events.ScheduleEvent(EVENT_SPELL_HOLY_WRATH, urand(20000, 25000));
-                        break;
-                    case EVENT_SPELL_ENRAGE:
-                        me->CastSpell(me, SPELL_BERSERK, true);
-                        break;
-                }
-
-                DoMeleeAttackIfReady();
             }
-        };
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetInstanceAI<boss_maiden_of_virtueAI>(creature);
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return GetKarazhanAI<boss_maiden_of_virtueAI>(creature);
+    }
 };
 
 void AddSC_boss_maiden_of_virtue()
