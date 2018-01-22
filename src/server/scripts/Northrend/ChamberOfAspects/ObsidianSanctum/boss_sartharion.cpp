@@ -1586,9 +1586,18 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            targets.remove_if([](WorldObject* target)
+            targets.remove_if([](WorldObject* target) -> bool
             {
-                return target->GetEntry() != NPC_BROOD_CAPTAIN && target->GetEntry() != NPC_BROOD_MISTRESS && target->GetEntry() != NPC_BROOD_GENERAL;
+                if (!target->ToCreature())
+                    return true;
+
+                if (!target->ToCreature()->IsInCombat())
+                    return true;
+
+                if (target->GetEntry() == NPC_BROOD_CAPTAIN || target->GetEntry() == NPC_BROOD_MISTRESS)
+                    return false;
+
+                return true;
             });
         }
 
