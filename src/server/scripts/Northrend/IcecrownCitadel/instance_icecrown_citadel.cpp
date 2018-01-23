@@ -133,6 +133,27 @@ class DelayedCastMincharEvent : public BasicEvent
         uint32 _spellId;
 };
 
+Movement::PointsArray DamnedLeftPath =
+{
+    { -134.602325f, 2211.437012f, 35.234386f },
+    { -122.300446f, 2222.972900f, 35.234386f },
+    { -108.775436f, 2236.692383f, 30.65416f },
+};
+
+Movement::PointsArray DamnedMiddlePath =
+{
+    { -134.602325f, 2211.437012f, 35.234386f },
+    { -118.135445f, 2211.544678f, 35.233578f },
+    { -91.747589f, 2211.454102f, 27.902412f },
+};
+
+Movement::PointsArray DamnedRightPath =
+{
+    { -134.602325f, 2211.437012f, 35.234386f },
+    { -123.595428f, 2199.131836f, 35.232285f },
+    { -108.697006f, 2185.655273f, 30.654232f },
+};
+
 class instance_icecrown_citadel : public InstanceMapScript
 {
     public:
@@ -142,6 +163,7 @@ class instance_icecrown_citadel : public InstanceMapScript
         {
             instance_icecrown_citadel_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
             {
+                LightsHammerTrashEnabled = true;
                 // pussywizard:
                 IsBuffAvailable = true;
                 WeeklyQuestId10 = 0;
@@ -579,6 +601,38 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (!creature->GetTransport() && creature->GetPositionZ() <= 205.0f && creature->GetExactDist2d(-439.0f, 2210.0f) <= 150.0f && (creature->GetEntry() == 37544 || creature->GetEntry() == 37545 || creature->GetName().compare(0, name1.length(), name1) == 0 || creature->GetName().compare(0, name2.length(), name2) == 0))
                     if (!creature->GetLootRecipient())
                         creature->m_Events.AddEvent(new RespawnEvent(*creature), creature->m_Events.CalculateTime(3000));
+
+                // fighting npcs in Light's Hammer
+                if (LightsHammerTrashEnabled && creature->GetEntry() == 37011)
+                {
+                    for (uint32 i = 247110; i <= 247112; ++i)
+                        if (creature->GetDBTableGUIDLow() == i)
+                        {
+                            Scheduler.Schedule(3s, 5s, [creature](TaskContext /*task*/) {
+                                Position pos = { -150.639267f, 2211.976563f, 35.233513f, 6.246146f };
+                                creature->Respawn(true);
+                                creature->SetLootMode(0);
+                                creature->SetHomePosition(pos);
+                                Movement::PointsArray path;
+                                switch (creature->GetDBTableGUIDLow())
+                                {
+                                    case 247111:
+                                        path = DamnedRightPath;
+                                        break;
+                                    case 247112:
+                                        path = DamnedMiddlePath;
+                                        break;
+                                    case 247110:
+                                        path = DamnedLeftPath;
+                                        break;
+                                }
+
+                                creature->UpdatePosition(pos, true);
+                                if (!path.empty())
+                                    creature->GetMotionMaster()->MoveSplinePath(&path);
+                            });
+                        } 
+                }
 
                 switch (creature->GetEntry())
                 {
@@ -1200,6 +1254,10 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (type)
                 {
+                    case DATA_LIGHTS_HAMMER_TRASH:
+                        if (data == 0)
+                            LightsHammerTrashEnabled = false;
+                        break;
                     case DATA_BUFF_AVAILABLE:
                         IsBuffAvailable = (data ? true : false);
                         if (!IsBuffAvailable)
@@ -1613,6 +1671,8 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             void Update(uint32 diff)
             {
+                Scheduler.Update(diff);
+
                 // Xinef: A Feast of Souls (24547) whispers
                 if (LichKingRandomWhisperTimer <= diff)
                 {
@@ -1826,6 +1886,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 ScourgeTransporterFirstGUID;
 
             EventMap Events;
+            TaskScheduler Scheduler;
             uint64 LadyDeathwisperElevatorGUID;
             uint64 GunshipGUID;
             uint64 EnemyGunshipGUID;
@@ -1884,6 +1945,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             bool IsOozeDanceEligible;
             bool IsNauseaEligible;
             bool IsOrbWhispererEligible;
+            bool LightsHammerTrashEnabled;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

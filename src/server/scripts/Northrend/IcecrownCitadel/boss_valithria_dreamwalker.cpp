@@ -890,6 +890,8 @@ class npc_blazing_skeleton : public CreatureScript
         {
             npc_blazing_skeletonAI(Creature* creature) : ScriptedAI(creature)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
             }
 
             void Reset()

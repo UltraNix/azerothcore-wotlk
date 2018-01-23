@@ -9,3 +9,257 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=`mechanic_immune_mask`|32,
 -- ICC Buff 10%->30%
 UPDATE `spell_area` SET `spell`=73822 WHERE `spell`=73818;
 UPDATE `spell_area` SET `spell`=73828 WHERE `spell`=73824;
+-- Gunship Prenerf
+DELETE FROM `creature` WHERE `guid`=133974;
+UPDATE `creature` SET `position_x`=14.61, `position_y`=30.60, `position_z`=35.71 WHERE `guid`=133991;
+-- Dominate Mind
+DELETE FROM `spell_script_names` WHERE `ScriptName`="spell_deathwhisper_dominate_mind";
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(71289, "spell_deathwhisper_dominate_mind");
+-- Trash corrections --
+
+-- Ancient Skeletal Soldier SAI
+SET @ENTRY := 37012;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,5000,10000,7000,12000,11,70964,0,0,0,0,0,2,0,0,0,0,0,0,0,"Ancient Skeletal Soldier - In Combat - Cast 'Shield Bash'");
+-- Servant of the Throne SAI
+SET @ENTRY := 36724;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,0,1000,3000,4500,11,71029,64,0,0,0,0,2,0,0,0,0,0,0,0,"Servant of the Throne - In Combat - Cast 'Glacial Blast'");
+-- The Damned SAI
+SET @ENTRY := 37011;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,6,0,100,1,0,0,0,0,11,70961,3,0,0,0,0,1,0,0,0,0,0,0,0,"The Damned - On Just Died - Cast 'Shattered Bones' (No Repeat)"),
+(@ENTRY,0,1,0,2,0,100,0,1,30,15000,20000,11,70960,0,0,0,0,0,2,0,0,0,0,0,0,0,"The Damned - Between 1-30% Health - Cast 'Bone Flurry'"),
+(@ENTRY,0,2,0,1,0,100,0,1000,1000,60000,60000,49,0,0,0,0,0,0,25,8,0,0,0,0,0,0,"The Damned - Out of Combat - Start Attacking");
+
+-- Before Marrowgar:
+DELETE FROM `creature` WHERE `guid` IN (201107, 247113, 247114, 247115, 201146, 201090);
+SET @CGUID = 200800;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND  @CGUID + 7;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+(@CGUID + 0, 37012, 631, 15, 1, 0, 1, -300.816803, 2200.999268, 41.981998, 6.248071, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 1, 37012, 631, 15, 1, 0, 1, -299.571411, 2223.170166, 41.978565, 6.160891, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 2, 36724, 631, 15, 1, 0, 1, -241.973160, 2215.202393, 42.564507, 6.215871, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 3, 36724, 631, 15, 1, 0, 1, -242.466614, 2207.968506, 42.564507, 6.223723, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 4, 37012, 631, 15, 1, 0, 1, -200.403839, 2214.431152, 35.233513, 0.029989, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 5, 37012, 631, 15, 1, 0, 1, -201.366531, 2206.084717, 35.233513, 0.029989, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 6, 36724, 631, 15, 1, 0, 1, -213.672729, 2196.816406, 35.233513, 0.029989, 86400, 0, 0, 315000, 0, 0, 0, 0, 0),
+(@CGUID + 7, 36724, 631, 15, 1, 0, 1, -214.241837, 2224.958740, 35.233513, 0.029989, 86400, 0, 0, 315000, 0, 0, 0, 0, 0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (200966,201066);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(200966,200966,0,0,3,0,0),
+(200966,201066,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (200878,200805,200804,200995,200806,200939,201080,201106,200807);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(200878,200878,0,0,3,0,0),
+(200878,200805,0,0,3,0,0),
+(200878,200804,0,0,3,0,0),
+(200878,200995,0,0,3,0,0),
+(200878,200806,0,0,3,0,0),
+(200878,200939,0,0,3,0,0),
+(200878,201080,0,0,3,0,0),
+(200878,201106,0,0,3,0,0),
+(200878,200807,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (200892,201170,200803,201090,200802,201127,201119);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(200892,200892,0,0,3,0,0),
+(200892,201170,0,0,3,0,0),
+(200892,200803,0,0,3,0,0),
+(200892,201090,0,0,3,0,0),
+(200892,200802,0,0,3,0,0),
+(200892,201127,0,0,3,0,0),
+(200892,201119,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (200936,200800,200934,201160,201011,200912,200801,200996);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(200936,200936,0,0,3,0,0),
+(200936,200800,0,0,3,0,0),
+(200936,200934,0,0,3,0,0),
+(200936,201160,0,0,3,0,0),
+(200936,201011,0,0,3,0,0),
+(200936,200912,0,0,3,0,0),
+(200936,200801,0,0,3,0,0),
+(200936,200996,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (201097,201029,201087,201186);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(201097,201097,0,0,3,0,0),
+(201097,201029,0,0,3,0,0),
+(201097,201087,0,0,3,0,0),
+(201097,201186,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (201177,200969,200913,200965);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(201177,201177,0,0,3,0,0),
+(201177,200969,0,0,3,0,0),
+(201177,200913,0,0,3,0,0),
+(201177,200965,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (200956,201145,201124,201037,200919);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(200956,200956,0,0,3,0,0),
+(200956,201145,0,0,3,0,0),
+(200956,201124,0,0,3,0,0),
+(200956,201037,0,0,3,0,0),
+(200956,200919,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (200949,201065,201036,200883,201093);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(200949,200949,0,0,3,0,0),
+(200949,201065,0,0,3,0,0),
+(200949,201036,0,0,3,0,0),
+(200949,200883,0,0,3,0,0),
+(200949,201093,0,0,3,0,0);
+
+UPDATE `creature` SET `MovementType`=1, `spawndist`=4 WHERE `guid` IN (201029, 201087, 201186, 201093, 200883, 201036, 201065, 201145, 200919, 201037, 201124, 200913, 200969, 201177);
+
+UPDATE `creature` SET `position_x`=-142.105408, `position_y`=2205.533691, `position_z`=35.227146 WHERE `guid`=200966;
+UPDATE `creature` SET `position_x`=-142.105408, `position_y`=2217.462402, `position_z`=35.227146 WHERE `guid`=201066;
+
+DELETE FROM `areatrigger_scripts` WHERE `entry`=5611;
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(5611, "at_icc_lights_hammer_disable_spawn");
+
+UPDATE `creature` SET `position_x`=-107.308174, `position_y`=2233.338867, `position_z`=30.564341 WHERE `guid`=247110;
+UPDATE `creature` SET `position_x`=-106.886055, `position_y`=2188.241943, `position_z`=30.654263 WHERE `guid`=247111;
+UPDATE `creature` SET `position_x`=-89.493370, `position_y`=2214.156250, `position_z`=27.902536 WHERE `guid`=247112;
+
+-- Before Gunship:
+-- Kor'kron Battle Standard SAI
+SET @ENTRY := 37044;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,11,69809,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Cast 'Kor'kron Battle Standard'");
+
+-- Before Valithria:
+UPDATE `creature_template` SET `ScriptName`="npc_icc_warhawk" WHERE `entry`=38154;
+-- Reputation:
+DELETE FROM `creature_onkill_reputation` WHERE `creature_id` IN (37501, 37502, 37228, 37229, 38154);
+INSERT INTO `creature_onkill_reputation` (`creature_id`, `RewOnKillRepFaction1`, `RewOnKillRepFaction2`, `MaxStanding1`, `IsTeamAward1`, `RewOnKillRepValue1`, `MaxStanding2`, `IsTeamAward2`, `RewOnKillRepValue2`, `TeamDependent`) VALUES 
+(37501, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(37502, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(37228, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(37229, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(38154, 1156, 0, 7, 0, 2, 0, 0, 0, 0);
+
+-- Crimson Hall:
+SET @CGUID = 210000;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 9;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+(@CGUID + 0, 37595, 631, 15, 1, 0, 1, 4624.595703, 2778.435303, 361.164734, 2.057239, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 1, 37666, 631, 15, 1, 0, 1, 4626.430176, 2791.383789, 361.164734, 4.162108, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 2, 37595, 631, 15, 1, 0, 1, 4629.443848, 2744.228516, 361.165314, 2.379777, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 3, 37666, 631, 15, 1, 0, 1, 4625.564941, 2756.155273, 361.165771, 4.374685, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 4, 37664, 631, 15, 1, 0, 1, 4582.464844, 2687.033203, 384.684418, 3.575848, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 5, 37595, 631, 15, 1, 0, 1, 4573.750000, 2675.562988, 384.684418, 1.438779, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 6, 37595, 631, 15, 1, 0, 1, 4512.936523, 2769.254395, 403.982422, 0.000720, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 7, 37666, 631, 15, 1, 0, 1, 4532.104492, 2769.261230, 403.982422, 3.142632, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 8, 37664, 631, 15, 1, 0, 1, 4580.873535, 2851.963135, 384.682861, 2.445193, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0),
+(@CGUID + 9, 37595, 631, 15, 1, 0, 1, 4575.161621, 2863.505127, 384.682861, 4.641165, 86400, 0, 0, 431360, 91600, 0, 0, 0, 0);
+
+UPDATE `creature` SET `position_x`=4629.100098, `position_y`=2753.189941, `position_z`=361.165985, `orientation`=3.624630 WHERE `guid`=201444;
+
+-- Darkfallen Advisor SAI
+SET @ENTRY := 37571;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,5000,7000,10000,12000,11,72057,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Advisor - In Combat - Cast 'Lich Slap'"),
+(@ENTRY,0,1,0,14,0,100,0,200000,39,8000,8000,11,72065,0,0,0,0,0,7,0,0,0,0,0,0,0,"Darkfallen Advisor - Friendly At 200000 Health - Cast 'Shroud of Protection'"),
+(@ENTRY,0,2,0,14,0,100,0,200000,39,8000,8000,11,72066,0,0,0,0,0,7,0,0,0,0,0,0,0,"Darkfallen Advisor - Friendly At 200000 Health - Cast 'Shroud of Spell Warding'");
+-- Darkfallen Blood Knight SAI
+SET @ENTRY := 37595;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,3000,5000,5000,5000,11,70437,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Blood Knight - In Combat - Cast 'Unholy Strike'"),
+(@ENTRY,0,1,0,0,0,100,0,0,0,20000,20000,11,71736,0,0,0,0,0,1,0,0,0,0,0,0,0,"Darkfallen Blood Knight - In Combat - Cast 'Vampiric Aura'");
+-- Darkfallen Noble SAI
+SET @ENTRY := 37663;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,3000,5000,5000,5000,11,72960,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Noble - In Combat - Cast 'Shadow Bolt'"),
+(@ENTRY,0,1,0,0,0,100,0,10000,15000,15000,15000,11,70645,0,0,0,0,0,6,0,0,0,0,0,0,0,"Darkfallen Noble - In Combat - Cast 'Chains of Shadow'");
+-- Darkfallen Archmage SAI
+SET @ENTRY := 37664;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,8000,10000,15000,20000,11,70408,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Archmage - In Combat - Cast 'Amplify Magic'"),
+(@ENTRY,0,1,0,0,0,100,0,6000,8000,12000,15000,11,70407,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Archmage - In Combat - Cast 'Blast Wave'"),
+(@ENTRY,0,2,0,0,0,100,0,2000,4000,8000,10000,11,70409,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Archmage - In Combat - Cast 'Fireball'"),
+(@ENTRY,0,3,0,0,0,100,0,6000,10000,16000,20000,11,70410,0,0,0,0,0,17,14,29,1,0,0,0,0,"Darkfallen Archmage - In Combat - Cast 'Polymorph: Spider'"),
+(@ENTRY,0,5,0,4,0,100,0,0,0,0,0,11,70299,0,0,0,0,0,1,0,0,0,0,0,0,0,"Darkfallen Archmage - On Aggro - Cast 'Siphon Essence'"),
+(@ENTRY,0,6,0,6,0,100,0,0,0,0,0,104,0,0,0,0,0,0,20,201741,40,0,0,0,0,0,"Darkfallen Archmage - On Just Died - Set Gameobject Flag ");
+-- Darkfallen Tactician SAI
+SET @ENTRY := 37666;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,5000,15000,10000,20000,11,70432,0,0,0,0,0,3,0,0,0,0,0,0,0,"Darkfallen Tactician - In Combat - Cast 'Blood Sap'"),
+(@ENTRY,0,1,0,0,0,100,0,15000,20000,15000,25000,11,70431,0,0,0,0,0,17,11,39,1,0,0,0,0,"Darkfallen Tactician - In Combat - Cast 'Shadowstep'"),
+(@ENTRY,0,2,0,0,0,100,0,3000,6000,5000,5000,11,70437,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Tactician - In Combat - Cast 'Unholy Strike'");
+-- Darkfallen Lieutenant SAI
+SET @ENTRY := 37665;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,2000,4000,8000,8000,11,70423,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Lieutenant - In Combat - Cast 'Vampiric Curse'"),
+(@ENTRY,0,1,0,0,0,100,0,5000,5000,5000,5000,11,70435,0,0,0,0,0,2,0,0,0,0,0,0,0,"Darkfallen Lieutenant - In Combat - Cast 'Rend Flesh'");
+-- Darkfallen Commander SAI
+SET @ENTRY := 37662;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,0,0,100,0,1000,1000,12000,12000,11,70750,0,0,0,0,0,1,0,0,0,0,0,0,0,"Darkfallen Commander - In Combat - Cast 'Battle Shout'"),
+(@ENTRY,0,1,0,0,0,100,0,4000,4000,20000,20000,11,70449,0,0,0,0,0,6,0,0,0,0,0,0,0,"Darkfallen Commander - In Combat - Cast 'Vampire Rush'");
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (201482,201646,201479,201659);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(201482,201482,0,0,3,0,0),
+(201482,201646,0,0,3,0,0),
+(201482,201479,0,0,3,0,0),
+(201482,201659,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (210000,201396,201458,201307,210001,201238);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(210000,210000,0,0,3,0,0),
+(210000,201396,0,0,3,0,0),
+(210000,201458,0,0,3,0,0),
+(210000,201307,0,0,3,0,0),
+(210000,210001,0,0,3,0,0),
+(210000,201238,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (201314,201673,210003,201444,210002,201259);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(201314,201314,0,0,3,0,0),
+(201314,201673,0,0,3,0,0),
+(201314,210003,0,0,3,0,0),
+(201314,201444,0,0,3,0,0),
+(201314,210002,0,0,3,0,0),
+(201314,201259,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (201218,210008,201604,201275,201595,210009);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(201218,201218,0,0,3,0,0),
+(201218,210008,0,0,3,0,0),
+(201218,201604,0,0,3,0,0),
+(201218,201275,0,0,3,0,0),
+(201218,201595,0,0,3,0,0),
+(201218,210009,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (210006,201385,201335,210007,201306,201296);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(210006,210006,0,0,3,0,0),
+(210006,201385,0,0,3,0,0),
+(210006,201335,0,0,3,0,0),
+(210006,210007,0,0,3,0,0),
+(210006,201306,0,0,3,0,0),
+(210006,201296,0,0,3,0,0);
+DELETE FROM `creature_formations` WHERE `memberGUID` IN (201530,210005,201630,201589,201553,210004);
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(201530,201530,0,0,3,0,0),
+(201530,210005,0,0,3,0,0),
+(201530,201630,0,0,3,0,0),
+(201530,201589,0,0,3,0,0),
+(201530,201553,0,0,3,0,0),
+(201530,210004,0,0,3,0,0);

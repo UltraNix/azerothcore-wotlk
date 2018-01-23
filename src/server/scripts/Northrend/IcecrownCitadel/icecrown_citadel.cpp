@@ -18,6 +18,8 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "icecrown_citadel.h"
 #include "ScriptedGossip.h"
 #include "Chat.h"
+#include "MoveSplineInit.h"
+#include "MotionMaster.h"
 
 enum Texts
 {
@@ -267,6 +269,18 @@ enum EventIds
 enum MovementPoints
 {
     POINT_LAND  = 1,
+};
+
+uint32 const FirstWardPathSize = 7;
+Position const FirstWardPath[FirstWardPathSize] =
+{
+    { -193.471802f, 2165.252930f, 37.985104f },
+    { -173.338287f, 2178.899658f, 37.985104f },
+    { -175.232864f, 2244.533203f, 37.985283f },
+    { -193.436111f, 2258.234863f, 37.985283f },
+    { -214.251709f, 2242.914551f, 37.985283f },
+    { -214.629257f, 2178.479736f, 37.985176f },
+    { -193.471802f, 2165.252930f, 37.985104f },
 };
 
 class FrostwingVrykulSearcher
@@ -1573,6 +1587,7 @@ class npc_captain_rupert : public CreatureScript
 enum FrostwingVrykl
 {
     SPELL_SPIRIT_STREAM                    = 69929,
+    SPELL_SUMMON_WARHAWK                   = 71705,
 
     NPC_INVISIBLE_STALKER_3_0            = 38310
 };
@@ -1625,6 +1640,8 @@ class npc_frostwing_vrykul : public CreatureScript
                 summons.DespawnAll();
                 events.Reset();
                 events2.Reset();
+                if (me->GetEntry() == NPC_YMIRJAR_HUNTRESS)
+                    DoCastSelf(SPELL_SUMMON_WARHAWK, true);
                 switch (me->GetEntry())
                 {
                     case NPC_YMIRJAR_HUNTRESS:
@@ -1964,12 +1981,20 @@ class spell_icc_sprit_alarm : public SpellScriptLoader
                 {
                     if ((*itr)->IsAlive() && (*itr)->HasAura(SPELL_STONEFORM))
                     {
-                        if (Player* target = (*itr)->SelectNearestPlayer(150.0f))
+                        (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
+                        (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
+                        Movement::MoveSplineInit init((*itr));
+                        for (auto i = 0; i < FirstWardPathSize; ++i)
                         {
-                            (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
-                            (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
-                            (*itr)->AI()->AttackStart(target);
+                            G3D::Vector3 point;
+                            point.x = FirstWardPath[i].GetPositionX();
+                            point.y = FirstWardPath[i].GetPositionY();
+                            point.z = FirstWardPath[i].GetPositionZ();
+                            init.Path().push_back(point);
                         }
+                        init.SetCyclic();
+                        init.SetWalk(true);
+                        init.Launch();
                         break;
                     }
                 }
@@ -3856,6 +3881,46 @@ struct npc_icc_web_wrapAI : public ScriptedAI
     }
 };
 
+class at_icc_lights_hammer_disable_spawn : public AreaTriggerScript
+{
+    public:
+        at_icc_lights_hammer_disable_spawn() : AreaTriggerScript("at_icc_lights_hammer_disable_spawn") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+        {
+            if (InstanceScript* instance = player->GetInstanceScript())
+                instance->SetData(DATA_LIGHTS_HAMMER_TRASH, 0);
+            return true;
+        }
+};
+
+struct npc_icc_warhawkAI : public ScriptedAI
+{
+    npc_icc_warhawkAI(Creature* creature) : ScriptedAI(creature)  { }
+    
+    void IsSummonedBy(Unit* /*summoner*/) override
+    {
+        _scheduler.Schedule(1s, [this](TaskContext /*task*/) 
+        {
+            me->SetOrientation(1.529950f);
+            me->SetFacingTo(1.529950f);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        TaskScheduler _scheduler;
+};
+
 void AddSC_icecrown_citadel()
 {
     new npc_highlord_tirion_fordring_lh();
@@ -3910,4 +3975,6 @@ void AddSC_icecrown_citadel()
     new at_icc_spire_frostwyrm();
     new CreatureAILoader<npc_plague_scientistAI>("npc_plague_scientist");
     new CreatureAILoader<npc_icc_web_wrapAI>("npc_icc_web_wrap");
+    new at_icc_lights_hammer_disable_spawn();
+    new CreatureAILoader<npc_icc_warhawkAI>("npc_icc_warhawk");
 }

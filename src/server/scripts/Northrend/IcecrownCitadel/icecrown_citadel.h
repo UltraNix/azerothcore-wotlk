@@ -13,7 +13,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #define ICCScriptName "instance_icecrown_citadel"
 
 uint32 const WeeklyNPCs = 9;
-uint32 const MaxHeroicAttempts = 2; // TESTING
+uint32 const MaxHeroicAttempts = 50; // TESTING
 
 // Defined in boss_valithria_dreamwalker.cpp
 extern Position const ValithriaSpawnPos;
@@ -122,6 +122,8 @@ enum DataTypes
     DATA_LK_HC_AVAILABLE            = 256,
 
     DATA_BPC_TRASH_DIED                = 300,
+
+    DATA_LIGHTS_HAMMER_TRASH        = 301
 };
 
 enum CreaturesIds

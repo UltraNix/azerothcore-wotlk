@@ -2815,6 +2815,23 @@ std::vector<uint32> partialCorrection =
     72796,  // Glittering Sparks 25 man
     72797,  // Glittering Sparks 10 man heroic
     72798,  // Glittering Sparks 25 man heroic
+    70759,  // Frostbolt Volley 10 man
+    71889,  // Frostbolt Volley 25 man
+    72015,  // Frostbolt Volley 10 man heroic
+    72016,  // Frostbolt Volley 25 man heroic
+    70702,  // Column of Frost 10 man
+    71746,  // Column of Frost 25 man
+    72019,  // Column of Frost 10 man heroic
+    72020,  // Column of Frost 25 man heroic
+    72963,  // Flesh Rot 10 man
+    72964,  // Flesh Rot 25 man
+    72965,  // Flesh Rot 10 man heroic
+    72966,  // Flesh Rot 25 man heroic
+    71387,  // Frost Aura
+    71377,  // Icy Blast 10 man
+    71378,  // Icy Blast 25 man
+    71380,  // Icy Blast 10 man
+    71381,  // Icy Blast 25 man
 };
 
 void SpellMgr::LoadSpellCustomAttr()
