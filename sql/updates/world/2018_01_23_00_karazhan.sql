@@ -1,0 +1,18 @@
+UPDATE `creature_template` SET `ScriptName` = 'npc_curator_astral_flare' WHERE `creature_template`.`entry` =17096;
+UPDATE `creature_template` SET `ScriptName` = 'npc_curator_astral_flare' WHERE `creature_template`.`entry` =19781;
+UPDATE `creature_template` SET `ScriptName` = 'npc_curator_astral_flare' WHERE `creature_template`.`entry` =19782;
+UPDATE `creature_template` SET `ScriptName` = 'npc_curator_astral_flare' WHERE `creature_template`.`entry` =19783;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'boss_baroness_dorothea_millstipe' WHERE `creature_template`.`entry` =19875;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'boss_baron_rafe_dreuger' WHERE `creature_template`.`entry` =19874;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'boss_lady_catriona_von_indi' WHERE `creature_template`.`entry` =19872;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'boss_lady_keira_berrybuck' WHERE `creature_template`.`entry` =17007;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'boss_lord_robin_daris' WHERE `creature_template`.`entry` =19876;
+UPDATE `creature_template` SET `AIName` = '', `ScriptName` = 'boss_lord_crispin_ference' WHERE `creature_template`.`entry` =19873;
+UPDATE `creature_template` SET `ScriptName` = '' WHERE `creature_template`.`entry` =16152;
+UPDATE `creature_template` SET `ScriptName` = '' WHERE `creature_template`.`entry` =16179;
+UPDATE `creature_template` SET `ScriptName` = '' WHERE `creature_template`.`entry` =16180;
+UPDATE `creature_template` SET `ScriptName` = '' WHERE `creature_template`.`entry` =16181;
+DELETE FROM `spell_script_names` WHERE `spell_script_names`.`ScriptName` = 'spell_karazhan_blink';
+DELETE FROM `spell_script_names` WHERE `spell_script_names`.`ScriptName` = 'spell_karazhan_brittle_bones';
+DELETE FROM `spell_script_names` WHERE `spell_script_names`.`ScriptName` = 'spell_karazhan_overload';
+DELETE FROM `spell_script_names` WHERE `spell_script_names`.`ScriptName` = 'spell_moroes_vanish';
