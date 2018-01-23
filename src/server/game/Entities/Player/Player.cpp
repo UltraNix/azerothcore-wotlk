@@ -3216,14 +3216,15 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     bool recruitAFriend = GetsRecruitAFriendBonus(true);
     bool premiumBonus   = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
     bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
-    bool eventBonusX2   = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP_X2);
-    bool eventBonusX3   = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP_X3);
-    bool IsBlizzlike    = BlizzlikeMode();
+    bool eventBonus     = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
+    int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
+    bool IsBlizzlike    = BlizzlikeMode();
+    
     if (sWorld->getBoolConfig(CONFIG_EXP_BOOST_ANGRATHAR))
     {
         if (recruitAFriend && !IsBlizzlike)
-            bonus_xp = 2 * xp; // RaF does NOT stack with rested experience
+            bonus_xp = 2 * xp;                          // RaF does NOT stack with rested experience
         else if (getLevel() < 70 && !IsBlizzlike)
             bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
         else
@@ -3236,10 +3237,8 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
             bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
         else if (premiumBonus && !IsBlizzlike)
             bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (eventBonusX3 && !IsBlizzlike)
-            bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (eventBonusX2 && !IsBlizzlike)
-            bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        else if (eventBonus && !IsBlizzlike)
+            bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
         else if (recruitAFriend && !IsBlizzlike)
             bonus_xp = 1 * xp; // RaF does NOT stack with rested experience
         else

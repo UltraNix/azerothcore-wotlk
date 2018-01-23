@@ -1185,8 +1185,8 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_START_ALL_EXPLORED] = sConfigMgr->GetBoolDefault("PlayerStart.MapsExplored", false);
     m_bool_configs[CONFIG_START_ALL_REP] = sConfigMgr->GetBoolDefault("PlayerStart.AllReputation", false);
     m_bool_configs[CONFIG_ALWAYS_MAXSKILL] = sConfigMgr->GetBoolDefault("AlwaysMaxWeaponSkill", false);
-    m_bool_configs[CONFIG_EVENT_BONUS_XP_X2] = sConfigMgr->GetBoolDefault("EventBonusXPx2.Enable", 0);
-    m_bool_configs[CONFIG_EVENT_BONUS_XP_X3] = sConfigMgr->GetBoolDefault("EventBonusXPx3.Enable", 0);
+    m_bool_configs[CONFIG_EVENT_BONUS_XP] = sConfigMgr->GetBoolDefault("EventBonusXP.Enable", 0);
+    m_bool_configs[CONFIG_EVENT_BONUS_MULTIPLER] = sConfigMgr->GetIntDefault("EventBonusXP.Multipler", 2);
     m_bool_configs[CONFIG_PVP_TOKEN_ENABLE] = sConfigMgr->GetBoolDefault("PvPToken.Enable", false);
     m_int_configs[CONFIG_PVP_TOKEN_MAP_TYPE] = sConfigMgr->GetIntDefault("PvPToken.MapAllowType", 4);
     m_int_configs[CONFIG_PVP_TOKEN_ID] = sConfigMgr->GetIntDefault("PvPToken.ItemID", 29434);
@@ -1252,7 +1252,7 @@ void World::LoadConfigSettings(bool reload)
     // MySQL ping time interval
     m_int_configs[CONFIG_DB_PING_INTERVAL] = sConfigMgr->GetIntDefault("MaxPingTime", 30);
 
-    // misc
+    // Misc
     m_bool_configs[CONFIG_PDUMP_NO_PATHS] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowPaths", true);
     m_bool_configs[CONFIG_PDUMP_NO_OVERWRITE] = sConfigMgr->GetBoolDefault("PlayerDump.DisallowOverwrite", true);
     m_bool_configs[CONFIG_FREE_DUAL_SPEC] = sConfigMgr->GetBoolDefault("FreeDualTalentSpecialization", false);
@@ -1274,6 +1274,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WINTERGRASP_NOBATTLETIME] = sConfigMgr->GetIntDefault("Wintergrasp.NoBattleTimer", 150);
     m_int_configs[CONFIG_WINTERGRASP_RESTART_AFTER_CRASH] = sConfigMgr->GetIntDefault("Wintergrasp.CrashRestartTimer", 10);
 
+    // Misc ...
     m_int_configs[CONFIG_BIRTHDAY_TIME] = sConfigMgr->GetIntDefault("BirthdayTime", 1222964635);
     m_int_configs[CONFIG_CURRENT_BUILD] = sConfigMgr->GetIntDefault("CurrentBuild", 12340); // Maczuga
 
@@ -1295,42 +1296,27 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_PTR_REALM] = sConfigMgr->GetBoolDefault("PTR.Realm", false);
     m_bool_configs[CONFIG_CROSSFACTION_RDF] = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
 
-    // Premium Config
     m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);
     m_bool_configs[CONFIG_PREMIUM_INSTANT_FLYING_ENABLE] = sConfigMgr->GetBoolDefault("Premium.InstantFlying.Enable", true);
 
-    // Phased Duels
     m_bool_configs[CONFIG_PHASED_DUELS_ENABLE] = sConfigMgr->GetBoolDefault("PhasedDuels.Enable", false);
     SetPhasedDuelsZones(sConfigMgr->GetStringDefault("PhasedDuels.Zones", ""));
 
-    // @autoinvite_feature
     m_bool_configs[CONFIG_AUTO_GLOBAL_INVITE_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInvite.Enable", false);
     m_bool_configs[CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE] = sConfigMgr->GetBoolDefault("AutoGlobalInviteAlways.Enable", false);
     m_int_configs[CONFIG_AUTO_GLOBAL_GUID] = sConfigMgr->GetIntDefault("AutoGlobalInvite.GUID", 1);
 
-    // Server Country
     SetCountryName(sConfigMgr->GetStringDefault("Country.Name", "Poland"));
 
-    //
     m_bool_configs[CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE] = sConfigMgr->GetBoolDefault("BoostPercentage.Enable", true);
     m_float_configs[CONFIG_BOOST_PERCENTAGE_ONLINE] = sConfigMgr->GetFloatDefault("BoostPercentage.Value", 0.1f);
 
-    // Kick player from BG / WG if doesn't move
     m_bool_configs[CONFIG_CUSTOM_AFK_REPORT] = sConfigMgr->GetBoolDefault("Custom.AFK.Report", false);
     m_int_configs[CONFIG_CUSTOM_AFK_REPORT_TIMER] = sConfigMgr->GetIntDefault("Custom.AFK.Report.PvP.Timer", 2);
 
-    // Encounter logs
     m_bool_configs[CONFIG_ENCOUNTER_LOG] = sConfigMgr->GetBoolDefault("EncounterLog.Enable", false);
 
-    // Experimental feature
     m_bool_configs[CONFIG_EXPERIMENTAL_FEATURE] = sConfigMgr->GetBoolDefault("Experimental.Enable", false);
-
-    // Custom Event
-    m_bool_configs[CONFIG_CUSTOM_EVENT_ENABLE] = sConfigMgr->GetBoolDefault("CustomEvent.Enable", false);
-    m_bool_configs[CONFIG_HUNGER_GAMES_ENABLE] = sConfigMgr->GetBoolDefault("HungerGames.Enable", false);
-    m_int_configs[CONFIG_HUNGER_GAMES_LIMIT] = sConfigMgr->GetIntDefault("HungerGames.Limit", 500);
-
-    m_bool_configs[CONFIG_TEST_SERVER_ENABLE] = sConfigMgr->GetBoolDefault("TestServer.Enable", false);
     m_bool_configs[CONFIG_BOOST_NAXXRAMAS] = sConfigMgr->GetBoolDefault("Naxxramas.Boost", false);
 
     m_bool_configs[CONFIG_EXP_BOOST_ANGRATHAR] = sConfigMgr->GetBoolDefault("Angrathar.Enable", false);

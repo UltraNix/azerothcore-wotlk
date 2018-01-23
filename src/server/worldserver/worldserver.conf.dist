@@ -179,7 +179,7 @@ Compression = 1
 #                     1+  - (Enabled)
 #                     0   - (Disabled, No limit)
 
-PlayerLimit = 100
+PlayerLimit = 3000
 
 #
 #    SaveRespawnTimeImmediately
@@ -1378,7 +1378,6 @@ AllowTickets = 1
 
 DungeonFinder.OptionsMask = 1
 
-
 #
 #   DBC.EnforceItemAttributes
 #        Description: Disallow overriding item attributes stored in DBC files with values from the
@@ -1397,12 +1396,12 @@ AccountInstancesPerHour = 5
 
 #
 #   BirthdayTime
-#        Description: Set to date of project's birth in UNIX time. By default the date when SunwellCore was started (Thu Oct 2, 2008)
-#        Default:     1222964635
+#        Description: Set to date of project's birth in UNIX time. By default the date when Sunwell.pl was started (Nov 13, 2016)
+#        Default:     1479038400
 #
 #
 
-BirthdayTime = 1222964635
+BirthdayTime = 1479038400
 
 #
 ###################################################################################################
@@ -2817,22 +2816,14 @@ HonorPointsAfterDuel = 0
 AlwaysMaxWeaponSkill = 0
 
 #
-#    EventBonusXPx2.Enable
-#        Description: Players will automatically gain double xp
+#    EventBonusXP.Enable
+#        Description: Players will automatically gain bonus xp
 #                     honor.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-EventBonusXPx2.Enable = 0
-
-#
-#    EventBonusXPx3.Enable
-#        Description: Players will automatically gain triple xp
-#                     honor.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-EventBonusXPx3.Enable = 0
+EventBonusXP.Enable = 0
+EventBonusXP.Multipler = 2
 
 #
 #    PvPToken.Enable
@@ -3135,7 +3126,7 @@ CurrentBuild = 12340
 
 #
 #   KruulEvent.Enable
-#       Description: For enable custom kruul world event
+#       Description: Enables or disables The Kruul World Event.
 #       Default: 0 (Disabled)
 #                1 - Enabled
 #
@@ -3171,7 +3162,7 @@ DuelMod.Cooldowns = 0
 
 #
 #     Anticheat.Enable
-#        Description: Enables or disables the Anticheat System functionality
+#        Description: Enables or disables the Anticheat System functionality.
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 
@@ -3205,7 +3196,7 @@ Anticheat.MaxReportsForDailyReport = 70
 
 #
 #     SaveLootSystem.Enable
-#        Description: Enables or disables the Save Loot System functionality
+#        Description: Enables or disables the Save Loot System functionality for Creatures.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
@@ -3213,7 +3204,7 @@ SaveLootSystem.Enable = 0
 
 #
 #     ExtraChanceEvent.Enable
-#        Description: Enables or disables the Extra Chance Event (50% chance to extra skill at professions)
+#        Description: Enables or disables the Extra Chance Event (50% chance to extra skill at professions).
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
@@ -3253,14 +3244,6 @@ Premium.Teleport.Enable = 1
 Premium.InstantFlying.Enable = 1
 
 #
-#     Gambling.Enable
-#        Description: Enables or disables Gambling functionality at Deadwind Pass zone
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-Gambling.Enable = 0
-
-#
 #     PhasedDuels.Enable
 #        Description: Enables or disables Phased Duels 
 #        Default:     0 - (Disabled)
@@ -3275,7 +3258,6 @@ PhasedDuels.Enable = 0
 #        Default:     "" - (Enabled everywhere)
 
 PhasedDuels.Zones = ""  
-
 
 #
 #     AutoGlobalInvite.Enable
@@ -3341,14 +3323,6 @@ Custom.AFK.Report = 1
 Custom.AFK.Report.PvP.Timer = 2
 
 #		
-#     ArmoryStats.Enable
-#        Description: Enables or disables save stats for armory encounters progress.
-#        Default:     0 - (Disabled)	
-#                     1 - (Enabled)
-	
-ArmoryStats.Enable = 0
-
-#		
 #     EncounterLog.Enable
 #        Description: Enables or disables encounter logs with aura list from combat.
 #        Default:     0 - (Disabled)	
@@ -3365,36 +3339,6 @@ EncounterLog.Enable = 0
 Experimental.Enable = 0
 
 #		
-#     CustomEvent.Enable
-#        Description: Enables or disables custom events.
-#        Default:     0 - (Disabled)	
-#                     1 - (Enabled)
-	
-CustomEvent.Enable = 0
-#		
-#     HungerGames.Enable
-#        Description: Enables or disables Hunger Games event.
-#        Default:     0 - (Disabled)	
-#                     1 - (Enabled)
-
-HungerGames.Enable = 0
-
-#		
-#     HungerGames.Limit
-#        Description: Limit of players on Hunger Games event.
-#        Default:     500
-
-HungerGames.Limit = 500
-
-#		
-#     TestServer.Enable
-#        Description: Enables or disables TestServer.
-#        Default:     0 - (Disabled)	
-#                     1 - (Enabled)
-
-TestServer.Enable = 0
-
-#		
 #     Naxxramas.Boost
 #        Description: Enables or disables Boost version of Naxxramas.
 #        Default:     0 - (Disabled)	
@@ -3402,10 +3346,9 @@ TestServer.Enable = 0
 
 Naxxramas.Boost = 0
 
-
 #
 #     Angrathar.Enable
-#     Description: Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70
+#     Description: Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70.
 #     Default:     0 - (Disabled)
 #                  1 - (Enabled)
 				   
@@ -3413,7 +3356,7 @@ Angrathar.Enable = 0
 
 #
 #     CreatureBossRecords.Enable
-#     Description: Enables or disables announcing boss records to the world and saving them to db
+#     Description: Enables or disables announcing boss records to the world and saving them to db.
 #     Default:     0 - (Disabled)
 #                  1 - (Enabled)
 				   
