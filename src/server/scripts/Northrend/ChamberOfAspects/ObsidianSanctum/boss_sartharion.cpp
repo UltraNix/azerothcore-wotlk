@@ -1594,7 +1594,7 @@ public:
                 if (!target->ToCreature()->IsInCombat())
                     return true;
 
-                if (target->GetEntry() == NPC_BROOD_CAPTAIN || target->GetEntry() == NPC_BROOD_MISTRESS)
+                if ((target->GetEntry() == NPC_BROOD_CAPTAIN || target->GetEntry() == NPC_BROOD_MISTRESS) && target->ToCreature()->IsUnderCrowdControl())
                     return false;
 
                 return true;
