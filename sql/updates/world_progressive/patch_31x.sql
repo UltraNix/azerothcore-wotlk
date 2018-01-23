@@ -2,8 +2,8 @@
 -- === Content 3.1.x (Ulduar, Basic AT) ===
 --
 
-SET @EmblemLowPREV  := 40752; # Emblem of Heroism
-SET @EmblemLowCURR  := 40753; # Emblem of Valor
+SET @EmblemLowPREV  := 40752; -- Emblem of Heroism
+SET @EmblemLowCURR  := 40753; -- Emblem of Valor
 
 -- Update loot tables
 
@@ -13,7 +13,7 @@ UPDATE `item_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPRE
 UPDATE `reference_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
 UPDATE `spell_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
 
-# Update quest emblems
+-- Update quest emblems
 UPDATE `quest_template` SET `RewardItemId1`=@EmblemLowCURR WHERE `RewardItemId1`=@EmblemLowPREV;
 UPDATE `quest_template` SET `RewardItemId2`=@EmblemLowCURR WHERE `RewardItemId2`=@EmblemLowPREV;
 UPDATE `quest_template` SET `RewardItemId3`=@EmblemLowCURR WHERE `RewardItemId3`=@EmblemLowPREV;
@@ -24,7 +24,7 @@ UPDATE `quest_template` SET `RewardChoiceItemId2`=@EmblemLowCURR WHERE `RewardCh
 UPDATE `quest_template` SET `RewardChoiceItemId3`=@EmblemLowCURR WHERE `RewardChoiceItemId3`=@EmblemLowPREV;
 UPDATE `quest_template` SET `RewardChoiceItemId4`=@EmblemLowCURR WHERE `RewardChoiceItemId4`=@EmblemLowPREV;
 
-# Remove disables for raids and instances for current content
+-- Remove disables for raids and instances for current content
 DELETE FROM `disables` WHERE `sourceType` = 2 AND `entry` IN (603);
 DELETE FROM `spell_area` WHERE `spell` = 61831; -- 3.1 phase
 
@@ -39,7 +39,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 DELETE FROM `creature` WHERE `creature`.`guid` = 202593; /* Emalon the Storm Watcher <VOA> */
 INSERT INTO `creature` ( `guid` , `id` , `map` , `spawnMask` , `phaseMask` , `modelid` , `equipment_id` , `position_x` , `position_y` , `position_z` , `orientation` , `spawntimesecs` , `spawndist` , `currentwaypoint` , `curhealth` , `curmana` , `MovementType` , `npcflag` , `unit_flags` , `dynamicflags` )
 VALUES (202593, 33993, 624, 3, 1, 0, 0, - 218.726, - 288.57, 91.5494, 1.58825, 604800, 0, 0, 1, 0, 0, 0, 0, 0);
--- # =============================================================================================
+-- -- =============================================================================================
 DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 34215 AND `reference_loot_template`.`item` = 40811;
 
 -- Conquests

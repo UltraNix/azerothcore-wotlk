@@ -1,27 +1,27 @@
-### CONFIG CHANGES REQUIRED
-# AllowTwoSide.Accounts = 1
-# AllowTwoSide.Interaction.Mail = 1
-# TalentsInspecting = 1
-#
+------ CONFIG CHANGES REQUIRED
+-- AllowTwoSide.Accounts = 1
+-- AllowTwoSide.Interaction.Mail = 1
+-- TalentsInspecting = 1
+--
 
-#
-# === Content 3.2.0 (Argent Tournament) ===
-#
-SET @EmblemHighPREV := 45624; # Emblem of Conquest
-SET @EmblemLowPREV  := 40753; # Emblem of Valor
-SET @EmblemLowPREV2 := 40752; # Emblem of Heroism
+--
+-- === Content 3.2.0 (Argent Tournament) ===
+--
+SET @EmblemHighPREV := 45624; -- Emblem of Conquest
+SET @EmblemLowPREV  := 40753; -- Emblem of Valor
+SET @EmblemLowPREV2 := 40752; -- Emblem of Heroism
 
-SET @EmblemHighCURR := 47241; # Emblem of Triumph
-SET @EmblemLowCURR  := 45624; # Emblem of Conquest
+SET @EmblemHighCURR := 47241; -- Emblem of Triumph
+SET @EmblemLowCURR  := 45624; -- Emblem of Conquest
 
-# Update loot tables
+-- Update loot tables
 UPDATE `creature_loot_template` SET `item`=@EmblemLowCURR WHERE `item` IN (@EmblemLowPREV2, @EmblemLowPREV);
 UPDATE `gameobject_loot_template` SET `item`=@EmblemLowCURR WHERE `item` IN (@EmblemLowPREV2, @EmblemLowPREV);
 UPDATE `item_loot_template` SET `item`=@EmblemLowCURR WHERE `item` IN (@EmblemLowPREV2, @EmblemLowPREV);
 UPDATE `reference_loot_template` SET `item`=@EmblemLowCURR WHERE `item` IN (@EmblemLowPREV2, @EmblemLowPREV);
 UPDATE `spell_loot_template` SET `item`=@EmblemLowCURR WHERE `item` IN (@EmblemLowPREV2, @EmblemLowPREV);
 
-# ToC & VoA (Koralon) & Daily Quest Proof of Demise should grant EoTs.
+-- ToC & VoA (Koralon) & Daily Quest Proof of Demise should grant EoTs.
 UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV AND `entry` IN (34797, 35447, 35448, 35449); -- Icehowl
 UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV AND `entry` IN (34780, 35216, 35268, 35269); -- Lord Jaraxxus
 UPDATE `gameobject_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV AND `entry` IN (27498, 27503, 27335, 27356); -- Faction Champions
@@ -30,7 +30,7 @@ UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemH
 UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV AND `entry` IN (35013, 35360); -- Koralon the Flame Watcher
 UPDATE `quest_template` SET `RewardItemId1`=47241 WHERE `Id` IN (13246, 13248, 13250, 13252, 13254, 13256, 13245, 13247, 13249, 13251, 13253, 13255, 14199); -- Proof of Demise quests
 
-# Update quest emblems
+-- Update quest emblems
 UPDATE `quest_template` SET `RewardItemId1`=@EmblemLowCURR WHERE `RewardItemId1` IN (@EmblemLowPREV, @EmblemLowPREV2);
 UPDATE `quest_template` SET `RewardItemId2`=@EmblemLowCURR WHERE `RewardItemId2` IN (@EmblemLowPREV, @EmblemLowPREV2);
 UPDATE `quest_template` SET `RewardItemId3`=@EmblemLowCURR WHERE `RewardItemId3` IN (@EmblemLowPREV, @EmblemLowPREV2);
@@ -39,10 +39,10 @@ UPDATE `quest_template` SET `RewardChoiceItemId1`=@EmblemLowCURR WHERE `RewardCh
 UPDATE `quest_template` SET `RewardChoiceItemId2`=@EmblemLowCURR WHERE `RewardChoiceItemId2` IN (@EmblemLowPREV, @EmblemLowPREV2);
 UPDATE `quest_template` SET `RewardChoiceItemId3`=@EmblemLowCURR WHERE `RewardChoiceItemId3` IN (@EmblemLowPREV, @EmblemLowPREV2);
 UPDATE `quest_template` SET `RewardChoiceItemId4`=@EmblemLowCURR WHERE `RewardChoiceItemId4` IN (@EmblemLowPREV, @EmblemLowPREV2);
-# Remove disables for raids and instances for current content
+-- Remove disables for raids and instances for current content
 DELETE FROM `disables` WHERE `sourceType` = 2 AND `entry` IN (649, 650);
 
-# =============================================================================================
+-- =============================================================================================
 
 -- Ulduar 3.2 nerfs
 UPDATE `creature_template` SET `health_mod`=1648.089171974522 WHERE `entry`=33449; -- General Vezax
