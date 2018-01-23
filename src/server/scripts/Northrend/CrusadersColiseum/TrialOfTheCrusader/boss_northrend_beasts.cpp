@@ -145,8 +145,12 @@ public:
                         if (auto target = Trinity::Containers::SelectRandomContainerElement(validPlayers))
                             DoSpawnFireBombTrigger(*target);
                     }
-                    else if (auto target = Trinity::Containers::SelectRandomContainerElement(allPlayers))
-                        DoSpawnFireBombTrigger(*target);
+                    else if (!allPlayers.empty())
+                    {
+                        if (auto target = Trinity::Containers::SelectRandomContainerElement(allPlayers))
+                            DoSpawnFireBombTrigger(*target);
+                    }
+
 
                 }
                 bombTimer = urand(20000, 30000);
