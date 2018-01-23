@@ -5452,7 +5452,7 @@ Corpse* Player::GetCorpse() const
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
     // Premium service or test server
-    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS) || sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS) || sWorld->getBoolConfig(CONFIG_PTR_REALM))
         return;
 
     for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)

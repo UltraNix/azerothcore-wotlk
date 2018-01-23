@@ -3322,7 +3322,7 @@ Custom.AFK.Report = 1
 
 Custom.AFK.Report.PvP.Timer = 2
 
-#		
+#
 #     EncounterLog.Enable
 #        Description: Enables or disables encounter logs with aura list from combat.
 #        Default:     0 - (Disabled)	
@@ -3330,7 +3330,7 @@ Custom.AFK.Report.PvP.Timer = 2
 	
 EncounterLog.Enable = 0
 
-#		
+#
 #     Experimental.Enable
 #        Description: Enables or disables experimental features.
 #        Default:     0 - (Disabled)	
@@ -3338,7 +3338,30 @@ EncounterLog.Enable = 0
 	
 Experimental.Enable = 0
 
-#		
+#
+#     CustomEventFeatures.Enable
+#        Description: Enables or disables custom events features like commands for them.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+	
+CustomEventFeatures.Enable = 0
+
+#
+#     HungerGames.Enable
+#        Description: Enables or disables Hunger Games event.
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+
+HungerGames.Enable = 0
+
+#
+#     HungerGames.Limit
+#        Description: Limit of players on Hunger Games event.
+#        Default:     500
+
+HungerGames.Limit = 500
+
+#
 #     Naxxramas.Boost
 #        Description: Enables or disables Boost version of Naxxramas.
 #        Default:     0 - (Disabled)	
@@ -3351,7 +3374,7 @@ Naxxramas.Boost = 0
 #     Description: Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70.
 #     Default:     0 - (Disabled)
 #                  1 - (Enabled)
-				   
+   
 Angrathar.Enable = 0
 
 #
@@ -3359,7 +3382,7 @@ Angrathar.Enable = 0
 #     Description: Enables or disables announcing boss records to the world and saving them to db.
 #     Default:     0 - (Disabled)
 #                  1 - (Enabled)
-				   
+   
 CreatureBossRecords.Enable = 0
 
 #

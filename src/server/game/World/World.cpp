@@ -1317,6 +1317,9 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ENCOUNTER_LOG] = sConfigMgr->GetBoolDefault("EncounterLog.Enable", false);
 
     m_bool_configs[CONFIG_EXPERIMENTAL_FEATURE] = sConfigMgr->GetBoolDefault("Experimental.Enable", false);
+    m_bool_configs[CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE] = sConfigMgr->GetBoolDefault("CustomEventFeatures.Enable", false);
+    m_bool_configs[CONFIG_HUNGER_GAMES_ENABLE] = sConfigMgr->GetBoolDefault("HungerGames.Enable", false);
+    m_int_configs[CONFIG_HUNGER_GAMES_LIMIT] = sConfigMgr->GetIntDefault("HungerGames.Limit", 500);
     m_bool_configs[CONFIG_BOOST_NAXXRAMAS] = sConfigMgr->GetBoolDefault("Naxxramas.Boost", false);
 
     m_bool_configs[CONFIG_EXP_BOOST_ANGRATHAR] = sConfigMgr->GetBoolDefault("Angrathar.Enable", false);

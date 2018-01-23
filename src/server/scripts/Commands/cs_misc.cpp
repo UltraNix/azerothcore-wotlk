@@ -3250,7 +3250,7 @@ public:
 
     static bool HandleEventGoCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
             handler->PSendSysMessage("You can't do that while event is disabled.");
             handler->SetSentErrorMessage(true);
@@ -3351,7 +3351,7 @@ public:
 
     static bool HandleSthHideCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
             handler->PSendSysMessage("You can't do that while event is disabled.");
             handler->SetSentErrorMessage(true);
@@ -3377,7 +3377,7 @@ public:
 
     static bool HandleCheckPointCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
             handler->PSendSysMessage("You can't do that while event is disabled.");
             handler->SetSentErrorMessage(true);
@@ -3439,12 +3439,12 @@ public:
 
     static bool HandleBuffCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
-        Unit* player = handler->GetSession()->GetPlayer();
-        if (!player)
-        {
+        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM)) 
             return false;
-        }
+
+        Player* player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
 
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(68378);
         SpellInfo const* spellInfo2 = sSpellMgr->GetSpellInfo(1908);
@@ -3460,10 +3460,13 @@ public:
 
     static bool HandleUnbuffCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
-        Unit* player = handler->GetSession()->GetPlayer();
+        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM))
+            return false;
+
+        Player* player = handler->GetSession()->GetPlayer();
         if (!player)
             return false;
+
         player->RemoveAurasDueToSpell(68378);
         player->RemoveAurasDueToSpell(1908);
 

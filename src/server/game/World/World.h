@@ -146,35 +146,37 @@ enum WorldBoolConfigs
     CONFIG_WINTERGRASP_ENABLE,
     CONFIG_PDUMP_NO_PATHS,
     CONFIG_PDUMP_NO_OVERWRITE,
-    CONFIG_FREE_DUAL_SPEC, // pussywizard
-    CONFIG_ENABLE_MMAPS, // pussywizard
-    CONFIG_ENABLE_LOGIN_AFTER_DC, // pussywizard
-    CONFIG_DONT_CACHE_RANDOM_MOVEMENT_PATHS, // pussywizard
+    CONFIG_FREE_DUAL_SPEC,                    // pussywizard
+    CONFIG_ENABLE_MMAPS,                      // pussywizard
+    CONFIG_ENABLE_LOGIN_AFTER_DC,             // pussywizard
+    CONFIG_DONT_CACHE_RANDOM_MOVEMENT_PATHS,  // pussywizard
     CONFIG_QUEST_IGNORE_AUTO_ACCEPT,
     CONFIG_QUEST_IGNORE_AUTO_COMPLETE,
     CONFIG_WARDEN_ENABLED,
-    CONFIG_DUEL_MOD, // Sitowsky: Makes the players HP & Mana reset before each duel.
-    CONFIG_DUEL_FULL_POWER, // Sitowsky: Makes the players HP & Mana reset before each duel.
-    CONFIG_DUEL_CD_RESET, // Sitowsky: Makes the players arena cooldowns reset before each duel.
-    CONFIG_KRUUL_EVENT, // Sitowsky:  Enables or disables The Kruul World Event.
-    CONFIG_SAVE_LOOT_SYSTEM, // Sitowsky: Enables or disables the Save Loot System functionality for Creatures.
-    CONFIG_EXTRA_CHANCE_EVENT, // Sitowsky: Enables or disables the Extra Chance Event (50% chance to extra skill at professions).
-    CONFIG_HK_REWARDS_ENABLE, // Sitowsky:  Character will receive a reward after reach higher pvp rank (Player::GiveTitleReward()).
-    CONFIG_CROSSFACTION_MAIL, // Sitowsky: Allow or disallow sending mail between two factions.
-    CONFIG_PTR_REALM, // Sitowsky: New created players have level 80 and allow them speak without any played time.
-    CONFIG_CROSSFACTION_RDF, // Afgann: Allow or disallow leveling with RDF between two factions.
-    CONFIG_PREMIUM_TELEPORT_ENABLE, // Sitowsky: Allow or disallow usage of specified premium service.
-    CONFIG_PREMIUM_INSTANT_FLYING_ENABLE, // Sitowsky: Allow or disallow usage of specified premium service.
-    CONFIG_PHASED_DUELS_ENABLE, // Piootrek: Enables or disables Phased Duels.
-    CONFIG_AUTO_GLOBAL_INVITE_ENABLE, // Sitowsky: When enabled the player will get invite to global every log in to game otherwise just once.
-    CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE, // Sitowsky: Origin country of server. This feature is necessary when you wan't control some aspects for players of your own country.
-    CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE, // Sitowsky: ...
-    CONFIG_CUSTOM_AFK_REPORT, // Sitowsky: Enables or disables Custom AFK reports at battlegrounds and battlefields.
-    CONFIG_ENCOUNTER_LOG, // Sitowsky: Enables or disables encounter logs with aura list from combat.
-    CONFIG_EXPERIMENTAL_FEATURE, // Sitowsky: Enables or disables experimental features.
-    CONFIG_BOOST_NAXXRAMAS, // Sitowsky: Enables or disables Boost version of Naxxramas.
-    CONFIG_EXP_BOOST_ANGRATHAR, // Riztazz: Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70.
-    CONFIG_BOSS_RECORDS, // Riztazz: Enables or disables announcing boss records to the world and saving them to db.
+    CONFIG_DUEL_MOD,                          // Sitowsky: Makes the players HP & Mana reset before each duel.
+    CONFIG_DUEL_FULL_POWER,                   // Sitowsky: Makes the players HP & Mana reset before each duel.
+    CONFIG_DUEL_CD_RESET,                     // Sitowsky: Makes the players arena cooldowns reset before each duel.
+    CONFIG_KRUUL_EVENT,                       // Sitowsky: Enables or disables The Kruul World Event.
+    CONFIG_SAVE_LOOT_SYSTEM,                  // Sitowsky: Enables or disables the Save Loot System functionality for Creatures.
+    CONFIG_EXTRA_CHANCE_EVENT,                // Sitowsky: Enables or disables the Extra Chance Event (50% chance to extra skill at professions).
+    CONFIG_HK_REWARDS_ENABLE,                 // Sitowsky: Character will receive a reward after reach higher pvp rank (Player::GiveTitleReward()).
+    CONFIG_CROSSFACTION_MAIL,                 // Sitowsky: Allow or disallow sending mail between two factions.
+    CONFIG_PTR_REALM,                         // Sitowsky: New created players have level 80 and allow them speak without any played time.
+    CONFIG_CROSSFACTION_RDF,                  // Afgann:   Allow or disallow leveling with RDF between two factions.
+    CONFIG_PREMIUM_TELEPORT_ENABLE,           // Sitowsky: Allow or disallow usage of specified premium service.
+    CONFIG_PREMIUM_INSTANT_FLYING_ENABLE,     // Sitowsky: Allow or disallow usage of specified premium service.
+    CONFIG_PHASED_DUELS_ENABLE,               // Piootrek: Enables or disables Phased Duels.
+    CONFIG_AUTO_GLOBAL_INVITE_ENABLE,         // Sitowsky: When enabled the player will get invite to global every log in to game otherwise just once.
+    CONFIG_AUTO_GLOBAL_ALWAYS_ENABLE,         // Sitowsky: Origin country of server. This feature is necessary when you wan't control some aspects for players of your own country.
+    CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE,    // Sitowsky: ...
+    CONFIG_CUSTOM_AFK_REPORT,                 // Sitowsky: Enables or disables Custom AFK reports at battlegrounds and battlefields.
+    CONFIG_ENCOUNTER_LOG,                     // Sitowsky: Enables or disables encounter logs with aura list from combat.
+    CONFIG_EXPERIMENTAL_FEATURE,              // Sitowsky: Enables or disables experimental features.
+    CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE,     // Sitowsky: Enables or disables custom events features like commands for them.
+    CONFIG_HUNGER_GAMES_ENABLE,               // Piootrek: Enables or disables Hunger Games event.
+    CONFIG_BOOST_NAXXRAMAS,                   // Sitowsky: Enables or disables Boost version of Naxxramas.
+    CONFIG_EXP_BOOST_ANGRATHAR,               // Riztazz:  Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70.
+    CONFIG_BOSS_RECORDS,                      // Riztazz:  Enables or disables announcing boss records to the world and saving them to db.
 
     BOOL_CONFIG_VALUE_COUNT
 };

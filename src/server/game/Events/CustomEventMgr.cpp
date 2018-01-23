@@ -142,38 +142,45 @@ void CustomEventMgr::Update(uint32 diff, uint8 eventUpdate)
         ///////////////////////
         case CUSTOM_EVENT_HUNGER_GAMES:
         {
-            if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE)) break;
-            if (hungerGamesTimedAnnSec == -1) break;
-            if (diff >= hungerGamesUpdateTimer) {
+            if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE)) 
+                break;
+
+            if (hungerGamesTimedAnnSec == -1) 
+                break;
+            if (diff >= hungerGamesUpdateTimer) 
+            {
                 hungerGamesUpdateTimer = 1000;
-                if (hungerGamesTimedAnnSec == 0) {
+
+                if (hungerGamesTimedAnnSec == 0) 
+                {
                     executeHungerGamesEvent();
                     --hungerGamesTimedAnnSec;
                     break;
                 }
                 std::string msg;
-                switch (hungerGamesEvent) {
-                case HUNGER_GAMES_EVENT_TELE:
-                    msg = "You will be teleported to Azshara Crater in ";
-                    break;
-                case HUNGER_GAMES_EVENT_REV:
-                    msg = "You will be revived in ";
-                    break;
-                case HUNGER_GAMES_EVENT_FR:
-                    msg = "You will be freezed in ";
-                    break;
-                case HUNGER_GAMES_EVENT_UNFR:
-                    msg = "You will be unfreezed in ";
-                    break;
-                case HUNGER_GAMES_EVENT_DEBUFF:
-                    msg = "You will be debuffed in ";
-                    break;
-                case HUNGER_GAMES_EVENT_TELE_HORDE:
-                    msg = "You will be teleported to Horde base in ";
-                    break;
-                case HUNGER_GAMES_EVENT_TELE_DALA:
-                    msg = "You will be teleported to Dalaran in ";
-                    break;
+                switch (hungerGamesEvent) 
+                {
+                    case HUNGER_GAMES_EVENT_TELE:
+                        msg = "You will be teleported to Azshara Crater in ";
+                        break;
+                    case HUNGER_GAMES_EVENT_REV:
+                        msg = "You will be revived in ";
+                        break;
+                    case HUNGER_GAMES_EVENT_FR:
+                        msg = "You will be freezed in ";
+                        break;
+                    case HUNGER_GAMES_EVENT_UNFR:
+                        msg = "You will be unfreezed in ";
+                        break;
+                    case HUNGER_GAMES_EVENT_DEBUFF:
+                        msg = "You will be debuffed in ";
+                        break;
+                    case HUNGER_GAMES_EVENT_TELE_HORDE:
+                        msg = "You will be teleported to Horde base in ";
+                        break;
+                    case HUNGER_GAMES_EVENT_TELE_DALA:
+                        msg = "You will be teleported to Dalaran in ";
+                        break;
                 }
                 msg += std::to_string(hungerGamesTimedAnnSec) + " second" + ((hungerGamesTimedAnnSec != 1) ? "s!" : "!");
                 --hungerGamesTimedAnnSec;
@@ -355,7 +362,9 @@ void CustomEventMgr::startHungerGamesEvent(HungerGamesEvents h)
 {
     if (h == HUNGER_GAMES_EVENT_TELE)
         hungerGamesState = HUNGER_GAMES_PREPARATION;
-    if (isHungerGamesEventInProgress()) return;
+
+    if (isHungerGamesEventInProgress()) 
+        return;
     hungerGamesTimedAnnSec = 5;
     hungerGamesEvent = h;
     hungerGamesUpdateTimer = (h == HUNGER_GAMES_EVENT_TELE_DALA) ? 3000 : 0;
@@ -363,35 +372,37 @@ void CustomEventMgr::startHungerGamesEvent(HungerGamesEvents h)
 
 void CustomEventMgr::executeHungerGamesEvent()
 {
-    switch (hungerGamesEvent) {
-    case HUNGER_GAMES_EVENT_TELE:
-        teleportHungerGamesPlayersToAzshara();
-        break;
-    case HUNGER_GAMES_EVENT_REV:
-        reviveHungerGamesPlayers();
-        break;
-    case HUNGER_GAMES_EVENT_FR:
-        freezeHungerGamesPlayers(true);
-        break;
-    case HUNGER_GAMES_EVENT_UNFR:
-        freezeHungerGamesPlayers(false);
-        break;
-    case HUNGER_GAMES_EVENT_DEBUFF:
-        applyHungerGamesDebuff(true);
-        break;
-    case HUNGER_GAMES_EVENT_TELE_HORDE:
-        teleportHungerGamesPlayersToHordeBase();
-        break;
-    case HUNGER_GAMES_EVENT_TELE_DALA:
-        teleportWinnerToDalaran();
-        break;
+    switch (hungerGamesEvent)
+    {
+        case HUNGER_GAMES_EVENT_TELE:
+            teleportHungerGamesPlayersToAzshara();
+            break;
+        case HUNGER_GAMES_EVENT_REV:
+            reviveHungerGamesPlayers();
+            break;
+        case HUNGER_GAMES_EVENT_FR:
+            freezeHungerGamesPlayers(true);
+            break;
+        case HUNGER_GAMES_EVENT_UNFR:
+            freezeHungerGamesPlayers(false);
+            break;
+        case HUNGER_GAMES_EVENT_DEBUFF:
+            applyHungerGamesDebuff(true);
+            break;
+        case HUNGER_GAMES_EVENT_TELE_HORDE:
+            teleportHungerGamesPlayersToHordeBase();
+            break;
+        case HUNGER_GAMES_EVENT_TELE_DALA:
+            teleportWinnerToDalaran();
+            break;
     }
 }
 
 void CustomEventMgr::teleportHungerGamesPlayersToHordeBase()
 {
     uint8 posIndex = 0;
-    for (auto &guid : hungerGamesPlayers) {
+    for (auto &guid : hungerGamesPlayers)
+    {
         if (Player *p = ObjectAccessor::FindPlayer(guid))
         {
             p->SetHealth(p->GetMaxHealth());
@@ -407,12 +418,17 @@ void CustomEventMgr::teleportHungerGamesPlayersToHordeBase()
 
 void CustomEventMgr::setPoiToHungerGamesPlayers(uint8 loc)
 {
-    if (loc >= 3) return;
-    for (auto &guid : hungerGamesPlayers) {
+    if (loc >= 3) 
+        return;
+
+    for (auto &guid : hungerGamesPlayers)
+    {
         if (Player *p = ObjectAccessor::FindPlayer(guid))
             p->PlayerTalkClass->SendPointOfInterest(2000 + loc);
     }
-    for (auto &guid : hungerGamesGMs) {
+
+    for (auto &guid : hungerGamesGMs)
+    {
         if (Player *p = ObjectAccessor::FindPlayer(guid))
             if (p->GetMapId() == 37)
                 p->PlayerTalkClass->SendPointOfInterest(2000 + loc);
@@ -421,10 +437,14 @@ void CustomEventMgr::setPoiToHungerGamesPlayers(uint8 loc)
 
 void CustomEventMgr::printHungerGamesPlayers(Player * p)
 {
-    if (!p || !p->IsInWorld() || !p->GetSession()) return;
+    if (!p || !p->IsInWorld() || !p->GetSession()) 
+        return;
+
     ChatHandler ch(p->GetSession());
     uint32 index = 1;
-    for (auto &guid : hungerGamesPlayers) {
+
+    for (auto &guid : hungerGamesPlayers)
+    {
         if (Player *pp = ObjectAccessor::FindPlayer(guid))
             ch.PSendSysMessage("%d. %s", index++, pp->GetName().c_str());
     }
@@ -432,11 +452,15 @@ void CustomEventMgr::printHungerGamesPlayers(Player * p)
 
 void CustomEventMgr::printHungerGamesGms(Player * p)
 {
-    if (!p || !p->IsInWorld() || !p->GetSession()) return;
+    if (!p || !p->IsInWorld() || !p->GetSession()) 
+        return;
+
     ChatHandler ch(p->GetSession());
     ch.PSendSysMessage("Lista GMow monitorujacych event:");
     uint32 index = 1;
-    for (auto &guid : hungerGamesGMs) {
+
+    for (auto &guid : hungerGamesGMs) 
+    {
         if (Player *pp = ObjectAccessor::FindPlayer(guid))
             ch.PSendSysMessage("%d. %s", index++, pp->GetName().c_str());
     }
@@ -444,12 +468,16 @@ void CustomEventMgr::printHungerGamesGms(Player * p)
 
 void CustomEventMgr::printHungerGamesStealthedPlayers(Player * p)
 {
-    if (!p || !p->IsInWorld() || !p->GetSession()) return;
+    if (!p || !p->IsInWorld() || !p->GetSession())
+        return;
     ChatHandler ch(p->GetSession());
     ch.PSendSysMessage("Lista graczy ukrywajacych sie w stealth:");
     uint32 index = 1;
-    for (auto &guid : hungerGamesPlayers) {
-        if (Player *pp = ObjectAccessor::FindPlayer(guid)) {
+
+    for (auto &guid : hungerGamesPlayers)
+    {
+        if (Player *pp = ObjectAccessor::FindPlayer(guid)) 
+        {
             if (pp->HasAuraType(SPELL_AURA_MOD_STEALTH))
                 ch.PSendSysMessage("%d. %s", index++, pp->GetName().c_str());
         }
@@ -458,8 +486,10 @@ void CustomEventMgr::printHungerGamesStealthedPlayers(Player * p)
 
 void CustomEventMgr::teleportWinnerToDalaran()
 {
-    //this method should be executed only when there is only one player left in hunger games (winner)
-    if (hungerGamesPlayers.size() != 1) return;
+    // This method should be executed only when there is only one player left in hunger games (winner)
+    if (hungerGamesPlayers.size() != 1) 
+        return;
+
     if (Player *p = ObjectAccessor::FindPlayer(hungerGamesPlayers[0]))
         p->TeleportTo(571, 5804.15f, 624.77f, 647.76f, 1.64f);
 }
