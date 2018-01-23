@@ -5386,6 +5386,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Vortex (Control Vehicle)
         case 56263:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             break;
         // Haste (Nexus Lord, increase run speed of the disk)
         case 57060:
