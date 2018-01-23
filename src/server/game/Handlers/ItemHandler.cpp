@@ -447,7 +447,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket & recvData)
     {
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();
         // If locale not default load packet here and overwrite data with locale one.
-        if (loc_idx != LOCALE_enUS)
+        if (loc_idx != DEFAULT_LOCALE)
         {
             std::string Name = pProto->Name1;
             std::string Description = pProto->Description;

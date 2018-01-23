@@ -362,8 +362,20 @@ class WorldSession
         time_t m_muteTime;
 
         // Locales
-        LocaleConstant GetSessionDbcLocale() const { return m_sessionDbcLocale; }
-        LocaleConstant GetSessionDbLocaleIndex() const { return m_sessionDbLocaleIndex; }
+        LocaleConstant GetSessionDbcLocale() const
+        {
+            if (m_sessionDbcLocale > MAX_LOCALES)
+                return DEFAULT_LOCALE;
+
+            return m_sessionDbcLocale;
+        }
+        LocaleConstant GetSessionDbLocaleIndex() const
+        {
+            if (m_sessionDbcLocale > MAX_LOCALES)
+                return DEFAULT_LOCALE;
+
+            return m_sessionDbLocaleIndex;
+        }
         const char *GetTrinityString(int32 entry) const;
 
         uint32 GetLatency() const { return m_latency; }

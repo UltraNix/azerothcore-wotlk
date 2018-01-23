@@ -15018,14 +15018,14 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
             std::string strOptionText = itr->second.OptionText;
             std::string strBoxText = itr->second.BoxText;
 
-            int32 locale = GetSession()->GetSessionDbLocaleIndex();
-            if (locale >= 0)
+            LocaleConstant loc_idx = GetSession()->GetSessionDbLocaleIndex();
+            if (loc_idx != DEFAULT_LOCALE)
             {
                 uint32 idxEntry = MAKE_PAIR32(menuId, itr->second.OptionIndex);
                 if (GossipMenuItemsLocale const* no = sObjectMgr->GetGossipMenuItemsLocale(idxEntry))
                 {
-                    ObjectMgr::GetLocaleString(no->OptionText, locale, strOptionText);
-                    ObjectMgr::GetLocaleString(no->BoxText, locale, strBoxText);
+                    ObjectMgr::GetLocaleString(no->OptionText, loc_idx, strOptionText);
+                    ObjectMgr::GetLocaleString(no->BoxText, loc_idx, strBoxText);
                 }
             }
 
@@ -15377,7 +15377,7 @@ void Player::SendPreparedQuest(uint64 guid)
                     title = gossiptext->Options[0].Text_0;
 
                     LocaleConstant loc_idx = GetSession()->GetSessionDbLocaleIndex();
-                    if (loc_idx >= LOCALE_enUS)
+                    if (loc_idx != DEFAULT_LOCALE)
                         if (NpcTextLocale const* nl = sObjectMgr->GetNpcTextLocale(textid))
                             ObjectMgr::GetLocaleString(nl->Text_0[0], loc_idx, title);
                 }
@@ -15386,7 +15386,7 @@ void Player::SendPreparedQuest(uint64 guid)
                     title = gossiptext->Options[0].Text_1;
 
                     LocaleConstant loc_idx = GetSession()->GetSessionDbLocaleIndex();
-                    if (loc_idx >= LOCALE_enUS)
+                    if (loc_idx != DEFAULT_LOCALE)
                         if (NpcTextLocale const* nl = sObjectMgr->GetNpcTextLocale(textid))
                             ObjectMgr::GetLocaleString(nl->Text_1[0], loc_idx, title);
                 }

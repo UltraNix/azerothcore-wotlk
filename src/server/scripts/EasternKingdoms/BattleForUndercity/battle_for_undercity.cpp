@@ -39,205 +39,185 @@ enum ThrallBattleForUndercity
     DATA_IS_ALREADY_BUSY            = 0
 };
 
-class npc_thrall_pre_battle_undercity : public CreatureScript
+struct npc_thrall_pre_battle_undercityAI : public ScriptedAI
 {
-public:
-    npc_thrall_pre_battle_undercity() : CreatureScript("npc_thrall_pre_battle_undercity") { }
-
-    struct npc_thrall_pre_battle_undercityAI : public ScriptedAI
+    npc_thrall_pre_battle_undercityAI(Creature* creature) : ScriptedAI(creature)
     {
-        npc_thrall_pre_battle_undercityAI(Creature* creature) : ScriptedAI(creature)
+        JainaEntry = me->GetEntry() == NPC_THRALL_ALLY ? NPC_JAINA_ALLY : NPC_JAINA_HORDE;
+        GuardsEntry = me->GetEntry() == NPC_THRALL_ALLY ? NPC_GUARD_ALLY : NPC_GUARD_HORDE;
+    }
+
+    bool RunScript;
+    uint32 ScriptTimer;
+    uint8 ScriptPhase;
+
+    uint64 JainaGUID;
+    uint64 PortalGUID;
+
+    std::list<Creature*> GuardList;
+
+    uint32 JainaEntry;
+    uint32 GuardsEntry;
+
+    void Reset() override
+    {
+        RunScript   = false;
+        ScriptTimer = 3000;
+        ScriptPhase = 0;
+
+        JainaGUID  = 0;
+        PortalGUID = 0;
+
+        GuardList.clear();
+    }
+
+    void SetData(uint32 type, uint32 data) override
+    {
+        switch (data)
         {
-            JainaEntry = me->GetEntry() == NPC_THRALL_ALLY ? NPC_JAINA_ALLY : NPC_JAINA_HORDE;
-            GuardsEntry = me->GetEntry() == NPC_THRALL_ALLY ? NPC_GUARD_ALLY : NPC_GUARD_HORDE;
+            case 1:
+                Talk(0);
+                ScriptPhase = 1;
+                break;
+            case 2:
+                Talk(7);
+                ScriptPhase = 2;
+                break;
+            case 3:
+                RunScript = true;
+                me->GetMotionMaster()->MovePoint(1, 1920.57f, -4136.53f, 40.5368f);
+                break;
+        }
+    }
+
+    uint32 GetData(uint32 data) const override
+    {
+        return uint32(RunScript);
+    }
+
+    void MovementInform(uint32 type, uint32 pointId) override
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (Creature* Jaina = me->FindNearestCreature(JainaEntry, 20.0f))
+        {
+            JainaGUID = Jaina->GetGUID();
+            if (Jaina->IsAIEnabled)
+                Jaina->AI()->SetData(0, 1);
         }
 
-        bool RunScript;
-        uint32 ScriptTimer;
-        uint8 ScriptPhase;
-
-        uint64 JainaGUID;
-        uint64 PortalGUID;
-
-        std::list<Creature*> GuardList;
-
-        uint32 JainaEntry;
-        uint32 GuardsEntry;
-
-        void Reset() 
+        if (Creature* Portal = me->FindNearestCreature(NPC_PORTAL, 20.0f))
         {
-            RunScript   = false;
-            ScriptTimer = 3000;
-            ScriptPhase = 0;
-
-            JainaGUID  = 0;
-            PortalGUID = 0;
-
-            GuardList.clear();
+            PortalGUID = Portal->GetGUID();
+            if (Portal->IsAIEnabled)
+                Portal->AI()->SetData(0, 1);
         }
 
-        void SetData(uint32 type, uint32 data) 
+        if (GuardList.empty())
+            me->GetCreatureListWithEntryInGrid(GuardList, GuardsEntry, 20.0f);
+
+        if (!GuardList.empty())
+            for (std::list<Creature*>::iterator itr = GuardList.begin(); itr != GuardList.end(); ++itr)
+                if (Creature* Guard = (*itr))
+                    if (Guard->IsAIEnabled)
+                        Guard->AI()->SetData(0, 1);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!ScriptPhase)
+            return;
+
+        if (ScriptTimer <= diff)
         {
-            switch (data)
+            switch (ScriptPhase)
             {
                 case 1:
-                    Talk(0);
-                    ScriptPhase = 1;
+                    ScriptTimer = 15000;
+                    ScriptPhase = 0;
+
+                    Talk(1);
+
+                    if (Creature* Jaina = ObjectAccessor::GetCreature(*me, JainaGUID))
+                        if (Jaina->IsAIEnabled)
+                            Jaina->AI()->SetData(0, 2);
+
+                    if (!GuardList.empty())
+                        for (auto guard : GuardList)
+                            guard->GetMotionMaster()->MoveTargetedHome();
                     break;
                 case 2:
-                    Talk(7);
-                    ScriptPhase = 2;
+                    EnterEvadeMode();
                     break;
-                case 3:
-                    RunScript = true;
-                    me->GetMotionMaster()->MovePoint(1, 1920.57f, -4136.53f, 40.5368f);
+                default:
                     break;
             }
         }
-
-        uint32 GetData(uint32 data) const 
-        {
-            return uint32(RunScript);
-        }
-
-        void MovementInform(uint32 type, uint32 pointId) 
-        {
-            if (type != POINT_MOTION_TYPE)
-                return;
-
-            if (Creature* Jaina = me->FindNearestCreature(JainaEntry, 20.0f))
-            {
-                JainaGUID = Jaina->GetGUID();
-                if (Jaina->AI())
-                    Jaina->AI()->SetData(0, 1);
-            }
-
-            if (Creature* Portal = me->FindNearestCreature(NPC_PORTAL, 20.0f))
-            {
-                PortalGUID = Portal->GetGUID();
-                if (Portal->AI())
-                    Portal->AI()->SetData(0, 1);
-            }
-
-            if (GuardList.empty())
-                me->GetCreatureListWithEntryInGrid(GuardList, GuardsEntry, 20.0f);
-
-            if (!GuardList.empty())
-                for (std::list<Creature*>::iterator itr = GuardList.begin(); itr != GuardList.end(); ++itr)
-                    if (Creature* Guard = (*itr))
-                        if (Guard->AI())
-                            Guard->AI()->SetData(0, 1);
-        }
-
-        void UpdateAI(uint32 diff) 
-        {
-            if (!ScriptPhase)
-                return;
-
-            if (ScriptTimer <= diff)
-            {
-                switch (ScriptPhase)
-                {
-                    case 1:
-                        ScriptTimer = 15000;
-                        ScriptPhase = 0;
-
-                        Talk(1);
-
-                        if (Creature* Jaina = ObjectAccessor::GetCreature(*me, JainaGUID))
-                            if (Jaina->AI())
-                                Jaina->AI()->SetData(0, 2);
-
-                        if (!GuardList.empty())
-                            for (std::list<Creature*>::iterator itr = GuardList.begin(); itr != GuardList.end(); ++itr)
-                                if (Creature* Guard = (*itr))
-                                    Guard->GetMotionMaster()->MoveTargetedHome();
-                        break;
-                    case 2:
-                        EnterEvadeMode();
-                        break;
-                }
-            }
-            else
-                ScriptTimer -= diff;
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const 
-    {
-        return new npc_thrall_pre_battle_undercityAI(creature);
+        else
+            ScriptTimer -= diff;
     }
 };
 
-class npc_runthak_pre_battle_undercity : public CreatureScript
+struct npc_runthak_pre_battle_undercityAI : public ScriptedAI
 {
-public:
-    npc_runthak_pre_battle_undercity() : CreatureScript("npc_runthak_pre_battle_undercity") { }
-
-    struct npc_runthak_pre_battle_undercityAI : public ScriptedAI
+    npc_runthak_pre_battle_undercityAI(Creature* creature) : ScriptedAI(creature)
     {
-        npc_runthak_pre_battle_undercityAI(Creature* creature) : ScriptedAI(creature)
+        MerchantList.clear();
+    }
+
+    bool StartScene;
+    uint32 SceneTimer;
+    uint8 ScenePhase;
+
+    std::list<Unit*> MerchantList;
+
+    void Reset() override
+    {
+        StartScene = false;
+        SceneTimer = 1000;
+        ScenePhase = 0;
+
+        if (MerchantList.empty())
+            PrepareMerchantsList();
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!who->IsPlayer() || !me->IsWithinDist(who, 50.0f))
+            return;
+
+        if (!StartScene)
+            StartScene = true;
+    }
+
+    void PrepareMerchantsList()
+    {
+        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 20.0f);
+        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, MerchantList, u_check);
+        me->VisitNearbyObject(20.0f, searcher);
+    }
+
+    Unit* SelectMerchant() const
+    {
+        return (!MerchantList.empty() ? Trinity::Containers::SelectRandomContainerElement(MerchantList) : nullptr);
+    }
+
+    void JumpToNextPhase(uint32 timer)
+    {
+        ++ScenePhase;
+        SceneTimer = timer;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!StartScene)
+            return;
+
+        if (SceneTimer <= diff)
         {
-            MerchantList.clear();
-        }
-
-        bool StartScene;
-        uint32 SceneTimer;
-        uint8 ScenePhase;
-
-        std::list<Unit*> MerchantList;
-
-        void Reset() 
-        {
-            StartScene = false;
-            SceneTimer = 1000;
-            ScenePhase = 0;
-
-            if (MerchantList.empty())
-                PrepareMerchantsList();
-        }
-
-        void MoveInLineOfSight(Unit* who) 
-        {
-            if (who->GetTypeId() != TYPEID_PLAYER || !me->IsWithinDist(who, 50.0f))
-                return;
-
-            if (!StartScene)
-                StartScene = true;
-        }
-
-        void PrepareMerchantsList()
-        {
-            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(me, me, 20.0f);
-            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(me, MerchantList, u_check);
-            me->VisitNearbyObject(20.0f, searcher);
-        }
-
-        Unit* SelectMerchant()
-        {
-            Unit* merchant = NULL;
-
-            if (!MerchantList.empty())
-                merchant = Trinity::Containers::SelectRandomContainerElement(MerchantList);
-
-            return merchant;
-        }
-
-        void JumpToNextPhase(uint32 timer)
-        {
-            ++ScenePhase;
-            SceneTimer = timer;
-        }
-
-        void UpdateAI(uint32 diff) 
-        {
-            if (!StartScene)
-                return;
-
-            if (SceneTimer <= diff)
+            switch (ScenePhase)
             {
-                switch (ScenePhase)
-                {
                 case 0:
                 case 1:
                 case 2:
@@ -267,92 +247,75 @@ public:
                 case 10:
                     Reset();
                     break;
-                }
+                default:
+                    break;
             }
-            else
-                SceneTimer -= diff;
         }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const 
-    {
-        return new npc_runthak_pre_battle_undercityAI(creature);
+        else
+            SceneTimer -= diff;
     }
 };
 
 class go_battle_for_undercity_portals : public GameObjectScript
 {
-public:
-    go_battle_for_undercity_portals() : GameObjectScript("go_battle_for_undercity_portals") { }
+    public:
+        go_battle_for_undercity_portals() : GameObjectScript("go_battle_for_undercity_portals") { }
 
-    struct go_battle_for_undercity_portalsAI : public GameObjectAI
-    {
-        go_battle_for_undercity_portalsAI(GameObject* gameObject) : GameObjectAI(gameObject)
+        struct go_battle_for_undercity_portalsAI : public GameObjectAI
         {
-            go->m_invisibility.AddFlag(INVISIBILITY_UNK7);
-            go->m_invisibility.AddValue(INVISIBILITY_UNK7, 1000);
-        }
-    };
+            go_battle_for_undercity_portalsAI(GameObject* go) : GameObjectAI(go)
+            {
+                go->m_invisibility.AddFlag(INVISIBILITY_UNK7);
+                go->m_invisibility.AddValue(INVISIBILITY_UNK7, 1000);
+            }
+        };
 
-    GameObjectAI* GetAI(GameObject* go) const 
-    {
-        return new go_battle_for_undercity_portalsAI(go);
-    }
+        GameObjectAI* GetAI(GameObject* go) const override
+        {
+            return new go_battle_for_undercity_portalsAI(go);
+        }
 };
 
 class AreaTrigger_at_orgrimmar : public AreaTriggerScript
 {
-public:
-    AreaTrigger_at_orgrimmar() : AreaTriggerScript("AreaTrigger_at_orgrimmar") { }
+    public:
+        AreaTrigger_at_orgrimmar() : AreaTriggerScript("AreaTrigger_at_orgrimmar") { }
 
-    bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) 
-    {
-        if (!player || !player->IsAlive())
-            return false;
-
-        uint32 QuestId = trigger->id == AREATRIGGER_ALLY ? QUEST_FATE_UP_AGAINST_YOUR_WILL : QUEST_HERALD_OF_WAR;
-        uint32 ThrallEntry = trigger->id == AREATRIGGER_ALLY ? NPC_THRALL_ALLY : NPC_THRALL_HORDE;
-
-        if (player->GetQuestStatus(QuestId) == QUEST_STATUS_REWARDED)
+        bool OnTrigger(Player* player, AreaTriggerEntry const* trigger) 
         {
-            if (Creature* Thrall = player->FindNearestCreature(ThrallEntry, 20.0f))
-                if (Thrall->GetAI() && !Thrall->GetAI()->GetData(DATA_IS_ALREADY_BUSY))
-                {
-                    Thrall->GetAI()->SetData(DATA_IS_ALREADY_BUSY, 3);
-                    return true;
-                }
-        }
+            if (!player || !player->IsAlive())
+                return false;
 
-        return false;
-    }
+            uint32 QuestId = trigger->id == AREATRIGGER_ALLY ? QUEST_FATE_UP_AGAINST_YOUR_WILL : QUEST_HERALD_OF_WAR;
+            uint32 ThrallEntry = trigger->id == AREATRIGGER_ALLY ? NPC_THRALL_ALLY : NPC_THRALL_HORDE;
+
+            if (player->GetQuestStatus(QuestId) == QUEST_STATUS_REWARDED)
+            {
+                if (Creature* thrall = player->FindNearestCreature(ThrallEntry, 20.0f))
+                    if (thrall->IsAIEnabled && !thrall->GetAI()->GetData(DATA_IS_ALREADY_BUSY))
+                    {
+                        thrall->GetAI()->SetData(DATA_IS_ALREADY_BUSY, 3);
+                        return true;
+                    }
+            }
+
+            return false;
+        }
 };
 
-class spell_portal_to_orgrimmar : public SpellScriptLoader
+class spell_portal_to_orgrimmar_SpellScript : public SpellScript
 {
-public:
-    spell_portal_to_orgrimmar() : SpellScriptLoader("spell_portal_to_orgrimmar") { }
+    PrepareSpellScript(spell_portal_to_orgrimmar_SpellScript);
 
-    class spell_portal_to_orgrimmar_SpellScript : public SpellScript
+    void HandleSendEvent(SpellEffIndex effIndex)
     {
-        PrepareSpellScript(spell_portal_to_orgrimmar_SpellScript);
+        PreventHitDefaultEffect(effIndex);
+        GetCaster()->SummonGameObject(GO_PORTAL, -8446.12f, 332.768f, 122.163f, 1.4659f, 0.0f, 0.0f, 0.669065f, 0.743204f, 15);
+    }
 
-        void HandleSendEvent(SpellEffIndex effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-
-            if (Unit* caster = GetCaster())
-                caster->SummonGameObject(GO_PORTAL, -8446.12f, 332.768f, 122.163f, 1.4659f, 0.0f, 0.0f, 0.669065f, 0.743204f, 15);
-        }
-
-        void Register() override
-        {
-            OnEffectHit += SpellEffectFn(spell_portal_to_orgrimmar_SpellScript::HandleSendEvent, EFFECT_0, SPELL_EFFECT_SEND_EVENT);
-        }
-    };
-
-    SpellScript* GetSpellScript() const override
+    void Register() override
     {
-        return new spell_portal_to_orgrimmar_SpellScript();
+        OnEffectHit += SpellEffectFn(spell_portal_to_orgrimmar_SpellScript::HandleSendEvent, EFFECT_0, SPELL_EFFECT_SEND_EVENT);
     }
 };
 
@@ -381,78 +344,73 @@ uint32 HordeMobs[8] =
     NPC_DOCTOR_H
 };
 
-class npc_wave_trigger_battle_undercity : public CreatureScript
+struct npc_wave_trigger_battle_undercityAI : public ScriptedAI
 {
-public:
-    npc_wave_trigger_battle_undercity() : CreatureScript("npc_wave_trigger_battle_undercity") { }
-
-    struct npc_wave_trigger_battle_undercityAI : public ScriptedAI
+    npc_wave_trigger_battle_undercityAI(Creature* creature) : ScriptedAI(creature), _summons(me)
     {
-        npc_wave_trigger_battle_undercityAI(Creature* creature) : ScriptedAI(creature), _summons(me)
+        IsPermament = true;
+        SummonerGUID = 0;
+        zoneScript = me->GetZoneScript();
+    }
+
+    ZoneScript* zoneScript;
+
+    SummonList _summons;
+
+    uint64 SummonerGUID;
+
+    uint32 GetWaveMobEntryByName[8];
+
+    uint32 PhaseTimer;
+    uint8 Phase;
+
+    int32 TreachorousCount;
+    uint8 PhaseCount;
+
+    bool IsPermament;
+    bool DoAttackSummoner;
+
+    void Reset() override
+    {
+        PhaseTimer = 5000;
+        Phase = 0;
+
+        TreachorousCount = 0;
+        PhaseCount = 0;
+
+        DoAttackSummoner = true;
+
+        DefineWaves();
+    }
+
+    void IsSummonedBy(Unit* summoner) override
+    {
+        IsPermament = false;
+
+        SummonerGUID = summoner->GetGUID();
+    }
+
+    void JustSummoned(Creature* creature) override
+    {
+        _summons.Summon(creature);
+        if (creature->GetEntry() == NPC_DOOMGUARD_PILLARGER)
         {
-            IsPermament = true;
-            SummonerGUID = 0;
-            zoneScript = me->GetZoneScript();
+            creature->SetReactState(REACT_PASSIVE);
+            creature->GetMotionMaster()->Clear();
+            creature->GetMotionMaster()->MovePath(NPC_DOOMGUARD_PILLARGER * 10, true);
         }
+    }
 
-        ZoneScript* zoneScript;
+    void SummonedCreatureDies(Creature* creature, Unit* /*killer*/) override
+    {
+        _summons.Despawn(creature);
 
-        SummonList _summons;
+        Creature* Summoner = ObjectAccessor::GetCreature(*me, SummonerGUID);
+        if (!Summoner || !Summoner->IsAIEnabled)
+            return;
 
-        uint64 SummonerGUID;
-
-        uint32 GetWaveMobEntryByName[8];
-
-        uint32 PhaseTimer;
-        uint8 Phase;
-
-        int32 TreachorousCount;
-        uint8 PhaseCount;
-
-        bool IsPermament;
-        bool DoAttackSummoner;
-
-        void Reset() 
+        switch (creature->GetEntry())
         {
-            PhaseTimer = 5000;
-            Phase = 0;
-
-            TreachorousCount = 0;
-            PhaseCount = 0;
-
-            DoAttackSummoner = true;
-
-            DefineWaves();
-        }
-
-        void IsSummonedBy(Unit* summoner) 
-        {
-            IsPermament = false;
-
-            SummonerGUID = summoner->GetGUID();
-        }
-
-        void JustSummoned(Creature* creature) 
-        {
-            _summons.Summon(creature);
-            if (creature->GetEntry() == NPC_DOOMGUARD_PILLARGER)
-            {
-                creature->SetReactState(REACT_PASSIVE);
-                creature->GetMotionMaster()->Clear();
-                creature->GetMotionMaster()->MovePath(NPC_DOOMGUARD_PILLARGER * 10, true);
-            }
-        }
-
-        void SummonedCreatureDies(Creature* creature, Unit* /*killer*/) 
-        {
-            _summons.Despawn(creature);
-
-            Creature* Summoner = ObjectAccessor::GetCreature(*me, SummonerGUID);
-            if (!Summoner || !Summoner->GetAI())
-                return;
-
-            switch (creature->GetEntry())
-            {
             case NPC_TREACHEROUS_GUARDIAN_A:
             case NPC_TREACHEROUS_GUARDIAN_H:
             {
@@ -470,25 +428,25 @@ public:
                 break;
             default:
                 break;
-            }
-
-            if (_summons.empty())
-                if (!IsPermament)
-                    if (TreachorousCount >= 10)
-                        Summoner->GetAI()->SetData(0, 5);
-                    else
-                        Summoner->GetAI()->SetData(0, 0);
         }
 
-        void DoAction(int32 /*action*/) 
-        {
-            _summons.DespawnAll();
-        }
+        if (_summons.empty())
+            if (!IsPermament)
+                if (TreachorousCount >= 10)
+                    Summoner->GetAI()->SetData(0, 5);
+                else
+                    Summoner->GetAI()->SetData(0, 0);
+    }
 
-        void SetData(uint32 /*type*/, uint32 data) 
+    void DoAction(int32 /*action*/) override
+    {
+        _summons.DespawnAll();
+    }
+
+    void SetData(uint32 /*type*/, uint32 data) override
+    {
+        switch (data)
         {
-            switch (data)
-            {
             case 0:
                 SummonMobs(GetWaveMobEntryByName[NPC_TREACHEROUS_GUARDIAN], 1);
                 break;
@@ -646,45 +604,47 @@ public:
                 Phase = 22;
                 IsPermament = true;
                 break;
-            }
+            default:
+                break;
         }
+    }
 
-        void DefineWaves()
-        {
-            bool IsAlly = (me->GetPhaseMask() == 128);
-            for (uint8 i = 0; i < 8; ++i)
-                GetWaveMobEntryByName[i] = IsAlly ? (NPC_TREACHEROUS_GUARDIAN_A + i) : HordeMobs[i];
-        }
+    void DefineWaves()
+    {
+        bool IsAlly = (me->GetPhaseMask() == 128);
+        for (uint8 i = 0; i < 8; ++i)
+            GetWaveMobEntryByName[i] = IsAlly ? (NPC_TREACHEROUS_GUARDIAN_A + i) : HordeMobs[i];
+    }
 
-        void SummonMobs(uint32 entry, uint8 num, uint32 timer = 0, bool Jump = false, bool forceDespawn = false)
-        {
-            for (uint8 i = 0; i < num; ++i)
-                if (Creature* summon = DoSpawnCreature(entry, 0.0f, 0.0f, 1.0f, 0.0f, (forceDespawn ? TEMPSUMMON_TIMED_DESPAWN : TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT), 60000))
+    void SummonMobs(uint32 entry, uint8 num, uint32 timer = 0, bool Jump = false, bool forceDespawn = false)
+    {
+        for (uint8 i = 0; i < num; ++i)
+            if (Creature* summon = DoSpawnCreature(entry, 0.0f, 0.0f, 1.0f, 0.0f, (forceDespawn ? TEMPSUMMON_TIMED_DESPAWN : TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT), 60000))
+            {
+                Creature* Summoner = ObjectAccessor::GetCreature(*me, SummonerGUID);
+
+                if (DoAttackSummoner)
+                    summon->m_CombatDistance = 100.0f;
+
+                summon->SetCorpseDelay(10);
+
+                if (IsPermament && zoneScript)
                 {
-                    Creature* Summoner = ObjectAccessor::GetCreature(*me, SummonerGUID);
-
-                    if (DoAttackSummoner)
-                        summon->m_CombatDistance = 100.0f;
-
-                    summon->SetCorpseDelay(10);
-
-                    if (IsPermament && zoneScript)
+                    uint64 targetGUID = zoneScript->GetData64(DATA_GET_ENEMY);
+                    if (targetGUID)
+                        if (Creature* target = ObjectAccessor::GetCreature(*me, targetGUID))
+                            if (summon->IsAIEnabled && target->IsAlive())
+                                summon->AI()->AttackStart(target);
+                }
+                else if (Summoner && DoAttackSummoner && summon->IsAIEnabled)
+                {
+                    if (Jump)
                     {
-                        uint64 targetGUID = zoneScript->GetData64(DATA_GET_ENEMY);
-                        if (targetGUID)
-                            if (Creature* Target = ObjectAccessor::GetCreature(*me, targetGUID))
-                                if (summon->AI() && Target->IsAlive())
-                                    summon->AI()->AttackStart(Target);
-                    }
-                    else if (Summoner && DoAttackSummoner && summon->AI())
-                    {
-                        if (Jump)
+                        Position pos;
+                        float speedXY = 30.0f;
+                        float speedZ = 20.0f;
+                        switch (Phase)
                         {
-                            Position pos;
-                            float speedXY = 30.0f;
-                            float speedZ = 20.0f;
-                            switch (Phase)
-                            {
                             case 2:
                                 summon->SetFacingToObject(Summoner);
                                 me->GetNearPosition(pos, 10.0f, me->GetOrientation());
@@ -703,28 +663,28 @@ public:
                                 else
                                     Jump = false;
                                 break;
-                            }
-
-                            if (Jump)
-                                summon->GetMotionMaster()->MoveJump(pos, speedXY, speedZ);
                         }
 
-                        summon->AI()->AttackStart(Summoner);
+                        if (Jump)
+                            summon->GetMotionMaster()->MoveJump(pos, speedXY, speedZ);
                     }
+
+                    summon->AI()->AttackStart(Summoner);
                 }
+            }
 
-            if (timer)
-                PhaseTimer = timer;
-        }
+        if (timer)
+            PhaseTimer = timer;
+    }
 
-        void UpdateAI(uint32 diff) override
+    void UpdateAI(uint32 diff) override
+    {
+        if (Phase)
         {
-            if (Phase)
+            if (PhaseTimer <= diff)
             {
-                if (PhaseTimer <= diff)
+                switch (Phase)
                 {
-                    switch (Phase)
-                    {
                     case 1:
                         if (Creature* Summoner = ObjectAccessor::GetCreature(*me, SummonerGUID))
                             if (Summoner->GetAI())
@@ -832,40 +792,34 @@ public:
                     case 22:
                         //SummonMobs(NPC_DOOMGUARD_PILLARGER, 1, 10000, false, true);
                         break;
-                    }
                 }
-                else
-                    PhaseTimer -= diff;
             }
-            else if (IsPermament)
-            {
-                if (PhaseTimer <= diff)
-                {
-                    SetData(0, urand(1, 4));
-                    Phase = 0;
-                    PhaseTimer = 120000;
-                }
-                else
-                    PhaseTimer -= diff;
-            }
+            else
+                PhaseTimer -= diff;
         }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const 
-    {
-        return new npc_wave_trigger_battle_undercityAI(creature);
+        else if (IsPermament)
+        {
+            if (PhaseTimer <= diff)
+            {
+                SetData(0, urand(1, 4));
+                Phase = 0;
+                PhaseTimer = 120000;
+            }
+            else
+                PhaseTimer -= diff;
+        }
     }
 };
 
 void AddSC_battle_for_undercity()
 {
     // pre battle
-    new npc_thrall_pre_battle_undercity();
-    new npc_runthak_pre_battle_undercity();
+    new CreatureAILoader<npc_thrall_pre_battle_undercityAI>("npc_thrall_pre_battle_undercity");
+    new CreatureAILoader<npc_runthak_pre_battle_undercityAI>("npc_runthak_pre_battle_undercity");
     new go_battle_for_undercity_portals();
     new AreaTrigger_at_orgrimmar();
-    new spell_portal_to_orgrimmar();
+    new SpellScriptLoaderEx<spell_portal_to_orgrimmar_SpellScript>("spell_portal_to_orgrimmar");
 
     // battle
-    new npc_wave_trigger_battle_undercity();
+    new CreatureAILoader<npc_wave_trigger_battle_undercityAI>("npc_wave_trigger_battle_undercity");
 }

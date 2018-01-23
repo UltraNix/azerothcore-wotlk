@@ -167,7 +167,7 @@ void CreatureTextMgr::LoadCreatureTextLocales()
     {
         Field* fields = result->Fetch();
         CreatureTextLocale& loc = mLocaleTextMap[CreatureTextId(fields[0].GetUInt32(), uint32(fields[1].GetUInt8()), uint32(fields[2].GetUInt8()))];
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = LocaleConstant(i);
             ObjectMgr::AddLocaleString(fields[3 + i - 1].GetString(), locale, loc.Text);
@@ -464,18 +464,16 @@ std::string CreatureTextMgr::GetLocalizedChatString(uint32 entry, uint8 textGrou
         return "";
 
     std::string baseText = groupItr->text;
-    if (locale == DEFAULT_LOCALE)
-        return baseText;
 
     if (locale > MAX_LOCALES)
-        return baseText;
+        locale = DEFAULT_LOCALE;
 
-    LocaleCreatureTextMap::const_iterator locItr = mLocaleTextMap.find(CreatureTextId(entry, uint32(textGroup), id));
-    if (locItr == mLocaleTextMap.end())
-        return baseText;
-
-    if (locItr->second.Text[locale].length())
-        return locItr->second.Text[locale];
+    if (locale != DEFAULT_LOCALE)
+    {
+        LocaleCreatureTextMap::const_iterator locItr = mLocaleTextMap.find(CreatureTextId(entry, uint32(textGroup), id));
+        if (locItr != mLocaleTextMap.end())
+            ObjectMgr::GetLocaleString(locItr->second.Text, locale, baseText);
+    }
 
     return baseText;
 }
