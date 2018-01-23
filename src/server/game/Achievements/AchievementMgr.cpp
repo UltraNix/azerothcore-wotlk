@@ -2827,12 +2827,13 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
         AchievementRewardLocale& data = m_achievementRewardLocales[entry];
 
-        for (int i = 1; i < TOTAL_LOCALES; ++i)
+        for (int i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = (LocaleConstant) i;
             ObjectMgr::AddLocaleString(fields[1 + 2 * (i - 1)].GetString(), locale, data.subject);
             ObjectMgr::AddLocaleString(fields[1 + 2 * (i - 1) + 1].GetString(), locale, data.text);
         }
+
     } while (result->NextRow());
 
     sLog->outString(">> Loaded %lu achievement reward locale strings in %u ms", (unsigned long)m_achievementRewardLocales.size(), GetMSTimeDiffToNow(oldMSTime));

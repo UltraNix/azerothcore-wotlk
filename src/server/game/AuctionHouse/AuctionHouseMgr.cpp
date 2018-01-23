@@ -529,8 +529,8 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
         return true;
     }
 
-    int loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
-    int locdbc_idx = player->GetSession()->GetSessionDbcLocale();
+    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+    LocaleConstant locdbc_idx = player->GetSession()->GetSessionDbcLocale();
     time_t curTime = sWorld->GetGameTime();
 
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
@@ -589,7 +589,7 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
                 continue;
 
             // local name
-            if (loc_idx >= 0)
+            if (loc_idx != DEFAULT_LOCALE)
                 if (ItemLocale const* il = sObjectMgr->GetItemLocale(proto->ItemId))
                     ObjectMgr::GetLocaleString(il->Name, loc_idx, name);
 
@@ -625,7 +625,7 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
                     // Append the suffix (ie: of the Monkey) to the name using localization
                     // or default enUS if localization is invalid
                     name += ' ';
-                    name += suffix[locdbc_idx >= 0 ? locdbc_idx : LOCALE_enUS];
+                    name += suffix[locdbc_idx != DEFAULT_LOCALE ? locdbc_idx : LOCALE_enUS];
                 }
             }
 

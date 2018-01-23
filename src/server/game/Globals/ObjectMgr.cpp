@@ -366,7 +366,7 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
 
         GossipMenuItemsLocale& data = _gossipMenuItemsLocaleStore[MAKE_PAIR32(menuId, id)];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = (LocaleConstant) i;
             AddLocaleString(fields[2 + 2 * (i - 1)].GetString(), locale, data.OptionText);
@@ -397,8 +397,9 @@ void ObjectMgr::LoadPointOfInterestLocales()
 
         PointOfInterestLocale& data = _pointOfInterestLocaleStore[entry];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
             AddLocaleString(fields[i].GetString(), LocaleConstant(i), data.IconName);
+
     } while (result->NextRow());
 
     sLog->outString(">> Loaded %lu points_of_interest locale strings in %u ms", (unsigned long)_pointOfInterestLocaleStore.size(), GetMSTimeDiffToNow(oldMSTime));
@@ -2369,7 +2370,7 @@ void ObjectMgr::LoadItemLocales()
 
         ItemLocale& data = _itemLocaleStore[entry];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = (LocaleConstant) i;
             AddLocaleString(fields[1 + 2 * (i - 1)].GetString(), locale, data.Name);
@@ -3043,8 +3044,9 @@ void ObjectMgr::LoadItemSetNameLocales()
 
         ItemSetNameLocale& data = _itemSetNameLocaleStore[entry];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
             AddLocaleString(fields[i].GetString(), LocaleConstant(i), data.Name);
+
     } while (result->NextRow());
 
     sLog->outString(">> Loaded " UI64FMTD " Item set name locale strings in %u ms", uint64(_itemSetNameLocaleStore.size()), GetMSTimeDiffToNow(oldMSTime));
@@ -4693,7 +4695,7 @@ void ObjectMgr::LoadQuestLocales()
 
         QuestLocale& data = _questLocaleStore[entry];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = (LocaleConstant) i;
 
@@ -5334,8 +5336,9 @@ void ObjectMgr::LoadPageTextLocales()
 
         PageTextLocale& data = _pageTextLocaleStore[entry];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
             AddLocaleString(fields[i].GetString(), LocaleConstant(i), data.Text);
+
     } while (result->NextRow());
 
     sLog->outString(">> Loaded %lu PageText locale strings in %u ms", (unsigned long)_pageTextLocaleStore.size(), GetMSTimeDiffToNow(oldMSTime));
@@ -5568,7 +5571,7 @@ void ObjectMgr::LoadNpcTextLocales()
 
         NpcTextLocale& data = _npcTextLocaleStore[entry];
 
-        for (uint8 i = 1; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_koKR; i < TOTAL_LOCALES; ++i)
         {
             LocaleConstant locale = (LocaleConstant) i;
             for (uint8 j = 0; j < MAX_LOCALES; ++j)
@@ -7984,8 +7987,9 @@ bool ObjectMgr::LoadTrinityStrings(const char* table, int32 min_value, int32 max
         data.Content.resize(1);
         ++count;
 
-        for (uint8 i = 0; i < TOTAL_LOCALES; ++i)
+        for (uint8 i = LOCALE_enUS; i < TOTAL_LOCALES; ++i)
             AddLocaleString(fields[i + 1].GetString(), LocaleConstant(i), data.Content);
+
     } while (result->NextRow());
 
     if (min_value == MIN_TRINITY_STRING_ID)

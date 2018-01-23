@@ -103,7 +103,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recvData)
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();
 
         // If locale not default load packet here and overwrite data with locale one.
-        if (loc_idx != LOCALE_enUS)
+        if (loc_idx != DEFAULT_LOCALE)
         {
             std::string Name, SubName;
             Name = ci->Name;
@@ -176,7 +176,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recvData)
         CastBarCaption = info->castBarCaption;
 
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();
-        if (loc_idx >= LOCALE_enUS)
+        if (loc_idx >= DEFAULT_LOCALE)
             if (GameObjectLocale const* gameObjectLocale = sObjectMgr->GetGameObjectLocale(entry))
             {
                 ObjectMgr::GetLocaleString(gameObjectLocale->Name, loc_idx, Name);
@@ -303,11 +303,11 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recvData)
         }
 
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();
-        if (loc_idx >= LOCALE_enUS)
+        if (loc_idx >= DEFAULT_LOCALE)
         {
             if (NpcTextLocale const* nl = sObjectMgr->GetNpcTextLocale(textID))
             {
-                for (int i = 0; i < MAX_LOCALES; ++i)
+                for (uint8 i = 0; i < MAX_LOCALES; ++i)
                 {
                     ObjectMgr::GetLocaleString(nl->Text_0[i], loc_idx, Text_0[i]);
                     ObjectMgr::GetLocaleString(nl->Text_1[i], loc_idx, Text_1[i]);
@@ -371,7 +371,7 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recvData)
             std::string Text = pageText->Text;
 
             LocaleConstant loc_idx = GetSessionDbLocaleIndex();
-            if (loc_idx >= LOCALE_enUS)
+            if (loc_idx != DEFAULT_LOCALE)
                 if (PageTextLocale const* player = sObjectMgr->GetPageTextLocale(pageID))
                     ObjectMgr::GetLocaleString(player->Text, loc_idx, Text);
 
