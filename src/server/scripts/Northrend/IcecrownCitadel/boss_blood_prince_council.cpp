@@ -518,7 +518,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_GLITTERING_SPARKS, urand(12000, 15000));
                 events.ScheduleEvent(EVENT_CONJURE_FLAME, 20000);
                 if (IsHeroic())
-                    me->AddAura(SPELL_SHADOW_PRISON, me);
+                    DoCastSelf(SPELL_SHADOW_PRISON);
             }
 
             void JustDied(Unit* /*killer*/)

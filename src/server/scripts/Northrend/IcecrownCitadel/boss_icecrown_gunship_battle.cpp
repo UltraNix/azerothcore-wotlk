@@ -15,6 +15,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "InstanceScript.h"
 #include "SpellAuraEffects.h"
 #include "ScriptedCreature.h"
+#include "Group.h"
 
 enum Texts
 {
@@ -741,10 +742,19 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
                 checkTimer = 1000;
             }
 
-            void sGossipSelect(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/)
+            void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/)
             {
                 if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
                     return;
+
+                if (Group* group = player->GetGroup())
+                {
+                    if (group->GetLeaderGUID() != player->GetGUID())
+                        return;
+                }
+                else
+                    return;
+
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 me->GetTransport()->setActive(true);
                 me->GetTransport()->ToMotionTransport()->EnableMovement(true);
@@ -1076,10 +1086,19 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
                 checkTimer = 1000;
             }
 
-            void sGossipSelect(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/)
+            void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/)
             {
                 if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
                     return;
+
+                if (Group* group = player->GetGroup())
+                {
+                    if (group->GetLeaderGUID() != player->GetGUID())
+                        return;
+                }
+                else
+                    return;
+
                 me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 me->GetTransport()->setActive(true);
                 me->GetTransport()->ToMotionTransport()->EnableMovement(true);

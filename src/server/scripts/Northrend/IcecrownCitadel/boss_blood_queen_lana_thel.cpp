@@ -472,7 +472,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                     if (p->IsAlive() && p != me->GetVictim() && p->GetGUID() != _offtankGUID && !p->IsGameMaster() && !p->HasAura(SPELL_PACT_OF_THE_DARKFALLEN) && !p->HasAura(SPELL_UNCONTROLLABLE_FRENZY))
                                         myList.push_back(p);
 
-                            Trinity::Containers::RandomResize(myList, uint32(Is25ManRaid() ? 4 : 2));
+                            Trinity::Containers::RandomResize(myList, 2);
                             for (std::list<Player*>::iterator itr = myList.begin(); itr != myList.end(); ++itr)
                                 me->CastSpell(*itr, SPELL_TWILIGHT_BLOODBOLT, false);
                             me->CastSpell(me, SPELL_TWILIGHT_BLOODBOLT_TARGET, false);

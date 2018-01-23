@@ -2807,6 +2807,14 @@ std::vector<uint32> partialCorrection =
     72548,  // Malleable Goo 25 man
     72549,  // Malleable Goo 10 man heroic
     72550,  // Malleable Goo 25 man heroic
+    70407,  // Blast Wave 10 man
+    71151,  // Blast Wave 25 man
+    72057,  // Lich Slap 10 man
+    72421,  // Lich Slap 25 man
+    71807,  // Glittering Sparks 10 man
+    72796,  // Glittering Sparks 25 man
+    72797,  // Glittering Sparks 10 man heroic
+    72798,  // Glittering Sparks 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
@@ -6477,6 +6485,17 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 71274: // Ymirjar Frostbinder, Frozen Orb
             spellInfo->EffectImplicitTargetA[0] = 6;
+            break;
+        case 69240: // Vile Gas
+        case 71218:
+        case 73019:
+        case 73020:
+        case 69248:
+        case 69244:
+        case 71288:
+        case 73173:
+        case 73174:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         case 69783: // Ooze Flood (Rotface)
         case 69797:

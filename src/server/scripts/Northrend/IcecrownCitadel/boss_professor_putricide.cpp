@@ -336,6 +336,7 @@ class boss_professor_putricide : public CreatureScript
                     DoCastAOE(SPELL_UNHOLY_INFUSION_CREDIT, true); // ReqTargetAura in dbc
 
                 me->CastSpell((Unit*)NULL, SPELL_MUTATED_PLAGUE_CLEAR, true);
+                instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(70911, 72854, 72855, 72856));
             }
 
             void JustSummoned(Creature* summon)
