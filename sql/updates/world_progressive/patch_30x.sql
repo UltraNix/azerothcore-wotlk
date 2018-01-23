@@ -1,14 +1,14 @@
-#
-# === Content 3.0.x (Naxx, OS, EoE) ===
-#
+--
+-- === Content 3.0.x (Naxx, OS, EoE) ===
+--
  
-SET @EmblemHighPREV := 49426; # Emblem of Frost
-SET @EmblemLowPREV  := 47241; # Emblem of Triumph
+SET @EmblemHighPREV := 49426; -- Emblem of Frost
+SET @EmblemLowPREV  := 47241; -- Emblem of Triumph
 
-SET @EmblemHighCURR := 40753; # Emblem of Valor
-SET @EmblemLowCURR  := 40752; # Emblem of Heroism
+SET @EmblemHighCURR := 40753; -- Emblem of Valor
+SET @EmblemLowCURR  := 40752; -- Emblem of Heroism
 
-# Update loot tables
+-- Update loot tables
 UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV;
 UPDATE `creature_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
 
@@ -24,7 +24,7 @@ UPDATE `reference_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemL
 UPDATE `spell_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV;
 UPDATE `spell_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
 
-# Update quest emblems
+-- Update quest emblems
 
 UPDATE `quest_template` SET `RewardItemID1`=@EmblemHighCURR WHERE `RewardItemID1`=@EmblemHighPREV;
 UPDATE `quest_template` SET `RewardItemID2`=@EmblemHighCURR WHERE `RewardItemID2`=@EmblemHighPREV;
@@ -46,9 +46,9 @@ UPDATE `quest_template` SET `RewardChoiceItemId2`=@EmblemLowCURR WHERE `RewardCh
 UPDATE `quest_template` SET `RewardChoiceItemId3`=@EmblemLowCURR WHERE `RewardChoiceItemId3`=@EmblemLowPREV;
 UPDATE `quest_template` SET `RewardChoiceItemId4`=@EmblemLowCURR WHERE `RewardChoiceItemId4`=@EmblemLowPREV;
 
-# Remove disables for raids and instances for current content
+-- Remove disables for raids and instances for current content
 DELETE FROM `disables` WHERE `sourceType` = 2 AND `entry` IN (533, 574, 575, 576, 578, 595, 599, 600, 601, 602, 604, 607, 608, 609, 615, 616, 617, 618, 619, 624, 628);
-# Add disables for raids and instances for future content
+-- Add disables for raids and instances for future content
 REPLACE INTO `disables` (`sourceType`, `entry`, `flags`, `params_0`, `params_1`, `comment`) VALUES 
 (2, 650, 3, '', '', 'Disable dungeon "Trial of the Champion" - patch 3.2.x content'),
 (2, 632, 3, '', '', 'Disable dungeon "The Forge of Souls" - patch 3.3.x content'),
@@ -60,7 +60,7 @@ REPLACE INTO `disables` (`sourceType`, `entry`, `flags`, `params_0`, `params_1`,
 (2, 631, 15, '', '', 'Disable raid with hc "Icecrown Citadel" - patch 3.3.x content'),
 (2, 724, 15, '', '', 'Disable raid with hc "Ruby Sanctum" - patch 3.3.5 content');
 
-# Proof of demise
+-- Proof of demise
 DELETE FROM `creature_queststarter` WHERE `quest` > 20000 AND `id` = 20735;
 REPLACE INTO `creature_queststarter` (`quest`, `id`) VALUES
 (13245, 20735),
@@ -105,7 +105,7 @@ REPLACE INTO `pool_quest` VALUES
 (13255, 60004, 'Proof of Demise: Herald Volazj'),
 (13256, 60004, 'Proof of Demise: Cyanigosa');
 
-# Timear forces
+-- Timear forces
 REPLACE INTO `creature_queststarter` (`quest`, `id`) VALUES
 (13240, 31439),
 (13241, 31439),
@@ -127,7 +127,7 @@ REPLACE INTO `pool_quest` VALUES
 
 UPDATE `creature_template` SET `ScriptName`='npc_archmage_timear' WHERE `entry`=31439;
 
-# AT phasing for objects
+-- AT phasing for objects
 
 DELETE FROM `spell_area` WHERE `spell` = 61831; -- 3.1 phase
 REPLACE INTO `spell_area` (`spell`, `area`, `autocast`) VALUES 
@@ -143,7 +143,7 @@ REPLACE INTO `spell_area` (`spell`, `area`, `autocast`) VALUES
 (61831, 4676, 1),
 (61831, 4677, 1);
 
-# Call to Arms quests
+-- Call to Arms quests
 
 DELETE FROM `disables` WHERE `entry` IN (11335,11336,11337,11338,11339,11340,11341,11342,13405,13407,14163,14164);
 DELETE FROM `game_event_seasonal_questrelation` WHERE `questId` IN (11335,11336,11337,11338,11339,11340,11341,11342,13405,13407,14163,14164);
@@ -214,7 +214,7 @@ INSERT INTO `creature_questender`   VALUES (15350, 14164);
 INSERT INTO `game_event_seasonal_questrelation` VALUES (14164, 54);
 INSERT INTO `conditions` VALUES (19, 0, 14164, 0, 0, 12, 0, 54, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: IoC');
 
-# =============================================================================================
+-- =============================================================================================
 
 /* WG VENDORS ITEMS */
 

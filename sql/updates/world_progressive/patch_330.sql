@@ -1,13 +1,13 @@
-#
-# === Content 3.3.x (ICC) ===
-# 
-SET @EmblemHighPREV := 47241; # Emblem of Triumph
-SET @EmblemLowPREV  := 45624; # Emblem of Conquest
+--
+-- === Content 3.3.x (ICC) ===
+-- 
+SET @EmblemHighPREV := 47241; -- Emblem of Triumph
+SET @EmblemLowPREV  := 45624; -- Emblem of Conquest
 
-SET @EmblemHighCURR := 49426; # Emblem of Frost
-SET @EmblemLowCURR  := 47241; # Emblem of Triumph
+SET @EmblemHighCURR := 49426; -- Emblem of Frost
+SET @EmblemLowCURR  := 47241; -- Emblem of Triumph
 
-# Update loot tables
+-- Update loot tables
 UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV;
 UPDATE `creature_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
 
@@ -23,7 +23,7 @@ UPDATE `reference_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemL
 UPDATE `spell_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV;
 UPDATE `spell_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
 
-# Update quest emblems
+-- Update quest emblems
 UPDATE `quest_template` SET `RewardItemId1`=@EmblemHighCURR WHERE `RewardItemId1`=@EmblemHighPREV;
 UPDATE `quest_template` SET `RewardItemId2`=@EmblemHighCURR WHERE `RewardItemId2`=@EmblemHighPREV;
 UPDATE `quest_template` SET `RewardItemId3`=@EmblemHighCURR WHERE `RewardItemId3`=@EmblemHighPREV;
@@ -44,14 +44,14 @@ UPDATE `quest_template` SET `RewardChoiceItemId2`=@EmblemLowCURR WHERE `RewardCh
 UPDATE `quest_template` SET `RewardChoiceItemId3`=@EmblemLowCURR WHERE `RewardChoiceItemId3`=@EmblemLowPREV;
 UPDATE `quest_template` SET `RewardChoiceItemId4`=@EmblemLowCURR WHERE `RewardChoiceItemId4`=@EmblemLowPREV;
 
-# Remove disables for raids and instances for current content
+-- Remove disables for raids and instances for current content
 DELETE FROM `disables` WHERE `sourceType` = 2 AND `entry` IN (632, 658, 668, 631);
 
-# Disable quests "Proof of demise: ..."
+-- Disable quests "Proof of demise: ..."
 DELETE FROM `creature_queststarter` WHERE `quest` IN (13245, 13246, 13247, 13248, 13249, 13250, 13251, 13252, 13253, 13254, 13255, 13256);
 DELETE FROM `creature_questender` WHERE `quest` IN (13245, 13246, 13247, 13248, 13249, 13250, 13251, 13252, 13253, 13254, 13255, 13256);
 
-# Disable quests "Timear forces: ..."
+-- Disable quests "Timear forces: ..."
 DELETE FROM `creature_queststarter` WHERE `quest` IN (13240, 13241, 13243, 13244);
 DELETE FROM `creature_questender` WHERE `quest` IN (13240, 13241, 13243, 13244);
 UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=31439;
@@ -70,4 +70,4 @@ INSERT INTO `disables` VALUES (1, 14163, 0, '', '', 'Deprecated quest: Call to A
 INSERT INTO `disables` VALUES (1, 14164, 0, '', '', 'Deprecated quest: Call to Arms: Isle of Conquest');
 
 
-# =============================================================================================
+-- =============================================================================================
