@@ -370,6 +370,7 @@ enum WorldIntConfigs
     CONFIG_KRUUL_EVENT_MINUTE,
     CONFIG_CUSTOM_AFK_REPORT_TIMER,
     CONFIG_HUNGER_GAMES_LIMIT,
+    CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
 
     INT_CONFIG_VALUE_COUNT
 };

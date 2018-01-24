@@ -1326,7 +1326,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_SPECIAL_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharSpecial.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS_ANNOUNCES] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Announces.Enable", false);
-
+    m_int_configs[CONFIG_CALENDAR_KEEP_DAYS] = sConfigMgr->GetIntDefault("Calendar.KeepDays", 0);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)
@@ -1808,6 +1808,14 @@ void World::SetInitialWorldSettings()
 
     sLog->outString("Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
+
+    // Sitowsky
+    if (getIntConfig(CONFIG_CALENDAR_KEEP_DAYS) != 0)
+    {
+        sLog->outString("Deleting calendar data older than %i days...", getIntConfig(CONFIG_CALENDAR_KEEP_DAYS));
+        CharacterDatabase.PQuery("DELETE FROM calendar_events WHERE eventtime < (UNIX_TIMESTAMP(NOW()) - %u)", uint32(getIntConfig(CONFIG_CALENDAR_KEEP_DAYS) * DAY));
+        CharacterDatabase.Query("DELETE FROM calendar_invites WHERE (event) NOT IN (SELECT id FROM calendar_events)");
+    }
 
     sLog->outString("Loading Calendar data...");
     sCalendarMgr->LoadFromDB();
