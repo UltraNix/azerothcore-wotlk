@@ -739,8 +739,11 @@ class World
 
         /// Are we in the middle of a shutdown?
         bool IsShuttingDown() const { return m_ShutdownTimer > 0; }
+        uint32 GetShutdownMask() const { return m_ShutdownMask; }
         uint32 GetShutDownTimeLeft() const { return m_ShutdownTimer; }
-        void ShutdownServ(uint32 time, uint32 options, uint8 exitcode);
+        char const* GetShutdownReason() { return m_ShutdownReason.c_str(); }
+
+        void ShutdownServ(uint32 time, uint32 options, uint8 exitcode, char const* = "no reason");
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
         static uint8 GetExitCode() { return m_ExitCode; }
@@ -896,6 +899,7 @@ class World
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
+        std::string m_ShutdownReason;
 
         uint32 m_CleaningFlags;
 
