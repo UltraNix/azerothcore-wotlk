@@ -898,6 +898,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Check premium services
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PREMIUM_TIME);
     stmt->setUInt32(0, id);
+    stmt->setUInt32(1, realmID);
 
     time_t premiumServices[MAX_PREMIUM_SERVICES] = { 0 };
     if (PreparedQueryResult premiumInfo = LoginDatabase.Query(stmt))

@@ -86,11 +86,11 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_DEL_ACCOUNT, "DELETE FROM account WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_UPD_UPTIME_PLAYERS, "UPDATE uptime SET uptime = ?, maxplayers = ? WHERE realmid = ? AND starttime = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_AUTOBROADCAST, "SELECT id, weight, country, exceptCountry, text FROM autobroadcast WHERE realmid = ? OR realmid = -1", CONNECTION_SYNCH);
-    PrepareStatement(LOGIN_SEL_PREMIUM_TIME, "SELECT premium_type, unset_date FROM account_premium WHERE id = ? AND unset_date > UNIX_TIMESTAMP()", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_PREMIUM_TIME, "SELECT premium_type, unset_date FROM account_premium WHERE id = ? AND RealmID = ? AND unset_date > UNIX_TIMESTAMP()", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_PREMIUM_ID, "SELECT id FROM account WHERE username = ?", CONNECTION_SYNCH);
-    PrepareStatement(LOGIN_DEL_PREMIUM_ID, "DELETE FROM account_premium WHERE id = ? AND premium_type = ?", CONNECTION_ASYNC);
-    PrepareStatement(LOGIN_REP_ACCOUNT_PREMIUM, "REPLACE INTO account_premium (id, premium_type, set_date, unset_date) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(LOGIN_SEL_PREMIUM_TIME_BY_ID, "SELECT premium_type, unset_date FROM account_premium WHERE id = ? AND unset_date > UNIX_TIMESTAMP() AND premium_type = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_DEL_PREMIUM_ID, "DELETE FROM account_premium WHERE id = ? AND RealmID = ? AND premium_type = ?", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_REP_ACCOUNT_PREMIUM, "REPLACE INTO account_premium (id, RealmID, premium_type, set_date, unset_date) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_SEL_PREMIUM_TIME_BY_ID, "SELECT premium_type, unset_date FROM account_premium WHERE id = ? AND RealmID = ? AND unset_date > UNIX_TIMESTAMP() AND premium_type = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_UPD_PREMIUM_POINTS, "UPDATE account SET dp = dp + ? WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_UPD_PREMIUM_POINTS_REMOVE, "UPDATE account SET dp = dp - ? WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_PREMIUM_POINTS, "SELECT dp FROM account WHERE id = ?", CONNECTION_SYNCH);
