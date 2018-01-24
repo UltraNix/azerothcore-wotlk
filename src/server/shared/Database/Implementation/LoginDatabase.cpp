@@ -100,4 +100,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_IP2NATION, "SELECT c.country FROM ip2nationcountries c, ip2nation i WHERE i.ip < ? AND c.code = i.country ORDER BY i.ip DESC LIMIT 0,1", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_IP2NATION_COUNT, "SELECT count(c.code) FROM ip2nationcountries c, ip2nation i WHERE c.code = i.country", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_GET_IP2NATION_PLAYER_IP, "SELECT last_ip FROM account WHERE id = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_MUTE_HISTORY, "SELECT characterName, muteReason, muteBy, minutes, DATE_FORMAT(mute_date, '%Y-%m-%d | %T') FROM account_mute_history WHERE account_id = ? ORDER BY mute_date DESC", CONNECTION_SYNCH);
 }

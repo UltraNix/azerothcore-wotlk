@@ -131,6 +131,7 @@ public:
             { "checkpoint",         SEC_PLAYER,             false, &HandleCheckPointCommand,            "" },
             { "buff",               SEC_ADMINISTRATOR,      false, &HandleBuffCommand,                  "" },
             { "unbuff",             SEC_ADMINISTRATOR,      false, &HandleUnbuffCommand,                "" },
+            { "mutehistory",        SEC_GAMEMASTER,         false, &HandleMuteHistoryCommand,           "" },
 
         };
         return commandTable;
@@ -3474,6 +3475,53 @@ public:
         player->RemoveAurasDueToSpell(1908);
 
         return true;
+    }
+
+    static bool HandleMuteHistoryCommand(ChatHandler* handler, char const* args) {
+        if (!*args)
+            return false;
+
+        std::string account = strtok((char*)args, " ");
+
+        if (!AccountMgr::normalizeString(account))
+            return false;
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ID_BY_NAME);
+        stmt->setString(0, account);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_NO_PLAYERS_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Field* fields = result->Fetch();
+        uint32 accountId = fields[0].GetUInt32();
+        
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_MUTE_HISTORY);
+        stmt->setInt32(0, accountId);
+        result = LoginDatabase.Query(stmt);
+        if (!result)
+        {
+            handler->PSendSysMessage("No mute history for this account!");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        handler->PSendSysMessage("Mute history for account %s:", account.c_str());
+        do
+        {
+            fields = result->Fetch();
+            std::string characterName = fields[0].GetString();
+            std::string muteReason = fields[1].GetString();
+            std::string muteBy = fields[2].GetString();
+            uint32 minutes = fields[3].GetUInt32();
+            std::string muteTime = fields[4].GetString();
+
+            handler->PSendSysMessage("|cff00ccff%s|r - Character: |cff00ccff%s|r muted for: |cff00ccff%s|r by: |cff00ccff%s|r (%d minutes)", muteTime.c_str(), characterName.c_str(), muteReason.c_str(), muteBy.c_str(), minutes);
+        } while (result->NextRow());
+
     }
 };
 
