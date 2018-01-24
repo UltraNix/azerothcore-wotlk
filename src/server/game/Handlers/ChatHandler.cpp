@@ -86,6 +86,17 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 }
         }
 
+    // Angrathar: Newbie gamemasters doesn't are without permissions to speak on public channels.
+    if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) && AccountMgr::IsModeratorAccount(GetSecurity()))
+    {
+        if (type == CHAT_MSG_CHANNEL)
+        {
+            SendNotification("Your GM rank doesn't allow you to write on public channels.");
+            recvData.rfinish();
+            return;
+        }
+    }
+
     // pussywizard:
     switch (type)
     {
