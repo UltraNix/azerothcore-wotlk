@@ -262,9 +262,7 @@ public:
                 pInstance->SetData(EVENT_HORSEMAN, DONE);
                 if (pInstance->GetData(EVENT_HORSEMAN) == DONE)
                 {
-                    if (!me->GetMap()->GetPlayers().isEmpty())
-                        if (Player* player = me->GetMap()->GetPlayers().getFirst()->GetSource())
-                            player->SummonGameObject(RAID_MODE(GO_HORSEMEN_CHEST_10, GO_HORSEMEN_CHEST_25), 2514.8f, -2944.9f, 245.55f, 5.51f, 0, 0, 0, 0, 0);
+                    pInstance->SetData(DATA_HORSEMAN_CHEST, DATA_HORSEMAN_CHEST);
 
                     if (Map* map = me->GetMap())
                     {

@@ -64,7 +64,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
             return false;
 
         if (creature->GetEntry() != 99004 && creature->GetEntry() < 99006)
@@ -1058,7 +1058,7 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override 
     {
-        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM))
             return false;
 
         if (player->getClass() == CLASS_DEATH_KNIGHT && !player->GetQuestRewardStatus(13166))

@@ -50,6 +50,7 @@ UPDATE `quest_template` SET `RewardChoiceItemId4`=@EmblemLowCURR WHERE `RewardCh
 DELETE FROM `disables` WHERE `sourceType` = 2 AND `entry` IN (533, 574, 575, 576, 578, 595, 599, 600, 601, 602, 604, 607, 608, 609, 615, 616, 617, 618, 619, 624, 628);
 -- Add disables for raids and instances for future content
 REPLACE INTO `disables` (`sourceType`, `entry`, `flags`, `params_0`, `params_1`, `comment`) VALUES 
+(2, 616, 15, '', '', 'Disable raid with hc "Eye of Eternity" - patch 3.3.5 content'),
 (2, 650, 3, '', '', 'Disable dungeon "Trial of the Champion" - patch 3.2.x content'),
 (2, 632, 3, '', '', 'Disable dungeon "The Forge of Souls" - patch 3.3.x content'),
 (2, 658, 3, '', '', 'Disable dungeon "Pit of Saron" - patch 3.3.x content'),
@@ -409,58 +410,6 @@ DELETE FROM `reference_loot_template` WHERE `reference_loot_template`.`entry` = 
 
 DELETE FROM `item_loot_template` WHERE `item_loot_template`.`mincountOrRef` = -10013;
 DELETE FROM `item_loot_template` WHERE `item_loot_template`.`mincountOrRef` = -10019;
-
-/* Hateful Vendor */
-
-INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(NULL, 29539, 571, 1, 1, 0, 0, 5752.55, 585.581, 614.969, 6.09849, 300, 0, 0, 10635, 0, 0, 0, 0, 0);
-UPDATE `creature_template` SET `npcflag` = '4224' WHERE `creature_template`.`entry` =29539;
-
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
-(29539, 0, 42207, 0, 0, 2256),
-(29539, 0, 42226, 0, 0, 2256),
-(29539, 0, 42231, 0, 0, 2256),
-(29539, 0, 42236, 0, 0, 2256),
-(29539, 0, 42241, 0, 0, 2256),
-(29539, 0, 42247, 0, 0, 2256),
-(29539, 0, 42254, 0, 0, 2256),
-(29539, 0, 42259, 0, 0, 2256),
-(29539, 0, 42274, 0, 0, 2256),
-(29539, 0, 42279, 0, 0, 2256),
-(29539, 0, 42284, 0, 0, 2256),
-(29539, 0, 42289, 0, 0, 2256),
-(29539, 0, 42316, 0, 0, 2965),
-(29539, 0, 42321, 0, 0, 2965),
-(29539, 0, 42326, 0, 0, 2965),
-(29539, 0, 42331, 0, 0, 2965),
-(29539, 0, 42345, 0, 0, 2256),
-(29539, 0, 42351, 0, 0, 2256),
-(29539, 0, 42383, 0, 0, 2965),
-(29539, 0, 42389, 0, 0, 2965),
-(29539, 0, 42449, 0, 0, 131),
-(29539, 0, 42484, 0, 0, 2256),
-(29539, 0, 42489, 0, 0, 2256),
-(29539, 0, 42494, 0, 0, 2256),
-(29539, 0, 42501, 0, 0, 131),
-(29539, 0, 42512, 0, 0, 131),
-(29539, 0, 42518, 0, 0, 131),
-(29539, 0, 42524, 0, 0, 131),
-(29539, 0, 42530, 0, 0, 131),
-(29539, 0, 42536, 0, 0, 131),
-(29539, 0, 42558, 0, 0, 2256),
-(29539, 0, 42563, 0, 0, 2256),
-(29539, 0, 42569, 0, 0, 2256),
-(29539, 0, 42577, 0, 0, 131),
-(29539, 0, 42582, 0, 0, 131),
-(29539, 0, 42587, 0, 0, 131),
-(29539, 0, 42596, 0, 0, 131),
-(29539, 0, 42601, 0, 0, 131),
-(29539, 0, 42606, 0, 0, 131),
-(29539, 0, 42613, 0, 0, 131),
-(29539, 0, 42619, 0, 0, 131),
-(29539, 0, 42851, 0, 0, 131),
-(29539, 0, 44417, 0, 0, 2965),
-(29539, 0, 44418, 0, 0, 2965);
 
 DELETE FROM `creature` WHERE `creature`.`id` = 33993; /* Koralon the Flame Watcher <VOA> */
 DELETE FROM `creature` WHERE `creature`.`id` = 35013; /* Emalon the Storm Watcher <VOA> */

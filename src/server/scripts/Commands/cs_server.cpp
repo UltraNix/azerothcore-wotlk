@@ -120,7 +120,7 @@ public:
             playerCount = (playerCount + (playerCount * boostPercentage));
         }
 
-        handler->PSendSysMessage("SunwellCore rev. %s.", _HASH);
+        handler->PSendSysMessage("SunwellCore rev. %s.", _REVISION);
         if (!queuedSessionCount)
             handler->PSendSysMessage("Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
         else
@@ -138,7 +138,12 @@ public:
 
         //! Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
-            handler->PSendSysMessage(LANG_SHUTDOWN_TIMELEFT, secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
+        {
+            handler->PSendSysMessage("");
+            handler->PSendSysMessage("[WARNING] Server will %s in: %s", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
+            handler->PSendSysMessage("Reason: %s.", sWorld->GetShutdownReason());
+
+        }
 
         return true;
     }
@@ -184,8 +189,8 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
-        char* exitCodeStr = strtok(NULL, "");
+        char const* timeStr = strtok((char*) args, " ");
+        char const* exitmsg = strtok(nullptr, "");
 
         int32 time = atoi(timeStr);
 
@@ -193,22 +198,8 @@ public:
         if ((time == 0 && (timeStr[0] != '0' || timeStr[1] != '\0')) || time < 0)
             return false;
 
-        if (exitCodeStr)
-        {
-            int32 exitCode = atoi(exitCodeStr);
-
-            // Handle atoi() errors
-            if (exitCode == 0 && (exitCodeStr[0] != '0' || exitCodeStr[1] != '\0'))
-                return false;
-
-            // Exit code should be in range of 0-125, 126-255 is used
-            // in many shells for their own return codes and code > 255
-            // is not supported in many others
-            if (exitCode < 0 || exitCode > 125)
-                return false;
-
-            sWorld->ShutdownServ(time, 0, exitCode);
-        }
+        if (exitmsg)
+            sWorld->ShutdownServ(time, 0, SHUTDOWN_EXIT_CODE, exitmsg);
         else
             sWorld->ShutdownServ(time, 0, SHUTDOWN_EXIT_CODE);
 
@@ -220,8 +211,8 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
-        char* exitCodeStr = strtok(NULL, "");
+        char const* timeStr = strtok((char*) args, " ");
+        char const* exitCodeStr = strtok(nullptr, "");
 
         int32 time = atoi(timeStr);
 
@@ -230,25 +221,11 @@ public:
             return false;
 
         if (exitCodeStr)
-        {
-            int32 exitCode = atoi(exitCodeStr);
-
-            // Handle atoi() errors
-            if (exitCode == 0 && (exitCodeStr[0] != '0' || exitCodeStr[1] != '\0'))
-                return false;
-
-            // Exit code should be in range of 0-125, 126-255 is used
-            // in many shells for their own return codes and code > 255
-            // is not supported in many others
-            if (exitCode < 0 || exitCode > 125)
-                return false;
-
-            sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART, exitCode);
-        }
+            sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART, RESTART_EXIT_CODE, exitCodeStr);
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART, RESTART_EXIT_CODE);
 
-            return true;
+        return true;
     }
 
     static bool HandleServerIdleRestartCommand(ChatHandler* /*handler*/, char const* args)
@@ -256,8 +233,8 @@ public:
         if (!*args)
             return false;
 
-        char* timeStr = strtok((char*) args, " ");
-        char* exitCodeStr = strtok(NULL, "");
+        char const* timeStr = strtok((char*) args, " ");
+        char const* exitCodeStr = strtok(nullptr, "");
 
         int32 time = atoi(timeStr);
 
@@ -266,23 +243,10 @@ public:
             return false;
 
         if (exitCodeStr)
-        {
-            int32 exitCode = atoi(exitCodeStr);
-
-            // Handle atoi() errors
-            if (exitCode == 0 && (exitCodeStr[0] != '0' || exitCodeStr[1] != '\0'))
-                return false;
-
-            // Exit code should be in range of 0-125, 126-255 is used
-            // in many shells for their own return codes and code > 255
-            // is not supported in many others
-            if (exitCode < 0 || exitCode > 125)
-                return false;
-
-            sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART | SHUTDOWN_MASK_IDLE, exitCode);
-        }
+            sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART | SHUTDOWN_MASK_IDLE, RESTART_EXIT_CODE, exitCodeStr);
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART | SHUTDOWN_MASK_IDLE, RESTART_EXIT_CODE);
+
         return true;
     }
 
@@ -301,24 +265,11 @@ public:
             return false;
 
         if (exitCodeStr)
-        {
-            int32 exitCode = atoi(exitCodeStr);
-
-            // Handle atoi() errors
-            if (exitCode == 0 && (exitCodeStr[0] != '0' || exitCodeStr[1] != '\0'))
-                return false;
-
-            // Exit code should be in range of 0-125, 126-255 is used
-            // in many shells for their own return codes and code > 255
-            // is not supported in many others
-            if (exitCode < 0 || exitCode > 125)
-                return false;
-
-            sWorld->ShutdownServ(time, SHUTDOWN_MASK_IDLE, exitCode);
-        }
+            sWorld->ShutdownServ(time, SHUTDOWN_MASK_IDLE, SHUTDOWN_EXIT_CODE, exitCodeStr);
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_IDLE, SHUTDOWN_EXIT_CODE);
-            return true;
+
+        return true;
     }
 
     // Exit the realm

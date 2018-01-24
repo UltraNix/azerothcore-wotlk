@@ -49,6 +49,7 @@ namespace AccountMgr
 
     bool normalizeString(std::string& utf8String);
     bool IsPlayerAccount(uint32 gmlevel);
+    bool IsModeratorAccount(uint32 gmlevel); // Sitowsky
     bool IsGMAccount(uint32 gmlevel);
     bool IsAdminAccount(uint32 gmlevel);
     bool IsConsoleAccount(uint32 gmlevel);

@@ -65,6 +65,7 @@ GameObject::GameObject() : WorldObject(false), MovableMapObject(),
     m_groupLootTimer = 0;
     lootingGroupLowGUID = 0;
     m_lootGenerationTime = 0;
+    hasValueableLoot = false;
 
     ResetLootMode(); // restore default loot mode
     m_stationaryPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
@@ -710,7 +711,23 @@ void GameObject::Update(uint32 diff)
                 return;
             }
 
-            m_respawnTime = time(NULL) + m_respawnDelayTime;
+            // If server launch config variable is enabled        and gameobject is for quests           map is not instance map       nor BG or ARENA          and doesnt have any loot that can be sold
+            if (sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && GetGOInfo()->IsGameObjectForQuests() && !GetMap()->Instanceable() && !GetMap()->IsBattlegroundOrArena() && !hasValueableLoot)
+            {
+                ContentLevels content = GetContentLevelsForMapAndZone(GetMapId(), GetZoneId());
+                switch (content)
+                {
+                    case CONTENT_1_60:
+                    case CONTENT_61_70:
+                        m_respawnTime = time(nullptr) + static_cast<uint32>(m_respawnDelayTime * 0.25f);
+                        break;
+                    default:
+                        m_respawnTime = time(nullptr) + m_respawnDelayTime;
+                        break;
+                }
+            }
+            else
+                m_respawnTime = time(nullptr) + m_respawnDelayTime;
 
             // if option not set then object will be saved at grid unload
             if (GetMap()->IsDungeon())

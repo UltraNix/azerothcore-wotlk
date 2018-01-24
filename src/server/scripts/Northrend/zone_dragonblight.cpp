@@ -40,6 +40,7 @@ EndContentData */
 #include "CombatAI.h"
 #include "Chat.h"
 #include "SpellAuras.h"
+#include "MoveSplineInit.h"
 
 // Ours
 /********
@@ -2260,6 +2261,301 @@ public:
     }
 };
 
+float const AgmarFinalOrient = 0.33065f;
+uint32 const AgmarMovementPointSize = 10;
+Position const AgmarMovementPoints[AgmarMovementPointSize] =
+{
+    { 3842.12f, 1492.08f, 91.717f },
+    { 3842.42f, 1498.37f, 91.988f },
+    { 3842.67f, 1511.37f, 91.988f },
+    { 3842.17f, 1520.62f, 91.738f },
+    { 3842.67f, 1535.87f, 90.238f },
+    { 3850.17f, 1547.62f, 90.238f },
+    { 3859.42f, 1559.87f, 90.238f },
+    { 3865.92f, 1568.37f, 90.238f },
+    { 3868.92f, 1577.62f, 90.238f },
+    { 3870.23f, 1589.65f, 89.759f }
+};
+
+Position const AgmarMovementHomePoints[AgmarMovementPointSize] =
+{
+    { 3870.23f, 1589.65f, 89.759f },
+    { 3868.92f, 1577.62f, 90.238f },
+    { 3865.92f, 1568.37f, 90.238f },
+    { 3859.42f, 1559.87f, 90.238f },
+    { 3850.17f, 1547.62f, 90.238f },
+    { 3842.67f, 1535.87f, 90.238f },
+    { 3842.17f, 1520.62f, 91.738f },
+    { 3842.67f, 1511.37f, 91.988f },
+    { 3842.42f, 1498.37f, 91.988f },
+    { 3842.12f, 1492.08f, 91.717f },
+};
+
+enum AgmarMisc
+{
+    QUEST_ALL_HAIL_RONA          = 12140,
+
+    EVENT_OVERLORD_AGMAR_GO_BACK = 1,
+    EVENT_OVERLORD_AGMAR_RESET   = 2
+};
+
+enum RoanaukMisc
+{
+    ROANAUK_GOSSIP_ID       = 1,
+    NPC_TAUNKA_SOLDIER      = 26437,
+    NPC_OVERLORD_AGMAR      = 26379,
+
+    EVENT_ROA_1             = 1,
+    EVENT_ROA_2             = 2,
+    EVENT_ROA_3             = 3,
+    EVENT_ROA_4             = 4,
+    EVENT_ROA_5             = 5,
+    EVENT_ROA_6             = 6,
+    EVENT_ROA_7             = 7,
+    EVENT_ROA_8             = 8,
+    EVENT_ROA_9             = 9,
+    EVENT_ROA_10            = 10,
+    EVENT_ROA_11            = 11,
+
+    SAY_ROA_1               = 0,
+    SAY_ROA_2               = 1,
+    SAY_ROA_3               = 2,
+    SAY_ROA_4               = 3,
+    SAY_ROA_5               = 4,
+    SAY_ROA_6               = 5,
+
+    SAY_AGMAR_1             = 0,
+    SAY_AGMAR_2             = 1,
+    SAY_AGMAR_3             = 2
+};
+
+struct npc_overlord_agmar_dragonblightAI : public ScriptedAI
+{
+public:
+    npc_overlord_agmar_dragonblightAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+        events.Reset();
+        eventActive = false;
+        ScriptedAI::Reset();
+    }
+
+    void sQuestAccept(Player* player, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_ALL_HAIL_RONA)
+        {
+            Talk(SAY_AGMAR_1, player);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            me->SetStandState(UNIT_STAND_STATE_STAND);
+
+            Movement::MoveSplineInit init(me);
+            for (auto i = 0; i < AgmarMovementPointSize; ++i)
+            {
+                G3D::Vector3 point;
+                point.x = AgmarMovementPoints[i].GetPositionX();
+                point.y = AgmarMovementPoints[i].GetPositionY();
+                point.z = AgmarMovementPoints[i].GetPositionZ();
+                init.Path().push_back(point);
+            }
+            init.SetSmooth();
+            init.SetWalk(true);
+            init.SetFacing(AgmarFinalOrient);
+            auto time = init.Launch();
+            //! time var is spline duration, accordining to vids agmar goes back to homePos
+            //! after around 50s + movement duration
+            events.ScheduleEvent(EVENT_OVERLORD_AGMAR_GO_BACK, time + 55000);
+            me->setActive(true);
+            eventActive = true;
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!eventActive)
+            return;
+
+        events.Update(diff);
+
+        while (auto eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_OVERLORD_AGMAR_GO_BACK:
+                {
+                    //! remove flags while walking back to homePos
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    Movement::MoveSplineInit init(me);
+                    for (auto i = 0; i < AgmarMovementPointSize; ++i)
+                    {
+                        G3D::Vector3 point;
+                        point.x = AgmarMovementHomePoints[i].GetPositionX();
+                        point.y = AgmarMovementHomePoints[i].GetPositionY();
+                        point.z = AgmarMovementHomePoints[i].GetPositionZ();
+                        init.Path().push_back(point);
+                    }
+
+                    init.SetSmooth();
+                    init.SetWalk(true);
+                    auto time = init.Launch();
+                    events.ScheduleEvent(EVENT_OVERLORD_AGMAR_RESET, time);
+                    break;
+                }
+                case EVENT_OVERLORD_AGMAR_RESET:
+                {
+                    Reset();
+                    ScriptedAI::Reset();
+                    EnterEvadeMode();
+                    break;
+                }
+            }
+
+        }
+    }
+private:
+    EventMap events;
+    bool eventActive;
+};
+
+struct npc_roanauk_icemistAI : public ScriptedAI
+{
+    npc_roanauk_icemistAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        events.Reset();
+        _eventActive = false;
+        _playerGUID = 0;
+        _taunkaGUIDs.clear();
+        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+        ScriptedAI::Reset();
+    }
+
+    void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) override
+    {
+        if (action == ROANAUK_GOSSIP_ID && !_eventActive)
+        {
+            _eventActive = true;
+            _playerGUID = player->GetGUID();
+            player->PlayerTalkClass->SendCloseGossip();
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+            std::list<Creature*> taunkaSoldierList;
+            me->GetCreatureListWithEntryInGrid(taunkaSoldierList, NPC_TAUNKA_SOLDIER, 25.f);
+
+            Position const myPosition = me->GetPosition();
+            float angle = 0.f;
+            float calcAngle = 2 * M_PI / taunkaSoldierList.size();
+
+            for (auto soldier : taunkaSoldierList)
+            {
+                //! can soldier be null at this point?
+                if (soldier)
+                {
+                    _taunkaGUIDs.push_back(soldier->GetGUID());
+                    soldier->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    soldier->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                    Movement::MoveSplineInit init(soldier);
+                    G3D::Vector3 point;
+                    point.x = myPosition.GetPositionX() + 3.5f * cosf(angle);
+                    point.y = myPosition.GetPositionY() + 3.5f * sinf(angle);
+                    point.z = me->GetPositionZ();
+                    init.MoveTo(point.x, point.y, point.z);
+                    init.SetFacing(me);
+                    init.SetWalk(true);
+                    init.Launch();
+                    angle += calcAngle;
+                }
+            }
+            events.ScheduleEvent(EVENT_ROA_1, 1s);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!_eventActive)
+            return;
+
+        events.Update(diff);
+
+        while (auto eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_ROA_1:
+                    Talk(SAY_ROA_1);
+                    events.ScheduleEvent(EVENT_ROA_2, 10s);
+                    break;
+                case EVENT_ROA_2:
+                    Talk(SAY_ROA_2);
+                    events.ScheduleEvent(EVENT_ROA_3, 2s);
+                    break;
+                case EVENT_ROA_3:
+                    Talk(SAY_ROA_3);
+                    events.ScheduleEvent(EVENT_ROA_4, 8s);
+                    break;
+                case EVENT_ROA_4:
+                    Talk(SAY_ROA_4);
+                    events.ScheduleEvent(EVENT_ROA_5, 8s);
+                    break;
+                case EVENT_ROA_5:
+                    Talk(SAY_ROA_5);
+                    events.ScheduleEvent(EVENT_ROA_6, 2s);
+                    break;
+                case EVENT_ROA_6:
+                    events.ScheduleEvent(EVENT_ROA_7, 4s);
+                    break;
+                case EVENT_ROA_7:
+                    me->HandleEmoteCommand(15);
+                    events.ScheduleEvent(EVENT_ROA_8, 4s);
+                    break;
+                case EVENT_ROA_8:
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        player->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
+
+                    me->HandleEmoteCommand(388);
+                    Talk(SAY_ROA_6);
+
+                    for (auto guid : _taunkaGUIDs)
+                    {
+                        if (Creature* soldier = ObjectAccessor::GetCreature(*me, guid))
+                        {
+                            soldier->HandleEmoteCommand(4);
+                            soldier->SetStandState(UNIT_STAND_STATE_STAND);
+                        }
+                    }
+
+                    if (Creature* agmar = me->FindNearestCreature(NPC_OVERLORD_AGMAR, 10.0f))
+                        agmar->AI()->Talk(SAY_AGMAR_2, me);
+
+                    events.ScheduleEvent(EVENT_ROA_9, 10s);
+                    break;
+                }
+                case EVENT_ROA_9:
+                    if (Creature* agmar = me->FindNearestCreature(NPC_OVERLORD_AGMAR, 10.0f))
+                        agmar->AI()->Talk(SAY_AGMAR_3, me);
+                    events.ScheduleEvent(EVENT_ROA_10, 3s);
+                    break;
+                case EVENT_ROA_10:
+                    for (auto guid : _taunkaGUIDs)
+                    {
+                        if (Creature* soldier = ObjectAccessor::GetCreature(*me, guid))
+                            if (soldier->GetAI())
+                                soldier->AI()->EnterEvadeMode();
+                    }
+                    Reset();
+                    break;
+            }
+        }
+    }
+private:
+    bool _eventActive;
+    uint64 _playerGUID;
+    EventMap events;
+    std::vector<uint64> _taunkaGUIDs;
+};
+
 void AddSC_dragonblight()
 {
     // Ours
@@ -2283,6 +2579,8 @@ void AddSC_dragonblight()
     new CreatureAILoader<npc_onslaught_knightAI>("npc_onslaught_knight");
     new spell_mystical_bolt();
     new npc_sarathstra_dragonblight();
+    new CreatureAILoader<npc_overlord_agmar_dragonblightAI>("npc_overlord_agmar_dragonblight");
+    new CreatureAILoader<npc_roanauk_icemistAI>("npc_roanauk_icemist");
 
     // Theirs
     new npc_commander_eligor_dawnbringer();

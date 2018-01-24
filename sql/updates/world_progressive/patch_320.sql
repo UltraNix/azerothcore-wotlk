@@ -1,4 +1,4 @@
------- CONFIG CHANGES REQUIRED
+-- CONFIG CHANGES REQUIRED
 -- AllowTwoSide.Accounts = 1
 -- AllowTwoSide.Interaction.Mail = 1
 -- TalentsInspecting = 1

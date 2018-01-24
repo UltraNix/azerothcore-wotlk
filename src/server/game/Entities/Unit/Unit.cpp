@@ -667,6 +667,11 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel) cons
             || HasBreakableByDamageAuraType(SPELL_AURA_TRANSFORM, excludeAura));
 }
 
+bool Unit::IsUnderCrowdControl() const
+{
+   return isFeared() || isStuned() || isInRoots() || IsPolymorphed() || IsCharmed() || isPossessed();
+}
+
 void Unit::DealDamageMods(Unit const* victim, uint32 &damage, uint32* absorb)
 {
     if (!victim || !victim->IsAlive() || victim->IsInFlight() || (victim->GetTypeId() == TYPEID_UNIT && victim->ToCreature()->IsInEvadeMode()))

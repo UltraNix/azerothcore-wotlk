@@ -49,7 +49,8 @@ enum NXData
     DATA_IMMORTAL_FAIL                 = 119,
     DATA_KELTHUZAD_GATE                = 120,
     DATA_NOTH_ENTRANCE_GATE            = 121,
-    DATA_GOTHIK                        = 122
+    DATA_GOTHIK                        = 122,
+    DATA_HORSEMAN_CHEST                = 123
 };
 
 enum NXGOs

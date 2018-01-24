@@ -770,6 +770,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         float m_respawnradius;
         uint16 m_transportCheckTimer;
         uint32 lootPickPocketRestoreTime;
+        float m_respawnRate;
 
         ReactStates m_reactState;                           // for AI, not charmInfo
         void RegenerateHealth();

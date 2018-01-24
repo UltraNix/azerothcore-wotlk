@@ -5358,6 +5358,12 @@ void SpellMgr::LoadDbcDataCorrections()
         case 57557:
             spellInfo->excludeTargetAuraSpell = 56911;
             break;
+        case 57742: // Avenging fury
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_SRC_AREA_ENTRY;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[EFFECT_1] = TARGET_UNIT_SRC_AREA_ENTRY;
+            break;
 
         //////////////////////////////////////////
         ////////// EYE OF ETERNITY
@@ -5380,6 +5386,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Vortex (Control Vehicle)
         case 56263:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             break;
         // Haste (Nexus Lord, increase run speed of the disk)
         case 57060:

@@ -92,42 +92,48 @@ public:
                 case SERVICE_TELEPORT_INPUT: // -> SERVICE_TELEPORT
                     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_PREMIUM_ID);
                     stmt->setUInt32(0, accId);
-                    stmt->setUInt8(1, SERVICE_TELEPORT);
+                    stmt->setUInt32(1, realmID);
+                    stmt->setUInt8(2, SERVICE_TELEPORT);
                     LoginDatabase.Execute(stmt);
                     serviceName = "SERVICE_TELEPORT";
                     break;
                 case SERVICE_NO_RESSURECTION_SICKNESS:
                     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_PREMIUM_ID);
                     stmt->setUInt32(0, accId);
-                    stmt->setUInt8(1, SERVICE_NO_RESSURECTION_SICKNESS);
+                    stmt->setUInt32(1, realmID);
+                    stmt->setUInt8(2, SERVICE_NO_RESSURECTION_SICKNESS);
                     LoginDatabase.Execute(stmt);
                     serviceName = "SERVICE_NO_RESSURECTION_SICKNESS";
                     break;
                 case SERVICE_EXP_BOOST:
                     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_PREMIUM_ID);
                     stmt->setUInt32(0, accId);
-                    stmt->setUInt8(1, SERVICE_EXP_BOOST);
+                    stmt->setUInt32(1, realmID);
+                    stmt->setUInt8(2, SERVICE_EXP_BOOST);
                     LoginDatabase.Execute(stmt);
                     serviceName = "SERVICE_EXP_BOOST";
                     break;
                 case SERVICE_NO_DURABILITY_LOSS:
                     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_PREMIUM_ID);
                     stmt->setUInt32(0, accId);
-                    stmt->setUInt8(1, SERVICE_NO_DURABILITY_LOSS);
+                    stmt->setUInt32(1, realmID);
+                    stmt->setUInt8(2, SERVICE_NO_DURABILITY_LOSS);
                     LoginDatabase.Execute(stmt);
                     serviceName = "SERVICE_NO_DURABILITY_LOSS";
                     break;
                 case SERVICE_INSTANT_FLIGHT_PATHS:
                     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_PREMIUM_ID);
                     stmt->setUInt32(0, accId);
-                    stmt->setUInt8(1, SERVICE_INSTANT_FLIGHT_PATHS);
+                    stmt->setUInt32(1, realmID);
+                    stmt->setUInt8(2, SERVICE_INSTANT_FLIGHT_PATHS);
                     LoginDatabase.Execute(stmt);
                     serviceName = "SERVICE_INSTANT_FLIGHT_PATHS";
                     break;
                 case SERVICE_EXP_BOOST_X4:
                     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_PREMIUM_ID);
                     stmt->setUInt32(0, accId);
-                    stmt->setUInt8(1, SERVICE_EXP_BOOST_X4);
+                    stmt->setUInt32(1, realmID);
+                    stmt->setUInt8(2, SERVICE_EXP_BOOST_X4);
                     LoginDatabase.Execute(stmt);
                     serviceName = "SERVICE_EXP_BOOST_X4";
                     break;
@@ -144,7 +150,8 @@ public:
                            // Query check for previous premium service, if there is result stack the time of premium service
         PreparedStatement* stmt2 = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PREMIUM_TIME_BY_ID);
         stmt2->setUInt32(0, accId);
-        stmt2->setUInt8(1, atoi(typeStr));
+        stmt2->setUInt32(1, realmID);
+        stmt2->setUInt8(2, atoi(typeStr));
         PreparedQueryResult timeResult = LoginDatabase.Query(stmt2);
 
         if (timeResult)
@@ -161,54 +168,60 @@ public:
             case SERVICE_TELEPORT_INPUT: // -> SERVICE_TELEPORT
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
                 stmt->setUInt32(0, accId);
-                stmt->setUInt8(1, SERVICE_TELEPORT);
-                stmt->setUInt32(2, time(nullptr));
-                stmt->setUInt32(3, premiumTime);
+                stmt->setUInt32(1, realmID);
+                stmt->setUInt8(2, SERVICE_TELEPORT);
+                stmt->setUInt32(3, time(nullptr));
+                stmt->setUInt32(4, premiumTime);
                 LoginDatabase.Execute(stmt);
                 serviceName = "SERVICE_TELEPORT";
                 break;
             case SERVICE_NO_RESSURECTION_SICKNESS:
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
                 stmt->setUInt32(0, accId);
-                stmt->setUInt8(1, SERVICE_NO_RESSURECTION_SICKNESS);
-                stmt->setUInt32(2, time(nullptr));
-                stmt->setUInt32(3, premiumTime);
+                stmt->setUInt32(1, realmID);
+                stmt->setUInt8(2, SERVICE_NO_RESSURECTION_SICKNESS);
+                stmt->setUInt32(3, time(nullptr));
+                stmt->setUInt32(4, premiumTime);
                 LoginDatabase.Execute(stmt);
                 serviceName = "SERVICE_NO_RESSURECTION_SICKNESS";
                 break;
             case SERVICE_EXP_BOOST:
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
                 stmt->setUInt32(0, accId);
-                stmt->setUInt8(1, SERVICE_EXP_BOOST);
-                stmt->setUInt32(2, time(nullptr));
-                stmt->setUInt32(3, premiumTime);
+                stmt->setUInt32(1, realmID);
+                stmt->setUInt8(2, SERVICE_EXP_BOOST);
+                stmt->setUInt32(3, time(nullptr));
+                stmt->setUInt32(4, premiumTime);
                 LoginDatabase.Execute(stmt);
                 serviceName = "SERVICE_EXP_BOOST";
                 break;
             case SERVICE_NO_DURABILITY_LOSS:
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
                 stmt->setUInt32(0, accId);
-                stmt->setUInt8(1, SERVICE_NO_DURABILITY_LOSS);
-                stmt->setUInt32(2, time(nullptr));
-                stmt->setUInt32(3, premiumTime);
+                stmt->setUInt32(1, realmID);
+                stmt->setUInt8(2, SERVICE_NO_DURABILITY_LOSS);
+                stmt->setUInt32(3, time(nullptr));
+                stmt->setUInt32(4, premiumTime);
                 LoginDatabase.Execute(stmt);
                 serviceName = "SERVICE_NO_DURABILITY_LOSS";
                 break;
             case SERVICE_INSTANT_FLIGHT_PATHS:
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
                 stmt->setUInt32(0, accId);
-                stmt->setUInt8(1, SERVICE_INSTANT_FLIGHT_PATHS);
-                stmt->setUInt32(2, time(nullptr));
-                stmt->setUInt32(3, premiumTime);
+                stmt->setUInt32(1, realmID);
+                stmt->setUInt8(2, SERVICE_INSTANT_FLIGHT_PATHS);
+                stmt->setUInt32(3, time(nullptr));
+                stmt->setUInt32(4, premiumTime);
                 LoginDatabase.Execute(stmt);
                 serviceName = "SERVICE_INSTANT_FLIGHT_PATHS";
                 break;
             case SERVICE_EXP_BOOST_X4:
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
                 stmt->setUInt32(0, accId);
-                stmt->setUInt8(1, SERVICE_EXP_BOOST_X4);
-                stmt->setUInt32(2, time(nullptr));
-                stmt->setUInt32(3, premiumTime);
+                stmt->setUInt32(1, realmID);
+                stmt->setUInt8(2, SERVICE_EXP_BOOST_X4);
+                stmt->setUInt32(3, time(nullptr));
+                stmt->setUInt32(4, premiumTime);
                 LoginDatabase.Execute(stmt);
                 serviceName = "SERVICE_EXP_BOOST_X4";
                 break;

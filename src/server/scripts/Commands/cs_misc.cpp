@@ -131,6 +131,7 @@ public:
             { "checkpoint",         SEC_PLAYER,             false, &HandleCheckPointCommand,            "" },
             { "buff",               SEC_ADMINISTRATOR,      false, &HandleBuffCommand,                  "" },
             { "unbuff",             SEC_ADMINISTRATOR,      false, &HandleUnbuffCommand,                "" },
+            { "mutehistory",        SEC_GAMEMASTER,         false, &HandleMuteHistoryCommand,           "" },
 
         };
         return commandTable;
@@ -2133,9 +2134,9 @@ public:
         if (!delayStr)
             return false;
 
-        char const* muteReason = strtok(NULL, "\r");
+        char const* muteReason = strtok(nullptr, "\r");
         std::string muteReasonStr = "No reason";
-        if (muteReason != NULL)
+        if (muteReason != nullptr)
             muteReasonStr = muteReason;
 
         Player* target;
@@ -2167,7 +2168,7 @@ public:
         if (target)
         {
             // Target is online, mute will be in effect right away.
-            int64 muteTime = time(NULL) + notSpeakTime * MINUTE;
+            int64 muteTime = time(nullptr) + notSpeakTime * MINUTE;
             target->GetSession()->m_muteTime = muteTime;
             stmt->setInt64(0, muteTime);
             ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notSpeakTime, muteBy.c_str(), muteReasonStr.c_str());
@@ -2185,6 +2186,9 @@ public:
         LoginDatabase.Execute(stmt);
         std::string nameLink = handler->playerLink(targetName);
 
+        // Sitowsky: Mute History
+        LoginDatabase.PExecute("REPLACE INTO account_mute_history VALUES ('%u', '%s', '%s', '%s', '%u', NOW())", accountId, targetName.c_str(), muteReasonStr.c_str(), muteBy.c_str(), notSpeakTime);
+        
         // pussywizard: notify all online GMs
         TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
@@ -3250,7 +3254,7 @@ public:
 
     static bool HandleEventGoCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
             handler->PSendSysMessage("You can't do that while event is disabled.");
             handler->SetSentErrorMessage(true);
@@ -3351,7 +3355,7 @@ public:
 
     static bool HandleSthHideCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
             handler->PSendSysMessage("You can't do that while event is disabled.");
             handler->SetSentErrorMessage(true);
@@ -3377,7 +3381,7 @@ public:
 
     static bool HandleCheckPointCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENT_ENABLE))
+        if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
             handler->PSendSysMessage("You can't do that while event is disabled.");
             handler->SetSentErrorMessage(true);
@@ -3439,12 +3443,12 @@ public:
 
     static bool HandleBuffCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
-        Unit* player = handler->GetSession()->GetPlayer();
-        if (!player)
-        {
+        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM)) 
             return false;
-        }
+
+        Player* player = handler->GetSession()->GetPlayer();
+        if (!player)
+            return false;
 
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(68378);
         SpellInfo const* spellInfo2 = sSpellMgr->GetSpellInfo(1908);
@@ -3460,14 +3464,64 @@ public:
 
     static bool HandleUnbuffCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE)) return false;
-        Unit* player = handler->GetSession()->GetPlayer();
+        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM))
+            return false;
+
+        Player* player = handler->GetSession()->GetPlayer();
         if (!player)
             return false;
+
         player->RemoveAurasDueToSpell(68378);
         player->RemoveAurasDueToSpell(1908);
 
         return true;
+    }
+
+    static bool HandleMuteHistoryCommand(ChatHandler* handler, char const* args) {
+        if (!*args)
+            return false;
+
+        std::string account = strtok((char*)args, " ");
+
+        if (!AccountMgr::normalizeString(account))
+            return false;
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ID_BY_NAME);
+        stmt->setString(0, account);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_NO_PLAYERS_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Field* fields = result->Fetch();
+        uint32 accountId = fields[0].GetUInt32();
+        
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_MUTE_HISTORY);
+        stmt->setInt32(0, accountId);
+        result = LoginDatabase.Query(stmt);
+        if (!result)
+        {
+            handler->PSendSysMessage("No mute history for this account!");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        handler->PSendSysMessage("Mute history for account %s:", account.c_str());
+        do
+        {
+            fields = result->Fetch();
+            std::string characterName = fields[0].GetString();
+            std::string muteReason = fields[1].GetString();
+            std::string muteBy = fields[2].GetString();
+            uint32 minutes = fields[3].GetUInt32();
+            std::string muteTime = fields[4].GetString();
+
+            handler->PSendSysMessage("|cff00ccff%s|r - Character: |cff00ccff%s|r muted for: |cff00ccff%s|r by: |cff00ccff%s|r (%d minutes)", muteTime.c_str(), characterName.c_str(), muteReason.c_str(), muteBy.c_str(), minutes);
+        } while (result->NextRow());
+
     }
 };
 

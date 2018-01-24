@@ -3216,35 +3216,24 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     bool recruitAFriend = GetsRecruitAFriendBonus(true);
     bool premiumBonus   = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
     bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
-    bool eventBonusX2   = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP_X2);
-    bool eventBonusX3   = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP_X3);
-    bool IsBlizzlike    = BlizzlikeMode();
+    bool eventBonus     = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
+    int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-    if (sWorld->getBoolConfig(CONFIG_EXP_BOOST_ANGRATHAR))
-    {
-        if (recruitAFriend && !IsBlizzlike)
-            bonus_xp = 2 * xp; // RaF does NOT stack with rested experience
-        else if (getLevel() < 70 && !IsBlizzlike)
-            bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else
-            bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
-    }
+    bool IsBlizzlike    = BlizzlikeMode();
+    
+    // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
+    if (premiumBonusX4 && !IsBlizzlike)
+        bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
+    else if (premiumBonus && !IsBlizzlike)
+        bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
+    else if (eventBonus && !IsBlizzlike)
+        bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
+    else if (recruitAFriend && !IsBlizzlike)
+        bonus_xp = 1 * xp;                          // RaF does NOT stack with rested experience
+    else if (getLevel() < 70 && !IsBlizzlike)
+        bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
     else
-    {
-        // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
-        if (premiumBonusX4 && !IsBlizzlike)
-            bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (premiumBonus && !IsBlizzlike)
-            bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (eventBonusX3 && !IsBlizzlike)
-            bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (eventBonusX2 && !IsBlizzlike)
-            bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (recruitAFriend && !IsBlizzlike)
-            bonus_xp = 1 * xp; // RaF does NOT stack with rested experience
-        else
-            bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
-    }
+        bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
 
@@ -5453,7 +5442,7 @@ Corpse* Player::GetCorpse() const
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
     // Premium service or test server
-    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS) || sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS) || sWorld->getBoolConfig(CONFIG_PTR_REALM))
         return;
 
     for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
@@ -9214,6 +9203,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 // get next RR player (for next loot)
                 if (groupRules && !go->loot.empty())
                     group->UpdateLooterGuid(go);
+
+                if (go->loot.GetNonQuestItemListSize())
+                    go->SetValueableLoot();
             }
 
             if (loot_type == LOOT_FISHING)

@@ -1721,8 +1721,8 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
 
     if (achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_REACH | ACHIEVEMENT_FLAG_REALM_FIRST_KILL))
     {
-        // someone on this realm has already completed that achievement
-        if (sAchievementMgr->IsRealmCompleted(achievement, GetInstanceId(GetPlayer())))
+        // someone on this realm has already completed that achievement or player is a GM
+        if (sAchievementMgr->IsRealmCompleted(achievement, GetInstanceId(GetPlayer())) || GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
             return false;
     }
 

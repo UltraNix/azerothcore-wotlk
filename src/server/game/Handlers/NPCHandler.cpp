@@ -195,7 +195,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
         data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
         data << uint8(state == TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
         
-        if(sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+        if(sWorld->getBoolConfig(CONFIG_PTR_REALM))
             data << uint32(0);
         else
             data << uint32(floor(tSpell->spellCost * fDiscountMod));
@@ -280,12 +280,10 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket & recvData)
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
-
-
-    if (!sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE) && !_player->HasEnoughMoney(nSpellCost))
+    if (!sWorld->getBoolConfig(CONFIG_PTR_REALM) && !_player->HasEnoughMoney(nSpellCost))
         return;
 
-    if(sWorld->getBoolConfig(CONFIG_TEST_SERVER_ENABLE))
+    if(sWorld->getBoolConfig(CONFIG_PTR_REALM))
         _player->ModifyMoney(0);
     else
         _player->ModifyMoney(-int32(nSpellCost));

@@ -47,6 +47,8 @@ CalendarMgr::~CalendarMgr()
 
 void CalendarMgr::LoadFromDB()
 {
+    uint32 oldMSTime = getMSTime();
+
     uint32 count = 0;
     _maxEventId = 0;
     _maxInviteId = 0;
@@ -80,7 +82,7 @@ void CalendarMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-    sLog->outString(">> Loaded %u calendar events", count);
+    sLog->outString(">> Loaded %u calendar events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     count = 0;
 
     //                                                       0   1      2        3       4       5           6     7
@@ -107,7 +109,7 @@ void CalendarMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-    sLog->outString(">> Loaded %u calendar invites", count);
+    sLog->outString(">> Loaded %u calendar invites in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
     for (uint64 i = 1; i < _maxEventId; ++i)
         if (!GetEvent(i))

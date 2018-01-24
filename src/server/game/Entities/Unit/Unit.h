@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -669,7 +669,7 @@ enum NPCFlags
     UNIT_NPC_FLAG_GUILD_BANKER          = 0x00800000,       // cause client to send 997 opcode
     UNIT_NPC_FLAG_SPELLCLICK            = 0x01000000,       // cause client to send 1015 opcode (spell click)
     UNIT_NPC_FLAG_PLAYER_VEHICLE        = 0x02000000,       // players with mounts that have vehicle data should have it set
-    UNIT_NPC_FLAG_MAILBOX               = 0x04000000        // 
+    UNIT_NPC_FLAG_MAILBOX               = 0x04000000        //
 };
 
 enum MovementFlags
@@ -1708,6 +1708,7 @@ class Unit : public WorldObject
         bool virtual HasSpell(uint32 /*spellID*/) const { return false; }
         bool HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura = 0) const;
         bool HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel = NULL) const;
+        bool IsUnderCrowdControl() const;
 
         bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }
         bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }

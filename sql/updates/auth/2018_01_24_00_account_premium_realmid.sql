@@ -1,0 +1,1 @@
+ALTER TABLE `account_premium` ADD `RealmID` INT( 11 ) NOT NULL DEFAULT '1' AFTER `id` ;
