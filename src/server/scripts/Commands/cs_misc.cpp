@@ -2133,9 +2133,9 @@ public:
         if (!delayStr)
             return false;
 
-        char const* muteReason = strtok(NULL, "\r");
+        char const* muteReason = strtok(nullptr, "\r");
         std::string muteReasonStr = "No reason";
-        if (muteReason != NULL)
+        if (muteReason != nullptr)
             muteReasonStr = muteReason;
 
         Player* target;
@@ -2167,7 +2167,7 @@ public:
         if (target)
         {
             // Target is online, mute will be in effect right away.
-            int64 muteTime = time(NULL) + notSpeakTime * MINUTE;
+            int64 muteTime = time(nullptr) + notSpeakTime * MINUTE;
             target->GetSession()->m_muteTime = muteTime;
             stmt->setInt64(0, muteTime);
             ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notSpeakTime, muteBy.c_str(), muteReasonStr.c_str());
@@ -2185,6 +2185,9 @@ public:
         LoginDatabase.Execute(stmt);
         std::string nameLink = handler->playerLink(targetName);
 
+        // Sitowsky: Mute History
+        LoginDatabase.PExecute("REPLACE INTO account_mute_history VALUES ('%u', '%s', '%s', '%s', '%u', NOW())", accountId, targetName.c_str(), muteReasonStr.c_str(), muteBy.c_str(), notSpeakTime);
+        
         // pussywizard: notify all online GMs
         TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
