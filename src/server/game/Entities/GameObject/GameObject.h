@@ -774,6 +774,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Mov
         void SaveRespawnTime();
 
         Loot        loot;
+        void SetValueableLoot() { hasValueableLoot = true; }
 
         Player* GetLootRecipient() const;
         Group* GetLootRecipientGroup() const;
@@ -898,6 +899,8 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Mov
         uint32 m_lootRecipientGroup;
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
         uint32 m_lootGenerationTime;
+        bool hasValueableLoot;                              // Riztazz: set upon loot generation based on non quest item loot list size
+
     private:
         void CheckRitualList();
         void ClearRitualList();

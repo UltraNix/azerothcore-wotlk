@@ -1322,7 +1322,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_HUNGER_GAMES_LIMIT] = sConfigMgr->GetIntDefault("HungerGames.Limit", 500);
     m_bool_configs[CONFIG_BOOST_NAXXRAMAS] = sConfigMgr->GetBoolDefault("Naxxramas.Boost", false);
 
-    m_bool_configs[CONFIG_EXP_BOOST_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharExperience.Enable", false);
+    m_bool_configs[CONFIG_LAUNCH_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharLaunch.Enable", false);
     m_bool_configs[CONFIG_SPECIAL_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharSpecial.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS_ANNOUNCES] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Announces.Enable", false);

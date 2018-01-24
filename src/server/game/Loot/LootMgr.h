@@ -400,6 +400,8 @@ struct Loot
     bool hasItemFor(Player* player) const;
     bool hasOverThresholdItem() const;
 
+    uint32 GetNonQuestItemListSize() { return items.size(); }
+
     private:
         void RemoveSavedLootFromDB(Creature *pCreature);
         void FillNotNormalLootFor(Player* player, bool presentAtLooting);

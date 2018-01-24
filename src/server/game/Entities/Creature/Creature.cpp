@@ -173,7 +173,8 @@ m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemov
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_moveInLineOfSightDisabled(false), m_moveInLineOfSightStrictlyDisabled(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
-m_originalEntry(0), m_homePosition(), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE)
+m_originalEntry(0), m_homePosition(), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE),
+m_respawnRate(1.0f)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -278,7 +279,7 @@ void Creature::RemoveCorpse(bool setSpawnTime, bool skipVisibility)
     if (!skipVisibility) // pussywizard
         DestroyForNearbyPlayers(); // pussywizard: previous UpdateObjectVisibility()
     loot.clear();
-    uint32 respawnDelay = m_respawnDelay;
+    uint32 respawnDelay = static_cast<uint32>(m_respawnDelay * m_respawnRate);
     if (IsAIEnabled)
         AI()->CorpseRemoved(respawnDelay);
 
@@ -384,6 +385,24 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
     SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
 
     m_inhabitType = InhabitTypeValues(cinfo->InhabitType);
+
+    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
+    {
+        ContentLevels content = GetContentLevelsForMapAndZone(GetMapId(), GetZoneId(true));
+        switch (content)
+        {
+            case CONTENT_1_60:
+                m_respawnRate = 0.25f;
+                break;
+            case CONTENT_61_70:
+            case CONTENT_71_80:
+                m_respawnRate = 0.5f;
+                break;
+            default:
+                m_respawnRate = 1.0f;
+                break;
+        }
+    }
 
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
     SetObjectScale(cinfo->scale);
@@ -847,13 +866,14 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
         return false;
     }
 
+    bool serverLaunch = sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR);
     switch (GetCreatureTemplate()->rank)
     {
         case CREATURE_ELITE_RARE:
             m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RARE);
             break;
         case CREATURE_ELITE_ELITE:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_ELITE);
+            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_ELITE) / (serverLaunch ? 2 : 1);
             break;
         case CREATURE_ELITE_RAREELITE:
             m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RAREELITE);
@@ -866,9 +886,12 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
                 m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
             break;
         default:
-            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL);
+            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL) / (serverLaunch ? 2 : 1);
             break;
     }
+
+    if (serverLaunch && m_corpseDelay < 20)
+        m_corpseDelay = 20;
 
     LoadCreaturesAddon();
 
@@ -1578,8 +1601,8 @@ void Creature::setDeathState(DeathState s, bool despawn)
 
     if (s == JUST_DIED)
     {
-        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
-        m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
+        m_corpseRemoveTime = time(nullptr) + m_corpseDelay;
+        m_respawnTime = time(nullptr) + static_cast<uint32>(m_respawnDelay * m_respawnRate) + m_corpseDelay;
 
         // always save boss respawn time at death to prevent crash cheating
         if (GetMap()->IsDungeon() || isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)

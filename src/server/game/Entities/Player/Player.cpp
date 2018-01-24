@@ -3221,29 +3221,19 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
 
     bool IsBlizzlike    = BlizzlikeMode();
     
-    if (sWorld->getBoolConfig(CONFIG_EXP_BOOST_ANGRATHAR))
-    {
-        if (recruitAFriend && !IsBlizzlike)
-            bonus_xp = 2 * xp;                          // RaF does NOT stack with rested experience
-        else if (getLevel() < 70 && !IsBlizzlike)
-            bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else
-            bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
-    }
+    // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
+    if (premiumBonusX4 && !IsBlizzlike)
+        bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
+    else if (premiumBonus && !IsBlizzlike)
+        bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
+    else if (eventBonus && !IsBlizzlike)
+        bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
+    else if (recruitAFriend && !IsBlizzlike)
+        bonus_xp = 1 * xp;                          // RaF does NOT stack with rested experience
+    else if (getLevel() < 70 && !IsBlizzlike)
+        bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
     else
-    {
-        // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
-        if (premiumBonusX4 && !IsBlizzlike)
-            bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (premiumBonus && !IsBlizzlike)
-            bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (eventBonus && !IsBlizzlike)
-            bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
-        else if (recruitAFriend && !IsBlizzlike)
-            bonus_xp = 1 * xp; // RaF does NOT stack with rested experience
-        else
-            bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
-    }
+        bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
 
@@ -9213,6 +9203,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 // get next RR player (for next loot)
                 if (groupRules && !go->loot.empty())
                     group->UpdateLooterGuid(go);
+
+                if (go->loot.GetNonQuestItemListSize())
+                    go->SetValueableLoot();
             }
 
             if (loot_type == LOOT_FISHING)
