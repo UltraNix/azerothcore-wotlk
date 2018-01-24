@@ -176,8 +176,9 @@ enum WorldBoolConfigs
     CONFIG_HUNGER_GAMES_ENABLE,               // Piootrek: Enables or disables Hunger Games event.
     CONFIG_BOOST_NAXXRAMAS,                   // Sitowsky: Enables or disables Boost version of Naxxramas.
     CONFIG_EXP_BOOST_ANGRATHAR,               // Riztazz:  Enables or disables dynamic exp rates, 2x exp below level 70 and 1x above level 70.
-    CONFIG_BOSS_RECORDS,                      // Riztazz:  Enables or disables announcing boss records to the world and saving them to db.
-
+    CONFIG_BOSS_RECORDS,                      // Riztazz:  Enables or disables boss records (saving them to db).
+    CONFIG_BOSS_RECORDS_ANNOUNCES,            // Sitowsky: Enables or disables announcing boss records to the world if boss records are enabled.
+    CONFIG_SPECIAL_ANGRATHAR,                 // Sitowsky: Enables or disables Special Angrathar core settings.
     BOOL_CONFIG_VALUE_COUNT
 };
 

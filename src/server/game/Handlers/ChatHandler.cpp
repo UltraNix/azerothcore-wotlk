@@ -78,7 +78,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             case CHAT_MSG_PARTY_LEADER:
                 break;
             default:
-                if (sender->GetTotalPlayedTime() < 2 * HOUR && !sWorld->getBoolConfig(CONFIG_PTR_REALM))
+                if (sender->GetTotalPlayedTime() < 2 * HOUR && !sWorld->getBoolConfig(CONFIG_PTR_REALM) && !sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
                 {
                     SendNotification("Speaking is allowed after playing for at least 2 hours. You may use party and guild chat.");
                     recvData.rfinish();

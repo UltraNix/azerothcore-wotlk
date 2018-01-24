@@ -1439,10 +1439,13 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
         stmt->setString(5, recordData.prevBestTimeGuild = "");
         CharacterDatabase.Execute(stmt);
 
-        std::ostringstream msg;
-        msg << creatureName << " has been killed for the first time " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
-            << " in " << time / 1000 << "." << time % 1000 << " seconds!";
-        sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
+        if (sWorld->getBoolConfig(CONFIG_BOSS_RECORDS_ANNOUNCES))
+        {
+            std::ostringstream msg;
+            msg << creatureName << " has been killed for the first time " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+                << " in " << time / 1000 << "." << time % 1000 << " seconds!";
+            sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
+        }
 
         sLog->outError("Creature %u has been killed %s in %u seconds", entry, (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group")).c_str(), time);
         return;
@@ -1480,10 +1483,13 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
     stmt->setString(1, recordData.bestTimeGuild = (guildName != "" ? guildName : leaderName + std::string("'s group")));
     stmt->setUInt32(0, recordData.bestKillTime = time);
 
-    std::ostringstream msg;
-    msg << creatureName << " has been killed " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
-        << " in " << time / 1000 << "." << time % 1000 << " seconds! Previous record: " << oldTime / 1000 << "." << oldTime % 1000 << " seconds." << " (Previous record holder: " << oldGuild << ")";
-    sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
+    if (sWorld->getBoolConfig(CONFIG_BOSS_RECORDS_ANNOUNCES))
+    {
+        std::ostringstream msg;
+        msg << creatureName << " has been killed " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+            << " in " << time / 1000 << "." << time % 1000 << " seconds! Previous record: " << oldTime / 1000 << "." << oldTime % 1000 << " seconds." << " (Previous record holder: " << oldGuild << ")";
+        sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
+    }
 
     sLog->outError("Creature %u was killed by guild %s in record time of %u seconds. Previous record time: %u, guild: %s.", entry, (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group")).c_str(), time, oldTime, oldGuild.c_str());
     CharacterDatabase.Execute(stmt);
