@@ -158,7 +158,7 @@ class boss_gal_darah : public CreatureScript
                         events.ScheduleEvent(EVENT_STAMPEDE, 15000);
                         break;
                     case EVENT_WHIRLING_SLASH:
-                        if (++phaseCounter >= 3)
+                        if (++phaseCounter >= 2)
                         {
                             ScheduleEvents(false);
                             me->CastSpell(me, SPELL_TRANSFORM_TO_RHINO, false);
@@ -183,7 +183,7 @@ class boss_gal_darah : public CreatureScript
                         events.ScheduleEvent(EVENT_STOMP, 20000);
                         break;
                     case EVENT_IMPALING_CHARGE:
-                        if (++phaseCounter >= 3)
+                        if (++phaseCounter >= 2)
                         {
                             ScheduleEvents(true);
                             me->CastSpell(me, SPELL_TRANSFORM_TO_TROLL, false);
