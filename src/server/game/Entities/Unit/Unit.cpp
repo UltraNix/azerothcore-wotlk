@@ -13583,28 +13583,9 @@ Unit* Creature::SelectVictim()
 
     if (target && _CanDetectFeignDeathOf(target) && CanCreatureAttack(target))
     {
-        if (m_mmapNotAcceptableStartTime) m_mmapNotAcceptableStartTime = 0; // pussywizard: finding any valid target resets timer
         SetInFront(target);
         return target;
     }
-
-    // pussywizard: if victim is not acceptable only due to mmaps, it may be for example a knockback, wait for a few secs before evading
-    if (!target && !isWorldBoss() && !GetInstanceId() && IsAlive() && (!CanHaveThreatList() || !getThreatManager().isThreatListEmpty()))
-        if (Unit* v = GetVictim())
-            if (isTargetNotAcceptableByMMaps(v->GetGUID(), sWorld->GetGameTime(), v))
-                if (_CanDetectFeignDeathOf(v) && CanCreatureAttack(v))
-                {
-                    if (m_mmapNotAcceptableStartTime)
-                    {
-                        if (sWorld->GetGameTime() <= m_mmapNotAcceptableStartTime+4)
-                            return NULL;
-                    }
-                    else
-                    {
-                        m_mmapNotAcceptableStartTime = sWorld->GetGameTime();
-                        return NULL;
-                    }
-                }
 
     // pussywizard: not sure why it's here
     // pussywizard: if some npc (not player pet) is attacking us and we can't fight back - don't evade o_O
@@ -13634,15 +13615,26 @@ Unit* Creature::SelectVictim()
                 AI()->EnterEvadeMode();
                 break;
             }
-        return NULL;
+        return nullptr;
     }
 
     // enter in evade mode in other case
     AI()->EnterEvadeMode();
 
-    return NULL;
+    return nullptr;
 }
 
+bool Unit::isTargetNotAcceptableByMMaps(uint64 guid, uint32 currTime, const Position* target) const
+{
+    std::map<uint64, MMapTargetData>::const_iterator itr = m_targetsNotAcceptable.find(guid);
+    if (itr == m_targetsNotAcceptable.end())
+        return false;
+
+    if (itr->second._endTime >= currTime /*|| (target && !itr->second.PosChanged(*this, *target))*/)
+        return true;
+
+    return false;
+}
 //======================================================================
 //======================================================================
 //======================================================================
@@ -13974,6 +13966,49 @@ uint32 Unit::GetCreatureType() const
     }
     else
         return ToCreature()->GetCreatureTemplate()->type;
+}
+
+bool Unit::IsInFeralForm() const
+{
+    ShapeshiftForm form = GetShapeshiftForm();
+    return form == FORM_CAT || form == FORM_BEAR || form == FORM_DIREBEAR;
+}
+
+bool Unit::IsInDisallowedMountForm() const
+{
+    if (SpellInfo const* transformSpellInfo = sSpellMgr->GetSpellInfo(getTransForm()))
+        if (transformSpellInfo->HasAttribute(SPELL_ATTR0_CASTABLE_WHILE_MOUNTED))
+            return false;
+
+    if (ShapeshiftForm form = GetShapeshiftForm())
+    {
+        SpellShapeshiftEntry const* shapeshift = sSpellShapeshiftStore.LookupEntry(form);
+        if (!shapeshift)
+            return true;
+
+        if (!(shapeshift->flags1 & 0x1))
+            return true;
+    }
+
+    if (GetDisplayId() == GetNativeDisplayId())
+        return false;
+
+    CreatureDisplayInfoEntry const* display = sCreatureDisplayInfoStore.LookupEntry(GetDisplayId());
+    if (!display)
+        return true;
+
+    CreatureDisplayInfoExtraEntry const* displayExtra = sCreatureDisplayInfoExtraStore.LookupEntry(display->ExtraId);
+    if (!displayExtra)
+        return true;
+
+    CreatureModelDataEntry const* model = sCreatureModelDataStore.LookupEntry(display->ModelId);
+    ChrRacesEntry const* race = sChrRacesStore.LookupEntry(displayExtra->Race);
+
+    if (model && !(model->Flags & 0x80))
+        if (race && !(race->Flags & 0x4))
+            return true;
+
+    return false;
 }
 
 /*#######################################
