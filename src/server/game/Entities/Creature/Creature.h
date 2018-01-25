@@ -76,6 +76,7 @@ enum CreatureFlagsExtra
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 #define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
+#define CREATURE_NOPATH_EVADE_TIME 5 * IN_MILLISECONDS
 
 #define MAX_CREATURE_QUEST_ITEMS 6
 
@@ -695,6 +696,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
                 return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
+        void SetCannotReachTarget(bool cannotReach) { if (cannotReach == m_cannotReachTarget) return; m_cannotReachTarget = cannotReach; m_cannotReachTimer = 0; }
+        bool CanNotReachTarget() const { return m_cannotReachTarget; }
+
         void SetPosition(float x, float y, float z, float o);
         void SetPosition(const Position &pos) { SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()); }
 
@@ -783,6 +787,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_regenHealth;
+        bool m_cannotReachTarget;
+        uint32 m_cannotReachTimer;
         bool m_AI_locked;
 
         SpellSchoolMask m_meleeDamageSchoolMask;

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -36,11 +36,17 @@
 template<class T, typename D>
 void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool initial)
 {
-    if (!i_target.isValid() || !i_target->IsInWorld() || !owner->IsInMap(i_target.getTarget())) 
+    if (!i_target.isValid() || !i_target->IsInWorld() || !owner->IsInMap(i_target.getTarget()))
         return;
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
         return;
+
+    if (owner->GetTypeId() == TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
+    {
+        owner->ToCreature()->SetCannotReachTarget(true);
+        return;
+    }
 
     float x, y, z;
     bool isPlayerPet = owner->IsPet() && IS_PLAYER_GUID(owner->GetOwnerGUID());
@@ -48,9 +54,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     if (owner->GetMapId() == 631 && owner->GetTransport() && owner->GetTransport()->IsMotionTransport() && i_target->GetTransport() && i_target->GetTransport()->IsMotionTransport()) // for ICC, if both on a motion transport => don't use mmaps
         sameTransport = owner->GetTypeId() == TYPEID_UNIT && i_target->isInAccessiblePlaceFor(owner->ToCreature());
     bool useMMaps = MMAP::MMapFactory::IsPathfindingEnabled(owner->FindMap()) && !sameTransport;
-    bool forceDest = (owner->FindMap() && owner->FindMap()->IsDungeon() && !isPlayerPet) || // force in instances to prevent exploiting
-                     (owner->GetTypeId() == TYPEID_UNIT && ((owner->IsPet() && owner->HasUnitState(UNIT_STATE_FOLLOW)) || // allow pets following their master to cheat while generating paths
-                     (((Creature*)owner)->isWorldBoss()) || ((Creature*)owner)->IsDungeonBoss())) || // force for all bosses, even not in instances
+    bool forceDest = (owner->GetTypeId() == TYPEID_UNIT && owner->IsPet() && owner->HasUnitState(UNIT_STATE_FOLLOW)) || // allow pets following their master to cheat while generating paths
                      (owner->GetMapId() == 572 && (owner->GetPositionX() < 1275.0f || i_target->GetPositionX() < 1275.0f)) || // pussywizard: Ruins of Lordaeron - special case (acid)
                      sameTransport || // nothing to comment, can't find path on transports so allow it
                      (i_target->GetTypeId() == TYPEID_PLAYER && i_target->ToPlayer()->IsGameMaster()); // for .npc follow
@@ -63,13 +67,18 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     {
         float allowedRange = MELEE_RANGE;
         if ((!initial || (owner->movespline->Finalized() && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinMeleeRange(owner, allowedRange) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
+        {
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->ToCreature()->SetCannotReachTarget(false);
             return;
+        }
 
         bool inRange = i_target->GetRandomContactPoint(owner, x, y, z, forcePoint);
         if (useMMaps && !inRange && (!isPlayerPet || i_target->GetPositionZ()-z > 50.0f))
         {
             //useMMaps = false;
-            owner->m_targetsNotAcceptable[i_target->GetGUID()] = MMapTargetData(sWorld->GetGameTime()+DISALLOW_TIME_AFTER_FAIL, owner, i_target.getTarget());
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->ToCreature()->SetCannotReachTarget(true);
             return;
         }
     }
@@ -96,7 +105,11 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
         }
 
         if ((!initial || (owner->movespline->Finalized() && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinDistInMap(owner, dist) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
+        {
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->ToCreature()->SetCannotReachTarget(false);
             return;
+        }
 
         // Xinef: Fix follow angle for hostile units
         float angle = i_angle;
@@ -115,7 +128,8 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     D::_addUnitStateMove(owner);
     i_targetReached = false;
     i_recalculateTravel = false;
-
+    if (owner->GetTypeId() == TYPEID_UNIT)
+        owner->ToCreature()->SetCannotReachTarget(false);
     Movement::MoveSplineInit init(owner);
 
     if (useMMaps) // pussywizard
@@ -172,21 +186,12 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
             float maxDist = MELEE_RANGE + owner->GetMeleeReach() + i_target->GetMeleeReach();
             if (!forceDest && (i_path->GetPathType() & PATHFIND_NOPATH || !i_offset && !isPlayerPet && i_target->GetExactDistSq(i_path->GetActualEndPosition().x, i_path->GetActualEndPosition().y, i_path->GetActualEndPosition().z) > maxDist*maxDist))
             {
-                lastPathingFailMSTime = World::GetGameTimeMS();
-                owner->m_targetsNotAcceptable[i_target->GetGUID()] = MMapTargetData(sWorld->GetGameTime()+DISALLOW_TIME_AFTER_FAIL, owner, i_target.getTarget());
+                if (owner->GetTypeId() == TYPEID_UNIT)
+                    owner->ToCreature()->SetCannotReachTarget(false);
                 return;
             }
             else
             {
-                owner->m_targetsNotAcceptable.erase(i_target->GetGUID());
-
-                // Fix for Impact of Anub'Rekhan
-                if (owner->GetTypeId() == TYPEID_UNIT && owner->GetEntry() == 15956 || owner->GetEntry() == 16573)
-                {
-                    if (i_target->GetPositionZ() >= 289.0f)
-                        return;
-                }
-
                 // Fix for Algalon
                 if (owner->GetTypeId() == TYPEID_UNIT && owner->GetEntry() == 32871)
                 {
@@ -214,6 +219,10 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
                 if (i_angle == 0.f)
                     init.SetFacing(i_target.getTarget());
                 init.SetWalk(((D*)this)->EnableWalking());
+
+                if (owner->GetTypeId() == TYPEID_UNIT)
+                    owner->ToCreature()->SetCannotReachTarget(false);
+
                 init.Launch();
                 return;
             }
@@ -227,6 +236,9 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     // - applies to ChaseMovementGenerator mostly
     if (i_angle == 0.f)
         init.SetFacing(i_target.getTarget());
+
+    if (owner->GetTypeId() == TYPEID_UNIT)
+        owner->ToCreature()->SetCannotReachTarget(false);
 
     init.SetWalk(((D*)this)->EnableWalking());
     init.Launch();

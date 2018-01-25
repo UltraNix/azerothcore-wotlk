@@ -219,20 +219,14 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
         return false;
 
     // prevent movement while casting spells with cast time or channel time
-    if (creature->HasUnitState(UNIT_STATE_CASTING))
-    {
-        bool stop = true;
-        if (Spell* spell = creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            if (!(spell->GetSpellInfo()->ChannelInterruptFlags & (AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING)) && !(spell->GetSpellInfo()->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
-                stop = false;
+    bool stop = creature->IsMovementPreventedByCasting();
 
-        if (stop)
-        {
-            Stop(1000);
-            if (!creature->IsStopped())
-                creature->StopMoving();
-            return true;
-        }
+    if (stop)
+    {
+        Stop(1000);
+        if (!creature->IsStopped())
+            creature->StopMoving();
+        return true;
     }
 
     if (Stopped())
