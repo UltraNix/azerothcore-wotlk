@@ -2830,9 +2830,15 @@ std::vector<uint32> partialCorrection =
     71387,  // Frost Aura
     71377,  // Icy Blast 10 man
     71378,  // Icy Blast 25 man
-    71380,  // Icy Blast 10 man
-    71381,  // Icy Blast 25 man
-    71386, // Frost Breath
+    71380,  // Icy Blast 10 man heroic
+    71381,  // Icy Blast 25 man heroic
+    71386,  // Frost Breath
+    70633,  // Gut Spray 10 man
+    71283,  // Gut Spray 25 man
+    72025,  // Gut Spray 10 heroic
+    72026,  // Gut Spray 25 heroic
+    71361,  // Frost Blast 10 man
+    71362,  // Frost Blast 25 man
 };
 
 void SpellMgr::LoadSpellCustomAttr()

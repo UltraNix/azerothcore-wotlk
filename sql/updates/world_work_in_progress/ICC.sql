@@ -10,8 +10,9 @@ UPDATE `creature_template` SET `mechanic_immune_mask`=`mechanic_immune_mask`|32,
 UPDATE `spell_area` SET `spell`=73822 WHERE `spell`=73818;
 UPDATE `spell_area` SET `spell`=73828 WHERE `spell`=73824;
 -- Gunship Prenerf
-DELETE FROM `creature` WHERE `guid`=133974;
+DELETE FROM `creature` WHERE `guid` IN (133974, 133990);
 UPDATE `creature` SET `position_x`=14.61, `position_y`=30.60, `position_z`=35.71 WHERE `guid`=133991;
+UPDATE `creature` SET `position_x`=-19.81, `position_y`=-24.40, `position_z`=21.62 WHERE `guid`=133989;
 -- Dominate Mind
 DELETE FROM `spell_script_names` WHERE `ScriptName`="spell_deathwhisper_dominate_mind";
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
@@ -126,6 +127,25 @@ UPDATE `creature` SET `position_x`=-107.308174, `position_y`=2233.338867, `posit
 UPDATE `creature` SET `position_x`=-106.886055, `position_y`=2188.241943, `position_z`=30.654263 WHERE `guid`=247111;
 UPDATE `creature` SET `position_x`=-89.493370, `position_y`=2214.156250, `position_z`=27.902536 WHERE `guid`=247112;
 
+SET @CGUID = 247113;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 2;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(@CGUID + 0, 37011, 631, 15, 1, 0, 0, -175.0, 2215.0, 35.23, 0.0, 86400, 0, 0, 478800, 0, 2, 0, 0, 0),
+(@CGUID + 1, 37011, 631, 15, 1, 0, 0, -175.0, 2215.0, 35.23, 0.0, 86400, 0, 0, 478800, 0, 2, 0, 0, 0),
+(@CGUID + 2, 37011, 631, 15, 1, 0, 0, -175.0, 2215.0, 35.23, 0.0, 86400, 0, 0, 478800, 0, 2, 0, 0, 0);
+DELETE FROM `creature_addon` WHERE `guid`=@CGUID + 0;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES 
+(@CGUID + 0, 3701100, 0, 0, 1, 0, "");
+DELETE FROM `creature_formations` WHERE `leaderGUID`=@CGUID + 0;
+INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
+(@CGUID + 0, @CGUID + 0, 0, 0, 1, 0, 0),
+(@CGUID + 0, @CGUID + 1, 4, 90, 1, 1, 2),
+(@CGUID + 0, @CGUID + 2, 4, 270, 1, 1, 2);
+DELETE FROM `waypoint_data` WHERE `id`=3701100;
+INSERT INTO `waypoint_data` VALUES 
+(3701100, 1, -175.0, 2190.0, 35.5, 0, 0, 1, 0, 100, 0),
+(3701100, 2, -175.0, 2240.0, 35.5, 0, 0, 1, 0, 100, 0);
+
 -- Before Gunship:
 -- Kor'kron Battle Standard SAI
 SET @ENTRY := 37044;
@@ -135,6 +155,15 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,0,0,0,11,0,100,0,0,0,0,0,11,69809,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Cast 'Kor'kron Battle Standard'"),
 (@ENTRY,0,1,0,11,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Set Reactstate Passive"),
 (@ENTRY,0,2,0,11,0,100,0,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Disable Combat Movement");
+
+-- Skybreaker Battle Standard SAI
+SET @ENTRY := 37041;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,11,69808,0,0,0,0,0,1,0,0,0,0,0,0,0,"Skybreaker Battle Standard - On Respawn - Cast 'Skybreaker Battle Standard'"),
+(@ENTRY,0,1,0,11,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Skybreaker Battle Standard - On Respawn - Set Reactstate Passive"),
+(@ENTRY,0,2,0,11,0,100,0,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Skybreaker Battle Standard - On Respawn - Disable Combat Movement");
 
 -- Before Valithria:
 UPDATE `creature_template` SET `ScriptName`="npc_icc_warhawk" WHERE `entry`=38154;
@@ -269,3 +298,7 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 (201530,201589,0,0,3,0,0),
 (201530,201553,0,0,3,0,0),
 (201530,210004,0,0,3,0,0);
+
+-- Sindragosa room:
+UPDATE `creature` SET `MovementType`=1, `spawndist`=4 WHERE `id`=37532;
+UPDATE `creature_onkill_reputation` SET `RewOnKillRepValue1`=2 WHERE `creature_id` IN (37532, 38151);
