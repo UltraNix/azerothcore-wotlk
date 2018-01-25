@@ -1,0 +1,1 @@
+DELETE FROM creature_formations WHERE leaderGUID IN (79650, 79895, 79899, 79921, 80342, 80351);
