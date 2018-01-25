@@ -3440,6 +3440,15 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         });
 
+        // Transmute: Titanium
+        ApplySpellFix({ 60350 }, [](SpellInfo* spellInfo) {
+            if (!sWorld->PatchNotes(PATCH_320))
+            {
+                spellInfo->RecoveryTime = 8 * HOUR * IN_MILLISECONDS;
+                spellInfo->_requireCooldownInfo = true;
+            }
+        });
+
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
