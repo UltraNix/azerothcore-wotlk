@@ -244,19 +244,10 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
     {
         if (creature->IsStopped())
             Stop(STOP_TIME_FOR_PLAYER);
-        else
+        else if (creature->movespline->Finalized())
         {
-            // xinef: code to detect pre-empetively if we should start movement to next waypoint
-            // xinef: do not start pre-empetive movement if current node has delay or we are ending waypoint movement
-            bool finished = creature->movespline->Finalized();
-            if (!finished && !i_path->at(i_currentNode)->delay && ((i_currentNode != i_path->size() - 1) || repeating))
-                finished = (creature->movespline->_Spline().length(creature->movespline->_currentSplineIdx()+1) - creature->movespline->timePassed()) < 200;
-
-            if (finished)
-            {
-                OnArrived(creature);
-                return StartMove(creature);
-            }
+            OnArrived(creature);
+            return StartMove(creature);
         }
     }
      return true;
