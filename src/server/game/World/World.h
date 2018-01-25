@@ -860,20 +860,23 @@ class World
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
         void   ResetEventSeasonalQuests(uint16 event_id);
 
-        time_t GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour); // pussywizard
-        time_t GetNextTimeWithMonthAndHour(int8 month, int8 hour); // pussywizard
+        time_t GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour);                       // pussywizard
+        time_t GetNextTimeWithMonthAndHour(int8 month, int8 hour);                         // pussywizard
 
-        std::string const& GetRealmName() const { return _realmName; } // pussywizard
-        void SetRealmName(std::string name) { _realmName = name; } // pussywizard
+        std::string const& GetRealmName() const { return _realmName; }                     // pussywizard
+        void SetRealmName(std::string name) { _realmName = name; }                         // pussywizard
 
-        std::string const& GetCountryName() const { return _countryName; } // @peypey
-        void SetCountryName(std::string country) { _countryName = country; } // @peypey
+        uint32 const& GetRevision() const { return _revision; }                            // Sitowsky: Revision number to allow synch with changelog.
+        void SetRevision(uint32 revision) { _revision = revision; }                        // Sitowsky: Revision number to allow synch with changelog.
 
-        std::string const& GetWinnerMessage() const { return _winnerMessage; } // @bgreward
-        void SetWinnerMessage(std::string message) { _winnerMessage = message; } // @bgreward
+        std::string const& GetCountryName() const { return _countryName; }                 // Sitowsky
+        void SetCountryName(std::string country) { _countryName = country; }               // Sitowsky
 
-        std::string const& GetWinnerMessageArena() const { return _winnerMessageArena; } // @pvpevent
-        void SetWinnerMessageArena(std::string message) { _winnerMessageArena = message; } // @pvpevent
+        std::string const& GetWinnerMessage() const { return _winnerMessage; }             // Sitowsky: @bgreward
+        void SetWinnerMessage(std::string message) { _winnerMessage = message; }           // Sitowsky: @bgreward
+
+        std::string const& GetWinnerMessageArena() const { return _winnerMessageArena; }   // Sitowsky: @pvpevent
+        void SetWinnerMessageArena(std::string message) { _winnerMessageArena = message; } // Sitowsky: @pvpevent
 
         void SetPhasedDuelsZones(std::string zones);
         bool IsPhasedDuelsZone(uint32 zone) const { if (m_phasedDuelsZones.empty()) return true; return std::find(m_phasedDuelsZones.begin(), m_phasedDuelsZones.end(), zone) != m_phasedDuelsZones.end(); }
@@ -946,6 +949,7 @@ class World
         GlobalPlayerDataMap _globalPlayerDataStore; // xinef
         GlobalPlayerNameMap _globalPlayerNameStore; // xinef
 
+        uint32 _revision;
         std::string _realmName;
         std::string _countryName;
         std::string _winnerMessage;

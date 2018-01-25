@@ -3477,7 +3477,8 @@ public:
         return true;
     }
 
-    static bool HandleMuteHistoryCommand(ChatHandler* handler, char const* args) {
+    static bool HandleMuteHistoryCommand(ChatHandler* handler, char const* args)
+    {
         if (!*args)
             return false;
 
@@ -3509,19 +3510,23 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
+
         handler->PSendSysMessage("Mute history for account %s:", account.c_str());
-        do
         {
-            fields = result->Fetch();
-            std::string characterName = fields[0].GetString();
-            std::string muteReason = fields[1].GetString();
-            std::string muteBy = fields[2].GetString();
-            uint32 minutes = fields[3].GetUInt32();
-            std::string muteTime = fields[4].GetString();
+            do
+            {
+                fields = result->Fetch();
+                std::string characterName = fields[0].GetString();
+                std::string muteReason = fields[1].GetString();
+                std::string muteBy = fields[2].GetString();
+                uint32 minutes = fields[3].GetUInt32();
+                std::string muteTime = fields[4].GetString();
 
-            handler->PSendSysMessage("|cff00ccff%s|r - Character: |cff00ccff%s|r muted for: |cff00ccff%s|r by: |cff00ccff%s|r (%d minutes)", muteTime.c_str(), characterName.c_str(), muteReason.c_str(), muteBy.c_str(), minutes);
-        } while (result->NextRow());
+                handler->PSendSysMessage("|cff00ccff%s|r - Character: |cff00ccff%s|r muted for: |cff00ccff%s|r by: |cff00ccff%s|r (%d minutes)", muteTime.c_str(), characterName.c_str(), muteReason.c_str(), muteBy.c_str(), minutes);
+            } while (result->NextRow());
+        }
 
+        return true;
     }
 };
 

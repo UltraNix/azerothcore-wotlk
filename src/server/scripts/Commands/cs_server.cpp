@@ -104,6 +104,7 @@ public:
     static bool HandleServerInfoCommand(ChatHandler* handler, char const* /*args*/)
     {
         std::string realmName = sWorld->GetRealmName();
+        uint32 revision = sWorld->GetRevision();
         uint32 playerCount = sWorld->GetPlayerCount();
         uint32 activeSessionCount = sWorld->GetActiveSessionCount();
         uint32 queuedSessionCount = sWorld->GetQueuedSessionCount();
@@ -120,7 +121,11 @@ public:
             playerCount = (playerCount + (playerCount * boostPercentage));
         }
 
-        handler->PSendSysMessage("SunwellCore rev. %s.", _REVISION);
+        if (revision != 0)
+            handler->PSendSysMessage("Sunwell.pl - Rev: %u (%s)", revision, _HASH);
+        else
+            handler->PSendSysMessage("Sunwell.pl - Rev: %s", _HASH);
+
         if (!queuedSessionCount)
             handler->PSendSysMessage("Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
         else

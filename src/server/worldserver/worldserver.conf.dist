@@ -3118,6 +3118,13 @@ Instance.ResetTimeRelativeTimestamp = 1135814400
 RealmName = "X"
 
 #
+#     Revision
+#        Description: Revision for ".server info" command
+#        Default:     "0"
+
+Revision = "0"
+
+#
 #   CurrentBuild
 #        Description: Client build number of currently supported patch. Used to filter out currently not supported spawns. For example: 3.3.5a is 12340.
 #        Default:     12340
