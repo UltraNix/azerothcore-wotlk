@@ -151,9 +151,12 @@ struct boss_hadronoxAI : public BossAI
                     SetCombatMovement(true);
                     if (_step < NUM_STEPS - 1)
                         return true;
-                    DoCastAOE(SPELL_WEB_FRONT_DOORS);
-                    DoCastAOE(SPELL_WEB_SIDE_DOORS);
-                    _doorsWebbed = true;
+                    if (!_doorsWebbed)
+                    {
+                        DoCastAOE(SPELL_WEB_FRONT_DOORS);
+                        DoCastAOE(SPELL_WEB_SIDE_DOORS);
+                        _doorsWebbed = true;
+                    }
                     DoZoneInCombat();
                     return true;
                 }
@@ -216,9 +219,12 @@ struct boss_hadronoxAI : public BossAI
         AttackStart(me->GetVictim());
         if (_step < NUM_STEPS - 1)
             return;
-        DoCastAOE(SPELL_WEB_FRONT_DOORS);
-        DoCastAOE(SPELL_WEB_SIDE_DOORS);
-        _doorsWebbed = true;
+        if (!_doorsWebbed)
+        {
+            DoCastAOE(SPELL_WEB_FRONT_DOORS);
+            DoCastAOE(SPELL_WEB_SIDE_DOORS);
+            _doorsWebbed = true;
+        }
         DoZoneInCombat();
     }
 
