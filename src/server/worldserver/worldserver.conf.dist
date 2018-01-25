@@ -3120,9 +3120,9 @@ RealmName = "X"
 #
 #     Revision
 #        Description: Revision for ".server info" command
-#        Default:     "0"
+#        Default:     0
 
-Revision = "0"
+Revision = 0
 
 #
 #   CurrentBuild
