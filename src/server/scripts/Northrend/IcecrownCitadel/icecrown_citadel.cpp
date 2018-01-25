@@ -3907,6 +3907,14 @@ struct npc_icc_warhawkAI : public ScriptedAI
         });
     }
 
+    bool CanAIAttack(const Unit* who) const override
+    {
+        if (Unit* owner = me->GetOwner())
+            return owner->IsInCombat();
+
+        return ScriptedAI::CanAIAttack(who);
+    }
+
     void UpdateAI(uint32 diff) override
     {
         _scheduler.Update(diff);

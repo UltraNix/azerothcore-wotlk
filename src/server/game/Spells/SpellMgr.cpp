@@ -2832,6 +2832,7 @@ std::vector<uint32> partialCorrection =
     71378,  // Icy Blast 25 man
     71380,  // Icy Blast 10 man
     71381,  // Icy Blast 25 man
+    71386, // Frost Breath
 };
 
 void SpellMgr::LoadSpellCustomAttr()
@@ -6592,6 +6593,16 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 70715: // Column of Frost (visual marker)
             spellInfo->DurationIndex = 32; // 6 seconds (missing)
+            break;
+        case 70702:  // Column of Frost 10 man
+        case 71746:  // Column of Frost 25 man
+        case 72019:  // Column of Frost 10 man heroic
+        case 72020:  // Column of Frost 25 man heroic
+        case 72963:  // Flesh Rot 10 man
+        case 72964:  // Flesh Rot 25 man
+        case 72965:  // Flesh Rot 10 man heroic
+        case 72966:  // Flesh Rot 25 man heroic
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
         case 71085: // Mana Void (periodic aura)
             spellInfo->DurationIndex = 9; // 30 seconds (missing)

@@ -132,18 +132,24 @@ SET @ENTRY := 37044;
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,11,69809,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Cast 'Kor'kron Battle Standard'");
+(@ENTRY,0,0,0,11,0,100,0,0,0,0,0,11,69809,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Cast 'Kor'kron Battle Standard'"),
+(@ENTRY,0,1,0,11,0,100,0,0,0,0,0,8,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Set Reactstate Passive"),
+(@ENTRY,0,2,0,11,0,100,0,0,0,0,0,21,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Kor'kron Battle Standard - On Respawn - Disable Combat Movement");
 
 -- Before Valithria:
 UPDATE `creature_template` SET `ScriptName`="npc_icc_warhawk" WHERE `entry`=38154;
 -- Reputation:
-DELETE FROM `creature_onkill_reputation` WHERE `creature_id` IN (37501, 37502, 37228, 37229, 38154);
+DELETE FROM `creature_onkill_reputation` WHERE `creature_id` IN (37501, 37502, 37228, 37229, 38154, 38134, 38137, 38197, 38198);
 INSERT INTO `creature_onkill_reputation` (`creature_id`, `RewOnKillRepFaction1`, `RewOnKillRepFaction2`, `MaxStanding1`, `IsTeamAward1`, `RewOnKillRepValue1`, `MaxStanding2`, `IsTeamAward2`, `RewOnKillRepValue2`, `TeamDependent`) VALUES 
 (37501, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
 (37502, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
 (37228, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
 (37229, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
-(38154, 1156, 0, 7, 0, 2, 0, 0, 0, 0);
+(38154, 1156, 0, 7, 0, 2, 0, 0, 0, 0),
+(38134, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(38137, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(38197, 1156, 0, 7, 0, 15, 0, 0, 0, 0),
+(38198, 1156, 0, 7, 0, 15, 0, 0, 0, 0);
 
 -- Crimson Hall:
 SET @CGUID = 210000;
