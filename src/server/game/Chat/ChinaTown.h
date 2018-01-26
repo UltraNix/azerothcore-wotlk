@@ -20,15 +20,19 @@ std::vector<std::string> chinaTags =
 {
     "€",
     "$",
-    " usd",
-    " eur",
+    " usd ",
+    " eur ",
+    " usd.",
+    " eur.",
+    " wvvw",
     "angrathar.com",
+    "angrathardotcom"
     "buy gold",
     "gold stock",
     "free gold",
     "cheap gold",
     "sell gold",
-    "real money"   
+    "real money"
 };
 
 void LookForGoldMessage(Player* player, std::string& msg, uint32 lang)

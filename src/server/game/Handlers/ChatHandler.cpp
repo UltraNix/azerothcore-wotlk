@@ -319,9 +319,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 return;
             }
 
-            // @ChinaTown
-            LookForGoldMessage(sender, msg, lang);
-
             if (type == CHAT_MSG_SAY)
                 sender->Say(msg, lang);
             else if (type == CHAT_MSG_EMOTE)
