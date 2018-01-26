@@ -142,6 +142,7 @@ class Log
         void outLoot(const char * str, ...)                     ATTR_PRINTF(2, 3); // sitowsky
         void outRewards(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitowsky
         void outReleaseDebug(const char * str, ...)             ATTR_PRINTF(2, 3); // sitowsky
+        void outChinaTown(const char * str, ...)                ATTR_PRINTF(2, 3); // sitowsky
         void outCharDump(const char * str, uint32 account_id, uint32 guid, const char * name);
 
         static void outTimestamp(FILE* file);
@@ -173,6 +174,7 @@ class Log
         FILE* premiumLogFile;
         FILE* lootLogFile;
         FILE* rewardsLogFile;
+        FILE* chinaTownLogFile;
         FILE* releaseDebugLogFile;
 
         // cache values for after initilization use (like gm log per account case)

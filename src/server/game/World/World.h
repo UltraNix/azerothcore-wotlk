@@ -179,6 +179,7 @@ enum WorldBoolConfigs
     CONFIG_BOSS_RECORDS,                      // Riztazz:  Enables or disables boss records (saving them to db).
     CONFIG_BOSS_RECORDS_ANNOUNCES,            // Sitowsky: Enables or disables announcing boss records to the world if boss records are enabled.
     CONFIG_SPECIAL_ANGRATHAR,                 // Sitowsky: Enables or disables Special Angrathar core settings.
+    CONFIG_CHINA_TOWN,                        // Sitowsky: Enables of disables special warnings of send messages by china gold sellers.
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -371,7 +372,7 @@ enum WorldIntConfigs
     CONFIG_CUSTOM_AFK_REPORT_TIMER,
     CONFIG_HUNGER_GAMES_LIMIT,
     CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
-
+    CONFIG_CHINA_TOWN_TIMER,
     INT_CONFIG_VALUE_COUNT
 };
 

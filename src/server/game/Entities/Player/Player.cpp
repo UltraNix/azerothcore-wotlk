@@ -923,6 +923,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_BlizzlikeMode = false;
     m_NeedAutoInvite = false;
     m_PvPAnnounces = false;
+    m_goldSeller = false;
     m_comboPointGain = 0;
     m_MountBlockId = 0;
     m_selectedAuction = 0;
@@ -1941,6 +1942,8 @@ void Player::Update(uint32 p_time)
 
     // Custom.AFK.Report
     UpdateAutoAfkKick(now);
+    // @ChinaTown
+    UpdateChinaTownTimer(now);
 
     if (m_unstuckCooldown > p_time)
         m_unstuckCooldown -= p_time;
@@ -20716,6 +20719,24 @@ void Player::SendResetInstanceFailed(uint32 reason, uint32 MapId)
 /*********************************************************/
 /***              Update timers                        ***/
 /*********************************************************/
+
+// @ChinaTown
+void Player::UpdateChinaTownTimer(time_t currTime, bool updateTimer)
+{
+    if (!sWorld->getBoolConfig(CONFIG_CHINA_TOWN)
+        || !IsInWorld() || IsBeingTeleported() || IsBeingTeleportedFar())
+        return;
+
+    // Function is called only for update timer see: ChinaTown.h
+    if (updateTimer)
+    {
+        m_goldTimer = currTime + sWorld->getIntConfig(CONFIG_CHINA_TOWN_TIMER);
+        return;
+    }
+
+    if (IsGoldSeller() && currTime > m_goldTimer)
+        SetGoldSeller(false);
+}
 
 enum AFKcheck
 {

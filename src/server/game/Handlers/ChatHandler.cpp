@@ -40,6 +40,7 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
+#include "ChinaTown.h"
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
 {
@@ -302,6 +303,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
         }
     }
 
+    // @ChinaTown
+    LookForGoldMessage(sender, msg);
 
     switch (type)
     {

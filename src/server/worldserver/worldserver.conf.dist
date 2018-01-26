@@ -647,6 +647,23 @@ RewardsLogFile = "Rewards.log"
 RewardsLogTimestamp = 0
 
 #
+#    ChinaTownLogFile
+#        Description: ChinaTown file for possible gold sellers.
+#        Default:     "ChinaTown.log"   - (Enabled)
+#                     ""                - (Disabled)
+
+ChinaTownLogFile = "ChinaTown.log"
+
+#
+#    ChinaTownLogTimestamp
+#        Description: Append timestamp to the loot log file name.
+#                     Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+ChinaTownLogTimestamp = 0
+
+#
 #    ReleaseDebugLogFile
 #        Description: Log file for special debug operations
 #        Default:     "ReleaseDebug.log" - (Enabled)
@@ -3415,6 +3432,15 @@ CreatureBossRecords.Announces.Enable = 0
 #                  30 - (Enabled, load everything and 30 days back)
 
 Calendar.KeepDays = 0
+
+#
+#     ChinaTown.Enable
+#     Description: Enables of disables special warnings of send messages by china gold sellers.
+#     Default:     0 - (Disabled)
+#                  1 - (Enabled)
+
+ChinaTown.Enable = 1
+ChinaTown.Spam.Timer = 10
 
 #
 ###################################################################################################

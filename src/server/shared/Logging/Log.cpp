@@ -32,7 +32,7 @@ extern LoginDatabaseWorkerPool LoginDatabase;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), releaseDebugLogFile(NULL),
+    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL),
     m_gmlog_per_account(false), m_enableLogDB(false), m_colored(false)
 {
     Initialize();
@@ -83,6 +83,10 @@ Log::~Log()
     if (rewardsLogFile != NULL)
         fclose(rewardsLogFile);
     rewardsLogFile = NULL;
+    
+    if (chinaTownLogFile != NULL)
+        fclose(chinaTownLogFile);
+    chinaTownLogFile = NULL;
     
     if (releaseDebugLogFile != NULL)
         fclose(releaseDebugLogFile);
@@ -171,6 +175,7 @@ void Log::Initialize()
     premiumLogFile = openLogFile("PremiumLogFile", "PremiumLogTimestamp", "a");
     lootLogFile = openLogFile("LootLogFile", "LootLogTimestamp", "a");
     rewardsLogFile = openLogFile("RewardsLogFile", "RewardsLogTimestamp", "a");
+    chinaTownLogFile = openLogFile("ChinaTownLogFile", "ChinaTownLogTimestamp", "a");
     releaseDebugLogFile = openLogFile("ReleaseDebugLogFile", "ReleaseDebugLogTimestamp", "a");
 
     // Main log file settings
@@ -1086,6 +1091,34 @@ void Log::outRewards(const char * str, ...)
         va_end(ap);
     }
 }
+
+void Log::outChinaTown(const char * str, ...)
+{
+    if (!str)
+        return;
+
+    if (m_enableLogDB)
+    {
+        va_list ap2;
+        va_start(ap2, str);
+        char nnew_str[MAX_QUERY_LEN];
+        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
+        outDB(LOG_TYPE_PERF, nnew_str);
+        va_end(ap2);
+    }
+
+    if (chinaTownLogFile)
+    {
+        outTimestamp(chinaTownLogFile);
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(chinaTownLogFile, str, ap);
+        fprintf(chinaTownLogFile, "\n");
+        fflush(chinaTownLogFile);
+        va_end(ap);
+    }
+}
+
 
 void Log::outReleaseDebug(const char * str, ...)
 {

@@ -1257,6 +1257,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
         time_t m_afkTimer;
+        time_t m_goldTimer;
 
         void setDeathState(DeathState s, bool despawn = false);                   // overwrite Unit::setDeathState
 
@@ -1898,7 +1899,9 @@ class Player : public Unit, public GridObject<Player>
         void UpdateAreaDependentAuras(uint32 area_id);    // subzones
 
         void UpdateAfkReport(time_t currTime);
-        void UpdateAutoAfkKick(time_t currTime, bool updateTimer = false);    // Custom.AFK.Report
+        void UpdateAutoAfkKick(time_t currTime, bool updateTimer = false);     // Custom.AFK.Report
+        void UpdateChinaTownTimer(time_t currTime, bool updateTimer = false);  // @ChinaTown
+
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
@@ -2677,6 +2680,10 @@ class Player : public Unit, public GridObject<Player>
         bool PvPAnnounces() { return m_PvPAnnounces; }
         void SetPvPAnnounces(bool val) { m_PvPAnnounces = val; }
 
+        // @ChinaTown
+        bool IsGoldSeller() { return m_goldSeller; }
+        void SetGoldSeller(bool val) { m_goldSeller = val; }
+
         uint32 GetSelectedAuction() { return m_selectedAuction; }
         void SetSelectedAuction(uint32 val) { m_selectedAuction = val; }
 
@@ -2935,6 +2942,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_BlizzlikeMode;
         bool m_NeedAutoInvite; // @autoinvite_feature
         bool m_PvPAnnounces;
+        bool m_goldSeller;     // @ChinaTown
 
         ////////////////////Rest System/////////////////////
         time_t _restTime;

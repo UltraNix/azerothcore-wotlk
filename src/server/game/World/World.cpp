@@ -1328,6 +1328,8 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_BOSS_RECORDS] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS_ANNOUNCES] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Announces.Enable", false);
     m_int_configs[CONFIG_CALENDAR_KEEP_DAYS] = sConfigMgr->GetIntDefault("Calendar.KeepDays", 0);
+    m_bool_configs[CONFIG_CHINA_TOWN] = sConfigMgr->GetBoolDefault("ChinaTown.Enable", false);
+    m_int_configs[CONFIG_CHINA_TOWN_TIMER] = sConfigMgr->GetIntDefault("ChinaTown.Spam.Timer", 10);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)
