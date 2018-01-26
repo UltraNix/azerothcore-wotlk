@@ -7349,6 +7349,12 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectMiscValue[EFFECT_0] = 90033;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
+        case 62242:     // Icy Prism
+            spellInfo->ReagentCount[0] = 3;
+            spellInfo->ReagentCount[1] = 3;
+            spellInfo->ReagentCount[2] = 3;
+            spellInfo->ReagentCount[3] = 3;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
