@@ -1878,12 +1878,15 @@ void Spell::EffectCreateItem(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    // !Sitowsky: Temporary new SunwellCheatMgr soon.
+    if (Player* cheater = m_caster->ToPlayer())
     {
-       m_caster->ToPlayer()->m_gold_cast_count++;
-
-       if (m_caster->ToPlayer()->m_gold_cast_count > 2000)
-           sWorld->SendGMText(LANG_POSSIBLE_GOLD_CHEATER, m_caster->GetName().c_str(), m_spellInfo->Id, m_caster->ToPlayer()->m_gold_cast_count);
+        cheater->m_gold_cast_count++;
+        if (cheater->m_gold_cast_count > 2000)
+        {
+            sLog->outChinaTown("Possible gold cheater: %s (account Id: %u), casted spell: %u. Cast count: %u.", cheater->GetName().c_str(), cheater->GetSession()->GetAccountId(), cheater->m_gold_cast_count);
+            // sWorld->SendGMText(LANG_POSSIBLE_GOLD_CHEATER, m_caster->GetName().c_str(), m_spellInfo->Id, m_caster->ToPlayer()->m_gold_cast_count);
+        }
     }
 
     DoCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
