@@ -922,7 +922,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_NeedToSaveGlyphs = false;
     m_BlizzlikeMode = false;
     m_NeedAutoInvite = false;
-    m_PvPAnnounces = false;
+    m_PvPAnnounces = true;
     m_goldSeller = false;
     m_comboPointGain = 0;
     m_MountBlockId = 0;
@@ -19388,12 +19388,12 @@ inline const char* PremiumName(PremiumServiceTypes serviceId)
 {
     switch (serviceId)
     {
-        case 0: return "Teleport";
-        case 1: return "No Sickness";
-        case 2: return "Exp Boost";
-        case 3: return "No Durability";
-        case 4: return "Instant Flying";
-        case 5: return "Exp Boost X4";
+        case 0: return "Teleportation";
+        case 1: return "Down with the Sickness";
+        case 2: return "Experience Boost";
+        case 3: return "Unbreakable Equipment";
+        case 4: return "Instant Taxi";
+        case 5: return "Experience Boost";
         default:
             return "Unknown";
     }
@@ -19402,17 +19402,19 @@ inline const char* PremiumName(PremiumServiceTypes serviceId)
 void Player::SendPremiumInfo()
 {
     char buff[20];
+    uint8 activePremium = 0;
     for (uint8 i = 0; i < MAX_PREMIUM_SERVICES; i++)
     {
         if (GetSession()->IsPremiumServiceActive(PremiumServiceTypes(i)))
         {
             time_t now = GetSession()->GetPremiumService(PremiumServiceTypes(i));
             strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-            ChatHandler(GetSession()).PSendSysMessage("Premium '%s' - is |cff00ff00Enabled|r and expire at: %s", PremiumName(PremiumServiceTypes(i)), buff);
+            ChatHandler(GetSession()).PSendSysMessage("|cff76bae8%s|r |cff77a5c4is|r |cff06e015enabled|r. |cff77a5c4Expires:|r |cff76bae8%s Realm Time.|r", PremiumName(PremiumServiceTypes(i)), buff);
+            ++activePremium;
         }
-        else
-            ChatHandler(GetSession()).PSendSysMessage("Premium '%s' - is |cffff0000Disabled", PremiumName(PremiumServiceTypes(i)));
     }
+    if (!activePremium)
+        ChatHandler(GetSession()).PSendSysMessage("|cff77a5c4You have no active Premium Priviledges.|r");
 }
 
 void Player::SendAutoJoin()

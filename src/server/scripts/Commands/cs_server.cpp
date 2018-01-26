@@ -89,7 +89,7 @@ public:
         static std::vector<ChatCommand> commandTable =
         {
             { "server",         SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverCommandTable },
-
+            { "info",           SEC_PLAYER,         true,  &HandleServerInfoCommand,                "" },
         };
         return commandTable;
     }
@@ -112,7 +112,6 @@ public:
         std::string uptime = secsToTimeString(sWorld->GetUptime()).append(".");
         uint32 updateTime = sWorld->GetUpdateTime();
         uint32 avgUpdateTime = avgDiffTracker.getAverage();
-        std::string str2 = TimeToTimestampStr(sWorld->GetGameTime());
 
         float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
         if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
@@ -120,21 +119,24 @@ public:
             activeSessionCount = (activeSessionCount + (activeSessionCount * boostPercentage));
             playerCount = (playerCount + (playerCount * boostPercentage));
         }
-
         if (revision != 0)
-            handler->PSendSysMessage("Sunwell.pl - Rev: %u (%s)", revision, _HASH);
+            handler->PSendSysMessage("|cff76bae8Sunwell.pl - %s|r |cff77a5c4revision %u (%s)|r", sWorld->GetRealmName().c_str(), revision, _HASH);
         else
-            handler->PSendSysMessage("Sunwell.pl - Rev: %s", _HASH);
+            handler->PSendSysMessage("|cff76bae8Sunwell.pl - %s|r |cff77a5c4revision %s|r", sWorld->GetRealmName().c_str(), _HASH);
 
-        if (!queuedSessionCount)
-            handler->PSendSysMessage("Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
-        else
-            handler->PSendSysMessage("Connected players: %u. Characters in world: %u. Queue: %u.", activeSessionCount, playerCount, queuedSessionCount);
+        handler->PSendSysMessage("|cff76bae8Connected Players:|r |cff77a5c4%u|r ", activeSessionCount);
+        handler->PSendSysMessage("|cff76bae8In-Game Players:|r |cff77a5c4%u|r", playerCount);
+        if (queuedSessionCount)
+            handler->PSendSysMessage("|cff76bae8Players in queue:|r |cff77a5c4%u|r", queuedSessionCount);
+
+        handler->PSendSysMessage("|cff76bae8Update Time Diff:|r |cff77a5c4%ums (avg. %ums)|r ", updateTime, avgUpdateTime);
+
+        char buff[20];
+        time_t now = sWorld->GetGameTime();
+        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+        handler->PSendSysMessage("|cff76bae8Realm Time:|r |cff77a5c4%s|r ", buff);
 
         //handler->PSendSysMessage("Connection peak: %u.", connPeak);
-        handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
-        handler->PSendSysMessage("Update time diff: %ums, average: %ums.", updateTime, avgUpdateTime);
-        handler->PSendSysMessage("Current time: %s", str2.c_str());
 
         if (handler->GetSession())
             if (Player* p = handler->GetSession()->GetPlayer())
@@ -145,8 +147,8 @@ public:
         if (sWorld->IsShuttingDown())
         {
             handler->PSendSysMessage("");
-            handler->PSendSysMessage("[WARNING] Server will %s in: %s", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
-            handler->PSendSysMessage("Reason: %s.", sWorld->GetShutdownReason());
+            handler->PSendSysMessage("|cff76bae8[WARNING] Server will %s in: |cff77a5c4%s|r", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
+            handler->PSendSysMessage("|cff76bae8Reason: |cff77a5c4%s.|r", sWorld->GetShutdownReason());
 
         }
 

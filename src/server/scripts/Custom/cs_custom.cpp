@@ -361,13 +361,13 @@ public:
         if (!player->BlizzlikeMode())
         {
             player->SetBlizzlikeMode(true);
-            handler->PSendSysMessage("Your character is now at Blizzlike mode, please relog to take effect.");
+            handler->PSendSysMessage("|cff77a5c4Your experience rate has been changed to blizzlike (x1). You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
-        else 
+        else
         {
             player->SetBlizzlikeMode(false);
-            handler->PSendSysMessage("Your character is now at normal rates, please relog to take effect.");
+            handler->PSendSysMessage("|cff77a5c4Your experience rate has been changed to default. You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
 
@@ -384,13 +384,13 @@ public:
         if (!player->PvPAnnounces())
         {
             player->SetPvPAnnounces(true);
-            handler->PSendSysMessage("PvP announces are enabled, please relog to take effect.");
+            handler->PSendSysMessage("|cff77a5c4PvP announcements are |cff06e015enabled|cff77a5c4. You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetPvPAnnounces(false);
-            handler->PSendSysMessage("PvP announces are disabled, please relog to take effect.");
+            handler->PSendSysMessage("|cff77a5c4PvP announcements are |cffff0000disabled|cff77a5c4. You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
 
@@ -406,21 +406,21 @@ public:
 
         if (player->GetMaxPersonalArenaRatingRequirement(0) < 2000)
         {
-            handler->PSendSysMessage("2000 personal rating required to use dodge command.");
+            handler->PSendSysMessage("|cff77a5c42000 Personal Rating is required to use this command.|r");
             handler->SetSentErrorMessage(true);
             return false;
         }
-		
+
         if (!player->IsInDodgeMode())
         {
             player->SetDodgeMode(true);
-            handler->PSendSysMessage("Dodge mode has been enabled, display of your location is disabled.");
+            handler->PSendSysMessage("|cff77a5c4Dodge mode has been |cff06e015enabled|cff77a5c4, display of your location is disabled.|r");
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetDodgeMode(false);
-            handler->PSendSysMessage("Dodge mode has been disabled, display of your location is enabled.");
+            handler->PSendSysMessage("|cff77a5c4Dodge mode has been |cffff0000disabled|cff77a5c4, display of your location is enabled.|r");
             handler->SetSentErrorMessage(true);
         }
 

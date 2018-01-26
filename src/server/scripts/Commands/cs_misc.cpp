@@ -132,7 +132,7 @@ public:
             { "buff",               SEC_ADMINISTRATOR,      false, &HandleBuffCommand,                  "" },
             { "unbuff",             SEC_ADMINISTRATOR,      false, &HandleUnbuffCommand,                "" },
             { "mutehistory",        SEC_GAMEMASTER,         false, &HandleMuteHistoryCommand,           "" },
-
+            { "gmhelp",             SEC_MODERATOR,          false, &HandleGmhelpCommand,                "" },
         };
         return commandTable;
     }
@@ -966,6 +966,17 @@ public:
     }
 
     static bool HandleHelpCommand(ChatHandler* handler, char const* args)
+    {
+        handler->PSendSysMessage("|cff76bae8List of commands:|r ");
+        handler->PSendSysMessage(" |cff76bae8.info|r |cff77a5c4- shows you the information about the server. |r");
+        handler->PSendSysMessage(" |cff76bae8.premium|r |cff77a5c4- displays the status of your Premium Priviledges. |r ");
+        handler->PSendSysMessage(" |cff76bae8.pvpinfo|r |cff77a5c4- toggles the visibility of PvP related announcements.|r");
+        handler->PSendSysMessage(" |cff76bae8.blizzlike|r |cff77a5c4- toggles x1 experience rate.|r");
+        handler->PSendSysMessage(" |cff76bae8.dodge|r |cff77a5c4- hides your location at /who (requires 2000 Arena Rating).|r");
+        return true;
+    }
+
+    static bool HandleGmhelpCommand(ChatHandler* handler, char const* args)
     {
         char const* cmd = strtok((char*)args, " ");
         if (!cmd)
