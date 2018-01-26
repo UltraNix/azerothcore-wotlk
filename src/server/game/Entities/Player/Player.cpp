@@ -19414,7 +19414,7 @@ void Player::SendPremiumInfo()
         }
     }
     if (!activePremium)
-        ChatHandler(GetSession()).PSendSysMessage("|cff77a5c4You have no active Premium Priviledges.|r");
+        ChatHandler(GetSession()).PSendSysMessage("|cff77a5c4You have no active Premium Privileges.|r");
 }
 
 void Player::SendAutoJoin()
