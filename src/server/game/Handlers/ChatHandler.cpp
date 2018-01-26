@@ -303,9 +303,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
         }
     }
 
-    // @ChinaTown
-    LookForGoldMessage(sender, msg);
-
     switch (type)
     {
         case CHAT_MSG_SAY:
@@ -322,6 +319,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 return;
             }
 
+            // @ChinaTown
+            LookForGoldMessage(sender, msg);
+
             if (type == CHAT_MSG_SAY)
                 sender->Say(msg, lang);
             else if (type == CHAT_MSG_EMOTE)
@@ -336,6 +336,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 SendNotification(GetTrinityString(LANG_WHISPER_REQ), sWorld->getIntConfig(CONFIG_CHAT_WHISPER_LEVEL_REQ));
                 return;
             }
+
+            // @ChinaTown
+            LookForGoldMessage(sender, msg);
 
             if (!normalizePlayerName(to))
             {
