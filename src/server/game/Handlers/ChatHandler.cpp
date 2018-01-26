@@ -320,7 +320,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             }
 
             // @ChinaTown
-            LookForGoldMessage(sender, msg);
+            LookForGoldMessage(sender, msg, lang);
 
             if (type == CHAT_MSG_SAY)
                 sender->Say(msg, lang);
@@ -338,7 +338,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             }
 
             // @ChinaTown
-            LookForGoldMessage(sender, msg);
+            LookForGoldMessage(sender, msg, lang);
 
             if (!normalizePlayerName(to))
             {

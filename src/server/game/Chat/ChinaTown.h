@@ -31,8 +31,11 @@ std::vector<std::string> chinaTags =
     "real money"   
 };
 
-void LookForGoldMessage(Player* player, std::string& msg)
+void LookForGoldMessage(Player* player, std::string& msg, uint32 lang)
 {
+    if (!sWorld->getBoolConfig(CONFIG_CHINA_TOWN) || lang == LANG_ADDON)
+        return;
+
     bool found = false;
     // transform to lowercase (for simpler checking)
     std::string lower = msg; 
