@@ -576,7 +576,12 @@ uint32 ArenaTeam::GetPoints(uint32 memberRating)
     uint32 rating = memberRating + 150 < Stats.Rating ? memberRating : Stats.Rating;
 
     if (rating <= 1500)
-        points = 344;
+    {
+        if (sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID) < 6)
+            points = (float)rating * 0.22f + 14.0f;
+        else
+            points = 344;
+    }
     else
         points = 1511.26f / (1.0f + 1639.28f * exp(-0.00412f * (float)rating));
 

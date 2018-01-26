@@ -6241,6 +6241,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 if (!target->IsPlayer())
                     return SPELL_FAILED_BAD_TARGETS;
+                if (target->ToPlayer()->getLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+                    return SPELL_FAILED_DONT_REPORT;
 
                 if (target->ToPlayer()->GetSession()->GetRecruiterId() != m_caster->ToPlayer()->GetSession()->GetAccountId() &&
                     target->ToPlayer()->GetSession()->GetAccountId() != m_caster->ToPlayer()->GetSession()->GetRecruiterId())
