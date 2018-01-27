@@ -50,7 +50,7 @@ UPDATE `quest_template` SET `RewardChoiceItemId4`=@EmblemLowCURR WHERE `RewardCh
 DELETE FROM `disables` WHERE `sourceType` = 2 AND `entry` IN (533, 574, 575, 576, 578, 595, 599, 600, 601, 602, 604, 607, 608, 609, 615, 616, 617, 618, 619, 624, 628);
 -- Add disables for raids and instances for future content
 REPLACE INTO `disables` (`sourceType`, `entry`, `flags`, `params_0`, `params_1`, `comment`) VALUES 
-(2, 616, 15, '', '', 'Disable raid with hc "Eye of Eternity" - patch 3.3.5 content'),
+(2, 616, 3, '', '', 'Disable raid with hc "Eye of Eternity" - patch 3.3.5 content'),
 (2, 650, 3, '', '', 'Disable dungeon "Trial of the Champion" - patch 3.2.x content'),
 (2, 632, 3, '', '', 'Disable dungeon "The Forge of Souls" - patch 3.3.x content'),
 (2, 658, 3, '', '', 'Disable dungeon "Pit of Saron" - patch 3.3.x content'),
