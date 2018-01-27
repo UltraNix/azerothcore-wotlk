@@ -596,6 +596,23 @@ SQLDriverLogFile = ""
 SQLDriverQueryLogging = 0
 
 #
+#    BanLogFile
+#        Description: Log file for ban commands.
+#        Default:     "Ban.log"     - (Enabled)
+#                     ""            - (Disabled)
+
+BanLogFile = "Ban.log"
+
+#
+#    BanLogTimestamp
+#        Description: Append timestamp to the premium log file name.
+#                     Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+BanLogTimestamp = 0
+
+#
 #    PremiumLogFile
 #        Description: Log file for premium operations
 #        Default:     "Premium.log" - (Enabled)

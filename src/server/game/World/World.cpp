@@ -1726,9 +1726,6 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Trainers...");
     sObjectMgr->LoadTrainerSpell();                              // must be after load CreatureTemplate
 
-    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Opcodes Cooldown...");
-    sObjectMgr->LoadOpcodesCooldown();
-
     sLog->outString("Loading Waypoints...");
     sWaypointMgr->Load();
 

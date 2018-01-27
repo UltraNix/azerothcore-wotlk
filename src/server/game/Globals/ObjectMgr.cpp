@@ -53,43 +53,6 @@ ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
 ScriptMapMap sWaypointScripts;
 
-void ObjectMgr::LoadOpcodesCooldown()
-{
-    uint32 oldMSTime = getMSTime();
-    _opcodesCooldown.clear();
-
-    QueryResult result = LoginDatabase.Query("SELECT opcode, cooldown FROM opcodes_cooldown");
-    if (!result)
-    {
-        //sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 opcodes cooldown. DB table `opcodes_cooldown` is empty.");
-        return;
-    }
-
-    uint32 count = 0;
-    do
-    {
-        Field *fields = result->Fetch();
-        uint16 opcode = LookupOpcodeId(fields[0].GetString().c_str());
-
-        if (opcode >= NUM_MSG_TYPES)
-        {
-            //sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Table opcodes_cooldown has opcode with invalid opcode number, skipping data for opcode %u", opcode);
-            continue;
-        }
-
-        if (opcode != MSG_NULL_ACTION)
-        {
-            uint32 cooldown = fields[1].GetUInt32();
-            _opcodesCooldown[opcode].SetInterval(cooldown);
-        }
-
-        count++;
-    }
-    while (result->NextRow());
-
-    //sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u opcode cooldowns in %u ms", count, GetMSTimeDiffToNow(oldMSTime), _opcodesCooldown.size());
-}
-
 std::string GetScriptsTableNameByType(ScriptsType type)
 {
     std::string res = "";
