@@ -386,7 +386,7 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
 
     m_inhabitType = InhabitTypeValues(cinfo->InhabitType);
 
-    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_SERVER_LAUNCH) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
+    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
     {
         if (getLevel() <= 4)
             m_respawnRate = 0.15f;
