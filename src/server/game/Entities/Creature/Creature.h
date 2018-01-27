@@ -57,9 +57,11 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_ALL_DIMINISH    = 0x00100000,       // Creature is subject to all diminishing returns as player are
     CREATURE_FLAG_EXTRA_KNOCKBACK_IMMUNE= 0x00200000,       // pussywizard: set mostly for dungeon bosses and their summons
     CREATURE_FLAG_EXTRA_AVOID_AOE       = 0x00400000,       // pussywizard: ignored by aoe attacks (for icc blood prince council npc - Dark Nucleus)
-    CREATURE_FLAG_EXTRA_NO_DODGE        = 0x00800000,        // xinef: target cannot dodge
+    CREATURE_FLAG_EXTRA_NO_DODGE        = 0x00800000,       // xinef: target cannot dodge
     CREATURE_FLAG_EXTRA_DUNGEON_BOSS        = 0x10000000,   // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
-    CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING  = 0x20000000    // creature ignore pathfinding
+    CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING  = 0x20000000,   // creature ignore pathfinding
+    CREATURE_FLAG_USE_WAYPOINT_MMAP         = 0x40000000    // forces creature to use MMAP & ForceDest in waypointMovementGenerator || TEMP - I dont want to enable movemaps and forceDest globally for now
+                                                            //                                                                         Last time i did that - stuff broke and we're releasing angrathar tomorrow
 };
 
 #define CREATURE_FLAG_EXTRA_DB_ALLOWED (CREATURE_FLAG_EXTRA_INSTANCE_BIND | CREATURE_FLAG_EXTRA_CIVILIAN | \
@@ -68,7 +70,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_TAUNT | CREATURE_FLAG_EXTRA_WORLDEVENT | CREATURE_FLAG_EXTRA_NO_CRIT | \
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
     CREATURE_FLAG_EXTRA_GUARD | CREATURE_FLAG_EXTRA_KNOCKBACK_IMMUNE | CREATURE_FLAG_EXTRA_AVOID_AOE | \
-    CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING)
+    CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING | CREATURE_FLAG_USE_WAYPOINT_MMAP)
 
 
 #define MAX_AGGRO_RESET_TIME 10 // in seconds
@@ -76,6 +78,7 @@ enum CreatureFlagsExtra
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 #define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
+#define CREATURE_NOPATH_EVADE_TIME 6 * IN_MILLISECONDS
 
 #define MAX_CREATURE_QUEST_ITEMS 6
 
@@ -695,6 +698,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
                 return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
+        void SetCannotReachTarget(bool cannotReach) { if (cannotReach == m_cannotReachTarget) return; m_cannotReachTarget = cannotReach; m_cannotReachTimer = 0; }
+        bool CanNotReachTarget() const { return m_cannotReachTarget; }
+
         void SetPosition(float x, float y, float z, float o);
         void SetPosition(const Position &pos) { SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()); }
 
@@ -783,6 +789,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
         bool m_regenHealth;
+        bool m_cannotReachTarget;
+        uint32 m_cannotReachTimer;
         bool m_AI_locked;
 
         SpellSchoolMask m_meleeDamageSchoolMask;

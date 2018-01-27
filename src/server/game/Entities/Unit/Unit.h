@@ -2075,18 +2075,9 @@ class Unit : public WorldObject
             SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
         }
 
-        inline bool IsInFeralForm() const
-        {
-            ShapeshiftForm form = GetShapeshiftForm();
-            return form == FORM_CAT || form == FORM_BEAR || form == FORM_DIREBEAR || form == FORM_GHOSTWOLF; // Xinef: added shamans Ghost Wolf, should behave exactly like druid forms
-        }
+        bool IsInFeralForm() const;
 
-        inline bool IsInDisallowedMountForm() const
-        {
-            ShapeshiftForm form = GetShapeshiftForm();
-            return form != FORM_NONE && form != FORM_BATTLESTANCE && form != FORM_BERSERKERSTANCE && form != FORM_DEFENSIVESTANCE &&
-                form != FORM_SHADOW && form != FORM_STEALTH && form != FORM_UNDEAD && form != FORM_SHADOW_DANCE;
-        }
+        bool IsInDisallowedMountForm() const;
 
         float m_modMeleeHitChance;
         float m_modRangedHitChance;
@@ -2168,9 +2159,9 @@ class Unit : public WorldObject
         void AddInterruptMask(uint32 mask) { m_interruptMask |= mask; }
         void UpdateInterruptMask();
 
-        uint32 GetDisplayId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
+        uint32 GetDisplayId() const { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
         virtual void SetDisplayId(uint32 modelId);
-        uint32 GetNativeDisplayId() { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
+        uint32 GetNativeDisplayId() const { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
         void RestoreDisplayId();
         void SetNativeDisplayId(uint32 modelId) { SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, modelId); }
         void setTransForm(uint32 spellid) { m_transform = spellid;}
@@ -2385,7 +2376,7 @@ class Unit : public WorldObject
         // pussywizard:
         // MMaps
         std::map<uint64, MMapTargetData> m_targetsNotAcceptable;
-        bool isTargetNotAcceptableByMMaps(uint64 guid, uint32 currTime, const Position* t = NULL) const { std::map<uint64, MMapTargetData>::const_iterator itr = m_targetsNotAcceptable.find(guid); if (itr != m_targetsNotAcceptable.end() && (itr->second._endTime >= currTime || t && !itr->second.PosChanged(*this, *t))) return true; return false; }
+        bool isTargetNotAcceptableByMMaps(uint64 guid, uint32 currTime, const Position* t = nullptr) const;
         uint32 m_mmapNotAcceptableStartTime;
         // Safe mover
         std::set<SafeUnitPointer*> SafeUnitPointerSet;

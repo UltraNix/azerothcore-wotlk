@@ -134,6 +134,7 @@ public:
 
         void EnterCombat(Unit *who) override
         {
+            DoZoneInCombat();
             _fightTimer = getMSTime();
             me->CallForHelp(30.0f); // catch helpers
             Talk(SAY_AGGRO);

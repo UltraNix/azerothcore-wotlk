@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -206,7 +206,7 @@ void GameEventMgr::LoadFromDB()
 {
     {
         uint32 oldMSTime = getMSTime();
-                                                //       1           2                           3                         4          5       6        7            8
+                                                //       0           1                           2                         3           4       5        6            7              8
         QueryResult result = WorldDatabase.Query("SELECT eventEntry, UNIX_TIMESTAMP(start_time), UNIX_TIMESTAMP(end_time), occurence, length, holiday, holidayStage, description, world_event FROM game_event");
         if (!result)
         {
@@ -237,10 +237,9 @@ void GameEventMgr::LoadFromDB()
             pGameEvent.length       = fields[4].GetUInt64();
             pGameEvent.holiday_id   = HolidayIds(fields[5].GetUInt32());
             pGameEvent.holidayStage = fields[6].GetUInt8();
-
-            pGameEvent.state        = (GameEventState)(fields[7].GetUInt8());
+            pGameEvent.description  = fields[7].GetString();
+            pGameEvent.state        = (GameEventState)(fields[8].GetUInt8());
             pGameEvent.nextstart    = 0;
-            pGameEvent.description  = fields[6].GetString();
 
             ++count;
             if (pGameEvent.length == 0 && pGameEvent.state == GAMEEVENT_NORMAL)                            // length>0 is validity check

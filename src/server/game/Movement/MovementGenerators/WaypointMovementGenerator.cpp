@@ -170,7 +170,13 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 
     //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
     //! but formationDest contains global coordinates
-    init.MoveTo(node->x, node->y, node->z);
+
+    //! @todo: @riztazz: enable mmaps & force dest for specific creatures, should be abled for everything
+    //! last time i changed this, some stuff broke for no reason and since we're releasing angrathar soon
+    //! i dont want to break stuff on launch, ill change it later
+    bool useMMapsAndForceDest = (!transportPath && !creature->IsPet() && creature->GetCreatureTemplate() && creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_USE_WAYPOINT_MMAP);
+
+    init.MoveTo(node->x, node->y, node->z, useMMapsAndForceDest, useMMapsAndForceDest);
 
     //! Accepts angles such as 0.00001 and -0.00001, 0 must be ignored, default value in waypoint table
     if (node->orientation && node->delay)
@@ -219,20 +225,14 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
         return false;
 
     // prevent movement while casting spells with cast time or channel time
-    if (creature->HasUnitState(UNIT_STATE_CASTING))
-    {
-        bool stop = true;
-        if (Spell* spell = creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            if (!(spell->GetSpellInfo()->ChannelInterruptFlags & (AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING)) && !(spell->GetSpellInfo()->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
-                stop = false;
+    bool stop = creature->IsMovementPreventedByCasting();
 
-        if (stop)
-        {
-            Stop(1000);
-            if (!creature->IsStopped())
-                creature->StopMoving();
-            return true;
-        }
+    if (stop)
+    {
+        Stop(1000);
+        if (!creature->IsStopped())
+            creature->StopMoving();
+        return true;
     }
 
     if (Stopped())

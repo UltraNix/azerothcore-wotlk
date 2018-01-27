@@ -1511,7 +1511,7 @@ float WorldObject::GetSightRange(const WorldObject* target) const
     return 0.0f;
 }
 
-bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, bool distanceCheck) const
+bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, bool distanceCheck, bool checkAlert) const
 {
     if (this == obj)
         return true;
@@ -1634,7 +1634,7 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
         if (((const Player*)this)->IsSpectator() && ((const Player*)this)->FindMap()->IsBattleArena() && (obj->m_invisibility.GetFlags() || obj->m_stealth.GetFlags()))
             return false;
 
-    if (!CanDetect(obj, ignoreStealth, !distanceCheck))
+    if (!CanDetect(obj, ignoreStealth, !distanceCheck, checkAlert))
         return false;
 
     return true;
@@ -1647,7 +1647,7 @@ bool WorldObject::CanNeverSee(WorldObject const* obj) const
     return GetMap() != obj->GetMap() || !InSamePhase(obj);
 }
 
-bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth, bool checkClient) const
+bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth, bool checkClient, bool checkAlert) const
 {
     const WorldObject* seer = this;
 
@@ -1664,7 +1664,7 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth, bool che
         if (!seer->CanDetectInvisibilityOf(obj)) // xinef: added ignoreStealth, allow AoE spells to hit invisible targets!
             return false;
 
-        if (!seer->CanDetectStealthOf(obj))
+        if (!seer->CanDetectStealthOf(obj, checkAlert))
         {
             // xinef: ignore units players have at client, this cant be cheated!
             if (checkClient)
@@ -1722,7 +1722,7 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
     return true;
 }
 
-bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
+bool WorldObject::CanDetectStealthOf(WorldObject const* obj, bool checkAlert) const
 {
     // Combat reach is the minimal distance (both in front and behind),
     //   and it is also used in the range calculation.
@@ -1739,8 +1739,10 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
     float distance = GetExactDist(obj);
     float combatReach = 0.0f;
 
-    if (isType(TYPEMASK_UNIT))
-        combatReach = ((Unit*)this)->GetCombatReach();
+    Unit const* unit = ToUnit();
+
+    if (unit)
+        combatReach = unit->GetCombatReach();
 
     if (distance < combatReach)
         return true;
@@ -1753,9 +1755,8 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
         if (!(obj->m_stealth.GetFlags() & (1 << i)))
             continue;
 
-        if (isType(TYPEMASK_UNIT))
-            if (((Unit*)this)->HasAuraTypeWithMiscvalue(SPELL_AURA_DETECT_STEALTH, i))
-                return true;
+        if (unit && unit->HasAuraTypeWithMiscvalue(SPELL_AURA_DETECT_STEALTH, i))
+            return true;
 
         // Starting points
         int32 detectionValue = 30;
@@ -1779,8 +1780,15 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
         // Calculate max distance
         float visibilityRange = float(detectionValue) * 0.3f + combatReach;
 
-        if (visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE)
+        if (unit && unit->GetTypeId() == TYPEID_PLAYER && visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE)
             visibilityRange = MAX_PLAYER_STEALTH_DETECT_RANGE;
+
+        if (checkAlert)
+            visibilityRange += (visibilityRange * 0.08) + 2.0f;
+
+        Unit const* tunit = obj->ToUnit();
+        if (checkAlert && unit && unit->ToCreature() && visibilityRange >= unit->ToCreature()->GetAggroRange(tunit) + unit->ToCreature()->m_CombatDistance)
+            return false;
 
         if (distance > visibilityRange)
             return false;

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -87,6 +87,9 @@ class CreatureAI : public UnitAI
 
         // Called if IsVisible(Unit* who) is true at each who move, reaction at visibility zone enter
         void MoveInLineOfSight_Safe(Unit* who);
+
+        // Trigger Creature "Alert" state (creature can see stealthed unit)
+        void TriggerAlert(Unit const* who) const;
 
         // Called in Creature::Update when deathstate = DEAD. Inherited classes may maniuplate the ability to respawn based on scripted events.
         virtual bool CanRespawn() { return true; }

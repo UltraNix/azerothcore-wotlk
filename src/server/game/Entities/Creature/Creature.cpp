@@ -174,7 +174,7 @@ m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REAC
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_moveInLineOfSightDisabled(false), m_moveInLineOfSightStrictlyDisabled(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_originalEntry(0), m_homePosition(), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE),
-m_respawnRate(1.0f)
+m_respawnRate(1.0f), m_cannotReachTarget(false), m_cannotReachTimer(0)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -386,22 +386,16 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
 
     m_inhabitType = InhabitTypeValues(cinfo->InhabitType);
 
-    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
+    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_SERVER_LAUNCH) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
     {
-        ContentLevels content = GetContentLevelsForMapAndZone(GetMapId(), GetZoneId(true));
-        switch (content)
-        {
-            case CONTENT_1_60:
-                m_respawnRate = 0.25f;
-                break;
-            case CONTENT_61_70:
-            case CONTENT_71_80:
-                m_respawnRate = 0.5f;
-                break;
-            default:
-                m_respawnRate = 1.0f;
-                break;
-        }
+        if (getLevel() <= 4)
+            m_respawnRate = 0.15f;
+        else if (getLevel() > 4 && getLevel() <= 20)
+            m_respawnRate = 0.25f;
+        else if (getLevel() > 20 && getLevel() <= 60)
+            m_respawnRate = 0.35f;
+        else
+            m_respawnRate = 0.5f;
     }
 
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
@@ -618,7 +612,7 @@ void Creature::Update(uint32 diff)
             m_regenTimer -= diff;
             if (m_regenTimer <= 0)
             {
-                if (!IsInEvadeMode() && (!IsInCombat() || IsPolymorphed())) // regenerate health if not in combat or if polymorphed
+                if (!IsInEvadeMode() && (!IsInCombat() || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
                     RegenerateHealth();
 
                 if (getPowerType() == POWER_ENERGY)
@@ -627,6 +621,17 @@ void Creature::Update(uint32 diff)
                     Regenerate(POWER_MANA);
 
                 m_regenTimer += CREATURE_REGEN_INTERVAL;
+            }
+
+            if (CanNotReachTarget() && !IsInEvadeMode())
+            {
+                m_cannotReachTimer += diff;
+                if (m_cannotReachTimer >= CREATURE_NOPATH_EVADE_TIME)
+                {
+                    SetCannotReachTarget(false);
+                    if (IsAIEnabled)
+                        AI()->EnterEvadeMode();
+                }
             }
             break;
         }
@@ -1649,6 +1654,8 @@ void Creature::setDeathState(DeathState s, bool despawn)
         SetFullHealth();
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
+        SetCannotReachTarget(false);
+
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         // Xinef: npc run by default
         //SetWalk(true);

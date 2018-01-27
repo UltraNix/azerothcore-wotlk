@@ -12722,7 +12722,9 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
                 return false;
 
     // can't attack invisible (ignore stealth for aoe spells) also if the area being looked at is from a spell use the dynamic object created instead of the casting unit.
-    if ((!bySpell || !bySpell->HasAttribute(SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && (obj ? !obj->CanSeeOrDetect(target, bySpell && bySpell->IsAffectingArea() && !bySpell->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO)) : !CanSeeOrDetect(target, bySpell && bySpell->IsAffectingArea() && !bySpell->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO))))
+    if ((!bySpell || !bySpell->HasAttribute(SPELL_ATTR6_CAN_TARGET_INVISIBLE)) && (obj ? !obj->CanSeeOrDetect(target, bySpell && bySpell->IsAffectingArea() && !bySpell->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO)) : // second part of ternarny in second line
+        !CanSeeOrDetect(target, (bySpell && bySpell->IsAffectingArea() && !bySpell->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO)) ||
+        (target->GetTypeId() == TYPEID_PLAYER && target->HasStealthAura() && target->IsInCombat() && IsInCombatWith(target)))))
         return false;
 
     // can't attack dead
@@ -12754,43 +12756,34 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
 
     // PvP, PvC, CvP case
     // can't attack friendly targets
-    ReputationRank repThisToTarget = GetReactionTo(target);
-    ReputationRank repTargetToThis;
-
-    if (repThisToTarget > REP_NEUTRAL
-        || (repTargetToThis = target->GetReactionTo(this)) > REP_NEUTRAL)
+    if (GetReactionTo(target) > REP_NEUTRAL
+        || (target->GetReactionTo(this)) > REP_NEUTRAL)
         return false;
 
+    Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : nullptr;
+    Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : nullptr;
+
     // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
-    if (repThisToTarget == REP_NEUTRAL &&
-        repTargetToThis <= REP_NEUTRAL)
+    if ((playerAffectingAttacker && !playerAffectingTarget) ||
+        (!playerAffectingAttacker && playerAffectingTarget))
     {
-        Player* owner = GetAffectingPlayer();
-        const Unit *const thisUnit = owner ? owner : this;
-        if  (!(target->GetTypeId() == TYPEID_PLAYER && thisUnit->GetTypeId() == TYPEID_PLAYER) &&
-            !(target->GetTypeId() == TYPEID_UNIT && thisUnit->GetTypeId() == TYPEID_UNIT))
+        Player const* player = playerAffectingAttacker ? playerAffectingAttacker : playerAffectingTarget;
+        Unit const* creature = playerAffectingAttacker ? target : this;
+
+        if (FactionTemplateEntry const* factionTemplate = creature->GetFactionTemplateEntry())
         {
-            Player const* player = target->GetTypeId() == TYPEID_PLAYER ? target->ToPlayer() : thisUnit->ToPlayer();
-            Unit const* creature = target->GetTypeId() == TYPEID_UNIT ? target : thisUnit;
+            if (!(player->GetReputationMgr().GetForcedRankIfAny(factionTemplate)))
+                if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
+                    if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
+                        if (!(repState->Flags & FACTION_FLAG_AT_WAR))
+                            return false;
 
-            if (FactionTemplateEntry const* factionTemplate = creature->GetFactionTemplateEntry())
-            {
-                if (!(player->GetReputationMgr().GetForcedRankIfAny(factionTemplate)))
-                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
-                        if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
-                            if (!(repState->Flags & FACTION_FLAG_AT_WAR))
-                                return false;
-
-            }
         }
     }
 
     Creature const* creatureAttacker = ToCreature();
     if (creatureAttacker && creatureAttacker->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_PARTY_MEMBER)
         return false;
-
-    Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : NULL;
-    Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : NULL;
 
     // check duel - before sanctuary checks
     if (playerAffectingAttacker && playerAffectingTarget)
@@ -13583,28 +13576,9 @@ Unit* Creature::SelectVictim()
 
     if (target && _CanDetectFeignDeathOf(target) && CanCreatureAttack(target))
     {
-        if (m_mmapNotAcceptableStartTime) m_mmapNotAcceptableStartTime = 0; // pussywizard: finding any valid target resets timer
         SetInFront(target);
         return target;
     }
-
-    // pussywizard: if victim is not acceptable only due to mmaps, it may be for example a knockback, wait for a few secs before evading
-    if (!target && !isWorldBoss() && !GetInstanceId() && IsAlive() && (!CanHaveThreatList() || !getThreatManager().isThreatListEmpty()))
-        if (Unit* v = GetVictim())
-            if (isTargetNotAcceptableByMMaps(v->GetGUID(), sWorld->GetGameTime(), v))
-                if (_CanDetectFeignDeathOf(v) && CanCreatureAttack(v))
-                {
-                    if (m_mmapNotAcceptableStartTime)
-                    {
-                        if (sWorld->GetGameTime() <= m_mmapNotAcceptableStartTime+4)
-                            return NULL;
-                    }
-                    else
-                    {
-                        m_mmapNotAcceptableStartTime = sWorld->GetGameTime();
-                        return NULL;
-                    }
-                }
 
     // pussywizard: not sure why it's here
     // pussywizard: if some npc (not player pet) is attacking us and we can't fight back - don't evade o_O
@@ -13634,15 +13608,26 @@ Unit* Creature::SelectVictim()
                 AI()->EnterEvadeMode();
                 break;
             }
-        return NULL;
+        return nullptr;
     }
 
     // enter in evade mode in other case
     AI()->EnterEvadeMode();
 
-    return NULL;
+    return nullptr;
 }
 
+bool Unit::isTargetNotAcceptableByMMaps(uint64 guid, uint32 currTime, const Position* target) const
+{
+    std::map<uint64, MMapTargetData>::const_iterator itr = m_targetsNotAcceptable.find(guid);
+    if (itr == m_targetsNotAcceptable.end())
+        return false;
+
+    if (itr->second._endTime >= currTime /*|| (target && !itr->second.PosChanged(*this, *target))*/)
+        return true;
+
+    return false;
+}
 //======================================================================
 //======================================================================
 //======================================================================
@@ -13974,6 +13959,49 @@ uint32 Unit::GetCreatureType() const
     }
     else
         return ToCreature()->GetCreatureTemplate()->type;
+}
+
+bool Unit::IsInFeralForm() const
+{
+    ShapeshiftForm form = GetShapeshiftForm();
+    return form == FORM_CAT || form == FORM_BEAR || form == FORM_DIREBEAR;
+}
+
+bool Unit::IsInDisallowedMountForm() const
+{
+    if (SpellInfo const* transformSpellInfo = sSpellMgr->GetSpellInfo(getTransForm()))
+        if (transformSpellInfo->HasAttribute(SPELL_ATTR0_CASTABLE_WHILE_MOUNTED))
+            return false;
+
+    if (ShapeshiftForm form = GetShapeshiftForm())
+    {
+        SpellShapeshiftEntry const* shapeshift = sSpellShapeshiftStore.LookupEntry(form);
+        if (!shapeshift)
+            return true;
+
+        if (!(shapeshift->flags1 & 0x1))
+            return true;
+    }
+
+    if (GetDisplayId() == GetNativeDisplayId())
+        return false;
+
+    CreatureDisplayInfoEntry const* display = sCreatureDisplayInfoStore.LookupEntry(GetDisplayId());
+    if (!display)
+        return true;
+
+    CreatureDisplayInfoExtraEntry const* displayExtra = sCreatureDisplayInfoExtraStore.LookupEntry(display->ExtraId);
+    if (!displayExtra)
+        return true;
+
+    CreatureModelDataEntry const* model = sCreatureModelDataStore.LookupEntry(display->ModelId);
+    ChrRacesEntry const* race = sChrRacesStore.LookupEntry(displayExtra->Race);
+
+    if (model && !(model->Flags & 0x80))
+        if (race && !(race->Flags & 0x4))
+            return true;
+
+    return false;
 }
 
 /*#######################################
