@@ -45,6 +45,9 @@ public:
             { "pvpinfo",            SEC_PLAYER,             false, HandlePvPInfoCommand,                "" },
             { "dodge",              SEC_PLAYER,             false, HandleDodgeModeCommand,              "" },
             { "hasblizzlike",       SEC_MODERATOR,          false, HandleHasBlizzlikeCommand,           "" },
+            { "chinaban",           SEC_MODERATOR,          false, &HandleChinaBanCommand,              "" },
+            { "speedban",           SEC_MODERATOR,          false, &HandleSpeedBanCommand,              "" },
+            { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" }
         };
         return commandTable;
     }
@@ -442,6 +445,160 @@ public:
             handler->PSendSysMessage("Player %s has |cff00ff00enabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
         else
             handler->PSendSysMessage("Player %s has |cffff0000disabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
+
+        return true;
+    }
+
+    // ChinaBan!
+    static bool HandleChinaBanCommand(ChatHandler* handler, char const* args)
+    {
+        Player* target;
+        uint64 targetGuid;
+        std::string targetName;
+        std::string accountName;
+
+        if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName))
+            return false;
+
+        uint32 accountId = target ? target->GetSession()->GetAccountId() : sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
+
+        if (target)
+        {
+            // check online security
+            if (handler->HasLowerSecurity(target, 0))
+                return false;
+
+            if (AccountMgr::GetName(accountId, accountName))
+                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "-1", "Gold selling.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
+        }
+        else
+        {
+            // check offline security
+            if (handler->HasLowerSecurity(NULL, targetGuid))
+                return false;
+
+            if (AccountMgr::GetName(sObjectMgr->GetPlayerAccountIdByPlayerName(targetName.c_str()), accountName))
+                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "-1", "Gold selling.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
+        }
+
+        // pussywizard: notify all online GMs
+        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
+        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+            if (itr->second->GetSession()->GetSecurity())
+                ChatHandler(itr->second->GetSession()).PSendSysMessage("Game Master: [%s] has banned player: [%s] for gold selling.", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+
+        return true;
+    }
+
+    // SpeedBan!
+    static bool HandleSpeedBanCommand(ChatHandler* handler, char const* args)
+    {
+        Player* target;
+        uint64 targetGuid;
+        std::string targetName;
+        std::string accountName;
+
+        if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName))
+            return false;
+
+        uint32 accountId = target ? target->GetSession()->GetAccountId() : sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
+
+        if (target)
+        {
+            // check online security
+            if (handler->HasLowerSecurity(target, 0))
+                return false;
+
+            if (AccountMgr::GetName(target->GetSession()->GetAccountId(), accountName))
+                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "30d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
+        }
+        else
+        {
+            // check offline security
+            if (handler->HasLowerSecurity(NULL, targetGuid))
+                return false;
+
+            if (AccountMgr::GetName(accountId, accountName))
+                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "30d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
+        }
+
+        // pussywizard: notify all online GMs
+        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
+        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+            if (itr->second->GetSession()->GetSecurity())
+                ChatHandler(itr->second->GetSession()).PSendSysMessage("Game Master: [%s] has banned player: [%s] for speed hack.", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+
+        return true;
+    }
+
+    // EnglishMute!
+    static bool HandleEnglishMuteCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        char* nameStr = strtok((char*)args, " ");
+        if (!nameStr)
+            return false;
+
+        Player* target;
+        uint64 targetGuid;
+        std::string targetName;
+        if (!handler->extractPlayerTarget(nameStr, &target, &targetGuid, &targetName))
+            return false;
+
+        uint32 accountId = target ? target->GetSession()->GetAccountId() : sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
+
+        // find only player from same account if any
+        if (!target)
+            if (WorldSession* session = sWorld->FindSession(accountId))
+                target = session->GetPlayer();
+
+        // must have strong lesser security level
+        if (handler->HasLowerSecurity(target, targetGuid, true))
+            return false;
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
+        std::string muteBy = "";
+        if (handler->GetSession())
+            muteBy = handler->GetSession()->GetPlayerName();
+        else
+            muteBy = "Console";
+
+        std::string reason = "Inappropriate language, speak English!";
+
+        if (target)
+        {
+            // Target is online, mute will be in effect right away.
+            int64 muteTime = time(nullptr) + 30 * MINUTE;
+            target->GetSession()->m_muteTime = muteTime;
+            stmt->setInt64(0, muteTime);
+            ChatHandler(target->GetSession()).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, 30, muteBy.c_str(), reason.c_str());
+        }
+        else
+        {
+            // Target is offline, mute will be in effect starting from the next login.
+            int32 muteTime = -int32(30 * MINUTE);
+            stmt->setInt64(0, muteTime);
+        }
+
+        stmt->setString(1, reason.c_str());
+        stmt->setString(2, muteBy.c_str());
+        stmt->setUInt32(3, accountId);
+        LoginDatabase.Execute(stmt);
+        std::string nameLink = handler->playerLink(targetName);
+
+        // Sitowsky: Mute History
+        LoginDatabase.PExecute("REPLACE INTO account_mute_history VALUES ('%u', '%s', '%s', '%s', '%u', NOW())", accountId, targetName.c_str(), reason.c_str(), muteBy.c_str(), 30);
+
+        // pussywizard: notify all online GMs
+        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
+        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
+        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+            if (itr->second->GetSession()->GetSecurity())
+                ChatHandler(itr->second->GetSession()).PSendSysMessage(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, (handler->GetSession() ? handler->GetSession()->GetPlayerName().c_str() : "Console"), nameLink.c_str(), 30, reason.c_str());
 
         return true;
     }
