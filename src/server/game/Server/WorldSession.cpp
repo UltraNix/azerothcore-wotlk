@@ -249,15 +249,17 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     uint32 processedPackets = 0;
     time_t currentTime = time(NULL);
 
-    if (!AntiDOS.EvaluateOpcode(*packet, currentTime))
+    while (m_Socket && !m_Socket->IsClosed() && !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&_recvQueue.next(packet, updater))
     {
-        delete packet;
-        KickPlayer();
-    }
-
-    while (m_Socket && !m_Socket->IsClosed() && !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket && _recvQueue.next(packet, updater))
-    {
-        if (packet && packet->GetOpcode() < NUM_MSG_TYPES)
+        if (!AntiDOS.EvaluateOpcode(*packet, currentTime))
+        {
+            KickPlayer();
+        }
+        else if (packet->GetOpcode() >= NUM_MSG_TYPES)
+        {
+            sLog->outError("network.opcode Received non-existed opcode %s from %s", GetPlayerInfo().c_str());
+        }
+        else
         {
             OpcodeHandler &opHandle = opcodeTable[packet->GetOpcode()];
             try
