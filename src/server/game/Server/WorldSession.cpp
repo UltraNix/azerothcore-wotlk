@@ -337,6 +337,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
         if (++processedPackets >= sWorld->getIntConfig(CONFIG_MAX_PACKETS_PER_UPDATE)) // limit (by count) packets processed in one update, prevent DDoS
         {
+            KickPlayer();
             break;
         }
 
