@@ -391,11 +391,11 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
         if (getLevel() <= 4)
             m_respawnRate = 0.15f;
         else if (getLevel() > 4 && getLevel() <= 20)
-            m_respawnRate = 0.25f;
-        else if (getLevel() > 20 && getLevel() <= 60)
             m_respawnRate = 0.35f;
+        else if (getLevel() > 20 && getLevel() <= 60)
+            m_respawnRate = 0.45f;
         else
-            m_respawnRate = 0.5f;
+            m_respawnRate = 0.65f;
     }
 
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
