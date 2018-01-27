@@ -988,8 +988,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(recvPacket);
 
-    LoginDatabase.EscapeString(lastLocalIp);
-    LoginDatabase.PExecute("INSERT INTO account_history VALUES ('%u', '%s', '%s', '%s', NOW())", id, hostname.c_str(), address.c_str(), lastLocalIp.c_str());
+    // LoginDatabase.EscapeString(lastLocalIp);
+    // LoginDatabase.PExecute("INSERT INTO account_history VALUES ('%u', '%s', '%s', '%s', NOW())", id, hostname.c_str(), address.c_str(), lastLocalIp.c_str());
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
