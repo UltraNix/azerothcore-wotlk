@@ -1393,6 +1393,7 @@ inline const uint16 LookupOpcodeId(char const* name)
         if (strcmp(opcodeTable[i].name, name) == 0)
             return i;
     }
+    return 0;
 }
 
 #endif
