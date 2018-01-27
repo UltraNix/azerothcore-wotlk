@@ -190,7 +190,7 @@ public:
             {
                 case 0:
                     DoCast(me, SPELL_TUXEDO, false);
-                    instance->DoUseDoorOrButton(instance->GetGuidData(DATA_GO_STAGEDOORLEFT));
+                    instance->DoUseDoorOrButton(instance->GetData64(DATA_GO_STAGEDOORLEFT));
                     break;
                 case 4:
                     TalkCount = 0;
@@ -206,12 +206,12 @@ public:
                     }
                     break;
                 case 8:
-                    instance->DoUseDoorOrButton(instance->GetGuidData(DATA_GO_STAGEDOORLEFT));
+                    instance->DoUseDoorOrButton(instance->GetData64(DATA_GO_STAGEDOORLEFT));
                     PerformanceReady = true;
                     break;
                 case 9:
                     PrepareEncounter();
-                    instance->DoUseDoorOrButton(instance->GetGuidData(DATA_GO_CURTAINS));
+                    instance->DoUseDoorOrButton(instance->GetData64(DATA_GO_CURTAINS));
                     break;
             }
         }
@@ -349,8 +349,8 @@ public:
             switch (ac)
             {
                 case GOSSIP_ACTION_INFO_DEF + 1:
-                    //AddGossipItemFor(player, GOSSIP_ICON_CHAT, OZ_GOSSIP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                    //SendGossipMenuFor(player, 8971, me->GetGUID());
+                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, OZ_GOSSIP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+                    SendGossipMenuFor(player, 8971, me->GetGUID());
                     break;
                 case GOSSIP_ACTION_INFO_DEF + 2:
                     player->CLOSE_GOSSIP_MENU();
@@ -373,29 +373,28 @@ public:
 
         void sGossipHello(Player* player) override
         {
-            // @todo change these methods
             // Check for death of Moroes and if opera event is not done already
             if (instance->GetBossState(DATA_MOROES) == DONE && instance->GetBossState(DATA_OPERA_PERFORMANCE) != DONE)
             {
-                //AddGossipItemFor(player, GOSSIP_ICON_CHAT, OZ_GOSSIP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, OZ_GOSSIP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
                 if (player->IsGameMaster())
                 {
-                    //AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                    //AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-                    //AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+                    AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+                    AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+                    AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
                 }
 
-                /*
+                
                 if (!RaidWiped)
                     SendGossipMenuFor(player, 8970, me->GetGUID());
                 else
                     SendGossipMenuFor(player, 8975, me->GetGUID());
-                    */
+                    
                 return;
             }
 
-            //SendGossipMenuFor(player, 8978, me->GetGUID());
+            SendGossipMenuFor(player, 8978, me->GetGUID());
         }
     };
 

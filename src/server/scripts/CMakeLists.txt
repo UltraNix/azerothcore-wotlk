@@ -25,6 +25,7 @@ set(scripts_STAT_SRCS
   ../game/AI/ScriptedAI/ScriptedEscortAI.cpp
   ../game/AI/ScriptedAI/ScriptedCreature.cpp
   ../game/AI/ScriptedAI/ScriptedFollowerAI.cpp
+  ../game/AI/ScriptedAI/ScriptedGossip.cpp
   ../game/Entities/Item/Transmogrification.cpp
   ../game/Events/CustomEventMgr.cpp
   ../shared/Utilities/TaskScheduler.cpp
