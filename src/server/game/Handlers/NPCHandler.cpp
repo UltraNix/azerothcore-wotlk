@@ -152,7 +152,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     if (!trainer_spells)
     {
         sLog->outChinaTown( "WORLD: SendTrainerList - Training spells not found for creature (GUID: %u Entry: %u)",
-        //    GUID_LOPART(guid), unit->GetEntry());
+            GUID_LOPART(guid), unit->GetEntry());
         return;
     }
 
