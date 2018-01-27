@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1385,5 +1385,15 @@ inline const char* LookupOpcodeName(uint16 id)
         return "Received unknown opcode, it's more than max!";
     return opcodeTable[id].name;
 }
+
+inline const uint16 LookupOpcodeId(char const* name)
+{
+    for (uint16 i = 0; i < NUM_MSG_TYPES; ++i)
+    {
+        if (strcmp(opcodeTable[i].name, name) == 0)
+            return i;
+    }
+}
+
 #endif
 /// @}

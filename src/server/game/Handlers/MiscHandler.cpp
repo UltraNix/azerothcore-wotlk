@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -174,10 +174,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 {
     ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_WHO Message");
 
-    time_t now = time(NULL);
-    if (now < timeWhoCommandAllowed)
-        return;
-    timeWhoCommandAllowed = now+3;
 
     uint32 matchcount = 0;
 

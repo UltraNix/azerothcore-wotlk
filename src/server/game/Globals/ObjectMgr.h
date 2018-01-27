@@ -452,6 +452,7 @@ typedef std::unordered_map<uint32, PageTextLocale> PageTextLocaleContainer;
 typedef std::unordered_map<int32, TrinityStringLocale> TrinityStringLocaleContainer;
 typedef std::unordered_map<uint32, GossipMenuItemsLocale> GossipMenuItemsLocaleContainer;
 typedef std::unordered_map<uint32, PointOfInterestLocale> PointOfInterestLocaleContainer;
+typedef std::unordered_map<uint16, ShortIntervalTimer> OpcodesCooldown;
 
 typedef std::multimap<uint32, uint32> QuestRelations;
 typedef std::pair<QuestRelations::const_iterator, QuestRelations::const_iterator> QuestRelationBounds;
@@ -965,6 +966,9 @@ class ObjectMgr
 
         void LoadVendors();
         void LoadTrainerSpell();
+        void LoadOpcodesCooldown();
+        OpcodesCooldown GetOpcodesCooldown() { return _opcodesCooldown; }
+
         void AddSpellToTrainer(uint32 entry, uint32 spell, uint32 spellCost, uint32 reqSkill, uint32 reqSkillValue, uint32 reqLevel);
 
         std::string GeneratePetName(uint32 entry);
@@ -1401,6 +1405,8 @@ class ObjectMgr
             GO_TO_GO,
             GO_TO_CREATURE,         // GO is dependant on creature
         };
+
+        OpcodesCooldown _opcodesCooldown;
 
         std::set<uint32> _transportMaps; // Helper container storing map ids that are for transports only, loaded from gameobject_template
 };

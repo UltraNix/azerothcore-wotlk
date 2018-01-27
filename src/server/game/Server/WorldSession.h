@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -123,7 +123,7 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
- 
+
 enum PremiumServiceTypes
 {
     PREMIUM_TELEPORT                    = 0,
@@ -144,8 +144,10 @@ public:
     explicit PacketFilter(WorldSession* pSession) : m_pSession(pSession) {}
     virtual ~PacketFilter() {}
 
-    virtual bool Process(WorldPacket* /*packet*/) { return true; }
-    virtual bool ProcessLogout() const { return true; }
+    virtual bool Process(WorldPacket* /*packet*/) = 0;
+    virtual bool ProcessLogout() const = 0;
+    virtual bool ProcessTimersUpdate() const = 0;
+    virtual bool ProcessWardenUpdate() const = 0;
 
 protected:
     WorldSession* const m_pSession;
@@ -160,6 +162,8 @@ public:
     virtual bool Process(WorldPacket* packet);
     //in Map::Update() we do not process player logout!
     virtual bool ProcessLogout() const { return false; }
+    bool ProcessTimersUpdate() const { return false; }
+    bool ProcessWardenUpdate() const { return false; }
 };
 
 //class used to filer only thread-unsafe packets from queue
@@ -171,6 +175,9 @@ public:
     ~WorldSessionFilter() {}
 
     virtual bool Process(WorldPacket* packet);
+    bool ProcessLogout() const { return true; }
+    bool ProcessTimersUpdate() const { return true; }
+    bool ProcessWardenUpdate() const { return true; }
 };
 
 // Proxy structure to contain data passed to callback function,
@@ -1033,6 +1040,10 @@ class WorldSession
         AddonsList m_addonsList;
         uint32 recruiterId;
         bool isRecruiter;
+
+        typedef UNORDERED_MAP<uint16, ShortIntervalTimer> OpcodesCooldown;
+        OpcodesCooldown _opcodesCooldown;
+
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
         uint64 m_currentBankerGUID;
         time_t timeWhoCommandAllowed;

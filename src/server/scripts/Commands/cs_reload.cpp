@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -149,7 +149,8 @@ public:
             { "waypoint_scripts",             SEC_ADMINISTRATOR, true,  &HandleReloadWpScriptsCommand,                  "" },
             { "waypoint_data",                SEC_ADMINISTRATOR, true,  &HandleReloadWpCommand,                         "" },
             { "vehicle_accessory",            SEC_ADMINISTRATOR, true,  &HandleReloadVehicleAccessoryCommand,           "" },
-            { "vehicle_template_accessory",   SEC_ADMINISTRATOR, true,  &HandleReloadVehicleTemplateAccessoryCommand,   "" }
+            { "vehicle_template_accessory",   SEC_ADMINISTRATOR, true,  &HandleReloadVehicleTemplateAccessoryCommand,   "" },
+        { "opcodes_cooldown",             SEC_ADMINISTRATOR, true,  &HandleReloadOpcodesCooldownCommand,            "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1186,6 +1187,14 @@ public:
         sLog->outString("Reloading vehicle_template_accessory table...");
         sObjectMgr->LoadVehicleTemplateAccessories();
         handler->SendGlobalGMSysMessage("Vehicle template accessories reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadOpcodesCooldownCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        //sLog->outInfo(LOG_FILTER_GENERAL, "Reloading opcodes_cooldown table...");
+        sObjectMgr->LoadOpcodesCooldown();
+        handler->SendGlobalGMSysMessage("Opcodes cooldown reloaded.");
         return true;
     }
 };

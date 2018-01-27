@@ -122,6 +122,8 @@ isRecruiter(isARecruiter), m_currentBankerGUID(0), timeWhoCommandAllowed(0), _la
         sock->AddReference();
         ResetTimeOutTime();
         LoginDatabase.PExecute("UPDATE account SET online = online | (1<<(%u-1)) WHERE id = %u;", realmID, GetAccountId());
+
+        _opcodesCooldown = sObjectMgr->GetOpcodesCooldown();
     }
 
     InitializeQueryCallbackParameters();
@@ -226,6 +228,15 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
 {
+    OpcodesCooldown::iterator itr = _opcodesCooldown.find(new_packet->GetOpcode());
+    if (itr != _opcodesCooldown.end())
+    {
+        if (!itr->second.Passed())
+            return;
+
+        itr->second.SetCurrent(0);
+    }
+
     _recvQueue.add(new_packet);
 }
 
@@ -237,6 +248,10 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         UpdateTimeOutTime(diff);
         if (IsConnectionIdle())
             m_Socket->CloseSocket();
+
+        if (updater.ProcessTimersUpdate())
+            for (OpcodesCooldown::iterator itr = _opcodesCooldown.begin(); itr != _opcodesCooldown.end(); ++itr)
+                itr->second.Update(diff);
     }
 
     HandleTeleportTimeout(updater.ProcessLogout());
@@ -360,8 +375,11 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         if (ShouldLogOut(currTime) && !m_playerLoading)
             LogoutPlayer(true);
 
-        if (m_Socket && !m_Socket->IsClosed() && _warden)
-            _warden->Update();
+        if (updater.ProcessWardenUpdate())
+        {
+            if (m_Socket && !m_Socket->IsClosed() && _warden)
+                _warden->Update();
+        }
 
         if (m_Socket && m_Socket->IsClosed())
         {
