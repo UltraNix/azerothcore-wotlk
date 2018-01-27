@@ -335,10 +335,8 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         else
             deletePacket = true;
 
-        if (++processedPackets >= sWorld->getIntConfig(CONFIG_MAX_PACKETS_PER_UPDATE)) // limit (by count) packets processed in one update, prevent DDoS
-        {
+        if (++processedPackets >= 100) // limit (by count) packets processed in one update, prevent DDoS
             break;
-        }
 
         if (getMSTimeDiff(_startMSTime, getMSTime()) >= 3) // limit (by time) packets processed in one update, prevent DDoS
             break;

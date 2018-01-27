@@ -1201,8 +1201,6 @@ void World::LoadConfigSettings(bool reload)
     if (m_int_configs[CONFIG_BG_ITEM_REWARD_COUNT] < 1)
         m_int_configs[CONFIG_BG_ITEM_REWARD_COUNT] = 1;
 
-    m_int_configs[CONFIG_MAX_PACKETS_PER_UPDATE] = sConfigMgr->GetIntDefault("PacketLimit.Amount", 100);
-
     SetWinnerMessage(sConfigMgr->GetStringDefault("BattleGroundReward.Message", "You have been awarded for winning the battleground."));
 
     m_bool_configs[CONFIG_ARENA_REWARD_ENABLE] = sConfigMgr->GetBoolDefault("ArenaReward.Enable", 0);

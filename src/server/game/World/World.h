@@ -373,7 +373,6 @@ enum WorldIntConfigs
     CONFIG_HUNGER_GAMES_LIMIT,
     CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
     CONFIG_CHINA_TOWN_TIMER,
-    CONFIG_MAX_PACKETS_PER_UPDATE,            // max packets in one session update before player is considered cheater and kicked from session
     INT_CONFIG_VALUE_COUNT
 };
 
