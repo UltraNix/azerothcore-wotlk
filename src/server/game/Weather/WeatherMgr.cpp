@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,7 +27,7 @@
 #include "AutoPtr.h"
 #include "Player.h"
 #include "WorldPacket.h"
-#include "Opcodes.h"
+#include "WorldSession.h"
 
 namespace WeatherMgr
 {

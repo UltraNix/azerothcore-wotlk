@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -172,12 +172,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 {
-    sLog->outChinaTown( "WORLD: Recvd CMSG_WHO Message");
-
-    time_t now = time(NULL);
-    if (now < timeWhoCommandAllowed)
-        return;
-    timeWhoCommandAllowed = now+3;
+    //sLog->outError("WORLD: Recvd CMSG_WHO Message");
 
     uint32 matchcount = 0;
 

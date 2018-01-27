@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,9 +28,11 @@
 #include "AddonMgr.h"
 #include "DatabaseEnv.h"
 #include "World.h"
+#include "Opcodes.h"
 #include "WorldPacket.h"
 #include "GossipDef.h"
 #include "Cryptography/BigNumber.h"
+#include "AccountMgr.h"
 
 class Creature;
 class GameObject;
@@ -123,7 +125,7 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
- 
+
 enum PremiumServiceTypes
 {
     PREMIUM_TELEPORT                    = 0,
@@ -204,6 +206,12 @@ class CharacterCreateInfo
 
     private:
         virtual ~CharacterCreateInfo(){};
+};
+
+struct PacketCounter
+{
+    time_t lastReceiveTime;
+    uint32 amountCounter;
 };
 
 /// Player session in the World
@@ -984,6 +992,48 @@ class WorldSession
         PreparedQueryResultFuture _loadActionsSwitchSpecCallback;
         PreparedQueryResultFuture _CharacterAuraFrozenCallback;
 
+        friend class World;
+    protected:
+        class DosProtection
+        {
+            friend class World;
+        public:
+            DosProtection(WorldSession* s) : Session(s), _policy((Policy)sWorld->getIntConfig(CONFIG_PACKET_SPOOF_POLICY)) {}
+
+            bool EvaluateOpcode(WorldPacket& p, time_t time) const;
+            void AllowOpcode(uint16 opcode, bool allow) { _isOpcodeAllowed[opcode] = allow; }
+
+        protected:
+            enum Policy
+            {
+                POLICY_LOG,
+                POLICY_KICK,
+                POLICY_BAN,
+            };
+
+            bool IsOpcodeAllowed(uint16 opcode) const
+            {
+                OpcodeStatusMap::const_iterator itr = _isOpcodeAllowed.find(opcode);
+                if (itr == _isOpcodeAllowed.end())
+                    return true;    // No presence in the map indicates this is the first time the opcode was sent this session, so allow
+
+                return itr->second;
+            }
+
+            uint32 GetMaxPacketCounterAllowed(uint16 opcode) const;
+            WorldSession* Session;
+
+        private:
+            typedef std::unordered_map<uint16, bool> OpcodeStatusMap;
+            OpcodeStatusMap _isOpcodeAllowed; // could be bool array, but wouldn't be practical for game versions with non-linear opcodes
+            Policy _policy;
+            typedef std::unordered_map<uint16, PacketCounter> PacketThrottlingMap;
+            // mark this member as "mutable" so it can be modified even in const functions
+            mutable PacketThrottlingMap _PacketThrottlingMap;
+
+
+        } AntiDOS;
+
     /***
     END OF CALLBACKS
     ***/
@@ -1035,7 +1085,6 @@ class WorldSession
         bool isRecruiter;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
         uint64 m_currentBankerGUID;
-        time_t timeWhoCommandAllowed;
         uint32 _offlineTime;
         bool _kicked;
         bool _shouldSetOfflineInDB;

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -94,7 +94,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue, 
+WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue,
     time_t premium_services[MAX_PREMIUM_SERVICES]):
 m_muteTime(mute_time), m_timeOutTime(0), m_GUIDLow(0), _player(NULL), m_Socket(sock),
 _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
@@ -102,7 +102,7 @@ m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerSave(fa
 m_sessionDbcLocale(sWorld->GetDefaultDbcLocale()),
 m_sessionDbLocaleIndex(locale),
 m_latency(0), m_clientTimeDelay(0), m_TutorialsChanged(false), recruiterId(recruiter),
-isRecruiter(isARecruiter), m_currentBankerGUID(0), timeWhoCommandAllowed(0), _lastAuctionListItemsMSTime(0), _lastAuctionListOwnerItemsMSTime(0), _skipQueue(skipQueue)
+isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0), _lastAuctionListOwnerItemsMSTime(0), _skipQueue(skipQueue), AntiDOS(this)
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
 
@@ -247,10 +247,17 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     bool deletePacket = true;
     WorldPacket* firstDelayedPacket = NULL;
     uint32 processedPackets = 0;
+    time_t currentTime = time(NULL);
+
+    if (!AntiDOS.EvaluateOpcode(*packet, currentTime))
+    {
+        delete packet;
+        KickPlayer();
+    }
 
     while (m_Socket && !m_Socket->IsClosed() && !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket && _recvQueue.next(packet, updater))
     {
-        if (packet->GetOpcode() < NUM_MSG_TYPES)
+        if (packet && packet->GetOpcode() < NUM_MSG_TYPES)
         {
             OpcodeHandler &opHandle = opcodeTable[packet->GetOpcode()];
             try
@@ -324,8 +331,11 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
                 sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.", packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
                 if (sLog->IsOutDebug())
                 {
-                    sLog->outDebug(LOG_FILTER_NETWORKIO, "Dumping error causing packet:");
-                    packet->hexlike();
+                    if (packet)
+                    {
+                        sLog->outDebug(LOG_FILTER_NETWORKIO, "Dumping error causing packet:");
+                        packet->hexlike();
+                    }
                 }
             }
         }
@@ -561,6 +571,7 @@ void WorldSession::LogoutPlayer(bool save)
 
     m_playerLogout = false;
     m_playerSave = false;
+    AntiDOS.AllowOpcode(CMSG_CHAR_ENUM, true);
     LogoutRequest(0);
 }
 
@@ -1271,4 +1282,278 @@ void WorldSession::InitWarden(BigNumber* k, std::string const& os)
         // _warden = new WardenMac();
         // _warden->Init(this, k);
     }
+}
+
+bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) const
+{
+    uint32 maxPacketCounterAllowed = GetMaxPacketCounterAllowed(p.GetOpcode());
+
+    // Return true if there no limit for the opcode
+    if (!maxPacketCounterAllowed)
+        return true;
+
+    PacketCounter& packetCounter = _PacketThrottlingMap[p.GetOpcode()];
+    if (packetCounter.lastReceiveTime != time)
+    {
+        packetCounter.lastReceiveTime = time;
+        packetCounter.amountCounter = 0;
+    }
+
+    // Check if player is flooding some packets
+    if (++packetCounter.amountCounter <= maxPacketCounterAllowed)
+        return true;
+
+    sLog->outError("AntiDOS: Account %u, IP: %s, Ping: %u, Character: %s, flooding packet (opc: %s (0x%X), count: %u)",
+        +Session->GetAccountId(), Session->GetRemoteAddress().c_str(), Session->GetLatency(), Session->GetPlayerName().c_str(),
+        +opcodeTable[p.GetOpcode()].name, p.GetOpcode(), packetCounter.amountCounter);
+
+    switch (_policy)
+    {
+        case POLICY_LOG:
+            return true;
+        case POLICY_KICK:
+        {
+            sLog->outError("network: AntiDOS: Player kicked!");
+            Session->KickPlayer();
+            return false;
+        }
+        case POLICY_BAN:
+        {
+            BanMode bm = (BanMode)sWorld->getIntConfig(CONFIG_PACKET_SPOOF_BANMODE);
+            uint32 duration = sWorld->getIntConfig(CONFIG_PACKET_SPOOF_BANDURATION); // in seconds
+            std::string nameOrIp = "";
+            switch (bm)
+            {
+                case BAN_CHARACTER: // not supported, ban account
+                case BAN_ACCOUNT: (void)AccountMgr::GetName(Session->GetAccountId(), nameOrIp); break;
+                case BAN_IP: nameOrIp = Session->GetRemoteAddress(); break;
+            }
+            sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding/Spoofing", "Server: AutoDOS");
+            sLog->outError("AntiDOS: Player automatically banned for %u seconds.", duration);
+            Session->KickPlayer();
+            return false;
+        }
+        default: // invalid policy
+            return true;
+    }
+}
+
+uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) const
+{
+    uint32 maxPacketCounterAllowed;
+    switch (opcode)
+    {
+        // These opcodes are spammed by few addons so a very high limit is required
+        case CMSG_QUEST_QUERY:
+        case CMSG_MESSAGECHAT:
+        case CMSG_ITEM_QUERY_SINGLE:
+        case CMSG_ITEM_NAME_QUERY:
+        case CMSG_GAMEOBJECT_QUERY:
+        case CMSG_NAME_QUERY:
+        case CMSG_PET_NAME_QUERY:
+        case CMSG_CREATURE_QUERY:
+        case CMSG_NPC_TEXT_QUERY:
+        {
+            maxPacketCounterAllowed = 5000;
+            break;
+        }
+
+        case CMSG_ATTACKSTOP:
+        case CMSG_GUILD_QUERY:
+        case CMSG_ARENA_TEAM_QUERY:
+        case CMSG_TAXINODE_STATUS_QUERY:
+        case CMSG_TAXIQUERYAVAILABLENODES:
+        case CMSG_QUESTGIVER_QUERY_QUEST:
+        case CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY:
+        case CMSG_QUERY_QUESTS_COMPLETED:
+        case CMSG_QUEST_POI_QUERY:
+        case CMSG_QUERY_TIME:
+        case CMSG_PAGE_TEXT_QUERY:
+        case CMSG_PETITION_QUERY:
+        case CMSG_QUERY_INSPECT_ACHIEVEMENTS:
+        case CMSG_AREA_SPIRIT_HEALER_QUERY:
+        case CMSG_CORPSE_MAP_POSITION_QUERY:
+        case CMSG_MOVE_TIME_SKIPPED:
+        case CMSG_GUILD_BANK_QUERY_TAB:
+        case MSG_GUILD_BANK_LOG_QUERY:
+        case MSG_QUERY_GUILD_BANK_TEXT:
+        case MSG_CORPSE_QUERY:
+        case MSG_QUERY_NEXT_MAIL_TIME:
+        case MSG_GUILD_EVENT_LOG_QUERY:
+        case MSG_MOVE_SET_FACING:
+        case CMSG_INSPECT:
+        {
+            maxPacketCounterAllowed = 500;
+            break;
+        }
+
+        case CMSG_REQUEST_PARTY_MEMBER_STATS:
+        case CMSG_WHO:
+        case CMSG_SETSHEATHED:
+        case CMSG_CONTACT_LIST:
+        case CMSG_GUILD_SET_PUBLIC_NOTE:
+        case CMSG_GUILD_SET_OFFICER_NOTE:
+        {
+            maxPacketCounterAllowed = 50;
+            break;
+        }
+
+        case CMSG_SPELLCLICK:
+        case CMSG_GAMEOBJ_USE:
+        case CMSG_GAMEOBJ_REPORT_USE:
+        case MSG_RAID_TARGET_UPDATE:
+        case CMSG_QUESTGIVER_COMPLETE_QUEST:
+        {
+            maxPacketCounterAllowed = 20;
+            break;
+        }
+
+        case CMSG_PLAYER_LOGOUT:
+        case CMSG_LOGOUT_REQUEST:
+        case CMSG_LOGOUT_CANCEL:
+        case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
+        case CMSG_REQUEST_VEHICLE_PREV_SEAT:
+        case CMSG_REQUEST_VEHICLE_NEXT_SEAT:
+        case CMSG_REQUEST_VEHICLE_SWITCH_SEAT:
+        case CMSG_TOGGLE_PVP:
+        case CMSG_ADD_FRIEND:
+        case CMSG_DEL_FRIEND:
+        case CMSG_SET_CONTACT_NOTES:
+        case CMSG_RESET_INSTANCES:
+        case CMSG_HEARTH_AND_RESURRECT:
+        case CMSG_CHAR_CREATE:
+        case CMSG_READY_FOR_ACCOUNT_DATA_TIMES:
+        case CMSG_CHAR_ENUM:
+        case CMSG_REALM_SPLIT:
+        case CMSG_CHAR_DELETE:
+        case CMSG_PLAYER_LOGIN:
+        case CMSG_PET_ABANDON:
+        case CMSG_PET_RENAME:
+        case CMSG_CHAR_RENAME:
+        case CMSG_CHAR_CUSTOMIZE:
+        case CMSG_CHAR_RACE_CHANGE:
+        case CMSG_CHAR_FACTION_CHANGE:
+        case CMSG_GMTICKET_CREATE:
+        case CMSG_GMTICKET_UPDATETEXT:
+        case CMSG_GMTICKET_DELETETICKET:
+        case CMSG_GMSURVEY_SUBMIT:
+        case CMSG_GM_REPORT_LAG:
+        case CMSG_BUG:
+        case CMSG_GMRESPONSE_RESOLVE:
+        case CMSG_ACTIVATETAXIEXPRESS:
+        case CMSG_ACTIVATETAXI:
+        case CMSG_SELF_RES:
+        case CMSG_INITIATE_TRADE:
+        case CMSG_BEGIN_TRADE:
+        case CMSG_UNLEARN_SKILL:
+        case CMSG_DISMISS_CONTROLLED_VEHICLE:
+        case CMSG_REQUEST_VEHICLE_EXIT:
+        case CMSG_LEARN_PREVIEW_TALENTS:
+        case CMSG_LEARN_PREVIEW_TALENTS_PET:
+        case CMSG_PLAYER_VEHICLE_ENTER:
+        case CMSG_CONTROLLER_EJECT_PASSENGER:
+        case CMSG_EQUIPMENT_SET_SAVE:
+        case CMSG_DELETEEQUIPMENT_SET:
+        case CMSG_REMOVE_GLYPH:
+        case CMSG_ALTER_APPEARANCE:
+        case CMSG_QUESTGIVER_ACCEPT_QUEST:
+        case CMSG_QUESTGIVER_CHOOSE_REWARD:
+        case CMSG_QUESTGIVER_REQUEST_REWARD:
+        case CMSG_QUESTGIVER_CANCEL:
+        case CMSG_QUESTLOG_REMOVE_QUEST:
+        case CMSG_QUEST_CONFIRM_ACCEPT:
+        case CMSG_DISMISS_CRITTER:
+        case CMSG_REPOP_REQUEST:
+        case CMSG_PETITION_BUY:
+        case CMSG_PETITION_SIGN:
+        case CMSG_TURN_IN_PETITION:
+        case CMSG_COMPLETE_CINEMATIC:
+        case CMSG_ITEM_REFUND:
+        case CMSG_SOCKET_GEMS:
+        case CMSG_WRAP_ITEM:
+        case CMSG_BUY_BANK_SLOT:
+        case CMSG_GROUP_ACCEPT:
+        case CMSG_GROUP_DECLINE:
+        case CMSG_GROUP_UNINVITE_GUID:
+        case CMSG_GROUP_UNINVITE:
+        case CMSG_GROUP_SET_LEADER:
+        case CMSG_GROUP_DISBAND:
+        case CMSG_GROUP_RAID_CONVERT:
+        case CMSG_GROUP_CHANGE_SUB_GROUP:
+        case CMSG_GROUP_ASSISTANT_LEADER:
+        case CMSG_OPT_OUT_OF_LOOT:
+        case CMSG_BATTLEMASTER_JOIN_ARENA:
+        case CMSG_LEAVE_BATTLEFIELD:
+        case CMSG_REPORT_PVP_AFK:
+        case CMSG_DUEL_ACCEPTED:
+        case CMSG_DUEL_CANCELLED:
+        case CMSG_CALENDAR_GET_CALENDAR:
+        case CMSG_CALENDAR_ADD_EVENT:
+        case CMSG_CALENDAR_UPDATE_EVENT:
+        case CMSG_CALENDAR_REMOVE_EVENT:
+        case CMSG_CALENDAR_COPY_EVENT:
+        case CMSG_CALENDAR_EVENT_INVITE:
+        case CMSG_CALENDAR_EVENT_SIGNUP:
+        case CMSG_CALENDAR_EVENT_RSVP:
+        case CMSG_CALENDAR_EVENT_REMOVE_INVITE:
+        case CMSG_CALENDAR_EVENT_MODERATOR_STATUS:
+        case CMSG_CALENDAR_COMPLAIN:
+        case CMSG_ARENA_TEAM_INVITE:
+        case CMSG_ARENA_TEAM_ACCEPT:
+        case CMSG_ARENA_TEAM_DECLINE:
+        case CMSG_ARENA_TEAM_LEAVE:
+        case CMSG_ARENA_TEAM_DISBAND:
+        case CMSG_ARENA_TEAM_REMOVE:
+        case CMSG_ARENA_TEAM_LEADER:
+        case CMSG_LOOT_METHOD:
+        case CMSG_GUILD_INVITE:
+        case CMSG_GUILD_ACCEPT:
+        case CMSG_GUILD_DECLINE:
+        case CMSG_GUILD_LEAVE:
+        case CMSG_GUILD_DISBAND:
+        case CMSG_GUILD_LEADER:
+        case CMSG_GUILD_MOTD:
+        case CMSG_GUILD_RANK:
+        case CMSG_GUILD_ADD_RANK:
+        case CMSG_GUILD_DEL_RANK:
+        case CMSG_GUILD_INFO_TEXT:
+        case CMSG_GUILD_BANK_DEPOSIT_MONEY:
+        case CMSG_GUILD_BANK_WITHDRAW_MONEY:
+        case CMSG_GUILD_BANK_BUY_TAB:
+        case CMSG_GUILD_BANK_UPDATE_TAB:
+        case CMSG_SET_GUILD_BANK_TEXT:
+        case MSG_SAVE_GUILD_EMBLEM:
+        case MSG_PETITION_RENAME:
+        case MSG_PETITION_DECLINE:
+        case MSG_TALENT_WIPE_CONFIRM:
+        case MSG_SET_DUNGEON_DIFFICULTY:
+        case MSG_SET_RAID_DIFFICULTY:
+        case MSG_RANDOM_ROLL:
+        case MSG_PARTY_ASSIGNMENT:
+        case MSG_RAID_READY_CHECK:
+        {
+            maxPacketCounterAllowed = 3;
+            break;
+        }
+
+        case CMSG_SET_ACTION_BUTTON:
+        {
+            maxPacketCounterAllowed = MAX_ACTION_BUTTONS;
+            break;
+        }
+
+        case CMSG_ITEM_REFUND_INFO:
+        {
+            maxPacketCounterAllowed = PLAYER_SLOTS_COUNT;
+            break;
+        }
+
+        default:
+        {
+            maxPacketCounterAllowed = 100;
+            break;
+        }
+    }
+
+    return maxPacketCounterAllowed;
 }
