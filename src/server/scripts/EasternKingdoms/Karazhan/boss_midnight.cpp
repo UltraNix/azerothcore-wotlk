@@ -120,6 +120,7 @@ public:
             if (Creature* midnight = ObjectAccessor::GetCreature(*me, _midnightGUID))
                 BossAI::_DespawnAtEvade(10, midnight);
 
+            summons.DespawnAll();
             me->DespawnOrUnsummon();
         }
 
