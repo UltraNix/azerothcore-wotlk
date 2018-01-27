@@ -386,22 +386,16 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
 
     m_inhabitType = InhabitTypeValues(cinfo->InhabitType);
 
-    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
+    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_SERVER_LAUNCH) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
     {
-        ContentLevels content = GetContentLevelsForMapAndZone(GetMapId(), GetZoneId(true));
-        switch (content)
-        {
-            case CONTENT_1_60:
-                m_respawnRate = 0.25f;
-                break;
-            case CONTENT_61_70:
-            case CONTENT_71_80:
-                m_respawnRate = 0.5f;
-                break;
-            default:
-                m_respawnRate = 1.0f;
-                break;
-        }
+        if (getLevel() <= 4)
+            m_respawnRate = 0.15f;
+        else if (getLevel() > 4 && getLevel() <= 20)
+            m_respawnRate = 0.25f;
+        else if (getLevel() > 20 && getLevel() <= 60)
+            m_respawnRate = 0.35f;
+        else
+            m_respawnRate = 0.5f;
     }
 
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
