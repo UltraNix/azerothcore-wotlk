@@ -138,6 +138,7 @@ class Log
         void outRemote(const char * str, ...)                   ATTR_PRINTF(2, 3);
         void outSQLDriver(const char* str, ...)                 ATTR_PRINTF(2, 3);
         void outMisc(const char * str, ...)                     ATTR_PRINTF(2, 3); // pussywizard
+        void outBan(const char * str, ...)                      ATTR_PRINTF(2, 3); // sitowsky
         void outPremium(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitowsky
         void outLoot(const char * str, ...)                     ATTR_PRINTF(2, 3); // sitowsky
         void outRewards(const char * str, ...)                  ATTR_PRINTF(2, 3); // sitowsky
@@ -171,6 +172,7 @@ class Log
         FILE* sqlLogFile;
         FILE* sqlDevLogFile;
         FILE* miscLogFile;
+        FILE* banLogFile;
         FILE* premiumLogFile;
         FILE* lootLogFile;
         FILE* rewardsLogFile;

@@ -184,9 +184,24 @@ public:
         {
             case BAN_SUCCESS:
                 if (atoi(durationStr) > 0)
+                {
                     handler->PSendSysMessage(LANG_BAN_YOUBANNED, nameOrIP.c_str(), secsToTimeString(TimeStringToSecs(durationStr), true).c_str(), reasonStr);
+                }
                 else
                     handler->PSendSysMessage(LANG_BAN_YOUPERMBANNED, nameOrIP.c_str(), reasonStr);
+
+                switch (mode)
+                {
+                    case BAN_ACCOUNT:
+                        sLog->outBan("Game Master: [%s] has banned account: [%s] for %s with reason: %s", handler->GetSession()->GetPlayerName().c_str(), nameOrIP.c_str(), secsToTimeString(TimeStringToSecs(durationStr), true).c_str(), reasonStr);
+                        break;
+                    case BAN_CHARACTER:
+                        sLog->outBan("Game Master: [%s] has banned character: [%s] for %s with reason: %s", handler->GetSession()->GetPlayerName().c_str(), nameOrIP.c_str(), secsToTimeString(TimeStringToSecs(durationStr), true).c_str(), reasonStr);
+                        break;
+                    case BAN_IP:
+                        sLog->outBan("Game Master: [%s] has banned ip address: [%s] for %s with reason: %s", handler->GetSession()->GetPlayerName().c_str(), nameOrIP.c_str(), secsToTimeString(TimeStringToSecs(durationStr), true).c_str(), reasonStr);
+                        break;
+                }
                 break;
             case BAN_SYNTAX_ERROR:
                 return false;

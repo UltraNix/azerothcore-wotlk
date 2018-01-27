@@ -481,6 +481,8 @@ public:
                 sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "-1", "Gold selling.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
         }
 
+        sLog->outBan("Game Master: [%s] has banned player: [%s] for gold selling.", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+
         // pussywizard: notify all online GMs
         TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
@@ -522,6 +524,8 @@ public:
             if (AccountMgr::GetName(accountId, accountName))
                 sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "30d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
         }
+
+        sLog->outBan("Game Master: [%s] has banned player: [%s] for speed hack.", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
 
         // pussywizard: notify all online GMs
         TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
