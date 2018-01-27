@@ -491,3 +491,22 @@ UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_templa
 UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_template`.`entry` = 30061 AND `creature_loot_template`.`item` = 40752;
 
 UPDATE `gameobject_loot_template` SET `item` = '40752' WHERE `gameobject_loot_template`.`entry` = 25192 AND `gameobject_loot_template`.`item` = 40753;
+
+/* Piootrek additional changes */
+DELETE FROM disables WHERE sourceType = 2 AND entry IN(533, 615, 624);
+INSERT INTO disables(sourceType, entry, flags, comment) VALUES
+(2, 533, 3, 'Disable raid Naxxramas'),
+(2, 615, 3, 'Disable raid The Obsidan Sanctum'),
+(2, 624, 3, 'Disable raid Vault of Archavon');
+ 
+-- delete Nightmare Tear gem
+DELETE FROM npc_vendor WHERE item = 49112;
+ 
+-- delete ICC 5 man quest givers
+DELETE FROM creature WHERE id IN (37776, 37780);
+ 
+-- delete Frozo the Renowed
+DELETE FROM creature WHERE id = 40160;
+ 
+-- delete transmute epic gems
+DELETE FROM npc_trainer WHERE spell IN (66659,66663,66662,66660,66658,66664);
