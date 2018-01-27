@@ -1041,7 +1041,7 @@ class WorldSession
         uint32 recruiterId;
         bool isRecruiter;
 
-        typedef std::unordered_map<uint16, ShortIntervalTimer> OpcodesCooldown;
+        typedef UNORDERED_MAP<uint16, ShortIntervalTimer> OpcodesCooldown;
         OpcodesCooldown _opcodesCooldown;
 
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
