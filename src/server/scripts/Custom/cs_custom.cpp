@@ -462,6 +462,9 @@ public:
 
         uint32 accountId = target ? target->GetSession()->GetAccountId() : sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
 
+        if (target == handler->GetSession()->GetPlayer())
+            return false;
+
         if (target)
         {
             // check online security
@@ -505,6 +508,9 @@ public:
             return false;
 
         uint32 accountId = target ? target->GetSession()->GetAccountId() : sObjectMgr->GetPlayerAccountIdByGUID(targetGuid);
+
+        if (target == handler->GetSession()->GetPlayer())
+            return false;
 
         if (target)
         {
