@@ -686,7 +686,15 @@ void SmartAI::MoveInLineOfSight(Unit* who)
         return;
 
     if (me->CanStartAttack(who))
+    {
+        // Clear distracted state on combat
+        if (me->HasUnitState(UNIT_STATE_DISTRACTED))
+        {
+            me->ClearUnitState(UNIT_STATE_DISTRACTED);
+            me->GetMotionMaster()->Clear();
+        }
         AttackStart(who);
+    }
 }
 
 bool SmartAI::CanAIAttack(const Unit* /*who*/) const
