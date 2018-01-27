@@ -45,7 +45,7 @@ public:
             { "pvpinfo",            SEC_PLAYER,             false, HandlePvPInfoCommand,                "" },
             { "dodge",              SEC_PLAYER,             false, HandleDodgeModeCommand,              "" },
             { "hasblizzlike",       SEC_MODERATOR,          false, HandleHasBlizzlikeCommand,           "" },
-            { "chinaban",           SEC_MODERATOR,          false, &HandleChinaBanCommand,              "" },
+            { "goldban",            SEC_MODERATOR,          false, &HandleGoldBanCommand,               "" },
             { "speedban",           SEC_MODERATOR,          false, &HandleSpeedBanCommand,              "" },
             { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" }
         };
@@ -449,8 +449,8 @@ public:
         return true;
     }
 
-    // ChinaBan!
-    static bool HandleChinaBanCommand(ChatHandler* handler, char const* args)
+    // GoldBan!
+    static bool HandleGoldBanCommand(ChatHandler* handler, char const* args)
     {
         Player* target;
         uint64 targetGuid;
