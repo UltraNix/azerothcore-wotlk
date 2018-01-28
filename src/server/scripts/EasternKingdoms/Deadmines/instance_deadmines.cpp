@@ -5,6 +5,7 @@ REWRITTEN BY XINEF
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "deadmines.h"
+#include "GameObjectAI.h"
 
 class instance_deadmines : public InstanceMapScript
 {
@@ -20,21 +21,48 @@ class instance_deadmines : public InstanceMapScript
             void Initialize()
             {
                 memset(&_encounters, 0, sizeof(_encounters));
+                _factoryDoors = 0;
+                _factoryDoorLever = 0;
             }
 
             void OnGameObjectCreate(GameObject* gameobject)
             {
                 switch (gameobject->GetEntry())
                 {
-                    case GO_FACTORY_DOOR:
-                        if (_encounters[TYPE_RHAHK_ZOR] == DONE)
-                            HandleGameObject(0, true, gameobject);
-                        break;
                     case GO_IRON_CLAD_DOOR:
                         if (_encounters[TYPE_CANNON] == DONE)
                             HandleGameObject(0, true, gameobject);
                         break;
+                    case GO_DOOR_LEVE_FIRST_BOSS:
+                        _factoryDoorLever = gameobject->GetGUID();
+                        break;
+                    case GO_FACTORY_DOOR:
+                        _factoryDoors = gameobject->GetGUID();
+                        if (_encounters[TYPE_RHAHK_ZOR] == DONE)
+                        {
+                            HandleGameObject(0, true, gameobject);
+
+                            if (GameObject* lever = instance->GetGameObject(_factoryDoorLever))
+                                lever->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                        }
+                        break;
                 }
+            }
+
+            uint64 GetData64(uint32 data) const override
+            {
+                switch (data)
+                {
+                    case GO_FACTORY_DOOR:
+                        return _factoryDoors;
+                }
+
+                return 0;
+            }
+
+            void OnUnitDeath(Unit* who) override
+            {
+
             }
 
             void SetData(uint32 type, uint32 data)
@@ -42,6 +70,10 @@ class instance_deadmines : public InstanceMapScript
                 switch (type)
                 {
                     case TYPE_RHAHK_ZOR:
+                        if (GameObject* lever = instance->GetGameObject(_factoryDoorLever))
+                            lever->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                        _encounters[type] = data;
+                        break;
                     case TYPE_CANNON:
                         _encounters[type] = data;
                         break;
@@ -79,6 +111,8 @@ class instance_deadmines : public InstanceMapScript
 
         private:
             uint32 _encounters[MAX_ENCOUNTERS];
+            uint64 _factoryDoors;
+            uint64 _factoryDoorLever;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const
@@ -87,7 +121,33 @@ class instance_deadmines : public InstanceMapScript
         }
 };
 
+struct go_deadmines_lever_first_bossAI : public GameObjectAI
+{
+public:
+    go_deadmines_lever_first_bossAI(GameObject* go) : GameObjectAI(go) { }
+
+    void OnStateChanged(uint32 state, Unit* player) override
+    {
+        //GameObjectAI::OnStateChanged(state, player);
+
+        if (!player)
+            return;
+
+        if (InstanceScript* instance = player->GetInstanceScript())
+        {
+            if (GameObject* doors = ObjectAccessor::GetGameObject(*player, instance->GetData64(GO_FACTORY_DOOR)))
+            {
+                if (doors->GetGoState() == GO_STATE_ACTIVE)
+                    doors->SetGoState(GO_STATE_READY);
+                else
+                    doors->SetGoState(GO_STATE_ACTIVE);
+            }
+        }
+    }
+};
+
 void AddSC_instance_deadmines()
 {
     new instance_deadmines();
+    new GameObjectAILoader<go_deadmines_lever_first_bossAI>("go_deadmines_lever_first_boss");
 }
