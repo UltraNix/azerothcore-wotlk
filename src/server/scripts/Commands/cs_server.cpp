@@ -131,11 +131,6 @@ public:
 
         handler->PSendSysMessage("|cff76bae8Update Time Diff:|r |cff77a5c4%ums (avg. %ums)|r ", updateTime, avgUpdateTime);
 
-        char buff[20];
-        time_t now = sWorld->GetGameTime();
-        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-        handler->PSendSysMessage("|cff76bae8Realm Time:|r |cff77a5c4%s|r ", buff);
-
         //handler->PSendSysMessage("Connection peak: %u.", connPeak);
 
         if (handler->GetSession())
