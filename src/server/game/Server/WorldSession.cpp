@@ -1359,6 +1359,11 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
             maxPacketCounterAllowed = 5000;
             break;
         }
+        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:
+        {
+            maxPacketCounterAllowed = 1000;
+            break;
+        }
 
         case CMSG_ATTACKSTOP:
         case CMSG_GUILD_QUERY:
