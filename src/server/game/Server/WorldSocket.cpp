@@ -988,8 +988,17 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(recvPacket);
 
-    // LoginDatabase.EscapeString(lastLocalIp);
-    // LoginDatabase.PExecute("INSERT INTO account_history VALUES ('%u', '%s', '%s', '%s', NOW())", id, hostname.c_str(), address.c_str(), lastLocalIp.c_str());
+    // Sitowsky: Account History
+    if (sWorld->getBoolConfig(CONFIG_ACCOUNT_HISTORY))
+    {
+        LoginDatabase.EscapeString(lastLocalIp);
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_HISTORY);
+        stmt->setUInt32(0, id);
+        stmt->setString(1, hostname.c_str());
+        stmt->setString(2, address.c_str());
+        stmt->setString(3, lastLocalIp.c_str());
+        LoginDatabase.Execute(stmt);
+    }
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))

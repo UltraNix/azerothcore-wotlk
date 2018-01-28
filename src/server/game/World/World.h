@@ -180,6 +180,8 @@ enum WorldBoolConfigs
     CONFIG_BOSS_RECORDS_ANNOUNCES,            // Sitowsky: Enables or disables announcing boss records to the world if boss records are enabled.
     CONFIG_SPECIAL_ANGRATHAR,                 // Sitowsky: Enables or disables Special Angrathar core settings.
     CONFIG_CHINA_TOWN,                        // Sitowsky: Enables of disables special warnings of send messages by china gold sellers.
+    CONFIG_ACCOUNT_HISTORY,                   // Sitowsky: Every log of login on in-game account is saving to database.
+    CONFIG_MUTE_HISTORY,                      // Sitowsky: Every log of mute command is saving to database.
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -361,6 +363,9 @@ enum WorldIntConfigs
     CONFIG_WARDEN_CLIENT_BAN_DURATION,
     CONFIG_WARDEN_NUM_MEM_CHECKS,
     CONFIG_WARDEN_NUM_OTHER_CHECKS,
+    CONFIG_PACKET_SPOOF_POLICY,
+    CONFIG_PACKET_SPOOF_BANMODE,
+    CONFIG_PACKET_SPOOF_BANDURATION,
     CONFIG_BIRTHDAY_TIME,
     CONFIG_CURRENT_BUILD, // Maczuga
     CONFIG_EVENT_BONUS_MULTIPLER,
@@ -377,9 +382,6 @@ enum WorldIntConfigs
     CONFIG_HUNGER_GAMES_LIMIT,
     CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
     CONFIG_CHINA_TOWN_TIMER,
-    CONFIG_PACKET_SPOOF_POLICY,
-    CONFIG_PACKET_SPOOF_BANMODE,
-    CONFIG_PACKET_SPOOF_BANDURATION,
     INT_CONFIG_VALUE_COUNT
 };
 

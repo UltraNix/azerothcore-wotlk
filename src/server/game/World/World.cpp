@@ -1232,6 +1232,13 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WARDEN_CLIENT_FAIL_ACTION]    = sConfigMgr->GetIntDefault("Warden.ClientCheckFailAction", 0);
     m_int_configs[CONFIG_WARDEN_CLIENT_RESPONSE_DELAY] = sConfigMgr->GetIntDefault("Warden.ClientResponseDelay", 600);
 
+    // Packet spoof punishment
+    m_int_configs[CONFIG_PACKET_SPOOF_POLICY] = sConfigMgr->GetIntDefault("PacketSpoof.Policy", (uint32)WorldSession::DosProtection::Policy::POLICY_KICK);
+    m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] = sConfigMgr->GetIntDefault("PacketSpoof.BanMode", (uint32)BAN_ACCOUNT);
+    if (m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] == BAN_CHARACTER || m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] > BAN_IP)
+        m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] = BAN_ACCOUNT;
+    m_int_configs[CONFIG_PACKET_SPOOF_BANDURATION] = sConfigMgr->GetIntDefault("PacketSpoof.BanDuration", 86400);
+
     // Dungeon finder
     m_int_configs[CONFIG_LFG_OPTIONSMASK] = sConfigMgr->GetIntDefault("DungeonFinder.OptionsMask", 3);
 
@@ -1331,13 +1338,8 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_CHINA_TOWN] = sConfigMgr->GetBoolDefault("ChinaTown.Enable", false);
     m_int_configs[CONFIG_CHINA_TOWN_TIMER] = sConfigMgr->GetIntDefault("ChinaTown.Spam.Timer", 10);
 
-    //packet spoof punishment
-    m_int_configs[CONFIG_PACKET_SPOOF_POLICY] = sConfigMgr->GetIntDefault("PacketSpoof.Policy", (uint32)WorldSession::DosProtection::Policy::POLICY_KICK);
-    m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] = sConfigMgr->GetIntDefault("PacketSpoof.BanMode", (uint32)BAN_ACCOUNT);
-    if (m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] == BAN_CHARACTER || m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] > BAN_IP)
-        m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] = BAN_ACCOUNT;
-
-    m_int_configs[CONFIG_PACKET_SPOOF_BANDURATION] = sConfigMgr->GetIntDefault("PacketSpoof.BanDuration", 86400);
+    m_bool_configs[CONFIG_ACCOUNT_HISTORY] = sConfigMgr->GetBoolDefault("AccountHistory.Enable", false);
+    m_bool_configs[CONFIG_MUTE_HISTORY] = sConfigMgr->GetBoolDefault("MuteHistory.Enable", false);
 
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_1_4] = sConfigMgr->GetFloatDefault("DynamicRespawn.1.4", 0.15f);
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_5_20] = sConfigMgr->GetFloatDefault("DynamicRespawn.5.20", 0.25f);

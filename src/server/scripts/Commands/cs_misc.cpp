@@ -2198,8 +2198,17 @@ public:
         std::string nameLink = handler->playerLink(targetName);
 
         // Sitowsky: Mute History
-        LoginDatabase.PExecute("REPLACE INTO account_mute_history VALUES ('%u', '%s', '%s', '%s', '%u', NOW())", accountId, targetName.c_str(), muteReasonStr.c_str(), muteBy.c_str(), notSpeakTime);
-        
+        if (sWorld->getBoolConfig(CONFIG_MUTE_HISTORY))
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_MUTE_HISTORY);
+            stmt->setUInt32(0, accountId);
+            stmt->setString(1, targetName.c_str());
+            stmt->setString(2, muteReasonStr.c_str());
+            stmt->setString(3, muteBy.c_str());
+            stmt->setUInt32(4, notSpeakTime);
+            LoginDatabase.Execute(stmt);
+        }
+
         // pussywizard: notify all online GMs
         TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
