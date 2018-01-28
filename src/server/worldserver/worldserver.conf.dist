@@ -3492,6 +3492,35 @@ PacketSpoof.BanMode = 0
 
 PacketSpoof.BanDuration = 86400
 
+#	DynamicRespawn.1.4
+#		Description: Respawn rate for creatures between 1 and 4 level
+#		Default: 0.15
+#
+
+DynamicRespawn.1.4 = 0.15
+
+#	DynamicRespawn.5.20
+#		Description: Respawn rate for creatures between 5 and 20 level
+#		Default: 0.25
+#
+
+DynamicRespawn.5.20 = 0.25
+
+#	DynamicRespawn.21.60
+#		Description: Respawn rate for creatures between 21 and 60 level
+#		Default: 0.35
+#
+
+DynamicRespawn.21.60 = 0.35
+
+#	DynamicRespawn.61.80
+#		Description: Respawn rate for creatures between 61 and 80 level
+#		Default: 0.65
+#
+
+DynamicRespawn.61.80 = 0.65
+
+
 #
 ###################################################################################################
 

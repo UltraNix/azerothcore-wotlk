@@ -389,13 +389,13 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
     if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
     {
         if (getLevel() <= 4)
-            m_respawnRate = 0.15f;
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_1_4);
         else if (getLevel() > 4 && getLevel() <= 20)
-            m_respawnRate = 0.35f;
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_5_20);
         else if (getLevel() > 20 && getLevel() <= 60)
-            m_respawnRate = 0.45f;
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_21_60);
         else
-            m_respawnRate = 0.65f;
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_61_80);
     }
 
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH

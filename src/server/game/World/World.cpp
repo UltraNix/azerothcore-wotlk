@@ -1339,6 +1339,11 @@ void World::LoadConfigSettings(bool reload)
 
     m_int_configs[CONFIG_PACKET_SPOOF_BANDURATION] = sConfigMgr->GetIntDefault("PacketSpoof.BanDuration", 86400);
 
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_1_4] = sConfigMgr->GetFloatDefault("DynamicRespawn.1.4", 0.15f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_5_20] = sConfigMgr->GetFloatDefault("DynamicRespawn.5.20", 0.25f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_21_60] = sConfigMgr->GetFloatDefault("DynamicRespawn.21.60", 0.35f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_61_80] = sConfigMgr->GetFloatDefault("DynamicRespawn.61.80", 0.65f);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
