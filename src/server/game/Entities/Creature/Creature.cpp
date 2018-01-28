@@ -386,18 +386,6 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
 
     m_inhabitType = InhabitTypeValues(cinfo->InhabitType);
 
-    if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
-    {
-        if (getLevel() <= 4)
-            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_1_4);
-        else if (getLevel() > 4 && getLevel() <= 20)
-            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_5_20);
-        else if (getLevel() > 20 && getLevel() <= 60)
-            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_21_60);
-        else
-            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_61_80);
-    }
-
     // Will set UNIT_FIELD_BOUNDINGRADIUS and UNIT_FIELD_COMBATREACH
     SetObjectScale(cinfo->scale);
 
@@ -1606,6 +1594,18 @@ void Creature::setDeathState(DeathState s, bool despawn)
 
     if (s == JUST_DIED)
     {
+        if (m_respawnDelay >= 60 && !IsDungeonBoss() && sWorld->getBoolConfig(CONFIG_LAUNCH_ANGRATHAR) && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
+        {
+            if (getLevel() <= 4)
+                m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_1_4);
+            else if (getLevel() > 4 && getLevel() <= 20)
+                m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_5_20);
+            else if (getLevel() > 20 && getLevel() <= 60)
+                m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_21_60);
+            else
+                m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_61_80);
+        }
+
         m_corpseRemoveTime = time(nullptr) + m_corpseDelay;
         m_respawnTime = time(nullptr) + static_cast<uint32>(m_respawnDelay * m_respawnRate) + m_corpseDelay;
 
