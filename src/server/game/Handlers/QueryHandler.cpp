@@ -147,12 +147,12 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket & recvData)
     }
     else
     {
-       sLog->outChinaTown( "WORLD: CMSG_CREATURE_QUERY - NO CREATURE INFO! (GUID: %u, ENTRY: %u)",
-            GUID_LOPART(guid), entry);
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_CREATURE_QUERY - NO CREATURE INFO! (GUID: %u, ENTRY: %u)",
+        //    GUID_LOPART(guid), entry);
         WorldPacket data(SMSG_CREATURE_QUERY_RESPONSE, 4);
         data << uint32(entry | 0x80000000);
         SendPacket(&data);
-       sLog->outChinaTown( "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
     }
 }
 
@@ -183,7 +183,7 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recvData)
                 ObjectMgr::GetLocaleString(gameObjectLocale->CastBarCaption, loc_idx, CastBarCaption);
             }
 
-       sLog->outChinaTown( "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name.c_str(), entry);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 150);
         data << uint32(entry);
         data << uint32(info->type);
@@ -198,22 +198,22 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket & recvData)
         for (uint32 i = 0; i < MAX_GAMEOBJECT_QUEST_ITEMS; ++i)
             data << uint32(info->questItems[i]);              // itemId[6], quest drop
         SendPacket(&data);
-       sLog->outChinaTown( "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
     else
     {
-       sLog->outChinaTown( "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
-            GUID_LOPART(guid), entry);
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (GUID: %u, ENTRY: %u)",
+        //    GUID_LOPART(guid), entry);
         WorldPacket data (SMSG_GAMEOBJECT_QUERY_RESPONSE, 4);
         data << uint32(entry | 0x80000000);
         SendPacket(&data);
-       sLog->outChinaTown( "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
 }
 
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recvData*/)
 {
-   sLog->outChinaTown( "WORLD: Received MSG_CORPSE_QUERY");
+    ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received MSG_CORPSE_QUERY");
 
     Corpse* corpse = GetPlayer()->GetCorpse();
 
@@ -268,7 +268,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recvData)
     uint64 guid;
 
     recvData >> textID;
-   sLog->outChinaTown( "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
+    ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
 
     recvData >> guid;
 
@@ -341,13 +341,13 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket & recvData)
 
     SendPacket(&data);
 
-   sLog->outChinaTown( "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
+    ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_NPC_TEXT_UPDATE");
 }
 
 /// Only _static_ data is sent in this packet !!!
 void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recvData)
 {
-   sLog->outChinaTown( "WORLD: Received CMSG_PAGE_TEXT_QUERY");
+    ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_PAGE_TEXT_QUERY");
 
     uint32 pageID;
     recvData >> pageID;
@@ -381,13 +381,13 @@ void WorldSession::HandlePageTextQueryOpcode(WorldPacket & recvData)
         }
         SendPacket(&data);
 
-       sLog->outChinaTown( "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE");
+        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE");
     }
 }
 
 void WorldSession::HandleCorpseMapPositionQuery(WorldPacket & recvData)
 {
-   sLog->outChinaTown( "WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY");
+    ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY");
 
     uint32 unk;
     recvData >> unk;
