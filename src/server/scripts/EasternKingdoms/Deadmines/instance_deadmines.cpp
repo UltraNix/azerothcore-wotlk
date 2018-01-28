@@ -60,11 +60,6 @@ class instance_deadmines : public InstanceMapScript
                 return 0;
             }
 
-            void OnUnitDeath(Unit* who) override
-            {
-
-            }
-
             void SetData(uint32 type, uint32 data)
             {
                 switch (type)
