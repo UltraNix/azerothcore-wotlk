@@ -3182,6 +3182,12 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
     Unit* target = aurApp->GetTarget();
 
     target->UpdateSpeed(MOVE_RUN, true);
+
+    if (Player* player = target->ToPlayer())
+    {
+        if (Pet* pet = player->GetPet())
+            pet->UpdateSpeed(MOVE_RUN, true);
+    }
 }
 
 void AuraEffect::HandleAuraModIncreaseMountedSpeed(AuraApplication const* aurApp, uint8 mode, bool apply) const
