@@ -1135,6 +1135,7 @@ enum TrinityStrings
     LANG_ARENA_3V3_ANNOUNCE                 = 10503,
     LANG_ARENA_5V5_ANNOUNCE                 = 10504,
     LANG_EVENT_WINNER                       = 10505,
+    LANG_POSSIBLE_GOLD_SELLER               = 10506
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
