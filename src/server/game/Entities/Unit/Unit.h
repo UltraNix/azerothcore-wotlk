@@ -253,7 +253,7 @@ enum UnitRename
 #define MAX_SPELL_POSSESS       8
 #define MAX_SPELL_CONTROL_BAR   10
 
-#define MAX_AGGRO_RADIUS 45.0f  // yards
+#define MAX_AGGRO_RADIUS 30.0f  // yards
 
 enum VictimState
 {
