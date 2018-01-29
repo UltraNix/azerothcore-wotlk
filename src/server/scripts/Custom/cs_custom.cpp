@@ -261,7 +261,7 @@ public:
 
         if (!result)
         {
-            handler->PSendSysMessage("Wrong guid, player doesn't exists in database.");
+            handler->PSendSysMessage("|cFFFFD700Wrong guid, player doesn't exists in database.|r");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -271,7 +271,7 @@ public:
         stmt->setUInt32(1, ninjaGuid);
         CharacterDatabase.Execute(stmt);
 
-        handler->PSendSysMessage("Success! Player with GUID: %u has been added to ninja looter list.", ninjaGuid);
+        handler->PSendSysMessage("|cFFFFD700Success! Player with GUID: |cff00ccff%u|cFFFFD700 has been added to ninja looter list.|r", ninjaGuid);
 
         return true;
     }
@@ -302,7 +302,7 @@ public:
 
         if (!result)
         {
-            handler->PSendSysMessage("Wrong guid, player doesn't exists in database.");
+            handler->PSendSysMessage("|cFFFFD700Wrong guid, player doesn't exists in database.|r");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -312,7 +312,7 @@ public:
         stmt->setUInt32(1, ninjaGuid);
         CharacterDatabase.Execute(stmt);
 
-        handler->PSendSysMessage("Success! Player with GUID: %u has been removed from ninja looter list.", ninjaGuid);
+        handler->PSendSysMessage("|cFFFFD700Success! Player with GUID: |cff00ccff%u |cFFFFD700has been removed from ninja looter list.|r", ninjaGuid);
 
         return true;
     }
@@ -329,7 +329,7 @@ public:
 
         if (!result)
         {
-            handler->PSendSysMessage("There are no ninja looters on the list. Sounds good, isn't it?");
+            handler->PSendSysMessage("|cFFFFD700There are no ninja looters on the list. Sounds good, isn't it?|r");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -339,7 +339,7 @@ public:
             {
                 Field *fields = result->Fetch();
                 std::string name = fields[0].GetString();
-                handler->PSendSysMessage("Warning! Player: %s at ninja looter list!", name.c_str());
+                handler->PSendSysMessage("|cFFFFD700Warning! Player: |cff00ccff%s |cFFFFD700at ninja looter list!|r", name.c_str());
 
             } while (result->NextRow());
         }
@@ -364,13 +364,13 @@ public:
         if (!player->BlizzlikeMode())
         {
             player->SetBlizzlikeMode(true);
-            handler->PSendSysMessage("|cff77a5c4Your experience rate has been changed to blizzlike (x1). You have to relog for the change to apply.|r");
+            handler->PSendSysMessage("|cFFFFD700Your experience rate has been changed to blizzlike (x1). You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetBlizzlikeMode(false);
-            handler->PSendSysMessage("|cff77a5c4Your experience rate has been changed to default. You have to relog for the change to apply.|r");
+            handler->PSendSysMessage("|cFFFFD700Your experience rate has been changed to default. You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
 
@@ -387,13 +387,13 @@ public:
         if (!player->PvPAnnounces())
         {
             player->SetPvPAnnounces(true);
-            handler->PSendSysMessage("|cff77a5c4PvP announcements are |cff06e015enabled|cff77a5c4. You have to relog for the change to apply.|r");
+            handler->PSendSysMessage("|cFFFFD700PvP announcements are |cff06e015enabled|cFFFFD700. You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetPvPAnnounces(false);
-            handler->PSendSysMessage("|cff77a5c4PvP announcements are |cffff0000disabled|cff77a5c4. You have to relog for the change to apply.|r");
+            handler->PSendSysMessage("|cFFFFD700PvP announcements are |cffff0000disabled|cFFFFD700. You have to relog for the change to apply.|r");
             handler->SetSentErrorMessage(true);
         }
 
@@ -409,7 +409,7 @@ public:
 
         if (player->GetMaxPersonalArenaRatingRequirement(0) < 2000)
         {
-            handler->PSendSysMessage("|cff77a5c42000 Personal Rating is required to use this command.|r");
+            handler->PSendSysMessage("|cff00ccff2000|cFFFFD700 Personal Rating is required to use this command.|r");
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -417,13 +417,13 @@ public:
         if (!player->IsInDodgeMode())
         {
             player->SetDodgeMode(true);
-            handler->PSendSysMessage("|cff77a5c4Dodge mode has been |cff06e015enabled|cff77a5c4, display of your location is disabled.|r");
+            handler->PSendSysMessage("|cFFFFD700Dodge mode has been |cff06e015enabled|cFFFFD700, display of your location is disabled.|r");
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetDodgeMode(false);
-            handler->PSendSysMessage("|cff77a5c4Dodge mode has been |cffff0000disabled|cff77a5c4, display of your location is enabled.|r");
+            handler->PSendSysMessage("|cFFFFD700Dodge mode has been |cffff0000disabled|cFFFFD700, display of your location is enabled.|r");
             handler->SetSentErrorMessage(true);
         }
 
@@ -442,9 +442,9 @@ public:
         }
 
         if (player->BlizzlikeMode())
-            handler->PSendSysMessage("Player %s has |cff00ff00enabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
+            handler->PSendSysMessage("|cFFFFD700Player %s has |cff00ff00enabled|cFFFFD700 Blizzlike Mode.", player->GetName().c_str());
         else
-            handler->PSendSysMessage("Player %s has |cffff0000disabled|cffffff00 Blizzlike Mode.", player->GetName().c_str());
+            handler->PSendSysMessage("|cFFFFD700Player %s has |cffff0000disabled|cFFFFD700 Blizzlike Mode.", player->GetName().c_str());
 
         return true;
     }
@@ -491,7 +491,7 @@ public:
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
         for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
             if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage("Game Master: [%s] has banned player: [%s] for gold selling.", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+                ChatHandler(itr->second->GetSession()).PSendSysMessage("|cFFFFD700Game Master: [|cff00ccff%s|cFFFFD700] has banned player: [|cff00ccf%s|cFFFFD700] for gold selling.|r", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
 
         return true;
     }
@@ -538,7 +538,7 @@ public:
         HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
         for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
             if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage("Game Master: [%s] has banned player: [%s] for speed hack.", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+                ChatHandler(itr->second->GetSession()).PSendSysMessage("|cFFFFD700Game Master: [|cff00ccff%s|cFFFFD700] has banned player: [|cff00ccf%s|cFFFFD700] for speed hack.|r", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
 
         return true;
     }

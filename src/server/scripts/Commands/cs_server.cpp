@@ -79,7 +79,6 @@ public:
             { "idleshutdown",   SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverIdleShutdownCommandTable },
             { "info",           SEC_PLAYER,         true,  &HandleServerInfoCommand,                "" },
             { "underground",    SEC_ADMINISTRATOR,  true,  &HandleServerUnderGroundCommand,         "" },
-            { "motd",           SEC_PLAYER,         true,  &HandleServerMotdCommand,                "" },
             { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverRestartCommandTable },
             { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverShutdownCommandTable },
             { "set",            SEC_ADMINISTRATOR,  true,  NULL,                                    "", serverSetCommandTable },
@@ -119,32 +118,38 @@ public:
             activeSessionCount = (activeSessionCount + (activeSessionCount * boostPercentage));
             playerCount = (playerCount + (playerCount * boostPercentage));
         }
+
         if (revision != 0)
-            handler->PSendSysMessage("|cff76bae8Sunwell.pl - %s|r |cff77a5c4revision %u (%s)|r", sWorld->GetRealmName().c_str(), revision, _HASH);
+            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cff00ccff%s|cFFFFD700) - Rev: |cff00ccff%u|cFFFFD700 (|cff00ccff%s|cFFFFD700)|r", sWorld->GetRealmName().c_str(), revision, _HASH);
         else
-            handler->PSendSysMessage("|cff76bae8Sunwell.pl - %s|r |cff77a5c4revision %s|r", sWorld->GetRealmName().c_str(), _HASH);
+            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cff00ccff%s|cFFFFD700) - Rev: |cff00ccff%s", sWorld->GetRealmName().c_str(), _HASH);
 
-        handler->PSendSysMessage("|cff76bae8Connected Players:|r |cff77a5c4%u|r ", activeSessionCount);
-        handler->PSendSysMessage("|cff76bae8In-Game Players:|r |cff77a5c4%u|r", playerCount);
-        if (queuedSessionCount)
-            handler->PSendSysMessage("|cff76bae8Players in queue:|r |cff77a5c4%u|r", queuedSessionCount);
-
-        handler->PSendSysMessage("|cff76bae8Update Time Diff:|r |cff77a5c4%ums (avg. %ums)|r ", updateTime, avgUpdateTime);
+        if (!queuedSessionCount)
+            handler->PSendSysMessage("|cFFFFD700Connected players: |cff00ccff%u |cFFFFD700Characters in world: |cff00ccff%u|r", activeSessionCount, playerCount);
+        else
+            handler->PSendSysMessage("|cFFFFD700Connected players: |cff00ccff%u |cFFFFD700Characters in world: |cff00ccff%u |cFFFFD700Queue: |cff00ccff%u|r", activeSessionCount, playerCount, queuedSessionCount);
 
         //handler->PSendSysMessage("Connection peak: %u.", connPeak);
+        handler->PSendSysMessage("|cFFFFD700Server uptime: |cff00ccff%s|r", uptime.c_str());
+
+        char buff[20];
+        time_t now = sWorld->GetGameTime();
+        strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+        handler->PSendSysMessage("|cFFFFD700Server time: |cff00ccff%s|r", buff);
+
+        handler->PSendSysMessage("|cFFFFD700Update time diff: |cff00ccff%ums |cFFFFD700average: |cff00ccff%ums|r", updateTime, avgUpdateTime);
 
         if (handler->GetSession())
             if (Player* p = handler->GetSession()->GetPlayer())
                 if (p->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
-                    handler->PSendSysMessage("DEV wavg: %ums, nsmax: %ums, nsavg: %ums. LFG avg: %ums, max: %ums.", avgDiffTracker.getTimeWeightedAverage(), devDiffTracker.getMax(), devDiffTracker.getAverage(), lfgDiffTracker.getAverage(), lfgDiffTracker.getMax());
+                    handler->PSendSysMessage("|cFFFFD700DEV wavg: |cff00ccff%ums|cFFFFD700 nsmax: |cff00ccff%ums|cFFFFD700 nsavg: |cff00ccff%ums |cFFFFD700LFG avg: |cff00ccff%ums|cFFFFD700 max: |cff00ccff%ums|cFFFFD700|r", avgDiffTracker.getTimeWeightedAverage(), devDiffTracker.getMax(), devDiffTracker.getAverage(), lfgDiffTracker.getAverage(), lfgDiffTracker.getMax());
 
         //! Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
         {
             handler->PSendSysMessage("");
-            handler->PSendSysMessage("|cff76bae8[WARNING] Server will %s in: |cff77a5c4%s|r", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
-            handler->PSendSysMessage("|cff76bae8Reason: |cff77a5c4%s.|r", sWorld->GetShutdownReason());
-
+            handler->PSendSysMessage("|cFFFFD700[WARNING] Server will |cff00ccff%s|cFFFFD700 in: |cff00ccff%s|r", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
+            handler->PSendSysMessage("|cFFFFD700Reason: |cff00ccff%s|cFFFFD700.|r", sWorld->GetShutdownReason());
         }
 
         return true;
