@@ -1360,6 +1360,8 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
             break;
         }
         case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:
+        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:
+        case CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK:
         {
             maxPacketCounterAllowed = 1000;
             break;
@@ -1389,6 +1391,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case MSG_GUILD_EVENT_LOG_QUERY:
         case MSG_MOVE_SET_FACING:
         case CMSG_INSPECT:
+        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:
         {
             maxPacketCounterAllowed = 500;
             break;
@@ -1415,6 +1418,14 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
             break;
         }
 
+        case CMSG_QUESTGIVER_CHOOSE_REWARD:
+        case CMSG_ADD_FRIEND:
+        case CMSG_GUILD_INVITE:
+        {
+            maxPacketCounterAllowed = 8;
+            break;
+        }
+
         case CMSG_PLAYER_LOGOUT:
         case CMSG_LOGOUT_REQUEST:
         case CMSG_LOGOUT_CANCEL:
@@ -1423,7 +1434,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_REQUEST_VEHICLE_NEXT_SEAT:
         case CMSG_REQUEST_VEHICLE_SWITCH_SEAT:
         case CMSG_TOGGLE_PVP:
-        case CMSG_ADD_FRIEND:
         case CMSG_DEL_FRIEND:
         case CMSG_SET_CONTACT_NOTES:
         case CMSG_RESET_INSTANCES:
@@ -1464,7 +1474,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_REMOVE_GLYPH:
         case CMSG_ALTER_APPEARANCE:
         case CMSG_QUESTGIVER_ACCEPT_QUEST:
-        case CMSG_QUESTGIVER_CHOOSE_REWARD:
         case CMSG_QUESTGIVER_REQUEST_REWARD:
         case CMSG_QUESTGIVER_CANCEL:
         case CMSG_QUESTLOG_REMOVE_QUEST:
@@ -1513,7 +1522,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_ARENA_TEAM_REMOVE:
         case CMSG_ARENA_TEAM_LEADER:
         case CMSG_LOOT_METHOD:
-        case CMSG_GUILD_INVITE:
         case CMSG_GUILD_ACCEPT:
         case CMSG_GUILD_DECLINE:
         case CMSG_GUILD_LEAVE:
