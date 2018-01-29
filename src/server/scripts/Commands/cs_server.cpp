@@ -120,36 +120,36 @@ public:
         }
 
         if (revision != 0)
-            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cff00ccff%s|cFFFFD700) - Rev: |cff00ccff%u|cFFFFD700 (|cff00ccff%s|cFFFFD700)|r", sWorld->GetRealmName().c_str(), revision, _HASH);
+            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cffff9933%s|cFFFFD700) - Rev: |cffff9933%u|cFFFFD700 (|cffff9933%s|cFFFFD700)|r", sWorld->GetRealmName().c_str(), revision, _HASH);
         else
-            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cff00ccff%s|cFFFFD700) - Rev: |cff00ccff%s", sWorld->GetRealmName().c_str(), _HASH);
+            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cffff9933%s|cFFFFD700) - Rev: |cffff9933%s", sWorld->GetRealmName().c_str(), _HASH);
 
         if (!queuedSessionCount)
-            handler->PSendSysMessage("|cFFFFD700Connected players: |cff00ccff%u |cFFFFD700Characters in world: |cff00ccff%u|r", activeSessionCount, playerCount);
+            handler->PSendSysMessage("|cFFFFD700Connected players: |cffff9933%u |cFFFFD700Characters in world: |cffff9933%u|r", activeSessionCount, playerCount);
         else
-            handler->PSendSysMessage("|cFFFFD700Connected players: |cff00ccff%u |cFFFFD700Characters in world: |cff00ccff%u |cFFFFD700Queue: |cff00ccff%u|r", activeSessionCount, playerCount, queuedSessionCount);
+            handler->PSendSysMessage("|cFFFFD700Connected players: |cffff9933%u |cFFFFD700Characters in world: |cffff9933%u |cFFFFD700Queue: |cffff9933%u|r", activeSessionCount, playerCount, queuedSessionCount);
 
         //handler->PSendSysMessage("Connection peak: %u.", connPeak);
-        handler->PSendSysMessage("|cFFFFD700Server uptime: |cff00ccff%s|r", uptime.c_str());
+        handler->PSendSysMessage("|cFFFFD700Server uptime: |cffff9933%s|r", uptime.c_str());
 
         char buff[20];
         time_t now = sWorld->GetGameTime();
         strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-        handler->PSendSysMessage("|cFFFFD700Server time: |cff00ccff%s|r", buff);
+        handler->PSendSysMessage("|cFFFFD700Server time: |cffff9933%s|r", buff);
 
-        handler->PSendSysMessage("|cFFFFD700Update time diff: |cff00ccff%ums |cFFFFD700average: |cff00ccff%ums|r", updateTime, avgUpdateTime);
+        handler->PSendSysMessage("|cFFFFD700Update time diff: |cffff9933%ums |cFFFFD700average: |cffff9933%ums|r", updateTime, avgUpdateTime);
 
         if (handler->GetSession())
             if (Player* p = handler->GetSession()->GetPlayer())
                 if (p->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
-                    handler->PSendSysMessage("|cFFFFD700DEV wavg: |cff00ccff%ums|cFFFFD700 nsmax: |cff00ccff%ums|cFFFFD700 nsavg: |cff00ccff%ums |cFFFFD700LFG avg: |cff00ccff%ums|cFFFFD700 max: |cff00ccff%ums|cFFFFD700|r", avgDiffTracker.getTimeWeightedAverage(), devDiffTracker.getMax(), devDiffTracker.getAverage(), lfgDiffTracker.getAverage(), lfgDiffTracker.getMax());
+                    handler->PSendSysMessage("|cFFFFD700DEV wavg: |cffff9933%ums|cFFFFD700 nsmax: |cffff9933%ums|cFFFFD700 nsavg: |cffff9933%ums |cFFFFD700LFG avg: |cffff9933%ums|cFFFFD700 max: |cffff9933%ums|cFFFFD700|r", avgDiffTracker.getTimeWeightedAverage(), devDiffTracker.getMax(), devDiffTracker.getAverage(), lfgDiffTracker.getAverage(), lfgDiffTracker.getMax());
 
         //! Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
         {
             handler->PSendSysMessage("");
-            handler->PSendSysMessage("|cFFFFD700[WARNING] Server will |cff00ccff%s|cFFFFD700 in: |cff00ccff%s|r", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
-            handler->PSendSysMessage("|cFFFFD700Reason: |cff00ccff%s|cFFFFD700.|r", sWorld->GetShutdownReason());
+            handler->PSendSysMessage("|cFFFFD700[WARNING] Server will |cffff9933%s|cFFFFD700 in: |cffff9933%s|r", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
+            handler->PSendSysMessage("|cFFFFD700Reason: |cffff9933%s|cFFFFD700.|r", sWorld->GetShutdownReason());
         }
 
         return true;
