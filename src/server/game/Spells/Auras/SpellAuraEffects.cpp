@@ -3181,6 +3181,10 @@ void AuraEffect::HandleAuraModIncreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
+    //! If aura is fear type aura, do not increase movement speed because people are crying, revert this later
+    if (aurApp->GetBase() && aurApp->GetBase()->GetSpellInfo() && aurApp->GetBase()->GetSpellInfo()->HasAura(SPELL_AURA_MOD_FEAR) && target->ToCreature())
+        return;
+
     target->UpdateSpeed(MOVE_RUN, true);
 
     if (Player* player = target->ToPlayer())
