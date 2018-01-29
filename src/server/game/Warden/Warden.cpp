@@ -182,7 +182,9 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
     else
         action = WardenActions(sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_FAIL_ACTION));
 
-    std::string banReason = "Anticheat violation";
+    std::string banReason    = "Anticheat violation";
+    std::string longDuration = "1209600s";
+
     bool longBan = false; // 14d = 1209600s
     if (checkFailed)
         switch (checkFailed)
@@ -229,9 +231,11 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
     switch (action)
     {
         case WARDEN_ACTION_LOG:
+            sLog->outCheat("[Warden] Player: %s (Account: %u) check failed: %u", _session->GetPlayerName().c_str(), _session->GetAccountId(), checkFailed);
             return "None";
             break;
         case WARDEN_ACTION_KICK:
+            sLog->outCheat("[Warden] Player: %s (Account: %u) has been kicked due to check failed: %u", _session->GetPlayerName().c_str(), _session->GetAccountId(), checkFailed);
             _session->KickPlayer();
             return "Kick";
             break;
@@ -241,7 +245,8 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
                 duration << sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_BAN_DURATION) << "s";
                 std::string accountName;
                 AccountMgr::GetName(_session->GetAccountId(), accountName);
-                sWorld->BanAccount(BAN_ACCOUNT, accountName, (longBan ? "1209600s" : duration.str()), banReason, "Server");
+                sLog->outCheat("[Warden] Player: %s (Account: %u) has been banned for %s due to check failed: %u", _session->GetPlayerName().c_str(), _session->GetAccountId(), (longBan ? longDuration.c_str() : duration.str()), checkFailed);
+                sWorld->BanAccount(BAN_ACCOUNT, accountName, (longBan ? longDuration.c_str() : duration.str()), banReason, "Server");
 
                 return "Ban";
             }
