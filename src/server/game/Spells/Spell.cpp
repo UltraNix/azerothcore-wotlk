@@ -4597,38 +4597,38 @@ void Spell::WriteAmmoToPacket(WorldPacket* data)
     }
     else
     {
-        for (uint8 i = 0; i < 3; ++i)
+        //! @Riztazz: Always look for ranged item slot, do not loop over all of them
+        //! @Riztazz: if unit has a dagger as main weapon (there are cases where mobs have dagger as ranged slot item)
+        if (uint32 itemId = m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2))
         {
-            if (uint32 item_id = m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i))
+            if (ItemEntry const* itemEntry = sItemStore.LookupEntry(itemId))
             {
-                if (ItemEntry const* itemEntry = sItemStore.LookupEntry(item_id))
+                if (itemEntry->Class == ITEM_CLASS_WEAPON)
                 {
-                    if (itemEntry->Class == ITEM_CLASS_WEAPON)
+                    switch (itemEntry->SubClass)
                     {
-                        switch (itemEntry->SubClass)
-                        {
-                            case ITEM_SUBCLASS_WEAPON_THROWN:
-                            case ITEM_SUBCLASS_WEAPON_DAGGER:
-                                ammoDisplayID = itemEntry->DisplayId;
-                                ammoInventoryType = itemEntry->InventoryType;
-                                break;
-                            case ITEM_SUBCLASS_WEAPON_BOW:
-                            case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-                                ammoDisplayID = 5996;       // is this need fixing?
-                                ammoInventoryType = INVTYPE_AMMO;
-                                break;
-                            case ITEM_SUBCLASS_WEAPON_GUN:
-                                ammoDisplayID = 5998;       // is this need fixing?
-                                ammoInventoryType = INVTYPE_AMMO;
-                                break;
-                        }
-
-                        if (ammoDisplayID)
+                        case ITEM_SUBCLASS_WEAPON_BOW:
+                        case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+                            ammoDisplayID = 5996;       // is this need fixing?
+                            ammoInventoryType = INVTYPE_AMMO;
+                            break;
+                        case ITEM_SUBCLASS_WEAPON_GUN:
+                            ammoDisplayID = 5998;       // is this need fixing?
+                            ammoInventoryType = INVTYPE_AMMO;
+                            break;
+                        case ITEM_SUBCLASS_WEAPON_THROWN:
+                        case ITEM_SUBCLASS_WEAPON_DAGGER:
+                            ammoDisplayID = itemEntry->DisplayId;
+                            ammoInventoryType = itemEntry->InventoryType;
                             break;
                     }
                 }
             }
+            else
+                sLog->outErrorDb("Unit (ID: %d) tried to use spell (SpellId: %d) with SPELL_ATTR0_REQ_AMMO but item in ranged item slot is invalid!", m_caster->GetEntry(), m_spellInfo->Id);
         }
+        else
+            sLog->outErrorDb("Unit (ID: %d) tried to use spell (SpellId: %d) with SPELL_ATTR0_REQ_AMMO but doesnt have item in ranged item slot!", m_caster->GetEntry(), m_spellInfo->Id);
     }
 
     *data << uint32(ammoDisplayID);
