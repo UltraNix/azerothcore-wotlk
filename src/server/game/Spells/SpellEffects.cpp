@@ -70,6 +70,7 @@
 #include "InstanceScript.h"
 #include "ReputationMgr.h"
 #include "Transport.h"
+#include "SunwellCheat.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -1878,16 +1879,9 @@ void Spell::EffectCreateItem(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    // !Sitowsky: Temporary new SunwellCheatMgr soon.
-    if (Player* cheater = m_caster->ToPlayer())
-    {
-        cheater->m_gold_cast_count++;
-        if (cheater->m_gold_cast_count == 1000 || cheater->m_gold_cast_count == 2000 || cheater->m_gold_cast_count == 3000 || cheater->m_gold_cast_count == 4000 || cheater->m_gold_cast_count == 5000)
-        {
-            sLog->outChinaTown("Possible gold cheater: %s (account Id: %u), casted spell: %u. Cast count: %u.", cheater->GetName().c_str(), cheater->GetSession()->GetAccountId(), m_spellInfo->Id, cheater->m_gold_cast_count);
-            sWorld->SendGMText(LANG_POSSIBLE_GOLD_CHEATER, m_caster->GetName().c_str(), m_spellInfo->Id, m_caster->ToPlayer()->m_gold_cast_count);
-        }
-    }
+    // @SunwellCheat
+    if (Player* plr = m_caster->ToPlayer())
+        sSunwellCheatMgr->buildCastReport(plr, m_spellInfo->Id);
 
     DoCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
     ExecuteLogEffectCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);

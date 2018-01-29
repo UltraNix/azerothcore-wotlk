@@ -153,6 +153,8 @@ enum WorldBoolConfigs
     CONFIG_QUEST_IGNORE_AUTO_ACCEPT,
     CONFIG_QUEST_IGNORE_AUTO_COMPLETE,
     CONFIG_WARDEN_ENABLED,
+    CONFIG_SUNWELL_CHEAT,                     // Sitowsky: Enables or disables SunwellCheat additional protection against cheaters.
+    CONFIG_SUNWELL_CHEAT_NOTIFY,              // Sitowsky: Enable notify in-game reports in Sunwell anticheat system.
     CONFIG_DUEL_MOD,                          // Sitowsky: Makes the players HP & Mana reset before each duel.
     CONFIG_DUEL_FULL_POWER,                   // Sitowsky: Makes the players HP & Mana reset before each duel.
     CONFIG_DUEL_CD_RESET,                     // Sitowsky: Makes the players arena cooldowns reset before each duel.
@@ -366,6 +368,12 @@ enum WorldIntConfigs
     CONFIG_PACKET_SPOOF_POLICY,
     CONFIG_PACKET_SPOOF_BANMODE,
     CONFIG_PACKET_SPOOF_BANDURATION,
+    CONFIG_SUNWELL_CHEAT_DURATION,
+    CONFIG_SUNWELL_CHEAT_CLEAN_TIMER,
+    CONFIG_SUNWELL_CHEAT_OPCODE_ACTION,
+    CONFIG_SUNWELL_CHEAT_OPCODE_LIMIT,
+    CONFIG_SUNWELL_CHEAT_CAST_LIMIT,
+    CONFIG_SUNWELL_CHEAT_CAST_ACTION,
     CONFIG_BIRTHDAY_TIME,
     CONFIG_CURRENT_BUILD, // Maczuga
     CONFIG_EVENT_BONUS_MULTIPLER,

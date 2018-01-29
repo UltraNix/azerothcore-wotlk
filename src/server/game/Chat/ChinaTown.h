@@ -19,8 +19,7 @@
 std::vector<std::string> chinaTags =
 {
     "€",
-    " usd",
-    " usd ",
+    "usd",
     " eur ",
     " usd!",
     " eur!",

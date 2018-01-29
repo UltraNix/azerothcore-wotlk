@@ -702,6 +702,23 @@ ReleaseDebugLogFile = ""
 ReleaseDebugLogTimestamp = 0
 
 #
+#    CheatLogFile
+#        Description: Log file for special debug operations
+#        Default:     "Cheat.log" - (Enabled)
+#                     ""           - (Disabled)
+
+CheatLogFile = "Cheat.log"
+
+#
+#    CheatLogFileTimestamp
+#        Description: Append timestamp to the special debug log file name.
+#                     Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+CheatLogFileLogTimestamp = 0
+
+#
 #    LogColors
 #        Description: Colors for log messages (Format: "normal basic detail debug").
 #        Colors:      0  - Black
@@ -1542,6 +1559,74 @@ PacketSpoof.BanMode = 0
 #
 
 PacketSpoof.BanDuration = 86400
+
+#
+###################################################################################################
+
+
+###################################################################################################
+# SUNWELL CHEAT SETTINGS
+#
+#    SunwellCheat.Enable
+#        Description: Enables or disables SunwellCheat additional protection against cheaters.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+SunwellCheat.Enable = 1
+
+#
+#    SunwellCheat.Notify
+#        Description: Enable notify in-game reports in Sunwell anticheat system.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+SunwellCheat.Notify = 1
+
+#
+#    SunwellCheat.Duration
+#        Description: Duration of the ban in seconds.
+#        Default:     86400 seconds (1 day)
+
+SunwellCheat.Duration = 86400
+
+#
+#    SunwellCheat.CleanReportsTimer
+#        Description: After this timer reports are cleanup and start generates new one.
+#        Default:     45 minutes
+
+SunwellCheat.CleanReportsTimer = 45
+
+#
+#    SunwellCheat.opCode.Action
+#        Description: Default action being taken if a check failed.
+#        Default:     0 - (Logging only + in-game notify)
+#                     1 - (Kick)
+#                     2 - (Ban)
+
+SunwellCheat.opCode.Action = 0
+
+#
+#    SunwellCheat.opCode.Limit
+#        Description: opCode packets limit after action is taken.
+#        Default:     100
+
+SunwellCheat.opCode.Limit = 100
+
+#
+#    SunwellCheat.Cast.Action
+#        Description: Default action being taken if a check failed.
+#        Default:     0 - (Logging only + in-game notify)
+#                     1 - (Kick)
+#                     2 - (Ban)
+
+SunwellCheat.Cast.Action = 0
+
+#
+#    SunwellCheat.Cast.Limit
+#        Description: Spell cast limit due to possible gold abuse.
+#        Default:     2000
+
+SunwellCheat.Cast.Limit = 2000
 
 #
 ###################################################################################################

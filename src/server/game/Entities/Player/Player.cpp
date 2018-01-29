@@ -85,6 +85,7 @@
 #include "GameObjectAI.h"
 #include "PoolMgr.h"
 #include "SavingSystem.h"
+#include "SunwellCheat.h"
 
 #define ZONE_UPDATE_INTERVAL (2*IN_MILLISECONDS)
 
@@ -932,7 +933,6 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_pendingSpectatorForBG = 0;
     m_pendingSpectatorInviteInstanceId = 0;
     m_unstuckCooldown = 0;
-    m_gold_cast_count = 0;
     m_charmUpdateTimer = 0;
 
     for( int i = 0; i < NUM_CAI_SPELLS; ++i )
@@ -1944,6 +1944,8 @@ void Player::Update(uint32 p_time)
     UpdateAutoAfkKick(now);
     // @ChinaTown
     UpdateChinaTownTimer(now);
+    // @SunwellCheat
+    sSunwellCheatMgr->cleanupReports(this);
 
     if (m_unstuckCooldown > p_time)
         m_unstuckCooldown -= p_time;

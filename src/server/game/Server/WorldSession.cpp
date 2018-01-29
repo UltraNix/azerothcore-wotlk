@@ -1305,7 +1305,7 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) co
     if (++packetCounter.amountCounter <= maxPacketCounterAllowed)
         return true;
 
-    sLog->outError("AntiDOS: Account %u, IP: %s, Ping: %u, Character: %s, flooding packet (opc: %s (0x%X), count: %u)",
+    sLog->outCheat("AntiDOS: Account %u, IP: %s, Ping: %u, Character: %s, flooding packet (opc: %s (0x%X), count: %u)",
                    Session->GetAccountId(), Session->GetRemoteAddress().c_str(), Session->GetLatency(), Session->GetPlayerName().c_str(),
                    opcodeTable[p.GetOpcode()].name, p.GetOpcode(), packetCounter.amountCounter);
 
@@ -1315,7 +1315,7 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) co
             return true;
         case POLICY_KICK:
         {
-            sLog->outError("network: AntiDOS: Player kicked!");
+            sLog->outCheat("network: AntiDOS: Player kicked!");
             Session->KickPlayer();
             return false;
         }
@@ -1331,7 +1331,7 @@ bool WorldSession::DosProtection::EvaluateOpcode(WorldPacket& p, time_t time) co
                 case BAN_IP: nameOrIp = Session->GetRemoteAddress(); break;
             }
             sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding/Spoofing", "Server: AutoDOS");
-            sLog->outError("AntiDOS: Player automatically banned for %u seconds.", duration);
+            sLog->outCheat("AntiDOS: Player automatically banned for %u seconds.", duration);
             Session->KickPlayer();
             return false;
         }

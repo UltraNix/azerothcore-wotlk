@@ -2652,9 +2652,6 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetUnstuckCooldown() const { return m_unstuckCooldown; }
         uint32 m_unstuckCooldown;
 
-        // gold hack check
-        uint32 m_gold_cast_count;
-
         bool CanSeeDKPet() const    { return m_ExtraFlags & PLAYER_EXTRA_SHOW_DK_PET; }
         void SetShowDKPet(bool on)    { if (on) m_ExtraFlags |= PLAYER_EXTRA_SHOW_DK_PET; else m_ExtraFlags &= ~PLAYER_EXTRA_SHOW_DK_PET; };
 
@@ -2830,9 +2827,9 @@ class Player : public Unit, public GridObject<Player>
         uint64 m_lootGuid;
 
         TeamId m_team;
-        uint32 m_nextSave; // pussywizard
-        uint16 m_additionalSaveTimer; // pussywizard
-        uint8 m_additionalSaveMask; // pussywizard
+        uint32 m_nextSave;                   // pussywizard
+        uint16 m_additionalSaveTimer;        // pussywizard
+        uint8 m_additionalSaveMask;          // pussywizard
         uint16 m_hostileReferenceCheckTimer; // pussywizard
         time_t m_speakTime;
         uint32 m_speakCount;

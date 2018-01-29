@@ -1239,6 +1239,16 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_PACKET_SPOOF_BANMODE] = BAN_ACCOUNT;
     m_int_configs[CONFIG_PACKET_SPOOF_BANDURATION] = sConfigMgr->GetIntDefault("PacketSpoof.BanDuration", 86400);
 
+    // @SunwellCheat
+    m_bool_configs[CONFIG_SUNWELL_CHEAT]              = sConfigMgr->GetBoolDefault("SunwellCheat.Enable", true);
+    m_bool_configs[CONFIG_SUNWELL_CHEAT_NOTIFY]       = sConfigMgr->GetBoolDefault("SunwellCheat.Notify", true);
+    m_int_configs[CONFIG_SUNWELL_CHEAT_DURATION]      = sConfigMgr->GetIntDefault("SunwellCheat.Duration", 86400);
+    m_int_configs[CONFIG_SUNWELL_CHEAT_CLEAN_TIMER]   = sConfigMgr->GetIntDefault("SunwellCheat.CleanReportsTimer", 45);
+    m_int_configs[CONFIG_SUNWELL_CHEAT_OPCODE_ACTION] = sConfigMgr->GetIntDefault("SunwellCheat.opCode.Action", 0);
+    m_int_configs[CONFIG_SUNWELL_CHEAT_OPCODE_LIMIT]  = sConfigMgr->GetIntDefault("SunwellCheat.opCode.Limit", 100);
+    m_int_configs[CONFIG_SUNWELL_CHEAT_CAST_ACTION]   = sConfigMgr->GetIntDefault("SunwellCheat.Cast.Action", 0);
+    m_int_configs[CONFIG_SUNWELL_CHEAT_CAST_LIMIT]    = sConfigMgr->GetIntDefault("SunwellCheat.Cast.Limit", 2000);
+
     // Dungeon finder
     m_int_configs[CONFIG_LFG_OPTIONSMASK] = sConfigMgr->GetIntDefault("DungeonFinder.OptionsMask", 3);
 

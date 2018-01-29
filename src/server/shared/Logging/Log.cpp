@@ -32,7 +32,7 @@ extern LoginDatabaseWorkerPool LoginDatabase;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL),
+    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL), cheatLogFile(NULL),
     m_gmlog_per_account(false), m_enableLogDB(false), m_colored(false)
 {
     Initialize();
@@ -95,6 +95,10 @@ Log::~Log()
     if (releaseDebugLogFile != NULL)
         fclose(releaseDebugLogFile);
     releaseDebugLogFile = NULL;
+
+    if (cheatLogFile != NULL)
+        fclose(cheatLogFile);
+    cheatLogFile = NULL;
 }
 
 void Log::SetLogLevel(char *Level)
@@ -182,6 +186,7 @@ void Log::Initialize()
     rewardsLogFile = openLogFile("RewardsLogFile", "RewardsLogTimestamp", "a");
     chinaTownLogFile = openLogFile("ChinaTownLogFile", "ChinaTownLogTimestamp", "a");
     releaseDebugLogFile = openLogFile("ReleaseDebugLogFile", "ReleaseDebugLogTimestamp", "a");
+    cheatLogFile = openLogFile("CheatLogFile", "CheatLogTimestamp", "a");
 
     // Main log file settings
     m_logLevel     = sConfigMgr->GetIntDefault("LogLevel", LOGL_NORMAL);
@@ -1175,6 +1180,33 @@ void Log::outReleaseDebug(const char * str, ...)
         vfprintf(releaseDebugLogFile, str, ap);
         fprintf(releaseDebugLogFile, "\n");
         fflush(releaseDebugLogFile);
+        va_end(ap);
+    }
+}
+
+void Log::outCheat(const char * str, ...)
+{
+    if (!str)
+        return;
+
+    if (m_enableLogDB)
+    {
+        va_list ap2;
+        va_start(ap2, str);
+        char nnew_str[MAX_QUERY_LEN];
+        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
+        outDB(LOG_TYPE_PERF, nnew_str);
+        va_end(ap2);
+    }
+
+    if (cheatLogFile)
+    {
+        outTimestamp(cheatLogFile);
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(cheatLogFile, str, ap);
+        fprintf(cheatLogFile, "\n");
+        fflush(cheatLogFile);
         va_end(ap);
     }
 }

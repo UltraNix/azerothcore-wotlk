@@ -48,13 +48,15 @@ Copied events should probably have a new owner
 #include "GuildMgr.h"
 #include "ArenaTeamMgr.h"
 #include "WorldSession.h"
+#include "SunwellCheat.h"
 
 void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
 {
     uint64 guid = _player->GetGUID();
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_GET_CALENDAR [" UI64FMTD "]", guid);
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_GET_CALENDAR);
 
-    time_t currTime = time(NULL);
+    time_t currTime = time(nullptr);
 
     WorldPacket data(SMSG_CALENDAR_SEND_CALENDAR, 1000); // Average size if no instance
 
@@ -183,6 +185,7 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket& recvData)
     uint64 eventId;
     recvData >> eventId;
 
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_GET_EVENT);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_GET_EVENT. Player ["
         UI64FMTD "] Event [" UI64FMTD "]", _player->GetGUID(), eventId);
 
@@ -194,6 +197,7 @@ void WorldSession::HandleCalendarGetEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarGuildFilter(WorldPacket& recvData)
 {
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_GUILD_FILTER);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_GUILD_FILTER [" UI64FMTD "]", _player->GetGUID());
 
     uint32 minLevel;
@@ -210,6 +214,7 @@ void WorldSession::HandleCalendarGuildFilter(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarArenaTeam(WorldPacket& recvData)
 {
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_ARENA_TEAM);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_ARENA_TEAM [" UI64FMTD "]", _player->GetGUID());
 
     uint32 arenaTeamId;
@@ -338,6 +343,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
         return;
     }
 
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_UPDATE_EVENT);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_UPDATE_EVENT [" UI64FMTD "] EventId [" UI64FMTD
         "], InviteId [" UI64FMTD "] Title %s, Description %s, type %u "
         "Repeatable %u, MaxInvites %u, Dungeon ID %d, Time %u "
@@ -377,6 +383,7 @@ void WorldSession::HandleCalendarRemoveEvent(WorldPacket& recvData)
 
 void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
 {
+<<<<<<< HEAD
     //uint64 guid = _player->GetGUID();
     //uint64 eventId;
     //uint64 inviteId;
@@ -415,10 +422,52 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
     //}
     //else
     //    sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
+=======
+    uint64 guid = _player->GetGUID();
+    uint64 eventId;
+    uint64 inviteId;
+    uint32 eventTime;
+
+    recvData >> eventId >> inviteId;
+    recvData.ReadPackedTime(eventTime);
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_COPY_EVENT);
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_COPY_EVENT [" UI64FMTD "], EventId [" UI64FMTD
+        "] inviteId [" UI64FMTD "] Time: %u", guid, eventId, inviteId, eventTime);
+
+    // prevent events in the past
+    // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
+    if (time_t(eventTime) < (time(NULL) - time_t(86400L)))
+    {
+        recvData.rfinish();
+        return;
+    }
+
+    if (CalendarEvent* oldEvent = sCalendarMgr->GetEvent(eventId))
+    {
+        CalendarEvent* newEvent = new CalendarEvent(*oldEvent, sCalendarMgr->GetFreeEventId());
+        newEvent->SetEventTime(time_t(eventTime));
+        sCalendarMgr->AddEvent(newEvent, CALENDAR_SENDTYPE_COPY);
+
+        CalendarInviteStore invites = sCalendarMgr->GetEventInvites(eventId);
+        SQLTransaction trans;
+        if (invites.size() > 1)
+            trans = CharacterDatabase.BeginTransaction();
+
+        for (CalendarInviteStore::const_iterator itr = invites.begin(); itr != invites.end(); ++itr)
+            sCalendarMgr->AddInvite(newEvent, new CalendarInvite(**itr, sCalendarMgr->GetFreeInviteId(), newEvent->GetEventId()), trans);
+
+        if (invites.size() > 1)
+            CharacterDatabase.CommitTransaction(trans);
+        // should we change owner when somebody makes a copy of event owned by another person?
+    }
+    else
+        sCalendarMgr->SendCalendarCommandResult(guid, CALENDAR_ERROR_EVENT_INVALID);
+>>>>>>> SunwellCheat new protection.
 }
 
 void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
 {
+<<<<<<< HEAD
     //sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_INVITE");
 
     //uint64 playerGuid = _player->GetGUID();
@@ -509,6 +558,99 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     //    CalendarInvite* invite = new CalendarInvite(inviteId, 0, inviteeGuid, playerGuid, 946684800, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
     //    sCalendarMgr->SendCalendarEventInvite(*invite);
     //}
+=======
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_EVENT_INVITE);
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_INVITE");
+
+    uint64 playerGuid = _player->GetGUID();
+
+    uint64 eventId;
+    uint64 inviteId;
+    std::string name;
+    bool isPreInvite;
+    bool isGuildEvent;
+
+    uint64 inviteeGuid = 0;
+    uint32 inviteeTeamId = TEAM_NEUTRAL;
+    uint32 inviteeGuildId = 0;
+
+    recvData >> eventId >> inviteId >> name >> isPreInvite >> isGuildEvent;
+
+    if (Player* player = ObjectAccessor::FindPlayerByName(name.c_str(), false))
+    {
+        // Invitee is online
+        inviteeGuid = player->GetGUID();
+        inviteeTeamId = player->GetTeamId();
+        inviteeGuildId = player->GetGuildId();
+    }
+    else
+    {
+        // xinef: Get Data From global storage
+        if (uint32 guidLow = sWorld->GetGlobalPlayerGUID(name))
+        {
+            if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guidLow))
+            {
+                inviteeGuid = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
+                inviteeTeamId = Player::TeamIdForRace(playerData->race);
+                inviteeGuildId = playerData->guildId;
+            }
+        }
+    }
+
+    if (!inviteeGuid)
+    {
+        sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_PLAYER_NOT_FOUND);
+        return;
+    }
+
+    if (_player->GetTeamId() != inviteeTeamId /*&& !sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CALENDAR)*/)
+    {
+        sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NOT_ALLIED);
+        return;
+    }
+
+    // xinef: zomg! sync query
+    if (QueryResult result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = " UI64FMTD " AND friend = " UI64FMTD, inviteeGuid, playerGuid))
+    {
+        Field* fields = result->Fetch();
+        if (fields[0].GetUInt8() & SOCIAL_FLAG_IGNORED)
+        {
+            sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_IGNORING_YOU_S, name.c_str());
+            return;
+        }
+    }
+
+    if (!isPreInvite)
+    {
+        if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
+        {
+            if (calendarEvent->IsGuildEvent() && calendarEvent->GetGuildId() == inviteeGuildId)
+            {
+                // we can't invite guild members to guild events
+                sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NO_GUILD_INVITES);
+                return;
+            }
+
+            // 946684800 is 01/01/2000 00:00:00 - default response time
+            CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, inviteeGuid, playerGuid, 946684800, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
+            sCalendarMgr->AddInvite(calendarEvent, invite);
+        }
+        else
+            sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_EVENT_INVALID);
+    }
+    else
+    {
+        if (isGuildEvent && inviteeGuildId == _player->GetGuildId())
+        {
+            sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NO_GUILD_INVITES);
+            return;
+        }
+
+        // 946684800 is 01/01/2000 00:00:00 - default response time
+        CalendarInvite* invite = new CalendarInvite(inviteId, 0, inviteeGuid, playerGuid, 946684800, CALENDAR_STATUS_INVITED, CALENDAR_RANK_PLAYER, "");
+        sCalendarMgr->SendCalendarEventInvite(*invite);
+    }
+>>>>>>> SunwellCheat new protection.
 }
 
 void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
@@ -518,6 +660,7 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
     bool tentative;
 
     recvData >> eventId >> tentative;
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_EVENT_SIGNUP);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_SIGNUP [" UI64FMTD "] EventId [" UI64FMTD "] Tentative %u", guid, eventId, tentative);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
@@ -545,6 +688,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
     uint32 status;
 
     recvData >> eventId >> inviteId >> status;
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_EVENT_RSVP);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_RSVP [" UI64FMTD"] EventId ["
         UI64FMTD "], InviteId [" UI64FMTD "], status %u", guid, eventId,
         inviteId, status);
@@ -585,6 +729,7 @@ void WorldSession::HandleCalendarEventRemoveInvite(WorldPacket& recvData)
     recvData.readPackGUID(invitee);
     recvData >> inviteId >> ownerInviteId >> eventId;
 
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_EVENT_REMOVE_INVITE);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_REMOVE_INVITE ["
         UI64FMTD "] EventId [" UI64FMTD "], ownerInviteId ["
         UI64FMTD "], Invitee ([" UI64FMTD "] id: [" UI64FMTD "])",
@@ -615,6 +760,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recvData)
 
     recvData.readPackGUID(invitee);
     recvData >> eventId >> inviteId >> ownerInviteId >> status;
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_EVENT_STATUS);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_STATUS [" UI64FMTD"] EventId ["
         UI64FMTD "] ownerInviteId [" UI64FMTD "], Invitee ([" UI64FMTD "] id: ["
         UI64FMTD "], status %u", guid, eventId, ownerInviteId, invitee, inviteId, status);
@@ -649,6 +795,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recvData)
 
     recvData.readPackGUID(invitee);
     recvData >> eventId >>  inviteId >> ownerInviteId >> rank;
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_EVENT_MODERATOR_STATUS);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_EVENT_MODERATOR_STATUS [" UI64FMTD "] EventId ["
         UI64FMTD "] ownerInviteId [" UI64FMTD "], Invitee ([" UI64FMTD "] id: ["
         UI64FMTD "], rank %u", guid, eventId, ownerInviteId, invitee, inviteId, rank);
@@ -675,6 +822,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recvData)
     uint64 complainGUID;
 
     recvData >> eventId >> complainGUID;
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_COMPLAIN);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_COMPLAIN [" UI64FMTD "] EventId ["
         UI64FMTD "] guid [" UI64FMTD "]", guid, eventId, complainGUID);
 
@@ -686,6 +834,7 @@ void WorldSession::HandleCalendarGetNumPending(WorldPacket& /*recvData*/)
     uint64 guid = _player->GetGUID();
     uint32 pending = sCalendarMgr->GetPlayerNumPending(guid);
 
+    sSunwellCheatMgr->buildOpcodeReport(_player, CMSG_CALENDAR_GET_NUM_PENDING);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_CALENDAR_GET_NUM_PENDING: [" UI64FMTD
         "] Pending: %u", guid, pending);
 
@@ -724,6 +873,7 @@ void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recvData)
 
 void WorldSession::SendCalendarRaidLockout(InstanceSave const* save, bool add)
 {
+    sSunwellCheatMgr->buildOpcodeReport(_player, add ? SMSG_CALENDAR_RAID_LOCKOUT_ADDED : SMSG_CALENDAR_RAID_LOCKOUT_REMOVED);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", add ? "SMSG_CALENDAR_RAID_LOCKOUT_ADDED" : "SMSG_CALENDAR_RAID_LOCKOUT_REMOVED");
     time_t currTime = time(NULL);
 
