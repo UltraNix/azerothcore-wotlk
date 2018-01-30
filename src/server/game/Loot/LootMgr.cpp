@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -640,7 +640,7 @@ void Loot::removeItemFromSavedLoot(LootItem *item)
     }
 
     QueryResult result = CharacterDatabase.PQuery("SELECT itemCount FROM group_saved_loot WHERE itemId = '%u' AND instanceId = '%u' AND creatureId = '%u'", item->itemid, pMap->GetInstanceId(), pCreature->GetEntry());
-   
+
     if (!result)
     {
         sLog->outLoot("Loot::removeItemFromSavedLoot: result empty !! SQL: SELECT itemCount FROM group_saved_loot WHERE itemId = '%u' AND instanceId = '%u' AND creatureId = '%u'", item->itemid, pMap->GetInstanceId(), pCreature->GetEntry());
@@ -651,7 +651,7 @@ void Loot::removeItemFromSavedLoot(LootItem *item)
     uint32 count = 0;
     Field *fields = result->Fetch();
     count = fields[0].GetUInt32();
-    
+
     if (count > 1)
     {
         count--;
@@ -805,7 +805,13 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     items.reserve(MAX_NR_LOOT_ITEMS);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
 
-    tab->Process(*this, store.IsRatesAllowed(), lootMode);          // Processing is done there, callback via Loot::AddItem()
+    //! Do not apply config item rates to instance creatures
+    bool ratesAllowed = store.IsRatesAllowed();
+    if (Map* map = lootOwner->GetMap())
+        if (map->Instanceable())
+            ratesAllowed = false;
+
+    tab->Process(*this, ratesAllowed, lootMode);          // Processing is done there, callback via Loot::AddItem()
 
     // Setting access rights for group loot case
     Group* group = lootOwner->GetGroup();
