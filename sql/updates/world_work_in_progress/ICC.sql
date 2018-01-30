@@ -13,10 +13,13 @@ UPDATE `spell_area` SET `spell`=73828 WHERE `spell`=73824;
 DELETE FROM `creature` WHERE `guid` IN (133974, 133990);
 UPDATE `creature` SET `position_x`=14.61, `position_y`=30.60, `position_z`=35.71 WHERE `guid`=133991;
 UPDATE `creature` SET `position_x`=-19.81, `position_y`=-24.40, `position_z`=21.62 WHERE `guid`=133989;
+UPDATE `creature` SET `spawnMask`=15 WHERE `guid` IN (133991);
 -- Dominate Mind
 DELETE FROM `spell_script_names` WHERE `ScriptName`="spell_deathwhisper_dominate_mind";
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (71289, "spell_deathwhisper_dominate_mind");
+-- Respawning npcs
+UPDATE `creature_template` SET `AIName`="", `ScriptName`="npc_icc_champion" WHERE `entry` IN (37928,37996,37965);
 -- Trash corrections --
 
 -- Ancient Skeletal Soldier SAI
@@ -145,6 +148,65 @@ DELETE FROM `waypoint_data` WHERE `id`=3701100;
 INSERT INTO `waypoint_data` VALUES 
 (3701100, 1, -175.0, 2190.0, 35.5, 0, 0, 1, 0, 100, 0),
 (3701100, 2, -175.0, 2240.0, 35.5, 0, 0, 1, 0, 100, 0);
+
+UPDATE `creature` SET `position_x`=-218.248, `position_y`=2181.06, `position_z`=37.9852 WHERE `guid`=200806;
+UPDATE `creature` SET `position_x`=-210.888, `position_y`=2180.11, `position_z`=37.985 WHERE `guid`=200878;
+UPDATE `creature` SET `position_x`=-214.409363, `position_y`= 2180.516357, `position_z`=37.984989 WHERE `guid`=200805;
+UPDATE `creature` SET `position_x`=-236.411423, `position_y`=2211.396484, `position_z`=42.154911 WHERE `guid`=201080;
+UPDATE `creature` SET `position_x`=-216.789795, `position_y`=2242.590576, `position_z`=37.985176 WHERE `guid`=200804;
+UPDATE `creature` SET `position_x`=-212.368439, `position_y`=2237.508301, `position_z`=36.326073 WHERE `guid`=200995;
+UPDATE `creature` SET `position_x`=-224.459259, `position_y`=2239.782227, `position_z`=37.985332 WHERE `guid`=200807;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=37007 AND `source_type`=0;
+UPDATE `creature_template` SET `AIName`="", `ScriptName`="npc_deathbound_ward" WHERE `entry`=37007;
+
+-- First room (left ward)
+SET @GUID = 200987;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`) VALUES
+(@GUID*10, 1, -193.471802, 2165.252930, 37.985104),
+(@GUID*10, 2, -173.338287, 2178.899658, 37.985104),
+(@GUID*10, 3, -175.232864, 2244.533203, 37.985283),
+(@GUID*10, 4, -193.436111, 2258.234863, 37.985283),
+(@GUID*10, 5, -214.251709, 2242.914551, 37.985283),
+(@GUID*10, 6, -214.629257, 2178.479736, 37.985176),
+(@GUID*10, 7, -193.471802, 2165.252930, 37.985104);
+
+-- First room (right ward)
+SET @GUID = 201043;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`) VALUES
+(@GUID*10, 1, -193.436111, 2258.234863, 37.985283),
+(@GUID*10, 2, -214.251709, 2242.914551, 37.985283),
+(@GUID*10, 3, -214.629257, 2178.479736, 37.985176),
+(@GUID*10, 4, -193.471802, 2165.252930, 37.985104),
+(@GUID*10, 5, -173.338287, 2178.899658, 37.985104),
+(@GUID*10, 6, -175.232864, 2244.533203, 37.985283),
+(@GUID*10, 7, -193.436111, 2258.234863, 37.985283);
+
+-- Second room (left ward)
+SET @GUID = 201108;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`) VALUES
+(@GUID*10, 1, -269.783661, 2211.531494, 42.564575),
+(@GUID*10, 2, -238.439240, 2211.536621, 42.564537),
+(@GUID*10, 3, -215.574402, 2211.696533, 35.233490),
+(@GUID*10, 4, -192.182373, 2210.857178, 35.234684),
+(@GUID*10, 5, -215.574402, 2211.696533, 35.233490),
+(@GUID*10, 6, -238.439240, 2211.536621, 42.564537),
+(@GUID*10, 7, -337.642487, 2211.516113, 42.564522);
+
+-- Second room (right ward)
+SET @GUID = 201130;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`) VALUES
+(@GUID*10, 1, -300.544312, 2211.772949, 42.012756),
+(@GUID*10, 2, -337.642487, 2211.516113, 42.564522),
+(@GUID*10, 3, -238.439240, 2211.536621, 42.564537),
+(@GUID*10, 4, -215.574402, 2211.696533, 35.233490),
+(@GUID*10, 5, -192.182373, 2210.857178, 35.234684),
+(@GUID*10, 6, -215.574402, 2211.696533, 35.233490),
+(@GUID*10, 7, -238.439240, 2211.536621, 42.564537);
 
 -- Before Gunship:
 -- Kor'kron Battle Standard SAI

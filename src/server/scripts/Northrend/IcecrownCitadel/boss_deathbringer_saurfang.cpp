@@ -9,6 +9,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "SpellAuras.h"
 #include "icecrown_citadel.h"
 #include "Player.h"
+#include "Group.h"
 
 enum ScriptTexts
 {
@@ -735,11 +736,19 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
 
         bool OnGossipHello(Player* player, Creature* creature)
         {
+            if (Group* group = player->GetGroup())
+            {
+                if (group->GetLeaderGUID() != player->GetGUID())
+                    return true;
+            }
+            else
+                return true;
+
             InstanceScript* instance = creature->GetInstanceScript();
             if (instance && instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) != DONE && instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) != IN_PROGRESS)
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "We are ready to go, High Overlord. The Lich King must fall!", 631, -ACTION_START_EVENT);
-                player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "We are ready to go, High Overlord. The Lich King must fall!", 631, GOSSIP_ACTION_INFO_DEF + 1);
+                player->SEND_GOSSIP_MENU(15217, creature->GetGUID());
             }
 
             return true;
@@ -752,7 +761,12 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
             {
                 player->PlayerTalkClass->ClearMenus();
                 player->CLOSE_GOSSIP_MENU();
-                if (action == -ACTION_START_EVENT)
+                if (action == GOSSIP_ACTION_INFO_DEF + 1)
+                {
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Lok'tar ogar! We are ready! Onward, brother orc!", 631, GOSSIP_ACTION_INFO_DEF + 2);
+                    player->SEND_GOSSIP_MENU(15218, creature->GetGUID());
+                }
+                else if (action == GOSSIP_ACTION_INFO_DEF + 2)
                     creature->AI()->DoAction(ACTION_START_EVENT);
             }
 

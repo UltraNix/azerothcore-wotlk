@@ -17,6 +17,8 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "CreatureTextMgr.h"
 #include "SpellAuras.h"
 #include "Chat.h"
+#include "CreatureGroups.h"
+#include "MoveSplineInit.h"
 
 enum EventIds
 {
@@ -153,6 +155,94 @@ Movement::PointsArray DamnedRightPath =
     { -123.595428f, 2199.131836f, 35.232285f },
     { -108.697006f, 2185.655273f, 30.654232f },
 };
+
+const uint32 FirstFormationMemberPathSize = 2;
+std::vector<Position> FirstFormationMemberPath =
+{
+    { -217.756699f, 2190.889893f, 35.233532f },
+    { -210.244873f, 2196.437256f, 35.233501f }
+};
+
+const uint32 SecondFormationMemberPathSize = 2;
+std::vector<Position> SecondFormationMemberPath =
+{
+    { -208.484467f, 2193.178955f, 35.233494f },
+    { -201.815994f, 2198.159912f, 35.233601f }
+};
+
+const uint32 ThirdFormationMemberPathSize = 2;
+std::vector<Position> ThirdFormationMemberPath =
+{
+    { -210.443512f, 2191.287598f, 35.233513f },
+    { -201.367004f, 2206.080078f, 35.233501f }
+};
+
+const uint32 FourthFormationMemberPathSize = 2;
+std::vector<Position> FourthFormationMemberPath =
+{
+    { -213.339798f, 2228.968750f, 35.233707f },
+    { -200.404007f, 2214.429932f, 35.233501f }
+};
+
+const uint32 FifthFormationMemberPathSize = 2;
+std::vector<Position> FifthFormationMemberPath =
+{
+    { -221.596893f, 2211.319092f, 37.416222f },
+    { -207.421005f, 2211.219971f, 35.233501f }
+};
+
+const uint32 SixthFormationMemberPathSize = 2;
+std::vector<Position> SixthFormationMemberPath =
+{
+    { -211.480515f, 2229.128662f, 35.233139f },
+    { -200.272003f, 2222.790039f, 35.233601f },
+};
+
+const uint32 SeventhFormationMemberPathSize = 2;
+std::vector<Position> SeventhFormationMemberPath =
+{
+    { -219.459473f, 2230.342285f, 35.233543f },
+    { -209.750412f, 2225.617188f, 35.233543f },
+};
+
+struct TrashEventFormationData
+{
+    std::vector<Position> path;
+    size_t pathSize;
+    float finalOrient;
+};
+
+std::vector<TrashEventFormationData> formationData =
+{
+    { FirstFormationMemberPath, FirstFormationMemberPathSize, 0.029989f },
+    { SecondFormationMemberPath, SecondFormationMemberPathSize, 0.212435f },
+    { ThirdFormationMemberPath, ThirdFormationMemberPathSize, 0.029989f },
+    { FourthFormationMemberPath, FourthFormationMemberPathSize, 0.029989f },
+    { FifthFormationMemberPath,  FifthFormationMemberPathSize, 0.045133f },
+    { SixthFormationMemberPath, SixthFormationMemberPathSize, 6.183820f },
+    { SeventhFormationMemberPath, SeventhFormationMemberPathSize, 6.233337f }
+};
+
+void SendSplinePath(Creature* creature, std::vector<Position> path, size_t pathSize, float finalOrient)
+{
+    if (!pathSize)
+        return;
+
+    Movement::MoveSplineInit init(creature);
+    for (uint16 i = 0; i < pathSize; ++i)
+    {
+        G3D::Vector3 point;
+        point.x = path[i].GetPositionX();
+        point.y = path[i].GetPositionY();
+        point.z = path[i].GetPositionZ();
+        init.Path().push_back(point);
+    }
+
+    init.SetSmooth();
+    init.SetWalk(true);
+    init.SetFacing(finalOrient);
+    init.Launch();
+}
 
 class instance_icecrown_citadel : public InstanceMapScript
 {
@@ -309,6 +399,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_INFILTRATOR_MINCHAR_BQ:
                     case NPC_MINCHAR_BEAM_STALKER:
                     case NPC_VALITHRIA_DREAMWALKER_QUEST:
+                    case NPC_ROTTING_FROST_GIANT_10:
+                    case NPC_ROTTING_FROST_GIANT_25:
+                    // @ICC beta test
+                    {
+                        creature->SetVisible(false);
+                        break;
+                    }
                         for (uint8 i = 0; i < WeeklyNPCs; ++i)
                             if (WeeklyQuestData[i].creatureEntry == creature->GetEntry())
                             {
@@ -323,6 +420,10 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
+                    case NPC_SERVANT_OF_THE_THRONE:
+                        if (creature->GetDBTableGUIDLow() == 201080)
+                            ServantGUID = creature->GetGUID();
+                        break;
                     case NPC_KOR_KRON_GENERAL:
                         if (TeamIdInInstance == TEAM_ALLIANCE)
                             creature->UpdateEntry(NPC_ALLIANCE_COMMANDER);
@@ -402,7 +503,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case NPC_PROFESSOR_PUTRICIDE:
                         ProfessorPutricideGUID = creature->GetGUID();
-                        if (GetBossState(DATA_ROTFACE) == DONE && GetBossState(DATA_FESTERGUT) == DONE && !HeroicAttempts && GetData(DATA_HAS_LIMITED_ATTEMPTS) && creature->IsAlive())
+                        if (GetBossState(DATA_ROTFACE) == DONE && GetBossState(DATA_FESTERGUT) == DONE && !HeroicAttempts && creature->IsAlive())
                             creature->SetVisible(false);
                         break;
                     case NPC_PRINCE_KELESETH:
@@ -419,7 +520,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case NPC_BLOOD_QUEEN_LANA_THEL:
                         BloodQueenLanaThelGUID = creature->GetGUID();
-                        if (!HeroicAttempts && GetData(DATA_HAS_LIMITED_ATTEMPTS) && creature->IsAlive())
+                        if (!HeroicAttempts && creature->IsAlive())
                             creature->SetVisible(false);
                         break;
                     case NPC_CROK_SCOURGEBANE:
@@ -452,7 +553,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case NPC_SINDRAGOSA:
                         SindragosaGUID = creature->GetGUID();
-                        if (!HeroicAttempts && GetData(DATA_HAS_LIMITED_ATTEMPTS) && creature->IsAlive())
+                        if (!HeroicAttempts && creature->IsAlive())
                             creature->SetVisible(false);
                         break;
                     case NPC_SPINESTALKER:
@@ -468,7 +569,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case NPC_THE_LICH_KING:
                         TheLichKingGUID = creature->GetGUID();
-                        if (!HeroicAttempts && GetData(DATA_HAS_LIMITED_ATTEMPTS) && creature->IsAlive())
+                        if (!HeroicAttempts && creature->IsAlive())
                             creature->SetVisible(false);
                         break;
                     case NPC_HIGHLORD_TIRION_FORDRING_LK:
@@ -608,10 +709,11 @@ class instance_icecrown_citadel : public InstanceMapScript
                     for (uint32 i = 247110; i <= 247112; ++i)
                         if (creature->GetDBTableGUIDLow() == i)
                         {
-                            Scheduler.Schedule(3s, 5s, [creature](TaskContext /*task*/) {
+                            Scheduler.Schedule(15s, [creature, this](TaskContext /*task*/) {
                                 Position pos = { -150.639267f, 2211.976563f, 35.233513f, 6.246146f };
                                 creature->Respawn(true);
                                 creature->SetLootMode(0);
+                                creature->SetDisableReputationGain(true);
                                 creature->SetHomePosition(pos);
                                 Movement::PointsArray path;
                                 switch (creature->GetDBTableGUIDLow())
@@ -629,7 +731,14 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                                 creature->UpdatePosition(pos, true);
                                 if (!path.empty())
+                                {
                                     creature->GetMotionMaster()->MoveSplinePath(&path);
+                                    auto time = creature->movespline->Duration() - 50;
+                                    creature->SetImmuneToNPC(true);
+                                    Scheduler.Schedule(Milliseconds(time), [creature](TaskContext /*task*/) {
+                                        creature->SetImmuneToNPC(false);
+                                    });
+                                }
                             });
                         } 
                 }
@@ -666,7 +775,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_RIMEFANG:
                     case NPC_SPINESTALKER:
                     {
-                        if (GetData(DATA_HAS_LIMITED_ATTEMPTS) && !HeroicAttempts)
+                        if (!HeroicAttempts)
                             return;
 
                         if (GetBossState(DATA_SINDRAGOSA) == DONE)
@@ -940,6 +1049,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (type)
                 {
+                    case DATA_LIGHTS_HAMMER_TRASH:
+                        return LightsHammerTrashEnabled;
                     case DATA_BUFF_AVAILABLE:
                         return (IsBuffAvailable ? 1 : 0);
                     case DATA_WEEKLY_QUEST_ID:
@@ -1257,6 +1368,79 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_LIGHTS_HAMMER_TRASH:
                         if (data == 0)
                             LightsHammerTrashEnabled = false;
+                        break;
+                    case DATA_EVENT_SERVANT:
+                        if (Creature* creature = instance->GetCreature(ServantGUID))
+                        {
+                            auto formation = creature->GetFormation();
+                            if (formation)
+                                for (auto creatureData : creature->GetFormation()->GetMembers())
+                                    FirstGroupEventGUIDs.push_back(creatureData.first->GetGUID());
+                        }
+                        break;
+                    case DATA_HANDLE_FIRST_GROUP_EVENT:
+                        for (auto guid : FirstGroupEventGUIDs)
+                        {
+                            if (Creature* creature = instance->GetCreature(guid))
+                            {
+                                if (!creature->IsAlive())
+                                    continue;
+
+                                bool check = false;
+                                TrashEventFormationData data;
+                                switch (creature->GetDBTableGUIDLow())
+                                {
+                                    case 200806:
+                                        check = true; 
+                                        creature->SetHomePosition(FirstFormationMemberPath[FirstFormationMemberPathSize - 1]);
+                                        data = formationData[0];
+                                        break;
+                                    case 200878:
+                                        check = true;
+                                        creature->SetHomePosition(SecondFormationMemberPath[SecondFormationMemberPathSize - 1]);
+                                        data = formationData[1];
+                                        break;
+                                    case 200805:
+                                        check = true;
+                                        creature->SetHomePosition(ThirdFormationMemberPath[ThirdFormationMemberPathSize - 1]);
+                                        data = formationData[2];
+                                        break;
+                                    case 200804:
+                                        check = true;
+                                        creature->SetHomePosition(FourthFormationMemberPath[FourthFormationMemberPathSize - 1]);
+                                        data = formationData[3];
+                                        break;
+                                    case 201080:
+                                        check = true;
+                                        creature->SetHomePosition(FifthFormationMemberPath[FifthFormationMemberPathSize - 1]);
+                                        data = formationData[4];
+                                        break;
+                                    case 200995:
+                                        check = true;
+                                        creature->SetHomePosition(SixthFormationMemberPath[SixthFormationMemberPathSize - 1]);
+                                        data = formationData[5];
+                                        break;
+                                    case 200807:
+                                        check = true;
+                                        creature->SetHomePosition(SeventhFormationMemberPath[SeventhFormationMemberPathSize - 1]);
+                                        data = formationData[6];
+                                        break;
+                                    case 200939:
+                                        check = false;
+                                        break;
+                                    case 201106:
+                                        check = false;
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                if (check)
+                                    SendSplinePath(creature, data.path, data.pathSize, data.finalOrient);
+                                else if (creature->IsAIEnabled)
+                                    creature->AI()->DoAction(2);
+                            }
+                        }
                         break;
                     case DATA_BUFF_AVAILABLE:
                         IsBuffAvailable = (data ? true : false);
@@ -1887,6 +2071,8 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             EventMap Events;
             TaskScheduler Scheduler;
+            std::vector<uint64> FirstGroupEventGUIDs;
+            uint64 ServantGUID;
             uint64 LadyDeathwisperElevatorGUID;
             uint64 GunshipGUID;
             uint64 EnemyGunshipGUID;

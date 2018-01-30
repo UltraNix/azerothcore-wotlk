@@ -875,7 +875,7 @@ public:
 
         void Reset()
         {
-            me->SetSpeed(MOVE_RUN, 0.8f);
+            me->SetSpeed(MOVE_RUN, 0.6f);
             me->setAttackTimer(BASE_ATTACK, 2000);
             me->AddAura(SPELL_VENGEFUL_BLAST_PASSIVE, me);
         }
@@ -1115,8 +1115,7 @@ public:
         {
             if (GetCaster()->ToTempSummon())
                 if (Unit* owner = GetCaster()->ToTempSummon()->GetSummoner())
-                    if (owner->GetAI())
-                        owner->GetAI()->SetGUID(GetCaster()->GetGUID());
+                    owner->GetAI()->SetGUID(GetCaster()->GetGUID());
 
             if (Creature* caster = GetCaster()->ToCreature())
                 caster->AI()->DoAction(-1);
@@ -1135,6 +1134,27 @@ public:
     }
 };
 
+class spell_deathwhisper_dominate_mind_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_deathwhisper_dominate_mind_AuraScript);
+
+    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->SetObjectScale(2.5f);
+    }
+
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->SetObjectScale(1.0f);
+    }
+
+    void Register()
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_deathwhisper_dominate_mind_AuraScript::OnApply, EFFECT_0, SPELL_AURA_AOE_CHARM, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(spell_deathwhisper_dominate_mind_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_AOE_CHARM, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_boss_lady_deathwhisper()
 {
     new boss_lady_deathwhisper();
@@ -1144,4 +1164,5 @@ void AddSC_boss_lady_deathwhisper()
     new npc_darnavan();
     new spell_deathwhisper_mana_barrier();
     new spell_cultist_dark_martyrdom();
+    new AuraScriptLoaderEx<spell_deathwhisper_dominate_mind_AuraScript>("spell_deathwhisper_dominate_mind");
 }

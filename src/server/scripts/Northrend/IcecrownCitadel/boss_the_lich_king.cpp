@@ -17,6 +17,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "CreatureTextMgr.h"
 #include "icecrown_citadel.h"
 #include "PassiveAI.h"
+#include "Group.h"
 
 enum Texts
 {
@@ -1316,8 +1317,16 @@ class npc_tirion_fordring_tft : public CreatureScript
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
             }
 
-            void sGossipSelect(Player* /*player*/, uint32 sender, uint32 action)
+            void sGossipSelect(Player* player, uint32 sender, uint32 action) override
             {
+                if (Group* group = player->GetGroup())
+                {
+                    if (group->GetLeaderGUID() != player->GetGUID())
+                        return;
+                }
+                else
+                    return;
+
                 Creature* theLichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING));
                 if (me->GetCreatureTemplate()->GossipMenuId == sender && !action && me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && theLichKing && !theLichKing->IsInEvadeMode())
                 {

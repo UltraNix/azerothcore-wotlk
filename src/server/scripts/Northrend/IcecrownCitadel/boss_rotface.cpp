@@ -853,96 +853,87 @@ class spell_rotface_unstable_ooze_explosion_suicide : public SpellScriptLoader
 };
 
 
-class npc_precious_icc : public CreatureScript
+struct npc_precious_iccAI : public ScriptedAI
 {
-    public:
-        npc_precious_icc() : CreatureScript("npc_precious_icc") { }
+    npc_precious_iccAI(Creature* creature) : ScriptedAI(creature), _summons(me)
+    {
+        _instance = creature->GetInstanceScript();
+    }
 
-        struct npc_precious_iccAI : public ScriptedAI
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+        _summons.DespawnAll();
+    }
+
+    void JustSummoned(Creature* summon) override
+    {
+        summon->SetReactState(REACT_AGGRESSIVE);
+        summon->SetSpeed(MOVE_RUN, 0.5f);
+        _summons.Summon(summon);
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(20s, 25s, [this](TaskContext task) 
         {
-            npc_precious_iccAI(Creature* creature) : ScriptedAI(creature), summons(me){}
-
-            void Reset()
-            {
-                events.Reset();
-                summons.DespawnAll();
-            }
-
-            void EnterCombat(Unit* /*target*/)
-            {
-                me->setActive(true);
-                events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(1500, 2500));
-                events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(25000, 30000));
-            }
-
-            void JustSummoned(Creature* summon)
-            {
-                summons.Summon(summon);
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    summon->AI()->AttackStart(target);
-            }
-
-            void SummonedCreatureDespawn(Creature* summon)
-            {
-                summons.Despawn(summon);
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                summons.DespawnAll();
-                if (InstanceScript* _instance = me->GetInstanceScript())
-                    if (Creature* rotface = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_ROTFACE)))
-                        if (rotface->IsAlive())
-                            rotface->AI()->Talk(SAY_PRECIOUS_DIES);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
+            DoCastSelf(SPELL_DECIMATE);
+            task.Repeat();
+        });
+        _scheduler.Schedule(1500ms, 2500ms, [this](TaskContext task) 
+        {
+            DoCastVictim(SPELL_MORTAL_WOUND);
+            task.Repeat();
+        });
+        _scheduler.Schedule(25s, 30s, [this](TaskContext task)
+        {
+            Talk(EMOTE_PRECIOUS_ZOMBIES);
+            for (uint32 i = 0; i < 11; ++i)
+                DoCastAOE(SPELL_AWAKEN_PLAGUED_ZOMBIES, true);
+            _scheduler.Schedule(2s, 3s, [this](TaskContext /*task*/) {
+                for (auto guid : _summons)
+                    if (Creature* summon = _instance->instance->GetCreature(guid))
                     {
-                        case EVENT_DECIMATE:
-                            me->CastSpell(me->GetVictim(), SPELL_DECIMATE, false);
-                            events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
-                            break;
-                        case EVENT_MORTAL_WOUND:
-                            me->CastSpell(me->GetVictim(), SPELL_MORTAL_WOUND, false);
-                            events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(1500, 2500));
-                            break;
-                        case EVENT_SUMMON_ZOMBIES:
-                            Talk(EMOTE_PRECIOUS_ZOMBIES);
-                            for (uint32 i = 0; i < 11; ++i)
-                                me->CastSpell(me, SPELL_AWAKEN_PLAGUED_ZOMBIES, true);
-                            events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(20000, 25000));
-                            break;
-                        default:
-                            break;
+                        if (summon->HasReactState(REACT_PASSIVE))
+                        {
+                            summon->SetReactState(REACT_AGGRESSIVE);
+                            DoZoneInCombat(summon);
+                        }
                     }
-                }
 
-                DoMeleeAttackIfReady();
-            }
+            });
+            task.Repeat(20s, 22s);
+        });
+    }
 
-        private:
-            EventMap events;
-            SummonList summons;
-        };
+    void SummonedCreatureDespawn(Creature* summon) override
+    {
+        _summons.Despawn(summon);
+    }
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetIcecrownCitadelAI<npc_precious_iccAI>(creature);
-        }
+    void JustDied(Unit* /*killer*/) override
+    {
+        _summons.DespawnAll();
+        if (Creature* rotface = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_ROTFACE)))
+            if (rotface->IsAlive() && rotface->IsAIEnabled)
+                rotface->AI()->Talk(SAY_PRECIOUS_DIES);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff,
+            std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+    }
+
+private:
+    TaskScheduler _scheduler;
+    SummonList _summons;
+    InstanceScript* _instance;
 };
+
 
 void AddSC_boss_rotface()
 {
@@ -957,5 +948,5 @@ void AddSC_boss_rotface()
     new spell_rotface_unstable_ooze_explosion();
     new spell_rotface_unstable_ooze_explosion_suicide();
 
-    new npc_precious_icc();
+    new CreatureAILoader<npc_precious_iccAI>("npc_precious_icc");
 }

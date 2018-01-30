@@ -13,7 +13,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #define ICCScriptName "instance_icecrown_citadel"
 
 uint32 const WeeklyNPCs = 9;
-uint32 const MaxHeroicAttempts = 50; // TESTING
+uint32 const MaxHeroicAttempts = 100; // @ICC beta test
 
 // Defined in boss_valithria_dreamwalker.cpp
 extern Position const ValithriaSpawnPos;
@@ -123,7 +123,9 @@ enum DataTypes
 
     DATA_BPC_TRASH_DIED                = 300,
 
-    DATA_LIGHTS_HAMMER_TRASH        = 301
+    DATA_LIGHTS_HAMMER_TRASH        = 301,
+    DATA_HANDLE_FIRST_GROUP_EVENT   = 302,
+    DATA_EVENT_SERVANT              = 303
 };
 
 enum CreaturesIds
@@ -155,6 +157,7 @@ enum CreaturesIds
     NPC_MURADIN_BRONZEBEARD_QUEST               = 38607,
     NPC_UTHER_THE_LIGHTBRINGER_QUEST            = 38608,
     NPC_LADY_SYLVANAS_WINDRUNNER_QUEST          = 38609,
+    NPC_SERVANT_OF_THE_THRONE                   = 36724,
 
     // Weekly quests
     NPC_INFILTRATOR_MINCHAR                     = 38471,

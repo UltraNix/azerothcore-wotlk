@@ -261,7 +261,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SHADOW_RESONANCE, urand(10000, 15000));
                 if (IsHeroic())
-                    me->AddAura(SPELL_SHADOW_PRISON, me);
+                    DoCastSelf(SPELL_SHADOW_PRISON_DUMMY);
             }
 
             void AttackStart(Unit* who)
@@ -346,6 +346,15 @@ class boss_prince_keleseth_icc : public CreatureScript
             {
                 if (spell->Id == 71080 && me->IsInCombat() && !me->IsInEvadeMode())
                     DoAction(ACTION_CAST_INVOCATION);
+
+                if (spell->Id == SPELL_SHADOW_PRISON_DUMMY)
+                {
+                    me->AddAura(SPELL_SHADOW_PRISON, me);
+                    if (Creature* taldaram = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_TALDARAM_GUID)))
+                        taldaram->AddAura(SPELL_SHADOW_PRISON, taldaram);
+                    if (Creature* valanar = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_VALANAR_GUID)))
+                        valanar->AddAura(SPELL_SHADOW_PRISON, valanar);
+                }
             }
 
             void DoAction(int32 action)
@@ -517,8 +526,6 @@ class boss_prince_taldaram_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_GLITTERING_SPARKS, urand(12000, 15000));
                 events.ScheduleEvent(EVENT_CONJURE_FLAME, 20000);
-                if (IsHeroic())
-                    DoCastSelf(SPELL_SHADOW_PRISON);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -806,11 +813,6 @@ class boss_prince_valanar_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_KINETIC_BOMB, urand(18000, 24000));
                 events.ScheduleEvent(EVENT_SHOCK_VORTEX, urand(15000, 20000));
                 events.ScheduleEvent(EVENT_INVOCATION_OF_BLOOD, 45000);
-                if (IsHeroic())
-                {
-                    me->AddAura(SPELL_SHADOW_PRISON, me);
-                    me->CastSpell(me, SPELL_SHADOW_PRISON_DUMMY, true);
-                }
             }
 
             void JustDied(Unit* /*killer*/)

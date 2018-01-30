@@ -20,6 +20,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "Chat.h"
 #include "MoveSplineInit.h"
 #include "MotionMaster.h"
+#include "CreatureGroups.h"
 
 enum Texts
 {
@@ -148,6 +149,10 @@ enum Spells
 
     // Invisible Stalker (Float, Uninteractible, LargeAOI)
     SPELL_SOUL_MISSILE              = 72585,
+
+    // Deathbound Ward
+    SPELL_DISRUPTING_SHOUT          = 71022,
+    SPELL_SABER_LASH                = 71021,
 };
 
 // Helper defines
@@ -246,6 +251,7 @@ enum EventTypes
 enum DataTypesICC
 {
     DATA_DAMNED_KILLS       = 1,
+    DATA_SET_PATH           = 1
 };
 
 enum Actions
@@ -269,18 +275,6 @@ enum EventIds
 enum MovementPoints
 {
     POINT_LAND  = 1,
-};
-
-uint32 const FirstWardPathSize = 7;
-Position const FirstWardPath[FirstWardPathSize] =
-{
-    { -193.471802f, 2165.252930f, 37.985104f },
-    { -173.338287f, 2178.899658f, 37.985104f },
-    { -175.232864f, 2244.533203f, 37.985283f },
-    { -193.436111f, 2258.234863f, 37.985283f },
-    { -214.251709f, 2242.914551f, 37.985283f },
-    { -214.629257f, 2178.479736f, 37.985176f },
-    { -193.471802f, 2165.252930f, 37.985104f },
 };
 
 class FrostwingVrykulSearcher
@@ -1981,20 +1975,11 @@ class spell_icc_sprit_alarm : public SpellScriptLoader
                 {
                     if ((*itr)->IsAlive() && (*itr)->HasAura(SPELL_STONEFORM))
                     {
+                        (*itr)->AI()->SetData(DATA_SET_PATH, 1);
                         (*itr)->AI()->Talk(SAY_TRAP_ACTIVATE);
                         (*itr)->RemoveAurasDueToSpell(SPELL_STONEFORM);
-                        Movement::MoveSplineInit init((*itr));
-                        for (auto i = 0; i < FirstWardPathSize; ++i)
-                        {
-                            G3D::Vector3 point;
-                            point.x = FirstWardPath[i].GetPositionX();
-                            point.y = FirstWardPath[i].GetPositionY();
-                            point.z = FirstWardPath[i].GetPositionZ();
-                            init.Path().push_back(point);
-                        }
-                        init.SetCyclic();
-                        init.SetWalk(true);
-                        init.Launch();
+                        uint32 pathId = (*itr)->GetDBTableGUIDLow() * 10;
+                        (*itr)->GetMotionMaster()->MovePath(pathId, true);
                         break;
                     }
                 }
@@ -3355,8 +3340,24 @@ public:
             events.ScheduleEvent(3, urand(8000, 15000)); // Web Wrap
         }
 
+        void DoAction(int32 actionId) override
+        {
+            if (actionId == 2)
+            {
+                float nx = me->GetPositionX() + cos(me->GetOrientation())*2.0f;
+                float ny = me->GetPositionY() + sin(me->GetOrientation())*2.0f;
+                float nz = me->GetMap()->GetHeight(nx, ny, 50.0f);
+                me->SetHomePosition(nx, ny, nz, me->GetOrientation());
+                me->CastSpell(me, SPELL_WEB_BEAM, false);
+                me->GetMotionMaster()->MovePoint(1, nx, ny, nz, false);
+            }
+        }
+
         void MoveInLineOfSight(Unit* who)
         {
+            if (me->GetDBTableGUIDLow() == 200939 || me->GetDBTableGUIDLow() == 201106)
+                return;
+
             if (!_didWebBeam && who->GetTypeId() == TYPEID_PLAYER && me->GetExactDist2d(who) < 70.0f)
             {
                 _didWebBeam = true;
@@ -3371,11 +3372,6 @@ public:
             if (me->HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY))
                 return;
             ScriptedAI::MoveInLineOfSight(who);
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            me->CallForHelp(15.0f);
         }
 
         void JustReachedHome()
@@ -3888,8 +3884,17 @@ class at_icc_lights_hammer_disable_spawn : public AreaTriggerScript
 
         bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
         {
-            if (InstanceScript* instance = player->GetInstanceScript())
-                instance->SetData(DATA_LIGHTS_HAMMER_TRASH, 0);
+            InstanceScript* instance = player->GetInstanceScript();
+            if (!instance)
+                return true;
+
+            instance->SetData(DATA_EVENT_SERVANT, 0);
+
+            if (!instance->GetData(DATA_LIGHTS_HAMMER_TRASH))
+                return true;
+
+            instance->SetData(DATA_LIGHTS_HAMMER_TRASH, 0);
+            instance->SetData(DATA_HANDLE_FIRST_GROUP_EVENT, 0);
             return true;
         }
 };
@@ -3926,6 +3931,92 @@ struct npc_icc_warhawkAI : public ScriptedAI
     }
 
     private:
+        TaskScheduler _scheduler;
+};
+
+class ChampionRessurrect : public BasicEvent
+{
+    public:
+        explicit ChampionRessurrect(Creature& owner, Unit& killer) : _owner(owner), _killer(killer) { }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            _owner.Respawn();
+            if (&_killer)
+                if (_killer.IsInWorld() && _owner.IsAIEnabled && _killer.IsInCombat())
+                    _owner.AI()->AttackStart(&_killer);
+            return true;
+        }
+
+    private:
+        Creature& _owner;
+        Unit& _killer;
+};
+
+struct npc_icc_championAI : public ScriptedAI
+{
+    npc_icc_championAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void JustDied(Unit* killer) override
+    {
+        if (InstanceScript* instance = me->GetInstanceScript())
+            if (instance->GetData(DATA_LIGHTS_HAMMER_TRASH))
+                me->m_Events.AddEvent(new ChampionRessurrect(*me, *killer), me->m_Events.CalculateTime(15000));
+    }
+};
+
+struct npc_deathbound_wardAI : public ScriptedAI
+{
+    npc_deathbound_wardAI(Creature* creature) : ScriptedAI(creature) 
+    { 
+        _path = false;
+    }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+        if (_path && me->HasAura(SPELL_STONEFORM))
+            me->RemoveAurasDueToSpell(SPELL_STONEFORM);
+    }
+
+    void SetData(uint32 identifier, uint32 data) override
+    {
+        if (identifier == DATA_SET_PATH && data == 1)
+            _path = true;
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(15s, 20s, [this](TaskContext task) 
+        {
+            DoCastAOE(SPELL_DISRUPTING_SHOUT);
+            task.Repeat(30s, 35s);
+        });
+        _scheduler.Schedule(9s, 12s, [this](TaskContext task) 
+        {
+            DoCastVictim(SPELL_SABER_LASH);
+            task.Repeat();
+        });
+    }
+    
+    void EnterEvadeMode() override
+    {
+        ScriptedAI::EnterEvadeMode();
+        if (_path && me->HasAura(SPELL_STONEFORM))
+            me->RemoveAurasDueToSpell(SPELL_STONEFORM);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff,
+            std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+    }
+
+    private:
+        bool _path;
         TaskScheduler _scheduler;
 };
 
@@ -3985,4 +4076,6 @@ void AddSC_icecrown_citadel()
     new CreatureAILoader<npc_icc_web_wrapAI>("npc_icc_web_wrap");
     new at_icc_lights_hammer_disable_spawn();
     new CreatureAILoader<npc_icc_warhawkAI>("npc_icc_warhawk");
+    new CreatureAILoader<npc_icc_championAI>("npc_icc_champion");
+    new CreatureAILoader<npc_deathbound_wardAI>("npc_deathbound_ward");
 }
