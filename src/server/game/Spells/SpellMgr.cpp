@@ -6120,6 +6120,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67267: // dark surge 3
             spellInfo->excludeTargetAuraSpell = 67178;
             break;
+        case 65811: // Light Essence Effect 2
+        case 65827: // Dark Essence Effect 2
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
 
         //! Touch of light/darkness
         //! Removed EFFECT_1 (didnt exist anyway, just making sure) and EFFECT_2 because
