@@ -247,6 +247,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     std::vector<WhoListPlayerInfo> * m = WhoListCacheMgr::GetWhoList();
     for (std::vector<WhoListPlayerInfo>::const_iterator itr = m->begin(); itr != m->end(); ++itr)
     {
+        /*
         if (AccountMgr::IsPlayerAccount(security))
         {
             if ((*itr).teamId != teamId)
@@ -256,6 +257,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
             //if ((*itr).security > AccountTypes(gmLevelInWhoList))
             //    continue;
         }
+        */
 
         //do not process players which are not in world
         //if (!(itr->second->IsInWorld()))
