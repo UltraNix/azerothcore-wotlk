@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "SharedDefines.h"
+#include "Language.h"
 #include "Player.h"
 #include "Chat.h"
 

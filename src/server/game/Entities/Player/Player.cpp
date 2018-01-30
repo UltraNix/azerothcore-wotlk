@@ -19396,14 +19396,14 @@ inline const char* PremiumName(PremiumServiceTypes serviceId)
 {
     switch (serviceId)
     {
-        case 0: return "|cff00ccffTeleportation";
-        case 1: return "|cff00ccffDown with the Sickness";
-        case 2: return "|cff00ccffExperience Boost";
-        case 3: return "|cff00ccffUnbreakable Equipment";
-        case 4: return "|cff00ccffInstant Taxi";
-        case 5: return "|cff00ccffExperience Boost";
+        case 0: return "Teleportation";
+        case 1: return "Down with the Sickness";
+        case 2: return "Experience Boost";
+        case 3: return "Unbreakable Equipment";
+        case 4: return "Instant Taxi";
+        case 5: return "Experience Boost";
         default:
-            return "|cff00ccffUnknown";
+            return "Unknown";
     }
 }
 
@@ -19417,12 +19417,12 @@ void Player::SendPremiumInfo()
         {
             time_t now = GetSession()->GetPremiumService(PremiumServiceTypes(i));
             strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-            ChatHandler(GetSession()).PSendSysMessage("%s |cFFFFD700is|r |cff06e015enabled|cFFFFD700. Expires: |cff00ccff%s |cFFFFD700Realm Time.|r", PremiumName(PremiumServiceTypes(i)), buff);
+            ChatHandler(GetSession()).PSendSysMessage(LANG_SEND_PREMIUM_ACTIVE, PremiumName(PremiumServiceTypes(i)), buff);
             ++activePremium;
         }
     }
     if (!activePremium)
-        ChatHandler(GetSession()).PSendSysMessage("|cFFFFD700You have no active Premium Privileges.|r");
+        ChatHandler(GetSession()).PSendSysMessage(LANG_NO_PREMIUM_ACTIVE);
 }
 
 void Player::SendAutoJoin()
@@ -19441,9 +19441,9 @@ void Player::SendAutoJoin()
         CountryVersion ? channelName = "world" : channelName = "global";
 
         if (CountryVersion)
-            ChatHandler(GetSession()).PSendSysMessage("|cFFFFD700Drogi graczu, na Sunwellu dziala system geolokalizacji, ktory automatycznie przypisuje graczy do kanalow zalezenie od jezyka. Nasz system wykryl, ze jestes z Polski, dlatego automatycznie przypiszemy Cie do kanalu polskiego. Zyczymy milej gry na Sunwellu!");
+            ChatHandler(GetSession()).PSendSysMessage(LANG_SEND_AUTOINVITE_PL);
         else
-            ChatHandler(GetSession()).PSendSysMessage("|cFFFFD700Dear community, there is a Geolocalization System on Sunwell that automatically invites players to chat channels by their language. Our system detected, that you are based outside of Poland, that's why you are in an English group. If you are Polish and play outside of Poland, write: /join world");
+            ChatHandler(GetSession()).PSendSysMessage(LANG_SEND_AUTOINVITE_EN);
 
         // this will work if at least 1 player is logged in regrdless if he is on the channel or not
         // the first person that login empty server is the one with bad luck and wont be invited,

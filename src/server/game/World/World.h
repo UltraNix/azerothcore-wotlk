@@ -650,14 +650,13 @@ class World
         void SendAutoBroadcast();
         bool KickSession(uint32 id);
         /// Get the number of current active sessions
-        void UpdateMaxSessionCounters();
+        void UpdateMaxSessionCounters() { m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount, uint32(m_QueuedPlayer.size())); };
         const SessionMap& GetAllSessions() const { return m_sessions; }
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
         uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedPlayer.size(); }
         uint32 GetQueuedSessionCount() const { return m_QueuedPlayer.size(); }
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxQueuedSessionCount() const { return m_maxQueuedSessionCount; }
-        uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }
         /// Get number of players
         inline uint32 GetPlayerCount() const { return m_PlayerCount; }
         inline uint32 GetMaxPlayerCount() const { return m_MaxPlayerCount; }
@@ -938,7 +937,6 @@ class World
         SessionMap m_offlineSessions;
         typedef std::unordered_map<uint32, time_t> DisconnectMap;
         DisconnectMap m_disconnects;
-        uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
         uint32 m_PlayerCount;
         uint32 m_MaxPlayerCount;

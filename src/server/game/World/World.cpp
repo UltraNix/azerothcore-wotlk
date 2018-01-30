@@ -110,7 +110,6 @@ World::World()
     m_gameTime = time(nullptr);
     m_gameMSTime = getMSTime();
     m_startTime = m_gameTime;
-    m_maxActiveSessionCount = 0;
     m_maxQueuedSessionCount = 0;
     m_PlayerCount = 0;
     m_MaxPlayerCount = 0;
@@ -3185,12 +3184,6 @@ void World::ResetGuildCap()
     sWorld->setWorldState(WS_GUILD_DAILY_RESET_TIME, uint64(m_NextGuildReset));
 
     sGuildMgr->ResetTimes();
-}
-
-void World::UpdateMaxSessionCounters()
-{
-    m_maxActiveSessionCount = std::max(m_maxActiveSessionCount, uint32(m_sessions.size()-m_QueuedPlayer.size()));
-    m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount, uint32(m_QueuedPlayer.size()));
 }
 
 void World::LoadDBVersion()

@@ -190,7 +190,7 @@ public:
 
         if (!guid)
         {
-            handler->PSendSysMessage("There is no player.");
+            handler->PSendSysMessage(LANG_ANTICHEAT_NO_PLAYER);
             return true;
         }
 
@@ -203,11 +203,11 @@ public:
         uint32 teleportplane_reports = sAnticheatMgr->GetTypeReports(guid,4);
         uint32 climb_reports = sAnticheatMgr->GetTypeReports(guid,5);
 
-        handler->PSendSysMessage("Information about player %s",player->GetName().c_str());
-        handler->PSendSysMessage("Average: %f || Total Reports: %u ",average,total_reports);
-        handler->PSendSysMessage("Speed Reports: %u || Fly Reports: %u || Jump Reports: %u ",speed_reports,fly_reports,jump_reports);
-        handler->PSendSysMessage("Walk On Water Reports: %u  || Teleport To Plane Reports: %u",waterwalk_reports,teleportplane_reports);
-        handler->PSendSysMessage("Climb Reports: %u", climb_reports);
+        handler->PSendSysMessage(LANG_ANTICHEAT_INFO_PART_1, player->GetName().c_str());
+        handler->PSendSysMessage(LANG_ANTICHEAT_INFO_PART_2, average, total_reports);
+        handler->PSendSysMessage(LANG_ANTICHEAT_INFO_PART_3, speed_reports, fly_reports, jump_reports);
+        handler->PSendSysMessage(LANG_ANTICHEAT_INFO_PART_4, waterwalk_reports, teleportplane_reports);
+        handler->PSendSysMessage(LANG_ANTICHEAT_INFO_PART_5, climb_reports);
 
         return true;
     }

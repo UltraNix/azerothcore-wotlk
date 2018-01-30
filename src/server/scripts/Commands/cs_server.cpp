@@ -103,11 +103,9 @@ public:
     static bool HandleServerInfoCommand(ChatHandler* handler, char const* /*args*/)
     {
         std::string realmName = sWorld->GetRealmName();
-        uint32 revision = sWorld->GetRevision();
         uint32 playerCount = sWorld->GetPlayerCount();
         uint32 activeSessionCount = sWorld->GetActiveSessionCount();
         uint32 queuedSessionCount = sWorld->GetQueuedSessionCount();
-        uint32 connPeak = sWorld->GetMaxActiveSessionCount();
         std::string uptime = secsToTimeString(sWorld->GetUptime()).append(".");
         uint32 updateTime = sWorld->GetUpdateTime();
         uint32 avgUpdateTime = avgDiffTracker.getAverage();
@@ -119,37 +117,26 @@ public:
             playerCount = (playerCount + (playerCount * boostPercentage));
         }
 
-        if (revision != 0)
-            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cffff9933%s|cFFFFD700) - Rev: |cffff9933%u|cFFFFD700 (|cffff9933%s|cFFFFD700)|r", sWorld->GetRealmName().c_str(), revision, _HASH);
-        else
-            handler->PSendSysMessage("|cFFFFD700Sunwell.pl (|cffff9933%s|cFFFFD700) - Rev: |cffff9933%s", sWorld->GetRealmName().c_str(), _HASH);
-
-        if (!queuedSessionCount)
-            handler->PSendSysMessage("|cFFFFD700Connected players: |cffff9933%u |cFFFFD700Characters in world: |cffff9933%u|r", activeSessionCount, playerCount);
-        else
-            handler->PSendSysMessage("|cFFFFD700Connected players: |cffff9933%u |cFFFFD700Characters in world: |cffff9933%u |cFFFFD700Queue: |cffff9933%u|r", activeSessionCount, playerCount, queuedSessionCount);
-
-        //handler->PSendSysMessage("Connection peak: %u.", connPeak);
-        handler->PSendSysMessage("|cFFFFD700Server uptime: |cffff9933%s|r", uptime.c_str());
-
         char buff[20];
         time_t now = sWorld->GetGameTime();
         strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-        handler->PSendSysMessage("|cFFFFD700Server time: |cffff9933%s|r", buff);
 
-        handler->PSendSysMessage("|cFFFFD700Update time diff: |cffff9933%ums |cFFFFD700average: |cffff9933%ums|r", updateTime, avgUpdateTime);
+        sWorld->GetRevision() != 0 ? handler->PSendSysMessage(LANG_SERVER_HASH_WITH_REVISION, sWorld->GetRealmName().c_str(), sWorld->GetRevision(), _HASH) : handler->PSendSysMessage(LANG_SERVER_HASH, sWorld->GetRealmName().c_str(), _HASH);
+        queuedSessionCount != 0 ? handler->PSendSysMessage(LANG_CONNECTED_USERS, activeSessionCount, playerCount) : handler->PSendSysMessage(LANG_CONNECTED_USERS_QUE, activeSessionCount, playerCount, queuedSessionCount);
+        handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
+        handler->PSendSysMessage(LANG_SERVER_TIME, buff);
+        handler->PSendSysMessage(LANG_UPDATE_DIFF, updateTime, avgUpdateTime);
 
         if (handler->GetSession())
             if (Player* p = handler->GetSession()->GetPlayer())
                 if (p->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER))
-                    handler->PSendSysMessage("|cFFFFD700DEV wavg: |cffff9933%ums|cFFFFD700 nsmax: |cffff9933%ums|cFFFFD700 nsavg: |cffff9933%ums |cFFFFD700LFG avg: |cffff9933%ums|cFFFFD700 max: |cffff9933%ums|cFFFFD700|r", avgDiffTracker.getTimeWeightedAverage(), devDiffTracker.getMax(), devDiffTracker.getAverage(), lfgDiffTracker.getAverage(), lfgDiffTracker.getMax());
+                    handler->PSendSysMessage(LANG_SERVER_DEV_INFO, avgDiffTracker.getTimeWeightedAverage(), devDiffTracker.getMax(), devDiffTracker.getAverage(), lfgDiffTracker.getAverage(), lfgDiffTracker.getMax());
 
         //! Can't use sWorld->ShutdownMsg here in case of console command
         if (sWorld->IsShuttingDown())
         {
-            handler->PSendSysMessage("");
-            handler->PSendSysMessage("|cFFFFD700[WARNING] Server will |cffff9933%s|cFFFFD700 in: |cffff9933%s|r", (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
-            handler->PSendSysMessage("|cFFFFD700Reason: |cffff9933%s|cFFFFD700.|r", sWorld->GetShutdownReason());
+            handler->PSendSysMessage(LANG_SERVER_SHUTDOWN_WARNING, (sWorld->GetShutdownMask() & SHUTDOWN_MASK_RESTART ? "restart" : "be shutteddown"), secsToTimeString(sWorld->GetShutDownTimeLeft()).append(".").c_str());
+            handler->PSendSysMessage(LANG_SERVER_SHUTDOWN_REASON, sWorld->GetShutdownReason());
         }
 
         return true;
@@ -159,20 +146,10 @@ public:
     {
         uint32 playerCount = sWorld->GetPlayerCount();
         uint32 activeSessionCount = sWorld->GetActiveSessionCount();
-        uint32 connPeak = sWorld->GetMaxActiveSessionCount();
 
-        handler->PSendSysMessage("# # # Underground begin # # #");
-        handler->PSendSysMessage("NO BOOST: Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
-
-        if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
-        {
-            float boostPercentage = sWorld->getFloatConfig(CONFIG_BOOST_PERCENTAGE_ONLINE);
-            activeSessionCount = (activeSessionCount + (activeSessionCount * boostPercentage));
-            playerCount = (playerCount + (playerCount * boostPercentage));
-
-            handler->PSendSysMessage("WITH BOOST: Connected players: %u. Characters in world: %u.", activeSessionCount, playerCount);
-        }
-        handler->PSendSysMessage("# # # Underground end # # #");
+        handler->PSendSysMessage(LANG_SERVER_BOOST);
+        handler->PSendSysMessage(LANG_SERVER_BOOST_INFO, activeSessionCount, playerCount);
+        handler->PSendSysMessage(LANG_SERVER_BOOST);
 
         return true;
     }

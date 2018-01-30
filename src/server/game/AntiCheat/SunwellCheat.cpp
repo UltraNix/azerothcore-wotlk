@@ -100,7 +100,7 @@ void SunwellCheat::buildOpcodeReport(Player* player, uint16 opCode)
                     case BAN_IP: nameOrIp = player->GetSession()->GetRemoteAddress(); break;
                 }
 
-                sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding or Spoofing)", "Server: SunwellCheat");
+                sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding or Spoofing)", "[SunwellCheat]");
                 sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been banned for %u minutes due to possible DOS flooding! opCode: %u count: %u",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), duration / MINUTE, opCode, opCounter);
 
@@ -113,12 +113,7 @@ void SunwellCheat::buildOpcodeReport(Player* player, uint16 opCode)
         if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT_NOTIFY))
             return;
 
-        // pussywizard: notify all online GMs
-        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-            if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage("Player: %s (GUID: %u) (Account ID: %u) has been reported due to possible DOS flooding! opCode: %u count: %u", player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), opCode, opCounter);
+        sWorld->SendGMText(LANG_SUNWELLCHEAT_DOS, player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), opCode, opCounter);
     }
 }
 
@@ -165,7 +160,7 @@ void SunwellCheat::buildCastReport(Player* player, uint32 spellId)
                     case BAN_IP: nameOrIp = player->GetSession()->GetRemoteAddress(); break;
                 }
 
-                sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding or Spoofing)", "Server: SunwellCheat");
+                sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding or Spoofing)", "[SunwellCheat]");
                 sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been banned for %u due to casted spell: %u over: %u times! Possible gold cheater!",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), duration / MINUTE, spellId, castCounter);
 
@@ -178,11 +173,6 @@ void SunwellCheat::buildCastReport(Player* player, uint32 spellId)
         if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT_NOTIFY))
             return;
 
-        // pussywizard: notify all online GMs
-        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-            if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been reported due to casted spell: %u over: %u times! Possible gold cheater!", player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), spellId, castCounter);
+        sWorld->SendGMText(LANG_SUNWELLCHEAT_GOLD, player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), spellId, castCounter);
     }
 }

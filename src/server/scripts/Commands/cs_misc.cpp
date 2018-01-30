@@ -967,12 +967,12 @@ public:
 
     static bool HandleHelpCommand(ChatHandler* handler, char const* args)
     {
-        handler->PSendSysMessage("|cFFFFD700List of commands:|r ");
-        handler->PSendSysMessage("|cff00ccff.info|cFFFFD700 - shows you the information about the server. |r");
-        handler->PSendSysMessage("|cff00ccff.premium|cFFFFD700 - displays the status of your Premium Privileges. |r ");
-        handler->PSendSysMessage("|cff00ccff.pvpinfo|cFFFFD700 - toggles the visibility of PvP related announcements.|r");
-        handler->PSendSysMessage("|cff00ccff.blizzlike|cFFFFD700 - toggles x1 experience rate.|r");
-        handler->PSendSysMessage("|cff00ccff.dodge|cFFFFD700 - hides your location at /who (requires 2000 Arena Rating).|r");
+        handler->PSendSysMessage(LANG_HELP_INFORMATION);
+        handler->PSendSysMessage(LANG_HELP_COMMAND_INFO);
+        handler->PSendSysMessage(LANG_HELP_COMMAND_PREMIUM);
+        handler->PSendSysMessage(LANG_HELP_COMMAND_PVPINFO);
+        handler->PSendSysMessage(LANG_HELP_COMMAND_BLIZZLIKE);
+        handler->PSendSysMessage(LANG_HELP_COMMAND_DODGE);
         return true;
     }
 

@@ -261,7 +261,7 @@ public:
 
         if (!result)
         {
-            handler->PSendSysMessage("|cFFFFD700Wrong guid, player doesn't exists in database.|r");
+            handler->PSendSysMessage(LANG_NINJA_ADD_FAILED);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -271,7 +271,7 @@ public:
         stmt->setUInt32(1, ninjaGuid);
         CharacterDatabase.Execute(stmt);
 
-        handler->PSendSysMessage("|cFFFFD700Success! Player with GUID: |cff00ccff%u|cFFFFD700 has been added to ninja looter list.|r", ninjaGuid);
+        handler->PSendSysMessage(LANG_NINJA_ADD_SUCCESS, ninjaGuid);
 
         return true;
     }
@@ -302,7 +302,7 @@ public:
 
         if (!result)
         {
-            handler->PSendSysMessage("|cFFFFD700Wrong guid, player doesn't exists in database.|r");
+            handler->PSendSysMessage(LANG_NINJA_REMOVE_FAILED);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -312,7 +312,7 @@ public:
         stmt->setUInt32(1, ninjaGuid);
         CharacterDatabase.Execute(stmt);
 
-        handler->PSendSysMessage("|cFFFFD700Success! Player with GUID: |cff00ccff%u |cFFFFD700has been removed from ninja looter list.|r", ninjaGuid);
+        handler->PSendSysMessage(LANG_NINJA_REMOVE_SUCCESS, ninjaGuid);
 
         return true;
     }
@@ -329,7 +329,7 @@ public:
 
         if (!result)
         {
-            handler->PSendSysMessage("|cFFFFD700There are no ninja looters on the list. Sounds good, isn't it?|r");
+            handler->PSendSysMessage(LANG_NINJA_NOT_FOUND);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -339,7 +339,7 @@ public:
             {
                 Field *fields = result->Fetch();
                 std::string name = fields[0].GetString();
-                handler->PSendSysMessage("|cFFFFD700Warning! Player: |cff00ccff%s |cFFFFD700at ninja looter list!|r", name.c_str());
+                handler->PSendSysMessage(LANG_NINJA_FOUND, name.c_str());
 
             } while (result->NextRow());
         }
@@ -364,13 +364,13 @@ public:
         if (!player->BlizzlikeMode())
         {
             player->SetBlizzlikeMode(true);
-            handler->PSendSysMessage("|cFFFFD700Your experience rate has been changed to blizzlike (x1). You have to relog for the change to apply.|r");
+            handler->PSendSysMessage(LANG_BLIZZLIKE_ON);
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetBlizzlikeMode(false);
-            handler->PSendSysMessage("|cFFFFD700Your experience rate has been changed to default. You have to relog for the change to apply.|r");
+            handler->PSendSysMessage(LANG_BLIZZLIKE_OFF);
             handler->SetSentErrorMessage(true);
         }
 
@@ -387,13 +387,13 @@ public:
         if (!player->PvPAnnounces())
         {
             player->SetPvPAnnounces(true);
-            handler->PSendSysMessage("|cFFFFD700PvP announcements are |cff06e015enabled|cFFFFD700. You have to relog for the change to apply.|r");
+            handler->PSendSysMessage(LANG_PVP_ANNOUNCEMENTS_ON);
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetPvPAnnounces(false);
-            handler->PSendSysMessage("|cFFFFD700PvP announcements are |cffff0000disabled|cFFFFD700. You have to relog for the change to apply.|r");
+            handler->PSendSysMessage(LANG_PVP_ANNOUNCEMENTS_OFF);
             handler->SetSentErrorMessage(true);
         }
 
@@ -409,7 +409,7 @@ public:
 
         if (player->GetMaxPersonalArenaRatingRequirement(0) < 2000)
         {
-            handler->PSendSysMessage("|cff00ccff2000|cFFFFD700 Personal Rating is required to use this command.|r");
+            handler->PSendSysMessage(LANG_DODGE_NO_RATING);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -417,13 +417,13 @@ public:
         if (!player->IsInDodgeMode())
         {
             player->SetDodgeMode(true);
-            handler->PSendSysMessage("|cFFFFD700Dodge mode has been |cff06e015enabled|cFFFFD700, display of your location is disabled.|r");
+            handler->PSendSysMessage(LANG_DODGE_ON);
             handler->SetSentErrorMessage(true);
         }
         else
         {
             player->SetDodgeMode(false);
-            handler->PSendSysMessage("|cFFFFD700Dodge mode has been |cffff0000disabled|cFFFFD700, display of your location is enabled.|r");
+            handler->PSendSysMessage(LANG_DODGE_OFF);
             handler->SetSentErrorMessage(true);
         }
 
@@ -442,9 +442,9 @@ public:
         }
 
         if (player->BlizzlikeMode())
-            handler->PSendSysMessage("|cFFFFD700Player %s has |cff00ff00enabled|cFFFFD700 Blizzlike Mode.", player->GetName().c_str());
+            handler->PSendSysMessage(LANG_HAS_BLIZZLIKE_ON, player->GetName().c_str());
         else
-            handler->PSendSysMessage("|cFFFFD700Player %s has |cffff0000disabled|cFFFFD700 Blizzlike Mode.", player->GetName().c_str());
+            handler->PSendSysMessage(LANG_HAS_BLIZZLIKE_OFF, player->GetName().c_str());
 
         return true;
     }
@@ -485,13 +485,7 @@ public:
         }
 
         sLog->outBan("Game Master: [%s] has banned player: [%s] for gold selling. (30 days)", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
-
-        // pussywizard: notify all online GMs
-        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-            if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage("|cFFFFD700Game Master: [|cff00ccff%s|cFFFFD700] has banned player: [|cff00ccf%s|cFFFFD700] for gold selling.|r", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+        sWorld->SendGMText(LANG_GOLD_BAN, handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
 
         return true;
     }
@@ -532,13 +526,7 @@ public:
         }
 
         sLog->outBan("Game Master: [%s] has banned player: [%s] for speed hack. (30 days)", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
-
-        // pussywizard: notify all online GMs
-        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-            if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage("|cFFFFD700Game Master: [|cff00ccff%s|cFFFFD700] has banned player: [|cff00ccf%s|cFFFFD700] for speed hack.|r", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+        sWorld->SendGMText(LANG_SPEED_BAN, handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
 
         return true;
     }
@@ -601,14 +589,18 @@ public:
         std::string nameLink = handler->playerLink(targetName);
 
         // Sitowsky: Mute History
-        LoginDatabase.PExecute("REPLACE INTO account_mute_history VALUES ('%u', '%s', '%s', '%s', '%u', NOW())", accountId, targetName.c_str(), reason.c_str(), muteBy.c_str(), 30);
+        if (sWorld->getBoolConfig(CONFIG_MUTE_HISTORY))
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_MUTE_HISTORY);
+            stmt->setUInt32(0, accountId);
+            stmt->setString(1, targetName.c_str());
+            stmt->setString(2, reason.c_str());
+            stmt->setString(3, muteBy.c_str());
+            stmt->setUInt32(4, 30);
+            LoginDatabase.Execute(stmt);
+        }
 
-        // pussywizard: notify all online GMs
-        TRINITY_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
-        HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
-            if (itr->second->GetSession()->GetSecurity())
-                ChatHandler(itr->second->GetSession()).PSendSysMessage(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, (handler->GetSession() ? handler->GetSession()->GetPlayerName().c_str() : "Console"), nameLink.c_str(), 30, reason.c_str());
+        sWorld->SendGMText(target ? LANG_YOU_DISABLE_CHAT : LANG_COMMAND_DISABLE_CHAT_DELAYED, (handler->GetSession() ? handler->GetSession()->GetPlayerName().c_str() : "Console"), nameLink.c_str(), 30, reason.c_str());
 
         return true;
     }

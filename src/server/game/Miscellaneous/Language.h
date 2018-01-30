@@ -83,10 +83,22 @@ enum TrinityStrings
     LANG_USING_WORLD_DB                 = 57,
     LANG_USING_SCRIPT_LIB               = 58,
     LANG_USING_EVENT_AI                 = 59,
-    LANG_CONNECTED_PLAYERS              = 60,
+    LANG_CONNECTED_USERS_QUE            = 60,
     LANG_ACCOUNT_ADDON                  = 61,
     LANG_IMPROPER_VALUE                 = 62,
-    // Room for more level 0              63-99 not used
+    LANG_SERVER_TIME                    = 63,
+    LANG_SERVER_HASH                    = 64,
+    LANG_SERVER_HASH_WITH_REVISION      = 65,
+    LANG_SERVER_DEV_INFO                = 66,
+    LANG_SERVER_SHUTDOWN_WARNING        = 67,
+    LANG_SERVER_SHUTDOWN_REASON         = 68,
+    LANG_HELP_INFORMATION               = 69,
+    LANG_HELP_COMMAND_INFO              = 70,
+    LANG_HELP_COMMAND_PREMIUM           = 71,
+    LANG_HELP_COMMAND_PVPINFO           = 72,
+    LANG_HELP_COMMAND_BLIZZLIKE         = 73,
+    LANG_HELP_COMMAND_DODGE             = 74,
+    // Room for more level 0              75-99 not used
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
@@ -1128,6 +1140,40 @@ enum TrinityStrings
     LANG_AUTO_BROADCAST                     = 11000,
     LANG_INVALID_REALMID                    = 11001,
 
+    LANG_SERVER_BOOST                       = 11002,
+    LANG_SERVER_BOOST_INFO                  = 11003,
+    LANG_SERVER_RECORD_DIFF                 = 11004,
+    LANG_SUNWELLCHEAT_DOS                   = 11005,
+    LANG_SUNWELLCHEAT_GOLD                  = 11006,
+    LANG_NINJA_ADD_FAILED                   = 11007,
+    LANG_NINJA_ADD_SUCCESS                  = 11008,
+    LANG_NINJA_REMOVE_FAILED                = 11009,
+    LANG_NINJA_REMOVE_SUCCESS               = 11010,
+    LANG_NINJA_NOT_FOUND                    = 11011,
+    LANG_NINJA_FOUND                        = 11012,
+    LANG_BLIZZLIKE_ON                       = 11013,
+    LANG_BLIZZLIKE_OFF                      = 11014,
+    LANG_PVP_ANNOUNCEMENTS_ON               = 11015,
+    LANG_PVP_ANNOUNCEMENTS_OFF              = 11016,
+    LANG_DODGE_NO_RATING                    = 11017,
+    LANG_DODGE_ON                           = 11018,
+    LANG_DODGE_OFF                          = 11019,
+    LANG_HAS_BLIZZLIKE_ON                   = 11020,
+    LANG_HAS_BLIZZLIKE_OFF                  = 11021,
+    LANG_GOLD_BAN                           = 11022,
+    LANG_SPEED_BAN                          = 11023,
+    LANG_ANTICHEAT_WARN                     = 11024,
+    LANG_ANTICHEAT_NO_PLAYER                = 11025,
+    LANG_ANTICHEAT_INFO_PART_1              = 11026,
+    LANG_ANTICHEAT_INFO_PART_2              = 11027,
+    LANG_ANTICHEAT_INFO_PART_3              = 11028,
+    LANG_ANTICHEAT_INFO_PART_4              = 11029,
+    LANG_ANTICHEAT_INFO_PART_5              = 11030,
+    LANG_NO_PREMIUM_ACTIVE                  = 11031,
+    LANG_SEND_PREMIUM_ACTIVE                = 11032,
+    LANG_SEND_AUTOINVITE_PL                 = 11033,
+    LANG_SEND_AUTOINVITE_EN                 = 11034,
+
     LANG_POSSIBLE_CHEATER                   = 10500,
     //                                      = 10501,
 
@@ -1136,6 +1182,7 @@ enum TrinityStrings
     LANG_ARENA_5V5_ANNOUNCE                 = 10504,
     LANG_EVENT_WINNER                       = 10505,
     LANG_POSSIBLE_GOLD_SELLER               = 10506
+
 
     // NOT RESERVED IDS                   12000-1999999999
     // `db_script_string` table index     2000000000-2000009999 (MIN_DB_SCRIPT_STRING_ID-MAX_DB_SCRIPT_STRING_ID)
