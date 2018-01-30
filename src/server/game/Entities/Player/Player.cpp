@@ -3192,7 +3192,7 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     if (xp < 1)
         return;
 
-    if (!IsAlive() && !GetBattlegroundId())
+    if (!IsAlive() && !GetBattlegroundId() && (!GetMap() || !GetMap()->IsDungeon()))
         return;
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN))
