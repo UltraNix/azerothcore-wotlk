@@ -1874,7 +1874,7 @@ void ObjectMgr::LoadCreatures()
         data.movementType   = fields[14].GetUInt8();
         data.spawnMask      = fields[15].GetUInt8();
         data.phaseMask      = fields[16].GetUInt32();
-        uint16 gameEvent    = fields[17].GetUInt16();
+        uint16 gameEvent    = fields[17].GetUInt8();
         uint32 PoolId       = fields[18].GetUInt32();
         data.npcflag        = fields[19].GetUInt32();
         data.unit_flags     = fields[20].GetUInt32();
@@ -2233,7 +2233,7 @@ void ObjectMgr::LoadGameobjects()
             sLog->outErrorDb("Table `gameobject` has gameobject (GUID: %u Entry: %u) that has wrong spawn mask %u including not supported difficulty modes for map (Id: %u), skip", guid, data.id, data.spawnMask, data.mapid);
 
         data.phaseMask       = fields[15].GetUInt32();
-        uint16 gameEvent     = fields[16].GetUInt16();
+        uint16 gameEvent     = fields[16].GetUInt8();
         uint32 PoolId        = fields[17].GetUInt32();
 
         if (data.rotation.x < -1.0f || data.rotation.x > 1.0f)

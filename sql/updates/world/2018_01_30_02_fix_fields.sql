@@ -1,0 +1,12 @@
+ALTER TABLE `game_event` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL COMMENT 'Entry of the game event';
+ALTER TABLE `game_event_creature` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) NOT NULL COMMENT 'Entry of the game event. Put negative entry to remove during event.';
+ALTER TABLE `game_event_creature_quest` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL COMMENT 'Entry of the game event.';
+ALTER TABLE `game_event_gameobject` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) NOT NULL COMMENT 'Entry of the game event. Put negative entry to remove during event.';
+ALTER TABLE `game_event_gameobject_quest` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL COMMENT 'Entry of the game event';
+ALTER TABLE `game_event_model_equip` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) NOT NULL COMMENT 'Entry of the game event.';
+ALTER TABLE `game_event_npcflag` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL COMMENT 'Entry of the game event';
+ALTER TABLE `game_event_npc_vendor` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) NOT NULL COMMENT 'Entry of the game event.';
+ALTER TABLE `game_event_pool` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) NOT NULL COMMENT 'Entry of the game event. Put negative entry to remove during event.';
+ALTER TABLE `game_event_prerequisite` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL COMMENT 'Entry of the game event';
+ALTER TABLE `game_event_quest_condition` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL COMMENT 'Entry of the game event.';
+ALTER TABLE `game_event_seasonal_questrelation` CHANGE `eventEntry` `eventEntry` TINYINT( 3 ) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Entry of the game event';

@@ -554,7 +554,7 @@ public:
         stmt->setFloat(0, player->GetPositionX());
         stmt->setFloat(1, player->GetPositionY());
         stmt->setFloat(2, player->GetPositionZ());
-        stmt->setUInt32(3, player->GetMapId());
+        stmt->setUInt16(3, uint16(player->GetMapId()));
         stmt->setFloat(4, player->GetPositionX());
         stmt->setFloat(5, player->GetPositionY());
         stmt->setFloat(6, player->GetPositionZ());
