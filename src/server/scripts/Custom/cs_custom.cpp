@@ -47,7 +47,8 @@ public:
             { "hasblizzlike",       SEC_MODERATOR,          false, HandleHasBlizzlikeCommand,           "" },
             { "goldban",            SEC_MODERATOR,          false, &HandleGoldBanCommand,               "" },
             { "speedban",           SEC_MODERATOR,          false, &HandleSpeedBanCommand,              "" },
-            { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" }
+            { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" },
+            { "iccreset",           SEC_MODERATOR,          false, HandleICCResetCommand,               "" },
         };
         return commandTable;
     }
@@ -604,6 +605,30 @@ public:
 
         return true;
     }
+
+    static bool HandleICCResetCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        uint32 iccMapID = 631;
+
+        if (!player)
+            return false;
+
+        if (player->GetMap()->Instanceable())
+        {
+            handler->PSendSysMessage("You can't do that here.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+            sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUIDLow(), iccMapID, Difficulty(i), true, player);
+
+        handler->PSendSysMessage("ICC has been successfully reset.");
+        return true;
+    }
+
+
 };
 
 void AddSC_custom_commandscript()
