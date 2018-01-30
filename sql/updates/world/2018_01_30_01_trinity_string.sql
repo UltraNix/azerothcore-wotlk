@@ -1,0 +1,1 @@
+UPDATE `trinity_string` SET `content_default` = '%s' WHERE `trinity_string`.`entry` = 11000; 
