@@ -494,19 +494,13 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             {
                 // Special handling for vehicles
                 if (IsUnit(*itr))
-                {
                     if (Vehicle* vehicle = (*itr)->ToUnit()->GetVehicleKit())
                         for (SeatMap::iterator it = vehicle->Seats.begin(); it != vehicle->Seats.end(); ++it)
                             if (Player* player = ObjectAccessor::GetPlayer(*(*itr), it->second.Passenger.Guid))
                                 player->AreaExploredOrEventHappens(e.action.quest.quest);
 
-                    if (Player* player = (*itr)->ToUnit()->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    {
-                        player->GroupEventHappens(e.action.quest.quest, me);
-                        ;//sLog->outDebug(LOG_FILTER_DATABASE_AI, "SmartScript::ProcessAction:: SMART_ACTION_CALL_AREAEXPLOREDOREVENTHAPPENS: Player guidLow %u credited quest %u",
-                        //    (*itr)->GetGUIDLow(), e.action.quest.quest);
-                    }
-                }
+                if (IsPlayer(*itr))
+                    (*itr)->ToPlayer()->AreaExploredOrEventHappens(e.action.quest.quest);;
             }
 
             delete targets;
