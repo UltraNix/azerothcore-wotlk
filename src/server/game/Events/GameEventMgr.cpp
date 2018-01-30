@@ -806,8 +806,6 @@ void GameEventMgr::LoadFromDB()
                     continue;
                 }
 
-                sLog->outReleaseDebug("EventMgr Loading - Quest Id: %u, Event Entry: %u, Event Entry as uint32: %u", questId, eventEntry, uint32(eventEntry));
-
                 questTemplate->SetEventIdForQuest(eventEntry);
                 ++count;
             }

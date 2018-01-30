@@ -218,11 +218,9 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
                 {
                 case 3: // 3v3
                     sWorld->SendPvPWorldText(LANG_ARENA_3V3_ANNOUNCE);
-                    sLog->outReleaseDebug("Arena Team Id: %u has been added to queue and pass info to world", arenateamid);
                     break;
                 case 5: // 5v5
                     sWorld->SendPvPWorldText(LANG_ARENA_5V5_ANNOUNCE);
-                    sLog->outReleaseDebug("Arena Team Id: %u has been added to queue and pass info to world", arenateamid);
                     break;
                 }
             }

@@ -624,15 +624,6 @@ public:
                 me->MonsterYell("Powerless to act...", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SARA_P1_KILL1);
             }
-
-            // FOR DEBUG SOME SHIT ONLY!
-            {
-                std::string str = TimeToTimestampStr(sWorld->GetGameTime());
-
-                if (who->getClass() == CLASS_WARLOCK)
-                    sLog->outReleaseDebug("YOGG: Player (WARLOCK): %s died, time: %s", who->GetName().c_str(), str.c_str());
-            }
-            // FOR DEBUG SOME SHIT ONLY!
         }
 
         void SpellHitTarget(Unit* target, const SpellInfo* spellInfo)
@@ -640,15 +631,6 @@ public:
             if (spellInfo->Id == SPELL_SANITY)
                 if (Aura* aur = target->GetAura(SPELL_SANITY))
                     aur->SetStackAmount(100);
-
-            // FOR DEBUG SOME SHIT ONLY!
-            {
-                std::string str = TimeToTimestampStr(sWorld->GetGameTime());
-
-                if (target->getClass() == CLASS_WARLOCK)
-                    sLog->outReleaseDebug("YOGG: Player (WARLOCK): %s, hit by spell ID: %u, time: %s", target->GetName().c_str(), spellInfo->Id, str.c_str());
-            }
-            // FOR DEBUG SOME SHIT ONLY!
         }
 
         uint32 GetData(uint32 param) const
