@@ -1,0 +1,2 @@
+UPDATE `access_requirement` SET `completed_achievement`=0 WHERE `mapId`=631 AND `difficulty`=2; -- 4530
+UPDATE `access_requirement` SET `completed_achievement`=0 WHERE `mapId`=631 AND `difficulty`=3; -- 4597
