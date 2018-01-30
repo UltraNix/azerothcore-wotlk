@@ -149,6 +149,7 @@ set(scripts_STAT_SRCS
   Northrend/AzjolNerub/ahnkahet/boss_elder_nadox.cpp
   Northrend/AzjolNerub/ahnkahet/boss_amanitar.cpp
   Northrend/AzjolNerub/ahnkahet/ahnkahet.h
+  Northrend/AzjolNerub/ahnkahet/ahnkahet.cpp
   Northrend/VioletHold/boss_zuramat.cpp
   Northrend/VioletHold/instance_violet_hold.cpp
   Northrend/VioletHold/boss_lavanthor.cpp

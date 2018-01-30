@@ -342,6 +342,7 @@ void AddSC_boss_hadronox();
 void AddSC_boss_anub_arak();
 void AddSC_instance_azjol_nerub();
 void AddSC_instance_ahnkahet();          //Azjol-Nerub Ahn'kahet
+void AddSC_ahnkahet();
 void AddSC_boss_amanitar();
 void AddSC_boss_taldaram();
 void AddSC_boss_jedoga_shadowseeker();
@@ -1080,6 +1081,7 @@ void AddNorthrendScripts()
     AddSC_boss_jedoga_shadowseeker();
     AddSC_boss_volazj();
     AddSC_instance_ahnkahet();
+    AddSC_ahnkahet();
     AddSC_boss_argent_challenge();      //Trial of the Champion
     AddSC_boss_black_knight();
     AddSC_boss_grand_champions();
