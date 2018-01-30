@@ -245,7 +245,7 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 
     // prevent events in the past
     // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-    if (time_t(eventPackedTime) < (time(NULL) - time_t(86400L)))
+    if (time_t(eventPackedTime) < (time(nullptr) - time_t(86400L)))
     {
         recvData.rfinish();
         return;
@@ -337,7 +337,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
 
     // prevent events in the past
     // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-    if (time_t(eventPackedTime) < (time(NULL) - time_t(86400L)))
+    if (time_t(eventPackedTime) < (time(nullptr) - time_t(86400L)))
     {
         recvData.rfinish();
         return;
@@ -397,7 +397,7 @@ void WorldSession::HandleCalendarCopyEvent(WorldPacket& recvData)
 
     // prevent events in the past
     // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-    if (time_t(eventTime) < (time(NULL) - time_t(86400L)))
+    if (time_t(eventTime) < (time(nullptr) - time_t(86400L)))
     {
         recvData.rfinish();
         return;
@@ -539,7 +539,7 @@ void WorldSession::HandleCalendarEventSignup(WorldPacket& recvData)
         }
 
         CalendarInviteStatus status = tentative ? CALENDAR_STATUS_TENTATIVE : CALENDAR_STATUS_SIGNED_UP;
-        CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, guid, guid, time(NULL), status, CALENDAR_RANK_PLAYER, "");
+        CalendarInvite* invite = new CalendarInvite(sCalendarMgr->GetFreeInviteId(), eventId, guid, guid, time(nullptr), status, CALENDAR_RANK_PLAYER, "");
         sCalendarMgr->AddInvite(calendarEvent, invite);
         sCalendarMgr->SendCalendarClearPendingAction(guid);
     }
@@ -572,7 +572,7 @@ void WorldSession::HandleCalendarEventRsvp(WorldPacket& recvData)
         if (CalendarInvite* invite = sCalendarMgr->GetInvite(inviteId))
         {
             invite->SetStatus(CalendarInviteStatus(status));
-            invite->SetStatusTime(time(NULL));
+            invite->SetStatusTime(time(nullptr));
 
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventStatus(*calendarEvent, *invite);
@@ -638,7 +638,7 @@ void WorldSession::HandleCalendarEventStatus(WorldPacket& recvData)
         {
             invite->SetStatus((CalendarInviteStatus)status);
             // not sure if we should set response time when moderator changes invite status
-            //invite->SetStatusTime(time(NULL));
+            //invite->SetStatusTime(time(nullptr));
 
             sCalendarMgr->UpdateInvite(invite);
             sCalendarMgr->SendCalendarEventStatus(*calendarEvent, *invite);
@@ -742,7 +742,7 @@ void WorldSession::SendCalendarRaidLockout(InstanceSave const* save, bool add)
 {
     sSunwellCheatMgr->buildOpcodeReport(_player, add ? SMSG_CALENDAR_RAID_LOCKOUT_ADDED : SMSG_CALENDAR_RAID_LOCKOUT_REMOVED);
     sLog->outDebug(LOG_FILTER_NETWORKIO, "%s", add ? "SMSG_CALENDAR_RAID_LOCKOUT_ADDED" : "SMSG_CALENDAR_RAID_LOCKOUT_REMOVED");
-    time_t currTime = time(NULL);
+    time_t currTime = time(nullptr);
 
     WorldPacket data(SMSG_CALENDAR_RAID_LOCKOUT_REMOVED, (add ? 4 : 0) + 4 + 4 + 4 + 8);
     if (add)
@@ -760,7 +760,7 @@ void WorldSession::SendCalendarRaidLockout(InstanceSave const* save, bool add)
 
 void WorldSession::SendCalendarRaidLockoutUpdated(InstanceSave const* save, bool isExtended)
 {
-    time_t currTime = time(NULL);
+    time_t currTime = time(nullptr);
     time_t resetTime = isExtended ? save->GetExtendedResetTime() : save->GetResetTime();
     time_t resetTimeOp = isExtended ? save->GetResetTime() : save->GetExtendedResetTime();
     WorldPacket data(SMSG_CALENDAR_RAID_LOCKOUT_UPDATED, 4 + 4 + 4 + 4 + 8);

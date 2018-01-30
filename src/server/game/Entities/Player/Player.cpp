@@ -778,8 +778,9 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     for (uint8 j = 0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; ++j)
         m_bgBattlegroundQueueID[j] = BATTLEGROUND_QUEUE_NONE;
 
-    m_logintime = time(NULL);
+    m_logintime = time(nullptr);
     m_Last_tick = m_logintime;
+    m_Last_sb_tick = m_logintime;
     m_Played_time[PLAYED_TIME_TOTAL] = 0;
     m_Played_time[PLAYED_TIME_LEVEL] = 0;
     m_WeaponProficiency = 0;
@@ -851,7 +852,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_spellPenetrationItemMod = 0;
 
     // Honor System
-    m_lastHonorUpdateTime = time(NULL);
+    m_lastHonorUpdateTime = time(nullptr);
 
     m_IsBGRandomWinner = false;
 
@@ -1154,7 +1155,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     }
 
     // Played time
-    m_Last_tick = time(NULL);
+    m_Last_tick = time(nullptr);
     m_Played_time[PLAYED_TIME_TOTAL] = 0;
     m_Played_time[PLAYED_TIME_LEVEL] = 0;
 
@@ -1589,7 +1590,7 @@ void Player::Update(uint32 p_time)
         return;
 
     // undelivered mail
-    if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
+    if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(nullptr))
     {
         SendNewMail();
         ++unReadMails;
@@ -1603,7 +1604,7 @@ void Player::Update(uint32 p_time)
     Unit::Update(p_time);
     SetMustDelayTeleport(false);
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     UpdatePvPFlag(now);
 
@@ -1634,7 +1635,11 @@ void Player::Update(uint32 p_time)
         UpdateItemDuration(uint32(now - m_Last_tick));
 
         // check every minute, less chance to crash and wont break anything.
-        UpdateSoulboundTradeItems();
+        if (now > m_Last_sb_tick)
+        {
+            UpdateSoulboundTradeItems();
+            m_Last_sb_tick = now + 60;
+        }
 
         // Played time
         uint32 elapsed = uint32(now - m_Last_tick);
@@ -1753,7 +1758,7 @@ void Player::Update(uint32 p_time)
     {
         if (now > m_Last_tick && _restTime > 0)      // freeze update
         {
-            time_t currTime = time(NULL);
+            time_t currTime = time(nullptr);
             time_t timeDiff = currTime - _restTime;
             if (timeDiff >= 10)                             // freeze update
             {
@@ -2012,7 +2017,7 @@ void Player::setDeathState(DeathState s, bool /*despawn = false*/)
 void Player::SetRestState(uint32 triggerId)
 {
     _innTriggerId = triggerId;
-    _restTime = time(NULL);
+    _restTime = time(nullptr);
     SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 }
 
@@ -2316,7 +2321,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (MustDelayTeleport())
         {
             SetHasDelayedTeleport(true);
-            SetSemaphoreTeleportNear(time(NULL));
+            SetSemaphoreTeleportNear(time(nullptr));
             //lets save teleport destination for player
             teleportStore_dest = WorldLocation(mapid, x, y, z, orientation);
             teleportStore_options = options;
@@ -2338,11 +2343,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // this will be used instead of the current location in SaveToDB
         teleportStore_dest = WorldLocation(mapid, x, y, z, orientation);
-        SetFallInformation(time(NULL), z);
+        SetFallInformation(time(nullptr), z);
 
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet MSG_MOVE_TELEPORT_ACK
-        SetSemaphoreTeleportNear(time(NULL));
+        SetSemaphoreTeleportNear(time(nullptr));
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
         {
@@ -2378,7 +2383,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (MustDelayTeleport())
             {
                 SetHasDelayedTeleport(true);
-                SetSemaphoreTeleportFar(time(NULL));
+                SetSemaphoreTeleportFar(time(nullptr));
                 //lets save teleport destination for player
                 teleportStore_dest = WorldLocation(mapid, x, y, z, orientation);
                 teleportStore_options = options;
@@ -2449,7 +2454,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
 
             teleportStore_dest = WorldLocation(mapid, x, y, z, orientation);
-            SetFallInformation(time(NULL), z);
+            SetFallInformation(time(nullptr), z);
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
@@ -2468,7 +2473,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // move packet sent by client always after far teleport
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
-            SetSemaphoreTeleportFar(time(NULL));
+            SetSemaphoreTeleportFar(time(nullptr));
         }
     }
     return true;
@@ -3669,7 +3674,7 @@ void Player::UpdateNextMailTimeAndUnreads()
 {
     // calculate next delivery time (min. from non-delivered mails
     // and recalculate unReadMail
-    time_t cTime = time(NULL);
+    time_t cTime = time(nullptr);
     m_nextMailDelivereTime = 0;
     unReadMails = 0;
     for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
@@ -3686,7 +3691,7 @@ void Player::UpdateNextMailTimeAndUnreads()
 
 void Player::AddNewMailDeliverTime(time_t deliver_time)
 {
-    if (deliver_time <= time(NULL))                          // ready now
+    if (deliver_time <= time(nullptr))                          // ready now
     {
         ++unReadMails;
         SendNewMail();
@@ -4409,7 +4414,7 @@ void Player::_LoadSpellCooldowns(PreparedQueryResult result)
 
     if (result)
     {
-        time_t curTime = time(NULL);
+        time_t curTime = time(nullptr);
 
         do
         {
@@ -4443,7 +4448,7 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans, bool logout)
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
 
-    time_t curTime = time(NULL);
+    time_t curTime = time(nullptr);
     uint32 curMSTime = World::GetGameTimeMS();
     uint32 infTime = curMSTime + infinityCooldownDelayCheck;
 
@@ -4610,7 +4615,7 @@ bool Player::resetTalents(bool noResetCost)
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS, 1);
 
         m_resetTalentsCost = resetCost;
-        m_resetTalentsTime = time(NULL);
+        m_resetTalentsTime = time(nullptr);
     }
 
     return true;
@@ -5137,7 +5142,7 @@ void Player::DeleteOldCharacters(uint32 keepDays)
     sLog->outString("Player::DeleteOldChars: Deleting all characters which have been deleted %u days before...", keepDays);
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_OLD_CHARS);
-    stmt->setUInt32(0, uint32(time(NULL) - time_t(keepDays * DAY)));
+    stmt->setUInt32(0, uint32(time(nullptr) - time_t(keepDays * DAY)));
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
     if (result)
@@ -7270,8 +7275,8 @@ void Player::RewardReputation(Quest const* quest)
 void Player::UpdateHonorFields()
 {
     /// called when rewarding honor and at each save
-    time_t now = time_t(time(NULL));
-    time_t today = time_t(time(NULL) / DAY) * DAY;
+    time_t now = time_t(time(nullptr));
+    time_t today = time_t(time(nullptr) / DAY) * DAY;
 
     if (m_lastHonorUpdateTime < today)
     {
@@ -9173,7 +9178,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         // Xinef: loot was generated and respawntime has passed since then, allow to recreate loot
         // Xinef: to avoid bugs, this rule covers spawned gameobjects only
-        if (go->isSpawnedByDefault() && go->getLootState() == GO_ACTIVATED && !go->loot.isLooted() && go->GetLootGenerationTime()+go->GetRespawnDelay() < time(NULL))
+        if (go->isSpawnedByDefault() && go->getLootState() == GO_ACTIVATED && !go->loot.isLooted() && go->GetLootGenerationTime()+go->GetRespawnDelay() < time(nullptr))
             go->SetLootState(GO_READY);
 
         if (go->getLootState() == GO_READY)
@@ -10228,7 +10233,7 @@ void Player::SendBattlefieldWorldStates()
             SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_SHOW_WORLDSTATE, wg->IsWarTime() ? 1 : 0);
 
             for (uint32 i = 0; i < 2; ++i)
-                SendUpdateWorldState(ClockWorldState[i], uint32(time(NULL) + (wg->GetTimer() / 1000)));
+                SendUpdateWorldState(ClockWorldState[i], uint32(time(nullptr) + (wg->GetTimer() / 1000)));
         }
     }
 }
@@ -14080,7 +14085,7 @@ void Player::AddItemToBuyBackSlot(Item* pItem)
         ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
 
         m_items[slot] = pItem;
-        time_t base = time(NULL);
+        time_t base = time(nullptr);
         uint32 etime = uint32(base - m_logintime + (30 * 3600));
         uint32 eslot = slot - BUYBACK_SLOT_START;
 
@@ -14226,6 +14231,7 @@ void Player::UpdateSoulboundTradeItems()
     for (ItemSoulboundGUIDs::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
         Item* item = GetItemByGuid(*itr);
+
         if (!item || item->GetOwnerGUID() != GetGUID() || item->CheckSoulboundTradeExpire())
             itr = m_itemSoulboundTradeable.erase(itr);
         else
@@ -15750,7 +15756,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 
         AddTimedQuest(quest_id);
         questStatusData.Timer = limittime * IN_MILLISECONDS;
-        qtime = static_cast<uint32>(time(NULL)) + limittime;
+        qtime = static_cast<uint32>(time(nullptr)) + limittime;
     }
     else
         questStatusData.Timer = 0;
@@ -18031,7 +18037,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     SaveRecallPosition();
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     time_t logoutTime = time_t(fields[22].GetUInt32());
 
     // since last logout (in seconds)
@@ -18199,7 +18205,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     SetUInt32Value(PLAYER_CHOSEN_TITLE, curTitle);
 
     // has to be called after last Relocate() in Player::LoadFromDB
-    SetFallInformation(time(NULL), GetPositionZ());
+    SetFallInformation(time(nullptr), GetPositionZ());
 
     _LoadSpellCooldowns(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS));
 
@@ -19360,7 +19366,7 @@ void Player::SendRaidInfo()
     size_t p_counter = data.wpos();
     data << uint32(counter);                                // placeholder
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
     {
@@ -20789,7 +20795,7 @@ void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
                     ToggleAFK();
             }
             else  // Battleground was not found we should update the timer anyway ...
-                UpdateAutoAfkKick(time(NULL), true);
+                UpdateAutoAfkKick(time(nullptr), true);
 
         } break;
         // Player in Battlefield
@@ -20808,7 +20814,7 @@ void Player::UpdateAutoAfkKick(time_t currTime, bool updateTimer)
                 }
             }
             else // Battlefield was not found we should update the timer anyway ...
-                UpdateAutoAfkKick(time(NULL), true);
+                UpdateAutoAfkKick(time(nullptr), true);
 
         } break;
     }
@@ -22352,7 +22358,7 @@ void Player::UpdatePvPState(bool onlyFFA)
     else                                                    // in friendly area
     {
         if (IsPvP() && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP) && pvpInfo.EndTimer == 0)
-            pvpInfo.EndTimer = time(NULL);                     // start toggle-off
+            pvpInfo.EndTimer = time(nullptr);                     // start toggle-off
     }
 }
 
@@ -22365,7 +22371,7 @@ void Player::UpdatePvP(bool state, bool _override)
     }
     else
     {
-        pvpInfo.EndTimer = time(NULL);
+        pvpInfo.EndTimer = time(nullptr);
         SetPvP(state);
     }
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
@@ -22760,7 +22766,7 @@ void Player::LeaveBattleground(Battleground* bg)
         return;
 
     // xinef: reset corpse reclaim time
-    m_deathExpireTime = time(NULL);
+    m_deathExpireTime = time(nullptr);
 
     // pussywizard: clear movement, because after porting player will move to arena cords
     GetMotionMaster()->MovementExpired();
@@ -23412,7 +23418,7 @@ void Player::ApplyEquipCooldown(Item* pItem)
 
         // Don't replace longer cooldowns by equip cooldown if we have any.
         SpellCooldowns::iterator itr = m_spellCooldowns.find(spellData.SpellId);
-        if (itr != m_spellCooldowns.end() && itr->second.itemid == pItem->GetEntry() && itr->second.end > time(NULL) + 30)
+        if (itr != m_spellCooldowns.end() && itr->second.itemid == pItem->GetEntry() && itr->second.end > time(nullptr) + 30)
             continue;
 
         // xinef: dont apply eqiup cooldown for spells with this attribute
@@ -23584,7 +23590,7 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
                 if (!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
                 {
                     SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx, quest_id);
-                    m_lastDailyQuestTime = time(NULL);              // last daily quest time
+                    m_lastDailyQuestTime = time(nullptr);              // last daily quest time
                     m_DailyQuestChanged = true;
                     break;
                 }
@@ -23592,7 +23598,7 @@ void Player::SetDailyQuestStatus(uint32 quest_id)
         } else
         {
             m_DFQuests.insert(quest_id);
-            m_lastDailyQuestTime = time(NULL);
+            m_lastDailyQuestTime = time(nullptr);
             m_DailyQuestChanged = true;
         }
     }
@@ -23850,7 +23856,7 @@ void Player::SummonIfPossible(bool agree)
     }
 
     // expire and auto declined
-    if (m_summon_expire < time(NULL))
+    if (m_summon_expire < time(nullptr))
         return;
 
     // drop flag at summon
@@ -24374,7 +24380,7 @@ uint32 Player::GetCorpseReclaimDelay(bool pvp) const
     else if (!sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE))
         return 0;
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     // 0..2 full period
     // should be ceil(x)-1 but not floor(x)
     uint64 count = (now < m_deathExpireTime - 1) ? (m_deathExpireTime - 1 - now) / DEATH_EXPIRE_STEP : 0;
@@ -24389,7 +24395,7 @@ void Player::UpdateCorpseReclaimDelay()
         (!pvp && !sWorld->getBoolConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE)))
         return;
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     if (now < m_deathExpireTime)
     {
@@ -24433,7 +24439,7 @@ int32 Player::CalculateCorpseReclaimDelay(bool load)
         }
 
         time_t expected_time = corpse->GetGhostTime() + copseReclaimDelay[count];
-        time_t now = time(NULL);
+        time_t now = time(nullptr);
 
         if (now >= expected_time)
             return -1;
@@ -26391,7 +26397,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_TOTAL]);
         stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_LEVEL]);
         stmt->setFloat(index++, finiteAlways(_restBonus));
-        stmt->setUInt32(index++, uint32(time(NULL)));
+        stmt->setUInt32(index++, uint32(time(nullptr)));
         stmt->setUInt8(index++,  (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0));
         //save, far from tavern/city
         //save, but in tavern/city
@@ -26521,7 +26527,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_TOTAL]);
         stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_LEVEL]);
         stmt->setFloat(index++, finiteAlways(_restBonus));
-        stmt->setUInt32(index++, uint32(time(NULL)));
+        stmt->setUInt32(index++, uint32(time(nullptr)));
         stmt->setUInt8(index++,  (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0));
         //save, far from tavern/city
         //save, but in tavern/city
@@ -27435,7 +27441,7 @@ void Player::_LoadBrewOfTheMonth(PreparedQueryResult result)
         lastEventId = fields[0].GetUInt16();
     }
 
-    time_t curtime = time(NULL);
+    time_t curtime = time(nullptr);
     tm localTime;
     ACE_OS::localtime_r(&curtime, &localTime);
 
@@ -27518,7 +27524,7 @@ bool Player::SetCanFly(bool apply, bool packetOnly /*= false*/)
         return false;
 
     if (!apply)
-        SetFallInformation(time(NULL), GetPositionZ());
+        SetFallInformation(time(nullptr), GetPositionZ());
 
     WorldPacket data(apply ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY, 12);
     data.append(GetPackGUID());

@@ -190,13 +190,13 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     static uint64 sendPacketCount = 0;
     static uint64 sendPacketBytes = 0;
 
-    static time_t firstTime = time(NULL);
+    static time_t firstTime = time(nullptr);
     static time_t lastTime = firstTime;                     // next 60 secs start time
 
     static uint64 sendLastPacketCount = 0;
     static uint64 sendLastPacketBytes = 0;
 
-    time_t cur_time = time(NULL);
+    time_t cur_time = time(nullptr);
 
     if ((cur_time - lastTime) < 60)
     {
@@ -247,7 +247,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     bool deletePacket = true;
     WorldPacket* firstDelayedPacket = NULL;
     uint32 processedPackets = 0;
-    time_t currentTime = time(NULL);
+    time_t currentTime = time(nullptr);
 
     while (m_Socket && !m_Socket->IsClosed() && !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&_recvQueue.next(packet, updater))
     {
@@ -366,7 +366,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     if (updater.ProcessLogout())
     {
-        time_t currTime = time(NULL);
+        time_t currTime = time(nullptr);
         if (ShouldLogOut(currTime) && !m_playerLoading)
             LogoutPlayer(true);
 
@@ -403,7 +403,7 @@ void WorldSession::HandleTeleportTimeout(bool updateInSessions)
     // pussywizard: handle teleport ack timeout
     if (m_Socket && !m_Socket->IsClosed() && GetPlayer() && GetPlayer()->IsBeingTeleported())
     {
-        time_t currTime = time(NULL);
+        time_t currTime = time(nullptr);
         if (updateInSessions) // session update from World::UpdateSessions
         {
             if (GetPlayer()->IsBeingTeleportedFar() && GetPlayer()->GetSemaphoreTeleportFar()+sWorld->getIntConfig(CONFIG_TELEPORT_TIMEOUT_FAR) < currTime)
@@ -736,7 +736,7 @@ void WorldSession::SetAccountData(AccountDataType type, time_t tm, std::string c
 void WorldSession::SendAccountDataTimes(uint32 mask)
 {
     WorldPacket data(SMSG_ACCOUNT_DATA_TIMES, 4 + 1 + 4 + 8 * 4); // changed in WotLK
-    data << uint32(time(NULL));                             // unix time of something
+    data << uint32(time(nullptr));                             // unix time of something
     data << uint8(1);
     data << uint32(mask);                                   // type mask
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)

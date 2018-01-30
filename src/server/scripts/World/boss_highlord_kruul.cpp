@@ -246,7 +246,7 @@ public:
             {
                 if (sWorld->getBoolConfig(CONFIG_KRUUL_EVENT))
                 {
-                    time_t now = time(NULL);
+                    time_t now = time(nullptr);
                     tm* aTm = localtime(&now);
              
                     if (aTm->tm_wday == sCustomEventMgr->GetKruulDay()

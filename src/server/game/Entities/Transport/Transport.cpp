@@ -289,7 +289,7 @@ void MotionTransport::RemovePassenger(WorldObject* passenger, bool withAll)
         if (Player* plr = passenger->ToPlayer())
         {
             sScriptMgr->OnRemovePassenger(ToTransport(), plr);
-            plr->SetFallInformation(time(NULL), plr->GetPositionZ());
+            plr->SetFallInformation(time(nullptr), plr->GetPositionZ());
         }
 
         if (withAll)
@@ -960,7 +960,7 @@ void StaticTransport::RemovePassenger(WorldObject* passenger, bool withAll)
         if (Player* plr = passenger->ToPlayer())
         {
             sScriptMgr->OnRemovePassenger(ToTransport(), plr);
-            plr->SetFallInformation(time(NULL), plr->GetPositionZ());
+            plr->SetFallInformation(time(nullptr), plr->GetPositionZ());
         }
 
         if (withAll)

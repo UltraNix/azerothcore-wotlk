@@ -831,7 +831,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
     if (mutetime < 0)
     {
-        mutetime = time(NULL) + llabs(mutetime);
+        mutetime = time(nullptr) + llabs(mutetime);
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
 
@@ -910,7 +910,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             if (type < 0 || type >= MAX_PREMIUM_SERVICES) continue;
 
             time_t expires_at = time_t(fields[1].GetUInt32());
-            if (expires_at < time(NULL)) continue;
+            if (expires_at < time(nullptr)) continue;
 
             premiumServices[type] = time_t(fields[1].GetUInt32());
         } while (premiumInfo->NextRow());

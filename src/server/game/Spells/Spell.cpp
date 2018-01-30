@@ -4016,7 +4016,7 @@ void Spell::SendSpellCooldown()
     {
         // Custom.AFK.Report
         if (Player* plr = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
-            plr->UpdateAutoAfkKick(time(NULL), true);
+            plr->UpdateAutoAfkKick(time(nullptr), true);
 
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD))
         {
@@ -6206,7 +6206,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // Xinef: Implement summon pending error
-                if (target->GetSummonExpireTimer() > time(NULL))
+                if (target->GetSummonExpireTimer() > time(nullptr))
                     return SPELL_FAILED_SUMMON_PENDING;
 
                 // check if our map is dungeon
@@ -6249,7 +6249,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // Xinef: Implement summon pending error
-                if (target->ToPlayer()->GetSummonExpireTimer() > time(NULL))
+                if (target->ToPlayer()->GetSummonExpireTimer() > time(nullptr))
                     return SPELL_FAILED_SUMMON_PENDING;
 
                 break;

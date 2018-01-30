@@ -45,7 +45,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     ;//sLog->outStaticDebug("Player 1 is: %u (%s)", player->GetGUIDLow(), player->GetName().c_str());
     ;//sLog->outStaticDebug("Player 2 is: %u (%s)", plTarget->GetGUIDLow(), plTarget->GetName().c_str());
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     player->duel->startTimer = now;
     plTarget->duel->startTimer = now;
 

@@ -310,7 +310,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recvData)
     uint64 guid;
     recvData >> guid;
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     tm* aTm = localtime(&now);
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);

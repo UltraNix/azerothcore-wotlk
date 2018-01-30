@@ -1985,11 +1985,11 @@ public:
             banreason     = fields[3].GetString();
         }
 
-        if (muteTime > 0 && muteTime > time(NULL))
-            handler->PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - time(NULL), true).c_str(), muteBy.c_str(), muteReason.c_str());
+        if (muteTime > 0 && muteTime > time(nullptr))
+            handler->PSendSysMessage(LANG_PINFO_MUTE, secsToTimeString(muteTime - time(nullptr), true).c_str(), muteBy.c_str(), muteReason.c_str());
 
         if (banTime >= 0)
-            handler->PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - time(NULL), true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
+            handler->PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - time(nullptr), true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
 
         std::string raceStr, ClassStr;
         switch (race)

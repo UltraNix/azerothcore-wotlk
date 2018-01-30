@@ -979,7 +979,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
             // @TODO: Move this to CustomEventMgr
             if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE) && isArena() && isRated())
             {
-                time_t now = time(NULL);
+                time_t now = time(nullptr);
                 tm* aTm = localtime(&now);
 
                 uint32 itemId = 0;

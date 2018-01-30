@@ -202,7 +202,7 @@ void Guild::EventLogEntry::WritePacket(WorldPacket& data) const
     if (m_eventType == GUILD_EVENT_LOG_PROMOTE_PLAYER || m_eventType == GUILD_EVENT_LOG_DEMOTE_PLAYER)
         data << uint8(m_newRank);
     // Event timestamp
-    data << uint32(::time(NULL) - m_timestamp);
+    data << uint32(::time(nullptr) - m_timestamp);
 }
 
 // BankEventLogEntry
@@ -252,7 +252,7 @@ void Guild::BankEventLogEntry::WritePacket(WorldPacket& data) const
             data << uint32(m_itemOrMoney);
     }
 
-    data << uint32(time(NULL) - m_timestamp);
+    data << uint32(time(nullptr) - m_timestamp);
 }
 
 // RankInfo
@@ -713,7 +713,7 @@ void Guild::Member::WritePacket(WorldPacket& data, bool sendOfficerNote) const
          << uint32(m_zoneId);
 
     if (!m_flags)
-        data << float(float(::time(NULL) - m_logoutTime) / DAY);
+        data << float(float(::time(nullptr) - m_logoutTime) / DAY);
 
     data << m_publicNote;
 
@@ -1163,7 +1163,7 @@ bool Guild::Create(Player* pLeader, std::string const& name)
     m_info = "";
     m_motd = "No message set.";
     m_bankMoney = 0;
-    m_createdDate = ::time(NULL);
+    m_createdDate = ::time(nullptr);
     _CreateLogHolders();
 
     ;//sLog->outDebug(LOG_FILTER_GUILD, "GUILD: creating guild [%s] for leader %s (%u)",

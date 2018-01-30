@@ -293,7 +293,7 @@ public: // pussywizard: public class Member
             m_level(0),
             m_class(0),
             m_flags(GUILDMEMBER_STATUS_NONE),
-            m_logoutTime(::time(NULL)),
+            m_logoutTime(::time(nullptr)),
             m_accountId(0),
             m_rankId(rankId)
         {
@@ -332,7 +332,7 @@ public: // pussywizard: public class Member
 
         void ChangeRank(uint8 newRank);
 
-        inline void UpdateLogoutTime() { m_logoutTime = ::time(NULL); }
+        inline void UpdateLogoutTime() { m_logoutTime = ::time(nullptr); }
         inline bool IsRank(uint8 rankId) const { return m_rankId == rankId; }
         inline bool IsRankNotLower(uint8 rankId) const { return m_rankId <= rankId; }
         inline bool IsSamePlayer(uint64 guid) const { return m_guid == guid; }
@@ -387,7 +387,7 @@ private:
     class LogEntry
     {
     public:
-        LogEntry(uint32 guildId, uint32 guid) : m_guildId(guildId), m_guid(guid), m_timestamp(::time(NULL)) { }
+        LogEntry(uint32 guildId, uint32 guid) : m_guildId(guildId), m_guid(guid), m_timestamp(::time(nullptr)) { }
         LogEntry(uint32 guildId, uint32 guid, time_t timestamp) : m_guildId(guildId), m_guid(guid), m_timestamp(timestamp) { }
         virtual ~LogEntry() { }
 

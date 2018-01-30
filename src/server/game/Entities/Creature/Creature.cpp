@@ -273,7 +273,7 @@ void Creature::RemoveCorpse(bool setSpawnTime, bool skipVisibility)
     if (getDeathState() != CORPSE)
         return;
 
-    m_corpseRemoveTime = time(NULL);
+    m_corpseRemoveTime = time(nullptr);
     setDeathState(DEAD);
     RemoveAllAuras();
     if (!skipVisibility) // pussywizard
@@ -286,7 +286,7 @@ void Creature::RemoveCorpse(bool setSpawnTime, bool skipVisibility)
     // Should get removed later, just keep "compatibility" with scripts
     if (setSpawnTime)
     {
-        m_respawnTime = time(NULL) + respawnDelay;
+        m_respawnTime = time(nullptr) + respawnDelay;
         //SaveRespawnTime();
     }
 
@@ -515,7 +515,7 @@ void Creature::Update(uint32 diff)
             break;
         case DEAD:
         {
-            time_t now = time(NULL);
+            time_t now = time(nullptr);
             if (m_respawnTime <= now)
             {
                 bool allowed = IsAIEnabled ? AI()->CanRespawn() : true;     // First check if there are any scripts that object to us respawning
@@ -557,7 +557,7 @@ void Creature::Update(uint32 diff)
                 }
                 else m_groupLootTimer -= diff;
             }
-            else if (m_corpseRemoveTime <= time(NULL))
+            else if (m_corpseRemoveTime <= time(nullptr))
             {
                 RemoveCorpse(false);
                 ;//sLog->outStaticDebug("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
@@ -1529,7 +1529,7 @@ bool Creature::IsInvisibleDueToDespawn() const
     if (Unit::IsInvisibleDueToDespawn())
         return true;
 
-    if (IsAlive() || m_corpseRemoveTime > time(NULL))
+    if (IsAlive() || m_corpseRemoveTime > time(nullptr))
         return false;
 
     return true;
@@ -2466,7 +2466,7 @@ bool Creature::HasSpell(uint32 spellID) const
 
 time_t Creature::GetRespawnTimeEx() const
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     if (m_respawnTime > now)
         return m_respawnTime;
     else
@@ -2517,7 +2517,7 @@ void Creature::AllLootRemovedFromCorpse()
 {
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
-        time_t now = time(NULL);
+        time_t now = time(nullptr);
         if (m_corpseRemoveTime <= now)
             return;
 
@@ -2531,7 +2531,7 @@ void Creature::AllLootRemovedFromCorpse()
 
         // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
         if (cinfo && cinfo->SkinLootId)
-            m_corpseRemoveTime = time(NULL);
+            m_corpseRemoveTime = time(nullptr);
         else
             m_corpseRemoveTime -= diff;
     }
@@ -2585,7 +2585,7 @@ uint32 Creature::GetVendorItemCurrentCount(VendorItem const* vItem)
 
     VendorItemCount* vCount = &*itr;
 
-    time_t ptime = time(NULL);
+    time_t ptime = time(nullptr);
 
     if (time_t(vCount->lastIncrementTime + vItem->incrtime) <= ptime)
     {
@@ -2624,7 +2624,7 @@ uint32 Creature::UpdateVendorItemCurrentCount(VendorItem const* vItem, uint32 us
 
     VendorItemCount* vCount = &*itr;
 
-    time_t ptime = time(NULL);
+    time_t ptime = time(nullptr);
 
     if (time_t(vCount->lastIncrementTime + vItem->incrtime) <= ptime)
     {

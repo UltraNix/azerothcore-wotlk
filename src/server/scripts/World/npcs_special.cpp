@@ -121,7 +121,7 @@ public:
             {
                 case EVENT_CLEARWATER_ANNOUNCE:
                 {
-                    time_t curtime = time(NULL);
+                    time_t curtime = time(nullptr);
                     tm strdate;
                     ACE_OS::localtime_r(&curtime, &strdate);
 
@@ -266,7 +266,7 @@ public:
             {
                 case EVENT_RIGGLE_ANNOUNCE:
                 {
-                    time_t curtime = time(NULL);
+                    time_t curtime = time(nullptr);
                     tm strdate;
                     ACE_OS::localtime_r(&curtime, &strdate);
                     if (!startWarning && strdate.tm_hour == 14 && strdate.tm_min == 0)
@@ -400,7 +400,7 @@ public:
             {
                 case EVENT_SHORT_JOHN_ACTION:
                 {
-                    time_t curtime = time(NULL);
+                    time_t curtime = time(nullptr);
                     tm strdate;
                     ACE_OS::localtime_r(&curtime, &strdate);
                     if (!startWarning && strdate.tm_hour % 3 == 0 && strdate.tm_min == 0)

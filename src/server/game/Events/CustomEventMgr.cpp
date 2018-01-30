@@ -72,7 +72,7 @@ void CustomEventMgr::InitCustomEventMgr()
 }
 void CustomEventMgr::Update(uint32 diff, uint8 eventUpdate)
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     tm* aTm = localtime(&now);
 
     switch (eventUpdate)

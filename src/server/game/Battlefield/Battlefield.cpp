@@ -86,7 +86,7 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
             auto GetPlayerCountInWar = [&](TeamId team) -> int32 {return m_PlayersInWar[team].size(); };
             auto KickAndInviteToQueue = [&](Player* pl) -> void
             {
-                m_PlayersWillBeKick[pl->GetTeamId()][pl->GetGUID()] = time(NULL) + (pl->IsGameMaster() ? 30 * MINUTE : 10);
+                m_PlayersWillBeKick[pl->GetTeamId()][pl->GetGUID()] = time(nullptr) + (pl->IsGameMaster() ? 30 * MINUTE : 10);
                 InvitePlayerToQueue(pl);
             };
 
@@ -194,7 +194,7 @@ bool Battlefield::Update(uint32 diff)
         // Kick players who chose not to accept invitation to the battle
         if (m_uiKickDontAcceptTimer <= diff)
         {
-            time_t now = time(NULL);
+            time_t now = time(nullptr);
             for (int team = 0; team < 2; team++)
                 for (PlayerTimerMap::iterator itr = m_InvitedPlayers[team].begin(); itr != m_InvitedPlayers[team].end(); ++itr)
                     if (itr->second <= now)
@@ -280,7 +280,7 @@ void Battlefield::InvitePlayersInZoneToWar()
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
                     InvitePlayerToWar(player);
                 else if (m_PlayersWillBeKick[player->GetTeamId()].count(player->GetGUID()) == 0)// Battlefield is full of players
-                    m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(NULL) + 10;
+                    m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(nullptr) + 10;
             }
         }
 }
@@ -304,7 +304,7 @@ void Battlefield::InvitePlayerToWar(Player* player)
     if (player->getLevel() < m_MinLevel)
     {
         if (m_PlayersWillBeKick[player->GetTeamId()].count(player->GetGUID()) == 0)
-            m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(NULL) + 10;
+            m_PlayersWillBeKick[player->GetTeamId()][player->GetGUID()] = time(nullptr) + 10;
         return;
     }
 
@@ -313,7 +313,7 @@ void Battlefield::InvitePlayerToWar(Player* player)
         return;
 
     m_PlayersWillBeKick[player->GetTeamId()].erase(player->GetGUID());
-    m_InvitedPlayers[player->GetTeamId()][player->GetGUID()] = time(NULL) + m_TimeForAcceptInvite;
+    m_InvitedPlayers[player->GetTeamId()][player->GetGUID()] = time(nullptr) + m_TimeForAcceptInvite;
     player->GetSession()->SendBfInvitePlayerToWar(m_BattleId, m_ZoneId, m_TimeForAcceptInvite);
 }
 

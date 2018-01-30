@@ -368,7 +368,7 @@ void GameObject::Update(uint32 diff)
                 case GAMEOBJECT_TYPE_FISHINGNODE:
                 {
                     // fishing code (bobber ready)
-                    if (time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME)
+                    if (time(nullptr) > m_respawnTime - FISHING_BOBBER_READY_TIME)
                     {
                         // splash bobber (bobber ready now)
                         Unit* caster = GetOwner();
@@ -466,7 +466,7 @@ void GameObject::Update(uint32 diff)
         {
             if (m_respawnTime > 0)                          // timer on
             {
-                time_t now = time(NULL);
+                time_t now = time(nullptr);
                 if (m_respawnTime <= now)            // timer expired
                 {
                     uint64 dbtableHighGuid = MAKE_NEW_GUID(m_DBTableGuid, GetEntry(), HIGHGUID_GAMEOBJECT);
@@ -935,7 +935,7 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
             m_respawnTime = GetMap()->GetGORespawnTime(m_DBTableGuid);
 
             // ready to respawn
-            if (m_respawnTime && m_respawnTime <= time(NULL))
+            if (m_respawnTime && m_respawnTime <= time(nullptr))
             {
                 m_respawnTime = 0;
                 GetMap()->RemoveGORespawnTime(m_DBTableGuid);
@@ -1019,7 +1019,7 @@ Unit* GameObject::GetOwner() const
 
 void GameObject::SaveRespawnTime()
 {
-    if (m_goData && m_goData->dbData && m_respawnTime > time(NULL) && m_spawnedByDefault)
+    if (m_goData && m_goData->dbData && m_respawnTime > time(nullptr) && m_spawnedByDefault)
         GetMap()->SaveGORespawnTime(m_DBTableGuid, m_respawnTime);
 }
 
@@ -1078,7 +1078,7 @@ void GameObject::Respawn()
 {
     if (m_spawnedByDefault && m_respawnTime > 0)
     {
-        m_respawnTime = time(NULL);
+        m_respawnTime = time(nullptr);
         GetMap()->RemoveGORespawnTime(m_DBTableGuid);
     }
 }

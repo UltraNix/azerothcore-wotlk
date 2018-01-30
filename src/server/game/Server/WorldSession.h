@@ -416,7 +416,7 @@ class WorldSession
         time_t GetPremiumService(PremiumServiceTypes serviceId) { return _premiumServices[serviceId]; }
         bool IsPremiumServiceActive(PremiumServiceTypes serviceId) const
         {
-            return _premiumServices[serviceId] > time(NULL);
+            return _premiumServices[serviceId] > time(nullptr);
         }
 
     public:                                                 // opcodes handlers

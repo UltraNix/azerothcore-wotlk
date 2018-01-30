@@ -247,7 +247,7 @@ FILE* Log::openGmlogPerAccount(uint32 account)
 
 void Log::outTimestamp(FILE* file)
 {
-    time_t t = time(NULL);
+    time_t t = time(nullptr);
     tm* aTm = localtime(&t);
     //       YYYY   year
     //       MM     month (2 digits 01-12)
@@ -373,7 +373,7 @@ void Log::ResetColor(bool stdout_stream)
 
 std::string Log::GetTimestampStr()
 {
-    time_t t = time(NULL);
+    time_t t = time(nullptr);
     tm aTm;
     ACE_OS::localtime_r(&t, &aTm);
     //       YYYY   year

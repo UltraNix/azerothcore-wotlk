@@ -5142,7 +5142,7 @@ uint32 Unit::GetDiseasesByCaster(uint64 casterGUID, uint8 mode)
                 {
                     Aura* aura = (*i)->GetBase();
                     if (aura && !aura->IsRemoved() && aura->GetDuration() > 0)
-                        if ((aura->GetApplyTime() + aura->GetMaxDuration()/1000 + 8) > (time(NULL) + aura->GetDuration()/1000))
+                        if ((aura->GetApplyTime() + aura->GetMaxDuration()/1000 + 8) > (time(nullptr) + aura->GetDuration()/1000))
                             aura->SetDuration(aura->GetDuration()+3000);
                 }
             }
@@ -6822,7 +6822,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         if (AuraEffect* aurEff = victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x100000, 0, 0, GetGUID()))
                             if (Aura* aur = aurEff->GetBase())
                                 if (!aur->IsRemoved() && aur->GetDuration() > 0)
-                                    if ((aur->GetApplyTime() + aur->GetMaxDuration()/1000 + 5) > (time(NULL) + aur->GetDuration()/1000) )
+                                    if ((aur->GetApplyTime() + aur->GetMaxDuration()/1000 + 5) > (time(nullptr) + aur->GetDuration()/1000) )
                                     {
                                         aur->SetDuration(aur->GetDuration()+2000);
                                         return true;
@@ -18351,7 +18351,7 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     AddUnitState(UNIT_STATE_MOVE);
 
     if (player)
-        player->SetFallInformation(time(NULL), GetPositionZ());
+        player->SetFallInformation(time(nullptr), GetPositionZ());
     else if (HasUnitMovementFlag(MOVEMENTFLAG_ROOT))
     {
         WorldPacket data(SMSG_SPLINE_MOVE_UNROOT, 8);
@@ -18537,7 +18537,7 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
 
     // Custom.AFK.Report
     if (GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->UpdateAutoAfkKick(time(NULL), true);
+        ToPlayer()->UpdateAutoAfkKick(time(nullptr), true);
 
 
     if (relocated)

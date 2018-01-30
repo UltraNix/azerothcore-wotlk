@@ -43,7 +43,7 @@ SunwellCheat* SunwellCheat::instance()
 //////////////////
 void SunwellCheat::cleanupReports(Player* player)
 {
-    if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT) || !player)
+    if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT) || !player || !player->IsInWorld())
         return;
 
     time_t actualTime = time(nullptr);
@@ -78,11 +78,11 @@ void SunwellCheat::buildOpcodeReport(Player* player, uint16 opCode)
         switch (action)
         {
             case SUN_ACTION_LOG:
-                sLog->outCheat("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been reported due to possible DOS flooding! opCode: %u count: %u",
+                sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been reported due to possible DOS flooding! opCode: %u count: %u",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), opCode, opCounter);
                 break;
             case SUN_ACTION_KICK:
-                sLog->outCheat("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been kicked due to possible DOS flooding! opCode: %u count: %u",
+                sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been kicked due to possible DOS flooding! opCode: %u count: %u",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), opCode, opCounter);
                 player->GetSession()->KickPlayer();
                 break;
@@ -101,7 +101,7 @@ void SunwellCheat::buildOpcodeReport(Player* player, uint16 opCode)
                 }
 
                 sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding or Spoofing)", "Server: SunwellCheat");
-                sLog->outCheat("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been banned for %u minutes due to possible DOS flooding! opCode: %u count: %u",
+                sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been banned for %u minutes due to possible DOS flooding! opCode: %u count: %u",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), duration / MINUTE, opCode, opCounter);
 
                 player->GetSession()->KickPlayer();
@@ -143,11 +143,11 @@ void SunwellCheat::buildCastReport(Player* player, uint32 spellId)
         switch (action)
         {
             case SUN_ACTION_LOG:
-                sLog->outCheat("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been reported due to casted spell: %u over: %u times! Possible gold cheater!",
+                sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been reported due to casted spell: %u over: %u times! Possible gold cheater!",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), spellId, castCounter);
                 break;
             case SUN_ACTION_KICK:
-                sLog->outCheat("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been kicked due to casted spell: %u over: %u times! Possible gold cheater!",
+                sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been kicked due to casted spell: %u over: %u times! Possible gold cheater!",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), spellId, castCounter);
                 player->GetSession()->KickPlayer();
                 break;
@@ -166,7 +166,7 @@ void SunwellCheat::buildCastReport(Player* player, uint32 spellId)
                 }
 
                 sWorld->BanAccount(bm, nameOrIp, duration, "DOS (Packet Flooding or Spoofing)", "Server: SunwellCheat");
-                sLog->outCheat("SunwellCheat: Player %s (GUID: %u) (Account ID: %u) has been banned for %u due to casted spell: %u over: %u times! Possible gold cheater!",
+                sLog->outCheat("[SunwellCheat] Player %s (GUID: %u) (Account ID: %u) has been banned for %u due to casted spell: %u over: %u times! Possible gold cheater!",
                     player->GetName().c_str(), player->GetGUID(), player->GetSession()->GetAccountId(), duration / MINUTE, spellId, castCounter);
 
                 player->GetSession()->KickPlayer();
