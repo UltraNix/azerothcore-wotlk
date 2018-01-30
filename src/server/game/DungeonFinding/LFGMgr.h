@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -51,7 +51,8 @@ enum LFGMgrEnum
     LFG_SPELL_DUNGEON_COOLDOWN                   = 71328,
     LFG_SPELL_DUNGEON_DESERTER                   = 71041,
     LFG_SPELL_LUCK_OF_THE_DRAW                   = 72221,
-    LFG_GROUP_KICK_VOTES_NEEDED                  = 3
+    LFG_GROUP_KICK_VOTES_NEEDED                  = 3,
+    LFG_DESERTER_DURATION_AFTER_KICK             = 600000
 };
 
 enum LfgFlags

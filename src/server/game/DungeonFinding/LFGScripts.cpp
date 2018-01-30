@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "ObjectAccessor.h"
 #include "WorldSession.h"
+#include "SpellAuras.h"
 
 namespace lfg
 {
@@ -217,9 +218,14 @@ void LFGGroupScript::OnRemoveMember(Group* group, uint64 guid, RemoveMethod meth
     if (Player* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
     {
         // xinef: fixed dungeon deserter
-        if (method != GROUP_REMOVEMETHOD_KICK_LFG && state != LFG_STATE_FINISHED_DUNGEON && players >= LFG_GROUP_KICK_VOTES_NEEDED)
+        if (state != LFG_STATE_FINISHED_DUNGEON && players >= LFG_GROUP_KICK_VOTES_NEEDED)
         {
             player->AddAura(LFG_SPELL_DUNGEON_DESERTER, player);
+            if (method == GROUP_REMOVEMETHOD_KICK_LFG)
+            {
+                if (Aura* lfgDeserterAura = player->GetAura(LFG_SPELL_DUNGEON_DESERTER))
+                    lfgDeserterAura->SetDuration(static_cast<int32>(LFG_DESERTER_DURATION_AFTER_KICK));
+            }
         }
         //else if (state == LFG_STATE_BOOT)
             // Update internal kick cooldown of kicked
