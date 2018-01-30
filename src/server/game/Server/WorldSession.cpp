@@ -1423,6 +1423,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_QUESTGIVER_CHOOSE_REWARD:
         case CMSG_ADD_FRIEND:
         case CMSG_GUILD_INVITE:
+        case CMSG_PETITION_SIGN:
         {
             maxPacketCounterAllowed = 8;
             break;
@@ -1483,7 +1484,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_DISMISS_CRITTER:
         case CMSG_REPOP_REQUEST:
         case CMSG_PETITION_BUY:
-        case CMSG_PETITION_SIGN:
         case CMSG_TURN_IN_PETITION:
         case CMSG_COMPLETE_CINEMATIC:
         case CMSG_ITEM_REFUND:
