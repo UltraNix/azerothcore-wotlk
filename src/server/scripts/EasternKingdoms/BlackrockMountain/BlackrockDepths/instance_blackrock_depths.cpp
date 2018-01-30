@@ -20,6 +20,7 @@
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"
 #include "blackrock_depths.h"
+#include "Group.h"
 
 #define TIMER_TOMBOFTHESEVEN    15000
 #define MAX_ENCOUNTER           6
@@ -205,7 +206,16 @@ public:
                 else
                     HandleGameObject(0, false, go);
                 break;
-            case GO_LYCEUM: GoLyceumGUID = go->GetGUID(); break;
+            case GO_LYCEUM: 
+                if (instance->HavePlayers())
+                {
+                    auto const& list = instance->GetPlayers();
+                    auto player = list.begin()->GetSource();
+                    if (player->GetGroup()->isLFGGroup())
+                        HandleGameObject(0, true, go);
+                }
+                GoLyceumGUID = go->GetGUID(); 
+                break;
             case GO_SF_S: GoSFSGUID = go->GetGUID(); break;
             case GO_SF_N: GoSFNGUID = go->GetGUID(); break;
             case GO_GOLEM_ROOM_N: GoGolemNGUID = go->GetGUID(); break;
