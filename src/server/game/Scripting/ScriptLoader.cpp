@@ -146,7 +146,13 @@ void AddSC_boss_flamegor();
 void AddSC_boss_chromaggus();
 void AddSC_boss_nefarian();
 void AddSC_instance_blackwing_lair();
+void AddSC_boss_captain_greenskin();
+void AddSC_boss_cookie();
+void AddSC_boss_edwin_vancleef();
+void AddSC_boss_gilnid();
 void AddSC_boss_mr_smite();
+void AddSC_boss_rhahk_zor();
+void AddSC_boss_sneed();
 void AddSC_instance_deadmines();             //Deadmines
 void AddSC_instance_gnomeregan();            //Gnomeregan
 void AddSC_instance_karazhan();              //Karazhan
@@ -787,7 +793,13 @@ void AddEasternKingdomsScripts()
     AddSC_boss_chromaggus();
     AddSC_boss_nefarian();
     AddSC_instance_blackwing_lair();
+    AddSC_boss_captain_greenskin();
+    AddSC_boss_cookie();
+    AddSC_boss_edwin_vancleef();
+    AddSC_boss_gilnid();
     AddSC_boss_mr_smite();
+    AddSC_boss_rhahk_zor();
+    AddSC_boss_sneed();
     AddSC_instance_deadmines();             //Deadmines
     AddSC_instance_gnomeregan();            //Gnomeregan
     AddSC_instance_karazhan();              //Karazhan

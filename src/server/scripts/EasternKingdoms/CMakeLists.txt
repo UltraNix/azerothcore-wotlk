@@ -125,6 +125,12 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Deadmines/boss_mr_smite.cpp
   EasternKingdoms/Deadmines/instance_deadmines.cpp
   EasternKingdoms/Deadmines/deadmines.h
+  EasternKingdoms/Deadmines/boss_rhahk_zor.cpp
+  EasternKingdoms/Deadmines/boss_sneed.cpp
+  EasternKingdoms/Deadmines/boss_gilnid.cpp
+  EasternKingdoms/Deadmines/boss_captain_greenskin.cpp
+  EasternKingdoms/Deadmines/boss_edwin_vancleef.cpp
+  EasternKingdoms/Deadmines/boss_cookie.cpp
   EasternKingdoms/zone_duskwood.cpp
   EasternKingdoms/ScarletMonastery/instance_scarlet_monastery.cpp
   EasternKingdoms/zone_undercity.cpp
