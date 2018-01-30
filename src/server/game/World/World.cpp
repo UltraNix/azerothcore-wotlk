@@ -683,6 +683,11 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_STRICT_CHANNEL_NAMES]                = sConfigMgr->GetIntDefault ("StrictChannelNames", 0);
     m_int_configs[CONFIG_STRICT_PET_NAMES]                    = sConfigMgr->GetIntDefault ("StrictPetNames",     0);
 
+    m_int_configs[CONFIG_CROSSFACTION_RDF_MINLVL]             = sConfigMgr->GetIntDefault("CrossFactionRDF.MinLVL", 15);
+    m_int_configs[CONFIG_CROSSFACTION_RDF_MAXLVL]             = sConfigMgr->GetIntDefault("CrossFactionRDF.MaxLVL", 70);
+    m_bool_configs[CONFIG_CROSSFACTION_RDF]                   = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
+    m_bool_configs[CONFIG_CROSSFACTION_MAIL]                  = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
+
     m_int_configs[CONFIG_MIN_PLAYER_NAME]                     = sConfigMgr->GetIntDefault ("MinPlayerName",  2);
     if (m_int_configs[CONFIG_MIN_PLAYER_NAME] < 1 || m_int_configs[CONFIG_MIN_PLAYER_NAME] > MAX_PLAYER_NAME)
     {
@@ -1281,7 +1286,6 @@ void World::LoadConfigSettings(bool reload)
 
     MMAP::MMapFactory::InitializeDisabledMaps();
 
-
     // Wintergrasp
     m_bool_configs[CONFIG_WINTERGRASP_ENABLE] = sConfigMgr->GetBoolDefault("Wintergrasp.Enable", true);
     m_int_configs[CONFIG_WINTERGRASP_PLR_MAX] = sConfigMgr->GetIntDefault("Wintergrasp.PlayerMax", 100);
@@ -1295,9 +1299,6 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_BIRTHDAY_TIME] = sConfigMgr->GetIntDefault("BirthdayTime", 1222964635);
     m_int_configs[CONFIG_CURRENT_BUILD] = sConfigMgr->GetIntDefault("CurrentBuild", 12340); // Maczuga
 
-    m_int_configs[CONFIG_CROSSFACTION_RDF_MINLVL] = sConfigMgr->GetIntDefault("CrossFactionRDF.MinLVL", 15);
-    m_int_configs[CONFIG_CROSSFACTION_RDF_MAXLVL] = sConfigMgr->GetIntDefault("CrossFactionRDF.MaxLVL", 70);
-
     m_bool_configs[CONFIG_DUEL_MOD] = sConfigMgr->GetBoolDefault("DuelMod.Enable", false);
     m_bool_configs[CONFIG_DUEL_FULL_POWER] = sConfigMgr->GetBoolDefault("DuelMod.PowerReset", false);
     m_bool_configs[CONFIG_DUEL_CD_RESET] = sConfigMgr->GetBoolDefault("DuelMod.Cooldowns", false);
@@ -1309,9 +1310,8 @@ void World::LoadConfigSettings(bool reload)
 
     m_bool_configs[CONFIG_SAVE_LOOT_SYSTEM] = sConfigMgr->GetBoolDefault("SaveLootSystem.Enable", false);
     m_bool_configs[CONFIG_EXTRA_CHANCE_EVENT] = sConfigMgr->GetBoolDefault("ExtraChanceEvent.Enable", false);
-    m_bool_configs[CONFIG_CROSSFACTION_MAIL] = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
+
     m_bool_configs[CONFIG_PTR_REALM] = sConfigMgr->GetBoolDefault("PTR.Realm", false);
-    m_bool_configs[CONFIG_CROSSFACTION_RDF] = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
 
     m_bool_configs[CONFIG_PREMIUM_TELEPORT_ENABLE] = sConfigMgr->GetBoolDefault("Premium.Teleport.Enable", true);
     m_bool_configs[CONFIG_PREMIUM_INSTANT_FLYING_ENABLE] = sConfigMgr->GetBoolDefault("Premium.InstantFlying.Enable", true);

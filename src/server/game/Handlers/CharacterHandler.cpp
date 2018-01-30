@@ -471,7 +471,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
                 }
             }
 
-            bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || true/*sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS)*/ || !AccountMgr::IsPlayerAccount(GetSecurity());
+            bool allowTwoSideAccounts = true;
             uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
 
             _charCreateCallback.FreeResult();
@@ -495,7 +495,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             bool haveSameRace = false;
             uint32 heroicReqLevel = sWorld->getIntConfig(CONFIG_CHARACTER_CREATING_MIN_LEVEL_FOR_HEROIC_CHARACTER);
             bool hasHeroicReqLevel = (heroicReqLevel == 0) ;
-            bool allowTwoSideAccounts = !sWorld->IsPvPRealm() || true/*sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS)*/ || !AccountMgr::IsPlayerAccount(GetSecurity());
+            bool allowTwoSideAccounts = true;
             uint32 skipCinematics = sWorld->getIntConfig(CONFIG_SKIP_CINEMATICS);
 
             if (result)
