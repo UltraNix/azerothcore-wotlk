@@ -1351,6 +1351,11 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ACCOUNT_HISTORY] = sConfigMgr->GetBoolDefault("AccountHistory.Enable", false);
     m_bool_configs[CONFIG_MUTE_HISTORY] = sConfigMgr->GetBoolDefault("MuteHistory.Enable", false);
 
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_1_4] = sConfigMgr->GetFloatDefault("DynamicRespawn.1.4", 0.15f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_5_20] = sConfigMgr->GetFloatDefault("DynamicRespawn.5.20", 0.25f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_21_60] = sConfigMgr->GetFloatDefault("DynamicRespawn.21.60", 0.35f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_61_80] = sConfigMgr->GetFloatDefault("DynamicRespawn.61.80", 0.65f);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
