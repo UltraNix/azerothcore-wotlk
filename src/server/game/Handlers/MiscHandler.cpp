@@ -247,17 +247,20 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     std::vector<WhoListPlayerInfo> * m = WhoListCacheMgr::GetWhoList();
     for (std::vector<WhoListPlayerInfo>::const_iterator itr = m->begin(); itr != m->end(); ++itr)
     {
-        /*
+        
         if (AccountMgr::IsPlayerAccount(security))
         {
             if ((*itr).teamId != teamId)
+            {
+                ++matchcount;
                 continue;
+            }
 
             // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
             //if ((*itr).security > AccountTypes(gmLevelInWhoList))
             //    continue;
         }
-        */
+        
 
         //do not process players which are not in world
         //if (!(itr->second->IsInWorld()))
