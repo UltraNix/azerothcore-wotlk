@@ -176,7 +176,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 
 
     uint32 matchcount = 0;
-    uint32 matchcountOpossite = 0;                          // for counting opposite faction.
+    uint32 matchcountOpposite = 0;                          // for counting opposite faction.
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
@@ -252,7 +252,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         if (AccountMgr::IsPlayerAccount(security))
             if ((*itr).teamId != teamId)
             {
-                ++matchcountOpossite;
+                ++matchcountOpposite;
                 continue;
             }
 
@@ -344,7 +344,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
             matchcount = (matchcount + (matchcount * boostPercentage));
 
     if (sWorld->getBoolConfig(CONFIG_WHO_OPPOSITE))
-        matchcount += matchcountOpossite;
+        matchcount += matchcountOpposite;
 
     data.put(0, displaycount);                            // insert right count, count displayed
     data.put(4, matchcount);                              // insert right count, count of matches
