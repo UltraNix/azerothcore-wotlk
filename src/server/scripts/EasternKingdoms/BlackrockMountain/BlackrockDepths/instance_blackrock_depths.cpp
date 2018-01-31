@@ -207,13 +207,13 @@ public:
                     HandleGameObject(0, false, go);
                 break;
             case GO_LYCEUM:
-                if (instance->HavePlayers())
-                {
-                    auto const& list = instance->GetPlayers();
-                    auto player = list.begin()->GetSource();
-                    if (player->GetGroup() && player->GetGroup()->isLFGGroup())
-                        HandleGameObject(0, true, go);
-                }
+                //if (instance->HavePlayers())
+                //{
+                //    auto const& list = instance->GetPlayers();
+                //    auto player = list.begin()->GetSource();
+                //    if (player->GetGroup() && player->GetGroup()->isLFGGroup())
+                //        HandleGameObject(0, true, go);
+                //}
                 GoLyceumGUID = go->GetGUID();
                 break;
             case GO_SF_S: GoSFSGUID = go->GetGUID(); break;
