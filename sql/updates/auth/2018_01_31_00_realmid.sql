@@ -1,2 +1,0 @@
-ALTER TABLE `ingame_stats` ADD `RealmID` INT UNSIGNED NOT NULL DEFAULT '1';
-ALTER TABLE `account_mute_history` ADD `RealmID` INT UNSIGNED NOT NULL DEFAULT '1';

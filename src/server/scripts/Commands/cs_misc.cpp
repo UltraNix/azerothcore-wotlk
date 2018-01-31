@@ -2206,7 +2206,6 @@ public:
             stmt->setString(2, muteReasonStr.c_str());
             stmt->setString(3, muteBy.c_str());
             stmt->setUInt32(4, notSpeakTime);
-            stmt->setUInt32(5, realmID);
             LoginDatabase.Execute(stmt);
         }
 
@@ -3523,8 +3522,7 @@ public:
         uint32 accountId = fields[0].GetUInt32();
         
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_MUTE_HISTORY);
-        stmt->setUInt32(0, accountId);
-        stmt->setUInt32(0, realmID);
+        stmt->setInt32(0, accountId);
         result = LoginDatabase.Query(stmt);
         if (!result)
         {

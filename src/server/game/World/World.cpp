@@ -2194,7 +2194,6 @@ void World::Update(uint32 diff)
         stmt->setUInt32(2, updateTime);
         stmt->setUInt32(3, avgUpdateTime);
         stmt->setString(4, TimeToTimestampStr(sWorld->GetGameTime()));
-        stmt->setUInt32(5, realmID);
 
         LoginDatabase.Execute(stmt);
     }
