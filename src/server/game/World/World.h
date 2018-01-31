@@ -184,6 +184,7 @@ enum WorldBoolConfigs
     CONFIG_CHINA_TOWN,                        // Sitowsky: Enables of disables special warnings of send messages by china gold sellers.
     CONFIG_ACCOUNT_HISTORY,                   // Sitowsky: Every log of login on in-game account is saving to database.
     CONFIG_MUTE_HISTORY,                      // Sitowsky: Every log of mute command is saving to database.
+    CONFIG_WHO_OPPOSITE,                      // Sitowsky: Count players of both factions in who list.
     BOOL_CONFIG_VALUE_COUNT
 };
 

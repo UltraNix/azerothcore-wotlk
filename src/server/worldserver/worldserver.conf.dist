@@ -1651,6 +1651,14 @@ CrossFactionRDF.MaxLVL = 70
 CrossFactionMail.Enable = 0
 
 #
+#     CrossFactionWHO.Enable
+#        Description: Count players of both factions in who list.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+CrossFactionWHO.Enable = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

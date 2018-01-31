@@ -176,6 +176,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
 
 
     uint32 matchcount = 0;
+    uint32 matchcountOpossite = 0;                          // for counting opposite faction.
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
@@ -249,26 +250,11 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     {
         
         if (AccountMgr::IsPlayerAccount(security))
-        {
             if ((*itr).teamId != teamId)
             {
-                ++matchcount;
+                ++matchcountOpossite;
                 continue;
             }
-
-            // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-            //if ((*itr).security > AccountTypes(gmLevelInWhoList))
-            //    continue;
-        }
-        
-
-        //do not process players which are not in world
-        //if (!(itr->second->IsInWorld()))
-        //    continue;
-
-        // check if target is globally visible for player
-        //if (!(itr->second->IsVisibleGloballyFor(_player)))
-        //    continue;
 
         // check if target's level is in level range
         uint8 lvl = (*itr).level;
@@ -356,6 +342,9 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     if (sWorld->getBoolConfig(CONFIG_BOOST_PERCENTAGE_ONLINE_ENABLE))
         if (matchcount >= 50)  // ;-)
             matchcount = (matchcount + (matchcount * boostPercentage));
+
+    if (sWorld->getBoolConfig(CONFIG_WHO_OPPOSITE))
+        matchcount += matchcountOpossite;
 
     data.put(0, displaycount);                            // insert right count, count displayed
     data.put(4, matchcount);                              // insert right count, count of matches
