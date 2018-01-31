@@ -211,7 +211,7 @@ public:
                 {
                     auto const& list = instance->GetPlayers();
                     auto player = list.begin()->GetSource();
-                    if (player->GetGroup && player->GetGroup()->isLFGGroup())
+                    if (player->GetGroup() && player->GetGroup()->isLFGGroup())
                         HandleGameObject(0, true, go);
                 }
                 GoLyceumGUID = go->GetGUID();
