@@ -788,7 +788,11 @@ void Creature::DoFleeToGetAssistance()
             //TODO: use 31365
             SetControlled(true, UNIT_STATE_FLEEING);
         else
-            GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
+        {
+            Position pos;
+            creature->GetNearPosition(pos, creature->GetObjectSize() + 0.5f, GetAngle(creature->GetPositionX(), creature->GetPositionZ()));
+            GetMotionMaster()->MoveSeekAssistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+        }
     }
 }
 

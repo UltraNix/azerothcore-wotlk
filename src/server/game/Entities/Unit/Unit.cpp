@@ -9545,12 +9545,15 @@ bool Unit::AttackStop()
     // reset only at real combat stop
     if (Creature* creature = ToCreature())
     {
-        creature->SetNoCallAssistance(false);
-
-        if (creature->HasSearchedAssistance())
+        if (!IsInCombat())
         {
-            creature->SetNoSearchAssistance(false);
-            UpdateSpeed(MOVE_RUN, false);
+            creature->SetNoCallAssistance(false);
+
+            if (creature->HasSearchedAssistance())
+            {
+                creature->SetNoSearchAssistance(false);
+                UpdateSpeed(MOVE_RUN, false);
+            }
         }
     }
 
