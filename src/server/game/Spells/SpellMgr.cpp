@@ -3410,14 +3410,14 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
-            56513,
-            56524
+            56513, // Jormungar Strike
+            56524 // Acid Breath
         }, [](SpellInfo* spellInfo)
         {
             spellInfo->RecoveryTime = (spellInfo->Id == 56524 ? 6000 : 2000);
-            spellInfo->StartRecoveryTime = (spellInfo->Id == 56524 ? 6000 : 2000);
             spellInfo->_requireCooldownInfo = true;
         });
+
         // Jotunheim Rapid-Fire Harpoon: Rapid-Fire Harpoon
         ApplySpellFix({ 56570 }, [](SpellInfo* spellInfo) {
             spellInfo->RecoveryTime = 200;
