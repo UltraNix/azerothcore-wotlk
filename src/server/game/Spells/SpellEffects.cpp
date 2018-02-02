@@ -2690,7 +2690,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
                 bool alreadyListed = false;
                 for (DispelChargesList::iterator successItr = success_list.begin(); successItr != success_list.end(); ++successItr)
                 {
-                    if (successItr->first->GetId() == itr->first->GetId())
+                    if (successItr->first->GetId() == itr->first->GetId() && successItr->first->GetCasterGUID() == itr->first->GetCasterGUID())
                     {
                         ++successItr->second;
                         alreadyListed = true;
