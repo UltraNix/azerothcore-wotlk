@@ -205,7 +205,7 @@ void BattlegroundAB::CreateBanner(uint8 node, bool delay)
         for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
         {
             if (itr->second->GetTeamId() == team)
-                itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
         }
     }
 }

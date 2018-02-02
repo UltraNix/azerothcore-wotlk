@@ -257,7 +257,7 @@ void BattlegroundIC::PostUpdateImpl(uint32 diff)
                     for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
                     {
                         if (itr->second->GetTeamId() == teamId)
-                            itr->second->GiveXP(0.005 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                            itr->second->GiveXP(0.005 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
                     }
                 }
 
@@ -963,7 +963,7 @@ void BattlegroundIC::DestroyGate(Player* player, GameObject* go)
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
                 if (itr->second->GetTeamId() == TEAM_ALLIANCE)
-                    itr->second->GiveXP(0.03 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
             }
         }
 
@@ -978,7 +978,7 @@ void BattlegroundIC::DestroyGate(Player* player, GameObject* go)
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
                 if (itr->second->GetTeamId() == TEAM_HORDE)
-                    itr->second->GiveXP(0.03 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
             }
         }
 

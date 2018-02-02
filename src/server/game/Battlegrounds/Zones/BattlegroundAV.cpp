@@ -117,7 +117,7 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
                 if (itr->second->GetTeamId() == team)
-                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
             }
         }
 
@@ -147,7 +147,7 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
                 if (itr->second->GetTeamId() == killer->GetTeamId())
-                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                    itr->second->GiveXP(0.02 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
             }
         }
 
@@ -1483,7 +1483,7 @@ void BattlegroundAV::DestroyNode(BG_AV_Nodes node)
         for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
         {
             if ((itr->second->GetTeamId() == m_Nodes[node].OwnerId) && m_Nodes[node].Tower)
-                itr->second->GiveXP(0.01 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                itr->second->GiveXP(0.005 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
         }
     }
 }

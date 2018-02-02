@@ -511,7 +511,7 @@ void BattlegroundEY::EventPlayerCapturedFlag(Player* player, uint32 BgObjectType
             if (player)
             {
                 if (itr->second->GetTeamId() == team)
-                    itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                    itr->second->GiveXP(0.05 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
             }
         }
     }

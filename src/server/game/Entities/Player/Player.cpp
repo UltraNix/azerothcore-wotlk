@@ -3187,7 +3187,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
     GetSession()->SendPacket(&data);
 }
 
-void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
+void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool premium)
 {
     if (xp < 1)
         return;
@@ -3229,7 +3229,7 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate)
     bool eventBonus     = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
     int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-    bool IsBlizzlike    = BlizzlikeMode();
+    bool IsBlizzlike    = BlizzlikeMode() || !premium;
     
     // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
     if (premiumBonusX4 && !IsBlizzlike)
@@ -7489,7 +7489,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
             bg->UpdatePlayerScore(this, SCORE_BONUS_HONOR, honor, false); //false: prevent looping
             // award xp for pvp kills
             if (uVictim)
-                GiveXP(0.001 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr);
+                GiveXP(0.0005 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
         }
 
     return true;
