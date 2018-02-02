@@ -9545,12 +9545,15 @@ bool Unit::AttackStop()
     // reset only at real combat stop
     if (Creature* creature = ToCreature())
     {
-        creature->SetNoCallAssistance(false);
-
-        if (creature->HasSearchedAssistance())
+        if (!IsInCombat())
         {
-            creature->SetNoSearchAssistance(false);
-            UpdateSpeed(MOVE_RUN, false);
+            creature->SetNoCallAssistance(false);
+
+            if (creature->HasSearchedAssistance())
+            {
+                creature->SetNoSearchAssistance(false);
+                UpdateSpeed(MOVE_RUN, false);
+            }
         }
     }
 
@@ -13173,10 +13176,19 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
             if (GetTypeId() == TYPEID_UNIT)
             {
                 Unit* pOwner = GetCharmerOrOwner();
-                if (pOwner && !IsInCombat() && !IsVehicle() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID() || GetCharmerGUID() == pOwner->GetGUID()))
+                if (pOwner && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID()) && !IsInCombat()) // Must check for owner or crash on "Tame Beast"
                 {
-                    if (speed < pOwner->GetSpeedRate(mtype)+0.1f)
-                        speed = pOwner->GetSpeedRate(mtype)+0.1f; // pets derive speed from owner when not in combat
+                    // For every yard over 5, increase speed by 0.01
+                    //  to help prevent pet from lagging behind and despawning
+                    float dist = GetDistance(pOwner);
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
+
+                    if (dist < 5)
+                        dist = 5;
+
+                    float mult = base_rate + ((dist - 5) * 0.01f);
+
+                    speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
                 }
                 else
                     speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
@@ -13291,23 +13303,6 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
             // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
             // and do it only for real sent packets and use run for run/mounted as client expected
             ++ToPlayer()->m_forced_speed_changes[mtype];
-
-            // Xinef: update speed of pet also
-            if (!IsInCombat())
-            {
-                Unit* pet = ToPlayer()->GetPet();
-                if (!pet)
-                    pet = GetCharm();
-
-                // xinef: do not affect vehicles and possesed pets
-                if (pet && (pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || pet->IsVehicle()))
-                    pet = NULL;
-
-                if (pet && pet->GetTypeId() == TYPEID_UNIT && !pet->IsInCombat() && pet->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-                    pet->UpdateSpeed(mtype, forced);
-                if (Unit* critter = ObjectAccessor::GetUnit(*this, GetCritterGUID()))
-                    critter->UpdateSpeed(mtype, forced);
-            }
         }
 
         switch (mtype)

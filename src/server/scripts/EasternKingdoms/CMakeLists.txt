@@ -10,6 +10,7 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  EasternKingdoms/zone_elwynn_forest.cpp
   EasternKingdoms/zone_ghostlands.cpp
   EasternKingdoms/zone_eversong_woods.cpp
   EasternKingdoms/AlteracValley/boss_galvangar.cpp

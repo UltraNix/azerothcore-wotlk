@@ -1405,6 +1405,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_CONTACT_LIST:
         case CMSG_GUILD_SET_PUBLIC_NOTE:
         case CMSG_GUILD_SET_OFFICER_NOTE:
+        case MSG_RAID_TARGET_UPDATE:
         {
             maxPacketCounterAllowed = 50;
             break;
@@ -1413,7 +1414,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_SPELLCLICK:
         case CMSG_GAMEOBJ_USE:
         case CMSG_GAMEOBJ_REPORT_USE:
-        case MSG_RAID_TARGET_UPDATE:
         case CMSG_QUESTGIVER_COMPLETE_QUEST:
         {
             maxPacketCounterAllowed = 20;

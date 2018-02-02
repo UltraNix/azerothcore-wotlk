@@ -600,7 +600,7 @@ void Creature::Update(uint32 diff)
             m_regenTimer -= diff;
             if (m_regenTimer <= 0)
             {
-                if (!IsInEvadeMode() && (!IsInCombat() || IsPolymorphed() || CanNotReachTarget())) // regenerate health if not in combat or if polymorphed
+                if (!IsInEvadeMode() && (!IsInCombat() || IsPolymorphed())) // regenerate health if not in combat or if polymorphed
                     RegenerateHealth();
 
                 if (getPowerType() == POWER_ENERGY)
@@ -788,7 +788,11 @@ void Creature::DoFleeToGetAssistance()
             //TODO: use 31365
             SetControlled(true, UNIT_STATE_FLEEING);
         else
-            GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
+        {
+            Position pos;
+            creature->GetNearPosition(pos, creature->GetObjectSize() + 0.5f, GetAngle(creature->GetPositionX(), creature->GetPositionZ()));
+            GetMotionMaster()->MoveSeekAssistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+        }
     }
 }
 

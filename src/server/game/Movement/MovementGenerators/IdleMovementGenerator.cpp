@@ -115,7 +115,7 @@ bool DistractMovementGenerator::Update(Unit* owner, uint32 time_diff)
     if (owner->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         return false;
 
-    if (owner->IsInCombat() || time_diff > m_timer)
+    if (time_diff > m_timer)
         return false;
 
     m_timer -= time_diff;
@@ -126,4 +126,8 @@ void AssistanceDistractMovementGenerator::Finalize(Unit* unit)
 {
     unit->ClearUnitState(UNIT_STATE_DISTRACTED);
     unit->ToCreature()->SetReactState(REACT_AGGRESSIVE);
+    //! change no search assistance so creature updates its speed to proper values
+    //! shouldnt happen twice if scripts are written properly
+    unit->ToCreature()->SetNoSearchAssistance(false);
+    unit->UpdateSpeed(MOVE_RUN, false);
 }

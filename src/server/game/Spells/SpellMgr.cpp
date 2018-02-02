@@ -7326,6 +7326,14 @@ void SpellMgr::LoadDbcDataCorrections()
         case 7764:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
+
+        /////////////////////////////////////////////
+        ///////////////// GNOMEREGAN ////////////////
+        /////////////////////////////////////////////
+        case 11504: // Spell walking bomb effect
+            spellInfo->Effect[EFFECT_1] = 0;
+            break;
+
         /////////////////////////////////////////////
         /////////////////// CUSTOM //////////////////
         /////////////////////////////////////////////
