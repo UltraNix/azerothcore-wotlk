@@ -13181,7 +13181,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                     // For every yard over 5, increase speed by 0.01
                     //  to help prevent pet from lagging behind and despawning
                     float dist = GetDistance(pOwner);
-                    float base_rate = 1.20f; // base speed is 120% of owner speed
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
 
                     if (dist < 5)
                         dist = 5;
@@ -13303,23 +13303,6 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
             // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
             // and do it only for real sent packets and use run for run/mounted as client expected
             ++ToPlayer()->m_forced_speed_changes[mtype];
-
-            // Xinef: update speed of pet also
-            if (!IsInCombat())
-            {
-                Unit* pet = ToPlayer()->GetPet();
-                if (!pet)
-                    pet = GetCharm();
-
-                // xinef: do not affect vehicles and possesed pets
-                if (pet && (pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || pet->IsVehicle()))
-                    pet = NULL;
-
-                if (pet && pet->GetTypeId() == TYPEID_UNIT && !pet->IsInCombat() && pet->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-                    pet->UpdateSpeed(mtype, forced);
-                if (Unit* critter = ObjectAccessor::GetUnit(*this, GetCritterGUID()))
-                    critter->UpdateSpeed(mtype, forced);
-            }
         }
 
         switch (mtype)
