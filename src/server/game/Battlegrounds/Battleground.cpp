@@ -939,9 +939,9 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
             }
 
             if (!isArena() && (GetBgTypeID() == BATTLEGROUND_AV || GetBgTypeID() == BATTLEGROUND_IC) && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
-                player->GiveXP(0.08 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
+                player->GiveXP(0.05 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
             else if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
-                player->GiveXP(0.06 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
+                player->GiveXP(0.04 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
 
             // @Transmog
             if (sTransmogrification->TokenRewardEnabled())
@@ -1102,7 +1102,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
         }
 
         if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
-            player->GiveXP(0.04 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
+            player->GiveXP(0.03 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
 
         player->ResetAllPowers();
         player->CombatStopWithPets(true);
