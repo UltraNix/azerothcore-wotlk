@@ -113,9 +113,77 @@ class spell_gnomeregan_radiation_bolt : public SpellScriptLoader
         }
 };
 
+enum MiscSpells
+{
+    SPELL_WALKING_BOMB_EFFECT   = 11504
+};
+
+class BoomEvent : public BasicEvent
+{
+public:
+    explicit BoomEvent(Creature* me) : _me(me) {}
+
+    bool Execute(uint64 /*time*/, uint32 /*diff*/) override
+    {
+        if (!_me)
+            return false;
+
+        // This hack is here because we suspect our implementation of spell effect execution on targets
+        // is done in the wrong order. We suspect that EFFECT_0 needs to be applied on all targets,
+        // then EFFECT_1, etc - instead of applying each effect on target1, then target2, etc.
+        // The above situation causes the visual for this spell to be bugged, so we remove the instakill
+        // effect and implement a script hack for that.
+
+        WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8 + 8 + 4);
+        data << uint64(_me->GetGUID());
+        data << uint64(_me->GetGUID());
+        data << uint32(SPELL_WALKING_BOMB_EFFECT);
+        _me->SendMessageToSet(&data, false);
+
+        Unit::Kill(_me, _me);
+        return true;
+    }
+
+private:
+    Creature * _me;
+};
+
+class spell_walking_bomb_effect_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_walking_bomb_effect_SpellScript);
+
+    bool Load() override
+    {
+        _exploded = false;
+        return true;
+    }
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (!_exploded)
+        {
+            _exploded = true;
+            if (GetCaster()->ToCreature())
+            {
+                GetCaster()->ToCreature()->SetReactState(REACT_PASSIVE);
+                GetCaster()->ToCreature()->AttackStop();
+                GetCaster()->m_Events.AddEvent(new BoomEvent(GetCaster()->ToCreature()), GetCaster()->m_Events.CalculateTime(1 * IN_MILLISECONDS));
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_walking_bomb_effect_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+private:
+    bool _exploded;
+};
+
 void AddSC_instance_gnomeregan()
 {
     new instance_gnomeregan();
     new npc_kernobee();
     new spell_gnomeregan_radiation_bolt();
+    new SpellScriptLoaderEx<spell_walking_bomb_effect_SpellScript>("spell_walking_bomb_effect");
 }
