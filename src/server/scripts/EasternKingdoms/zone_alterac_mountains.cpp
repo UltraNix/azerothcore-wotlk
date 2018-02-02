@@ -55,7 +55,7 @@ public:
                 return;
 
             if (Player* playerWho = who->ToPlayer())
-                if (playerWho->ToPlayer()->GetQuestStatus(QUEST_GOLDIR) == QUEST_STATUS_INCOMPLETE)
+                if (playerWho->GetQuestStatus(QUEST_GOLDIR) == QUEST_STATUS_INCOMPLETE)
                     playerWho->AreaExploredOrEventHappens(QUEST_GOLDIR);
         }
 
