@@ -26460,6 +26460,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
         stmt->setBool(index++, m_PvPAnnounces);
+        stmt->setFloat(index++, GetAverageItemLevel());
     }
     else
     {
@@ -26590,6 +26591,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
         stmt->setBool(index++, m_PvPAnnounces);
+        stmt->setFloat(index++, GetAverageItemLevel());
 
         stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
         // Index
