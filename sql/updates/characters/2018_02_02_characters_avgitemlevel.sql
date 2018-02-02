@@ -1,1 +1,0 @@
-ALTER TABLE `characters` ADD `avgitemlevel` FLOAT NOT NULL DEFAULT '0' AFTER `pvpAnnounces`;
