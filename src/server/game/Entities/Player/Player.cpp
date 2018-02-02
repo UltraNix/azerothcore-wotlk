@@ -20393,6 +20393,7 @@ void Player::_SaveStats(SQLTransaction& trans)
     stmt->setUInt32(index++, GetBaseSpellPowerBonus());
     stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_TAKEN_SPELL));
     stmt->setUInt32(index++, m_achievementMgr->CalculateAchievementPoints());
+    stmt->setFloat(index++, GetAverageItemLevel());
 
     trans->Append(stmt);
 }

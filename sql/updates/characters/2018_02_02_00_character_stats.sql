@@ -1,0 +1,1 @@
+ALTER TABLE `character_stats` ADD `avgItemLevel` FLOAT NOT NULL DEFAULT '0' AFTER `achievementPoints`;
