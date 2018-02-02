@@ -170,13 +170,7 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 
     //! Do not use formationDest here, MoveTo requires transport offsets due to DisableTransportPathTransformations() call
     //! but formationDest contains global coordinates
-
-    //! @todo: @riztazz: enable mmaps & force dest for specific creatures, should be abled for everything
-    //! last time i changed this, some stuff broke for no reason and since we're releasing angrathar soon
-    //! i dont want to break stuff on launch, ill change it later
-    bool useMMapsAndForceDest = (!transportPath && !creature->IsPet() && creature->GetCreatureTemplate() && creature->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_USE_WAYPOINT_MMAP);
-
-    init.MoveTo(node->x, node->y, node->z, useMMapsAndForceDest, useMMapsAndForceDest);
+    init.MoveTo(node->x, node->y, node->z, true, true);
 
     //! Accepts angles such as 0.00001 and -0.00001, 0 must be ignored, default value in waypoint table
     if (node->orientation && node->delay)
