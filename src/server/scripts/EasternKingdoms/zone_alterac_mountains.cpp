@@ -25,11 +25,44 @@ EndScriptData */
 
 /* ContentData
 EndContentData */
+   
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
-//#include "ScriptMgr.h"
-//#include "ScriptedCreature.h"
+/*######
+## npc_goldir
+######*/
 
-/*void AddSC_alterac_mountains()
+#define QUEST_GOLDIR 503
+
+class npc_goldir : public CreatureScript
 {
-    Script* newscript;
-}*/
+public:
+    npc_goldir() : CreatureScript("npc_goldir") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_goldirAI(creature);
+    }
+
+    struct npc_goldirAI : public ScriptedAI
+    {
+        npc_goldirAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!who || who->GetTypeId() != TYPEID_PLAYER || !me->IsWithinDist(who, 10.0f))
+                return;
+
+            if (Player* playerWho = who->ToPlayer())
+                if (playerWho->ToPlayer()->GetQuestStatus(QUEST_GOLDIR) == QUEST_STATUS_INCOMPLETE)
+                    playerWho->AreaExploredOrEventHappens(QUEST_GOLDIR);
+        }
+
+    };
+};
+
+void AddSC_alterac_mountains()
+{
+    new npc_goldir();
+}
