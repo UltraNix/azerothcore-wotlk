@@ -105,6 +105,7 @@ void AddSC_event_midsummer_scripts();
 void AddSC_event_childrens_week();
 
 //eastern kingdoms
+void AddSC_zone_elwynn_forest();
 void AddSC_alterac_valley();                 //Alterac Valley
 void AddSC_boss_balinda();
 void AddSC_boss_drekthar();
@@ -752,6 +753,7 @@ void AddEventScripts()
 void AddEasternKingdomsScripts()
 {
 #ifdef SCRIPTS
+    AddSC_zone_elwynn_forest();
     AddSC_alterac_valley();                 //Alterac Valley
     AddSC_boss_balinda();
     AddSC_boss_drekthar();
