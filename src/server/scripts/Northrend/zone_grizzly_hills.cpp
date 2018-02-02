@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,6 +26,7 @@
 #include "SpellInfo.h"
 #include "CreatureTextMgr.h"
 #include "SpellScript.h"
+#include "CreatureGroups.h"
 
 // Ours
 enum qRedRocket
@@ -864,11 +865,11 @@ class spell_infected_worgen_bite : public SpellScriptLoader
 {
     public:
         spell_infected_worgen_bite() : SpellScriptLoader("spell_infected_worgen_bite") { }
-        
+
         class spell_infected_worgen_bite_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_infected_worgen_bite_AuraScript);
-            
+
             void HandleAfterEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* target = GetTarget();
@@ -879,7 +880,7 @@ class spell_infected_worgen_bite : public SpellScriptLoader
                         target->CastSpell(target, SPELL_WORGENS_CALL, true);
                     }
             }
-            
+
             void Register()
             {
                 AfterEffectApply += AuraEffectApplyFn(spell_infected_worgen_bite_AuraScript::HandleAfterEffectApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAPPLY);
@@ -892,10 +893,72 @@ class spell_infected_worgen_bite : public SpellScriptLoader
         }
 };
 
+enum mustangMisc
+{
+    SPELL_RIDE_HIGHLAND_MUSTANG     = 49282,
+    SPELL_SCARE_HIGHLAND_MUSTANG    = 49319,
+    SPELL_SPOOKY_MUSTANG_CREDIT     = 49323,
+    SPELL_DANGLE_CARROT             = 49266,
+
+};
+
+struct npc_highland_mustangAI : public ScriptedAI
+{
+public:
+    npc_highland_mustangAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _gotHitByQuestSpell = false;
+        if (me->GetFormation())
+            me->SearchFormation();
+    }
+
+    void OnCharmed(bool apply) override { }
+
+    void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) override
+    {
+        if (!apply)
+            me->DespawnOrUnsummon(2s);
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell) override
+    {
+        if (_gotHitByQuestSpell || !caster->IsPlayer())
+            return;
+
+        switch (spell->Id)
+        {
+            case SPELL_DANGLE_CARROT:
+            {
+                _gotHitByQuestSpell = true;
+                if (me->GetFormation())
+                    me->GetFormation()->RemoveMember(me);
+                me->StopMoving();
+                caster->CastSpell(me, SPELL_RIDE_HIGHLAND_MUSTANG, true);
+                break;
+            }
+            case SPELL_SCARE_HIGHLAND_MUSTANG:
+            {
+                _gotHitByQuestSpell = true;
+                caster->CastSpell(caster, SPELL_SPOOKY_MUSTANG_CREDIT, true);
+                if (me->GetFormation())
+                    me->GetFormation()->RemoveMember(me);
+                me->GetMotionMaster()->MoveRandom(25.f);
+                me->DespawnOrUnsummon(5s);
+                break;
+            }
+        }
+    }
+private:
+    bool _gotHitByQuestSpell;
+};
+
 void AddSC_grizzly_hills()
 {
     // Ours
     new npc_riding_the_red_rocket();
+    new CreatureAILoader<npc_highland_mustangAI>("npc_highland_mustang");
 
     // Theirs
     new npc_emily();
