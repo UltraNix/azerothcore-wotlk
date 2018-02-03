@@ -1,0 +1,1 @@
+DELETE FROM reference_loot_template WHERE item IN (51804, 51805, 51806, 51807, 51808);
