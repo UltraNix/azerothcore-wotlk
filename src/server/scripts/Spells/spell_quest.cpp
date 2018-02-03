@@ -1539,41 +1539,33 @@ enum Quest12459Data
     NPC_WEAK_DEATHGAZE              = 27807,
 };
 
-class spell_q12459_seeds_of_natures_wrath : public SpellScriptLoader
+class spell_q12459_seeds_of_natures_wrath_SpellScript : public SpellScript
 {
-    public:
-        spell_q12459_seeds_of_natures_wrath() : SpellScriptLoader("spell_q12459_seeds_of_natures_wrath") { }
+    PrepareSpellScript(spell_q12459_seeds_of_natures_wrath_SpellScript);
 
-        class spell_q12459_seeds_of_natures_wrath_SpellScript : public SpellScript
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Creature* creatureTarget = GetHitCreature())
         {
-            PrepareSpellScript(spell_q12459_seeds_of_natures_wrath_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            uint32 uiNewEntry = 0;
+            switch (creatureTarget->GetEntry())
             {
-                if (Creature* creatureTarget = GetHitCreature())
-                {
-                    uint32 uiNewEntry = 0;
-                    switch (creatureTarget->GetEntry())
-                    {
-                        case NPC_REANIMATED_FROSTWYRM:  uiNewEntry = NPC_WEAK_REANIMATED_FROSTWYRM; break;
-                        case NPC_TURGID:                uiNewEntry = NPC_WEAK_TURGID;               break;
-                        case NPC_DEATHGAZE:             uiNewEntry = NPC_WEAK_DEATHGAZE;            break;
-                    }
-                    if (uiNewEntry)
-                        creatureTarget->UpdateEntry(uiNewEntry);
-                }
+                case NPC_REANIMATED_FROSTWYRM:  uiNewEntry = NPC_WEAK_REANIMATED_FROSTWYRM; break;
+                case NPC_TURGID:                uiNewEntry = NPC_WEAK_TURGID;               break;
+                case NPC_DEATHGAZE:             uiNewEntry = NPC_WEAK_DEATHGAZE;            break;
             }
+            if (uiNewEntry)
+                creatureTarget->UpdateEntry(uiNewEntry);
 
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_q12459_seeds_of_natures_wrath_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_q12459_seeds_of_natures_wrath_SpellScript();
+            if (creatureTarget->IsAIEnabled)
+                creatureTarget->AI()->AttackStart(GetCaster());
         }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_q12459_seeds_of_natures_wrath_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
 };
 
 // http://www.wowhead.com/quest=12634 Some Make Lemonade, Some Make Liquor
@@ -3236,7 +3228,7 @@ void AddSC_quest_spell_scripts()
     new spell_q11515_fel_siphon_dummy();
     new spell_q11587_arcane_prisoner_rescue();
     new spell_q11730_ultrasonic_screwdriver();
-    new spell_q12459_seeds_of_natures_wrath();
+    new SpellScriptLoaderEx<spell_q12459_seeds_of_natures_wrath_SpellScript>("spell_q12459_seeds_of_natures_wrath");
     new spell_q12634_despawn_fruit_tosser();
     new spell_q12683_take_sputum_sample();
     new spell_q12851_going_bearback();
