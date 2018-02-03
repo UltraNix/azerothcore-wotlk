@@ -1656,6 +1656,117 @@ public:
     }
 };
 
+enum TormentingTheSoftknuckles
+{
+    DATA_FEARED_SOFTKNUCKLE             = 1,
+
+    SAY_ENRAGE                          = 0,
+
+    SPELL_THUNDERSTOMP                  = 61580,
+    SPELL_ENRAGE                        = 54287,
+
+    NPC_HARDKNUCKLE_MATRIARCH           = 28213,
+
+    QUEST_TORMENTING_THE_SOFTKNUCKLES   = 12530
+};
+
+struct npc_hardknuckle_matriarchAI : public ScriptedAI
+{
+    npc_hardknuckle_matriarchAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+        SetImmune(true);
+        _counter = 0;
+        _amount = urand(3, 8);
+    }
+
+    void SetImmune(bool apply)
+    {
+        if (apply)
+        {
+            me->SetVisible(false);
+            me->SetImmuneToAll(true);
+            me->SetReactState(REACT_PASSIVE);
+        }
+        else
+        {
+            me->SetVisible(true);
+            me->SetImmuneToAll(false);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        me->DespawnOrUnsummon();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(6s, 10s, [this](TaskContext task)
+        {
+            DoCastVictim(SPELL_THUNDERSTOMP);
+            task.Repeat(12s, 15s);
+        });
+    }
+
+    void SetData(uint32 id, uint32 /*data*/) override
+    {
+        if (id == DATA_FEARED_SOFTKNUCKLE)
+            if (++_counter > _amount)
+            {
+                Position homePos = me->GetHomePosition();
+                me->NearTeleportTo(homePos.GetPositionX(), homePos.GetPositionY(), homePos.GetPositionZ(), homePos.GetOrientation());
+                _counter = 0;
+                SetImmune(false);
+                Talk(SAY_ENRAGE);
+                DoCastSelf(SPELL_ENRAGE);
+                _scheduler.Schedule(500ms, [this](TaskContext /*task*/)
+                {
+                    me->GetMotionMaster()->MovePath(me->GetDBTableGUIDLow() * 10, false);
+                });
+            }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        TaskScheduler _scheduler;
+        uint16 _counter, _amount;
+};
+
+class spell_scared_softknuckle_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_scared_softknuckle_AuraScript);
+
+    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Creature* matriarch = GetTarget()->FindNearestCreature(NPC_HARDKNUCKLE_MATRIARCH, 100.0f))
+        {
+            if (!matriarch->IsVisible() && matriarch->IsAIEnabled)
+                matriarch->AI()->SetData(DATA_FEARED_SOFTKNUCKLE, 1);
+
+        }
+        else if (Creature* matriarch = GetTarget()->FindNearestCreature(NPC_HARDKNUCKLE_MATRIARCH, 100.0f, false))
+            matriarch->Respawn();
+    }
+
+    void Register() override
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_scared_softknuckle_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_FEAR, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     // Ours
@@ -1679,4 +1790,6 @@ void AddSC_sholazar_basin()
     new spell_q12589_shoot_rjr();
     new npc_vics_flying_machine();
     new spell_shango_tracks();
+    new CreatureAILoader<npc_hardknuckle_matriarchAI>("npc_hardknuckle_matriarch");
+    new AuraScriptLoaderEx<spell_scared_softknuckle_AuraScript>("spell_scared_softknuckle");
 }
