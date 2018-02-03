@@ -541,10 +541,22 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
     }
     if (xp)
     {
-        // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT).
-        Unit::AuraEffectList const& auras = player->GetAuraEffectsByType(SPELL_AURA_MOD_XP_PCT);
-        for (Unit::AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
-            AddPct(xp, (*i)->GetAmount());
+        { // Heirloom and premium stuff.
+            uint8 division = 0;
+            bool premiumBonus = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
+            bool premiumBonusX4 = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+            bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
+            int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
+
+            if (premiumBonusX4)    division = 3;
+            else if (premiumBonus) division = 2;
+            else if (eventBonus)   division = eventMultipler;
+
+            // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT).
+            Unit::AuraEffectList const& auras = player->GetAuraEffectsByType(SPELL_AURA_MOD_XP_PCT);
+            for (auto aura : auras)
+                AddPct(xp, (division > 0 ? (aura->GetAmount() / division) : aura->GetAmount()));
+        }
 
         // 4.2.3. Give XP to player.
         player->GiveXP(xp, _victim, _groupRate);
@@ -3224,13 +3236,13 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool premium)
 
     uint32 bonus_xp = 0;
     bool recruitAFriend = GetsRecruitAFriendBonus(true);
-    bool premiumBonus   = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
+    bool premiumBonus = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
     bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
-    bool eventBonus     = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
+    bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
     int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-    bool IsBlizzlike    = BlizzlikeMode() || !premium;
-    
+    bool IsBlizzlike = BlizzlikeMode() || !premium;
+
     // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
     if (premiumBonusX4 && !IsBlizzlike)
         bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
@@ -15884,12 +15896,12 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     if (!problematicItems.empty())
     {
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
-        MailSender sender(MAIL_CREATURE, 34337 /* The Postmaster */ );
+        MailSender sender(MAIL_CREATURE, 34337 /* The Postmaster */);
         MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
 
         for (std::vector<std::pair<uint32, uint32> >::const_iterator itr = problematicItems.begin(); itr != problematicItems.end(); ++itr)
         {
-            if(Item* item = Item::CreateItem(itr->first, itr->second))
+            if (Item* item = Item::CreateItem(itr->first, itr->second))
             {
                 item->SaveToDB(trans);
                 draft.AddItem(item);
@@ -15911,10 +15923,22 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     // Not give XP in case already completed once repeatable quest
     uint32 XP = rewarded ? 0 : uint32(quest->XPValue(this)*sWorld->getRate(RATE_XP_QUEST));
 
-    // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
-    Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(SPELL_AURA_MOD_XP_QUEST_PCT);
-    for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
-        AddPct(XP, (*i)->GetAmount());
+    { // Heirloom and premium stuff.
+        uint8 division = 0;
+        bool premiumBonus = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
+        bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+        bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
+        int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
+
+        if (premiumBonusX4)    division = 3;
+        else if (premiumBonus) division = 2;
+        else if (eventBonus)   division = eventMultipler;
+
+        // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
+        Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(SPELL_AURA_MOD_XP_QUEST_PCT);
+        for (auto aura : ModXPPctAuras)
+            AddPct(XP, (division > 0 ? (aura->GetAmount() / division) : aura->GetAmount()));
+    }
 
     int32 moneyRew = 0;
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
