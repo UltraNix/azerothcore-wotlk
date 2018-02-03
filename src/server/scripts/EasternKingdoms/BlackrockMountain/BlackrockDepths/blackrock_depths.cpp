@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,6 +21,7 @@
 #include "ScriptedGossip.h"
 #include "blackrock_depths.h"
 #include "Player.h"
+#include "Group.h"
 #include "WorldSession.h"
 
 //go_shadowforge_brazier
@@ -600,6 +601,156 @@ public:
     };
 };
 
+/*######
+## COMMANDER GOR'SHAK
+######*/
+enum Gorshak
+{
+    NPC_FOOTMAN                             = 8892,
+    NPC_GUARDSMAN                           = 8891,
+
+    QUEST_WHATS_GOING_ON                    = 3982,
+
+    EVENT_SECONDWAVE                        = 1,
+    EVENT_WHAT_IS_GOING_ON_COMPLETE         = 2
+};
+
+Position const AddSpawnPos[4] =
+{
+    { 375.73f, -201.22f, -70.37f, 2.03f },
+    { 379.39f, -199.37f, -69.68f, 1.87f },
+    { 382.15f, -198.50f, -69.11f, 1.87f },
+    { 377.89f, -195.24f, -70.12f, 1.90f }
+};
+
+class npc_commander_gorshak : public CreatureScript
+{
+public:
+    npc_commander_gorshak() : CreatureScript("npc_commander_gorshak") { }
+
+    struct npc_commander_gorshakAI : ScriptedAI
+    {
+        npc_commander_gorshakAI(Creature* creature) : ScriptedAI(creature), Summons(me) { }
+
+        void Reset() override
+        {
+            me->setFaction(35);
+            playerGUID = 0;
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        }
+
+        void StartEvent(uint64 GUID)
+        {
+            playerGUID = GUID;
+
+            for (auto i = 0; i < 4; ++i)
+            {
+                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+            }
+
+            events.ScheduleEvent(EVENT_SECONDWAVE, 20s);
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                player->FailQuest(QUEST_WHATS_GOING_ON);
+
+            Summons.DespawnAll();
+        }
+
+        void JustSummoned(Creature* summoned) override
+        {
+            Summons.Summon(summoned);
+            summoned->AI()->AttackStart(me);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SECONDWAVE:
+                    {
+                        for (auto i = 0; i < 4; ++i)
+                        {
+                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
+                        }
+                        events.ScheduleEvent(EVENT_WHAT_IS_GOING_ON_COMPLETE, 30s);
+                        break;
+                    }
+                    case EVENT_WHAT_IS_GOING_ON_COMPLETE:
+                    {
+                        if (!me->IsAlive())
+                            return;
+
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
+                        {
+                            player->CompleteQuest(QUEST_WHATS_GOING_ON);
+                            if (Group* group = player->GetGroup())
+                            {
+                                for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                                {
+                                    Player* groupMember = itr->GetSource();
+                                    if (groupMember && groupMember->GetMapId() == player->GetMapId() && groupMember->GetQuestStatus(QUEST_WHATS_GOING_ON) == QUEST_STATUS_INCOMPLETE)
+                                    {
+                                        groupMember->CompleteQuest(QUEST_WHATS_GOING_ON);
+                                    }
+                                }
+                            }
+                        }
+
+                        me->GetMotionMaster()->MoveTargetedHome();
+                        me->DespawnOrUnsummon(40s);
+                        me->setFaction(35);
+                        break;
+                    }
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+        void JustReachedHome() override
+        {
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            ScriptedAI::JustReachedHome();
+        }
+    private:
+        uint64 playerGUID;
+        EventMap events;
+        SummonList Summons;
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_WHATS_GOING_ON)
+        {
+            if (creature->GetAI())
+            {
+                CAST_AI(npc_commander_gorshak::npc_commander_gorshakAI, creature->AI())->StartEvent(player->GetGUID());
+                creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                creature->setFaction(113);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_commander_gorshakAI(creature);
+    }
+};
+
 void AddSC_blackrock_depths()
 {
     new go_shadowforge_brazier();
@@ -608,4 +759,5 @@ void AddSC_blackrock_depths()
     new npc_kharan_mighthammer();
     new npc_lokhtos_darkbargainer();
     new npc_rocknot();
+    new npc_commander_gorshak();
 }
