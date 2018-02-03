@@ -7482,14 +7482,14 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
 
     ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, honor, true);
 
-    // Xinef: Battleground experience
+    // Battleground experience
     if (awardXP)
         if (Battleground* bg = GetBattleground())
         {
             bg->UpdatePlayerScore(this, SCORE_BONUS_HONOR, honor, false); //false: prevent looping
             // award xp for pvp kills
             if (uVictim)
-                GiveXP(0.0005 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, false);
+                GiveXP(0.0005 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
         }
 
     return true;
