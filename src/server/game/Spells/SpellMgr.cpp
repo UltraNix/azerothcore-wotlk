@@ -3435,6 +3435,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->_requireCooldownInfo = true;
         });
 
+        // Stampy's Stompy-Stomp (Quest: 12614)
+        ApplySpellFix({ 51752 }, [](SpellInfo* spellInfo) {
+            spellInfo->RecoveryTime = 10000;
+            spellInfo->_requireCooldownInfo = true;
+        });
+      
         ApplySpellFix
         ({
             56001, // Ebonweave
