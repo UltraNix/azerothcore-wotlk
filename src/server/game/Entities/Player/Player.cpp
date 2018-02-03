@@ -3253,7 +3253,7 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool premium)
     else if (eventBonus && !IsBlizzlike)
         bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (recruitAFriend && !IsBlizzlike)
-        bonus_xp = 1 * xp;                          // RaF does NOT stack with rested experience
+        bonus_xp = 2 * xp;                          // RaF does NOT stack with rested experience
     else if (getLevel() < 70 && !IsBlizzlike)
         bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
     else
