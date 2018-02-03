@@ -2195,6 +2195,9 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
                 if (Unit* itrTarget = (*itr)->ToUnit())
                 {
                     uint32 deficit = itrTarget->GetMaxHealth() - itrTarget->GetHealth();
+                    // xinef: chain should not heal targets with max health
+                    if (deficit == 0)
+                        continue;
 
                     if ((deficit > maxHPDeficit || foundItr == tempTargets.end()) && target->IsWithinDist(itrTarget, jumpRadius) && target->IsWithinLOSInMap(itrTarget))
                     {
