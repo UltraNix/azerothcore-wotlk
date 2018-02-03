@@ -694,6 +694,31 @@ private:
     SummonList summons;
 };
 
+class AbyssalShelfRespawn : public BasicEvent
+{
+    public:
+        explicit AbyssalShelfRespawn(Creature& owner) : _owner(owner) { }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            _owner.Respawn();
+            return true;
+        }
+
+    private:
+        Creature& _owner;
+};
+
+struct npc_abyssal_shelfAI : public ScriptedAI
+{
+    npc_abyssal_shelfAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        me->m_Events.AddEvent(new AbyssalShelfRespawn(*me), me->m_Events.CalculateTime(20000));
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     // Ours
@@ -707,4 +732,5 @@ void AddSC_hellfire_peninsula()
     new npc_wounded_blood_elf();
     new npc_fel_guard_hound();
     new CreatureAILoader<npc_colonel_julesAI>("npc_colonel_jules");
+    new CreatureAILoader<npc_abyssal_shelfAI>("npc_abyssal_shelf");
 }

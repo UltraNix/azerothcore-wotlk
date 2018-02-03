@@ -27,3 +27,6 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 
 -- Cyanigosa
 UPDATE `creature_model_info` SET `bounding_radius`=3.0, `combat_reach`=10.0 WHERE `modelid`=27340;
+
+-- Abyssal Shelf
+UPDATE `creature_template` SET `AIName`="", `ScriptName`="npc_abyssal_shelf" WHERE `entry` IN (19398, 19397, 19399);
