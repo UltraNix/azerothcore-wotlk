@@ -3849,6 +3849,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 34367: //Bloodgem Crystals quest
             spellInfo->ChannelInterruptFlags = AURA_INTERRUPT_FLAG_MOVE;
             break;
+        case 51597: // Cocooned! quest
+            spellInfo->EffectBasePoints[EFFECT_0] = 0;
+            break;
         case 15538: // Gout of Flame
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
