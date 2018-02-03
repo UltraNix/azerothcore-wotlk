@@ -543,6 +543,7 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
     {
         { // Heirloom and premium stuff.
             uint8 division = 0;
+            bool recruitAFriend = player->GetsRecruitAFriendBonus(true);
             bool premiumBonus = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
             bool premiumBonusX4 = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
             bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
@@ -550,6 +551,7 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
 
             if (premiumBonusX4)    division = 3;
             else if (premiumBonus) division = 2;
+            else if (recruitAFriend) division = 2;
             else if (eventBonus)   division = eventMultipler;
 
             // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT).
@@ -3252,8 +3254,6 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool premium)
         bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (recruitAFriend && !IsBlizzlike)
         bonus_xp = 1 * xp;                          // RaF does NOT stack with rested experience
-    else if (getLevel() < 70 && !IsBlizzlike)
-        bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
     else
         bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
 
@@ -15925,6 +15925,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     { // Heirloom and premium stuff.
         uint8 division = 0;
+        bool recruitAFriend = GetsRecruitAFriendBonus(true);
         bool premiumBonus = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
         bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
         bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
@@ -15932,6 +15933,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
         if (premiumBonusX4)    division = 3;
         else if (premiumBonus) division = 2;
+        else if (recruitAFriend) division = 2;
         else if (eventBonus)   division = eventMultipler;
 
         // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
