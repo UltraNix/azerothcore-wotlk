@@ -1,0 +1,1 @@
+DELETE FROM gameobject WHERE guid IN(7304,7321);
