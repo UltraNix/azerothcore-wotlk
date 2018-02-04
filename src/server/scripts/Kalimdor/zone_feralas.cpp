@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -219,6 +219,139 @@ class spell_gordunni_trap : public SpellScriptLoader
         }
 };
 
+enum ShayMisc
+{
+    SAY_SHAY_0              = 0, // Don''t forget to get my bell out of the chest here...
+    SAY_SHAY_1              = 1, // This is quite an adventure!...
+    SAY_SHAY_2              = 2, // %s begins to wander off.
+    SAY_SHAY_3              = 3, // Are we taking the scenic route?
+
+    SAY_ROCKBITTER_0        = 0,
+
+    SHAY_FACTION            = 250,
+    QUEST_WANDERING_SHAY    = 2845,
+
+    SPELL_SHAY_BELL         = 11402,
+
+    EVENT_BEGIN_FOLLOW      = 1,
+    EVENT_WANDER_OFF        = 2,
+
+    EVENT_QUEST_TIMER       = 3,
+
+    NPC_ROCKBITTER          = 7765
+};
+
+struct npc_shay_wanderer_AI : public ScriptedAI
+{
+    npc_shay_wanderer_AI(Creature* creature) : ScriptedAI(creature)
+    {
+        me->RestoreFaction();
+        _wandering = false;
+        _playerGUID = 0;
+        events.Reset();
+    }
+
+    void sQuestAccept(Player* player, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_WANDERING_SHAY)
+        {
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            me->setFaction(SHAY_FACTION);
+            _playerGUID = player->GetGUID();
+            Talk(SAY_SHAY_0);
+            events.ScheduleEvent(EVENT_BEGIN_FOLLOW, 2s);
+            events.ScheduleEvent(EVENT_WANDER_OFF, 20s);
+            events.ScheduleEvent(EVENT_QUEST_TIMER, 15min);
+        }
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+            player->FailQuest(QUEST_WANDERING_SHAY);
+    }
+
+    void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
+    {
+        if (!caster->ToPlayer())
+            return;
+
+        if (caster->ToPlayer()->GetQuestStatus(QUEST_WANDERING_SHAY) == QUEST_STATUS_INCOMPLETE && _wandering)
+        {
+            _wandering = false;
+            events.ScheduleEvent(EVENT_WANDER_OFF, 20s, 40s);
+            Talk(SAY_SHAY_1);
+            FollowPlayer();
+        }
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (who->GetEntry() == NPC_ROCKBITTER && me->IsWithinDist(who, 10.f))
+        {
+            events.Reset();
+            if (who->ToCreature() && who->IsAIEnabled)
+                who->ToCreature()->AI()->Talk(SAY_ROCKBITTER_0);
+
+            me->GetMotionMaster()->MovementExpired();
+            me->GetMotionMaster()->Clear();
+            me->DespawnOrUnsummon(5s);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        events.Update(diff);
+
+        while (auto eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_BEGIN_FOLLOW:
+                {
+                    FollowPlayer();
+                    break;
+                }
+                case EVENT_WANDER_OFF:
+                {
+                    _wandering = true;
+                    me->GetMotionMaster()->MovementExpired();
+                    me->GetMotionMaster()->Clear();
+                    Talk(SAY_SHAY_2);
+                    Talk(SAY_SHAY_3);
+                    me->GetMotionMaster()->MoveRandom(10.0f);
+                    break;
+                }
+                case EVENT_QUEST_TIMER:
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                    {
+                        if (player->GetQuestStatus(QUEST_WANDERING_SHAY) == QUEST_STATUS_INCOMPLETE)
+                            player->FailQuest(QUEST_WANDERING_SHAY);
+                    }
+                    me->DespawnOrUnsummon();
+                    break;
+                }
+            }
+        }
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+    void FollowPlayer()
+    {
+        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+            me->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, me->GetFollowAngle());
+    }
+private:
+    uint64 _playerGUID;
+    bool _wandering;
+    EventMap events;
+};
+
 /*######
 ## AddSC
 ######*/
@@ -228,4 +361,5 @@ void AddSC_feralas()
     new npc_gregan_brewspewer();
     new npc_oox22fe();
     new spell_gordunni_trap();
+    new CreatureAILoader<npc_shay_wanderer_AI>("npc_shay_wanderer");
 }
