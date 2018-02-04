@@ -377,7 +377,10 @@ struct boss_jedoga_shadowseekerAI : public BossAI
                     {
                         VolunteerPositionPair posPair = VolunteerSpotPositions.at(pos);
                         if (TempSummon* volunteer = me->SummonCreature(NPC_TWILIGHT_VOLUNTEER, posPair.first, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3000))
+                        {
                             volunteer->GetMotionMaster()->MovePoint(POINT_INITIAL_POSITION, posPair.second);
+                            _volunteerGUIDS[pos] = volunteer->GetGUID();
+                        }
                     }
                     break;
                 }
