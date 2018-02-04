@@ -108,3 +108,9 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 
 -- Ragemane
 UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=29664;
+
+-- Colonel Kurzen
+UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=813;
+
+-- Brann Bronzebeard
+UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=28070;
