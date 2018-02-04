@@ -974,8 +974,8 @@ void GameEventMgr::LoadHolidayDates()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                               0   1         2
-    QueryResult result = WorldDatabase.Query("SELECT id, date_id, date_value FROM holiday_dates");
+    //                                               0   1         2           3
+    QueryResult result = WorldDatabase.Query("SELECT id, date_id, date_value, duration FROM holiday_dates");
 
     if (!result)
     {
@@ -1002,6 +1002,8 @@ void GameEventMgr::LoadHolidayDates()
             continue;
         }
         entry->Date[dateId] = fields[2].GetUInt32();
+        if (fields[3].GetUInt32())
+            entry->Duration[dateId] = fields[3].GetUInt32();
         modifiedHolidays.insert(entry->Id);
         ++count;
 
