@@ -13,3 +13,5 @@ INSERT INTO `creature_template_addon` (`entry`,`bytes2`,`auras`) VALUES
 (24783, 1, 54422);
 -- Nass SAI
 UPDATE `smart_scripts` SET `action_type`=0 WHERE `entryorguid`=28521 AND `source_type`=0 AND `id`=3;
+-- Basic Campfire
+UPDATE `gameobject_template` SET `data1`=5 WHERE `entry`=29784;
