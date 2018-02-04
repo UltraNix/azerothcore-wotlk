@@ -1226,20 +1226,20 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     float dist = m_caster->GetExactDist2d(x, y);
     CalculateJumpSpeeds(effIndex, dist, speedXY, speedZ);
 
-    // Override, calculations are incorrect
-    if (m_spellInfo->Id == 49376) // feral charge
+    switch (m_spellInfo->Id)
     {
-        speedXY = pow(speedZ*10, 2);
-        m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, 0, ObjectAccessor::GetUnit(*m_caster, m_caster->GetUInt64Value(UNIT_FIELD_TARGET)));
-        return;
-    }
-    else if (m_spellInfo->Id == 57604) // death grip
-    {
-        speedZ = 3.0f;
-        speedXY = 50.0f;
+        case 49376: // Feral charge.
+            m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, 0, ObjectAccessor::GetUnit(*m_caster, m_caster->GetUInt64Value(UNIT_FIELD_TARGET)));
+            return;
+        case 57604: // Death grip.
+            speedZ  = 3.0f;
+            speedXY = 50.0f;
+            break;
+        default:
+            break;
     }
 
-    // crash fix?
+    // Crash Fix ?
     if (speedXY < 1.0f)
         speedXY = 1.0f;
 
