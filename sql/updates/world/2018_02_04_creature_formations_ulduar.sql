@@ -1,0 +1,250 @@
+-- Hodir Trash Group #1
+SET @LEADER = 136272;
+SET @RIGHT = 136278;
+SET @CENTER = 136279;
+SET @LEFT = 136280;
+
+UPDATE `creature_addon` SET `path_id` = 0 WHERE `guid` IN (@RIGHT,@LEFT, @CENTER);
+UPDATE `creature` SET `MovementType` = 0 WHERE `guid`  IN (@RIGHT,@LEFT, @CENTER);
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @LEFT, 5.77, 120, 3, 0, 0),
+(@LEADER, @RIGHT, 5.77, 240, 3, 0, 0),
+(@LEADER, @CENTER, 5, 180, 3, 0, 0);
+
+-- Hodir Trash Group #2
+SET @LEADER = 136273;
+SET @RIGHT = 136276;
+SET @CENTER = 136277;
+SET @LEFT = 136275;
+
+UPDATE `creature_addon` SET `path_id` = 0 WHERE `guid` IN (@RIGHT,@LEFT, @CENTER);
+UPDATE `creature` SET `MovementType` = 0 WHERE `guid`  IN (@RIGHT,@LEFT, @CENTER);
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @LEFT, 5.77, 60, 3, 0, 0),
+(@LEADER, @RIGHT, 5, 300, 3, 0, 0),
+(@LEADER, @CENTER, 5.77, 0, 3, 0, 0);
+
+-- Freya Trash Group #1 
+SET @LEADER = 137527;
+SET @ENT1 = 137519;
+SET @ENT2 = 1979808;
+SET @LASHER1 = 137523;
+SET @LASHER2 = 1979809;
+SET @NATUREBLADE = 1979810;
+SET @GUARDIAN = 137530;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @ENT1, 0, 0, 3, 0, 0),
+(@LEADER, @ENT2, 0, 0, 3, 0, 0),
+(@LEADER, @LASHER1, 0, 0, 3, 0, 0),
+(@LEADER, @LASHER2, 0, 0, 3, 0, 0),
+(@LEADER, @NATUREBLADE, 0, 0, 3, 0, 0),
+(@LEADER, @GUARDIAN, 0, 0, 3, 0, 0);
+
+-- Freya Trash Group #2
+SET @LEADER = 137518;
+SET @MEMBER1 = 137531;
+SET @MEMBER2 = 1979818;
+SET @MEMBER3 = 137526;
+SET @MEMBER4 = 137522;
+SET @MEMBER5 = 1979817;
+SET @MEMBER6 = 1979819;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER6, 0, 0, 3, 0, 0);
+
+-- Freya Trash Group #3
+SET @LEADER = 137520;
+SET @MEMBER1 = 137528;
+SET @MEMBER2 = 137515;
+SET @MEMBER3 = 137524;
+SET @MEMBER4 = 1979811;
+SET @MEMBER5 = 1979813;
+SET @MEMBER6 = 1979812;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER6, 0, 0, 3, 0, 0);
+
+
+-- Freya Trash Group #4
+SET @LEADER = 137525;
+SET @MEMBER1 = 137529;
+SET @MEMBER2 = 137516;
+SET @MEMBER3 = 137521;
+SET @MEMBER4 = 1979815;
+SET @MEMBER5 = 1979814;
+SET @MEMBER6 = 1979816;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER6, 0, 0, 3, 0, 0);
+
+
+-- Mimiron Trash Group #1
+SET @LEADER = 136535;
+SET @MEMBER1 = 136561;
+SET @MEMBER2 = 136583;
+SET @MEMBER3 = 136563;
+SET @MEMBER4 = 136560;
+SET @MEMBER5 = 136562;
+SET @MEMBER6 = 136582;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER6, 0, 0, 3, 0, 0);
+
+-- Mimiron Trash Group #2
+SET @LEADER = 136566;
+SET @MEMBER1 = 136569;
+SET @MEMBER2 = 136568;
+SET @MEMBER3 = 136565;
+SET @MEMBER4 = 136564;
+SET @MEMBER5 = 136567;
+SET @MEMBER6 = 136589;
+SET @MEMBER7 = 136588;
+SET @MEMBER8 = 136536;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER6, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER7, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER8, 0, 0, 3, 0, 0);
+
+
+-- Mimiron Trash Group #3
+SET @LEADER = 136533;
+SET @MEMBER1 = 136585;
+SET @MEMBER2 = 136586;
+SET @MEMBER3 = 136587;
+SET @MEMBER4 = 136534;
+SET @MEMBER5 = 136584;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0);
+
+-- Mimiron Trash Group #3
+SET @LEADER = 136574;
+SET @MEMBER1 = 136575;
+SET @MEMBER2 = 136578;
+SET @MEMBER3 = 136579;
+SET @MEMBER4 = 136580;
+SET @MEMBER5 = 136581;
+SET @MEMBER6 = 136570;
+SET @MEMBER7 = 136571;
+SET @MEMBER8 = 136572;
+SET @MEMBER9 = 136573;
+SET @MEMBER10 = 136591;
+SET @MEMBER11 = 136592;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER6, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER7, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER8, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER9, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER10, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER11, 0, 0, 3, 0, 0);
+
+-- Vezax Trash Group #1
+SET @LEADER = 137544;
+SET @MEMBER1 = 137539;
+SET @MEMBER2 = 137557;
+SET @MEMBER3 = 137555;
+SET @MEMBER4 = 137548;
+SET @MEMBER5 = 137551;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0);
+
+-- Vezax Trash Group #2
+SET @LEADER = 137559;
+SET @MEMBER1 = 137545;
+SET @MEMBER2 = 137549;
+SET @MEMBER3 = 137553;
+SET @MEMBER4 = 137541;
+SET @MEMBER5 = 137546;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0);
+
+
+-- Vezax Trash Group #3
+SET @LEADER = 137543;
+SET @MEMBER1 = 137547;
+SET @MEMBER2 = 137558;
+SET @MEMBER3 = 137542;
+SET @MEMBER4 = 137538;
+SET @MEMBER5 = 137550;
+
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADER;
+INSERT INTO `creature_formations` VALUES
+(@LEADER, @LEADER, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER1, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER2, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER3, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER4, 0, 0, 3, 0, 0),
+(@LEADER, @MEMBER5, 0, 0, 3, 0, 0);
