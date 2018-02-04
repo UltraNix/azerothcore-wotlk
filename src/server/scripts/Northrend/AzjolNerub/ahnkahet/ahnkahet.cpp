@@ -54,7 +54,11 @@ enum AhnkahetSpells
     // Forgotten One
     SPELL_SHADOW_NOVA           = 60845,
     SPELL_SHADOW_CRASH          = 60833,
-    SPELL_PSYCHIC_SCREAM        = 34322
+    SPELL_PSYCHIC_SCREAM        = 34322,
+
+    // Ahn'kahar Web Winder
+    SPELL_WEB_GRAB              = 56640,
+    SPELL_TANGLED_WEBS          = 56632
 };
 
 struct npc_deep_crawlerAI : public ScriptedAI
@@ -565,6 +569,46 @@ struct npc_forgotten_oneAI : public ScriptedAI
         TaskScheduler _scheduler;
 };
 
+struct npc_ahnkahar_web_winderAI : public ScriptedAI
+{
+    npc_ahnkahar_web_winderAI(Creature* creature) : ScriptedAI(creature)
+    {
+        _scheduler.SetValidator([this] { return !me->HasUnitState(UNIT_STATE_CASTING); });
+    }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(10s, 15s, [this](TaskContext task)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 40.0f, true))
+                DoCast(target, SPELL_WEB_GRAB);
+            task.Repeat(14s, 19s);
+        });
+        _scheduler.Schedule(5s, 9s, [this](TaskContext task)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 25.0f, true))
+                DoCast(target, SPELL_TANGLED_WEBS);
+            task.Repeat(14s, 19s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff, std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+    }
+
+    private:
+        TaskScheduler _scheduler;
+};
+
 // 56710, 61460 - Aura of Lost Hope
 class spell_aura_of_lost_hope_SpellScript : public SpellScript
 {
@@ -599,5 +643,6 @@ void AddSC_ahnkahet()
     new CreatureAILoader<npc_twilight_apostleAI>("npc_twilight_apostle");
     new CreatureAILoader<npc_twilight_darkcasterAI>("npc_twilight_darkcaster");
     new CreatureAILoader<npc_forgotten_oneAI>("npc_forgotten_one");
+    new CreatureAILoader<npc_ahnkahar_web_winderAI>("npc_ahnkahar_web_winder");
     new SpellScriptLoaderEx<spell_aura_of_lost_hope_SpellScript>("spell_aura_of_lost_hope");
 }
