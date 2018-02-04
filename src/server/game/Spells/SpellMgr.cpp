@@ -7374,9 +7374,9 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
             break;
         case 62242:     // Icy Prism
-            if (sWorld->PatchNotes(PATCH_30X))
+            if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
             {
-                spellInfo->ReagentCount[0] = 3;
+                spellInfo->ReagentCount[0] = 1;
                 spellInfo->ReagentCount[1] = 3;
                 spellInfo->ReagentCount[2] = 3;
                 spellInfo->ReagentCount[3] = 3;
