@@ -11,3 +11,5 @@ INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`) VALUES
 DELETE FROM `creature_template_addon` WHERE `entry`= 24783;
 INSERT INTO `creature_template_addon` (`entry`,`bytes2`,`auras`) VALUES
 (24783, 1, 54422);
+-- Nass SAI
+UPDATE `smart_scripts` SET `action_type`=0 WHERE `entryorguid`=28521 AND `source_type`=0 AND `id`=3;
