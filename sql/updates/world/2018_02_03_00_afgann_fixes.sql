@@ -105,3 +105,6 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (@GUID*10, 1, 773.114014, -4973.180176, 1.379400, 1, 0),
 (@GUID*10, 2, 738.953491, -4979.407715, 3.195509, 1, 0),
 (@GUID*10, 3, 724.995483, -4984.345215, 5.996824, 1, 0);
+
+-- Ragemane
+UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=29664;
