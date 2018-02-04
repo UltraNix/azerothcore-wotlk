@@ -384,6 +384,142 @@ public:
     }
 };
 
+enum ValgardeEvent
+{
+    NPC_DRAGONFLAYER_INVADER            = 24051,
+
+    // Dragonflayer Invader
+    SPELL_INTERCEPT                     = 58747,
+    SPELL_THROW_DRAGONFLAYER_HARPOON    = 42870,
+    
+    SAY_AGGRO                           = 0,
+
+    // Dragonflayer Worg
+    SPELL_INFECTED_BITE                 = 7367,
+
+    // Valgarde Defender
+    SPELL_REVENGE                       = 12170,
+
+    SAY_FIGHT                           = 0
+};
+
+class ValgardeEventRespawn : public BasicEvent
+{
+    public:
+        explicit ValgardeEventRespawn(Creature& owner) : _owner(owner) { }
+
+        bool Execute(uint64 /*currTime*/, uint32 /*diff*/)
+        {
+            _owner.Respawn();
+            return true;
+        }
+
+    private:
+        Creature& _owner;
+};
+
+struct npc_valgarde_eventAI : public ScriptedAI
+{
+    npc_valgarde_eventAI(Creature* creature) : ScriptedAI(creature) 
+    { 
+        if (me->isDead())
+            me->Respawn();
+    }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        me->m_Events.AddEvent(new ValgardeEventRespawn(*me), me->m_Events.CalculateTime(10000));
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff,
+            std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+    }
+
+    protected:
+        TaskScheduler _scheduler;
+};
+
+struct npc_valgarde_event_attackerAI : public npc_valgarde_eventAI
+{
+    npc_valgarde_event_attackerAI(Creature* creature) : npc_valgarde_eventAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        me->SetHomePosition(me->GetPosition());
+        if (me->GetEntry() == NPC_DRAGONFLAYER_INVADER)
+        {
+            if (roll_chance_i(10))
+                Talk(SAY_AGGRO);
+            _scheduler.Schedule(0s, 1s, [this](TaskContext task)
+            {
+                DoCastVictim(SPELL_INTERCEPT);
+                task.Repeat(15s, 20s);
+            });
+            _scheduler.Schedule(6s, 10s, [this](TaskContext task)
+            {
+                DoCastVictim(SPELL_THROW_DRAGONFLAYER_HARPOON);
+                task.Repeat(15s, 20s);
+            });
+        }
+        else
+        {
+            _scheduler.Schedule(2s, 5s, [this](TaskContext task)
+            {
+                DoCastVictim(SPELL_INFECTED_BITE);
+                task.Repeat(6s, 10s);
+            });
+        }
+    }
+};
+
+struct npc_valgarde_event_defenderAI : public npc_valgarde_eventAI
+{
+    npc_valgarde_event_defenderAI(Creature* creature) : npc_valgarde_eventAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(2s, 5s, [this](TaskContext task)
+        {
+            DoCastVictim(SPELL_REVENGE);
+            task.Repeat(5s, 8s);
+        });
+        if (GuidCheck(me->GetDBTableGUIDLow()))
+        {
+            _scheduler.Schedule(2s, 5s, [this](TaskContext task)
+            {
+                if (roll_chance_i(5))
+                    Talk(SAY_FIGHT);
+                task.Repeat(30s, 1min);
+            });
+        }
+    }
+
+    bool GuidCheck(uint32 dbGUID)
+    {
+        for (auto guid : { 113665, 113644, 113664, 113663, 112719, 112720 })
+            if (dbGUID == guid)
+                return true;
+
+        return false;
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        if (GuidCheck(me->GetDBTableGUIDLow()))
+            npc_valgarde_eventAI::JustDied(killer);
+    }
+};
+
 void AddSC_howling_fjord()
 {
     // Ours
@@ -394,4 +530,6 @@ void AddSC_howling_fjord()
     new npc_apothecary_hanes();
     new npc_plaguehound_tracker();
     new npc_razael_and_lyana();
+    new CreatureAILoader<npc_valgarde_event_attackerAI>("npc_valgarde_event_attacker");
+    new CreatureAILoader<npc_valgarde_event_defenderAI>("npc_valgarde_event_defender");
  }
