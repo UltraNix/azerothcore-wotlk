@@ -4944,6 +4944,40 @@ public:
     }
 };
 
+class spell_undigestible_immune : public SpellScriptLoader
+{
+    public:
+        spell_undigestible_immune() : SpellScriptLoader("spell_undigestible_immune") { }
+
+        class spell_undigestible_immune_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_undigestible_immune_AuraScript);
+
+            void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+                target->ApplySpellImmune(47447 /*Corrosive Spit*/, IMMUNITY_ID, 47447 /*Corrosive Spit*/, true);
+            }
+
+            void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                Unit* target = GetTarget();
+                target->ApplySpellImmune(47447 /*Corrosive Spit*/, IMMUNITY_ID, 47447 /*Corrosive Spit*/, false);
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_undigestible_immune_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_undigestible_immune_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_undigestible_immune_AuraScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
     // ours:
@@ -4995,6 +5029,7 @@ void AddSC_generic_spell_scripts()
     new spell_sleep_magic_dust();
     new spell_gen_cleansing_vial();
     new spell_opening_battleground_nodes();
+    new spell_undigestible_immune();
 
     // theirs:
     new spell_gen_absorb0_hitlimit1();
