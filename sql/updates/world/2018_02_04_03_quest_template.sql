@@ -1,0 +1,1 @@
+UPDATE quest_template SET minlevel = 20, maxlevel = 80 WHERE id IN (24597,24612,24609,24614,24610,24611,24629,24635,24636);
