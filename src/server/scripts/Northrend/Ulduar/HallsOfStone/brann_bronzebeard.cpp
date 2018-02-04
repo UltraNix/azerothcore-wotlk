@@ -218,6 +218,7 @@ public:
         {   
             AbedneumGUID = MarnakGUID = KaddrakGUID = 0;
             pInstance = c->GetInstanceScript();
+            c->SetCorpseDelay(10);
         }
 
         InstanceScript* pInstance;
