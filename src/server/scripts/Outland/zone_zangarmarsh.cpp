@@ -521,6 +521,26 @@ public:
     }
 };
 
+enum ParalyticPoison
+{
+    SPELL_PARALYSIS = 35202
+};
+
+class spell_paralytic_poison_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_paralytic_poison_AuraScript);
+    
+    void OnRemove(AuraEffect const* /*AuraEff*/, AuraEffectHandleModes /*AuraEff*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), SPELL_PARALYSIS, true);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove += AuraEffectRemoveFn(spell_paralytic_poison_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 /*######
 ## AddSC
 ######*/
@@ -537,4 +557,5 @@ void AddSC_zangarmarsh()
     new npc_mortog_steamhead();
     new npc_kayra_longmane();
     new npc_timothy_daniels();
+    new AuraScriptLoaderEx<spell_paralytic_poison_AuraScript>("spell_paralytic_poison");
 }

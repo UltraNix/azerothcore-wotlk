@@ -114,3 +114,8 @@ UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=813;
 
 -- Brann Bronzebeard
 UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=28070;
+
+-- Paralytic Poison aurascript
+DELETE FROM `spell_script_names` WHERE `ScriptName`="spell_paralytic_poison";
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(35201, "spell_paralytic_poison");
