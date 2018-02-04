@@ -1245,7 +1245,7 @@ class Player : public Unit, public GridObject<Player>
                 m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_TWK;
         }
 
-        void GiveXP(uint32 xp, Unit* victim, float group_rate=1.0f, bool premium = true);
+        void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool bgExtra = false);
         void GiveLevel(uint8 level);
 
         void InitStatsForLevel(bool reapplyMods = false);

@@ -3201,7 +3201,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
     GetSession()->SendPacket(&data);
 }
 
-void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool premium)
+void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
 {
     if (xp < 1)
         return;
@@ -3243,17 +3243,17 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool premium)
     bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
     int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-    bool IsBlizzlike = BlizzlikeMode() || !premium;
+    bool IsBlizzlike = BlizzlikeMode();
 
     // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
     if (premiumBonusX4 && !IsBlizzlike)
-        bonus_xp = 3 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        bonus_xp = (bgExtra ? 1.5 : 3) * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (premiumBonus && !IsBlizzlike)
-        bonus_xp = 2 * xp + (victim ? GetXPRestBonus(xp) : 0);
+        bonus_xp = (bgExtra ? 1.5 : 2) * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (eventBonus && !IsBlizzlike)
-        bonus_xp = eventMultipler * xp + (victim ? GetXPRestBonus(xp) : 0);
+        bonus_xp = (bgExtra ? 1.5 : eventMultipler) * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (recruitAFriend && !IsBlizzlike)
-        bonus_xp = 2 * xp;                          // RaF does NOT stack with rested experience
+        bonus_xp = (bgExtra ? 1.5 : 2) * xp;                          // RaF does NOT stack with rested experience
     else if (getLevel() < 70 && !IsBlizzlike)
         bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
     else
@@ -7503,7 +7503,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
             bg->UpdatePlayerScore(this, SCORE_BONUS_HONOR, honor, false); //false: prevent looping
             // award xp for pvp kills
             if (uVictim)
-                GiveXP(0.0005 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+                GiveXP(0.0005 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
         }
 
     return true;
