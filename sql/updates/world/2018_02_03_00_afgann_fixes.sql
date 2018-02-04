@@ -7,3 +7,7 @@ UPDATE `creature_template` SET `AIName`="", `ScriptName`="npc_ahnkahar_web_winde
 DELETE FROM `spelldifficulty_dbc` WHERE `id`=56640;
 INSERT INTO `spelldifficulty_dbc` (`id`, `spellid0`, `spellid1`) VALUES
 (56640, 56640, 59106);
+-- Trained Rock Falcon
+DELETE FROM `creature_template_addon` WHERE `entry`= 24783;
+INSERT INTO `creature_template_addon` (`entry`,`bytes2`,`auras`) VALUES
+(24783, 1, 54422);
