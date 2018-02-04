@@ -722,7 +722,7 @@ void GameObject::Update(uint32 diff)
                         m_respawnTime = time(nullptr) + static_cast<uint32>(m_respawnDelayTime * 0.25f);
                         break;
                     default:
-                        m_respawnTime = time(nullptr) + m_respawnDelayTime;
+                        m_respawnTime = time(nullptr) + static_cast<uint32>(m_respawnDelayTime * 0.5f);
                         break;
                 }
             }
