@@ -1761,9 +1761,15 @@ class spell_scared_softknuckle_AuraScript : public AuraScript
             matriarch->Respawn();
     }
 
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->GetMotionMaster()->MoveTargetedHome();
+    }
+
     void Register() override
     {
         OnEffectApply += AuraEffectApplyFn(spell_scared_softknuckle_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_FEAR, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(spell_scared_softknuckle_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_FEAR, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
