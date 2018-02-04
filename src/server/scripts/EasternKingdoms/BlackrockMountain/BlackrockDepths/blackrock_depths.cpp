@@ -644,12 +644,7 @@ public:
             playerGUID = GUID;
 
             for (auto i = 0; i < 4; ++i)
-            {
                 me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                me->SummonCreature(NPC_FOOTMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-            }
 
             events.ScheduleEvent(EVENT_SECONDWAVE, 20s);
         }
@@ -679,12 +674,7 @@ public:
                     case EVENT_SECONDWAVE:
                     {
                         for (auto i = 0; i < 4; ++i)
-                        {
                             me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                            me->SummonCreature(NPC_GUARDSMAN, AddSpawnPos[i], TEMPSUMMON_MANUAL_DESPAWN, 180000);
-                        }
                         events.ScheduleEvent(EVENT_WHAT_IS_GOING_ON_COMPLETE, 30s);
                         break;
                     }
@@ -694,20 +684,7 @@ public:
                             return;
 
                         if (Player* player = ObjectAccessor::GetPlayer(*me, playerGUID))
-                        {
-                            player->CompleteQuest(QUEST_WHATS_GOING_ON);
-                            if (Group* group = player->GetGroup())
-                            {
-                                for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
-                                {
-                                    Player* groupMember = itr->GetSource();
-                                    if (groupMember && groupMember->GetMapId() == player->GetMapId() && groupMember->GetQuestStatus(QUEST_WHATS_GOING_ON) == QUEST_STATUS_INCOMPLETE)
-                                    {
-                                        groupMember->CompleteQuest(QUEST_WHATS_GOING_ON);
-                                    }
-                                }
-                            }
-                        }
+                            player->GroupEventHappens(QUEST_WHATS_GOING_ON, me);
 
                         me->GetMotionMaster()->MoveTargetedHome();
                         me->DespawnOrUnsummon(40s);
