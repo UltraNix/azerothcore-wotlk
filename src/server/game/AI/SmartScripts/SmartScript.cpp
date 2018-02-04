@@ -500,7 +500,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                                 player->AreaExploredOrEventHappens(e.action.quest.quest);
 
                 if (IsPlayer(*itr))
-                    (*itr)->ToPlayer()->AreaExploredOrEventHappens(e.action.quest.quest);;
+                    (*itr)->ToPlayer()->GroupEventHappens(e.action.quest.quest, me);
             }
 
             delete targets;
