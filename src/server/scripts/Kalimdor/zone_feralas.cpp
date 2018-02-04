@@ -247,6 +247,7 @@ struct npc_shay_wanderer_AI : public ScriptedAI
     {
         me->RestoreFaction();
         _wandering = false;
+        _eventFinished = false;
         _playerGUID = 0;
         events.Reset();
     }
@@ -287,11 +288,15 @@ struct npc_shay_wanderer_AI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* who) override
     {
-        if (who->GetEntry() == NPC_ROCKBITTER && me->IsWithinDist(who, 10.f))
+        if (who->GetEntry() == NPC_ROCKBITTER && me->IsWithinDist(who, 10.f) && !_eventFinished)
         {
+            _eventFinished = true;
             events.Reset();
             if (who->ToCreature() && who->IsAIEnabled)
                 who->ToCreature()->AI()->Talk(SAY_ROCKBITTER_0);
+
+            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                player->GroupEventHappens(QUEST_WANDERING_SHAY, me);
 
             me->GetMotionMaster()->MovementExpired();
             me->GetMotionMaster()->Clear();
@@ -349,6 +354,7 @@ struct npc_shay_wanderer_AI : public ScriptedAI
 private:
     uint64 _playerGUID;
     bool _wandering;
+    bool _eventFinished;
     EventMap events;
 };
 
