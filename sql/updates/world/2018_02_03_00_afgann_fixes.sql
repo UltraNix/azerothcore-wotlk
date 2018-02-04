@@ -119,3 +119,6 @@ UPDATE `creature` SET `spawntimesecs`=0 WHERE `id`=28070;
 DELETE FROM `spell_script_names` WHERE `ScriptName`="spell_paralytic_poison";
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (35201, "spell_paralytic_poison");
+
+-- All NPCs Are Immune To Crowd Control -- Daze, Horror, Shackle, Banish, Polymorph, Knockout, Freeze, Stun, Snare, Sleep, Silence, Pacify, Root, Fear, Distract, Disarm, Confused, Charm
+UPDATE `creature_template` SET `mechanic_immune_mask`=`mechanic_immune_mask`|76234719 WHERE `entry` IN (30014, 30017, 30026, 30019, 30025, 30024, 30020, 30023, 30022, 18398, 18399, 18400, 18401, 18402, 18069, 27715, 27716, 27717, 27718, 27727, 31242, 31277);
