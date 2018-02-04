@@ -4186,7 +4186,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 51690:
             spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
             break;
-
+        // Cheap Shot
+        case 1833:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
 
         /////////////////////////////////
         ///// DEATH KNIGHT
