@@ -1,1 +1,1 @@
-UPDATE `creature_template` SET `speed_run` = 1.14286 WHERE `entry` = 24238; -- 2.2
+UPDATE `creature_template` SET `speed_run` = 1.75 WHERE `entry` = 24238; -- 2.2
