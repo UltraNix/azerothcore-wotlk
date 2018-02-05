@@ -7379,7 +7379,7 @@ void SpellMgr::LoadDbcDataCorrections()
             }
             break;
         case 47214:    // Burninate Effect
-            spellInfo->EffectRadiusIndex[EFFECT_0] = 8.5;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
             break;
         }
 
