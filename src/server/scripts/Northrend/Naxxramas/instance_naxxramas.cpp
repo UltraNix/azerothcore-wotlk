@@ -680,6 +680,8 @@ public:
                             go->SetPhaseMask(1, true);
                         if (GameObject* go = instance->GetGameObject(_horsemanPortalEyeGUID))
                             go->SetGoState(GO_STATE_ACTIVE);
+                        if (GameObject* go = instance->GetGameObject(_horsemanGateGUID))
+                            go->SetGoState(GO_STATE_ACTIVE);
                         break;
                 }
             }
@@ -764,6 +766,8 @@ public:
                     return _kelthuzadgateGUID;
                 case DATA_NOTH_ENTRANCE_GATE:
                     return _nothEntranceGateGUID;
+                case DATA_HORSEMAN_GATE:
+                    return _horsemanGateGUID;
 
                 // NPCs
                 case DATA_THADDIUS_BOSS:
