@@ -1,0 +1,1 @@
+INSERT INTO creature(guid, id, map, position_x, position_y, position_z, orientation) VALUES (NULL, 6491, 0, -1315.88, -3184.42, 37.28, 5.56);
