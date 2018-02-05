@@ -67,7 +67,11 @@ public:
             dropSludgeTimer = 0;
 
             if (pInstance)
+            {
                 pInstance->SetData(EVENT_GROBBULUS, NOT_STARTED);
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_PATCHWERK_GATE)))
+                    go->SetGoState(GO_STATE_ACTIVE);
+            }
         }
 
         void EnterCombat(Unit *who)
@@ -80,7 +84,11 @@ public:
             events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(12 * MINUTE * IN_MILLISECONDS, 8 * MINUTE * IN_MILLISECONDS));
 
             if (pInstance)
+            {
                 pInstance->SetData(EVENT_GROBBULUS, IN_PROGRESS);
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_PATCHWERK_GATE)))
+                    go->SetGoState(GO_STATE_READY);
+            }
         }
 
         void SpellHitTarget(Unit *target, const SpellInfo* spellInfo)

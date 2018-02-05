@@ -459,7 +459,6 @@ public:
             switch(id)
             {
                 case EVENT_PATCHWERK:
-                case EVENT_GROBBULUS:
                 case EVENT_GLUTH:
                 case EVENT_NOTH:
                 case EVENT_ANUB:
@@ -685,6 +684,10 @@ public:
                         if (GameObject* go = instance->GetGameObject(_horsemanGateGUID))
                             go->SetGoState(GO_STATE_ACTIVE);
                         break;
+                    case EVENT_GROBBULUS:
+                        if (GameObject* go = instance->GetGameObject(_patchwerkGateGUID))
+                            go->SetGoState(GO_STATE_ACTIVE);
+                        break;
                 }
             }
         }
@@ -772,6 +775,8 @@ public:
                     return _horsemanGateGUID;
                 case DATA_THADDIUS_GATE:
                     return _thaddiusGateGUID;
+                case DATA_PATCHWERK_GATE:
+                    return _patchwerkGateGUID;
 
                 // NPCs
                 case DATA_THADDIUS_BOSS:
