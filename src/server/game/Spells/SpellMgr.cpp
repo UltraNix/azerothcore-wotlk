@@ -7378,6 +7378,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->ReagentCount[3] = 3;
             }
             break;
+        case 47214:    // Burninate Effect
+            spellInfo->EffectRadiusIndex[EFFECT_0] = 8.5;
+            break;
         }
 
         switch (spellInfo->SpellFamilyName)
