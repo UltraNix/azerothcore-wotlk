@@ -1,5 +1,6 @@
 DELETE FROM `creature_formations` WHERE `leaderGUID` = 137525;
-UPDATE `smart_scripts` SET `event_param1` = 10 WHERE `entryorguid` = 33526 AND `id` IN (0,1);
+UPDATE `smart_scripts` SET `event_param1` = 63240, `event_param2` = 10 WHERE `entryorguid` = 33526 AND `id` = 0;
+UPDATE `smart_scripts`SET `event_param1` = 63553, `event_param2` = 10 WHERE `entryorguid` = 33526 AND `id` = 1;
 -- Freya Trash Group #4
 SET @FREYA_LEADER_4 = 1979816;
 DELETE FROM `creature_formations` WHERE `leaderGUID` = @FREYA_LEADER_4;
