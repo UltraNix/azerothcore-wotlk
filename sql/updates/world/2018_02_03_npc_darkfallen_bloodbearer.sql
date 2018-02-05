@@ -1,4 +1,4 @@
-SET @CGUID = XXXXXXXX;
+SET @CGUID = 1979922;
 
 UPDATE `creature_template` SET `AIName`= "SmartAI" WHERE `entry` = 26115;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = 26115;
