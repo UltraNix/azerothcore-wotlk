@@ -51,7 +51,8 @@ enum NXData
     DATA_NOTH_ENTRANCE_GATE            = 121,
     DATA_GOTHIK                        = 122,
     DATA_HORSEMAN_CHEST                = 123,
-    DATA_HORSEMAN_GATE                 = 124
+    DATA_HORSEMAN_GATE                 = 124,
+    DATA_THADDIUS_GATE                 = 125
 };
 
 enum NXGOs
