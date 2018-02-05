@@ -1,108 +1,94 @@
 /*
-REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
-*/
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "violet_hold.h"
 
-enum LavanthorSpells
+enum XevozzSpells
 {
-    SPELL_CAUTERIZING_FLAMES        = 59466,
-    SPELL_FIREBOLT                  = 54235,
-    SPELL_FLAME_BREATH              = 54282,
-    SPELL_LAVA_BURN                 = 54249
-
+    SPELL_CAUTERIZING_FLAMES                    = 59466, // Only in heroic
+    SPELL_FIREBOLT                              = 54235,
+    SPELL_FLAME_BREATH                          = 54282,
+    SPELL_LAVA_BURN                             = 54249
 };
 
-enum LavanthorEvents
+struct boss_lavanthorAI : public BossAI
 {
-    EVENT_FIREBOLT                  = 1,
-    EVENT_FLAME_BREATH,
-    EVENT_LAVA_BURN,
-    EVENT_CAUTERIZING_FLAMES,
-};
+    boss_lavanthorAI(Creature* creature) : BossAI(creature, DATA_LAVANTHOR) { }
 
-class boss_lavanthor : public CreatureScript
-{
-    public:
-        boss_lavanthor() : CreatureScript("boss_lavanthor") { }
+    void Reset() override
+    {
+        me->SetWalk(true);
+        _Reset();
+    }
 
-        struct boss_lavanthorAI : public BossAI
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        me->SetWalk(false);
+        _EnterCombat();
+        scheduler.Schedule(1s, [this](TaskContext task)
         {
-            boss_lavanthorAI(Creature* creature) : BossAI(creature, BOSS_LAVANTHOR) { }
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                DoCast(target, SPELL_FIREBOLT);
+            task.Repeat(5s, 13s);
+        });
 
-            void EnterCombat(Unit* /*who*/) override
-            {
-                _EnterCombat();
-                events.ScheduleEvent(EVENT_FIREBOLT, 1000);
-                events.ScheduleEvent(EVENT_FLAME_BREATH, 5000);
-                events.ScheduleEvent(EVENT_LAVA_BURN, 10000);
-                if (IsHeroic())
-                    events.ScheduleEvent(EVENT_CAUTERIZING_FLAMES, 3000);
-            }
-
-            void MovementInform(uint32 /*type*/, uint32 /*id*/) override
-            {
-                if (me->movespline->Finalized())
-                {
-                    me->SetWalk(false);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_NPC);
-                    if (Player* target = SelectTargetFromPlayerList(100.0f))
-                        AttackStart(target);
-                }
-            }
-
-            void ExecuteEvent(uint32 eventId) override
-            {
-                switch (eventId)
-                {
-                    case EVENT_FIREBOLT:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
-                            DoCast(target, SPELL_FIREBOLT);
-                        events.RepeatEvent(urand(5000, 13000));
-                        break;
-                    case EVENT_FLAME_BREATH:
-                        DoCastVictim(SPELL_FLAME_BREATH);
-                        events.RepeatEvent(urand(10000, 15000));
-                        break;
-                    case EVENT_LAVA_BURN:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f))
-                            DoCast(target, SPELL_LAVA_BURN);
-                        events.RepeatEvent(urand(15000, 23000));
-                        break;
-                    case EVENT_CAUTERIZING_FLAMES:
-                        DoCastAOE(SPELL_CAUTERIZING_FLAMES);
-                        events.RepeatEvent(urand(10000, 16000));
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            void JustDied(Unit* /*killer*/) override
-            {
-                _JustDied();
-                instance->SetData(DATA_BOSS_DIED, 0);
-            }
-
-            void MoveInLineOfSight(Unit* /*who*/) override { } 
-
-            void EnterEvadeMode() override
-            {
-                _EnterEvadeMode();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                instance->SetData(DATA_FAILED, 1);
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
+        scheduler.Schedule(5s, [this](TaskContext task)
         {
-            return new boss_lavanthorAI(creature);
+            DoCastAOE(SPELL_FLAME_BREATH);
+            task.Repeat(10s, 15s);
+        });
+
+        scheduler.Schedule(10s, [this](TaskContext task)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f))
+                DoCast(target, SPELL_LAVA_BURN);
+            task.Repeat(15s, 23s);
+        });
+
+        if (IsHeroic())
+        {
+            scheduler.Schedule(3s, [this](TaskContext task)
+            {
+                DoCastSelf(SPELL_CAUTERIZING_FLAMES);
+                task.Repeat(10s, 16s);
+            });
         }
+    }
+
+    void JustReachedHome() override
+    {
+        _JustReachedHome();
+        instance->SetData(DATA_HANDLE_CELLS, DATA_LAVANTHOR);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        scheduler.Update(diff,
+            std::bind(&BossAI::DoMeleeAttackIfReady, this));
+    }
 };
 
 void AddSC_boss_lavanthor()
 {
-    new boss_lavanthor();
+    new CreatureAILoader<boss_lavanthorAI>("boss_lavanthor");
 }

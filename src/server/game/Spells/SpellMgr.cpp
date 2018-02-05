@@ -5333,19 +5333,15 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// VIOLET HOLD
         //////////////////////////////////////////
-        // Control Crystal Activation
-        case 57804:
-            spellInfo->EffectImplicitTargetA[0] = 1;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            break;
-        // Destroy Door Seal
-        case 58040:
-            spellInfo->ChannelInterruptFlags &= ~(AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE);
-            break;
-        // Ichoron, Water Blast
-        case 54237:
-        case 59520:
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+        // Water Globule (Ichoron)
+        case 54258:
+        case 54264:
+        case 54265:
+        case 54266:
+        case 54267:
+            // in 3.3.5 there is only one radius in dbc which is 0 yards in this
+            // use max radius from 4.3.4
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_25_YARDS;
             break;
 
         //////////////////////////////////////////
