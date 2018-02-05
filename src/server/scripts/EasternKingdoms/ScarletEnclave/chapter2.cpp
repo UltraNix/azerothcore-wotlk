@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -396,6 +396,7 @@ public:
                 else
                     m_uiWave_Timer -= uiDiff;
             }
+            DoMeleeAttackIfReady();
         }
     };
 
@@ -1086,6 +1087,42 @@ class spell_q12779_an_end_to_all_things : public SpellScriptLoader
         }
 };
 
+class spell_arrow_assault_crusader_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_arrow_assault_crusader_SpellScript);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* object)
+        {
+            return object->IsPlayer();
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_arrow_assault_crusader_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
+
+uint32 const SPELL_CONTROL_ACHERUS = 51852;
+class spell_acherus_recall_52694_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_acherus_recall_52694_SpellScript);
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        if (Unit* caster = GetCaster())
+            if (Unit* target = caster->GetOwner())
+                target->RemoveAurasDueToSpell(SPELL_CONTROL_ACHERUS);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_acherus_recall_52694_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
 void AddSC_the_scarlet_enclave_c2()
 {
     new npc_crusade_persuaded();
@@ -1093,6 +1130,8 @@ void AddSC_the_scarlet_enclave_c2()
     new npc_koltira_deathweaver();
     new npc_high_inquisitor_valroth();
     new npc_a_special_surprise();
+    new SpellScriptLoaderEx<spell_arrow_assault_crusader_SpellScript>("spell_arrow_assault_crusader");
+    new SpellScriptLoaderEx<spell_acherus_recall_52694_SpellScript>("spell_acherus_recall_52694");
 
     // Xinef: Should be in chapter III
     new spell_q12779_an_end_to_all_things();
