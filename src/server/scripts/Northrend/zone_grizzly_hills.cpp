@@ -898,8 +898,7 @@ enum mustangMisc
     SPELL_RIDE_HIGHLAND_MUSTANG     = 49282,
     SPELL_SCARE_HIGHLAND_MUSTANG    = 49319,
     SPELL_SPOOKY_MUSTANG_CREDIT     = 49323,
-    SPELL_DANGLE_CARROT             = 49266,
-
+    SPELL_DANGLE_CARROT             = 49266
 };
 
 struct npc_highland_mustangAI : public ScriptedAI
@@ -910,8 +909,7 @@ public:
     void Reset() override
     {
         _gotHitByQuestSpell = false;
-        if (me->GetFormation())
-            me->SearchFormation();
+        me->SearchFormation();
     }
 
     void SpellHit(Unit* caster, SpellInfo const* spell) override
@@ -942,24 +940,9 @@ public:
             }
         }
     }
+
 private:
     bool _gotHitByQuestSpell;
-};
-
-class spell_ride_highland_mustang_AuraScript : public AuraScript
-{
-    PrepareAuraScript(spell_ride_highland_mustang_AuraScript);
-
-    void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-    {
-        if (GetTarget() && GetTarget()->IsInWorld() && GetTarget()->ToCreature())
-            GetTarget()->ToCreature()->DespawnOrUnsummon(2s);
-    }
-
-    void Register() override
-    {
-        OnEffectRemove += AuraEffectRemoveFn(spell_ride_highland_mustang_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_CONTROL_VEHICLE, AURA_EFFECT_HANDLE_REAL);
-    }
 };
 
 class spell_hand_over_reins_49285_SpellScript : public SpellScript
@@ -983,7 +966,6 @@ void AddSC_grizzly_hills()
     // Ours
     new npc_riding_the_red_rocket();
     new CreatureAILoader<npc_highland_mustangAI>("npc_highland_mustang");
-    new AuraScriptLoaderEx<spell_ride_highland_mustang_AuraScript>("spell_ride_highland_mustang");
     new SpellScriptLoaderEx<spell_hand_over_reins_49285_SpellScript>("spell_hand_over_reins_49285");
 
     // Theirs
