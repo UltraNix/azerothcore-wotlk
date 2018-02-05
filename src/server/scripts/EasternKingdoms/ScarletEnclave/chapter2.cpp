@@ -197,104 +197,69 @@ class npc_koltira_deathweaver : public CreatureScript
 public:
     npc_koltira_deathweaver() : CreatureScript("npc_koltira_deathweaver") { }
 
-    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest)
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
     {
         if (quest->GetQuestId() == QUEST_BREAKOUT)
         {
             creature->SetStandState(UNIT_STAND_STATE_STAND);
-            creature->setActive(true);
 
-            if (npc_escortAI* pEscortAI = CAST_AI(npc_koltira_deathweaver::npc_koltira_deathweaverAI, creature->AI()))
-                pEscortAI->Start(false, false, player->GetGUID());
+            if (npc_escortAI* escortAI = CAST_AI(npc_koltira_deathweaver::npc_koltira_deathweaverAI, creature->AI()))
+                escortAI->Start(false, false, player->GetGUID());
         }
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_koltira_deathweaverAI(creature);
-    }
-
     struct npc_koltira_deathweaverAI : public npc_escortAI
     {
-        npc_koltira_deathweaverAI(Creature* creature) : npc_escortAI(creature), summons(me)
+        npc_koltira_deathweaverAI(Creature* creature) : npc_escortAI(creature)
         {
             me->SetReactState(REACT_DEFENSIVE);
+            cantReset = false;
+            me->LoadEquipment(0, true);
+            me->Dismount();
         }
 
-        uint32 m_uiWave;
-        uint32 m_uiWave_Timer;
-        uint64 m_uiValrothGUID;
-        SummonList summons;
-
-        void Reset()
+        void Reset() override
         {
-            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            if (!cantReset)
             {
-                m_uiWave = 0;
-                m_uiWave_Timer = 3000;
-                m_uiValrothGUID = 0;
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->LoadEquipment(0, true);
-                me->RemoveAllAuras();
-                me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ALL, true);
-                summons.DespawnAll();
+                if (me->IsMounted())
+                    me->Dismount();
+                me->SetReactState(REACT_DEFENSIVE);
+                wave = 0;
+                waveTimer = 3000;
+                valrothGUID = 0;
+                me->RemoveAurasDueToSpell(SPELL_ANTI_MAGIC_ZONE);
+                me->RemoveAurasDueToSpell(SPELL_KOLTIRA_TRANSFORM);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
         }
 
-        void EnterEvadeMode()
-        {
-            me->DeleteThreatList();
-            me->CombatStop(false);
-            me->SetLootRecipient(NULL);
-
-            if (HasEscortState(STATE_ESCORT_ESCORTING))
-            {
-                AddEscortState(STATE_ESCORT_RETURNING);
-                ReturnToLastPoint();
-                ;//sLog->outDebug(LOG_FILTER_TSCR, "TSCR: EscortAI has left combat and is now returning to last point");
-            }
-            else
-            {
-                me->GetMotionMaster()->MoveTargetedHome();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                Reset();
-            }
-        }
-
-        void AttackStart(Unit* who)
-        {
-            if (HasEscortState(STATE_ESCORT_PAUSED))
-                return;
-
-            npc_escortAI::AttackStart(who);
-        }
-
-        void WaypointReached(uint32 waypointId)
+        void WaypointReached(uint32 waypointId) override
         {
             switch (waypointId)
             {
                 case 0:
                     Talk(SAY_BREAKOUT1);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    cantReset = true;
                     break;
                 case 1:
                     me->SetStandState(UNIT_STAND_STATE_KNEEL);
                     break;
                 case 2:
                     me->SetStandState(UNIT_STAND_STATE_STAND);
-                    //me->UpdateEntry(NPC_KOLTIRA_ALT); //unclear if we must update or not
                     DoCast(me, SPELL_KOLTIRA_TRANSFORM);
                     me->LoadEquipment();
                     break;
                 case 3:
                     SetEscortPaused(true);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    me->SetReactState(REACT_PASSIVE);
                     Talk(SAY_BREAKOUT2);
-                    DoCast(me, SPELL_ANTI_MAGIC_ZONE);  // cast again that makes bubble up
+                    DoCast(me, SPELL_ANTI_MAGIC_ZONE);
                     break;
                 case 4:
-                    me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     SetRun(true);
                     break;
                 case 9:
@@ -302,21 +267,21 @@ public:
                     break;
                 case 10:
                     me->Dismount();
+                    me->DespawnOrUnsummon();
+                    cantReset = false;
                     break;
             }
         }
 
-        void JustSummoned(Creature* summoned)
+        void JustSummoned(Creature* summoned) override
         {
             if (Player* player = GetPlayerForEscort())
                 summoned->AI()->AttackStart(player);
 
             if (summoned->GetEntry() == NPC_HIGH_INQUISITOR_VALROTH)
-                m_uiValrothGUID = summoned->GetGUID();
+                valrothGUID = summoned->GetGUID();
 
-            summoned->AddThreat(me, 0.0f);
             summoned->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-            summons.Summon(summoned);
         }
 
         void SummonAcolyte(uint32 uiAmount)
@@ -325,81 +290,85 @@ public:
                 me->SummonCreature(NPC_CRIMSON_ACOLYTE, 1642.329f, -6045.818f, 127.583f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
         }
 
-        void UpdateAI(uint32 uiDiff)
+        void UpdateAI(uint32 uiDiff) override
         {
             npc_escortAI::UpdateAI(uiDiff);
 
             if (HasEscortState(STATE_ESCORT_PAUSED))
             {
-                if (m_uiWave_Timer <= uiDiff)
+                if (waveTimer <= uiDiff)
                 {
-                    switch (m_uiWave)
+                    switch (wave)
                     {
                         case 0:
                             Talk(SAY_BREAKOUT3);
                             SummonAcolyte(3);
-                            m_uiWave_Timer = 20000;
+                            waveTimer = 20000;
                             break;
                         case 1:
                             Talk(SAY_BREAKOUT4);
                             SummonAcolyte(3);
-                            m_uiWave_Timer = 20000;
+                            waveTimer = 20000;
                             break;
                         case 2:
                             Talk(SAY_BREAKOUT5);
                             SummonAcolyte(4);
-                            m_uiWave_Timer = 20000;
+                            waveTimer = 20000;
                             break;
                         case 3:
                             Talk(SAY_BREAKOUT6);
                             me->SummonCreature(NPC_HIGH_INQUISITOR_VALROTH, 1642.329f, -6045.818f, 127.583f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1000);
-                            m_uiWave_Timer = 1000;
+                            waveTimer = 1000;
                             break;
                         case 4:
                         {
-                            Creature* temp = ObjectAccessor::GetCreature(*me, m_uiValrothGUID);
+                            Creature* temp = ObjectAccessor::GetCreature(*me, valrothGUID);
 
                             if (!temp || !temp->IsAlive())
                             {
                                 Talk(SAY_BREAKOUT8);
-                                m_uiWave_Timer = 5000;
+                                waveTimer = 5000;
                             }
                             else
                             {
-                                // xinef: despawn check
-                                Player* player = GetPlayerForEscort();
-                                if (!player || me->GetDistance(player) > 60.0f)
-                                {
-                                    me->DespawnOrUnsummon();
-                                    return;
-                                }
-
-                                m_uiWave_Timer = 2500;
-                                return;                         //return, we don't want m_uiWave to increment now
+                                waveTimer = 2500;
+                                return;
                             }
+                            me->RemoveAurasDueToSpell(SPELL_ANTI_MAGIC_ZONE);
                             break;
                         }
                         case 5:
                             Talk(SAY_BREAKOUT9);
                             me->RemoveAurasDueToSpell(SPELL_ANTI_MAGIC_ZONE);
-                            // i do not know why the armor will also be removed
-                            m_uiWave_Timer = 2500;
+                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            waveTimer = 2500;
                             break;
                         case 6:
                             Talk(SAY_BREAKOUT10);
                             SetEscortPaused(false);
+                            me->RemoveAurasDueToSpell(SPELL_ANTI_MAGIC_ZONE);
                             break;
                     }
 
-                    ++m_uiWave;
+                    ++wave;
                 }
                 else
-                    m_uiWave_Timer -= uiDiff;
+                    waveTimer -= uiDiff;
             }
-            DoMeleeAttackIfReady();
         }
+
+    private:
+        uint8 wave;
+        uint32 waveTimer;
+        uint64 valrothGUID;
+        bool cantReset;
+
     };
 
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_koltira_deathweaverAI(creature);
+    }
 };
 
 //Scarlet courier
