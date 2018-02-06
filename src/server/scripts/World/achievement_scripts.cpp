@@ -260,9 +260,9 @@ enum FlirtWithDisaster
     AURA_PERFUME_VICTORY        = 70233,
 };
 
-class achievement_filtr_with_disaster_check : public AchievementCriteriaScript{
+class achievement_flirt_with_disaster_check : public AchievementCriteriaScript{
 public:
-    achievement_filtr_with_disaster_check() : AchievementCriteriaScript("achievement_filtr_with_disaster_check"){}
+    achievement_flirt_with_disaster_check() : AchievementCriteriaScript("achievement_flirt_with_disaster_check"){}
     bool OnCheck(Player* player, Unit* /*target*/) {
         return player && (player->HasAura(AURA_PERFUME_FOREVER) || player->HasAura(AURA_PERFUME_ENCHANTRESS) || player->HasAura(AURA_PERFUME_VICTORY));
     }
@@ -287,5 +287,5 @@ void AddSC_achievement_scripts()
     new achievement_tilted();
     new achievement_not_even_a_scratch();
     new achievement_killed_exp_or_honor_target();
-    new achievement_filtr_with_disaster_check();
+    new achievement_flirt_with_disaster_check();
 }
