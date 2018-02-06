@@ -1,0 +1,2 @@
+UPDATE creature SET position_x = -268.245270, position_y = 1125.750000, position_z = 42.495678, orientation = 4.704379, MovementType = 0 WHERE guid = 68313;
+UPDATE creature SET position_x = -237.204117, position_y = 1127.095947, position_z = 42.064510, orientation = 4.704379, MovementType = 0 WHERE guid = 68311;
