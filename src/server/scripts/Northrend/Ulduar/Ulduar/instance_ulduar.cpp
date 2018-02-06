@@ -63,6 +63,9 @@ public:
         uint64 m_assemblyDoorsGUID;
         uint64 m_archivumDoorsGUID;
 
+        // Kologarn
+        uint64 m_kologarnDoorsGUID;
+
         // Thorim
         uint64 m_thorimGameobjectsGUID[5];
 
@@ -137,6 +140,9 @@ public:
             // Assembly of Iron
             m_assemblyDoorsGUID        = 0;
             m_archivumDoorsGUID        = 0;
+
+            // Kologarn
+            m_kologarnDoorsGUID      = 0;
 
             // Thorim
             memset(&m_thorimGameobjectsGUID, 0, sizeof(m_thorimGameobjectsGUID));
@@ -450,6 +456,9 @@ public:
                 case GO_KOLOGARN_BRIDGE:
                     OpenIfDone(TYPE_KOLOGARN, gameObject, GO_STATE_READY);
                     break;
+                case GO_KOLOGARN_DOORS:
+                    m_kologarnDoorsGUID = gameObject->GetGUID();
+                    break;
                 case GO_ASSEMBLY_DOORS:
                     m_assemblyDoorsGUID = gameObject->GetGUID();
                     break;
@@ -594,6 +603,9 @@ public:
                 case TYPE_VEZAX:
                 case TYPE_YOGGSARON:
                 case TYPE_KOLOGARN:
+                    if (GameObject* go = instance->GetGameObject(m_kologarnDoorsGUID))
+                        go->SetGoState(data == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
+
                     m_auiEncounter[type] = data;
                     break;
                 case TYPE_ASSEMBLY:
