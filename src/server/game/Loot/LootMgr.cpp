@@ -521,19 +521,22 @@ bool Loot::IsPlayerAllowedToLoot(Player *player, WorldObject *object)
 
 void Loot::setCreatureGUID(Creature *pCreature)
 {
-    if (!sWorld->getBoolConfig(CONFIG_SAVE_LOOT_SYSTEM))
-        return;
-
     if (!pCreature)
         return;
 
-    pCreature->FillPlayersAllowedToLoot(&players_allowed_to_loot);
-
-    if (!pCreature->isWorldBoss() && !WrathRaids(pCreature->GetMapId()))
-        return;
-
     m_creatureGUID = pCreature->GetGUID();
-    m_mapID = MapID(pCreature->GetMapId(), pCreature->GetInstanceId());
+
+    //! @Riztazz: Commented out because it doesnt work for now, but i need creatureGUID for some lootRate magic
+    //if (!sWorld->getBoolConfig(CONFIG_SAVE_LOOT_SYSTEM))
+    //    return;
+
+    //pCreature->FillPlayersAllowedToLoot(&players_allowed_to_loot);
+
+    //if (!pCreature->isWorldBoss() && !WrathRaids(pCreature->GetMapId()))
+    //    return;
+
+    //m_creatureGUID = pCreature->GetGUID();
+    //m_mapID = MapID(pCreature->GetMapId(), pCreature->GetInstanceId());
 }
 
 void Loot::FillLootFromDB(Creature *pCreature, Player* pLootOwner, uint32 mapId, uint8 mode)
@@ -624,6 +627,9 @@ void Loot::FillLootFromDB(Creature *pCreature, Player* pLootOwner, uint32 mapId,
 
 void Loot::removeItemFromSavedLoot(LootItem *item)
 {
+    if (!sWorld->getBoolConfig(CONFIG_SAVE_LOOT_SYSTEM))
+        return;
+
     if (!m_creatureGUID)
         return;
 
@@ -692,6 +698,9 @@ void Loot::RemoveSavedLootFromDB(Creature * pCreature)
 
 void Loot::RemoveSavedLootFromDB()
 {
+    if (!sWorld->getBoolConfig(CONFIG_SAVE_LOOT_SYSTEM))
+        return;
+
     if (!m_creatureGUID)
         return;
 
@@ -711,6 +720,9 @@ void Loot::RemoveSavedLootFromDB()
 
 void Loot::saveLootToDB(Player *owner)
 {
+    if (!sWorld->getBoolConfig(CONFIG_SAVE_LOOT_SYSTEM))
+        return;
+
     if (!m_creatureGUID)
         return;
 
@@ -814,6 +826,9 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     if (Map* map = lootOwner->GetMap())
         if (map->Instanceable())
             ratesAllowed = false;
+
+    if (!m_creatureGUID)
+        ratesAllowed = false;
 
     tab->Process(*this, ratesAllowed, lootMode);          // Processing is done there, callback via Loot::AddItem()
 
