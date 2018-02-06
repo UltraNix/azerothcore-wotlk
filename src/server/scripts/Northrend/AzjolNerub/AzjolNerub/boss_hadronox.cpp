@@ -139,7 +139,7 @@ struct boss_hadronoxAI : public BossAI
 {
     boss_hadronoxAI(Creature* creature) : BossAI(creature, DATA_HADRONOX_EVENT), _enteredCombat(false), _doorsWebbed(false), _lastPlayerCombatState(false), _step(0) { }
 
-    bool IsInCombatWithPlayer() 
+    bool IsInCombatWithPlayer()
     {
         std::list<HostileReference*> const& refs = me->getThreatManager().getThreatList();
         for (HostileReference const* hostileRef : refs)
@@ -387,8 +387,8 @@ private:
 
 struct npc_hadronox_crusherPackAI : public ScriptedAI
 {
-    npc_hadronox_crusherPackAI(Creature* creature, Position const* positions) : ScriptedAI(creature), _instance(creature->GetInstanceScript()), _positions(positions), _myPack(SummonGroups(0)), _doFacing(false) 
-    { 
+    npc_hadronox_crusherPackAI(Creature* creature, Position const* positions) : ScriptedAI(creature), _instance(creature->GetInstanceScript()), _positions(positions), _myPack(SummonGroups(0)), _doFacing(false)
+    {
         if (me->IsSummon())
             me->SetNoCallAssistance(true);
     }
@@ -440,8 +440,8 @@ struct npc_hadronox_crusherPackAI : public ScriptedAI
     {
         std::list<Creature*> others;
         me->GetCreatureListWithEntryInGrid(others, 28922, 100.0f);
-        me->GetCreatureListWithEntryInGrid(others, 29117, 100.0f); 
-        me->GetCreatureListWithEntryInGrid(others, 29118, 100.0f); 
+        me->GetCreatureListWithEntryInGrid(others, 29117, 100.0f);
+        me->GetCreatureListWithEntryInGrid(others, 29118, 100.0f);
         me->GetCreatureListWithEntryInGrid(others, 29119, 100.0f);
 
         for (Creature* other : others)
@@ -884,7 +884,7 @@ class spell_hadronox_periodic_summon_template_AuraScript : public AuraScript
                 case 53037: // fiend
                     return 5000;
                 case 53036: // necromancer
-                    return 8000; 
+                    return 8000;
                 default:
                     return 0;
             }
@@ -1006,20 +1006,21 @@ class spell_hadronox_web_doors_SpellScript : public SpellScript
 
 class achievement_hadronox_denied : public AchievementCriteriaScript
 {
-    public:
-        achievement_hadronox_denied() : AchievementCriteriaScript("achievement_hadronox_denied") { }
+public:
+    achievement_hadronox_denied() : AchievementCriteriaScript("achievement_hadronox_denied") {}
 
-        bool OnCheck(Player* /*player*/, Unit* target) override
-        {
-            if (!target)
-                return false;
+    bool OnCheck(Player* /*player*/, Unit* target) override
+    {
+        if (!target)
+            return false;
 
-            if (Creature* cTarget = target->ToCreature())
+        if (Creature* cTarget = target->ToCreature())
+            if (cTarget->GetMap() && cTarget->GetMap()->IsHeroic())
                 if (!cTarget->AI()->GetData(DATA_HADRONOX_WEBBED_DOORS))
                     return true;
 
-            return false;
-        }
+        return false;
+    }
 };
 
 
