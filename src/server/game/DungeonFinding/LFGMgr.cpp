@@ -546,9 +546,9 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
     if (!isRaid && joinData.result == LFG_JOIN_OK)
     {
         // Check player or group member restrictions
-        if (player->InBattleground() || player->InArena() || player->InBattlegroundQueue())
+        /*if (player->InBattleground() || player->InArena() || player->InBattlegroundQueue())
             joinData.result = LFG_JOIN_USING_BG_SYSTEM;
-        else if (player->HasAura(LFG_SPELL_DUNGEON_DESERTER))
+        else*/ if (player->HasAura(LFG_SPELL_DUNGEON_DESERTER))
             joinData.result = LFG_JOIN_DESERTER;
         else if (dungeons.empty())
             joinData.result = LFG_JOIN_NOT_MEET_REQS;
@@ -565,8 +565,8 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
                     {
                         if (plrg->HasAura(LFG_SPELL_DUNGEON_DESERTER))
                             joinData.result = LFG_JOIN_PARTY_DESERTER;
-                        else if (plrg->InBattleground() || plrg->InArena() || plrg->InBattlegroundQueue())
-                            joinData.result = LFG_JOIN_USING_BG_SYSTEM;
+                        /*else if (plrg->InBattleground() || plrg->InArena() || plrg->InBattlegroundQueue())
+                            joinData.result = LFG_JOIN_USING_BG_SYSTEM;*/
                         ++memberCount;
                         players.insert(plrg->GetGUID());
                     }

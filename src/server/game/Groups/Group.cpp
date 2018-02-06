@@ -1827,8 +1827,8 @@ void Group::UpdateLooterGuid(WorldObject* pLootedObject, bool ifneed)
 GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* bgTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 /*MaxPlayerCount*/, bool isRated, uint32 arenaSlot)
 {
     // check if this group is LFG group
-    if (isLFGGroup())
-        return ERR_LFG_CANT_USE_BATTLEGROUND;
+    /*if (isLFGGroup())
+        return ERR_LFG_CANT_USE_BATTLEGROUND;*/
 
     BattlemasterListEntry const* bgEntry = sBattlemasterListStore.LookupEntry(bgTemplate->GetBgTypeID());
     if (!bgEntry)
@@ -1878,8 +1878,8 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
             return ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;
 
         // check if someone in party is using dungeon system
-        if (member->isUsingLfg())
-            return ERR_LFG_CANT_USE_BATTLEGROUND;
+        /*if (member->isUsingLfg())
+            return ERR_LFG_CANT_USE_BATTLEGROUND;*/
 
         // pussywizard: prevent joining when any member is in bg/arena
         if (member->InBattleground())
