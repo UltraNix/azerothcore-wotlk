@@ -4,7 +4,6 @@ REWRITTEN BY XINEF
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "Group.h"
 
 uint32 const GO_HEROD_DOOR = 101854;
 
