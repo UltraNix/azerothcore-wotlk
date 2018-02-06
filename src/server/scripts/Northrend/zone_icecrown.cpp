@@ -2413,6 +2413,40 @@ public:
     }
 };
 
+enum scourgeWagon
+{
+    SPELL_WAGON_EXPLOSION_ROLLER       = 52325,
+    SPELL_WAGON_EXPLOSION_FRAME        = 52329,
+    SPELL_WAGON_EXPLOSION_GRILL        = 52330,
+    SPELL_WAGON_EXPLOSION_WHEEL        = 52332
+};
+
+uint32 const wagonExploSpellIds[4] =
+{
+    SPELL_WAGON_EXPLOSION_ROLLER,
+    SPELL_WAGON_EXPLOSION_FRAME,
+    SPELL_WAGON_EXPLOSION_GRILL,
+    SPELL_WAGON_EXPLOSION_WHEEL
+};
+
+class spell_scourgewagon_explosion_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_scourgewagon_explosion_SpellScript);
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        for (auto i = 0; i < 4; ++i)
+            GetCaster()->CastSpell((Unit*)nullptr, wagonExploSpellIds[i], true);
+        if (GetCaster()->ToCreature())
+            GetCaster()->ToCreature()->DespawnOrUnsummon(1s);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_scourgewagon_explosion_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
 void AddSC_icecrown()
 {
     // Ours
@@ -2428,6 +2462,7 @@ void AddSC_icecrown()
     new spell_anti_air_rocket_bomber();
     new npc_infra_green_bomber_generic();
     new npc_cauldron_target_basic_chemistry();
+    new SpellScriptLoaderEx<spell_scourgewagon_explosion_SpellScript>("spell_scourgewagon_explosion");
 
     // Theirs
     new npc_guardian_pavilion();
