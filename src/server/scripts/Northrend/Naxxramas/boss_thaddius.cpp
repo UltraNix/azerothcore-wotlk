@@ -160,7 +160,11 @@ public:
             me->SetPosition(me->GetHomePosition());
 
             if (pInstance)
+            {
                 pInstance->SetData(EVENT_THADDIUS, NOT_STARTED);
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_THADDIUS_GATE)))
+                    go->SetGoState(GO_STATE_ACTIVE);
+            }
 
             me->SummonCreature(NPC_STALAGG, 3450.45f, -2931.42f, 312.091f, 5.49779f);
             me->SummonCreature(NPC_FEUGEN, 3508.14f, -2988.65f, 312.092f, 2.37365f);
@@ -219,7 +223,11 @@ public:
             summons.DoZoneInCombat(NPC_STALAGG);
 
             if (pInstance)
+            {
                 pInstance->SetData(EVENT_THADDIUS, IN_PROGRESS);
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_THADDIUS_GATE)))
+                    go->SetGoState(GO_STATE_READY);
+            }
         }
 
         void PolarityDamage()

@@ -459,7 +459,6 @@ public:
             switch(id)
             {
                 case EVENT_PATCHWERK:
-                case EVENT_GROBBULUS:
                 case EVENT_GLUTH:
                 case EVENT_NOTH:
                 case EVENT_ANUB:
@@ -674,11 +673,19 @@ public:
                             go->SetPhaseMask(1, true);
                         if (GameObject* go = instance->GetGameObject(_thaddiusPortalEyeGUID))
                             go->SetGoState(GO_STATE_ACTIVE);
+                        if (GameObject* go = instance->GetGameObject(_thaddiusGateGUID))
+                            go->SetGoState(GO_STATE_ACTIVE);
                         break;
                     case EVENT_HORSEMAN:
                         if (GameObject* go = instance->GetGameObject(_horsemanPortalGUID))
                             go->SetPhaseMask(1, true);
                         if (GameObject* go = instance->GetGameObject(_horsemanPortalEyeGUID))
+                            go->SetGoState(GO_STATE_ACTIVE);
+                        if (GameObject* go = instance->GetGameObject(_horsemanGateGUID))
+                            go->SetGoState(GO_STATE_ACTIVE);
+                        break;
+                    case EVENT_GROBBULUS:
+                        if (GameObject* go = instance->GetGameObject(_patchwerkGateGUID))
                             go->SetGoState(GO_STATE_ACTIVE);
                         break;
                 }
@@ -764,6 +771,12 @@ public:
                     return _kelthuzadgateGUID;
                 case DATA_NOTH_ENTRANCE_GATE:
                     return _nothEntranceGateGUID;
+                case DATA_HORSEMAN_GATE:
+                    return _horsemanGateGUID;
+                case DATA_THADDIUS_GATE:
+                    return _thaddiusGateGUID;
+                case DATA_PATCHWERK_GATE:
+                    return _patchwerkGateGUID;
 
                 // NPCs
                 case DATA_THADDIUS_BOSS:
