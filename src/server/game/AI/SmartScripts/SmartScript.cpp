@@ -512,6 +512,15 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (!targets)
                 break;
 
+            SpellInfo const* spellInfo = nullptr;
+            spellInfo = sSpellMgr->GetSpellInfo(e.action.cast.spell);
+            if (!spellInfo)
+            {
+                sLog->outError("Creature [entry: %d, guid: %d] is trying to cast a spell that doesn't exist (spellId: %d)", me->GetEntry(), me->GetDBTableGUIDLow(), e.action.cast.spell);
+                delete targets;
+                break;
+            }
+
             Unit* caster = me;
             // Areatrigger Cast!
             if (e.GetScriptType() == SMART_SCRIPT_TYPE_AREATRIGGER)
@@ -544,7 +553,8 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     if ((e.action.cast.flags & SMARTCAST_COMBAT_MOVE) && GetCasterMaxDist() > 0.0f && me->GetMaxPower(GetCasterPowerType()) > 0)
                     {
                         // Xinef: check mana case only and operate movement accordingly, LoS and range is checked in targetet movement generator
-                        if (me->GetPowerPct(GetCasterPowerType()) < 15.0f || me->HasAuraType(SPELL_AURA_MOD_SILENCE) || me->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE))
+                        if (me->GetPowerPct(GetCasterPowerType()) < 15.0f || me->HasAuraType(SPELL_AURA_MOD_SILENCE) || me->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE) ||
+                            me->IsSpellProhibited(spellInfo->GetSchoolMask()))
                         {
                             SetCasterActualDist(0);
                             CAST_AI(SmartAI, me->AI())->SetForcedCombatMove(0);
