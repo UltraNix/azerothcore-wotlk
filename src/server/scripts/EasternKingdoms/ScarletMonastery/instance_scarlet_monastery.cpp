@@ -4,6 +4,9 @@ REWRITTEN BY XINEF
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Group.h"
+
+uint32 const GO_HEROD_DOOR = 101854;
 
 class instance_scarlet_monastery : public InstanceMapScript
 {
@@ -17,7 +20,22 @@ class instance_scarlet_monastery : public InstanceMapScript
 
         struct instance_scarlet_monastery_InstanceMapScript : public InstanceScript
         {
-            instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map) {}
+            instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map) { }
+
+            void OnGameObjectCreate(GameObject* go) override
+            {
+                switch (go->GetEntry())
+                {
+                    case GO_HEROD_DOOR:
+                    {
+                        if (IsLFGInstance())
+                            HandleGameObject(0, true, go);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
         };
 };
 

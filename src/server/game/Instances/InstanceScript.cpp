@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -560,4 +560,18 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
     }
 
     instance->SendToPlayers(&data);
+}
+
+bool InstanceScript::IsLFGInstance() const
+{
+    auto const& list = instance->GetPlayers();
+    for (auto itr : list)
+    {
+        if (Player* player = itr.GetSource())
+        {
+            if (player->GetGroup() && player->GetGroup()->isLFGGroup())
+                return true;
+        }
+    }
+    return false;
 }

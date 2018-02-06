@@ -209,9 +209,7 @@ public:
             case GO_LYCEUM:
                 if (instance->HavePlayers())
                 {
-                    auto const& list = instance->GetPlayers();
-                    auto player = list.begin()->GetSource();
-                    if (player && player->GetGroup() && player->GetGroup()->isLFGGroup())
+                    if (IsLFGInstance())
                         HandleGameObject(0, true, go);
                 }
                 GoLyceumGUID = go->GetGUID();

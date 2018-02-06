@@ -236,6 +236,8 @@ class InstanceScript : public ZoneScript
 
         virtual void FillInitialWorldStates(WorldPacket& /*data*/) {}
 
+        bool IsLFGInstance() const;
+
     protected:
         void LoadTrashMapInfoData();
         void AddObject(Creature* obj, bool add);
