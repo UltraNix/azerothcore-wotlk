@@ -40,6 +40,7 @@
 #include "Pet.h"
 #include "ReputationMgr.h"
 #include "InstanceScript.h"
+#include "MoveSplineInit.h"
 
 class Aura;
 //
@@ -3163,6 +3164,14 @@ void AuraEffect::HandleAuraControlVehicle(AuraApplication const* aurApp, uint8 m
             Unit::Kill(target, caster);
             if (caster->GetTypeId() == TYPEID_UNIT)
                 caster->ToCreature()->RemoveCorpse();
+        }
+
+        //! hack for archavon..
+        if (GetId() == 58672)
+        {
+            caster->_ExitVehicle();
+            Position pos = caster->GetPosition();
+            caster->KnockbackFrom(pos.GetPositionX(), pos.GetPositionY(), 50.0f, 20.0f);
         }
 
         caster->_ExitVehicle();
