@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `PrevQuestId` = 11332 WHERE `id` = 11406;
