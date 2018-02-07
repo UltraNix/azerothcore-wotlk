@@ -5107,6 +5107,14 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[0] = 12; //100yd
             spellInfo->MaxAffectedTargets = 1;
             break;
+        case 58666: // Impale, archavon
+        case 60882: // Impale, archavon
+            spellInfo->Effect[EFFECT_1] = 0;
+            break;
+        case 58672: // Impale enter vehicle
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+            break;
+
 
         //////////////////////////////////////////
         ////////// Naxxramas
