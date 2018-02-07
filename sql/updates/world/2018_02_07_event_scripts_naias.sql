@@ -1,0 +1,1 @@
+UPDATE `event_scripts` SET `x` = -12129.62, `y` = 956.31, `z` = 4.69, `o` = 4.8 WHERE `id` = 10554;
