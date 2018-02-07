@@ -1,4 +1,4 @@
-/* Copyright (C) 
+/* Copyright (C)
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -564,7 +564,7 @@ class npc_wg_quest_giver : public CreatureScript
         }
 
         uint32 GetDialogStatus(Player* player, Creature* creature)
-        { 
+        {
             QuestRelationBounds qr = sObjectMgr->GetCreatureQuestRelationBounds(creature->GetEntry());
             QuestRelationBounds qir = sObjectMgr->GetCreatureQuestInvolvedRelationBounds(creature->GetEntry());
             QuestGiverStatus result = DIALOG_STATUS_NONE;
@@ -761,7 +761,7 @@ class go_wg_vehicle_teleporter : public GameObjectScript
                             if (IsFriendly(passenger))
                                 if (Creature* teleportTrigger = passenger->SummonTrigger(go->GetPositionX()-60.0f, go->GetPositionY(), go->GetPositionZ()+1.0f, cVeh->GetOrientation(), 1000))
                                     return teleportTrigger;
-                    
+
                 return NULL;
             }
 
@@ -902,6 +902,25 @@ class spell_wintergrasp_rp_gg : public SpellScriptLoader
         {
             return new spell_wintergrasp_rp_gg_SpellScript();
         }
+};
+
+class spell_rocket_propelled_goblin_grande_wintergrasp_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_rocket_propelled_goblin_grande_wintergrasp_SpellScript);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([&](WorldObject* object)
+        {
+            return !object->IsWithinLOSInMap(GetCaster());
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rocket_propelled_goblin_grande_wintergrasp_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rocket_propelled_goblin_grande_wintergrasp_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
 };
 
 class spell_wintergrasp_portal : public SpellScriptLoader
@@ -1113,6 +1132,7 @@ void AddSC_wintergrasp()
     new spell_wintergrasp_water();
     new spell_wintergrasp_hide_small_elementals();
     new spell_wg_reduce_damage_by_distance();
+    new SpellScriptLoaderEx<spell_rocket_propelled_goblin_grande_wintergrasp_SpellScript>("spell_rocket_propelled_goblin_grande_wintergrasp");
 
     // ACHIEVEMENTs
     new achievement_wg_didnt_stand_a_chance();
