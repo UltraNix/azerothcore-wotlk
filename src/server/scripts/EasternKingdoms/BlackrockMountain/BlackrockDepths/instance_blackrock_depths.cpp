@@ -207,11 +207,11 @@ public:
                     HandleGameObject(0, false, go);
                 break;
             case GO_LYCEUM:
-                if (instance->HavePlayers())
-                {
-                    if (IsLFGInstance())
-                        HandleGameObject(0, true, go);
-                }
+                //if (instance->HavePlayers())
+                //{
+                //    if (IsLFGInstance())
+                //        HandleGameObject(0, true, go);
+                //}
                 GoLyceumGUID = go->GetGUID();
                 break;
             case GO_SF_S: GoSFSGUID = go->GetGUID(); break;
