@@ -2132,6 +2132,9 @@ enum BasicChemistry
     QUEST_BASIC_CHEMISTRY_1         = 13279,
     QUEST_BASIC_CHEMISTRY_2         = 13295,
 
+    QUEST_NEUTRALIZING_PLAGUE_1     = 13281,
+    QUEST_NEUTRALIZING_PLAGUE_2     = 13297,
+
     SPELL_ITEM_SPELL_DOSE           = 59659,
     SPELL_GREEN_SPLASH              = 60059,
     SPELL_SUMMON_PC_BUNNY           = 61026,
@@ -2205,7 +2208,8 @@ public:
                 return;
 
             if (spell->Id == SPELL_ITEM_SPELL_DOSE && caster->GetTypeId() == TYPEID_PLAYER && (caster->ToPlayer()->GetQuestStatus(QUEST_BASIC_CHEMISTRY_1) == QUEST_STATUS_INCOMPLETE ||
-                caster->ToPlayer()->GetQuestStatus(QUEST_BASIC_CHEMISTRY_2) == QUEST_STATUS_INCOMPLETE))
+                caster->ToPlayer()->GetQuestStatus(QUEST_BASIC_CHEMISTRY_2) == QUEST_STATUS_INCOMPLETE || caster->ToPlayer()->GetQuestStatus(QUEST_NEUTRALIZING_PLAGUE_1) == QUEST_STATUS_INCOMPLETE ||
+                caster->ToPlayer()->GetQuestStatus(QUEST_NEUTRALIZING_PLAGUE_2) == QUEST_STATUS_INCOMPLETE))
             {
                 if (!_eventInProgress)
                 {
