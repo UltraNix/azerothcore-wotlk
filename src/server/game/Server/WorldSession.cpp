@@ -1363,6 +1363,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:
         case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
         case CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK:
+        case CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK:
         case CMSG_AUCTION_REMOVE_ITEM:
         {
             maxPacketCounterAllowed = 1000;
@@ -1399,12 +1400,17 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
             break;
         }
 
+        case CMSG_GUILD_SET_OFFICER_NOTE:
+        {
+            maxPacketCounterAllowed = 200;
+            break;
+        }
+
         case CMSG_REQUEST_PARTY_MEMBER_STATS:
         case CMSG_WHO:
         case CMSG_SETSHEATHED:
         case CMSG_CONTACT_LIST:
         case CMSG_GUILD_SET_PUBLIC_NOTE:
-        case CMSG_GUILD_SET_OFFICER_NOTE:
         case MSG_RAID_TARGET_UPDATE:
         {
             maxPacketCounterAllowed = 50;
