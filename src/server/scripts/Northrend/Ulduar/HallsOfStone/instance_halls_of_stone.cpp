@@ -61,7 +61,7 @@ public:
 
         bool IsEncounterInProgress() const
         {
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+            for (uint8 i = 0; i < MAX_ENCOUNTER - 1; ++i)
             {
                 if (Encounter[i] == IN_PROGRESS)
                     return true;
@@ -73,29 +73,29 @@ public:
         {
             switch(go->GetEntry())
             {
-                case GO_KADDRAK: 
+                case GO_KADDRAK:
                     goKaddrakGUID = go->GetGUID();
                     break;
-                case GO_ABEDNEUM: 
+                case GO_ABEDNEUM:
                     goAbedneumGUID = go->GetGUID();
                     if (Encounter[BOSS_TRIBUNAL_OF_AGES] == DONE)
                         go->SetGoState(GO_STATE_ACTIVE);
                     break;
-                case GO_MARNAK: 
-                    goMarnakGUID = go->GetGUID(); 
+                case GO_MARNAK:
+                    goMarnakGUID = go->GetGUID();
                     break;
-                case GO_TRIBUNAL_CONSOLE: 
-                    goTribunalConsoleGUID = go->GetGUID(); 
+                case GO_TRIBUNAL_CONSOLE:
+                    goTribunalConsoleGUID = go->GetGUID();
                     break;
-                case GO_SKY_FLOOR: 
+                case GO_SKY_FLOOR:
                     goSkyRoomFloorGUID = go->GetGUID();
                     if (Encounter[BOSS_TRIBUNAL_OF_AGES] == DONE)
                         go->SetGoState(GO_STATE_ACTIVE);
                     break;
-                case GO_SJONNIR_CONSOLE: 
+                case GO_SJONNIR_CONSOLE:
                     goSjonnirConsoleGUID = go->GetGUID();
                     break;
-                case GO_SJONNIR_DOOR: 
+                case GO_SJONNIR_DOOR:
                     goSjonnirDoorGUID = go->GetGUID();
                     if (Encounter[BOSS_TRIBUNAL_OF_AGES] == DONE)
                         go->SetGoState(GO_STATE_ACTIVE);
@@ -114,7 +114,7 @@ public:
         {
             switch(creature->GetEntry())
             {
-            case NPC_SJONNIR:    
+            case NPC_SJONNIR:
                 SjonnirGUID = creature->GetGUID();
                 break;
             case NPC_BRANN:
@@ -202,7 +202,7 @@ public:
                 sjonnirAchievement = (bool)data;
                 return;
             }
-            
+
             if (data == DONE)
                 SaveToDB();
         }
