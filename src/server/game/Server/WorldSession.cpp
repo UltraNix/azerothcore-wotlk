@@ -990,7 +990,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 
             addonInfo >> enabled >> crc >> unk1;
 
-            ;//sLog->outDetail("ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk1);
+            sLog->outDetail("ADDON: Name: %s, Enabled: 0x%x, CRC: 0x%x, Unknown2: 0x%x", addonName.c_str(), enabled, crc, unk1);
 
             AddonInfo addon(addonName, enabled, crc, 2, true);
 
@@ -1003,15 +1003,15 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
                     match = false;
 
                 if (!match)
-                    ;//sLog->outDetail("ADDON: %s was known, but didn't match known CRC (0x%x)!", addon.Name.c_str(), savedAddon->CRC);
+                    sLog->outDetail("ADDON: %s was known, but didn't match known CRC (0x%x)!", addon.Name.c_str(), savedAddon->CRC);
                 else
-                    ;//sLog->outDetail("ADDON: %s was known, CRC is correct (0x%x)", addon.Name.c_str(), savedAddon->CRC);
+                    sLog->outDetail("ADDON: %s was known, CRC is correct (0x%x)", addon.Name.c_str(), savedAddon->CRC);
             }
             else
             {
                 AddonMgr::SaveAddon(addon);
 
-                ;//sLog->outDetail("ADDON: %s (0x%x) was not known, saving...", addon.Name.c_str(), addon.CRC);
+                sLog->outDetail("ADDON: %s (0x%x) was not known, saving...", addon.Name.c_str(), addon.CRC);
             }
 
             // TODO: Find out when to not use CRC/pubkey, and other possible states.
@@ -1020,10 +1020,10 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 
         uint32 currentTime;
         addonInfo >> currentTime;
-        ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "ADDON: CurrentTime: %u", currentTime);
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "ADDON: CurrentTime: %u", currentTime);
 
-        //if (addonInfo.rpos() != addonInfo.size())
-            ;//sLog->outDebug(LOG_FILTER_NETWORKIO, "packet under-read!");
+        if (addonInfo.rpos() != addonInfo.size())
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "packet under-read!");
     }
     else
         sLog->outError("Addon packet uncompress error!");
