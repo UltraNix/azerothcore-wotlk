@@ -4040,6 +4040,15 @@ void Spell::SendSpellCooldown()
         }
         return;
     }
+    else if (m_caster->IsPlayer() && m_spellInfo->RequireCooldownInfo() && !(_triggeredCastFlags & TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD))
+    {
+        WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4 + 4);
+        data << uint64(m_caster->GetGUID());
+        data << uint8(SPELL_COOLDOWN_FLAG_INCLUDE_GCD);
+        data << uint32(m_spellInfo->Id);
+        data << uint32(m_spellInfo->RecoveryTime);
+        m_caster->ToPlayer()->SendDirectMessage(&data);
+    }
 
     Player* _player = m_caster->ToPlayer();
 
