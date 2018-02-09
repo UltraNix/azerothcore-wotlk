@@ -43,7 +43,9 @@ public:
             { "gmannounce",     SEC_GAMEMASTER,      true,   &HandleGMAnnounceCommand,           "" },
             { "notify",         SEC_GAMEMASTER,      true,   &HandleNotifyCommand,               "" },
             { "gmnotify",       SEC_GAMEMASTER,      true,   &HandleGMNotifyCommand,             "" },
-            { "whispers",       SEC_GAMEMASTER,      false,  &HandleWhispersCommand,             "" }
+            { "whispers",       SEC_GAMEMASTER,      false,  &HandleWhispersCommand,             "" },
+            { "annhorde",       SEC_ADMINISTRATOR,  false,   &HandleAnnHordeCommand,             "" },
+            { "annalliance",    SEC_ADMINISTRATOR,  false,   &HandleAnnAllianceCommand,          "" },
         };
         return commandTable;
     }
@@ -154,6 +156,34 @@ public:
         handler->SendSysMessage(LANG_USE_BOL);
         handler->SetSentErrorMessage(true);
         return false;
+    }
+
+    static bool HandleAnnHordeCommand(ChatHandler* handler, char const* args)
+    {
+        if (!args)
+            return false;
+        return SendFactionAnnounce(handler, args, TEAM_HORDE);
+    }
+
+    static bool HandleAnnAllianceCommand(ChatHandler* handler, char const* args)
+    {
+        if (!args)
+            return false;
+        return SendFactionAnnounce(handler, args, TEAM_ALLIANCE);
+    }
+
+    static bool SendFactionAnnounce(ChatHandler* handler, char const* args, TeamId teamId)
+    {
+        char buff[2048];
+        sprintf(buff, handler->GetTrinityString(LANG_SYSTEMMESSAGE), args);
+        sWorld->SendServerMessage(SERVER_MSG_STRING, buff, nullptr, teamId);
+
+        //Send additional ann to GM if he is from second faction
+        Player *player = handler->GetSession()->GetPlayer();
+        if (player && player->GetTeamId() != teamId) {
+            sWorld->SendServerMessage(SERVER_MSG_STRING, buff, player);
+        }
+        return true;
     }
 };
 

@@ -2824,7 +2824,7 @@ void World::ShutdownCancel()
 }
 
 /// Send a server message to the user(s)
-void World::SendServerMessage(ServerMessageType type, const char *text, Player* player)
+void World::SendServerMessage(ServerMessageType type, const char *text, Player* player, TeamId teamId)
 {
     WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
     data << uint32(type);
@@ -2834,7 +2834,7 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
     if (player)
         player->GetSession()->SendPacket(&data);
     else
-        SendGlobalMessage(&data);
+        SendGlobalMessage(&data, nullptr, teamId);
 }
 
 void World::UpdateSessions(uint32 diff)

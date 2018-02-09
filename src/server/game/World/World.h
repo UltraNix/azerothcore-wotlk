@@ -754,7 +754,7 @@ class World
         void SendGlobalGMMessage(WorldPacket* packet, WorldSession* self = 0, TeamId teamId = TEAM_NEUTRAL);
         bool SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = 0, TeamId teamId = TEAM_NEUTRAL);
         void SendZoneText(uint32 zone, const char *text, WorldSession* self = 0, TeamId teamId = TEAM_NEUTRAL);
-        void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL);
+        void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL, TeamId teamId = TEAM_NEUTRAL);
 
         uint32 pvp_ranks[HKRANKMAX];
 
