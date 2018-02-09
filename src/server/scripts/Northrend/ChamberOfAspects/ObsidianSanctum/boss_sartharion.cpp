@@ -190,6 +190,8 @@ const Position EggsPos[24] =
     { 3250.23f, 543.93f, 58.718f, 3.29f }
 };
 
+Position const CenterOfSartharionRoom = { 3247.588867f, 529.303589f, 58.954414f, 1.735082f };
+
 /////////////////////////////
 // SARTHARION
 /////////////////////////////
@@ -472,6 +474,11 @@ public:
             return false;
         }
 
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetDistance(CenterOfSartharionRoom) > 65.f;
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -506,6 +513,7 @@ public:
             HandleDrakeAbilities();
 
             DoMeleeAttackIfReady();
+            EnterEvadeIfOutOfCombatArea();
         }
     };
 };
