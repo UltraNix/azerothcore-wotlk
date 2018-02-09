@@ -2556,6 +2556,28 @@ private:
     std::vector<uint64> _taunkaGUIDs;
 };
 
+class npc_wintergarde_gryphon : public CreatureScript
+{
+public: npc_wintergarde_gryphon() : CreatureScript("npc_wintergarde_gryphon") {}
+
+        struct npc_wintergarde_gryphonAI : public ScriptedAI
+        {
+            npc_wintergarde_gryphonAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void Reset() override
+            {
+                if (me->IsSummon())
+                    if (Unit* owner = me->ToTempSummon()->GetSummoner())
+                        me->GetMotionMaster()->MovePoint(0, owner->GetPosition());
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_wintergarde_gryphonAI(creature);
+        }
+};
+
 void AddSC_dragonblight()
 {
     // Ours
@@ -2581,6 +2603,7 @@ void AddSC_dragonblight()
     new npc_sarathstra_dragonblight();
     new CreatureAILoader<npc_overlord_agmar_dragonblightAI>("npc_overlord_agmar_dragonblight");
     new CreatureAILoader<npc_roanauk_icemistAI>("npc_roanauk_icemist");
+    new npc_wintergarde_gryphon();
 
     // Theirs
     new npc_commander_eligor_dawnbringer();
