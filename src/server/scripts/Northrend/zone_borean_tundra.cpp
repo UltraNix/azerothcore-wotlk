@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1280,7 +1280,7 @@ public:
 
 struct npc_nedarAI : public ScriptedAI
 {
-    npc_nedarAI(Creature* creature) : ScriptedAI(creature) 
+    npc_nedarAI(Creature* creature) : ScriptedAI(creature)
     {
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     }
@@ -1300,7 +1300,7 @@ struct npc_nedarAI : public ScriptedAI
                 lunchbox->AI()->AttackStart(victim);
     }
 
-    void UpdateAI(uint32 diff) override 
+    void UpdateAI(uint32 diff) override
     {
         if (!UpdateVictim())
             return;
@@ -1333,10 +1333,143 @@ struct npc_lunchboxAI : public ScriptedAI
     }
 };
 
+enum Assasination
+{
+    QUEST_ASSASINATION = 11892,
+    SPELL_STAMPED_PERIODIC = 46384,
+
+    NPC_HAROLD_LANE = 25804,
+    NPC_STAMPED_MAMMOTH = 25988,
+    NPC_STAMPED_CARRIBOU = 25989,
+    NPC_STAMPED_RHINO = 25990,
+    NPC_STAMPED_EXIT_POINT = 25995
+};
+
+const Position StartStamped = { 3283.67f, 5645.19f, 51.12f, 1.18f };
+# define STAMPED    "Harold Lane is override by a stampede!"
+
+class spell_blow_cenarion_horn : public SpellScriptLoader
+{
+    public:
+        spell_blow_cenarion_horn() : SpellScriptLoader("spell_blow_cenarion_horn") { }
+
+        class spell_blow_cenarion_horn_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_blow_cenarion_horn_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+                if (!caster || !caster->IsAlive())
+                    return;
+                if (caster->ToPlayer() && caster->ToPlayer()->GetQuestStatus(QUEST_ASSASINATION) == QUEST_STATUS_INCOMPLETE)
+                {
+                    if (target && target->GetEntry() == NPC_HAROLD_LANE)
+                    {
+                        if (target->IsInCombat())
+                        {
+                            for (uint8 i = 0; i < 10; ++i)
+                            {
+                                if (Creature* stampedCreature = caster->SummonCreature(RAND(NPC_STAMPED_MAMMOTH, NPC_STAMPED_CARRIBOU, NPC_STAMPED_RHINO),
+                                    StartStamped.GetPositionX() + urand(0.0f, 7.0f), StartStamped.GetPositionY() + urand(0.0f, 7.0f), StartStamped.GetPositionZ(), StartStamped.GetOrientation()))
+                                {
+                                    stampedCreature->SetOrientation(stampedCreature->GetAngle(caster));
+                                    stampedCreature->SendMovementFlagUpdate();
+                                }
+                            }
+                            target->MonsterTextEmote(STAMPED, caster, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_blow_cenarion_horn_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_blow_cenarion_horn_SpellScript();
+        }
+};
+
+class npc_stamped_creature : public CreatureScript
+{
+    public:
+        npc_stamped_creature() :CreatureScript("npc_stamped_creature") { }
+
+        struct npc_stamped_creatureAI : public ScriptedAI
+        {
+            npc_stamped_creatureAI(Creature* creature) : ScriptedAI(creature) { }
+
+            bool isStamped;
+
+            void Reset()
+            {
+                isStamped = false;
+                DoCast(me, SPELL_STAMPED_PERIODIC, true);
+            }
+
+            void IsSummonedBy(Unit* summoner)
+            {
+                if (summoner)
+                    me->GetMotionMaster()->MovePoint(0, *summoner);
+            }
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (type == POINT_MOTION_TYPE)
+                {
+                    switch (id)
+                    {
+                    case 0:
+                        isStamped = true;
+                        break;
+                    case 1:
+                        me->DespawnOrUnsummon();
+                        break;
+                    }
+                }
+            }
+
+            void UpdateAI(uint32 diff)
+            {
+                if (isStamped)
+                {
+                    isStamped = false;
+                    std::list<Creature*> exitsCreatures;
+
+                    me->GetCreatureListWithEntryInGrid(exitsCreatures, NPC_STAMPED_EXIT_POINT, 200.0f);
+
+                    if (!exitsCreatures.empty())
+                    {
+                        Creature* exitPoint = Trinity::Containers::SelectRandomContainerElement(exitsCreatures);
+                        if (exitPoint)
+                        {
+                            me->GetMotionMaster()->Clear();
+                            me->GetMotionMaster()->MovePoint(1, *exitPoint);
+                        }
+                    }
+                }
+            }
+        };
+
+        ScriptedAI* GetAI(Creature* creature) const
+        {
+            return new npc_stamped_creatureAI(creature);
+        }
+};
+
 void AddSC_borean_tundra()
 {
     // Ours
     new spell_q11919_q11940_drake_hunt();
+    new spell_blow_cenarion_horn();
+    new npc_stamped_creature();
 
     // Theirs
     new npc_sinkhole_kill_credit();
