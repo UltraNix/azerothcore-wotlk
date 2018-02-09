@@ -7476,6 +7476,12 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
     }
 
     honor_f *= sWorld->getRate(RATE_HONOR);
+
+    if (GetTeamId() == TEAM_ALLIANCE && sWorld->getBoolConfig(CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE))
+        honor_f *= sWorld->getFloatConfig(CONFIG_BONUS_HONOR_FOR_FACTION_RATE);
+    else if (GetTeamId() == TEAM_HORDE && sWorld->getBoolConfig(CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE))
+        honor_f *= sWorld->getFloatConfig(CONFIG_BONUS_HONOR_FOR_FACTION_RATE);
+
     // Back to int now
     honor = int32(honor_f);
     // honor - for show honor points in log

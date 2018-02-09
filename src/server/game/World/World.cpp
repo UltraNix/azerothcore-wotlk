@@ -1356,6 +1356,11 @@ void World::LoadConfigSettings(bool reload)
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_21_60] = sConfigMgr->GetFloatDefault("DynamicRespawn.21.60", 0.35f);
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_61_80] = sConfigMgr->GetFloatDefault("DynamicRespawn.61.80", 0.65f);
 
+    /* Increased honor gains per faction config values */
+    m_float_configs[CONFIG_BONUS_HONOR_FOR_FACTION_RATE] = sConfigMgr->GetFloatDefault("FactionHonorBonusRate", 1.0f);
+    m_bool_configs[CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE] = sConfigMgr->GetBoolDefault("HordeHonorBoost.Enable", false);
+    m_bool_configs[CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE] = sConfigMgr->GetBoolDefault("AllianceHonorBoost.Enable", false);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

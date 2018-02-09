@@ -185,6 +185,8 @@ enum WorldBoolConfigs
     CONFIG_ACCOUNT_HISTORY,                   // Sitowsky: Every log of login on in-game account is saving to database.
     CONFIG_MUTE_HISTORY,                      // Sitowsky: Every log of mute command is saving to database.
     CONFIG_WHO_OPPOSITE,                      // Sitowsky: Count players of both factions in who list.
+    CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE,      // Enables bonus honor for all honor related stuff for horde teamId
+    CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE,   // Same as above but for alliance
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -210,6 +212,7 @@ enum WorldFloatConfigs
     CONFIG_DYNAMIC_RESPAWN_5_20,
     CONFIG_DYNAMIC_RESPAWN_21_60,
     CONFIG_DYNAMIC_RESPAWN_61_80,
+    CONFIG_BONUS_HONOR_FOR_FACTION_RATE, // in order for this to work, you need to enable per side honor bonus in bool configs
     FLOAT_CONFIG_VALUE_COUNT
 };
 
