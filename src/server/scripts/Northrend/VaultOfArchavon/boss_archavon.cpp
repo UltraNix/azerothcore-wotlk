@@ -7,6 +7,7 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "vault_of_archavon.h"
 #include "SpellAuras.h"
 #include "SpellScript.h"
+#include "SpellAuraEffects.h"
 
 enum Archavon
 {
@@ -17,8 +18,7 @@ enum Archavon
     SPELL_STOMP_25          = 60880,
     SPELL_IMPALE_10         = 58666,
     SPELL_IMPALE_25         = 60882, //Lifts an enemy off the ground with a spiked fist, inflicting 47125 to 52875 Physical damage and 9425 to 10575 additional damage each second for 8 sec.
-    SPELL_BERSERK           = 47008,
-    SPELL_KNOCKBACK_TANK    = 24199  // @Riztazz: remove this when we figure out vehicle seat DBCs and exit locations and so on and so forth (probably never lol)
+    SPELL_BERSERK           = 47008
 };
 
 enum
@@ -63,12 +63,6 @@ public:
                 }
                 pInstance->SetData(EVENT_ARCHAVON, NOT_STARTED);
             }
-        }
-
-        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) override
-        {
-            if (!apply)
-                me->CastSpell(who, SPELL_KNOCKBACK_TANK, true);
         }
 
         void AttackStart(Unit* who) override
@@ -201,7 +195,6 @@ public:
         return new spell_archavon_rock_shards_SpellScript();
     }
 };
-
 
 void AddSC_boss_archavon()
 {

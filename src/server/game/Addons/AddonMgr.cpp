@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,7 +21,23 @@
 #include "Log.h"
 #include "Timer.h"
 
-#include <list>
+#include <unordered_map>
+
+inline uint32_t fnv1a( const void* key, const uint32_t len )
+{
+    const char* data = ( char* )key;
+    uint32_t hash = 0x811c9dc5;
+    uint32_t prime = 0x1000193;
+
+    for (uint32_t i = 0u; i < len; ++i)
+    {
+        uint8_t value = data[ i ];
+        hash = hash ^ value;
+        hash *= prime;
+    }
+
+    return hash;
+}
 
 namespace AddonMgr
 {
@@ -31,9 +47,9 @@ namespace AddonMgr
 namespace
 {
     // List of saved addons (in DB).
-    typedef std::list<SavedAddon> SavedAddonsList;
+    typedef std::unordered_map< uint32_t, SavedAddon> SavedAddonsMap;
 
-    SavedAddonsList m_knownAddons;
+    SavedAddonsMap m_knownAddons;
 }
 
 void LoadFromDB()
@@ -57,7 +73,8 @@ void LoadFromDB()
         std::string name = fields[0].GetString();
         uint32 crc = fields[1].GetUInt32();
 
-        m_knownAddons.push_back(SavedAddon(name, crc));
+        uint32_t hash = fnv1a(name.c_str(), name.size());
+        m_knownAddons.insert({ hash, SavedAddon(std::move(name), crc) });
 
         ++count;
     }
@@ -78,19 +95,19 @@ void SaveAddon(AddonInfo const& addon)
 
     CharacterDatabase.Execute(stmt);
 
-    m_knownAddons.push_back(SavedAddon(addon.Name, addon.CRC));
+    uint32_t hash = fnv1a(name.c_str(), name.size());
+    m_knownAddons.insert({ hash, SavedAddon(std::move(name), addon.CRC) });
 }
 
 SavedAddon const* GetAddonInfo(const std::string& name)
 {
-    for (SavedAddonsList::const_iterator it = m_knownAddons.begin(); it != m_knownAddons.end(); ++it)
-    {
-        SavedAddon const& addon = (*it);
-        if (addon.Name == name)
-            return &addon;
-    }
+    uint32_t hash = fnv1a(name.c_str(), name.size());
 
-    return NULL;
+    auto it = m_knownAddons.find(hash);
+    if (it == m_knownAddons.end())
+        return nullptr;
+
+    return &(it->second);
 }
 
 } // Namespace
