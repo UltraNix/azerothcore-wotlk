@@ -207,11 +207,6 @@ public:
                     HandleGameObject(0, false, go);
                 break;
             case GO_LYCEUM:
-                //if (instance->HavePlayers())
-                //{
-                //    if (IsLFGInstance())
-                //        HandleGameObject(0, true, go);
-                //}
                 GoLyceumGUID = go->GetGUID();
                 break;
             case GO_SF_S: GoSFSGUID = go->GetGUID(); break;
@@ -222,6 +217,13 @@ public:
             case GO_CHEST_SEVEN: GoChestGUID = go->GetGUID(); break;
             case GO_SPECTRAL_CHALICE: GoSpectralChaliceGUID = go->GetGUID(); break;
             }
+        }
+
+        void OnPlayerEnter(Player* player) override
+        {
+            if (player && player->GetGroup() && player->GetGroup()->isLFGGroup())
+                if (GameObject* doors = instance->GetGameObject(GoLyceumGUID))
+                    HandleGameObject(0, true, doors);
         }
 
         void SetData64(uint32 type, uint64 data)

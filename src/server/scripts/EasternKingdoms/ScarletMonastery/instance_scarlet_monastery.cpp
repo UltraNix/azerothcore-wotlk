@@ -4,6 +4,7 @@ REWRITTEN BY XINEF
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Group.h"
 
 uint32 const GO_HEROD_DOOR = 101854;
 
@@ -12,30 +13,42 @@ class instance_scarlet_monastery : public InstanceMapScript
     public:
         instance_scarlet_monastery() : InstanceMapScript("instance_scarlet_monastery", 189) { }
 
+
+        struct instance_scarlet_monastery_InstanceMapScript : public InstanceScript
+        {
+            instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map)
+            {
+                _goHerodDoor = 0;
+            }
+
+            void OnGameObjectCreate(GameObject* go) override
+            {
+                switch (go->GetEntry())
+                {
+                    case GO_HEROD_DOOR:
+                    {
+                        _goHerodDoor = go->GetGUID();
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+
+            void OnPlayerEnter(Player* player) override
+            {
+                if (player && player->GetGroup() && player->GetGroup()->isLFGGroup())
+                    if (GameObject* doors = instance->GetGameObject(_goHerodDoor))
+                        HandleGameObject(0, true, doors);
+            }
+        private:
+            uint64 _goHerodDoor;
+        };
+
         InstanceScript* GetInstanceScript(InstanceMap* map) const
         {
             return new instance_scarlet_monastery_InstanceMapScript(map);
         }
-
-        struct instance_scarlet_monastery_InstanceMapScript : public InstanceScript
-        {
-            instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map) { }
-
-            //void OnGameObjectCreate(GameObject* go) override
-            //{
-            //    switch (go->GetEntry())
-            //    {
-            //        case GO_HEROD_DOOR:
-            //        {
-            //            if (IsLFGInstance())
-            //                HandleGameObject(0, true, go);
-            //            break;
-            //        }
-            //        default:
-            //            break;
-            //    }
-            //}
-        };
 };
 
 void AddSC_instance_scarlet_monastery()

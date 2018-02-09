@@ -561,17 +561,3 @@ void InstanceScript::SendEncounterUnit(uint32 type, Unit* unit /*= NULL*/, uint8
 
     instance->SendToPlayers(&data);
 }
-
-bool InstanceScript::IsLFGInstance() const
-{
-    auto const& list = instance->GetPlayers();
-    for (auto itr : list)
-    {
-        if (Player* player = itr.GetSource())
-        {
-            if (player->GetGroup() && player->GetGroup()->isLFGGroup())
-                return true;
-        }
-    }
-    return false;
-}
