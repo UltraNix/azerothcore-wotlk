@@ -152,11 +152,6 @@ struct boss_loathebAI : public BossAI
         DoMeleeAttackIfReady();
         EnterEvadeIfOutOfCombatArea();
     }
-
-    void ExecuteEvent(uint32 eventId) override
-    {
-
-    }
 private:
     uint32 _fightTimer;
 };
