@@ -18,7 +18,7 @@ class instance_scarlet_monastery : public InstanceMapScript
         {
             instance_scarlet_monastery_InstanceMapScript(Map* map) : InstanceScript(map)
             {
-                _goHerodDoor = 0;
+                _goHerodDoorGUID = 0;
             }
 
             void OnGameObjectCreate(GameObject* go) override
@@ -27,7 +27,7 @@ class instance_scarlet_monastery : public InstanceMapScript
                 {
                     case GO_HEROD_DOOR:
                     {
-                        _goHerodDoor = go->GetGUID();
+                        _goHerodDoorGUID = go->GetGUID();
                         break;
                     }
                     default:
@@ -38,11 +38,11 @@ class instance_scarlet_monastery : public InstanceMapScript
             void OnPlayerEnter(Player* player) override
             {
                 if (player && player->GetGroup() && player->GetGroup()->isLFGGroup())
-                    if (GameObject* doors = instance->GetGameObject(_goHerodDoor))
+                    if (GameObject* doors = instance->GetGameObject(_goHerodDoorGUID))
                         HandleGameObject(0, true, doors);
             }
         private:
-            uint64 _goHerodDoor;
+            uint64 _goHerodDoorGUID;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const
