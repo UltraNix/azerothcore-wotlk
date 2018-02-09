@@ -92,7 +92,12 @@ enum NXGOs
     GO_THADDIUS_PORTAL_EYE             = 181232, // Thadius  portal eye
     GO_MAEXXNA_PORTAL_EYE              = 181233, // Maexxna  portal eye
     GO_HORSEMAN_PORTAL_EYE             = 181230, // Horseman portal eye
-    GO_NAXXRAMAS_ORB                   = 202277  // Sapphiron teleport
+    GO_NAXXRAMAS_ORB                   = 202277,  // Sapphiron teleport
+
+    GO_THADDIUS_ENTRANCE               = 181213,
+    GO_MEXANNA_ENTRANCE                = 181212,
+    GO_HORSEMAN_ENTRANCE               = 181210,
+    GO_LOATHEB_ENTRANCE                = 181211
 };
 
 enum NXNPCs

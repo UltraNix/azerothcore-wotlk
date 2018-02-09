@@ -143,6 +143,10 @@ public:
         uint64 _naxxramasOrbGUID;
         uint64 _nothEntranceGateGUID;
         uint64 _mChestGUID;
+        uint64 _goThaddiusEntrance;
+        uint64 _goMexannaEntrance;
+        uint64 _goHorsemanEntrance;
+        uint64 _goLoathebEntrance;
 
         // NPCs
         uint64 _thaddiusGUID;
@@ -382,6 +386,26 @@ public:
                 case GO_NOTH_ENTRANCE_GATE:
                     _nothEntranceGateGUID = pGo->GetGUID();
                     break;
+                case GO_THADDIUS_ENTRANCE:
+                    if (Encounters[EVENT_THADDIUS] == DONE)
+                        pGo->SetGoState(GO_STATE_ACTIVE);
+                    _goThaddiusEntrance = pGo->GetGUID();
+                    break;
+                case GO_MEXANNA_ENTRANCE:
+                    if (Encounters[EVENT_MAEXXNA] == DONE)
+                        pGo->SetGoState(GO_STATE_ACTIVE);
+                    _goMexannaEntrance = pGo->GetGUID();
+                    break;
+                case GO_HORSEMAN_ENTRANCE:
+                    if (Encounters[EVENT_HORSEMAN] == DONE)
+                        pGo->SetGoState(GO_STATE_ACTIVE);
+                    _goHorsemanEntrance = pGo->GetGUID();
+                    break;
+                case GO_LOATHEB_ENTRANCE:
+                    if (Encounters[EVENT_LOATHEB] == DONE)
+                        pGo->SetGoState(GO_STATE_ACTIVE);
+                    _goLoathebEntrance = pGo->GetGUID();
+                    break;
             }
 
         }
@@ -462,10 +486,16 @@ public:
                 case EVENT_GLUTH:
                 case EVENT_NOTH:
                 case EVENT_ANUB:
-                case EVENT_MAEXXNA:
                 case EVENT_RAZUVIOUS:
                 case EVENT_GOTHIK:
                 // EVENT_HORSEMAN HANDLED BELOW
+                    Encounters[id] = data;
+                    break;
+                case EVENT_MAEXXNA:
+                    if (data == DONE)
+                        if (GameObject* go = instance->GetGameObject(_goMexannaEntrance))
+                            go->SetGoState(GO_STATE_ACTIVE);
+
                     Encounters[id] = data;
                     break;
                 case EVENT_KELTHUZAD:
@@ -481,11 +511,21 @@ public:
                 case EVENT_THADDIUS:
                     if (data == NOT_STARTED)
                         thaddiusAchievement = true;
+
+                    if (data == DONE)
+                        if (GameObject* go = instance->GetGameObject(_goThaddiusEntrance))
+                            go->SetGoState(GO_STATE_ACTIVE);
+
                     Encounters[id] = data;
                     break;
                 case EVENT_LOATHEB:
                     if (data == NOT_STARTED)
                         loathebAchievement = true;
+
+                    if (data == DONE)
+                        if (GameObject* go = instance->GetGameObject(_goLoathebEntrance))
+                            go->SetGoState(GO_STATE_ACTIVE);
+
                     Encounters[id] = data;
                     break;
                 case EVENT_HEIGAN:
@@ -547,6 +587,9 @@ public:
                     // All horsemans are killed
                     if (Creature* cr = instance->GetCreature(_blaumeuxGUID))
                         cr->CastSpell(cr, 59450, true); // credit
+
+                    if (GameObject* go = instance->GetGameObject(_goHorsemanEntrance))
+                        go->SetGoState(GO_STATE_ACTIVE);
                 }
 
                 // respawn
