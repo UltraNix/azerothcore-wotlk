@@ -94,47 +94,68 @@ struct boss_loathebAI : public BossAI
             CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
     }
 
+    bool CheckEvadeIfOutOfCombatArea() const override
+    {
+        return me->GetDistance(me->GetHomePosition()) > 50.0f;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        while (auto eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_SPELL_NECROTIC_AURA:
+                    Talk(SAY_NECROTIC_AURA_APPLIED);
+                    if (int32 duration = sSpellMgr->GetSpellInfo(SPELL_NECROTIC_AURA)->GetDuration())
+                    {
+                        events.ScheduleEvent(EVENT_AURA_FADING, duration - 4000);
+                        events.ScheduleEvent(EVENT_AURA_REMOVED, duration);
+                    }
+                    DoCastSelf(SPELL_NECROTIC_AURA, true);
+                    events.Repeat(20000);
+                    break;
+                case EVENT_SPELL_DEATHBLOOM:
+                    DoCastSelf(RAID_MODE(SPELL_DEATHBLOOM_10, SPELL_DEATHBLOOM_25));
+                    events.Repeat(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (me->GetMap()->Is25ManRaid() ? 20000 : 30000) : 30000);
+                    break;
+                case EVENT_SPELL_SPORE:
+                    DoCastSelf(SPELL_SUMMON_SPORE, true);
+                    events.Repeat(RAID_MODE(36000, 15000));
+                    break;
+                case EVENT_SPELL_INEVITABLE_DOOM:
+                    DoCastSelf(RAID_MODE(SPELL_INEVITABLE_DOOM_10, SPELL_INEVITABLE_DOOM_25));
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                        me->GetMap()->Is25ManRaid() ? events.RepeatEvent(20000) : events.RepeatEvent(events.GetTimer() < 5 * MINUTE * IN_MILLISECONDS ? 30000 : 15000);
+                    else
+                        events.Repeat(events.GetTimer() < 5 * MINUTE*IN_MILLISECONDS ? 30000 : 15000);
+                    break;
+                case EVENT_SPELL_BERSERK:
+                    DoCastSelf(SPELL_BERSERK, true);
+                    break;
+                case EVENT_AURA_FADING:
+                    Talk(SAY_NECROTIC_AURA_FADING);
+                    break;
+                case EVENT_AURA_REMOVED:
+                    Talk(SAY_NECROTIC_AURA_REMOVED);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        DoMeleeAttackIfReady();
+        EnterEvadeIfOutOfCombatArea();
+    }
+
     void ExecuteEvent(uint32 eventId) override
     {
-        switch (eventId)
-        {
-            case EVENT_SPELL_NECROTIC_AURA:
-                Talk(SAY_NECROTIC_AURA_APPLIED);
-                if (int32 duration = sSpellMgr->GetSpellInfo(SPELL_NECROTIC_AURA)->GetDuration())
-                {
-                    events.ScheduleEvent(EVENT_AURA_FADING, duration - 4000);
-                    events.ScheduleEvent(EVENT_AURA_REMOVED, duration);
-                }
-                DoCastSelf(SPELL_NECROTIC_AURA, true);
-                events.Repeat(20000);
-                break;
-            case EVENT_SPELL_DEATHBLOOM:
-                DoCastSelf(RAID_MODE(SPELL_DEATHBLOOM_10, SPELL_DEATHBLOOM_25));
-                events.Repeat(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (me->GetMap()->Is25ManRaid() ? 20000 : 30000) : 30000);
-                break;
-            case EVENT_SPELL_SPORE:
-                DoCastSelf(SPELL_SUMMON_SPORE, true);
-                events.Repeat(RAID_MODE(36000, 15000));
-                break;
-            case EVENT_SPELL_INEVITABLE_DOOM:
-                DoCastSelf(RAID_MODE(SPELL_INEVITABLE_DOOM_10, SPELL_INEVITABLE_DOOM_25));
-                if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                    me->GetMap()->Is25ManRaid() ? events.RepeatEvent(20000) : events.RepeatEvent(events.GetTimer() < 5 * MINUTE * IN_MILLISECONDS ? 30000 : 15000);
-                else
-                    events.Repeat(events.GetTimer() < 5 * MINUTE*IN_MILLISECONDS ? 30000 : 15000);
-                break;
-            case EVENT_SPELL_BERSERK:
-                DoCastSelf(SPELL_BERSERK, true);
-                break;
-            case EVENT_AURA_FADING:
-                Talk(SAY_NECROTIC_AURA_FADING);
-                break;
-            case EVENT_AURA_REMOVED:
-                Talk(SAY_NECROTIC_AURA_REMOVED);
-                break;
-            default:
-                break;
-        }
+
     }
 private:
     uint32 _fightTimer;
