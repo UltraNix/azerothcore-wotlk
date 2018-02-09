@@ -624,3 +624,16 @@ TeamId BattlegroundEY::GetPrematureWinner()
 
     return GetTeamScore(TEAM_HORDE) > GetTeamScore(TEAM_ALLIANCE) ? TEAM_HORDE : Battleground::GetPrematureWinner();
 }
+
+bool BattlegroundEY::HandlePlayerUnderMap(Player* player)
+{
+    if (!player)
+        return false;
+
+    if (player->GetTeamId() == TEAM_ALLIANCE)
+        player->NearTeleportTo(2523.686035f, 1596.597290f, 1269.344482f, 3.031230f);
+    else if (player->GetTeamId() == TEAM_HORDE)
+        player->NearTeleportTo(1808.134644f, 1539.440552f, 1267.438843f, 0.02f);
+
+    return true;
+}
