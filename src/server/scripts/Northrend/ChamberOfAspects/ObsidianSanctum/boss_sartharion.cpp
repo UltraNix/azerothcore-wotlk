@@ -1651,6 +1651,32 @@ public:
     }
 };
 
+uint32 const SPELL_CURSE_OF_MENDING_TRIGGERED = 39703;
+
+class spell_curse_of_mending_sartharion_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_curse_of_mending_sartharion_AuraScript);
+
+    void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+    {
+        PreventDefaultAction();
+
+        if (!GetTarget())
+            return;
+
+        if (!GetTarget()->ToPlayer())
+            return;
+
+        if (Unit* target = GetTarget()->ToPlayer()->GetVictim())
+            GetTarget()->CastSpell(target, SPELL_CURSE_OF_MENDING_TRIGGERED, true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_curse_of_mending_sartharion_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     new boss_sartharion();
@@ -1663,6 +1689,7 @@ void AddSC_boss_sartharion()
     new spell_summon_flame_orb_mistress();
     new spell_onyx_brood_avenging_fury();
     new spell_vesperon_shadow_fissure();
+    new AuraScriptLoaderEx<spell_curse_of_mending_sartharion_AuraScript>("spell_curse_of_mending_sartharion");
 
     new CreatureAILoader<npc_blaze_mistress_sarthrionAI>("npc_blaze_mistress_sarthrion");
     new CreatureAILoader<npc_flame_orb_mistressAI>("npc_flame_orb_mistress");
