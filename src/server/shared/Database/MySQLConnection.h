@@ -20,6 +20,7 @@
 #include "DatabaseWorkerPool.h"
 #include "Transaction.h"
 #include "Util.h"
+#include "Timer.h"
 
 #ifndef _MYSQLCONNECTION_H
 #define _MYSQLCONNECTION_H
@@ -70,8 +71,8 @@ class MySQLConnection
     friend class PingOperation;
 
     public:
-        MySQLConnection(MySQLConnectionInfo& connInfo);                               //! Constructor for synchronous connections.
-        MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo);  //! Constructor for asynchronous connections.
+        MySQLConnection(MySQLConnectionInfo& connInfo, uint32_t maxPingTime );                               //! Constructor for synchronous connections.
+        MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo, uint32_t maxPingTime );  //! Constructor for asynchronous connections.
         virtual ~MySQLConnection();
 
         virtual bool Open();
@@ -91,11 +92,14 @@ class MySQLConnection
         bool ExecuteTransaction(SQLTransaction& transaction);
 
         operator bool () const { return m_Mysql != NULL; }
-        void Ping() { mysql_ping(m_Mysql); }
 
         uint32 GetLastError() { return mysql_errno(m_Mysql); }
 
+        void Update( uint32_t dt );
+
     protected:
+        void Ping() { mysql_ping(m_Mysql); }
+
         bool LockIfReady()
         {
             /// Tries to acquire lock. If lock is acquired by another thread
@@ -117,6 +121,7 @@ class MySQLConnection
         virtual void DoPrepareStatements() = 0;
 
     protected:
+        IntervalTimer                        m_pingTimer;
         std::vector<MySQLPreparedStatement*> m_stmts;         //! PreparedStatements storage
         PreparedStatementMap                 m_queries;       //! Query storage
         bool                                 m_reconnecting;  //! Are we reconnecting?

@@ -64,7 +64,20 @@ class DatabaseWorkerPool
         {
         }
 
-        bool Open(const std::string& infoString, uint8 async_threads, uint8 synch_threads)
+        void Update( uint32_t dt )
+        {
+            for ( auto conn : _connections[ IDX_SYNCH ] )
+            {
+                conn->Update( dt );
+            }
+
+            for ( auto conn : _connections[ IDX_ASYNC ] )
+            {
+                conn->Update( dt );
+            }
+        }
+
+        bool Open(const std::string& infoString, uint8 async_threads, uint8 synch_threads, uint32_t maxPingTime )
         {
             bool res = true;
             _connectionInfo = MySQLConnectionInfo(infoString);
@@ -76,7 +89,7 @@ class DatabaseWorkerPool
             _connections[IDX_ASYNC].resize(async_threads);
             for (uint8 i = 0; i < async_threads; ++i)
             {
-                T* t = new T(_queue, _connectionInfo);
+                T* t = new T(_queue, _connectionInfo, maxPingTime );
                 res &= t->Open();
                 if (res) // only check mysql version if connection is valid
                     WPFatal(mysql_get_server_version(t->GetHandle()) >= MIN_MYSQL_SERVER_VERSION, "SunwellCore does not support MySQL versions below 5.1");
@@ -88,7 +101,7 @@ class DatabaseWorkerPool
             _connections[IDX_SYNCH].resize(synch_threads);
             for (uint8 i = 0; i < synch_threads; ++i)
             {
-                T* t = new T(_connectionInfo);
+                T* t = new T(_connectionInfo, maxPingTime );
                 res &= t->Open();
                 _connections[IDX_SYNCH][i] = t;
                 ++_connectionCount[IDX_SYNCH];

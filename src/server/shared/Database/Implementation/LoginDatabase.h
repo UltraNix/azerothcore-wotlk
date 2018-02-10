@@ -25,8 +25,8 @@ class LoginDatabaseConnection : public MySQLConnection
 {
     public:
         //- Constructors for sync and async connections
-        LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+        LoginDatabaseConnection(MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) : MySQLConnection(connInfo, maxPingTime ) { }
+        LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) : MySQLConnection(q, connInfo, maxPingTime ) { }
 
         //- Loads database type specific prepared statements
         void DoPrepareStatements();

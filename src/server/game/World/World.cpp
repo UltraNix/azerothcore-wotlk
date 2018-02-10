@@ -1880,8 +1880,6 @@ void World::SetInitialWorldSettings()
                                                             // clean logs table every 14 days by default
     m_timers[WUPDATE_AUTOBROADCAST].SetInterval(getIntConfig(CONFIG_AUTOBROADCAST_INTERVAL));
 
-    m_timers[WUPDATE_PINGDB].SetInterval(getIntConfig(CONFIG_DB_PING_INTERVAL)*MINUTE*IN_MILLISECONDS);    // Mysql ping time in minutes
-
     // our speed up
     m_timers[WUPDATE_5_SECS].SetInterval(5*IN_MILLISECONDS);
 
@@ -2105,6 +2103,11 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_5_SECS].Reset();
 
+        //! update databases every 5s, it used to track ping time for every spawned mysql connection
+        CharacterDatabase.Update( 5 * IN_MILLISECONDS );
+        LoginDatabase.Update( 5 * IN_MILLISECONDS );
+        WorldDatabase.Update( 5 * IN_MILLISECONDS );
+
         // moved here from HandleCharEnumOpcode
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_BANS);
         CharacterDatabase.Execute(stmt);
@@ -2252,16 +2255,6 @@ void World::Update(uint32 diff)
         uint32 nextGameEvent = sGameEventMgr->Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
-    }
-
-    ///- Ping to keep MySQL connections alive
-    if (m_timers[WUPDATE_PINGDB].Passed())
-    {
-        m_timers[WUPDATE_PINGDB].Reset();
-        ;//sLog->outDetail("Ping MySQL to keep connection alive");
-        CharacterDatabase.KeepAlive();
-        LoginDatabase.KeepAlive();
-        WorldDatabase.KeepAlive();
     }
 
     // update the instance reset times

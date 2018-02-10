@@ -25,8 +25,8 @@ class CharacterDatabaseConnection : public MySQLConnection
 {
     public:
         //- Constructors for sync and async connections
-        CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) {}
-        CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) {}
+        CharacterDatabaseConnection(MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) : MySQLConnection(connInfo, maxPingTime ) {}
+        CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) : MySQLConnection(q, connInfo, maxPingTime ) {}
 
         //- Loads database type specific prepared statements
         void DoPrepareStatements();

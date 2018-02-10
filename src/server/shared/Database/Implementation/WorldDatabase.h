@@ -25,8 +25,8 @@ class WorldDatabaseConnection : public MySQLConnection
 {
     public:
         //- Constructors for sync and async connections
-        WorldDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        WorldDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+        WorldDatabaseConnection(MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) : MySQLConnection(connInfo, maxPingTime ) { }
+        WorldDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) : MySQLConnection(q, connInfo, maxPingTime ) { }
 
         //- Loads database type specific prepared statements
         void DoPrepareStatements();

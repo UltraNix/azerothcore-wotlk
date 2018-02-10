@@ -311,8 +311,10 @@ bool StartDB()
         synch_threads = 1;
     }
 
+    uint32 maxPingTime = ( uint32 )sConfigMgr->GetIntDefault( "MaxPingTime", 30 ) * MINUTE*IN_MILLISECONDS;
+
     // NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
-    if (!LoginDatabase.Open(dbstring.c_str(), uint8(worker_threads), uint8(synch_threads)))
+    if (!LoginDatabase.Open(dbstring.c_str(), uint8(worker_threads), uint8(synch_threads), maxPingTime ))
     {
         sLog->outError("Cannot connect to database");
         return false;

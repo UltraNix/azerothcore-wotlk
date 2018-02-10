@@ -34,7 +34,7 @@
 #include "Timer.h"
 #include "Log.h"
 
-MySQLConnection::MySQLConnection(MySQLConnectionInfo& connInfo) :
+MySQLConnection::MySQLConnection(MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) :
 m_reconnecting(false),
 m_prepareError(false),
 m_queue(NULL),
@@ -43,9 +43,10 @@ m_Mysql(NULL),
 m_connectionInfo(connInfo),
 m_connectionFlags(CONNECTION_SYNCH)
 {
+    m_pingTimer.SetInterval( maxPingTime );
 }
 
-MySQLConnection::MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo) :
+MySQLConnection::MySQLConnection(ACE_Activation_Queue* queue, MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) :
 m_reconnecting(false),
 m_prepareError(false),
 m_queue(queue),
@@ -54,6 +55,7 @@ m_connectionInfo(connInfo),
 m_connectionFlags(CONNECTION_ASYNC)
 {
     m_worker = new DatabaseWorker(m_queue, this);
+    m_pingTimer.SetInterval( maxPingTime );
 }
 
 MySQLConnection::~MySQLConnection()
@@ -158,6 +160,8 @@ bool MySQLConnection::Execute(const char* sql)
     if (!m_Mysql)
         return false;
 
+    m_pingTimer.Reset();
+
     {
         uint32 _s = 0;
         if (sLog->GetSQLDriverQueryLogging())
@@ -188,6 +192,8 @@ bool MySQLConnection::Execute(PreparedStatement* stmt)
 {
     if (!m_Mysql)
         return false;
+
+    m_pingTimer.Reset();
 
     uint32 index = stmt->m_index;
     {
@@ -241,6 +247,8 @@ bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES **pResult, uint6
 {
     if (!m_Mysql)
         return false;
+
+    m_pingTimer.Reset();
 
     uint32 index = stmt->m_index;
     {
@@ -317,6 +325,8 @@ bool MySQLConnection::_Query(const char *sql, MYSQL_RES **pResult, MYSQL_FIELD *
 {
     if (!m_Mysql)
         return false;
+
+    m_pingTimer.Reset();
 
     {
         uint32 _s = 0;
@@ -421,6 +431,29 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
 
     CommitTransaction();
     return true;
+}
+
+void MySQLConnection::Update( uint32_t dt )
+{
+    if ( m_pingTimer.GetCurrent() >= 0 )
+    {
+        m_pingTimer.Update( dt );
+    }
+    else
+    {
+        m_pingTimer.SetCurrent( 0 );
+    }
+
+    if ( m_pingTimer.Passed() )
+    {
+        m_pingTimer.Reset();
+
+        if ( LockIfReady() )
+        {
+            Ping();
+            Unlock();
+        }
+    }
 }
 
 MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)

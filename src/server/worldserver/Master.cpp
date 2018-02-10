@@ -404,8 +404,11 @@ bool Master::_StartDB()
     }
 
     synch_threads = uint8(sConfigMgr->GetIntDefault("WorldDatabase.SynchThreads", 1));
+
+    uint32 maxPingTime = ( uint32 )sConfigMgr->GetIntDefault( "MaxPingTime", 30 ) * MINUTE*IN_MILLISECONDS;
+
     ///- Initialise the world database
-    if (!WorldDatabase.Open(dbstring, async_threads, synch_threads))
+    if (!WorldDatabase.Open(dbstring, async_threads, synch_threads, maxPingTime ))
     {
         sLog->outError("Cannot connect to world database %s", dbstring.c_str());
         return false;
@@ -430,7 +433,7 @@ bool Master::_StartDB()
     synch_threads = uint8(sConfigMgr->GetIntDefault("CharacterDatabase.SynchThreads", 2));
 
     ///- Initialise the Character database
-    if (!CharacterDatabase.Open(dbstring, async_threads, synch_threads))
+    if (!CharacterDatabase.Open(dbstring, async_threads, synch_threads, maxPingTime ))
     {
         sLog->outError("Cannot connect to Character database %s", dbstring.c_str());
         return false;
@@ -454,7 +457,7 @@ bool Master::_StartDB()
 
     synch_threads = uint8(sConfigMgr->GetIntDefault("LoginDatabase.SynchThreads", 1));
     ///- Initialise the login database
-    if (!LoginDatabase.Open(dbstring, async_threads, synch_threads))
+    if (!LoginDatabase.Open(dbstring, async_threads, synch_threads, maxPingTime ))
     {
         sLog->outError("Cannot connect to login database %s", dbstring.c_str());
         return false;
