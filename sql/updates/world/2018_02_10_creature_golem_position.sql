@@ -1,0 +1,1 @@
+UPDATE `creature` SET `position_x` = -6922.75, `position_y` = -1386.93, `position_z` = 170.03 WHERE `guid` = 5608;
