@@ -512,8 +512,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (!targets)
                 break;
 
-            SpellInfo const* spellInfo = nullptr;
-            spellInfo = sSpellMgr->GetSpellInfo(e.action.cast.spell);
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(e.action.cast.spell);
             if (!spellInfo)
             {
                 sLog->outError("Creature [entry: %d, guid: %d] is trying to cast a spell that doesn't exist (spellId: %d)", me->GetEntry(), me->GetDBTableGUIDLow(), e.action.cast.spell);
