@@ -361,6 +361,9 @@ public:
 
         void Reset()
         {
+            if (me->IsInCombat())
+                return;
+
             pullTimer = 0;
             visualTimer = 1;
 
@@ -382,20 +385,20 @@ public:
 
             if (me->GetEntry() == NPC_STALAGG)
             {
-                events.ScheduleEvent(EVENT_MINION_SPELL_POWER_SURGE, 10000);
+                events.ScheduleEvent(EVENT_MINION_SPELL_POWER_SURGE, 10s);
                 Talk(SAY_STAL_AGGRO);
             }
             else
             {
-                events.ScheduleEvent(EVENT_MINION_SPELL_STATIC_FIELD, 5000);
+                events.ScheduleEvent(EVENT_MINION_SPELL_STATIC_FIELD, 5s);
                 Talk(SAY_FEUG_AGGRO);
             }
 
-            events.ScheduleEvent(EVENT_MINION_CHECK_DISTANCE, 5000);
+            events.ScheduleEvent(EVENT_MINION_CHECK_DISTANCE, 5s);
 
             // This event needs synchronisation, called for stalagg only
             if (me->GetEntry() == NPC_STALAGG)
-                events.ScheduleEvent(EVENT_MINION_SPELL_MAGNETIC_PULL, 25000);
+                events.ScheduleEvent(EVENT_MINION_SPELL_MAGNETIC_PULL, 25s);
 
             if (pInstance)
                 if (Creature* cr = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_THADDIUS_BOSS)))
@@ -417,7 +420,8 @@ public:
                 if (!me->IsAlive())
                 {
                     me->Respawn();
-                    me->SetInCombatWithZone();
+                    Reset();
+                    DoZoneInCombat(nullptr, 500.f);
                 }
                 else
                     me->SetHealth(me->GetMaxHealth());
@@ -476,71 +480,75 @@ public:
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            switch (events.GetEvent())
+            while (auto eventId = events.ExecuteEvent())
             {
-                case EVENT_MINION_SPELL_POWER_SURGE:
-                    me->CastSpell(me, RAID_MODE(SPELL_POWER_SURGE_10, SPELL_POWER_SURGE_25), false);
-                    events.RepeatEvent(19000);
-                    break;
-                case EVENT_MINION_SPELL_STATIC_FIELD:
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                    {
-                        if (me->GetMap()->Is25ManRaid())
+                switch (eventId)
+                {
+                    case EVENT_MINION_SPELL_POWER_SURGE:
+                        me->CastSpell(me, RAID_MODE(SPELL_POWER_SURGE_10, SPELL_POWER_SURGE_25), false);
+                        events.Repeat(19s);
+                        break;
+                    case EVENT_MINION_SPELL_STATIC_FIELD:
+                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                         {
-                            int32 dmg = urand(5000, 5400);
-                            me->CastCustomSpell(me, SPELL_STATIC_FIELD_25, &dmg, nullptr, nullptr, false);
+                            if (me->GetMap()->Is25ManRaid())
+                            {
+                                int32 dmg = urand(5000, 5400);
+                                me->CastCustomSpell(me, SPELL_STATIC_FIELD_25, &dmg, nullptr, nullptr, false);
+                            }
+                            else
+                                me->CastSpell(me, SPELL_STATIC_FIELD_10, false);
                         }
                         else
-                            me->CastSpell(me, SPELL_STATIC_FIELD_10, false);
-                    }
-                    else
-                        me->CastSpell(me, RAID_MODE(SPELL_STATIC_FIELD_10, SPELL_STATIC_FIELD_25), false);
+                            me->CastSpell(me, RAID_MODE(SPELL_STATIC_FIELD_10, SPELL_STATIC_FIELD_25), false);
 
-                    events.RepeatEvent(3000);
-                    break;
-                case EVENT_MINION_SPELL_MAGNETIC_PULL:
-                    events.RepeatEvent(25000);
-                    if (pInstance)
-                        if (Creature* feugen = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_FEUGEN_BOSS)))
+                        events.Repeat(3s);
+                        break;
+                    case EVENT_MINION_SPELL_MAGNETIC_PULL:
+                        events.Repeat(25s);
+                        if (pInstance)
                         {
-                            if (!feugen->IsAlive() || !feugen->GetVictim() || !me->GetVictim())
-                                return;
+                            if (Creature* feugen = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_FEUGEN_BOSS)))
+                            {
+                                if (!feugen->IsAlive() || !feugen->GetVictim() || !me->GetVictim())
+                                    return;
 
-                            float threatFeugen = feugen->getThreatManager().getThreat(feugen->GetVictim());
-                            float threatStalagg = me->getThreatManager().getThreat(me->GetVictim());
-                            Unit* tankFeugen = feugen->GetVictim();
-                            Unit* tankStalagg = me->GetVictim();
+                                float threatFeugen = feugen->getThreatManager().getThreat(feugen->GetVictim());
+                                float threatStalagg = me->getThreatManager().getThreat(me->GetVictim());
+                                Unit* tankFeugen = feugen->GetVictim();
+                                Unit* tankStalagg = me->GetVictim();
 
-                            feugen->getThreatManager().modifyThreatPercent(tankFeugen, -100);
-                            feugen->AddThreat(tankStalagg, threatFeugen);
-                            feugen->CastSpell(tankStalagg, SPELL_MAGNETIC_PULL, true);
-                            feugen->AI()->DoAction(ACTION_MAGNETIC_PULL);
+                                feugen->getThreatManager().modifyThreatPercent(tankFeugen, -100);
+                                feugen->AddThreat(tankStalagg, threatFeugen);
+                                feugen->CastSpell(tankStalagg, SPELL_MAGNETIC_PULL, true);
+                                feugen->AI()->DoAction(ACTION_MAGNETIC_PULL);
 
-                            me->getThreatManager().modifyThreatPercent(tankStalagg, -100);
-                            me->AddThreat(tankFeugen, threatStalagg);
-                            me->CastSpell(tankFeugen, SPELL_MAGNETIC_PULL, true);
-                            DoAction(ACTION_MAGNETIC_PULL);
+                                me->getThreatManager().modifyThreatPercent(tankStalagg, -100);
+                                me->AddThreat(tankFeugen, threatStalagg);
+                                me->CastSpell(tankFeugen, SPELL_MAGNETIC_PULL, true);
+                                DoAction(ACTION_MAGNETIC_PULL);
+                            }
+                        }
+                        break;
+                    case EVENT_MINION_CHECK_DISTANCE:
+                        if (Creature* cr = me->FindNearestCreature(NPC_TESLA_COIL, 150.0f))
+                        {
+                            if (me->GetExactDist(cr) > 60.0f || me->GetExactDist(cr) < 20.0f)
+                            {
+                                cr->InterruptNonMeleeSpells(true);
+                                cr->CastSpell(me->GetVictim(), SPELL_TESLA_SHOCK, true); // dont know real spell
+                                events.Repeat(1.5s);
+                                break;
+                            }
+                            else
+                            {
+                                cr->CastSpell(cr, me->GetEntry() == NPC_STALAGG ? SPELL_STALAGG_CHAIN : SPELL_FEUGEN_CHAIN, false);
+                            }
                         }
 
-                    break;
-                case EVENT_MINION_CHECK_DISTANCE:
-                    if (Creature* cr = me->FindNearestCreature(NPC_TESLA_COIL, 150.0f))
-                    {
-                        if (me->GetExactDist(cr) > 60.0f || me->GetExactDist(cr) < 20.0f)
-                        {
-                            cr->InterruptNonMeleeSpells(true);
-                            cr->CastSpell(me->GetVictim(), SPELL_TESLA_SHOCK, true); // dont know real spell
-                            events.RepeatEvent(1500);
-                            break;
-                        }
-                        else
-                        {
-                            cr->CastSpell(cr, me->GetEntry() == NPC_STALAGG ? SPELL_STALAGG_CHAIN : SPELL_FEUGEN_CHAIN, false);
-                        }
-                    }
-
-                    events.RepeatEvent(5000);
-                    break;
+                        events.Repeat(5s);
+                        break;
+                }
             }
 
             DoMeleeAttackIfReady();
