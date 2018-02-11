@@ -677,6 +677,10 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         float GetRespawnRadius() const { return m_respawnradius; }
         void SetRespawnRadius(float dist) { m_respawnradius = dist; }
 
+        void SetPassive();
+        void SetDefensive();
+        void SetAggressive();
+
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 lootingGroupLowGUID;                         // used to find group which is looting corpse
 

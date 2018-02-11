@@ -2318,6 +2318,21 @@ bool Creature::LoadCreaturesAddon(bool reload)
     return true;
 }
 
+void Creature::SetPassive()
+{
+    SetReactState(REACT_PASSIVE);
+}
+
+void Creature::SetDefensive()
+{
+    SetReactState(REACT_DEFENSIVE);
+}
+
+void Creature::SetAggressive()
+{
+    SetReactState(REACT_AGGRESSIVE);
+}
+
 /// Send a message to LocalDefense channel for players opposition team in the zone
 void Creature::SendZoneUnderAttackMessage(Player* attacker)
 {
