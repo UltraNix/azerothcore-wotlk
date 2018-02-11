@@ -99,7 +99,7 @@ public:
                 pInstance->SetData(EVENT_RAZUVIOUS, NOT_STARTED);
 
             introTalk = false;
-            me->GetMotionMaster()->InitDefault();
+            me->GetMotionMaster()->MovePath(me->GetDBTableGUIDLow() * 10, true);
         }
 
         void KilledUnit(Unit* who)
@@ -150,6 +150,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            DoZoneInCombat();
             _fightTimer = getMSTime();
             switch (urand(0,2))
             {
@@ -261,18 +262,16 @@ public:
 
     struct boss_razuvious_minionAI : public ScriptedAI
     {
-        boss_razuvious_minionAI(Creature *c) : ScriptedAI(c)
-        {
-        }
+        boss_razuvious_minionAI(Creature *c) : ScriptedAI(c) { }
 
         EventMap events;
 
-        void Reset()
+        void Reset() override
         {
             events.Reset();
         }
 
-        void KilledUnit(Unit* who)
+        void KilledUnit(Unit* who) override
         {
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -281,7 +280,7 @@ public:
                 me->GetInstanceScript()->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
-        void EnterCombat(Unit *who)
+        void EnterCombat(Unit *who) override
         {
             if (Creature* cr = me->FindNearestCreature(NPC_RAZUVIOUS, 100.0f))
             {
@@ -293,7 +292,7 @@ public:
             events.ScheduleEvent(EVENT_MINION_BONE_BARRIER, 9000);
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
                 return;
@@ -318,13 +317,15 @@ public:
             DoMeleeAttackIfReady();
         }
 
-        void OnCharmed(bool apply)
+        void OnCharmed(bool apply) override
         {
             ScriptedAI::OnCharmed(apply);
             if (apply)
             {
+                me->AttackStop();
                 me->RemoveAurasByType(SPELL_AURA_MOD_FEAR);
                 me->RemoveAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                 me->GetMotionMaster()->InitDefault();
             }
         }
