@@ -467,11 +467,12 @@ struct npc_sinclariAI : public ScriptedAI
                     task.Repeat(5s);
                     break;
                 case 8:
-                    me->SetVisible(false);
+                    //me->SetVisible(false);
                     task.Repeat(1s);
                     break;
                 case 9:
                     _instance->SetData(DATA_MAIN_EVENT_STATE, IN_PROGRESS);
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     // [1] GUID: Full: 0xF1300077C202E6DD Type: Creature Entry: 30658 Low: 190173
                     break;
                 default:
