@@ -26,11 +26,6 @@
 #include "violet_hold.h"
 #include "WorldPacket.h"
 
-/*
- * TODO:
- * - replace bosses by dummy npcs also after grid unload
- */
-
 Position const DefenseSystemLocation  = { 1888.146f, 803.382f,  58.60389f, 3.071779f }; // sniff
 
 Position const CyanigosaSpawnLocation = { 1922.109f, 804.4493f, 52.49254f, 3.176499f }; // sniff
@@ -365,7 +360,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                     DoUpdateWorldState(WORLD_STATE_VH_SHOW, 1);
 
                     WaveCount = 1;
-                    Scheduler.Async(std::bind(&instance_violet_hold_InstanceMapScript::AddWave, this));
+                    AddWave();
 
                     for (uint8 i = 0; i < ActivationCrystalCount; ++i)
                         if (GameObject* crystal = instance->GetGameObject(ActivationCrystalGUIDs[i]))
@@ -534,9 +529,9 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                             task.Schedule(1s, [this](TaskContext /*task*/)
                             {
                                 if (Creature* guard = instance->GetCreature(ErekemGuardGUIDs[0]))
-                                    guard->SetImmuneToAll(false);                                
+                                    guard->SetImmuneToAll(false);
                                 if (Creature* guard = instance->GetCreature(ErekemGuardGUIDs[1]))
-                                    guard->SetImmuneToAll(false);                                
+                                    guard->SetImmuneToAll(false);
 
                                 if (Creature* erekem = GetCreature(DATA_EREKEM))
                                 {
