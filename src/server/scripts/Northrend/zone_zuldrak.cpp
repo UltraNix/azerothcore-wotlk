@@ -720,6 +720,30 @@ private:
     uint64 _drakuruGUID;
 };
 
+enum SkullcrusherSpells
+{
+    SPELL_BURST_AT_THE_SEAMS    = 52510,
+    SPELL_TROLL_EXPLOSION       = 52565,
+    SPELL_EXPLODE_TROLL_MEAT    = 52578,
+    SPELL_SUICIDE               = 51744
+};
+
+struct npc_drakkari_skullcrusherAI : public ScriptedAI
+{
+    npc_drakkari_skullcrusherAI(Creature* creature) : ScriptedAI(creature)
+    {
+        me->SetCorpseDelay(30);
+    }
+
+    void SpellHit(Unit* /*caster*/, const SpellInfo* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_BURST_AT_THE_SEAMS)
+        {
+            for (auto spellId : { SPELL_TROLL_EXPLOSION, SPELL_EXPLODE_TROLL_MEAT, SPELL_SUICIDE })
+                DoCastSelf(spellId);
+        }
+    }
+};
 
 void AddSC_zuldrak()
 {
@@ -736,4 +760,5 @@ void AddSC_zuldrak()
     new npc_crusade_recruit();
     new go_scourge_enclosure();
     new npc_storm_cloud();
+    new CreatureAILoader<npc_drakkari_skullcrusherAI>("npc_drakkari_skullcrusher");
 }

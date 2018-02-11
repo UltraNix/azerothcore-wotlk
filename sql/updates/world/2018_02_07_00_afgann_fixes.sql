@@ -9,3 +9,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 DELETE FROM `achievement_criteria_data` WHERE `criteria_id`=7587;
 INSERT INTO `achievement_criteria_data` (`criteria_id`,`type`,`value1`,`value2`,`ScriptName`) VALUES
 (7587,11,0,0,"achievement_void_dance");
+-- Drakkari Skullcrusher
+DELETE FROM `smart_scripts` WHERE `entryorguid`=28844 AND `source_type`=0;
+UPDATE `creature` SET `spawntimesecs`=30 WHERE `id`=28844;
+UPDATE `creature_template` SET `AIName`="", `ScriptName`="npc_drakkari_skullcrusher" WHERE `entry`=28844;
