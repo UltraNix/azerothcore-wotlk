@@ -79,9 +79,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             case CHAT_MSG_PARTY_LEADER:
                 break;
             default:
-                if (sender->GetTotalPlayedTime() < 2 * HOUR && !sWorld->getBoolConfig(CONFIG_PTR_REALM) && !sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
+                if (sender->GetTotalPlayedTime() < 4 * HOUR && !sWorld->getBoolConfig(CONFIG_PTR_REALM))
                 {
-                    SendNotification("Speaking is allowed after playing for at least 2 hours. You may use party and guild chat.");
+                    SendNotification("Speaking is allowed after playing for at least 4 hours. You may use party and guild chat.");
                     recvData.rfinish();
                     return;
                 }
@@ -483,6 +483,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                     SendNotification(GetTrinityString(LANG_CHANNEL_REQ), sWorld->getIntConfig(CONFIG_CHAT_CHANNEL_LEVEL_REQ));
                     return;
                 }
+
+                // @ChinaTown
+                LookForGoldMessage(sender, msg, lang);
             }
 
             if (ChannelMgr* cMgr = ChannelMgr::forTeam(sender->GetTeamId()))
