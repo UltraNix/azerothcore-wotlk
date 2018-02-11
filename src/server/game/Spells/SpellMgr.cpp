@@ -3963,10 +3963,10 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // hack for seal of light and few spells, judgement consists of few single casts and each of them can proc
         // some spell, base one has disabled proc flag but those dont have this flag
+        case 20185:
         case 20186:
             spellInfo->procChance = 40;
         case 20184:
-        case 20185:
         case 68055:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_CANT_TRIGGER_PROC;
             break;

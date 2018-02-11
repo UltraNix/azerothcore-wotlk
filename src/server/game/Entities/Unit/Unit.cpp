@@ -7031,12 +7031,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Judgement of Light
                 case 20185:
                 {
-                    if (!victim || !victim->IsAlive() || victim->HasSpellCooldown(20267))
+                    if (!victim || !victim->IsAlive())
                         return false;
-                    // 2% of base mana
-                    basepoints0 = int32(victim->CountPctFromMaxHealth(2));
-                    victim->CastCustomSpell(victim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
-                    victim->AddSpellCooldown(20267, 0, 4*IN_MILLISECONDS);
+                    // 2% of base health
+                    basepoints0 = static_cast<int32>(std::ceil(0.02 * victim->GetMaxHealth()));
+                    victim->CastCustomSpell(victim, 20267, &basepoints0, nullptr, nullptr, true, 0, triggeredByAura);
                     return true;
                 }
                 // Judgement of Wisdom
