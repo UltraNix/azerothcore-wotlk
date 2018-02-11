@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -555,7 +555,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                             return;
 
                     // Not let attack through obstructions
-                    bool checkLos = !MMAP::MMapFactory::IsPathfindingEnabled(pet->GetMap()) || 
+                    bool checkLos = !MMAP::MMapFactory::IsPathfindingEnabled(pet->GetMap()) ||
                                     (TargetUnit->GetTypeId() == TYPEID_UNIT && (TargetUnit->ToCreature()->isWorldBoss() || TargetUnit->ToCreature()->IsDungeonBoss()));
 
                     if (checkLos && !pet->IsWithinLOSInMap(TargetUnit))
@@ -610,7 +610,9 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
                     if (pet->GetCharmerGUID() == GetPlayer()->GetGUID())
                     {
-                        if (pet->IsSummon())
+                        //! @Riztazz: only unsummon pet if player is owner, otherwise we will despawn
+                        //! creatures that are summoned by ie. bosses and are supposed to be charmed (razuvious for example)
+                        if (pet->IsSummon() && (pet->GetOwnerGUID() == GetPlayer()->GetGUID() || pet->GetCreatorGUID() == GetPlayer()->GetGUID()))
                             pet->ToTempSummon()->UnSummon();
                         else
                             _player->StopCastingCharm();
