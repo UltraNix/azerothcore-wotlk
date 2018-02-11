@@ -1,0 +1,1 @@
+DELETE FROM `conditions` WHERE `SourceEntry` = 1790 AND `ConditionTypeOrReference` = 28;
