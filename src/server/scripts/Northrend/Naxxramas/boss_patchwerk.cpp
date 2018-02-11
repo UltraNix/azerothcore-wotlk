@@ -49,6 +49,8 @@ enum Misc
     ACHIEV_TIMED_START_EVENT           = 10286
 };
 
+Position const PatchwerkEvadeArea = { 3085.953613f, -3219.698975f, 294.253387f };
+
 class boss_patchwerk : public CreatureScript
 {
 public:
@@ -112,6 +114,11 @@ public:
                 pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
                 pInstance->SetData(EVENT_PATCHWERK, IN_PROGRESS);
             }
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const
+        {
+            return me->IsWithinDist2d(&PatchwerkEvadeArea, 10.0f);
         }
 
         void UpdateAI(uint32 diff)
@@ -204,6 +211,7 @@ public:
 
             }
 
+            EnterEvadeIfOutOfCombatArea();
             DoMeleeAttackIfReady();
         }
 
