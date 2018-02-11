@@ -70,7 +70,7 @@ struct boss_krystallusAI : public BossAI
                 events.Repeat(urand(9000, 15000));
                 break;
             case EVENT_GROUND_SPIKE:
-                DoCastVictim(SPELL_GROUND_SPIKE); 
+                DoCastVictim(SPELL_GROUND_SPIKE);
                 events.Repeat(urand(8000, 11000));
                 break;
             case EVENT_STOMP:
@@ -147,7 +147,10 @@ class spell_krystallus_shatter_effect_SpellScript : public SpellScript
             return;
 
         if (GetHitUnit()->GetTypeId() != TYPEID_PLAYER)
+        {
+            SetHitDamage(0);
             return;
+        }
 
         float radius = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(GetCaster());
         if (!radius)
