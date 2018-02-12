@@ -1342,11 +1342,12 @@ enum Assasination
     NPC_STAMPED_MAMMOTH = 25988,
     NPC_STAMPED_CARRIBOU = 25989,
     NPC_STAMPED_RHINO = 25990,
-    NPC_STAMPED_EXIT_POINT = 25995
+    NPC_STAMPED_EXIT_POINT = 25995,
+
+    SAY_LINE_1 = 1
 };
 
 const Position StartStamped = { 3283.67f, 5645.19f, 51.12f, 1.18f };
-# define STAMPED    "Harold Lane is override by a stampede!"
 
 class spell_blow_cenarion_horn : public SpellScriptLoader
 {
@@ -1379,7 +1380,7 @@ class spell_blow_cenarion_horn : public SpellScriptLoader
                                     stampedCreature->SendMovementFlagUpdate();
                                 }
                             }
-                            target->MonsterTextEmote(STAMPED, caster, true);
+                            target->ToCreature()->AI()->Talk(SAY_LINE_1, caster);
                         }
                     }
                 }
@@ -1408,19 +1409,19 @@ class npc_stamped_creature : public CreatureScript
 
             bool isStamped;
 
-            void Reset()
+            void Reset() override
             {
                 isStamped = false;
                 DoCast(me, SPELL_STAMPED_PERIODIC, true);
             }
 
-            void IsSummonedBy(Unit* summoner)
+            void IsSummonedBy(Unit* summoner) override
             {
                 if (summoner)
                     me->GetMotionMaster()->MovePoint(0, *summoner);
             }
 
-            void MovementInform(uint32 type, uint32 id)
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type == POINT_MOTION_TYPE)
                 {
@@ -1436,7 +1437,7 @@ class npc_stamped_creature : public CreatureScript
                 }
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) override
             {
                 if (isStamped)
                 {

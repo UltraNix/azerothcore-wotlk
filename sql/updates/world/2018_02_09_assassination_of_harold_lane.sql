@@ -11,3 +11,7 @@ UPDATE `creature_template`SET `unit_flags`=0, `faction`=7, `ScriptName`='npc_sta
 DELETE FROM `smart_scripts` WHERE `entryorguid` = 25804 AND `id` = 3;
 INSERT INTO `smart_scripts` VALUES
 (25804, 0, 3, 0, 6, 0, 100, 0, 0, 0, 0, 0, 33, 25804, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 'Harold Lane - On Death - Give Kill Credit');
+
+DELETE FROM `creature_text` WHERE `entry` = 25804 AND `groupid` = 1;
+INSERT INTO `creature_text` VALUES
+(25804, 1, 0, 'Harold Lane is override by a stampede!', 16, 0, 100, 0, 0, 0, 0, 'Harold Lane');
