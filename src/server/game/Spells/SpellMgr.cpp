@@ -3440,7 +3440,7 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->RecoveryTime = 10000;
             spellInfo->_requireCooldownInfo = true;
         });
-      
+
         ApplySpellFix
         ({
             56001, // Ebonweave
@@ -4839,11 +4839,13 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[EFFECT_2] = 99;
             break;
-
         // Ram - siege
         case 62345:
             spellInfo->EffectRadiusIndex[EFFECT_0] = 13; // 10yd
             spellInfo->EffectRadiusIndex[EFFECT_1] = 13; // 10yd
+            break;
+        case 60988:
+            spellInfo->Attributes |= SPELL_ATTR0_REQ_AMMO;
             break;
 
         /////////////////////////////////
