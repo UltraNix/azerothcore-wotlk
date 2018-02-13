@@ -190,6 +190,12 @@ bool BattlefieldWG::SetupBattlefield()
     }
 
     UpdateCounterVehicle(true);
+
+    for (uint8 i = 0; i < 4; i++)
+    {
+        m_reminderStage[i] = false;
+    }
+
     return true;
 }
 
@@ -222,6 +228,19 @@ bool BattlefieldWG::Update(uint32 diff)
         }
         else
             m_tenacityUpdateTimer -= diff;
+    }
+
+    if (sWorld->getIntConfig(CONFIG_WINTERGRASP_REMINDER))
+    {
+        for (uint8 i = 0; i < 4; i++)
+        {
+            uint8 minutes = (i == 0) ? 1 : i * 5;
+            if (!m_reminderStage[i] && m_Timer <= minutes * MINUTE * IN_MILLISECONDS)
+            {
+                m_reminderStage[i] = true;
+                SendReminder(minutes);
+            }
+        }
     }
 
     return m_return;
@@ -508,6 +527,11 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
         SendWarningToAllInZone((GetDefenderTeam() == TEAM_ALLIANCE) ? BATTLEFIELD_WG_TEXT_WIN_KEEP : (BATTLEFIELD_WG_TEXT_WIN_KEEP + 2));
     else // defend alli/horde
         SendWarningToAllInZone((GetDefenderTeam() == TEAM_ALLIANCE) ? BATTLEFIELD_WG_TEXT_DEFEND_KEEP : (BATTLEFIELD_WG_TEXT_DEFEND_KEEP + 2));
+
+    for (uint8 i = 0; i < 4; i++)
+    {
+        m_reminderStage[i] = false;
+    }
 }
 
 // *******************************************************
@@ -907,6 +931,24 @@ uint32 BattlefieldWG::GetData(uint32 data) const
     }
 
     return Battlefield::GetData(data);
+}
+
+void BattlefieldWG::SendReminder(uint8 minutes)
+{
+    if (m_Timer < (minutes * MINUTE - 10) * IN_MILLISECONDS) 
+        return;
+    if (sWorld->getIntConfig(CONFIG_WINTERGRASP_REMINDER) & 1)
+    {
+        std::ostringstream oss;
+        oss << "|cffff0000Wintergrasp starts in " << std::to_string(minutes) << " minutes! Prepare yourself and fight for the Horde! Takeover Vault of Archavon!|r";
+        sWorld->SendServerMessage(SERVER_MSG_STRING, oss.str().c_str(), nullptr, TEAM_HORDE);
+    }
+    if (sWorld->getIntConfig(CONFIG_WINTERGRASP_REMINDER) & 2)
+    {
+        std::ostringstream oss;
+        oss << "|cffff0000Wintergrasp starts in " << std::to_string(minutes) << " minutes! Prepare yourself and fight for the Alliance! Takeover Vault of Archavon!|r";
+        sWorld->SendServerMessage(SERVER_MSG_STRING, oss.str().c_str(), nullptr, TEAM_ALLIANCE);
+    }
 }
 
 void BattlefieldWG::FillInitialWorldStates(WorldPacket& data)

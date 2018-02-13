@@ -3523,6 +3523,17 @@ ChinaTown.Enable = 1
 ChinaTown.Spam.Timer = 10
 
 #
+#     Wintergrasp.Reminder
+#     Description: Sends reminder message before start of Wintergrasp (15, 10, 5 and 1 minute)
+#     Default:     0 - (Disabled)
+#                  1 - (Enabled, Horde only)
+#                  2 - (Enabled, Alliance only)
+#                  3 - (Enabled, Horde and Alliance)
+#
+
+Wintergrasp.Reminder = 0
+
+#
 ###################################################################################################
 
 ###################################################################################################

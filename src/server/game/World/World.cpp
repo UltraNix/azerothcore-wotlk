@@ -1361,6 +1361,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE] = sConfigMgr->GetBoolDefault("HordeHonorBoost.Enable", false);
     m_bool_configs[CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE] = sConfigMgr->GetBoolDefault("AllianceHonorBoost.Enable", false);
 
+    m_int_configs[CONFIG_WINTERGRASP_REMINDER] = sConfigMgr->GetIntDefault("Wintergrasp.Reminder", 0);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

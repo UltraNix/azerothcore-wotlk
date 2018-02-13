@@ -430,6 +430,8 @@ class BattlefieldWG : public Battlefield
         uint32 GetAreaByGraveyardId(uint8 gId) const;
 
         uint32 GetData(uint32 data) const;
+    private:
+        void SendReminder(uint8 minutes);
     protected:
         bool m_isRelicInteractible;
 
@@ -450,6 +452,7 @@ class BattlefieldWG : public Battlefield
         uint32 m_saveTimer;
 
         uint64 m_titansRelic;
+        bool m_reminderStage[4];
 };
 
 const uint8 WG_MAX_OBJ = 32;
