@@ -3883,6 +3883,10 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// PALADIN
         /////////////////////////////////
+        case 64205: // Divine Sacrifice
+        case 6940:  // Hand of Sacrifice
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_PUSHBACK;
+            break;
         case 58597: // sacred shield
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             break;
