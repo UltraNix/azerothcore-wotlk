@@ -1380,7 +1380,8 @@ class spell_blow_cenarion_horn : public SpellScriptLoader
                                     stampedCreature->SendMovementFlagUpdate();
                                 }
                             }
-                            target->ToCreature()->AI()->Talk(SAY_LINE_1, caster);
+                            if (target->ToCreature() && target->GetAI())
+                                target->ToCreature()->AI()->Talk(SAY_LINE_1, caster);
                         }
                     }
                 }
