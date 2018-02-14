@@ -383,6 +383,18 @@ class Object
         Object& operator=(Object const&);                   // prevent generation assigment operator
 };
 
+//! Quake3 fast inverse square root
+//! https://en.wikipedia.org/wiki/Fast_inverse_square_root
+inline float FastSqrt(float x)
+{
+    float xhalf = 0.5f*x;
+    int i = *(int*)&x;              // evil floating point bit level hacking
+    i = 0x5f375a86 - (i >> 1);      // what the fuck?
+    x = *(float*)&i;                // convert bits back to float
+    x = x * (1.5f - xhalf * x*x);   // Newton step, repeating increases accuracy
+    return 1.0f / x;
+}
+
 struct Position
 {
     Position(float x = 0, float y = 0, float z = 0, float o = 0)
@@ -419,11 +431,11 @@ struct Position
     void SetOrientation(float orientation)
         { m_orientation = orientation; }
 
-    float GetPositionX() const { return m_positionX; }
-    float GetPositionY() const { return m_positionY; }
-    float GetPositionZ() const { return m_positionZ; }
-    float GetOrientation() const { return m_orientation; }
-    Position GetPosition() const { return *this; }
+    inline float GetPositionX() const { return m_positionX; }
+    inline float GetPositionY() const { return m_positionY; }
+    inline float GetPositionZ() const { return m_positionZ; }
+    inline float GetOrientation() const { return m_orientation; }
+    inline const Position& GetPosition() const { return *this; }
 
     void GetPosition(float &x, float &y) const
         { x = m_positionX; y = m_positionY; }
@@ -451,20 +463,31 @@ struct Position
     float GetExactDist2dSq(float x, float y) const
         { float dx = m_positionX - x; float dy = m_positionY - y; return dx*dx + dy*dy; }
     float GetExactDist2d(const float x, const float y) const
-        { return sqrt(GetExactDist2dSq(x, y)); }
+    {
+        return FastSqrt(GetExactDist2dSq(x, y));
+    }
     float GetExactDist2dSq(const Position* pos) const
         { float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; return dx*dx + dy*dy; }
     float GetExactDist2d(const Position* pos) const
-        { return sqrt(GetExactDist2dSq(pos)); }
+        { return FastSqrt(GetExactDist2dSq(pos)); }
     float GetExactDistSq(float x, float y, float z) const
         { float dz = m_positionZ - z; return GetExactDist2dSq(x, y) + dz*dz; }
     float GetExactDist(float x, float y, float z) const
-        { return sqrt(GetExactDistSq(x, y, z)); }
+        { return FastSqrt(GetExactDistSq(x, y, z)); }
     float GetExactDistSq(const Position* pos) const
         { float dx = m_positionX - pos->m_positionX; float dy = m_positionY - pos->m_positionY; float dz = m_positionZ - pos->m_positionZ; return dx*dx + dy*dy + dz*dz; }
     float GetExactDist(const Position* pos) const
-        { return sqrt(GetExactDistSq(pos)); }
+        { return FastSqrt(GetExactDistSq(pos)); }
 
+    inline float GetExactDist2dSq(Position const& pos) const
+    {
+        return GetExactDist2dSq(&pos);
+    }
+
+    inline float GetExactDistSq(Position const& pos) const
+    {
+        return GetExactDistSq(&pos);
+    }
     void GetPositionOffsetTo(const Position & endPos, Position & retOffset) const;
 
     float GetAngle(const Position* pos) const;

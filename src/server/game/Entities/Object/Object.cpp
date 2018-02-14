@@ -1076,26 +1076,17 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 
     if (m_transport && obj->GetTransport() &&  obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
     {
-        float dtx = m_movementInfo.transport.pos.m_positionX - obj->m_movementInfo.transport.pos.m_positionX;
-        float dty = m_movementInfo.transport.pos.m_positionY - obj->m_movementInfo.transport.pos.m_positionY;
-        float disttsq = dtx * dtx + dty * dty;
-        if (is3D)
-        {
-            float dtz = m_movementInfo.transport.pos.m_positionZ - obj->m_movementInfo.transport.pos.m_positionZ;
-            disttsq += dtz * dtz;
-        }
+        const Position & pos1 = m_movementInfo.transport.pos;
+        const Position & pos2 = obj->m_movementInfo.transport.pos;
+
+        float disttsq = is3D ? pos1.GetExactDistSq(pos2) : pos1.GetExactDist2dSq(pos2);
         return disttsq < (maxdist * maxdist);
     }
 
-    float dx = GetPositionX() - obj->GetPositionX();
-    float dy = GetPositionY() - obj->GetPositionY();
-    float distsq = dx*dx + dy*dy;
-    if (is3D)
-    {
-        float dz = GetPositionZ() - obj->GetPositionZ();
-        distsq += dz*dz;
-    }
+    const Position & pos1 = GetPosition();
+    const Position & pos2 = obj->GetPosition();
 
+    float distsq = is3D ? pos1.GetExactDistSq(pos2) : pos1.GetExactDist2dSq(pos2);
     return distsq < maxdist * maxdist;
 }
 
@@ -1261,7 +1252,7 @@ void Position::GetSinCos(const float x, const float y, float &vsin, float &vcos)
     }
     else
     {
-        float dist = sqrt((dx*dx) + (dy*dy));
+        float dist = FastSqrt((dx*dx) + (dy*dy));
         vcos = dx / dist;
         vsin = dy / dist;
     }
@@ -2711,7 +2702,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
             desty -= CONTACT_DISTANCE * sin(angle);
         }
 
-        newDist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+        newDist = FastSqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
     }
 
     // check dynamic collision
@@ -2726,7 +2717,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
             destx -= CONTACT_DISTANCE * cos(angle);
             desty -= CONTACT_DISTANCE * sin(angle);
         }
-        newDist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+        newDist = FastSqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
     }
 
     float step = newDist / 10.0f;
