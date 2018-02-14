@@ -103,6 +103,7 @@ enum Actions
     ACTION_ACQUIRE_TARGET
 };
 
+Position const GothikMiddleOfTheRoom = { 2692.814453f, -3358.323242f, 267.683777f, 3.241947f };
 
 /* Room side checking logic */
 #define POS_Y_GATE    -3360.78f
@@ -141,7 +142,8 @@ static Player* FindEligibleTarget(Creature const* me, bool isGateOpen)
     for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
     {
         Player* player = it->GetSource();
-        if (player && (isGateOpen || IsOnSameSide(me, player)) && me->CanSeeOrDetect(player) && me->IsValidAttackTarget(player) && player->isInAccessiblePlaceFor(me))
+        if (player && (isGateOpen || IsOnSameSide(me, player)) && me->CanSeeOrDetect(player) && me->IsValidAttackTarget(player) && player->isInAccessiblePlaceFor(me) &&
+            player->GetDistance(GothikMiddleOfTheRoom) < 85.0f)
             return player;
     }
 
