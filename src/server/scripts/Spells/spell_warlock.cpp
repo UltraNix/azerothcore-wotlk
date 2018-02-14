@@ -1471,6 +1471,37 @@ class spell_chaos_bolt_damage_hack_SpellScript : public SpellScript
     }
 };
 
+
+class spell_warl_everlasting_affliction_aura : public SpellScriptLoader
+{
+public:
+    spell_warl_everlasting_affliction_aura() : SpellScriptLoader("spell_warl_everlasting_affliction_aura") { }
+    class spell_warl_everlasting_affliction_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_everlasting_affliction_aura_AuraScript)
+            
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if ((eventInfo.GetHitMask() & (PROC_EX_EX_ONE_TIME_TRIGGER)))
+                return true;
+            SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+            if((spellInfo && spellInfo->GetFirstRankSpell()))
+                if((spellInfo->GetFirstRankSpell()->Id == 686 || spellInfo->GetFirstRankSpell()->Id == 48181))
+                    return true;
+            return false;
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warl_everlasting_affliction_aura_AuraScript::CheckProc);
+        }
+    };
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_everlasting_affliction_aura_AuraScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     // Ours
@@ -1484,6 +1515,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_generic_scaling();
     new spell_warl_infernal_scaling();
     new spell_wrl_fire_bolt();
+    new spell_warl_everlasting_affliction_aura();
     new SpellScriptLoaderEx<spell_chaos_bolt_damage_hack_SpellScript>("spell_chaos_bolt_damage_hack");
 
     // Theirs

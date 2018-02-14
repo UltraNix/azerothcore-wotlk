@@ -6190,6 +6190,10 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     uint32 procAttacker = PROC_FLAG_DONE_PERIODIC;
     uint32 procVictim   = PROC_FLAG_TAKEN_PERIODIC;
     uint32 procEx = (crit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT) | PROC_EX_INTERNAL_DOT;
+
+    if (m_tickNumber == 1)
+        procEx |= PROC_EX_EX_ONE_TIME_TRIGGER;
+
     if (absorb > 0)
         procEx |= PROC_EX_ABSORB;
 
@@ -6258,6 +6262,9 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
     uint32 procEx = (crit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT) | PROC_EX_INTERNAL_DOT;
     if (absorb > 0)
         procEx |= PROC_EX_ABSORB;
+
+    if (m_tickNumber == 1)
+        procEx |= PROC_EX_EX_ONE_TIME_TRIGGER;
 
     damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
     if (damage)
