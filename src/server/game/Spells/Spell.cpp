@@ -3820,6 +3820,8 @@ void Spell::_cast(bool skipCheck)
                 m_caster->CombatStartOnCast(target, !m_spellInfo->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO), GetDelayMoment() + 500); // xinef: increase this time so we dont leave and enter combat in a moment
 
     SetExecutedCurrently(false);
+    if (m_casttime)
+        m_caster->resetAttackTimer();
 }
 
 void Spell::handle_immediate()
