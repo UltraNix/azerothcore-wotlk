@@ -438,8 +438,14 @@ public:
                     break;
             }
 
+            EnterEvadeIfOutOfCombatArea();
             if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
                 DoMeleeAttackIfReady();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetHomePosition().GetExactDist2d(me) > 70.0f;
         }
     };
 };
@@ -519,7 +525,7 @@ public:
 
         void EnterCombat(Unit* who)
         {
-            me->SetInCombatWithZone();
+            DoZoneInCombat();
 
             if (me->GetEntry() == NPC_UNSTOPPABLE_ABOMINATION)
             {
