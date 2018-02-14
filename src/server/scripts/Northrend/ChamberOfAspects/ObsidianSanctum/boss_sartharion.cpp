@@ -1677,6 +1677,27 @@ class spell_curse_of_mending_sartharion_AuraScript : public AuraScript
     }
 };
 
+class achievement_realm_first_obsidian_slayer : public AchievementCriteriaScript
+{
+public:
+    achievement_realm_first_obsidian_slayer() : AchievementCriteriaScript("achievement_realm_first_obsidian_slayer") { }
+
+    bool OnCheck(Player* /*player*/, Unit* target) override
+    {
+        if (!target)
+            return false;
+
+        if (!target->GetMap()->Is25ManRaid())
+            return false;
+
+        if (Creature* sartharion = target->ToCreature())
+            if (sartharion->AI())
+                if (sartharion->AI()->GetData(DATA_ACHIEVEMENT_DRAGONS_COUNT) >= 3)
+                    return true;
+        return false;
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     new boss_sartharion();
@@ -1693,4 +1714,6 @@ void AddSC_boss_sartharion()
 
     new CreatureAILoader<npc_blaze_mistress_sarthrionAI>("npc_blaze_mistress_sarthrion");
     new CreatureAILoader<npc_flame_orb_mistressAI>("npc_flame_orb_mistress");
+
+    new achievement_realm_first_obsidian_slayer();
 }
