@@ -151,6 +151,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            DoZoneInCombat();
             _fightTimer = getMSTime();
             Talk(SAY_AGGRO);
 
