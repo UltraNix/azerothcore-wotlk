@@ -378,11 +378,17 @@ public:
 
             if ((me->GetEntry() == NPC_LADY_BLAUMEUX || me->GetEntry() == NPC_SIR_ZELIEK))
             {
+                EnterEvadeIfOutOfCombatArea();
                 if (Unit* target = SelectTarget(SELECT_TARGET_NEAREST, 0, 45.0f, true))
                     me->CastSpell(target, RAID_MODE(TABLE_SPELL_PRIMARY_10[horsemanId], TABLE_SPELL_PRIMARY_25[horsemanId]), false);
             }
             else
                 DoMeleeAttackIfReady();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return !SelectTargetFromPlayerList(135.0f);
         }
     };
 };
