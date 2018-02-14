@@ -187,7 +187,13 @@ struct boss_faerlinaAI : public ScriptedAI
                 return;
         }
 
+        EnterEvadeIfOutOfCombatArea();
         DoMeleeAttackIfReady();
+    }
+
+    bool CheckEvadeIfOutOfCombatArea() const override
+    {
+        return me->GetHomePosition().GetExactDist2d(me) > 65.0f;
     }
 
 private:
