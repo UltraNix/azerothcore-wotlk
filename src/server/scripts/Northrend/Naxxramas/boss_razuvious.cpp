@@ -245,7 +245,13 @@ public:
                     break;
             }
 
+            EnterEvadeIfOutOfCombatArea();
             DoMeleeAttackIfReady();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetHomePosition().GetExactDist2d(me) > 50.0f;
         }
     };
 };
