@@ -39,6 +39,8 @@ enum Misc
     ACHIEV_TIMED_START_EVENT           = 9891
 };
 
+Position const AnubMiddlePosition = { 3273.161621f, -3476.242432f, 287.077118f, 0.033442f };
+
 class boss_anubrekhan : public CreatureScript
 {
 public:
@@ -49,11 +51,10 @@ public:
         return new boss_anubrekhanAI (pCreature);
     }
 
-    struct boss_anubrekhanAI : public ScriptedAI
+    struct boss_anubrekhanAI : public BossAI
     {
-        boss_anubrekhanAI(Creature *c) : ScriptedAI(c), summons(me)
+        boss_anubrekhanAI(Creature* creature) : BossAI(creature, EVENT_ANUB)
         {
-            pInstance = c->GetInstanceScript();
             sayGreet = false;
         }
 
@@ -65,6 +66,11 @@ public:
                 me->SummonCreature(NPC_CRYPT_GUARD, 3308.590f, -3486.29f, 287.16f, M_PI, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
         }
 
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetDistance(AnubMiddlePosition) > 70.0f;
+        }
+
         void Reset() override
         {
             _fightTimer = 0;
@@ -72,12 +78,9 @@ public:
             summons.DespawnAll();
             SummonCryptGuards();
 
-            if (pInstance)
-            {
-                pInstance->SetData(EVENT_ANUB, NOT_STARTED);
-                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_ANUB_GATE)))
-                    go->SetGoState(GO_STATE_ACTIVE);
-            }
+            instance->SetData(EVENT_ANUB, NOT_STARTED);
+            if (GameObject* go = me->GetMap()->GetGameObject(instance->GetData64(DATA_ANUB_GATE)))
+                go->SetGoState(GO_STATE_ACTIVE);
         }
 
         void JustSummoned(Creature* cr) override
@@ -107,11 +110,8 @@ public:
         {
             summons.DespawnAll();
 
-            if (pInstance)
-            {
-                pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
-                pInstance->SetData(EVENT_ANUB, DONE);
-            }
+            instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
+            instance->SetData(EVENT_ANUB, DONE);
 
             if (Map* map = me->GetMap())
                 CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
@@ -128,8 +128,7 @@ public:
             //Force the player to spawn corpse scarabs via spell
             victim->CastSpell(victim, SPELL_SUMMON_CORPSE_SCRABS_5, true, NULL, NULL, me->GetGUID());
 
-            if (pInstance)
-                pInstance->SetData(DATA_IMMORTAL_FAIL, 0);
+            instance->SetData(DATA_IMMORTAL_FAIL, 0);
         }
 
         void EnterCombat(Unit *who) override
@@ -138,12 +137,10 @@ public:
             _fightTimer = getMSTime();
             me->CallForHelp(30.0f); // catch helpers
             Talk(SAY_AGGRO);
-            if (pInstance)
-            {
-                pInstance->SetData(EVENT_ANUB, IN_PROGRESS);
-                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_ANUB_GATE)))
-                    go->SetGoState(GO_STATE_READY);
-            }
+
+            instance->SetData(EVENT_ANUB, IN_PROGRESS);
+            if (GameObject* go = me->GetMap()->GetGameObject(instance->GetData64(DATA_ANUB_GATE)))
+                go->SetGoState(GO_STATE_READY);
 
             events.ScheduleEvent(EVENT_SPELL_IMPALE, 15000);
             events.ScheduleEvent(EVENT_SPELL_LOCUST_SWARM, 70000 + urand(0, 50000));
@@ -194,12 +191,10 @@ public:
                     break;
             }
 
+            EnterEvadeIfOutOfCombatArea();
             DoMeleeAttackIfReady();
         }
     private:
-        InstanceScript * pInstance;
-        EventMap events;
-        SummonList summons;
         bool sayGreet;
         uint32 _fightTimer;
     };
