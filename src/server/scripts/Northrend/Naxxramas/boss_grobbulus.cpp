@@ -91,6 +91,11 @@ public:
             }
         }
 
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return !SelectTargetFromPlayerList(50.0f);
+        }
+
         void SpellHitTarget(Unit *target, const SpellInfo* spellInfo)
         {
             if (spellInfo->Id == RAID_MODE(SPELL_SLIME_SPRAY_10, SPELL_SLIME_SPRAY_25) && target->GetTypeId() == TYPEID_PLAYER)
@@ -174,6 +179,7 @@ public:
                     break;
             }
 
+            EnterEvadeIfOutOfCombatArea();
             DoMeleeAttackIfReady();
         }
     };
