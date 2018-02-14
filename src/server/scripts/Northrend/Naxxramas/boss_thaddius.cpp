@@ -86,6 +86,8 @@ enum Misc
     NPC_TESLA_COIL                               = 16218 // the coils (emotes "Tesla Coil overloads!")
 };
 
+Position const ThaddiusMiddleOfTheRoom = { 3472.996826f, -2966.209717f, 315.730194f, 3.972281f };
+
 class boss_thaddius : public CreatureScript
 {
 public:
@@ -129,6 +131,30 @@ public:
                     }
                 }
             }
+        }
+
+        void DespawnThaddiusAtEvade()
+        {
+            summons.DespawnAll();
+
+            me->DespawnOrUnsummon(0, 20);
+
+            if (pInstance)
+            {
+                pInstance->SetData(EVENT_THADDIUS, NOT_STARTED);
+                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_THADDIUS_GATE)))
+                    go->SetGoState(GO_STATE_ACTIVE);
+            }
+        }
+
+        void JustReachedHome() override
+        {
+            DespawnThaddiusAtEvade();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return !SelectTargetFromPlayerList(125.0f) || me->GetDistance(ThaddiusMiddleOfTheRoom) > 75.0f;
         }
 
         void DoAction(int32 param)
@@ -213,7 +239,10 @@ public:
                 CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
         }
 
-        void JustSummoned(Creature* cr) { summons.Summon(cr); }
+        void JustSummoned(Creature* cr)
+        {
+            summons.Summon(cr);
+        }
 
         void EnterCombat(Unit *who)
         {
@@ -333,6 +362,7 @@ public:
                 else
                     DoMeleeAttackIfReady();
             }
+            EnterEvadeIfOutOfCombatArea();
         }
     };
 };
@@ -377,6 +407,14 @@ public:
         {
            me->SetControlled(false, UNIT_STATE_STUNNED);
            ScriptedAI::EnterEvadeMode();
+
+           if (pInstance)
+           {
+               if (Creature* thaddius = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_THADDIUS_BOSS)))
+                   if (thaddius->GetAI())
+                       if (!thaddius->IsInEvadeMode())
+                           thaddius->AI()->EnterEvadeMode();
+           }
         }
 
         void EnterCombat(Unit* pWho)
@@ -446,6 +484,22 @@ public:
 
             if (!urand(0,2))
                 Talk(me->GetEntry() == NPC_STALAGG ? SAY_FEUG_SLAY : SAY_STAL_SLAY);
+        }
+
+        bool IsUnitInRoom(Unit* who)
+        {
+            if (!who)
+                return false;
+
+            if (who->GetDistance(ThaddiusMiddleOfTheRoom) > 80.0f)
+                return false;
+
+            return true;
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetDistance(ThaddiusMiddleOfTheRoom) > 80.0f;
         }
 
         void UpdateAI(uint32 diff)
@@ -518,6 +572,9 @@ public:
                                 Unit* tankFeugen = feugen->GetVictim();
                                 Unit* tankStalagg = me->GetVictim();
 
+                                if (!IsUnitInRoom(tankFeugen) || !IsUnitInRoom(tankStalagg))
+                                    return;
+
                                 feugen->getThreatManager().modifyThreatPercent(tankFeugen, -100);
                                 feugen->AddThreat(tankStalagg, threatFeugen);
                                 feugen->CastSpell(tankStalagg, SPELL_MAGNETIC_PULL, true);
@@ -551,6 +608,7 @@ public:
                 }
             }
 
+            EnterEvadeIfOutOfCombatArea();
             DoMeleeAttackIfReady();
         }
     };
