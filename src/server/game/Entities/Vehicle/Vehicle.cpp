@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -352,7 +352,7 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
 
     seat->second.Passenger.Guid = unit->GetGUID();
     seat->second.Passenger.IsUnselectable = unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-    
+
     if (seat->second.SeatInfo->CanEnterOrExit())
     {
         ASSERT(_usableSeatNum);
@@ -432,7 +432,11 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         if (_me->GetTypeId() == TYPEID_UNIT)
         {
             if (_me->ToCreature()->IsAIEnabled)
+            {
                 _me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
+                if (unit->ToCreature())
+                    unit->UpdateObjectVisibility(true, true);
+            }
         }
     }
 
@@ -548,7 +552,7 @@ void Vehicle::TeleportVehicle(float x, float y, float z, float ang)
 {
     _me->GetMap()->LoadGrid(x, y);
     _me->NearTeleportTo(x, y, z, ang, true);
-    
+
     for (SeatMap::const_iterator itr = Seats.begin(); itr != Seats.end(); ++itr)
         if (Unit* passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.Passenger.Guid))
         {

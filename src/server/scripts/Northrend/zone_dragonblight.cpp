@@ -1929,7 +1929,6 @@ enum Onslaught_warhorse
     EVENT_TRANSFORM,
     EVENT_RUN_OFF,
     EVENT_DESPAWN_HORSE,
-    EVENT_MOUNT_KNIGHT,
     EVENT_CHECK_IF_MOUNTED,
 
     SPELL_HAND_OVER_REINS = 48297,
@@ -1945,19 +1944,15 @@ enum Onslaught_warhorse
     NPC_SHOWER_GUID = 98539
 };
 
-Position Warhorse_pos[] = {
+Position Warhorse_pos[] =
+{
     { 3263.979980f, -623.401001f, 165.321442f, 1.059199f },
     { 3239.105957f, -648.267578f, 165.650528f, 3.71414f }
 };
 
 struct npc_onslaught_warhorseAI : public ScriptedAI
 {
-    npc_onslaught_warhorseAI(Creature* creature) : ScriptedAI(creature), summons(me)
-    {
-        _playerMounted = false;
-        _knightGUID = 0;
-        _needNewKnight = false;
-    }
+    npc_onslaught_warhorseAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
 
     void EnterCombat(Unit* attacker) override
     {
@@ -1971,27 +1966,13 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
 
     void Reset() override
     {
-        _events.Reset();
-
-        if (Creature *knight = ObjectAccessor::GetCreature(*me, _knightGUID))
-            _needNewKnight = !knight->IsAlive() ? true : false;
-        else
-            _needNewKnight = true;
-
-        if (!_knightGUID || _needNewKnight)
-        {
-            if (Creature *knight = me->SummonCreature(NPC_ONSLAUGHT_KNIGHT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 20 * IN_MILLISECONDS))
-            {
-                _knightGUID = knight->GetGUID();
-                _needNewKnight = false;
-                _events.ScheduleEvent(EVENT_MOUNT_KNIGHT, 1 * IN_MILLISECONDS);
-                knight->CastSpell(me, SPELL_RIDE_VEH_HARDCODED);
-            }
-        }
-
-        me->setFaction(67); //restore original faction
+        me->RestoreFaction();
         me->SetReactState(REACT_AGGRESSIVE);
+        summons.DespawnAll();
+        _events.Reset();
         _playerMounted = false;
+        _knightGUID = 0;
+        me->ApplySpellImmune(0, IMMUNITY_ID, 48290, false);
     }
 
     void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell) override
@@ -1999,7 +1980,7 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
         if (spell->Id == SPELL_HAND_OVER_REINS)
         {
             me->CastSpell(me, SPELL_EJECT_ALL);
-            _events.ScheduleEvent(EVENT_MOVE_FIRST, 1 * IN_MILLISECONDS);
+            _events.ScheduleEvent(EVENT_MOVE_FIRST, 1s);
             me->ApplySpellImmune(0, IMMUNITY_ID, 48290, true);
         }
     }
@@ -2007,7 +1988,8 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
     void JustSummoned(Creature* summon) override
     {
         summons.Summon(summon);
-        _knightGUID = summon->GetGUID();
+        if (summon->GetEntry() == NPC_ONSLAUGHT_KNIGHT)
+            _knightGUID = summon->GetGUID();
     }
 
     void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
@@ -2021,7 +2003,7 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
         else
         {
             _playerMounted = false;
-            me->DespawnOrUnsummon(2000);
+            me->DespawnOrUnsummon(2s);
         }
     }
 
@@ -2035,13 +2017,12 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
 
             me->setFaction(35);
             me->SetReactState(REACT_PASSIVE);
-            _events.ScheduleEvent(EVENT_CHECK_IF_MOUNTED, 10000);
+            _events.ScheduleEvent(EVENT_CHECK_IF_MOUNTED, 10s);
         }
     }
 
     // have to stay there for override reason(prevent for ai change i suppose)
-    void OnCharmed(bool /*apply*/) override
-    { }
+    void OnCharmed(bool /*apply*/) override { }
 
     void UpdateAI(uint32 diff) override
     {
@@ -2054,33 +2035,29 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
                 case EVENT_MOVE_FIRST:
                     me->SetWalk(true);
                     me->GetMotionMaster()->MovePoint(0, Warhorse_pos[0]);
-                    _events.ScheduleEvent(EVENT_PLAGUE_SHOWER, 5 * IN_MILLISECONDS);
+                    _events.ScheduleEvent(EVENT_PLAGUE_SHOWER, 5s);
                     break;
                 case EVENT_PLAGUE_SHOWER:
                     if (Creature *shower = me->FindNearestCreature(23837, 10.0f))
                         shower->CastSpell(me, SPELL_PLAGUE_SHOWER);
 
-                    _events.ScheduleEvent(EVENT_TRANSFORM, 4 * IN_MILLISECONDS);
+                    _events.ScheduleEvent(EVENT_TRANSFORM, 4s);
                     break;
                 case EVENT_TRANSFORM:
                     DoCast(SPELL_TRANSFORM);
-                    _events.ScheduleEvent(EVENT_RUN_OFF, 2 * IN_MILLISECONDS);
+                    _events.ScheduleEvent(EVENT_RUN_OFF, 2s);
                     break;
                 case EVENT_RUN_OFF:
                     me->SetWalk(false);
                     me->GetMotionMaster()->MovePoint(0, Warhorse_pos[1]);
-                    _events.ScheduleEvent(EVENT_DESPAWN_HORSE, 9 * IN_MILLISECONDS);
+                    _events.ScheduleEvent(EVENT_DESPAWN_HORSE, 9s);
                     break;
                 case EVENT_DESPAWN_HORSE:
                     me->DespawnOrUnsummon();
                     break;
-                case EVENT_MOUNT_KNIGHT:
-                    if (Creature *knight = ObjectAccessor::GetCreature(*me, _knightGUID))
-                        knight->CastSpell(me, SPELL_RIDE_VEH_HARDCODED);
-                    break;
                 case EVENT_CHECK_IF_MOUNTED:
                     if (!_playerMounted)
-                        me->DespawnOrUnsummon(2000);
+                        me->DespawnOrUnsummon(2s);
                     break;
                 default:
                     break;
@@ -2098,7 +2075,7 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
 
 private:
     EventMap _events;
-    bool _playerMounted, _needNewKnight;
+    bool _playerMounted;
     uint64 _knightGUID;
     SummonList summons;
 };
