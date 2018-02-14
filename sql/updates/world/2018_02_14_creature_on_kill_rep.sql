@@ -1,0 +1,1 @@
+UPDATE `creature_onkill_reputation` SET `RewOnKillRepValue1` = 2, `RewOnKillRepValue2` = 2 WHERE `creature_id` IN (27636, 30902); 
