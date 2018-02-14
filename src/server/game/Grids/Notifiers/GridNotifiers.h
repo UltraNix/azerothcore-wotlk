@@ -1325,6 +1325,22 @@ namespace Trinity
         float m_fRange;
     };
 
+    class AllGameObjectsRange
+    {
+    public:
+        AllGameObjectsRange(const WorldObject* object, float maxRange) : m_pObject(object), m_fRange(maxRange) {}
+        bool operator() (GameObject* go)
+        {
+            if (m_pObject->IsWithinDist(go, m_fRange, false))
+                return true;
+
+            return false;
+        }
+    private:
+        const WorldObject* m_pObject;
+        float m_fRange;
+    };
+
     class AllCreaturesOfEntryInRange
     {
         public:

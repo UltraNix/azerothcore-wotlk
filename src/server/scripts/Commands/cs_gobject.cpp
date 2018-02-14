@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -550,38 +550,19 @@ public:
 
         Player* player = handler->GetSession()->GetPlayer();
 
-        PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_GAMEOBJECT_NEAREST);
-        stmt->setFloat(0, player->GetPositionX());
-        stmt->setFloat(1, player->GetPositionY());
-        stmt->setFloat(2, player->GetPositionZ());
-        stmt->setUInt16(3, uint16(player->GetMapId()));
-        stmt->setFloat(4, player->GetPositionX());
-        stmt->setFloat(5, player->GetPositionY());
-        stmt->setFloat(6, player->GetPositionZ());
-        stmt->setFloat(7, distance * distance);
-        PreparedQueryResult result = WorldDatabase.Query(stmt);
-
-        if (result)
+        std::list<GameObject*> goTempList;
+        player->GetGameObjectListInGrid(goTempList, distance);
+        if (goTempList.empty())
         {
-            do
-            {
-                Field* fields = result->Fetch();
-                uint32 guid = fields[0].GetUInt32();
-                uint32 entry = fields[1].GetUInt32();
-                float x = fields[2].GetFloat();
-                float y = fields[3].GetFloat();
-                float z = fields[4].GetFloat();
-                uint16 mapId = fields[5].GetUInt16();
+            handler->PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, count);
+            return true;
+        }
 
-                GameObjectTemplate const* gameObjectInfo = sObjectMgr->GetGameObjectTemplate(entry);
-
-                if (!gameObjectInfo)
-                    continue;
-
-                handler->PSendSysMessage(LANG_GO_LIST_CHAT, guid, entry, guid, gameObjectInfo->name.c_str(), x, y, z, mapId);
-
-                ++count;
-            } while (result->NextRow());
+        for (auto i : goTempList)
+        {
+            handler->PSendSysMessage(LANG_GO_LIST_CHAT, i->GetDBTableGUIDLow(), i->GetEntry(), i->GetGUID(), i->GetName().c_str(),
+                                     i->GetPositionX(), i->GetPositionY(), i->GetPositionZ(), i->GetMapId());
+            ++count;
         }
 
         handler->PSendSysMessage(LANG_COMMAND_NEAROBJMESSAGE, distance, count);
@@ -665,7 +646,7 @@ public:
 
         if (!object)
         {
-            
+
             handler->PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, abs(guidLow));
             handler->SetSentErrorMessage(true);
             return false;
