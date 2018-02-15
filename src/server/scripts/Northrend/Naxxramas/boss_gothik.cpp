@@ -570,6 +570,12 @@ class boss_gothik : public CreatureScript
                             break;
                     }
                 }
+                EnterEvadeIfOutOfCombatArea();
+            }
+
+            bool CheckEvadeIfOutOfCombatArea() const override
+            {
+                return !SelectTargetFromPlayerList(150.0f);
             }
 
             private:

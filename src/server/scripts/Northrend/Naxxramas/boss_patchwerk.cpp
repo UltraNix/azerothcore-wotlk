@@ -118,7 +118,7 @@ public:
 
         bool CheckEvadeIfOutOfCombatArea() const
         {
-            return me->IsWithinDist2d(&PatchwerkEvadeArea, 10.0f);
+            return me->IsWithinDist2d(&PatchwerkEvadeArea, 10.0f) || me->GetPositionY() < -3250.00f;
         }
 
         void UpdateAI(uint32 diff)
