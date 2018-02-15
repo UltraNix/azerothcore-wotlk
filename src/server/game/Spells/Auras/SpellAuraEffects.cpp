@@ -6207,29 +6207,6 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
     // allow null caster to call this function
     caster->ProcDamageAndSpell(target, caster ? procAttacker : 0, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo());
-
-    if (caster && !target->IsAlive()) { //Seed of Corruption fix
-        switch (GetId())
-        {
-        case 47836: //Seed of Corruption rank 3
-        {
-            caster->CastSpell(target, 47834, true);
-            break;
-        }
-        case 47835: //Seed of Corruption rank 2
-        {
-            caster->CastSpell(target, 47833, true);
-            break;
-        }
-        case 27243: //Seed of Corruption rank 1
-        {
-            caster->CastSpell(target, 27285, true);
-            break;
-        }
-        default:
-            break;
-        }
-    }
 }
 
 void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) const
