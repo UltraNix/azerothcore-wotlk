@@ -1335,16 +1335,16 @@ struct npc_lunchboxAI : public ScriptedAI
 
 enum Assasination
 {
-    QUEST_ASSASINATION = 11892,
+    QUEST_ASSASINATION     = 11892,
     SPELL_STAMPED_PERIODIC = 46384,
 
-    NPC_HAROLD_LANE = 25804,
-    NPC_STAMPED_MAMMOTH = 25988,
-    NPC_STAMPED_CARRIBOU = 25989,
-    NPC_STAMPED_RHINO = 25990,
+    NPC_HAROLD_LANE        = 25804,
+    NPC_STAMPED_MAMMOTH    = 25988,
+    NPC_STAMPED_CARRIBOU   = 25989,
+    NPC_STAMPED_RHINO      = 25990,
     NPC_STAMPED_EXIT_POINT = 25995,
 
-    SAY_LINE_1 = 1
+    SAY_LINE_1             = 1
 };
 
 const Position StartStamped = { 3283.67f, 5645.19f, 51.12f, 1.18f };
@@ -1363,25 +1363,30 @@ class spell_blow_cenarion_horn : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 Unit* target = GetHitUnit();
 
-                if (!caster || !caster->IsAlive())
+                if (!caster || !target)
                     return;
-                if (caster->ToPlayer() && caster->ToPlayer()->GetQuestStatus(QUEST_ASSASINATION) == QUEST_STATUS_INCOMPLETE)
+
+                if (Player* plr = caster->ToPlayer())
                 {
-                    if (target && target->GetEntry() == NPC_HAROLD_LANE)
+                    if (plr->GetQuestStatus(QUEST_ASSASINATION) == QUEST_STATUS_INCOMPLETE && plr->IsAlive())
                     {
-                        if (target->IsInCombat())
+                        if (Creature* creatureTarget = target->ToCreature())
                         {
-                            for (uint8 i = 0; i < 10; ++i)
+                            if (creatureTarget->GetEntry() == NPC_HAROLD_LANE && creatureTarget->IsInCombat())
                             {
-                                if (Creature* stampedCreature = caster->SummonCreature(RAND(NPC_STAMPED_MAMMOTH, NPC_STAMPED_CARRIBOU, NPC_STAMPED_RHINO),
-                                    StartStamped.GetPositionX() + urand(0.0f, 7.0f), StartStamped.GetPositionY() + urand(0.0f, 7.0f), StartStamped.GetPositionZ(), StartStamped.GetOrientation()))
+                                for (uint8 i = 0; i < 10; ++i)
                                 {
-                                    stampedCreature->SetOrientation(stampedCreature->GetAngle(caster));
-                                    stampedCreature->SendMovementFlagUpdate();
+                                    if (Creature* stampedCreature = caster->SummonCreature(RAND(NPC_STAMPED_MAMMOTH, NPC_STAMPED_CARRIBOU, NPC_STAMPED_RHINO),
+                                        StartStamped.GetPositionX() + urand(0.0f, 7.0f), StartStamped.GetPositionY() + urand(0.0f, 7.0f), StartStamped.GetPositionZ(), StartStamped.GetOrientation()))
+                                    {
+                                        stampedCreature->SetOrientation(stampedCreature->GetAngle(caster));
+                                        stampedCreature->SendMovementFlagUpdate();
+                                    }
                                 }
+
+                                if (creatureTarget->GetAI())
+                                    creatureTarget->AI()->Talk(SAY_LINE_1, caster);
                             }
-                            if (target->ToCreature() && target->GetAI())
-                                target->ToCreature()->AI()->Talk(SAY_LINE_1, caster);
                         }
                     }
                 }
@@ -1408,8 +1413,6 @@ class npc_stamped_creature : public CreatureScript
         {
             npc_stamped_creatureAI(Creature* creature) : ScriptedAI(creature) { }
 
-            bool isStamped;
-
             void Reset() override
             {
                 isStamped = false;
@@ -1428,12 +1431,12 @@ class npc_stamped_creature : public CreatureScript
                 {
                     switch (id)
                     {
-                    case 0:
-                        isStamped = true;
-                        break;
-                    case 1:
-                        me->DespawnOrUnsummon();
-                        break;
+                        case 0:
+                            isStamped = true;
+                            break;
+                        case 1:
+                            me->DespawnOrUnsummon();
+                            break;
                     }
                 }
             }
@@ -1444,13 +1447,11 @@ class npc_stamped_creature : public CreatureScript
                 {
                     isStamped = false;
                     std::list<Creature*> exitsCreatures;
-
                     me->GetCreatureListWithEntryInGrid(exitsCreatures, NPC_STAMPED_EXIT_POINT, 200.0f);
 
                     if (!exitsCreatures.empty())
                     {
-                        Creature* exitPoint = Trinity::Containers::SelectRandomContainerElement(exitsCreatures);
-                        if (exitPoint)
+                        if (Creature* exitPoint = Trinity::Containers::SelectRandomContainerElement(exitsCreatures))
                         {
                             me->GetMotionMaster()->Clear();
                             me->GetMotionMaster()->MovePoint(1, *exitPoint);
@@ -1458,6 +1459,9 @@ class npc_stamped_creature : public CreatureScript
                     }
                 }
             }
+
+            private:
+                bool isStamped;
         };
 
         ScriptedAI* GetAI(Creature* creature) const
