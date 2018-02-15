@@ -528,7 +528,7 @@ class achievement_volunteer_work : public AchievementCriteriaScript
                 return false;
 
             if (Creature* jedoga = target->ToCreature())
-                if (jedoga->IsAIEnabled)
+                if (jedoga->IsAIEnabled && jedoga->GetMap()->IsHeroic())
                     if (jedoga->AI()->GetData(DATA_VOLUNTEER_WORK) == 1)
                         return true;
 
