@@ -92,7 +92,7 @@ struct boss_zuramatAI : public BossAI
 
     void SummonedCreatureDies(Creature* summon, Unit* who) override
     {
-        if (summon->GetEntry() == NPC_VOID_SENTRY)
+        if (summon->GetEntry() == NPC_VOID_SENTRY && summon->IsAIEnabled)
             _voidDance = false;
         BossAI::SummonedCreatureDies(summon, who);
     }
@@ -169,6 +169,13 @@ struct npc_void_sentryAI : public ScriptedAI
     void JustDied(Unit* /*killer*/) override
     {
         DoAction(ACTION_DESPAWN_VOID_SENTRY_BALL);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (InstanceScript* instance = me->GetInstanceScript())
+            if (instance->GetBossState(DATA_ZURAMAT) != IN_PROGRESS)
+                me->DespawnOrUnsummon();
     }
 
     private:
