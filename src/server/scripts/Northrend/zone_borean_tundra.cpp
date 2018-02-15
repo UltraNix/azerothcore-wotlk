@@ -1470,6 +1470,80 @@ class npc_stamped_creature : public CreatureScript
         }
 };
 
+enum LupusPupus
+{
+    SPELL_OIL_COAT = 45948,
+    SPELL_THROW_WOLF_BAIT = 53326,
+    SPELL_SUMMON_WOLF_DROPPINGS = 46075,
+    SPELL_EMOTE_ROAR = 48350
+};
+
+struct npc_oil_stained_wolfAI : public ScriptedAI
+{
+    npc_oil_stained_wolfAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void SetDisableMove(bool apply)
+    {
+        if (apply)
+            me->AddUnitState(UNIT_STATE_ROOT);
+        else
+            me->ClearUnitState(UNIT_STATE_ROOT);
+    }
+
+    void Reset() override
+    {
+        DoCastSelf(SPELL_OIL_COAT, true);
+    }
+
+    void SpellHit(Unit* /*caster*/, const SpellInfo* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_THROW_WOLF_BAIT)
+        {
+            me->setFaction(35);
+            Position pos(*me);
+            me->MovePositionToFirstCollision(pos, 10.0f, Position::RandomOrientation());
+            me->GetMotionMaster()->MovePoint(0, pos);
+        }
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        SetDisableMove(true);
+
+        switch (id)
+        {
+            case 0:
+                DoCastSelf(SPELL_EMOTE_ROAR, true);
+                _scheduler.Schedule(4s, [this](TaskContext /*task*/)
+                {
+                    DoCastSelf(SPELL_SUMMON_WOLF_DROPPINGS);
+                    Position pos(*me);
+                    me->MovePositionToFirstCollision(pos, 15.0f, Position::RandomOrientation());
+                    me->GetMotionMaster()->MovePoint(1, pos);
+                    SetDisableMove(false);
+                });
+                break;
+            case 1:
+                me->DespawnOrUnsummon(5s);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+    private:
+        TaskScheduler _scheduler;
+};
+
+
 void AddSC_borean_tundra()
 {
     // Ours
@@ -1493,4 +1567,5 @@ void AddSC_borean_tundra()
     new npc_hidden_cultist();
     new CreatureAILoader<npc_nedarAI>("npc_nedar");
     new CreatureAILoader<npc_lunchboxAI>("npc_lunchbox");
+    new CreatureAILoader<npc_oil_stained_wolfAI>("npc_oil_stained_wolf");
 }
