@@ -496,6 +496,7 @@ public:
                 case EVENT_ANUB:
                 case EVENT_RAZUVIOUS:
                 case EVENT_GOTHIK:
+                case EVENT_GROBBULUS:
                 // EVENT_HORSEMAN HANDLED BELOW
                     Encounters[id] = data;
                     break;
@@ -866,21 +867,29 @@ public:
 
         void CheckSapphironStatus()
         {
-            // No reason to check encountres again ... orb already spawned.
+            if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                return;
+
+            // No reason to check encountres again, orb already spawned.
             if (sapphironAllowed)
                 return;
 
             uint8 bossCount = 0;
             for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
+            {
                 if (Encounters[i] == DONE)
-                    ++bossCount;
-
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && bossCount == 13)
-                if (GameObject* go = instance->GetGameObject(_naxxramasOrbGUID))
                 {
-                    sapphironAllowed = true;
-                    go->SetPhaseMask(1, true);
+                    if (++bossCount >= 13)
+                    {
+                        if (GameObject* go = instance->GetGameObject(_naxxramasOrbGUID))
+                        {
+                            sapphironAllowed = true;
+                            go->SetPhaseMask(1, true);
+                        }
+                        break;
+                    }
                 }
+            }
         }
 
         std::string GetSaveData()
