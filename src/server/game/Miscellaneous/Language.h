@@ -1174,7 +1174,7 @@ enum TrinityStrings
     LANG_SEND_AUTOINVITE_PL                 = 11033,
     LANG_SEND_AUTOINVITE_EN                 = 11034,
 
-    LANG_POSSIBLE_CHEATER                   = 10500,
+    //                                      = 10500,
     //                                      = 10501,
 
     LANG_ARENA_2V2_ANNOUNCE                 = 10502,

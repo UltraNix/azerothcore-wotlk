@@ -356,8 +356,12 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     if (movementPacket)
     {
-        if (_player && _player->IsInWorld())
-            HandleMovementOpcodes(*movementPacket);
+        if (m_Socket && !m_Socket->IsClosed())
+        {
+            if (_player && _player->IsInWorld())
+                HandleMovementOpcodes(*movementPacket);
+        }
+
         delete movementPacket;
     }
 

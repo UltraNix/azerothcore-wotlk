@@ -333,16 +333,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
     if (!mover || !mover->IsInWorld() || mover->IsDuringRemoveFromWorld() || guid != mover->GetGUID())
         return;
 
-    // sitdev: typical check for invalid orientation movement packets (useed by Leito software aka FPSdropper)
-    float plr_o = movementInfo.pos.GetOrientation(); // Mover orientation
-    float inv_o = -10.0f;                            // Invalid orentation
-    float new_o = rand_norm() * 2 * M_PI;            // Write into packets random orientation to prevent freeze ingame clients
-    if (plrMover && plr_o <= inv_o)
-    {
-        movementInfo.pos.m_orientation = new_o;
-        sWorld->SendGMText(LANG_POSSIBLE_CHEATER, plrMover->GetName().c_str(), plr_o);
-    }
-
     if (!movementInfo.pos.IsPositionValid())
     {
         recvData.rfinish();                     // prevent warnings spam
@@ -505,6 +495,19 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
                 //! https://youtu.be/DSmMvIv1HA0?t=207 as you can see, he is set out of bounds which allows to ressurect
                 //! but keeps falling and falling
                 //plrMover->StopMovingOnCurrentPos(); // pussywizard: moving corpse can't release spirit
+            }
+        }
+
+        // sitowsky: typical check for invalid orientation movement packets (used by Leito software aka FPSdropper)
+        if (sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT))
+        {
+            float plr_o = movementInfo.pos.GetOrientation();   // Mover orientation
+            float inv_o = -5000.0f;                            // Invalid orentation
+
+            if (plr_o <= inv_o)
+            {
+                sLog->outCheat("Possible cheater: %s has invalid orientation: %f", plrMover->GetName().c_str(), plr_o);
+                KickPlayer();
             }
         }
     }
