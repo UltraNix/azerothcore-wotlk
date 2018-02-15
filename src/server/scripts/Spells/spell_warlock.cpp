@@ -847,6 +847,28 @@ class spell_warl_seed_of_corruption : public SpellScriptLoader
         }
 };
 
+// HACK: see https://github.com/TrinityCore/TrinityCore/issues/13441
+// -27243 - Seed of Corruption
+class spell_warl_seed_of_corruption_aura_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_warl_seed_of_corruption_aura_AuraScript)
+
+    void HandleEffectRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetCaster() && GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
+        {
+            auto rank = sSpellMgr->GetSpellRank(aurEff->GetId());
+            auto spellId = sSpellMgr->GetSpellWithRank(27285, rank);
+            GetCaster()->CastSpell(GetTarget(), spellId, true);
+        }
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_warl_seed_of_corruption_aura_AuraScript::HandleEffectRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 // 29858 - Soulshatter
 class spell_warl_soulshatter : public SpellScriptLoader
 {
@@ -1456,6 +1478,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_life_tap();
     new spell_warl_ritual_of_doom_effect();
     new spell_warl_seed_of_corruption();
+    new AuraScriptLoaderEx<spell_warl_seed_of_corruption_aura_AuraScript>("spell_warl_seed_of_corruption_aura");
     new spell_warl_shadow_ward();
     new spell_warl_siphon_life();
     new spell_warl_soulshatter();

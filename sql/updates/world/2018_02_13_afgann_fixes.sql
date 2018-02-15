@@ -19,3 +19,8 @@ UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x20000000 WHERE `ent
 
 -- Kologarn shouldn't parry
 UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00000004 WHERE `entry` IN (32930, 33909);
+
+-- Seed of Corruption
+DELETE FROM `spell_script_names` WHERE `ScriptName`="spell_warl_seed_of_corruption_aura";
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(-27243, "spell_warl_seed_of_corruption_aura");
