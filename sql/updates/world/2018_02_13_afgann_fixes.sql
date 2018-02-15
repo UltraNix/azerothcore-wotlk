@@ -16,3 +16,6 @@ UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x20000000 WHERE `ent
 	26674, -- Darkweb Hatchling
 	31335  -- Darkweb Hatchling (Heroic)
 );
+
+-- Kologarn shouldn't parry
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00000004 WHERE `entry` IN (32930, 33909);
