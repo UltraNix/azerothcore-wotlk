@@ -124,8 +124,8 @@ std::vector<VolunteerPositionPair> const VolunteerSpotPositions =
 
 struct boss_jedoga_shadowseekerAI : public BossAI
 {
-    boss_jedoga_shadowseekerAI(Creature* creature) : BossAI(creature, BOSS_JEDOGA) 
-    { 
+    boss_jedoga_shadowseekerAI(Creature* creature) : BossAI(creature, BOSS_JEDOGA)
+    {
         _preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
     }
 
@@ -370,8 +370,16 @@ struct boss_jedoga_shadowseekerAI : public BossAI
 
                     _selectedVolunteerGUID = Trinity::Containers::SelectRandomContainerElement(_volunteerGUIDS);
                     if (Creature* volunteer = ObjectAccessor::GetCreature(*me, _selectedVolunteerGUID))
+                    {
                         if (volunteer->IsAIEnabled)
                             volunteer->AI()->DoAction(ACTION_CHOSEN);
+                    }
+                    else
+                    {
+                        // In case something went wrong
+                        events.RescheduleEvent(EVENT_END_PHASE_TWO, 3s);
+                    }
+
                     break;
                 case EVENT_SUMMON_VOLUNTEER:
                 {
