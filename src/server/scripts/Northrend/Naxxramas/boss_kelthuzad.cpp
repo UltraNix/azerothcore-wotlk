@@ -416,6 +416,8 @@ public:
                         Talk(SAY_REQUEST_AID);
                         events.DelayEvents(5500);
                         events.ScheduleEvent(EVENT_THIRD_PHASE_LICH_KING_SAY, 5000);
+                        if (pInstance)
+                            pInstance->SetData(DATA_ACTIVATE_KEL_PORTALS, DATA_ACTIVATE_KEL_PORTALS);
                         break;
                     }
                     events.RepeatEvent(1000);

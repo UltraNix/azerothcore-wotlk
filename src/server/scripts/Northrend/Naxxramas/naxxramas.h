@@ -53,7 +53,8 @@ enum NXData
     DATA_HORSEMAN_CHEST                = 123,
     DATA_HORSEMAN_GATE                 = 124,
     DATA_THADDIUS_GATE                 = 125,
-    DATA_PATCHWERK_GATE                = 126
+    DATA_PATCHWERK_GATE                = 126,
+    DATA_ACTIVATE_KEL_PORTALS          = 127
 };
 
 enum NXGOs

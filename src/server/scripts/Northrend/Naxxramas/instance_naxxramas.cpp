@@ -512,9 +512,25 @@ public:
                     Encounters[id] = data;
 
                     for (auto i : kelthuzadPortals)
+                    {
                         if (GameObject* go = instance->GetGameObject(i))
-                            go->SetGoState(data == NOT_STARTED ? GO_STATE_READY : GO_STATE_ACTIVE);
+                        {
+                            if (data == NOT_STARTED)
+                                go->SetGoState(GO_STATE_READY);
+                            else if (data == DONE)
+                                go->SetGoState(GO_STATE_ACTIVE);
+                        }
+                    }
                     break;
+                case DATA_ACTIVATE_KEL_PORTALS:
+                {
+                    for (auto i : kelthuzadPortals)
+                    {
+                        if (GameObject* go = instance->GetGameObject(i))
+                            go->SetGoState(GO_STATE_ACTIVE);
+                    }
+                    break;
+                }
                 case EVENT_FAERLINA:
                     if (data == NOT_STARTED)
                         faerlinaAchievement = true;
