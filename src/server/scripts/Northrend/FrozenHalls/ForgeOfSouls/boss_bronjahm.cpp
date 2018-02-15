@@ -8,7 +8,7 @@
 
 enum BronjahmYells
 {
-    SAY_AGGRO                       = 0,
+    SAY_AGGRO,
     SAY_SLAY,
     SAY_DEATH,
     SAY_SOUL_STORM,
@@ -17,27 +17,27 @@ enum BronjahmYells
 
 enum BronjahmSpells
 {
-    SPELL_SOULSTORM_CHANNEL_OOC     = 69008,
+    SPELL_SOULSTORM_CHANNEL_OOC = 69008,
 
-    SPELL_SHADOW_BOLT               = 70043,
-    SPELL_FEAR                      = 68950,
-    SPELL_MAGICS_BANE               = 68793,
+    SPELL_SHADOW_BOLT           = 70043,
+    SPELL_FEAR                  = 68950,
+    SPELL_MAGICS_BANE           = 68793,
 
-    SPELL_CORRUPT_SOUL              = 68839,
-    SPELL_KNOCK_DOWN                = 68848,
-    SPELL_CONSUME_SOUL              = 68861,
-    SPELL_PURPLE_BANISH_VISUAL      = 68862,  // Used by Soul Fragment (Aura)
+    SPELL_CORRUPT_SOUL          = 68839,
+    SPELL_KNOCK_DOWN            = 68848,
+    SPELL_CONSUME_SOUL          = 68861,
+    SPELL_PURPLE_BANISH_VISUAL  = 68862,  // Used by Soul Fragment (Aura)
 
-    SPELL_TELEPORT                  = 68988,
-    SPELL_TELEPORT_VISUAL           = 52096,
+    SPELL_TELEPORT              = 68988,
+    SPELL_TELEPORT_VISUAL       = 52096,
 
-    SPELL_SOULSTORM_VISUAL          = 68870,
-    SPELL_SOULSTORM                 = 68872
+    SPELL_SOULSTORM_VISUAL      = 68870,
+    SPELL_SOULSTORM             = 68872
 };
 
 enum BronjahmEvents
 {
-    EVENT_FEAR                      = 1,
+    EVENT_FEAR = 1,
     EVENT_MAGICS_BANE,
     EVENT_CORRUPT_SOUL,
     EVENT_START_SOULSTORM,
@@ -207,27 +207,42 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
         if (Creature* bronjahm = _instance->GetCreature(DATA_BRONJAHM))
             if (bronjahm->IsAIEnabled)
                 bronjahm->AI()->JustSummoned(me);
+
+        _scheduler.Schedule(1s, [this](TaskContext task)
+        {
+            if (!me->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+                if (Creature* bronjahm = _instance->GetCreature(DATA_BRONJAHM))
+                    me->GetMotionMaster()->MovePoint(0, *bronjahm);
+
+            task.Repeat();
+        });
     }
 
-    void MovementInform(uint32 type, uint32 id) override
+    void UpdateAI(uint32 diff)
     {
+        if (!_instance)
+            return;
+
         if (_casted)
             return;
 
-        if (type != FOLLOW_MOTION_TYPE)
-            return;
+        _scheduler.Update(diff);
 
-        if (_instance->GetCreature(DATA_BRONJAHM)->GetGUIDLow() != id)
-            return;
-
-        DoCastAOE(SPELL_CONSUME_SOUL, true);
-        _casted = true;
-        me->DespawnOrUnsummon();
+        if (Creature* bronjahm = _instance->GetCreature(DATA_BRONJAHM))
+        {
+            if (me->IsInRange(bronjahm, 0.0f, 2.0f))
+            {
+                DoCastAOE(SPELL_CONSUME_SOUL, true);
+                _casted = true;
+                me->DespawnOrUnsummon();
+            }
+        }
     }
 
     private:
         InstanceScript* _instance;
         bool _casted;
+        TaskScheduler _scheduler;
 };
 
 
@@ -275,7 +290,7 @@ class spell_bronjahm_soulstorm_visual_AuraScript : public AuraScript
 {
     PrepareAuraScript(spell_bronjahm_soulstorm_visual_AuraScript)
 
-        void HandlePeriodicTick(AuraEffect const* aurEff)
+    void HandlePeriodicTick(AuraEffect const* aurEff)
     {
         PreventDefaultAction();
         uint32 spellId = 0;
@@ -338,15 +353,15 @@ class spell_bronjahm_corrupt_soul_AuraScript : public AuraScript
 
 class achievement_bronjahm_soul_power : public AchievementCriteriaScript
 {
-public:
-    achievement_bronjahm_soul_power() : AchievementCriteriaScript("achievement_bronjahm_soul_power") { }
+    public:
+        achievement_bronjahm_soul_power() : AchievementCriteriaScript("achievement_bronjahm_soul_power") { }
 
-    bool OnCheck(Player* /*source*/, Unit* target) override
-    {
-        if (target && target->ToUnit() && target->ToUnit()->IsAIEnabled && target->GetMap()->IsHeroic())
-            return target->GetAI()->GetData(DATA_SOUL_POWER) >= 4;
-        return false;
-    }
+        bool OnCheck(Player* /*source*/, Unit* target) override
+        {
+            if (target && target->ToUnit() && target->ToUnit()->IsAIEnabled && target->GetMap()->IsHeroic())
+                return target->GetAI()->GetData(DATA_SOUL_POWER) >= 4;
+            return false;
+        }
 };
 
 void AddSC_boss_bronjahm()
