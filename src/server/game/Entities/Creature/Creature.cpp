@@ -886,6 +886,9 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
             break;
     }
 
+    if (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS && map->IsDungeon())
+        m_corpseDelay = std::numeric_limits<uint32>::max();
+
     LoadCreaturesAddon();
 
     uint32 displayID = GetNativeDisplayId();
@@ -2520,23 +2523,20 @@ void Creature::AllLootRemovedFromCorpse()
 {
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
-        time_t now = time(nullptr);
+        time_t now = sWorld->GetGameTime();
         if (m_corpseRemoveTime <= now)
             return;
 
-        float decayRate;
+        float decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
         CreatureTemplate const* cinfo = GetCreatureTemplate();
-
-        decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
-        uint32 diff = uint32((m_corpseRemoveTime - now) * decayRate);
-
-        m_respawnTime -= diff;
 
         // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
         if (cinfo && cinfo->SkinLootId)
-            m_corpseRemoveTime = time(nullptr);
+            m_corpseRemoveTime = time(NULL);
         else
-            m_corpseRemoveTime -= diff;
+            m_corpseRemoveTime = now + m_corpseDelay * decayRate;
+
+        m_corpseRemoveTime = now + uint32(m_corpseDelay * decayRate);
     }
 }
 
