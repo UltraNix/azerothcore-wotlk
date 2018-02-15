@@ -250,58 +250,6 @@ Position const DefaultPortalWPs[] =
     { 1843.567017f, 804.288208f, 44.139091f }
 };
 
-Movement::PointsArray SaboteurMoraggPath = // sniff
-{
-    { 1886.251f, 803.0743f, 38.42326f },
-    { 1885.71f,  799.8929f, 38.37241f },
-    { 1887.949f, 777.5015f, 38.60480f },
-    { 1889.505f, 762.3288f, 47.66684f },
-    { 1894.542f, 742.1829f, 47.66684f },
-    { 1894.603f, 739.9231f, 47.66684f },
-};
-
-Movement::PointsArray SaboteurErekemPath = // sniff
-{
-    { 1886.251f, 803.0743f, 38.42326f },
-    { 1881.047f, 829.6866f, 38.64856f },
-    { 1878.803f, 841.6255f, 43.33362f },
-    { 1876.085f, 851.6685f, 42.99014f },
-    { 1873.747f, 864.1373f, 43.33349f }
-};
-
-Movement::PointsArray SaboteurIchoronPath = // sniff
-{
-    { 1886.251f, 803.0743f, 38.42326f },
-    { 1888.672f, 801.2348f, 38.42305f },
-    { 1901.987f, 793.3254f, 38.65126f }
-};
-
-Movement::PointsArray SaboteurLavanthorPath = // sniff
-{
-    { 1886.251f, 803.0743f, 38.42326f },
-    { 1867.925f, 778.8035f, 38.64702f },
-    { 1853.304f, 759.0161f, 38.65761f }
-};
-
-Movement::PointsArray SaboteurXevozzPath = // sniff
-{
-    { 1886.251f, 803.0743f, 38.42326f },
-    { 1889.096f, 810.0487f, 38.43871f },
-    { 1896.547f, 823.5473f, 38.72863f },
-    { 1906.666f, 842.3111f, 38.63351f }
-};
-
-Movement::PointsArray SaboteurZuramatPath = // sniff
-{
-    { 1886.251f, 803.0743f, 38.42326f },
-    { 1889.69f,  807.0032f, 38.39914f },
-    { 1906.91f,  818.2574f, 38.86596f },
-    { 1929.03f,  824.2713f, 46.09165f },
-    { 1928.441f, 842.8891f, 47.15078f },
-    { 1927.454f, 851.6091f, 47.19094f },
-    { 1927.947f, 852.2986f, 47.19637f }
-};
-
 Position const SinclariPositions[] = // sniff
 {
     { 1829.142f, 798.219f,  44.36212f, 0.122173f }, // 0 - Crystal
@@ -531,22 +479,22 @@ struct npc_azure_saboteurAI : public ScriptedAI
         switch (_bossId)
         {
             case DATA_MORAGG:
-                StartPath(SaboteurMoraggPath);
+                me->GetMotionMaster()->MovePoint(0, { 1894.603f, 739.9231f, 47.66684f });
                 break;
             case DATA_EREKEM:
-                StartPath(SaboteurErekemPath);
+                me->GetMotionMaster()->MovePoint(0, { 1873.747f, 864.1373f, 43.33349f });
                 break;
             case DATA_ICHORON:
-                StartPath(SaboteurIchoronPath);
+                me->GetMotionMaster()->MovePoint(0, { 1901.987f, 793.3254f, 38.65126f });
                 break;
             case DATA_LAVANTHOR:
-                StartPath(SaboteurLavanthorPath);
+                me->GetMotionMaster()->MovePoint(0, { 1853.304f, 759.0161f, 38.65761f });
                 break;
             case DATA_XEVOZZ:
-                StartPath(SaboteurXevozzPath);
+                me->GetMotionMaster()->MovePoint(0, { 1906.666f, 842.3111f, 38.63351f });
                 break;
             case DATA_ZURAMAT:
-                StartPath(SaboteurZuramatPath);
+                me->GetMotionMaster()->MovePoint(0, { 1927.947f, 852.2986f, 47.19637f });
                 break;
         }
     }
@@ -562,7 +510,7 @@ struct npc_azure_saboteurAI : public ScriptedAI
 
     void MovementInform(uint32 type, uint32 pointId) override
     {
-        if (me->movespline->Finalized())
+        if (type == POINT_MOTION_TYPE && pointId == 0)
         {
             _scheduler.Schedule(0s, [this](TaskContext task)
             {

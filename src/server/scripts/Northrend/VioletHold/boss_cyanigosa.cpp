@@ -125,6 +125,9 @@ class achievement_defenseless : public AchievementCriteriaScript
             if (!instance)
                 return false;
 
+            if (!instance->instance->IsHeroic())
+                return false;
+
             return instance->GetData(DATA_DEFENSELESS) != 0;
         }
 };

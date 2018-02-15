@@ -193,7 +193,7 @@ class achievement_void_dance : public AchievementCriteriaScript
                 return false;
 
             if (Creature* Zuramat = target->ToCreature())
-                if (Zuramat->IsAIEnabled && Zuramat->AI()->GetData(DATA_VOID_DANCE))
+                if (Zuramat->IsAIEnabled && Zuramat->AI()->GetData(DATA_VOID_DANCE) && Zuramat->GetMap()->IsHeroic())
                     return true;
 
             return false;

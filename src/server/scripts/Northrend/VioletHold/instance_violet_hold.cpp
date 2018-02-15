@@ -63,64 +63,6 @@ Position const PortalIntroPositions[PortalIntroPositionsSize] = // sniff
 
 uint32 const EncouterPortalsCount = PortalPositionsSize + PortalElitePositionsSize;
 
-Movement::PointsArray MoraggPath = // sniff
-{
-    { 1893.895f, 728.1261f, 47.75016f },
-    { 1892.997f, 738.4987f, 47.66684f },
-    { 1889.76f,  758.1089f, 47.66684f }
-};
-
-Movement::PointsArray ErekemPath = // sniff
-{
-    { 1871.456f, 871.0361f, 43.41524f },
-    { 1874.948f, 859.5452f, 43.33349f },
-    { 1877.245f, 851.967f,  43.3335f  }
-};
-
-Movement::PointsArray ErekemGuardLeftPath = // sniff
-{
-    { 1853.752f, 862.4528f, 43.41614f },
-    { 1866.931f, 854.577f,  43.3335f  },
-    { 1872.973f, 850.7875f, 43.3335f  }
-};
-
-Movement::PointsArray ErekemGuardRightPath = // sniff
-{
-    { 1892.418f, 872.2831f, 43.41563f },
-    { 1885.639f, 859.0245f, 43.3335f  },
-    { 1882.432f, 852.2423f, 43.3335f  }
-};
-
-Movement::PointsArray IchoronPath = // sniff
-{
-    { 1942.041f, 749.5228f, 30.95229f },
-    { 1930.571f, 762.9065f, 31.98814f },
-    { 1923.657f, 770.6718f, 34.07256f },
-    { 1910.631f, 784.4096f, 37.09015f },
-    { 1906.595f, 788.3828f, 37.99429f }
-};
-
-Movement::PointsArray LavanthorPath = // sniff
-{
-    { 1844.557f, 748.7083f, 38.74205f },
-    { 1854.618f, 761.5295f, 38.65631f },
-    { 1862.17f,  773.2255f, 38.74879f }
-};
-
-Movement::PointsArray XevozzPath = // sniff
-{
-    { 1908.417f, 845.8502f, 38.71947f },
-    { 1905.557f, 841.3157f, 38.65529f },
-    { 1899.453f, 832.533f,  38.70752f }
-};
-
-Movement::PointsArray ZuramatPath = // sniff
-{
-    { 1934.151f, 860.9463f, 47.29499f },
-    { 1927.085f, 852.1342f, 47.19214f },
-    { 1923.226f, 847.3297f, 47.15541f }
-};
-
 enum Yells
 {
     SAY_CYANIGOSA_SPAWN                         = 3,
@@ -492,7 +434,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                     task.Schedule(3s, [this](TaskContext task)
                     {
                         if (Creature* moragg = GetCreature(DATA_MORAGG))
-                            moragg->GetMotionMaster()->MoveSplinePath(&MoraggPath);
+                            moragg->GetMotionMaster()->MovePoint(0, { 1889.76f,  758.1089f, 47.66684f });
 
                         task.Schedule(14s, [this](TaskContext /*task*/)
                         {
@@ -514,12 +456,12 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                     task.Schedule(5s, [this](TaskContext task)
                     {
                         if (Creature* erekem = GetCreature(DATA_EREKEM))
-                            erekem->GetMotionMaster()->MoveSplinePath(&ErekemPath);
+                            erekem->GetMotionMaster()->MovePoint(0, { 1877.245f, 851.967f,  43.3335f });
 
                         if (Creature* guard = instance->GetCreature(ErekemGuardGUIDs[0]))
-                            guard->GetMotionMaster()->MoveSplinePath(&ErekemGuardLeftPath);
+                            guard->GetMotionMaster()->MovePoint(0, { 1872.973f, 850.7875f, 43.3335f });
                         if (Creature* guard = instance->GetCreature(ErekemGuardGUIDs[1]))
-                            guard->GetMotionMaster()->MoveSplinePath(&ErekemGuardRightPath);
+                            guard->GetMotionMaster()->MovePoint(0, { 1882.432f, 852.2423f, 43.3335f });
 
                         task.Schedule(10s, [this](TaskContext task)
                         {
@@ -552,7 +494,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                     task.Schedule(3s, [this](TaskContext task)
                     {
                         if (Creature* ichoron = GetCreature(DATA_ICHORON))
-                            ichoron->GetMotionMaster()->MoveSplinePath(&IchoronPath);
+                            ichoron->GetMotionMaster()->MovePoint(0, { 1906.595f, 788.3828f, 37.99429f });
 
                         task.Schedule(20s, [this](TaskContext /*task*/)
                         {
@@ -574,7 +516,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                     task.Schedule(3s, [this](TaskContext task)
                     {
                         if (Creature* lavanthor = GetCreature(DATA_LAVANTHOR))
-                            lavanthor->GetMotionMaster()->MoveSplinePath(&LavanthorPath);
+                            lavanthor->GetMotionMaster()->MovePoint(0, { 1862.17f,  773.2255f, 38.74879f });
 
                         task.Schedule(12s, [this](TaskContext /*task*/)
                         {
@@ -601,7 +543,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                         task.Schedule(4s, [this](TaskContext task)
                         {
                             if (Creature* xevozz = GetCreature(DATA_XEVOZZ))
-                                xevozz->GetMotionMaster()->MoveSplinePath(&XevozzPath);
+                                xevozz->GetMotionMaster()->MovePoint(0, { 1899.453f, 832.533f,  38.70752f });
 
                             task.Schedule(8s, [this](TaskContext /*task*/)
                             {
@@ -627,7 +569,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
                     task.Schedule(6s, [this](TaskContext task)
                     {
                         if (Creature* zuramat = GetCreature(DATA_ZURAMAT))
-                            zuramat->GetMotionMaster()->MoveSplinePath(&ZuramatPath);
+                            zuramat->GetMotionMaster()->MovePoint(0, { 1923.226f, 847.3297f, 47.15541f });
 
                         task.Schedule(8s, [this](TaskContext /*task*/)
                         {
