@@ -424,7 +424,7 @@ class achievement_dehydration : public AchievementCriteriaScript
 
             if (Creature* Ichoron = target->ToCreature())
                 if (Ichoron->IsAIEnabled)
-                    if (Ichoron->AI()->GetData(DATA_DEHYDRATION))
+                    if (Ichoron->AI()->GetData(DATA_DEHYDRATION) && Ichoron->GetMap()->IsHeroic())
                         return true;
 
             return false;
