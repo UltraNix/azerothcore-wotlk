@@ -5291,6 +5291,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->Effect[1] = 0;
             spellInfo->Effect[2] = 0;
             break;
+        // Flame Sphere Periodic
+        case 55926:
+            spellInfo->EffectAmplitude[EFFECT_0] = 750;
+            break;
 
         //////////////////////////////////////////
         ////////// DRAK'THARON KEEP
