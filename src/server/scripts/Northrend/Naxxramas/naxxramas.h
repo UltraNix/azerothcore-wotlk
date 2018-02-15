@@ -97,7 +97,13 @@ enum NXGOs
     GO_THADDIUS_ENTRANCE               = 181213,
     GO_MEXANNA_ENTRANCE                = 181212,
     GO_HORSEMAN_ENTRANCE               = 181210,
-    GO_LOATHEB_ENTRANCE                = 181211
+    GO_LOATHEB_ENTRANCE                = 181211,
+
+    //! Kelthuzad portals
+    GO_KELTHUZAD_PORTAL_1              = 181402,
+    GO_KELTHUZAD_PORTAL_2              = 181403,
+    GO_KELTHUZAD_PORTAL_3              = 181404,
+    GO_KELTHUZAD_PORTAL_4              = 181405
 };
 
 enum NXNPCs

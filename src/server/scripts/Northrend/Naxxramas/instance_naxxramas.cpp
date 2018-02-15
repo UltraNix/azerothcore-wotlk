@@ -107,6 +107,7 @@ public:
             heiganAchievement    = true;
             sapphironAllowed     = false;
             immortalAchievement  = 1;
+            kelthuzadPortals.clear();
         }
 
         uint32 Encounters[MAX_ENCOUNTERS];
@@ -147,6 +148,7 @@ public:
         uint64 _goMexannaEntrance;
         uint64 _goHorsemanEntrance;
         uint64 _goLoathebEntrance;
+        std::vector<uint64> kelthuzadPortals;
 
         // NPCs
         uint64 _thaddiusGUID;
@@ -406,6 +408,12 @@ public:
                         pGo->SetGoState(GO_STATE_ACTIVE);
                     _goLoathebEntrance = pGo->GetGUID();
                     break;
+                case GO_KELTHUZAD_PORTAL_1:
+                case GO_KELTHUZAD_PORTAL_2:
+                case GO_KELTHUZAD_PORTAL_3:
+                case GO_KELTHUZAD_PORTAL_4:
+                    kelthuzadPortals.push_back(pGo->GetGUID());
+                    break;
             }
 
         }
@@ -502,6 +510,10 @@ public:
                     if (data == NOT_STARTED)
                         abominationsKilled = 0;
                     Encounters[id] = data;
+
+                    for (auto i : kelthuzadPortals)
+                        if (GameObject* go = instance->GetGameObject(i))
+                            go->SetGoState(data == NOT_STARTED ? GO_STATE_READY : GO_STATE_ACTIVE);
                     break;
                 case EVENT_FAERLINA:
                     if (data == NOT_STARTED)
