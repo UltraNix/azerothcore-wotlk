@@ -403,7 +403,7 @@ m_spellInfo(spellproto), m_casterGuid(casterGUID ? casterGUID : caster->GetGUID(
 m_castItemGuid(castItem ? castItem->GetGUID() : 0), m_applyTime(time(nullptr)),
 m_owner(owner), m_timeCla(0), m_updateTargetMapInterval(0),
 m_casterLevel(caster ? caster->getLevel() : m_spellInfo->SpellLevel), m_procCharges(0), m_stackAmount(1),
-m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
+m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false), m_isSpellStolen(false)
 {
     if ((m_spellInfo->ManaPerSecond || m_spellInfo->ManaPerSecondPerLevel) && !m_spellInfo->HasAttribute(SPELL_ATTR2_HEALTH_FUNNEL))
         m_timeCla = 1 * IN_MILLISECONDS;

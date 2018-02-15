@@ -7930,6 +7930,16 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     UpdateLocalChannels(newZone);
 
     UpdateZoneDependentAuras(newZone);
+
+    Unit::AuraMap& ownedAuras = GetOwnedAuras();
+    for (auto && aura : ownedAuras)
+    {
+        if (aura.second->IsRemoved())
+            continue;
+
+        if (aura.second->IsSpellStolen())
+            aura.second->Remove();
+    }
 }
 
 //If players are too far away from the duel flag... they lose the duel

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -172,6 +172,8 @@ class Aura
         void SetIsSingleTarget(bool val) { m_isSingleTarget = val; }
         void UnregisterSingleTarget();
         int32 CalcDispelChance(Unit* auraTarget, bool offensive) const;
+        bool IsSpellStolen() const { return m_isSpellStolen; }
+        void SetIsSpellStolen() { m_isSpellStolen = true; }
 
         void SetLoadedState(int32 maxduration, int32 duration, int32 charges, uint8 stackamount, uint8 recalculateMask, int32 * amount);
 
@@ -266,6 +268,7 @@ class Aura
         bool m_isRemoved:1;
         bool m_isSingleTarget:1;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
         bool m_isUsingCharges:1;
+        bool m_isSpellStolen:1;
 
     private:
         Unit::AuraApplicationList m_removedApplications;

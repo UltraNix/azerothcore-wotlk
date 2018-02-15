@@ -4405,6 +4405,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit*
                         // FIXME: using aura->GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
                         newAura->SetLoadedState(aura->GetMaxDuration(), int32(dur), stealCharge ? 1 : aura->GetCharges(), 1, recalculateMask, &damage[0]);
                         newAura->ApplyForTargets();
+                        newAura->SetIsSpellStolen();
                     }
             }
 
@@ -4413,6 +4414,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit*
             else
                 aura->ModStackAmount(-1, AURA_REMOVE_BY_ENEMY_SPELL);
 
+            aura->SetIsSpellStolen();
             return;
         }
         else
