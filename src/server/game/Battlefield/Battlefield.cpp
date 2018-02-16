@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -78,7 +78,7 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
     // Xinef: do not invite players on taxi
     if (!player->IsInFlight())
     {
-        // If battle is started, 
+        // If battle is started,
         // If not full of players > invite player to join the war
         // If full of players > invite player to join the war if his faction has less players than the other one
         if (IsWarTime())
@@ -90,7 +90,7 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
                 InvitePlayerToQueue(pl);
             };
 
-            if (GetPlayerCountInWar(player->GetTeamId()) + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer) 
+            if (GetPlayerCountInWar(player->GetTeamId()) + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
                 InvitePlayerToWar(player);
             else
             {
@@ -275,6 +275,9 @@ void Battlefield::InvitePlayersInZoneToWar()
         {
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
+                if (player->IsInFlight())
+                    continue;
+
                 if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()))
                     continue;
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
@@ -339,7 +342,7 @@ void Battlefield::KickPlayerFromBattlefield(uint64 guid)
 {
     if (Player* player = ObjectAccessor::FindPlayer(guid))
     {
-        if (player->GetZoneId() == GetZoneId() && !player->IsGameMaster())
+        if (player->GetZoneId() == GetZoneId() && !player->IsGameMaster() /*&& !player->IsInFlight()*/)
             player->TeleportTo(KickPosition);
     }
 }
@@ -894,9 +897,9 @@ GuidSet::iterator BfCapturePoint::HandlePlayerLeave(Player* player)
 {
     if (GameObject* go = GetCapturePointGo(player))
         player->SendUpdateWorldState(go->GetGOInfo()->capturePoint.worldState1, 0);
-    
+
     GuidSet::iterator current = m_activePlayers[player->GetTeamId()].find(player->GetGUID());
-    
+
     if (current == m_activePlayers[player->GetTeamId()].end())
         return current; // return end()
 
