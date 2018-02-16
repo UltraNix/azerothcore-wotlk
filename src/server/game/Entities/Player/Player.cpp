@@ -7859,6 +7859,17 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
         if (Guild* guild = GetGuild())
             guild->UpdateMemberData(this, GUILD_MEMBER_DATA_ZONEID, newZone);
+
+        //! remove spellstolen auras on zone change
+        Unit::AuraMap& ownedAuras = GetOwnedAuras();
+        for (auto && aura : ownedAuras)
+        {
+            if (aura.second->IsRemoved())
+                continue;
+
+            if (aura.second->IsSpellStolen())
+                aura.second->Remove();
+        }
     }
 
     // group update
@@ -7930,16 +7941,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     UpdateLocalChannels(newZone);
 
     UpdateZoneDependentAuras(newZone);
-
-    Unit::AuraMap& ownedAuras = GetOwnedAuras();
-    for (auto && aura : ownedAuras)
-    {
-        if (aura.second->IsRemoved())
-            continue;
-
-        if (aura.second->IsSpellStolen())
-            aura.second->Remove();
-    }
 }
 
 //If players are too far away from the duel flag... they lose the duel
