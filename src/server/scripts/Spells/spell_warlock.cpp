@@ -54,7 +54,8 @@ enum WarlockSpells
     SPELL_WARLOCK_LIFE_TAP_ENERGIZE_2               = 32553,
     SPELL_WARLOCK_SOULSHATTER                       = 32835,
     SPELL_WARLOCK_SIPHON_LIFE_HEAL                  = 63106,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
+    SPELL_WARLOCK_CHAOS_BOLT                        = 59172
 };
 
 enum WarlockSpellIcons
@@ -1449,6 +1450,27 @@ public:
     }
 };
 
+class spell_chaos_bolt_damage_hack_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_chaos_bolt_damage_hack_SpellScript);
+
+    bool Validate(const SpellInfo* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_WARLOCK_CHAOS_BOLT });
+    }
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
+            SetHitDamage(GetHitDamage() * 0.9f);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_chaos_bolt_damage_hack_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     // Ours
@@ -1462,6 +1484,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_generic_scaling();
     new spell_warl_infernal_scaling();
     new spell_wrl_fire_bolt();
+    new SpellScriptLoaderEx<spell_chaos_bolt_damage_hack_SpellScript>("spell_chaos_bolt_damage_hack");
 
     // Theirs
     new spell_warl_banish();

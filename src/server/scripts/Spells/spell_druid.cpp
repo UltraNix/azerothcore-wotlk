@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -41,6 +41,7 @@ enum DruidSpells
     SPELL_DRUID_BARKSKIN                    = 22812,
     SPELL_DRUID_GLYPH_OF_BARKSKIN            = 63057,
     SPELL_DRUID_GLYPH_OF_BARKSKIN_TRIGGER    = 63058,
+    SPELL_FEROCIOUS_BITE_DRUID               = 48577,
 
 
     // Theirs
@@ -644,7 +645,7 @@ class spell_dru_lifebloom : public SpellScriptLoader
                             // healing with bonus
                             healAmount = caster->SpellHealingBonusDone(target, finalHeal, healAmount, HEAL, 0.0f, dispelInfo->GetRemovedCharges());
                             healAmount = target->SpellHealingBonusTaken(caster, finalHeal, healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                            
+
                             // mana amount
                             int32 mana = CalculatePct(caster->GetCreateMana(), GetSpellInfo()->ManaCostPercentage) * dispelInfo->GetRemovedCharges() / 2;
                             caster->CastCustomSpell(caster, SPELL_DRUID_LIFEBLOOM_ENERGIZE, &mana, NULL, NULL, true, NULL, NULL, GetCasterGUID());
@@ -1376,6 +1377,27 @@ class spell_dru_wild_growth : public SpellScriptLoader
         }
 };
 
+class spell_ferocious_bite_damage_hack_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_ferocious_bite_damage_hack_SpellScript);
+
+    bool Validate(const SpellInfo* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_FEROCIOUS_BITE_DRUID });
+    }
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
+            SetHitDamage(GetHitDamage() * 0.9f);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ferocious_bite_damage_hack_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     // Ours
@@ -1386,6 +1408,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_brambles_treant();
     new spell_dru_barkskin();
     new spell_dru_treant_scaling();
+    new SpellScriptLoaderEx<spell_ferocious_bite_damage_hack_SpellScript>("spell_ferocious_bite_damage_hack");
 
     // Theirs
     new spell_dru_dash();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,6 +40,7 @@ enum DeathKnightSpells
     SPELL_SHADOWMOURNE_CHAOS_BANE_DAMAGE        = 71904,
     SPELL_SHADOWMOURNE_SOUL_FRAGMENT            = 71905,
     SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF          = 73422,
+    SPELL_GARGOYLE_STRIKE                       = 51963,
 
     // Theirs
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT            = 51052,
@@ -593,7 +594,7 @@ class spell_dk_wandering_plague_aura : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-                
+
                 eventInfo.GetActor()->AddSpellCooldown(SPELL_DK_WANDERING_PLAGUE_TRIGGER, 0, 1000);
                 eventInfo.GetActor()->CastCustomSpell(SPELL_DK_WANDERING_PLAGUE_TRIGGER, SPELLVALUE_BASE_POINT0, CalculatePct<int32, int32>(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()), eventInfo.GetActionTarget(), TRIGGERED_FULL_MASK);
             }
@@ -648,7 +649,7 @@ class spell_dk_bone_shield : public SpellScriptLoader
         class spell_dk_bone_shield_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_dk_bone_shield_AuraScript);
-            
+
             void HandleProc(ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
@@ -773,7 +774,7 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                 // Death Coil exception, Check if spell is from spellbook
                 if (spellInfo->Id != SPELL_DK_DEATH_COIL_DAMAGE && !eventInfo.GetActor()->ToPlayer()->HasActiveSpell(spellInfo->Id))
                     return false;
-                
+
                 // Can't cast raise dead/ally, death grip, dark command, death pact, death and decay, anti-magic shell
                 if (spellInfo->SpellFamilyFlags.HasFlag(0x20A1220, 0x10000000, 0x0))
                     return false;
@@ -806,7 +807,7 @@ class spell_dk_dancing_rune_weapon : public SpellScriptLoader
                         dancingRuneWeapon = *itr;
                         break;
                     }
-                
+
                 if (!dancingRuneWeapon)
                     return;
 
@@ -1001,7 +1002,7 @@ class spell_dk_pet_scaling : public SpellScriptLoader
                 isPeriodic = true;
                 amplitude = 2*IN_MILLISECONDS;
             }
-            
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
@@ -2626,6 +2627,28 @@ public:
     }
 };
 
+//! dont judge me, just doing shit requested by someone above me
+class spell_ebon_gargoyle_strike_hack_requested_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_ebon_gargoyle_strike_hack_requested_SpellScript);
+
+    bool Validate(const SpellInfo* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_GARGOYLE_STRIKE });
+    }
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
+            SetHitDamage(GetHitDamage() * 0.8f);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ebon_gargoyle_strike_hack_requested_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     // Ours
@@ -2648,6 +2671,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_dancing_rune_weapon_visual();
     new spell_dk_scent_of_blood_trigger();
     new spell_dk_pet_scaling();
+    new SpellScriptLoaderEx<spell_ebon_gargoyle_strike_hack_requested_SpellScript>("spell_ebon_gargoyle_strike_hack_requested");
 
     // Theirs
     new spell_dk_anti_magic_shell_raid();
