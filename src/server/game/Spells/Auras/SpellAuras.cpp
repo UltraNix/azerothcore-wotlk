@@ -1022,6 +1022,9 @@ bool Aura::IsDeathPersistent() const
 
 bool Aura::CanBeSaved() const
 {
+    if (IsSpellStolen())
+        return false;
+
     if (IsPassive() || (GetSpellInfo()->HasAttribute(SPELL_ATTR0_HIDDEN_CLIENTSIDE) && GetSpellInfo()->Stances))
         return false;
 
