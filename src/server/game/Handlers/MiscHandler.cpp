@@ -848,7 +848,11 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
             return;
 
         if (Group* group = player->GetGroup())
-            if (group->isLFGGroup() && player->GetMap()->IsDungeon())
+            //! teleport player to entry point if player is in dungeon group and is alive
+            //! alive check is important, because in cases like Oculus, when you're falling into the void
+            //! you're hitting exit areatrigger which teleports you to entry location
+            //! so you're dead in completely different location while your corpse is next to oculus entrance
+            if (group->isLFGGroup() && player->GetMap()->IsDungeon() && player->IsAlive())
                 teleported = player->TeleportToEntryPoint();
     }
 
