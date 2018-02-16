@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -433,7 +433,7 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
     // Update portal defender faction
     for (GameObjectSet::const_iterator itr = DefenderPortalList.begin(); itr != DefenderPortalList.end(); ++itr)
         (*itr)->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
-        
+
     // Saving data
     for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
     {
@@ -480,7 +480,7 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
         {
             // Victory in Wintergrasp
             player->AreaExploredOrEventHappens(GetDefenderTeam() ? 13183 : 13181); // HORDE / ALLY win wg quest id
-            
+
             player->CastSpell(player, SPELL_ESSENCE_OF_WINTERGRASP, true);
             player->CastSpell(player, SPELL_VICTORY_REWARD, true);
             RemoveAurasFromPlayer(player);
@@ -935,18 +935,26 @@ uint32 BattlefieldWG::GetData(uint32 data) const
 
 void BattlefieldWG::SendReminder(uint8 minutes)
 {
-    if (m_Timer < (minutes * MINUTE - 10) * IN_MILLISECONDS) 
+    if (m_Timer < (minutes * MINUTE - 10) * IN_MILLISECONDS)
         return;
     if (sWorld->getIntConfig(CONFIG_WINTERGRASP_REMINDER) & 1)
     {
         std::ostringstream oss;
-        oss << "|cffff0000Wintergrasp starts in " << std::to_string(minutes) << " minutes! Prepare yourself and fight for the Horde! Takeover Vault of Archavon!|r";
+        oss << "|cffff0000Wintergrasp starts in " << std::to_string(minutes) << " minutes! Prepare yourself and fight for the Horde! ";
+        if (GetDefenderTeam() == TEAM_HORDE)
+            oss << "Defend Vault of Archavon!|r";
+        else
+            oss << "Take control over Vault of Archavon!|r";
         sWorld->SendServerMessage(SERVER_MSG_STRING, oss.str().c_str(), nullptr, TEAM_HORDE);
     }
     if (sWorld->getIntConfig(CONFIG_WINTERGRASP_REMINDER) & 2)
     {
         std::ostringstream oss;
-        oss << "|cffff0000Wintergrasp starts in " << std::to_string(minutes) << " minutes! Prepare yourself and fight for the Alliance! Takeover Vault of Archavon!|r";
+        oss << "|cffff0000Wintergrasp starts in " << std::to_string(minutes) << " minutes! Prepare yourself and fight for the Alliance! ";
+        if (GetDefenderTeam() == TEAM_ALLIANCE)
+            oss << "Defend Vault of Archavon!|r";
+        else
+            oss << "Take control over Vault of Archavon!|r";
         sWorld->SendServerMessage(SERVER_MSG_STRING, oss.str().c_str(), nullptr, TEAM_ALLIANCE);
     }
 }
@@ -981,15 +989,15 @@ void BattlefieldWG::FillInitialWorldStates(WorldPacket& data)
 void BattlefieldWG::SendInitWorldStatesTo(Player* player)
 {
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4 + 4 + 4 + 2 + (14 + WG_MAX_OBJ + WG_MAX_WORKSHOP) * 8));
-    
+
     data << uint32(m_MapId);
     data << uint32(m_ZoneId);
-    data << uint32(0);    
+    data << uint32(0);
     data << uint16(14 + BuildingsInZone.size() + WorkshopsList.size()); // Number of fields
-    
+
     FillInitialWorldStates(data);
-    
-    player->GetSession()->SendPacket(&data);    
+
+    player->GetSession()->SendPacket(&data);
 }
 
 void BattlefieldWG::SendInitWorldStatesToAll()
