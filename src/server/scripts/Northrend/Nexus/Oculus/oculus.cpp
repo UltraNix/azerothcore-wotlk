@@ -588,6 +588,25 @@ class spell_oculus_ride_ruby_emerald_amber_drake_que : public SpellScriptLoader
         }
 };
 
+Position const oculusExitPosition = { 3876.16f, 6984.44f, 106.32f, 6.279f };
+uint32 const oculusExitPositionMapId = 571;
+
+class at_oculus_exit_5001 : public AreaTriggerScript
+{
+public:
+    at_oculus_exit_5001() : AreaTriggerScript("at_oculus_exit_5001") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const * /*trigger*/) override
+    {
+        if (!player->IsFalling())
+        {
+            player->TeleportTo(oculusExitPositionMapId, oculusExitPosition.GetPositionX(), oculusExitPosition.GetPositionY(), oculusExitPosition.GetPositionZ(),
+                               oculusExitPosition.GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT);
+            return true;
+        }
+        return true;
+    }
+};
 
 void AddSC_oculus()
 {
@@ -602,4 +621,6 @@ void AddSC_oculus()
     new spell_oculus_dream_funnel();
     new spell_oculus_call_ruby_emerald_amber_drake();
     new spell_oculus_ride_ruby_emerald_amber_drake_que();
+
+    new at_oculus_exit_5001();
 }
