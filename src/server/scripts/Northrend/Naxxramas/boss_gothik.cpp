@@ -610,6 +610,9 @@ struct npc_gothik_minion_baseAI : public ScriptedAI
 
         void DamageTaken(Unit* attacker, uint32 &damage, DamageEffectType, SpellSchoolMask) override
         { // do not allow minions to take damage before the gate is opened
+            if (!attacker)
+                return;
+
             if (!_gateIsOpen && !isOnSameSide(attacker))
                 damage = 0;
         }
