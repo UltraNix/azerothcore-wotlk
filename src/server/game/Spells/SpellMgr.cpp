@@ -5226,7 +5226,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // Frost Aura (Encounter: Sapphiron)
             case 55799:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2.5;
+                spellInfo->EffectBasePoints[EFFECT_0] = 5000;
                 break;
             // Chill (Encounter: Sapphiron)
             case 55699:
@@ -5254,7 +5254,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // Frosbolt multi (Encounter: Kel'thuzad)
             case 55807:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.30;
+                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.50;
                 break;
             // Arcane Explosion (Encounter: Gothik)
             case 56407:

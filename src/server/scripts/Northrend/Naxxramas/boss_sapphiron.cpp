@@ -118,6 +118,12 @@ public:
             return true;
         }
 
+        void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
+        {
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_EXPERIMENTAL_FEATURE) && Is25ManRaid())
+                damage *= 0.94f;
+        }
+
         void DespawnIceBlocks()
         {
             std::list<GameObject*> iceBlockList;
@@ -180,7 +186,7 @@ public:
 
             me->CastSpell(me, RAID_MODE(SPELL_FROST_AURA_10, SPELL_FROST_AURA_25), true);
 
-            events.ScheduleEvent(EVENT_BERSERK, 15 * 60000);
+            events.ScheduleEvent(EVENT_BERSERK, 10 * 60000);
             events.ScheduleEvent(EVENT_SPELL_CLEAVE, 5000);
 
             if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
@@ -307,7 +313,10 @@ public:
                     events.RepeatEvent(10000);
                     return;
                 case EVENT_SPELL_LIFE_DRAIN:
-                    me->CastCustomSpell(RAID_MODE(SPELL_LIFE_DRAIN_10, SPELL_LIFE_DRAIN_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5), me, false);
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                        me->CastCustomSpell(RAID_MODE(SPELL_LIFE_DRAIN_10, SPELL_LIFE_DRAIN_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 10), me, false);
+                    else
+                        me->CastCustomSpell(RAID_MODE(SPELL_LIFE_DRAIN_10, SPELL_LIFE_DRAIN_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5), me, false);
                     events.RepeatEvent(24000);
                     return;
                 case EVENT_SPELL_BLIZZARD:

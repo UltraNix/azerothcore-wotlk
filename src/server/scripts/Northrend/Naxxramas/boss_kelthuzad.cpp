@@ -133,6 +133,12 @@ public:
             return fmod(o, 2.0f * static_cast<float>(M_PI));
         }
 
+        void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
+        {
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_EXPERIMENTAL_FEATURE) && Is25ManRaid())
+                damage *= 0.94f;
+        }
+
         void SpawnHelpers()
         {
             // Ehhh...
@@ -342,7 +348,7 @@ public:
                     break;
                 case EVENT_SPELL_FROST_BOLT_MULTI:
                     me->CastSpell(me, RAID_MODE(SPELL_FROST_BOLT_MULTI_10, SPELL_FROST_BOLT_MULTI_25), false);
-                    events.RepeatEvent(24000);
+                    events.RepeatEvent(20000);
                     break;
                 case EVENT_SPELL_SHADOW_FISSURE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
@@ -406,7 +412,7 @@ public:
                             Talk(SAY_SPECIAL);
                     }
 
-                    events.RepeatEvent(30000);
+                    events.RepeatEvent(20000);
                     break;
                 }
                 case EVENT_SECOND_PHASE_HEALTH_CHECK:
@@ -560,7 +566,11 @@ public:
                     events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(15000, 7000) : 15000);
                     break;
                 case EVENT_MINION_SPELL_FRENZY:
-                    if (me->HealthBelowPct(35))
+                    int32 healthPercent = 35;
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
+                        healthPercent = 50;
+
+                    if (me->HealthBelowPct(healthPercent))
                     {
                         me->CastSpell(me, SPELL_FRENZY, true);
                         events.PopEvent();
