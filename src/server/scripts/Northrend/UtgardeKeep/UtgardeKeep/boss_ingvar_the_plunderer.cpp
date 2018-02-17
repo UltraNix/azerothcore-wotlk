@@ -104,11 +104,13 @@ public:
         SummonList summons;
         uint64 ValkyrGUID;
         uint64 ThrowGUID;
+        bool change;
 
         void Reset()
         {
             ValkyrGUID = 0;
             ThrowGUID = 0;
+            change = false;
             events.Reset();
             summons.DespawnAll();
             me->SetDisplayId(DISPLAYID_DEFAULT);
@@ -127,18 +129,22 @@ public:
             if (me->GetDisplayId() == DISPLAYID_DEFAULT && damage >= me->GetHealth())
             {
                 damage = 0;
-                me->InterruptNonMeleeSpells(true);
-                me->RemoveAllAuras();
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->SetControlled(false, UNIT_STATE_ROOT);
-                me->DisableRotate(false);
-                me->GetMotionMaster()->MovementExpired();
-                me->GetMotionMaster()->MoveIdle();
-                me->StopMoving();
-                FeignDeath(true);
-                events.Reset();
-                events.RescheduleEvent(EVENT_START_RESURRECTION, 1000);
-                events.RescheduleEvent(EVENT_YELL_DEAD_1, 0);
+                if (!change)
+                {
+                    change = true;
+                    me->InterruptNonMeleeSpells(true);
+                    me->RemoveAllAuras();
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    me->SetControlled(false, UNIT_STATE_ROOT);
+                    me->DisableRotate(false);
+                    me->GetMotionMaster()->MovementExpired();
+                    me->GetMotionMaster()->MoveIdle();
+                    me->StopMoving();
+                    FeignDeath(true);
+                    events.Reset();
+                    events.RescheduleEvent(EVENT_START_RESURRECTION, 1000);
+                    events.RescheduleEvent(EVENT_YELL_DEAD_1, 0);
+                }
             }
         }
 
