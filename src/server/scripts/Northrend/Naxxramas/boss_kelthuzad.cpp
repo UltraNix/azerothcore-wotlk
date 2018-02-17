@@ -566,6 +566,7 @@ public:
                     events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(15000, 7000) : 15000);
                     break;
                 case EVENT_MINION_SPELL_FRENZY:
+                {
                     int32 healthPercent = 35;
                     if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
                         healthPercent = 50;
@@ -578,6 +579,7 @@ public:
                     }
                     events.RepeatEvent(1000);
                     break;
+                }
                 case EVENT_MINION_SPELL_BLOOD_TAP:
                     me->CastSpell(me->GetVictim(), SPELL_BLOOD_TAP, false);
                     events.RepeatEvent(15000);
