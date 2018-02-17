@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `skinloot` = 70201 WHERE `entry` = 26824;
