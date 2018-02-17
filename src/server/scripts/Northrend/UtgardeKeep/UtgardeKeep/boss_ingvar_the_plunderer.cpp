@@ -104,13 +104,11 @@ public:
         SummonList summons;
         uint64 ValkyrGUID;
         uint64 ThrowGUID;
-        bool change;
 
         void Reset()
         {
             ValkyrGUID = 0;
             ThrowGUID = 0;
-            change = false;
             events.Reset();
             summons.DespawnAll();
             me->SetDisplayId(DISPLAYID_DEFAULT);
@@ -126,9 +124,8 @@ public:
 
         void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
         {
-            if (!change && me->GetDisplayId() == DISPLAYID_DEFAULT && damage >= me->GetHealth())
+            if (me->GetDisplayId() == DISPLAYID_DEFAULT && damage >= me->GetHealth())
             {
-                change = true;
                 damage = 0;
                 me->InterruptNonMeleeSpells(true);
                 me->RemoveAllAuras();
