@@ -331,7 +331,7 @@ public:
                         events.ScheduleEvent(EVENT_STOMP_BOOST, 10000);
 
                     events.ScheduleEvent(EVENT_THADDIUS_SPELL_CHAIN_LIGHTNING, 14000);
-                    events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(360000, 480000) : 360000);
+                    events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, 360000);
                     events.ScheduleEvent(EVENT_THADDIUS_POLARITY_SHIFT, 30000);
                     return;
                 case EVENT_STOMP_BOOST:
