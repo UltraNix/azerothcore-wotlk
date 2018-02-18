@@ -40,7 +40,13 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
         return;
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
+    {
+        //! if creature has not move states then its probably scripted to work like that
+        //! ie. teleporting somewhere and setting root so it doesnt move, but do not evade in cases like those
+        if (owner->GetTypeId() == TYPEID_UNIT)
+            owner->ToCreature()->SetCannotReachTarget(false);
         return;
+    }
 
     if (owner->GetTypeId() == TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
     {
