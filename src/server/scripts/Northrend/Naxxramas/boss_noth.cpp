@@ -240,8 +240,8 @@ public:
                     break;
                 case EVENT_MOVE_TO_BALCONY:
                     me->MonsterTextEmote("%s teleports to the balcony above!", 0, true);
-                    me->CastSpell(me, SPELL_TELEPORT, true);
                     StartBalconyPhase();
+                    me->CastSpell(me, SPELL_TELEPORT, true);
                     //events.PopEvent(); events.Reset()!!
                     break;
                 case EVENT_SPELL_BLINK:

@@ -128,8 +128,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     D::_addUnitStateMove(owner);
     i_targetReached = false;
     i_recalculateTravel = false;
-    if (owner->GetTypeId() == TYPEID_UNIT)
-        owner->ToCreature()->SetCannotReachTarget(false);
+
     Movement::MoveSplineInit init(owner);
 
     if (useMMaps) // pussywizard
@@ -187,7 +186,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
             if (!forceDest && (i_path->GetPathType() & PATHFIND_NOPATH || !i_offset && !isPlayerPet && i_target->GetExactDistSq(i_path->GetActualEndPosition().x, i_path->GetActualEndPosition().y, i_path->GetActualEndPosition().z) > maxDist*maxDist))
             {
                 if (owner->GetTypeId() == TYPEID_UNIT)
-                    owner->ToCreature()->SetCannotReachTarget(false);
+                    owner->ToCreature()->SetCannotReachTarget(true);
                 return;
             }
             else
