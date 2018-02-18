@@ -91,6 +91,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            me->SetHealth(me->GetMaxHealth());
             _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_MORTAL_WOUND, 10000);

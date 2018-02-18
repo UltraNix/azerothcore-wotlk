@@ -150,6 +150,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            me->SetHealth(me->GetMaxHealth());
             DoZoneInCombat();
             _fightTimer = getMSTime();
             switch (urand(0,2))

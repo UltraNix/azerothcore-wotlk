@@ -76,6 +76,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            me->SetHealth(me->GetMaxHealth());
             _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_POISON_CLOUD, 15000);

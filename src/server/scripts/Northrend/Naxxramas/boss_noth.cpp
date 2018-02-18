@@ -151,6 +151,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            me->SetHealth(me->GetMaxHealth());
             DoZoneInCombat();
             _fightTimer = getMSTime();
             Talk(SAY_AGGRO);

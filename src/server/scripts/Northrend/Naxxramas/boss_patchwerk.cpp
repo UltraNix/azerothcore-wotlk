@@ -100,6 +100,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            me->SetHealth(me->GetMaxHealth());
             _fightTimer = getMSTime();
             Talk(SAY_AGGRO);
 

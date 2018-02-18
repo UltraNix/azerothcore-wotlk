@@ -71,6 +71,7 @@ struct boss_loathebAI : public BossAI
 
     void EnterCombat(Unit* /*who*/)
     {
+        me->SetHealth(me->GetMaxHealth());
         _fightTimer = getMSTime();
         _EnterCombat();
         instance->SetData(EVENT_LOATHEB, IN_PROGRESS);

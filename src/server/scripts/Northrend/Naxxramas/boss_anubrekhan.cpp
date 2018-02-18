@@ -133,6 +133,7 @@ public:
 
         void EnterCombat(Unit *who) override
         {
+            me->SetHealth(me->GetMaxHealth());
             DoZoneInCombat();
             _fightTimer = getMSTime();
             me->CallForHelp(30.0f); // catch helpers

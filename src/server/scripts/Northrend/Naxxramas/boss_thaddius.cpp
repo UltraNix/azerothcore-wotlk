@@ -246,6 +246,7 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            me->SetHealth(me->GetMaxHealth());
             _fightTimer = getMSTime();
             me->SetInCombatWithZone();
             summons.DoZoneInCombat(NPC_FEUGEN);
