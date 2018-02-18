@@ -2530,7 +2530,7 @@ void Creature::AllLootRemovedFromCorpse()
 {
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
-        time_t now = sWorld->GetGameTime();
+        time_t now = time(nullptr);
         if (m_corpseRemoveTime <= now)
             return;
 
@@ -2541,9 +2541,9 @@ void Creature::AllLootRemovedFromCorpse()
         if (cinfo && cinfo->SkinLootId)
             m_corpseRemoveTime = time(nullptr);
         else
-            m_corpseRemoveTime = now + m_corpseDelay * decayRate;
+            m_corpseRemoveTime = now + uint32(m_corpseDelay * decayRate);
 
-        m_corpseRemoveTime = now + uint32(m_corpseDelay * decayRate);
+        m_respawnTime = m_corpseRemoveTime + m_respawnTime;
     }
 }
 
