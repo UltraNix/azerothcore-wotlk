@@ -136,7 +136,7 @@ public:
         void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
         {
             if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_EXPERIMENTAL_FEATURE) && Is25ManRaid())
-                damage *= 0.94f;
+                damage *= 0.92f;
         }
 
         void SpawnHelpers()
@@ -541,7 +541,7 @@ public:
                 events.ScheduleEvent(EVENT_MINION_SPELL_MORTAL_WOUND, 5000);
             }
             else if (me->GetEntry() == NPC_GUARDIAN_OF_ICECROWN)
-                events.ScheduleEvent(EVENT_MINION_SPELL_BLOOD_TAP, 15000);
+                events.ScheduleEvent(EVENT_MINION_SPELL_BLOOD_TAP, 13000);
         }
 
         void KilledUnit(Unit* who)
@@ -582,7 +582,7 @@ public:
                 }
                 case EVENT_MINION_SPELL_BLOOD_TAP:
                     me->CastSpell(me->GetVictim(), SPELL_BLOOD_TAP, false);
-                    events.RepeatEvent(15000);
+                    events.RepeatEvent(13000);
                     break;
             }
 
