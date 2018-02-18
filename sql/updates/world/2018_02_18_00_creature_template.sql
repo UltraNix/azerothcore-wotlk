@@ -1,1 +1,2 @@
-UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask` | 1073741824 WHERE `entry` = 30057; -- 25 man guardian of icecrown.
+ UPDATE `creature_template` SET `mechanic_immune_mask` = '617299839' WHERE `creature_template`.`entry` = 16441;
+ UPDATE `creature_template` SET `mechanic_immune_mask` = '617299839' WHERE `creature_template`.`entry` = 30057;
