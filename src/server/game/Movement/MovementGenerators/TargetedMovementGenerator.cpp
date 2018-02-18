@@ -41,8 +41,6 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
     {
-        //! if creature has not move states then its probably scripted to work like that
-        //! ie. teleporting somewhere and setting root so it doesnt move, but do not evade in cases like those
         if (owner->GetTypeId() == TYPEID_UNIT)
             owner->ToCreature()->SetCannotReachTarget(false);
         return;
@@ -260,6 +258,12 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
     {
+        //! In some cases when unit teleports out somewhere and sets root to self(crap script, what you gonna do)
+        //! just before the root is set it will call cannotreachtarget in _setTargetLocation
+        //! and then it will never enter _setEnterLocation to correct that because it is rooted
+        //! so if creature cant move then do not allow this function to execute ever
+        if (owner->GetTypeId() == TYPEID_UNIT)
+            owner->ToCreature()->SetCannotReachTarget(false);
         D::_clearUnitStateMove(owner);
         return true;
     }

@@ -617,7 +617,14 @@ void Creature::Update(uint32 diff)
                 if (m_cannotReachTimer >= CREATURE_NOPATH_EVADE_TIME)
                 {
                     SetCannotReachTarget(false);
-                    if (IsAIEnabled)
+                    //! Nothing with base REACT_PASSIVE should ever chase anything unless its scripted that way. Never evade for those creatures
+                    //! ie. teleporting in the middle of the room, start some kind of casting and deleting all movement generators
+                    //! hence SetCannotReachTarget will execute just after teleport and then TargetedMovementGenerator will be destroyed
+                    //! and this value will never set itself back to false and creature will evade.
+                    //! This is protection against awful scripts by xinef and pussywizard
+                    //! example: boss_urom.cpp line 233, react passive added by Riztazz
+                    //! @Riztazz ToDo when movement is rewritten
+                    if (IsAIEnabled && !HasReactState(REACT_PASSIVE))
                         AI()->EnterEvadeMode();
                 }
             }

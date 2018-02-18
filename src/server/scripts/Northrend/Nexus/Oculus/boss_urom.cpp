@@ -234,6 +234,7 @@ public:
                     }
                     break;
                 case SPELL_TELEPORT:
+                    me->SetReactState(REACT_PASSIVE);
                     me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveIdle();
                     me->StopMoving();
@@ -306,6 +307,7 @@ public:
                     events.DelayEvents(10000);
                     break;
                 case EVENT_TELE_BACK:
+                    me->SetReactState(REACT_AGGRESSIVE);
                     me->GetMotionMaster()->MoveIdle();
                     me->DisableSpline();
                     me->SetCanFly(false);
