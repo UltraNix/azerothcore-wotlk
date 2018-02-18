@@ -5175,6 +5175,10 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
         {
+            case 61254: // will of sartharion
+                spellInfo->EffectBasePoints[EFFECT_0] = 50;
+                spellInfo->EffectBasePoints[EFFECT_1] = 50;
+                break;
             case 54363: // Poison cloud - Grobbulus
                 spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
                 break;
