@@ -51,6 +51,7 @@ struct boss_faerlinaAI : public ScriptedAI
     {
         instance = me->GetInstanceScript();
         _greet = false;
+        _init  = false;
     }
 
     void SummonHelpers()
@@ -72,11 +73,23 @@ struct boss_faerlinaAI : public ScriptedAI
     {
         _fightTimer = 0;
         events.Reset();
-        summons.DespawnAll();
-        SummonHelpers();
+
+        if (!_init)
+        {
+            _init = true;
+            summons.DespawnAll();
+            SummonHelpers();
+        }
 
         if (instance)
             instance->SetData(EVENT_FAERLINA, NOT_STARTED);
+    }
+
+    void JustReachedHome() override
+    {
+        summons.DespawnAll();
+        SummonHelpers();
+        ScriptedAI::JustReachedHome();
     }
 
     void EnterCombat(Unit* /*who*/) override
@@ -99,8 +112,8 @@ struct boss_faerlinaAI : public ScriptedAI
     {
         if (!_greet && who->GetTypeId() == TYPEID_PLAYER)
         {
-            Talk(SAY_GREET);
             _greet = true;
+            Talk(SAY_GREET);
         }
 
         ScriptedAI::MoveInLineOfSight(who);
@@ -201,6 +214,7 @@ private:
     EventMap events;
     SummonList summons;
     bool _greet;
+    bool _init;
     uint32 _fightTimer;
 };
 
