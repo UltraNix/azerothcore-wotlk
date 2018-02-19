@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `NextQuestId` = '0' WHERE `quest_template`.`Id` = 11501;
