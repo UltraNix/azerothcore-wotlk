@@ -2534,16 +2534,19 @@ void Creature::AllLootRemovedFromCorpse()
         if (m_corpseRemoveTime <= now)
             return;
 
-        float decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
+        float decayRate;
         CreatureTemplate const* cinfo = GetCreatureTemplate();
+
+        decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
+        uint32 diff = uint32((m_corpseRemoveTime - now) * decayRate);
+
+        m_respawnTime -= diff;
 
         // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
         if (cinfo && cinfo->SkinLootId)
             m_corpseRemoveTime = time(nullptr);
         else
-            m_corpseRemoveTime = now + uint32(m_corpseDelay * decayRate);
-
-        m_respawnTime = m_corpseRemoveTime + m_respawnTime;
+            m_corpseRemoveTime -= diff;
     }
 }
 
