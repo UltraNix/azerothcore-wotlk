@@ -5413,6 +5413,11 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_SRC_CASTER;
             spellInfo->EffectImplicitTargetB[EFFECT_1] = TARGET_UNIT_SRC_AREA_ENTRY;
             break;
+        case 58835: // twilight torment
+        case 57935: // twilight torment
+            spellInfo->procCharges = 0;
+            spellInfo->StackAmount = 1;
+            break;
 
         //////////////////////////////////////////
         ////////// EYE OF ETERNITY
