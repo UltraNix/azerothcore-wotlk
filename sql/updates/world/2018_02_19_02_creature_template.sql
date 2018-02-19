@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `mindmg` = '143.4', `maxdmg` = '199.24', `minrangedmg` = '117.3', `maxrangedmg` = '173.06' WHERE `creature_template`.`entry` = 24207; 
