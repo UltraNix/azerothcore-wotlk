@@ -243,6 +243,11 @@ public:
             }
         }
 
+        void OnPlayerEnter(Player* /*player*/) override
+        {
+            CheckSapphironStatus();
+        }
+
         void OnGameObjectCreate(GameObject* pGo)
         {
             if (pGo->GetGOInfo()->displayId == 6785 || pGo->GetGOInfo()->displayId == 1287)
@@ -870,8 +875,11 @@ public:
             if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                 return;
 
-            // No reason to check encountres again, orb already spawned.
-            if (sapphironAllowed)
+            GameObject* go = instance->GetGameObject(_naxxramasOrbGUID);
+            if (!go)
+                return;
+
+            if (go->GetPhaseMask() == 1 && sapphironAllowed)
                 return;
 
             uint8 bossCount = 0;
@@ -881,11 +889,8 @@ public:
                 {
                     if (++bossCount >= 13)
                     {
-                        if (GameObject* go = instance->GetGameObject(_naxxramasOrbGUID))
-                        {
-                            sapphironAllowed = true;
-                            go->SetPhaseMask(1, true);
-                        }
+                        sapphironAllowed = true;
+                        go->SetPhaseMask(1, true);
                         break;
                     }
                 }
