@@ -61,8 +61,11 @@ enum Spells
     SPELL_SHADOW_FISSURE                          = 57579,
     SPELL_SUMMON_TWILIGHT_WHELP                   = 58035,
     SPELL_GIFT_OF_TWILIGHT_SHADOW                 = 57835,
-    SPELL_TWILIGHT_TORMENT_VESPERON               = 57935,
+    SPELL_TWILIGHT_TORMENT_VESPERON               = 58853,
     SPELL_TWILIGHT_TORMENT_VESPERON_AURA          = 57988,
+    SPELL_TWILIGHT_TORMENT_DEBUFF_SARTHARION      = 58835,
+    SPELL_TWILIGHT_TORMENT_DEBUFF_ALONE           = 57935,
+
 
     // Sartharion
     SPELL_SARTHARION_CLEAVE                       = 56909,
@@ -1136,6 +1139,8 @@ public:
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_SHIFT);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_SARTHARION_AURA);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_VESPERON);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_DEBUFF_ALONE);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_DEBUFF_SARTHARION);
             }
 
             summons.DespawnAll();
@@ -1311,6 +1316,20 @@ public:
                     Talk(WHISPER_SUMMON_DICIPLE);
 
                     me->CastSpell(me, (isSartharion ? (uint32)SPELL_TWILIGHT_TORMENT_SARTHARION : (uint32)SPELL_TWILIGHT_TORMENT_VESPERON), true);
+                    uint32 tempSpell = 0;
+                    if (isSartharion)
+                        tempSpell = SPELL_TWILIGHT_TORMENT_DEBUFF_SARTHARION;
+                    else
+                        tempSpell = SPELL_TWILIGHT_TORMENT_DEBUFF_ALONE;
+
+                    SpellInfo* spellInfo = const_cast<SpellInfo*>(sSpellMgr->GetSpellInfo(tempSpell));
+                    if (spellInfo)
+                    {
+                        spellInfo->StackAmount = 1;
+                        spellInfo->ProcCharges = 1;
+                        me->CastSpell(me, tempSpell, true);
+                    }
+
                     if (Creature* cr = me->SummonCreature((isSartharion ? NPC_ACOLYTE_OF_VESPERON : NPC_DISCIPLE_OF_VESPERON), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation()))
                     {
                         summons.Summon(cr);
