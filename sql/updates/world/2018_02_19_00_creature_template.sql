@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `mindmg` = '0', `maxdmg` = '0', `attackpower` = '0', `dmg_multiplier` = '0', `baseattacktime` = '0', `rangeattacktime` = '0', `minrangedmg` = '0', `maxrangedmg` = '0' WHERE `creature_template`.`entry` = 27430; 
