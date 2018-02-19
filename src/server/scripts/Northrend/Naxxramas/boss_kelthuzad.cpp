@@ -480,6 +480,9 @@ public:
             me->SetNoCallAssistance(true);
             callHelp = true;
             events.Reset();
+
+            if (me->GetEntry() == NPC_GUARDIAN_OF_ICECROWN)
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
         }
 
         void DoAction(int32 param)
