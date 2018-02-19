@@ -229,6 +229,16 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
     _recvQueue.add(new_packet);
 }
 
+void ReportMalformedPacket( WorldPacket* packet, const std::string& address, uint32 accountId )
+{
+    sLog->outError( "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.", packet->GetOpcode(), address.c_str(), accountId );
+    if ( sLog->IsOutDebug() )
+    {
+        sLog->outDebug( LOG_FILTER_NETWORKIO, "Dumping error causing packet:" );
+        packet->hexlike();
+    }
+}
+
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 {
@@ -249,7 +259,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     uint32 processedPackets = 0;
     time_t currentTime = time(nullptr);
 
-    while (m_Socket && !m_Socket->IsClosed() && !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket &&_recvQueue.next(packet, updater))
+    while (m_Socket && !m_Socket->IsClosed() && !_recvQueue.empty() && _recvQueue.peek(true) != firstDelayedPacket && _recvQueue.next(packet, updater))
     {
         if (!AntiDOS.EvaluateOpcode(*packet, currentTime))
         {
@@ -262,6 +272,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         else
         {
             OpcodeHandler &opHandle = opcodeTable[packet->GetOpcode()];
+
             try
             {
                 switch (opHandle.status)
@@ -330,15 +341,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             }
             catch(ByteBufferException &)
             {
-                sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.", packet->GetOpcode(), GetRemoteAddress().c_str(), GetAccountId());
-                if (sLog->IsOutDebug())
-                {
-                    if (packet)
-                    {
-                        sLog->outDebug(LOG_FILTER_NETWORKIO, "Dumping error causing packet:");
-                        packet->hexlike();
-                    }
-                }
+                ReportMalformedPacket( packet, GetRemoteAddress(), GetAccountId());
             }
         }
 
@@ -359,7 +362,16 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         if (m_Socket && !m_Socket->IsClosed())
         {
             if (_player && _player->IsInWorld())
-                HandleMovementOpcodes(*movementPacket);
+            {
+                try
+                {
+                    HandleMovementOpcodes( *movementPacket );
+                }
+                catch ( ByteBufferException & )
+                {
+                    ReportMalformedPacket( movementPacket, GetRemoteAddress(), GetAccountId() );
+                }
+            }
         }
 
         delete movementPacket;
