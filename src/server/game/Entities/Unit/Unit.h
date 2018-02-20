@@ -1691,6 +1691,8 @@ class Unit : public WorldObject
         void CombatStartOnCast(Unit* target, bool initialAggro = true, uint32 duration = 0);
         void SetInCombatState(bool PvP, Unit* enemy = NULL, uint32 duration = 0);
         void SetInCombatWith(Unit* enemy, uint32 duration = 0);
+        //! Check if current spell cast can be used in combat, if not then interrupt it
+        void StopNonCombatCasts();
         void ClearInCombat();
         void ClearInPetCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }

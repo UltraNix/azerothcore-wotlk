@@ -12548,6 +12548,12 @@ void Unit::CombatStartOnCast(Unit* target, bool initialAggro, uint32 duration)
         me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
     }
 }
+void Unit::StopNonCombatCasts()
+{
+    for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+        if (m_currentSpells[i] && !m_currentSpells[i]->m_spellInfo->CanBeUsedInCombat())
+            InterruptSpell(CurrentSpellTypes(i), false, true);
+}
 
 void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
 {
@@ -12569,6 +12575,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
 
     if (IsInCombat())
         return;
+
+    StopNonCombatCasts();
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
