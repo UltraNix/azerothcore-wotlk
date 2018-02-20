@@ -636,8 +636,8 @@ class npc_the_lich_king_controller : public CreatureScript
             {
                 summon->SetPhaseMask((summon->GetPhaseMask() & ~0x10), true); // must not be in dream phase
                 if (summon->GetEntry() != NPC_SUPPRESSER)
-                    if (Unit* target = SelectTargetFromPlayerList(200.0f))
-                        summon->AI()->AttackStart(target);
+                    if (summon->IsAIEnabled)
+                        DoZoneInCombat(summon, 200.0f);
             }
 
             void UpdateAI(uint32 diff)

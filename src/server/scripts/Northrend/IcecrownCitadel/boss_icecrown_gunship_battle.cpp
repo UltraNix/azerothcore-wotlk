@@ -199,7 +199,7 @@ Position const OrgrimsHammerTeleportExit = { 7.461699f, 0.158853f, 35.72989f, 0.
 // Alliance encounter
 Position const OrgrimsHammerTeleportPortal = { 47.550990f, -0.101778f, 37.61111f, 0.0f };
 Position const SkybreakerTeleportExit      = { -17.55738f, -0.090421f, 21.18366f, 0.0f };
-  
+
 uint32 const MuradinExitPathSize = 10;
 Position const MuradinExitPath[MuradinExitPathSize] =
 {
@@ -1016,7 +1016,7 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
 
                 if (!me->GetVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-                
+
                 if (me->IsWithinMeleeRange(me->GetVictim()))
                     DoMeleeAttackIfReady();
                 else if (me->isAttackReady())
@@ -1364,7 +1364,7 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
 
                 if (!me->GetVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                     return;
-                
+
                 if (me->IsWithinMeleeRange(me->GetVictim()))
                     DoMeleeAttackIfReady();
                 else if (me->isAttackReady())

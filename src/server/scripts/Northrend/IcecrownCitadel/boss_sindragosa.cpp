@@ -328,7 +328,6 @@ class boss_sindragosa : public CreatureScript
                 summons.DespawnAll();
                 events.Reset();
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
-                events.ScheduleEvent(EVENT_AIR_PHASE, 50000);
                 events.ScheduleEvent(EVENT_CLEAVE, 10000, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_TAIL_SMASH, 20000, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_FROST_BREATH, urand(8000, 12000), EVENT_GROUP_LAND_PHASE);
@@ -472,8 +471,12 @@ class boss_sindragosa : public CreatureScript
                 if (!damage || me->IsInEvadeMode())
                     return;
 
-                if (!_didFirstFlyPhase)
+                if (!_didFirstFlyPhase && me->HealthBelowPctDamaged(85, damage))
+                {
+                    _didFirstFlyPhase = true;
+                    events.ScheduleEvent(EVENT_AIR_PHASE, 0s);
                     return;
+                }
 
                 if (!_isThirdPhase)
                 {
@@ -543,7 +546,7 @@ class boss_sindragosa : public CreatureScript
                         me->DisableRotate(true);
                         me->SetControlled(true, UNIT_STATE_ROOT);
                         me->SendMovementFlagUpdate();
-                        me->CastSpell(me->GetVictim(), SPELL_TAIL_SMASH, false);
+                        DoCastSelf(SPELL_TAIL_SMASH);
                         events.DelayEventsToMax(1, 0);
                         events.ScheduleEvent(EVENT_UNROOT, 0);
                         events.ScheduleEvent(EVENT_TAIL_SMASH, urand(22000, 27000), EVENT_GROUP_LAND_PHASE);
@@ -595,7 +598,6 @@ class boss_sindragosa : public CreatureScript
                             me->SetControlled(false, UNIT_STATE_ROOT);
                         }
 
-                        _didFirstFlyPhase = true;
                         Talk(SAY_AIR_PHASE);
                         me->SetReactState(REACT_PASSIVE);
                         me->SetSpeed(MOVE_RUN, 4.28571f);
@@ -640,7 +642,7 @@ class boss_sindragosa : public CreatureScript
                             if (ok)
                                 break;
                         } while (--triesLeft);
-                                
+
                         me->CastSpell(destX, destY, destZ, SPELL_FROST_BOMB_TRIGGER, false);
                         if (_bombCount >= 4)
                             events.ScheduleEvent(EVENT_LAND, 5500);
@@ -1278,7 +1280,7 @@ class MysticBuffetTargetFilter
         explicit MysticBuffetTargetFilter(Unit* caster) : _caster(caster) { }
 
         bool operator()(WorldObject* unit) const
-        {    
+        {
             if (!unit->IsInMap(_caster))
                 return true;
 

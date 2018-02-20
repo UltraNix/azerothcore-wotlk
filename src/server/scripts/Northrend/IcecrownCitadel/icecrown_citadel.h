@@ -13,7 +13,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #define ICCScriptName "instance_icecrown_citadel"
 
 uint32 const WeeklyNPCs = 9;
-uint32 const MaxHeroicAttempts = 100; // @ICC beta test
+uint32 const MaxHeroicAttempts = 0;
 
 // Defined in boss_valithria_dreamwalker.cpp
 extern Position const ValithriaSpawnPos;
@@ -343,7 +343,7 @@ enum CreaturesIds
     NPC_SPIRIT_BOMB                             = 39189,
     NPC_FROSTMOURNE_TRIGGER                     = 38584,
     NPC_TERENAS_MENETHIL_OUTRO                  = 38579,
-    
+
     // Generic
     NPC_INVISIBLE_STALKER                       = 30298,
     NPC_SPIRE_FROSTWYRM                         = 37230,
@@ -370,7 +370,7 @@ enum GameObjectsIds
     // Lady Deathwhisper
     GO_ORATORY_OF_THE_DAMNED_ENTRANCE       = 201563,
     GO_LADY_DEATHWHISPER_ELEVATOR           = 202220,
-  
+
     // Icecrown Gunship Battle - Horde raid
     GO_ORGRIMS_HAMMER_H                     = 201812,
     GO_THE_SKYBREAKER_H                     = 201811,

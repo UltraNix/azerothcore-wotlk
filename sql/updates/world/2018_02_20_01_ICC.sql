@@ -364,3 +364,91 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 -- Sindragosa room:
 UPDATE `creature` SET `MovementType`=1, `spawndist`=4 WHERE `id`=37532;
 UPDATE `creature_onkill_reputation` SET `RewOnKillRepValue1`=2 WHERE `creature_id` IN (37532, 38151);
+
+-- Valithria
+UPDATE `creature_template` SET `flags_extra`=(`flags_extra`&~0x00000080) WHERE `entry`=37950;
+UPDATE `creature_template` SET `mechanic_immune_mask`=8388624 WHERE `entry` IN (37868, 37863, 37934, 37886, 38171, 38727, 38737, 38167, 38725, 38735, 38166, 38724, 38734, 38170, 38723, 38733);
+
+-- Rampart of Skull Horde NPCs
+SET @CGUID = 1980054;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID AND @CGUID+5;
+INSERT INTO `creature` VALUES
+(@CGUID, 37031, 631, 15, 1, 0, 1, -563.49, 2282.43, 199.96, 0.95, 86400, 0, 0, 324010, 41690, 0, 0, 0, 0),
+(@CGUID+1, 37033, 631, 15, 1, 0, 1, -555.20, 2283.03, 199.96, 1.03, 86400, 0, 0, 261715, 91600, 0, 0, 0, 0),
+(@CGUID+2, 37035, 631, 15, 1, 0, 1, -546.93, 2285.06, 199.96, 0.73, 86400, 0, 0, 471835, 41690, 0, 0, 0, 0),
+(@CGUID+3, 37149, 631, 15, 1, 0, 1, -547.45, 2273.36, 199.96, 0.42, 86400, 0, 0, 261715, 91600, 0, 0, 0, 0),
+(@CGUID+4, 37034, 631, 15, 1, 0, 1, -538.90, 2265.76, 199.96, 1.35, 86400, 0, 0, 261715, 91600, 0, 0, 0, 0),
+(@CGUID+5, 37029, 631, 15, 1, 0, 1, -519.92, 2317.28, 199.97, 3.73, 86400, 0, 0, 471835, 0, 0, 0, 0, 0);
+
+-- Darkfallen Blood Knight
+UPDATE `creature_template` SET `ScriptName` = "npc_darkfallen_blood_knight", `AIName` = "" WHERE `entry` = 37595; 
+
+-- LK valkyrs
+UPDATE `creature_template` SET `HoverHeight`=0 WHERE `entry` IN (36609, 39120, 39121, 39122);
+
+-- Frostwing Halls
+UPDATE `creature` SET `position_y`=2554.991211, `position_z`=354.717682 WHERE `guid`=137765;
+UPDATE `creature` SET `position_y`=2558.303711, `position_z`=353.850403 WHERE `guid`=137769;
+UPDATE `creature` SET `position_y`=2558.230713, `position_z`=353.869324 WHERE `guid`=137768;
+UPDATE `creature` SET `position_x`=4365.277344, `position_y`=2556.302734, `position_z`=354.374420 WHERE `guid`=137757;
+UPDATE `creature` SET `position_x`=4347.931641, `position_y`=2556.314941, `position_z`=354.371399 WHERE `guid`=137756;
+
+-- Left Battle Maiden (1st group)
+SET @GUID = 137757;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4365.456055, 2638.538330, 351.100433, 1);
+
+-- Left Huntress (1st group)
+SET @GUID = 137769;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4362.18, 2642.97, 351.1, 1);
+
+-- Warlord (1st group)
+SET @GUID = 137765;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4356.85, 2636.39, 351.101, 1);
+
+-- Right Huntress (1st group)
+SET @GUID = 137768;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4351.66, 2642.95, 351.1, 1);
+
+-- Right Battle Maiden (1st group)
+SET @GUID = 137756;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4348.057617, 2638.836914, 351.100433, 1);
+
+
+UPDATE `creature` SET `position_x`=4349.928223, `position_y`=2535.158447, `position_z`=358.432465 WHERE `guid`=137760;
+UPDATE `creature` SET `position_x`=4353.247070, `position_y`=2539.200195, `position_z`=358.432465 WHERE `guid`=137771;
+UPDATE `creature` SET `position_x`=4360.323730, `position_y`=2539.200195, `position_z`=358.432465 WHERE `guid`=137770;
+UPDATE `creature` SET `position_x`=4363.255859, `position_y`=2535.158447, `position_z`=358.432465 WHERE `guid`=137761;
+
+-- Left Battle Maiden (2nd group)
+SET @GUID = 137761;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4363.255859, 2596.497559, 351.101624, 1);
+
+-- Left Huntress (2nd group)
+SET @GUID = 137770;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4360.323730, 2599.092041, 351.101624, 1);
+
+-- Right Huntress (2nd group)
+SET @GUID = 137771;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4353.247070, 2599.411621, 351.101624, 1);
+
+-- Right Battle Maiden (2nd group)
+SET @GUID = 137760;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID*10;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `move_type`) VALUES
+(@GUID*10, 1, 4350.106445, 2597.012451, 351.101929, 1);

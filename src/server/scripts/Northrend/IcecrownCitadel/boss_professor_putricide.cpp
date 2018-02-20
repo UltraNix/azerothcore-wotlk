@@ -173,15 +173,15 @@ public:
     bool operator()(WorldObject* object) const
     {
         if (!object)
-            return true;
+            return false;
         if (Player* p = object->ToPlayer())
         {
             if (p == _source->GetVictim() || p->GetExactDist(_source) >= 45.0f)
-                return true;
+                return false;
 
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 private:
     Creature const* _source;
@@ -750,6 +750,10 @@ class npc_putricide_oozeAI : public ScriptedAI
 
         void SelectNewTarget()
         {
+            if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
+                for (auto spellId : { SPELL_VOLATILE_OOZE_PROTECTION, SPELL_GASEOUS_BLOAT_PROTECTION })
+                    target->RemoveAurasDueToSpell(spellId);
+
             targetGUID = 0;
             me->InterruptNonMeleeSpells(true);
             me->AttackStop();
@@ -779,11 +783,11 @@ class npc_putricide_oozeAI : public ScriptedAI
                 else if (targetGUID)
                 {
                     Unit* target = ObjectAccessor::GetUnit(*me, targetGUID);
-                    if (!target || !me->IsValidAttackTarget(target) || target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) || target->GetExactDist2dSq(4356.0f, 3211.0f) > 80.0f*80.0f || target->GetPositionZ() < 380.0f || target->GetPositionZ() > 405.0f)
+                    if (me->GetVictim()->GetGUID() != targetGUID || !target || !me->IsValidAttackTarget(target) || target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH) || target->GetExactDist2dSq(4356.0f, 3211.0f) > 80.0f*80.0f || target->GetPositionZ() < 380.0f || target->GetPositionZ() > 405.0f)
                         SelectNewTarget();
                 }
             }
-            
+
             if (me->GetEntry() == NPC_VOLATILE_OOZE)
                 if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
                     if (target->HasAura(45438) || target->HasAura(642))
@@ -1104,9 +1108,9 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
 
             // set up initial variables and check if caster is creature
             // this will let use safely use ToCreature() casts in entire script
-            bool Load()
+            bool Load() override
             {
-                _target = NULL;
+                _target = nullptr;
                 return GetCaster()->GetTypeId() == TYPEID_UNIT;
             }
 
@@ -1217,6 +1221,7 @@ class spell_putricide_mutated_plague : public SpellScriptLoader
 
                 int32 damage = spell->Effects[EFFECT_0].CalcValue(caster);
                 damage = damage * pow(2.5f, GetStackAmount());
+                damage *= frand(1.1f, 1.4f);
 
                 GetTarget()->CastCustomSpell(triggerSpell, SPELLVALUE_BASE_POINT0, damage, GetTarget(), true, NULL, aurEff, GetCasterGUID());
             }
@@ -1340,6 +1345,7 @@ class spell_putricide_unbound_plague_dmg : public SpellScriptLoader
                     dmg = aurEff->GetSpellInfo()->Effects[0].CalcValue() * frand(1.20f, 1.30f);
                 if (dmg <= 0) // safety check, impossible
                     return;
+
                 aurEff->SetAmount(dmg);
             }
 
@@ -1556,7 +1562,7 @@ class spell_putricide_mutated_transformation : public SpellScriptLoader
                 caster->CastSpell(summon, SPELL_MUTATED_TRANSFORMATION_NAME, true);
 
                 //EnterVehicle(summon, 0);    // VEHICLE_SPELL_RIDE_HARDCODED is used according to sniff, this is ok
-                caster->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, summon, TRIGGERED_FULL_MASK); 
+                caster->CastCustomSpell(VEHICLE_SPELL_RIDE_HARDCODED, SPELLVALUE_BASE_POINT0, 1, summon, TRIGGERED_FULL_MASK);
                 summon->SetCreatorGUID(caster->GetGUID());
                 putricide->AI()->JustSummoned(summon);
 

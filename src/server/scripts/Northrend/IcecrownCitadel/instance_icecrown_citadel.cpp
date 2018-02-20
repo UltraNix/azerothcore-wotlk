@@ -401,19 +401,14 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_VALITHRIA_DREAMWALKER_QUEST:
                     case NPC_ROTTING_FROST_GIANT_10:
                     case NPC_ROTTING_FROST_GIANT_25:
-                    // @ICC beta test
-                    {
-                        creature->SetVisible(false);
-                        break;
-                    }
                         for (uint8 i = 0; i < WeeklyNPCs; ++i)
                             if (WeeklyQuestData[i].creatureEntry == creature->GetEntry())
                             {
                                 WeeklyQuestNpcGUID[i] = creature->GetGUID();
                                 if (WeeklyQuestId10 != WeeklyQuestData[i].questId[0])
-                                    creature->SetVisible(false);
+                                    creature->DespawnOrUnsummon();
                                 else if (WeeklyQuestData[i].creatureEntry == NPC_VALITHRIA_DREAMWALKER_QUEST && GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
-                                    creature->SetVisible(false);
+                                    creature->DespawnOrUnsummon();
                             }
                         break;
                 }
@@ -740,7 +735,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                                     });
                                 }
                             });
-                        } 
+                        }
                 }
 
                 switch (creature->GetEntry())
@@ -1346,7 +1341,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                  return true;
             }
-  
+
             void SpawnGunship()
             {
                 if (!GunshipGUID && instance->HavePlayers())
@@ -1391,7 +1386,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                                 switch (creature->GetDBTableGUIDLow())
                                 {
                                     case 200806:
-                                        check = true; 
+                                        check = true;
                                         creature->SetHomePosition(FirstFormationMemberPath[FirstFormationMemberPathSize - 1]);
                                         data = formationData[0];
                                         break;
@@ -1633,8 +1628,6 @@ class instance_icecrown_citadel : public InstanceMapScript
 
             bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const
             {
-                return true; // TESTING
-
                 switch (bossId)
                 {
                     case DATA_THE_LICH_KING:
@@ -1793,7 +1786,7 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 std::ostringstream saveStream;
                 saveStream << "I C " << GetBossSaveData() << HeroicAttempts << ' '
-                    << ColdflameJetsState << ' ' << BloodQuickeningState << ' ' << BloodQuickeningMinutes << ' ' << WeeklyQuestId10 << ' ' << PutricideEventProgress << ' ' 
+                    << ColdflameJetsState << ' ' << BloodQuickeningState << ' ' << BloodQuickeningMinutes << ' ' << WeeklyQuestId10 << ' ' << PutricideEventProgress << ' '
                     << uint32(LichKingHeroicAvailable ? 1 : 0) << ' ' << BloodPrinceTrashCount;
 
                 OUT_SAVE_INST_DATA_COMPLETE;

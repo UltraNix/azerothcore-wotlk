@@ -103,6 +103,7 @@ enum EventTypes
     EVENT_BERSERK,
     EVENT_SPELL_DEATH_AND_DECAY,
     EVENT_SPELL_DOMINATE_MIND_25,
+    EVENT_PERIODIC_ZONE_IN_COMBAT,
 
     // Phase 1:
     EVENT_SPELL_SHADOW_BOLT,
@@ -238,6 +239,7 @@ class boss_lady_deathwhisper : public CreatureScript
 
                 events.Reset();
                 events.SetPhase(PHASE_ONE);
+                events.ScheduleEvent(EVENT_PERIODIC_ZONE_IN_COMBAT, 1s);
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_SPELL_DEATH_AND_DECAY, 10000);
                 if (GetDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL)
@@ -321,6 +323,30 @@ class boss_lady_deathwhisper : public CreatureScript
                         Talk(SAY_INTRO_7);
                         events.PopEvent();
                         break;
+                    case EVENT_PERIODIC_ZONE_IN_COMBAT:
+                    {
+                        auto const &players = me->GetMap()->GetPlayers();
+                        if (!players.isEmpty())
+                            for (auto it = players.begin(); it != players.end(); ++it)
+                            {
+                                if (Player* player = it->GetSource())
+                                {
+                                    if (player->IsGameMaster())
+                                        continue;
+
+                                    if (player->IsAlive() && me->IsHostileTo(player))
+                                    {
+                                        if (me->CanHaveThreatList())
+                                            me->AddThreat(player, 0.0f);
+                                        me->SetInCombatWith(player);
+                                        player->SetInCombatWith(me);
+                                    }
+                                }
+                            }
+
+                        events.RepeatEvent(1000);
+                        break;
+                    }
                     case EVENT_BERSERK:
                         me->CastSpell(me, SPELL_BERSERK, true);
                         Talk(SAY_BERSERK);
@@ -1140,12 +1166,12 @@ class spell_deathwhisper_dominate_mind_AuraScript : public AuraScript
 
     void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        GetTarget()->SetObjectScale(2.5f);
+        GetTarget()->CastSpell(GetTarget(), 22788, true);
     }
 
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        GetTarget()->SetObjectScale(1.0f);
+        GetTarget()->RemoveAurasDueToSpell(22788);
     }
 
     void Register()

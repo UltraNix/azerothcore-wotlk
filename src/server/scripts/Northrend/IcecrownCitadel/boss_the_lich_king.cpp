@@ -18,6 +18,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "icecrown_citadel.h"
 #include "PassiveAI.h"
 #include "Group.h"
+#include "MoveSplineInit.h"
 
 enum Texts
 {
@@ -807,7 +808,7 @@ class boss_the_lich_king : public CreatureScript
                             tirion->PlayDirectSound(17389);
                         }
                     }
-                    
+
                 }
                 else if (damage >= me->GetHealth())
                     damage = me->GetHealth()-1;
@@ -916,7 +917,6 @@ class boss_the_lich_king : public CreatureScript
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
                         me->CastSpell(me, SPELL_REMORSELESS_WINTER_2, false);
-                        summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         //events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions, bullshit, 15 mins on movies
                         events.ScheduleEvent(EVENT_QUAKE_2, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
@@ -1435,7 +1435,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                             Map::PlayerList const& pl = me->GetMap()->GetPlayers();
                             for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
                                 if (Player* p = itr->GetSource())
-                                    if (p->IsAlive())
+                                    if (p->IsAlive() && !p->IsGameMaster())
                                         Unit::Kill(me, p);
                         }
                         break;
@@ -1462,7 +1462,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                         {
                             theLichKing->GetMotionMaster()->MovePoint(0, CenterPosition);
                             uint32 travelTime = 1000*theLichKing->GetExactDist(&CenterPosition)/theLichKing->GetSpeed(MOVE_WALK) + 1000;
-                            
+
                             _events.ScheduleEvent(EVENT_OUTRO_LK_TALK_4, 1+travelTime);
                             _events.ScheduleEvent(EVENT_OUTRO_LK_RAISE_DEAD, 1000+travelTime);
                             _events.ScheduleEvent(EVENT_OUTRO_LK_TALK_5, 29000+travelTime);
@@ -1524,7 +1524,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                             theLichKing->SetDisableGravity(true);
                             theLichKing->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
                             theLichKing->GetMotionMaster()->MovePoint(0, OutroFlying);
-                            
+
                             _events.ScheduleEvent(EVENT_OUTRO_AFTER_SOUL_BARRAGE, 3000);
                         }
                         break;
@@ -2521,7 +2521,14 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 if (apply)
                 {
-                    //pass->ClearUnitState(UNIT_STATE_ONVEHICLE);
+                    /// !HACK!
+                    /// Lack of attachment calculations, gotta do it this way
+                    /// We need to figure out where blizzard stores vehicle seat attachment offsets
+                    Movement::MoveSplineInit init(pass);
+                    init.DisableTransportPathTransformations();
+                    init.MoveTo(0.4018555f, -2.024658f, -4.000122f, false);
+                    init.SetFacing(3.141593f);
+                    init.Launch();
                     return;
                 }
                 pass->RemoveAurasDueToSpell(VEHICLE_SPELL_PARACHUTE);
