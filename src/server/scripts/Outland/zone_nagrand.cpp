@@ -370,7 +370,8 @@ public:
               Say_Timer = 5000;
               ReleasedFromCage = true;
               if (me->GetEntry() == NPC_CORKI)
-                  Talk(CORKI_SAY_THANKS);
+                  if (Player* plr = me->SelectNearestPlayer(10.0f))
+                    Talk(CORKI_SAY_THANKS, plr);
               if (me->GetEntry() == NPC_CORKI_2)
                   Talk(CORKI_SAY_PROMISE);
               if (me->GetEntry() == NPC_CORKI_3)
