@@ -13873,7 +13873,6 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
     // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
     // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
     // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
-    /*
     if (group == DIMINISHING_TAUNT)
     {
         if (GetTypeId() == TYPEID_UNIT && (ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))
@@ -13891,7 +13890,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
         }
     }
     // Some diminishings applies to mobs too (for example, Stun)
-    else */ if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER
+    else if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER
         && ((targetOwner ? (targetOwner->GetTypeId() == TYPEID_PLAYER) : (GetTypeId() == TYPEID_PLAYER))
         || (GetTypeId() == TYPEID_UNIT && ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_ALL_DIMINISH)))
         || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
