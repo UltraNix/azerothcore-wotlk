@@ -37,5 +37,3 @@ INSERT INTO `creature_loot_template` VALUES
 UPDATE `reference_loot_template` SET `item` = @TRIUMPH WHERE `item` = @CONQUEST;
 UPDATE `item_loot_template` SET `item` = @TRIUMPH WHERE `item` = @CONQUEST;
 UPDATE `item_loot_template` SET `item` = @FROST WHERE `entry` = 52006 AND `item` = @TRIUMPH;
-
-UPDATE `quest_template` SET `RewardItemId1` = @FROST, `RewardItemId2` = @TRIUMPH WHERE `id` IN (SELECT `quest` FROM `creature_queststarter` WHERE `id` = 20735);
