@@ -3004,7 +3004,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                                                                                                            // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
                                                                                                            // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
                                                                                                            // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
-            unit->GetCharmerOrOwnerPlayerOrPlayerItself() || flagsExtra & CREATURE_FLAG_EXTRA_ALL_DIMINISH /*|| (m_diminishGroup == DIMINISHING_TAUNT && (flagsExtra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))*/
+            unit->GetCharmerOrOwnerPlayerOrPlayerItself() || flagsExtra & CREATURE_FLAG_EXTRA_ALL_DIMINISH || (m_diminishGroup == DIMINISHING_TAUNT && (flagsExtra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))
             )) || type == DRTYPE_ALL)
             unit->IncrDiminishing(m_diminishGroup);
     }
