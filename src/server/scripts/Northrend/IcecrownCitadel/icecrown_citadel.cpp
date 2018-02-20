@@ -2933,7 +2933,8 @@ public:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 37.5f, true))
                             {
                                 casted = true;
-                                me->CastSpell(target, 71906); // Severed Essence
+                                for (auto i = 0; i < me->GetMap()->Is25ManRaid() ? 5 : 2; ++i)
+                                    me->CastSpell(target, 71906); // Severed Essence
                             }
 
                         events.RepeatEvent(casted ? 25000 : 5000);
