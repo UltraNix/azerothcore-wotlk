@@ -893,9 +893,6 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
             break;
     }
 
-    if (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS && map->IsDungeon())
-        m_corpseDelay = std::numeric_limits<uint32>::max();
-
     LoadCreaturesAddon();
 
     uint32 displayID = GetNativeDisplayId();
