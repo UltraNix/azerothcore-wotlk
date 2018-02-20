@@ -1,7 +1,3 @@
-/*
-REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "vault_of_archavon.h"
@@ -9,235 +5,169 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "PassiveAI.h"
 #include "Player.h"
 
-enum Spells
+enum ToravonSpells
 {
     // Toravon
-    SPELL_FREEZING_GROUND                = 72090,
+    SPELL_FREEZING_GROUND               = 72090,
     SPELL_FROZEN_ORB                    = 72091,
-    SPELL_WHITEOUT                        = 72034,
-    SPELL_FROZEN_MALLET                    = 71993,
+    SPELL_WHITEOUT                      = 72034,
+    SPELL_FROZEN_MALLET                 = 71993,
+    SPELL_FROSTBITE                     = 72004,
 
     // Frozen Orb
-    SPELL_FROZEN_ORB_DMG                = 72081,    // priodic dmg aura
-    SPELL_FROZEN_ORB_AURA                = 72067,    // make visible
-
-    // Frozen Orb Stalker
-    SPELL_FROZEN_ORB_STALKER_VISUAL        = 72094,
+    SPELL_FROZEN_ORB_DMG                = 72081,
+    SPELL_FROZEN_ORB_AURA               = 72067,
+    SPELL_RANDOM_AGGRO                  = 72084
 };
 
-enum Events
+enum ToravonMisc
 {
-    EVENT_FREEZING_GROUND                = 1,
-    EVENT_FROZEN_ORB_STALKER            = 2,
-    EVENT_CHECK_SUMMONS                    = 3,
+    NPC_FROZEN_ORB                      = 38456,
+    NPC_FROZEN_ORB_STALKER              = 38461
 };
 
-enum Misc
+struct boss_toravonAI : public BossAI
 {
-    NPC_FROZEN_ORB                        = 38456,
-    NPC_FROZEN_ORB_STALKER                = 38461,
-};
+    boss_toravonAI(Creature* creature) : BossAI(creature, EVENT_TORAVON) { }
 
-
-class boss_toravon : public CreatureScript
-{
-    public:
-        boss_toravon() : CreatureScript("boss_toravon") { }
-
-        struct boss_toravonAI : public ScriptedAI
-        {
-            boss_toravonAI(Creature* creature) : ScriptedAI(creature), summons(me)
-            {
-                pInstance = me->GetInstanceScript();
-            }
-
-            InstanceScript* pInstance;
-            EventMap events;
-            SummonList summons;
-
-            void Reset()
-            {
-                events.Reset();
-                summons.DespawnAll();
-                if (pInstance)
-                {
-                    if (pInstance->GetData(DATA_STONED))
-                    {
-                        if (Aura* aur = me->AddAura(SPELL_STONED_AURA, me))
-                        {
-                            aur->SetMaxDuration(60 * MINUTE* IN_MILLISECONDS);
-                            aur->SetDuration(60 * MINUTE* IN_MILLISECONDS);
-                        }
-                    }
-                    pInstance->SetData(EVENT_TORAVON, NOT_STARTED);
-                }
-            }
-
-            void AttackStart(Unit* who)
-            {
-                if (me->HasAura(SPELL_STONED_AURA))
-                    return;
-
-                ScriptedAI::AttackStart(who);
-            }
-
-            void EnterCombat(Unit* /*who*/)
-            {
-                me->CastSpell(me, SPELL_FROZEN_MALLET, true);
-
-                events.ScheduleEvent(EVENT_FROZEN_ORB_STALKER, 12000);
-                events.ScheduleEvent(EVENT_FREEZING_GROUND, 7000);
-                if (pInstance)
-                    pInstance->SetData(EVENT_TORAVON, IN_PROGRESS);
-            }
-
-            void JustDied(Unit* )
-            {
-                if (pInstance)
-                {
-                    pInstance->SetData(EVENT_TORAVON, DONE);
-                    pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_WHITEOUT);
-                }
-            }
-
-            void JustSummoned(Creature* cr)
-            {
-                summons.Summon(cr);
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                switch (events.GetEvent())
-                {
-                    case EVENT_FREEZING_GROUND:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
-                            me->CastSpell(target, SPELL_FREEZING_GROUND, false);
-                        events.RepeatEvent(20000);
-                        break;
-                    case EVENT_FROZEN_ORB_STALKER:
-                        me->CastCustomSpell(SPELL_FROZEN_ORB, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), me, false);
-                        events.RepeatEvent(35000);
-                        events.ScheduleEvent(EVENT_CHECK_SUMMONS, 10000);
-                        break;
-                    case EVENT_CHECK_SUMMONS:
-                        for (SummonList::iterator i = summons.begin(); i != summons.end();)
-                        {
-                            if (Creature* cr = ObjectAccessor::GetCreature(*me, *i))
-                            {
-                                if (!cr->IsAlive())
-                                    summons.erase(i++);
-                                else
-                                    ++i;
-                            }
-                            else
-                                summons.erase(i++);
-                        }
-                        if (summons.empty())
-                        {
-                            events.PopEvent();
-                            me->CastSpell(me, SPELL_WHITEOUT, false);
-                            break;
-                        }
-                        events.RepeatEvent(2000);
-                        break;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_toravonAI(creature);
-        }
-};
-
-class npc_frozen_orb : public CreatureScript
-{
-public:
-    npc_frozen_orb() : CreatureScript("npc_frozen_orb") { }
-
-    struct npc_frozen_orbAI : public ScriptedAI
+    void Reset() override
     {
-        npc_frozen_orbAI(Creature* creature) : ScriptedAI(creature)
+        _Reset();
+        if (instance->GetData(DATA_STONED))
         {
-        }
-
-        uint32 switchTimer;
-
-        void Reset()
-        {
-            switchTimer = 9000;
-            me->CastSpell(me, SPELL_FROZEN_ORB_AURA, true);
-            me->CastSpell(me, SPELL_FROZEN_ORB_DMG, true);
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            me->SetInCombatWithZone();
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            switchTimer += diff;
-            if (switchTimer >= 10000)
+            if (Aura* aura = me->AddAura(SPELL_STONED_AURA, me))
             {
-                switchTimer = 0;
-                me->getThreatManager().resetAllAggro();
-                if (Player* player = SelectTargetFromPlayerList(100.0f))
-                    me->AddThreat(player, 100000.0f);
+                aura->SetMaxDuration(60 * MINUTE* IN_MILLISECONDS);
+                aura->SetDuration(60 * MINUTE* IN_MILLISECONDS);
             }
         }
-    };
 
-    CreatureAI* GetAI(Creature* creature) const
+        instance->SetData(EVENT_TORAVON, NOT_STARTED);
+    }
+
+    void AttackStart(Unit* who) override
     {
-        return new npc_frozen_orbAI(creature);
+        if (me->HasAura(SPELL_STONED_AURA))
+            return;
+
+        BossAI::AttackStart(who);
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        _EnterCombat();
+
+        DoCastSelf(SPELL_FROZEN_MALLET);
+        scheduler.Schedule(12s, [this](TaskContext task)
+        {
+            me->CastCustomSpell(SPELL_FROZEN_ORB, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), me, false);
+            task.Repeat(32s);
+        });
+        scheduler.Schedule(25s, [this](TaskContext task)
+        {
+            DoCastSelf(SPELL_WHITEOUT);
+            task.Repeat(38s);
+        });
+        scheduler.Schedule(7s, [this](TaskContext task)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
+                DoCast(target, SPELL_FREEZING_GROUND);
+            task.Repeat(38s);
+        });
+
+
+        instance->SetData(EVENT_TORAVON, IN_PROGRESS);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        _JustDied();
+        instance->SetData(EVENT_TORAVON, DONE);
+        for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_WHITEOUT, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_FROSTBITE, me) })
+            instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
+    }
+
+    void EnterEvadeMode() override
+    {
+        for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_WHITEOUT, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_FROSTBITE, me) })
+            instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
+        BossAI::EnterEvadeMode();
+    }
+
+    void JustSummoned(Creature* summon) override
+    {
+        summons.Summon(summon);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        scheduler.Update(diff,
+            std::bind(&BossAI::DoMeleeAttackIfReady, this));
     }
 };
 
-class npc_frozen_orb_stalker : public CreatureScript
+struct npc_frozen_orbAI : public ScriptedAI
 {
-public:
-    npc_frozen_orb_stalker() : CreatureScript("npc_frozen_orb_stalker") { }
+    npc_frozen_orbAI(Creature* creature) : ScriptedAI(creature) { }
 
-    struct npc_frozen_orb_stalkerAI : public NullCreatureAI
+    void IsSummonedBy(Unit* /*summoner*/) override
     {
-        npc_frozen_orb_stalkerAI(Creature* creature) : NullCreatureAI(creature)
-        {
-        }
+        DoCastSelf(SPELL_FROZEN_ORB_AURA, true);
+        DoCastSelf(SPELL_FROZEN_ORB_DMG, true);
+        DoCastSelf(SPELL_RANDOM_AGGRO, true);
 
-        void Reset()
+        if (InstanceScript* instance = me->GetInstanceScript())
         {
-            me->CastSpell(me, SPELL_FROZEN_ORB_STALKER_VISUAL, true);
+            if (Creature* toravon = instance->instance->GetCreature(instance->GetData64(EVENT_TORAVON)))
+            {
+                if (toravon->IsInCombat())
+                {
+                    toravon->AI()->JustSummoned(me);
+                    DoZoneInCombat();
+                }
+                else
+                    me->DespawnOrUnsummon();
+            }
         }
-
-        void JustSummoned(Creature* cr)
-        {
-            if (InstanceScript* pInstance = me->GetInstanceScript())
-                if (Creature* toravon = ObjectAccessor::GetCreature(*me, pInstance->GetData64(EVENT_TORAVON)))
-                    if (toravon->AI())
-                        toravon->AI()->JustSummoned(cr);
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_frozen_orb_stalkerAI(creature);
     }
+
+    void UpdateAI(uint32 /*diff*/) override { }
 };
 
+// 46523 - Random Aggro
+class spell_toravon_random_aggro_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_toravon_random_aggro_SpellScript);
+
+    bool Load() override
+    {
+        return GetCaster()->IsCreature();
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Creature* caster = GetCaster()->ToCreature();
+        if (!caster->IsAIEnabled)
+            return;
+
+        caster->getThreatManager().resetAllAggro();
+
+        if (Unit* target = caster->AI()->SelectTarget(SELECT_TARGET_RANDOM, 1))
+            caster->getThreatManager().addThreat(target, 1000000.0f);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_toravon_random_aggro_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
 
 void AddSC_boss_toravon()
 {
-    new boss_toravon();
-    new npc_frozen_orb();
-    new npc_frozen_orb_stalker();
+    new CreatureAILoader<boss_toravonAI>("boss_toravon");
+    new CreatureAILoader<npc_frozen_orbAI>("npc_frozen_orb");
+    new SpellScriptLoaderEx<spell_toravon_random_aggro_SpellScript>("spell_toravon_random_aggro");
 }
