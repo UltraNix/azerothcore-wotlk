@@ -2841,6 +2841,10 @@ std::vector<uint32> partialCorrection =
     71362,  // Frost Blast 25 man
     55959,  // Embrace of the Vampyr
     59513,  // Embrace of the Vampyr heroic
+    72004, // Frostbite 10 man
+    72098, // Frostbite 25 man
+    72034, // Whiteout 10 man
+    72096  // Whiteout 25 man
 };
 
 void SpellMgr::LoadSpellCustomAttr()
