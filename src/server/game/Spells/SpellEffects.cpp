@@ -6024,6 +6024,10 @@ void Spell::EffectGameObjectDamage(SpellEffIndex /*effIndex*/)
     if (gameObjTarget->GetEntry() == 193070 && caster->GetTypeId() != TYPEID_UNIT)
         return;
 
+    // ICC LK platform
+    if (gameObjTarget->GetEntry() == 202189 && caster->GetTypeId() != TYPEID_UNIT)
+        return;
+
     FactionTemplateEntry const* casterFaction = caster->GetFactionTemplateEntry();
     FactionTemplateEntry const* targetFaction = sFactionTemplateStore.LookupEntry(gameObjTarget->GetUInt32Value(GAMEOBJECT_FACTION));
     // Do not allow to damage GO's of friendly factions (ie: Wintergrasp Walls/Ulduar Storm Beacons)
