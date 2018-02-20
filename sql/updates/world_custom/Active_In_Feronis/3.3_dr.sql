@@ -1,0 +1,14 @@
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (37958, 37959, 36612, 37957); -- Marrowgar
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (38297, 38296, 36855, 38106); -- Lady Deathwhisper
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36939, 38156, 38637, 38638); -- High Overlord Saurfang
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36948, 38157, 38639, 38640); -- Muradin Bronzebeard
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (37813, 38402, 38582, 38583); -- Deathbringer Saurfang
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36626, 37504, 37505, 37506); -- Festergut
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36627, 38390, 38549, 38550); -- Rotface
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36678, 38431, 38585, 38586); -- Putricide
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (37970, 38401, 38784, 38785); -- Valanar
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (37972, 38399, 38769, 38770); -- Keleseth
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (37973, 38400, 38771, 38772); -- Taldaram
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (37955, 38434, 38435, 38436); -- Lana'thel
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36853, 38265, 38266, 38267); -- Sindragosa
+UPDATE `creature_template` SET `flags_extra`=`flags_extra`|0x00080000 WHERE `entry` IN (36597, 39166, 39167, 39168); -- The Lich King
