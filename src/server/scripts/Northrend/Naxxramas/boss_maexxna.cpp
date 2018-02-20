@@ -158,7 +158,10 @@ public:
                 case EVENT_SPELL_WEB_SPRAY:
                     me->MonsterTextEmote("%s sprays strands of web everywhere!", 0, true);
                     me->CastSpell(me, RAID_MODE(SPELL_WEB_SPRAY_10, SPELL_WEB_SPRAY_25), true);
-                    events.RepeatEvent(40000);
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
+                        events.RepeatEvent(30000);
+                    else
+                        events.RepeatEvent(40000);
                     break;
                 case EVENT_SPELL_POISON_SHOCK:
                     me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_POISON_SHOCK_10, SPELL_POISON_SHOCK_25), false);
