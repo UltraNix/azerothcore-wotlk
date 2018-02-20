@@ -33,10 +33,14 @@ UPDATE `creature_template` SET `dmg_multiplier` = '43', `Health_mod` = '2475' WH
 UPDATE `creature_template` SET `dmg_multiplier` = '26', `Health_mod` = '45' WHERE `creature_template`.`entry` =29941;
 UPDATE `creature_template` SET `dmg_multiplier` = '210',`Health_mod` = '1080' WHERE `creature_template`.`entry` =29940;
 
-UPDATE `creature_template` SET `Health_mod` = '340' WHERE `creature_template`.`entry` =30601;
-UPDATE `creature_template` SET `Health_mod` = '340' WHERE `creature_template`.`entry` =30602;
-UPDATE `creature_template` SET `Health_mod` = '340' WHERE `creature_template`.`entry` =30603;
-UPDATE `creature_template` SET `Health_mod` = '340' WHERE `creature_template`.`entry` =30600;
+SET @ZELIK:= 30602;
+SET @BARON:= 30600;
+SET @THANE:= 30603;
+SET @LADY:= 30601;
+
+SET @BASE_HEALTH_MOD:= 340;
+
+UPDATE `creature_template` SET `Health_mod` = @BASE_HEALTH_MOD + (@BASE_HEALTH_MOD * 0.1) WHERE `entry` IN (@ZELIK, @BARON, @THANE, @LADY);
 
 SET @MALYGOS_BASE_HP_MODIFIER:= 1400;
 SET @MALYGOS_25_ENTRY:= 31734;
