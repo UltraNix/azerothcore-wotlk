@@ -6690,7 +6690,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 73780:
         case 73781:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
-            break;
         case 70337: // Lich King, Necrotic Plague
         case 73912:
         case 73913:
