@@ -299,7 +299,11 @@ public:
           {
               corki->GetMotionMaster()->MovePoint(1, go->GetPositionX()+5, go->GetPositionY(), go->GetPositionZ());
               if (player)
+              {
                   player->KilledMonsterCredit(NPC_CORKI_CREDIT_1, 0);
+                  if (corki->IsAIEnabled)
+                      corki->AI()->Talk(CORKI_SAY_THANKS, player);
+              }
           }
       }
 
@@ -369,9 +373,6 @@ public:
           {
               Say_Timer = 5000;
               ReleasedFromCage = true;
-              if (me->GetEntry() == NPC_CORKI)
-                  if (Player* plr = me->SelectNearestPlayer(10.0f))
-                    Talk(CORKI_SAY_THANKS, plr);
               if (me->GetEntry() == NPC_CORKI_2)
                   Talk(CORKI_SAY_PROMISE);
               if (me->GetEntry() == NPC_CORKI_3)
