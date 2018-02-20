@@ -416,7 +416,7 @@ public:
                     break;
                 }
                 case EVENT_SECOND_PHASE_HEALTH_CHECK:
-                    if (me->HealthBelowPct(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (me->GetMap()->Is25ManRaid() ? 90 : 45) : 45))
+                    if (me->HealthBelowPct(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? (me->GetMap()->Is25ManRaid() ? 90 : 80) : 45))
                     {
                         events.PopEvent();
                         Talk(SAY_REQUEST_AID);
