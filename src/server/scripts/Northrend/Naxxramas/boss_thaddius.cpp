@@ -333,7 +333,7 @@ public:
 
                     events.ScheduleEvent(EVENT_THADDIUS_SPELL_CHAIN_LIGHTNING, 14000);
                     events.ScheduleEvent(EVENT_THADDIUS_SPELL_BERSERK, 360000);
-                    events.ScheduleEvent(EVENT_THADDIUS_POLARITY_SHIFT, 30000);
+                    events.ScheduleEvent(EVENT_THADDIUS_POLARITY_SHIFT, 15000);
                     return;
                 case EVENT_STOMP_BOOST:
                     if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
@@ -352,7 +352,7 @@ public:
                 case EVENT_THADDIUS_POLARITY_SHIFT:
                     me->CastSpell(me, SPELL_POLARITY_SHIFT, false);
                     PolarityDamage();
-                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(30000, 20000) : 30000);
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(30000, 15000) : 30000);
                     break;
             }
 
