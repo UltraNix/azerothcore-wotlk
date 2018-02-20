@@ -821,7 +821,8 @@ enum DiminishingLevels
     DIMINISHING_LEVEL_3             = 2,
     DIMINISHING_LEVEL_IMMUNE        = 3,
     DIMINISHING_LEVEL_4             = 3,
-    DIMINISHING_LEVEL_TAUNT_IMMUNE  = 4,
+    DIMINISHING_LEVEL_5             = 4,
+    DIMINISHING_LEVEL_TAUNT_IMMUNE  = 5,
 };
 
 struct DiminishingReturn

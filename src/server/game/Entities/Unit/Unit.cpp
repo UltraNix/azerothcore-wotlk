@@ -13884,6 +13884,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
                 case DIMINISHING_LEVEL_2: mod = 0.65f; break;
                 case DIMINISHING_LEVEL_3: mod = 0.4225f; break;
                 case DIMINISHING_LEVEL_4: mod = 0.274625f; break;
+                case DIMINISHING_LEVEL_5: mod = 0.17850625f; break;
                 case DIMINISHING_LEVEL_TAUNT_IMMUNE: mod = 0.0f; break;
                 default: break;
             }
