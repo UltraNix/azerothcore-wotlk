@@ -107,8 +107,11 @@ public:
             PatchwerkFormation();
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_HATEFUL_STRIKE, 1200);
-            events.ScheduleEvent(EVENT_SPELL_BERSERK, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(360000, 300000) : 360000);
             events.ScheduleEvent(EVENT_HEALTH_CHECK, 1000);
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(2min, 4min));
+            else
+                events.ScheduleEvent(EVENT_SPELL_BERSERK, 6min);
 
             if (pInstance)
             {
