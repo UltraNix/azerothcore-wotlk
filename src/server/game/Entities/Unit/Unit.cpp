@@ -17163,7 +17163,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
                 break;
         }
     }
-    else if (GetTypeId() == TYPEID_PLAYER)
+    else if (GetTypeId() == TYPEID_PLAYER && aurApp->GetBase()->GetId() != 71289)
         RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
     _charmThreatInfo.clear();
