@@ -96,7 +96,7 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (20735, 24589),
 (20735, 24590);
 -- Update Archmage Landalock quest rewards
-UPDATE `quest_template` SET `RewardItemId1` = @FROST, `RewardItemId2` = @TRIUMPH WHERE `id` IN (SELECT `quest` FROM `creature_queststarter` WHERE `id` = 20735);
+UPDATE `quest_template` SET `RewardItemId1` = @EmblemHighCURR, `RewardItemId2` = @EmblemLowCURR WHERE `id` IN (SELECT `quest` FROM `creature_queststarter` WHERE `id` = 20735);
 
 -- Archmage Timear
 DELETE FROM `creature_queststarter` WHERE `id`=31439;
