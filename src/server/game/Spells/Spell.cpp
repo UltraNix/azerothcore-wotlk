@@ -3821,7 +3821,10 @@ void Spell::_cast(bool skipCheck)
 
     SetExecutedCurrently(false);
     if (m_casttime)
-        m_caster->resetAttackTimer();
+    {
+        m_caster->resetAttackTimer(BASE_ATTACK);
+        m_caster->resetAttackTimer(OFF_ATTACK);
+    }
 }
 
 void Spell::handle_immediate()
