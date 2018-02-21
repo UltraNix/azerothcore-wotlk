@@ -12620,8 +12620,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
 
 void Unit::ClearInCombat()
 {
-    if (IsPlayer() && IsAlive() && !ToPlayer()->IsGameMaster() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
-        return;
+    //if (IsPlayer() && IsAlive() && !ToPlayer()->IsGameMaster() && GetMap() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
+    //    return;
 
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
