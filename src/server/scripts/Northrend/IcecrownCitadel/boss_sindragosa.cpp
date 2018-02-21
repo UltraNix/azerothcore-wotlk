@@ -264,6 +264,7 @@ class boss_sindragosa : public CreatureScript
             boss_sindragosaAI(Creature* creature) : BossAI(creature, DATA_SINDRAGOSA), _summoned(false)
             {
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+                me->SetReactState(REACT_PASSIVE);
             }
 
             void Reset()
@@ -319,6 +320,8 @@ class boss_sindragosa : public CreatureScript
                     return;
                 }
 
+
+                me->SetReactState(REACT_AGGRESSIVE);
                 _didFirstFlyPhase = false;
                 _isBelow20Pct = false;
                 _isThirdPhase = false;
