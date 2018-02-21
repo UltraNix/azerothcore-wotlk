@@ -3787,6 +3787,12 @@ public:
             _events.ScheduleEvent(EVENT_UNHOLY_STRIKE, urand(1000, 2000));
         }
 
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (InstanceScript* instance = me->GetInstanceScript())
+                instance->SetData(DATA_BPC_TRASH_DIED, DATA_BPC_TRASH_DIED);
+        }
+
         void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
