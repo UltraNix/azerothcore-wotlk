@@ -6833,11 +6833,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
             spellInfo->EffectMiscValue[0] = 100;
             break;
-        // Empowered Blood
-        case 70227:
-        case 70232:
-            spellInfo->AreaGroupId = 2452; // Whole icc instead of Crimson Halls only, remove when area calculation is fixed
-            break;
 
         //////////////////////////////////////////
         ////////// RUBY SANCTUN
