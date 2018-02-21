@@ -567,4 +567,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     //! boss records
     PrepareStatement(CHAR_UPD_CREATURE_RECORD, "UPDATE creature_records SET BestKillTime = ?, BestTimeGuild = ?, PrevBestTimeGuild = ? WHERE entry = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_CREATURE_RECORD, "INSERT INTO creature_records VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    // MAIL SPAM
+    PrepareStatement(CHAR_SEL_MAX_LEVEL_BY_ACC_ID, "SELECT MAX(level) FROM characters WHERE account = ?", CONNECTION_SYNCH);
 }

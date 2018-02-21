@@ -2695,7 +2695,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 GetNextSave() const { return m_nextSave; }
         SpellModList const& GetSpellModList(uint32 type) const { return m_spellMods[type]; }
 
-		bool CheckPremiumAmount(uint32 amount);
+        bool CheckPremiumAmount(uint32 amount);
+        bool HasRequiredCharacterLevel(uint8 level);
 
     protected:
         // Gamemaster whisper whitelist

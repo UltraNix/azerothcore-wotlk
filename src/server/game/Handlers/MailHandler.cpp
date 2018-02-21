@@ -101,6 +101,19 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
 
     Player* player = _player;
 
+    // Sitowsky: Mail Spam
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->HasRequiredCharacterLevel(uint8(sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))))
+    {
+        SendNotification(GetTrinityString(LANG_MAIL_SPAM_REQ_LEVEL), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        return;
+    }
+
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == false && player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    {
+        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        return;
+    }
+
     uint64 rc = 0;
     if (normalizePlayerName(receiver))
         rc = sObjectMgr->GetPlayerGUIDByName(receiver);
@@ -188,12 +201,6 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     if (!sWorld->getBoolConfig(CONFIG_CROSSFACTION_MAIL) && !accountBound && player->GetTeamId() != rc_teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
     {
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_YOUR_TEAM);
-        return;
-    }
-
-    if (player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ) && !accountBound)
-    {
-        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         return;
     }
 

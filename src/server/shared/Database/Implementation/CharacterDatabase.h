@@ -504,6 +504,8 @@ enum CharacterDatabaseStatements
     // boss records
     CHAR_UPD_CREATURE_RECORD,
     CHAR_INS_CREATURE_RECORD,
+    // MAIL SPAM
+    CHAR_SEL_MAX_LEVEL_BY_ACC_ID,
 
     MAX_CHARACTERDATABASE_STATEMENTS
 };

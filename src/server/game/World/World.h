@@ -184,8 +184,9 @@ enum WorldBoolConfigs
     CONFIG_ACCOUNT_HISTORY,                   // Sitowsky: Every log of login on in-game account is saving to database.
     CONFIG_MUTE_HISTORY,                      // Sitowsky: Every log of mute command is saving to database.
     CONFIG_WHO_OPPOSITE,                      // Sitowsky: Count players of both factions in who list.
-    CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE,      // Enables bonus honor for all honor related stuff for horde teamId
-    CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE,   // Same as above but for alliance
+    CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE,      // Riztazz: Enables bonus honor for all honor related stuff for horde teamId
+    CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE,   // Riztazz: Same as above but for alliance
+    CONFIG_MAIL_SPAM_ENABLE,                  // Sitowsky: Enables or disables the additional system of preventing low level characters mailbox spam without having a character of a required level.
     BOOL_CONFIG_VALUE_COUNT
 };
 

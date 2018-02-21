@@ -27666,3 +27666,21 @@ bool Player::CheckPremiumAmount(uint32 amount)
 
 	return true;
 }
+
+bool Player::HasRequiredCharacterLevel(uint8 level)
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAX_LEVEL_BY_ACC_ID);
+    stmt->setUInt32(0, GetSession()->GetAccountId());
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+    if (!result)
+        return false;
+
+    uint8 resultLevel = (*result)[0].GetUInt8();
+
+    if (resultLevel < level)
+        return false;
+
+    return true;
+}
