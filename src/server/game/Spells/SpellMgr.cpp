@@ -5232,7 +5232,7 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             // Frost Aura (Encounter: Sapphiron)
             case 55799:
-                spellInfo->EffectBasePoints[EFFECT_0] = 5000;
+                spellInfo->EffectBasePoints[EFFECT_0] = 6000;
                 break;
             case 28531: // Frost Aura (sapphiron 10man)
                 spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
