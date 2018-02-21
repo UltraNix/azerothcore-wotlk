@@ -399,8 +399,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_INFILTRATOR_MINCHAR_BQ:
                     case NPC_MINCHAR_BEAM_STALKER:
                     case NPC_VALITHRIA_DREAMWALKER_QUEST:
-                    case NPC_ROTTING_FROST_GIANT_10:
-                    case NPC_ROTTING_FROST_GIANT_25:
                         for (uint8 i = 0; i < WeeklyNPCs; ++i)
                             if (WeeklyQuestData[i].creatureEntry == creature->GetEntry())
                             {
