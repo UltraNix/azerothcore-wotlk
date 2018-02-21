@@ -138,7 +138,7 @@ void BattlegroundMgr::Update(uint32 diff)
         if (sWorld->GetGameTime() > m_NextAutoDistributionTime)
         {
             sArenaTeamMgr->DistributeArenaPoints();
-            m_NextAutoDistributionTime = sWorld->GetNextTimeWithDayAndHour(5, 18);
+            m_NextAutoDistributionTime = sWorld->GetNextTimeWithDayAndHourAndMinute(5, 18);
             sWorld->setWorldState(WS_ARENA_DISTRIBUTION_TIME, uint64(m_NextAutoDistributionTime));
         }
     }
@@ -697,7 +697,7 @@ void BattlegroundMgr::InitAutomaticArenaPointDistribution()
         return;
 
     time_t wstime = time_t(sWorld->getWorldState(WS_ARENA_DISTRIBUTION_TIME));
-    m_NextAutoDistributionTime = wstime ? wstime : sWorld->GetNextTimeWithDayAndHour(5, 18);
+    m_NextAutoDistributionTime = wstime ? wstime : sWorld->GetNextTimeWithDayAndHourAndMinute(5, 18);
     if (!wstime)
         sWorld->setWorldState(WS_ARENA_DISTRIBUTION_TIME, uint64(m_NextAutoDistributionTime));
 }

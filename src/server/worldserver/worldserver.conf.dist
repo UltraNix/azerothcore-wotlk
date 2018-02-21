@@ -1223,6 +1223,14 @@ Instance.IgnoreRaid = 0
 Instance.ResetTimeHour = 4
 
 #
+#    Instance.ResetTimeMinute
+#        Description: Minute for ResetTimeHour when the global instance reset occurs.
+#        Range:       0-59
+#        Default:     0
+
+Instance.ResetTimeMinute = 0
+
+#
 #    Instance.UnloadDelay
 #        Description: Time (in milliseconds) before instance maps are unloaded from memory if no
 #                     characters are inside.

@@ -255,6 +255,7 @@ enum WorldIntConfigs
     CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL,
     CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL_DIFFERENCE,
     CONFIG_INSTANCE_RESET_TIME_HOUR,
+    CONFIG_INSTANCE_RESET_TIME_MINUTE,
     CONFIG_INSTANCE_RESET_TIME_RELATIVE_TIMESTAMP,
     CONFIG_INSTANCE_UNLOAD_DELAY,
     CONFIG_MAX_PRIMARY_TRADE_SKILL,
@@ -882,8 +883,8 @@ class World
         void   SetCleaningFlags(uint32 flags) { m_CleaningFlags = flags; }
         void   ResetEventSeasonalQuests(uint16 event_id);
 
-        time_t GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour);                       // pussywizard
-        time_t GetNextTimeWithMonthAndHour(int8 month, int8 hour);                         // pussywizard
+        time_t GetNextTimeWithDayAndHourAndMinute(int8 dayOfWeek, int8 hour, int8 minute = 0);                       // pussywizard
+        time_t GetNextTimeWithMonthAndHourAndMinute(int8 month, int8 hour, int8 minute = 0);                         // pussywizard
 
         std::string const& GetRealmName() const { return _realmName; }                     // pussywizard
         void SetRealmName(std::string name) { _realmName = name; }                         // pussywizard

@@ -858,7 +858,9 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_INSTANCE_IGNORE_LEVEL] = sConfigMgr->GetBoolDefault("Instance.IgnoreLevel", false);
     m_bool_configs[CONFIG_INSTANCE_IGNORE_RAID]  = sConfigMgr->GetBoolDefault("Instance.IgnoreRaid", false);
 
-    m_int_configs[CONFIG_INSTANCE_RESET_TIME_HOUR]  = sConfigMgr->GetIntDefault("Instance.ResetTimeHour", 4);
+    m_int_configs[CONFIG_INSTANCE_RESET_TIME_HOUR]   = sConfigMgr->GetIntDefault("Instance.ResetTimeHour", 4);
+    m_int_configs[CONFIG_INSTANCE_RESET_TIME_MINUTE] = sConfigMgr->GetIntDefault("Instance.ResetTimeMinute", 0);
+
     m_int_configs[CONFIG_INSTANCE_RESET_TIME_RELATIVE_TIMESTAMP] = sConfigMgr->GetIntDefault("Instance.ResetTimeRelativeTimestamp", 1135814400);
     m_int_configs[CONFIG_INSTANCE_UNLOAD_DELAY] = sConfigMgr->GetIntDefault("Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
 
@@ -2998,15 +3000,19 @@ void World::_UpdateRealmCharCount(PreparedQueryResult resultCharCount)
 }
 
 // int8 dayOfWeek: 0 (sunday) to 6 (saturday)
-time_t World::GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour)
+time_t World::GetNextTimeWithDayAndHourAndMinute(int8 dayOfWeek, int8 hour, int8 minute)
 {
     if (hour < 0 || hour > 23)
         hour = 0;
+
+    if (minute < 0 || minute > 59)
+        minute = 0;
+
     time_t curr = time(nullptr);
     tm localTm;
     ACE_OS::localtime_r(&curr, &localTm);
     localTm.tm_hour = hour;
-    localTm.tm_min  = 0;
+    localTm.tm_min  = minute;
     localTm.tm_sec  = 0;
     uint32 add;
     if (dayOfWeek < 0 || dayOfWeek > 6)
@@ -3019,16 +3025,20 @@ time_t World::GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour)
 }
 
 // int8 month: 0 (january) to 11 (december)
-time_t World::GetNextTimeWithMonthAndHour(int8 month, int8 hour)
+time_t World::GetNextTimeWithMonthAndHourAndMinute(int8 month, int8 hour, int8 minute)
 {
     if (hour < 0 || hour > 23)
         hour = 0;
+
+    if (minute < 0 || minute > 59)
+        minute = 0;
+
     time_t curr = time(nullptr);
     tm localTm;
     ACE_OS::localtime_r(&curr, &localTm);
     localTm.tm_mday = 1;
     localTm.tm_hour = hour;
-    localTm.tm_min  = 0;
+    localTm.tm_min  = minute;
     localTm.tm_sec  = 0;
     if (month < 0 || month > 11)
     {
@@ -3045,7 +3055,7 @@ time_t World::GetNextTimeWithMonthAndHour(int8 month, int8 hour)
 void World::InitWeeklyQuestResetTime()
 {
     time_t wstime = time_t(sWorld->getWorldState(WS_WEEKLY_QUEST_RESET_TIME));
-    m_NextWeeklyQuestReset = wstime ? wstime : GetNextTimeWithDayAndHour(4, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextWeeklyQuestReset = wstime ? wstime : GetNextTimeWithDayAndHourAndMinute(4, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     if (!wstime)
         sWorld->setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(m_NextWeeklyQuestReset));
 }
@@ -3053,7 +3063,7 @@ void World::InitWeeklyQuestResetTime()
 void World::InitDailyQuestResetTime()
 {
     time_t wstime = time_t(sWorld->getWorldState(WS_DAILY_QUEST_RESET_TIME));
-    m_NextDailyQuestReset = wstime ? wstime : GetNextTimeWithDayAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextDailyQuestReset = wstime ? wstime : GetNextTimeWithDayAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     if (!wstime)
         sWorld->setWorldState(WS_DAILY_QUEST_RESET_TIME, uint64(m_NextDailyQuestReset));
 }
@@ -3061,7 +3071,7 @@ void World::InitDailyQuestResetTime()
 void World::InitMonthlyQuestResetTime()
 {
     time_t wstime = time_t(sWorld->getWorldState(WS_MONTHLY_QUEST_RESET_TIME));
-    m_NextMonthlyQuestReset = wstime ? wstime : GetNextTimeWithMonthAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextMonthlyQuestReset = wstime ? wstime : GetNextTimeWithMonthAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     if (!wstime)
         sWorld->setWorldState(WS_MONTHLY_QUEST_RESET_TIME, uint64(m_NextMonthlyQuestReset));
 }
@@ -3069,7 +3079,7 @@ void World::InitMonthlyQuestResetTime()
 void World::InitRandomBGResetTime()
 {
     time_t wstime = time_t(sWorld->getWorldState(WS_BG_DAILY_RESET_TIME));
-    m_NextRandomBGReset = wstime ? wstime : GetNextTimeWithDayAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextRandomBGReset = wstime ? wstime : GetNextTimeWithDayAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     if (!wstime)
         sWorld->setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
 }
@@ -3077,7 +3087,7 @@ void World::InitRandomBGResetTime()
 void World::InitGuildResetTime()
 {
     time_t wstime = time_t(getWorldState(WS_GUILD_DAILY_RESET_TIME));
-    m_NextGuildReset = wstime ? wstime : GetNextTimeWithDayAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextGuildReset = wstime ? wstime : GetNextTimeWithDayAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     if (!wstime)
         sWorld->setWorldState(WS_GUILD_DAILY_RESET_TIME, uint64(m_NextGuildReset));
 }
@@ -3091,7 +3101,7 @@ void World::ResetDailyQuests()
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetDailyQuestStatus();
 
-    m_NextDailyQuestReset = GetNextTimeWithDayAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextDailyQuestReset = GetNextTimeWithDayAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     sWorld->setWorldState(WS_DAILY_QUEST_RESET_TIME, uint64(m_NextDailyQuestReset));
 
     // change available dailies
@@ -3128,7 +3138,7 @@ void World::ResetWeeklyQuests()
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
 
-    m_NextWeeklyQuestReset = GetNextTimeWithDayAndHour(4, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextWeeklyQuestReset = GetNextTimeWithDayAndHourAndMinute(4, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     sWorld->setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(m_NextWeeklyQuestReset));
 
     // change available weeklies
@@ -3146,7 +3156,7 @@ void World::ResetMonthlyQuests()
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetMonthlyQuestStatus();
 
-    m_NextMonthlyQuestReset = GetNextTimeWithMonthAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextMonthlyQuestReset = GetNextTimeWithMonthAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     sWorld->setWorldState(WS_MONTHLY_QUEST_RESET_TIME, uint64(m_NextMonthlyQuestReset));
 }
 
@@ -3172,7 +3182,7 @@ void World::ResetRandomBG()
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->SetRandomWinner(false);
 
-    m_NextRandomBGReset = GetNextTimeWithDayAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextRandomBGReset = GetNextTimeWithDayAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     sWorld->setWorldState(WS_BG_DAILY_RESET_TIME, uint64(m_NextRandomBGReset));
 }
 
@@ -3180,7 +3190,7 @@ void World::ResetGuildCap()
 {
     sLog->outString("Guild Daily Cap reset.");
 
-    m_NextGuildReset = GetNextTimeWithDayAndHour(-1, sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 12 : 6);
+    m_NextGuildReset = GetNextTimeWithDayAndHourAndMinute(-1, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     sWorld->setWorldState(WS_GUILD_DAILY_RESET_TIME, uint64(m_NextGuildReset));
 
     sGuildMgr->ResetTimes();

@@ -259,7 +259,9 @@ void InstanceSaveManager::LoadResetTimes()
     time_t today = (now / DAY) * DAY;
 
     // load the global respawn times for raid/heroic instances
-    uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
+    uint32 GMTzone = HOUR;
+    uint32 diff = (sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR + sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_MINUTE) * MINUTE) - GMTzone;
+
     QueryResult result = CharacterDatabase.Query("SELECT mapid, difficulty, resettime FROM instance_reset");
     if (result)
     {
@@ -525,16 +527,18 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, b
         }
 
         // calculate the next reset time
-        uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
+        uint32 GMTzone = HOUR;
+        uint32 diff = (sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR + sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_MINUTE) * MINUTE) - GMTzone;
 
         uint32 period = mapDiff->resetTime;
         if (period < DAY)
             period = DAY;
 
         uint32 next_reset = uint32(((resetTime + MINUTE) / DAY * DAY) + period + diff);
+
         SetResetTimeFor(mapid, difficulty, next_reset);
         SetExtendedResetTimeFor(mapid, difficulty, next_reset + period);
-        ScheduleReset(time_t(next_reset-3600), InstResetEvent(1, mapid, difficulty));
+        ScheduleReset(time_t(next_reset), InstResetEvent(1, mapid, difficulty));
 
         // update it in the DB
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GLOBAL_INSTANCE_RESETTIME);
