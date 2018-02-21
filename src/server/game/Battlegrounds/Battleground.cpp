@@ -923,6 +923,9 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
         uint32 loser_kills = player->GetRandomWinner() ? BG_REWARD_LOSER_HONOR_LAST : BG_REWARD_LOSER_HONOR_FIRST;
         uint32 winner_arena = player->GetRandomWinner() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
 
+        if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) && !player->GetRandomWinner())
+            winner_arena += 25;
+
         // Reward winner team
         if (bgTeamId == winnerTeamId)
         {
