@@ -101,3 +101,12 @@ UPDATE `quest_template` SET `RewardItemId1` = @EmblemHighCURR, `RewardItemId2` =
 -- Archmage Timear
 DELETE FROM `creature_queststarter` WHERE `id`=31439;
 DELETE FROM `creature_questender` WHERE `id`=31439;
+
+-- EoF Vendors
+DELETE FROM `creature` WHERE `guid` IN (202582, 4761);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES 
+(202582, 37941, 571, 1, 1, 0, 1, 5936.93, 509.132, 650.263, 2.28638, 300, 0, 0, 10080, 8814, 0, 0, 0, 0), 
+(4761, 37942, 571, 1, 1, 0, 1, 5765.45, 734.38, 653.748, 2.7227, 300, 0, 0, 1, 0, 0, 0, 0, 0);
+
+-- ICC 0% buff
+DELETE FROM `spell_area` WHERE `spell` IN (73822, 73828);

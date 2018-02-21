@@ -2933,8 +2933,7 @@ public:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 37.5f, true))
                             {
                                 casted = true;
-                                for (auto i = 0; i < me->GetMap()->Is25ManRaid() ? 5 : 2; ++i)
-                                    me->CastSpell(target, 71906); // Severed Essence
+                                me->CastSpell(target, 71906); // Severed Essence
                             }
 
                         events.RepeatEvent(casted ? 25000 : 5000);
@@ -3786,6 +3785,12 @@ public:
             _events.Reset();
             _events.ScheduleEvent(EVENT_BLOOD_MIRROR, urand(6000, 7000));
             _events.ScheduleEvent(EVENT_UNHOLY_STRIKE, urand(1000, 2000));
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (InstanceScript* instance = me->GetInstanceScript())
+                instance->SetData(DATA_BPC_TRASH_DIED, DATA_BPC_TRASH_DIED);
         }
 
         void UpdateAI(uint32 diff) override

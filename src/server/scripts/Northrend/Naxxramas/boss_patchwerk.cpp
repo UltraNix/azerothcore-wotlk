@@ -109,7 +109,7 @@ public:
             events.ScheduleEvent(EVENT_SPELL_HATEFUL_STRIKE, 1200);
             events.ScheduleEvent(EVENT_HEALTH_CHECK, 1000);
             if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(2min, 4min));
+                events.ScheduleEvent(EVENT_SPELL_BERSERK, Is25ManRaid() ? 300000 : 210000);
             else
                 events.ScheduleEvent(EVENT_SPELL_BERSERK, 6min);
 

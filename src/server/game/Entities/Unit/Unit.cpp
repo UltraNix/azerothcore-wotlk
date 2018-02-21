@@ -12620,7 +12620,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
 
 void Unit::ClearInCombat()
 {
-    if (IsPlayer() && IsAlive() && !ToPlayer()->IsGameMaster() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
+    if (IsInWorld() && IsPlayer() && IsAlive() && !ToPlayer()->IsGameMaster() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
         return;
 
     m_CombatTimer = 0;

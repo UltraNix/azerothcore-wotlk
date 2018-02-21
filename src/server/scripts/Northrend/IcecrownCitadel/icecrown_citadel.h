@@ -13,7 +13,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #define ICCScriptName "instance_icecrown_citadel"
 
 uint32 const WeeklyNPCs = 9;
-uint32 const MaxHeroicAttempts = 0;
+uint32 const MaxHeroicAttempts = 5;
 
 // Defined in boss_valithria_dreamwalker.cpp
 extern Position const ValithriaSpawnPos;

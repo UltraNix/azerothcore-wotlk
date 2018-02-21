@@ -897,6 +897,9 @@ class spell_gen_proc_once_per_cast : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
+                if ((eventInfo.GetHitMask() & (PROC_EX_EX_ONE_TIME_TRIGGER)))
+                    return true;
+
                 if (Player* player = eventInfo.GetActor()->ToPlayer())
                 {
                     if (player->m_spellModTakingSpell == _spellPointer)

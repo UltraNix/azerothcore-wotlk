@@ -223,6 +223,15 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+                if (instance)
+                {
+                    instance->DoRemoveAurasDueToSpellOnPlayers(70711);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(70227);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(70232);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(70304);
+                    instance->DoRemoveAurasDueToSpellOnPlayers(70320);
+                }
+
                 bool valid = true;
                 if (Creature* keleseth = instance->instance->GetCreature(instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
                     if (!keleseth->IsAlive() || keleseth->IsInEvadeMode())

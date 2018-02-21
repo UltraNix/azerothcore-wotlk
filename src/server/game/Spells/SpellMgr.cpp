@@ -5422,7 +5422,13 @@ void SpellMgr::LoadDbcDataCorrections()
         case 57935: // twilight torment
             spellInfo->procCharges = 0;
             spellInfo->StackAmount = 1;
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
             break;
+        case 57948: // twilight torments
+        case 58853: // twilight torments
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+            break;
+
 
         //////////////////////////////////////////
         ////////// EYE OF ETERNITY
@@ -6826,11 +6832,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
             spellInfo->EffectMiscValue[0] = 100;
-            break;
-        // Empowered Blood
-        case 70227:
-        case 70232:
-            spellInfo->AreaGroupId = 2452; // Whole icc instead of Crimson Halls only, remove when area calculation is fixed
             break;
 
         //////////////////////////////////////////
