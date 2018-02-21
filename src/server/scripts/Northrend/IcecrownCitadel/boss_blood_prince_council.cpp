@@ -223,7 +223,7 @@ class boss_prince_keleseth_icc : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance)
+                if (instance)
                     instance->DoRemoveAurasDueToSpellOnPlayers(70227);
 
                 bool valid = true;
