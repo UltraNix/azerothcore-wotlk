@@ -5422,7 +5422,13 @@ void SpellMgr::LoadDbcDataCorrections()
         case 57935: // twilight torment
             spellInfo->procCharges = 0;
             spellInfo->StackAmount = 1;
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
             break;
+        case 57948: // twilight torments
+        case 58853: // twilight torments
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+            break;
+
 
         //////////////////////////////////////////
         ////////// EYE OF ETERNITY

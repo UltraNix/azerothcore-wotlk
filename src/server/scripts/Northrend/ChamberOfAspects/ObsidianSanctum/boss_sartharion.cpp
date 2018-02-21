@@ -995,7 +995,10 @@ public:
             else if (pInstance)
             {
                 if (Creature* cr = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_SARTHARION)))
+                {
+                    cr->RemoveAura(SPELL_GIFT_OF_TWILIGHT_FIRE);
                     cr->AI()->DoAction(ACTION_DRAKE_DIED);
+                }
             }
         }
 
@@ -1137,10 +1140,10 @@ public:
             if (pInstance)
             {
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_SHIFT);
-                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_SARTHARION_AURA);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_VESPERON);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_DEBUFF_ALONE);
-                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_DEBUFF_SARTHARION);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_SARTHARION);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_TORMENT_SARTHARION_AURA);
             }
 
             summons.DespawnAll();
