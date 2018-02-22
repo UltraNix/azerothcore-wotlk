@@ -404,12 +404,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                             {
                                 WeeklyQuestNpcGUID[i] = creature->GetGUID();
                                 if (WeeklyQuestId10 != WeeklyQuestData[i].questId[0])
-                                    creature->DespawnOrUnsummon();
+                                    creature->SetVisible(false);
                                 else if (WeeklyQuestData[i].creatureEntry == NPC_VALITHRIA_DREAMWALKER_QUEST && GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
-                                    creature->DespawnOrUnsummon();
+                                    creature->SetVisible(false);
                             }
                         break;
                 }
+
 
                 switch (creature->GetEntry())
                 {
