@@ -3057,7 +3057,7 @@ time_t World::GetNextTimeWithMonthAndHourAndMinute(int8 month, int8 hour, int8 m
 void World::InitWeeklyQuestResetTime()
 {
     time_t wstime = time_t(sWorld->getWorldState(WS_WEEKLY_QUEST_RESET_TIME));
-    m_NextWeeklyQuestReset = wstime ? wstime : GetNextTimeWithDayAndHourAndMinute(4, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
+    m_NextWeeklyQuestReset = wstime ? wstime : GetNextTimeWithDayAndHourAndMinute((sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 4 : 3), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     if (!wstime)
         sWorld->setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(m_NextWeeklyQuestReset));
 }
