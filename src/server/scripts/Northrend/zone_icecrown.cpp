@@ -106,6 +106,8 @@ enum valhalas
     NPC_CARNAGE                                    = 31271,
     NPC_THANE                                    = 31277,
     NPC_PRINCE                                    = 14688, // no mistake
+
+    SUMMON_KILLED                               = 6
 };
 
 class npc_battle_at_valhalas : public CreatureScript
@@ -345,7 +347,7 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
-            if (type == 6 && data == 6)
+            if (type == SUMMON_KILLED && data == SUMMON_KILLED)
                 summonsKilled = true;
         }
     };
