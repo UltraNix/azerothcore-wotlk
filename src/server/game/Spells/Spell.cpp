@@ -6788,7 +6788,6 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     if (strict && IsNextMeleeSwingSpell())
         maxRange = 100.0f;
-
     else if (m_spellInfo->RangeEntry)
     {
         if (m_spellInfo->RangeEntry->type & SPELL_RANGE_MELEE)
