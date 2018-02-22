@@ -3289,6 +3289,10 @@ void SpellMgr::LoadSpellCustomAttr()
             55550, // Jagged Knife
             48642, // Launch Harpoon
             66734, // Trample
+	        69409,
+            73797,
+            73798,
+            73799, // Soul Reaper
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
