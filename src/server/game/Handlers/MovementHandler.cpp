@@ -494,7 +494,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
                 //! code below is not correct and not true
                 //! https://youtu.be/DSmMvIv1HA0?t=207 as you can see, he is set out of bounds which allows to ressurect
                 //! but keeps falling and falling
-                //plrMover->StopMovingOnCurrentPos(); // pussywizard: moving corpse can't release spirit
+                plrMover->StopMovingOnCurrentPos(); // pussywizard: moving corpse can't release spirit
             }
         }
 
