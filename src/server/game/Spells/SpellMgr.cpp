@@ -5262,7 +5262,8 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.35;
                 break;
             // Frosbolt multi (Encounter: Kel'thuzad)
-            case 55807:
+            case 28479: // 10 Man
+            case 55807: // 25 Man
                 spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.50;
                 break;
             // Arcane Explosion (Encounter: Gothik)
