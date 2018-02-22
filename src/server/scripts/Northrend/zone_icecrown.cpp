@@ -125,6 +125,7 @@ public:
         uint64 playerGUID;
         uint64 playerGUID2;
         uint32 currentQuest;
+        bool summonsKilled;
 
         void Reset()
         {
@@ -133,6 +134,7 @@ public:
             playerGUID = 0;
             currentQuest = 0;
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            summonsKilled = false;
         }
 
         void JustSummoned(Creature* creature)
@@ -206,7 +208,7 @@ public:
                             break;
                         }
 
-                    if (allow)
+                    if (allow && summonsKilled)
                     {
                         switch (currentQuest)
                         {
@@ -339,6 +341,12 @@ public:
                     break;
                 }
             }
+        }
+
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == 6 && data == 6)
+                summonsKilled = true;
         }
     };
 
