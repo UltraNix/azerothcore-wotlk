@@ -110,3 +110,37 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 
 -- ICC 0% buff
 DELETE FROM `spell_area` WHERE `spell` IN (73822, 73828);
+
+-- ICC rep
+DELETE FROM `creature_onkill_reputation` WHERE `creature_id` IN (
+37232,
+38362, -- Nerubar Broodling
+37782,
+38312, -- Flesh-eating Insect
+37868, 
+37863, 
+37934, 
+37886, 
+38171, 
+38727, 
+38737, 
+38167, 
+38725, 
+38735, 
+38166, 
+38724, 
+38734, 
+38170, 
+38723, 
+38733,
+36791,
+38169,
+38721,
+38722, -- Valithria adds
+37695,
+39309,
+39310,
+39311, -- Drudge Ghoul
+38104,
+38105  -- Plagued Zombie
+);
