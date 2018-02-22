@@ -544,7 +544,7 @@ public:
                 events.ScheduleEvent(EVENT_MINION_SPELL_MORTAL_WOUND, 5000);
             }
             else if (me->GetEntry() == NPC_GUARDIAN_OF_ICECROWN)
-                events.ScheduleEvent(EVENT_MINION_SPELL_BLOOD_TAP, 13000);
+                events.ScheduleEvent(EVENT_MINION_SPELL_BLOOD_TAP, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? 13000 : 15000);
         }
 
         void KilledUnit(Unit* who)
@@ -585,7 +585,7 @@ public:
                 }
                 case EVENT_MINION_SPELL_BLOOD_TAP:
                     me->CastSpell(me->GetVictim(), SPELL_BLOOD_TAP, false);
-                    events.RepeatEvent(13000);
+                    events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? 13000 : 15000);
                     break;
             }
 
