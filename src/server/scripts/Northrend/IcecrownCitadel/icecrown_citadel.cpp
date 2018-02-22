@@ -4079,8 +4079,14 @@ struct npc_deathbound_wardAI : public ScriptedAI
     void Reset() override
     {
         _scheduler.CancelAll();
-        if (_path && me->HasAura(SPELL_STONEFORM))
-            me->RemoveAurasDueToSpell(SPELL_STONEFORM);
+
+        _scheduler.Schedule(1s, [this](TaskContext task)
+        {
+            if (me->HasAura(SPELL_STONEFORM) && _path)
+                me->RemoveAurasDueToSpell(SPELL_STONEFORM);
+
+            task.Repeat();
+        });
     }
 
     void SetData(uint32 identifier, uint32 data) override
@@ -4093,30 +4099,26 @@ struct npc_deathbound_wardAI : public ScriptedAI
     {
         _scheduler.Schedule(15s, 20s, [this](TaskContext task)
         {
-            DoCastAOE(SPELL_DISRUPTING_SHOUT);
+            if (me->IsInCombat())
+                DoCastAOE(SPELL_DISRUPTING_SHOUT);
             task.Repeat(30s, 35s);
         });
         _scheduler.Schedule(9s, 12s, [this](TaskContext task)
         {
-            DoCastVictim(SPELL_SABER_LASH);
+            if (me->IsInCombat())
+                DoCastVictim(SPELL_SABER_LASH);
             task.Repeat();
         });
     }
 
-    void EnterEvadeMode() override
-    {
-        ScriptedAI::EnterEvadeMode();
-        if (_path && me->HasAura(SPELL_STONEFORM))
-            me->RemoveAurasDueToSpell(SPELL_STONEFORM);
-    }
-
     void UpdateAI(uint32 diff) override
     {
+        _scheduler.Update(diff);
+
         if (!UpdateVictim())
             return;
 
-        _scheduler.Update(diff,
-            std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+        DoMeleeAttackIfReady();
     }
 
     private:
