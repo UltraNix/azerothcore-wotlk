@@ -2837,128 +2837,86 @@ public:
     }
 };
 
-class npc_icc_valkyr_herald : public CreatureScript
+enum ValkyrHerald
 {
-public:
-    npc_icc_valkyr_herald() : CreatureScript("npc_icc_valkyr_herald") { }
+    SPELL_SEVERED_ESSENCE = 71906
+};
 
-    struct npc_icc_valkyr_heraldAI : public ScriptedAI
+struct npc_icc_valkyr_heraldAI : public ScriptedAI
+{
+    npc_icc_valkyr_heraldAI(Creature* creature) : ScriptedAI(creature), _summons(me)
     {
-        npc_icc_valkyr_heraldAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
-        EventMap events;
-        SummonList summons;
+        _scheduler.SetValidator([this] { return !me->HasUnitState(UNIT_STATE_CASTING); });
+    }
 
-        void Reset() { events.Reset(); summons.DespawnAll(); }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            events.Reset();
-            summons.DespawnAll();
-            me->setActive(true);
-            events.ScheduleEvent(1, 10000);
-            me->SetInCombatWithZone();
-        }
-
-        void JustReachedHome()
-        {
-            me->setActive(false);
-        }
-
-        void JustSummoned(Creature* s)
-        {
-            summons.Summon(s);
-        }
-
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (me->IsAlive() && !me->IsInCombat() && who->GetTypeId() == TYPEID_PLAYER && who->GetExactDist2d(me) < 35.0f)
-                AttackStart(who);
-        }
-
-        void SummonedCreatureDespawn(Creature* s)
-        {
-            summons.Despawn(s);
-        }
-
-        bool CanAIAttack(Unit const* target) const
-        {
-            return target->GetExactDist(4357.0f, 2769.0f, 356.0f) < 170.0f;
-        }
-
-        void SpellHitTarget(Unit* target, const SpellInfo* spell)
-        {
-            if (spell->Id == 71906 || spell->Id == 71942)
-            {
-                if (Creature* c = me->SummonCreature(38410, *target, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                {
-                    c->AI()->AttackStart(target);
-                    DoZoneInCombat(c);
-                    uint8 Class = target->getClass();
-                    if (Class != CLASS_DRUID)
-                        if (Player* p = target->ToPlayer())
-                        {
-                            if (Item* i = p->GetWeaponForAttack(BASE_ATTACK))
-                                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, i->GetEntry());
-                            if (Item* i = p->GetWeaponForAttack(OFF_ATTACK))
-                                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, i->GetEntry());
-                            if (Item* i = p->GetWeaponForAttack(RANGED_ATTACK))
-                                me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, i->GetEntry());
-
-                            target->CastSpell(c, 60352, true); // Mirror Image, clone visual appearance
-                        }
-                    c->AI()->DoAction(Class);
-                }
-            }
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.GetEvent())
-            {
-                case 0:
-                    break;
-                case 1:
-                    {
-                        uint8 count = me->GetMap()->Is25ManRaid() ? 5 : 2;
-                        bool casted = false;
-                        for (uint8 i=0; i<count; ++i)
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 37.5f, true))
-                            {
-                                casted = true;
-                                me->CastSpell(target, 71906); // Severed Essence
-                            }
-
-                        events.RepeatEvent(casted ? 25000 : 5000);
-                    }
-                    break;
-            }
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const
+    void Reset() override
     {
-        return new npc_icc_valkyr_heraldAI(creature);
+        _scheduler.CancelAll();
+        _summons.DespawnAll();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.CancelAll();
+        _summons.DespawnAll();
+        me->setActive(true);
+        DoZoneInCombat(nullptr, 100.0f);
+        _scheduler.Schedule(10s, [this](TaskContext task)
+        {
+            DoCastAOE(SPELL_SEVERED_ESSENCE);
+            task.Repeat(25s);
+        });
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (me->IsAlive() && !me->IsInCombat() && who->IsPlayer() && who->GetExactDist2d(me) < 35.0f)
+            AttackStart(who);
+    }
+
+    bool CanAIAttack(Unit const* target) const override
+    {
+        return target->GetExactDist(4357.0f, 2769.0f, 356.0f) < 170.0f;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff, std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+    }
+
+    private:
+        TaskScheduler _scheduler;
+        SummonList _summons;
+};
+
+class spell_valkyr_herald_targeting_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_valkyr_herald_targeting_SpellScript);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        std::cout << "filter\n";
+        if (!targets.empty())
+            Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 5 : 2);
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_valkyr_herald_targeting_SpellScript::FilterTargets, EFFECT_ALL, TARGET_UNIT_DEST_AREA_ENEMY);
     }
 };
 
 class SeveredEssenceSpellInfo
 {
-public:
-    uint8 Class;
-    uint32 id;
-    uint32 cooldown_ms;
-    uint8 targetType;
-    float range;
+    public:
+        uint8 Class;
+        uint32 id;
+        uint32 cooldown_ms;
+        uint8 targetType;
+        float range;
 };
 
 SeveredEssenceSpellInfo sesi_spells[] =
@@ -3000,6 +2958,27 @@ public:
         npc_icc_severed_essenceAI(Creature* creature) : ScriptedAI(creature) {}
         EventMap events;
         uint8 Class;
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            DoZoneInCombat();
+
+            uint8 Class = summoner->getClass();
+            if (Class != CLASS_DRUID)
+                if (Player* player = summoner->ToPlayer())
+                {
+                    if (Item* i = player->GetWeaponForAttack(BASE_ATTACK))
+                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, i->GetEntry());
+                    if (Item* i = player->GetWeaponForAttack(OFF_ATTACK))
+                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, i->GetEntry());
+                    if (Item* i = player->GetWeaponForAttack(RANGED_ATTACK))
+                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, i->GetEntry());
+
+                    player->CastSpell(me, 60352, true); // Mirror Image, clone visual appearance
+                }
+
+            DoAction(Class);
+        }
 
         void DoAction(int32 a)
         {
@@ -4168,7 +4147,8 @@ void AddSC_icecrown_citadel()
     new npc_icc_skybreaker_marksman();
     new npc_icc_skybreaker_vicar();
     new npc_icc_skybreaker_luminary();
-    new npc_icc_valkyr_herald();
+    new CreatureAILoader<npc_icc_valkyr_heraldAI>("npc_icc_valkyr_herald");
+    new SpellScriptLoaderEx<spell_valkyr_herald_targeting_SpellScript>("spell_valkyr_herald_targeting");
     new npc_icc_severed_essence();
     new npc_icc_spire_frostwyrm();
     new npc_icc_vengeful_fleshreaper();

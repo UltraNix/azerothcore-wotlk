@@ -6566,12 +6566,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 71289: // Dominate Mind (Lady Deathwhisper)
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
-        case 71906: // Severed Essence (Val'kyr Herald)
-        case 71942: // Severed Essence (Val'kyr Herald)
-            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0;
-            break;
         case 71159: // Awaken Plagued Zombies (Precious)
         case 71302: // Awaken Ymirjar Fallen (Ymirjar Deathbringer)
             spellInfo->DurationIndex = 21;
