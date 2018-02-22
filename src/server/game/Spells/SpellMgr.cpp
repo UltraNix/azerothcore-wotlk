@@ -6833,6 +6833,28 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
             spellInfo->EffectMiscValue[0] = 100;
             break;
+        // Vengeful Blast
+        case 71544:
+        case 72010:
+        case 72011:
+        case 72012:
+        // Malleable Goo (Festergut)
+        case 72297:
+        case 72548:
+        case 72549:
+        case 72550:
+        // Malleable Goo (Professor)
+        case 70853:
+        case 72458:
+        case 72873:
+        case 72874:
+        // Choking Gas
+        case 71279:
+        case 72459:
+        case 72621:
+        case 72622:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
 
         //////////////////////////////////////////
         ////////// RUBY SANCTUN
