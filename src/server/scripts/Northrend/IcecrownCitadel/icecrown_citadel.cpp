@@ -2898,7 +2898,6 @@ class spell_valkyr_herald_targeting_SpellScript : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-        std::cout << "filter\n";
         if (!targets.empty())
             Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 5 : 2);
     }
