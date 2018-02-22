@@ -1196,7 +1196,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_START_ALL_REP] = sConfigMgr->GetBoolDefault("PlayerStart.AllReputation", false);
     m_bool_configs[CONFIG_ALWAYS_MAXSKILL] = sConfigMgr->GetBoolDefault("AlwaysMaxWeaponSkill", false);
     m_bool_configs[CONFIG_EVENT_BONUS_XP] = sConfigMgr->GetBoolDefault("EventBonusXP.Enable", 0);
-    m_bool_configs[CONFIG_EVENT_BONUS_MULTIPLER] = sConfigMgr->GetIntDefault("EventBonusXP.Multipler", 2);
+    m_int_configs[CONFIG_EVENT_BONUS_MULTIPLER] = sConfigMgr->GetIntDefault("EventBonusXP.Multipler", 2);
     m_bool_configs[CONFIG_PVP_TOKEN_ENABLE] = sConfigMgr->GetBoolDefault("PvPToken.Enable", false);
     m_int_configs[CONFIG_PVP_TOKEN_MAP_TYPE] = sConfigMgr->GetIntDefault("PvPToken.MapAllowType", 4);
     m_int_configs[CONFIG_PVP_TOKEN_ID] = sConfigMgr->GetIntDefault("PvPToken.ItemID", 29434);
