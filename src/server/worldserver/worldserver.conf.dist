@@ -1231,6 +1231,13 @@ Instance.ResetTimeHour = 4
 Instance.ResetTimeMinute = 0
 
 #
+#    Instance.ResetTimeZone
+#        Description: Adjusting the timezone to time of instance reset.
+#        Default:     1 (UTC+01:00)
+
+Instance.ResetTimeZone = 1
+
+#
 #    Instance.UnloadDelay
 #        Description: Time (in milliseconds) before instance maps are unloaded from memory if no
 #                     characters are inside.

@@ -123,8 +123,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recvData*/)
     data.append(dataBuffer);
 
     // pussywizard
-    uint32 GMTzone = HOUR;
-    uint32 relationTime = (sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_RELATIVE_TIMESTAMP) + sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR + sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_MINUTE) * MINUTE) - GMTzone; // set point in time (default 29.12.2005) + X hours + X minutes
+    uint32 relationTime = (sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_RELATIVE_TIMESTAMP) + sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR + sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_MINUTE) * MINUTE); // set point in time (default 29.12.2005) + X hours + X minutes
     data << uint32(relationTime);
 
     // Reuse variables

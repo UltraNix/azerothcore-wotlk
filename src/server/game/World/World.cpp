@@ -861,6 +861,7 @@ void World::LoadConfigSettings(bool reload)
 
     m_int_configs[CONFIG_INSTANCE_RESET_TIME_HOUR]   = sConfigMgr->GetIntDefault("Instance.ResetTimeHour", 4);
     m_int_configs[CONFIG_INSTANCE_RESET_TIME_MINUTE] = sConfigMgr->GetIntDefault("Instance.ResetTimeMinute", 0);
+    m_int_configs[CONFIG_INSTANCE_RESET_TIME_ZONE]   = sConfigMgr->GetIntDefault("Instance.ResetTimeZone", 1);
 
     m_int_configs[CONFIG_INSTANCE_RESET_TIME_RELATIVE_TIMESTAMP] = sConfigMgr->GetIntDefault("Instance.ResetTimeRelativeTimestamp", 1135814400);
     m_int_configs[CONFIG_INSTANCE_UNLOAD_DELAY] = sConfigMgr->GetIntDefault("Instance.UnloadDelay", 30 * MINUTE * IN_MILLISECONDS);
