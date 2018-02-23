@@ -61,6 +61,9 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
     WorldPacket data2(SMSG_PROPOSE_LEVEL_GRANT, 8);
     data2.append(_player->GetPackGUID());
     target->GetSession()->SendPacket(&data2);
+
+    sLog->outRaF("Player (sender, GUID: %u): %s has send Grant Level (at level: %u) to Player (receiver, GUID: %u): %s (at level: %u)",
+        _player->GetGUIDLow(), _player->GetName().c_str(), _player->getLevel(), target->GetGUIDLow(), target->GetName().c_str(), target->getLevel());
 }
 
 void WorldSession::HandleAcceptGrantLevel(WorldPacket& recvData)
@@ -81,6 +84,9 @@ void WorldSession::HandleAcceptGrantLevel(WorldPacket& recvData)
         other->SetGrantableLevels(other->GetGrantableLevels() - 1);
     else
         return;
+
+    sLog->outRaF("Player (receiver, GUID: %u): %s has accepted Grant Level (at level: %u) from Player (sender, GUID: %u): %s (at level: %u), new Player (receiver) level: %u",
+        _player->GetGUIDLow(), _player->GetName().c_str(), _player->getLevel(), other->GetGUIDLow(), other->GetName().c_str(), other->getLevel(), _player->getLevel() + 1);
 
     _player->GiveLevel(_player->getLevel() + 1);
 }

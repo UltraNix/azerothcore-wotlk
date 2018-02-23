@@ -705,7 +705,7 @@ ReleaseDebugLogTimestamp = 0
 #    CheatLogFile
 #        Description: Log file for special debug operations
 #        Default:     "Cheat.log" - (Enabled)
-#                     ""           - (Disabled)
+#                     ""          - (Disabled)
 
 CheatLogFile = "Cheat.log"
 
@@ -717,6 +717,23 @@ CheatLogFile = "Cheat.log"
 #                     1 - (Enabled)
 
 CheatLogFileLogTimestamp = 0
+
+#
+#    RaFLogFile
+#        Description: Log file for refer a friend.
+#        Default:     "RaF.log" - (Enabled)
+#                     ""        - (Disabled)
+
+RaFLogFile = "RaF.log"
+
+#
+#    RaFLogFileTimestamp
+#        Description: Append timestamp to the special debug log file name.
+#                     Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+RaFLogFileLogTimestamp = 0
 
 #
 #    LogColors
