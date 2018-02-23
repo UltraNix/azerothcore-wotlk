@@ -35,14 +35,13 @@ public:
         if (InstanceScript* instance = go->GetInstanceScript())
         {
             if (instance->GetData(TYPE_LYCEUM) == IN_PROGRESS)
+            {
+                instance->HandleGameObject(instance->GetData64(DATA_GOLEM_DOOR_S), true);
+                instance->HandleGameObject(instance->GetData64(DATA_GOLEM_DOOR_N), true);
                 instance->SetData(TYPE_LYCEUM, DONE);
+            }
             else
                 instance->SetData(TYPE_LYCEUM, IN_PROGRESS);
-            // If used brazier open linked doors (North or South)
-            if (go->GetGUID() == instance->GetData64(DATA_SF_BRAZIER_N))
-                instance->HandleGameObject(instance->GetData64(DATA_GOLEM_DOOR_N), true);
-            else if (go->GetGUID() == instance->GetData64(DATA_SF_BRAZIER_S))
-                instance->HandleGameObject(instance->GetData64(DATA_GOLEM_DOOR_S), true);
         }
         return false;
     }
