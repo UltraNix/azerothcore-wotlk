@@ -7,6 +7,9 @@
 #include "Player.h"
 #include "battle_for_undercity.h"
 
+#include <unordered_map>
+#include <vector>
+
 class worldzone_trisfal_glades : public WorldMapZoneScript
 {
     public:
@@ -29,7 +32,8 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
             uint64 SylvanasGUID;
             uint64 WaveTriggerGUID;
 
-            std::list<uint64> AllianceSpawns;
+            std::unordered_map< uint64_t, size_t >  SpawnToIndex;
+            std::vector<uint64>                     AllianceSpawns;
 
             void Initialize() 
             {
@@ -55,6 +59,8 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                 WaveTriggerGUID = 0;
 
                 AllianceSpawns.clear();
+                SpawnToIndex.clear();
+                AllianceSpawns.reserve( 200 );
             }
 
             void OnCreatureCreate(Creature* creature) 
@@ -73,8 +79,15 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                         break;
                     case NPC_STORMWIND_ELITE_A:
                     case NPC_ALLIANCE_SIEGE:
-                        AllianceSpawns.push_back(creature->GetGUID());
+                    {
+                        uint64_t guid = creature->GetGUID();
+
+                        size_t idx = AllianceSpawns.size();
+                        SpawnToIndex[ guid ] = idx;
+
+                        AllianceSpawns.push_back( creature->GetGUID() );
                         break;
+                    }
                     case NPC_FLYING_MACHINE:
                         creature->m_CombatDistance = 50.0f;
                         break;
@@ -90,8 +103,22 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                 {
                     case NPC_STORMWIND_ELITE_A:
                     case NPC_ALLIANCE_SIEGE:
-                        AllianceSpawns.remove(unit->GetGUID());
+                    {
+                        uint64_t guid = unit->GetGUID();
+
+                        auto idx = SpawnToIndex[ guid ];
+                        SpawnToIndex.erase( guid );
+
+                        uint64 guidToSwap = AllianceSpawns.back();
+                        if ( guidToSwap != guid )
+                        {
+                            SpawnToIndex[ guidToSwap ] = idx;
+                            AllianceSpawns[ idx ] = guidToSwap;
+                        }
+
+                        AllianceSpawns.pop_back();
                         break;
+                    }
                 }
             }
 
