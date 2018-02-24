@@ -1277,8 +1277,17 @@ public:
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1, 0, me);
         }
 
-        void MoveInLineOfSight(Unit* who) {}
-        void AttackStart(Unit* who) {}
+        void MoveInLineOfSight(Unit* who)
+        {
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                ScriptedAI::MoveInLineOfSight(who);
+        }
+
+        void AttackStart(Unit* who)
+        {
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                ScriptedAI::AttackStart(who);
+        }
     };
 };
 
