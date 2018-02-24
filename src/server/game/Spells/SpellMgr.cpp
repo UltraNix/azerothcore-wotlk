@@ -5201,6 +5201,32 @@ void SpellMgr::LoadDbcDataCorrections()
         case 28206:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+        /*########################################
+        ########## Malygos 10 & 25 ###############
+        ########################################*/
+        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+        {
+            case 56272: // Arcane breath normal
+                spellInfo->EffectBasePoints[EFFECT_0] = 30000;
+                break;
+            case 60072: // Arcane breath heroic
+                spellInfo->EffectBasePoints[EFFECT_0] = 45000;
+                break;
+            case 56256: // vortex
+                spellInfo->EffectBasePoints[EFFECT_1] = 4000;
+                break;
+            case 56548: // surge of power targeted (p2 i think)
+                spellInfo->EffectBasePoints[EFFECT_0] = 10000;
+                break;
+            case 61693: // arcane storm normal
+                spellInfo->EffectBasePoints[EFFECT_0] = 12000;
+                spellInfo->EffectDieSides[EFFECT_0] = 1250;
+                break;
+            case 61694: // arcane storm heroic
+                spellInfo->EffectBasePoints[EFFECT_0] = 14000;
+                spellInfo->EffectDieSides[EFFECT_0] = 1250;
+                break;
+        }
 
         //////////////////////////////////////////
         ////////// Naxxramas - BOOST - ONLY 25 MAN!
@@ -5508,7 +5534,11 @@ void SpellMgr::LoadDbcDataCorrections()
         // Surge of Power (Phase 3)
         case 57407: // N
         case 60936: // H
-            spellInfo->MaxAffectedTargets = (i == 60936 ? 3 : 1);
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                spellInfo->MaxAffectedTargets = (i == 60936 ? 6 : 1);
+            else
+                spellInfo->MaxAffectedTargets = (i == 60936 ? 3 : 1);
+
             spellInfo->InterruptFlags = 0;
             spellInfo->EffectRadiusIndex[0] = 28;
             spellInfo->AttributesEx4 |= SPELL_ATTR4_CAN_CAST_WHILE_CASTING;
