@@ -425,9 +425,9 @@ public:
                             c->CastSpell(c, SPELL_PORTAL_BEAM, false);
                         if (Creature* c = me->SummonCreature(NPC_POWER_SPARK, FourSidesPos[random], TEMPSUMMON_MANUAL_DESPAWN, 0))
                             c->AI()->DoAction(1);
-                        me->MonsterTextEmote("A Power Spark forms from a nearby rift!", 0, true);
-                        events.RepeatEvent(urand(20000, 30000));
                     }
+                    me->MonsterTextEmote("A Power Spark forms from a nearby rift!", 0, true);
+                    events.RepeatEvent(urand(20000, 30000));
                 }
                 break;
                 case EVENT_START_VORTEX_0:
