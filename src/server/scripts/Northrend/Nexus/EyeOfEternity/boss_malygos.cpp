@@ -1264,7 +1264,7 @@ public:
                     }
                     break;
             }
-            if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                 DoMeleeAttackIfReady();
         }
 
