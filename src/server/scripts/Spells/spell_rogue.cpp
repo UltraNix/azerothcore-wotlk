@@ -116,67 +116,82 @@ class spell_rog_combat_potency : public SpellScriptLoader
 // 13877, 33735, (check 51211, 65956) - Blade Flurry
 class spell_rog_blade_flurry : public SpellScriptLoader
 {
-    public:
-        spell_rog_blade_flurry() : SpellScriptLoader("spell_rog_blade_flurry") { }
+public:
+    spell_rog_blade_flurry() : SpellScriptLoader("spell_rog_blade_flurry") {}
 
-        class spell_rog_blade_flurry_AuraScript : public AuraScript
+    class spell_rog_blade_flurry_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_blade_flurry_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            PrepareAuraScript(spell_rog_blade_flurry_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK))
-                    return false;
-                return true;
-            }
-
-            bool Load()
-            {
-                _procTargetGUID = 0;
-                return true;
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                Unit* _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
-                if (_procTarget)
-                    _procTargetGUID = _procTarget->GetGUID();
-                return _procTarget;
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-                // Xinef: no _procTarget but checkproc passed??
-                // Unit::CalculateAOEDamageReduction (this=0x0, damage=4118, schoolMask=1, caster=0x7ffdad089000)
-                Unit* procTarget = ObjectAccessor::GetUnit(*GetTarget(), _procTargetGUID);
-                if (procTarget && eventInfo.GetDamageInfo())
-                {
-                    int32 damage = eventInfo.GetDamageInfo()->GetDamage();
-                    // Xinef: Include AOE Damage Reduction auras
-                    damage = procTarget->CalculateAOEDamageReduction(damage, SPELL_SCHOOL_MASK_NORMAL, GetTarget());
-
-                    CustomSpellValues values;
-                    values.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
-                    values.AddSpellMod(SPELLVALUE_FORCED_CRIT_RESULT, int32(eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT));
-                    GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, values, procTarget, TRIGGERED_FULL_MASK, NULL, aurEff);
-                }
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_rog_blade_flurry_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_rog_blade_flurry_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE);
-            }
-
-        private:
-            uint64 _procTargetGUID;
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_rog_blade_flurry_AuraScript();
+            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK))
+                return false;
+            return true;
         }
+
+        bool Load() override
+        {
+            _procTarget = nullptr;
+            _procOffOfTarget = nullptr;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            _procOffOfTarget = eventInfo.GetProcTarget();
+            _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+            return _procTarget && _procOffOfTarget;
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            if (!GetTarget() || !_procTarget || !_procOffOfTarget)
+                return;
+
+            PreventDefaultAction();
+
+            uint32 procDamage = 0;
+            SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+            SpellSchoolMask const schoolMask = eventInfo.GetDamageInfo()->GetSchoolMask();
+            WeaponAttackType attackType = eventInfo.GetDamageInfo()->GetAttackType();
+            uint32 damage = eventInfo.GetDamageInfo()->GetDamage();
+
+            //! Get armor difference between target that blade fury proced on and target that BF procced from
+            //! and calculate damage reduction based on the difference
+            //! if armor diff is negative or 0 then BF damage is full original damage
+            //! else calculate based on quotient
+            int32 armorDiff = _procTarget->GetArmor() - _procOffOfTarget->GetArmor();
+
+            if (armorDiff > 0)
+            {
+                if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
+                    procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
+                else
+                    procDamage = damage;
+            }
+            else
+                procDamage = damage;
+
+            if (procDamage)
+                GetTarget()->CastCustomSpell(SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, procDamage, _procTarget, true, nullptr, aurEff);
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_blade_flurry_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_rog_blade_flurry_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_MOD_MELEE_HASTE);
+        }
+
+    private:
+        Unit * _procTarget;
+        Unit * _procOffOfTarget;
+    };
+
+    AuraScript * GetAuraScript() const override
+    {
+        return new spell_rog_blade_flurry_AuraScript();
+    }
 };
 
 // -31228 - Cheat Death

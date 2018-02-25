@@ -3293,6 +3293,7 @@ void SpellMgr::LoadSpellCustomAttr()
             73797,
             73798,
             73799, // Soul Reaper
+            22482  // Rogue blade flurry (armor reduction is calculated in script already)
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
