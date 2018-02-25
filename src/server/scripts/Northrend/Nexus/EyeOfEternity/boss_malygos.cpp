@@ -191,7 +191,6 @@ public:
             me->SetDisableGravity(true);
             //me->SetHover(true);
             me->SendMovementFlagUpdate();
-
             if (pInstance)
             {
                 pInstance->SetData(DATA_ENCOUNTER_STATUS, NOT_STARTED);
@@ -550,6 +549,8 @@ public:
                     break;
                 }
                 case EVENT_START_PHASE_2:
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->MonsterYell("I had hoped to end your lives quickly, but you have proven more...resilient then I had anticipated. Nonetheless, your efforts are in vain, it is you reckless, careless mortals who are to blame for this war! I do what I must...And if it means your...extinction...THEN SO BE IT!", LANG_UNIVERSAL,0);
                     me->PlayDirectSound(SOUND_PHASE_1_END);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
