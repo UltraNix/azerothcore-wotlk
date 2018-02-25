@@ -43,37 +43,39 @@ enum MovementInformPoints
 
 enum MalygosSpells
 {
-    SPELL_BERSERK                        = 64238,
-    SPELL_ARCANE_BREATH_N                = 56272,
-    SPELL_ARCANE_BREATH_H                = 60072,
-    SPELL_ARCANE_STORM_N                = 61693,
-    SPELL_ARCANE_STORM_H                = 61694,
+    SPELL_BERSERK                           = 64238,
+    SPELL_ARCANE_BREATH_N                   = 56272,
+    SPELL_ARCANE_BREATH_H                   = 60072,
+    SPELL_ARCANE_STORM_N                    = 61693,
+    SPELL_ARCANE_STORM_H                    = 61694,
 
-    SPELL_VORTEX_VISUAL                    = 55873,
-    SPELL_VORTEX_CONTROL_VEHICLE        = 56263,
-    SPELL_FREEZE_ANIM                    = 55883,
+    SPELL_VORTEX_VISUAL                     = 55873,
+    SPELL_VORTEX_CONTROL_VEHICLE            = 56263,
+    SPELL_FREEZE_ANIM                       = 55883,
 
-    SPELL_ARCANE_OVERLOAD                = 56430,
-    SPELL_ARCANE_OVERLOAD_SUMMON        = 56429,
-    SPELL_ARCANE_OVERLOAD_AURA            = 56432,
-    SPELL_ARCANE_OVERLOAD_DMG            = 56431,
-    SPELL_ARCANE_OVERLOAD_SIZE            = 56435,
-    SPELL_ARCANE_OVERLOAD_PROTECTION    = 56438,
+    SPELL_ARCANE_OVERLOAD                   = 56430,
+    SPELL_ARCANE_OVERLOAD_SUMMON            = 56429,
+    SPELL_ARCANE_OVERLOAD_AURA              = 56432,
+    SPELL_ARCANE_OVERLOAD_DMG               = 56431,
+    SPELL_ARCANE_OVERLOAD_SIZE              = 56435,
+    SPELL_ARCANE_OVERLOAD_PROTECTION        = 56438,
 
-    SPELL_SURGE_OF_POWER                = 56505, // no heroic version?
-    SPELL_SURGE_OF_POWER_DMG            = 56548,
+    SPELL_SURGE_OF_POWER                    = 56505, // no heroic version?
+    SPELL_SURGE_OF_POWER_DMG                = 56548,
 
-    SPELL_DESTROY_PLATFORM_EFFECT        = 59099,
-    SPELL_DESTROY_PLATFORM_VISUAL        = 59084,
+    SPELL_DESTROY_PLATFORM_EFFECT           = 59099,
+    SPELL_DESTROY_PLATFORM_VISUAL           = 59084,
 
-    SPELL_ARCANE_PULSE                    = 57432,
-    SPELL_PH3_SURGE_OF_POWER_N            = 57407,
-    SPELL_PH3_SURGE_OF_POWER_H            = 60936,
+    SPELL_ARCANE_PULSE                      = 57432,
+    SPELL_PH3_SURGE_OF_POWER_N              = 57407,
+    SPELL_PH3_SURGE_OF_POWER_H              = 60936,
 
-    SPELL_STATIC_FIELD_MAIN                = 57430,
-    SPELL_STATIC_FIELD_SUMMON            = 57431,
-    SPELL_STATIC_FIELD_AURA                = 57428,
-    SPELL_STATIC_FIELD_DAMAGE            = 57429,
+    SPELL_STATIC_FIELD_MAIN                 = 57430,
+    SPELL_STATIC_FIELD_SUMMON               = 57431,
+    SPELL_STATIC_FIELD_AURA                 = 57428,
+    SPELL_STATIC_FIELD_DAMAGE               = 57429,
+
+    SPELL_STRENGTH_OF_THE_PACK_BOOST        = 64369
 };
 
 #define SPELL_ARCANE_BREATH                DUNGEON_MODE(SPELL_ARCANE_BREATH_N, SPELL_ARCANE_BREATH_H)
@@ -618,7 +620,7 @@ public:
                         me->SetFacingTo(me->GetAngle(posx, posy));
                         me->CastSpell(posx, posy, CenterPos.GetPositionZ()+1.5f, SPELL_ARCANE_OVERLOAD, true);
                         if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                            events.RepeatEvent(35000);
+                            events.RepeatEvent(40000);
                         else
                             events.RepeatEvent(15000);
                         events.RescheduleEvent(EVENT_RESUME_FLYING_CIRCLES_PH_2, 3000, 1);
@@ -1110,6 +1112,12 @@ public:
         EventMap events;
         uint16 timer;
 
+        void Reset() override
+        {
+            DoCastSelf(SPELL_STRENGTH_OF_THE_PACK_BOOST, true);
+            ScriptedAI::Reset();
+        }
+
         void EnterCombat(Unit* who)
         {
             DoZoneInCombat();
@@ -1218,8 +1226,7 @@ public:
     {
         npc_scion_of_eternityAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
-            if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                me->SetReactState(REACT_PASSIVE);
+            me->SetReactState(REACT_PASSIVE);
             pInstance = me->GetInstanceScript();
             events.Reset();
             events.RescheduleEvent(EVENT_TELEPORT_VISUAL, 0);
@@ -1264,8 +1271,6 @@ public:
                     }
                     break;
             }
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                DoMeleeAttackIfReady();
         }
 
         void JustDied(Unit* killer)
@@ -1277,17 +1282,9 @@ public:
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1, 0, me);
         }
 
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                ScriptedAI::MoveInLineOfSight(who);
-        }
+        void MoveInLineOfSight(Unit* who) { }
 
-        void AttackStart(Unit* who)
-        {
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                ScriptedAI::AttackStart(who);
-        }
+        void AttackStart(Unit* who) { }
     };
 };
 

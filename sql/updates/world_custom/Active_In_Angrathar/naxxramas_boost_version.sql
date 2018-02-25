@@ -116,3 +116,9 @@ SET @MALYGOS_25_BASE_DMG_MULTIPLIER:= 50;
 
 UPDATE `creature_template` SET `dmg_multiplier` = @MALYGOS_10_BASE_DMG_MULTIPLIER + 35 WHERE `entry` = @MALYGOS_10_ENTRY;
 UPDATE `creature_template` SET `dmg_multiplier` = @MALYGOS_25_BASE_DMG_MULTIPLIER + 20 WHERE `entry` = @MALYGOS_25_ENTRY;
+
+DELETE FROM `conditions` WHERE `sourceEntry` = 64381;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 64381, 0, 0, 31, 0, 3, 34014, 0, 0, 0, 0, '', ''),
+(13, 1, 64381, 0, 1, 31, 0, 3, 30245, 0, 0, 0, 0, '', '');
+
