@@ -94,6 +94,7 @@ struct boss_faerlinaAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        me->SetHealth(me->GetMaxHealth());
         _fightTimer = getMSTime();
         me->SetInCombatWithZone();
         summons.DoZoneInCombat();
