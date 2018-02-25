@@ -527,8 +527,8 @@ void BattlegroundWS::FillInitialWorldStates(WorldPacket& data)
     data << uint32(BG_WS_STATE_TIMER_ACTIVE) << uint32(GetStatus() == STATUS_IN_PROGRESS);
     data << uint32(BG_WS_STATE_TIMER) << uint32(GetMatchTime());
 
-    data << uint32(BG_WS_FLAG_STATE_HORDE) << uint32(GetFlagState(TEAM_HORDE));
-    data << uint32(BG_WS_FLAG_STATE_ALLIANCE) << uint32(GetFlagState(TEAM_ALLIANCE));
+    data << uint32(BG_WS_FLAG_STATE_HORDE) << uint32(GetFlagState(TEAM_ALLIANCE));
+    data << uint32(BG_WS_FLAG_STATE_ALLIANCE) << uint32(GetFlagState(TEAM_HORDE));
 }
 
 TeamId BattlegroundWS::GetPrematureWinner()
