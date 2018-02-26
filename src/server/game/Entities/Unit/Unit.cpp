@@ -10881,7 +10881,8 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
         AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
         for (AuraEffectList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
         {
-            if (!spellProto->ValidateAttribute6SpellDamageMods(caster, *i, damagetype == DOT))
+            //! spells [event dots] with attr fixed damage should benefit from mechanic dmg auras but only from those
+            if (!spellProto->ValidateAttribute6SpellDamageMods(caster, *i, damagetype == DOT) && !spellProto->HasAttribute(SPELL_ATTR4_FIXED_DAMAGE))
                 continue;
 
             // Only death knight spell with this aura, ZOMG!
