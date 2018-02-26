@@ -1295,9 +1295,15 @@ bool SpellInfo::IsAffectedBySpellMods() const
 bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
 {
     // xinef: dont check duration mod
-    if (mod->op != SPELLMOD_DURATION)
+    // Riztazz: do not affect crit damage bonus mod either, its done per spell basis for a reason
+    // on a side note: I dont think this entire function is quite right
+    // NO_DONE_BONUS attr is supposed to do something else entirely
+    // ToDo: Research this in the future
+    if (mod->op != SPELLMOD_DURATION && mod->op != SPELLMOD_CRIT_DAMAGE_BONUS)
+    {
         if (!IsAffectedBySpellMods())
             return false;
+    }
 
     SpellInfo const* affectSpell = sSpellMgr->GetSpellInfo(mod->spellId);
     // False if affect_spell == NULL or spellFamily not equal
