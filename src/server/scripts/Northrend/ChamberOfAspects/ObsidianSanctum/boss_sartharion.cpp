@@ -1693,11 +1693,17 @@ class spell_twilight_torment_proc_damage_AuraScript : public AuraScript
 
     bool CheckProc(ProcEventInfo& /*eventInfo*/)
     {
+        if (!GetTarget())
+            return false;
+
         return !GetTarget()->HasSpellCooldown(SPELL_TWILIGHT_TORMENT_SELF_DAMAGE);
     }
 
     void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
     {
+        if (!GetTarget())
+            return;
+
         PreventDefaultAction();
         GetTarget()->CastSpell((Unit*)nullptr, SPELL_TWILIGHT_TORMENT_SELF_DAMAGE);
         GetTarget()->AddSpellCooldown(SPELL_TWILIGHT_TORMENT_SELF_DAMAGE, 0, 1500);
