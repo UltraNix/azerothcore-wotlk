@@ -269,6 +269,7 @@ struct npc_sinclariAI : public ScriptedAI
 
     void Reset() override
     {
+        _eventStarted = false;
         _summons.DespawnAll();
         for (uint8 i = 0; i < PortalIntroCount; ++i)
             if (Creature* summon = me->SummonCreature(NPC_TELEPORTATION_PORTAL_INTRO, PortalIntroPositions[i], TEMPSUMMON_MANUAL_DESPAWN))
@@ -311,8 +312,9 @@ struct npc_sinclariAI : public ScriptedAI
 
     void sGossipSelect(Player* player, uint32 sender, uint32 action) override
     {
-        if (sender == GOSSIP_MENU_START_ENCOUNTER && action == 0)
+        if (!_eventStarted && sender == GOSSIP_MENU_START_ENCOUNTER && action == 0)
         {
+            _eventStarted = true;
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             _instance->SetData(DATA_MAIN_EVENT_STATE, SPECIAL);
             ScheduleIntro();
@@ -453,7 +455,7 @@ struct npc_sinclariAI : public ScriptedAI
     private:
         InstanceScript* _instance;
         TaskScheduler _scheduler;
-
+        bool _eventStarted;
         SummonList _summons;
 };
 
