@@ -1686,6 +1686,30 @@ class spell_curse_of_mending_sartharion_AuraScript : public AuraScript
     }
 };
 
+uint32 const SPELL_TWILIGHT_TORMENT_SELF_DAMAGE = 57988;
+class spell_twilight_torment_proc_damage_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_twilight_torment_proc_damage_AuraScript);
+
+    bool CheckProc(ProcEventInfo& /*eventInfo*/)
+    {
+        return !GetTarget()->HasSpellCooldown(SPELL_TWILIGHT_TORMENT_SELF_DAMAGE);
+    }
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    {
+        PreventDefaultAction();
+        GetTarget()->CastSpell((Unit*)nullptr, SPELL_TWILIGHT_TORMENT_SELF_DAMAGE);
+        GetTarget()->AddSpellCooldown(SPELL_TWILIGHT_TORMENT_SELF_DAMAGE, 0, 1500);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_twilight_torment_proc_damage_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL);
+        DoCheckProc += AuraCheckProcFn(spell_twilight_torment_proc_damage_AuraScript::CheckProc);
+    }
+};
+
 class achievement_realm_first_obsidian_slayer : public AchievementCriteriaScript
 {
 public:
@@ -1720,6 +1744,7 @@ void AddSC_boss_sartharion()
     new spell_onyx_brood_avenging_fury();
     new spell_vesperon_shadow_fissure();
     new AuraScriptLoaderEx<spell_curse_of_mending_sartharion_AuraScript>("spell_curse_of_mending_sartharion");
+    new AuraScriptLoaderEx<spell_twilight_torment_proc_damage_AuraScript>("spell_twilight_torment_proc_damage");
 
     new CreatureAILoader<npc_blaze_mistress_sarthrionAI>("npc_blaze_mistress_sarthrion");
     new CreatureAILoader<npc_flame_orb_mistressAI>("npc_flame_orb_mistress");
