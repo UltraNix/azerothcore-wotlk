@@ -300,6 +300,16 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 }
             }
 
+            void CastBite(Unit* target)
+            {
+                me->CastSpell(target, SPELL_VAMPIRIC_BITE, false);
+                me->CastSpell((Unit*)nullptr, SPELL_VAMPIRIC_BITE_DUMMY, true);
+                Talk(SAY_VAMPIRIC_BITE);
+                SetGUID(target->GetGUID(), GUID_VAMPIRE);
+                target->CastSpell(target, SPELL_PRESENCE_OF_THE_DARKFALLEN_DUMMY, TRIGGERED_FULL_MASK);
+                target->CastSpell(target, SPELL_PRESENCE_OF_THE_DARKFALLEN_SE, TRIGGERED_FULL_MASK);
+            }
+
             void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
@@ -335,14 +345,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                     }
 
                             if (target)
-                            {
-                                me->CastSpell(target, SPELL_VAMPIRIC_BITE, false);
-                                me->CastSpell((Unit*)NULL, SPELL_VAMPIRIC_BITE_DUMMY, true);
-                                Talk(SAY_VAMPIRIC_BITE);
-                                SetGUID(target->GetGUID(), GUID_VAMPIRE);
-                                target->CastSpell(target, SPELL_PRESENCE_OF_THE_DARKFALLEN_DUMMY, TRIGGERED_FULL_MASK);
-                                target->CastSpell(target, SPELL_PRESENCE_OF_THE_DARKFALLEN_SE, TRIGGERED_FULL_MASK);
-                            }
+                                CastBite(target);
+                            else if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+                                CastBite(tar);
                         }
                         break;
                     case EVENT_BLOOD_MIRROR:
@@ -551,7 +556,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     if (Player* p = itr->GetSource())
                         if (p->IsAlive() && p->HasAura(SPELL_UNCONTROLLABLE_FRENZY))
                             Unit::Kill(me, p);
-                
+
                 if (_killMinchar)
                 {
                     if (!me->IsAlive())
