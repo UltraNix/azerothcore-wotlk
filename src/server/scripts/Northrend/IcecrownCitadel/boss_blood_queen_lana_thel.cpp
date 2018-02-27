@@ -336,7 +336,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                                 if (Player* p = itr->GetSource())
                                     if (p->IsAlive() && p != me->GetVictim() && p->GetGUID() != _offtankGUID && !p->IsGameMaster() && p->GetDistance(me) < 70.0f)
                                     {
-                                        float th = me->getThreatManager().getThreatWithoutTemp(p);
+                                        float th = me->getThreatManager().getThreatWithoutTemp(p, true);
                                         if (!target || th > maxThreat)
                                         {
                                             target = p;
