@@ -562,8 +562,8 @@ void BattlegroundEY::FillInitialWorldStates(WorldPacket& data)
     data << uint32(DRAENEI_RUINS_HORDE_CONTROL)     << uint32(_capturePointInfo[POINT_DRAENEI_RUINS].IsUnderControl(TEAM_HORDE));
     data << uint32(DRAENEI_RUINS_ALLIANCE_CONTROL)  << uint32(_capturePointInfo[POINT_DRAENEI_RUINS].IsUnderControl(TEAM_ALLIANCE));
     data << uint32(DRAENEI_RUINS_UNCONTROL)         << uint32(_capturePointInfo[POINT_DRAENEI_RUINS].IsUncontrolled());
-    data << uint32(MAGE_TOWER_ALLIANCE_CONTROL)     << uint32(_capturePointInfo[POINT_MAGE_TOWER].IsUnderControl(TEAM_HORDE));
-    data << uint32(MAGE_TOWER_HORDE_CONTROL)        << uint32(_capturePointInfo[POINT_MAGE_TOWER].IsUnderControl(TEAM_ALLIANCE));
+    data << uint32(MAGE_TOWER_ALLIANCE_CONTROL)     << uint32(_capturePointInfo[POINT_MAGE_TOWER].IsUnderControl(TEAM_ALLIANCE));
+    data << uint32(MAGE_TOWER_HORDE_CONTROL)        << uint32(_capturePointInfo[POINT_MAGE_TOWER].IsUnderControl(TEAM_HORDE));
     data << uint32(MAGE_TOWER_UNCONTROL)            << uint32(_capturePointInfo[POINT_MAGE_TOWER].IsUncontrolled());
     data << uint32(FEL_REAVER_HORDE_CONTROL)        << uint32(_capturePointInfo[POINT_FEL_REAVER].IsUnderControl(TEAM_HORDE));
     data << uint32(FEL_REAVER_ALLIANCE_CONTROL)     << uint32(_capturePointInfo[POINT_FEL_REAVER].IsUnderControl(TEAM_ALLIANCE));
