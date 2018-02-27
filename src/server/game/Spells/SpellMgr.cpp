@@ -6606,6 +6606,9 @@ void SpellMgr::LoadDbcDataCorrections()
             // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client
             spellInfo->Effect[2] = 0;
             break;
+        case 72293: // Mark of the Fallen Champion
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+            break;
         case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang) // Patch 3.3.2 (2010-01-02): Deathbringer Saurfang will no longer gain blood power from Mark of the Fallen Champion.
         case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang) // Xinef: prevented in script, effect needed for Prayer of Mending
         case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
