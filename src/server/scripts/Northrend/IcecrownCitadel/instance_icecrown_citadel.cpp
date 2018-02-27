@@ -359,6 +359,22 @@ class instance_icecrown_citadel : public InstanceMapScript
                     SpawnGunship();
             }
 
+            void HandleHeroic(Creature* creature, bool gossipNPC) const
+            {
+                if (instance->IsHeroic())
+                {
+                    creature->SetVisible(false);
+                    if (creature->GetReactState() == REACT_AGGRESSIVE && !gossipNPC)
+                        creature->SetPassive();
+                }
+                else
+                {
+                    creature->SetVisible(true);
+                    if (creature->GetReactState() == REACT_PASSIVE && !gossipNPC)
+                        creature->SetAggressive();
+                }
+            }
+
             void OnCreatureCreate(Creature* creature)
             {
                 if (TeamIdInInstance == TEAM_NEUTRAL)
@@ -411,6 +427,27 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                 }
 
+                // limited heroic bosses
+                switch (creature->GetEntry())
+                {
+                    case NPC_FESTERGUT:
+                    case NPC_ROTFACE:
+                    case NPC_PROFESSOR_PUTRICIDE:
+                    case NPC_PRINCE_KELESETH:
+                    case NPC_PRINCE_TALDARAM:
+                    case NPC_PRINCE_VALANAR:
+                    case NPC_BLOOD_QUEEN_LANA_THEL:
+                    case NPC_SINDRAGOSA:
+                    case NPC_RISEN_ARCHMAGE:
+                        HandleHeroic(creature, false);
+                        break;
+                    case NPC_VALITHRIA_DREAMWALKER:
+                    case 38995:
+                        HandleHeroic(creature, true);
+                        break;
+                    default:
+                        break;
+                }
 
                 switch (creature->GetEntry())
                 {
