@@ -126,6 +126,8 @@ class boss_festergut : public CreatureScript
 
             void JustDied(Unit* /*killer*/)
             {
+                for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
+                    instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
                 _JustDied();
                 Talk(SAY_DEATH);
                 if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
@@ -142,6 +144,8 @@ class boss_festergut : public CreatureScript
 
             void EnterEvadeMode()
             {
+                for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
+                    instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
                 ScriptedAI::EnterEvadeMode();
                 if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->EnterEvadeMode();
