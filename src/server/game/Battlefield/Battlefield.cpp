@@ -97,6 +97,15 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
                 bool blockHorde = GetPlayerCountInWar(TEAM_HORDE) - GetPlayerCountInWar(TEAM_ALLIANCE) > 5;
                 bool blockAlliance = GetPlayerCountInWar(TEAM_ALLIANCE) - GetPlayerCountInWar(TEAM_HORDE) > 5;
 
+                // Horde limit
+                if (GetPlayerCountInWar(TEAM_HORDE) >= 150)
+                    blockHorde = true;
+
+                // Alliance limit
+                if (GetPlayerCountInWar(TEAM_ALLIANCE) >= 150)
+                    blockAlliance = true;
+
+
                 if (!blockHorde && !blockAlliance)
                     InvitePlayerToWar(player);
                 else
