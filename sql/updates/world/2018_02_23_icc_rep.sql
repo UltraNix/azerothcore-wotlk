@@ -45,5 +45,29 @@ DELETE FROM `creature_onkill_reputation` WHERE `creature_id` IN
 	36960,
 	38262,
 	38683,
-	38684  -- Kor'kron Sergeant
+	38684, -- Kor'kron Sergeant
+	37890,
+	38393,
+	38628,
+	38629, -- Cult Fanatic
+	38135,
+	38395,
+	38634,
+	38635, -- Deformed Fanatic
+	38009,
+	38398,
+	38630,
+	38631, -- Reanimated Fanatic
+	37949,
+	38394,
+	38625,
+	38626, -- Cult Adherent
+	38136,
+	38396,
+	38632,
+	38633, -- Empowered Adherent
+	38010,
+	38397,
+	39000,
+	39001  -- Reanimated Adherent
 );
