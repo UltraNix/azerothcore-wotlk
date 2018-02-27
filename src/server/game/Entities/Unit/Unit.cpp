@@ -2349,8 +2349,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
 
     // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
     if (attType != RANGED_ATTACK &&
-        (GetTypeId() == TYPEID_PLAYER || IsPet()) &&
-        victim->GetTypeId() != TYPEID_PLAYER && !victim->IsPet() &&
+        (GetTypeId() == TYPEID_PLAYER || IsGuardian()) &&
+        victim->GetTypeId() != TYPEID_PLAYER && !victim->IsGuardian() &&
         getLevel() < victim->getLevelForTarget(this))
     {
         // cap possible value (with bonuses > max skill)
@@ -2358,13 +2358,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
         int32 maxskill = attackerMaxSkillValueForLevel;
         skill = (skill > maxskill) ? maxskill : skill;
 
-        tmp = (10 + (victimDefenseSkill - skill)) * 100;
-        tmp = tmp > 4000 ? 4000 : tmp;
-        if (roll < (sum += tmp))
-        {
-            ;//sLog->outStaticDebug ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
+        // against boss-level targets - 24% chance of 25% average damage reduction (damage reduction range : 20-30%)
+        // against level 82 elites - 18% chance of 15% average damage reduction (damage reduction range : 10-20%)
+        tmp = 600 + (victimDefenseSkill - skill) * 120;
+        tmp = std::min(tmp, 4000);
+        if (tmp > 0 && roll < (sum += tmp))
             return MELEE_HIT_GLANCING;
-        }
     }
 
     // mobs can score crushing blows if they're 4 or more levels above victim
