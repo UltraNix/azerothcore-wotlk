@@ -9,7 +9,7 @@ INSERT INTO `smart_scripts` VALUES
 
 DELETE FROM `pool_template` WHERE `entry` = 60002;
 INSERT INTO `pool_template` VALUES (60002, 1, 'Vyragosa / Time Lost');
-.go creature 202461
+
 DELETE FROM `pool_creature` WHERE `guid` BETWEEN 202461 AND 202480;
 DELETE FROM `pool_creature` WHERE `guid` BETWEEN @VYRAGOSA AND @VYRAGOSA+10;
 INSERT INTO `pool_creature` VALUES
