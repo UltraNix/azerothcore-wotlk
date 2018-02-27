@@ -1763,29 +1763,28 @@ void Unit::CalcAbsorbResist(Unit* attacker, Unit* victim, SpellSchoolMask school
     {
         float averageResist = Unit::GetEffectiveResistChance(attacker, schoolMask, victim, spellInfo);
 
-        float discreteResistProbability[11];
-        for (uint32 i = 0; i < 11; ++i)
-        {
-            discreteResistProbability[i] = 0.5f - 2.5f * fabs(0.1f * i - averageResist);
-            if (discreteResistProbability[i] < 0.0f)
-                discreteResistProbability[i] = 0.0f;
-        }
-
+        float discreteResistProbability[11] = {};
         if (averageResist <= 0.1f)
         {
-            discreteResistProbability[0] = 1.0f - 7.5f * averageResist;
-            discreteResistProbability[1] = 5.0f * averageResist;
-            discreteResistProbability[2] = 2.5f * averageResist;
+            discreteResistProbability[0] = 0.6f - 1.0f * averageResist;
+            discreteResistProbability[1] = 0.9f - 6.0f * averageResist;
+            discreteResistProbability[2] = 1.0f - 4.0f * averageResist;
+        }
+        else
+        {
+            for (uint32 i = 0; i < 11; ++i)
+                discreteResistProbability[i] = std::max(0.5f - 2.5f * std::fabs(0.1f * i - averageResist), 0.0f);
         }
 
-        float r = float(rand_norm());
-        uint32 i = 0;
-        float probabilitySum = discreteResistProbability[0];
+        auto roll = float(rand_norm());
+        float probabilitySum = 0.0f;
 
-        while (r >= probabilitySum && i < 10)
-            probabilitySum += discreteResistProbability[++i];
+        uint32 resistance = 0;
+        for (; resistance < 11; ++resistance)
+            if (roll < (probabilitySum += discreteResistProbability[resistance]))
+                break;
 
-        float damageResisted = float(damage * i / 10);
+        float damageResisted = damage * resistance / 10.f;
 
         if (damageResisted) // if equal to 0, checking these is pointless
         {
