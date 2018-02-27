@@ -630,6 +630,15 @@ bool BattlegroundEY::HandlePlayerUnderMap(Player* player)
     if (!player)
         return false;
 
+    if (player->IsAlive())
+    {
+        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IS_OUT_OF_BOUNDS);
+        player->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, player->GetMaxHealth());
+        // player can be alive if GM
+        if (player->IsAlive())
+            player->KillPlayer();
+    }
+
     if (player->GetTeamId() == TEAM_ALLIANCE)
         player->NearTeleportTo(2523.686035f, 1596.597290f, 1269.344482f, 3.031230f);
     else if (player->GetTeamId() == TEAM_HORDE)
