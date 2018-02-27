@@ -88,6 +88,12 @@ struct boss_taldaramAI : public BossAI
         Talk(SAY_DEATH);
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (victim->IsPlayer())
+            Talk(SAY_SLAY);
+    }
+
     void DoAction(int32 actionId) override
     {
         if (actionId == ACTION_FREE)

@@ -192,7 +192,7 @@ public:
                 {
                     if (IsHeroic())
                         instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_LODI_DODI);
-                    
+
                     instance->SetData(DATA_SKADI_THE_RUTHLESS, IN_PROGRESS);
                 }
 
@@ -203,7 +203,7 @@ public:
         }
 
         void DoAction(int32 param) override
-        {   
+        {
             if (param == ACTION_PHASE2)
             {
                 Talk(SAY_DRAKE_DEATH);
@@ -287,7 +287,7 @@ public:
 
         void KilledUnit(Unit* victim) override
         {
-            if(roll_chance_i(50))
+            if(roll_chance_i(50) && victim->IsPlayer())
                 Talk(SAY_KILL);
         }
 
@@ -312,8 +312,8 @@ public:
 
     struct boss_skadi_graufAI : public VehicleAI
     {
-        boss_skadi_graufAI(Creature* creature) : VehicleAI(creature), summons(me), instance(creature->GetInstanceScript()) 
-        { 
+        boss_skadi_graufAI(Creature* creature) : VehicleAI(creature), summons(me), instance(creature->GetInstanceScript())
+        {
             preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
             harpoonReqCount = preNerf ? 5 : 3;
         }
@@ -442,7 +442,7 @@ public:
 
                 return;
             }
-            
+
             RemoveSkadi(true);
         }
 
@@ -513,8 +513,8 @@ public:
 };
 
 class go_harpoon_canon : public GameObjectScript
-{ 
-public: 
+{
+public:
     go_harpoon_canon() : GameObjectScript("go_harpoon_canon") { }
 
     bool OnGossipHello(Player* player, GameObject* go)
@@ -781,9 +781,9 @@ public:
         void FilterTargets(std::list<WorldObject*>& targets)
         {
             if (targets.size() >= 2)
-                targets.remove_if([](WorldObject* obj) -> bool 
-                { 
-                    return obj->GetEntry() != NPC_GRAUF; 
+                targets.remove_if([](WorldObject* obj) -> bool
+                {
+                    return obj->GetEntry() != NPC_GRAUF;
                 });
         }
 
@@ -826,7 +826,7 @@ public:
         {
             targets.remove_if([](WorldObject* obj) -> bool
             {
-                return obj->GetPositionY() > -511.0f; 
+                return obj->GetPositionY() > -511.0f;
             });
         }
 
@@ -867,8 +867,8 @@ public:
         void FilterTargets(std::list<WorldObject*>& targets)
         {
             targets.remove_if([](WorldObject* obj) -> bool
-            { 
-                return obj->GetPositionY() < -511.0f; 
+            {
+                return obj->GetPositionY() < -511.0f;
             });
         }
 

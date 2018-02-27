@@ -147,7 +147,8 @@ public:
 
         void KilledUnit(Unit *victim)
         {
-            Talk(SAY_KILL);
+            if (victim->IsPlayer())
+                Talk(SAY_KILL);
         }
 
         void MoveInLineOfSight(Unit* who) {}

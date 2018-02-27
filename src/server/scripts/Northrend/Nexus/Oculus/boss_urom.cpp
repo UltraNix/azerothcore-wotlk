@@ -212,7 +212,8 @@ public:
 
         void KilledUnit(Unit *victim)
         {
-            Talk(SAY_PLAYER_KILL);
+            if (victim->IsPlayer())
+                Talk(SAY_PLAYER_KILL);
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)

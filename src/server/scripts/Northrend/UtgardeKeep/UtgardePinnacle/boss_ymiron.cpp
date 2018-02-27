@@ -135,7 +135,7 @@ public:
             BoatNum = 0;
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_DISABLE_MOVE);
-            
+
             if(pInstance)
             {
                 pInstance->SetData(DATA_KING_YMIRON, NOT_STARTED);
@@ -312,7 +312,7 @@ public:
 
             }
 
-            DoMeleeAttackIfReady();  
+            DoMeleeAttackIfReady();
         }
 
         void JustDied(Unit* pKiller)
@@ -327,7 +327,7 @@ public:
 
         void KilledUnit(Unit* pVictim)
         {
-            if (urand(0,1))
+            if (!pVictim->IsPlayer())
                 return;
 
             Talk(SAY_SLAY);

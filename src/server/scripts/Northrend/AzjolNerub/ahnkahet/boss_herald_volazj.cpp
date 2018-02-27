@@ -88,7 +88,7 @@ struct boss_volazjAI : public BossAI
 
             // phase mask
             pTarget->CastSpell(pTarget, SPELL_INSANITY_TARGET+insanityHandled, true);
-                
+
             // summon twisted party members for this target
             Map::PlayerList const &players = me->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
@@ -272,9 +272,10 @@ struct boss_volazjAI : public BossAI
         ResetPlayersPhaseMask();
     }
 
-    void KilledUnit(Unit * /*victim*/) override
+    void KilledUnit(Unit* victim) override
     {
-        Talk(SAY_SLAY);
+        if (victim->IsPlayer())
+            Talk(SAY_SLAY);
     }
 };
 

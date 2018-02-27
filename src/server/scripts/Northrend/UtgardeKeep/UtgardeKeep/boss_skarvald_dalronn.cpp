@@ -121,9 +121,9 @@ public:
             }
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* victim)
         {
-            if (me->GetEntry() == NPC_SKARVALD)
+            if (me->GetEntry() == NPC_SKARVALD && victim->IsPlayer())
                 Talk(YELL_SKARVALD_KILL);
         }
 
@@ -154,7 +154,7 @@ public:
                 return;
 
             events.Update(diff);
-            
+
             if( me->HasUnitState(UNIT_STATE_CASTING) )
                 return;
 
@@ -304,7 +304,7 @@ public:
                 return;
 
             events.Update(diff);
-            
+
             if( me->HasUnitState(UNIT_STATE_CASTING) )
                 return;
 
@@ -323,7 +323,7 @@ public:
                 case EVENT_SPELL_SHADOW_BOLT:
                     if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 42.0f, true) )
                         me->CastSpell(target, SPELL_SHADOW_BOLT, false);
-                    events.RepeatEvent(2500);                    
+                    events.RepeatEvent(2500);
                     break;
                 case EVENT_SPELL_DEBILITATE:
                     if( Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f, true) )

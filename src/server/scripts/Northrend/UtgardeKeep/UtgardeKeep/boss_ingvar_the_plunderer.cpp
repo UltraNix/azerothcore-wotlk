@@ -184,8 +184,11 @@ public:
             }
         }
 
-        void KilledUnit(Unit* /*who*/)
+        void KilledUnit(Unit* who)
         {
+            if (!who->IsPlayer())
+                return;
+
             if (me->GetDisplayId() == DISPLAYID_DEFAULT)
                 Talk(YELL_KILL_2);
             else
