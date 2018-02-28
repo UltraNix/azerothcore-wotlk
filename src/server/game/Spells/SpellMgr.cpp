@@ -3081,7 +3081,14 @@ void SpellMgr::LoadSpellCustomAttr()
             50661, // Weakened Resolve
             68979, // Unleashed Souls
             48714, // Compelled
-            7853   // The Art of Being a Water Terror: Force Cast on Player
+            7853,  // The Art of Being a Water Terror: Force Cast on Player
+            740,   // Tranquility
+            8918,  // Tranquility
+            9862,  // Tranquility
+            9863,  // Tranquility
+            26983, // Tranquility
+            48446, // Tranquility
+            48447  // Tranquility
         }, [](SpellInfo* spellInfo)
         {
             spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
