@@ -3065,28 +3065,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
         });
 
-        ApplySpellFix({
-            16177, // Ancestral Fortitude (Rank 1)
-            16236, // Ancestral Fortitude (Rank 2)
-            16237, // Ancestral Fortitude (Rank 3)
-            47930, // Grace
-            45145, // Snake Trap Effect (Rank 1)
-            13812, // Explosive Trap Effect (Rank 1)
-            14314, // Explosive Trap Effect (Rank 2)
-            14315, // Explosive Trap Effect (Rank 3)
-            27026, // Explosive Trap Effect (Rank 4)
-            49064, // Explosive Trap Effect (Rank 5)
-            49065, // Explosive Trap Effect (Rank 6)
-            43446, // Explosive Trap Effect (Hexlord Malacrass)
-            50661, // Weakened Resolve
-            68979, // Unleashed Souls
-            48714, // Compelled
-            7853   // The Art of Being a Water Terror: Force Cast on Player
-        }, [](SpellInfo* spellInfo)
-        {
-            spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
-        });
-
         ApplySpellFix
         ({
             64415, // Val'anyr, Hammer of Ancient Kings - proc HOT
