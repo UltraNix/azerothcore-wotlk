@@ -60,6 +60,7 @@ enum DruidSpells
     SPELL_DRUID_SAVAGE_ROAR                 = 62071,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_ITEM_T8_BALANCE_RELIC       = 64950,
+    SPELL_DRUID_WOLFSHEAD_HELM_ENERGY       = 29940
 };
 
 // Ours
@@ -1398,6 +1399,35 @@ class spell_ferocious_bite_damage_hack_SpellScript : public SpellScript
     }
 };
 
+
+
+class spell_dru_wolfshead_helm_energy_dummy : public SpellScriptLoader
+{
+public:
+    spell_dru_wolfshead_helm_energy_dummy() : SpellScriptLoader("spell_dru_wolfshead_helm_energy_dummy") { }
+
+    class spell_dru_wolfshead_helm_energy_dummy_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_wolfshead_helm_energy_dummy_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_DRUID_WOLFSHEAD_HELM_ENERGY);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_wolfshead_helm_energy_dummy_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dru_wolfshead_helm_energy_dummy_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     // Ours
@@ -1435,4 +1465,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_typhoon();
     new spell_dru_t10_restoration_4p_bonus();
     new spell_dru_wild_growth();
+    new spell_dru_wolfshead_helm_energy_dummy();
 }
