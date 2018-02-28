@@ -7114,7 +7114,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         else if (stackAmount == 4) basepoints = 26;
                         else if (stackAmount == 5) basepoints = 33;
                         CastCustomSpell(victim, 42463, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
-                        aur->RecalculateAmountOfEffects();
 
                         if (aur->GetStackAmount() == 5)
                         {
@@ -7159,7 +7158,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         else if (stackAmount == 4) basepoints = 26;
                         else if (stackAmount == 5) basepoints = 33;
                         CastCustomSpell(victim, 53739, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
-                        aur->RecalculateAmountOfEffects();
 
                         if (aur->GetStackAmount() == 5)
                         {
