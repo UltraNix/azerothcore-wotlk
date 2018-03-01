@@ -1847,14 +1847,23 @@ class npc_torturer_lecraft : public CreatureScript
 
             void Reset()
             {
+                _scheduler.CancelAll();
                 _textCounter = 1;
                 _playerGUID  = 0;
             }
 
             void EnterCombat(Unit* who)
             {
-                _events.ScheduleEvent(EVENT_HEMORRHAGE, urand(5000, 8000));
-                _events.ScheduleEvent(EVENT_KIDNEY_SHOT, urand(12000, 15000));
+                _scheduler.CancelAll();
+                _scheduler.Schedule(12s, 15s, [this](TaskContext task) {
+                    DoCast(SPELL_KIDNEY_SHOT);
+                    task.Repeat(20s, 26s);
+                });
+
+                _scheduler.Schedule(5s, 8s, [this](TaskContext task) {
+                    DoCast(SPELL_HEMORRHAGE);
+                    task.Repeat(12s, 168s);
+                });
 
                 if (Player* player = who->ToPlayer())
                     Talk (SAY_AGGRO, player);
@@ -1890,28 +1899,10 @@ class npc_torturer_lecraft : public CreatureScript
                if (!UpdateVictim())
                    return;
 
-               _events.Update(diff);
-
-                while (uint32 eventId = _events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_HEMORRHAGE:
-                            DoCastVictim(SPELL_HEMORRHAGE);
-                            _events.ScheduleEvent(EVENT_HEMORRHAGE, urand(12000, 168000));
-                            break;
-                        case EVENT_KIDNEY_SHOT:
-                            DoCastVictim(SPELL_KIDNEY_SHOT);
-                            _events.ScheduleEvent(EVENT_KIDNEY_SHOT, urand(20000, 26000));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                DoMeleeAttackIfReady();
+               _scheduler.Update(diff, std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
             }
             private:
-                EventMap _events;
+                TaskScheduler _scheduler;
                 uint8    _textCounter;
                 uint64   _playerGUID;
         };
