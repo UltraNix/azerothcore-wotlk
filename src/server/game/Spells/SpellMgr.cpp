@@ -3873,6 +3873,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 45008: // Quest: Sorlof Booty Cannon Assault
             spellInfo->EffectBasePoints[EFFECT_0] = 126000;
             break;
+        case 54683: // Ablaze
+            spellInfo->DurationIndex = 27; // 3s
+            break;
 
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
