@@ -1366,6 +1366,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE] = sConfigMgr->GetBoolDefault("AllianceHonorBoost.Enable", false);
 
     m_int_configs[CONFIG_WINTERGRASP_REMINDER] = sConfigMgr->GetIntDefault("Wintergrasp.Reminder", 0);
+    m_bool_configs[CONFIG_ADDITIONAL_MALYGOS_BOOST] = sConfigMgr->GetBoolDefault("MalygosAdditionalBoost.Enable", false);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

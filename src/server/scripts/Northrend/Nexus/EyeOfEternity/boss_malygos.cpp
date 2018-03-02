@@ -129,8 +129,7 @@ enum MalygosEvents
     EVENT_SCION_OF_ETERNITY_ARCANE_BARRAGE,
     EVENT_NEXUS_LORD_ARCANE_SHOCK,
     EVENT_NEXUS_LORD_HASTE,
-    EVENT_DISK_MOVE_NEXT_POINT,
-    EVENT_NEXUS_LORD_SLOW_BOOST
+    EVENT_DISK_MOVE_NEXT_POINT
 };
 
 #define MAX_NEXUS_LORDS                    DUNGEON_MODE(2, 4)
@@ -1115,7 +1114,8 @@ public:
 
         void Reset() override
         {
-            DoCastSelf(SPELL_STRENGTH_OF_THE_PACK_BOOST, true);
+            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST))
+                DoCastSelf(SPELL_STRENGTH_OF_THE_PACK_BOOST, true);
             ScriptedAI::Reset();
         }
 
@@ -1125,8 +1125,6 @@ public:
             events.Reset();
             events.RescheduleEvent(EVENT_NEXUS_LORD_ARCANE_SHOCK, urand(3000,10000));
             events.RescheduleEvent(EVENT_NEXUS_LORD_HASTE, urand(8000,14000));
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
-                events.ScheduleEvent(EVENT_NEXUS_LORD_SLOW_BOOST, 10s);
         }
 
         void AttackStart(Unit* victim)
@@ -1176,28 +1174,6 @@ public:
                 case EVENT_NEXUS_LORD_HASTE:
                     me->CastSpell(me, SPELL_HASTE);
                     events.RepeatEvent(urand(20000,30000));
-                    break;
-                case EVENT_NEXUS_LORD_SLOW_BOOST:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [](WorldObject* object) -> bool
-                    {
-                        if (object->IsPlayer())
-                        {
-                            switch (object->ToPlayer()->getClass())
-                            {
-                                case CLASS_WARRIOR:
-                                case CLASS_ROGUE:
-                                case CLASS_DRUID:
-                                case CLASS_DEATH_KNIGHT:
-                                case CLASS_SHAMAN:
-                                case CLASS_PALADIN:
-                                    return true;
-                            }
-                        }
-                        return false;
-                    }))
-                    {
-                        DoCast(target, 6146, true);
-                    }
                     break;
             }
 
