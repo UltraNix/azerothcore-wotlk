@@ -460,6 +460,12 @@ UPDATE `reference_loot_template` SET `item` = '40753' WHERE `reference_loot_temp
 /* VOA EMBLEMS */
 UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_template`.`entry` =31722 AND `creature_loot_template`.`item` =40752;
 
+/* EOE EMBLEMS */
+DELETE FROM `gameobject_loot_template` WHERE `item` IN(@EmblemHighPREV,@EmblemLowPREV,@EmblemHighCURR,@EmblemLowCURR) AND `entry` IN(26094, 26097);
+INSERT INTO `gameobject_loot_template` VALUES 
+(26094, @EmblemLowCURR, 100, 1, 0, 2, 2), -- EoH for 10man
+(26097, @EmblemHighCURR, 100, 1, 0, 2, 2); -- EoV for 25man
+
 /* NAXXRAMAS EMBLEMS NEW VALUES */
 UPDATE `creature_loot_template` SET `item` = '40752' WHERE `creature_loot_template`.`entry` = 15956 AND `creature_loot_template`.`item` = 40753; 
 UPDATE `creature_loot_template` SET `item` = '40752' WHERE `creature_loot_template`.`entry` = 15953 AND `creature_loot_template`.`item` = 40753;  
