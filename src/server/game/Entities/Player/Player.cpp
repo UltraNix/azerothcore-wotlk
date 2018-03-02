@@ -20440,6 +20440,13 @@ void Player::_SaveStats(SQLTransaction& trans)
     stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_TAKEN_SPELL));
     stmt->setUInt32(index++, m_achievementMgr->CalculateAchievementPoints());
     stmt->setFloat(index++, GetAverageItemLevel());
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_ARMOR_PENETRATION));  // Armor Penetration
+    // Spell Penetration: We need reverse negative target resistance to get positive number of penetration.
+    int32 spellPenetration = GetInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE) < 0 ? GetInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE) * -1 : GetInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE) * 1;
+    stmt->setUInt32(index++, uint32(spellPenetration));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_EXPERTISE));          // Expertise
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HASTE_SPELL));        // Haste
+    stmt->setUInt32(index++, uint32(GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * 5));      // Mana Regen: Mana is regenerated every 5 seconds so we need multiply the value by 5.
 
     trans->Append(stmt);
 }

@@ -1,0 +1,6 @@
+ALTER TABLE `character_stats` 
+ADD `penArmor` INT(10)  UNSIGNED NOT NULL DEFAULT '0' AFTER `avgItemLevel`, 
+ADD `penSpell` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `penArmor`,
+ADD `ratExpertise` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `penSpell`, 
+ADD `ratHaste` INT(10)  UNSIGNED NOT NULL DEFAULT '0' AFTER `ratExpertise`, 
+ADD `regMana` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `ratHaste`;
