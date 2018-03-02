@@ -384,10 +384,7 @@ public:
                         }
                         events.PopEvent();
 
-                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                            events.RescheduleEvent(EVENT_BERSERK, 480000, 0);
-                        else
-                            events.RescheduleEvent(EVENT_BERSERK, 600000, 0);
+                        events.RescheduleEvent(EVENT_BERSERK, 600000, 0);
                         events.RescheduleEvent(EVENT_SPELL_ARCANE_BREATH, urand(9000,12000), 1);
                         events.RescheduleEvent(EVENT_SPELL_ARCANE_STORM, urand(2000,5000), 1);
                         events.RescheduleEvent(EVENT_SUMMON_POWER_SPARK, urand(10000,15000), 1);
