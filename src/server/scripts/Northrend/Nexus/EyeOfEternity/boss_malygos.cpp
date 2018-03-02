@@ -1595,6 +1595,20 @@ class spell_eoe_ph3_surge_of_power : public SpellScriptLoader
         }
 };
 
+class go_exit_portal_malygos : public GameObjectScript
+{
+public:
+    go_exit_portal_malygos() : GameObjectScript("go_exit_portal_malygos") {}
+
+    bool OnGossipHello(Player* player, GameObject* /*go*/) override
+    {
+        if (player->GetVehicle())
+            player->ExitVehicle();
+
+        player->CastSpell(player, 60474, true);
+        return true;
+    }
+};
 
 void AddSC_boss_malygos()
 {
@@ -1607,6 +1621,6 @@ void AddSC_boss_malygos()
     new npc_scion_of_eternity();
     new npc_hover_disk();
     new npc_eoe_wyrmrest_skytalon();
-
+    new go_exit_portal_malygos();
     new spell_eoe_ph3_surge_of_power();
 }
