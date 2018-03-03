@@ -3866,6 +3866,9 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
+        case 45008: // Quest: Sorlof Booty Cannon Assault
+            spellInfo->EffectBasePoints[EFFECT_0] = 126000;
+            break;
 
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
