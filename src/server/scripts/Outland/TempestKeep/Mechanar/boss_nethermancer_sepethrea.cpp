@@ -40,6 +40,11 @@ class boss_nethermancer_sepethrea : public CreatureScript
         {
             boss_nethermancer_sepethreaAI(Creature* creature) : BossAI(creature, DATA_NETHERMANCER_SEPRETHREA) { }
 
+            void Reset()
+            {
+                events.Reset();
+            }
+
             void EnterCombat(Unit* who)
             {
                 _EnterCombat();

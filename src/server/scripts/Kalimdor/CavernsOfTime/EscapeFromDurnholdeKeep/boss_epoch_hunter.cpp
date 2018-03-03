@@ -43,6 +43,7 @@ public:
 
         void Reset()
         {
+            events.Reset();
         }
 
         void EnterCombat(Unit* /*who*/)

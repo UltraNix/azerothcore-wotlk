@@ -50,6 +50,11 @@ class boss_mechano_lord_capacitus : public CreatureScript
         {
             boss_mechano_lord_capacitusAI(Creature* creature) : BossAI(creature, DATA_MECHANOLORD_CAPACITUS) { }
 
+            void Reset()
+            {
+                events.Reset();
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();

@@ -38,6 +38,11 @@ class boss_gatewatcher_iron_hand : public CreatureScript
         {
             boss_gatewatcher_iron_handAI(Creature* creature) : BossAI(creature, DATA_GATEWATCHER_IRON_HAND) { }
 
+            void Reset()
+            {
+                events.Reset();
+            }
+
             void EnterCombat(Unit* /*who*/)
             {
                 _EnterCombat();

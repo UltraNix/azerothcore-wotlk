@@ -176,6 +176,7 @@ public:
         void Reset()
         {
             myClass = CLASS_WARRIOR;
+            events.Reset();
             events.ScheduleEvent(EVENT_STOLEN_SOUL_SPELL, 1000);
         }
 

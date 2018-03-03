@@ -37,6 +37,11 @@ class boss_gatewatcher_gyrokill : public CreatureScript
         {
             boss_gatewatcher_gyrokillAI(Creature* creature) : BossAI(creature, DATA_GATEWATCHER_GYROKILL) { }
 
+            void Reset()
+            {
+                events.Reset();
+            }
+
             void JustDied(Unit* /*killer*/)
             {
                 _JustDied();

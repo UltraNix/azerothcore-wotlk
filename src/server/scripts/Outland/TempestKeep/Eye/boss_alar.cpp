@@ -44,7 +44,7 @@ enum Misc
     DISPLAYID_INVISIBLE            = 23377,
     NPC_EMBER_OF_ALAR            = 19551,
     NPC_FLAME_PATCH                = 20602,
-    
+
     POINT_PLATFORM                = 0,
     POINT_QUILL                    = 4,
     POINT_MIDDLE                = 5,
@@ -134,7 +134,7 @@ class boss_alar : public CreatureScript
             void JustSummoned(Creature* summon)
             {
                 summons.Summon(summon);
-                if (summon->GetEntry() == NPC_EMBER_OF_ALAR)    
+                if (summon->GetEntry() == NPC_EMBER_OF_ALAR)
                     summon->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_FIRE, true);
             }
 

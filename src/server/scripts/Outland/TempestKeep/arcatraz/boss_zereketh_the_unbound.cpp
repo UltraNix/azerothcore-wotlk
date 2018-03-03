@@ -38,6 +38,11 @@ class boss_zereketh_the_unbound : public CreatureScript
             boss_zereketh_the_unboundAI(Creature* creature) : BossAI(creature, DATA_ZEREKETH) { }
 
 
+            void Reset()
+            {
+                events.Reset();
+            }
+
             void JustDied(Unit* /*killer*/)
             {
                 _JustDied();

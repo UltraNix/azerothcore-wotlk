@@ -75,6 +75,11 @@ struct boss_amanitarAI : public BossAI
 {
     boss_amanitarAI(Creature* creature) : BossAI(creature, BOSS_AMANITAR) { }
 
+    void Reset() override
+    {
+        _Reset();
+    }
+
     void EnterCombat(Unit* /*attacker*/) override
     {
         _EnterCombat();
@@ -250,7 +255,7 @@ struct npc_amanitar_poisonous_mushroomAI : public npc_amanitar_mushroomsAI
             _events.ScheduleEvent(EVENT_SHRINK, 1s);
         }
     }
-    
+
     private:
         bool _active;
 };

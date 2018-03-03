@@ -49,6 +49,11 @@ class boss_pathaleon_the_calculator : public CreatureScript
         {
             boss_pathaleon_the_calculatorAI(Creature* creature) : BossAI(creature, DATA_PATHALEON_THE_CALCULATOR) { }
 
+            void Reset()
+            {
+                events.Reset();
+            }
+
             void InitializeAI()
             {
                 BossAI::InitializeAI();
