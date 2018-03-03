@@ -23090,7 +23090,20 @@ void Player::UpdateObjectVisibility(bool forced, bool fromUpdate)
 void Player::UpdateVisibilityForPlayer(bool mapChange)
 {
     Trinity::VisibleNotifier notifier(*this, mapChange);
-    m_seer->VisitNearbyObject(GetSightRange()+VISIBILITY_INC_FOR_GOBJECTS, notifier);
+
+    if ( mapChange && m_seer != this )
+    {
+        //! prevent crash?
+        m_seer = this;
+
+        sLog->outError( "UpdateVisibilityForPlayer after map change, but we are not seer!? Map: %d, Instance: %d, Position: %.3f, %.3f, %.3f", GetMapId(), GetInstanceId(), GetPositionX(), GetPositionY(), GetPositionZ() );
+        VisitNearbyObject( GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS, notifier );
+    }
+    else
+    {
+        m_seer->VisitNearbyObject( GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS, notifier );
+    }
+
     notifier.SendToSelf();
 
     if (mapChange)
