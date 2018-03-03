@@ -83,6 +83,7 @@ class boss_warbringer_omrogg : public CreatureScript
             void Reset()
             {
                 events2.Reset();
+                _Reset();
             }
 
             void EnterCombat(Unit* /*who*/)
