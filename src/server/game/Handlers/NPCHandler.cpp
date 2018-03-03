@@ -194,7 +194,7 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
 
         data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
         data << uint8(state == TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
-        
+
         if(sWorld->getBoolConfig(CONFIG_PTR_REALM))
             data << uint32(0);
         else
