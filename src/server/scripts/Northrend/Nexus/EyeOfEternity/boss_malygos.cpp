@@ -1115,8 +1115,8 @@ public:
 
         void Reset() override
         {
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST))
-                DoCastSelf(SPELL_STRENGTH_OF_THE_PACK_BOOST, true);
+            // if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST))
+            //     DoCastSelf(SPELL_STRENGTH_OF_THE_PACK_BOOST, true);
             ScriptedAI::Reset();
         }
 
