@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -317,7 +317,7 @@ class spell_sha_feral_spirit_scaling : public SpellScriptLoader
                 isPeriodic = true;
                 amplitude = 1*IN_MILLISECONDS;
             }
-            
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
@@ -696,12 +696,12 @@ class spell_sha_earth_shield : public SpellScriptLoader
                 return true;
             }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool & /*canBeRecalculated*/)
+            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool & /*canBeRecalculated*/)
             {
                 if (Unit* caster = GetCaster())
                 {
                     int32 baseAmount = amount;
-                    amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), amount, HEAL);
+                    amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), amount, HEAL, aurEff->GetEffIndex());
                     // xinef: taken should be calculated at every heal
                     //amount = GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), amount, HEAL);
 
@@ -967,7 +967,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                 return true;
             }
 
-            void HandleDummy(SpellEffIndex /*effIndex*/)
+            void HandleDummy(SpellEffIndex effIndex)
             {
                 int32 damage = GetEffectValue();
                 SpellInfo const* triggeringSpell = GetTriggeringSpell();
@@ -977,7 +977,7 @@ class spell_sha_healing_stream_totem : public SpellScriptLoader
                         if (Unit* owner = caster->GetOwner())
                         {
                             if (triggeringSpell)
-                                damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL));
+                                damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL, effIndex));
 
                             // Restorative Totems
                             if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_RESTORATIVE_TOTEMS, 1))
