@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -55,14 +55,22 @@ enum CreatureIds
     NPC_MANDOKIR            = 11382, // Mandokir Event
     NPC_OHGAN               = 14988, // Mandokir Event
     NPC_VILEBRANCH_SPEAKER  = 11391, // Mandokir Event
-    NPC_CHAINED_SPIRT       = 15117  // Mandokir Event
-
+    NPC_CHAINED_SPIRT       = 15117, // Mandokir Event
+    // Edge of madness event
+    NPC_EDGE_GRILEK         = 15082,
+    NPC_EDGE_HAZZA          = 15083,
+    NPC_EDGE_RENE           = 15084,
+    NPC_EDGE_WUSH           = 15085
 };
 
 enum GameobjectIds
 {
     GO_FORCEFIELD           = 180497, // Arlokk Event
-    GO_GONG_OF_BETHEKK      = 180526  // Arlokk Event
+    GO_GONG_OF_BETHEKK      = 180526, // Arlokk Event
+    GO_TROLL_AIR_PORTAL     = 180253,
+    GO_TROLL_FIRE_PORTAL    = 180254,
+    GO_TROLL_SOUND_PORTAL   = 180385,
+    GO_TROLL_PORT_PORTAL    = 180762
 };
 
 template<class AI>

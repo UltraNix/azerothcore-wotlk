@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -26,6 +26,9 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "zulgurub.h"
+#include "GameObjectAI.h"
+
+#include <array>
 
 DoorData const doorData[] =
 {
@@ -45,7 +48,7 @@ class instance_zulgurub : public InstanceMapScript
                 LoadDoorData(doorData);
             }
 
-            void Initialize()
+            void Initialize() override
             {
                 _zealotLorkhanGUID = 0;
                 _zealotZathGUID = 0;
@@ -56,13 +59,13 @@ class instance_zulgurub : public InstanceMapScript
                 _goGongOfBethekkGUID = 0;
             }
 
-            bool IsEncounterInProgress() const
+            bool IsEncounterInProgress() const override
             {
                 // not active in Zul'Gurub
                 return false;
             }
 
-            void OnCreatureCreate(Creature* creature)
+            void OnCreatureCreate(Creature* creature) override
             {
                 switch (creature->GetEntry())
                 {
@@ -87,7 +90,7 @@ class instance_zulgurub : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go)
+            void OnGameObjectCreate(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -106,7 +109,7 @@ class instance_zulgurub : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectRemove(GameObject* go)
+            void OnGameObjectRemove(GameObject* go) override
             {
                 switch (go->GetEntry())
                 {
@@ -144,7 +147,7 @@ class instance_zulgurub : public InstanceMapScript
                 return 0;
             }
 
-            std::string GetSaveData()
+            std::string GetSaveData() override
             {
                 OUT_SAVE_INST_DATA;
 
@@ -155,7 +158,7 @@ class instance_zulgurub : public InstanceMapScript
                 return saveStream.str();
             }
 
-            void Load(const char* str)
+            void Load(const char* str) override
             {
                 if (!str)
                 {
@@ -205,7 +208,159 @@ class instance_zulgurub : public InstanceMapScript
         }
 };
 
+/* Edge of Madness */
+enum EdgeOfMadnessMisc
+{
+    SPELL_RED_LIGHTNING = 24240,
+
+    EVENT_RENATAKI      = 29,
+    EVENT_WUSH          = 30,
+    EVENT_GRILEK        = 27,
+    EVENT_HAZZA         = 28,
+
+    EVENT_MAP_ONE       = 1,
+    EVENT_MAP_TWO       = 2,
+    EVENT_MAP_THREE     = 3
+};
+
+std::array<uint32, 4> eventIds =
+{
+    EVENT_RENATAKI,
+    EVENT_WUSH,
+    EVENT_GRILEK,
+    EVENT_HAZZA
+};
+
+Position airPortalPos = { -11890.91f, -1901.96f, 70.49f };
+Position spawnBossPos = { -11893.74f, -1902.78f, 65.14f, 0.84f };
+
+class go_brazzier_of_madness : public GameObjectScript
+{
+public:
+    go_brazzier_of_madness() : GameObjectScript("go_brazzier_of_madness") { }
+
+    struct go_brazzier_of_madness_AI : public GameObjectAI
+    {
+        go_brazzier_of_madness_AI(GameObject* go) : GameObjectAI(go)
+        {
+            instance = go->GetInstanceScript();
+            airGUID = 0;
+            fireGUID = 0;
+            soundGUID = 0;
+            bossEntry = 0;
+            events.Reset();
+        }
+
+        void OnStateChanged(uint32 /*state*/, Unit* /*stateChanger*/) override
+        {
+            if (!instance)
+            {
+                std::cout << "nie weszlo 1\n";
+                return;
+            }
+
+            if (instance->GetData(DATA_EDGE_OF_MADNESS) == DONE)
+            {
+                std::cout << "nie weszlo 1\n";
+                return;
+            }
+
+            go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+            uint32 eventActive = 0;
+            for (auto i : eventIds)
+            {
+                if (sGameEventMgr->IsActiveEvent(i))
+                {
+                    eventActive = i;
+                    break;
+                }
+            }
+
+            std::cout << "eventActive: " << eventActive << std::endl;
+            switch (eventActive)
+            {
+                case EVENT_RENATAKI:
+                    bossEntry = NPC_EDGE_RENE;
+                    break;
+                case EVENT_WUSH:
+                    bossEntry = NPC_EDGE_WUSH;
+                    break;
+                case EVENT_GRILEK:
+                    bossEntry = NPC_EDGE_GRILEK;
+                    break;
+                case EVENT_HAZZA:
+                    bossEntry = NPC_EDGE_GRILEK;
+                    break;
+                default:
+                    break;
+            }
+
+            events.ScheduleEvent(EVENT_MAP_ONE, 1s);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!instance)
+                return;
+
+            events.Update(diff);
+
+            while (uint32 eventid = events.ExecuteEvent())
+            {
+                switch (eventid)
+                {
+                    case EVENT_MAP_ONE:
+                        if (GameObject* air = go->SummonGameObject(GO_TROLL_AIR_PORTAL, airPortalPos.GetPositionX(), airPortalPos.GetPositionY(), airPortalPos.GetPositionZ(), 0.93f, 0, 0, 0, 0, 0))
+                            airGUID = air->GetGUID();
+
+                        if (GameObject* fire = go->SummonGameObject(GO_TROLL_FIRE_PORTAL, airPortalPos.GetPositionX(), airPortalPos.GetPositionY(), airPortalPos.GetPositionZ(), 0.93f, 0, 0, 0, 0, 0))
+                            fireGUID = fire->GetGUID();
+
+                        if (GameObject* sound = go->SummonGameObject(GO_TROLL_SOUND_PORTAL, airPortalPos.GetPositionX(), airPortalPos.GetPositionY(), airPortalPos.GetPositionZ(), 0.93f, 0, 0, 0, 0, 0))
+                            soundGUID = sound->GetGUID();
+
+                        events.ScheduleEvent(EVENT_MAP_TWO, 8s);
+                        break;
+                    case EVENT_MAP_TWO:
+                        if (!bossEntry)
+                            break;
+
+                        if (Creature* boss = instance->instance->SummonCreature(bossEntry, spawnBossPos))
+                            boss->AI()->DoCast(SPELL_RED_LIGHTNING);
+
+                        if (GameObject* air = ObjectAccessor::GetGameObject(*go, airGUID))
+                            air->Delete();
+
+                        if (GameObject* fire = ObjectAccessor::GetGameObject(*go, fireGUID))
+                            fire->Delete();
+
+                        if (GameObject* sound = ObjectAccessor::GetGameObject(*go, soundGUID))
+                            sound->Delete();
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+    private:
+        InstanceScript * instance;
+        EventMap events;
+        uint64 airGUID;
+        uint64 fireGUID;
+        uint64 soundGUID;
+        uint32 bossEntry;
+    };
+
+    GameObjectAI* GetAI(GameObject* go) const override
+    {
+        return new go_brazzier_of_madness_AI(go);
+    }
+};
+
 void AddSC_instance_zulgurub()
 {
     new instance_zulgurub();
+
+    new go_brazzier_of_madness();
 }
