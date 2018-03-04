@@ -4766,6 +4766,15 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// MISC
         /////////////////////////////////
+        // Spells that lack REQ0_AMMO attribute and throw visual cubes at you
+        case 55348: // throw (gundrak)
+        case 58966: // throw (gundrak)
+        case 55521: // Poisoned spear (gundrak)
+        case 58967: // Poisoned spear (gundrak)
+        case 42772: // hurl dagger
+        case 59685: // hurl dagger
+            spellInfo->Attributes |= SPELL_ATTR0_REQ_AMMO;
+            break;
         // Resurrection Sickness
         case 15007:
             spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
@@ -5379,10 +5388,6 @@ void SpellMgr::LoadDbcDataCorrections()
         // Ingvar the Plunderer, Ingvar transform
         case 42796:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
-            break;
-        case 42772:
-        case 59685:
-            spellInfo->Attributes |= SPELL_ATTR0_REQ_AMMO;
             break;
 
         //////////////////////////////////////////
