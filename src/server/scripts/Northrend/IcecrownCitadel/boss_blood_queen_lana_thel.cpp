@@ -329,22 +329,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         break;
                     case EVENT_VAMPIRIC_BITE:
                         {
-                            Player* target = NULL;
-                            float maxThreat = 0.0f;
-                            const Map::PlayerList &pl = me->GetMap()->GetPlayers();
-                            for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
-                                if (Player* p = itr->GetSource())
-                                    if (p->IsAlive() && p != me->GetVictim() && p->GetGUID() != _offtankGUID && !p->IsGameMaster() && p->GetDistance(me) < 70.0f)
-                                    {
-                                        float th = me->getThreatManager().getThreatWithoutTemp(p, true);
-                                        if (!target || th > maxThreat)
-                                        {
-                                            target = p;
-                                            maxThreat = th;
-                                        }
-                                    }
-
-                            if (target)
+                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1, [this](Unit* tar) { return tar->IsPlayer() && me->GetVictim()->GetGUID() != tar->GetGUID() && tar->GetGUID() != _offtankGUID; }))
                                 CastBite(target);
                             else if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
                                 CastBite(tar);
