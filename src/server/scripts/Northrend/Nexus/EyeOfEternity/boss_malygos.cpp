@@ -388,7 +388,7 @@ public:
                         events.PopEvent();
 
                         if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST))
-                            events.RescheduleEvent(EVENT_BERSERK, 540000, 0);
+                            events.RescheduleEvent(EVENT_BERSERK, 480000, 0);
                         else
                             events.RescheduleEvent(EVENT_BERSERK, 600000, 0);
 
