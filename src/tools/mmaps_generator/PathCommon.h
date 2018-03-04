@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -134,26 +134,6 @@ namespace MMAP
     #endif
 
         return LISTFILE_OK;
-    }
-
-    inline uint32 getMSTime()
-    {
-        static const ACE_Time_Value ApplicationStartTime = ACE_OS::gettimeofday();
-        return (ACE_OS::gettimeofday() - ApplicationStartTime).msec();
-    }
-
-    inline uint32 getMSTimeDiff(uint32 oldMSTime, uint32 newMSTime)
-    {
-        // getMSTime() have limited data range and this is case when it overflow in this tick
-        if (oldMSTime > newMSTime)
-            return (0xFFFFFFFF - oldMSTime) + newMSTime;
-        else
-            return newMSTime - oldMSTime;
-    }
-
-    inline uint32 GetMSTimeDiffToNow(uint32 oldMSTime)
-    {
-        return getMSTimeDiff(oldMSTime, getMSTime());
     }
 }
 

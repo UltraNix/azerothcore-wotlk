@@ -362,6 +362,11 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
         return false;
     }
 
+    //! Make all critters invalid target for aoe spells with chainTarget data
+    //! chain lightning, avenger's shield et cetera
+    if (cinfo->type == CREATURE_TYPE_CRITTER)
+        const_cast<CreatureTemplate*>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_AVOID_AOE;
+
     SetDisplayId(displayID);
     SetNativeDisplayId(displayID);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
