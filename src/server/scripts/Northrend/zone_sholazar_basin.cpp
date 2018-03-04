@@ -1591,7 +1591,7 @@ public:
 
         void UpdateAI(uint32 diff) override
         {
-            if (!_eventInProgress)
+            if (!UpdateVictim() && !_eventInProgress)
                 return;
 
             _events.Update(diff);
@@ -1642,6 +1642,7 @@ public:
                         break;
                 }
             }
+            DoMeleeAttackIfReady();
         }
     private:
         bool _eventInProgress;
