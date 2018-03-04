@@ -171,6 +171,7 @@ public:
         uint8 IntroCounter;
         bool bLockHealthCheck;
         uint32 _fightTimer;
+        bool _didBerserk;
 
         void Reset()
         {
@@ -182,6 +183,7 @@ public:
             timer2 = INTRO_MOVEMENT_INTERVAL;
             IntroCounter = 0;
             bLockHealthCheck = false;
+            _didBerserk = false;
 
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
@@ -345,6 +347,7 @@ public:
                     break;
                 case EVENT_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, true);
+                    _didBerserk = true;
                     events.PopEvent();
                     break;
                 case EVENT_INTRO_MOVE_CENTER:
@@ -811,10 +814,21 @@ public:
                 CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 30000, _fightTimer);
         }
 
-        void KilledUnit(Unit *victim)
+        void KilledUnit(Unit* victim)
         {
             if (victim && victim->GetGUID() == me->GetGUID())
                 return;
+
+            if (!_didBerserk && sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid() && victim->IsPlayer())
+            {
+                auto berserkTime = events.GetTimeUntilEvent(EVENT_BERSERK);
+                if (berserkTime > 15000)
+                {
+                    berserkTime -= 15000;
+
+                    events.RescheduleEvent(EVENT_BERSERK, berserkTime);
+                }
+            }
         }
 
         void JustSummoned(Creature* summon)
