@@ -592,13 +592,15 @@ public:
         // Sitowsky: Mute History
         if (sWorld->getBoolConfig(CONFIG_MUTE_HISTORY))
         {
+            uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? 2 : 1;
+
             stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_MUTE_HISTORY);
             stmt->setUInt32(0, accountId);
             stmt->setString(1, targetName.c_str());
             stmt->setString(2, reason.c_str());
             stmt->setString(3, muteBy.c_str());
             stmt->setUInt32(4, 30);
-            stmt->setUInt32(5, realmID);
+            stmt->setUInt32(5, rId);
             LoginDatabase.Execute(stmt);
         }
 

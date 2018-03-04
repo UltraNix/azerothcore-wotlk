@@ -2205,6 +2205,7 @@ void World::Update(uint32 diff)
         uint32 playersCount     = sWorld->GetPlayerCount();
         uint32 updateTime       = sWorld->GetUpdateTime();
         uint32 avgUpdateTime    = avgDiffTracker.getAverage();
+        uint32 rId              = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? 2 : 1;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_INGAME_STATISTICS);
 
@@ -2213,7 +2214,7 @@ void World::Update(uint32 diff)
         stmt->setUInt32(2, updateTime);
         stmt->setUInt32(3, avgUpdateTime);
         stmt->setString(4, TimeToTimestampStr(sWorld->GetGameTime()));
-        stmt->setUInt32(5, realmID);
+        stmt->setUInt32(5, rId);
 
         LoginDatabase.Execute(stmt);
     }
