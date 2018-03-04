@@ -598,6 +598,7 @@ public:
             stmt->setString(2, reason.c_str());
             stmt->setString(3, muteBy.c_str());
             stmt->setUInt32(4, 30);
+            stmt->setUInt32(5, realmID);
             LoginDatabase.Execute(stmt);
         }
 

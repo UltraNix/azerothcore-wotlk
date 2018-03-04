@@ -97,10 +97,10 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_REP_ACCOUNT_HISTORY, "REPLACE INTO account_history (account_id, hostname, ip, local_ip) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID, "SELECT ip, DATE_FORMAT(MAX(login_date), '%Y-%m-%d | %T') AS `date` FROM account_history WHERE account_id = ? GROUP BY ip ORDER BY `date` DESC LIMIT 15", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_IP, "SELECT account_id, DATE_FORMAT(MAX(login_date), '%Y-%m-%d | %T') AS `date` FROM account_history WHERE ip = ? GROUP BY account_id ORDER BY `date` DESC LIMIT 15", CONNECTION_SYNCH);
-    PrepareStatement(LOGIN_INS_INGAME_STATISTICS, "INSERT INTO ingame_stats (connectedPlayers, playersCount, diff, avgDiff, currentTime) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_INS_INGAME_STATISTICS, "INSERT INTO ingame_stats (connectedPlayers, playersCount, diff, avgDiff, currentTime, realm_id) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_IP2NATION, "SELECT c.country FROM ip2nationcountries c, ip2nation i WHERE i.ip < ? AND c.code = i.country ORDER BY i.ip DESC LIMIT 0,1", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_IP2NATION_COUNT, "SELECT count(c.code) FROM ip2nationcountries c, ip2nation i WHERE c.code = i.country", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_GET_IP2NATION_PLAYER_IP, "SELECT last_ip FROM account WHERE id = ?", CONNECTION_SYNCH);
-    PrepareStatement(LOGIN_REP_MUTE_HISTORY, "REPLACE INTO account_mute_history (account_id, characterName, muteReason, muteBy, minutes) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(LOGIN_SEL_MUTE_HISTORY, "SELECT characterName, muteReason, muteBy, minutes, DATE_FORMAT(mute_date, '%Y-%m-%d | %T') FROM account_mute_history WHERE account_id = ? ORDER BY mute_date DESC", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_REP_MUTE_HISTORY, "REPLACE INTO account_mute_history (account_id, characterName, muteReason, muteBy, minutes, realm_id) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_SEL_MUTE_HISTORY, "SELECT characterName, muteReason, muteBy, minutes, DATE_FORMAT(mute_date, '%Y-%m-%d | %T') FROM account_mute_history WHERE account_id = ? AND realm_id = ? ORDER BY mute_date DESC", CONNECTION_SYNCH);
 }
