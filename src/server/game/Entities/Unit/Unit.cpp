@@ -15746,10 +15746,10 @@ Unit* Unit::SelectNearbyTarget(Unit* exclude, float dist) const
     if (exclude)
         targets.remove(exclude);
 
-    // remove not LoS targets
+    // remove not LoS targets, not valid attack targets or critters
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
-        if (!IsWithinLOSInMap(*tIter) || !IsValidAttackTarget(*tIter))
+        if (!IsWithinLOSInMap(*tIter) || !IsValidAttackTarget(*tIter) || IsCritter())
         {
             std::list<Unit *>::iterator tIter2 = tIter;
             ++tIter;
