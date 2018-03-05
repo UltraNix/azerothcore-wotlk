@@ -2778,7 +2778,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
             if (m_caster->IsAlive())
             {
-                healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, HEAL, effIndex);
+                healthGain = m_caster->SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, HEAL);
                 healthGain = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, HEAL);
 
                 m_caster->HealBySpell(m_caster, m_spellInfo, uint32(healthGain));
