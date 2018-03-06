@@ -53,6 +53,7 @@ class boss_omor_the_unscarred : public CreatureScript
                 Talk(SAY_WIPE);
                 BossAI::Reset();
                 _targetGUID = 0;
+                _orbitalStrike = false;
             }
 
             void EnterCombat(Unit* who)
@@ -127,6 +128,7 @@ class boss_omor_the_unscarred : public CreatureScript
                     case EVENT_ORBITAL_STRIKE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 15.0f, true))
                         {
+                            _orbitalStrike = true;
                             _targetGUID = target->GetGUID();
                             me->CastSpell(target, SPELL_ORBITAL_STRIKE, false);
                             events.DelayEvents(5000);
@@ -140,6 +142,7 @@ class boss_omor_the_unscarred : public CreatureScript
                         if (Unit* target = ObjectAccessor::GetUnit(*me, _targetGUID))
                             me->CastSpell(target, SPELL_SHADOW_WHIP, false);
                         _targetGUID = 0;
+                        _orbitalStrike = false;
                         break;
                 }
 
@@ -154,13 +157,15 @@ class boss_omor_the_unscarred : public CreatureScript
                 else
                 {
                     me->GetMotionMaster()->Clear();
-                    me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
+                    if(!_orbitalStrike)
+                        me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
                     me->resetAttackTimer();
                 }
             }
 
         private:
             uint64 _targetGUID;
+            bool _orbitalStrike;
         };
 
         CreatureAI* GetAI(Creature* creature) const
