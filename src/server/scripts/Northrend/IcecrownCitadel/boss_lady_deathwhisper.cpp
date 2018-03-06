@@ -759,7 +759,9 @@ public:
                     events.RepeatEvent(urand(20000, 27000));
                     break;
                 case EVENT_SPELL_CULTIST_DARK_MARTYRDOM:
-                    me->CastSpell(me, SPELL_DARK_MARTYRDOM_FANATIC, false);
+                    if (Creature* deathwhisper = me->FindNearestCreature(36855, 250.0f))
+                        if (deathwhisper->HasAura(SPELL_MANA_BARRIER))
+                            me->CastSpell(me, SPELL_DARK_MARTYRDOM_FANATIC, false);
                     events.RepeatEvent(urand(16000, 21000));
                     break;
                 case EVENT_CULTIST_DARK_MARTYRDOM_SELF_KILL:
@@ -863,7 +865,9 @@ public:
                     events.RepeatEvent(urand(27000, 32000));
                     break;
                 case EVENT_SPELL_CULTIST_DARK_MARTYRDOM:
-                    me->CastSpell(me, SPELL_DARK_MARTYRDOM_ADHERENT, false);
+                    if (Creature* deathwhisper = me->FindNearestCreature(36855, 250.0f))
+                        if (deathwhisper->HasAura(SPELL_MANA_BARRIER))
+                            me->CastSpell(me, SPELL_DARK_MARTYRDOM_ADHERENT, false);
                     events.RepeatEvent(urand(16000, 21000));
                     break;
                 case EVENT_CULTIST_DARK_MARTYRDOM_SELF_KILL:
