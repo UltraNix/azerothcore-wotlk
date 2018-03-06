@@ -5202,6 +5202,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 28206:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+            // Void Blast (Encounter: Kel'thuzad)
+        case 27812:
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;
+            break;
         /*########################################
         ########## Malygos 10 & 25 ###############
         ########################################*/
