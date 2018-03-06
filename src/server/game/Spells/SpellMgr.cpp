@@ -2845,7 +2845,11 @@ std::vector<uint32> partialCorrection =
     72004, // Frostbite 10 man
     72098, // Frostbite 25 man
     72034, // Whiteout 10 man
-    72096  // Whiteout 25 man
+    72096,  // Whiteout 25 man
+    71420, // Frostbolt 10 man
+    72007, // Frostbolt 25 man
+    72501, // Frostbolt 10 man heroic
+    72502, // Frostbolt 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
