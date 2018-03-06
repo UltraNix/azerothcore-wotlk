@@ -398,6 +398,8 @@ enum WorldIntConfigs
     CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
     CONFIG_CHINA_TOWN_TIMER,
     CONFIG_WINTERGRASP_REMINDER,
+    CONFIG_ICC_STAGE,                           // Afgann: Sets amount of opened wings on heroic in ICC.
+    CONFIG_ICC_ATTEMPTS,                        // Afgann: Sets amount of heroic attempts in ICC.
     INT_CONFIG_VALUE_COUNT
 };
 

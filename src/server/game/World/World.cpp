@@ -1336,6 +1336,18 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_CUSTOM_AFK_REPORT] = sConfigMgr->GetBoolDefault("Custom.AFK.Report", false);
     m_int_configs[CONFIG_CUSTOM_AFK_REPORT_TIMER] = sConfigMgr->GetIntDefault("Custom.AFK.Report.PvP.Timer", 2);
 
+    // ICC progress stage
+    // flags:
+    // 1 - 1st wing heroic (marrowgar, deathwhisper, gunship, deathbringer)
+    // 2 - 2nd wing heroic (festergut, rotface, putricide)
+    // 4 - 3rd wing heroic (council, lana'thel)
+    // 8 - 4th wing heroic (valithria, sindragosa)
+    // 16 - lich king heroic
+    m_int_configs[CONFIG_ICC_STAGE] = sConfigMgr->GetIntDefault("ICC.Heroic.Stage", 1);
+
+    // ICC heroic attempts
+    m_int_configs[CONFIG_ICC_ATTEMPTS] = sConfigMgr->GetIntDefault("ICC.Attempts", 5);
+
     m_bool_configs[CONFIG_ENCOUNTER_LOG] = sConfigMgr->GetBoolDefault("EncounterLog.Enable", false);
 
     m_bool_configs[CONFIG_EXPERIMENTAL_FEATURE] = sConfigMgr->GetBoolDefault("Experimental.Enable", false);

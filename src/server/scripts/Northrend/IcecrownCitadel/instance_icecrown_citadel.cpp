@@ -19,6 +19,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "Chat.h"
 #include "CreatureGroups.h"
 #include "MoveSplineInit.h"
+#include "World.h"
 
 enum EventIds
 {
@@ -270,6 +271,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 SetBossNumber(MAX_ENCOUNTERS);
                 LoadDoorData(doorData);
                 TeamIdInInstance = TEAM_NEUTRAL;
+                MaxHeroicAttempts = sWorld->getIntConfig(CONFIG_ICC_ATTEMPTS);
                 HeroicAttempts = MaxHeroicAttempts;
                 LadyDeathwisperElevatorGUID = 0;
                 GunshipGUID = 0;
@@ -430,20 +432,43 @@ class instance_icecrown_citadel : public InstanceMapScript
                 // limited heroic bosses
                 switch (creature->GetEntry())
                 {
+                    case NPC_LORD_MARROWGAR:
+                    case NPC_LADY_DEATHWHISPER:
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 1))
+                            HandleHeroic(creature, false);
+                        break;
+                    case NPC_IGB_HIGH_OVERLORD_SAURFANG:
+                    case NPC_IGB_MURADIN_BRONZEBEARD:
+                    case NPC_SE_HIGH_OVERLORD_SAURFANG:
+                    case NPC_SE_MURADIN_BRONZEBEARD:
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 1))
+                            HandleHeroic(creature, true);
+                        break;
                     case NPC_FESTERGUT:
                     case NPC_ROTFACE:
                     case NPC_PROFESSOR_PUTRICIDE:
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 2))
+                            HandleHeroic(creature, false);
+                        break;
                     case NPC_PRINCE_KELESETH:
                     case NPC_PRINCE_TALDARAM:
                     case NPC_PRINCE_VALANAR:
                     case NPC_BLOOD_QUEEN_LANA_THEL:
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 4))
+                            HandleHeroic(creature, false);
+                        break;
                     case NPC_SINDRAGOSA:
                     case NPC_RISEN_ARCHMAGE:
-                        HandleHeroic(creature, false);
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 8))
+                            HandleHeroic(creature, true);
                         break;
                     case NPC_VALITHRIA_DREAMWALKER:
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 8))
+                            HandleHeroic(creature, true);
+                        break;
                     case 38995:
-                        HandleHeroic(creature, true);
+                        if (!(sWorld->getIntConfig(CONFIG_ICC_STAGE) & 16))
+                            HandleHeroic(creature, true);
                         break;
                     default:
                         break;
@@ -1855,7 +1880,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                         SetBossState(i, EncounterState(tmpState));
                     }
 
-                    loadStream >> HeroicAttempts;
+                    uint32 attempts = 0;
+                    loadStream >> attempts;
+                    HeroicAttempts = std::min(MaxHeroicAttempts, attempts);
 
                     uint32 temp = 0;
                     loadStream >> temp;
@@ -2154,6 +2181,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             std::set<uint32> RimefangTrash;
             uint32 BloodQuickeningState;
             uint32 HeroicAttempts;
+            uint32 MaxHeroicAttempts;
             uint16 BloodQuickeningMinutes;
             uint32 BloodPrinceTrashCount;
             bool IsBonedEligible;
