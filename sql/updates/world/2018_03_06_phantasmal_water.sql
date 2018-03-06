@@ -1,0 +1,1 @@
+UPDATE `smart_scripts` SET `event_phase_mask` = 0, `event_type` = 0, `event_param1` = 0, `event_param2` = 3000, `event_param3` = 8000, `event_param4` = 10000, `action_param2` = 0 WHERE `entryorguid` = 27653 AND `id` IN (2,3);
