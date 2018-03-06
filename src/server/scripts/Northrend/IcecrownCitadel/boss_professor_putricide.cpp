@@ -629,7 +629,7 @@ class boss_professor_putricide : public CreatureScript
                                 me->CastSpell(target, SPELL_MALLEABLE_GOO, true);
                             }
                         }
-                        events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(25000, 30000), EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_MALLEABLE_GOO, 20s, EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_CHOKING_GAS_BOMB:
                         Talk(EMOTE_CHOKING_GAS_BOMB);
