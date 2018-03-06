@@ -34,7 +34,8 @@ enum Misc
     EVENT_DEMONIC_SHIELD        = 4,
     EVENT_KILL_TALK                = 5,
     EVENT_ORBITAL_STRIKE        = 6,
-    EVENT_SHADOW_WHIP            = 7
+    EVENT_SHADOW_WHIP            = 7,
+    EVENT_SHADOW_BOLT           = 8
 };
 
 class boss_omor_the_unscarred : public CreatureScript
@@ -53,7 +54,6 @@ class boss_omor_the_unscarred : public CreatureScript
                 Talk(SAY_WIPE);
                 BossAI::Reset();
                 _targetGUID = 0;
-                _orbitalStrike = false;
             }
 
             void EnterCombat(Unit* who)
@@ -61,6 +61,7 @@ class boss_omor_the_unscarred : public CreatureScript
                 Talk(SAY_AGGRO);
                 BossAI::EnterCombat(who);
 
+                events.ScheduleEvent(EVENT_SHADOW_BOLT, 1000);
                 events.ScheduleEvent(EVENT_SUMMON1, 10000);
                 events.ScheduleEvent(EVENT_SUMMON2, 25000);
                 events.ScheduleEvent(EVENT_TREACHEROUS_AURA, 6000);
@@ -128,7 +129,6 @@ class boss_omor_the_unscarred : public CreatureScript
                     case EVENT_ORBITAL_STRIKE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 15.0f, true))
                         {
-                            _orbitalStrike = true;
                             _targetGUID = target->GetGUID();
                             me->CastSpell(target, SPELL_ORBITAL_STRIKE, false);
                             events.DelayEvents(5000);
@@ -142,7 +142,11 @@ class boss_omor_the_unscarred : public CreatureScript
                         if (Unit* target = ObjectAccessor::GetUnit(*me, _targetGUID))
                             me->CastSpell(target, SPELL_SHADOW_WHIP, false);
                         _targetGUID = 0;
-                        _orbitalStrike = false;
+                        break;
+                    case EVENT_SHADOW_BOLT:
+                        if (Unit* target = me->GetVictim())
+                            me->CastSpell(target, SPELL_SHADOW_BOLT, false);
+                        events.ScheduleEvent(EVENT_SHADOW_BOLT, 12000);
                         break;
                 }
 
@@ -157,15 +161,12 @@ class boss_omor_the_unscarred : public CreatureScript
                 else
                 {
                     me->GetMotionMaster()->Clear();
-                    if(!_orbitalStrike)
-                        me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
                     me->resetAttackTimer();
                 }
             }
 
         private:
             uint64 _targetGUID;
-            bool _orbitalStrike;
         };
 
         CreatureAI* GetAI(Creature* creature) const
