@@ -979,7 +979,7 @@ enum AmberpineOuthouse
     ITEM_ANDERHOLS_SLIDER_CIDER     = 37247,
     NPC_OUTHOUSE_BUNNY              = 27326,
     QUEST_DOING_YOUR_DUTY           = 12227,
-    SPELL_INDISPOSED                = 53017,
+    SPELL_INDISPOSED                = 48323,
     SPELL_INDISPOSED_III            = 48341,
     SPELL_CREATE_AMBERSEEDS         = 48330,
     GOSSIP_OUTHOUSE_INUSE           = 12775,
