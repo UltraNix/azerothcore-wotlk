@@ -51,5 +51,5 @@ UPDATE `creature` SET `spawntimesecs`=604800 WHERE `id` IN
 	37127, -- Ymirjar Frostbinder
 	38125, -- Ymirjar Deathbringer
 	37531, -- Frostwarden Handler
-	37532, -- Frostwing Whelp
+	37532  -- Frostwing Whelp
 );
