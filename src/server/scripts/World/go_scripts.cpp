@@ -220,6 +220,9 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go)
     {
+        go->SetRespawnTime(60);
+        go->SetLootState(GO_JUST_DEACTIVATED);
+
         int Random = rand() % (sizeof(NpcPrisonEntry) / sizeof(uint32));
 
         if (Creature* creature = player->SummonCreature(NpcPrisonEntry[Random], go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetAngle(player),
