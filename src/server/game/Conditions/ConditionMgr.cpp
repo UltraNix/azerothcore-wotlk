@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -386,8 +386,8 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
     if (!condMeets)
         sourceInfo.mLastFailedCondition = this;
 
-    //bool script = sScriptMgr->OnConditionCheck(this, sourceInfo); // Returns true by default. // pussywizard: optimization
-    return condMeets;// && script;
+    bool script = sScriptMgr->OnConditionCheck(this, sourceInfo); // Returns true by default.
+    return condMeets && script;
 }
 
 uint32 Condition::GetSearcherTypeMaskForCondition()

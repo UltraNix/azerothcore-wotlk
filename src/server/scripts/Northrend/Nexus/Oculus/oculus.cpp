@@ -608,6 +608,35 @@ public:
     }
 };
 
+class condition_cache_of_lay_guardian : public ConditionScript
+{
+public:
+    condition_cache_of_lay_guardian() : ConditionScript("condition_cache_of_lay_guardian") { }
+
+    bool OnConditionCheck(Condition* /*condition*/, ConditionSourceInfo& sourceInfo) override
+    {
+        Player* conditionTarget = nullptr;
+        for (uint32 i = 0; i < 3; ++i)
+        {
+            if (sourceInfo.mConditionTargets[i])
+            {
+                if (sourceInfo.mConditionTargets[i]->IsPlayer())
+                {
+                    conditionTarget = sourceInfo.mConditionTargets[i]->ToPlayer();
+                    break;
+                }
+            }
+        }
+
+        if (conditionTarget)
+        {
+            if (conditionTarget->inRandomLfgDungeon())
+                return true;
+        }
+        return false;
+    }
+};
+
 void AddSC_oculus()
 {
     new npc_oculus_drakegiver();
@@ -623,4 +652,5 @@ void AddSC_oculus()
     new spell_oculus_ride_ruby_emerald_amber_drake_que();
 
     new at_oculus_exit_5001();
+    new condition_cache_of_lay_guardian();
 }
