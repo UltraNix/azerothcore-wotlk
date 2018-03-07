@@ -364,7 +364,7 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
 
     //! Make all critters invalid target for aoe spells with chainTarget data
     //! chain lightning, avenger's shield et cetera
-    if (cinfo->type == CREATURE_TYPE_CRITTER)
+    if (cinfo->type == CREATURE_TYPE_CRITTER && Entry != 34606) // temp hack for anub'arak
         const_cast<CreatureTemplate*>(cinfo)->flags_extra |= CREATURE_FLAG_EXTRA_AVOID_AOE;
 
     SetDisplayId(displayID);
