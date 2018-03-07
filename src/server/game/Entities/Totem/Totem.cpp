@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,7 +35,7 @@ Totem::Totem(SummonPropertiesEntry const* properties, uint64 owner) : Minion(pro
 }
 
 void Totem::Update(uint32 time)
-{ 
+{
     if (!GetOwner()->IsAlive() || !IsAlive())
     {
         UnSummon();                                         // remove self
@@ -54,7 +54,9 @@ void Totem::Update(uint32 time)
 }
 
 void Totem::InitStats(uint32 duration)
-{ 
+{
+    m_duration = duration;
+
     // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
     // Xinef: Set level for Unit totems
     if (Unit* owner = ObjectAccessor::FindUnit(m_owner))
@@ -81,13 +83,10 @@ void Totem::InitStats(uint32 duration)
     if (SpellInfo const* totemSpell = sSpellMgr->GetSpellInfo(GetSpell()))
         if (totemSpell->CalcCastTime())   // If spell has cast time -> its an active totem
             m_type = TOTEM_ACTIVE;
-
-
-    m_duration = duration;
 }
 
 void Totem::InitSummon()
-{ 
+{
     if (m_type == TOTEM_PASSIVE && GetSpell())
         CastSpell(this, GetSpell(), true);
 
@@ -106,7 +105,7 @@ void Totem::InitSummon()
 }
 
 void Totem::UnSummon(uint32 msTime)
-{ 
+{
     if (msTime)
     {
         m_Events.AddEvent(new ForcedUnsummonDelayEvent(*this), m_Events.CalculateTime(msTime));
@@ -156,11 +155,11 @@ void Totem::UnSummon(uint32 msTime)
 }
 
 bool Totem::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) const
-{ 
+{
     // xinef: immune to all positive spells, except of stoneclaw totem absorb and sentry totem bind sight
     // totems positive spells have unit_caster target
-    if (spellInfo->Effects[index].Effect != SPELL_EFFECT_DUMMY && 
-        spellInfo->Effects[index].Effect != SPELL_EFFECT_SCRIPT_EFFECT && 
+    if (spellInfo->Effects[index].Effect != SPELL_EFFECT_DUMMY &&
+        spellInfo->Effects[index].Effect != SPELL_EFFECT_SCRIPT_EFFECT &&
         spellInfo->IsPositive() && spellInfo->Effects[index].TargetA.GetTarget() != TARGET_UNIT_CASTER &&
         spellInfo->Effects[index].TargetA.GetCheckType() != TARGET_CHECK_ENTRY && spellInfo->Id != 55277 && spellInfo->Id != 6277)
         return true;
