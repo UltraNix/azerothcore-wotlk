@@ -3970,6 +3970,7 @@ void SpellMgr::LoadDbcDataCorrections()
         // Light's Beacon, Beacon of Light
         case 53651:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
         // Hand of Reckoning
         case 62124:
@@ -4723,6 +4724,9 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->Effect[EFFECT_2] = SPELL_EFFECT_APPLY_AURA;
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_ADD_PCT_MODIFIER;
             spellInfo->EffectImplicitTargetA[EFFECT_2] = TARGET_UNIT_TARGET_ALLY;
+            break;
+        case 63944: // Rewned hope triggered spell
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
 
 
