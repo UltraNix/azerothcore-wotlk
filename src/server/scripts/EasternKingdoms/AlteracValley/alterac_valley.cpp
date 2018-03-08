@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -97,6 +97,11 @@ class npc_av_marshal_or_warmaster : public CreatureScript
                 events.ScheduleEvent(EVENT_CHECK_RESET, 5000);
 
                 _hasAura = false;
+            }
+
+            void EnterCombat(Unit* /*who*/)
+            {
+                me->CallForHelp(22.0f);
             }
 
             void JustRespawned()
