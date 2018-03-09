@@ -5304,7 +5304,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     UpdateObjectVisibility();
 
     // Premium service
-    bool allowPremium = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? getLevel() < 80 /* Angrthar affect only below 80 level */ : getLevel() <= 80 /* Feronis affect every1 */;
+    bool allowPremium = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? getLevel() < 80 /* Angrthar affect only below 80 level */ : true /* Feronis affect every1 */;
     if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_RESSURECTION_SICKNESS) && allowPremium)
         return;
 
