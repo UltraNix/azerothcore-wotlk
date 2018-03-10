@@ -9500,11 +9500,13 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     //if (GetTypeId() == TYPEID_UNIT)
     //    ToCreature()->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
 
-    if (GetTypeId() == TYPEID_UNIT && !IsPet() && !IsGuardian())
+    if (GetTypeId() == TYPEID_UNIT && !IsPet())
     {
         // should not let player enter combat by right clicking target - doesn't helps
         SetInCombatWith(victim);
-        if (victim->GetTypeId() == TYPEID_PLAYER)
+        //! Check for guardian, otherwise victim would get combat instantly
+        //! when you send ie. mirror images or shaman spirit wolves at target
+        if (victim->GetTypeId() == TYPEID_PLAYER && !IsGuardian())
             victim->SetInCombatWith(this);
         AddThreat(victim, 0.0f);
 
