@@ -4409,6 +4409,10 @@ void SpellMgr::LoadDbcDataCorrections()
         // Ancestral Awakening Heal
         case 52752:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            break;
+        case 52759: // Ancestral awekening
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
         case 32182: // Heroism
             spellInfo->excludeTargetAuraSpell = 57723; // Exhaustion
@@ -4428,6 +4432,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64695: //Storm, Earth and Fire talent
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
+
 
         /////////////////////////////////
         ///// WARLOCK
