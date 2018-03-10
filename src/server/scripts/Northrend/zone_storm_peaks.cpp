@@ -166,8 +166,6 @@ public:
 
                         me->CastSpell(me, SPELL_SUMMON_ANGRIM, false);
                         me->CastSpell(plr, SPELL_JORMUNGAR_CREDIT, false);
-
-                        me->DespawnOrUnsummon(15000); // Despawn after 15 seconds?
                     }
                 }
             }
