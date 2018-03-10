@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -44,7 +44,8 @@ enum TapokeSlim
     SPELL_STEALTH               = 1785,
     SPELL_CALL_FRIENDS          = 16457,                    //summons 1x friend
     NPC_SLIMS_FRIEND            = 4971,
-    NPC_TAPOKE_SLIM_JAHN        = 4962
+    NPC_TAPOKE_SLIM_JAHN        = 4962,
+    SAY_LINE_0                  = 0
 };
 
 class npc_tapoke_slim_jahn : public CreatureScript
@@ -124,6 +125,9 @@ public:
                     me->CombatStop(true);
 
                     SetRun(false);
+
+                    Talk(SAY_LINE_0);
+                    me->DespawnOrUnsummon(5000);
                 }
             }
         }
