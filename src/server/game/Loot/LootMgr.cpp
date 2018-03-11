@@ -300,7 +300,15 @@ bool LootStoreItem::Roll(bool rate) const
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(itemid);
 
-    float qualityModifier = pProto && rate ? sWorld->getRate(qualityToRate[pProto->Quality]) : 1.0f;
+    float qualityModifier = 1.0f;
+
+    if (pProto && rate)
+    {
+        //! Riztazz: only apply loot rates for loot below 90% chance
+        //! everything else is considered high chance and shouldnt be modified (time-lost protodrake loot et cetera)
+        if (chance < 90.0f)
+            qualityModifier = sWorld->getRate(qualityToRate[pProto->Quality]);
+    }
 
     return roll_chance_f(chance*qualityModifier);
 }
