@@ -5215,134 +5215,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 27812:
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;
             break;
-        /*########################################
-        ########## Malygos 10 & 25 ###############
-        ########################################*/
-        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-        {
-            case 56272: // Arcane breath normal
-                spellInfo->EffectBasePoints[EFFECT_0] = 30000;
-                break;
-            case 60072: // Arcane breath heroic
-                spellInfo->EffectBasePoints[EFFECT_0] = 45000;
-                break;
-            case 56256: // vortex
-                spellInfo->EffectBasePoints[EFFECT_1] = 4000;
-                break;
-            case 56548: // surge of power targeted (p2 i think)
-                spellInfo->EffectBasePoints[EFFECT_0] = 10000;
-                break;
-            case 61693: // arcane storm normal
-                spellInfo->EffectBasePoints[EFFECT_0] = 12000;
-                spellInfo->EffectDieSides[EFFECT_0] = 1250;
-                break;
-            case 61694: // arcane storm heroic
-                spellInfo->EffectBasePoints[EFFECT_0] = 14000;
-                spellInfo->EffectDieSides[EFFECT_0] = 1250;
-                break;
-        }
-
-        //////////////////////////////////////////
-        ////////// Naxxramas - BOOST - ONLY 25 MAN!
-        //////////////////////////////////////////
-        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-        {
-            case 54363: // Poison cloud - Grobbulus
-                spellInfo->EffectBasePoints[EFFECT_0] = 10000;
-                spellInfo->EffectDieSides[EFFECT_0] = 700;
-                break;
-            // Locust Swarm (Encounter: Anubrekhan)
-            case 54021:
-                spellInfo->DurationIndex = 64; // 40 seconds
-                break;
-            case 54022:
-                spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_35_YARDS;
-                spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_35_YARDS;
-                spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_35_YARDS;
-                break;
-            // Poison Bolt Volley (Encounter: Faerlina)
-            case 54098:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
-                spellInfo->EffectBasePoints[EFFECT_1] = spellInfo->EffectBasePoints[EFFECT_1] * 2;
-                break;
-            // Rain of Fire (Encounter: Faerlina)
-            case 54099:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.75;
-                break;
-            // Fireball (Encounter: Faerlina)
-            case 54096:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
-                break;
-            // Shadow Shock (Encounter: Faerlina)
-            case 54889:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
-                break;
-            // Disease Cloud (Encounter: Grobbulus)
-            case 54368:
-                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;
-                break;
-            // Death Bloom (Encounter: Loatheb)
-            case 55053:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 3;
-                break;
-            // Frenzy (Encounter: Maexxna)
-            case 54124:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] + 18; // + 15%
-                break;
-            // Web Spray (Encounter: Maexxna)
-            case 54125:
-                spellInfo->EffectBasePoints[1] = spellInfo->EffectBasePoints[1] * 2;
-                break;
-            // Poison Shock (Encounter: Maexxna)
-            case 54122:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
-                break;
-            // Frost Aura (Encounter: Sapphiron)
-            case 55799:
-                spellInfo->EffectBasePoints[EFFECT_0] = 6000;
-                break;
-            case 28531: // Frost Aura (sapphiron 10man)
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
-                break;
-            // Chill (Encounter: Sapphiron)
-            case 55699:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.5;
-                break;
-            // Chain Lightining (Encounter: Thaddius)
-            case 54531:
-                spellInfo->MaxAffectedTargets = 10;
-                break;
-            // Unholy Aura (Encounter: Horseman)
-            case 55609:
-            // Unholy Shadow (Encounter: Horseman)
-            case 57369:
-            // Meteor (Encounter: Horseman)
-            case 57467:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2;
-                break;
-            // Holy Wrath (Encounter: Horseman)
-            case 57466:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.5;
-                break;
-            // Frosbolt single (Encounter: Kel'thuzad)
-            case 55802:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.35;
-                break;
-            // Frosbolt multi (Encounter: Kel'thuzad)
-            case 28479: // 10 Man
-            case 55807: // 25 Man
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.50;
-                break;
-            // Arcane Explosion (Encounter: Gothik)
-            case 56407:
-                spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2;
-                break;
-            // Arcane Explosion (Encounter: Noth)
-            case 54891:
-                spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 8;
-                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
-                break;
-        }
 
         //////////////////////////////////////////
         ////////// Gundrak
@@ -7496,6 +7368,132 @@ void SpellMgr::LoadDbcDataCorrections()
         case 47214:    // Burninate Effect
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
             break;
+        }
+
+        //////////////////////////////////////////
+        ////////// Naxxramas - BOOST - ONLY 25 MAN! && Malygos
+        //////////////////////////////////////////
+        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+        {
+            switch (spellInfo->Id)
+            {
+                case 56272: // Arcane breath normal
+                    spellInfo->EffectBasePoints[EFFECT_0] = 30000;
+                    break;
+                case 60072: // Arcane breath heroic
+                    spellInfo->EffectBasePoints[EFFECT_0] = 45000;
+                    break;
+                case 56256: // vortex
+                    spellInfo->EffectBasePoints[EFFECT_1] = 3600;
+                    break;
+                case 56548: // surge of power targeted (p2 i think)
+                    spellInfo->EffectBasePoints[EFFECT_0] = 10000;
+                    break;
+                case 61693: // arcane storm normal
+                    spellInfo->EffectBasePoints[EFFECT_0] = 12000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1250;
+                    break;
+                case 61694: // arcane storm heroic
+                    spellInfo->EffectBasePoints[EFFECT_0] = 14000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1250;
+                    break;
+
+                case 54363: // Poison cloud - Grobbulus
+                    spellInfo->EffectBasePoints[EFFECT_0] = 10000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 700;
+                    break;
+                    // Locust Swarm (Encounter: Anubrekhan)
+                case 54021:
+                    spellInfo->DurationIndex = 64; // 40 seconds
+                    break;
+                case 54022:
+                    spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_35_YARDS;
+                    spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_35_YARDS;
+                    spellInfo->EffectRadiusIndex[EFFECT_2] = EFFECT_RADIUS_35_YARDS;
+                    break;
+                    // Poison Bolt Volley (Encounter: Faerlina)
+                case 54098:
+                    spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
+                    spellInfo->EffectBasePoints[EFFECT_1] = spellInfo->EffectBasePoints[EFFECT_1] * 2;
+                    break;
+                    // Rain of Fire (Encounter: Faerlina)
+                case 54099:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.75;
+                    break;
+                    // Fireball (Encounter: Faerlina)
+                case 54096:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
+                    break;
+                    // Shadow Shock (Encounter: Faerlina)
+                case 54889:
+                    spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
+                    break;
+                    // Disease Cloud (Encounter: Grobbulus)
+                case 54368:
+                    spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_100_YARDS;
+                    break;
+                    // Death Bloom (Encounter: Loatheb)
+                case 55053:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 3;
+                    break;
+                    // Frenzy (Encounter: Maexxna)
+                case 54124:
+                    spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] + 18; // + 15%
+                    break;
+                    // Web Spray (Encounter: Maexxna)
+                case 54125:
+                    spellInfo->EffectBasePoints[1] = spellInfo->EffectBasePoints[1] * 2;
+                    break;
+                    // Poison Shock (Encounter: Maexxna)
+                case 54122:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2.85;
+                    break;
+                    // Frost Aura (Encounter: Sapphiron)
+                case 55799:
+                    spellInfo->EffectBasePoints[EFFECT_0] = 6000;
+                    break;
+                case 28531: // Frost Aura (sapphiron 10man)
+                    spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
+                    break;
+                    // Chill (Encounter: Sapphiron)
+                case 55699:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.5;
+                    break;
+                    // Chain Lightining (Encounter: Thaddius)
+                case 54531:
+                    spellInfo->MaxAffectedTargets = 10;
+                    break;
+                    // Unholy Aura (Encounter: Horseman)
+                case 55609:
+                    // Unholy Shadow (Encounter: Horseman)
+                case 57369:
+                    // Meteor (Encounter: Horseman)
+                case 57467:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2;
+                    break;
+                    // Holy Wrath (Encounter: Horseman)
+                case 57466:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.5;
+                    break;
+                    // Frosbolt single (Encounter: Kel'thuzad)
+                case 55802:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.35;
+                    break;
+                    // Frosbolt multi (Encounter: Kel'thuzad)
+                case 28479: // 10 Man
+                case 55807: // 25 Man
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.50;
+                    break;
+                    // Arcane Explosion (Encounter: Gothik)
+                case 56407:
+                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 2;
+                    break;
+                    // Arcane Explosion (Encounter: Noth)
+                case 54891:
+                    spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 8;
+                    spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
+                    break;
+            }
         }
 
         switch (spellInfo->SpellFamilyName)
