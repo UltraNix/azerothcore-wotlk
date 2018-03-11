@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -333,10 +333,10 @@ void WardenWin::RequestData()
 
     _dataSent = true;
 
-    std::stringstream stream;
-    stream << "Sent check id's: ";
-    for (std::list<uint16>::iterator itr = _currentChecks.begin(); itr != _currentChecks.end(); ++itr)
-        stream << *itr << " ";
+    //std::stringstream stream;
+    //stream << "Sent check id's: ";
+    //for (std::list<uint16>::iterator itr = _currentChecks.begin(); itr != _currentChecks.end(); ++itr)
+    //    stream << *itr << " ";
 
     ;//sLog->outDebug(LOG_FILTER_WARDEN, "%s", stream.str().c_str());
 }
