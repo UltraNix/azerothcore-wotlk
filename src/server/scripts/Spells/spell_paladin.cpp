@@ -245,6 +245,9 @@ public:
             if (!sealDot)
                 return;
 
+            if (!(eventInfo.GetTypeMask() & (PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_DONE_MELEE_AUTO_ATTACK)))
+                return;
+
             uint8 const stacks = sealDot->GetBase()->GetStackAmount();
             uint8 const maxStacks = sealDot->GetSpellInfo()->StackAmount;
 
