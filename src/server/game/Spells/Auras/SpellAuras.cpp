@@ -547,8 +547,7 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
 
     // fill up to date target list
     //       target, effMask
-    std::map<Unit*, uint8> targets;
-
+    std::unordered_map<Unit*, uint8> targets;
     FillTargetMap(targets, caster);
 
     UnitList targetsToRemove;
@@ -556,7 +555,7 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
     // mark all auras as ready to remove
     for (ApplicationMap::iterator appIter = m_applications.begin(); appIter != m_applications.end();++appIter)
     {
-        std::map<Unit*, uint8>::iterator existing = targets.find(appIter->second->GetTarget());
+        auto existing = targets.find(appIter->second->GetTarget());
         // not found in current area - remove the aura
         if (existing == targets.end())
             targetsToRemove.push_back(appIter->second->GetTarget());
@@ -581,7 +580,7 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
     }
 
     // register auras for units
-    for (std::map<Unit*, uint8>::iterator itr = targets.begin(); itr!= targets.end();)
+    for (auto itr = targets.begin(); itr!= targets.end();)
     {
         // aura mustn't be already applied on target
         if (AuraApplication * aurApp = GetApplicationOfTarget(itr->first->GetGUID()))
@@ -684,7 +683,7 @@ void Aura::UpdateTargetMap(Unit* caster, bool apply)
         return;
 
     // apply aura effects for units
-    for (std::map<Unit*, uint8>::iterator itr = targets.begin(); itr!= targets.end();++itr)
+    for (auto itr = targets.begin(); itr!= targets.end();++itr)
     {
         if (AuraApplication * aurApp = GetApplicationOfTarget(itr->first->GetGUID()))
         {
@@ -2595,70 +2594,79 @@ void UnitAura::Remove(AuraRemoveMode removeMode)
     GetUnitOwner()->RemoveOwnedAura(this, removeMode);
 }
 
-void UnitAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* caster)
+void UnitAura::FillTargetMap(std::unordered_map<Unit*, uint8> & targets, Unit* caster)
 {
+    using TargetsContainer = UnitVec;
+
+    TargetsContainer targetList;
+    targetList.reserve( 25 );
+
+    SpellInfo const* spellInfo = GetSpellInfo();
+
     for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
     {
         if (!HasEffect(effIndex))
             continue;
-        UnitList targetList;
-        // non-area aura
-        if (GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AURA)
-        {
-            targetList.push_back(GetUnitOwner());
-        }
-        else
-        {
-            float radius = GetSpellInfo()->Effects[effIndex].CalcRadius(caster);
 
-            if (!GetUnitOwner()->HasUnitState(UNIT_STATE_ISOLATED))
+        targetList.clear();
+
+        // non-area aura
+        Unit* auraOwner = GetUnitOwner();
+
+        SpellEffectInfo const& spellEffectInfo = spellInfo->Effects[ effIndex ];
+
+        if ( spellEffectInfo.Effect == SPELL_EFFECT_APPLY_AURA)
+        {
+            targetList.push_back( auraOwner );
+            continue;
+        }
+
+        if (!auraOwner->HasUnitState(UNIT_STATE_ISOLATED))
+        {
+            float radius = spellEffectInfo.CalcRadius( caster );
+            switch ( spellEffectInfo.Effect )
             {
-                switch (GetSpellInfo()->Effects[effIndex].Effect)
+                case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
+                case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
                 {
-                    case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
-                    case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
-                    {
-                        targetList.push_back(GetUnitOwner());
-                        Trinity::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
-                        Trinity::UnitListSearcher<Trinity::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
-                        GetUnitOwner()->VisitNearbyObject(radius, searcher);
-                        break;
-                    }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
-                    {
-                        targetList.push_back(GetUnitOwner());
-                        Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
-                        Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
-                        GetUnitOwner()->VisitNearbyObject(radius, searcher);
-                        break;
-                    }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
-                    {
-                        Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius); // No GetCharmer in searcher
-                        Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
-                        GetUnitOwner()->VisitNearbyObject(radius, searcher);
-                        break;
-                    }
-                    case SPELL_EFFECT_APPLY_AREA_AURA_PET:
-                        targetList.push_back(GetUnitOwner());
-                    case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
-                    {
-                        if (Unit* owner = GetUnitOwner()->GetCharmerOrOwner())
-                            if (GetUnitOwner()->IsWithinDistInMap(owner, radius))
-                                targetList.push_back(owner);
-                        break;
-                    }
+                    targetList.push_back( auraOwner );
+                    Trinity::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, spellEffectInfo.Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
+                    Trinity::UnitGenericSearcher<Trinity::AnyGroupedUnitInObjectRangeCheck, TargetsContainer> searcher( auraOwner, targetList, u_check);
+                    GetUnitOwner()->VisitNearbyObject(radius, searcher);
+                    break;
+                }
+                case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
+                {
+                    targetList.push_back(GetUnitOwner());
+                    Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
+                    Trinity::UnitGenericSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck, TargetsContainer> searcher( auraOwner, targetList, u_check);
+                    GetUnitOwner()->VisitNearbyObject(radius, searcher);
+                    break;
+                }
+                case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
+                {
+                    Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius); // No GetCharmer in searcher
+                    Trinity::UnitGenericSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck, TargetsContainer> searcher( auraOwner, targetList, u_check);
+                    GetUnitOwner()->VisitNearbyObject(radius, searcher);
+                    break;
+                }
+                case SPELL_EFFECT_APPLY_AREA_AURA_PET:
+                    targetList.push_back( auraOwner );
+                    //! no break
+                case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
+                {
+                    if (Unit* owner = auraOwner->GetCharmerOrOwner())
+                        if ( auraOwner->IsWithinDistInMap(owner, radius))
+                            targetList.push_back(owner);
+                    break;
                 }
             }
         }
 
-        for (UnitList::iterator itr = targetList.begin(); itr!= targetList.end();++itr)
+        for ( Unit* target : targetList )
         {
-            std::map<Unit*, uint8>::iterator existing = targets.find(*itr);
-            if (existing != targets.end())
-                existing->second |= 1<<effIndex;
-            else
-                targets[*itr] = 1<<effIndex;
+            //! if does NOT exist it will be created and initialized to 0
+            targets[ target ] |= ( 1 << effIndex );
         }
     }
 }
@@ -2681,52 +2689,63 @@ void DynObjAura::Remove(AuraRemoveMode removeMode)
     _Remove(removeMode);
 }
 
-void DynObjAura::FillTargetMap(std::map<Unit*, uint8> & targets, Unit* /*caster*/)
+void DynObjAura::FillTargetMap(std::unordered_map<Unit*, uint8> & targets, Unit* /*caster*/)
 {
-    Unit* dynObjOwnerCaster = GetDynobjOwner()->GetCaster();
-    float radius = GetDynobjOwner()->GetRadius();
+    DynamicObject* auraOwner = GetDynobjOwner();
+    Unit* dynObjOwnerCaster = auraOwner->GetCaster();
+
+    float radius = auraOwner->GetRadius();
+
+    using TargetContainer = UnitVec;
+
+    TargetContainer targetList;
+    targetList.reserve( 10 );
+
+    SpellInfo const* spellInfo = GetSpellInfo();
 
     for (uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
     {
         if (!HasEffect(effIndex))
             continue;
-        UnitList targetList;
-        if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALLY
-            || GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY)
+
+        targetList.clear();
+
+        SpellEffectInfo const& spellEffectInfo = spellInfo->Effects[ effIndex ];
+
+        if ( spellEffectInfo.TargetB.GetTarget() == TARGET_DEST_DYNOBJ_ALLY
+            || spellEffectInfo.TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY)
         {
-            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
-            GetDynobjOwner()->VisitNearbyObject(radius, searcher);
+            Trinity::AnyFriendlyUnitInObjectRangeCheck u_check( auraOwner, dynObjOwnerCaster, radius);
+            Trinity::UnitGenericSearcher<Trinity::AnyFriendlyUnitInObjectRangeCheck, TargetContainer> searcher( auraOwner, targetList, u_check);
+            auraOwner->VisitNearbyObject(radius, searcher);
         }
         // pussywizard: TARGET_DEST_DYNOBJ_NONE is supposed to search for both friendly and unfriendly targets, so for any unit
         // what about EffectImplicitTargetA?
-        else if (GetSpellInfo()->Effects[effIndex].TargetB.GetTarget() == TARGET_DEST_DYNOBJ_NONE)
+        else if ( spellEffectInfo.TargetB.GetTarget() == TARGET_DEST_DYNOBJ_NONE)
         {
-            Trinity::AnyAttackableUnitExceptForOriginalCasterInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyAttackableUnitExceptForOriginalCasterInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
-            GetDynobjOwner()->VisitNearbyObject(radius, searcher);
+            Trinity::AnyAttackableUnitExceptForOriginalCasterInObjectRangeCheck u_check( auraOwner, dynObjOwnerCaster, radius);
+            Trinity::UnitGenericSearcher<Trinity::AnyAttackableUnitExceptForOriginalCasterInObjectRangeCheck, TargetContainer> searcher( auraOwner, targetList, u_check);
+            auraOwner->VisitNearbyObject(radius, searcher);
         }
         else
         {
-            Trinity::AnyAoETargetUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
-            Trinity::UnitListSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
-            GetDynobjOwner()->VisitNearbyObject(radius, searcher);
+            Trinity::AnyAoETargetUnitInObjectRangeCheck u_check( auraOwner, dynObjOwnerCaster, radius);
+            Trinity::UnitGenericSearcher<Trinity::AnyAoETargetUnitInObjectRangeCheck, TargetContainer> searcher( auraOwner, targetList, u_check);
+            auraOwner->VisitNearbyObject(radius, searcher);
         }
 
-        for (UnitList::iterator itr = targetList.begin(); itr!= targetList.end();++itr)
+        for ( Unit* target : targetList)
         {
             // xinef: check z level and los dependence
-            Unit* target = *itr;
             float zLevel = GetDynobjOwner()->GetPositionZ();
             if (target->GetPositionZ()+3.0f < zLevel || target->GetPositionZ()-5.0f > zLevel)
-                if (!target->IsWithinLOSInMap(GetDynobjOwner()))
+            {
+                if ( !target->IsWithinLOSInMap( auraOwner ) )
                     continue;
+            }
 
-            std::map<Unit*, uint8>::iterator existing = targets.find(*itr);
-            if (existing != targets.end())
-                existing->second |= 1<<effIndex;
-            else
-                targets[*itr] = 1<<effIndex;
+            //! if does NOT exist it will be created and initialized to 0
+            targets[ target ] |= (1 << effIndex);
         }
     }
 }

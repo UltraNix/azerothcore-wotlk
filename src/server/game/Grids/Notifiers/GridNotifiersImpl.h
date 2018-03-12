@@ -427,6 +427,24 @@ void Trinity::UnitListSearcher<Check>::Visit(CreatureMapType &m)
                 i_objects.push_back(itr->GetSource());
 }
 
+template<class Check, class Container>
+void Trinity::UnitGenericSearcher<Check, Container>::Visit( PlayerMapType &m )
+{
+    for ( PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr )
+        if ( itr->GetSource()->InSamePhase( i_phaseMask ) )
+            if ( i_check( itr->GetSource() ) )
+                i_objects.push_back( itr->GetSource() );
+}
+
+template<class Check, class Container>
+void Trinity::UnitGenericSearcher<Check, Container>::Visit( CreatureMapType &m )
+{
+    for ( CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr )
+        if ( itr->GetSource()->InSamePhase( i_phaseMask ) )
+            if ( i_check( itr->GetSource() ) )
+                i_objects.push_back( itr->GetSource() );
+}
+
 // Creature searchers
 
 template<class Check>

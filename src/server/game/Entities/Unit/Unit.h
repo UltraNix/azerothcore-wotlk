@@ -27,6 +27,7 @@
 #include "Object.h"
 #include "SpellAuraDefines.h"
 #include "ThreatManager.h"
+#include <vector>
 
 #define WORLD_TRIGGER   12999
 
@@ -331,6 +332,8 @@ class TransportBase;
 class SpellCastTargets;
 
 typedef std::list<Unit*> UnitList;
+typedef std::vector<Unit*> UnitVec;
+
 typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
 
 enum SpellImmuneBlockType

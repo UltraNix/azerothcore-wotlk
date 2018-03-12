@@ -389,6 +389,7 @@ namespace Trinity
     struct UnitListSearcher
     {
         uint32 i_phaseMask;
+
         std::list<Unit*> &i_objects;
         Check& i_check;
 
@@ -399,6 +400,26 @@ namespace Trinity
         void Visit(CreatureMapType &m);
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+    template<class Check,class Container>
+    struct UnitGenericSearcher
+    {
+        uint32      i_phaseMask;
+        Container & i_objects;
+        Check&      i_check;
+
+        UnitGenericSearcher( WorldObject const* searcher, Container & objects, Check & check )
+            : i_phaseMask( searcher->GetPhaseMask() ), i_objects( objects ), i_check( check )
+        {
+        }
+
+        void Visit( PlayerMapType &m );
+        void Visit( CreatureMapType &m );
+
+        template<class NOT_INTERESTED> void Visit( GridRefManager<NOT_INTERESTED> & )
+        {
+        }
     };
 
     // Creature searchers
