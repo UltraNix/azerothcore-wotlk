@@ -2850,6 +2850,10 @@ std::vector<uint32> partialCorrection =
     72007, // Frostbolt 25 man
     72501, // Frostbolt 10 man heroic
     72502, // Frostbolt 25 man heroic
+    68980, // Harvest Soul 10 man
+    74325, // Harvest Soul 25 man
+    74326, // Harvest Soul 10 man heroic
+    74327, // Harvest Soul 25 man heroic
 };
 
 void SpellMgr::LoadSpellCustomAttr()
