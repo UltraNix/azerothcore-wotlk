@@ -1,5 +1,5 @@
 /*
- * Copyright (C)
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -82,11 +82,6 @@ enum PaladinSpells
     SPELL_PALADIN_IMPROVED_DEVOTION_AURA         = 63514,
     SPELL_PALADIN_SANCTIFIED_RETRIBUTION_AURA    = 63531,
     SPELL_PALADIN_AURA_MASTERY_IMMUNE            = 64364,
-
-    SPELL_PALADIN_HOLY_VENGEANCE                 = 31803,
-    SPELL_PALADIN_SEAL_OF_VENGEANCE_DAMAGE       = 42463,
-    SPELL_PALADIN_BLOOD_CORRUPTION               = 53742,
-    SPELL_PALADIN_SEAL_OF_CORRUPTION_DAMAGE      = 53739,
 
     SPELL_GENERIC_ARENA_DAMPENING                = 74410,
     SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411
@@ -193,83 +188,6 @@ class spell_pal_seal_of_command : public SpellScriptLoader
         {
             return new spell_pal_seal_of_command_SpellScript();
         }
-};
-
-// 31801 - Seal of Vengeance
-// 53736 - Seal of Corruption
-template <uint32 DoTSpellId, uint32 DamageSpellId>
-class spell_pal_seal_of_vengeance : public SpellScriptLoader
-{
-public:
-    spell_pal_seal_of_vengeance(char const* ScriptName) : SpellScriptLoader(ScriptName) { }
-
-    template <uint32 DoTSpell, uint32 DamageSpell>
-    class spell_pal_seal_of_vengeance_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_seal_of_vengeance_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo(
-            {
-                DoTSpell,
-                DamageSpell
-            });
-        }
-
-        void HandleApplyDoT(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-
-            if (!(eventInfo.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK))
-            {
-                // Patch 3.2.0 Notes: Only auto-attacks and Hammer of the Righteous can place the debuff on the paladin's current target(s).
-                SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
-                if (!spellInfo || spellInfo->SpellIconID != 3023)
-                    return;
-            }
-
-            // don't cast triggered, spell already has SPELL_ATTR4_CAN_CAST_WHILE_CASTING attr
-            eventInfo.GetActor()->CastSpell(eventInfo.GetProcTarget(), DoTSpell, TRIGGERED_NO_PERIODIC_RESET, nullptr, aurEff);
-        }
-
-        void HandleSeal(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-
-            Unit* caster = eventInfo.GetActor();
-            Unit* target = eventInfo.GetProcTarget();
-
-            // get current aura on target, if any
-            AuraEffect const* sealDot = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PALADIN, 0x00000000, 0x00000800, 0x00000000, caster->GetGUID());
-            if (!sealDot)
-                return;
-
-            if (!(eventInfo.GetTypeMask() & (PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS | PROC_FLAG_DONE_MELEE_AUTO_ATTACK)))
-                return;
-
-            uint8 const stacks = sealDot->GetBase()->GetStackAmount();
-            uint8 const maxStacks = sealDot->GetSpellInfo()->StackAmount;
-
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(DamageSpell);
-            int32 amount = spellInfo->Effects[EFFECT_0].CalcValue();
-            amount *= stacks;
-            amount /= maxStacks;
-
-            caster->CastCustomSpell(target, DamageSpell, &amount, nullptr, nullptr, false, nullptr, aurEff);
-        }
-
-        void Register() override
-        {
-            OnEffectProc += AuraEffectProcFn(spell_pal_seal_of_vengeance_AuraScript::HandleApplyDoT, EFFECT_0, SPELL_AURA_DUMMY);
-            OnEffectProc += AuraEffectProcFn(spell_pal_seal_of_vengeance_AuraScript::HandleSeal, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_pal_seal_of_vengeance_AuraScript<DoTSpellId, DamageSpellId>();
-    }
 };
 
 class spell_pal_divine_intervention : public SpellScriptLoader
@@ -385,7 +303,7 @@ class spell_pal_sacred_shield_base : public SpellScriptLoader
 
                     return;
                 }
-
+                
                 uint32 triggered_spell_id = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
                 if (eventInfo.GetActionTarget()->HasSpellCooldown(triggered_spell_id))
                     return;
@@ -1279,7 +1197,7 @@ class spell_pal_lay_on_hands : public SpellScriptLoader
 
             bool Load()
             {
-                _manaAmount = 0;
+                _manaAmount = 0; 
                 return true;
             }
 
@@ -1455,8 +1373,6 @@ void AddSC_paladin_spell_scripts()
 {
     // Ours
     new spell_pal_seal_of_command();
-    new spell_pal_seal_of_vengeance<SPELL_PALADIN_HOLY_VENGEANCE, SPELL_PALADIN_SEAL_OF_VENGEANCE_DAMAGE>("spell_pal_seal_of_vengeance");
-    new spell_pal_seal_of_vengeance<SPELL_PALADIN_BLOOD_CORRUPTION, SPELL_PALADIN_SEAL_OF_CORRUPTION_DAMAGE>("spell_pal_seal_of_corruption");
     new spell_pal_divine_intervention();
     new spell_pal_seal_of_light();
     new spell_pal_sacred_shield_base();

@@ -7086,6 +7086,94 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
+                // Seal of Vengeance (damage calc on apply aura)
+                case 31801:
+                {
+                    if (effIndex != 0 || !victim)                       // effect 1, 2 used by seal unleashing code
+                        return false;
+
+                    // At melee attack or Hammer of the Righteous spell damage considered as melee attack
+                    bool stacker = !procSpell || procSpell->Id == 53595;
+                    // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
+                    bool damager = procSpell && (procSpell->EquippedItemClass != -1 || (procSpell->SpellIconID == 243 && procSpell->SpellVisual[0] == 39));
+
+                    if (!stacker && !damager)
+                        return false;
+
+                    triggered_spell_id = 31803;
+
+                    /* Patch 3.2
+                    While the seal is active, each melee swing or ability (excluding judgements) that lands on the target will deal a percentage of weapon damage as Holy damage to the target.
+                    This damage maxes out at 33% weapon damage with 5 applications of the debuff and scales upward evenly based on how many applications of the debuff are active.
+                    */
+                    if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))
+                    {
+                        int32 basepoints = 0;
+                        uint8 stackAmount = aur->GetStackAmount();
+                        if (stackAmount == 1) basepoints = 7;
+                        else if (stackAmount == 2) basepoints = 13;
+                        else if (stackAmount == 3) basepoints = 20;
+                        else if (stackAmount == 4) basepoints = 26;
+                        else if (stackAmount == 5) basepoints = 33;
+                        CastCustomSpell(victim, 42463, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
+
+                        if (aur->GetStackAmount() == 5)
+                        {
+                            if (stacker)
+                                aur->RefreshDuration();
+
+                            return true;
+                        }
+                    }
+
+                    if (!stacker)
+                        return false;
+                    break;
+                }
+                // Seal of Corruption
+                case 53736:
+                {
+                    if (effIndex != 0 || !victim)                       // effect 1, 2 used by seal unleashing code
+                        return false;
+
+                    // At melee attack or Hammer of the Righteous spell damage considered as melee attack
+                    bool stacker = !procSpell || procSpell->Id == 53595;
+                    // spells with SPELL_DAMAGE_CLASS_MELEE excluding Judgements
+                    bool damager = procSpell && (procSpell->EquippedItemClass != -1 || (procSpell->SpellIconID == 243 && procSpell->SpellVisual[0] == 39));
+
+                    if (!stacker && !damager)
+                        return false;
+
+                    triggered_spell_id = 53742;
+
+                    /* Patch 3.2
+                    While the seal is active, each melee swing or ability (excluding judgements) that lands on the target will deal a percentage of weapon damage as Holy damage to the target.
+                    This damage maxes out at 33% weapon damage with 5 applications of the debuff and scales upward evenly based on how many applications of the debuff are active.
+                    */
+                    if (Aura* aur = victim->GetAura(triggered_spell_id, GetGUID()))
+                    {
+                        int32 basepoints = 0;
+                        uint8 stackAmount = aur->GetStackAmount();
+                        if (stackAmount == 1) basepoints = 7;
+                        else if (stackAmount == 2) basepoints = 13;
+                        else if (stackAmount == 3) basepoints = 20;
+                        else if (stackAmount == 4) basepoints = 26;
+                        else if (stackAmount == 5) basepoints = 33;
+                        CastCustomSpell(victim, 53739, &basepoints, NULL, NULL, true, castItem, triggeredByAura);
+
+                        if (aur->GetStackAmount() == 5)
+                        {
+                            if (stacker)
+                                aur->RefreshDuration();
+
+                            return true;
+                        }
+                    }
+
+                    if (!stacker)
+                        return false;
+                    break;
+                }
                 // Spiritual Attunement
                 case 31785:
                 case 33776:
