@@ -299,9 +299,10 @@ class boss_rotface : public CreatureScript
                             if (targets.size() >= minTargets)
                                 minDist = -5.0f;
 
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
-                                if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                                    professor->CastSpell(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
+                            for (int16 i = 0; i < RAID_MODE(1, 1, 1, 3); ++i)
+                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
+                                    if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                                        professor->CastSpell(target, SPELL_VILE_GAS_H, true); // triggered, to skip LoS check
                         }
                         events.ScheduleEvent(EVENT_ROTFACE_VILE_GAS, urand(15000, 20000));
                         break;
@@ -875,12 +876,12 @@ struct npc_precious_iccAI : public ScriptedAI
 
     void EnterCombat(Unit* /*attacker*/) override
     {
-        _scheduler.Schedule(20s, 25s, [this](TaskContext task) 
+        _scheduler.Schedule(20s, 25s, [this](TaskContext task)
         {
             DoCastSelf(SPELL_DECIMATE);
             task.Repeat();
         });
-        _scheduler.Schedule(1500ms, 2500ms, [this](TaskContext task) 
+        _scheduler.Schedule(1500ms, 2500ms, [this](TaskContext task)
         {
             DoCastVictim(SPELL_MORTAL_WOUND);
             task.Repeat();

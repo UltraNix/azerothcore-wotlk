@@ -233,8 +233,9 @@ class boss_festergut : public CreatureScript
                         if (targets.size() >= minTargets)
                             minDist = -5.0f;
 
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
-                            me->CastSpell(target, SPELL_VILE_GAS, false);
+                        for (int16 i = 0; i < RAID_MODE(1, 1, 1, 3); ++i)
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
+                                me->CastSpell(target, SPELL_VILE_GAS, false);
                         events.ScheduleEvent(EVENT_VILE_GAS, urand(28000, 35000), 1);
                         break;
                     }

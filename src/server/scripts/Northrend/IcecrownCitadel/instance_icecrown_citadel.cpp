@@ -274,6 +274,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 MaxHeroicAttempts = sWorld->getIntConfig(CONFIG_ICC_ATTEMPTS);
                 HeroicAttempts = MaxHeroicAttempts;
                 LadyDeathwisperElevatorGUID = 0;
+                LadyGUID = 0;
                 GunshipGUID = 0;
                 EnemyGunshipGUID = 0;
                 GunshipArmoryGUID = 0;
@@ -476,6 +477,9 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
+                    case NPC_LADY_DEATHWHISPER:
+                        LadyGUID = creature->GetGUID();
+                        break;
                     case NPC_SERVANT_OF_THE_THRONE:
                         if (creature->GetDBTableGUIDLow() == 201080)
                             ServantGUID = creature->GetGUID();
@@ -751,6 +755,12 @@ class instance_icecrown_citadel : public InstanceMapScript
                 Creature* creature = unit->ToCreature();
                 if (!creature)
                     return;
+
+                // Blood Prince Council door
+                if (auto formation = creature->GetFormation())
+                    if (auto leader = formation->getLeader())
+                        if (leader->GetDBTableGUIDLow() == 201482)
+                            SetData(DATA_BPC_TRASH_DIED, DATA_BPC_TRASH_DIED);
 
                 // fighting npcs in Rampart of Skulls
                 std::string name1("Skybreaker ");
@@ -1148,6 +1158,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             {
                 switch (type)
                 {
+                    case DATA_LADY_DEATHWHISPER:
+                        return LadyGUID;
                     case DATA_ICECROWN_GUNSHIP_BATTLE:
                         return GunshipGUID;
                     case DATA_ENEMY_GUNSHIP:
@@ -1638,7 +1650,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     }
                     case DATA_BPC_TRASH_DIED:
                     {
-                        if (++BloodPrinceTrashCount >= 4)
+                        if (++BloodPrinceTrashCount >= 6)
                         {
                             SetBossState(DATA_BLOOD_PRINCE_TRASH, NOT_STARTED);
                             SetBossState(DATA_BLOOD_PRINCE_TRASH, DONE);
@@ -2130,6 +2142,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             std::vector<uint64> FirstGroupEventGUIDs;
             uint64 ServantGUID;
             uint64 LadyDeathwisperElevatorGUID;
+            uint64 LadyGUID;
             uint64 GunshipGUID;
             uint64 EnemyGunshipGUID;
             uint64 GunshipArmoryGUID;

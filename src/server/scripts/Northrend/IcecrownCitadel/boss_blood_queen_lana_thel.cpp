@@ -598,13 +598,18 @@ class spell_blood_queen_pact_of_the_darkfallen_dmg : public SpellScriptLoader
             // this is an additional effect to be executed
             void PeriodicTick(AuraEffect const* aurEff)
             {
-                if ((aurEff->GetTickNumber()%2) == 0)
-                    return;
-                SpellInfo const* damageSpell = sSpellMgr->GetSpellInfo(SPELL_PACT_OF_THE_DARKFALLEN_DAMAGE);
-                int32 damage = damageSpell->Effects[EFFECT_0].CalcValue();
-                float herobonus = ((GetTarget()->FindMap() && GetTarget()->FindMap()->IsHeroic()) ? 0.2f : 0.0f);
-                float multiplier = 0.5f + herobonus + 0.1f * uint32(aurEff->GetTickNumber()/10); // do not convert to 0.01f - we need tick number/10 as INT (damage increases every 10 ticks)
-                damage = int32(damage * multiplier);
+                uint32 damage = 1500;
+                if (auto caster = GetCaster())
+                {
+                    if (auto map = caster->GetMap())
+                    {
+                        if (map->IsHeroic()) // 25 hc, 10hc
+                            damage = 2500;
+                        else if (map->Is25ManRaid() && !map->IsHeroic()) // 25 n
+                            damage = 1750;
+                    }
+                }
+
                 GetTarget()->CastCustomSpell(SPELL_PACT_OF_THE_DARKFALLEN_DAMAGE, SPELLVALUE_BASE_POINT0, damage, GetTarget(), true);
             }
 

@@ -117,6 +117,7 @@ enum Spells
     SPELL_IMPALING_SPEAR            = 71443,
     SPELL_AETHER_SHIELD             = 71463,
     SPELL_HURL_SPEAR                = 71466,
+    SPELL_DIVINE_SURGE              = 71465,
 
     // Captain Arnath
     SPELL_DOMINATE_MIND             = 14515,
@@ -1192,6 +1193,7 @@ class boss_sister_svalna : public CreatureScript
                         me->CastSpell(me, SPELL_REVIVE_CHAMPION, false);
                         break;
                     case EVENT_SVALNA_COMBAT:
+                        DoCastSelf(SPELL_DIVINE_SURGE);
                         Talk(SAY_SVALNA_AGGRO);
                         break;
                     case EVENT_IMPALING_SPEAR:
@@ -1689,7 +1691,7 @@ class npc_frostwing_vrykul : public CreatureScript
                         break;
                     case NPC_YMIRJAR_FROSTBINDER:
                         events.ScheduleEvent(31, 0); // Arctic Chill
-                        events.ScheduleEvent(32, urand(15000, 25000)); // Frozen Orb
+                        events.ScheduleEvent(32, urand(1000, 2000)); // Frozen Orb
                         events.ScheduleEvent(33, urand(15000, 30000)); // Twisted Winds
                         events2.ScheduleEvent(100, 0); // Spirit Stream
                         me->SetHover(false);
@@ -1772,7 +1774,7 @@ class npc_frostwing_vrykul : public CreatureScript
                     case 32: // Frozen Orb
                         if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 30.0f, true))
                             me->CastSpell(target, 71274, false);
-                        events.RepeatEvent(urand(40000, 50000));
+                        events.RepeatEvent(urand(18000, 22000));
                         break;
                     case 33: // Twisted Winds
                         me->CastSpell((Unit*)NULL, 71306, false);
@@ -3765,12 +3767,6 @@ public:
             _events.ScheduleEvent(EVENT_UNHOLY_STRIKE, urand(1000, 2000));
         }
 
-        void JustDied(Unit* /*killer*/) override
-        {
-            if (InstanceScript* instance = me->GetInstanceScript())
-                instance->SetData(DATA_BPC_TRASH_DIED, DATA_BPC_TRASH_DIED);
-        }
-
         void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
@@ -4039,11 +4035,84 @@ struct npc_icc_championAI : public ScriptedAI
 {
     npc_icc_championAI(Creature* creature) : ScriptedAI(creature) { }
 
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+    }
+
     void JustDied(Unit* killer) override
     {
         if (InstanceScript* instance = me->GetInstanceScript())
             if (instance->GetData(DATA_LIGHTS_HAMMER_TRASH))
                 me->m_Events.AddEvent(new ChampionRessurrect(*me, *killer), me->m_Events.CalculateTime(15000));
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff);
+        DoMeleeAttackIfReady();
+    }
+
+    protected:
+        TaskScheduler _scheduler;
+};
+
+enum ArgentChampion
+{
+    SPELL_HEROIC_LEAP = 71961
+};
+
+struct npc_icc_argent_championAI : public npc_icc_championAI
+{
+    npc_icc_argent_championAI(Creature* creature) : npc_icc_championAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(5s, 10s, [this](TaskContext task)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [this](Unit* tar) { return tar->IsInRange(me, 8.0f, 25.0f); }))
+                DoCast(target, SPELL_HEROIC_LEAP);
+        });
+    }
+};
+
+enum EbonChampion
+{
+    SPELL_ICY_TOUCH             = 66021,
+    SPELL_FROST_STRIKE          = 66047,
+    SPELL_ICEBOUND_FORTITUDE    = 66023
+};
+
+struct npc_icc_ebon_championAI : public npc_icc_championAI
+{
+    npc_icc_ebon_championAI(Creature* creature) : npc_icc_championAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(1s, 3s, [this](TaskContext task)
+        {
+            DoCastVictim(SPELL_ICY_TOUCH);
+            task.Repeat(15s, 20s);
+        });
+        _scheduler.Schedule(3s, 6s, [this](TaskContext task)
+        {
+            DoCastVictim(SPELL_FROST_STRIKE);
+            task.Repeat(8s, 12s);
+        });
+        _scheduler.Schedule(1s, [this](TaskContext task)
+        {
+            if (HealthBelowPct(50))
+            {
+                DoCastSelf(SPELL_ICEBOUND_FORTITUDE);
+                task.Repeat(1min);
+                return;
+            }
+
+            task.Repeat(3s);
+        });
     }
 };
 
@@ -4057,7 +4126,7 @@ struct npc_deathbound_wardAI : public ScriptedAI
     void Reset() override
     {
         _scheduler.CancelAll();
-
+        _saberLash = false;
         _scheduler.Schedule(1s, [this](TaskContext task)
         {
             if (me->HasAura(SPELL_STONEFORM) && _path)
@@ -4081,11 +4150,13 @@ struct npc_deathbound_wardAI : public ScriptedAI
                 DoCastAOE(SPELL_DISRUPTING_SHOUT);
             task.Repeat(30s, 35s);
         });
-        _scheduler.Schedule(9s, 12s, [this](TaskContext task)
+        _scheduler.Schedule(4s, [this](TaskContext task)
         {
-            if (me->IsInCombat())
-                DoCastVictim(SPELL_SABER_LASH);
-            task.Repeat();
+            if (!_saberLash && me->IsInCombat())
+                _saberLash = true;
+
+            DoCastVictim(SPELL_SABER_LASH, true);
+            task.Repeat(1500ms);
         });
     }
 
@@ -4096,12 +4167,46 @@ struct npc_deathbound_wardAI : public ScriptedAI
         if (!UpdateVictim())
             return;
 
-        DoMeleeAttackIfReady();
+        if (!_saberLash)
+            DoMeleeAttackIfReady();
     }
 
     private:
-        bool _path;
+        bool _path, _saberLash;
         TaskScheduler _scheduler;
+};
+
+class spell_icc_rush_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_icc_rush_AuraScript);
+
+    void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    {
+        GetAura()->Remove();
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_icc_rush_AuraScript::OnProc, EFFECT_1, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    }
+};
+
+class spell_icc_summon_battle_standard_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_icc_summon_battle_standard_SpellScript);
+
+    void HandleSummon(SpellEffIndex effIndex)
+    {
+        Unit* caster = GetCaster();
+        uint32 entry = GetSpellInfo()->Effects[EFFECT_0].MiscValue;
+        if (caster->FindNearestCreature(entry, 50.0f, true))
+            PreventHitDefaultEffect(effIndex);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_icc_summon_battle_standard_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+    }
 };
 
 void AddSC_icecrown_citadel()
@@ -4163,5 +4268,9 @@ void AddSC_icecrown_citadel()
     new at_icc_lights_hammer_disable_spawn();
     new CreatureAILoader<npc_icc_warhawkAI>("npc_icc_warhawk");
     new CreatureAILoader<npc_icc_championAI>("npc_icc_champion");
+    new CreatureAILoader<npc_icc_argent_championAI>("npc_icc_argent_champion");
+    new CreatureAILoader<npc_icc_ebon_championAI>("npc_icc_ebon_champion");
     new CreatureAILoader<npc_deathbound_wardAI>("npc_deathbound_ward");
+    new AuraScriptLoaderEx<spell_icc_rush_AuraScript>("spell_icc_rush");
+    new SpellScriptLoaderEx<spell_icc_summon_battle_standard_SpellScript>("spell_icc_summon_battle_standard");
 }

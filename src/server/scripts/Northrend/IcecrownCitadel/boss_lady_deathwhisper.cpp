@@ -164,6 +164,11 @@ enum DeprogrammingData
     POINT_DESPAWN           = 384721,
 };
 
+enum Misc
+{
+    ACTION_TALK_ENTER       = 1
+};
+
 #define NPC_DARNAVAN        RAID_MODE<uint32>(NPC_DARNAVAN_10, NPC_DARNAVAN_25, NPC_DARNAVAN_10, NPC_DARNAVAN_25)
 #define NPC_DARNAVAN_CREDIT RAID_MODE<uint32>(NPC_DARNAVAN_CREDIT_10, NPC_DARNAVAN_CREDIT_25, NPC_DARNAVAN_CREDIT_10, NPC_DARNAVAN_CREDIT_25)
 #define QUEST_DEPROGRAMMING RAID_MODE<uint32>(QUEST_DEPROGRAMMING_10, QUEST_DEPROGRAMMING_25, QUEST_DEPROGRAMMING_10, QUEST_DEPROGRAMMING_25)
@@ -255,6 +260,22 @@ class boss_lady_deathwhisper : public CreatureScript
                 instance->SetBossState(DATA_LADY_DEATHWHISPER, IN_PROGRESS);
             }
 
+            void DoAction(int32 actionId) override
+            {
+                if (!_introDone && actionId == ACTION_TALK_ENTER)
+                {
+                    _introDone = true;
+                    Talk(SAY_INTRO_1);
+                    events.SetPhase(PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_INTRO_2, 11000, 0, PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_INTRO_3, 21000, 0, PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_INTRO_4, 31500, 0, PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_INTRO_5, 39500, 0, PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_INTRO_6, 48500, 0, PHASE_INTRO);
+                    events.ScheduleEvent(EVENT_INTRO_7, 58000, 0, PHASE_INTRO);
+                }
+            }
+
             void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask)
             {
                 if (events.GetPhaseMask() & PHASE_ONE_MASK && damage >= me->GetPower(POWER_MANA))
@@ -276,7 +297,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
                     events.SetPhase(PHASE_TWO);
-                    events.ScheduleEvent(EVENT_SPELL_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_SPELL_FROSTBOLT, urand(3500, 7000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_TOUCH_OF_INSIGNIFICANCE, urand(6000, 9000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_SUMMON_SHADE, urand(12000, 15000), 0, PHASE_TWO);
@@ -355,7 +376,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     case EVENT_SPELL_DEATH_AND_DECAY:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                             me->CastSpell(target, SPELL_DEATH_AND_DECAY, false);
-                        events.RepeatEvent(urand(22000, 30000));
+                        events.RepeatEvent(20000);
                         break;
                     case EVENT_SPELL_DOMINATE_MIND_25:
                         {
@@ -412,11 +433,11 @@ class boss_lady_deathwhisper : public CreatureScript
                         break;
                     case EVENT_SPELL_FROSTBOLT:
                         me->CastSpell(me->GetVictim(), SPELL_FROSTBOLT, false);
-                        events.RepeatEvent(urand(10000, 11000));
+                        events.RepeatEvent(urand(3500, 7000));
                         break;
                     case EVENT_SPELL_FROSTBOLT_VOLLEY:
                         me->CastSpell((Unit*)NULL, SPELL_FROSTBOLT_VOLLEY, false);
-                        events.RepeatEvent(urand(13000, 15000));
+                        events.RepeatEvent(urand(18000, 20000));
                         break;
                     case EVENT_SPELL_TOUCH_OF_INSIGNIFICANCE:
                         me->CastSpell(me->GetVictim(), SPELL_TOUCH_OF_INSIGNIFICANCE, false);
@@ -535,24 +556,6 @@ class boss_lady_deathwhisper : public CreatureScript
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_KILL);
-            }
-
-            void MoveInLineOfSight(Unit* who)
-            {
-                if (!_introDone && me->IsWithinDistInMap(who, 110.0f))
-                {
-                    _introDone = true;
-                    Talk(SAY_INTRO_1);
-                    events.SetPhase(PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_INTRO_2, 11000, 0, PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_INTRO_3, 21000, 0, PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_INTRO_4, 31500, 0, PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_INTRO_5, 39500, 0, PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_INTRO_6, 48500, 0, PHASE_INTRO);
-                    events.ScheduleEvent(EVENT_INTRO_7, 58000, 0, PHASE_INTRO);
-                }
-
-                BossAI::MoveInLineOfSight(who);
             }
 
             void SummonWaveP1()
@@ -795,7 +798,7 @@ public:
         {
             events.Reset();
             events.ScheduleEvent(EVENT_SPELL_ADHERENT_FROST_FEVER, urand(10000, 12000));
-            events.ScheduleEvent(EVENT_SPELL_ADHERENT_DEATHCHILL, urand(14000, 16000));
+            events.ScheduleEvent(EVENT_SPELL_ADHERENT_DEATHCHILL, urand(2000, 4000));
             events.ScheduleEvent(EVENT_SPELL_ADHERENT_CURSE_OF_TORPOR, urand(14000, 16000));
             events.ScheduleEvent(EVENT_SPELL_ADHERENT_SHORUD_OF_THE_OCCULT, urand(32000, 39000));
             if (me->GetEntry() == NPC_CULT_ADHERENT)
@@ -867,7 +870,7 @@ public:
                 case EVENT_SPELL_CULTIST_DARK_MARTYRDOM:
                     if (Creature* deathwhisper = me->FindNearestCreature(36855, 250.0f))
                         if (deathwhisper->HasAura(SPELL_MANA_BARRIER))
-                            me->CastSpell(me, SPELL_DARK_MARTYRDOM_ADHERENT, false);
+                    me->CastSpell(me, SPELL_DARK_MARTYRDOM_ADHERENT, false);
                     events.RepeatEvent(urand(16000, 21000));
                     break;
                 case EVENT_CULTIST_DARK_MARTYRDOM_SELF_KILL:
@@ -1185,6 +1188,23 @@ class spell_deathwhisper_dominate_mind_AuraScript : public AuraScript
     }
 };
 
+class at_icc_lady_deathwhisper_entrance : public AreaTriggerScript
+{
+    public:
+        at_icc_lady_deathwhisper_entrance() : AreaTriggerScript("at_icc_lady_deathwhisper_entrance") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/)
+        {
+            if (InstanceScript* instance = player->GetInstanceScript())
+                if (InstanceScript* instance = player->GetInstanceScript())
+                    if (Creature* deathwhisper = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_LADY_DEATHWHISPER)))
+                        if (deathwhisper->IsAIEnabled)
+                            deathwhisper->AI()->DoAction(ACTION_TALK_ENTER);
+
+            return true;
+        }
+};
+
 void AddSC_boss_lady_deathwhisper()
 {
     new boss_lady_deathwhisper();
@@ -1195,4 +1215,5 @@ void AddSC_boss_lady_deathwhisper()
     new spell_deathwhisper_mana_barrier();
     new spell_cultist_dark_martyrdom();
     new AuraScriptLoaderEx<spell_deathwhisper_dominate_mind_AuraScript>("spell_deathwhisper_dominate_mind");
+    new at_icc_lady_deathwhisper_entrance();
 }

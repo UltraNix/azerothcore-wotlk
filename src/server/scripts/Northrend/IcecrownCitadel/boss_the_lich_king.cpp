@@ -209,6 +209,7 @@ enum Events
     EVENT_OUTRO_LK_TALK_6,
     EVENT_OUTRO_LK_TALK_7,
     EVENT_OUTRO_LK_TALK_8,
+    EVENT_OUTRO_LK_TERENAS_START_ATTACK,
     EVENT_OUTRO_FORDRING_TALK_1,
     EVENT_OUTRO_FORDRING_BLESS,
     EVENT_OUTRO_FORDRING_REMOVE_ICE,
@@ -906,7 +907,6 @@ class boss_the_lich_king : public CreatureScript
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
                         me->CastSpell(me, SPELL_REMORSELESS_WINTER_1, false);
-                        //events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions, bullshit, 15mins on movies
                         events.ScheduleEvent(EVENT_QUAKE, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, EVENT_GROUP_ABILITIES);
@@ -917,7 +917,6 @@ class boss_the_lich_king : public CreatureScript
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
                         me->CastSpell(me, SPELL_REMORSELESS_WINTER_2, false);
-                        //events.DelayEvents(62500, EVENT_GROUP_BERSERK); // delay berserk timer, its not ticking during phase transitions, bullshit, 15 mins on movies
                         events.ScheduleEvent(EVENT_QUAKE_2, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, EVENT_GROUP_ABILITIES);
@@ -1560,9 +1559,15 @@ class npc_tirion_fordring_tft : public CreatureScript
                                 me->Attack(lichKing, true);
                                 me->GetMotionMaster()->MovePoint(0, 512.16f, -2120.25f, 840.86f);
                             }
+                            _events.ScheduleEvent(EVENT_OUTRO_LK_TERENAS_START_ATTACK, 3500);
                             _events.ScheduleEvent(EVENT_OUTRO_LK_TALK_7, 7000);
                             _events.ScheduleEvent(EVENT_OUTRO_LK_TALK_8, 17000);
                         }
+                        break;
+                    case EVENT_OUTRO_LK_TERENAS_START_ATTACK:
+                        if (Creature* terenas = me->FindNearestCreature(NPC_TERENAS_MENETHIL_OUTRO, 50.0f))
+                            if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                                terenas->Attack(lichKing, true);
                         break;
                     case EVENT_OUTRO_LK_TALK_7:
                         if (Creature* theLichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))

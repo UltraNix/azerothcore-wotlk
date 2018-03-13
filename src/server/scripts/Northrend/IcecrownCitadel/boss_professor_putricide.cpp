@@ -135,6 +135,20 @@ Position const festergutWatchPos = {4324.820f, 3166.03f, 389.3831f, 3.316126f}; 
 Position const rotfaceWatchPos   = {4390.371f, 3164.50f, 389.3890f, 5.497787f}; //emote 432 (release ooze)
 Position const tablePos          = {4356.190f, 3262.90f, 389.4820f, 1.483530f};
 
+auto GetUnboundPlagueTime(uint8 phase)
+{
+    switch (phase)
+    {
+        case 1:
+        case 2:
+            return 60s;
+        case 3:
+            return 40s;
+    }
+
+    return 60s;
+}
+
 class AbominationDespawner
 {
     public:
@@ -163,28 +177,6 @@ class AbominationDespawner
 
     private:
         Unit* _owner;
-};
-
-class UnboundPlagueTargetSelector
-{
-public:
-    UnboundPlagueTargetSelector(Creature* source) : _source(source) { }
-
-    bool operator()(WorldObject* object) const
-    {
-        if (!object)
-            return false;
-        if (Player* p = object->ToPlayer())
-        {
-            if (p == _source->GetVictim() || p->GetExactDist(_source) >= 45.0f)
-                return false;
-
-            return true;
-        }
-        return false;
-    }
-private:
-    Creature const* _source;
 };
 
 // xinef: malleable goo selector, check for target validity
@@ -599,11 +591,25 @@ class boss_professor_putricide : public CreatureScript
                         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_OOZE_VARIABLE);
                         break;
                     case EVENT_UNBOUND_PLAGUE:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, UnboundPlagueTargetSelector(me)))
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [this](Unit* tar)
+                        {
+                            if (!tar->IsPlayer())
+                                return false;
+
+                            if (Unit* victim = me->GetVictim())
+                                if (tar == victim)
+                                    return false;
+
+                            if (tar->IsInRange(me, 0.0f, 45.0f))
+                                return true;
+
+                            return false;
+                        } ))
                         {
                             me->CastSpell(target, SPELL_UNBOUND_PLAGUE, false);
                             me->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, false);
-                            events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 90000, EVENT_GROUP_ABILITIES);
+                            auto time = GetUnboundPlagueTime(_phase);
+                            events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, time, EVENT_GROUP_ABILITIES);
                         }
                         else
                             events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 3500, EVENT_GROUP_ABILITIES);
@@ -699,7 +705,7 @@ class boss_professor_putricide : public CreatureScript
                     case 1:
                         _phase = 2;
                         events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(25000, 28000) + heroicDelay, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(35000, 40000) + heroicDelay, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(0, 20000) + heroicDelay, EVENT_GROUP_ABILITIES);
                         break;
                     case 2:
                         _phase = 3;
@@ -726,6 +732,7 @@ class npc_putricide_oozeAI : public ScriptedAI
             _stopped = false;
             targetGUID = 0;
             me->SetReactState(REACT_PASSIVE);
+            _newTargetSelectTimer = 2500;
         }
 
         uint64 targetGUID;
@@ -759,7 +766,7 @@ class npc_putricide_oozeAI : public ScriptedAI
             me->AttackStop();
             me->GetMotionMaster()->Clear();
             me->StopMoving();
-            _newTargetSelectTimer = 1000;
+            _newTargetSelectTimer = 500;
         }
 
         void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
@@ -833,9 +840,7 @@ class npc_volatile_ooze : public CreatureScript
 
         struct npc_volatile_oozeAI : public npc_putricide_oozeAI
         {
-            npc_volatile_oozeAI(Creature* creature) : npc_putricide_oozeAI(creature, SPELL_OOZE_ERUPTION)
-            {
-            }
+            npc_volatile_oozeAI(Creature* creature) : npc_putricide_oozeAI(creature, SPELL_OOZE_ERUPTION) { }
 
             void CastMainSpell()
             {
@@ -856,18 +861,12 @@ class npc_gas_cloud : public CreatureScript
 
         struct npc_gas_cloudAI : public npc_putricide_oozeAI
         {
-            npc_gas_cloudAI(Creature* creature) : npc_putricide_oozeAI(creature, SPELL_EXPUNGED_GAS)
-            {
-                _newTargetSelectTimer = 0;
-            }
+            npc_gas_cloudAI(Creature* creature) : npc_putricide_oozeAI(creature, SPELL_EXPUNGED_GAS) { }
 
             void CastMainSpell()
             {
                 me->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, me, false);
             }
-
-        private:
-            uint32 _newTargetSelectTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1220,8 +1219,8 @@ class spell_putricide_mutated_plague : public SpellScriptLoader
                 spell = sSpellMgr->GetSpellForDifficultyFromSpell(spell, caster);
 
                 int32 damage = spell->Effects[EFFECT_0].CalcValue(caster);
-                damage = damage * pow(2.5f, GetStackAmount());
-                damage *= frand(1.1f, 1.4f);
+                for (auto i = 0; i < GetStackAmount(); ++i)
+                    damage *= 3;
 
                 GetTarget()->CastCustomSpell(triggerSpell, SPELLVALUE_BASE_POINT0, damage, GetTarget(), true, NULL, aurEff, GetCasterGUID());
             }
@@ -1305,6 +1304,9 @@ class spell_putricide_unbound_plague : public SpellScriptLoader
                             {
                                 newPlague->SetMaxDuration(oldPlague->GetMaxDuration());
                                 newPlague->SetDuration(oldPlague->GetDuration());
+                                if (auto aurApp = oldPlague->GetApplicationOfTarget(GetCaster()->GetGUID()))
+                                    if (auto aurEff = oldPlague->GetEffect(EFFECT_0))
+                                        aurEff->PeriodicTick(aurApp, GetCaster());
                                 oldPlague->Remove();
                                 GetCaster()->RemoveAurasDueToSpell(SPELL_UNBOUND_PLAGUE_SEARCHER);
                                 GetCaster()->CastSpell(GetCaster(), SPELL_PLAGUE_SICKNESS, true);
@@ -1340,12 +1342,8 @@ class spell_putricide_unbound_plague_dmg : public SpellScriptLoader
 
             void HandlePeriodic(AuraEffect* aurEff)
             {
-                int32 dmg = int32(aurEff->GetAmount() * frand(1.24f, 1.26f));
-                if (aurEff->GetTickNumber() == 1)
-                    dmg = aurEff->GetSpellInfo()->Effects[0].CalcValue() * frand(1.20f, 1.30f);
-                if (dmg <= 0) // safety check, impossible
-                    return;
-
+                auto dmg = aurEff->GetAmount();
+                dmg *= 1.25f;
                 aurEff->SetAmount(dmg);
             }
 

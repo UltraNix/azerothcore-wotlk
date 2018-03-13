@@ -264,7 +264,6 @@ class boss_sindragosa : public CreatureScript
             boss_sindragosaAI(Creature* creature) : BossAI(creature, DATA_SINDRAGOSA), _summoned(false)
             {
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
-                me->SetReactState(REACT_PASSIVE);
             }
 
             void Reset()
@@ -320,8 +319,6 @@ class boss_sindragosa : public CreatureScript
                     return;
                 }
 
-
-                me->SetReactState(REACT_AGGRESSIVE);
                 _didFirstFlyPhase = false;
                 _isBelow20Pct = false;
                 _isThirdPhase = false;
@@ -546,13 +543,18 @@ class boss_sindragosa : public CreatureScript
                         events.ScheduleEvent(EVENT_CLEAVE, urand(10000, 15000), EVENT_GROUP_LAND_PHASE);
                         break;
                     case EVENT_TAIL_SMASH:
-                        me->DisableRotate(true);
-                        me->SetControlled(true, UNIT_STATE_ROOT);
-                        me->SendMovementFlagUpdate();
-                        DoCastSelf(SPELL_TAIL_SMASH);
-                        events.DelayEventsToMax(1, 0);
-                        events.ScheduleEvent(EVENT_UNROOT, 0);
-                        events.ScheduleEvent(EVENT_TAIL_SMASH, urand(22000, 27000), EVENT_GROUP_LAND_PHASE);
+                        if (SelectTarget(SELECT_TARGET_RANDOM, 0, [this](Unit* target) { return !me->HasInArc(float(M_PI), target); }))
+                        {
+                            me->DisableRotate(true);
+                            me->SetControlled(true, UNIT_STATE_ROOT);
+                            me->SendMovementFlagUpdate();
+                            DoCastSelf(SPELL_TAIL_SMASH);
+                            events.DelayEventsToMax(1, 0);
+                            events.ScheduleEvent(EVENT_UNROOT, 0);
+                            events.ScheduleEvent(EVENT_TAIL_SMASH, urand(22000, 27000), EVENT_GROUP_LAND_PHASE);
+                            break;
+                        }
+                        events.ScheduleEvent(EVENT_TAIL_SMASH, urand(5000, 7000), EVENT_GROUP_LAND_PHASE);
                         break;
                     case EVENT_FROST_BREATH:
                         me->DisableRotate(true);
