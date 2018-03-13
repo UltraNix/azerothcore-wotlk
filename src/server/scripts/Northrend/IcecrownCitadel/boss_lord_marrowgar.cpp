@@ -416,6 +416,7 @@ public:
             summoner->SetPetGUID(0);
             me->CastSpell(summoner, SPELL_IMPALED, true);
             summoner->CastSpell(me, SPELL_RIDE_VEHICLE, true);
+            summoner->SendMeleeAttackStop();
             //summoner->ClearUnitState(UNIT_STATE_ONVEHICLE);
             summoner->SetPetGUID(petGUID);
             summoner->GetMotionMaster()->Clear();
