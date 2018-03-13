@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,113 +39,6 @@ EndContentData */
 #include "ScriptedFollowerAI.h"
 #include "Player.h"
 #include "WorldSession.h"
-
-/*######
-## npc_aquementas
-######*/
-
-enum Aquementas
-{
-    AGGRO_YELL_AQUE     = 0,
-
-    SPELL_AQUA_JET      = 13586,
-    SPELL_FROST_SHOCK   = 15089
-};
-
-class npc_aquementas : public CreatureScript
-{
-public:
-    npc_aquementas() : CreatureScript("npc_aquementas") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_aquementasAI(creature);
-    }
-
-    struct npc_aquementasAI : public ScriptedAI
-    {
-        npc_aquementasAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 SendItemTimer;
-        uint32 SwitchFactionTimer;
-        bool isFriendly;
-
-        uint32 FrostShockTimer;
-        uint32 AquaJetTimer;
-
-        void Reset()
-        {
-            SendItemTimer = 0;
-            SwitchFactionTimer = 10000;
-            me->setFaction(35);
-            isFriendly = true;
-
-            AquaJetTimer = 5000;
-            FrostShockTimer = 1000;
-        }
-
-        void SendItem(Unit* receiver)
-        {
-            Player* player = receiver->ToPlayer();
-
-            if (player && player->HasItemCount(11169, 1, false) &&
-                player->HasItemCount(11172, 11, false) &&
-                player->HasItemCount(11173, 1, false) &&
-                !player->HasItemCount(11522, 1, true))
-            {
-                ItemPosCountVec dest;
-                uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 11522, 1, NULL);
-                if (msg == EQUIP_ERR_OK)
-                    player->StoreNewItem(dest, 11522, 1, true);
-            }
-        }
-
-        void EnterCombat(Unit* who)
-        {
-            Talk(AGGRO_YELL_AQUE, who);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (isFriendly)
-            {
-                if (SwitchFactionTimer <= diff)
-                {
-                    me->setFaction(91);
-                    isFriendly = false;
-                } else SwitchFactionTimer -= diff;
-            }
-
-            if (!UpdateVictim())
-                return;
-
-            if (!isFriendly)
-            {
-                if (SendItemTimer <= diff)
-                {
-                    if (me->GetVictim()->GetTypeId() == TYPEID_PLAYER)
-                        SendItem(me->GetVictim());
-                    SendItemTimer = 5000;
-                } else SendItemTimer -= diff;
-            }
-
-            if (FrostShockTimer <= diff)
-            {
-                DoCastVictim(SPELL_FROST_SHOCK);
-                FrostShockTimer = 15000;
-            } else FrostShockTimer -= diff;
-
-            if (AquaJetTimer <= diff)
-            {
-                DoCast(me, SPELL_AQUA_JET);
-                AquaJetTimer = 15000;
-            } else AquaJetTimer -= diff;
-
-            DoMeleeAttackIfReady();
-        }
-    };
-
-};
 
 /*######
 ## npc_custodian_of_time
@@ -645,7 +538,6 @@ public:
 
 void AddSC_tanaris()
 {
-    new npc_aquementas();
     new npc_custodian_of_time();
     new npc_steward_of_time();
     new npc_stone_watcher_of_norgannon();
