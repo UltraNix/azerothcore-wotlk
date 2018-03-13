@@ -518,16 +518,16 @@ enum ShrineOfTheBirds
     GO_SHRINE_EAGLE     = 185547,
     GO_SHRINE_FALCON    = 185553,
 
-    EAGLE_GUARD_POSITION = 0,
-    HAWK_GUARD_POSITION = 1,
-    FALCON_GUARD_POSITION = 2
+    EAGLE_GUARD_POSITION     = 0,
+    HAWK_GUARD_POSITION      = 1,
+    FALCON_GUARD_POSITION    = 2
 };
 
 Position const guardPosition[3] =
 {
     { -2623.18f, 4573.95f, 138.77f, 1.78f }, // Eagle Guarsd
     { -4363.11f, 4625.4f, -39.01f, 0.46f }, // Hawk Guard
-    { -3165.45f, 3808.17f, 59.98f, 1.90f }, // Falcon Guard
+    { -3165.45f, 3808.17f, 59.98f, 1.90f } // Falcon Guard
 };
 
 class go_shrine_of_the_birds : public GameObjectScript
