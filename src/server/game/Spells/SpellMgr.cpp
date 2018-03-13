@@ -3948,6 +3948,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 54683: // Ablaze
             spellInfo->DurationIndex = 27; // 3s
             break;
+        case 54178: // Goregek's Endurance
+            spellInfo->procChance = 40;
+            break;
 
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
