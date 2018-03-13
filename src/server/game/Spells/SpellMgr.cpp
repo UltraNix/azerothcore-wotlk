@@ -6522,8 +6522,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 72443: // Boiling Blood (Deathbringer Saurfang)
         case 71160: // Plague Stench (Stinky)
         case 71123: // Decimate (Stinky & Precious)
+            spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
+            break;
         case 71464: // Divine Surge (Sister Svalna)
             spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
+            spellInfo->EffectBasePoints[EFFECT_0] = 4500;
             break;
         case 71169: // Shadow's Fate
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
