@@ -3297,7 +3297,58 @@ void SpellMgr::LoadSpellCustomAttr()
             73797,
             73798,
             73799, // Soul Reaper
-            22482  // Rogue blade flurry (armor reduction is calculated in script already)
+            22482, // Rogue blade flurry (armor reduction is calculated in script already)
+            66794, // Sweep
+            67644,
+            67645,
+            67646,
+            66683, // Massive Crash
+            67660,
+            67661,
+            67662,
+            66012, // Freezing Slash
+            72385,
+            72441,
+            72442,
+            72443, // Boiling Blood
+            72380,
+            72438,
+            72439,
+            72440, // Blood Nova
+            72052,
+            72800,
+            72801,
+            72802, // Kinetic Bomb Explosion
+            72039,
+            73037,
+            73038,
+            73039,
+            72038,
+            72815,
+            72816,
+            72817, // Empowered Shock Vortex
+            71944,
+            72812,
+            72813,
+            72814, // Shock Vortex
+            69075,
+            70834,
+            70835,
+            70836, // Bone Storm
+            64422,
+            64688, // Sonic Screech
+            66316,
+            67100,
+            67101,
+            67102, // Spinning Pain Spike
+            71257, // Barbaric Spike
+            70961, // Shattered Bones
+            71114,
+            71115, // Massive Stomp
+            71726,
+            71727,
+            71728,
+            71729, // Vampiric Bite
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
@@ -6191,6 +6242,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS | SPELL_ATTR3_CANT_TRIGGER_PROC;
             break;
+       // Trial of the Crusader, Anub'Arak, Freezing Slash
+        case 66012:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         // Trial of the Crusader, Anub'Arak, Leeching Swarm aura
         case 66118:
         case 67630:
@@ -6516,10 +6571,17 @@ void SpellMgr::LoadDbcDataCorrections()
         case 71274: // Ymirjar Frostbinder, Frozen Orb
             spellInfo->EffectImplicitTargetA[0] = 6;
             break;
-        case 69240: // Vile Gas
+        case 71089:
+        case 71090: // Bubbling Pus
+        case 69195:
+        case 71219:
+        case 73031:
+        case 73032: // Pungent Blight
+        case 69240:
         case 71218:
         case 73019:
-        case 73020:
+        case 73020: // Vile Gas
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
         case 69248:
         case 69244:
         case 71288:
@@ -6540,6 +6602,12 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+        case 70492: // Ooze Eruption
+        case 72505:
+        case 72624:
+        case 72625:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         case 71412: // Green Ooze Summon (Professor Putricide)
         case 71415: // Orange Ooze Summon (Professor Putricide)
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
@@ -6559,6 +6627,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 72854: // Unbound Plague (Professor Putricide) (needs target selection script)
         case 72855: // Unbound Plague (Professor Putricide) (needs target selection script)
         case 72856: // Unbound Plague (Professor Putricide) (needs target selection script)
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
             break;
         case 70402: // Mutated Transformation (Professor Putricide)
@@ -6641,6 +6710,12 @@ void SpellMgr::LoadDbcDataCorrections()
 
         case 71614: // Ice Lock
             spellInfo->Mechanic = MECHANIC_STUN;
+            break;
+        case 72133: // Pain and Suffering
+        case 73788:
+        case 73789:
+        case 73790:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
         case 70541: // Lich King, Infest
         case 73779:
