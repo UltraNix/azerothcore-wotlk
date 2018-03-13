@@ -516,7 +516,18 @@ enum ShrineOfTheBirds
     NPC_FALCON_GUARD    = 22994,
     GO_SHRINE_HAWK      = 185551,
     GO_SHRINE_EAGLE     = 185547,
-    GO_SHRINE_FALCON    = 185553
+    GO_SHRINE_FALCON    = 185553,
+
+    EAGLE_GUARD_POSITION = 0,
+    HAWK_GUARD_POSITION = 1,
+    FALCON_GUARD_POSITION = 2
+};
+
+Position const guardPosition[3] =
+{
+    { -2623.18f, 4573.95f, 138.77f, 1.78f }, // Eagle Guarsd
+    { -4363.11f, 4625.4f, -39.01f, 0.46f }, // Hawk Guard
+    { -3165.45f, 3808.17f, 59.98f, 1.90f }, // Falcon Guard
 };
 
 class go_shrine_of_the_birds : public GameObjectScript
@@ -527,25 +538,26 @@ public:
     bool OnGossipHello(Player* player, GameObject* go)
     {
         uint32 BirdEntry = 0;
-
-        float fX, fY, fZ;
-        go->GetClosePoint(fX, fY, fZ, go->GetObjectSize(), INTERACTION_DISTANCE);
+        uint8 PositionIndex = 0;
 
         switch (go->GetEntry())
         {
             case GO_SHRINE_HAWK:
                 BirdEntry = NPC_HAWK_GUARD;
+                PositionIndex = HAWK_GUARD_POSITION;
                 break;
             case GO_SHRINE_EAGLE:
                 BirdEntry = NPC_EAGLE_GUARD;
+                PositionIndex = EAGLE_GUARD_POSITION;
                 break;
             case GO_SHRINE_FALCON:
                 BirdEntry = NPC_FALCON_GUARD;
+                PositionIndex = FALCON_GUARD_POSITION;
                 break;
         }
 
         if (BirdEntry)
-            player->SummonCreature(BirdEntry, fX, fY, fZ, go->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+            player->SummonCreature(BirdEntry, guardPosition[PositionIndex], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
 
         return false;
     }
