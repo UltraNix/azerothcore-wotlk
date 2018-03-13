@@ -105,6 +105,7 @@ enum Guids
 {
     GUID_VAMPIRE    = 1,
     GUID_BLOODBOLT  = 2,
+    GUID_OFFTANK    = 3,
 };
 
 enum Points
@@ -532,6 +533,14 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     default:
                         break;
                 }
+            }
+
+            uint64 GetGUID(int32 identifier) const override
+            {
+                if (identifier == GUID_OFFTANK)
+                    return _offtankGUID;
+
+                return 0;
             }
 
             void EnterEvadeMode()
@@ -969,6 +978,23 @@ class spell_blood_queen_presence_of_the_darkfallen : public SpellScriptLoader
         }
 };
 
+class spell_blood_shroud_of_sorrow_dmg_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_blood_shroud_of_sorrow_dmg_SpellScript);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        if (Creature* caster = GetCaster()->ToCreature())
+            if (caster->IsAIEnabled)
+                targets.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->ToCreature()->AI()->GetGUID(GUID_OFFTANK), true));
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_blood_shroud_of_sorrow_dmg_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+    }
+};
+
 class achievement_once_bitten_twice_shy : public AchievementCriteriaScript
 {
 public:
@@ -1000,6 +1026,7 @@ void AddSC_boss_blood_queen_lana_thel()
     new spell_blood_queen_vampiric_bite();
     new spell_blood_queen_swarming_shadows_floor_dmg();
     new spell_blood_queen_presence_of_the_darkfallen();
+    new SpellScriptLoaderEx<spell_blood_shroud_of_sorrow_dmg_SpellScript>("spell_blood_shroud_of_sorrow_dmg");
     new achievement_once_bitten_twice_shy("achievement_once_bitten_twice_shy_n_10", 0, false);
     new achievement_once_bitten_twice_shy("achievement_once_bitten_twice_shy_v_10", 0, true);
     new achievement_once_bitten_twice_shy("achievement_once_bitten_twice_shy_n_25", 1, false);
