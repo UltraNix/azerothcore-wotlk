@@ -1,0 +1,6 @@
+SET @OGUID = 163440;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID AND @OGUID+2;
+INSERT INTO `gameobject` VALUES
+(@OGUID, 177748, 1, 1, 1, -2323.65, 1357.97, 63.58, 0, 0, 0, 0, 0, 180, 0, 1, 0),
+(@OGUID+1, 177748, 1, 1, 1, -2266.14, 1324.88, 63.68, 0, 0, 0, 0, 0, 180, 0, 1, 0),
+(@OGUID+2, 177748, 1, 1, 1, -2308.27, 1398.30, 63.58, 0, 0, 0, 0, 0, 180, 0, 1, 0);
