@@ -705,7 +705,7 @@ class boss_professor_putricide : public CreatureScript
                     case 1:
                         _phase = 2;
                         events.ScheduleEvent(EVENT_MALLEABLE_GOO, urand(25000, 28000) + heroicDelay, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(0, 20000) + heroicDelay, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_CHOKING_GAS_BOMB, urand(15000, 35000) + heroicDelay, EVENT_GROUP_ABILITIES);
                         break;
                     case 2:
                         _phase = 3;
