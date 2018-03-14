@@ -3539,6 +3539,14 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         });
 
+        // Detect Undead
+        ApplySpellFix({ 11389 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->PowerType = 0;
+            spellInfo->ManaCost = 0;
+            spellInfo->ManaPerSecond = 0;
+        });
+
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
