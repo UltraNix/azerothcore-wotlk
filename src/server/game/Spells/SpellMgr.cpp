@@ -3355,6 +3355,10 @@ void SpellMgr::LoadSpellCustomAttr()
             71729, // Vampiric Bite
             64443,
             64584, // Big Bang
+            70946,
+            71475,
+            71476,
+            71477, // Vampiric Bite
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
