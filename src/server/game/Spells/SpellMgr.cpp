@@ -6528,7 +6528,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 71464: // Divine Surge (Sister Svalna)
             spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
-            spellInfo->EffectBasePoints[EFFECT_0] = 4500;
+            spellInfo->EffectBasePoints[EFFECT_0] = 2500;
             break;
         case 71169: // Shadow's Fate
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
