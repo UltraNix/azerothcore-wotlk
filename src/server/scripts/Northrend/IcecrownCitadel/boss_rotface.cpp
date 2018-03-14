@@ -419,8 +419,8 @@ class npc_big_ooze : public CreatureScript
 
             void IsSummonedBy(Unit* /*summoner*/)
             {
-                if (Player* p = me->SelectNearestPlayer(100.0f))
-                    AttackStart(p);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                    AttackStart(target);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -450,8 +450,8 @@ class npc_big_ooze : public CreatureScript
                     events.ScheduleEvent(EVENT_STICKY_OOZE, 5000);
                     DoResetThreat();
                     me->SetInCombatWithZone();
-                    if (Player* p = me->SelectNearestPlayer(100.0f))
-                        AttackStart(p);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
+                        AttackStart(target);
                 }
 
                 if (!UpdateVictim())
