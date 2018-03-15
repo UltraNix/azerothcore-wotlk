@@ -6581,6 +6581,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 70952: // Blood Prince Council, Invocation of Blood
             spellInfo->Effect[0] = 0; // clear share health aura
             break;
+	    case 71341: // Pact of the Darkfallen
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         case 71274: // Ymirjar Frostbinder, Frozen Orb
             spellInfo->EffectImplicitTargetA[0] = 6;
             break;
