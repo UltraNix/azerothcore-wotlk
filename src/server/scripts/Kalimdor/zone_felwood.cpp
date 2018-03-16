@@ -70,6 +70,5 @@ class at_ancient_leaf : public AreaTriggerScript
 
 void AddSC_felwood()
 {
-    new npcs_riverbreeze_and_silversky();
     new at_ancient_leaf();
 }
