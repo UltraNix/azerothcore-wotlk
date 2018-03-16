@@ -283,6 +283,18 @@ public:
 
         void EnterCombat(Unit *who)
         {
+            marksCount = 0;
+            hasEnrage = false;
+
+            if (pInstance)
+            {
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_KORTHAZZ);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_BLAUMEUX);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_RIVENDARE);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_ZELIEK);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_DAMAGE);
+            }
+
             me->SetHealth(me->GetMaxHealth());
             _fightTimer = getMSTime();
             if (pInstance)
