@@ -184,6 +184,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                     if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
                         if (sender->getLevel() >= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MINLVL) && sender->getLevel() <= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MAXLVL))
                             lang = LANG_UNIVERSAL;
+                    break;
+                case CHAT_MSG_BATTLEGROUND:
+                case CHAT_MSG_BATTLEGROUND_LEADER:
+                    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
+                        lang = LANG_UNIVERSAL;
+                    break;
                 case CHAT_MSG_RAID:
                 case CHAT_MSG_RAID_LEADER:
                 case CHAT_MSG_RAID_WARNING:

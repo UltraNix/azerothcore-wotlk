@@ -1675,6 +1675,14 @@ CrossFactionRDF.MinLVL = 15
 CrossFactionRDF.MaxLVL = 70
 
 #
+#     CrossFactionBG.Enable
+#        Description: Allow or disallow playing in BG between two factions.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+CrossFactionBG.Enable = 0
+
+#
 #     CrossFactionMail.Enable
 #        Description: Allow or disallow sending mail between two factions.
 #        Default:     0 - (Disabled)

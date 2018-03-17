@@ -2146,6 +2146,7 @@ class Player : public Unit, public GridObject<Player>
 
         static TeamId TeamIdForRace(uint8 race);
         TeamId GetTeamId() const { return m_team; }
+        void SetTeam(TeamId Team) { m_team = Team; }
         void setFactionForRace(uint8 race);
 
         void InitDisplayIds();

@@ -687,6 +687,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CROSSFACTION_RDF_MINLVL]             = sConfigMgr->GetIntDefault("CrossFactionRDF.MinLVL", 15);
     m_int_configs[CONFIG_CROSSFACTION_RDF_MAXLVL]             = sConfigMgr->GetIntDefault("CrossFactionRDF.MaxLVL", 70);
     m_bool_configs[CONFIG_CROSSFACTION_RDF]                   = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
+    m_bool_configs[CONFIG_CROSSFACTION_BG]                    = sConfigMgr->GetBoolDefault("CrossFactionBG.Enable", false);
     m_bool_configs[CONFIG_CROSSFACTION_MAIL]                  = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
     m_bool_configs[CONFIG_WHO_OPPOSITE]                       = sConfigMgr->GetBoolDefault("CrossFactionWHO.Enable", false);
 
