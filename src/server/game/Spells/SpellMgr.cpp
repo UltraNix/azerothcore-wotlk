@@ -4949,6 +4949,8 @@ void SpellMgr::LoadDbcDataCorrections()
         case 31700: // Black Qiraji Battle Tank
             spellInfo->EffectApplyAuraName[EFFECT_2] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
             spellInfo->EffectBasePoints[EFFECT_2] = 99;
+            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_MOVEMENT;
+            spellInfo->CastingTimeIndex = 16; // 1.5 sec
             break;
         // Ram - siege
         case 62345:
