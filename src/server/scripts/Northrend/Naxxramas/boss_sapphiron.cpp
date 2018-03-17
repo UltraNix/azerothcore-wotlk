@@ -6,6 +6,8 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "ScriptedCreature.h"
 #include "naxxramas.h"
 #include "SpellScript.h"
+#include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "Player.h"
 
 enum Yells
@@ -498,8 +500,25 @@ class spell_sapphiron_frost_explosion : public SpellScriptLoader
         }
 };
 
+class spell_sapphiron_frost_aura_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_sapphiron_frost_aura_AuraScript);
+
+    void OnPeriodic(AuraEffect const* /*aurEff*/)
+    {
+        if (GetTarget()->HasAura(SPELL_ICEBOLT_TRIGGER))
+            PreventDefaultAction();
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_sapphiron_frost_aura_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+    }
+};
+
 void AddSC_boss_sapphiron()
 {
     new boss_sapphiron();
     new spell_sapphiron_frost_explosion();
+    new AuraScriptLoaderEx<spell_sapphiron_frost_aura_AuraScript>("spell_sapphiron_frost_aura");
 }
