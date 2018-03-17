@@ -4229,6 +4229,18 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// ROGUE
         /////////////////////////////////
+            /* rupture */
+        case 1943:
+        case 8639:
+        case 8640:
+        case 11273:
+        case 11274:
+        case 11275:
+        case 26867:
+        case 48671:
+        case 48672:
+            spellInfo->Effect[1] = 0;
+            break;
         // Detect traps
         case 2836:
             spellInfo->EffectBasePoints[0] = 139;
