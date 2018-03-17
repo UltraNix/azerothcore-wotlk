@@ -881,10 +881,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
 
         // Sitowsky: Crossfaction Battlegrounds
         if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
-        {
             player->setFactionForRace(player->getRace());
-            player->SetTeam(player->GetTeamId());
-        }
 
         // Last standing - Rated 5v5 arena & be solely alive player
         if (bgTeamId == winnerTeamId && isArena() && isRated() && GetArenaType() == ARENA_TYPE_5v5 && aliveWinners == 1 && player->IsAlive() && bValidArena)
@@ -1188,10 +1185,7 @@ void Battleground::RemovePlayerAtLeave(Player* player)
 
     // Sitowsky: Crossfaction Battlegrounds
     if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
-    {
         player->setFactionForRace(player->getRace());
-        player->SetTeam(player->GetTeamId());
-    }
 
     player->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
@@ -1354,12 +1348,12 @@ void Battleground::AddPlayer(Player* player)
         switch (player->GetBgTeamId())
         {
             case TEAM_HORDE:
-                player->setFaction(2);  // orc, and generic for horde
                 player->SetTeam(TEAM_HORDE);
+                player->setFaction(2);
                 break;
             case TEAM_ALLIANCE:
-                player->setFaction(1);  // dwarf/gnome, and generic for alliance
                 player->SetTeam(TEAM_ALLIANCE);
+                player->setFaction(1);
                 break;
         }
     }
