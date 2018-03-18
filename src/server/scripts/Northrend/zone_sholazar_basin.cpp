@@ -1774,6 +1774,25 @@ class spell_scared_softknuckle_AuraScript : public AuraScript
     }
 };
 
+class go_raised_mud_scholazar_river : public GameObjectScript
+{
+public:
+    go_raised_mud_scholazar_river() : GameObjectScript("go_raised_mud_scholazar_river")
+    {
+
+    }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (!player)
+            return true;
+
+        go->SetRespawnTime(300);
+        go->SetLootState(GO_ACTIVATED, player);
+        return false;
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     // Ours
@@ -1785,6 +1804,7 @@ void AddSC_sholazar_basin()
     new go_brazier();
     new spell_q12915_mending_fences();
     new npc_rejek_sholazar_event();
+    new go_raised_mud_scholazar_river();
 
     // Theirs
     new npc_vekjik();
