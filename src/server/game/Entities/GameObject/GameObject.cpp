@@ -711,6 +711,8 @@ void GameObject::Update(uint32 diff)
                 return;
             }
 
+            m_respawnTime = time(nullptr) + m_respawnDelayTime;
+
             // if option not set then object will be saved at grid unload
             if (GetMap()->IsDungeon())
                 SaveRespawnTime();
