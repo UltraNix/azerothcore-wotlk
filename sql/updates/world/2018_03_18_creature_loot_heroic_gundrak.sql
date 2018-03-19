@@ -198,14 +198,14 @@ INSERT INTO `creature_loot_template` VALUES
 (30942, 37646, 4.1, 1, 0, 1, 1);
 
 UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30926;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30927;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30929;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30930;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30931;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30933;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30935;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30936;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30938;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30939;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30941;
-UPDATE `creature_template` SET `lootid` = 30926 WHERE `entry` = 30942;
+UPDATE `creature_template` SET `lootid` = 30927 WHERE `entry` = 30927;
+UPDATE `creature_template` SET `lootid` = 30929 WHERE `entry` = 30929;
+UPDATE `creature_template` SET `lootid` = 30930 WHERE `entry` = 30930;
+UPDATE `creature_template` SET `lootid` = 30931 WHERE `entry` = 30931;
+UPDATE `creature_template` SET `lootid` = 30933 WHERE `entry` = 30933;
+UPDATE `creature_template` SET `lootid` = 30935 WHERE `entry` = 30935;
+UPDATE `creature_template` SET `lootid` = 30936 WHERE `entry` = 30936;
+UPDATE `creature_template` SET `lootid` = 30938 WHERE `entry` = 30938;
+UPDATE `creature_template` SET `lootid` = 30939 WHERE `entry` = 30939;
+UPDATE `creature_template` SET `lootid` = 30941 WHERE `entry` = 30941;
+UPDATE `creature_template` SET `lootid` = 30942 WHERE `entry` = 30942;
