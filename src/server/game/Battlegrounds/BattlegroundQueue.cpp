@@ -440,10 +440,11 @@ void BattlegroundQueue::FillPlayersToBG(const int32 aliFree, const int32 hordeFr
     GroupsQueueType::const_iterator Horde_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].begin();
     for (; Horde_itr != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].end() && m_SelectionPools[TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); ++Horde_itr);
 
-    if (Battleground* bgT = sBattlegroundMgr->GetBattlegroundTemplate(m_bgTypeId))
-        if (!bgT->isArena())
-            if (FillXPlayersToBG(bracket_id, bgT, false))
-                return;
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
+        if (Battleground* bgT = sBattlegroundMgr->GetBattlegroundTemplate(m_bgTypeId))
+            if (!bgT->isArena())
+                if (FillXPlayersToBG(bracket_id, bgT, false))
+                    return;
 
     // calculate free space after adding
     int32 aliDiff   = aliFree   - int32(m_SelectionPools[TEAM_ALLIANCE].GetPlayerCount());
@@ -1079,9 +1080,6 @@ bool BattlegroundQueue::CheckCrossFactionMatch(BattlegroundBracketId bracket_id,
 // which is useful in FillPlayersToBG. Because then we can interrupt the regular invitation if cross faction bg's are enabled.
 bool BattlegroundQueue::FillXPlayersToBG(BattlegroundBracketId bracket_id, Battleground* bg, bool start)
 {
-    if (!sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG))
-        return false;
-
     int32 aliFree = start ? bg->GetMinPlayersPerTeam() : bg->GetFreeSlotsForTeam(TEAM_ALLIANCE);
     int32 hordeFree = start ? bg->GetMinPlayersPerTeam() : bg->GetFreeSlotsForTeam(TEAM_HORDE);
     // Empty selection pools. They will be refilled from queued groups.
