@@ -297,7 +297,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
                     events.SetPhase(PHASE_TWO);
-                    events.ScheduleEvent(EVENT_SPELL_FROSTBOLT, urand(3500, 7000), 0, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_SPELL_FROSTBOLT, Is25ManRaid() ? urand(3500, 7000) : urand(10000, 12000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_TOUCH_OF_INSIGNIFICANCE, urand(6000, 9000), 0, PHASE_TWO);
                     events.ScheduleEvent(EVENT_SPELL_SUMMON_SHADE, urand(12000, 15000), 0, PHASE_TWO);
@@ -433,7 +433,7 @@ class boss_lady_deathwhisper : public CreatureScript
                         break;
                     case EVENT_SPELL_FROSTBOLT:
                         me->CastSpell(me->GetVictim(), SPELL_FROSTBOLT, false);
-                        events.RepeatEvent(urand(3500, 7000));
+                        events.RepeatEvent(Is25ManRaid() ? urand(3500, 7000) : urand(10000, 12000));
                         break;
                     case EVENT_SPELL_FROSTBOLT_VOLLEY:
                         me->CastSpell((Unit*)NULL, SPELL_FROSTBOLT_VOLLEY, false);
