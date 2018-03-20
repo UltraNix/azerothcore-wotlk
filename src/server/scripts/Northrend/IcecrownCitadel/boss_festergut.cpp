@@ -1,7 +1,3 @@
-/*
-REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
-*/
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -10,26 +6,26 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "SpellAuraEffects.h"
 #include "Player.h"
 
-enum ScriptTexts
+enum FestergutTexts
 {
-    SAY_STINKY_DEAD             = 0,
-    SAY_AGGRO                   = 1,
-    EMOTE_GAS_SPORE             = 2,
-    EMOTE_WARN_GAS_SPORE        = 3,
-    SAY_PUNGENT_BLIGHT          = 4,
-    EMOTE_WARN_PUNGENT_BLIGHT   = 5,
-    EMOTE_PUNGENT_BLIGHT        = 6,
-    SAY_KILL                    = 7,
-    SAY_BERSERK                 = 8,
-    SAY_DEATH                   = 9,
+    SAY_STINKY_DEAD,
+    SAY_AGGRO,
+    EMOTE_GAS_SPORE,
+    EMOTE_WARN_GAS_SPORE,
+    SAY_PUNGENT_BLIGHT,
+    EMOTE_WARN_PUNGENT_BLIGHT,
+    EMOTE_PUNGENT_BLIGHT,
+    SAY_KILL,
+    SAY_BERSERK,
+    SAY_DEATH
 };
 
-enum Spells
+enum FestergutSpells
 {
     // Festergut
     SPELL_INHALE_BLIGHT         = 69165,
     SPELL_PUNGENT_BLIGHT        = 69195,
-    SPELL_GASTRIC_BLOAT         = 72219, // 72214 is the proper way (with proc) but atm procs can't have cooldown for creatures
+    SPELL_GASTRIC_BLOAT         = 72214,
     SPELL_GASTRIC_EXPLOSION     = 72227,
     SPELL_GAS_SPORE             = 69278,
     SPELL_VILE_GAS              = 69240,
@@ -42,20 +38,15 @@ enum Spells
     SPELL_PLAGUE_STENCH         = 71805,
 };
 
-// Used for HasAura checks
-#define PUNGENT_BLIGHT_HELPER RAID_MODE<uint32>(69195, 71219, 73031, 73032)
-#define INOCULATED_HELPER     RAID_MODE<uint32>(69291, 72101, 72102, 72103)
-
 uint32 const gaseousBlight[3]        = {69157, 69162, 69164};
 uint32 const gaseousBlightVisual[3]  = {69126, 69152, 69154};
 
 #define DATA_INOCULATED_STACK 69291
 
-enum Events
+enum FestergutEvents
 {
     // Festergut
-    EVENT_NONE,
-    EVENT_BERSERK,
+    EVENT_BERSERK               = 1,
     EVENT_INHALE_BLIGHT,
     EVENT_VILE_GAS,
     EVENT_GAS_SPORE,
@@ -67,342 +58,315 @@ enum Events
     EVENT_MORTAL_WOUND,
 };
 
-class boss_festergut : public CreatureScript
+struct boss_festergutAI : public BossAI
 {
-    public:
-        boss_festergut() : CreatureScript("boss_festergut") { }
+    boss_festergutAI(Creature* creature) : BossAI(creature, DATA_FESTERGUT)
+    {
+        _gasDummyGUID = 0;
+    }
 
-        struct boss_festergutAI : public BossAI
+    void Reset() override
+    {
+        _maxInoculatedStack = 0;
+        _inhaleCounter = 0;
+        _Reset();
+        events.Reset();
+        if (Creature* gasDummy = me->FindNearestCreature(NPC_GAS_DUMMY, 100.0f, true))
         {
-            boss_festergutAI(Creature* creature) : BossAI(creature, DATA_FESTERGUT)
+            _gasDummyGUID = gasDummy->GetGUID();
+            for (uint32 i : gaseousBlightVisual)
+                gasDummy->RemoveAurasDueToSpell(i);
+        }
+    }
+
+    auto GetPutricide() const
+    {
+        return ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE));
+    }
+
+    void EnterCombat(Unit* attacker) override
+    {
+        if (!instance->CheckRequiredBosses(DATA_FESTERGUT, attacker->ToPlayer()))
+        {
+            EnterEvadeMode();
+            instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+            return;
+        }
+
+        events.ScheduleEvent(EVENT_BERSERK, 5min);
+        events.ScheduleEvent(EVENT_INHALE_BLIGHT, 25s, 30s);
+        events.ScheduleEvent(EVENT_GAS_SPORE, 20s, 25s);
+        events.ScheduleEvent(EVENT_VILE_GAS, 30s, 40s, 1);
+        events.ScheduleEvent(EVENT_GASTRIC_BLOAT, 14s);
+        if (IsHeroic())
+            events.ScheduleEvent(EVENT_FESTERGUT_GOO, 15s, 20s);
+
+        me->setActive(true);
+        Talk(SAY_AGGRO);
+        DoZoneInCombat();
+
+        if (Creature* gasDummy = me->FindNearestCreature(NPC_GAS_DUMMY, 100.0f, true))
+            _gasDummyGUID = gasDummy->GetGUID();
+        if (Creature* professor = GetPutricide())
+            professor->AI()->DoAction(ACTION_FESTERGUT_COMBAT);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
+            instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
+        _JustDied();
+        Talk(SAY_DEATH);
+        if (Creature* professor = GetPutricide())
+            professor->AI()->DoAction(ACTION_FESTERGUT_DEATH);
+
+        RemoveBlight();
+    }
+
+    void JustReachedHome() override
+    {
+        _JustReachedHome();
+        instance->SetBossState(DATA_FESTERGUT, FAIL);
+    }
+
+    void EnterEvadeMode() override
+    {
+        for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
+            instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
+        ScriptedAI::EnterEvadeMode();
+        if (Creature* professor = GetPutricide())
+            professor->AI()->EnterEvadeMode();
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (victim->IsPlayer())
+            Talk(SAY_KILL);
+    }
+
+    void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+    {
+        if (spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_PUNGENT_BLIGHT, me))
+            target->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me));
+        else if (Player* p = target->ToPlayer())
+        {
+            // Gaseous Blight damage
+            if ((spell->Id == 69159 || spell->Id == 70136 || spell->Id == 69161 || spell->Id == 70139 || spell->Id == 69163 || spell->Id == 70469) && p->GetQuestStatus(QUEST_RESIDUE_RENDEZVOUS_10) == QUEST_STATUS_INCOMPLETE ||
+                (spell->Id == 70135 || spell->Id == 70138 || spell->Id == 70468 || spell->Id == 70137 || spell->Id == 70140 || spell->Id == 70470) && p->GetQuestStatus(QUEST_RESIDUE_RENDEZVOUS_25) == QUEST_STATUS_INCOMPLETE)
+                p->CastSpell(p, SPELL_ORANGE_BLIGHT_RESIDUE, true);
+        }
+    }
+
+    void RemoveBlight() const
+    {
+        if (Creature* gasDummy = ObjectAccessor::GetCreature(*me, _gasDummyGUID))
+            for (uint8 i = 0; i < 3; ++i)
             {
-                _gasDummyGUID = 0;
+                me->RemoveAurasDueToSpell(gaseousBlight[i]);
+                gasDummy->RemoveAurasDueToSpell(gaseousBlightVisual[i]);
             }
+    }
 
-            uint64 _gasDummyGUID;
-            uint32 _maxInoculatedStack;
-            uint32 _inhaleCounter;
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim() || !CheckInRoom())
+            return;
 
-            void Reset()
+        events.Update(diff);
+
+        if (me->IsCasting())
+            return;
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
             {
-                _maxInoculatedStack = 0;
-                _inhaleCounter = 0;
-                _Reset();
-                events.Reset();
-                if (Creature* gasDummy = me->FindNearestCreature(NPC_GAS_DUMMY, 100.0f, true))
-                {
-                    _gasDummyGUID = gasDummy->GetGUID();
-                    for (uint8 i=0; i<3; ++i)
-                        gasDummy->RemoveAurasDueToSpell(gaseousBlightVisual[i]);
-                }
-            }
-
-            void EnterCombat(Unit* who)
-            {
-                if (!instance->CheckRequiredBosses(DATA_FESTERGUT, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
-                events.ScheduleEvent(EVENT_BERSERK, 300000);
-                events.ScheduleEvent(EVENT_INHALE_BLIGHT, urand(25000, 30000));
-                events.ScheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_VILE_GAS, urand(30000, 40000), 1);
-                events.ScheduleEvent(EVENT_GASTRIC_BLOAT, urand(12500, 15000));
-                if (IsHeroic())
-                    events.ScheduleEvent(EVENT_FESTERGUT_GOO, urand(15000, 20000));
-
-                me->setActive(true);
-                Talk(SAY_AGGRO);
-                DoZoneInCombat();
-
-                if (Creature* gasDummy = me->FindNearestCreature(NPC_GAS_DUMMY, 100.0f, true))
-                    _gasDummyGUID = gasDummy->GetGUID();
-                if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                    professor->AI()->DoAction(ACTION_FESTERGUT_COMBAT);
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
-                    instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
-                _JustDied();
-                Talk(SAY_DEATH);
-                if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                    professor->AI()->DoAction(ACTION_FESTERGUT_DEATH);
-
-                RemoveBlight();
-            }
-
-            void JustReachedHome()
-            {
-                _JustReachedHome();
-                instance->SetBossState(DATA_FESTERGUT, FAIL);
-            }
-
-            void EnterEvadeMode()
-            {
-                for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
-                    instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
-                ScriptedAI::EnterEvadeMode();
-                if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                    professor->AI()->EnterEvadeMode();
-            }
-
-            void KilledUnit(Unit* victim)
-            {
-                if (victim->GetTypeId() == TYPEID_PLAYER)
-                    Talk(SAY_KILL);
-            }
-
-            void SpellHitTarget(Unit* target, SpellInfo const* spell)
-            {
-                if (spell->Id == PUNGENT_BLIGHT_HELPER)
-                    target->RemoveAurasDueToSpell(INOCULATED_HELPER);
-                else if (Player* p = target->ToPlayer())
-                {
-                    // Gaseous Blight damage
-                    if ((spell->Id == 69159 || spell->Id == 70136 || spell->Id == 69161 || spell->Id == 70139 || spell->Id == 69163 || spell->Id == 70469) && p->GetQuestStatus(QUEST_RESIDUE_RENDEZVOUS_10) == QUEST_STATUS_INCOMPLETE ||
-                        (spell->Id == 70135 || spell->Id == 70138 || spell->Id == 70468 || spell->Id == 70137 || spell->Id == 70140 || spell->Id == 70470) && p->GetQuestStatus(QUEST_RESIDUE_RENDEZVOUS_25) == QUEST_STATUS_INCOMPLETE)
-                        p->CastSpell(p, SPELL_ORANGE_BLIGHT_RESIDUE, true);
-                }
-            }
-
-            void RemoveBlight()
-            {
-                if (Creature* gasDummy = ObjectAccessor::GetCreature(*me, _gasDummyGUID))
-                    for (uint8 i = 0; i < 3; ++i)
+                case EVENT_BERSERK:
+                    DoCastSelf(SPELL_BERSERK2, true);
+                    Talk(SAY_BERSERK);
+                    break;
+                case EVENT_INHALE_BLIGHT:
+                    RemoveBlight();
+                    if (_inhaleCounter == 3)
                     {
-                        me->RemoveAurasDueToSpell(gaseousBlight[i]);
-                        gasDummy->RemoveAurasDueToSpell(gaseousBlightVisual[i]);
+                        Talk(EMOTE_WARN_PUNGENT_BLIGHT);
+                        Talk(SAY_PUNGENT_BLIGHT);
+                        DoCastSelf(SPELL_PUNGENT_BLIGHT);
+                        _inhaleCounter = 0;
+                        events.RescheduleEvent(EVENT_GAS_SPORE, 20s, 25s);
                     }
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim() || !CheckInRoom())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                switch (events.ExecuteEvent())
-                {
-                    case EVENT_BERSERK:
-                        me->CastSpell(me, SPELL_BERSERK2, true);
-                        Talk(SAY_BERSERK);
-                        break;
-                    case EVENT_INHALE_BLIGHT:
-                        RemoveBlight();
-                        if (_inhaleCounter == 3)
-                        {
-                            Talk(EMOTE_WARN_PUNGENT_BLIGHT);
-                            Talk(SAY_PUNGENT_BLIGHT);
-                            me->CastSpell(me, SPELL_PUNGENT_BLIGHT, false);
-                            _inhaleCounter = 0;
-                            events.RescheduleEvent(EVENT_GAS_SPORE, urand(20000, 25000));
-                        }
-                        else
-                        {
-                            me->CastSpell(me, SPELL_INHALE_BLIGHT, false);
-                            // just cast and dont bother with target, conditions will handle it
-                            ++_inhaleCounter;
-                            if (_inhaleCounter < 3)
-                                me->CastSpell(me, gaseousBlight[_inhaleCounter], true, NULL, NULL, me->GetGUID());
-                        }
-
-                        events.ScheduleEvent(EVENT_INHALE_BLIGHT, 34000);
-                        break;
-                    case EVENT_GAS_SPORE:
-                        Talk(EMOTE_WARN_GAS_SPORE);
-                        Talk(EMOTE_GAS_SPORE);
-                        me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 3, 2, 3), me);
-                        events.ScheduleEvent(EVENT_GAS_SPORE, urand(40000, 45000));
-                        events.DelayEventsToMax(20000, 1); // delay EVENT_VILE_GAS
-                        break;
-                    case EVENT_VILE_GAS:
+                    else
                     {
-                        std::list<Unit*> targets;
-                        uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
-                        SelectTargetList(targets, minTargets, SELECT_TARGET_RANDOM, -5.0f, true);
-                        float minDist = 0.0f;
-                        if (targets.size() >= minTargets)
-                            minDist = -5.0f;
-
-                        for (int16 i = 0; i < RAID_MODE(1, 1, 1, 3); ++i)
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, minDist, true))
-                                me->CastSpell(target, SPELL_VILE_GAS, false);
-                        events.ScheduleEvent(EVENT_VILE_GAS, urand(28000, 35000), 1);
-                        break;
+                        DoCastSelf(SPELL_INHALE_BLIGHT);
+                        // just cast and dont bother with target, conditions will handle it
+                        ++_inhaleCounter;
+                        if (_inhaleCounter < 3)
+                            me->CastSpell(me, gaseousBlight[_inhaleCounter], true, nullptr, nullptr, me->GetGUID());
                     }
-                    case EVENT_GASTRIC_BLOAT:
-                        me->CastSpell(me->GetVictim(), SPELL_GASTRIC_BLOAT, false);
-                        events.ScheduleEvent(EVENT_GASTRIC_BLOAT, urand(15000, 17500));
-                        break;
-                    case EVENT_FESTERGUT_GOO:
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                            if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                                professor->CastSpell(target, SPELL_MALLABLE_GOO_H, true);
-                        events.ScheduleEvent(EVENT_FESTERGUT_GOO, urand(15000, 20000));
-                    default:
-                        break;
-                }
 
-                DoMeleeAttackIfReady();
-            }
-
-            void SetData(uint32 type, uint32 data)
-            {
-                if (type == DATA_INOCULATED_STACK && data > _maxInoculatedStack)
-                    _maxInoculatedStack = data;
-            }
-
-            uint32 GetData(uint32 type) const
-            {
-                if (type == DATA_INOCULATED_STACK)
-                    return _maxInoculatedStack;
-
-                return 0;
-            }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetIcecrownCitadelAI<boss_festergutAI>(creature);
-        }
-};
-
-class spell_festergut_pungent_blight : public SpellScriptLoader
-{
-    public:
-        spell_festergut_pungent_blight() : SpellScriptLoader("spell_festergut_pungent_blight") { }
-
-        class spell_festergut_pungent_blight_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_festergut_pungent_blight_SpellScript);
-
-            bool Load()
-            {
-                return GetCaster()->GetTypeId() == TYPEID_UNIT;
-            }
-
-            void HandleScript(SpellEffIndex /*effIndex*/)
-            {
-                Unit* caster = GetCaster();
-                if (caster->GetTypeId() != TYPEID_UNIT)
-                    return;
-
-                // Get Inhaled Blight id for our difficulty
-                uint32 blightId = sSpellMgr->GetSpellIdForDifficulty(uint32(GetEffectValue()), caster);
-
-                // ...and remove it
-                caster->RemoveAurasDueToSpell(blightId);
-                caster->ToCreature()->AI()->Talk(EMOTE_PUNGENT_BLIGHT);
-
-                if (InstanceScript* inst = caster->GetInstanceScript())
-                    if (Creature* professor = ObjectAccessor::GetCreature(*caster, inst->GetData64(DATA_PROFESSOR_PUTRICIDE)))
-                        professor->AI()->DoAction(ACTION_FESTERGUT_GAS);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_festergut_pungent_blight_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_festergut_pungent_blight_SpellScript();
-        }
-};
-
-class spell_festergut_blighted_spores : public SpellScriptLoader
-{
-    public:
-        spell_festergut_blighted_spores() : SpellScriptLoader("spell_festergut_blighted_spores") { }
-
-        class spell_festergut_blighted_spores_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_festergut_blighted_spores_AuraScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_INOCULATED))
-                    return false;
-                return true;
-            }
-
-            void ExtraEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (Aura* a = aurEff->GetBase())
-                    if (a->GetDuration() > a->GetMaxDuration()-1000) // this does not stack for different casters and previous is removed by new DoT, prevent it from giving inoculation in such case
-                        return;
-                uint32 inoculatedId = sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, GetTarget());
-                uint8 inoculatedStack = 1;
-                if (Aura* a = GetTarget()->GetAura(inoculatedId))
+                    events.Repeat(34s);
+                    break;
+                case EVENT_GAS_SPORE:
+                    Talk(EMOTE_WARN_GAS_SPORE);
+                    Talk(EMOTE_GAS_SPORE);
+                    me->CastCustomSpell(SPELL_GAS_SPORE, SPELLVALUE_MAX_TARGETS, RAID_MODE<int32>(2, 3, 2, 3), me);
+                    events.Repeat(40s, 45s);
+                    events.DelayEventsToMax(20000, 1); // delay EVENT_VILE_GAS
+                    break;
+                case EVENT_VILE_GAS:
                 {
-                    inoculatedStack += a->GetStackAmount();
-                    if (a->GetDuration() > a->GetMaxDuration()-10000) // player may gain only one stack at a time, no matter how many spores explode near him
-                        return;
+                    std::list<Unit*> ranged, melee;
+                    uint32 minTargets = RAID_MODE<uint32>(3, 8, 3, 8);
+                    SelectTargetList(ranged, 25, SELECT_TARGET_RANDOM, -5.0f, true);
+                    SelectTargetList(melee, 25, SELECT_TARGET_RANDOM, 5.0f, true);
+                    while (ranged.size() < minTargets)
+                    {
+                        if (melee.empty())
+                            break;
+
+                        Unit* target = Trinity::Containers::SelectRandomContainerElement(melee);
+                        ranged.push_back(target);
+                        melee.remove(target);
+                    }
+
+                    if (!ranged.empty())
+                    {
+                        Trinity::Containers::RandomResize(ranged, RAID_MODE<uint32>(1, 3, 1, 3));
+                        for (auto &itr : ranged)
+                            DoCast(itr, SPELL_VILE_GAS);
+                    }
+                    events.ScheduleEvent(EVENT_VILE_GAS, 28s, 35s, 1);
+                    break;
                 }
-                GetTarget()->CastSpell(GetTarget(), SPELL_INOCULATED, true);
-                if (InstanceScript* instance = GetTarget()->GetInstanceScript())
-                    if (Creature* festergut = ObjectAccessor::GetCreature(*GetTarget(), instance->GetData64(DATA_FESTERGUT)))
-                        festergut->AI()->SetData(DATA_INOCULATED_STACK, inoculatedStack);
+                case EVENT_GASTRIC_BLOAT:
+                    DoCastSelf(SPELL_GASTRIC_BLOAT, true);
+                    break;
+                case EVENT_FESTERGUT_GOO:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                        if (Creature* professor = GetPutricide())
+                            professor->CastSpell(target, SPELL_MALLABLE_GOO_H, true);
+                    events.Repeat(15s, 20s);
+                default:
+                    break;
             }
 
-            void Register()
-            {
-                AfterEffectRemove += AuraEffectRemoveFn(spell_festergut_blighted_spores_AuraScript::ExtraEffect, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_festergut_blighted_spores_AuraScript();
+            if (me->IsCasting())
+                return;
         }
+
+        DoMeleeAttackIfReady();
+    }
+
+    void SetData(uint32 type, uint32 data) override
+    {
+        if (type == DATA_INOCULATED_STACK && data > _maxInoculatedStack)
+            _maxInoculatedStack = data;
+    }
+
+    uint32 GetData(uint32 type) const override
+    {
+        if (type == DATA_INOCULATED_STACK)
+            return _maxInoculatedStack;
+
+        return 0;
+    }
+
+    private:
+        uint64 _gasDummyGUID;
+        uint32 _maxInoculatedStack;
+        uint32 _inhaleCounter;
 };
 
-class spell_festergut_gastric_bloat : public SpellScriptLoader
+class spell_festergut_pungent_blight_SpellScript : public SpellScript
 {
-    public:
-        spell_festergut_gastric_bloat() : SpellScriptLoader("spell_festergut_gastric_bloat") { }
+    PrepareSpellScript(spell_festergut_pungent_blight_SpellScript);
 
-        class spell_festergut_gastric_bloat_SpellScript : public SpellScript
+    bool Load() override
+    {
+        return GetCaster()->IsCreature();
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Unit* caster = GetCaster();
+        if (caster->GetTypeId() != TYPEID_UNIT)
+            return;
+
+        // Get Inhaled Blight id for our difficulty
+        uint32 blightId = sSpellMgr->GetSpellIdForDifficulty(uint32(GetEffectValue()), caster);
+
+        // ...and remove it
+        caster->RemoveAurasDueToSpell(blightId);
+        caster->ToCreature()->AI()->Talk(EMOTE_PUNGENT_BLIGHT);
+
+        if (InstanceScript* inst = caster->GetInstanceScript())
+            if (Creature* professor = ObjectAccessor::GetCreature(*caster, inst->GetData64(DATA_PROFESSOR_PUTRICIDE)))
+                professor->AI()->DoAction(ACTION_FESTERGUT_GAS);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_festergut_pungent_blight_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+class spell_festergut_blighted_spores_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_festergut_blighted_spores_AuraScript);
+
+    bool Validate(SpellInfo const* /*spell*/) override
+    {
+        return ValidateSpellInfo({ SPELL_INOCULATED });
+    }
+
+    void ExtraEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        if (Aura* a = aurEff->GetBase())
+            if (a->GetDuration() > a->GetMaxDuration() - 1000) // this does not stack for different casters and previous is removed by new DoT, prevent it from giving inoculation in such case
+                return;
+        uint32 inoculatedId = sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, GetTarget());
+        uint8 inoculatedStack = 1;
+        if (Aura* a = GetTarget()->GetAura(inoculatedId))
         {
-            PrepareSpellScript(spell_festergut_gastric_bloat_SpellScript);
-
-            bool Validate(SpellInfo const* /*spell*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_GASTRIC_EXPLOSION))
-                    return false;
-                return true;
-            }
-
-            void HandleScript(SpellEffIndex /*effIndex*/)
-            {
-                Aura const* aura = GetHitUnit()->GetAura(GetSpellInfo()->Id);
-                if (!(aura && aura->GetStackAmount() == 10))
-                    return;
-
-                GetHitUnit()->RemoveAurasDueToSpell(GetSpellInfo()->Id);
-                GetHitUnit()->CastSpell(GetHitUnit(), SPELL_GASTRIC_EXPLOSION, true);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_festergut_gastric_bloat_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_festergut_gastric_bloat_SpellScript();
+            inoculatedStack += a->GetStackAmount();
+            if (a->GetDuration() > a->GetMaxDuration() - 10000) // player may gain only one stack at a time, no matter how many spores explode near him
+                return;
         }
+        GetTarget()->CastSpell(GetTarget(), SPELL_INOCULATED, true);
+        if (InstanceScript* instance = GetTarget()->GetInstanceScript())
+            if (Creature* festergut = ObjectAccessor::GetCreature(*GetTarget(), instance->GetData64(DATA_FESTERGUT)))
+                festergut->AI()->SetData(DATA_INOCULATED_STACK, inoculatedStack);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_festergut_blighted_spores_AuraScript::ExtraEffect, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class spell_festergut_gastric_bloat_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_festergut_gastric_bloat_SpellScript);
+
+    bool Validate(SpellInfo const* /*spell*/) override
+    {
+        return ValidateSpellInfo({ SPELL_GASTRIC_EXPLOSION });
+    }
+
+    void HandleScript(SpellEffIndex /*effIndex*/)
+    {
+        Aura const* aura = GetHitUnit()->GetAura(GetSpellInfo()->Id);
+        if (!(aura && aura->GetStackAmount() == 10))
+            return;
+
+        GetHitUnit()->RemoveAurasDueToSpell(GetSpellInfo()->Id);
+        GetHitUnit()->CastSpell(GetHitUnit(), SPELL_GASTRIC_EXPLOSION, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_festergut_gastric_bloat_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
 };
 
 class achievement_flu_shot_shortage : public AchievementCriteriaScript
@@ -410,92 +374,84 @@ class achievement_flu_shot_shortage : public AchievementCriteriaScript
     public:
         achievement_flu_shot_shortage() : AchievementCriteriaScript("achievement_flu_shot_shortage") { }
 
-        bool OnCheck(Player* /*source*/, Unit* target)
+        bool OnCheck(Player* /*source*/, Unit* target) override
         {
-            if (target && target->GetTypeId() == TYPEID_UNIT)
+            if (target && target->IsCreature() && target->IsAIEnabled)
                 return target->ToCreature()->AI()->GetData(DATA_INOCULATED_STACK) < 3;
 
             return false;
         }
 };
 
-class npc_stinky_icc : public CreatureScript
+struct npc_stinky_iccAI : public ScriptedAI
 {
-    public:
-        npc_stinky_icc() : CreatureScript("npc_stinky_icc") { }
+    npc_stinky_iccAI(Creature* creature) : ScriptedAI(creature) {}
 
-        struct npc_stinky_iccAI : public ScriptedAI
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        me->setActive(true);
+        DoCastSelf(SPELL_PLAGUE_STENCH, true);
+        _events.ScheduleEvent(EVENT_DECIMATE, 20s, 25s);
+        _events.ScheduleEvent(EVENT_MORTAL_WOUND, 1500ms, 2500ms);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->IsCasting())
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
         {
-            npc_stinky_iccAI(Creature* creature) : ScriptedAI(creature) {}
-
-            void Reset()
+            switch (eventId)
             {
-                events.Reset();
+                case EVENT_DECIMATE:
+                    DoCastSelf(SPELL_DECIMATE);
+                    _events.Repeat(20s, 25s);
+                    break;
+                case EVENT_MORTAL_WOUND:
+                    DoCastVictim(SPELL_MORTAL_WOUND);
+                    _events.Repeat(1500ms, 2500ms);
+                    break;
+                default:
+                    break;
             }
 
-            void EnterCombat(Unit* /*target*/)
-            {
-                me->setActive(true);
-                me->CastSpell(me, SPELL_PLAGUE_STENCH, true);
-                events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(1500, 2500));
-            }
-
-            void UpdateAI(uint32 diff)
-            {
-                if (!UpdateVictim())
-                    return;
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                if (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_DECIMATE:
-                            me->CastSpell(me->GetVictim(), SPELL_DECIMATE, false);
-                            events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
-                            break;
-                        case EVENT_MORTAL_WOUND:
-                            me->CastSpell(me->GetVictim(), SPELL_MORTAL_WOUND, false);
-                            events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(1500, 2500));
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-            void JustDied(Unit* /*killer*/)
-            {
-                if (InstanceScript* _instance = me->GetInstanceScript())
-                    if (Creature* festergut = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_FESTERGUT)))
-                        if (festergut->IsAlive())
-                            festergut->AI()->Talk(SAY_STINKY_DEAD);
-            }
-
-        private:
-            EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return GetIcecrownCitadelAI<npc_stinky_iccAI>(creature);
+            if (me->IsCasting())
+                return;
         }
+
+        DoMeleeAttackIfReady();
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (InstanceScript* _instance = me->GetInstanceScript())
+            if (Creature* festergut = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_FESTERGUT)))
+                if (festergut->IsAlive())
+                    festergut->AI()->Talk(SAY_STINKY_DEAD);
+    }
+
+    private:
+        EventMap _events;
 };
 
 void AddSC_boss_festergut()
 {
-    new boss_festergut();
-    new spell_festergut_pungent_blight();
-    new spell_festergut_blighted_spores();
-    new spell_festergut_gastric_bloat();
+    new CreatureAILoader<boss_festergutAI>("boss_festergut");
+    new SpellScriptLoaderEx<spell_festergut_pungent_blight_SpellScript>("spell_festergut_pungent_blight");
+    new AuraScriptLoaderEx<spell_festergut_blighted_spores_AuraScript>("spell_festergut_blighted_spores");
+    new SpellScriptLoaderEx<spell_festergut_gastric_bloat_SpellScript>("spell_festergut_gastric_bloat");
     new achievement_flu_shot_shortage();
 
-    new npc_stinky_icc();
+    new CreatureAILoader<npc_stinky_iccAI>("npc_stinky_icc");
 }
