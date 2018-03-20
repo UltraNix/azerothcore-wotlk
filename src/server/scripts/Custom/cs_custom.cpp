@@ -49,6 +49,7 @@ public:
             { "speedban",           SEC_MODERATOR,          false, &HandleSpeedBanCommand,              "" },
             { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" },
             { "iccreset",           SEC_MODERATOR,          false, HandleICCResetCommand,               "" },
+            { "bonusxp",            SEC_ADMINISTRATOR,     true,  &HandleBonusXpCommand,                "" },
         };
         return commandTable;
     }
@@ -631,7 +632,65 @@ public:
         return true;
     }
 
+    // Event x4
+    static bool HandleBonusXpCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
 
+        // Account Name
+        char* aname = strtok((char*)args, " ");
+        if (!aname)
+            return false;
+
+        std::string accName = aname;
+        std::string serviceName;      // To display on output command and log
+
+        // convert accountname to account ID
+        PreparedStatement*  stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ID_BY_NAME);
+        stmt->setString(0, accName);
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+        if (!result)
+            return false;
+
+        uint32 accId = 0;
+        Field* fields = result->Fetch();
+        accId = fields[0].GetUInt32();
+
+        uint32 premiumTime = 4 * DAY; // duration of premium service
+        time_t extraTime;             // is time left of previous active service, if no result then null
+
+        // Query check for previous premium service, if there is result stack the time of premium service
+        PreparedStatement* stmt2 = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PREMIUM_TIME_BY_ID);
+        stmt2->setUInt32(0, accId);
+        stmt2->setUInt32(1, realmID);
+        stmt2->setUInt8(2, SERVICE_EXP_BOOST_X4);
+        PreparedQueryResult timeResult = LoginDatabase.Query(stmt2);
+
+        if (timeResult)
+        {
+            Field* timeFields = timeResult->Fetch();
+            extraTime = time_t(timeFields[1].GetUInt32());
+            premiumTime = premiumTime + extraTime;
+            handler->PSendSysMessage("Warning! Account: %s already got X4 bonus.", accName.c_str());
+        }
+        else
+            premiumTime = time(nullptr) + premiumTime;
+
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_PREMIUM);
+        stmt->setUInt32(0, accId);
+        stmt->setUInt32(1, realmID);
+        stmt->setUInt8(2, SERVICE_EXP_BOOST_X4);
+        stmt->setUInt32(3, time(nullptr));
+        stmt->setUInt32(4, premiumTime);
+        LoginDatabase.Execute(stmt);
+        serviceName = "SERVICE_EXP_BOOST_X4";
+
+        handler->PSendSysMessage("You have enabled service '%s' on account %s for 4 days.", serviceName.c_str(), accName.c_str());
+        sLog->outPremium("Service '%s' has been enabled on account %s for 4 days.", serviceName.c_str(), accName.c_str());
+        return true;
+    }
 };
 
 void AddSC_custom_commandscript()
