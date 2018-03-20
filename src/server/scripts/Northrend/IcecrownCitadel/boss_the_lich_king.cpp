@@ -2576,6 +2576,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                                         target->GetMotionMaster()->Clear();
                                         target->UpdatePosition(*me, true);
                                         target->StopMovingOnCurrentPos();
+                                        target->SendMeleeAttackStop();
 
                                         me->CastSpell(target, SPELL_VALKYR_CARRY, false);
                                         _destPoint.Relocate(triggers.front());
