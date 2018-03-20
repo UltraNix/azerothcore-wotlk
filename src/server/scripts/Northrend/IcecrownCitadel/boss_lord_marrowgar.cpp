@@ -626,9 +626,26 @@ class spell_marrowgar_bone_storm : public SpellScriptLoader
         {
             PrepareSpellScript(spell_marrowgar_bone_storm_SpellScript);
 
+            float GetMaxRange()
+            {
+                if (auto map = GetCaster()->GetMap())
+                {
+                    if (map->IsHeroic() && map->Is25ManRaid())
+                        return 60.0f;
+                    else if (map->IsHeroic())
+                        return 52.0f;
+                }
+
+                return 26.0f;
+            }
+
             void RecalculateDamage()
             {
-                SetHitDamage(int32(GetHitDamage() / std::max(std::sqrt(GetHitUnit()->GetExactDist2d(GetCaster())), 1.0f)));
+                auto damage = GetHitDamage();
+                float range = std::min(GetHitUnit()->GetExactDist2d(GetCaster()), GetMaxRange());
+                // @todo find out proper dmg calc
+                damage = -223.48*range + GetHitDamage();
+                SetHitDamage(damage);
             }
 
             void Register()
