@@ -236,6 +236,7 @@ enum CreaturesIds
     NPC_OOZE_SPRAY_STALKER                      = 37986,
     NPC_PUDDLE_STALKER                          = 37013,
     NPC_UNSTABLE_EXPLOSION_STALKER              = 38107,
+    NPC_VILE_GAS_STALKER                        = 38548,
 
     // Professor Putricide
     NPC_PROFESSOR_PUTRICIDE                     = 36678,
