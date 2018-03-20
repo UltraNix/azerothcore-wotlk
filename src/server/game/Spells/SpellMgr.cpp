@@ -3896,6 +3896,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64936: // Item - Warrior T8 Protection 4P Bonus
             spellInfo->EffectBasePoints[EFFECT_0] = 100; // 100% chance of procc'ing, not -10% (chance calculated in PrepareTriggersExecutedOnHit)
             break;
+        case 12721: // Deep Wounds - should be affected by resilience
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_FIXED_DAMAGE;
+            break;
         case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
             break;
