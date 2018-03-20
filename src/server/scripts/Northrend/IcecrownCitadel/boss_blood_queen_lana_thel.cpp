@@ -330,9 +330,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         break;
                     case EVENT_VAMPIRIC_BITE:
                         {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 1, [this](Unit* tar) { return tar->IsPlayer() && me->GetVictim()->GetGUID() != tar->GetGUID() && tar->GetGUID() != _offtankGUID; }))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, [this](Unit* tar) { return tar->IsPlayer() && me->GetVictim()->GetGUID() != tar->GetGUID() && tar->GetGUID() != _offtankGUID; }))
                                 CastBite(target);
-                            else if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 1, 100.0f, true))
+                            else if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 CastBite(tar);
                         }
                         break;
