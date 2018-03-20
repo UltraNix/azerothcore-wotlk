@@ -6670,6 +6670,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 72854: // Unbound Plague (Professor Putricide) (needs target selection script)
         case 72855: // Unbound Plague (Professor Putricide) (needs target selection script)
         case 72856: // Unbound Plague (Professor Putricide) (needs target selection script)
+            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;

@@ -433,7 +433,7 @@ class boss_professor_putricide : public CreatureScript
                         me->SetFacingTo(tablePos.GetOrientation());
                         me->GetMotionMaster()->Clear(false);
                         me->GetMotionMaster()->MoveIdle();
-                        events.ScheduleEvent(EVENT_TABLE_DRINK_STUFF, IsHeroic() ? 25000 : 0);
+                        events.ScheduleEvent(EVENT_TABLE_DRINK_STUFF, IsHeroic() ? (_phase == 3 ? 15s : 25s) : 0s);
                         break;
                 }
             }
@@ -520,9 +520,9 @@ class boss_professor_putricide : public CreatureScript
                             std::list<Unit*> targets;
                             SelectTargetList(targets, 2, SELECT_TARGET_RANDOM, 0.0f, true);
                             if (!targets.empty())
-                                for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                                    me->CastSpell(*itr, SPELL_SLIME_PUDDLE_TRIGGER, true);
-                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, 35000, EVENT_GROUP_ABILITIES);
+                                for (auto &target : targets)
+                                    me->CastSpell(target, SPELL_SLIME_PUDDLE_TRIGGER, true);
+                            events.ScheduleEvent(EVENT_SLIME_PUDDLE, _phase == 3 ? 20s : 35s, EVENT_GROUP_ABILITIES);
                         }
                         break;
                     case EVENT_UNSTABLE_EXPERIMENT:
@@ -579,6 +579,7 @@ class boss_professor_putricide : public CreatureScript
                         }
                         break;
                     case EVENT_RESUME_ATTACK:
+                        events.RescheduleEvent(EVENT_SLIME_PUDDLE, 15s, EVENT_GROUP_ABILITIES);
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->SetStandState(UNIT_STAND_STATE_STAND);
                         AttackStart(me->GetVictim());
@@ -600,7 +601,7 @@ class boss_professor_putricide : public CreatureScript
                                 if (tar == victim)
                                     return false;
 
-                            if (tar->IsInRange(me, 0.0f, 45.0f))
+                            if (tar->IsInRange(me, 0.0f, 100.0f))
                                 return true;
 
                             return false;
