@@ -687,7 +687,7 @@ class boss_sindragosa : public CreatureScript
                                 if (events.GetTimer() > evTime || evTime - events.GetTimer() < 8000)
                                     events.RescheduleEvent(EVENT_ICY_GRIP, 8000, EVENT_GROUP_LAND_PHASE);
                         }
-                        events.ScheduleEvent(EVENT_ICE_TOMB, urand(18000, 22000));
+                        events.ScheduleEvent(EVENT_ICE_TOMB, 15s, 16s);
                         break;
                     default:
                         break;
