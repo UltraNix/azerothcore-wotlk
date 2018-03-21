@@ -7962,7 +7962,8 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier,
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         uint32 targetAmount = m_UniqueTargetInfo.size();
-                        if (targetAmount > 10)
+                        // temp hack for pact of the darkfallen and mutated plague
+                        if (targetAmount > 10 && m_spellInfo->Id != 71341 && m_spellInfo->Id != 72454 && m_spellInfo->Id != 72464 && m_spellInfo->Id != 72506 && m_spellInfo->Id != 72507)
                             m_damage = m_damage * 10/targetAmount;
                     }
                 }

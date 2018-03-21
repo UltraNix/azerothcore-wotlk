@@ -6607,7 +6607,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->Effect[0] = 0; // clear share health aura
             break;
 	    case 71341: // Pact of the Darkfallen
-            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES | SPELL_ATTR4_FIXED_DAMAGE;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
         case 71274: // Ymirjar Frostbinder, Frozen Orb
             spellInfo->EffectImplicitTargetA[0] = 6;
@@ -6663,7 +6663,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 72464: // Mutated Plague (Professor Putricide)
         case 72506: // Mutated Plague (Professor Putricide)
         case 72507: // Mutated Plague (Professor Putricide)
-            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES | SPELL_ATTR4_FIXED_DAMAGE;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
             break;
         case 70911: // Unbound Plague (Professor Putricide) (needs target selection script)
