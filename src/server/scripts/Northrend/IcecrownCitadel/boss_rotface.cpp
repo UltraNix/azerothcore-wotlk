@@ -107,10 +107,10 @@ struct RotfaceHeightCheck
     }
 };
 
-class StartMovementEvent : public BasicEvent
+class StartMovementEventRotface : public BasicEvent
 {
     public:
-        StartMovementEvent(Creature* owner) : _owner(owner) {}
+        StartMovementEventRotface(Creature* owner) : _owner(owner) {}
 
         bool Execute(uint64 /*time*/, uint32 /*diff*/)
         {
@@ -416,7 +416,7 @@ struct npc_big_oozeAI : public ScriptedAI
     void IsSummonedBy(Unit* /*summoner*/) override
     {
         me->SetPassive();
-        me->m_Events.AddEvent(new StartMovementEvent(me), me->m_Events.CalculateTime(2000));
+        me->m_Events.AddEvent(new StartMovementEventRotface(me), me->m_Events.CalculateTime(2000));
     }
 
     void JustDied(Unit* /*killer*/) override
