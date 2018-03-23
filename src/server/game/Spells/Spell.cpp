@@ -3389,6 +3389,18 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         finish(false);
         return;
     }
+
+    // @schody
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true && m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id != 8690 /*HearthStone*/)
+    {
+        if (m_caster->GetZoneId() == 616 /* Hyjal */ || m_caster->GetZoneId() == 268 /* Azshara Crater */ || m_caster->GetZoneId() == 2037 /*Quel'thalas*/)
+        {
+            SendCastResult(SPELL_FAILED_SPELL_UNAVAILABLE);
+            finish(false);
+            return;
+        }
+    }
+
     LoadScripts();
 
     m_powerCost = m_CastItem ? 0 : m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask, this);

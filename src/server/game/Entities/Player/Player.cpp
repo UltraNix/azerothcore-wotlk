@@ -7750,7 +7750,7 @@ void Player::UpdateArea(uint32 newArea)
 
     AreaTableEntry const* area = sAreaTableStore.LookupEntry(newArea);
     bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
-    pvpInfo.IsInFFAPvPArea = area && ((area->flags & AREA_FLAG_ARENA) || area->ID == 268);
+    pvpInfo.IsInFFAPvPArea = area && area->flags & AREA_FLAG_ARENA;
     UpdatePvPState(true);
 
     // xinef: check if we were in ffa arena and we left
@@ -7785,14 +7785,17 @@ void Player::UpdateArea(uint32 newArea)
     // Xinef: area should inherit zone flags
     AreaTableEntry const* zone = sAreaTableStore.LookupEntry(area->zone);
     uint32 areaFlags = area->flags;
-    bool isSanctuary = (area->IsSanctuary() || area->ID == 876 || area->ID == 616 || area->ID == 3817 || area->ID == 2037 || area->ID == 2401);
+    bool isSanctuary = area->IsSanctuary();
     bool isInn = area->IsInn(GetTeamId());
+    // @schody
+    bool isEvent = (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true && area->ID == 616 /* Hyjal */ || area->ID == 268 /* Azshara Crater */ || area->ID == 2037 /* Quel'Thalas */) ? true : false;
 
     if (zone)
     {
         areaFlags |= zone->flags;
         isSanctuary |= zone->IsSanctuary();
         isInn |= zone->IsInn(GetTeamId());
+        isEvent |= zone->IsSanctuary();
     }
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
@@ -25607,15 +25610,14 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     float z_diff = m_lastFallZ - movementInfo.pos.GetPositionZ();
     //sLog->outDebug("zDiff = %f", z_diff);
 
-    // event only                                                   ToC
+    // ToC @todo: Do it in proper way.
     if (GetZoneId() == 3817 || GetZoneId() == 4722)
         return;
-    // event only
-    if(GetZoneId() == 876 /*GM Island*/ ||
-        GetZoneId() == 616 /*Hyjal*/ ||
-        GetZoneId() == 2037 /*Quel'thalas*/ ||
-        (GetZoneId() == 45 /*Arathi Highlands*/ && GetAreaId() == 2401 /*The Forbidding Sea*/))
-        return;
+
+    // @schody
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true)
+        if (GetZoneId() == 616 /* Hyjal */ || GetZoneId() == 268 /* Azshara Crater */ || GetZoneId() == 2037 /*Quel'thalas*/)
+            return;
 
     //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
     // 14.57 can be calculated by resolving damageperc formula below to 0

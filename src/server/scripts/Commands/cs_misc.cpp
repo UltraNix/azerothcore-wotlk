@@ -3329,11 +3329,11 @@ public:
         switch (atoi(loc))
         {
         case 1:
-            player->TeleportTo(1, 16232.267578f, 16301.253906f, 45.449554f, player->GetOrientation());
+            player->TeleportTo(1, 4636.781f, -3818.905f, 942.849f, player->GetOrientation());
             break;
         case 2:
-            if (player->HasItemCount(86001))
-                player->TeleportTo(1, 5249.313965f, -1473.966064f, 1360.240723f, player->GetOrientation());
+            if (player->HasItemCount(86101))
+                player->TeleportTo(37, 656.831f, 108.904f, 328.049f, player->GetOrientation());
             else
             {
                 handler->PSendSysMessage("You don't have required entry ticket to enter this stage.");
@@ -3341,8 +3341,8 @@ public:
             }
             break;
         case 3:
-            if (player->HasItemCount(86002))
-                player->TeleportTo(0, 4241.554199f, -2741.025879f, 9.378314f, player->GetOrientation());
+            if (player->HasItemCount(86102))
+                player->TeleportTo(1, 5261.821f, -2174.786f, 1259.123f, player->GetOrientation());
             else
             {
                 handler->PSendSysMessage("You don't have required token to enter this stage.");
@@ -3350,8 +3350,8 @@ public:
             }
             break;
         case 4:
-            if (player->HasItemCount(86003))
-                player->TeleportTo(0, -1858.023071f, -4262.541992f, 12.328624f, player->GetOrientation());
+            if (player->HasItemCount(86103))
+                player->TeleportTo(0, 4330.820f, -2880.420f, 0.925f, player->GetOrientation());
             else
             {
                 handler->PSendSysMessage("You don't have required token to enter this stage.");
@@ -3359,8 +3359,8 @@ public:
             }
             break;
         case 5:
-            if (player->HasItemCount(86004))
-                player->TeleportTo(1, 5262.578125f, -2170.639160f, 1259.369141f, player->GetOrientation());
+            if (player->HasItemCount(86104))
+                player->TeleportTo(37, 51.713f, -176.806f, 402.282f, player->GetOrientation());
             else
             {
                 handler->PSendSysMessage("You don't have required token to enter this stage.");
@@ -3446,14 +3446,10 @@ public:
             return false;
         }
 
-        if (player->HasItemCount(86008))
-            player->TeleportTo(1, 5168.235352f, -2146.421875f, 1469.553711f, player->GetOrientation());
-        else if (player->HasItemCount(86007))
-            player->TeleportTo(0, -1648.537354f, -4170.267090f, 153.271378f, player->GetOrientation());
-        else if (player->HasItemCount(86006))
-            player->TeleportTo(0, -1708.539429f, -4193.820801f, 117.195877f, player->GetOrientation());
-        else if (player->HasItemCount(86005))
-            player->TeleportTo(0, 4322.602051f, -2747.558594f, 152.527390f, player->GetOrientation());
+        if (player->HasItemCount(86106))
+            player->TeleportTo(37, -26.462f, 2.054f, 416.863f, player->GetOrientation());
+        else if (player->HasItemCount(86105))
+            player->TeleportTo(0, 4313.661f, -2709.859f, 215.788f, player->GetOrientation());
         else
         {
             handler->PSendSysMessage("You don't have any check points.");
