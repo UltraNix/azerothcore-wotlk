@@ -7799,7 +7799,7 @@ void Player::UpdateArea(uint32 newArea)
     }
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
-    if (isSanctuary)    // in sanctuary
+    if (isSanctuary || isEvent)    // in sanctuary or in event
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.IsInNoPvPArea = true;
