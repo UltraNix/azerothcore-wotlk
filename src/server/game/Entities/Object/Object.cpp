@@ -1532,17 +1532,13 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
                         if (thisPlayer->duel && charmerOrOwnerOrPlayer != thisPlayer->duel->opponent && charmerOrOwnerOrPlayer != thisPlayer)
                             return false;
 
-    //Stairways to heaven
-    if (obj->GetTypeId() == TYPEID_PLAYER) {
-        if (GetZoneId() == 876 /*GM Island*/ ||
-            GetZoneId() == 616 /*Hyjal*/ ||
-            GetZoneId() == 2037 /*Quel'thalas*/ ||
-            (GetZoneId() == 45 /*Arathi Highlands*/ && GetAreaId() == 2401 /*The Forbidding Sea*/))
-        {
-            if (Player const* thisPlayer = ToPlayer()) {
-                if (thisPlayer->hasSthHide()) return false;
-            }
-        }
+    // @schody
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true && obj->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (GetZoneId() == 616 /* Hyjal */ || GetZoneId() == 268 /* Azshara Crater */ || GetZoneId() == 2037 /*Quel'thalas*/)
+            if (Player const* thisPlayer = ToPlayer())
+                if (thisPlayer->hasSthHide())
+                    return false;
     }
 
     bool corpseVisibility = false;
