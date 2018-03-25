@@ -3216,6 +3216,32 @@ public:
     }
 };
 
+class spell_q11472_anuniaq_net : public SpellScriptLoader
+{
+public:
+    spell_q11472_anuniaq_net() : SpellScriptLoader("spell_q11472_anuniaq_net") { }
+
+    class spell_q11472_anuniaq_net_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q11472_anuniaq_net_SpellScript);
+
+        void HandleActiveObject(SpellEffIndex /*effIndex*/)
+        {
+            GetHitGObj()->SetLootState(GO_JUST_DEACTIVATED);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q11472_anuniaq_net_SpellScript::HandleActiveObject, EFFECT_1, SPELL_EFFECT_ACTIVATE_OBJECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_q11472_anuniaq_net_SpellScript();
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     // Ours
@@ -3243,6 +3269,7 @@ void AddSC_quest_spell_scripts()
     new spell_q11140_salvage_wreckage();
     new spell_aura_wrangling_rope_channel_despawner();
     new spell_q12279_cast_net();
+    new spell_q11472_anuniaq_net();
 
     // Theirs
     new spell_q55_sacred_cleansing();
