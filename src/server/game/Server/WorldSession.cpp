@@ -1513,11 +1513,9 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_WRAP_ITEM:
         case CMSG_BUY_BANK_SLOT:
         case CMSG_GROUP_ACCEPT:
-        case CMSG_GROUP_DECLINE:
         case CMSG_GROUP_UNINVITE_GUID:
         case CMSG_GROUP_UNINVITE:
         case CMSG_GROUP_SET_LEADER:
-        case CMSG_GROUP_DISBAND:
         case CMSG_GROUP_RAID_CONVERT:
         case CMSG_GROUP_CHANGE_SUB_GROUP:
         case CMSG_GROUP_ASSISTANT_LEADER:
@@ -1563,7 +1561,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_SET_GUILD_BANK_TEXT:
         case MSG_SAVE_GUILD_EMBLEM:
         case MSG_PETITION_RENAME:
-        case MSG_PETITION_DECLINE:
         case MSG_TALENT_WIPE_CONFIRM:
         case MSG_SET_DUNGEON_DIFFICULTY:
         case MSG_SET_RAID_DIFFICULTY:
