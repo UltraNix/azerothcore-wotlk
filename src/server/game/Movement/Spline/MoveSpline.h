@@ -87,7 +87,7 @@ namespace Movement
         MySpline const& _Spline() const { return spline; }
         int32 _currentSplineIdx() const { return point_Idx; }
         void _Finalize();
-        void _Interrupt() { splineflags.done = true; }
+        void _Interrupt();
 
     public:
         void Initialize(const MoveSplineInitArgs&);
@@ -118,6 +118,8 @@ namespace Movement
         bool isCyclic() const { return splineflags.cyclic; }
         bool isFalling() const { return splineflags.falling; }
         bool isWalking() const { return splineflags.walkmode; }
+        bool isParabolic() const { return splineflags.parabolic; }
+
         Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last(), false) : Vector3(); }
         Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1, false) : Vector3(); }
         int32 currentPathIdx() const;

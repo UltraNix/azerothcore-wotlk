@@ -213,7 +213,7 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
     movementInfo.guid = guid;
     ReadMovementInfo(recvData, &movementInfo);
 
-    recvData.read_skip<uint32>();                          // spline id
+    uint32 splineId = recvData.read<uint32>();              // spline id
 }
 
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket & recvData)
