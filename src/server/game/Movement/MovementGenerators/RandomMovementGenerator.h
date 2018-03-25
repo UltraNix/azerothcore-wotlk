@@ -2,13 +2,13 @@
 #define TRINITY_RANDOMMOTIONGENERATOR_H
 
 #include "MovementGenerator.h"
-#include "PathGenerator.h"
+#include "ThreadedPathGenerator.hpp"
 
 template<class T>
 class RandomMovementGenerator : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
 {
     public:
-        explicit RandomMovementGenerator(float distance = 0.0f) : _path(nullptr), _timer(0), _reference(), _wanderDistance(distance), _interrupt(false) { }
+        explicit RandomMovementGenerator(float distance = 0.0f) : _timer(0), _reference(), _wanderDistance(distance), _interrupt(false) { }
         ~RandomMovementGenerator();
 
         MovementGeneratorType GetMovementGeneratorType() { return RANDOM_MOTION_TYPE; }
@@ -21,7 +21,7 @@ class RandomMovementGenerator : public MovementGeneratorMedium< T, RandomMovemen
     private:
         void SetRandomLocation(T*);
 
-        PathGenerator* _path;
+        Movement::AsyncPathResult m_pathRequest;
         TimeTracker _timer;
         Position _reference;
         float _wanderDistance;

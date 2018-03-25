@@ -23,7 +23,7 @@
 #include "FollowerReference.h"
 #include "Timer.h"
 #include "Unit.h"
-#include "PathGenerator.h"
+#include "ThreadedPathGenerator.hpp"
 
 class TargetedMovementGeneratorBase
 {
@@ -41,22 +41,23 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
 {
     protected:
         TargetedMovementGeneratorMedium(Unit* target, float offset, float angle) :
-            TargetedMovementGeneratorBase(target), i_path(NULL), lastPathingFailMSTime(0),
+            TargetedMovementGeneratorBase(target), lastPathingFailMSTime(0),
             i_recheckDistance(0), i_recheckDistanceForced(2500), i_offset(offset), i_angle(angle),
             i_recalculateTravel(false), i_targetReached(false)
         {
         }
-        ~TargetedMovementGeneratorMedium() { delete i_path; }
 
     public:
         bool DoUpdate(T*, uint32);
         Unit* GetTarget() const { return i_target.getTarget(); }
 
         void unitSpeedChanged() { i_recalculateTravel = true; }
-        bool IsReachable() const { return (i_path) ? (i_path->GetPathType() & PATHFIND_NORMAL) : true; }
 
     protected:
         void _setTargetLocation(T* owner, bool initial);
+        bool _handleAsyncPathRequest( T* owner );
+
+        std::pair<Movement::AsyncPathResult, bool > m_pathRequest;
 
         TimeTrackerSmall i_recheckDistance;
         TimeTrackerSmall i_recheckDistanceForced;
@@ -64,7 +65,6 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
         float i_angle;
         bool i_recalculateTravel : 1;
         bool i_targetReached : 1;
-        PathGenerator* i_path;
         uint32 lastPathingFailMSTime;
 };
 

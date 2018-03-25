@@ -40,7 +40,9 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
         init.MovebyPath(m_precomputedPath);
     else if (_generatePath)
     {
-        PathGenerator path(unit);
+        PathGeneratorContext context( unit );
+
+        PathGenerator path( &context );
         bool result = path.CalculatePath(i_x, i_y, i_z, _forceDestination);
         if (result && !(path.GetPathType() & PATHFIND_NOPATH) && path.GetPath().size() > 2)
         {
