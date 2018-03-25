@@ -16814,24 +16814,12 @@ void Unit::SetStunned(bool apply)
         SetTarget(0);
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
-        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
-        // setting MOVEMENTFLAG_ROOT
-        RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
-        AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
+        CastStop();
 
-        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
-        data.append(GetPackGUID());
-        data << uint32(0);
-        SendMessageToSet(&data, true);
-
-        // Creature specific
-        if (GetTypeId() != TYPEID_PLAYER)
-            StopMoving();
-        else if (!IsMounted() && !IsSitState())
+        if ( !IsMounted() && !IsStandState() )
             SetStandState(UNIT_STAND_STATE_STAND);
 
-        CastStop();
+        SetRooted( true );
     }
     else
     {
@@ -16841,27 +16829,18 @@ void Unit::SetStunned(bool apply)
         if (GetTypeId() == TYPEID_UNIT)
         {
             // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
-            Unit* owner = GetOwner();
+            Unit* owner = GetCharmerOrOwner();
             if (!owner || owner->GetTypeId() != TYPEID_PLAYER || !owner->ToPlayer()->IsMounted())
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-
-            // Xinef: same for charmed npcs
-            owner = GetCharmer();
-            if (!owner || owner->GetTypeId() != TYPEID_PLAYER || !owner->ToPlayer()->IsMounted())
-                RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            {
+                RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED );
+            }
         }
         else
-            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-
-        if (!HasUnitState(UNIT_STATE_ROOT))         // prevent moving if it also has root effect
         {
-            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
-            data.append(GetPackGUID());
-            data << uint32(0);
-            SendMessageToSet(&data, true);
-
-            RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
+            RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED );
         }
+
+        SetRooted( false );
     }
 }
 
@@ -16872,25 +16851,26 @@ void Unit::SetRooted(bool apply)
         if (m_rootTimes > 0) // blizzard internal check?
             m_rootTimes++;
 
+        StopMovingOnCurrentPos();
+
         // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
         // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
         // setting MOVEMENTFLAG_ROOT
         RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
         AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
 
-        if (GetTypeId() == TYPEID_PLAYER)
+        if ( GetTypeId() == TYPEID_PLAYER )
         {
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-            data.append(GetPackGUID());
+            WorldPacket data( SMSG_FORCE_MOVE_ROOT, 10 );
+            data.append( GetPackGUID() );
             data << m_rootTimes;
-            SendMessageToSet(&data, true);
+            SendMessageToSet( &data, true );
         }
         else
         {
-            WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);
-            data.append(GetPackGUID());
-            SendMessageToSet(&data, true);
-            StopMoving();
+            WorldPacket data( SMSG_SPLINE_MOVE_ROOT, 8 );
+            data.append( GetPackGUID() );
+            SendMessageToSet( &data, true );
         }
     }
     else
