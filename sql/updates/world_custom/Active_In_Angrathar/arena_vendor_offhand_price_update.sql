@@ -1,0 +1,1 @@
+UPDATE `npc_vendor` SET `ExtendedCost` = 2463 WHERE `entry` = 31863 AND `item` IN (42255,42248,42265,42270,42232,42227,42280,42290);
