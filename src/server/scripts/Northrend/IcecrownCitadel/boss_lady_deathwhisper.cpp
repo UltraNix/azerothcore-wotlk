@@ -264,6 +264,9 @@ class boss_lady_deathwhisper : public CreatureScript
             {
                 if (!_introDone && actionId == ACTION_TALK_ENTER)
                 {
+                    if (me->IsInCombat())
+                        return;
+
                     _introDone = true;
                     Talk(SAY_INTRO_1);
                     events.SetPhase(PHASE_INTRO);
