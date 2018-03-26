@@ -369,6 +369,13 @@ AddonChannel = 1
 MapUpdate.Threads = 1
 
 #
+#    PathGenerator.Threads
+#        Description: Number of threads to generate paths.
+#        Default:     2
+
+PathGenerator.Threads = 2
+
+#
 #    CleanCharacterDB
 #        Description: Clean out deprecated achievements, skills, spells and talents from the db.
 #        Default:     0 - (Disabled)

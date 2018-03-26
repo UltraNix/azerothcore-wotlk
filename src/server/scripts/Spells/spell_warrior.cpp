@@ -369,7 +369,7 @@ class spell_warr_charge_stun : public SpellScriptLoader
             bool Load()
             {
                 if (Unit* caster = GetCaster())
-                    m_pathFinder = new PathGenerator(caster);
+                    m_pathFinder = new PathGenerator( new PathGeneratorContext(caster), true );
 
                 return true;
             }

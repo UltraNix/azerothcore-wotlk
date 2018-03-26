@@ -24,6 +24,7 @@
 #include "Vehicle.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
+#include "PathGenerator.h"
 
 namespace Movement
 {
@@ -216,7 +217,9 @@ namespace Movement
     {
         if (generatePath)
         {
-            PathGenerator path(unit);
+            PathGeneratorContext context( unit );
+            PathGenerator path( &context );
+
             bool result = path.CalculatePath(dest.x, dest.y, dest.z, forceDestination);
             if (result && !(path.GetPathType() & PATHFIND_NOPATH))
             {
