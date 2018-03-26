@@ -3069,6 +3069,34 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
         });
 
+		ApplySpellFix({
+            27892, // To Anchor 1
+            27928, // To Anchor 1
+            27935, // To Anchor 1
+            27915, // Anchor to Skulls
+            27931, // Anchor to Skulls
+            27937, // Anchor to Skulls
+            16177, // Ancestral Fortitude (Rank 1)
+            16236, // Ancestral Fortitude (Rank 2)
+            16237, // Ancestral Fortitude (Rank 3)
+            47930, // Grace
+            45145, // Snake Trap Effect (Rank 1)
+            13812, // Explosive Trap Effect (Rank 1)
+            14314, // Explosive Trap Effect (Rank 2)
+            14315, // Explosive Trap Effect (Rank 3)
+            27026, // Explosive Trap Effect (Rank 4)
+            49064, // Explosive Trap Effect (Rank 5)
+            49065, // Explosive Trap Effect (Rank 6)
+            43446, // Explosive Trap Effect (Hexlord Malacrass)
+            50661, // Weakened Resolve
+            68979, // Unleashed Souls
+            48714, // Compelled
+            7853   // The Art of Being a Water Terror: Force Cast on Player
+        }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(13);
+        });
+	
         ApplySpellFix({ 45145 /* Snake Trap Effect*/ }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
         });
@@ -3819,14 +3847,6 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 41013: // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // proc debuff, and summon infinite fiends
-            break;
-        case 27892: // To Anchor 1
-        case 27928: // To Anchor 1
-        case 27935: // To Anchor 1
-        case 27915: // Anchor to Skulls
-        case 27931: // Anchor to Skulls
-        case 27937: // Anchor to Skulls
-            spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
             break;
         // target allys instead of enemies, target A is src_caster, spells with effect like that have ally target
         // this is the only known exception, probably just wrong data
