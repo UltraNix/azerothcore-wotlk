@@ -62,7 +62,7 @@ public:
         void EnterCombat(Unit* /*who*/)
         {
             Talk(YELL_AGGRO);
-			 me->CallForHelp(22.0f);
+	    me->CallForHelp(22.0f);
         }
 
         void UpdateAI(uint32 diff)
