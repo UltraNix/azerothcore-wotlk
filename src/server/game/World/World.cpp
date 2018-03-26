@@ -89,7 +89,6 @@
 #include "AsyncAuctionListing.h"
 #include "SavingSystem.h"
 #include "CustomEventMgr.h"
-#include "ThreadedPathGenerator.hpp"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1231,8 +1230,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_SHOW_KICK_IN_WORLD] = sConfigMgr->GetBoolDefault("ShowKickInWorld", false);
     m_int_configs[CONFIG_INTERVAL_LOG_UPDATE] = sConfigMgr->GetIntDefault("RecordUpdateTimeDiffInterval", 60000);
     m_int_configs[CONFIG_MIN_LOG_UPDATE] = sConfigMgr->GetIntDefault("MinRecordUpdateTimeDiff", 100);
-    m_int_configs[CONFIG_MAPUPDATER_NUMTHREADS] = sConfigMgr->GetIntDefault("MapUpdate.Threads", 1);
-    m_int_configs[CONFIG_PATHGENERATOR_NUMTHREADS] = sConfigMgr->GetIntDefault( "PathGenerator.Threads", 2 );
+    m_int_configs[CONFIG_NUMTHREADS] = sConfigMgr->GetIntDefault("MapUpdate.Threads", 1);
     m_int_configs[CONFIG_MAX_RESULTS_LOOKUP_COMMANDS] = sConfigMgr->GetIntDefault("Command.LookupMaxResults", 0);
 
     // Warden
@@ -1907,8 +1905,6 @@ void World::SetInitialWorldSettings()
 
     ///- Initilize static helper structures
     AIRegistry::Initialize();
-
-    Movement::GetPathGenerator().Initialize( getIntConfig( CONFIG_MAPUPDATER_NUMTHREADS ) );
 
     ///- Initialize MapManager
     sLog->outString("Starting Map System");

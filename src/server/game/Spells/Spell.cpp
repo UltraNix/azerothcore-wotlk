@@ -6063,10 +6063,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (m_caster->GetTransport())
                         break;
 
-                    m_pathFinder = new PathGenerator( new PathGeneratorContext( m_caster ), true );
+                    m_pathFinder = new PathGenerator(m_caster);
                     m_pathFinder->CalculatePath(destx, desty, destz + 0.15f, false);
                     G3D::Vector3 endPos = m_pathFinder->GetEndPosition(); // also check distance between target and the point calculated by mmaps
-                    if (m_pathFinder->GetPathType()&PATHFIND_NOPATH || target->GetExactDistSq(endPos.x, endPos.y, endPos.z) > maxdist*maxdist || m_pathFinder->GetPathLength() > (40.0f + (m_caster->HasAura(58097) ? 5.0f : 0.0f)))
+                    if (m_pathFinder->GetPathType()&PATHFIND_NOPATH || target->GetExactDistSq(endPos.x, endPos.y, endPos.z) > maxdist*maxdist || m_pathFinder->getPathLength() > (40.0f + (m_caster->HasAura(58097) ? 5.0f : 0.0f)))
                         return SPELL_FAILED_NOPATH;
                 }
                 break;

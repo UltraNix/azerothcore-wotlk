@@ -4,7 +4,6 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "PathGenerator.h"
-#include "ThreadedPathGenerator.hpp"
 
 template<class T>
 RandomMovementGenerator<T>::~RandomMovementGenerator() { }
@@ -12,6 +11,7 @@ RandomMovementGenerator<T>::~RandomMovementGenerator() { }
 template<>
 RandomMovementGenerator<Creature>::~RandomMovementGenerator()
 {
+    delete _path;
 }
 
 template<class T>
@@ -22,8 +22,6 @@ void RandomMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
     if (!owner || !owner->IsAlive())
         return;
-
-    //owner->setActive( true );
 
     owner->AddUnitState(UNIT_STATE_ROAMING);
     _reference = owner->GetPosition();
@@ -82,10 +80,24 @@ void RandomMovementGenerator<Creature>::SetRandomLocation(Creature* owner)
     float angle = Position::RandomOrientation();
     owner->MovePositionToFirstCollision(position, distance, angle);
 
-    AsyncPathGeneratorContext context( owner, { position.m_positionX, position.m_positionY, position.m_positionZ } );
-    context.SetPathLengthLimit( 30.0f );
+    uint32 resetTimer = urand(0, 1) ? urand(5000, 10000) : urand(250, 500);
 
-    m_pathRequest = Movement::GetPathGenerator().RequestPath( context );
+    if (!_path)
+        _path = new PathGenerator(owner);
+
+    _path->SetPathLengthLimit(30.0f);
+    bool result = _path->CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
+    if (!result || !(_path->GetPathType() & (PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH)))
+    {
+        _timer.Reset(100);
+        return;
+    }
+
+    Movement::MoveSplineInit init(owner);
+    init.MovebyPath(_path->GetPath());
+    init.SetWalk(true);
+    int32 traveltime = init.Launch();
+    _timer.Reset(traveltime + resetTimer);
 }
 
 template<class T>
@@ -100,26 +112,6 @@ bool RandomMovementGenerator<Creature>::DoUpdate(Creature* owner, uint32 diff)
     if (!owner || !owner->IsAlive())
         return false;
 
-    if ( m_pathRequest.IsValid() && m_pathRequest.IsReady() )
-    {
-        auto path = std::move( m_pathRequest.GetPath() );
-
-        if ( !( path.type & ( PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH ) ) )
-        {
-            _timer.Reset( 100 );
-            return true;
-        }
-
-        Movement::MoveSplineInit init( owner );
-        init.MovebyPath( path.points );
-        init.SetWalk( true );
-        int32 traveltime = init.Launch();
-
-        uint32 resetTimer = urand( 0, 1 ) ? urand( 5000, 10000 ) : urand( 250, 500 );
-        _timer.Reset( 200 );
-        return true;
-    }
-
     _interrupt = false;
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
@@ -129,9 +121,7 @@ bool RandomMovementGenerator<Creature>::DoUpdate(Creature* owner, uint32 diff)
 
     _timer.Update(diff);
     if (!_interrupt && _timer.Passed() && owner->movespline->Finalized())
-    {
-        SetRandomLocation( owner );
-    }
+        SetRandomLocation(owner);
 
     return true;
 }

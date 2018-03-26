@@ -25,7 +25,6 @@
 #include "TemporarySummon.h"
 #include "CreatureAIFactory.h"
 #include "ScriptMgr.h"
-#include "RandomMovementGenerator.h"
 
 namespace FactorySelector
 {
@@ -128,7 +127,6 @@ namespace FactorySelector
             }
         }*/
 
-        //return new RandomMovementGenerator< Creature >( 100.0f );
         return (mv_factory == NULL ? NULL : mv_factory->Create(creature));
 
     }
