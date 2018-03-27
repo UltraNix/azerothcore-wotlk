@@ -6704,6 +6704,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 72890: // Swarming Shadows
             spellInfo->AreaGroupId = 0; // originally, these require area 4522, which is... outside of Icecrown Citadel
             break;
+        case 47788:  // Guardian Spirit
+            spellInfo->excludeTargetAuraSpell = 72232; // Weakened Spirit
+            break;
         case 71301: // Summon Dream Portal (Valithria Dreamwalker)
         case 71977: // Summon Nightmare Portal (Valithria Dreamwalker)
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_DEST;
