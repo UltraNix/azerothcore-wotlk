@@ -6589,6 +6589,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang) // Patch 3.3.2 (2010-01-02): Deathbringer Saurfang will no longer gain blood power from Mark of the Fallen Champion.
         case 72444: // Mark of the Fallen Champion (Deathbringer Saurfang) // Xinef: prevented in script, effect needed for Prayer of Mending
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS; // damage shouldn't increase from blood power on normal mode
         case 72445: // Mark of the Fallen Champion (Deathbringer Saurfang)
         case 72446: // Mark of the Fallen Champion (Deathbringer Saurfang)
             spellInfo->AttributesEx3 &= ~SPELL_ATTR3_CANT_TRIGGER_PROC;
