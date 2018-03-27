@@ -270,7 +270,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         Talk(SAY_AGGRO);
 
         events.Reset();
-        events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 30000);
+        events.ScheduleEvent(EVENT_SUMMON_BLOOD_BEAST, 40s);
         events.ScheduleEvent(EVENT_BERSERK, (IsHeroic() ? 360000 : 480000));
         events.ScheduleEvent(EVENT_BOILING_BLOOD, 15500, 0);
         events.ScheduleEvent(EVENT_BLOOD_NOVA, 17000, 0);
