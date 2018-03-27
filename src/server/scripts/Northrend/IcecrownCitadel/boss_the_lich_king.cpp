@@ -953,7 +953,11 @@ class boss_the_lich_king : public CreatureScript
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                             if (Player* player = itr->GetSource())
                                 if (player->GetPositionZ() < 700.0f)
+                                {
                                     Unit::Kill(me, player);
+                                    if (player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+                                        player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+                                }
                 }
                 else
                     _positionCheckTimer -= diff;
