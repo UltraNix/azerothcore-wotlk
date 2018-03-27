@@ -6609,6 +6609,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 70952: // Blood Prince Council, Invocation of Blood
             spellInfo->Effect[0] = 0; // clear share health aura
             break;
+        case 71815: // Empowered Shadow Lance
+        case 72809:
+        case 72810:
+        case 72811:
 	    case 71341: // Pact of the Darkfallen
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
