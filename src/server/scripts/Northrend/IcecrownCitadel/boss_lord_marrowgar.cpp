@@ -207,7 +207,6 @@ class boss_lord_marrowgar : public CreatureScript
                                 events.RepeatEvent(1);
                                 break;
                             }
-                            events.RepeatEvent(5000);
                             Unit* unit = SelectTarget(SELECT_TARGET_FARTHEST, 0, BoneStormMoveTargetSelector(me));
                             if (!unit)
                             {
@@ -220,6 +219,7 @@ class boss_lord_marrowgar : public CreatureScript
                             }
                             if (unit)
                                 me->GetMotionMaster()->MoveCharge(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), 25.0f, 1337);
+                            events.PopEvent();
                             break;
                         }
                         break;
@@ -258,6 +258,7 @@ class boss_lord_marrowgar : public CreatureScript
                 if (type != POINT_MOTION_TYPE || id != 1337)
                     return;
 
+                events.ScheduleEvent(EVENT_BONE_STORM_MOVE, 6s);
                 events.ScheduleEvent(EVENT_SPELL_COLDFLAME_BONE_STORM, 0);
             }
 
