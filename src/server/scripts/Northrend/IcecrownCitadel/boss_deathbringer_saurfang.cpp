@@ -127,6 +127,7 @@ enum DeathbringerEvents
     EVENT_BERSERK               = 18,
     EVENT_SUMMON_BLOOD_BEAST    = 19,
     EVENT_BLOOD_BEAST_SCENT_OF_BLOOD = 100,
+    EVENT_MARK_OF_THE_FALLEN_CHAMPION = 101,
     EVENT_BOILING_BLOOD         = 20,
     EVENT_BLOOD_NOVA            = 21,
     EVENT_RUNE_OF_BLOOD         = 22,
@@ -426,9 +427,22 @@ struct boss_deathbringer_saurfangAI : public BossAI
                     DoCastSelf(SPELL_BERSERK);
                     Talk(SAY_BERSERK);
                     break;
+                case EVENT_MARK_OF_THE_FALLEN_CHAMPION:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION))
+                    {
+                        ++_fallenChampionCastCount;
+                        DoCast(target, SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+                        me->SetPower(POWER_ENERGY, 0);
+                        if (Aura* bloodPower = me->GetAura(SPELL_BLOOD_POWER))
+                            bloodPower->RecalculateAmountOfEffects();
+                    }
+                    break;
                 default:
                     break;
             }
+
+            if (me->IsCasting())
+                return;
         }
 
         DoMeleeAttackIfReady();
@@ -439,14 +453,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         switch (actionId)
         {
             case ACTION_MARK_OF_THE_FALLEN_CHAMPION:
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION))
-                {
-                    ++_fallenChampionCastCount;
-                    DoCast(target, SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-                    me->SetPower(POWER_ENERGY, 0);
-                    if (Aura* bloodPower = me->GetAura(SPELL_BLOOD_POWER))
-                        bloodPower->RecalculateAmountOfEffects();
-                }
+                events.ScheduleEvent(EVENT_MARK_OF_THE_FALLEN_CHAMPION, 0s);
                 break;
             case ACTION_INTRO_DONE:
                 _introDone = true;
