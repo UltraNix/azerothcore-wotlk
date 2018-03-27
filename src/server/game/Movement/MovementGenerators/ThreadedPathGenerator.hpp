@@ -53,6 +53,8 @@ namespace Movement
         bool            IsValid() const;
         bool            IsReady() const;
 
+        void            Invalidate();
+
         Path            GetPath();
 
     protected:

@@ -98,8 +98,13 @@ bool RandomMovementGenerator<Creature>::DoUpdate(Creature* owner, uint32 diff)
     if (!owner || !owner->IsAlive())
         return false;
 
+    _interrupt = owner->HasUnitState( UNIT_STATE_NOT_MOVE ) || owner->IsMovementPreventedByCasting();
+
     if ( m_pathRequest.IsValid() && m_pathRequest.IsReady() )
     {
+        if ( _interrupt )
+            return m_pathRequest.Invalidate(), true;
+
         auto path = std::move( m_pathRequest.GetPath() );
 
         if ( !( path.type & ( PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH ) ) )
@@ -117,13 +122,6 @@ bool RandomMovementGenerator<Creature>::DoUpdate(Creature* owner, uint32 diff)
         _timer.Reset( traveltime + resetTimer );
         return true;
     }
-
-    _interrupt = false;
-
-    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
-        _interrupt = true;
-    else if (owner->IsMovementPreventedByCasting())
-        _interrupt = true;
 
     _timer.Update(diff);
     if (!_interrupt && _timer.Passed() && owner->movespline->Finalized())

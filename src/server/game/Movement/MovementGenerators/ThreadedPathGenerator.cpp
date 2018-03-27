@@ -88,6 +88,19 @@ namespace Movement
         return IsValid() && m_future.wait_for( std::chrono::nanoseconds( 0 ) ) == std::future_status::ready;
     }
 
+
+    void AsyncPathResult::Invalidate()
+    {
+        if ( !IsValid() )
+            return;
+
+        PathPromise promise;
+        m_future = promise.get_future();
+
+        promise.set_value( { PATHFIND_NOPATH, PointsArray() } );
+        m_future.get();
+    }
+
     Path AsyncPathResult::GetPath()
     {
         return std::move( m_future.get() );

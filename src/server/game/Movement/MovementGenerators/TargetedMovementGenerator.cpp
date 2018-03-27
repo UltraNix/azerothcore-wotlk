@@ -210,6 +210,7 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
             bool forceDest = m_pathRequest.second;
 
             auto path = std::move( request.GetPath() );
+
             if ( Creature * creature = owner->ToCreature() )
                 creature->SetCannotReachTarget( false );
 
@@ -228,10 +229,10 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
 
                 // Fix for Algalon
             if ( owner->GetTypeId() == TYPEID_UNIT && owner->GetEntry() == 32871 )
-                {
+            {
                 if ( i_target->GetPositionZ() >= 418.5f )
                     return true;
-                }
+            }
 
                 // Fix for Razorscale
             if ( owner->IsSummon() && i_target->GetEntry() == 33186 )
@@ -242,7 +243,7 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
 
                 // Ring of Valor
             if ( owner->IsSummon() && owner->GetMapId() == 618 )  // pussywizard: 618 Ring of Valor
-                {
+            {
                     float petZ = owner->GetPositionZ();
                     float tarZ = i_target->GetPositionZ();
 
@@ -261,7 +262,7 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
             init.Launch();
 
             return true;
-            }
+        }
 
         return true;
     }
@@ -278,10 +279,7 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
     if (!owner || !owner->IsAlive())
         return false;
 
-    if ( _handleAsyncPathRequest( owner ) )
-        return true;
-
-    if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
+    if ( owner->HasUnitState(UNIT_STATE_NOT_MOVE) )
     {
         //! In some cases when unit teleports out somewhere and sets root to self(crap script, what you gonna do)
         //! just before the root is set it will call cannotreachtarget in _setTargetLocation
@@ -289,12 +287,15 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
         //! so if creature cant move then do not allow this function to execute ever
         if (owner->GetTypeId() == TYPEID_UNIT)
             owner->ToCreature()->SetCannotReachTarget(false);
+
         D::_clearUnitStateMove(owner);
-        return true;
+
+        auto & request = m_pathRequest.first;
+        return request.Invalidate(), true;
     }
 
     // prevent movement while casting spells with cast time or channel time
-    if (owner->HasUnitState(UNIT_STATE_CASTING))
+    if ( owner->HasUnitState(UNIT_STATE_CASTING))
     {
         bool stop = true;
         if (Spell* spell = owner->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
@@ -308,9 +309,13 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
             if (!owner->IsStopped())
                 owner->StopMoving();
 
-            return true;
+            auto & request = m_pathRequest.first;
+            return request.Invalidate(), true;
         }
     }
+
+    if ( _handleAsyncPathRequest( owner ) )
+        return true;
 
     // prevent crash after creature killed pet
     if (static_cast<D*>(this)->_lostTarget(owner))
