@@ -658,7 +658,7 @@ class boss_the_lich_king : public CreatureScript
                 events.ScheduleEvent(EVENT_INFEST, 5000, EVENT_GROUP_ABILITIES);
                 events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 31000), EVENT_GROUP_ABILITIES);
                 if (IsHeroic())
-                    events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, EVENT_GROUP_ABILITIES);
+                    events.ScheduleEvent(EVENT_SHADOW_TRAP, 15s, 16s, EVENT_GROUP_ABILITIES);
             }
 
             void JustReachedHome()
@@ -910,9 +910,11 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_QUAKE, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, 4000, EVENT_GROUP_ABILITIES);
+                        for (auto time : { 6s, 28s, 50s })
+                            events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, time, EVENT_GROUP_ABILITIES);
                         break;
                     case POINT_CENTER_2:
+                    {
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
@@ -920,8 +922,13 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_QUAKE_2, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, 4000, EVENT_GROUP_ABILITIES);
+                        std::vector<std::chrono::duration<long long>> timers = { 6s, 23s, 41s, 59s };
+                        if (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
+                            timers = { 6s, 25s, 43s };
+                        for (auto time : timers)
+                            events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, time, EVENT_GROUP_ABILITIES);
                         break;
+                    }
                     default:
                         break;
                 }
@@ -981,10 +988,10 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_QUAKE:
                         _phase = PHASE_TWO;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_INFEST, 8000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SUMMON_VALKYR, 15000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SOUL_REAPER, 22000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_DEFILE, 32500, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_INFEST, 14s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SUMMON_VALKYR, 20s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SOUL_REAPER, 40s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_DEFILE, 38s, EVENT_GROUP_ABILITIES);
 
                         me->InterruptNonMeleeSpells(false);
                         me->ClearUnitState(UNIT_STATE_CASTING);
@@ -996,10 +1003,10 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_QUAKE_2:
                         _phase = PHASE_THREE;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SOUL_REAPER, 25000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_DEFILE, 32500, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_VILE_SPIRITS, 18000, EVENT_GROUP_VILE_SPIRITS);
-                        events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 11000, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SOUL_REAPER, 40s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_DEFILE, 38s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_VILE_SPIRITS, 20s, EVENT_GROUP_VILE_SPIRITS);
+                        events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 14s, EVENT_GROUP_ABILITIES);
 
                         me->InterruptNonMeleeSpells(false);
                         me->ClearUnitState(UNIT_STATE_CASTING);
@@ -1021,7 +1028,7 @@ class boss_the_lich_king : public CreatureScript
                         break;
                     case EVENT_INFEST:
                         me->CastSpell(me, SPELL_INFEST, false);
-                        events.ScheduleEvent(EVENT_INFEST, urand(21000, 22000), EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_INFEST, 22.5s, EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_NECROTIC_PLAGUE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
@@ -1036,12 +1043,11 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_SHADOW_TRAP:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankLKTargetSelector(me, true, true, 100.0f)))
                             me->CastSpell(target, SPELL_SHADOW_TRAP, false);
-                        events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SHADOW_TRAP, 15s, 16s, EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_PAIN_AND_SUFFERING:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         {
-                            events.DelayEventsToMax(500, EVENT_GROUP_ABILITIES);
                             me->SetOrientation(me->GetAngle(target));
                             me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, false);
                         }
@@ -1054,7 +1060,6 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_SUMMON_RAGING_SPIRIT:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                             me->CastSpell(target, SPELL_RAGING_SPIRIT, false);
-                        events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, (!HealthAbovePct(40) ? 15000 : 20000), EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_DEFILE:
                         {
@@ -1074,10 +1079,10 @@ class boss_the_lich_king : public CreatureScript
                             {
                                 Talk(EMOTE_DEFILE_WARNING);
                                 me->CastSpell(target, SPELL_DEFILE, false);
-                                events.ScheduleEvent(EVENT_DEFILE, urand(31000, 34000), EVENT_GROUP_ABILITIES);
+                                events.ScheduleEvent(EVENT_DEFILE, 31s, 36s, EVENT_GROUP_ABILITIES);
                             }
                             else
-                                events.ScheduleEvent(EVENT_DEFILE, 2000, EVENT_GROUP_ABILITIES);
+                                events.ScheduleEvent(EVENT_DEFILE, 1s, EVENT_GROUP_ABILITIES);
                         }
                         break;
                     case EVENT_SOUL_REAPER:
@@ -1085,7 +1090,7 @@ class boss_the_lich_king : public CreatureScript
                         {
                             me->CastSpell(me->GetVictim(), SPELL_SOUL_REAPER, false);
                             events.DelayEventsToMax(12000, EVENT_GROUP_ABILITIES);
-                            events.ScheduleEvent(EVENT_SOUL_REAPER, 30000, EVENT_GROUP_ABILITIES);
+                            events.ScheduleEvent(EVENT_SOUL_REAPER, 30.5s, EVENT_GROUP_ABILITIES);
                         }
                         else
                             events.ScheduleEvent(EVENT_SOUL_REAPER, 1000, EVENT_GROUP_ABILITIES);
@@ -1095,7 +1100,7 @@ class boss_the_lich_king : public CreatureScript
                             me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
                             Talk(SAY_LK_SUMMON_VALKYR);
                             me->CastSpell((Unit*)NULL, SUMMON_VALKYR, false);
-                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 48000), EVENT_GROUP_ABILITIES);
+                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, 45s, EVENT_GROUP_ABILITIES);
 
                             uint32 minTime = (Is25ManRaid() ? 5000 : 4000);
                             if (uint32 evTime = events.GetNextEventTime(EVENT_DEFILE))
@@ -1113,7 +1118,7 @@ class boss_the_lich_king : public CreatureScript
                         {
                             Talk(SAY_LK_HARVEST_SOUL);
                             me->CastSpell(target, SPELL_HARVEST_SOUL, false);
-                            events.ScheduleEvent(EVENT_HARVEST_SOUL, 70000, EVENT_GROUP_ABILITIES);
+                            events.ScheduleEvent(EVENT_HARVEST_SOUL, 75s, EVENT_GROUP_ABILITIES);
                         }
                         else
                             events.ScheduleEvent(EVENT_HARVEST_SOUL, 10000, EVENT_GROUP_ABILITIES);
@@ -2576,6 +2581,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                                         target->GetMotionMaster()->Clear();
                                         target->UpdatePosition(*me, true);
                                         target->StopMovingOnCurrentPos();
+                                        target->SendMeleeAttackStop();
 
                                         me->CastSpell(target, SPELL_VALKYR_CARRY, false);
                                         _destPoint.Relocate(triggers.front());
@@ -2685,7 +2691,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                                     target = lichKing->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankLKTargetSelector(lichKing, true, false, 100.0f));
                             if (target)
                                 me->CastSpell(target, SPELL_LIFE_SIPHON, false);
-                            _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2500);
+                            _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2400);
                         }
                         break;
                     default:
@@ -2985,7 +2991,8 @@ class spell_the_lich_king_vile_spirit_move_target_search : public SpellScriptLoa
                 if (targets.empty())
                     return;
 
-                _target = Trinity::Containers::SelectRandomContainerElement(targets);
+                Trinity::Containers::RandomResize(targets, [](WorldObject* target) { return target->IsPlayer(); }, 1);
+                _target = targets.front();
             }
 
             void HandleScript(SpellEffIndex effIndex)
