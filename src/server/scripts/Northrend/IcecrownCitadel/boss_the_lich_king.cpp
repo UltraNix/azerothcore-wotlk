@@ -915,6 +915,10 @@ class boss_the_lich_king : public CreatureScript
                         break;
                     case POINT_CENTER_2:
                     {
+                        std::list<Creature*> list;
+                        me->GetCreatureListWithEntryInGrid(list, NPC_VALKYR_SHADOWGUARD, 250.0f);
+                        for (auto valkyr : list)
+                            valkyr->DespawnOrUnsummon();
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
