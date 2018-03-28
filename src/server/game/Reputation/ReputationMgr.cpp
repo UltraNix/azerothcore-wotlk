@@ -292,9 +292,6 @@ bool ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standi
         {
             if (repTemplate->faction[i])
             {
-                if (_player->GetReputationRank(repTemplate->faction[i]) > REP_FRIENDLY)
-                    continue;
-
                 if (_player->GetReputationRank(repTemplate->faction[i]) <= ReputationRank(repTemplate->faction_rank[i]))
                 {
                     // bonuses are already given, so just modify standing by rate
