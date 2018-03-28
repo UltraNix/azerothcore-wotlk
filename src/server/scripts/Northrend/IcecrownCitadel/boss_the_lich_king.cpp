@@ -998,7 +998,7 @@ class boss_the_lich_king : public CreatureScript
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_INFEST, 14s, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SUMMON_VALKYR, 20s, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SOUL_REAPER, 40s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SOUL_REAPER, 20s, 22s, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_DEFILE, 38s, EVENT_GROUP_ABILITIES);
 
                         me->InterruptNonMeleeSpells(false);
@@ -1011,7 +1011,7 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_QUAKE_2:
                         _phase = PHASE_THREE;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SOUL_REAPER, 40s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SOUL_REAPER, 20s, 22s, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_DEFILE, 38s, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_VILE_SPIRITS, 20s, EVENT_GROUP_VILE_SPIRITS);
                         events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 14s, EVENT_GROUP_ABILITIES);
