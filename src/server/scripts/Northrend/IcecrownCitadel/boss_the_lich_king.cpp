@@ -996,10 +996,10 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_QUAKE:
                         _phase = PHASE_TWO;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_INFEST, 8s, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SUMMON_VALKYR, 15s, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SOUL_REAPER, 22s, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_DEFILE, 32.5s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_INFEST, 14s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SUMMON_VALKYR, 20s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SOUL_REAPER, 40s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_DEFILE, 38s, EVENT_GROUP_ABILITIES);
 
                         me->InterruptNonMeleeSpells(false);
                         me->ClearUnitState(UNIT_STATE_CASTING);
@@ -1011,10 +1011,10 @@ class boss_the_lich_king : public CreatureScript
                     case EVENT_QUAKE_2:
                         _phase = PHASE_THREE;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_SOUL_REAPER, 25s, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_DEFILE, 32.5s, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_VILE_SPIRITS, 18s, EVENT_GROUP_VILE_SPIRITS);
-                        events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 11s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_SOUL_REAPER, 40s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_DEFILE, 38s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_VILE_SPIRITS, 20s, EVENT_GROUP_VILE_SPIRITS);
+                        events.ScheduleEvent(IsHeroic() ? EVENT_HARVEST_SOULS : EVENT_HARVEST_SOUL, 14s, EVENT_GROUP_ABILITIES);
 
                         me->InterruptNonMeleeSpells(false);
                         me->ClearUnitState(UNIT_STATE_CASTING);
@@ -1036,7 +1036,7 @@ class boss_the_lich_king : public CreatureScript
                         break;
                     case EVENT_INFEST:
                         me->CastSpell(me, SPELL_INFEST, false);
-                        events.ScheduleEvent(EVENT_INFEST, 21s, 22s, EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_INFEST, 22.5s, EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_NECROTIC_PLAGUE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
@@ -1087,10 +1087,10 @@ class boss_the_lich_king : public CreatureScript
                             {
                                 Talk(EMOTE_DEFILE_WARNING);
                                 me->CastSpell(target, SPELL_DEFILE, false);
-                                events.ScheduleEvent(EVENT_DEFILE, 31s, 34s, EVENT_GROUP_ABILITIES);
+                                events.ScheduleEvent(EVENT_DEFILE, 31s, 36s, EVENT_GROUP_ABILITIES);
                             }
                             else
-                                events.ScheduleEvent(EVENT_DEFILE, 2s, EVENT_GROUP_ABILITIES);
+                                events.ScheduleEvent(EVENT_DEFILE, 1s, EVENT_GROUP_ABILITIES);
                         }
                         break;
                     case EVENT_SOUL_REAPER:
@@ -1098,7 +1098,7 @@ class boss_the_lich_king : public CreatureScript
                         {
                             me->CastSpell(me->GetVictim(), SPELL_SOUL_REAPER, false);
                             events.DelayEventsToMax(12000, EVENT_GROUP_ABILITIES);
-                            events.ScheduleEvent(EVENT_SOUL_REAPER, 30s, EVENT_GROUP_ABILITIES);
+                            events.ScheduleEvent(EVENT_SOUL_REAPER, 30.5s, EVENT_GROUP_ABILITIES);
                         }
                         else
                             events.ScheduleEvent(EVENT_SOUL_REAPER, 1000, EVENT_GROUP_ABILITIES);
@@ -1108,7 +1108,7 @@ class boss_the_lich_king : public CreatureScript
                             me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
                             Talk(SAY_LK_SUMMON_VALKYR);
                             me->CastSpell((Unit*)NULL, SUMMON_VALKYR, false);
-                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, 45s, 48s, EVENT_GROUP_ABILITIES);
+                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, 45s, EVENT_GROUP_ABILITIES);
 
                             uint32 minTime = (Is25ManRaid() ? 5000 : 4000);
                             if (uint32 evTime = events.GetNextEventTime(EVENT_DEFILE))
@@ -1126,7 +1126,7 @@ class boss_the_lich_king : public CreatureScript
                         {
                             Talk(SAY_LK_HARVEST_SOUL);
                             me->CastSpell(target, SPELL_HARVEST_SOUL, false);
-                            events.ScheduleEvent(EVENT_HARVEST_SOUL, 70s, EVENT_GROUP_ABILITIES);
+                            events.ScheduleEvent(EVENT_HARVEST_SOUL, 75s, EVENT_GROUP_ABILITIES);
                         }
                         else
                             events.ScheduleEvent(EVENT_HARVEST_SOUL, 10000, EVENT_GROUP_ABILITIES);
