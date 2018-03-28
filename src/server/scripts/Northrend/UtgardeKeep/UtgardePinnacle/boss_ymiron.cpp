@@ -276,7 +276,7 @@ public:
                     if (Creature* sf = me->SummonCreature(NPC_SPIRIT_FOUNT, 385+rand()%10, -330+rand()%10, 104.756f, 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 180000))
                     {
                         summons.Summon(sf);
-                        sf->SetSpeed(MOVE_RUN, 0.4f);
+                        sf->SetSpeedRate(MOVE_RUN, 0.4f);
                         sf->AddAura(IsHeroic() ? SPELL_SPIRIT_FOUNT_H : SPELL_SPIRIT_FOUNT_N, sf);
                         sf->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         sf->GetMotionMaster()->MoveFollow(me->GetVictim(), 0, rand_norm()*M_PI*2);

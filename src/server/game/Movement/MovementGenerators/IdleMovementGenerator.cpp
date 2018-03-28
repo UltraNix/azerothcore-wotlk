@@ -129,5 +129,5 @@ void AssistanceDistractMovementGenerator::Finalize(Unit* unit)
     //! change no search assistance so creature updates its speed to proper values
     //! shouldnt happen twice if scripts are written properly
     unit->ToCreature()->SetNoSearchAssistance(false);
-    unit->UpdateSpeed(MOVE_RUN, false);
+    unit->UpdateSpeed(MOVE_RUN);
 }

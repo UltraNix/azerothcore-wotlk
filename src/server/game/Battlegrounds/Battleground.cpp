@@ -1718,8 +1718,8 @@ Creature* Battleground::AddCreature(uint32 entry, uint32 type, float x, float y,
         return NULL;
     }
     // Force using DB speeds
-    creature->SetSpeed(MOVE_WALK,  cinfo->speed_walk);
-    creature->SetSpeed(MOVE_RUN,   cinfo->speed_run);
+    creature->SetSpeedRate(MOVE_WALK,  cinfo->speed_walk);
+    creature->SetSpeedRate(MOVE_RUN,   cinfo->speed_run);
 
     if (!map->AddToMap(creature))
     {

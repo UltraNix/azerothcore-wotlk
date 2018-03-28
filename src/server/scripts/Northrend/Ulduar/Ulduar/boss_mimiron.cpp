@@ -1988,8 +1988,8 @@ struct npc_ulduar_mimiron_rocketAI : public NullCreatureAI
     {
         if (!me->GetVehicle())
         {
-            me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN)+0.4f, false);
-            me->SetSpeed(MOVE_FLIGHT, me->GetSpeedRate(MOVE_RUN), false);
+            me->SetSpeedRate(MOVE_RUN, me->GetSpeedRate(MOVE_RUN)+0.4f);
+            me->SetSpeedRate(MOVE_FLIGHT, me->GetSpeedRate(MOVE_RUN));
         }
     }
 };
@@ -2385,9 +2385,9 @@ struct npc_db_target_mimironAI : public ScriptedAI
 {
     npc_db_target_mimironAI(Creature * creature) : ScriptedAI(creature)
     {
-        me->SetSpeed(MOVE_RUN, 4.0f);
-        me->SetSpeed(MOVE_WALK, 4.0f);
-        me->SetSpeed(MOVE_FLIGHT, 4.0f);
+        me->SetSpeedRate(MOVE_RUN, 4.0f);
+        me->SetSpeedRate(MOVE_WALK, 4.0f);
+        me->SetSpeedRate(MOVE_FLIGHT, 4.0f);
     }
 
     void FillCirclePath(Position const& centerPos, float radius, float z, Movement::PointsArray& path)

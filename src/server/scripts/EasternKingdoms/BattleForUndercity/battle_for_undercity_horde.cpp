@@ -155,7 +155,7 @@ Position const SpreaderSpawnPos[5] =
     {1816.663208f, 195.277527f, 70.399864f, 1.652197f}
 };
 
-uint32 HordeWorldStates[] = 
+uint32 HordeWorldStates[] =
 {
     WORLDSTATE_UNDERCITY_CONTROLLED_H,
     WORLDSTATE_BATTLE_TIMER_STATE,
@@ -175,7 +175,7 @@ uint32 HordeWorldStates[] =
 
 struct npc_thrall_battle_undercityAI : public npc_escortAI
 {
-    npc_thrall_battle_undercityAI(Creature* creature) : npc_escortAI(creature), _summons(me) 
+    npc_thrall_battle_undercityAI(Creature* creature) : npc_escortAI(creature), _summons(me)
     {
         zoneScript = me->GetZoneScript();
         map = me->GetMap();
@@ -312,7 +312,7 @@ struct npc_thrall_battle_undercityAI : public npc_escortAI
         PlayerGUID = player->GetGUID();
     }
 
-    void WaypointReached(uint32 waypointId) override 
+    void WaypointReached(uint32 waypointId) override
     {
         switch (waypointId)
         {
@@ -460,7 +460,7 @@ struct npc_thrall_battle_undercityAI : public npc_escortAI
         if (!players.isEmpty())
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 if (Player* player = itr->GetSource())
-                    if ((player->GetZoneId() == ZONE_TRISFAL_GLADES || player->GetZoneId() == ZONE_UNDERCITY) 
+                    if ((player->GetZoneId() == ZONE_TRISFAL_GLADES || player->GetZoneId() == ZONE_UNDERCITY)
                         && player->GetPhaseMask() == phaseMask)
                         player->SendUpdateWorldState(uiStateId, uiStateData);
 
@@ -822,7 +822,7 @@ struct npc_thrall_battle_undercityAI : public npc_escortAI
                         if (Creature* wave = ObjectAccessor::GetCreature(*me, TidalWaveGUID))
                         {
                             wave->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
-                            wave->SetSpeed(MOVE_RUN, 1.5f);
+                            wave->SetSpeedRate(MOVE_RUN, 1.5f);
                             wave->CastSpell(wave, SPELL_TIDAY_FURY, true);
                             wave->CastSpell(wave, SPELL_TIDAL_WAVE, true);
                             wave->GetMotionMaster()->MovePoint(0, 1741.84f, 238.88f, 62.24f);
@@ -1430,7 +1430,7 @@ struct npc_tidal_waveAI : public ScriptedAI
 
 struct npc_varimathras_battle_undercityAI : public ScriptedAI
 {
-    npc_varimathras_battle_undercityAI(Creature* creature) : ScriptedAI(creature), _summons(me) 
+    npc_varimathras_battle_undercityAI(Creature* creature) : ScriptedAI(creature), _summons(me)
     {
         ThrallGUID = 0;
     }
@@ -1492,7 +1492,7 @@ struct npc_varimathras_battle_undercityAI : public ScriptedAI
         ThrallGUID = summoner->GetGUID();
     }
 
-    void EnterCombat(Unit* target) 
+    void EnterCombat(Unit* target)
     {
         DoCastSelf(SPELL_MIGHT_OF_VARIMATHRAS);
     }

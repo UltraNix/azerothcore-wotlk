@@ -298,7 +298,7 @@ struct npc_taldaram_flamesphereAI : public ScriptedAI
             float x = me->GetPositionX() + distOffset * std::cos(angle);
             float y = me->GetPositionY() + distOffset * std::sin(angle);
 
-            me->SetSpeed(MOVE_RUN, 0.65f);
+            me->SetSpeedRate(MOVE_RUN, 0.65f);
             me->GetMotionMaster()->MovePoint(0, x, y, me->GetPositionZ());
             DoCastSelf(SPELL_FLAME_SPHERE_PERIODIC);
         }

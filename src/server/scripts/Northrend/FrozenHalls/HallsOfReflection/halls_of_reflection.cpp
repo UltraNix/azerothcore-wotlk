@@ -1164,7 +1164,7 @@ struct npc_hor_lich_kingAI : public NullCreatureAI
                 else
                 {
                     me->RemoveAura(SPELL_REMORSELESS_WINTER);
-                    me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run * 2.0f);
+                    me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run * 2.0f);
                 }
 
                 if (Creature* leader = _instance->instance->GetCreature(_instance->GetData64(NPC_SYLVANAS_PART2)))
@@ -1292,7 +1292,7 @@ struct npc_hor_lich_kingAI : public NullCreatureAI
                     break;
                 case EVENT_LK_START_FOLLOWING:
                 {
-                    me->SetSpeed(MOVE_RUN, 9.0f / 7.0f);
+                    me->SetSpeedRate(MOVE_RUN, 9.0f / 7.0f);
                     Movement::PointsArray path;
                     path.push_back(G3D::Vector3(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()));
                     for (uint8 i = 0; i <= 2; ++i)
@@ -1302,7 +1302,7 @@ struct npc_hor_lich_kingAI : public NullCreatureAI
                 }
                 case EVENT_LK_REMORSELESS_WINTER:
                 {
-                    me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
+                    me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                     Talk(SAY_LK_IW_1_SUMMON);
                     DoCastSelf(SPELL_REMORSELESS_WINTER, true);
                     Movement::PointsArray path;

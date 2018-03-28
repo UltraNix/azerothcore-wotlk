@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -82,7 +82,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
                         if (AuraEffect *aurEff = owner->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_DEATHKNIGHT, 2718, 0))
                             if (aur->GetEffect(0))
                                 aur->GetEffect(0)->SetAmount(-aurEff->GetSpellInfo()->Effects[EFFECT_2].CalcValue());
-                
+
                 float tz = me->GetMap()->GetHeight(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), true, MAX_FALL_DISTANCE);
                 me->GetMotionMaster()->MoveCharge(me->GetPositionX(), me->GetPositionY(), tz, 7.0f, 1);
                 me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
@@ -150,8 +150,8 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
                 me->CastSpell(me, SPELL_DK_SANCTUARY, true);
                 me->SetReactState(REACT_PASSIVE);
 
-                me->SetSpeed(MOVE_FLIGHT, 1.0f, true);
-                me->SetSpeed(MOVE_RUN, 1.0f, true);
+                me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+                me->SetSpeedRate(MOVE_RUN, 1.0f);
                 float x = me->GetPositionX() + 20 * cos(me->GetOrientation());
                 float y = me->GetPositionY() + 20 * sin(me->GetOrientation());
                 float z = me->GetPositionZ() + 40;
