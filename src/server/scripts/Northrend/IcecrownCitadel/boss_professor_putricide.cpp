@@ -433,7 +433,7 @@ class boss_professor_putricide : public CreatureScript
                         me->SetFacingTo(tablePos.GetOrientation());
                         me->GetMotionMaster()->Clear(false);
                         me->GetMotionMaster()->MoveIdle();
-                        events.ScheduleEvent(EVENT_TABLE_DRINK_STUFF, IsHeroic() ? (_phase == 3 ? 15s : 25s) : 0s);
+                        events.ScheduleEvent(EVENT_TABLE_DRINK_STUFF, IsHeroic() ? 15s : 0s);
                         break;
                 }
             }
