@@ -138,9 +138,9 @@ struct TimeTrackerSmall
         {
         }
 
-        void Update(int32 diff)
+        bool Update(int32 diff)
         {
-            i_expiryTime -= diff;
+            return ( i_expiryTime -= diff ) <= 0;
         }
 
         bool Passed() const

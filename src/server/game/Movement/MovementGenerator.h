@@ -31,7 +31,7 @@ class Unit;
 class MovementGenerator
 {
     public:
-        virtual ~MovementGenerator();
+        virtual ~MovementGenerator() = default;
 
         virtual void Initialize(Unit*) = 0;
         virtual void Finalize(Unit*) = 0;

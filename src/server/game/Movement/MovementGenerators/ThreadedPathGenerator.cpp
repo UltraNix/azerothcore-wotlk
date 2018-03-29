@@ -94,6 +94,7 @@ namespace Movement
         if ( !IsValid() )
             return;
 
+        //! we create new future, so we don't need to wait for old one on .get() call
         PathPromise promise;
         m_future = promise.get_future();
 

@@ -1806,6 +1806,8 @@ class Unit : public WorldObject
         virtual bool SetFeatherFall(bool enable, bool packetOnly = false);
         virtual bool SetHover(bool enable, bool packetOnly = false);
 
+        Position CalculateFuturePosition( float moveTime );
+
         // pussywizard:
         void SendMovementWaterWalking(Player* sendTo);
         void SendMovementFeatherFall(Player* sendTo);

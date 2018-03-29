@@ -36,6 +36,17 @@ namespace Movement
     {
         PathType    type;
         PointsArray points;
+
+        float       GetPathLength()
+        {
+            float length = 0.0f;
+            for ( auto idx = 1; idx < points.size(); ++idx )
+            {
+                length += ( points[ idx ] - points[ idx - 1 ] ).length();
+            }
+
+            return length;
+        }
     };
 
     using PathFuture = std::future< Path >;

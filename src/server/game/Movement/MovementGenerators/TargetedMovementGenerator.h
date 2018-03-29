@@ -32,8 +32,6 @@ class TargetedMovementGeneratorBase
         void stopFollowing() { }
     protected:
         FollowerReference i_target;
-        Position lastOwnerXYZ;
-        Position lastTargetXYZ;
 };
 
 template<class T, typename D>
@@ -58,6 +56,9 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
         bool _handleAsyncPathRequest( T* owner );
 
         std::pair<Movement::AsyncPathResult, bool > m_pathRequest;
+
+        Position lastOwnerXYZ;
+        Position lastTargetXYZ;
 
         TimeTrackerSmall i_recheckDistance;
         TimeTrackerSmall i_recheckDistanceForced;
@@ -90,32 +91,6 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
         bool EnableWalking() const { return false;}
         bool _lostTarget(T* u) const { return u->GetVictim() != this->GetTarget(); }
         void _reachTarget(T*);
-};
-
-template<class T>
-class FollowMovementGenerator : public TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >
-{
-    public:
-        FollowMovementGenerator(Unit* target)
-            : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target){}
-        FollowMovementGenerator(Unit* target, float offset, float angle)
-            : TargetedMovementGeneratorMedium<T, FollowMovementGenerator<T> >(target, offset, angle) {}
-        ~FollowMovementGenerator() {}
-
-        MovementGeneratorType GetMovementGeneratorType() { return FOLLOW_MOTION_TYPE; }
-
-        void DoInitialize(T*);
-        void DoFinalize(T*);
-        void DoReset(T*);
-        void MovementInform(T*);
-
-        static void _clearUnitStateMove(T* u) { u->ClearUnitState(UNIT_STATE_FOLLOW_MOVE); }
-        static void _addUnitStateMove(T* u)  { u->AddUnitState(UNIT_STATE_FOLLOW_MOVE); }
-        bool EnableWalking() const;
-        bool _lostTarget(T*) const { return false; }
-        void _reachTarget(T*) {}
-    private:
-        void _updateSpeed(T* owner);
 };
 
 #endif

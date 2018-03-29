@@ -90,6 +90,7 @@
 #include "SavingSystem.h"
 #include "CustomEventMgr.h"
 #include "ThreadedPathGenerator.hpp"
+#include "FollowMovementGenerator.hpp"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1386,6 +1387,16 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ITEM_RESTORE] = sConfigMgr->GetBoolDefault("ItemRestore.Enable", false);
     m_bool_configs[CONFIG_LATENCY_RECORD] = sConfigMgr->GetBoolDefault("LatencyRecorder.Enable", false);
     m_bool_configs[CONFIG_STATS_LATENCY_ONLY_ON_LOGOUT] = sConfigMgr->GetBoolDefault("LatencyRecorder.onlyLogout.Enable", false);
+
+
+    /* Follow movegen params */
+    m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ] = sConfigMgr->GetIntDefault( "Movement.FollowUpdateInterval", 300 );
+    m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ] = sConfigMgr->GetIntDefault( "Movement.FollowStartTimer", 100 );
+    m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ] = sConfigMgr->GetFloatDefault( "Movement.FollowMaxPathLength", 60.0f );
+
+    Movement::FollowMovementGenerator::FOLLOW_UPDATE_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ];
+    Movement::FollowMovementGenerator::FOLLOW_START_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ];
+    Movement::FollowMovementGenerator::FOLLOW_MAX_PATH_LENGTH = m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ];
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)

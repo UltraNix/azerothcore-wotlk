@@ -320,6 +320,27 @@ DetectPosCollision = 1
 TargetPosRecalculateRange = 1.5
 
 #
+#    Movement.FollowUpdateInterval
+#        Description: Time (milliseconds) between follow movement update calls.
+#        Default:     300 - (0.3 second)
+
+Movement.FollowUpdateInterval = 300
+
+#
+#    Movement.FollowStartTimer
+#        Description: Time (milliseconds) between rechecks if units needs to start movement
+#        Default:     100 - (0.1 second)
+
+Movement.FollowStartTimer = 100
+
+#
+#    Movement.FollowMaxPathLength
+#        Description: Max path distance unit can traverse, before forcing shortcut to owner
+#        Default:     60.0
+
+Movement.FollowMaxPathLength = 60
+
+#
 #    UpdateUptimeInterval
 #        Description: Update realm uptime period (in minutes).
 #        Default:     10 - (10 minutes)

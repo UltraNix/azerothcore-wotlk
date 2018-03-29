@@ -32,6 +32,7 @@ EndScriptData */
 #include "CreatureAI.h"
 #include "Player.h"
 #include "Pet.h"
+#include "FollowMovementGenerator.hpp"
 
 struct NpcFlagText
 {
@@ -1172,7 +1173,7 @@ public:
             return false;
         }
 
-        FollowMovementGenerator<Creature> const* mgen = static_cast<FollowMovementGenerator<Creature> const*>((creature->GetMotionMaster()->top()));
+        Movement::FollowMovementGenerator const* mgen = static_cast<Movement::FollowMovementGenerator const*>((creature->GetMotionMaster()->top()));
 
         if (mgen->GetTarget() != player)
         {

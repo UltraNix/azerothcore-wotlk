@@ -116,7 +116,6 @@ public:
     /// This method transforms supplied global coordinates into local offsets
     virtual void CalculatePassengerOffset(float& x, float& y, float& z, float* o = NULL) const = 0;
 
-protected:
     static void CalculatePassengerPosition(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO)
     {
         float inx = x, iny = y, inz = z;
@@ -127,6 +126,8 @@ protected:
         y = transY + iny * std::cos(transO) + inx * std::sin(transO);
         z = transZ + inz;
     }
+
+protected:
 
     static void CalculatePassengerOffset(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO)
     {

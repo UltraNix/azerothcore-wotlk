@@ -13198,7 +13198,9 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
     // now we ready for speed calculation
     float speed = std::max(non_stack_bonus, stack_bonus);
     if (main_speed_mod)
+    {
         AddPct(speed, main_speed_mod);
+    }
 
     switch (mtype)
     {
@@ -13209,19 +13211,52 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
             if (GetTypeId() == TYPEID_UNIT)
             {
                 Unit* pOwner = GetCharmerOrOwner();
-                if (pOwner && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID()) && !IsInCombat()) // Must check for owner or crash on "Tame Beast"
+                if (pOwner && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID()) && !IsInCombat() && !pOwner->IsInCombat() ) // Must check for owner or crash on "Tame Beast"
                 {
-                    // For every yard over 5, increase speed by 0.01
-                    //  to help prevent pet from lagging behind and despawning
-                    float dist = GetDistance(pOwner);
+                    G3D::Vector3 destPosition;
+                    const bool hasDestination = i_motionMaster->GetDestination( destPosition.x, destPosition.y, destPosition.z );
+
+                    float distanceToTarget = hasDestination ? ( destPosition - GetPosition() ).length() : GetDistance( pOwner );
+
                     float base_rate = 1.00f; // base speed is 100% of owner speed
 
-                    if (dist < 5)
-                        dist = 5;
+                    // At distance <= MIN_DISTANCE_BONUS, base_rate = 1.0f
+                    const float MIN_DISTANCE_BONUS = 5.0f;
 
-                    float mult = base_rate + ((dist - 5) * 0.01f);
+                    // At distance >= MAX_DISTANCE_BONUS , base_rate = 2.0f
+                    const float MAX_DISTANCE_BONUS = 40.0f;
 
-                    speed *= pOwner->GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
+                    distanceToTarget = std::max( 0.0f, distanceToTarget - MIN_DISTANCE_BONUS );
+
+                    float mult = base_rate + ( distanceToTarget / MAX_DISTANCE_BONUS ) * ( distanceToTarget / MAX_DISTANCE_BONUS );
+                    UnitMoveType ownerMoveType = mtype;
+
+                    //! owner is backpedaling :(
+                    if ( pOwner->m_movementInfo.HasMovementFlag( MOVEMENTFLAG_BACKWARD ) )
+                    {
+                        switch ( mtype )
+                        {
+                            case MOVE_RUN:
+                            {
+                                mult *= playerBaseMoveSpeed[ MOVE_RUN_BACK ] / playerBaseMoveSpeed[ MOVE_RUN ];
+                                ownerMoveType = MOVE_RUN_BACK;
+                                break;
+                            }
+                            case MOVE_SWIM:
+                            {
+                                mult *= playerBaseMoveSpeed[ MOVE_SWIM_BACK ] / playerBaseMoveSpeed[ MOVE_SWIM ];
+                                ownerMoveType = MOVE_SWIM_BACK;
+                                break;
+                            }
+                            case MOVE_FLIGHT:
+                            {
+                                mult *= playerBaseMoveSpeed[ MOVE_FLIGHT_BACK ] / playerBaseMoveSpeed[ MOVE_FLIGHT ];
+                                ownerMoveType = MOVE_FLIGHT_BACK;
+                                break;
+                            }
+                        }
+                    }
+                    speed *= pOwner->GetSpeedRate( ownerMoveType ) * mult; // pets derive speed from owner when not in combat
                 }
                 else
                     speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
@@ -19241,6 +19276,46 @@ bool Unit::SetHover(bool enable, bool /*packetOnly = false*/)
     }
 
     return true;
+}
+
+Position Unit::CalculateFuturePosition( float movingTime )
+{
+    movingTime += IsPlayer() ? ( float )ToPlayer()->GetSession()->GetLatency() / 1000.0f : 0.0f;
+
+    const float orientation = GetOrientation();
+
+    Position position = GetPosition();
+    if ( m_movementInfo.HasMovementFlag( MOVEMENTFLAG_FORWARD ) )
+    {
+        const float speed = GetSpeed( IsWalking() ? MOVE_WALK : MOVE_RUN );
+
+        position.m_positionX += cos( orientation ) * speed * movingTime;
+        position.m_positionY += sin( orientation ) * speed * movingTime;
+    }
+    else if ( m_movementInfo.HasMovementFlag( MOVEMENTFLAG_BACKWARD ) )
+    {
+        const float speed = GetSpeed( IsWalking() ? MOVE_WALK : MOVE_RUN_BACK );
+
+        position.m_positionX -= cos( orientation ) * speed * movingTime;
+        position.m_positionY -= sin( orientation ) * speed * movingTime;
+    }
+
+    if ( m_movementInfo.HasMovementFlag( MOVEMENTFLAG_STRAFE_LEFT ) )
+    {
+        float speed = GetSpeed( IsWalking() ? MOVE_WALK : MOVE_RUN );
+
+        position.m_positionX += cos( orientation + M_PI / 2.0 ) * speed * movingTime;
+        position.m_positionY += sin( orientation + M_PI / 2.0 ) * speed * movingTime;
+    }
+    else if ( m_movementInfo.HasMovementFlag( MOVEMENTFLAG_STRAFE_RIGHT ) )
+    {
+        float speed = GetSpeed( IsWalking() ? MOVE_WALK : MOVE_RUN );
+
+        position.m_positionX += cos( orientation - M_PI / 2.0 ) * speed * movingTime;
+        position.m_positionY += sin( orientation - M_PI / 2.0 ) * speed * movingTime;
+    }
+
+    return position;
 }
 
 void Unit::SendMovementHover(Player* sendTo)

@@ -400,6 +400,9 @@ enum WorldIntConfigs
     CONFIG_KRUUL_EVENT_HOUR,
     CONFIG_KRUUL_EVENT_MINUTE,
     CONFIG_CUSTOM_AFK_REPORT_TIMER,
+    CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL,
+    CONFIG_MOVEMENT_FOLLOWSTART_TIMER,
+    CONFIG_MOVEMENT_FOLLOWPATH_LENGTH,
     CONFIG_HUNGER_GAMES_LIMIT,
     CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
     CONFIG_CHINA_TOWN_TIMER,

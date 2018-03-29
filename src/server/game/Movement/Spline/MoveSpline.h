@@ -31,6 +31,11 @@ namespace Movement
         Location(const Vector3& v) : Vector3(v), orientation(0) {}
         Location(const Vector3& v, float o) : Vector3(v), orientation(o) {}
 
+        operator Vector3()
+        {
+            return *this;
+        }
+
         float orientation;
     };
 

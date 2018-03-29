@@ -31,6 +31,7 @@
 #include "RandomMovementGenerator.h"
 #include "EscortMovementGenerator.h"
 #include "SplineChainMovementGenerator.h"
+#include "FollowMovementGenerator.hpp"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
 #include <cassert>
@@ -254,7 +255,7 @@ void MotionMaster::MoveTargetedHome()
         if (target)
         {
             ;//sLog->outStaticDebug("Following %s (GUID: %u)", target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature", target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : ((Creature*)target)->GetDBTableGUIDLow());
-            Mutate(new FollowMovementGenerator<Creature>(target, PET_FOLLOW_DIST, _owner->GetFollowAngle()), MOTION_SLOT_ACTIVE);
+            Mutate(new Movement::FollowMovementGenerator(target, PET_FOLLOW_DIST, _owner->GetFollowAngle()), MOTION_SLOT_ACTIVE);
         }
     }
     else
@@ -289,7 +290,6 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle)
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
-    //_owner->ClearUnitState(UNIT_STATE_FOLLOW);
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         ;//sLog->outStaticDebug("Player (GUID: %u) chase to %s (GUID: %u)",
@@ -315,23 +315,8 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
     if (!target || target == _owner || _owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return;
 
-    //_owner->AddUnitState(UNIT_STATE_FOLLOW);
-    if (_owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        ;//sLog->outStaticDebug("Player (GUID: %u) follow to %s (GUID: %u)", _owner->GetGUIDLow(),
-        //    target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
-        //    target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
-        Mutate(new FollowMovementGenerator<Player>(target, dist, angle), slot);
+    Mutate(new Movement::FollowMovementGenerator(target, dist, angle), slot);
     }
-    else
-    {
-        ;//sLog->outStaticDebug("Creature (Entry: %u GUID: %u) follow to %s (GUID: %u)",
-        //    _owner->GetEntry(), _owner->GetGUIDLow(),
-        //    target->GetTypeId() == TYPEID_PLAYER ? "player" : "creature",
-        //    target->GetTypeId() == TYPEID_PLAYER ? target->GetGUIDLow() : target->ToCreature()->GetDBTableGUIDLow());
-        Mutate(new FollowMovementGenerator<Creature>(target, dist, angle), slot);
-    }
-}
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath, bool forceDestination, MovementSlot slot)
 {

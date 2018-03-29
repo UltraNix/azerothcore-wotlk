@@ -39,6 +39,8 @@
 #include "BattlegroundMgr.h"
 #include "MapManager.h"
 #include "ace/INET_Addr.h"
+#include "TargetedMovementGenerator.h"
+#include "FollowMovementGenerator.hpp"
 
 class misc_commandscript : public CommandScript
 {
@@ -2334,11 +2336,7 @@ public:
                 }
                 case FOLLOW_MOTION_TYPE:
                 {
-                    Unit* target = NULL;
-                    if (unit->GetTypeId() == TYPEID_PLAYER)
-                        target = static_cast<FollowMovementGenerator<Player> const*>(movementGenerator)->GetTarget();
-                    else
-                        target = static_cast<FollowMovementGenerator<Creature> const*>(movementGenerator)->GetTarget();
+                    Unit* target = static_cast< Movement::FollowMovementGenerator const*>(movementGenerator)->GetTarget();
 
                     if (!target)
                         handler->SendSysMessage(LANG_MOVEGENS_FOLLOW_NULL);

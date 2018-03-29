@@ -27,6 +27,8 @@
 #include "GridDefines.h"
 #include "Map.h"
 
+#include "G3D/Vector3.h"
+
 #include <set>
 #include <string>
 #include <sstream>
@@ -400,6 +402,11 @@ struct Position
     Position(float x = 0, float y = 0, float z = 0, float o = 0)
         : m_positionX(x), m_positionY(y), m_positionZ(z), m_orientation(NormalizeOrientation(o)) { }
 
+    operator G3D::Vector3() const
+    {
+        return { m_positionX, m_positionY, m_positionZ };
+    }
+
     struct PositionXYZStreamer
     {
         explicit PositionXYZStreamer(Position& pos) : m_pos(&pos) {}
@@ -435,6 +442,7 @@ struct Position
     inline float GetPositionY() const { return m_positionY; }
     inline float GetPositionZ() const { return m_positionZ; }
     inline float GetOrientation() const { return m_orientation; }
+
     inline const Position& GetPosition() const { return *this; }
 
     void GetPosition(float &x, float &y) const
