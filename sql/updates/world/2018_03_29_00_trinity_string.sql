@@ -1,0 +1,3 @@
+REPLACE INTO `trinity_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES 
+('75', '|cffff9933.blockinvite|cFFFFD700 - disables channel invites|r', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('76', ' The receiver must add you on the Friend list. This is a precaution against the gold sellers.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);

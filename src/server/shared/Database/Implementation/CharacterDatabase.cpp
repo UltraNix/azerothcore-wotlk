@@ -569,4 +569,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_CREATURE_RECORD, "INSERT INTO creature_records VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     // MAIL SPAM
     PrepareStatement(CHAR_SEL_MAX_LEVEL_BY_ACC_ID, "SELECT MAX(level) FROM characters WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_FRIEND_OF_MINE, "SELECT friend FROM character_social WHERE guid = ? AND friend = ?", CONNECTION_SYNCH);
 }

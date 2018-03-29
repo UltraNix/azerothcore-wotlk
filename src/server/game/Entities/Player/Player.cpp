@@ -1114,6 +1114,9 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     InitRunes();
 
+    if (sWorld->getBoolConfig(CONFIG_CHINA_TOWN) == true)
+        SetBlockChannelInvite(true);
+
     SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
     SetHonorPoints(sWorld->getIntConfig(CONFIG_START_HONOR_POINTS));
     SetArenaPoints(sWorld->getIntConfig(CONFIG_START_ARENA_POINTS));
@@ -27703,6 +27706,20 @@ bool Player::HasRequiredCharacterLevel(uint8 level)
     uint8 resultLevel = (*result)[0].GetUInt8();
 
     if (resultLevel < level)
+        return false;
+
+    return true;
+}
+
+bool Player::IsFriendOfMine(uint64 guid)
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_FRIEND_OF_MINE);
+    stmt->setUInt64(0, GetGUID());
+    stmt->setUInt64(0, guid);
+
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+    if (!result)
         return false;
 
     return true;

@@ -127,12 +127,13 @@ public:
             { "mailbox",            SEC_ADMINISTRATOR,      false, &HandleMailBoxCommand,               "" },      
             { "unstuck",            SEC_PLAYER,             false, HandleUnstuckCommand,                "" },
             { "eventgo",            SEC_PLAYER,             false, &HandleEventGoCommand,               "" },
-            { "hide",               SEC_PLAYER,             false, &HandleSthHideCommand,               "" },
+            { "hide",               SEC_PLAYER,             false, HandleSthHideCommand,                "" },
             { "checkpoint",         SEC_PLAYER,             false, &HandleCheckPointCommand,            "" },
             { "buff",               SEC_ADMINISTRATOR,      false, &HandleBuffCommand,                  "" },
             { "unbuff",             SEC_ADMINISTRATOR,      false, &HandleUnbuffCommand,                "" },
             { "mutehistory",        SEC_GAMEMASTER,         false, &HandleMuteHistoryCommand,           "" },
             { "gmhelp",             SEC_MODERATOR,          false, &HandleGmhelpCommand,                "" },
+            { "blockinvite",        SEC_PLAYER,             false, HandleBlockInviteCommand,            "" },
         };
         return commandTable;
     }
@@ -973,6 +974,7 @@ public:
         handler->PSendSysMessage(LANG_HELP_COMMAND_PVPINFO);
         handler->PSendSysMessage(LANG_HELP_COMMAND_BLIZZLIKE);
         handler->PSendSysMessage(LANG_HELP_COMMAND_DODGE);
+        handler->PSendSysMessage(LANG_HELP_CHANNEL_BLOCK);
         return true;
     }
 
@@ -3376,7 +3378,7 @@ public:
         return true;
     }
 
-    static bool HandleSthHideCommand(ChatHandler* handler, char const* args)
+    static bool HandleSthHideCommand(ChatHandler* handler, char const* /*args*/)
     {
         if (!sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         {
@@ -3547,6 +3549,25 @@ public:
             } while (result->NextRow());
         }
 
+        return true;
+    }
+
+    static bool HandleBlockInviteCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (player->HasBlockChannelInvite())
+        {
+            player->SetBlockChannelInvite(false);
+            handler->PSendSysMessage("You receive channel invites again.");
+        }
+        else {
+            player->SetBlockChannelInvite(true);
+            handler->PSendSysMessage("You no longer receive channel invites.");
+        }
         return true;
     }
 };

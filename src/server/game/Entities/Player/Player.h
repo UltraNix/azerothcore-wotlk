@@ -538,6 +538,7 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_MODEL_TWK                = 0x100000,
 
     PLAYER_EXTRA_STH_HIDE                 = 0x200000,
+    PLAYER_EXTRA_ACCEPT_CHANNEL_INV       = 0x400000,
 };
 
 // 2^n values
@@ -1216,11 +1217,22 @@ class Player : public Unit, public GridObject<Player>
         // Stairways to heaven
         void SetSthHide(bool hide)
         {
-            if (hide) m_ExtraFlags |= PLAYER_EXTRA_STH_HIDE;
-            else m_ExtraFlags &= ~PLAYER_EXTRA_STH_HIDE;
+            if (hide)
+                m_ExtraFlags |= PLAYER_EXTRA_STH_HIDE;
+            else
+                m_ExtraFlags &= ~PLAYER_EXTRA_STH_HIDE;
         }
         bool hasSthHide() const { return m_ExtraFlags & PLAYER_EXTRA_STH_HIDE; }
 
+        // Channel Blocks
+        void SetBlockChannelInvite(bool block)
+        {
+            if (block)
+                m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_CHANNEL_INV;
+            else
+                m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_CHANNEL_INV;
+        }
+        bool HasBlockChannelInvite() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_CHANNEL_INV; }
 
         // @Transmog
         bool HasTransmogModelPvE()   const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVE; }
@@ -2698,6 +2710,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool CheckPremiumAmount(uint32 amount);
         bool HasRequiredCharacterLevel(uint8 level);
+        bool IsFriendOfMine(uint64 guid);
 
     protected:
         // Gamemaster whisper whitelist

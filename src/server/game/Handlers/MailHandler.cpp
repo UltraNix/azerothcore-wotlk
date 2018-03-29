@@ -126,6 +126,12 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         return;
     }
 
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->IsFriendOfMine(rc))
+    {
+        SendNotification(GetTrinityString(LANG_IS_NOT_YOUR_FRIEND));
+        return;
+    }
+
     ;sLog->outDetail("Player %u is sending mail to %s (GUID: %u) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", player->GetGUIDLow(), receiver.c_str(), GUID_LOPART(rc), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
 
     if (player->GetGUID() == rc)
