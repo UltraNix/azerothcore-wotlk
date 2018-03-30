@@ -1130,9 +1130,9 @@ void RandomBattlegroundSystem::Update(uint32 diff)
 
         switch (m_CurrentRandomBg)
         {
-            case BATTLEGROUND_AV: m_SwitchTimer = 45*IN_MILLISECONDS; break; // max 40 per team
+            case BATTLEGROUND_AV: m_SwitchTimer = 60*IN_MILLISECONDS; break; // max 40 per team
             case BATTLEGROUND_WS: m_SwitchTimer = 120*IN_MILLISECONDS; break; // max 10 per team
-            case BATTLEGROUND_IC: m_SwitchTimer = 45*IN_MILLISECONDS; break; // max 40 per team
+            case BATTLEGROUND_IC: m_SwitchTimer = 60*IN_MILLISECONDS; break; // max 40 per team
             case BATTLEGROUND_EY: m_SwitchTimer = 120*IN_MILLISECONDS; break; // max 15 per team
             case BATTLEGROUND_AB: m_SwitchTimer = 120*IN_MILLISECONDS; break; // max 15 per team
             case BATTLEGROUND_SA: m_SwitchTimer = 120*IN_MILLISECONDS; break; // max 15 per team
