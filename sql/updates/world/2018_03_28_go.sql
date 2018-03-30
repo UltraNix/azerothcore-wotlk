@@ -1,0 +1,1 @@
+UPDATE `gameobject` SET `spawntimesecs` = 900 WHERE `guid` IN ( SELECT `guid` FROM `pool_gameobject` WHERE `pool_entry` = 982);
