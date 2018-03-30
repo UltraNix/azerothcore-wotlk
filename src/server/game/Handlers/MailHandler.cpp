@@ -104,13 +104,15 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     // Sitowsky: Mail Spam
     if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->HasRequiredCharacterLevel(uint8(sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))))
     {
-        SendNotification(GetTrinityString(LANG_MAIL_SPAM_REQ_LEVEL), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        ChatHandler(player->GetSession()).PSendSysMessage(LANG_MAIL_SENDER_REQ, sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
     if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == false && player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
     {
-        SendNotification(GetTrinityString(LANG_MAIL_SENDER_REQ), sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        ChatHandler(player->GetSession()).PSendSysMessage(LANG_MAIL_SENDER_REQ, sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
+        player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
@@ -123,12 +125,6 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         sLog->outDetail("Player %u is sending mail to %s (GUID: not existed!) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
             player->GetGUIDLow(), receiver.c_str(), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
-        return;
-    }
-
-    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->IsFriendOfMine(rc))
-    {
-        SendNotification(GetTrinityString(LANG_IS_NOT_YOUR_FRIEND));
         return;
     }
 
@@ -207,6 +203,13 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     if (!sWorld->getBoolConfig(CONFIG_CROSSFACTION_MAIL) && !accountBound && player->GetTeamId() != rc_teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
     {
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_YOUR_TEAM);
+        return;
+    }
+
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->IsFriendOfMine(rc) && GetAccountId() != rc_account)
+    {
+        ChatHandler(player->GetSession()).PSendSysMessage(LANG_IS_NOT_YOUR_FRIEND);
+        player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
