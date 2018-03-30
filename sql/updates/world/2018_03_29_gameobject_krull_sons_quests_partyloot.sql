@@ -1,0 +1,1 @@
+UPDATE `gameobject_template` SET data15 = 1 WHERE entry IN (185569,185152,185574,185562,185577);
