@@ -27714,8 +27714,8 @@ bool Player::HasRequiredCharacterLevel(uint8 level)
 bool Player::IsFriendOfMine(uint64 guid)
 {
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_FRIEND_OF_MINE);
-    stmt->setUInt64(0, GetGUID());
     stmt->setUInt64(0, guid);
+    stmt->setUInt64(1, GetGUID());
 
     PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
