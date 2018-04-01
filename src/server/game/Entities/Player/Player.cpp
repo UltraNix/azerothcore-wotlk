@@ -20454,6 +20454,9 @@ void Player::_SaveStats(SQLTransaction& trans)
     stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_EXPERTISE));          // Expertise
     stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HASTE_SPELL));        // Haste
     stmt->setUInt32(index++, uint32(GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * 5));      // Mana Regen: Mana is regenerated every 5 seconds so we need multiply the value by 5.
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HIT_SPELL));          // Spell Hit
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HIT_MELEE));          // Melee Hit
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_HIT_RANGED));         // Ranged Hit
 
     trans->Append(stmt);
 }
