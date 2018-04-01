@@ -422,6 +422,26 @@ namespace Trinity
         }
     };
 
+    template<class Check>
+    struct UnitLambdaSearcher
+    {
+        uint32      i_phaseMask;
+        Check       i_check;
+
+        UnitLambdaSearcher( WorldObject const* searcher, Check check )
+            : i_phaseMask( searcher->GetPhaseMask() )
+            , i_check( std::move( check ) )
+        {
+        }
+
+        void Visit( PlayerMapType &m );
+        void Visit( CreatureMapType &m );
+
+        template<class NOT_INTERESTED> void Visit( GridRefManager<NOT_INTERESTED> & )
+        {
+        }
+    };
+
     // Creature searchers
 
     template<class Check>

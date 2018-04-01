@@ -445,6 +445,32 @@ void Trinity::UnitGenericSearcher<Check, Container>::Visit( CreatureMapType &m )
                 i_objects.push_back( itr->GetSource() );
 }
 
+template<class Check>
+void Trinity::UnitLambdaSearcher<Check>::Visit( PlayerMapType &m )
+{
+    for ( PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr )
+    {
+        auto source = itr->GetSource();
+        if ( source->InSamePhase( i_phaseMask ) )
+        {
+            i_check( source );
+        }
+    }
+}
+
+template<class Check>
+void Trinity::UnitLambdaSearcher<Check>::Visit( CreatureMapType &m )
+{
+    for ( CreatureMapType::iterator itr = m.begin(); itr != m.end(); ++itr )
+    {
+        auto source = itr->GetSource();
+        if ( source->InSamePhase( i_phaseMask ) )
+        {
+            i_check( source );
+        }
+    }
+}
+
 // Creature searchers
 
 template<class Check>
