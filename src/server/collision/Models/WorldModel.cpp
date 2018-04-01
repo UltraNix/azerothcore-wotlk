@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -20,6 +20,7 @@
 #include "ModelInstance.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"
+#include "Log.h"
 
 using G3D::Vector3;
 using G3D::Ray;
@@ -359,17 +360,25 @@ namespace VMAP
 
     struct GModelRayCallback
     {
-        GModelRayCallback(const std::vector<MeshTriangle> &tris, const std::vector<Vector3> &vert):
-            vertices(vert.begin()), triangles(tris.begin()), hit(false) { }
+        GModelRayCallback(const std::vector<MeshTriangle> &tris, const std::vector<Vector3> &vert, size_t vectorSize):
+            vertices(vert.begin()), triangles(tris.begin()), hit(false), size(vectorSize) { }
         bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool /*StopAtFirstHit*/)
         {
+            if (entry >= size)
+            {
+                sLog->outCrash("GModelRayCallback entry is bigger or equal to vector size, preventing crash!");
+                return false;
+            }
+
             bool result = IntersectTriangle(triangles[entry], vertices, ray, distance);
-            if (result)  hit=true;
+            if (result)
+                hit = true;
             return hit;
         }
         std::vector<Vector3>::const_iterator vertices;
         std::vector<MeshTriangle>::const_iterator triangles;
         bool hit;
+        size_t size;
     };
 
     bool GroupModel::IntersectRay(const G3D::Ray &ray, float &distance, bool stopAtFirstHit) const
@@ -377,7 +386,7 @@ namespace VMAP
         if (triangles.empty())
             return false;
 
-        GModelRayCallback callback(triangles, vertices);
+        GModelRayCallback callback(triangles, vertices, triangles.size());
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
         return callback.hit;
     }
@@ -386,7 +395,7 @@ namespace VMAP
     {
         if (triangles.empty() || !iBound.contains(pos))
             return false;
-        GModelRayCallback callback(triangles, vertices);
+        GModelRayCallback callback(triangles, vertices, triangles.size());
         Vector3 rPos = pos - 0.1f * down;
         float dist = G3D::inf();
         G3D::Ray ray(rPos, down);
@@ -420,15 +429,23 @@ namespace VMAP
 
     struct WModelRayCallBack
     {
-        WModelRayCallBack(const std::vector<GroupModel> &mod): models(mod.begin()), hit(false) { }
+        WModelRayCallBack(const std::vector<GroupModel> &mod, size_t vectorSize): models(mod.begin()), hit(false), size(vectorSize) { }
         bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool StopAtFirstHit)
         {
+            if (entry >= size)
+            {
+                sLog->outCrash("WModelRayCallback entry is bigger or equal to vector size, preventing crash!");
+                return false;
+            }
+
             bool result = models[entry].IntersectRay(ray, distance, StopAtFirstHit);
-            if (result)  hit=true;
+            if (result)
+                hit = true;
             return hit;
         }
         std::vector<GroupModel>::const_iterator models;
         bool hit;
+        size_t size;
     };
 
     bool WorldModel::IntersectRay(const G3D::Ray &ray, float &distance, bool stopAtFirstHit) const
@@ -438,7 +455,7 @@ namespace VMAP
         if (groupModels.size() == 1)
             return groupModels[0].IntersectRay(ray, distance, stopAtFirstHit);
 
-        WModelRayCallBack isc(groupModels);
+        WModelRayCallBack isc(groupModels, groupModels.size());
         groupTree.intersectRay(ray, isc, distance, stopAtFirstHit);
         return isc.hit;
     }
