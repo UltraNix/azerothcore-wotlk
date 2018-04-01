@@ -1114,7 +1114,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
 
     InitRunes();
 
-    if (sWorld->getBoolConfig(CONFIG_CHINA_TOWN) == true)
+    if (sWorld->getBoolConfig(CONFIG_CHINA_TOWN))
         SetBlockChannelInvite(true);
 
     SetUInt32Value(PLAYER_FIELD_COINAGE, sWorld->getIntConfig(CONFIG_START_PLAYER_MONEY));
@@ -5307,7 +5307,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     UpdateObjectVisibility();
 
     // Premium service
-    bool allowPremium = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? getLevel() < 80 /* Angrthar affect only below 80 level */ : true /* Feronis affect every1 */;
+    bool allowPremium = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? getLevel() < 80 /* Angrthar affect only below 80 level */ : true /* Feronis affect every1 */;
     if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_RESSURECTION_SICKNESS) && allowPremium)
         return;
 
@@ -7791,7 +7791,7 @@ void Player::UpdateArea(uint32 newArea)
     bool isSanctuary = area->IsSanctuary();
     bool isInn = area->IsInn(GetTeamId());
     // @schody
-    bool isEvent = (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true && area->ID == 616 /* Hyjal */ || area->ID == 268 /* Azshara Crater */ || area->ID == 2037 /* Quel'Thalas */) ? true : false;
+    bool isEvent = (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) && area->ID == 616 /* Hyjal */ || area->ID == 268 /* Azshara Crater */ || area->ID == 2037 /* Quel'Thalas */) ? true : false;
 
     if (zone)
     {
@@ -25618,7 +25618,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
         return;
 
     // @schody
-    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true)
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE))
         if (GetZoneId() == 616 /* Hyjal */ || GetZoneId() == 268 /* Azshara Crater */ || GetZoneId() == 2037 /*Quel'thalas*/)
             return;
 

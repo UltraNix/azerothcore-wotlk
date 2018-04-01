@@ -593,7 +593,7 @@ public:
         // Sitowsky: Mute History
         if (sWorld->getBoolConfig(CONFIG_MUTE_HISTORY))
         {
-            uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? 2 : 1;
+            uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 2 : 1;
 
             stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_MUTE_HISTORY);
             stmt->setUInt32(0, accountId);

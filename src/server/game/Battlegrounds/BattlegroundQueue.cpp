@@ -154,7 +154,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
         index++;
 
     // Sitowsky: Crossfaction Battlegrounds
-    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true && m_arenaType == 0)
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && !m_arenaType && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? leader->getLevel() <= 79 : 80)
         index = BG_QUEUE_MIXED;
 
     // pussywizard: store indices at which GroupQueueInfo is in m_QueuedGroups
@@ -190,8 +190,9 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
         if (Battleground* bgt = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
         {
             // Sitowsky: Crossfaction Battlegrounds
-            if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
+            if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? leader->getLevel() <= 79 : 80)
             {
+                printf("CF BG QUE 2\n");
                 char const* bgName = bgt->GetName();
                 uint32 MinPlayers = bgt->GetMinPlayersPerTeam() * 2;
                 uint32 qPlayers = 0;
@@ -237,12 +238,12 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
             {
                 switch (m_arenaType)
                 {
-                case 3: // 3v3
-                    sWorld->SendPvPWorldText(LANG_ARENA_3V3_ANNOUNCE);
-                    break;
-                case 5: // 5v5
-                    sWorld->SendPvPWorldText(LANG_ARENA_5V5_ANNOUNCE);
-                    break;
+                    case 3: // 3v3
+                        sWorld->SendPvPWorldText(LANG_ARENA_3V3_ANNOUNCE);
+                        break;
+                    case 5: // 5v5
+                        sWorld->SendPvPWorldText(LANG_ARENA_5V5_ANNOUNCE);
+                        break;
                 }
             }
         }
@@ -440,7 +441,7 @@ void BattlegroundQueue::FillPlayersToBG(const int32 aliFree, const int32 hordeFr
     GroupsQueueType::const_iterator Horde_itr = m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].begin();
     for (; Horde_itr != m_QueuedGroups[bracket_id][BG_QUEUE_NORMAL_HORDE].end() && m_SelectionPools[TEAM_HORDE].AddGroup((*Horde_itr), hordeFree); ++Horde_itr);
 
-    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG))
         if (Battleground* bgT = sBattlegroundMgr->GetBattlegroundTemplate(m_bgTypeId))
             if (!bgT->isArena())
                 if (FillXPlayersToBG(bracket_id, bgT, false))

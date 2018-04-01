@@ -3391,7 +3391,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     }
 
     // @schody
-    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true && m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id != 8690 /*HearthStone*/)
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) && m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->Id != 8690 /*HearthStone*/)
     {
         if (m_caster->GetZoneId() == 616 /* Hyjal */ || m_caster->GetZoneId() == 268 /* Azshara Crater */ || m_caster->GetZoneId() == 2037 /*Quel'thalas*/)
         {

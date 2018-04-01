@@ -102,14 +102,14 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     Player* player = _player;
 
     // Sitowsky: Mail Spam
-    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->HasRequiredCharacterLevel(uint8(sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))))
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) && !player->HasRequiredCharacterLevel(uint8(sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))))
     {
         ChatHandler(player->GetSession()).PSendSysMessage(LANG_MAIL_SENDER_REQ, sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
-    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == false && player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
+    if (!sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) && player->getLevel() < sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ))
     {
         ChatHandler(player->GetSession()).PSendSysMessage(LANG_MAIL_SENDER_REQ, sWorld->getIntConfig(CONFIG_MAIL_LEVEL_REQ));
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
@@ -206,7 +206,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         return;
     }
 
-    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) == true && !player->IsFriendOfMine(rc) && GetAccountId() != rc_account)
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) && !player->IsFriendOfMine(rc) && GetAccountId() != rc_account)
     {
         ChatHandler(player->GetSession()).PSendSysMessage(LANG_IS_NOT_YOUR_FRIEND);
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);

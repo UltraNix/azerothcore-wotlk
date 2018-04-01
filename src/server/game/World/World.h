@@ -165,6 +165,7 @@ enum WorldBoolConfigs
     CONFIG_PTR_REALM,                         // Sitowsky: New created players have level 80 and allow them speak without any played time.
     CONFIG_CROSSFACTION_RDF,                  // Afgann:   Allow or disallow leveling with RDF between two factions.
     CONFIG_CROSSFACTION_BG,                   // Sitowsky: Allow or disallow playing in BG between two factions.
+    CONFIG_CROSSFACTION_BG_TWINK_ONLY,        // Sitowsky: Allow or disallow playing in BG between two factions only with twinks.
     CONFIG_PREMIUM_TELEPORT_ENABLE,           // Sitowsky: Allow or disallow usage of specified premium service.
     CONFIG_PREMIUM_INSTANT_FLYING_ENABLE,     // Sitowsky: Allow or disallow usage of specified premium service.
     CONFIG_PHASED_DUELS_ENABLE,               // Piootrek: Enables or disables Phased Duels.

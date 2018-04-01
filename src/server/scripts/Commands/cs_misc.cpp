@@ -2202,7 +2202,7 @@ public:
         // Sitowsky: Mute History
         if (sWorld->getBoolConfig(CONFIG_MUTE_HISTORY))
         {
-            uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? 2 : 1;
+            uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 2 : 1;
 
             stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_MUTE_HISTORY);
             stmt->setUInt32(0, accountId);
@@ -3521,7 +3521,7 @@ public:
 
         Field* fields = result->Fetch();
         uint32 accountId = fields[0].GetUInt32();
-        uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? 2 : 1;
+        uint32 rId = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 2 : 1;
 
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_MUTE_HISTORY);
         stmt->setUInt32(0, accountId);

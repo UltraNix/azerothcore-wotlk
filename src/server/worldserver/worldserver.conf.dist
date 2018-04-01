@@ -1688,6 +1688,7 @@ CrossFactionRDF.MaxLVL = 70
 #                     1 - (Enabled)
 
 CrossFactionBG.Enable = 0
+CrossFactionBG.Twink = 0
 
 #
 #     CrossFactionMail.Enable

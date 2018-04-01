@@ -671,15 +671,35 @@ void Battleground::RewardHonorToTeam(uint32 honor, TeamId teamId)
 
 void Battleground::RewardReputationToTeam(uint32 factionId, uint32 reputation, TeamId teamId)
 {
-    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId))
-        for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-            if (itr->second->GetBgTeamId() == teamId)
+    // Sitowsky: Crossfaction battlegrounds
+    bool cfBG = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG);
+
+    for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        if (itr->second->GetBgTeamId() == teamId)
+        {
+            if (cfBG)
+            {
+                TeamId originTeam = Player::TeamIdForRace(itr->second->getRace());
+                switch (factionId)
+                {
+                    case 509:
+                    case 510: originTeam == TEAM_ALLIANCE ? factionId = 509 : factionId = 510; break; // AB
+                    case 729:
+                    case 730: originTeam == TEAM_ALLIANCE ? factionId = 729 : factionId = 730; break; // AV
+                    case 889:
+                    case 890: originTeam == TEAM_ALLIANCE ? factionId = 890 : factionId = 889; break; // WSG
+                    default: break;
+                }
+            }
+
+            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId))
             {
                 uint32 repGain = reputation;
                 AddPct(repGain, itr->second->GetTotalAuraModifier(SPELL_AURA_MOD_REPUTATION_GAIN));
                 AddPct(repGain, itr->second->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_FACTION_REPUTATION_GAIN, factionId));
                 itr->second->GetReputationMgr().ModifyReputation(factionEntry, repGain);
             }
+        }
 }
 
 void Battleground::UpdateWorldState(uint32 Field, uint32 Value)
@@ -880,7 +900,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
             player->RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
 
         // Sitowsky: Crossfaction Battlegrounds
-        if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
+        if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG))
             player->setFactionForRace(player->getRace());
 
         // Last standing - Rated 5v5 arena & be solely alive player
@@ -1184,7 +1204,7 @@ void Battleground::RemovePlayerAtLeave(Player* player)
     }
 
     // Sitowsky: Crossfaction Battlegrounds
-    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG))
         player->setFactionForRace(player->getRace());
 
     player->RemoveAurasByType(SPELL_AURA_MOUNTED);
@@ -1343,7 +1363,7 @@ void Battleground::AddPlayer(Player* player)
     }
 
     // Sitowsky: Crossfaction Battlegrounds
-    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true && !isArena())
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && !isArena())
     {
         switch (player->GetBgTeamId())
         {

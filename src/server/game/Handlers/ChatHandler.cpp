@@ -114,15 +114,37 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             }
     }
 
+    // Sitowsky: Crossfaction Battlegrounds
+    bool cfBG = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && sender->GetMap()->IsBattleground();
+    bool cfSpeak = cfBG && lang != LANG_ORCISH || LANG_COMMON;
+
+    if (cfBG)
+    {
+        switch (type)
+        {
+            case CHAT_MSG_SAY:
+            case CHAT_MSG_YELL:
+            case CHAT_MSG_EMOTE:
+            case CHAT_MSG_TEXT_EMOTE:
+            case CHAT_MSG_AFK:
+            case CHAT_MSG_DND:
+            case CHAT_MSG_BATTLEGROUND:
+            case CHAT_MSG_BATTLEGROUND_LEADER:
+                // sender->GetTeamId() == TEAM_HORDE ? lang = LANG_ORCISH : lang = LANG_COMMON;
+                lang = LANG_UNIVERSAL; // @todo: Temporary need to be changed between teams.
+                break;
+        }
+    }
+
     // prevent talking at unknown language (cheating)
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
-    if (!langDesc)
+    if (!langDesc && !cfSpeak)
     {
         SendNotification(LANG_UNKNOWN_LANGUAGE);
         recvData.rfinish();
         return;
     }
-    if (langDesc->skill_id != 0 && !sender->HasSkill(langDesc->skill_id))
+    if (langDesc->skill_id != 0 && !sender->HasSkill(langDesc->skill_id) && !cfSpeak)
     {
         // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
         Unit::AuraEffectList const& langAuras = sender->GetAuraEffectsByType(SPELL_AURA_COMPREHEND_LANGUAGE);
@@ -184,11 +206,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                     if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
                         if (sender->getLevel() >= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MINLVL) && sender->getLevel() <= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MAXLVL))
                             lang = LANG_UNIVERSAL;
-                    break;
-                case CHAT_MSG_BATTLEGROUND:
-                case CHAT_MSG_BATTLEGROUND_LEADER:
-                    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) == true)
-                        lang = LANG_UNIVERSAL;
                     break;
                 case CHAT_MSG_RAID:
                 case CHAT_MSG_RAID_LEADER:

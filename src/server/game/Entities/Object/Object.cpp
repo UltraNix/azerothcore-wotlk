@@ -1533,7 +1533,7 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
                             return false;
 
     // @schody
-    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) == true && obj->GetTypeId() == TYPEID_PLAYER)
+    if (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) && obj->GetTypeId() == TYPEID_PLAYER)
     {
         if (GetZoneId() == 616 /* Hyjal */ || GetZoneId() == 268 /* Azshara Crater */ || GetZoneId() == 2037 /*Quel'thalas*/)
             if (Player const* thisPlayer = ToPlayer())

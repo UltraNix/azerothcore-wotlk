@@ -522,13 +522,17 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
     TeamId teamId = Player::TeamIdForRace(playerData->race);
     FriendsResult friendResult = FRIEND_NOT_FOUND;
 
+    // Sitowsky: Crossfaction Battlegrounds
+    TeamId originTeam = Player::TeamIdForRace(GetPlayer()->getRace());
+    bool cfBG = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && GetPlayer()->GetMap()->IsBattleground() && teamId != originTeam;
+
     if (!AccountMgr::IsPlayerAccount(GetSecurity()) || sWorld->getBoolConfig(CONFIG_ALLOW_GM_FRIEND) || AccountMgr::IsPlayerAccount(AccountMgr::GetSecurity(friendAccountId, realmID)))
     {
         if (friendGuid)
         {
             if (friendGuid == GetPlayer()->GetGUID())
                 friendResult = FRIEND_SELF;
-            else if (GetPlayer()->GetTeamId() != teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
+            else if (GetPlayer()->GetTeamId() != teamId && AccountMgr::IsPlayerAccount(GetSecurity()) || cfBG)
                 friendResult = FRIEND_ENEMY;
             else if (GetPlayer()->GetSocial()->HasFriend(guidLow))
                 friendResult = FRIEND_ALREADY;

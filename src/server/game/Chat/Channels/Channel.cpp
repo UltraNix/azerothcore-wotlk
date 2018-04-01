@@ -870,7 +870,7 @@ void Channel::Invite(Player const* player, std::string const& newname)
     }
 
     Player* newp = ObjectAccessor::FindPlayerByName(newname, false);
-    if (!newp || !newp->isGMVisible() || (sWorld->getBoolConfig(CONFIG_CHINA_TOWN) == true && newp->HasBlockChannelInvite() || player->getLevel() < 70))
+    if (!newp || !newp->isGMVisible() || (sWorld->getBoolConfig(CONFIG_CHINA_TOWN) && newp->HasBlockChannelInvite() || player->getLevel() < 70))
     {
         WorldPacket data;
         MakePlayerNotFound(&data, newname);

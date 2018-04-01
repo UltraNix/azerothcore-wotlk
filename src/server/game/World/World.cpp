@@ -689,6 +689,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CROSSFACTION_RDF_MAXLVL]             = sConfigMgr->GetIntDefault("CrossFactionRDF.MaxLVL", 70);
     m_bool_configs[CONFIG_CROSSFACTION_RDF]                   = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
     m_bool_configs[CONFIG_CROSSFACTION_BG]                    = sConfigMgr->GetBoolDefault("CrossFactionBG.Enable", false);
+    m_bool_configs[CONFIG_CROSSFACTION_BG_TWINK_ONLY]         = sConfigMgr->GetBoolDefault("CrossFactionBG.Twink", false);
     m_bool_configs[CONFIG_CROSSFACTION_MAIL]                  = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
     m_bool_configs[CONFIG_WHO_OPPOSITE]                       = sConfigMgr->GetBoolDefault("CrossFactionWHO.Enable", false);
 
@@ -2222,7 +2223,7 @@ void World::Update(uint32 diff)
         uint32 playersCount     = sWorld->GetPlayerCount();
         uint32 updateTime       = sWorld->GetUpdateTime();
         uint32 avgUpdateTime    = avgDiffTracker.getAverage();
-        uint32 rId              = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) == true ? 2 : 1;
+        uint32 rId              = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 2 : 1;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_INGAME_STATISTICS);
 
