@@ -2696,7 +2696,8 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
             }
         };
 
-        auraOwner->VisitNearbyObject( query.MaxRadius, Trinity::UnitLambdaSearcher< decltype( Func ) >( auraOwner, std::move( Func ) ) );
+	Trinity::UnitLambdaSearcher< decltype( Func ) > visitor( auraOwner, std::move( Func ) );
+        auraOwner->VisitNearbyObject( query.MaxRadius, visitor );
     }
 }
 
