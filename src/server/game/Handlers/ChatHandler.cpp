@@ -115,7 +115,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
     }
 
     // Sitowsky: Crossfaction Battlegrounds
-    bool cfBG = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && sender->GetMap()->IsBattleground();
+    bool cfBG = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG)
+        && sender->GetMap()->IsBattleground()
+        && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) && sender->getLevel() ? 79 : sender->getLevel() == 80
+        && lang != LANG_ADDON;
+
     bool cfSpeak = cfBG && lang != LANG_ORCISH || LANG_COMMON;
 
     if (cfBG)

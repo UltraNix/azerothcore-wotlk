@@ -154,7 +154,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
         index++;
 
     // Sitowsky: Crossfaction Battlegrounds
-    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && !m_arenaType && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? leader->getLevel() <= 79 : 80)
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && m_arenaType == 0 && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? leader->getLevel() <= 79 : leader->getLevel() == 80)
         index = BG_QUEUE_MIXED;
 
     // pussywizard: store indices at which GroupQueueInfo is in m_QueuedGroups
@@ -190,9 +190,8 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
         if (Battleground* bgt = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
         {
             // Sitowsky: Crossfaction Battlegrounds
-            if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? leader->getLevel() <= 79 : 80)
+            if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? leader->getLevel() <= 79 : leader->getLevel() == 80)
             {
-                printf("CF BG QUE 2\n");
                 char const* bgName = bgt->GetName();
                 uint32 MinPlayers = bgt->GetMinPlayersPerTeam() * 2;
                 uint32 qPlayers = 0;
