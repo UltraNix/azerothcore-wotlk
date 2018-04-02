@@ -75,6 +75,8 @@ enum CreatureIds
     NPC_WINTERGRASP_CONTROL_ARMS        = 27852,
 
     NPC_WORLD_TRIGGER_LARGE_AOI_NOT_IMMUNE_PC_NPC = 23742,
+
+    NPC_SORCERESS_KAYLANA               = 31051,
 };
 
 enum QuestIds
@@ -559,7 +561,22 @@ class npc_wg_quest_giver : public CreatureScript
                     }
                 }
             }
+
+            if(creature->GetEntry() == NPC_SORCERESS_KAYLANA)
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "I want to browse your goods.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Hi.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            }
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        {
+            player->PlayerTalkClass->ClearMenus();
+            if (action == GOSSIP_ACTION_TRADE)
+                player->GetSession()->SendListInventory(creature->GetGUID());
+
             return true;
         }
 
