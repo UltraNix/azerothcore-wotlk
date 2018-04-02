@@ -1,0 +1,17 @@
+DELETE FROM `item_loot_template` WHERE `entry` IN (50301,54218);
+INSERT INTO `item_loot_template` (`entry`,`item`,`ChanceOrQuestChance`,`lootmode`,`groupid`,`mincountOrRef`,`maxcount`) VALUES
+(50301,46779,36.36,1,1,50,50), -- Landro's Pet Box, Path of Cenarius (36.36)
+(50301,35223,36.36,1,1,50,50), -- Landro's Pet Box, Papa Hummel's Old-Fashioned Pet Biscuit (36.36)
+(50301,45047,27.28,1,1,50,50), -- Landro's Pet Box, Sandbox Tiger (27.28)
+(50301,32588,0.45,1,2,1,1), -- Landro's Pet Box, Banana Charm (0.45)
+(50301,38050,0.45,1,2,1,1), -- Landro's Pet Box, Soul-Trader Beacon (0.45)
+(50301,34493,0.10,1,2,1,1), -- Landro's Pet Box, Dragon Kite (0.1)
+(54218,46779,36.36,1,1,50,50), -- Landro's Gift Box, Path of Cenarius (36.36)
+(54218,35223,36.36,1,1,50,50), -- Landro's Gift Box, Papa Hummel's Old-Fashioned Pet Biscuit (36.36)
+(54218,45047,27.28,1,1,50,50), -- Landro's Gift Box, Sandbox Tiger (27.28)
+(54218,23720,0.50,1,2,1,1), -- Landro's Gift Box, Riding Turtle (0.5)
+(54218,49284,0.30,1,2,1,1), -- Landro's Gift Box, Reins of the Swift Spectral Tiger (0.3)
+(54218,49283,0.10,1,2,1,1), -- Landro's Gift Box, Reins of the Spectral Tiger (orginally: 0.1)
+(54218,49286,0.10,1,2,1,1), -- Landro's Gift Box, X-51 Nether-Rocket X-TREME(orginally: 0.3)
+(54218,49285,0.30,1,2,1,1), -- Landro's Gift Box, X-51 Nether-Rocket (orginally: 0.1)
+(54218,49282,0.20,1,2,1,1); -- Landro's Gift Box, Big Battle Bear (0.2)
