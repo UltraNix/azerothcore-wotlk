@@ -77,6 +77,7 @@ enum CreatureIds
     NPC_WORLD_TRIGGER_LARGE_AOI_NOT_IMMUNE_PC_NPC = 23742,
 
     NPC_SORCERESS_KAYLANA               = 31051,
+    NPC_HOODOO_MASTER                   = 31101,
 };
 
 enum QuestIds
@@ -562,10 +563,10 @@ class npc_wg_quest_giver : public CreatureScript
                 }
             }
 
-            if(creature->GetEntry() == NPC_SORCERESS_KAYLANA)
+            if(creature->GetEntry() == NPC_SORCERESS_KAYLANA || creature->GetEntry() == NPC_HOODOO_MASTER)
             {
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "I want to browse your goods.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Hi.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Hello.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
             }
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
             return true;
