@@ -206,7 +206,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         return;
     }
 
-    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) && !player->IsFriendOfMine(rc) && GetAccountId() != rc_account)
+    if (sWorld->getBoolConfig(CONFIG_MAIL_SPAM_ENABLE) && !player->IsFriendOfMine(rc) && GetAccountId() != rc_account && player->GetTotalPlayedTime() < 10 * DAY)
     {
         ChatHandler(player->GetSession()).PSendSysMessage(LANG_IS_NOT_YOUR_FRIEND);
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
