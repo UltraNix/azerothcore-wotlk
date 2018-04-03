@@ -1719,6 +1719,5 @@ void AddSC_boss_blood_prince_council()
     new spell_valanar_kinetic_bomb();
     new spell_valanar_kinetic_bomb_absorb();
     new spell_valanar_kinetic_bomb_knockback();
-    new spell_valanar_kinetic_bomb_summon();
     new spell_blood_council_summon_shadow_resonance();
 }
