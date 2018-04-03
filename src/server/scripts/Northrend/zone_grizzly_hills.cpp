@@ -231,9 +231,9 @@ public:
                     Talk(SAY_VICTORY4);
                     break;
                 case 27:
-                    me->DisappearAndDie();
+                    me->DespawnOrUnsummon(1000);
                     if (Creature* Mrfloppy = ObjectAccessor::GetCreature(*me, _mrfloppyGUID))
-                        Mrfloppy->DisappearAndDie();
+                        Mrfloppy->DespawnOrUnsummon(1000);;
                     break;
             }
         }
