@@ -106,7 +106,7 @@ public:
 
         void OnUnitDeath(Unit* u)
         {
-            if (bNooneDied && u->GetTypeId() == TYPEID_PLAYER)
+            if (bNooneDied && u->GetTypeId() == TYPEID_PLAYER && IsEncounterInProgress())
             {
                 bNooneDied = false;
                 SaveToDB();
@@ -163,12 +163,12 @@ public:
                 if( Player* plr = itr->GetSource() )
                     if( plr->IsAlive() && !plr->IsGameMaster() )
                         return EncounterStatus == IN_PROGRESS; // found alive player
-            
+
             if( EncounterStatus != NOT_STARTED )
                 *(const_cast<uint32*>(&EncounterStatus)) = NOT_STARTED;
             return false;
         }
-        
+
         void OnCreatureCreate(Creature* creature)
         {
             switch( creature->GetEntry() )
