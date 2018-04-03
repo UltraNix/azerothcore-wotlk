@@ -652,7 +652,7 @@ class boss_sindragosa : public CreatureScript
                         if (_bombCount >= 4)
                             events.ScheduleEvent(EVENT_LAND, 5500);
                         else
-                            events.ScheduleEvent(EVENT_FROST_BOMB, 6000);
+                            events.ScheduleEvent(EVENT_FROST_BOMB, 7s);
                         break;
                     }
                     case EVENT_LAND:
