@@ -6558,6 +6558,13 @@ void SpellMgr::LoadDbcDataCorrections()
         case 71123: // Decimate (Stinky & Precious)
             spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
             break;
+        case 72380: // Blood Nova
+        case 72438:
+        case 72439:
+        case 72440:
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_11_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_11_YARDS;
+            break;
         case 71464: // Divine Surge (Sister Svalna)
             spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
             spellInfo->EffectBasePoints[EFFECT_0] = 2500;
