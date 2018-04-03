@@ -83,7 +83,7 @@ enum DeathbringerSpells
     SPELL_FRENZY                        = 72737,
     SPELL_BLOOD_NOVA_TRIGGER            = 72378,
     SPELL_BLOOD_NOVA                    = 72380,
-    SPELL_BLOOD_POWER                   = 72371,
+    SPELL_BLOOD_POWER                   = 72370,
     SPELL_BLOOD_LINK_POWER              = 72195,
     SPELL_BLOOD_LINK_DUMMY              = 72202,
     SPELL_MARK_OF_THE_FALLEN_CHAMPION   = 72293,
@@ -255,7 +255,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         }
 
         // pussywizard: without this, the aura is not recalculated the first time
-        me->RemoveAurasDueToSpell(SPELL_BLOOD_POWER);
+        me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_BLOOD_POWER, me));
         DoCast(me, SPELL_BLOOD_POWER, true);
 
         if (!instance->CheckRequiredBosses(DATA_DEATHBRINGER_SAURFANG, attacker->ToPlayer()))
@@ -433,7 +433,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
                         ++_fallenChampionCastCount;
                         DoCast(target, SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                         me->SetPower(POWER_ENERGY, 0);
-                        if (Aura* bloodPower = me->GetAura(SPELL_BLOOD_POWER))
+                        if (Aura* bloodPower = me->GetAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_BLOOD_POWER, me)))
                             bloodPower->RecalculateAmountOfEffects();
                     }
                     break;
@@ -1054,8 +1054,9 @@ class spell_deathbringer_blood_link_SpellScript : public SpellScript
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
         GetHitUnit()->CastCustomSpell(SPELL_BLOOD_LINK_POWER, SPELLVALUE_BASE_POINT0, GetEffectValue(), GetHitUnit(), true);
-        if (Aura* bloodPower = GetHitUnit()->GetAura(SPELL_BLOOD_POWER))
-            bloodPower->RecalculateAmountOfEffects();
+        if (Unit* caster = GetCaster())
+            if (Aura* bloodPower = GetHitUnit()->GetAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_BLOOD_POWER, caster)))
+                bloodPower->RecalculateAmountOfEffects();
         PreventHitDefaultEffect(EFFECT_0);
     }
 
