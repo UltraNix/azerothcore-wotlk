@@ -192,6 +192,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 _JustDied();
                 Talk(SAY_DEATH);
 
+                if (me->CanFly())
+                    me->NearTeleportTo(centerPos.GetPositionX(), centerPos.GetPositionY(), centerPos.GetPositionZ(), 0.0f);
+
                 if (Is25ManRaid() && me->HasAura(SPELL_SHADOWS_FATE))
                     DoCastAOE(SPELL_BLOOD_INFUSION_CREDIT, true);
 
