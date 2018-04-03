@@ -6834,6 +6834,15 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+        case 69200: // Raging Spirit
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
+        case 69242: // Soul Shriek
+        case 73800:
+        case 73801:
+        case 73802:
+            spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+            break;
         case 72762: // Defile
             spellInfo->DurationIndex = 559; // 53 seconds
             spellInfo->excludeCasterAuraSpell = 0;
