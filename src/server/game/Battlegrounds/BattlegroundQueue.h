@@ -54,10 +54,9 @@ enum BattlegroundQueueGroupTypes
     BG_QUEUE_PREMADE_ALLIANCE   = 0,
     BG_QUEUE_PREMADE_HORDE      = 1,
     BG_QUEUE_NORMAL_ALLIANCE    = 2,
-    BG_QUEUE_NORMAL_HORDE       = 3,
-    BG_QUEUE_MIXED              = 4
+    BG_QUEUE_NORMAL_HORDE       = 3
 };
-#define BG_QUEUE_GROUP_TYPES_COUNT 5
+#define BG_QUEUE_GROUP_TYPES_COUNT 4
 
 class Battleground;
 class BattlegroundQueue
@@ -68,9 +67,6 @@ class BattlegroundQueue
 
         void BattlegroundQueueUpdate(BattlegroundBracketId bracket_id, uint8 actionMask, bool isRated, uint32 arenaRatedTeamId);
         void UpdateEvents(uint32 diff);
-
-        bool FillXPlayersToBG(BattlegroundBracketId bracket_id, Battleground* bg, bool start = false);
-        bool CheckCrossFactionMatch(BattlegroundBracketId bracket_id, Battleground* bg);
 
         void FillPlayersToBG(const int32 aliFree, const int32 hordeFree, BattlegroundBracketId bracket_id);
         void FillPlayersToBGWithSpecific(const int32 aliFree, const int32 hordeFree, BattlegroundBracketId thisBracketId, BattlegroundQueue* specificQueue, BattlegroundBracketId specificBracketId);

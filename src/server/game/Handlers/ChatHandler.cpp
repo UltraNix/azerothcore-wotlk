@@ -114,28 +114,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             }
     }
 
-    // Sitowsky: Crossfaction Battlegrounds
-    bool cfBG     = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG);
-    uint8 cfLevel = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? 79 : 80;
-
-    if (cfBG && sender->GetMap()->IsBattleground() && sender->getLevel() <= cfLevel && lang != LANG_ADDON)
-    {
-        switch (type)
-        {
-            case CHAT_MSG_SAY:
-            case CHAT_MSG_YELL:
-            case CHAT_MSG_EMOTE:
-            case CHAT_MSG_TEXT_EMOTE:
-            case CHAT_MSG_AFK:
-            case CHAT_MSG_DND:
-            case CHAT_MSG_BATTLEGROUND:
-            case CHAT_MSG_BATTLEGROUND_LEADER:
-                // sender->GetTeamId() == TEAM_HORDE ? lang = LANG_ORCISH : lang = LANG_COMMON;
-                lang = LANG_UNIVERSAL; // @todo: Temporary need to be changed between teams.
-                break;
-        }
-    }
-
     // prevent talking at unknown language (cheating)
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
     if (!langDesc)
