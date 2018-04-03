@@ -115,14 +115,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
     }
 
     // Sitowsky: Crossfaction Battlegrounds
-    bool cfBG = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG)
-        && sender->GetMap()->IsBattleground()
-        && sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? sender->getLevel() <= 79 : sender->getLevel() <= 80
-        && lang != LANG_ADDON;
+    bool cfBG     = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG);
+    uint8 cfLevel = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? 79 : 80;
 
-    bool cfSpeak = cfBG && lang != LANG_ORCISH || LANG_COMMON;
-
-    if (cfBG)
+    if (cfBG && sender->GetMap()->IsBattleground() && sender->getLevel() <= cfLevel && lang != LANG_ADDON)
     {
         switch (type)
         {
@@ -142,13 +138,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
 
     // prevent talking at unknown language (cheating)
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
-    if (!langDesc && !cfSpeak)
+    if (!langDesc)
     {
         SendNotification(LANG_UNKNOWN_LANGUAGE);
         recvData.rfinish();
         return;
     }
-    if (langDesc->skill_id != 0 && !sender->HasSkill(langDesc->skill_id) && !cfSpeak)
+    if (langDesc->skill_id != 0 && !sender->HasSkill(langDesc->skill_id))
     {
         // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
         Unit::AuraEffectList const& langAuras = sender->GetAuraEffectsByType(SPELL_AURA_COMPREHEND_LANGUAGE);
