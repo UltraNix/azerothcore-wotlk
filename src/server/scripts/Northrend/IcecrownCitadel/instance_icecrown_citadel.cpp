@@ -1717,6 +1717,11 @@ class instance_icecrown_citadel : public InstanceMapScript
                             return false;
                         break;
                     case DATA_BLOOD_QUEEN_LANA_THEL:
+                        if (!CheckCrimsonHalls(bossId))
+                            return false;
+                        if (GetBossState(DATA_BLOOD_PRINCE_COUNCIL) != DONE)
+                            return false;
+                        break;
                     case DATA_BLOOD_PRINCE_COUNCIL:
                         if (!CheckCrimsonHalls(bossId))
                             return false;
