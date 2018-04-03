@@ -287,8 +287,6 @@ class boss_lord_marrowgar : public CreatureScript
                     Talk(SAY_ENTER_ZONE);
                     _introDone = true;
                 }
-
-                BossAI::MoveInLineOfSight(who);
             }
 
             bool CanAIAttack(Unit const* target) const
