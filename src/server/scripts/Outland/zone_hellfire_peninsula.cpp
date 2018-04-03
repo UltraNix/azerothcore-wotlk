@@ -606,7 +606,7 @@ struct npc_colonel_julesAI : public npc_escortAI
             me->RemoveAllAuras();
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             DoCastSelf(SPELL_COL_FEIGN_DEATH);
-            _events.ScheduleEvent(EVENT_COL_12, 25000);
+            _events.ScheduleEvent(EVENT_COL_12, 35000);
             _events.CancelEvent(EVENT_SPAWN_COL_ADDS);
             summons.DespawnAll();
         }
