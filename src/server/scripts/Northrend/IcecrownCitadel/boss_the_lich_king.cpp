@@ -915,10 +915,6 @@ class boss_the_lich_king : public CreatureScript
                         break;
                     case POINT_CENTER_2:
                     {
-                        std::list<Creature*> list;
-                        me->GetCreatureListWithEntryInGrid(list, NPC_VALKYR_SHADOWGUARD, 250.0f);
-                        for (auto valkyr : list)
-                            valkyr->DespawnOrUnsummon();
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
                         me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
@@ -1009,6 +1005,7 @@ class boss_the_lich_king : public CreatureScript
                         Talk(SAY_LK_QUAKE);
                         break;
                     case EVENT_QUAKE_2:
+                        summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         _phase = PHASE_THREE;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SOUL_REAPER, 20s, 22s, EVENT_GROUP_ABILITIES);
