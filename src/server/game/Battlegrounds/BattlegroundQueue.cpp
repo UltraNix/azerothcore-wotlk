@@ -155,9 +155,8 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
 
     // Sitowsky: Crossfaction Battlegrounds
     uint8 cfLevel = sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG_TWINK_ONLY) ? 79 : 80;
-    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && m_arenaType == 0)
-        if (leader->getLevel() <= cfLevel)
-            index = BG_QUEUE_MIXED;
+    if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && m_arenaType == 0 && leader->getLevel() <= cfLevel)
+        index = BG_QUEUE_MIXED;
 
     // pussywizard: store indices at which GroupQueueInfo is in m_QueuedGroups
     ginfo->_bracketId = bracketId;
@@ -192,46 +191,18 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
         if (Battleground* bgt = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
         {
             // Sitowsky: Crossfaction Battlegrounds
-            if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG))
+            if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_BG) && leader->getLevel() <= cfLevel)
             {
-                if (leader->getLevel() <= cfLevel)
-                {
-                    char const* bgName = bgt->GetName();
-                    uint32 MinPlayers = bgt->GetMinPlayersPerTeam() * 2;
-                    uint32 qPlayers = 0;
-                    uint32 q_min_level = std::min(bracketEntry->minLevel, (uint32)80);
-                    uint32 q_max_level = std::min(bracketEntry->maxLevel, (uint32)80);
-                    for (GroupsQueueType::const_iterator itr = m_QueuedGroups[bracketId][BG_QUEUE_MIXED].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_MIXED].end(); ++itr)
-                        if (!(*itr)->IsInvitedToBGInstanceGUID)
-                            qPlayers += (*itr)->Players.size();
+                char const* bgName = bgt->GetName();
+                uint32 MinPlayers = bgt->GetMinPlayersPerTeam() * 2;
+                uint32 qPlayers = 0;
+                uint32 q_min_level = std::min(bracketEntry->minLevel, (uint32)80);
+                uint32 q_max_level = std::min(bracketEntry->maxLevel, (uint32)80);
+                for (GroupsQueueType::const_iterator itr = m_QueuedGroups[bracketId][BG_QUEUE_MIXED].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_MIXED].end(); ++itr)
+                    if (!(*itr)->IsInvitedToBGInstanceGUID)
+                        qPlayers += (*itr)->Players.size();
 
-                    ChatHandler(leader->GetSession()).PSendSysMessage("Queue status for %s (Lvl: %u to %u) Queued players: %u (Need at least %u more)", bgName, q_min_level, q_max_level, qPlayers, MinPlayers - qPlayers);
-                }
-                else /* For non-twinks if twink bool is on*/
-                {
-                    char const* bgName = bgt->GetName();
-                    uint32 q_min_level = std::min(bracketEntry->minLevel, (uint32)80);
-                    uint32 q_max_level = std::min(bracketEntry->maxLevel, (uint32)80);
-                    uint32 qHorde = 0;
-                    uint32 qAlliance = 0;
-                    GroupsQueueType::const_iterator itr;
-                    for (itr = m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].end(); ++itr)
-                        if (!(*itr)->IsInvitedToBGInstanceGUID)
-                            qAlliance += (*itr)->Players.size();
-                    for (itr = m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].begin(); itr != m_QueuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].end(); ++itr)
-                        if (!(*itr)->IsInvitedToBGInstanceGUID)
-                            qHorde += (*itr)->Players.size();
-
-                    // show queue status to player when joining queue
-                    if (ginfo->BgTypeId == BATTLEGROUND_RB)
-                        ChatHandler(leader->GetSession()).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_80_RANDOM, bgName, q_min_level, q_max_level, qAlliance, qHorde);
-                    else if (bgt->isArena())
-                        ChatHandler(leader->GetSession()).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_STANDARD, bgName, q_min_level, q_max_level, qAlliance, ((uint32)m_arenaType > qAlliance ? (uint32)m_arenaType - qAlliance : 0), qHorde, ((uint32)m_arenaType > qHorde ? (uint32)m_arenaType - qHorde : 0));
-                    else if (q_min_level >= 80)
-                        ChatHandler(leader->GetSession()).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_80_SPECIFIC, bgName, q_min_level, q_max_level, qAlliance, bgt->GetMinPlayersPerTeam(), qHorde, bgt->GetMinPlayersPerTeam());
-                    else
-                        ChatHandler(leader->GetSession()).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_STANDARD, bgName, q_min_level, q_max_level, qAlliance, (bgt->GetMinPlayersPerTeam() > qAlliance ? bgt->GetMinPlayersPerTeam() - qAlliance : 0), qHorde, (bgt->GetMinPlayersPerTeam() > qHorde ? bgt->GetMinPlayersPerTeam() - qHorde : 0));
-                }
+                ChatHandler(leader->GetSession()).PSendSysMessage("Queue status for %s (Lvl: %u to %u) Queued players: %u (Need at least %u more)", bgName, q_min_level, q_max_level, qPlayers, MinPlayers - qPlayers);
             }
             else
             {
