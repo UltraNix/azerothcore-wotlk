@@ -1653,40 +1653,6 @@ class spell_valanar_kinetic_bomb_knockback : public SpellScriptLoader
         }
 };
 
-class spell_valanar_kinetic_bomb_summon : public SpellScriptLoader
-{
-    public:
-        spell_valanar_kinetic_bomb_summon() : SpellScriptLoader("spell_valanar_kinetic_bomb_summon") { }
-
-        class spell_valanar_kinetic_bomb_summon_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_valanar_kinetic_bomb_summon_SpellScript);
-
-            void SelectDest()
-            {
-                if (Position* dest = const_cast<WorldLocation*>(GetExplTargetDest()))
-                {
-                    float angle = dest->GetAngle(GetCaster());
-                    Position offset = {6.0f*cos(angle), 6.0f*sin(angle), 10.0f, 0.0f};
-                    dest->RelocateOffset(offset);
-                    GetCaster()->UpdateAllowedPositionZ(dest->GetPositionX(), dest->GetPositionY(), dest->m_positionZ);
-                }
-            }
-
-            void Register()
-            {
-                BeforeCast += SpellCastFn(spell_valanar_kinetic_bomb_summon_SpellScript::SelectDest);
-            }
-
-            uint32 _targetCount;
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_valanar_kinetic_bomb_summon_SpellScript();
-        }
-};
-
 class spell_blood_council_summon_shadow_resonance : public SpellScriptLoader
 {
     public:
