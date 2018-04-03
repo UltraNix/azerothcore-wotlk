@@ -268,7 +268,6 @@ class boss_sindragosa : public CreatureScript
 
             void Reset()
             {
-                _didFirstFlyPhase = false;
                 _isBelow20Pct = false;
                 _isThirdPhase = false;
                 _bombCount = 0;
@@ -319,7 +318,6 @@ class boss_sindragosa : public CreatureScript
                     return;
                 }
 
-                _didFirstFlyPhase = false;
                 _isBelow20Pct = false;
                 _isThirdPhase = false;
                 _bombCount = 0;
@@ -327,6 +325,7 @@ class boss_sindragosa : public CreatureScript
 
                 summons.DespawnAll();
                 events.Reset();
+                events.ScheduleEvent(EVENT_AIR_PHASE, 50s, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
                 events.ScheduleEvent(EVENT_CLEAVE, 10000, EVENT_GROUP_LAND_PHASE);
                 events.ScheduleEvent(EVENT_TAIL_SMASH, 20000, EVENT_GROUP_LAND_PHASE);
@@ -470,13 +469,6 @@ class boss_sindragosa : public CreatureScript
             {
                 if (!damage || me->IsInEvadeMode())
                     return;
-
-                if (!_didFirstFlyPhase && me->HealthBelowPctDamaged(85, damage))
-                {
-                    _didFirstFlyPhase = true;
-                    events.ScheduleEvent(EVENT_AIR_PHASE, 0s);
-                    return;
-                }
 
                 if (!_isThirdPhase)
                 {
@@ -702,7 +694,6 @@ class boss_sindragosa : public CreatureScript
             bool _summoned;
             uint8 _bombCount;
             uint8 _mysticBuffetStack;
-            bool _didFirstFlyPhase;
             bool _isBelow20Pct;
             bool _isThirdPhase;
         };
