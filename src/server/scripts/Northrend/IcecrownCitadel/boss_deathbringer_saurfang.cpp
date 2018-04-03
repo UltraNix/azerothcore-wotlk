@@ -1215,9 +1215,8 @@ struct npc_icc_blood_beastAI : public ScriptedAI
     npc_icc_blood_beastAI(Creature* creature) : ScriptedAI(creature)
     {
         me->SetControlled(true, UNIT_STATE_ROOT);
-        _timer = 1500;
+        _timer = 2000;
     }
-
 
     void DoAction(int32 param) override
     {
