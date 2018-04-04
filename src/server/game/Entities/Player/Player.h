@@ -2710,7 +2710,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool CheckPremiumAmount(uint32 amount);
         bool HasRequiredCharacterLevel(uint8 level);
-        bool IsFriendOfMine(uint64 guid);
+        bool IsFriendOfMine(uint64 guid, bool checkGuildMate);
 
     protected:
         // Gamemaster whisper whitelist

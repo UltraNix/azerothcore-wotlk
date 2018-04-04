@@ -570,4 +570,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     // MAIL SPAM
     PrepareStatement(CHAR_SEL_MAX_LEVEL_BY_ACC_ID, "SELECT MAX(level) FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_FRIEND_OF_MINE, "SELECT friend FROM character_social WHERE guid = ? AND friend = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_GUILD_MATE, "SELECT guildid FROM guild_member WHERE guid = ?", CONNECTION_SYNCH);
 }
