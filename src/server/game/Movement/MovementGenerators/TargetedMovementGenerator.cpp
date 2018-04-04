@@ -256,7 +256,7 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
             if ( i_angle == 0.f )
             {
                 init.SetFacing( i_target.getTarget() );
-                }
+            }
 
             init.SetWalk( ( ( D* )this )->EnableWalking() );
             init.Launch();

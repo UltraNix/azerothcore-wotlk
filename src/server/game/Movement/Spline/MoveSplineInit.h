@@ -177,15 +177,22 @@ namespace Movement
 
     inline void MoveSplineInit::MovebyPath(const PointsArray& controls, int32 path_offset)
     {
+        if ( controls.empty() )
+            return;
+
+        Vector3 dest = controls.back();
+
         args.path_Idx_offset = path_offset;
         args.path.resize(controls.size());
-        std::transform(controls.begin(), controls.end(), args.path.begin(), TransportPathTransform(unit, args.TransformForTransport));
 
-        if ( !args.path.empty() )
+        TransportPathTransform transform( unit, args.TransformForTransport );
+        std::transform(controls.begin(), controls.end(), args.path.begin(), transform );
+
+        if ( unit->GetTransport() == nullptr )
         {
-            Vector3 & dest = args.path.back();
             unit->UpdateAllowedPositionZ( dest.x, dest.y, dest.z );
         }
+        args.path.back() = transform( dest );
     }
 
     inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
