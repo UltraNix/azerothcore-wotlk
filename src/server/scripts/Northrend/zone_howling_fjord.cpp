@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -64,7 +64,7 @@ public:
                         owner->CastSpell(owner, 44463, true);
             }
         }
-        
+
         void SpellHit(Unit* caster, const SpellInfo* spellInfo)
         {
             if (caster && spellInfo->Id == 44454)
@@ -104,9 +104,9 @@ public:
                 setphase(phase);
                 timer = 0;
             }
-            
+
             timer += diff;
-            
+
             DoMeleeAttackIfReady();
         }
 
@@ -391,7 +391,7 @@ enum ValgardeEvent
     // Dragonflayer Invader
     SPELL_INTERCEPT                     = 58747,
     SPELL_THROW_DRAGONFLAYER_HARPOON    = 42870,
-    
+
     SAY_AGGRO                           = 0,
 
     // Dragonflayer Worg
@@ -420,8 +420,8 @@ class ValgardeEventRespawn : public BasicEvent
 
 struct npc_valgarde_eventAI : public ScriptedAI
 {
-    npc_valgarde_eventAI(Creature* creature) : ScriptedAI(creature) 
-    { 
+    npc_valgarde_eventAI(Creature* creature) : ScriptedAI(creature)
+    {
         if (me->isDead())
             me->Respawn();
     }
@@ -520,6 +520,80 @@ struct npc_valgarde_event_defenderAI : public npc_valgarde_eventAI
     }
 };
 
+enum Lebronski
+{
+    NPC_CONSTRUCT      = 24823,
+
+    LEBRONSKI_PATH     = 867730,
+
+    SPELL_QUEST_CREDIT = 44569,
+    SPELL_BLUFF        = 44562,
+
+    AURA_VEHICLE       = 46598,
+
+    QUEST_IRON_RUNE    = 11491,
+
+    SAY_SPOTTED        = 1,
+    SAY_OUTRO          = 2,
+
+    EVENT_NONE         = 0,
+    EVENT_SPOTTED      = 1
+};
+
+struct npc_lebronskiAI : public ScriptedAI
+{
+    npc_lebronskiAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _phase = EVENT_NONE;
+        _scheduler.CancelAll();
+        me->GetMotionMaster()->MovePath(LEBRONSKI_PATH, true);
+    }
+
+    void MoveInLineOfSight(Unit* who)
+    {
+        if (me->GetDistance(who) > 5.0f)
+            return;
+        if (!who->IsPlayer() || !who->HasAura(AURA_VEHICLE))
+            return;
+        if (who->ToPlayer()->GetQuestStatus(QUEST_IRON_RUNE) != QUEST_STATUS_INCOMPLETE)
+            return;
+
+        if (_phase == EVENT_NONE)
+        {
+            _phase = EVENT_SPOTTED;
+
+            me->StopMoving();
+            me->SetFacingToObject(who);
+
+            Talk(SAY_SPOTTED);
+
+            _scheduler.Schedule(30s, [this](TaskContext task)
+            {
+                Reset();
+            });
+        }
+    }
+
+    void SpellHit(Unit* caster, const SpellInfo* spellInfo)
+    {
+        if (_phase != EVENT_SPOTTED)
+            return;
+
+        if (caster && spellInfo->Id == SPELL_BLUFF)
+        {
+            caster->CastSpell(caster, SPELL_QUEST_CREDIT);
+             Talk(SAY_OUTRO);
+             Reset();
+        }
+    }
+
+private:
+    TaskScheduler _scheduler;
+    uint8 _phase;
+};
+
 void AddSC_howling_fjord()
 {
     // Ours
@@ -532,4 +606,5 @@ void AddSC_howling_fjord()
     new npc_razael_and_lyana();
     new CreatureAILoader<npc_valgarde_event_attackerAI>("npc_valgarde_event_attacker");
     new CreatureAILoader<npc_valgarde_event_defenderAI>("npc_valgarde_event_defender");
+    new CreatureAILoader<npc_lebronskiAI>("npc_lebronski");
  }
