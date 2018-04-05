@@ -27716,9 +27716,10 @@ bool Player::HasRequiredCharacterLevel(uint8 level)
 
 bool Player::IsFriendOfMine(uint64 guid, bool checkGuildMate)
 {
-    bool isFriend    = false;
-    bool isGuildMate = false;
-    uint32 guildId = GetGuild() ? GetGuildId() : 0;
+    bool isFriend      = false;
+    bool isGuildMate   = false;
+    uint32 guildId     = GetGuildIdFromStorage(GUID_LOPART(GetGUID()));
+    uint32 mateGuildId = 0;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_FRIEND_OF_MINE);
     stmt->setUInt64(0, guid);
@@ -27732,10 +27733,9 @@ bool Player::IsFriendOfMine(uint64 guid, bool checkGuildMate)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GUILD_MATE);
         stmt->setUInt64(0, guid);
 
-
         if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
         {
-            uint32 mateGuildId = (*result)[0].GetUInt32();
+            mateGuildId = (*result)[0].GetUInt32();
 
             if (guildId == mateGuildId)
                 isGuildMate = true;
