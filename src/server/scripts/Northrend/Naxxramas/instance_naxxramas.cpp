@@ -490,6 +490,17 @@ public:
             return false;
         }
 
+        void OnUnitDeath(Unit* who) override
+        {
+            InstanceScript::OnUnitDeath(who);
+
+            if (who->ToPlayer() && immortalAchievement && IsEncounterInProgress())
+            {
+                immortalAchievement = 0;
+                SaveToDB();
+            }
+        }
+
         void SetData(uint32 id, uint32 data)
         {
             // Bosses data
@@ -595,10 +606,10 @@ public:
                 case DATA_DANCE_FAIL:
                     heiganAchievement = false;
                     return;
-                case DATA_IMMORTAL_FAIL:
-                    immortalAchievement = 0;
-                    SaveToDB();
-                    return;
+                //case DATA_IMMORTAL_FAIL:
+                //    immortalAchievement = 0;
+                //    SaveToDB();
+                //    return;
                 case DATA_HORSEMAN_CHEST:
                     if (GameObject* chest = instance->GetGameObject(_mChestGUID))
                     {
