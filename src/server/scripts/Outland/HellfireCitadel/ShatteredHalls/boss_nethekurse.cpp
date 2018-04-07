@@ -92,7 +92,8 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                     case SETDATA_PEON_AGGRO:
                         if (PeonEngagedCount >= 4)
                             return;
-
+                        if (EventStage == EVENT_STAGE_NONE)
+                            StartNethekurseRoleplay();
                         if (EventStage < EVENT_STAGE_TAUNT)
                             Talk(SAY_PEON_ATTACKED);
                         break;
@@ -136,12 +137,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                 {
                     if (who->GetTypeId() != TYPEID_PLAYER)
                         return;
-
-                    events2.ScheduleEvent(EVENT_INTRO, 90000);
-                    Talk(SAY_INTRO);
-                    EventStage = EVENT_STAGE_INTRO;
-                    instance->SetBossState(DATA_NETHEKURSE, IN_PROGRESS);
-                    me->SetInCombatWithZone();
+                    StartNethekurseRoleplay();
                 }
 
                 if (EventStage < EVENT_STAGE_MAIN)
@@ -152,6 +148,18 @@ class boss_grand_warlock_nethekurse : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+            }
+
+            void StartNethekurseRoleplay()
+            {
+                if (EventStage != EVENT_STAGE_NONE)
+                    return;
+
+                events2.ScheduleEvent(EVENT_INTRO, 90000);
+                Talk(SAY_INTRO);
+                EventStage = EVENT_STAGE_INTRO;
+                instance->SetBossState(DATA_NETHEKURSE, IN_PROGRESS);
+                me->SetInCombatWithZone();
             }
 
             void KilledUnit(Unit* /*victim*/)
@@ -177,7 +185,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                         Talk(SAY_AGGRO);
                         EventStage = EVENT_STAGE_MAIN;
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        if (Player* target = me->SelectNearestPlayer(50.0f))
+                        if (Player* target = me->SelectNearestPlayer(80.0f))
                             AttackStart(target);
 
                         events.ScheduleEvent(EVENT_SPELL_DEATH_COIL, 20000);
