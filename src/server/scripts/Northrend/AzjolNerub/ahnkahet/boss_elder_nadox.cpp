@@ -58,6 +58,7 @@ struct boss_elder_nadoxAI : public BossAI
     {
         _Reset();
         _guardianCount = 0;
+        _guardianDied = false;
     }
 
     void EnterCombat(Unit* /*attacker*/) override
@@ -91,7 +92,12 @@ struct boss_elder_nadoxAI : public BossAI
     uint32 GetData(uint32 type) const override
     {
         if (type == DATA_RESPECT_YOUR_ELDERS)
-            return !_guardianDied ? 1 : 0;
+        {
+            if (IsHeroic())
+            {
+                return !_guardianDied ? 1 : 0;
+            }
+        }
 
         return 0;
     }
@@ -174,7 +180,7 @@ struct boss_elder_nadoxAI : public BossAI
                 break;
         }
     }
- 
+
     private:
         uint8 _guardianCount;
         bool _preNerf;
@@ -248,7 +254,7 @@ struct npc_ahnkahar_nerubianAI : public npc_nadox_addAI
 struct npc_nadox_eggAI : public npc_nadox_addAI
 {
     npc_nadox_eggAI(Creature* creature) : npc_nadox_addAI(creature)
-    { 
+    {
         SetCombatMovement(false);
         me->SetReactState(REACT_PASSIVE);
     }
