@@ -1,0 +1,3 @@
+DELETE FROM `gameobject` WHERE `guid` = 150;
+INSERT INTO `gameobject` VALUES
+(150, 188019, 571, 1, 1, 3389.73, 5136.71, 13.21, 1.03, 0, 0, 0.112572, -0.993644, 25, 0, 1, 0);
