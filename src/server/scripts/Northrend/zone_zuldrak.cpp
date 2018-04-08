@@ -347,6 +347,8 @@ public:
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            _rageclawGUID = 0;
+            timer = 0;
         }
 
         void UpdateAI(uint32 diff)
@@ -381,7 +383,6 @@ public:
             // pointer check not needed
             DoCast(rageclaw, SPELL_FREE_RAGECLAW, true);
             _rageclawGUID = 0;
-            me->DespawnOrUnsummon(1);
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
