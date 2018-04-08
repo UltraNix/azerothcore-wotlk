@@ -313,18 +313,17 @@ public:
 
         void EnterCombat(Unit* /*who*/) { }
 
-        void AttackStart(Unit* who)
+        void StartEscape(Player* player)
         {
-            if (!who || PlayerGUID)
+            if (!player || PlayerGUID)
                 return;
 
-            Player* player = who->ToPlayer();
 
             if (player && player->GetQuestStatus(QUEST_CHASING_THE_MOONSTONE) == QUEST_STATUS_INCOMPLETE)
             {
-                PlayerGUID = who->GetGUID();
+                PlayerGUID = player->GetGUID();
                 Talk(SAY_RIZZLE_START);
-                DoCast(who, SPELL_RIZZLE_BLACKJACK, false);
+                DoCast(player, SPELL_RIZZLE_BLACKJACK, false);
                 return;
             }
         }
@@ -350,6 +349,15 @@ public:
 
             ++CurrWP;
             ContinueWP = true;
+        }
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            if (summoner->IsPlayer())
+            {
+                if (Player* player = summoner->ToPlayer())
+                    StartEscape(player);
+            }
         }
 
         void UpdateAI(uint32 diff)
