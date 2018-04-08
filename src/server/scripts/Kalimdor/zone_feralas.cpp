@@ -251,6 +251,15 @@ struct npc_shay_wanderer_AI : public ScriptedAI
         _playerGUID = 0;
         events.Reset();
     }
+    
+    void Reset() override
+    {
+        me->RestoreFaction();
+        _wandering = false;
+        _eventFinished = false;
+        _playerGUID = 0;
+        events.Reset();
+    }
 
     void sQuestAccept(Player* player, Quest const* quest) override
     {
