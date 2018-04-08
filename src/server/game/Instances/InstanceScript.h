@@ -151,11 +151,14 @@ class InstanceScript : public ZoneScript
         //On creation, NOT load.
         virtual void Initialize() {}
 
-        //On load
-        virtual void Load(char const* data) { LoadBossState(data); }
+        // On instance load, exactly ONE of these methods will ALWAYS be called:
+        // if we're starting without any saved instance data
+        virtual void Create();
+        // if we're loading existing instance save data
+        virtual void Load(char const* data);
 
         //When save is needed, this function generates the data
-        virtual std::string GetSaveData() { return GetBossSaveData(); }
+        virtual std::string GetSaveData();
 
         Creature* GetCreature(uint32 type);
         GameObject* GetGameObject(uint32 type);
@@ -252,7 +255,18 @@ class InstanceScript : public ZoneScript
 
         std::string LoadBossState(char const* data);
         std::string GetBossSaveData();
+
+        // Instance Load and Save
+        void SetHeaders(std::string const& dataHeaders);
+        bool ReadSaveDataHeaders(std::istringstream& data);
+        void ReadSaveDataBossStates(std::istringstream& data);
+        virtual void ReadSaveDataMore(std::istringstream& /*data*/) { }
+        void WriteSaveDataHeaders(std::ostringstream& data);
+        void WriteSaveDataBossStates(std::ostringstream& data);
+        virtual void WriteSaveDataMore(std::ostringstream& /*data*/) { }
+
     private:
+        std::vector<char> headers;
         static void LoadObjectData(ObjectData const* creatureData, ObjectInfoMap& objectInfo);
         ObjectInfoMap _creatureInfo;
         ObjectInfoMap _gameObjectInfo;

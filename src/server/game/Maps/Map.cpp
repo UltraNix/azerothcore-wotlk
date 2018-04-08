@@ -2685,7 +2685,7 @@ void InstanceMap::AfterPlayerUnlinkFromMap()
 
 void InstanceMap::CreateInstanceScript(bool load, std::string data, uint32 completedEncounterMask)
 {
-    if (instance_script != NULL)
+    if (instance_script != nullptr)
         return;
 
     InstanceTemplate const* mInstance = sObjectMgr->GetInstanceTemplate(GetId());
@@ -2706,6 +2706,8 @@ void InstanceMap::CreateInstanceScript(bool load, std::string data, uint32 compl
         if (data != "")
             instance_script->Load(data.c_str());
     }
+    else
+        instance_script->Create();
 }
 
 /*
