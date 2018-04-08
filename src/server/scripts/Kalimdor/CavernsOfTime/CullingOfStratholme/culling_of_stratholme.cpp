@@ -30,7 +30,7 @@ enum Says
     SAY_PHASE201                                = 10,
     SAY_PHASE203                                = 11,
     SAY_PHASE205                                = 12,
-    SAY_PHASE208                                = 13,    
+    SAY_PHASE208                                = 13,
     SAY_PHASE209                                = 14,
     SAY_PHASE210                                = 15,
 
@@ -83,7 +83,7 @@ enum Says
     SAY_PHASE117                                = 1,
 
     //Cityman
-    SAY_PHASE202                                = 0,  
+    SAY_PHASE202                                = 0,
 
     //Crazyman
     SAY_PHASE204                                = 0,
@@ -674,7 +674,7 @@ public:
                         for (int i = 0; i < 3; ++i)
                             if (Creature *horse = me->SummonCreature(NPC_HORSE_ESCORT, EventPos[EVENT_SRC_HORSE1+i], TEMPSUMMON_DEAD_DESPAWN, 180000))
                                 horse->GetMotionMaster()->MovePoint(0, EventPos[EVENT_DST_HORSE1+i], false);
-                        
+
                         ScheduleNextEvent(currentEvent, 4000);
                         break;
                     case EVENT_ACTION_PHASE1+1:
@@ -692,7 +692,7 @@ public:
                     case EVENT_ACTION_PHASE1+3:
                         if (Creature* uther = GetEventNpc(NPC_UTHER))
                             uther->AI()->Talk(SAY_PHASE102);
-                        
+
                         ScheduleNextEvent(currentEvent, 8000);
                         break;
                     case EVENT_ACTION_PHASE1+4:
@@ -712,7 +712,7 @@ public:
                     case EVENT_ACTION_PHASE1+6:
                         if (Creature* uther = GetEventNpc(NPC_UTHER))
                             uther->AI()->Talk(SAY_PHASE105);
-                        
+
                         ScheduleNextEvent(currentEvent, 1000);
                         break;
                     case EVENT_ACTION_PHASE1+7:
@@ -722,7 +722,7 @@ public:
                     case EVENT_ACTION_PHASE1+8:
                         if (Creature* uther = GetEventNpc(NPC_UTHER))
                             uther->AI()->Talk(SAY_PHASE107);
-                        
+
                         ScheduleNextEvent(currentEvent, 6000);
                         break;
                     case EVENT_ACTION_PHASE1+9:
@@ -732,7 +732,7 @@ public:
                     case EVENT_ACTION_PHASE1+10:
                         if (Creature* uther = GetEventNpc(NPC_UTHER))
                             uther->AI()->Talk(SAY_PHASE109);
-                        
+
                         ScheduleNextEvent(currentEvent, 8000);
                         break;
                     case EVENT_ACTION_PHASE1+11:
@@ -742,7 +742,7 @@ public:
                     case EVENT_ACTION_PHASE1+12:
                         if (Creature* uther = GetEventNpc(NPC_UTHER))
                             uther->AI()->Talk(SAY_PHASE111);
-                        
+
                         ScheduleNextEvent(currentEvent, 4000);
                         break;
                     case EVENT_ACTION_PHASE1+13:
@@ -752,7 +752,7 @@ public:
                     case EVENT_ACTION_PHASE1+14:
                         if (Creature* jaina = GetEventNpc(NPC_JAINA))
                             jaina->AI()->Talk(SAY_PHASE113);
-                        
+
                         ScheduleNextEvent(currentEvent, 2500);
                         break;
                     case EVENT_ACTION_PHASE1+15:
@@ -762,7 +762,7 @@ public:
                     case EVENT_ACTION_PHASE1+16:
                         if (Creature* uther = GetEventNpc(NPC_UTHER))
                             uther->AI()->Talk(SAY_PHASE115);
-                        
+
                         ScheduleNextEvent(currentEvent, 4000);
                         break;
                     case EVENT_ACTION_PHASE1+17:
@@ -882,7 +882,7 @@ public:
                     case EVENT_ACTION_PHASE2+5:
                         if (Creature* malganis = GetEventNpc(NPC_MAL_GANIS))
                             malganis->AI()->Talk(SAY_PHASE207);
-                        
+
                         ScheduleNextEvent(currentEvent, 15000);
                         break;
                     case EVENT_ACTION_PHASE2+6:
@@ -909,7 +909,7 @@ public:
                     case EVENT_ACTION_PHASE2+8:
                         if (pInstance)
                             pInstance->SetData(DATA_START_WAVES, 1);
-                        
+
                         SummonNextWave();
                         actionEvents.PopEvent();
                         break;
@@ -987,6 +987,7 @@ public:
                             cr->SetReactState(REACT_AGGRESSIVE);
                             cr->SetInCombatWithZone();
                             cr->AddThreat(me, 0.0f);
+                            me->AddThreat(cr, 0.0f);
                         }
                         if (Creature* cr = GetEventNpc(NPC_INFINITE_AGENT)) // it is infinite agent now :)
                         {
@@ -994,6 +995,7 @@ public:
                             cr->SetReactState(REACT_AGGRESSIVE);
                             cr->SetInCombatWithZone();
                             cr->AddThreat(me, 0.0f);
+                            me->AddThreat(cr, 0.0f);
                         }
                         if (Creature* cr = GetEventNpc(NPC_INFINITE_HUNTER)) // it is infinite hunter now :)
                         {
@@ -1001,8 +1003,9 @@ public:
                             cr->SetReactState(REACT_AGGRESSIVE);
                             cr->SetInCombatWithZone();
                             cr->AddThreat(me, 0.0f);
+                            me->AddThreat(cr, 0.0f);
                         }
-                        ScheduleNextEvent(currentEvent, 2000);
+                        ScheduleNextEvent(currentEvent, 5000);
                         break;
                     case EVENT_ACTION_PHASE3+9:
                         // Arthas is fighting infinites in town hall
@@ -1131,7 +1134,7 @@ public:
                         Talk(SAY_PHASE503);
                         SetEscortPaused(false);
                         eventInRun = false;
-                        ScheduleNextEvent(currentEvent, 5000);                        
+                        ScheduleNextEvent(currentEvent, 5000);
                         break;
                     case EVENT_ACTION_PHASE5+2:
                         me->SetFacingTo(5.28f);
@@ -1176,18 +1179,18 @@ public:
                 case EVENT_COMBAT_HEALTH_CHECK:
                     if (HealthBelowPct(40))
                         me->CastSpell(me, SPELL_ARTHAS_HOLY_LIGHT, false);
-                    
+
                     combatEvents.RepeatEvent(1000);
                     break;
-            }         
+            }
 
             DoMeleeAttackIfReady();
         }
     };
 };
 
-Creature* npc_arthas::npc_arthasAI::GetEventNpc(uint32 entry) 
-{ 
+Creature* npc_arthas::npc_arthasAI::GetEventNpc(uint32 entry)
+{
     for (SummonList::iterator i = summons.begin(); i != summons.end();)
     {
         Creature* summon = ObjectAccessor::GetCreature(*me, *i);
@@ -1219,7 +1222,7 @@ void npc_arthas::npc_arthasAI::SummonNextWave()
     uint32 tableId = waveGroupId;
     if (tableId > 4)
         tableId--;
-    
+
     for (uint32 i = 0; i < ENCOUNTER_WAVES_MAX_SPAWNS; ++i)
         me->SummonCreature(/*entry*/(uint32)WavesLocations[tableId][i][0], WavesLocations[tableId][i][1], WavesLocations[tableId][i][2], WavesLocations[tableId][i][3], WavesLocations[tableId][i][4]);
 }
@@ -1250,7 +1253,7 @@ void npc_arthas::npc_arthasAI::ReorderInstance(uint32 data)
         case COS_PROGRESS_KILLED_SALRAMM:
             SetNextWaypoint(12, false);
             //me->SetReactState(REACT_DEFENSIVE);
-            
+
             if (data == COS_PROGRESS_FINISHED_CITY_INTRO)
             {
                 eventInRun = true;
@@ -1481,7 +1484,7 @@ class npc_cos_chromie_middle : public CreatureScript
 
             if (!creature->GetInstanceScript() || creature->GetInstanceScript()->GetData(DATA_ARTHAS_EVENT) != COS_PROGRESS_CRATES_FOUND)
                 return true;
-            
+
             return false;
         }
 };
@@ -1506,7 +1509,7 @@ class npc_cos_stratholme_citizien : public CreatureScript
             InstanceScript* pInstance;
             uint32 allowTimer;
 
-            void Reset() 
+            void Reset()
             {
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                 locked = false;
@@ -1600,7 +1603,7 @@ class npc_cos_stratholme_citizien : public CreatureScript
         {
             return new npc_cos_stratholme_citizienAI(creature);
         }
-};   
+};
 
 void AddSC_culling_of_stratholme()
 {
