@@ -1,51 +1,16 @@
 /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Rewritten by Afgann
  */
 
-/* ScriptData
-SDName: Karazhan
-SD%Complete: 100
-SDComment: Support for Barnes (Opera controller) and Berthold (Doorman), Support for Quest 9645.
-SDCategory: Karazhan
-EndScriptData */
-
-/* ContentData
-npc_barnes
-npc_image_of_medivh
-EndContentData */
-
 #include "ScriptMgr.h"
-#include "InstanceScript.h"
-#include "karazhan.h"
-#include "Log.h"
-#include "Map.h"
-#include "MotionMaster.h"
-#include "ObjectAccessor.h"
-#include "Player.h"
-#include "ScriptedEscortAI.h"
+#include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
-#include "TemporarySummon.h"
+#include "karazhan.h"
+#include "ScriptedEscortAI.h"
+#include "Player.h"
 
 enum Spells
 {
-    // Barnes
-    SPELL_SPOTLIGHT             = 25824,
-    SPELL_TUXEDO                = 32616,
-
     // Berthold
     SPELL_TELEPORT              = 39567,
 
@@ -60,348 +25,6 @@ enum Creatures
 {
     NPC_ARCANAGOS               = 17652,
     NPC_SPOTLIGHT               = 19525
-};
-
-/*######
-# npc_barnesAI
-######*/
-
-#define GOSSIP_READY        "I'm not an actor."
-
-#define SAY_READY           "Splendid, I'm going to get the audience ready. Break a leg!"
-#define SAY_OZ_INTRO1       "Finally, everything is in place. Are you ready for your big stage debut?"
-#define OZ_GOSSIP1          "I'm not an actor."
-#define SAY_OZ_INTRO2       "Don't worry, you'll be fine. You look like a natural!"
-#define OZ_GOSSIP2          "Ok, I'll give it a try, then."
-
-#define SAY_RAJ_INTRO1      "The romantic plays are really tough, but you'll do better this time. You have TALENT. Ready?"
-#define RAJ_GOSSIP1         "I've never been more ready."
-
-#define OZ_GM_GOSSIP1       "[GM] Change event to EVENT_OZ"
-#define OZ_GM_GOSSIP2       "[GM] Change event to EVENT_HOOD"
-#define OZ_GM_GOSSIP3       "[GM] Change event to EVENT_RAJ"
-
-struct Dialogue
-{
-    int32 textid;
-    uint32 timer;
-};
-
-static Dialogue OzDialogue[]=
-{
-    {0, 6000},
-    {1, 18000},
-    {2, 9000},
-    {3, 15000}
-};
-
-static Dialogue HoodDialogue[]=
-{
-    {4, 6000},
-    {5, 10000},
-    {6, 14000},
-    {7, 15000}
-};
-
-static Dialogue RAJDialogue[]=
-{
-    {8, 5000},
-    {9, 7000},
-    {10, 14000},
-    {11, 14000}
-};
-
-// Entries and spawn locations for creatures in Oz event
-float Spawns[6][2]=
-{
-    {17535, -10896},                                        // Dorothee
-    {17546, -10891},                                        // Roar
-    {17547, -10884},                                        // Tinhead
-    {17543, -10902},                                        // Strawman
-    {17603, -10892},                                        // Grandmother
-    {17534, -10900},                                        // Julianne
-};
-
-#define SPAWN_Z             90.5f
-#define SPAWN_Y             -1758
-#define SPAWN_O             4.738f
-
-class npc_barnes : public CreatureScript
-{
-public:
-    npc_barnes() : CreatureScript("npc_barnes") { }
-
-    struct npc_barnesAI : public npc_escortAI
-    {
-        npc_barnesAI(Creature* creature) : npc_escortAI(creature)
-        {
-            Initialize();
-            RaidWiped = false;
-            m_uiEventId = 0;
-            instance = creature->GetInstanceScript();
-        }
-
-        void Initialize()
-        {
-            m_uiSpotlightGUID = 0;
-
-            TalkCount = 0;
-            TalkTimer = 2000;
-            WipeTimer = 5000;
-
-            PerformanceReady = false;
-        }
-
-        InstanceScript* instance;
-
-        uint64 m_uiSpotlightGUID;
-
-        uint32 TalkCount;
-        uint32 TalkTimer;
-        uint32 WipeTimer;
-        uint32 m_uiEventId;
-
-        bool PerformanceReady;
-        bool RaidWiped;
-
-        void Reset() override
-        {
-            Initialize();
-
-            m_uiEventId = instance->GetData(DATA_OPERA_PERFORMANCE);
-        }
-
-        void StartEvent()
-        {
-            instance->SetBossState(DATA_OPERA_PERFORMANCE, IN_PROGRESS);
-
-            //resets count for this event, in case earlier failed
-            if (m_uiEventId == EVENT_OZ)
-                instance->SetData(DATA_OPERA_OZ_DEATHCOUNT, IN_PROGRESS);
-
-            Start(false, false);
-        }
-
-        void EnterCombat(Unit* /*who*/) override { }
-
-        void WaypointReached(uint32 waypointId) override
-        {
-            switch (waypointId)
-            {
-                case 0:
-                    DoCast(me, SPELL_TUXEDO, false);
-                    instance->DoUseDoorOrButton(instance->GetData64(DATA_GO_STAGEDOORLEFT));
-                    break;
-                case 4:
-                    TalkCount = 0;
-                    SetEscortPaused(true);
-
-                    if (Creature* spotlight = me->SummonCreature(NPC_SPOTLIGHT,
-                        me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f,
-                        TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
-                    {
-                        spotlight->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        spotlight->CastSpell(spotlight, SPELL_SPOTLIGHT, false);
-                        m_uiSpotlightGUID = spotlight->GetGUID();
-                    }
-                    break;
-                case 8:
-                    instance->DoUseDoorOrButton(instance->GetData64(DATA_GO_STAGEDOORLEFT));
-                    PerformanceReady = true;
-                    break;
-                case 9:
-                    PrepareEncounter();
-                    instance->DoUseDoorOrButton(instance->GetData64(DATA_GO_CURTAINS));
-                    break;
-            }
-        }
-
-        void Talk(uint32 count)
-        {
-            int32 text = 0;
-
-            switch (m_uiEventId)
-            {
-                case EVENT_OZ:
-                    if (OzDialogue[count].textid)
-                         text = OzDialogue[count].textid;
-                    if (OzDialogue[count].timer)
-                        TalkTimer = OzDialogue[count].timer;
-                    break;
-
-                case EVENT_HOOD:
-                    if (HoodDialogue[count].textid)
-                        text = HoodDialogue[count].textid;
-                    if (HoodDialogue[count].timer)
-                        TalkTimer = HoodDialogue[count].timer;
-                    break;
-
-                case EVENT_RAJ:
-                     if (RAJDialogue[count].textid)
-                         text = RAJDialogue[count].textid;
-                    if (RAJDialogue[count].timer)
-                        TalkTimer = RAJDialogue[count].timer;
-                    break;
-            }
-
-            if (text)
-                 CreatureAI::Talk(text);
-        }
-
-        void PrepareEncounter()
-        {
-            uint8 index = 0;
-            uint8 count = 0;
-
-            switch (m_uiEventId)
-            {
-                case EVENT_OZ:
-                    index = 0;
-                    count = 4;
-                    break;
-                case EVENT_HOOD:
-                    index = 4;
-                    count = index+1;
-                    break;
-                case EVENT_RAJ:
-                    index = 5;
-                    count = index+1;
-                    break;
-            }
-
-            for (; index < count; ++index)
-            {
-                uint32 entry = ((uint32)Spawns[index][0]);
-                float PosX = Spawns[index][1];
-
-                if (Creature* creature = me->SummonCreature(entry, PosX, SPAWN_Y, SPAWN_Z, SPAWN_O, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR*2*IN_MILLISECONDS))
-                {
-                    // In case database has bad flags
-                    creature->SetUInt32Value(UNIT_FIELD_FLAGS, 0);
-                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                }
-            }
-
-            RaidWiped = false;
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            npc_escortAI::UpdateAI(diff);
-
-            if (HasEscortState(STATE_ESCORT_PAUSED))
-            {
-                if (TalkTimer <= diff)
-                {
-                    if (TalkCount > 3)
-                    {
-                        if (Creature* pSpotlight = ObjectAccessor::GetCreature(*me, m_uiSpotlightGUID))
-                            pSpotlight->DespawnOrUnsummon();
-
-                        SetEscortPaused(false);
-                        return;
-                    }
-
-                    Talk(TalkCount);
-                    ++TalkCount;
-                } else TalkTimer -= diff;
-            }
-
-            if (PerformanceReady)
-            {
-                if (!RaidWiped)
-                {
-                    if (WipeTimer <= diff)
-                    {
-                        Map::PlayerList const& PlayerList = me->GetMap()->GetPlayers();
-                        if (PlayerList.isEmpty())
-                            return;
-
-                        RaidWiped = true;
-                        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                        {
-                            if (i->GetSource()->IsAlive() && !i->GetSource()->IsGameMaster())
-                            {
-                                RaidWiped = false;
-                                break;
-                            }
-                        }
-
-                        if (RaidWiped)
-                        {
-                            RaidWiped = true;
-                            EnterEvadeMode();
-                            return;
-                        }
-
-                        WipeTimer = 15000;
-                    } else WipeTimer -= diff;
-                }
-            }
-        }
-
-        //bool GossipSelect(Player* player, uint32 /*menuId*/, uint32 gossipListId) override
-        void sGossipSelect(Player* player, uint32 sender, uint32 action) override
-        {
-            uint32 const ac = player->PlayerTalkClass->GetGossipOptionAction(action);
-            player->CLOSE_GOSSIP_MENU();
-
-            switch (ac)
-            {
-                case GOSSIP_ACTION_INFO_DEF + 1:
-                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, OZ_GOSSIP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-                    SendGossipMenuFor(player, 8971, me->GetGUID());
-                    break;
-                case GOSSIP_ACTION_INFO_DEF + 2:
-                    player->CLOSE_GOSSIP_MENU();
-                    StartEvent();
-                    break;
-                case GOSSIP_ACTION_INFO_DEF + 3:
-                    player->CLOSE_GOSSIP_MENU();
-                    m_uiEventId = EVENT_OZ;
-                    break;
-                case GOSSIP_ACTION_INFO_DEF + 4:
-                    player->CLOSE_GOSSIP_MENU();
-                    m_uiEventId = EVENT_HOOD;
-                    break;
-                case GOSSIP_ACTION_INFO_DEF + 5:
-                    player->CLOSE_GOSSIP_MENU();
-                    m_uiEventId = EVENT_RAJ;
-                    break;
-            }
-        }
-
-        void sGossipHello(Player* player) override
-        {
-            // Check for death of Moroes and if opera event is not done already
-            if (instance->GetBossState(DATA_MOROES) == DONE && instance->GetBossState(DATA_OPERA_PERFORMANCE) != DONE)
-            {
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, OZ_GOSSIP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-                if (player->IsGameMaster())
-                {
-                    AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-                    AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-                    AddGossipItemFor(player, GOSSIP_ICON_DOT, OZ_GM_GOSSIP3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
-                }
-
-                
-                if (!RaidWiped)
-                    SendGossipMenuFor(player, 8970, me->GetGUID());
-                else
-                    SendGossipMenuFor(player, 8975, me->GetGUID());
-                    
-                return;
-            }
-
-            SendGossipMenuFor(player, 8978, me->GetGUID());
-        }
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return GetKarazhanAI<npc_barnesAI>(creature);
-    }
 };
 
 /*###
@@ -419,9 +42,10 @@ public:
 #define SAY_DIALOG_MEDIVH_9         "He should not have angered me. I must go... recover my strength now..."
 
 
-static float MedivPos[4] = {-11161.49f, -1902.24f, 91.48f, 1.94f};
-static float ArcanagosPos[4] = {-11169.75f, -1881.48f, 95.39f, 4.83f};
+static float MedivPos[4] = { -11161.49f, -1902.24f, 91.48f, 1.94f };
+static float ArcanagosPos[4] = { -11169.75f, -1881.48f, 95.39f, 4.83f };
 
+// @todo rewrite this mess
 class npc_image_of_medivh : public CreatureScript
 {
 public:
@@ -429,7 +53,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return GetKarazhanAI<npc_image_of_medivhAI>(creature);
+        return GetInstanceAI<npc_image_of_medivhAI>(creature);
     }
 
     struct npc_image_of_medivhAI : public ScriptedAI
@@ -472,9 +96,7 @@ public:
                 Step = 0;
             }
             else
-            {
                 me->DespawnOrUnsummon();
-            }
         }
         void EnterCombat(Unit* /*who*/) override { }
 
@@ -498,7 +120,6 @@ public:
             if (!Arcanagos)
                 return;
             ArcanagosGUID = Arcanagos->GetGUID();
-            Arcanagos->SetDisableGravity(true);
             Arcanagos->GetMotionMaster()->MovePoint(0, ArcanagosPos[0], ArcanagosPos[1], ArcanagosPos[2]);
             Arcanagos->SetOrientation(ArcanagosPos[3]);
             me->SetOrientation(MedivPos[3]);
@@ -536,7 +157,7 @@ public:
                 return 5000;
             case 8:
                 FireMedivhTimer = 500;
-                DoCast(me, SPELL_MANA_SHIELD);
+                DoCastSelf(SPELL_MANA_SHIELD);
                 return 10000;
             case 9:
                 me->MonsterTextEmote(EMOTE_DIALOG_MEDIVH_7, nullptr);
@@ -566,20 +187,20 @@ public:
                 me->SetVisible(false);
                 me->ClearInCombat();
 
-                InstanceMap::PlayerList const& PlayerList = me->GetMap()->GetPlayers();
-                for (InstanceMap::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+                InstanceMap::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
+                for (const auto& i : PlayerList)
                 {
-                    if (i->GetSource()->IsAlive())
+                    if (i.GetSource()->IsAlive())
                     {
-                        if (i->GetSource()->GetQuestStatus(9645) == QUEST_STATUS_INCOMPLETE)
-                            i->GetSource()->CompleteQuest(9645);
+                        if (i.GetSource()->GetQuestStatus(9645) == QUEST_STATUS_INCOMPLETE)
+                            i.GetSource()->CompleteQuest(9645);
                     }
                 }
                 return 50000;
             }
             case 15:
                 if (Creature* arca = ObjectAccessor::GetCreature(*me, ArcanagosGUID))
-                    arca->Kill(arca, arca);
+                    arca->DealDamage(arca, arca, arca->GetHealth(), nullptr, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr);
                 return 5000;
             default:
                 return 9999999;
@@ -592,7 +213,8 @@ public:
             {
                 if (EventStarted)
                     YellTimer = NextStep(Step++);
-            } else YellTimer -= diff;
+            }
+            else YellTimer -= diff;
 
             if (Step >= 7 && Step <= 12)
             {
@@ -603,21 +225,290 @@ public:
                     if (arca)
                         arca->CastSpell(me, SPELL_FIRE_BALL, false);
                     FireArcanagosTimer = 6000;
-                } else FireArcanagosTimer -= diff;
+                }
+                else FireArcanagosTimer -= diff;
 
                 if (FireMedivhTimer <= diff)
                 {
                     if (arca)
                         DoCast(arca, SPELL_FIRE_BALL);
                     FireMedivhTimer = 5000;
-                } else FireMedivhTimer -= diff;
+                }
+                else FireMedivhTimer -= diff;
             }
         }
     };
 };
 
+struct npc_servant_quartersAI : public ScriptedAI
+{
+    npc_servant_quartersAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    virtual void DoEvent(uint32 eventId) = 0;
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->IsCasting())
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            DoEvent(eventId);
+            if (me->IsCasting())
+                return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        _events.Reset();
+        if (InstanceScript* instance = me->GetInstanceScript())
+            instance->SetData(DATA_SERVANT_QUARTERS_TRASH, 1);
+    }
+
+    protected:
+        EventMap _events;
+};
+
+enum ColdmistStalker
+{
+    SPELL_SNEAK             = 22766,
+    SPELL_CHILLING_POISON   = 29291
+};
+
+struct npc_coldmist_stalkerAI : public npc_servant_quartersAI
+{
+    npc_coldmist_stalkerAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void Reset() override
+    {
+        DoCastSelf(SPELL_SNEAK, true);
+        DoCastSelf(SPELL_CHILLING_POISON, true);
+    }
+
+    void DoEvent(uint32 /*eventId*/) override { }
+};
+
+enum ColdmistWidow
+{
+    SPELL_FROST_MIST            = 29292,
+    SPELL_POISON_BOLT_VOLLEY    = 29293,
+
+    EVENT_FROST_MIST            = 1,
+    EVENT_POISON_BOLT_VOLLEY
+};
+
+struct npc_coldmist_widowAI : public npc_servant_quartersAI
+{
+    npc_coldmist_widowAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_FROST_MIST, 2s, 6s);
+        _events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 4s, 8s);
+    }
+
+    void DoEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_FROST_MIST:
+                DoCastSelf(SPELL_FROST_MIST);
+                _events.Repeat(15s, 20s);
+                break;
+            case EVENT_POISON_BOLT_VOLLEY:
+                DoCastSelf(SPELL_POISON_BOLT_VOLLEY);
+                _events.Repeat(15s, 20s);
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+enum Shadowbat
+{
+    SPELL_DARK_SHRIEK   = 29298,
+
+    EVENT_DARK_SHRIEK   = 1
+};
+
+struct npc_shadowbatAI : public npc_servant_quartersAI
+{
+    npc_shadowbatAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_DARK_SHRIEK, 3s, 9s);
+    }
+
+    void DoEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_DARK_SHRIEK:
+                DoCastSelf(SPELL_DARK_SHRIEK);
+                _events.Repeat(14s, 21s);
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+enum GreaterShadowbat
+{
+    SPELL_SONIC_BLAST   = 29300,
+    SPELL_WING_BEAT     = 29303,
+
+    EVENT_SONIC_BLAST   = 1,
+    EVENT_WING_BEAT
+};
+
+struct npc_greater_shadowbatAI : public npc_servant_quartersAI
+{
+    npc_greater_shadowbatAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_SONIC_BLAST, 4s, 11s);
+        _events.ScheduleEvent(EVENT_WING_BEAT, 5s, 10s);
+    }
+
+    void DoEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_SONIC_BLAST:
+                DoCastVictim(SPELL_SONIC_BLAST);
+                _events.Repeat(14s, 21s);
+                break;
+            case EVENT_WING_BEAT:
+                DoCastSelf(SPELL_WING_BEAT);
+                _events.Repeat(14s, 21s);
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+enum VampiricShadowbat
+{
+    SPELL_DRAINING_TOUCH = 32429
+};
+
+struct npc_vampiric_shadowbatAI : public npc_servant_quartersAI
+{
+    npc_vampiric_shadowbatAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void Reset() override
+    {
+        DoCastSelf(SPELL_DRAINING_TOUCH);
+    }
+
+    void DoEvent(uint32 /*eventId*/) override { }
+};
+
+enum Shadowbeast
+{
+    SPELL_HOWL_OF_THE_BROKEN_HILLS  = 29304,
+
+    EVENT_HOWL_OF_THE_BROKEN_HILLS  = 1
+};
+
+struct npc_shadowbeastAI : public npc_servant_quartersAI
+{
+    npc_shadowbeastAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_HOWL_OF_THE_BROKEN_HILLS, 5s, 10s);
+    }
+
+    void DoEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_HOWL_OF_THE_BROKEN_HILLS:
+                DoCastSelf(SPELL_HOWL_OF_THE_BROKEN_HILLS);
+                _events.Repeat(20s, 30s);
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+enum Dreadbeast
+{
+    SPELL_CLEAVE    = 29561,
+
+    EVENT_CLEAVE    = 1
+};
+
+struct npc_dreadbeastAI : public npc_servant_quartersAI
+{
+    npc_dreadbeastAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_CLEAVE, 3s, 8s);
+    }
+
+    void DoEvent(uint32 eventId) override
+    {
+        switch (eventId)
+        {
+            case EVENT_CLEAVE:
+                DoCastVictim(SPELL_CLEAVE);
+                _events.Repeat(6s, 9s);
+                break;
+            default:
+                break;
+        }
+    }
+};
+
+enum PhaseHound
+{
+    SPELL_PHASE_SHIFT = 29315
+};
+
+struct npc_phase_houndAI : public npc_servant_quartersAI
+{
+    npc_phase_houndAI(Creature* creature) : npc_servant_quartersAI(creature) { }
+
+    void Reset() override
+    {
+        DoCastSelf(SPELL_PHASE_SHIFT, true);
+    }
+
+    void DoEvent(uint32 /*eventId*/) override { }
+};
+
 void AddSC_karazhan()
 {
-    new npc_barnes();
     new npc_image_of_medivh();
+
+    new CreatureAILoader<npc_coldmist_stalkerAI>("npc_coldmist_stalker");
+    new CreatureAILoader<npc_coldmist_widowAI>("npc_coldmist_widow");
+    new CreatureAILoader<npc_shadowbatAI>("npc_shadowbat");
+    new CreatureAILoader<npc_greater_shadowbatAI>("npc_greater_shadowbat");
+    new CreatureAILoader<npc_vampiric_shadowbatAI>("npc_vampiric_shadowbat");
+    new CreatureAILoader<npc_shadowbeastAI>("npc_shadowbeast");
+    new CreatureAILoader<npc_dreadbeastAI>("npc_dreadbeast");
+    new CreatureAILoader<npc_phase_houndAI>("npc_phase_hound");
 }

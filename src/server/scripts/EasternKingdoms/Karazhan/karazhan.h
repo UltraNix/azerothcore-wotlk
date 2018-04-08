@@ -1,122 +1,112 @@
 /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
- * Copyright (C) 2006-2009 ScriptDev2 <https://scriptdev2.svn.sourceforge.net/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * Rewritten by Afgann
  */
 
 #ifndef DEF_KARAZHAN_H
 #define DEF_KARAZHAN_H
 
-#include "CreatureAIImpl.h"
+#define DataHeader "KA"
 
-#define KZScriptName "instance_karazhan"
-#define DataHeader "KZ"
-
-uint32 const EncounterCount = 12;
-
-enum KZDataTypes
+enum DataTypes
 {
-    DATA_ATTUMEN                    = 0,
-    DATA_MOROES                     = 1,
-    DATA_MAIDEN_OF_VIRTUE           = 2,
-    DATA_OPTIONAL_BOSS              = 3,
-    DATA_OPERA_PERFORMANCE          = 4,
-    DATA_CURATOR                    = 5,
-    DATA_ARAN                       = 6,
-    DATA_TERESTIAN                  = 7,
-    DATA_NETHERSPITE                = 8,
-    DATA_CHESS                      = 9,
-    DATA_MALCHEZZAR                 = 10,
-    DATA_NIGHTBANE                  = 11,
+    BOSS_ATTUMEN,
+    BOSS_MOROES,
+    BOSS_MAIDEN,
+    BOSS_SERVANT_QUARTERS,
+    BOSS_OPERA,
+    BOSS_CURATOR,
+    BOSS_ARAN,
+    BOSS_TERESTIAN,
+    BOSS_NETHERSPITE,
+    BOSS_CHESS,
+    BOSS_MALCHEZZAR,
+    BOSS_NIGHTBANE,
 
-    DATA_OPERA_OZ_DEATHCOUNT        = 14,
+    DATA_KILREK,
 
-    DATA_KILREK                     = 15,
-    DATA_GO_CURTAINS                = 18,
-    DATA_GO_STAGEDOORLEFT           = 19,
-    DATA_GO_STAGEDOORRIGHT          = 20,
-    DATA_GO_LIBRARY_DOOR            = 21,
-    DATA_GO_MASSIVE_DOOR            = 22,
-    DATA_GO_NETHER_DOOR             = 23,
-    DATA_GO_GAME_DOOR               = 24,
-    DATA_GO_GAME_EXIT_DOOR          = 25,
+    DATA_OPERA_PERFORMANCE,
+    DATA_OPERA_OZ_DEATHCOUNT,
 
-    DATA_IMAGE_OF_MEDIVH            = 26,
-    DATA_MASTERS_TERRACE_DOOR_1     = 27,
-    DATA_MASTERS_TERRACE_DOOR_2     = 28,
-    DATA_GO_SIDE_ENTRANCE_DOOR      = 29,
-    DATA_GO_BLACKENED_URN           = 30
+    DATA_GO_CURTAINS,
+    DATA_GO_STAGEDOORLEFT,
+    DATA_GO_STAGEDOORRIGHT,
+    DATA_GO_LIBRARY_DOOR,
+    DATA_GO_MASSIVE_DOOR,
+    DATA_GO_NETHER_DOOR,
+    DATA_GO_GAME_DOOR,
+    DATA_GO_GAME_EXIT_DOOR,
+
+    DATA_IMAGE_OF_MEDIVH,
+    DATA_ECHO_OF_MEDIVH,
+    DATA_MASTERS_TERRACE_DOOR_1,
+    DATA_MASTERS_TERRACE_DOOR_2,
+    DATA_GO_SIDE_ENTRANCE_DOOR,
+
+    DATA_SERVANT_QUARTERS_TRASH,
+    DATA_SERVANT_QUARTERS_AGGRO,
+    DATA_SELECTED_RARE,
+    DATA_DUST_COVERED_CHEST,
+    DATA_ROMULO,
+    DATA_JULIANNE,
+    DATA_BARNES,
+    DATA_CRONE,
+    DATA_DOROTHEE,
+    DATA_MIDNIGHT,
+    DATA_BLACKENED_URN,
+    DATA_STRAWMAN,
+    DATA_TINHEAD,
+    DATA_ROAR,
+    DATA_GO_BLACKENED_URN
 };
 
-enum KZOperaEvents
+enum InstanceOperaEvents
 {
-    EVENT_OZ                        = 1,
-    EVENT_HOOD                      = 2,
-    EVENT_RAJ                       = 3
+    OPERA_EVENT_RED_RIDING_HOOD,
+    OPERA_EVENT_WIZARD_OF_OZ,
+    OPERA_EVENT_ROMULO_AND_JULIANNE
 };
 
-enum KZMiscCreatures
+enum KarazhanNPCs
 {
-    NPC_HYAKISS_THE_LURKER          = 16179,
-    NPC_ROKAD_THE_RAVAGER           = 16181,
-    NPC_SHADIKITH_THE_GLIDER        = 16180,
-    NPC_TERESTIAN_ILLHOOF           = 15688,
-    NPC_MOROES                      = 15687,
-    NPC_NIGHTBANE                   = 17225,
-    NPC_ATTUMEN_UNMOUNTED           = 15550,
-    NPC_ATTUMEN_MOUNTED             = 16152,
-    NPC_MIDNIGHT                    = 16151,
-
-    // Trash
-    NPC_COLDMIST_WIDOW              = 16171,
-    NPC_COLDMIST_STALKER            = 16170,
-    NPC_SHADOWBAT                   = 16173,
-    NPC_VAMPIRIC_SHADOWBAT          = 16175,
-    NPC_GREATER_SHADOWBAT           = 16174,
-    NPC_PHASE_HOUND                 = 16178,
-    NPC_DREADBEAST                  = 16177,
-    NPC_SHADOWBEAST                 = 16176,
-    NPC_KILREK                      = 17229
+    NPC_HYAKISS_THE_LURKER              = 16179,
+    NPC_SHADIKITH_THE_GLIDER            = 16180,
+    NPC_ROKAD_THE_RAVAGER               = 16181,
+    NPC_KILREK                          = 17229,
+    NPC_TERESTIAN                       = 15688,
+    NPC_MOROES                          = 15687,
+    NPC_ECHO_OF_MEDIVH                  = 16816,
+    NPC_IMAGE_OF_MEDIVH                 = 17651,
+    NPC_MALCHEZAAR                      = 15690,
+    NPC_NETHERSPITE                     = 15689,
+    NPC_ROMULO                          = 17533,
+    NPC_JULIANNE                        = 17534,
+    NPC_BARNES                          = 16812,
+    NPC_CRONE                           = 18168,
+    NPC_DOROTHEE                        = 17535,
+    NPC_STRAWMAN                        = 17543,
+    NPC_TINHEAD                         = 17547,
+    NPC_ROAR                            = 17546,
+    NPC_ATTUMEN_UNMOUNTED               = 15550,
+    NPC_ATTUMEN_MOUNTED                 = 16152,
+    NPC_MIDNIGHT                        = 16151,
+    NPC_NIGHTBANE                       = 17225
 };
 
-enum KZGameObjectIds
+enum KarazhanGOs
 {
-    GO_STAGE_CURTAIN                = 183932,
-    GO_STAGE_DOOR_LEFT              = 184278,
-    GO_STAGE_DOOR_RIGHT             = 184279,
-    GO_PRIVATE_LIBRARY_DOOR         = 184517,
-    GO_MASSIVE_DOOR                 = 185521,
-    GO_GAMESMAN_HALL_DOOR           = 184276,
-    GO_GAMESMAN_HALL_EXIT_DOOR      = 184277,
-    GO_NETHERSPACE_DOOR             = 185134,
-    GO_MASTERS_TERRACE_DOOR         = 184274,
-    GO_MASTERS_TERRACE_DOOR2        = 184280,
-    GO_SIDE_ENTRANCE_DOOR           = 184275,
-    GO_DUST_COVERED_CHEST           = 185119,
-    GO_BLACKENED_URN                = 194092
+    GO_STAGEDOORLEFT                    = 184278,
+    GO_STAGEDOORRIGHT                   = 184279,
+    GO_CURTAINS                         = 183932,
+    GO_LIBRARY_DOOR                     = 184517,
+    GO_MASSIVE_DOOR                     = 185521,
+    GO_SIDE_ENTRANCE_DOOR               = 184275,
+    GO_GAME_DOOR                        = 184276,
+    GO_GAME_EXIT_DOOR                   = 184277,
+    GO_NETHER_DOOR                      = 185134,
+    GO_MASTERS_TERRACE_DOOR_1           = 184274,
+    GO_MASTERS_TERRACE_DOOR_2           = 184280,
+    GO_DUST_COVERED_CHEST               = 185119,
+    GO_BLACKENED_URN                    = 194092
 };
-
-enum KZMisc
-{
-    OPTIONAL_BOSS_REQUIRED_DEATH_COUNT = 50
-};
-
-template <class AI, class T>
-inline AI* GetKarazhanAI(T* obj)
-{
-    return GetInstanceAI<AI>(obj, KZScriptName);
-}
 
 #endif

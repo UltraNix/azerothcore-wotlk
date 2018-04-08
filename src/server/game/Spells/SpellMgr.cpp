@@ -5085,6 +5085,33 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetB[0] = TARGET_DEST_DYNOBJ_ALLY;
             break;
 
+        //////////////
+        // Karazhan //
+        //////////////
+        case 29973: // Arcane Explosion (Shade of Aran)
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_20_YARDS;   // effect radius from 21 to 20 yd
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_20_YARDS;   // effect radius from 21 to 20 yd
+            break;
+        case 29962: // Summon Water Elementals (Shade of Aran)
+        case 37051:
+        case 37052:
+        case 37053:
+            spellInfo->rangeIndex = 6; // range from 0yd to 100yd
+            break;
+        case 37066: // Garrote (Moroes)
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ENEMY;
+            break;
+            // Netherspite:
+        case 30465: // Perseverence Beam
+        case 30464: // Serenity Beam
+        case 30463: // Dominance Beam
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_PERIODIC_DUMMY;
+            spellInfo->EffectAmplitude[EFFECT_0] = 1000;
+            break;
+        case 37098: // Rain of Bones
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_DEST_DEST;
+            break;
+
         // Sunwell Plateu
         // Activate Sunblade Protecto
         case 46475:
@@ -5147,9 +5174,6 @@ void SpellMgr::LoadDbcDataCorrections()
         //////////////////////////////////////////
         ////////// Old Scarlet Monastery
         //////////////////////////////////////////
-        case 29973: // arcane explosion, remove this after event
-            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
-            break;
         case 51103: // Frostbomb
         case 34172: // Arcane Orb
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS; // OLDSM

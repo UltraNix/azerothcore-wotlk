@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -90,6 +90,16 @@ namespace Trinity
             auto it = std::begin(container);
             std::advance(it, urand(0, uint32(Size(container)) - 1));
             return *it;
+        }
+
+        /*
+        * Erases all elements that satisfy the predicate pred from the container.
+        * (implementation of std::experimental::erase_if from C++17)
+        */
+        template<class Container, class Predicate>
+        inline void Erase_if(Container& container, Predicate pred)
+        {
+            container.erase(std::remove_if(std::begin(container), std::end(container), pred), std::end(container));
         }
     }
     //! namespace Containers
