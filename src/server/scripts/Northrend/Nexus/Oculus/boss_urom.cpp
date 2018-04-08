@@ -60,6 +60,12 @@ enum Yells
     SAY_PLAYER_KILL                               = 7
 };
 
+enum DataSet
+{
+    SETDATA_DATA                                  = 1,
+    SETDATA_SUMMON_KILLED                         = 1
+};
+
 float summons[3][4] =    {
                             {NPC_PHANTASMAL_AIR, NPC_PHANTASMAL_AIR, NPC_PHANTASMAL_WATER, NPC_PHANTASMAL_FIRE},
                             {NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_OGRE, NPC_PHANTASMAL_NAGAL, NPC_PHANTASMAL_MURLOC},
@@ -95,6 +101,7 @@ public:
         bool lock;
         float x,y,z;
         int32 releaseLockTimer;
+        uint8 summonsKilled;
 
         uint8 GetPhaseByCurrentPosition()
         {
@@ -110,11 +117,12 @@ public:
             if (pInstance)
             {
                 pInstance->SetData(DATA_UROM, NOT_STARTED);
-                if( pInstance->GetData(DATA_VAROS) != DONE )
+                if( pInstance->GetData(DATA_VAROS) != DONE)
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 else
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             }
+
 
             me->NearTeleportTo(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY(), me->GetHomePosition().GetPositionZ(), me->GetHomePosition().GetOrientation());
             me->CastSpell(me, SPELL_EVOCATION, true);
@@ -122,6 +130,7 @@ public:
             lock = false;
             x,y,z = 0.0f;
             releaseLockTimer = 0;
+            summonsKilled = 0;
             me->ApplySpellImmune(0, IMMUNITY_ID, 49838, true);
         }
 
@@ -225,6 +234,7 @@ public:
                 case SPELL_SUMMON_MENAGERIE_3:
                     {
                         me->DestroyForNearbyPlayers();
+                        summonsKilled = 0;
                         uint8 phase = GetPhaseByCurrentPosition();
                         for (uint8 i = 0; i < 4; ++i)
                             me->SummonCreature(summons[phase-1][i], cords[phase-1][0] + ((i % 2) ? 4.0f : -4.0f), cords[phase-1][1] + (i < 2 ? 4.0f : -4.0f), cords[phase-1][2], 0.0f, TEMPSUMMON_TIMED_DESPAWN, 300000);
@@ -232,6 +242,7 @@ public:
                         LeaveCombat();
                         me->CastSpell(me, SPELL_EVOCATION, true);
                         releaseLockTimer = 1;
+                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     }
                     break;
                 case SPELL_TELEPORT:
@@ -331,6 +342,15 @@ public:
             me->SetDisableGravity(false);
             me->SetControlled(false, UNIT_STATE_ROOT);
             ScriptedAI::EnterEvadeMode();
+        }
+
+        void SetData(uint32 data, uint32 value)
+        {
+            if (data != SETDATA_DATA)
+                return;
+            if (value == SETDATA_SUMMON_KILLED)
+                if(++summonsKilled == 4)
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
     };
 };
