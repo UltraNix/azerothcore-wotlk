@@ -207,7 +207,7 @@ struct boss_anub_arakAI : public BossAI
                 SummonHelpers(550.34f, 316.00f, 234.30f, SPELL_SUMMON_VENOMANCER);
                 break;
             case EVENT_CHECK_BOUNDARY:
-                if (me->GetDistance(_boundaryPos) > 15.0f)
+                if (me->GetDistance(_boundaryPos) > 20.0f)
                     EnterEvadeMode();
                 events.Repeat(500);
                 break;
