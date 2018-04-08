@@ -751,6 +751,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         bool m_isTempWorldObject; //true when possessed
 
+        void DisableChangeAI(bool apply) { m_disableChangeAI = apply; }
+        bool CanChangeAI() { return !m_disableChangeAI; }
+
         // Handling caster facing during spellcast
         void SetTarget(uint64 guid);
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
@@ -814,6 +817,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         uint16 m_LootMode;                                  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable
 
         InhabitTypeValues m_inhabitType;
+
+        bool m_disableChangeAI;
 
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;

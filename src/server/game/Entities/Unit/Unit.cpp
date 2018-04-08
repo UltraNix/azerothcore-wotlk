@@ -17108,7 +17108,8 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
 
     if (GetTypeId() == TYPEID_UNIT)
     {
-        ToCreature()->AI()->OnCharmed(true);
+        if (ToCreature()->CanChangeAI())
+            ToCreature()->AI()->OnCharmed(true);
         GetMotionMaster()->MoveIdle();
 
         // Xinef: If creature can fly, add normal player flying flag (fixes speed)
