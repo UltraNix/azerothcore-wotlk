@@ -130,7 +130,9 @@ void Vehicle::Reset(bool evading /*= false*/)
     else
     {
         ApplyAllImmunities();
-        InstallAllAccessories(evading);
+        // Do not install accessories on dead vehicles
+        if (_me->IsAlive())
+            InstallAllAccessories(evading);
         if (_usableSeatNum)
             _me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
     }
