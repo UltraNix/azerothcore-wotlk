@@ -243,11 +243,6 @@ public:
             }
         }
 
-        void OnPlayerEnter(Player* /*player*/) override
-        {
-            CheckSapphironStatus();
-        }
-
         void OnGameObjectCreate(GameObject* pGo)
         {
             if (pGo->GetGOInfo()->displayId == 6785 || pGo->GetGOInfo()->displayId == 1287)
@@ -388,7 +383,6 @@ public:
                     break;
                 case GO_NAXXRAMAS_ORB:
                     _naxxramasOrbGUID = pGo->GetGUID();
-                    CheckSapphironStatus();
                     break;
                 case GO_NOTH_ENTRANCE_GATE:
                     _nothEntranceGateGUID = pGo->GetGUID();
@@ -494,10 +488,14 @@ public:
         {
             InstanceScript::OnUnitDeath(who);
 
-            if (who->ToPlayer() && immortalAchievement && IsEncounterInProgress())
+            //! Immortal/Undying achievement handling
+            if (Player* player = who->ToPlayer())
             {
-                immortalAchievement = 0;
-                SaveToDB();
+                if (immortalAchievement && IsEncounterInProgress() && player->GetSession()->GetSecurity() == SEC_PLAYER)
+                {
+                    immortalAchievement = 0;
+                    SaveToDB();
+                }
             }
         }
 
@@ -689,7 +687,6 @@ public:
             // Save instance and open gates
             if (data == DONE)
             {
-                CheckSapphironStatus();
                 SaveToDB();
 
                 switch (id)
@@ -782,14 +779,7 @@ public:
 
         uint32 GetData(uint32 identifier) const
         {
-            switch(identifier)
-            {
-                case EVENT_HORSEMAN:
-                    return Encounters[identifier];
-                case EVENT_FAERLINA:
-                    return Encounters[identifier];
-            }
-            return 0;
+            return Encounters[identifier];
         }
 
         void Update(uint32 diff)
@@ -879,33 +869,6 @@ public:
                     return _gothikGUID;
             }
             return 0;
-        }
-
-        void CheckSapphironStatus()
-        {
-            if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                return;
-
-            GameObject* go = instance->GetGameObject(_naxxramasOrbGUID);
-            if (!go)
-                return;
-
-            if (go->GetPhaseMask() == 1 && sapphironAllowed)
-                return;
-
-            uint8 bossCount = 0;
-            for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
-            {
-                if (Encounters[i] == DONE)
-                {
-                    if (++bossCount >= 13)
-                    {
-                        sapphironAllowed = true;
-                        go->SetPhaseMask(1, true);
-                        break;
-                    }
-                }
-            }
         }
 
         std::string GetSaveData()
@@ -1138,10 +1101,52 @@ class spell_gargoyle_stoneskin_AuraScript : public AuraScript
     }
 };
 
+class go_sapphiron_teleport_downstairs : public GameObjectScript
+{
+public:
+    go_sapphiron_teleport_downstairs() : GameObjectScript("go_sapphiron_teleport_downstairs") { }
+
+    bool OnGossipHello(Player* player, GameObject* /*go*/) override
+    {
+        // debug handling if player has GM on turned on, would be great if we had proper bossAI scripts
+        // so i could implement a command to get boss states via that but well, we do not
+        // if by any chance we do get them for naxx bosses in the future we can drop this entire code
+        std::ostringstream stream;
+
+        InstanceScript* instance = player->GetInstanceScript();
+
+        if (!instance)
+            return false;
+
+        if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+            return false;
+
+        uint8 bossCount = 0;
+        for (uint8 i = 0; i < MAX_ENCOUNTERS - 2; ++i)
+        {
+            if (instance->GetData(i) == DONE)
+            {
+                if (++bossCount >= 13)
+                {
+                    player->CastSpell(player, 72617, true);
+                    return true;
+                }
+            }
+            stream << "Encounter number: " << std::to_string(i) << " state: " << std::to_string(instance->GetData(i)) << "\n";
+        }
+        stream << "State definition: 0 = not started, 1 = in progress, 3 = done, all bosses have to be set to 3 in order for teleport to work\n";
+        stream << "Encounter number definition has been posted on IRC and pinned to the channel (GENERAL EN)\n";
+        if (player->IsGameMaster())
+            ChatHandler(player->GetSession()).PSendSysMessage(stream.str().c_str());
+        return true;
+    }
+};
+
 void AddSC_instance_naxxramas()
 {
     new instance_naxxramas();
     new boss_naxxramas_misc();
     new CreatureAILoader<npc_stoneskin_gargoyleAI>("npc_stoneskin_gargoyle");
     new AuraScriptLoaderEx<spell_gargoyle_stoneskin_AuraScript>("spell_gargoyle_stoneskin");
+    new go_sapphiron_teleport_downstairs();
 }
