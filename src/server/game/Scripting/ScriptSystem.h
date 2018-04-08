@@ -6,7 +6,12 @@
 #define SC_SYSTEM_H
 
 #include "ScriptMgr.h"
-#include <ace/Singleton.h>
+#include "SplineChain.h"
+#include "Hash.h"
+#include <utility>
+#include <unordered_map>
+
+class Creature;
 
 #define TEXT_SOURCE_RANGE -1000000                          //the amount of entries each text source has available
 
@@ -48,33 +53,30 @@ typedef std::vector<ScriptPointMove> ScriptPointVector;
 
 class SystemMgr
 {
-        friend class ACE_Singleton<SystemMgr, ACE_Null_Mutex>;
-        SystemMgr() {}
-        ~SystemMgr() {}
+    private:
+        SystemMgr() { }
+        ~SystemMgr() { }
 
     public:
+        static SystemMgr* instance();
+
         typedef std::unordered_map<uint32, ScriptPointVector> PointMoveMap;
 
         //Database
         void LoadScriptWaypoints();
+        void LoadScriptSplineChains();
 
-        ScriptPointVector const& GetPointMoveList(uint32 creatureEntry) const
-        {
-            PointMoveMap::const_iterator itr = m_mPointMoveMap.find(creatureEntry);
+        ScriptPointVector const* GetPointMoveList(uint32 creatureEntry) const;
 
-            if (itr == m_mPointMoveMap.end())
-                return _empty;
-
-            return itr->second;
-        }
+        std::vector<SplineChainLink> const* GetSplineChain(uint32 entry, uint16 chainId) const;
+        std::vector<SplineChainLink> const* GetSplineChain(Creature const* who, uint16 id) const;
 
     protected:
         PointMoveMap    m_mPointMoveMap;                    //coordinates for waypoints
-
-    private:
-        static ScriptPointVector const _empty;
+        typedef std::pair<uint32, uint16> ChainKeyType; // creature entry + chain ID
+        std::unordered_map<ChainKeyType, std::vector<SplineChainLink>> m_mSplineChainsMap; // spline chains
 };
 
-#define sScriptSystemMgr ACE_Singleton<SystemMgr, ACE_Null_Mutex>::instance()
+#define sScriptSystemMgr SystemMgr::instance()
 
 #endif

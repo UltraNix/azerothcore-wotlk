@@ -19,6 +19,7 @@
 #include "MotionMaster.h"
 #include "CreatureAISelector.h"
 #include "Creature.h"
+#include "ScriptSystem.h"
 
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
@@ -29,6 +30,7 @@
 #include "WaypointMovementGenerator.h"
 #include "RandomMovementGenerator.h"
 #include "EscortMovementGenerator.h"
+#include "SplineChainMovementGenerator.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
 #include <cassert>
@@ -483,6 +485,38 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
         init.SetFacing(target);
     init.Launch();
     Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
+}
+
+void MotionMaster::MoveAlongSplineChain(uint32 pointId, uint16 dbChainId, bool walk)
+{
+    Creature* owner = _owner->ToCreature();
+    if (!owner)
+    {
+        //TC_LOG_ERROR("misc", "MotionMaster::MoveAlongSplineChain: non-creature %s tried to walk along DB spline chain. Ignoring.", _owner->GetGUID().ToString().c_str());
+        return;
+    }
+    std::vector<SplineChainLink> const* chain = sScriptSystemMgr->GetSplineChain(owner, dbChainId);
+    if (!chain)
+    {
+        //TC_LOG_ERROR("misc", "MotionMaster::MoveAlongSplineChain: creature with entry %u tried to walk along non-existing spline chain with DB id %u.", owner->GetEntry(), dbChainId);
+        return;
+    }
+    MoveAlongSplineChain(pointId, *chain, walk);
+}
+
+void MotionMaster::MoveAlongSplineChain(uint32 pointId, std::vector<SplineChainLink> const& chain, bool walk)
+{
+    Mutate(new SplineChainMovementGenerator(pointId, chain, walk), MOTION_SLOT_ACTIVE);
+}
+
+void MotionMaster::ResumeSplineChain(SplineChainResumeInfo const& info)
+{
+    if (info.Empty())
+    {
+        sLog->outError("MotionMaster::ResumeSplineChain: unit with entry %u tried to resume a spline chain from empty info.", _owner->GetEntry());
+        return;
+    }
+    Mutate(new SplineChainMovementGenerator(info), MOTION_SLOT_ACTIVE);
 }
 
 void MotionMaster::MoveFall(uint32 id /*=0*/, bool addFlagForNPC)

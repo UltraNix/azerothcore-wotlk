@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -24,6 +24,7 @@
 #include "SharedDefines.h"
 #include "Object.h"
 #include "Spline/MoveSpline.h"
+#include "Spline/SplineChain.h"
 
 class MovementGenerator;
 class Unit;
@@ -53,7 +54,9 @@ enum MovementGeneratorType
     ROTATE_MOTION_TYPE    = 15,
     EFFECT_MOTION_TYPE    = 16,
     ESCORT_MOTION_TYPE    = 17,                             // xinef: EscortMovementGenerator.h
-    NULL_MOTION_TYPE      = 18
+    NULL_MOTION_TYPE      = 18,
+    SPLINE_CHAIN_MOTION_TYPE = 19,                          // SplineChainMovementGenerator.h
+    MAX_MOTION_TYPE                                         // limit
 };
 
 enum MovementSlot
@@ -97,11 +100,11 @@ class MotionMaster //: private std::stack<MovementGenerator *>
                 --_top;
         }
 
-        bool needInitTop() const 
-        { 
+        bool needInitTop() const
+        {
             if (empty())
                 return false;
-            return _needInit[_top]; 
+            return _needInit[_top];
         }
         void InitTop();
     public:
@@ -121,15 +124,15 @@ class MotionMaster //: private std::stack<MovementGenerator *>
 
         bool empty() const { return (_top < 0); }
         int size() const { return _top + 1; }
-        _Ty top() const 
-        { 
+        _Ty top() const
+        {
             ASSERT(!empty());
-            return Impl[_top]; 
+            return Impl[_top];
         }
-        _Ty GetMotionSlot(int slot) const 
-        { 
+        _Ty GetMotionSlot(int slot) const
+        {
             ASSERT(slot >= 0);
-            return Impl[slot]; 
+            return Impl[slot];
         }
 
         uint8 GetCleanFlags() const { return _cleanFlag; }
@@ -196,6 +199,10 @@ class MotionMaster //: private std::stack<MovementGenerator *>
         void MoveJump(Position const& pos, float speedXY, float speedZ, uint32 id = 0)
             { MoveJump(pos.m_positionX, pos.m_positionY, pos.m_positionZ, speedXY, speedZ, id); };
         void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id = 0, Unit const* target = NULL);
+        // Walk along spline chain stored in DB (script_spline_chain_meta and script_spline_chain_waypoints)
+        void MoveAlongSplineChain(uint32 pointId, uint16 dbChainId, bool walk);
+        void MoveAlongSplineChain(uint32 pointId, std::vector<SplineChainLink> const& chain, bool walk);
+        void ResumeSplineChain(SplineChainResumeInfo const& info);
         void MoveFall(uint32 id = 0, bool addFlagForNPC = false);
 
         void MoveSeekAssistance(float x, float y, float z);

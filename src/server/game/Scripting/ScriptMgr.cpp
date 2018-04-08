@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -226,6 +226,7 @@ void ScriptMgr::Unload()
 void ScriptMgr::LoadDatabase()
 {
     sScriptSystemMgr->LoadScriptWaypoints();
+    sScriptSystemMgr->LoadScriptSplineChains();
 }
 
 struct TSpellSummary
@@ -1189,8 +1190,8 @@ void ScriptMgr::OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newAre
 }
 
 void ScriptMgr::OnAfterPlayerSetVisibleItemSlot(Player* player, uint8 slot, Item *item)
-{		
-    FOREACH_SCRIPT(PlayerScript)->OnAfterSetVisibleItemSlot(player, slot,item);	
+{
+    FOREACH_SCRIPT(PlayerScript)->OnAfterSetVisibleItemSlot(player, slot,item);
 }
 
 // Guild
