@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1229,8 +1229,8 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x4B0*/ { "CMSG_SET_ARENA_MEMBER_WEEKLY_GAMES",           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     , false },
     /*0x4B1*/ { "CMSG_SET_ARENA_MEMBER_SEASON_GAMES",           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     , false },
     /*0x4B2*/ { "SMSG_ITEM_REFUND_INFO_RESPONSE",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               , false },
-    /*0x4B3*/ { "CMSG_ITEM_REFUND_INFO",                        STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleItemRefundInfoRequest     , false },
-    /*0x4B4*/ { "CMSG_ITEM_REFUND",                             STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleItemRefund                , false },
+    /*0x4B3*/ { "CMSG_ITEM_REFUND_INFO",                        STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefundInfoRequest     , false },
+    /*0x4B4*/ { "CMSG_ITEM_REFUND",                             STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleItemRefund                , false },
     /*0x4B5*/ { "SMSG_ITEM_REFUND_RESULT",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               , false },
     /*0x4B6*/ { "CMSG_CORPSE_MAP_POSITION_QUERY",               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCorpseMapPositionQuery    , false },
     /*0x4B7*/ { "SMSG_CORPSE_MAP_POSITION_QUERY_RESPONSE",      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               , false },
