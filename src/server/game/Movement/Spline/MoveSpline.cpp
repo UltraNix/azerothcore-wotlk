@@ -308,12 +308,6 @@ void MoveSpline::_Finalize()
     time_passed = Duration();
 }
 
-
-void MoveSpline::_Interrupt()
-{
-    splineflags.done = true;
-}
-
 int32 MoveSpline::currentPathIdx() const
 {
     int32 point = point_Idx_offset + point_Idx - spline.first() + (int)Finalized();
