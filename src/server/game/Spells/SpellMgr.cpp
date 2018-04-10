@@ -6823,7 +6823,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 73788:
         case 73789:
         case 73790:
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS | SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         case 70541: // Lich King, Infest
         case 73779:
@@ -6845,7 +6845,18 @@ void SpellMgr::LoadDbcDataCorrections()
         case 73777: // Ice Pulse 10h
         case 73778: // Ice Pulse 25h
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
+        case 73576: // Explosion
+        case 73803:
+        case 73804:
+        case 73805:
+        case 70503: // Spirit Burst
+        case 73806:
+        case 73807:
+        case 73808:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         case 72350: // Fury of Frostmourne
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_50000_YARDS;   // 50000yd
@@ -6893,7 +6904,14 @@ void SpellMgr::LoadDbcDataCorrections()
         case 73800:
         case 73801:
         case 73802:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+            break;
+        case 73488: // Life Siphon
+        case 73782:
+        case 73783:
+        case 73784:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         case 72762: // Defile
             spellInfo->DurationIndex = 559; // 53 seconds

@@ -465,6 +465,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 72550: // Malleable Goo 25 man heroic
                         damage = urand(21060, 22140);
                         break;
+                    case 73778: // Ice Pulse 25 man heroic
+                        damage = urand(8500, 9400);
+                        break;
                 }
                 break;
             }
