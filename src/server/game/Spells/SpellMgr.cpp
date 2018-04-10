@@ -3198,6 +3198,20 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
+            65876, // Twin's Pact
+            67306,
+            67307,
+            67308,
+            72260, // Mark of the Fallen Champion
+            72278,
+            72279,
+            72280,
+        }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_HEALING_PCT_MODS;
+        });
+
+        ApplySpellFix
+        ({
             12317,
             13045,
             13046,
