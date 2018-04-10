@@ -18037,49 +18037,58 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         }
     }
 
-    // if the player is in an instance and it has been reset in the meantime teleport him to the entrance
-    if ((instanceId && !sInstanceSaveMgr->GetInstanceSave(instanceId) && !mapEntry->IsBattlegroundOrArena()) || (!instanceId && mapEntry->IsDungeon()))
-    {
-        AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(mapId);
-        if (at)
-            Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
-        else
-            RelocateToHomebind();
-    }
+    AreaTrigger const* areaTrigger = nullptr;
+    bool check = false;
 
     // NOW player must have valid map
     // load the player's map here if it's not already loaded
     Map* map = sMapMgr->CreateMap(mapId, this);
-
     if (!map)
     {
         instanceId = 0;
-        AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(mapId);
-        if (at)
+        areaTrigger = sObjectMgr->GetGoBackTrigger(mapId);
+    }
+    else if ( map->IsDungeon() )
+    {
+        if ( !( ( InstanceMap* )map )->CanEnter( this ) || !CheckInstanceLoginValid( map ) ) // ... and can't enter map, then look for entry point.
+        {
+            areaTrigger = sObjectMgr->GetGoBackTrigger( mapId );
+            check = true;
+        }
+    }
+
+    if ( check ) // in case of special event when creating map...
+    {
+        if ( areaTrigger ) // ... if we have an areatrigger, then relocate to new map/coordinates.
         {
             sLog->outError("Player (guidlow %d) is teleported to gobacktrigger (Map: %u X: %f Y: %f Z: %f O: %f).", guid, mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-            Relocate(at->target_X, at->target_Y, at->target_Z, GetOrientation());
-            mapId = at->target_mapId;
+
+            Relocate( areaTrigger->target_X, areaTrigger->target_Y, areaTrigger->target_Z, GetOrientation() );
+            if ( mapId != areaTrigger->target_mapId )
+            {
+                mapId = areaTrigger->target_mapId;
+                map = sMapMgr->CreateMap( mapId, this );
+            }
         }
         else
         {
             sLog->outError("Player (guidlow %d) is teleported to home (Map: %u X: %f Y: %f Z: %f O: %f).", guid, mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-            RelocateToHomebind();
-        }
 
-        map = sMapMgr->CreateMap(mapId, this);
-        if (!map)
+            RelocateToHomebind();
+            map = NULL;
+        }
+    }
+
+    if ( !map )
+    {
+        PlayerInfo const* info = sObjectMgr->GetPlayerInfo( getRace(), getClass() );
+        mapId = info->mapId;
+        Relocate( info->positionX, info->positionY, info->positionZ, 0.0f );
+        map = sMapMgr->CreateMap( mapId, this );
+        if ( !map )
         {
-            PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
-            mapId = info->mapId;
-            Relocate(info->positionX, info->positionY, info->positionZ, 0.0f);
-            sLog->outError("Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-            map = sMapMgr->CreateMap(mapId, this);
-            if (!map)
-            {
-                sLog->outError("Player (guidlow %d) has invalid default map coordinates (X: %f Y: %f Z: %f O: %f). or instance couldn't be created", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-                return false;
-            }
+            sLog->outError("Player (guidlow %d) has invalid default map coordinates (X: %f Y: %f Z: %f O: %f). or instance couldn't be created", guid, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());            return false;
+            return false;
         }
     }
 
@@ -19623,15 +19632,12 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
     return true;
 }
 
-bool Player::CheckInstanceLoginValid()
+bool Player::CheckInstanceLoginValid( Map * map )
 {
-    if (!GetMap())
-        return false;
-
-    if (!GetMap()->IsDungeon() || IsGameMaster())
+    if (!map->IsDungeon() || IsGameMaster())
         return true;
 
-    if (GetMap()->IsRaid())
+    if ( map->IsRaid())
     {
         // cannot be in raid instance without a group
         if (!GetGroup())
@@ -19640,16 +19646,16 @@ bool Player::CheckInstanceLoginValid()
     else
     {
         // cannot be in normal instance without a group and more players than 1 in instance
-        if (!GetGroup() && GetMap()->GetPlayersCountExceptGMs() > 1)
+        if (!GetGroup() && map->GetPlayersCountExceptGMs() > 1)
             return false;
     }
 
-    // pussywizard: check CanEnter for GetMap(), because in CanPlayerEnter it is called for a map decided before loading screen (can change)
-    if (!GetMap()->CanEnter(this, true))
-        return false;
+    //// pussywizard: check CanEnter for GetMap(), because in CanPlayerEnter it is called for a map decided before loading screen (can change)
+    //if (!map->CanEnter(this, true))
+    //    return false;
 
     // do checks for satisfy accessreqs, instance full, encounter in progress (raid), perm bind group != perm bind player
-    return sMapMgr->CanPlayerEnter(GetMap()->GetId(), this, true);
+    return sMapMgr->CanPlayerEnter( map->GetId(), this, true);
 }
 
 bool Player::CheckInstanceCount(uint32 instanceId) const

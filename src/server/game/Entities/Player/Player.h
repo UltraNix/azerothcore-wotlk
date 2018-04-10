@@ -2496,7 +2496,7 @@ class Player : public Unit, public GridObject<Player>
         void SendAutoJoin();
         void SendSavedInstances();
         bool Satisfy(AccessRequirement const* ar, uint32 target_map, bool report = false);
-        bool CheckInstanceLoginValid();
+        bool CheckInstanceLoginValid( Map * map );
         bool CheckInstanceCount(uint32 instanceId) const;
 
         void AddInstanceEnterTime(uint32 instanceId, time_t enterTime)

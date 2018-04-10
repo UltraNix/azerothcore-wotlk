@@ -992,7 +992,7 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
     // Xinef: moved this from below
     sObjectAccessor->AddObject(pCurrChar);
 
-    if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar) || !pCurrChar->CheckInstanceLoginValid())
+    if (!pCurrChar->GetMap()->AddPlayerToMap(pCurrChar))
     {
         AreaTrigger const* at = sObjectMgr->GetGoBackTrigger(pCurrChar->GetMapId());
         if (at)
