@@ -1120,26 +1120,25 @@ class spell_deathbringer_blood_nova_targeting_SpellScript : public SpellScript
 
     void FilterTargetsInitial(std::list<WorldObject*>& targets)
     {
-        // select one random target, with preference of ranged targets
-        uint32 targetsAtRange = 0;
-        uint32 const minTargets = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 10 : 4);
-        targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster(), false));
+        uint32 const minTargets = GetCaster()->GetMap()->Is25ManRaid() ? 10 : 4;
+        std::list<WorldObject*> ranged;
+        for (auto const& target : targets)
+        {
+            // Exclude targets with mark / boiling blood
+            if (target->ToUnit()->HasAura(SPELL_MARK_OF_THE_FALLEN_CHAMPION) || target->ToUnit()->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_BOILING_BLOOD, GetCaster())))
+            {
+                targets.remove(target);
+                continue;
+            }
 
-        // get target count at range
-        for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr, ++targetsAtRange)
-            if ((*itr)->GetDistance(GetCaster()) < 12.0f)
-                break;
+            if (!target->IsInRange(GetCaster(), 0.0f, 12.0f))
+                ranged.push_back(target);
+        }
 
-        // set the upper cap
-        if (targetsAtRange < minTargets)
-            targetsAtRange = std::min<uint32>(targets.size(), minTargets);
-
-        if (!targetsAtRange)
+        if (targets.empty())
             return;
 
-        std::list<WorldObject*>::iterator itrTarget = targets.begin();
-        std::advance(itrTarget, urand(0,targetsAtRange-1));
-        target = *itrTarget;
+        target = Trinity::Containers::SelectRandomContainerElement((Trinity::Containers::Size(ranged) >= minTargets) ? ranged : targets);
         targets.clear();
         targets.push_back(target);
     }
@@ -1175,18 +1174,18 @@ class spell_deathbringer_boiling_blood_SpellScript : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-        targets.remove(GetCaster()->GetVictim());
-        if (targets.empty())
-            return;
-
-        if (GetSpellInfo()->Id == 72385 || GetSpellInfo()->Id == 72442) // 10n, 10h
+        Trinity::Containers::RandomResize(targets, [this](WorldObject* target) -> bool
         {
-            WorldObject* target = Trinity::Containers::SelectRandomContainerElement(targets);
-            targets.clear();
-            targets.push_back(target);
-        }
-        else
-            Trinity::Containers::RandomResize(targets, 3);
+            // Remove tank
+            if (target == GetCaster()->GetVictim())
+                return false;
+
+            // Exclude targets with mark
+            if (target->ToUnit()->HasAura(SPELL_MARK_OF_THE_FALLEN_CHAMPION))
+                return false;
+
+            return true;
+        }, GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1);
     }
 
     void Register() override
