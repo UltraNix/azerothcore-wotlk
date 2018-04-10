@@ -3206,6 +3206,10 @@ void SpellMgr::LoadSpellCustomAttr()
             72278,
             72279,
             72280,
+            72745, // Mutated Plague
+            72746,
+            72747,
+            72748,
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_HEALING_PCT_MODS;
         });
