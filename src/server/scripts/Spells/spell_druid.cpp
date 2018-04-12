@@ -60,7 +60,9 @@ enum DruidSpells
     SPELL_DRUID_SAVAGE_ROAR                 = 62071,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_ITEM_T8_BALANCE_RELIC       = 64950,
-    SPELL_DRUID_WOLFSHEAD_HELM_ENERGY       = 29940
+    SPELL_DRUID_WOLFSHEAD_HELM_ENERGY       = 29940,
+
+    COOLDOWN_CATEGORY_MANGLE                = 971
 };
 
 // Ours
@@ -1428,6 +1430,34 @@ public:
     }
 };
 
+// 50334 - Berserk
+
+class spell_dru_berserk : public SpellScriptLoader
+{
+    public:
+        spell_dru_berserk() : SpellScriptLoader("spell_dru_berserk") { }
+        class spell_dru_berserk_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dru_berserk_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Player* caster = GetCaster()->ToPlayer())
+                    caster->RemoveCategoryCooldown(COOLDOWN_CATEGORY_MANGLE);
+            }
+            void Register() override
+            {
+                OnEffectHit += SpellEffectFn(spell_dru_berserk_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            }
+
+        };
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_dru_berserk_SpellScript();
+        }
+};
+
 void AddSC_druid_spell_scripts()
 {
     // Ours
@@ -1466,4 +1496,5 @@ void AddSC_druid_spell_scripts()
     new spell_dru_t10_restoration_4p_bonus();
     new spell_dru_wild_growth();
     new spell_dru_wolfshead_helm_energy_dummy();
+    new spell_dru_berserk();
 }
