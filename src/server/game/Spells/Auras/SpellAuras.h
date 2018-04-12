@@ -24,6 +24,8 @@
 #include "Unit.h"
 
 #include <unordered_map>
+#include <array>
+#include <vector>
 
 class Unit;
 class SpellInfo;
@@ -96,7 +98,11 @@ class Aura
 {
     friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID, bool noPeriodicReset);
     public:
-        typedef std::map<uint64, AuraApplication *> ApplicationMap;
+        typedef std::unordered_map<uint64, AuraApplication *> ApplicationMap;
+
+        //! maybe flat_set?
+        typedef std::unordered_set<AuraApplication *> ApplicationSet;
+        typedef std::array<ApplicationSet, MAX_SPELL_EFFECTS> EffectApplicationArr;
 
         static uint8 BuildEffectMaskForOwner(SpellInfo const* spellProto, uint8 avalibleEffectMask, WorldObject* owner);
         static Aura* TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount = NULL, Item* castItem = NULL, uint64 casterGUID = 0, bool* refresh = NULL, bool periodicReset = false);
@@ -189,7 +195,9 @@ class Aura
 
         // Helpers for targets
         ApplicationMap const & GetApplicationMap() {return m_applications;}
-        void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
+        ApplicationSet const & GetEffectApplicationSet(uint8 idx) const { return m_effectApplications[ idx ]; }
+
+        void GetApplicationList(std::vector<AuraApplication*> & applicationList) const;
         const AuraApplication * GetApplicationOfTarget (uint64 guid) const { ApplicationMap::const_iterator itr = m_applications.find(guid); if (itr != m_applications.end()) return itr->second; return NULL; }
         AuraApplication * GetApplicationOfTarget (uint64 guid) { ApplicationMap::iterator itr = m_applications.find(guid); if (itr != m_applications.end()) return itr->second; return NULL; }
         bool IsAppliedOnTarget(uint64 guid) const { return m_applications.find(guid) != m_applications.end(); }
@@ -266,6 +274,8 @@ class Aura
 
         AuraEffect* m_effects[3];
         ApplicationMap m_applications;
+
+        EffectApplicationArr m_effectApplications;
 
         bool m_isRemoved:1;
         bool m_isSingleTarget:1;                        // true if it's a single target spell and registered at caster - can change at spell steal for example

@@ -26,6 +26,8 @@ class Aura;
 #include "SpellAuras.h"
 #include "Spell.h"
 
+#include <vector>
+
 typedef void(AuraEffect::*pAuraEffectHandler)(AuraApplication const* aurApp, uint8 mode, bool apply) const;
 
 class AuraEffect
@@ -40,8 +42,8 @@ class AuraEffect
         Unit* GetCaster() const { return GetBase()->GetCaster(); }
         uint64 GetCasterGUID() const { return GetBase()->GetCasterGUID(); }
         Aura* GetBase() const { return m_base; }
-        void GetTargetList(std::list<Unit*> & targetList) const;
-        void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
+        void GetEffectTargetList(std::vector<Unit*> & targetList) const;
+        void GetEffectApplicationList(std::vector<AuraApplication*> & applicationList) const;
         SpellModifier* GetSpellModifier() const { return m_spellmod; }
 
         SpellInfo const* GetSpellInfo() const { return m_spellInfo; }

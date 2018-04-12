@@ -406,25 +406,23 @@ AuraEffect::~AuraEffect()
     delete m_channelData;
 }
 
-void AuraEffect::GetTargetList(std::list<Unit*> & targetList) const
+void AuraEffect::GetEffectTargetList(std::vector<Unit*> & targetList) const
 {
-    Aura::ApplicationMap const & targetMap = GetBase()->GetApplicationMap();
-    // remove all targets which were not added to new list - they no longer deserve area aura
-    for (Aura::ApplicationMap::const_iterator appIter = targetMap.begin(); appIter != targetMap.end(); ++appIter)
+    Aura::ApplicationSet const & auraSet = GetBase()->GetEffectApplicationSet( GetEffIndex() );
+
+    targetList.reserve( auraSet.size() );
+    std::transform( auraSet.begin(), auraSet.end(), std::back_inserter( targetList ), []( AuraApplication* application )
     {
-        if (appIter->second->HasEffect(GetEffIndex()))
-            targetList.push_back(appIter->second->GetTarget());
-    }
+        return application->GetTarget();
+    });
 }
 
-void AuraEffect::GetApplicationList(std::list<AuraApplication*> & applicationList) const
+void AuraEffect::GetEffectApplicationList(std::vector<AuraApplication*> & applicationList) const
 {
-    Aura::ApplicationMap const & targetMap = GetBase()->GetApplicationMap();
-    for (Aura::ApplicationMap::const_iterator appIter = targetMap.begin(); appIter != targetMap.end(); ++appIter)
-    {
-        if (appIter->second->HasEffect(GetEffIndex()))
-            applicationList.push_back(appIter->second);
-    }
+    Aura::ApplicationSet const & auraSet = GetBase()->GetEffectApplicationSet( GetEffIndex() );
+
+    applicationList.reserve( auraSet.size() );
+    std::copy( auraSet.begin(), auraSet.end(), std::back_inserter( applicationList ) );
 }
 
 int32 AuraEffect::CalculateAmount(Unit* caster)
@@ -701,12 +699,13 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
     if (!handleMask)
         return;
 
-    std::list<AuraApplication*> effectApplications;
-    GetApplicationList(effectApplications);
+    std::vector<AuraApplication*> effectApplications;
+    GetEffectApplicationList(effectApplications);
 
-    for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-        if ((*apptItr)->HasEffect(GetEffIndex()))
-            HandleEffect(*apptItr, handleMask, false);
+    for ( AuraApplication * application : effectApplications )
+    {
+        HandleEffect( application, handleMask, false );
+    }
 
     if (handleMask & AURA_EFFECT_HANDLE_CHANGE_AMOUNT)
     {
@@ -714,12 +713,14 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
             m_amount = newAmount;
         else
             SetAmount(newAmount);
+
         CalculateSpellMod();
     }
 
-    for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-        if ((*apptItr)->HasEffect(GetEffIndex()))
-            HandleEffect(*apptItr, handleMask, true);
+    for ( AuraApplication * application : effectApplications )
+    {
+        HandleEffect( application, handleMask, true );
+    }
 }
 
 void AuraEffect::HandleEffect(AuraApplication * aurApp, uint8 mode, bool apply)
@@ -891,12 +892,14 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             m_periodicTimer += m_amplitude;
             UpdatePeriodic(caster);
 
-            std::list<AuraApplication*> effectApplications;
-            GetApplicationList(effectApplications);
+            std::vector<AuraApplication*> effectApplications;
+            GetEffectApplicationList(effectApplications);
+
             // tick on targets of effects
-            for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-                if ((*apptItr)->HasEffect(GetEffIndex()))
-                    PeriodicTick(*apptItr, caster);
+            for ( AuraApplication * application : effectApplications)
+            {
+                PeriodicTick( application, caster );
+            }
         }
     }
 }
