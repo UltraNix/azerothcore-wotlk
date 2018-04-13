@@ -41,6 +41,7 @@
 #include "ReputationMgr.h"
 #include "InstanceScript.h"
 #include "MoveSplineInit.h"
+#include "ArenaSpectator.h"
 
 class Aura;
 //
@@ -1608,6 +1609,10 @@ void AuraEffect::HandleModStealth(AuraApplication const* aurApp, uint8 mode, boo
             target->FinishSpell(CURRENT_AUTOREPEAT_SPELL);
             target->ToPlayer()->SendAutoRepeatCancel(target);
         }
+
+        // interrupt Arena Spectator
+        if (target->HasAura(SPECTATOR_SPELL_BINDSIGHT))
+            target->RemoveAurasDueToSpell(SPECTATOR_SPELL_BINDSIGHT);
     }
     else
     {
