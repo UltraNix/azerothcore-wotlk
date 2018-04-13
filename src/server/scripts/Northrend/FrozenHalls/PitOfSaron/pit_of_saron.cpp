@@ -74,7 +74,7 @@ struct npc_pos_leaderAI : public NullCreatureAI
                     if (Creature* summon = me->SummonCreature(introPositions[_counter].entry[idx], PortalPos))
                     {
                         summon->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                        summon->SetSpeedRate(MOVE_RUN, 0.8f);
+                        summon->SetSpeed(MOVE_RUN, 0.8f);
                         summon->GetMotionMaster()->MovePoint(1, introPositions[_counter].endPosition);
                         summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY1H);
                     }
@@ -241,7 +241,7 @@ struct npc_pos_leaderAI : public NullCreatureAI
                         summon->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                         float dist = urand(0.0f, 1.0f);
                         float angle = Position::RandomOrientation();
-                        summon->SetSpeedRate(MOVE_RUN, 0.8f);
+                        summon->SetSpeed(MOVE_RUN, 0.8f);
                         summon->SetInCombatWithZone();
                         summon->GetMotionMaster()->MoveChase(me, dist, angle);
                         summon->SetHomePosition(me->GetPositionX() + dist*cos(angle), me->GetPositionY() + dist*sin(angle), me->GetPositionZ(), 0.0f);

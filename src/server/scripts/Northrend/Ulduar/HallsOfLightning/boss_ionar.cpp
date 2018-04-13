@@ -246,7 +246,7 @@ public:
         {
             if (param == ACTION_CALLBACK)
             {
-                me->SetSpeedRate(MOVE_RUN, 2.5f);
+                me->SetSpeed(MOVE_RUN, 2.5f);
                 me->DeleteThreatList();
                 me->CombatStop(true);
                 me->GetMotionMaster()->MoveTargetedHome();

@@ -559,7 +559,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
                 c->setActive(false);
                 c->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                 c->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-                c->SetSpeedRate(MOVE_RUN, c->GetCreatureTemplate()->speed_run);
+                c->SetSpeed(MOVE_RUN, c->GetCreatureTemplate()->speed_run);
             }
             IsDuringLKFight = false;
             outroTimer = 0;
@@ -617,7 +617,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
                 if (Creature* c = instance->GetCreature(NPC_QuelDelarGUID))
                 {
                     c->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                    c->SetSpeedRate(MOVE_RUN, 2.5f);
+                    c->SetSpeed(MOVE_RUN, 2.5f);
                 }
                 break;
             case 5:
@@ -627,7 +627,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
             case 6:
                 if (Creature* c = instance->GetCreature(NPC_QuelDelarGUID))
                 {
-                    c->SetSpeedRate(MOVE_RUN, c->GetCreatureTemplate()->speed_run);
+                    c->SetSpeed(MOVE_RUN, c->GetCreatureTemplate()->speed_run);
                     c->GetMotionMaster()->MoveLand(0, c->GetPositionX(), c->GetPositionY(), 707.70f, 7.0f);
                 }
                 break;

@@ -384,10 +384,10 @@ bool Creature::InitEntry(uint32 Entry, const CreatureData* data)
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
-    SetSpeedRate(MOVE_WALK,     cinfo->speed_walk);
-    SetSpeedRate(MOVE_RUN,      cinfo->speed_run);
-    SetSpeedRate(MOVE_SWIM, 1.0f);      // using 1.0 rate
-    SetSpeedRate(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
+    SetSpeed(MOVE_WALK,     cinfo->speed_walk);
+    SetSpeed(MOVE_RUN,      cinfo->speed_run);
+    SetSpeed(MOVE_SWIM, 1.0f);      // using 1.0 rate
+    SetSpeed(MOVE_FLIGHT, 1.0f);    // using 1.0 rate
 
     m_inhabitType = InhabitTypeValues(cinfo->InhabitType);
 
@@ -793,7 +793,7 @@ void Creature::DoFleeToGetAssistance()
         cell.Visit(p, grid_creature_searcher, *GetMap(), *this, radius);
 
         SetNoSearchAssistance(true);
-        UpdateSpeed(MOVE_RUN);
+        UpdateSpeed(MOVE_RUN, false);
 
         if (!creature)
             //SetFeared(true, GetVictim()->GetGUID(), 0, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
@@ -1626,7 +1626,7 @@ void Creature::setDeathState(DeathState s, bool despawn)
         if (HasSearchedAssistance())
         {
             SetNoSearchAssistance(false);
-            UpdateSpeed(MOVE_RUN);
+            UpdateSpeed(MOVE_RUN, false);
         }
 
         //Dismiss group if is leader

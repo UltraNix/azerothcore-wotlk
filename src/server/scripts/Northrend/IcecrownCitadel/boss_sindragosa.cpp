@@ -275,7 +275,7 @@ class boss_sindragosa : public CreatureScript
                 _Reset();
                 me->DisableRotate(false);
                 me->SetControlled(false, UNIT_STATE_ROOT);
-                me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
+                me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->CastSpell(me, SPELL_TANK_MARKER, true);
 
@@ -399,7 +399,7 @@ class boss_sindragosa : public CreatureScript
                     me->SetDisableGravity(true);
                     me->SetHover(true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    me->SetSpeedRate(MOVE_RUN, 4.28571f);
+                    me->SetSpeed(MOVE_RUN, 4.28571f);
                     float moveTime = me->GetExactDist(&SindragosaFlyInPos) / (me->GetSpeed(MOVE_RUN) * 0.001f);
                     me->m_Events.AddEvent(new FrostwyrmLandEvent(*me, SindragosaLandPos), me->m_Events.CalculateTime(uint64(moveTime) + 250));
                     me->GetMotionMaster()->MovePoint(POINT_FROSTWYRM_FLY_IN, SindragosaFlyInPos);
@@ -426,7 +426,7 @@ class boss_sindragosa : public CreatureScript
                         me->SetDisableGravity(false);
                         me->SetHover(false);
                         me->SetCanFly(false);
-                        me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
+                        me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                         me->SetHomePosition(SindragosaLandPos);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
@@ -454,7 +454,7 @@ class boss_sindragosa : public CreatureScript
                         me->SetDisableGravity(false);
                         me->SetHover(false);
                         me->SetCanFly(false);
-                        me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
+                        me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                         me->SetReactState(REACT_AGGRESSIVE);
                         if (Unit* target = me->SelectVictim())
                             AttackStart(target);
@@ -597,7 +597,7 @@ class boss_sindragosa : public CreatureScript
 
                         Talk(SAY_AIR_PHASE);
                         me->SetReactState(REACT_PASSIVE);
-                        me->SetSpeedRate(MOVE_RUN, 4.28571f);
+                        me->SetSpeed(MOVE_RUN, 4.28571f);
                         me->SendMeleeAttackStop(me->GetVictim());
                         me->AttackStop();
                         me->GetMotionMaster()->MoveIdle();

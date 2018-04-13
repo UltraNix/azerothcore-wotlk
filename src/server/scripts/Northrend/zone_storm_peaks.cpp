@@ -425,7 +425,7 @@ public:
         void Reset()
         {
             me->SetRegeneratingHealth(true);
-            me->SetSpeedRate(MOVE_RUN, 1.14f); // ZOMG!
+            me->SetSpeed(MOVE_RUN, 1.14f, true); // ZOMG!
             setCharm = false;
             switching = false;
             startPath = false;
@@ -556,7 +556,7 @@ public:
                     me->setFaction(16);
                     charmer->SetClientControl(me, 0, true);
 
-                    me->SetSpeedRate(MOVE_RUN, 2.0f);
+                    me->SetSpeed(MOVE_RUN, 2.0f, true);
                     startPath = true;
                 }
                 else
@@ -1112,7 +1112,7 @@ public:
         void Reset()
         {
             events.ScheduleEvent(EVENT_CHECK_AREA, 5000);
-            me->SetSpeedRate(MOVE_RUN, 2.0f);
+            me->SetSpeed(MOVE_RUN, 2.0f);
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -1123,8 +1123,8 @@ public:
 
         void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) override
         {
-            me->SetSpeedRate(MOVE_RUN, 2.0f);
-            me->SetSpeedRate(MOVE_FLIGHT, 2.0f);
+            me->SetSpeed(MOVE_RUN, 2.0f);
+            me->SetSpeed(MOVE_FLIGHT, 2.0f);
         }
 
         void UpdateAI(uint32 diff)

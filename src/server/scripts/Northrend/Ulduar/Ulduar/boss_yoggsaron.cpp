@@ -1548,8 +1548,8 @@ public:
                     me->CastSpell(me, SPELL_DEATH_RAY_DAMAGE, true);
 
                     _startTimer = 0;
-                    me->SetSpeedRate(MOVE_WALK, 2);
-                    me->SetSpeedRate(MOVE_RUN, 2);
+                    me->SetSpeed(MOVE_WALK, 2);
+                    me->SetSpeed(MOVE_RUN, 2);
                     me->GetMotionMaster()->MoveRandom(20.0f);
                 }
             }

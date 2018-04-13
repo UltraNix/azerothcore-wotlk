@@ -1320,7 +1320,7 @@ class npc_infra_green_bomber_generic : public CreatureScript
                 events.ScheduleEvent(EVENT_TAKE_PASSENGER, 3000);
                 me->SetCanFly(true);
                 me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
-                me->SetSpeedRate(MOVE_FLIGHT, 0.1f);
+                me->SetSpeed(MOVE_FLIGHT, 0.1f);
                 me->setFaction(summoner->getFaction());
             }
 
@@ -1364,7 +1364,7 @@ class npc_infra_green_bomber_generic : public CreatureScript
                             if (Vehicle* kit = me->GetVehicleKit())
                                 if (Unit* turret = kit->GetPassenger(SEAT_TURRET))
                                 {
-                                    me->SetSpeedRate(MOVE_FLIGHT, 1.2f);
+                                    me->SetSpeed(MOVE_FLIGHT, 1.2f);
                                     owner->RemoveAurasDueToSpell(SPELL_WAITING_FOR_A_BOMBER);
                                     turret->HandleSpellClick(owner, 0);
                                     return;

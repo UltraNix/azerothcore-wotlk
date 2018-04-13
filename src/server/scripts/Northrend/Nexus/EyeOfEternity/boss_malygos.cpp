@@ -1303,18 +1303,18 @@ public:
                     who->m_movedByPlayer = who->ToPlayer();
                     who->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ARCANE_OVERLOAD_DMG, true);
                     who->ApplySpellImmune(0, IMMUNITY_ID, SPELL_SURGE_OF_POWER_DMG, true);
-                    me->SetSpeedRate(MOVE_RUN, 1.5f);
-                    me->SetSpeedRate(MOVE_FLIGHT, 1.5f);
+                    me->SetSpeed(MOVE_RUN, 1.5f);
+                    me->SetSpeed(MOVE_FLIGHT, 1.5f);
                 }
                 else if (who->GetEntry() == NPC_NEXUS_LORD)
                 {
-                    me->SetSpeedRate(MOVE_RUN, 1.5f);
-                    me->SetSpeedRate(MOVE_FLIGHT, 1.5f);
+                    me->SetSpeed(MOVE_RUN, 1.5f);
+                    me->SetSpeed(MOVE_FLIGHT, 1.5f);
                 }
                 else
                 {
-                    me->SetSpeedRate(MOVE_RUN, 0.6f);
-                    me->SetSpeedRate(MOVE_FLIGHT, 0.6f);
+                    me->SetSpeed(MOVE_RUN, 0.6f);
+                    me->SetSpeed(MOVE_FLIGHT, 0.6f);
                 }
 
                 who->SetFacingTo(me->GetOrientation());

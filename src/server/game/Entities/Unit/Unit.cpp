@@ -9559,7 +9559,7 @@ bool Unit::AttackStop()
             if (creature->HasSearchedAssistance())
             {
                 creature->SetNoSearchAssistance(false);
-                UpdateSpeed(MOVE_RUN);
+                UpdateSpeed(MOVE_RUN, false);
             }
         }
     }
@@ -9872,7 +9872,7 @@ void Unit::SetMinion(Minion *minion, bool apply)
         // FIXME: hack, speed must be set only at follow
         if (GetTypeId() == TYPEID_PLAYER && minion->IsPet())
             for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
-                minion->SetSpeedRate(UnitMoveType(i), m_speed_rate[i]);
+                minion->SetSpeed(UnitMoveType(i), m_speed_rate[i], true);
 
         // Ghoul pets have energy instead of mana (is anywhere better place for this code?)
         if (minion->IsPetGhoul() || minion->GetEntry() == 24207 /*ENTRY_ARMY_OF_THE_DEAD*/)
@@ -12623,9 +12623,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
 
         if (IsPet())
         {
-            UpdateSpeed(MOVE_RUN);
-            UpdateSpeed(MOVE_SWIM);
-            UpdateSpeed(MOVE_FLIGHT);
+            UpdateSpeed(MOVE_RUN, true);
+            UpdateSpeed(MOVE_SWIM, true);
+            UpdateSpeed(MOVE_FLIGHT, true);
         }
 
         if (!(creature->GetCreatureTemplate()->type_flags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT))
@@ -13104,7 +13104,7 @@ void Unit::SetModelVisible(bool on)
         CastSpell(this, 24401, true);
 }
 
-void Unit::UpdateSpeed(UnitMoveType mtype)
+void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 {
     //if (this->ToPlayer())
     //    sAnticheatMgr->DisableAnticheatDetection(this->ToPlayer());
@@ -13148,11 +13148,11 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
 
 				if ((*itr)->GetId() == 64731 /*SPELL_SEA_TURTLE*/)
 				{
-					SetSpeedRate(mtype, AddPct(non_stack_bonus, (*itr)->GetAmount()));
+					SetSpeed(mtype, AddPct(non_stack_bonus, (*itr)->GetAmount()), forced);
 					return;
 				}
 				else if ((*itr)->GetId() == 30174 /* SPELL_RIDING_TURTLE*/) {
-					SetSpeedRate(mtype, 2.97f);
+					SetSpeed(mtype, 2.97f, forced);
 					return;
 				}
 				else if ((*itr)->GetAmount() > main_speed_mod)
@@ -13187,7 +13187,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
 
             // Update speed for vehicle if available
             if (GetTypeId() == TYPEID_PLAYER && GetVehicle())
-                GetVehicleBase()->UpdateSpeed(MOVE_FLIGHT);
+                GetVehicleBase()->UpdateSpeed(MOVE_FLIGHT, true);
             break;
         }
         default:
@@ -13267,7 +13267,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
             speed = min_speed;
     }
 
-    SetSpeedRate(mtype, speed);
+    SetSpeed(mtype, speed, forced);
 }
 
 float Unit::GetSpeed(UnitMoveType mtype) const
@@ -13275,7 +13275,7 @@ float Unit::GetSpeed(UnitMoveType mtype) const
     return m_speed_rate[mtype]*(IsControlledByPlayer() ? playerBaseMoveSpeed[mtype] : baseMoveSpeed[mtype]);
 }
 
-void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
+void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 {
     if (rate < 0)
         rate = 0.0f;
@@ -13288,60 +13288,95 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
 
     propagateSpeedChange();
 
-    // Spline packets are for units controlled by AI. "Force speed change" (wrongly named opcodes) and "move set speed" packets are for units controlled by a player.
-    static Opcodes const moveTypeToOpcode[MAX_MOVE_TYPE][3] =
+    WorldPacket data;
+    if (!forced)
     {
-        { SMSG_SPLINE_SET_WALK_SPEED,        SMSG_FORCE_WALK_SPEED_CHANGE,           MSG_MOVE_SET_WALK_SPEED        },
-        { SMSG_SPLINE_SET_RUN_SPEED,         SMSG_FORCE_RUN_SPEED_CHANGE,            MSG_MOVE_SET_RUN_SPEED         },
-        { SMSG_SPLINE_SET_RUN_BACK_SPEED,    SMSG_FORCE_RUN_BACK_SPEED_CHANGE,       MSG_MOVE_SET_RUN_BACK_SPEED    },
-        { SMSG_SPLINE_SET_SWIM_SPEED,        SMSG_FORCE_SWIM_SPEED_CHANGE,           MSG_MOVE_SET_SWIM_SPEED        },
-        { SMSG_SPLINE_SET_SWIM_BACK_SPEED,   SMSG_FORCE_SWIM_BACK_SPEED_CHANGE,      MSG_MOVE_SET_SWIM_BACK_SPEED   },
-        { SMSG_SPLINE_SET_TURN_RATE,         SMSG_FORCE_TURN_RATE_CHANGE,            MSG_MOVE_SET_TURN_RATE         },
-        { SMSG_SPLINE_SET_FLIGHT_SPEED,      SMSG_FORCE_FLIGHT_SPEED_CHANGE,         MSG_MOVE_SET_FLIGHT_SPEED      },
-        { SMSG_SPLINE_SET_FLIGHT_BACK_SPEED, SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE,    MSG_MOVE_SET_FLIGHT_BACK_SPEED },
-        { SMSG_SPLINE_SET_PITCH_RATE,        SMSG_FORCE_PITCH_RATE_CHANGE,           MSG_MOVE_SET_PITCH_RATE        }
-    };
+        switch (mtype)
+        {
+            case MOVE_WALK:
+                data.Initialize(MSG_MOVE_SET_WALK_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_RUN:
+                data.Initialize(MSG_MOVE_SET_RUN_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_RUN_BACK:
+                data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_SWIM:
+                data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_SWIM_BACK:
+                data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_TURN_RATE:
+                data.Initialize(MSG_MOVE_SET_TURN_RATE, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_FLIGHT:
+                data.Initialize(MSG_MOVE_SET_FLIGHT_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_FLIGHT_BACK:
+                data.Initialize(MSG_MOVE_SET_FLIGHT_BACK_SPEED, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            case MOVE_PITCH_RATE:
+                data.Initialize(MSG_MOVE_SET_PITCH_RATE, 8+4+2+4+4+4+4+4+4+4);
+                break;
+            default:
+                sLog->outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.", mtype);
+                return;
+        }
 
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
-        // and do it only for real sent packets and use run for run/mounted as client expected
-        ++ToPlayer()->m_forced_speed_changes[mtype];
-
-        if (!IsInCombat())
-            if (Pet* pet = ToPlayer()->GetPet())
-                pet->SetSpeedRate(mtype, m_speed_rate[mtype]);
-    }
-
-    if (m_movedByPlayer) // unit controlled by a player.
-    {
-        // Send notification to self. this packet is only sent to one client (the client of the player concerned by the change).
-        WorldPacket self;
-        self.Initialize(moveTypeToOpcode[mtype][1], mtype != MOVE_RUN ? 8 + 4 + 4 : 8 + 4 + 1 + 4);
-        self.append(GetPackGUID());
-        self << (uint32)0;                                  // Movement counter. Unimplemented at the moment! NUM_PMOVE_EVTS = 0x39Z.
-        if (mtype == MOVE_RUN)
-            self << uint8(1);                               // unknown byte added in 2.1.0
-        self << float(GetSpeed(mtype));
-        if (m_movedByPlayer->ToPlayer())
-            m_movedByPlayer->ToPlayer()->GetSession()->SendPacket(&self);
-
-        // Send notification to other players. sent to every clients (if in range) except one: the client of the player concerned by the change.
-        WorldPacket data;
-        data.Initialize(moveTypeToOpcode[mtype][2], 8 + 30 + 4);
-        data.append(GetPackGUID());
         BuildMovementPacket(&data);
         data << float(GetSpeed(mtype));
-        SendMessageToSet(&data, false);
+        SendMessageToSet(&data, true);
     }
-    else // unit controlled by AI.
+    else
     {
-        // send notification to every clients.
-        WorldPacket data;
-        data.Initialize(moveTypeToOpcode[mtype][0], 8 + 4);
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+            // and do it only for real sent packets and use run for run/mounted as client expected
+            ++ToPlayer()->m_forced_speed_changes[mtype];
+        }
+
+        switch (mtype)
+        {
+            case MOVE_WALK:
+                data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_RUN:
+                data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 17);
+                break;
+            case MOVE_RUN_BACK:
+                data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_SWIM:
+                data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, 16);
+                break;
+            case MOVE_SWIM_BACK:
+                data.Initialize(SMSG_FORCE_SWIM_BACK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_TURN_RATE:
+                data.Initialize(SMSG_FORCE_TURN_RATE_CHANGE, 16);
+                break;
+            case MOVE_FLIGHT:
+                data.Initialize(SMSG_FORCE_FLIGHT_SPEED_CHANGE, 16);
+                break;
+            case MOVE_FLIGHT_BACK:
+                data.Initialize(SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_PITCH_RATE:
+                data.Initialize(SMSG_FORCE_PITCH_RATE_CHANGE, 16);
+                break;
+            default:
+                sLog->outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.", mtype);
+                return;
+        }
         data.append(GetPackGUID());
+        data << (uint32)0;                                  // moveEvent, NUM_PMOVE_EVTS = 0x39
+        if (mtype == MOVE_RUN)
+            data << uint8(0);                               // new 2.1.0
         data << float(GetSpeed(mtype));
-        SendMessageToSet(&data, false);
+        SendMessageToSet(&data, true);
     }
 }
 
@@ -17212,7 +17247,7 @@ void Unit::RemoveCharmedBy(Unit* charmer)
     DeleteThreatList();
 
     // xinef: update speed after charming
-    UpdateSpeed(MOVE_RUN);
+    UpdateSpeed(MOVE_RUN, false);
 
     // xinef: do not break any controlled motion slot
     if (GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == NULL_MOTION_TYPE)

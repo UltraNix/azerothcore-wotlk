@@ -911,7 +911,7 @@ public:
 
         void Reset()
         {
-            me->SetSpeedRate(MOVE_RUN, 0.6f);
+            me->SetSpeed(MOVE_RUN, 0.6f);
             me->setAttackTimer(BASE_ATTACK, 2000);
             me->AddAura(SPELL_VENGEFUL_BLAST_PASSIVE, me);
         }

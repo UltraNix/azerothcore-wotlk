@@ -454,9 +454,9 @@ void FollowMovementGenerator<Creature>::_updateSpeed(Creature* owner)
     if (!IS_PLAYER_GUID(owner->GetOwnerGUID()) || !owner->IsInWorld() || !i_target.isValid() || i_target->GetGUID() != owner->GetOwnerGUID())
         return;
 
-    owner->UpdateSpeed(MOVE_RUN);
-    owner->UpdateSpeed(MOVE_WALK);
-    owner->UpdateSpeed(MOVE_SWIM);
+    owner->UpdateSpeed(MOVE_RUN, true);
+    owner->UpdateSpeed(MOVE_WALK, true);
+    owner->UpdateSpeed(MOVE_SWIM, true);
 }
 
 template<>

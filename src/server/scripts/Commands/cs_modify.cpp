@@ -1,5 +1,5 @@
 /*
- * Copyright (C)
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -558,11 +558,11 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_ASPEED_CHANGED, handler->GetNameLink().c_str(), ASpeed);
 
-        target->SetSpeedRate(MOVE_WALK,    ASpeed);
-        target->SetSpeedRate(MOVE_RUN,     ASpeed);
-        target->SetSpeedRate(MOVE_SWIM,    ASpeed);
-        //target->SetSpeedRate(MOVE_TURN,    ASpeed, true);
-        target->SetSpeedRate(MOVE_FLIGHT,     ASpeed);
+        target->SetSpeed(MOVE_WALK,    ASpeed, true);
+        target->SetSpeed(MOVE_RUN,     ASpeed, true);
+        target->SetSpeed(MOVE_SWIM,    ASpeed, true);
+        //target->SetSpeed(MOVE_TURN,    ASpeed, true);
+        target->SetSpeed(MOVE_FLIGHT,     ASpeed, true);
         return true;
     }
 
@@ -608,7 +608,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_SPEED_CHANGED, handler->GetNameLink().c_str(), Speed);
 
-        target->SetSpeedRate(MOVE_RUN, Speed);
+        target->SetSpeed(MOVE_RUN, Speed, true);
 
         return true;
     }
@@ -655,7 +655,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_SWIM_SPEED_CHANGED, handler->GetNameLink().c_str(), Swim);
 
-        target->SetSpeedRate(MOVE_SWIM, Swim);
+        target->SetSpeed(MOVE_SWIM, Swim, true);
 
         return true;
     }
@@ -702,7 +702,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_BACK_SPEED_CHANGED, handler->GetNameLink().c_str(), BSpeed);
 
-        target->SetSpeedRate(MOVE_RUN_BACK, BSpeed);
+        target->SetSpeed(MOVE_RUN_BACK, BSpeed, true);
 
         return true;
     }
@@ -740,7 +740,7 @@ public:
         if (handler->needReportToTarget(target))
             (ChatHandler(target->GetSession())).PSendSysMessage(LANG_YOURS_FLY_SPEED_CHANGED, handler->GetNameLink().c_str(), FSpeed);
 
-        target->SetSpeedRate(MOVE_FLIGHT, FSpeed);
+        target->SetSpeed(MOVE_FLIGHT, FSpeed, true);
 
         return true;
     }

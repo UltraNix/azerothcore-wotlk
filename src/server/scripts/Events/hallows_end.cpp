@@ -362,7 +362,7 @@ public:
 
     struct npc_costumed_orphan_matronAI : public ScriptedAI
     {
-        npc_costumed_orphan_matronAI(Creature *c) : ScriptedAI(c)
+        npc_costumed_orphan_matronAI(Creature *c) : ScriptedAI(c) 
         {
         }
 
@@ -575,7 +575,7 @@ class npc_hallows_end_soh : public CreatureScript
                 counter = 0;
                 unitList.clear();
                 me->CastSpell(me, SPELL_HORSEMAN_MOUNT, true);
-                me->SetSpeedRate(MOVE_WALK, 3.0f);
+                me->SetSpeed(MOVE_WALK, 3.0f, true);
                 Unmount = false;
             }
 
@@ -915,7 +915,7 @@ class boss_headless_horseman : public CreatureScript
                 for (std::list<Creature*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
                     (*itr)->ToCreature()->DespawnOrUnsummon(500);
 
-
+                
                 Map::PlayerList const& players = me->GetMap()->GetPlayers();
                 if (!players.isEmpty() && players.begin()->GetSource() && players.begin()->GetSource()->GetGroup())
                     sLFGMgr->FinishDungeon(players.begin()->GetSource()->GetGroup()->GetGUID(), 285, me->FindMap());
@@ -956,7 +956,7 @@ class boss_headless_horseman : public CreatureScript
                     events.CancelEvent(EVENT_HORSEMAN_CONFLAGRATION);
                     events.CancelEvent(EVENT_SUMMON_PUMPKIN);
                     me->MonsterYell("Here's my body, fit and pure! Now, your blackened souls I'll cure!", LANG_UNIVERSAL, 0);
-
+                    
                     if (phase == 1)
                         events.ScheduleEvent(EVENT_HORSEMAN_CONFLAGRATION, 6000);
                     else if (phase == 2)
@@ -974,7 +974,7 @@ class boss_headless_horseman : public CreatureScript
                     {
                         me->SetUInt32Value(UNIT_FIELD_FLAGS, 0);
                         me->StopMoving();
-
+                        
                         me->SetInCombatWithZone();
                         inFight = true;
                         events.ScheduleEvent(EVENT_HORSEMAN_FOLLOW, 500);
@@ -1030,9 +1030,9 @@ class boss_headless_horseman : public CreatureScript
                 phase = 0;
                 inFight = false;
                 health = 0;
-
+                
                 me->SetDisableGravity(true);
-                me->SetSpeedRate(MOVE_WALK, 5.0f);
+                me->SetSpeed(MOVE_WALK, 5.0f, true);
             }
 
             void UpdateAI(uint32 diff)
@@ -1247,7 +1247,7 @@ class boss_headless_horseman_head : public CreatureScript
                     damage = 0;
                     me->RemoveAllAuras();
                     me->CastSpell(me, SPELL_HEAD_DAMAGED_INFO, true);
-                    me->CastSpell(me, SPELL_THROW_HEAD_BACK, true);
+                    me->CastSpell(me, SPELL_THROW_HEAD_BACK, true);    
                     if (Unit* owner = GetOwner())
                         owner->RemoveAura(SPELL_HORSEMAN_IMMUNITY);
                 }
@@ -1371,7 +1371,7 @@ void AddSC_event_hallows_end_scripts()
     new spell_hallows_end_put_costume("spell_hallows_end_leper_costume", SPELL_LEPER_GNOME_COSTUME_MALE, SPELL_LEPER_GNOME_COSTUME_FEMALE);
     new spell_hallows_end_put_costume("spell_hallows_end_ghost_costume", SPELL_GHOST_COSTUME_MALE, SPELL_GHOST_COSTUME_FEMALE);
     new spell_hallows_end_put_costume("spell_hallows_end_ninja_costume", SPELL_NINJA_COSTUME_MALE, SPELL_NINJA_COSTUME_FEMALE);
-
+    
     // Quests
     new npc_hallows_end_train_fire();
 

@@ -96,7 +96,7 @@ public:
             HealthCheck = 100;
             events.Reset();
             summons.DespawnAll();
-            me->SetSpeedRate(MOVE_RUN, 1.2f);
+            me->SetSpeed(MOVE_RUN, 1.2f,true);
             me->SetReactState(REACT_AGGRESSIVE);
 
             if (m_pInstance)
@@ -133,7 +133,7 @@ public:
             {
                 if (me->GetPositionX() > 1330)
                     x = 1355;
-                else
+                else 
                     x = 1308;
 
                 y = -178;
@@ -143,7 +143,7 @@ public:
             {
                 if (me->GetPositionX() > 1330)
                     x = 1355;
-                else
+                else 
                     x = 1308;
 
                 y = -137;
@@ -153,7 +153,7 @@ public:
             {
                 if (me->GetPositionX() > 1330)
                     x = 1343;
-                else
+                else 
                     x = 1320;
 
                 y = -123;
@@ -214,7 +214,7 @@ public:
 
             if (id == POINT_ANVIL)
             {
-                me->SetSpeedRate(MOVE_RUN, 1.2f);
+                me->SetSpeed(MOVE_RUN, 1.2f,true);
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->CastSpell(me, SPELL_TEMPER, false);
                 PointID = 0;
@@ -248,7 +248,7 @@ public:
         {
             events.SetPhase(2);
             HealthCheck -= 20;
-            me->SetSpeedRate(MOVE_RUN, 4.0f);
+            me->SetSpeed(MOVE_RUN, 4.0f,true);
             me->SetReactState(REACT_PASSIVE);
 
             Talk(SAY_FORGE);
@@ -298,10 +298,10 @@ public:
                         EnterEvadeMode();
                     else
                         events.RepeatEvent(4000);
-
+                
                     return;
             }
-
+            
             DoMeleeAttackIfReady();
         }
     };

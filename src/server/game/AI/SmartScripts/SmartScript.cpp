@@ -1434,7 +1434,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             CAST_AI(SmartAI, me->AI())->SetFly(e.action.setFly.fly);
             // Xinef: Set speed if any
             if (e.action.setFly.speed)
-                me->SetSpeedRate(MOVE_RUN, float(e.action.setFly.speed/100.0f));
+                me->SetSpeed(MOVE_RUN, float(e.action.setFly.speed/100.0f), true);
 
             // Xinef: this wil be executed only if state is different
             me->SetDisableGravity(e.action.setFly.disableGravity);

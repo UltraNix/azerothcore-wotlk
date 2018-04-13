@@ -663,7 +663,7 @@ class spell_q12243_fire_upon_the_waters : public SpellScriptLoader
                 GetTarget()->GetCreatureListWithEntryInGrid(servants, 27233 /*NPC_ONSLAUGHT_DECKHAND*/, 40.0f);
                 for (std::list<Creature*>::const_iterator itr = servants.begin(); itr != servants.end(); ++itr)
                 {
-                    (*itr)->SetSpeedRate(MOVE_RUN, 0.7f);
+                    (*itr)->SetSpeed(MOVE_RUN, 0.7f, true);
                     (*itr)->GetMotionMaster()->MoveFleeing(GetTarget(), GetDuration());
                 }
             }
@@ -673,7 +673,7 @@ class spell_q12243_fire_upon_the_waters : public SpellScriptLoader
                 std::list<Creature*> servants;
                 GetTarget()->GetCreatureListWithEntryInGrid(servants, 27233 /*NPC_ONSLAUGHT_DECKHAND*/, 100.0f);
                 for (std::list<Creature*>::const_iterator itr = servants.begin(); itr != servants.end(); ++itr)
-                    (*itr)->SetSpeedRate(MOVE_RUN, 1.1f);
+                    (*itr)->SetSpeed(MOVE_RUN, 1.1f, true);
             }
 
             void Register()

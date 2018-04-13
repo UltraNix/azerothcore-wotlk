@@ -829,7 +829,7 @@ struct npc_precious_iccAI : public ScriptedAI
     void JustSummoned(Creature* summon) override
     {
         summon->SetPassive();
-        summon->SetSpeedRate(MOVE_RUN, 0.5f);
+        summon->SetSpeed(MOVE_RUN, 0.7f);
         _summons.Summon(summon);
     }
 

@@ -1073,8 +1073,8 @@ public:
 
         void Reset()
         {
-            me->SetSpeedRate(MOVE_RUN, 1);
-            me->SetSpeedRate(MOVE_WALK, 1);
+            me->SetSpeed(MOVE_RUN, 1);
+            me->SetSpeed(MOVE_WALK, 1);
             me->CastSpell(me, RAID_MODE(SPELL_BLIZZARD_10, SPELL_BLIZZARD_25), true);
         }
 

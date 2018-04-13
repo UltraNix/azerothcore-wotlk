@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -339,7 +339,7 @@ class boss_zuljin : public CreatureScript
                                 Vortex->CastSpell(Vortex, SPELL_CYCLONE_PASSIVE, true);
                                 Vortex->CastSpell(Vortex, SPELL_CYCLONE_VISUAL, true);
                                 Vortex->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                Vortex->SetSpeedRate(MOVE_RUN, 1.0f);
+                                Vortex->SetSpeed(MOVE_RUN, 1.0f);
                                 Vortex->AI()->AttackStart(SelectTarget(SELECT_TARGET_RANDOM, 0));
                                 DoZoneInCombat(Vortex);
                             }
@@ -429,7 +429,7 @@ class boss_zuljin : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
                                 TankGUID = me->GetVictim()->GetGUID();
-                                me->SetSpeedRate(MOVE_RUN, 5.0f);
+                                me->SetSpeed(MOVE_RUN, 5.0f);
                                 AttackStart(target); // change victim
                                 Claw_Rage_Timer = 0;
                                 Claw_Loop_Timer = 500;
@@ -453,7 +453,7 @@ class boss_zuljin : public CreatureScript
                                         if (Claw_Counter == 12)
                                         {
                                             Claw_Rage_Timer = urand(15000, 20000);
-                                            me->SetSpeedRate(MOVE_RUN, 1.2f);
+                                            me->SetSpeed(MOVE_RUN, 1.2f);
                                             AttackStart(ObjectAccessor::GetUnit(*me, TankGUID));
                                             TankGUID = 0;
                                             return;
@@ -478,7 +478,7 @@ class boss_zuljin : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             {
                                 TankGUID = me->GetVictim()->GetGUID();
-                                me->SetSpeedRate(MOVE_RUN, 5.0f);
+                                me->SetSpeed(MOVE_RUN, 5.0f);
                                 AttackStart(target); // change victim
                                 Lynx_Rush_Timer = 0;
                                 Claw_Counter = 0;
@@ -501,7 +501,7 @@ class boss_zuljin : public CreatureScript
                                     if (Claw_Counter == 9)
                                     {
                                         Lynx_Rush_Timer = urand(15000, 20000);
-                                        me->SetSpeedRate(MOVE_RUN, 1.2f);
+                                        me->SetSpeed(MOVE_RUN, 1.2f);
                                         AttackStart(ObjectAccessor::GetUnit(*me, TankGUID));
                                         TankGUID = 0;
                                     }

@@ -442,7 +442,7 @@ public:
         void JustSummoned(Creature* cr)
         {
             if (cr->GetEntry() == NPC_FLAME_TSUNAMI)
-                cr->SetSpeedRate(MOVE_FLIGHT, 1.5f);
+                cr->SetSpeed(MOVE_FLIGHT, 1.5f);
             else if (cr->GetEntry() == NPC_FIRE_CYCLONE)
                 cr->GetMotionMaster()->MoveRandom(5.0f);
 
@@ -697,7 +697,7 @@ public:
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             me->SetDisableGravity(false);
-            me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+            me->SetSpeed(MOVE_FLIGHT, 1.0f);
             me->SetCanFly(false);
             me->ResetLootMode();
             isSartharion = false;
@@ -717,7 +717,7 @@ public:
 
             if (me->IsFlying())
             {
-                me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+                me->SetSpeed(MOVE_FLIGHT, 1.0f);
                 me->SetCanFly(false);
             }
 
@@ -777,7 +777,7 @@ public:
                 {
                     Talk(SAY_TENEBRON_RESPOND);
                     me->SetCanFly(true);
-                    me->SetSpeedRate(MOVE_FLIGHT, 3.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 3.0f);
                     me->GetMotionMaster()->MovePath(me->GetEntry()*10, false);
                     timer = 0;
                 }
@@ -947,7 +947,7 @@ public:
             ClearInstance();
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+            me->SetSpeed(MOVE_FLIGHT, 1.0f);
             me->SetCanFly(false);
             me->ResetLootMode();
             isSartharion = false;
@@ -967,7 +967,7 @@ public:
             me->SetDisableGravity(false);
             if (me->IsFlying())
             {
-                me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+                me->SetSpeed(MOVE_FLIGHT, 1.0f);
                 me->SetCanFly(false);
             }
 
@@ -1047,7 +1047,7 @@ public:
                 {
                     Talk(SAY_SHADRON_RESPOND);
                     me->SetCanFly(true);
-                    me->SetSpeedRate(MOVE_FLIGHT, 3.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 3.0f);
                     me->GetMotionMaster()->MovePath(me->GetEntry()*10, false);
                     timer = 0;
                 }
@@ -1182,7 +1182,7 @@ public:
             ClearInstance();
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+            me->SetSpeed(MOVE_FLIGHT, 1.0f);
             me->SetCanFly(false);
             me->ResetLootMode();
             isSartharion = false;
@@ -1202,7 +1202,7 @@ public:
 
             if (me->IsFlying())
             {
-                me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
+                me->SetSpeed(MOVE_FLIGHT, 1.0f);
                 me->SetCanFly(false);
             }
 
@@ -1274,7 +1274,7 @@ public:
                 {
                     Talk(SAY_VESPERON_RESPOND);
                     me->SetCanFly(true);
-                    me->SetSpeedRate(MOVE_FLIGHT, 3.0f);
+                    me->SetSpeed(MOVE_FLIGHT, 3.0f);
                     me->GetMotionMaster()->MovePath(me->GetEntry()*10, false);
                     timer = 0;
                 }

@@ -638,7 +638,7 @@ struct boss_jormungarAI : public ScriptedAI
                     float angle=me->GetAngle(Locs[LOC_CENTER].GetPositionX()+urand(0,20)-10.0f, Locs[LOC_CENTER].GetPositionY()+urand(0,20)-10.0f), dist=urand(10,35);
                     if( Creature* c = me->SummonCreature(NPC_WORLD_TRIGGER, *me, TEMPSUMMON_TIMED_DESPAWN, 6000) )
                     {
-                        c->SetSpeedRate(MOVE_RUN, 2.5f);
+                        c->SetSpeed(MOVE_RUN, 2.5f);
                         c->CastSpell(c, SPELL_CHURNING_GROUND, true);
                         c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
                         c->GetMotionMaster()->MovePoint(0, Locs[LOC_CENTER].GetPositionX()+cos(angle)*dist, Locs[LOC_CENTER].GetPositionY()+sin(angle)*dist, me->GetPositionZ());

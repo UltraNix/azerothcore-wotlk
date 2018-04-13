@@ -2242,10 +2242,11 @@ class Unit : public WorldObject
         static void CalcAbsorbResist(Unit* attacker, Unit* victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellInfo const* spellInfo = NULL, bool Splited = false);
         static void CalcHealAbsorb(Unit const* victim, const SpellInfo* spellProto, uint32 &healAmount, uint32 &absorb);
 
-        void UpdateSpeed(UnitMoveType mtype);
+        void  UpdateSpeed(UnitMoveType mtype, bool forced);
         float GetSpeed(UnitMoveType mtype) const;
         float GetSpeedRate(UnitMoveType mtype) const { return m_speed_rate[mtype]; }
-        void SetSpeedRate(UnitMoveType mtype, float rate);
+        void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
+        void SetSpeedRate(UnitMoveType mtype, float rate) { m_speed_rate[mtype] = rate; }
 
         float ApplyEffectModifiers(SpellInfo const* spellProto, uint8 effect_index, float value) const;
         int32 CalculateSpellDamage(Unit const* target, SpellInfo const* spellProto, uint8 effect_index, int32 const* basePoints = NULL) const;

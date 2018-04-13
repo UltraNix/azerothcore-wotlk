@@ -85,11 +85,11 @@ class spell_warl_eye_of_kilrogg : public SpellScriptLoader
                     if (player->HasAura(58081))
                         if (Unit* charm = player->GetCharm())
                         {
-                            charm->SetSpeedRate(MOVE_RUN, 2.14f);
+                            charm->SetSpeed(MOVE_RUN, 2.14f, true);
                             if (charm->GetMapId() == 530 || charm->GetMapId() == 571)
                             {
                                 charm->SetCanFly(true);
-                                charm->SetSpeedRate(MOVE_FLIGHT, 2.14f);
+                                charm->SetSpeed(MOVE_FLIGHT, 2.14f, true);
                                 charm->SendMovementFlagUpdate();
                             }
                         }
@@ -1479,7 +1479,7 @@ public:
     class spell_warl_everlasting_affliction_aura_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_warl_everlasting_affliction_aura_AuraScript)
-
+            
         bool CheckProc(ProcEventInfo& eventInfo)
         {
             if ((eventInfo.GetHitMask() & (PROC_EX_EX_ONE_TIME_TRIGGER)))

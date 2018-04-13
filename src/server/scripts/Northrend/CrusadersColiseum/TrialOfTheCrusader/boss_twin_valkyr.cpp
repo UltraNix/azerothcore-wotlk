@@ -567,7 +567,7 @@ struct npc_concentrated_ballAI : public ScriptedAI
     {
         me->SetReactState(REACT_PASSIVE);
         _despawning = false;
-        me->SetSpeedRate(MOVE_RUN, 0.5f);
+        me->SetSpeed(MOVE_RUN, 0.5f, true);
     }
 
     void DoAction(int32 param) override

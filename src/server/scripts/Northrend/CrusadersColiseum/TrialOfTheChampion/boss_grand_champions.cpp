@@ -97,7 +97,7 @@ enum ChampionEvents
 
     EVENT_ROGUE_SPELL_EVISCERATE,
     EVENT_ROGUE_SPELL_FAN_OF_KNIVES,
-    EVENT_ROGUE_SPELL_POISON_BOTTLE,
+    EVENT_ROGUE_SPELL_POISON_BOTTLE,        
 
     EVENT_WARRIOR_SPELL_MORTAL_STRIKE,
     EVENT_WARRIOR_SPELL_BLADESTORM,
@@ -144,7 +144,7 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
         if (apply)
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetSpeedRate(MOVE_RUN, 2.0f);
+            me->SetSpeed(MOVE_RUN, 2.0f, false);
             DoCastSelf(SPELL_TRAMPLE_AURA, true);
         }
         else
@@ -206,7 +206,7 @@ struct npc_toc5_player_vehicleAI : public NullCreatureAI
             }
             _despawnTimer = 5000;
         }
-        else
+        else 
             _despawnTimer -= diff;
 
         if (_conditionsTimer <= diff)
@@ -501,7 +501,7 @@ struct boss_grand_championAI : public npc_escortAI
             me->SetHealth(me->GetMaxHealth());
             me->SetRegeneratingHealth(true);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
-            me->SetSpeedRate(MOVE_RUN, 1.0f);
+            me->SetSpeed(MOVE_RUN, 1.0f, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
             me->RemoveAurasDueToSpell(67867);
@@ -538,7 +538,7 @@ struct boss_grand_championAI : public npc_escortAI
             case 1:
                 if (data == 0) // 1 == short version
                 {
-                    AddWaypoint(0,747.35f,634.07f,411.57f);
+                    AddWaypoint(0,747.35f,634.07f,411.57f); 
                     AddWaypoint(1,768.72f,581.01f,411.92f);
                 }
                 AddWaypoint(2,763.55f,590.52f,411.71f);
@@ -686,7 +686,7 @@ struct boss_grand_championAI : public npc_escortAI
 
         if (!UpdateVictim() && !_newMountGUID)
             return;
-
+            
         _events.Update(diff);
 
         if (me->HasUnitState(UNIT_STATE_CASTING) || ((me->GetEntry() == NPC_JACOB || me->GetEntry() == NPC_MOKRA) && me->HasAura(SPELL_BLADESTORM)))
@@ -804,7 +804,7 @@ struct boss_grand_championAI : public npc_escortAI
                                 if (Unit* mount = vehicle->GetBase())
                                     list.push_back(mount->GetGUID());
                         }
-
+                    
                     if (!list.empty())
                     {
                         uint64 guid = Trinity::Containers::SelectRandomContainerElement(list);
@@ -960,7 +960,7 @@ struct boss_grand_championAI : public npc_escortAI
                 default:
                     break;
             }
-
+            
             if (me->HasUnitState(UNIT_STATE_CASTING) || ((me->GetEntry() == NPC_JACOB || me->GetEntry() == NPC_MOKRA) && me->HasAura(SPELL_BLADESTORM)))
                 return;
         }

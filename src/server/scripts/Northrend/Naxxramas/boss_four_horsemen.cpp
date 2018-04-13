@@ -310,7 +310,7 @@ public:
 
                 me->SetReactState(REACT_PASSIVE);
                 movementPhase = MOVE_PHASE_STARTED;
-                me->SetSpeedRate(MOVE_RUN, me->GetSpeedRate(MOVE_RUN));
+                me->SetSpeed(MOVE_RUN, me->GetSpeedRate(MOVE_RUN), true);
                 MoveToCorner();
             }
         }

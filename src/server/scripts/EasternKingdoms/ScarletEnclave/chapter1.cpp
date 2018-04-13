@@ -1,5 +1,5 @@
 /*
- * Copyright (C)
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -502,7 +502,7 @@ public:
                     events.RepeatEvent(1000);
                     return;
             }
-
+            
             if (!UpdateVictim())
                 return;
 
@@ -944,7 +944,7 @@ public:
 
                 //Not 100% correct, but movement is smooth. Sometimes miner walks faster
                 //than normal, this speed is fast enough to keep up at those times.
-                me->SetSpeedRate(MOVE_RUN, 1.25f);
+                me->SetSpeed(MOVE_RUN, 1.25f);
 
                 me->GetMotionMaster()->MoveFollow(miner, 1.0f, 0);
                 me->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);

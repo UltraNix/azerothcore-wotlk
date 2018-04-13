@@ -30,7 +30,7 @@ enum OnyxiaSpells
     SPELL_BREATH_NE_TO_SW            = 18617
 };
 
-enum OnyxiaEvents
+enum OnyxiaEvents 
 {
     EVENT_SPELL_WINGBUFFET           = 1,
     EVENT_SPELL_FLAMEBREATH,
@@ -137,7 +137,7 @@ struct boss_onyxiaAI : public BossAI
         me->SetCanFly(false);
         me->SetDisableGravity(false);
         me->SetHover(false);
-        me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
+        me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run, false);
 
         _whelpSpam = false;
         _whelpCount = 0;
@@ -156,7 +156,7 @@ struct boss_onyxiaAI : public BossAI
         if (who->GetTypeId() == TYPEID_PLAYER)
             AttackStart(who);
     }
-
+    
     void DoAction(int32 param) override
     {
         if (param == -1)
@@ -237,7 +237,7 @@ struct boss_onyxiaAI : public BossAI
             if (id > 0 && _phase == 2)
             {
                 me->SetFacingTo(OnyxiaMoveData[id].o);
-                me->SetSpeedRate(MOVE_RUN, 1.6f);
+                me->SetSpeed(MOVE_RUN, 1.6f, false);
                 _currentWP = id;
                 events.ScheduleEvent(EVENT_SPELL_FIREBALL_FIRST, 1000);
             }
@@ -260,7 +260,7 @@ struct boss_onyxiaAI : public BossAI
                 me->SetCanFly(false);
                 me->SetDisableGravity(false);
                 me->SetHover(false);
-                me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
+                me->SetSpeed(MOVE_RUN, me->GetCreatureTemplate()->speed_run, false);
                 events.ScheduleEvent(EVENT_PHASE_3_ATTACK, 0);
                 break;
             default:
@@ -350,7 +350,7 @@ struct boss_onyxiaAI : public BossAI
                     _manyWhelpsAvailable = false;
                     break;
                 case EVENT_FLY_S_TO_N:
-                    me->SetSpeedRate(MOVE_RUN, 2.95f);
+                    me->SetSpeed(MOVE_RUN, 2.95f, false);
                     me->GetMotionMaster()->MovePoint(5, OnyxiaMoveData[5].x, OnyxiaMoveData[5].y, OnyxiaMoveData[5].z);
                     _whelpSpam = true;
                     events.ScheduleEvent(EVENT_WHELP_SPAM, 90000);
@@ -426,12 +426,12 @@ struct boss_onyxiaAI : public BossAI
                 case EVENT_SPELL_BREATH:
                 {
                     auto newWP = OnyxiaMoveData[_currentWP].DestId;
-                    me->SetSpeedRate(MOVE_RUN, 2.95f);
+                    me->SetSpeed(MOVE_RUN, 2.95f, false);
                     me->GetMotionMaster()->MovePoint(newWP, OnyxiaMoveData[newWP].x, OnyxiaMoveData[newWP].y, OnyxiaMoveData[newWP].z);
                 }
                     break;
                 case EVENT_START_PHASE_3:
-                    me->SetSpeedRate(MOVE_RUN, 2.95f);
+                    me->SetSpeed(MOVE_RUN, 2.95f, false);
                     me->GetMotionMaster()->MovePoint(12, OnyxiaMoveData[1].x, OnyxiaMoveData[1].y, OnyxiaMoveData[1].z);
                     break;
                 case EVENT_PHASE_3_ATTACK:
