@@ -103,8 +103,13 @@ public:
         char* map = strtok((char*)args, " ");
         char* pDiff = strtok(NULL, " ");
         int8 diff = -1;
+
         if (pDiff)
-            diff = atoi(pDiff);
+           diff = atoi(pDiff);
+
+        if (diff > MAX_DIFFICULTY)
+            diff = MAX_DIFFICULTY;
+
         uint16 counter = 0;
         uint16 MapId = 0;
 
