@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -139,7 +139,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     uint32 cost = items_count ? 30 * items_count : 30;  // price hardcoded in client
 
     uint32 reqmoney = cost + money;
-  
+
     // Check for overflow
     if (reqmoney < money)
     {
@@ -309,7 +309,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
 
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
     uint32 deliver_delay = needItemDelay ? sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
-  
+
     // don't ask for COD if there are no items
     if (items_count == 0)
         COD = 0;
@@ -461,7 +461,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
         return;
     }
-  
+
     // verify that the mail has the item to avoid cheaters taking COD items without paying
     bool foundItem = false;
     for (std::vector<MailItemInfo>::const_iterator itr = m->items.begin(); itr != m->items.end(); ++itr)
