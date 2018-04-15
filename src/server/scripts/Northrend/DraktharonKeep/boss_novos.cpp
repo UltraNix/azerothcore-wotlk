@@ -9,45 +9,48 @@ REWRITTEN BY XINEF
 
 enum Yells
 {
-    SAY_AGGRO                            = 0,
-    SAY_KILL                            = 1,
-    SAY_DEATH                            = 2,
-    SAY_SUMMONING_ADDS                    = 3,
-    SAY_ARCANE_FIELD                    = 4,
-    EMOTE_SUMMONING_ADDS                = 5
+    SAY_AGGRO                          = 0,
+    SAY_KILL                           = 1,
+    SAY_DEATH                          = 2,
+    SAY_SUMMONING_ADDS                 = 3,
+    SAY_ARCANE_FIELD                   = 4,
+    EMOTE_SUMMONING_ADDS               = 5
 };
 
 enum Spells
 {
-    SPELL_BEAM_CHANNEL                    = 52106,
-    SPELL_ARCANE_BLAST                    = 49198,
-    SPELL_ARCANE_FIELD                    = 47346,
-    SPELL_SUMMON_FETID_TROLL_CORPSE        = 49103,
-    SPELL_SUMMON_HULKING_CORPSE            = 49104,
-    SPELL_SUMMON_RISEN_SHADOWCASTER        = 49105,
-    SPELL_SUMMON_CRYSTAL_HANDLER        = 49179,
-    SPELL_DESPAWN_CRYSTAL_HANDLER        = 51403,
+    SPELL_BEAM_CHANNEL                 = 52106,
+    SPELL_ARCANE_BLAST                 = 49198,
+    SPELL_ARCANE_FIELD                 = 47346,
+    SPELL_SUMMON_FETID_TROLL_CORPSE    = 49103,
+    SPELL_SUMMON_HULKING_CORPSE        = 49104,
+    SPELL_SUMMON_RISEN_SHADOWCASTER    = 49105,
+    SPELL_SUMMON_CRYSTAL_HANDLER       = 49179,
+    SPELL_DESPAWN_CRYSTAL_HANDLER      = 51403,
 
-    SPELL_SUMMON_MINIONS                = 59910,
-    SPELL_COPY_OF_SUMMON_MINIONS        = 59933,
-    SPELL_BLIZZARD                        = 49034,
-    SPELL_FROSTBOLT                        = 49037,
-    SPELL_TOUCH_OF_MISERY                = 50090
+    SPELL_SUMMON_MINIONS               = 59910,
+    SPELL_COPY_OF_SUMMON_MINIONS       = 59933,
+    SPELL_BLIZZARD                     = 49034,
+    SPELL_FROSTBOLT                    = 49037,
+    SPELL_TOUCH_OF_MISERY              = 50090
 };
 
 enum Misc
 {
-    NPC_CRYSTAL_CHANNEL_TARGET                = 26712,
-    NPC_CRYSTAL_HANDLER                        = 26627,
+    NPC_CRYSTAL_CHANNEL_TARGET         = 26712,
+    NPC_CRYSTAL_HANDLER                = 26627,
+    NPC_ZOMBIE_1                       = 27598,
+    NPC_ZOMBIE_2                       = 27597,
+    NPC_ZOMBIE_3                       = 27600,
 
-    EVENT_SUMMON_FETID_TROLL                = 1,
-    EVENT_SUMMON_SHADOWCASTER                = 2,
-    EVENT_SUMMON_HULKING_CORPSE                = 3,
-    EVENT_SUMMON_CRYSTAL_HANDLER            = 4,
-    EVENT_CAST_OFFENSIVE_SPELL                = 5,
-    EVENT_KILL_TALK                            = 6,
-    EVENT_CHECK_PHASE                        = 7,
-    EVENT_SPELL_SUMMON_MINIONS                = 8
+    EVENT_SUMMON_FETID_TROLL           = 1,
+    EVENT_SUMMON_SHADOWCASTER          = 2,
+    EVENT_SUMMON_HULKING_CORPSE        = 3,
+    EVENT_SUMMON_CRYSTAL_HANDLER       = 4,
+    EVENT_CAST_OFFENSIVE_SPELL         = 5,
+    EVENT_KILL_TALK                    = 6,
+    EVENT_CHECK_PHASE                  = 7,
+    EVENT_SPELL_SUMMON_MINIONS         = 8
 };
 
 class boss_novos : public CreatureScript
@@ -82,13 +85,17 @@ class boss_novos : public CreatureScript
                 return 0;
             }
 
-            void SetData(uint32 type, uint32)
-            {
-                if (type == me->GetEntry())
-                    _achievement = false;
-            }
+            void SetData(uint32 type, uint32){}
 
-            void MoveInLineOfSight(Unit* who) { }
+            void MoveInLineOfSight(Unit* who) {
+                if (!me->HasAura(SPELL_BEAM_CHANNEL))
+                    return;
+                if (me->GetDistance(who) > 35.0f)
+                    return;
+                if (uint32 entry = who->GetEntry())
+                    if (entry == NPC_ZOMBIE_1 || entry == NPC_ZOMBIE_2 || entry == NPC_ZOMBIE_3)
+                        _achievement = false;
+            }
 
             void EnterCombat(Unit* who)
             {
@@ -203,7 +210,7 @@ class boss_novos : public CreatureScript
 
                 EnterEvadeIfOutOfCombatArea();
             }
-                    
+
             bool CheckEvadeIfOutOfCombatArea() const
             {
                 return !SelectTargetFromPlayerList(80.0f);
@@ -307,7 +314,7 @@ class achievement_oh_novos : public AchievementCriteriaScript
     public:
         achievement_oh_novos() : AchievementCriteriaScript("achievement_oh_novos") { }
 
-        bool OnCheck(Player* /*player*/, Unit* target) 
+        bool OnCheck(Player* /*player*/, Unit* target)
         {
             return target && target->GetAI()->GetData(target->GetEntry());
         }
