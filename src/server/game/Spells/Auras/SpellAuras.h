@@ -94,15 +94,15 @@ class AuraApplication
 
 class Aura
 {
-    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID, bool noPeriodicReset);
+    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID, bool noPeriodicReset);
     public:
         typedef std::map<uint64, AuraApplication *> ApplicationMap;
 
         static uint8 BuildEffectMaskForOwner(SpellInfo const* spellProto, uint8 avalibleEffectMask, WorldObject* owner);
-        static Aura* TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount = NULL, Item* castItem = NULL, uint64 casterGUID = 0, bool* refresh = NULL, bool periodicReset = false);
-        static Aura* TryCreate(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount = NULL, Item* castItem = NULL, uint64 casterGUID = 0);
-        static Aura* Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID);
-        explicit Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, Item* castItem, uint64 casterGUID);
+        static Aura* TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount = NULL, ItemRef const& castItem = NULL, uint64 casterGUID = 0, bool* refresh = NULL, bool periodicReset = false);
+        static Aura* TryCreate(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount = NULL, ItemRef const& castItem = NULL, uint64 casterGUID = 0);
+        static Aura* Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, ItemRef const& castItem, uint64 casterGUID);
+        explicit Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, ItemRef const& castItem, uint64 casterGUID);
         void _InitEffects(uint8 effMask, Unit* caster, int32 *baseAmount);
         virtual ~Aura();
 
@@ -278,9 +278,9 @@ class Aura
 
 class UnitAura : public Aura
 {
-    friend Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID);
+    friend Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID);
     protected:
-        explicit UnitAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID);
+        explicit UnitAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID);
     public:
         void _ApplyForTarget(Unit* target, Unit* caster, AuraApplication * aurApp);
         void _UnapplyForTarget(Unit* target, Unit* caster, AuraApplication * aurApp);
@@ -299,9 +299,9 @@ class UnitAura : public Aura
 
 class DynObjAura : public Aura
 {
-    friend Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID);
+    friend Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID);
     protected:
-        explicit DynObjAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID);
+        explicit DynObjAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID);
     public:
         void Remove(AuraRemoveMode removeMode = AURA_REMOVE_BY_DEFAULT);
 

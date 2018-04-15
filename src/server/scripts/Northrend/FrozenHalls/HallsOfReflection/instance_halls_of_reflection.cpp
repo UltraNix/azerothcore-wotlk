@@ -478,7 +478,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
                             c->SetCanFly(true);
                             c->SetVisible(true);
 
-                            Item* i;
+                            ItemRef i;
                             i = p->GetWeaponForAttack(BASE_ATTACK);
                             c->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, i ? i->GetEntry() : 0);
                             i = p->GetWeaponForAttack(OFF_ATTACK);

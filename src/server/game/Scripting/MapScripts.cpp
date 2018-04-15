@@ -303,7 +303,7 @@ void Map::ScriptsProcess()
             {
                 case HIGHGUID_ITEM: // as well as HIGHGUID_CONTAINER
                     if (Player* player = GetPlayer(step.ownerGUID))
-                        source = player->GetItemByGuid(step.sourceGUID);
+                        source = *player->GetItemByGuid(step.sourceGUID);
                     break;
                 case HIGHGUID_UNIT:
                 case HIGHGUID_VEHICLE:
@@ -792,7 +792,7 @@ void Map::ScriptsProcess()
                     InventoryResult msg = pReceiver->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, step.script->CreateItem.ItemEntry, step.script->CreateItem.Amount);
                     if (msg == EQUIP_ERR_OK)
                     {
-                        if (Item* item = pReceiver->StoreNewItem(dest, step.script->CreateItem.ItemEntry, true))
+                        if (ItemRef item = pReceiver->StoreNewItem(dest, step.script->CreateItem.ItemEntry, true))
                             pReceiver->SendNewItem(item, step.script->CreateItem.Amount, false, true);
                     }
                     else

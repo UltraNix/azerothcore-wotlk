@@ -434,7 +434,7 @@ GameObject* SpellScript::GetExplTargetGObj()
     return m_spell->m_targets.GetGOTarget();
 }
 
-Item* SpellScript::GetExplTargetItem()
+ItemRef SpellScript::GetExplTargetItem()
 {
     return m_spell->m_targets.GetItemTarget();
 }
@@ -475,7 +475,7 @@ Player* SpellScript::GetHitPlayer()
         return NULL;
 }
 
-Item* SpellScript::GetHitItem()
+ItemRef SpellScript::GetHitItem()
 {
     if (!IsInTargetHook())
     {
@@ -611,7 +611,7 @@ void SpellScript::SetEffectValue(int32 value)
     m_spell->damage = value;
 }
 
-Item* SpellScript::GetCastItem()
+ItemRef SpellScript::GetCastItem()
 {
     return m_spell->m_CastItem;
 }

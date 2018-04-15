@@ -61,7 +61,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     }
     else if (IS_ITEM_GUID(lguid))
     {
-        Item* pItem = player->GetItemByGuid(lguid);
+        ItemRef pItem = player->GetItemByGuid(lguid);
 
         if (!pItem)
         {
@@ -141,7 +141,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recvData*/)
         }
         case HIGHGUID_ITEM:
         {
-            if (Item* item = player->GetItemByGuid(guid))
+            if (ItemRef item = player->GetItemByGuid(guid))
             {
                 loot = &item->loot;
                 shareMoney = false;
@@ -338,7 +338,7 @@ void WorldSession::DoLootRelease(uint64 lguid)
     }
     else if (IS_ITEM_GUID(lguid))
     {
-        Item* pItem = player->GetItemByGuid(lguid);
+        ItemRef pItem = player->GetItemByGuid( lguid );
         if (!pItem)
             return;
 
@@ -493,7 +493,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     AllowedLooterSet looters = item.GetAllowedLooters();
 
     // not move item from loot to target inventory
-    Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
+    ItemRef newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     target->UpdateLootAchievements(&item, loot);
 

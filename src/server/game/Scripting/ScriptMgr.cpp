@@ -628,7 +628,7 @@ WorldZoneScript* ScriptMgr::CreateWorldZoneScript(uint32 scriptId)
     return tmpscript->GetWorldZoneScript();
 }
 
-bool ScriptMgr::OnQuestAccept(Player* player, Item* item, Quest const* quest)
+bool ScriptMgr::OnQuestAccept(Player* player, ItemRef const& item, Quest const* quest)
 {
     ASSERT(player);
     ASSERT(item);
@@ -639,7 +639,7 @@ bool ScriptMgr::OnQuestAccept(Player* player, Item* item, Quest const* quest)
     return tmpscript->OnQuestAccept(player, item, quest);
 }
 
-bool ScriptMgr::OnItemUse(Player* player, Item* item, SpellCastTargets const& targets)
+bool ScriptMgr::OnItemUse(Player* player, ItemRef const& item, SpellCastTargets const& targets)
 {
     ASSERT(player);
     ASSERT(item);
@@ -1189,7 +1189,7 @@ void ScriptMgr::OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newAre
     FOREACH_SCRIPT(PlayerScript)->OnUpdateZone(player, newZone, newArea);
 }
 
-void ScriptMgr::OnAfterPlayerSetVisibleItemSlot(Player* player, uint8 slot, Item *item)
+void ScriptMgr::OnAfterPlayerSetVisibleItemSlot(Player* player, uint8 slot, ItemRef const& item)
 {
     FOREACH_SCRIPT(PlayerScript)->OnAfterSetVisibleItemSlot(player, slot,item);
 }
@@ -1235,7 +1235,7 @@ void ScriptMgr::OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &
     FOREACH_SCRIPT(GuildScript)->OnMemberDepositMoney(guild, player, amount);
 }
 
-void ScriptMgr::OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId,
+void ScriptMgr::OnGuildItemMove(Guild* guild, Player* player, ItemRef const& pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId,
             bool isDestBank, uint8 destContainer, uint8 destSlotId)
 {
     FOREACH_SCRIPT(GuildScript)->OnItemMove(guild, player, pItem, isSrcBank, srcContainer, srcSlotId, isDestBank, destContainer, destSlotId);
@@ -1290,7 +1290,7 @@ void ScriptMgr::OnGlobalItemDelFromDB(SQLTransaction& trans, uint32 itemGuid)
     FOREACH_SCRIPT(GlobalScript)->OnItemDelFromDB(trans, itemGuid);
 }
 
-void ScriptMgr::OnGlobalMirrorImageDisplayItem(const Item *item, uint32 &display)
+void ScriptMgr::OnGlobalMirrorImageDisplayItem(ItemRef const& item, uint32 &display)
 {
     FOREACH_SCRIPT(GlobalScript)->OnMirrorImageDisplayItem(item, display);
 }

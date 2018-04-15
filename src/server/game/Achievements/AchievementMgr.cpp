@@ -2199,7 +2199,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
 
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
-        Item* item = reward->itemId ? Item::CreateItem(reward->itemId, 1, GetPlayer()) : NULL;
+        ItemRef item = reward->itemId ? Item::CreateItem(reward->itemId, 1, GetPlayer()) : ItemRef( nullptr );
         if (item)
         {
             // save new item before send

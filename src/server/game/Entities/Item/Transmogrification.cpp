@@ -95,7 +95,7 @@ std::string Transmogrification::GetSlotIcon(uint8 slot, uint32 width, uint32 hei
     return ss.str();
 }
 
-std::string Transmogrification::GetItemLink(Item* item, WorldSession* session) const
+std::string Transmogrification::GetItemLink(ItemRef & item, WorldSession* session) const
 {
     sLog->outDebug(LOG_FILTER_MODULES, "Transmogrification::GetItemLink");
 
@@ -177,7 +177,7 @@ uint32 Transmogrification::GetFakeEntry(uint64 itemGUID) const
     return itr3->second;
 }
 
-void Transmogrification::UpdateItem(Player* player, Item* item) const
+void Transmogrification::UpdateItem(Player* player, ItemRef & item) const
 {
     sLog->outDebug(LOG_FILTER_MODULES, "Transmogrification::UpdateItem");
 
@@ -189,7 +189,7 @@ void Transmogrification::UpdateItem(Player* player, Item* item) const
     }
 }
 
-void Transmogrification::DeleteFakeEntry(Player* player, uint8 slot, Item* itemTransmogrified, SQLTransaction* trans)
+void Transmogrification::DeleteFakeEntry(Player* player, uint8 slot, ItemRef & itemTransmogrified, SQLTransaction* trans)
 {
     if (!GetFakeEntry(itemTransmogrified->GetGUID()))
         return;
@@ -198,7 +198,7 @@ void Transmogrification::DeleteFakeEntry(Player* player, uint8 slot, Item* itemT
     UpdateItem(player, itemTransmogrified);
 }
 
-void Transmogrification::SetFakeEntry(Player* player, uint32 newEntry, uint8 slot, Item* itemTransmogrified)
+void Transmogrification::SetFakeEntry(Player* player, uint32 newEntry, uint8 slot, ItemRef & itemTransmogrified)
 {
     uint64 itemGUID = itemTransmogrified->GetGUID();
     entryMap[player->GetGUID()][itemGUID] = newEntry;
@@ -216,7 +216,7 @@ TransmogTrinityStrings Transmogrification::Transmogrify(Player* player, uint64 i
         return LANG_ERR_TRANSMOG_INVALID_SLOT;
     }
 
-    Item* itemTransmogrifier = NULL;
+    ItemRef itemTransmogrifier = NULL;
     // guid of the transmogrifier item, if it's not 0
     if (itemGUID)
     {
@@ -229,7 +229,7 @@ TransmogTrinityStrings Transmogrification::Transmogrify(Player* player, uint64 i
     }
 
     // transmogrified item
-    Item* itemTransmogrified = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    ItemRef itemTransmogrified = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
     if (!itemTransmogrified)
     {
         //TC_LOG_DEBUG(LOG_FILTER_NETWORKIO, "WORLD: HandleTransmogrifyItems - Player (GUID: %u, name: %s) tried to transmogrify an invalid item in a valid slot (slot: %u).", player->GetGUIDLow(), player->GetName().c_str(), slot);

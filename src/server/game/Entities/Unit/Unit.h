@@ -29,6 +29,9 @@
 #include "ThreatManager.h"
 #include <vector>
 
+#include "ThreatManager.h"
+#include "Item.h"
+
 #define WORLD_TRIGGER   12999
 
 enum SpellInterruptFlags
@@ -1744,17 +1747,17 @@ class Unit : public WorldObject
         void SendEnergizeSpellLog(Unit* victim, uint32 SpellID, uint32 Damage, Powers powertype);
         void EnergizeBySpell(Unit* victim, uint32 SpellID, uint32 Damage, Powers powertype, bool sendLog = true);
 
-        void CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo, CustomSpellValues const* value, TriggerCastFlags triggerFlags = TRIGGERED_NONE, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastSpell(Unit* victim, uint32 spellId, bool triggered, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastSpell(Unit* victim, uint32 spellId, TriggerCastFlags triggerFlags = TRIGGERED_NONE, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastSpell(Unit* victim, SpellInfo const* spellInfo, bool triggered, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastSpell(Unit* victim, SpellInfo const* spellInfo, TriggerCastFlags triggerFlags = TRIGGERED_NONE, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastSpell(float x, float y, float z, uint32 spellId, bool triggered, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastSpell(GameObject* go, uint32 spellId, bool triggered, Item* castItem = NULL, AuraEffect* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastCustomSpell(Unit* victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastCustomSpell(uint32 spellId, SpellValueMod mod, int32 value, Unit* victim, bool triggered, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastCustomSpell(uint32 spellId, SpellValueMod mod, int32 value, Unit* victim = NULL, TriggerCastFlags triggerFlags = TRIGGERED_NONE, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
-        void CastCustomSpell(uint32 spellId, CustomSpellValues const &value, Unit* victim = NULL, TriggerCastFlags triggerFlags = TRIGGERED_NONE, Item* castItem = NULL, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo, CustomSpellValues const* value, TriggerCastFlags triggerFlags = TRIGGERED_NONE, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(Unit* victim, uint32 spellId, bool triggered, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(Unit* victim, uint32 spellId, TriggerCastFlags triggerFlags = TRIGGERED_NONE, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(Unit* victim, SpellInfo const* spellInfo, bool triggered, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(Unit* victim, SpellInfo const* spellInfo, TriggerCastFlags triggerFlags = TRIGGERED_NONE, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(float x, float y, float z, uint32 spellId, bool triggered, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastSpell(GameObject* go, uint32 spellId, bool triggered, ItemRef const& castItem = NullItemRef, AuraEffect* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastCustomSpell(Unit* victim, uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastCustomSpell(uint32 spellId, SpellValueMod mod, int32 value, Unit* victim, bool triggered, ItemRef const& castItem = ItemRef( NULL ), AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastCustomSpell(uint32 spellId, SpellValueMod mod, int32 value, Unit* victim = NULL, TriggerCastFlags triggerFlags = TRIGGERED_NONE, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
+        void CastCustomSpell(uint32 spellId, CustomSpellValues const &value, Unit* victim = NULL, TriggerCastFlags triggerFlags = TRIGGERED_NONE, ItemRef const& castItem = NullItemRef, AuraEffect const* triggeredByAura = NULL, uint64 originalCaster = 0);
         Aura* AddAura(uint32 spellId, Unit* target);
         Aura* AddAura(SpellInfo const* spellInfo, uint8 effMask, Unit* target);
         void SetAuraStack(uint32 spellId, Unit* target, uint32 stack);
@@ -1913,7 +1916,7 @@ class Unit : public WorldObject
         bool InitTamedPet(Pet* pet, uint8 level, uint32 spell_id);
 
         // aura apply/remove helpers - you should better not use these
-        Aura* _TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount = NULL, Item* castItem = NULL, uint64 casterGUID = 0, bool periodicReset = false);
+        Aura* _TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount = NULL, ItemRef const& castItem = NULL, uint64 casterGUID = 0, bool periodicReset = false);
         void _AddAura(UnitAura* aura, Unit* caster);
         AuraApplication * _CreateAuraApplication(Aura* aura, uint8 effMask);
         void _ApplyAuraEffect(Aura* aura, uint8 effIndex);

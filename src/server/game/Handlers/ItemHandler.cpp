@@ -113,7 +113,7 @@ void WorldSession::HandleAutoEquipItemSlotOpcode(WorldPacket & recvData)
     if (!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0, dstslot))
         return;
 
-    Item* item = _player->GetItemByGuid(itemguid);
+    ItemRef item = _player->GetItemByGuid(itemguid);
     uint16 dstpos = dstslot | (INVENTORY_SLOT_BAG_0 << 8);
 
     if (!item || item->GetPos() == dstpos)
@@ -172,7 +172,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket & recvData)
     recvData >> srcbag >> srcslot;
     //sLog->outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
-    Item* pSrcItem  = _player->GetItemByPos(srcbag, srcslot);
+    ItemRef pSrcItem  = _player->GetItemByPos(srcbag, srcslot);
     if (!pSrcItem)
         return;                                             // only at cheat
 
@@ -188,7 +188,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket & recvData)
     if (dest == src)                                           // prevent equip in same slot, only at cheat
         return;
 
-    Item* pDstItem = _player->GetItemByPos(dest);
+    ItemRef pDstItem = _player->GetItemByPos(dest);
     if (!pDstItem)                                         // empty slot, simple case
     {
         _player->RemoveItem(srcbag, srcslot, true);
@@ -282,7 +282,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket & recvData)
         }
     }
 
-    Item* pItem  = _player->GetItemByPos(bag, slot);
+    ItemRef pItem  = _player->GetItemByPos(bag, slot);
     if (!pItem)
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
@@ -607,7 +607,7 @@ void WorldSession::HandleReadItem(WorldPacket & recvData)
     recvData >> bag >> slot;
 
     //sLog->outDetail("STORAGE: Read bag = %u, slot = %u", bag, slot);
-    Item* pItem = _player->GetItemByPos(bag, slot);
+    ItemRef pItem = _player->GetItemByPos(bag, slot);
 
     if (pItem && pItem->GetTemplate()->PageText)
     {
@@ -655,7 +655,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket & recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Item* pItem = _player->GetItemByGuid(itemguid);
+    ItemRef pItem = _player->GetItemByGuid(itemguid);
     if (pItem)
     {
         // prevent sell not owner item
@@ -707,7 +707,7 @@ void WorldSession::HandleSellItemOpcode(WorldPacket & recvData)
             {
                 if (count < pItem->GetCount())               // need split items
                 {
-                    Item* pNewItem = pItem->CloneItem(count, _player);
+                    ItemRef pNewItem = pItem->CloneItem(count, _player);
                     if (!pNewItem)
                     {
                         sLog->outError("WORLD: HandleSellItemOpcode - could not create clone of item %u; count = %u", pItem->GetEntry(), count);
@@ -767,7 +767,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Item* pItem = _player->GetItemFromBuyBackSlot(slot);
+    ItemRef pItem = _player->GetItemFromBuyBackSlot(slot);
     if (pItem)
     {
         uint32 price = _player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START);
@@ -973,7 +973,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket & recvData)
     recvData >> srcbag >> srcslot >> dstbag;
     //sLog->outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u", srcbag, srcslot, dstbag);
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    ItemRef pItem = _player->GetItemByPos(srcbag, srcslot);
     if (!pItem)
         return;
 
@@ -1080,7 +1080,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    ItemRef pItem = _player->GetItemByPos(srcbag, srcslot);
     if (!pItem)
         return;
 
@@ -1118,7 +1118,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Item* pItem = _player->GetItemByPos(srcbag, srcslot);
+    ItemRef pItem = _player->GetItemByPos(srcbag, srcslot);
     if (!pItem)
         return;
 
@@ -1133,7 +1133,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         }
 
         _player->RemoveItem(srcbag, srcslot, true);
-        if (Item const* storedItem = _player->StoreItem(dest, pItem, true))
+        if (ItemRef storedItem = _player->StoreItem(dest, pItem, true))
             _player->ItemAddedQuestCheck(storedItem->GetEntry(), storedItem->GetCount());
     }
     else                                                    // moving from inventory to bank
@@ -1235,7 +1235,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WRAP: receive gift_bag = %u, gift_slot = %u, item_bag = %u, item_slot = %u", gift_bag, gift_slot, item_bag, item_slot);
 
-    Item* gift = _player->GetItemByPos(gift_bag, gift_slot);
+    ItemRef gift = _player->GetItemByPos(gift_bag, gift_slot);
     if (!gift)
     {
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, gift, NULL);
@@ -1248,7 +1248,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recvData)
         return;
     }
 
-    Item* item = _player->GetItemByPos(item_bag, item_slot);
+    ItemRef item = _player->GetItemByPos(item_bag, item_slot);
 
     if (!item)
     {
@@ -1358,7 +1358,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
         (gem_guids[1] && (gem_guids[1] == gem_guids[2])))
         return;
 
-    Item* itemTarget = _player->GetItemByGuid(item_guid);
+    ItemRef itemTarget = _player->GetItemByGuid(item_guid);
     if (!itemTarget)                                         //missing item to socket
         return;
 
@@ -1369,9 +1369,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
     //this slot is excepted when applying / removing meta gem bonus
     uint8 slot = itemTarget->IsEquipped() ? itemTarget->GetSlot() : uint8(NULL_SLOT);
 
-    Item* Gems[MAX_GEM_SOCKETS];
+    ItemRef Gems[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
-        Gems[i] = gem_guids[i] ? _player->GetItemByGuid(gem_guids[i]) : NULL;
+        Gems[i] = gem_guids[i] ? _player->GetItemByGuid(gem_guids[i]) : ItemRef( nullptr );
 
     GemPropertiesEntry const* GemProps[MAX_GEM_SOCKETS];
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)                //get geminfo from dbc storage
@@ -1512,7 +1512,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recvData)
         if (GemEnchants[i])
         {
             itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i), GemEnchants[i], 0, 0, _player->GetGUID());
-            if (Item* guidItem = _player->GetItemByGuid(gem_guids[i]))
+            if (ItemRef guidItem = _player->GetItemByGuid(gem_guids[i]))
                 _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true);
         }
     }
@@ -1549,7 +1549,7 @@ void WorldSession::HandleCancelTempEnchantmentOpcode(WorldPacket& recvData)
     if (!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0, eslot))
         return;
 
-    Item* item = GetPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, eslot);
+    ItemRef item = GetPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, eslot);
 
     if (!item)
         return;
@@ -1568,7 +1568,7 @@ void WorldSession::HandleItemRefundInfoRequest(WorldPacket& recvData)
     uint64 guid;
     recvData >> guid;                                      // item guid
 
-    Item* item = _player->GetItemByGuid(guid);
+    ItemRef item = _player->GetItemByGuid(guid);
     if (!item)
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "Item refund: item not found!");
@@ -1584,7 +1584,7 @@ void WorldSession::HandleItemRefund(WorldPacket &recvData)
     uint64 guid;
     recvData >> guid;                                      // item guid
 
-    Item* item = _player->GetItemByGuid(guid);
+    ItemRef item = _player->GetItemByGuid(guid);
     if (!item)
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "Item refund: item not found!");
@@ -1612,7 +1612,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recvData )
 
     WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, 50);        // guess size
 
-    if (Item* item = _player->GetItemByGuid(itemGuid))
+    if (ItemRef item = _player->GetItemByGuid(itemGuid))
     {
         data << uint8(0);                                       // has text
         data << uint64(itemGuid);                               // item guid

@@ -2468,7 +2468,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
 
                         if (Player* player = caster->ToPlayer())
                         {
-                            if (Item* mainItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                            if (ItemRef mainItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
                                 target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, mainItem->GetEntry());
                         }
                         else
@@ -2482,7 +2482,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
 
                         if (Player* player = caster->ToPlayer())
                         {
-                            if (Item* offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                            if (ItemRef offItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
                                 target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, offItem->GetEntry());
                         }
                         else
@@ -2495,7 +2495,7 @@ class spell_gen_clone_weapon_aura : public SpellScriptLoader
 
                         if (Player* player = caster->ToPlayer())
                         {
-                            if (Item* rangedItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                            if (ItemRef rangedItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
                                 target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, rangedItem->GetEntry());
                         }
                         else
@@ -4498,7 +4498,7 @@ class spell_gen_bonked : public SpellScriptLoader
 
                     if (Aura const* aura = target->GetAura(SPELL_ON_GUARD))
                     {
-                        if (Item* item = target->GetItemByGuid(aura->GetCastItemGUID()))
+                        if (ItemRef item = target->GetItemByGuid(aura->GetCastItemGUID()))
                             target->DestroyItemCount(item->GetEntry(), 1, true);
                     }
                 }

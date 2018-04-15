@@ -1904,7 +1904,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     return SPELL_CAST_OK;
 }
 
-SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject const* target, Item const* itemTarget) const
+SpellCastResult SpellInfo::CheckExplicitTarget(Unit const* caster, WorldObject const* target, ItemRef const& itemTarget) const
 {
     uint32 neededTargets = GetExplicitTargetMask();
     if (!target)

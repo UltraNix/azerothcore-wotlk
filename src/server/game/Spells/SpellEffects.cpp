@@ -1855,7 +1855,7 @@ void Spell::DoCreateItem(uint8 /*effIndex*/, uint32 itemId)
     if (addNumber)
     {
         // create the new item and store it
-        Item* pItem = player->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
+        ItemRef pItem = player->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
 
         // was it successful? return error if not
         if (!pItem)
@@ -2316,7 +2316,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
 
     uint16 pos = m_CastItem->GetPos();
 
-    Item* pNewItem = Item::CreateItem(newitemid, 1, player);
+    ItemRef pNewItem = Item::CreateItem(newitemid, 1, player);
     if (!pNewItem)
         return;
 
@@ -2339,7 +2339,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);
 
             // prevent crash at access and unexpected charges counting with item update queue corrupt
-            if (m_CastItem == m_targets.GetItemTarget())
+            if (m_targets.GetItemTarget() == m_CastItem)
                 m_targets.SetItemTarget(NULL);
 
             m_CastItem = NULL;
@@ -2359,7 +2359,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), true);
 
             // prevent crash at access and unexpected charges counting with item update queue corrupt
-            if (m_CastItem == m_targets.GetItemTarget())
+            if (m_targets.GetItemTarget() == m_CastItem)
                 m_targets.SetItemTarget(NULL);
 
             m_CastItem = NULL;
@@ -2382,7 +2382,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
             if (msg == EQUIP_ERR_CANT_DO_RIGHT_NOW) dest = EQUIPMENT_SLOT_MAINHAND;
 
             // prevent crash at access and unexpected charges counting with item update queue corrupt
-            if (m_CastItem == m_targets.GetItemTarget())
+            if (m_targets.GetItemTarget() == m_CastItem)
                 m_targets.SetItemTarget(NULL);
 
             m_CastItem = NULL;
@@ -2394,8 +2394,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
         }
     }
 
-    // fail
-    delete pNewItem;
+    sObjectMgr->RequestItemDestroy( *pNewItem );
 }
 
 void Spell::EffectProficiency(SpellEffIndex /*effIndex*/)
@@ -3087,7 +3086,7 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
 
         for (int j = BASE_ATTACK; j <= OFF_ATTACK; ++j)
         {
-            if (Item* item = p_caster->GetWeaponForAttack(WeaponAttackType(j)))
+            if (ItemRef item = p_caster->GetWeaponForAttack(WeaponAttackType(j)))
             {
                 if (item->IsFitToSpellRequirements(m_spellInfo))
                 {
@@ -3454,7 +3453,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 }
                 // 50% more damage with daggers
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
+                    if (ItemRef item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
                         if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                             AddPct(totalDamagePercentMod, 50.0f);
             }
@@ -4487,7 +4486,7 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     }
 
     // xinef: no hearthstone in bag or on cooldown
-    Item* hearthStone = target->GetItemByEntry(6948);
+    ItemRef hearthStone = target->GetItemByEntry(6948);
     if (!hearthStone || target->HasSpellCooldown(8690))
     {
         /* Blizzlike mode
@@ -4613,7 +4612,7 @@ void Spell::EffectEnchantHeldItem(SpellEffIndex effIndex)
         return;
 
     Player* item_owner = unitTarget->ToPlayer();
-    Item* item = item_owner->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    ItemRef item = item_owner->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
     if (!item)
         return;
@@ -4701,7 +4700,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     if (!player)
         return;
 
-    Item* foodItem = itemTarget;
+    ItemRef foodItem = itemTarget;
     if (!foodItem)
         return;
 
@@ -5424,7 +5423,7 @@ void Spell::EffectDurabilityDamage(SpellEffIndex effIndex)
     if (slot >= INVENTORY_SLOT_BAG_END)
         return;
 
-    if (Item* item = unitTarget->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+    if (ItemRef item = unitTarget->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
     {
         unitTarget->ToPlayer()->DurabilityPointsLoss(item, damage);
         ExecuteLogEffectDurabilityDamage(effIndex, unitTarget, item->GetEntry(), slot);
@@ -5456,7 +5455,7 @@ void Spell::EffectDurabilityDamagePCT(SpellEffIndex effIndex)
     if (damage <= 0)
         return;
 
-    if (Item* item = unitTarget->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+    if (ItemRef item = unitTarget->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         unitTarget->ToPlayer()->DurabilityLoss(item, float(damage) / 100.0f);
 }
 
@@ -6327,7 +6326,7 @@ void Spell::EffectRechargeManaGem(SpellEffIndex /*effIndex*/)
         return;
     }
 
-    if (Item* pItem = player->GetItemByEntry(item_id))
+    if (ItemRef pItem = player->GetItemByEntry(item_id))
     {
         for (int x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
             pItem->SetSpellCharges(x, pProto->Spells[x].SpellCharges);

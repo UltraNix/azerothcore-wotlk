@@ -1039,7 +1039,7 @@ class WorldSession
     ***/
     private:
         // private trade methods
-        void moveItems(Item* myItems[], Item* hisItems[]);
+        void moveItems(ItemRef myItems[], ItemRef hisItems[]);
 
         bool CanUseBank(uint64 bankerGUID = 0) const;
 

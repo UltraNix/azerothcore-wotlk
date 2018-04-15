@@ -1492,7 +1492,7 @@ class spell_q11730_ultrasonic_screwdriver : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                Item* castItem = GetCastItem();
+                ItemRef castItem = GetCastItem();
                 Unit* caster = GetCaster();
                 if (Creature* target = GetHitCreature())
                 {

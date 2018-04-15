@@ -1416,7 +1416,7 @@ class spell_item_trigger_spell : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
-                if (Item* item = GetCastItem())
+                if (ItemRef item = GetCastItem())
                     caster->CastSpell(caster, _triggeredSpellId, true, item);
             }
 
@@ -3169,7 +3169,7 @@ class spell_item_nigh_invulnerability : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                if (Item* castItem = GetCastItem())
+                if (ItemRef castItem = GetCastItem())
                 {
                     if (roll_chance_i(86))                  // Nigh-Invulnerability   - success
                         caster->CastSpell(caster, SPELL_NIGH_INVULNERABILITY, true, castItem);

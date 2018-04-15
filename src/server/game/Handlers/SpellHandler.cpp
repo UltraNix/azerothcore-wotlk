@@ -81,7 +81,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Item* pItem = pUser->GetUseableItemByPos(bagIndex, slot);
+    ItemRef pItem = pUser->GetUseableItemByPos(bagIndex, slot);
     if (!pItem)
     {
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
@@ -192,7 +192,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
     sLog->outDetail("bagIndex: %u, slot: %u", bagIndex, slot);
 
-    Item* item = pUser->GetItemByPos(bagIndex, slot);
+    ItemRef item = pUser->GetItemByPos(bagIndex, slot);
     if (!item)
     {
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
@@ -256,7 +256,7 @@ void WorldSession::HandleOpenWrappedItemCallback(PreparedQueryResult result, uin
     if (!GetPlayer())
         return;
 
-    Item* item = GetPlayer()->GetItemByPos(bagIndex, slot);
+    ItemRef item = GetPlayer()->GetItemByPos(bagIndex, slot);
     if (!item)
         return;
 
@@ -666,7 +666,7 @@ void WorldSession::HandleMirrorImageDataRequest(WorldPacket & recvData)
                 data << uint32(0);
             else if (*itr == EQUIPMENT_SLOT_BACK && player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
                 data << uint32(0);
-            else if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
+            else if (ItemRef const item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, *itr))
             {		
                 uint32 displayInfoId=item->GetTemplate()->DisplayInfoID;
                 sScriptMgr->OnGlobalMirrorImageDisplayItem(item,displayInfoId);

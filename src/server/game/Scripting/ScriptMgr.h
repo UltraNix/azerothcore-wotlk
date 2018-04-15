@@ -386,10 +386,10 @@ class ItemScript : public ScriptObject
         bool IsDatabaseBound() const { return true; }
 
         // Called when a player accepts a quest from the item.
-        virtual bool OnQuestAccept(Player* /*player*/, Item* /*item*/, Quest const* /*quest*/) { return false; }
+        virtual bool OnQuestAccept(Player* /*player*/, ItemRef const& /*item*/, Quest const* /*quest*/) { return false; }
 
         // Called when a player uses the item.
-        virtual bool OnUse(Player* /*player*/, Item* /*item*/, SpellCastTargets const& /*targets*/) { return false; }
+        virtual bool OnUse(Player* /*player*/, ItemRef const& /*item*/, SpellCastTargets const& /*targets*/) { return false; }
 
         // Called when the item expires (is destroyed).
         virtual bool OnExpire(Player* /*player*/, ItemTemplate const* /*proto*/) { return false; }
@@ -725,7 +725,7 @@ class PlayerScript : public ScriptObject
         virtual void OnMapChanged(Player* /*player*/) { }
 
         // To change behaviour of set visible item slot
-        virtual void OnAfterSetVisibleItemSlot(Player* /*player*/, uint8 /*slot*/, Item* /*item*/) { }
+        virtual void OnAfterSetVisibleItemSlot(Player* /*player*/, uint8 /*slot*/, ItemRef const& /*item*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -763,7 +763,7 @@ class GuildScript : public ScriptObject
         virtual void OnMemberDepositMoney(Guild* /*guild*/, Player* /*player*/, uint32& /*amount*/) { }
 
         // Called when a guild member moves an item in a guild bank.
-        virtual void OnItemMove(Guild* /*guild*/, Player* /*player*/, Item* /*pItem*/, bool /*isSrcBank*/, uint8 /*srcContainer*/, uint8 /*srcSlotId*/,
+        virtual void OnItemMove(Guild* /*guild*/, Player* /*player*/, ItemRef const& /*pItem*/, bool /*isSrcBank*/, uint8 /*srcContainer*/, uint8 /*srcSlotId*/,
             bool /*isDestBank*/, uint8 /*destContainer*/, uint8 /*destSlotId*/) { }
 
         virtual void OnEvent(Guild* /*guild*/, uint8 /*eventType*/, uint32 /*playerGuid1*/, uint32 /*playerGuid2*/, uint8 /*newRank*/) { }
@@ -808,7 +808,7 @@ public:
 
     // items
     virtual void OnItemDelFromDB(SQLTransaction& /*trans*/, uint32 /*itemGuid*/) { }
-    virtual void OnMirrorImageDisplayItem(const Item* /*item*/, uint32& /*display*/) { }
+    virtual void OnMirrorImageDisplayItem(ItemRef const& /*item*/, uint32& /*display*/) { }
 };
 
 // Placed here due to ScriptRegistry::AddScript dependency.
@@ -894,8 +894,8 @@ class ScriptMgr
 
     public: /* ItemScript */
 
-        bool OnQuestAccept(Player* player, Item* item, Quest const* quest);
-        bool OnItemUse(Player* player, Item* item, SpellCastTargets const& targets);
+        bool OnQuestAccept(Player* player, ItemRef const& item, Quest const* quest);
+        bool OnItemUse(Player* player, ItemRef const& item, SpellCastTargets const& targets);
         bool OnItemExpire(Player* player, ItemTemplate const* proto);
 
     public: /* CreatureScript */
@@ -1011,7 +1011,7 @@ class ScriptMgr
         void OnPlayerDelete(uint64 guid);
         void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);
         void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
-        void OnAfterPlayerSetVisibleItemSlot(Player* player, uint8 /*slot*/, Item *item);
+        void OnAfterPlayerSetVisibleItemSlot(Player* player, uint8 /*slot*/, ItemRef const& item);
 
     public: /* GuildScript */
 
@@ -1023,7 +1023,7 @@ class ScriptMgr
         void OnGuildDisband(Guild* guild);
         void OnGuildMemberWitdrawMoney(Guild* guild, Player* player, uint32 &amount, bool isRepair);
         void OnGuildMemberDepositMoney(Guild* guild, Player* player, uint32 &amount);
-        void OnGuildItemMove(Guild* guild, Player* player, Item* pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId,
+        void OnGuildItemMove(Guild* guild, Player* player, ItemRef const& pItem, bool isSrcBank, uint8 srcContainer, uint8 srcSlotId,
             bool isDestBank, uint8 destContainer, uint8 destSlotId);
         void OnGuildEvent(Guild* guild, uint8 eventType, uint32 playerGuid1, uint32 playerGuid2, uint8 newRank);
         void OnGuildBankEvent(Guild* guild, uint8 eventType, uint8 tabId, uint32 playerGuid, uint32 itemOrMoney, uint16 itemStackCount, uint8 destTabId);
@@ -1038,7 +1038,7 @@ class ScriptMgr
 
     public: /* GlobalScript */
         void OnGlobalItemDelFromDB(SQLTransaction& trans, uint32 itemGuid);
-        void OnGlobalMirrorImageDisplayItem(const Item *item, uint32 &display);
+        void OnGlobalMirrorImageDisplayItem(ItemRef const& item, uint32 &display);
 
     public: /* Scheduled scripts */
 

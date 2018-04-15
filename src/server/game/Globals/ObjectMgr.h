@@ -43,6 +43,8 @@
 #include "ConditionMgr.h"
 #include <functional>
 #include "ZoneScript.h"
+#include <mutex>
+#include <vector>
 
 class Item;
 struct AccessRequirement;
@@ -677,6 +679,9 @@ class ObjectMgr
 
         void LoadGameObjectTemplate();
         void AddGameobjectInfo(GameObjectTemplate* goinfo);
+
+        void RequestItemDestroy( Item * item );
+        void UpdateItemDestroyQueue();
 
         CreatureTemplate const* GetCreatureTemplate(uint32 entry);
         CreatureTemplateContainer const* GetCreatureTemplates() const { return &_creatureTemplateStore; }
@@ -1402,6 +1407,9 @@ class ObjectMgr
             GO_TO_GO,
             GO_TO_CREATURE,         // GO is dependant on creature
         };
+
+        std::mutex       _itemDestroyMutex;
+        std::vector< Item * > _itemsToDestroy;
 
         std::set<uint32> _transportMaps; // Helper container storing map ids that are for transports only, loaded from gameobject_template
 };

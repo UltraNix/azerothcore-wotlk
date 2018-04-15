@@ -63,7 +63,7 @@ AuctionHouseObject* AuctionHouseMgr::GetAuctionsMap(uint32 factionTemplateId)
         return &mNeutralAuctions;
 }
 
-uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count)
+uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, ItemRef const& pItem, uint32 count)
 {
     uint32 MSV = pItem->GetTemplate()->SellPrice;
 
@@ -281,10 +281,10 @@ void AuctionHouseMgr::LoadAuctionItems()
             continue;
         }
 
-        Item* item = NewItemOrBag(proto);
+        ItemRef item = NewItemOrBag(proto);
         if (!item->LoadFromDB(item_guid, 0, fields, item_template))
         {
-            delete item;
+            delete *item;
             continue;
         }
         AddAItem(item);
@@ -336,11 +336,11 @@ void AuctionHouseMgr::LoadAuctions()
     sLog->outString();
 }
 
-void AuctionHouseMgr::AddAItem(Item* it)
+void AuctionHouseMgr::AddAItem(ItemRef const& it)
 {
     ASSERT(it);
     ASSERT(mAitems.find(it->GetGUIDLow()) == mAitems.end());
-    mAitems[it->GetGUIDLow()] = it;
+    mAitems[it->GetGUIDLow()] = *it;
 }
 
 bool AuctionHouseMgr::RemoveAItem(uint32 id, bool deleteFromDB)

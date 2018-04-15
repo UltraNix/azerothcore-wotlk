@@ -29,7 +29,7 @@
 #include "Player.h"
 #include "WorldSession.h"
 
-void AddItemsSetItem(Player* player, Item* item)
+void AddItemsSetItem(Player* player, ItemRef const& item)
 {
     ItemTemplate const* proto = item->GetTemplate();
     uint32 setid = proto->ItemSet;
@@ -378,7 +378,7 @@ void Item::SaveToDB(SQLTransaction& trans)
             if (!isInTransaction)
                 CharacterDatabase.CommitTransaction(trans);
 
-            delete this;
+            sObjectMgr->RequestItemDestroy( this );
             return;
         }
         case ITEM_UNCHANGED:
@@ -687,7 +687,7 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
         // pretend the item never existed
         RemoveFromUpdateQueueOf(forplayer);
         forplayer->DeleteRefundReference(GetGUIDLow());
-        delete this;
+        sObjectMgr->RequestItemDestroy( this );
         return;
     }
     if (state != ITEM_UNCHANGED)
@@ -1050,7 +1050,7 @@ void Item::SendTimeUpdate(Player* owner)
     owner->GetSession()->SendPacket(&data);
 }
 
-Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
+ItemRef Item::CreateItem(uint32 item, uint32 count, Player const* player)
 {
     if (count < 1)
         return NULL;                                        //don't create item at zero count
@@ -1063,23 +1063,23 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
 
         ASSERT(count !=0 && "pProto->Stackable == 0 but checked at loading already");
 
-        Item* pItem = NewItemOrBag(pProto);
+        ItemRef pItem = NewItemOrBag(pProto);
         if (pItem->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), item, player))
         {
             pItem->SetCount(count);
             return pItem;
         }
         else
-            delete pItem;
+            delete *pItem;
     }
     else
         ASSERT(false);
     return NULL;
 }
 
-Item* Item::CloneItem(uint32 count, Player const* player) const
+ItemRef Item::CloneItem(uint32 count, Player const* player) const
 {
-    Item* newItem = CreateItem(GetEntry(), count, player);
+    ItemRef newItem = CreateItem(GetEntry(), count, player);
     if (!newItem)
         return NULL;
 
@@ -1253,4 +1253,77 @@ int32 Item::GetSpellCharges(uint8 index, bool normal) const
 void Item::SetSpellCharges(uint8 index, int32 value)
 {
     SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, (value > 0) ? -value : value);
+}
+
+const ItemRef NullItemRef = ItemRef( nullptr );
+
+ItemRef::ItemRef( const ItemRef & rhs )
+    : ItemRef( rhs.m_item )
+{
+}
+
+ItemRef::ItemRef( Item * item /*= nullptr */ )
+    : m_item( nullptr )
+{
+    Reset( item );
+}
+
+void ItemRef::Reset( Item * item /*= nullptr */ )
+{
+    if ( m_item != nullptr )
+    {
+        --m_item->m_refCounter;
+    }
+
+    m_item = item;
+
+    if ( m_item != nullptr )
+    {
+        ++m_item->m_refCounter;
+    }
+}
+
+ItemRef::~ItemRef()
+{
+    Reset();
+}
+
+ItemRef::operator bool() const
+{
+    return m_item != nullptr;
+}
+
+bool ItemRef::operator==( Item const* rhs ) const
+{
+    return m_item == rhs;
+}
+
+bool ItemRef::operator!=( ItemRef const& rhs ) const
+{
+    return m_item != rhs.m_item;
+}
+
+bool ItemRef::operator!=( Item const* rhs ) const
+{
+    return m_item != rhs;
+}
+
+bool ItemRef::operator==( ItemRef const& rhs ) const
+{
+    return m_item == rhs.m_item;
+}
+
+void ItemRef::operator=( ItemRef const& rhs )
+{
+    Reset( rhs.m_item );
+}
+
+Item * ItemRef::operator*() const
+{
+    return m_item;
+}
+
+Item* ItemRef::operator->() const
+{
+    return m_item;
 }

@@ -410,7 +410,7 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
         return false;
     }
 
-    Item* pItem = NewItemOrBag(proto);
+    ItemRef pItem = NewItemOrBag(proto);
     if (!pItem->LoadFromDB(itemGuid, 0, fields, itemEntry))
     {
         sLog->outError("Item (GUID %u, id: %u) not found in item_instance, deleting from guild bank!", itemGuid, itemEntry);
@@ -421,12 +421,12 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
         stmt->setUInt8 (2, slotId);
         CharacterDatabase.Execute(stmt);
 
-        delete pItem;
+        sObjectMgr->RequestItemDestroy( *pItem );
         return false;
     }
 
     pItem->AddToWorld();
-    m_items[slotId] = pItem;
+    m_items[slotId] = *pItem;
     return true;
 }
 
@@ -434,12 +434,13 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
 void Guild::BankTab::Delete(SQLTransaction& trans, bool removeItemsFromDB)
 {
     for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
-        if (Item* pItem = m_items[slotId])
+        if (ItemRef pItem = m_items[slotId])
         {
             pItem->RemoveFromWorld();
             if (removeItemsFromDB)
                 pItem->DeleteFromDB(trans);
-            delete pItem;
+
+            sObjectMgr->RequestItemDestroy( *pItem );
             pItem = NULL;
         }
 }
@@ -461,7 +462,7 @@ inline void Guild::BankTab::WritePacket(WorldPacket& data) const
 // Writes information about contents of specified slot into packet.
 bool Guild::BankTab::WriteSlotPacket(WorldPacket& data, uint8 slotId, bool ignoreEmpty /* = true */) const
 {
-    Item* pItem = GetItem(slotId);
+    ItemRef pItem = GetItem(slotId);
     uint32 itemEntry = pItem ? pItem->GetEntry() : 0;
 
     if (!itemEntry && ignoreEmpty)
@@ -535,12 +536,12 @@ void Guild::BankTab::SetText(std::string const& text)
 
 // Sets/removes contents of specified slot.
 // If pItem == NULL contents are removed.
-bool Guild::BankTab::SetItem(SQLTransaction& trans, uint8 slotId, Item* item)
+bool Guild::BankTab::SetItem(SQLTransaction& trans, uint8 slotId, ItemRef const& item)
 {
     if (slotId >= GUILD_BANK_MAX_SLOTS)
         return false;
 
-    m_items[slotId] = item;
+    m_items[slotId] = *item;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GUILD_BANK_ITEM);
     stmt->setUInt32(0, m_guildId);
@@ -806,7 +807,7 @@ bool Guild::MoveItemData::CheckItem(uint32& splitedAmount)
     return true;
 }
 
-bool Guild::MoveItemData::CanStore(Item* pItem, bool swap, bool sendError)
+bool Guild::MoveItemData::CanStore(ItemRef const& pItem, bool swap, bool sendError)
 {
     m_vec.clear();
     InventoryResult msg = CanStore(pItem, swap);
@@ -818,7 +819,7 @@ bool Guild::MoveItemData::CanStore(Item* pItem, bool swap, bool sendError)
 bool Guild::MoveItemData::CloneItem(uint32 count)
 {
     ASSERT(m_pItem);
-    m_pClonedItem = m_pItem->CloneItem(count);
+    m_pClonedItem = *m_pItem->CloneItem(count);
     if (!m_pClonedItem)
     {
         m_pPlayer->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, m_pItem);
@@ -845,7 +846,7 @@ inline void Guild::MoveItemData::CopySlots(SlotIds& ids) const
 // PlayerMoveItemData
 bool Guild::PlayerMoveItemData::InitItem()
 {
-    m_pItem = m_pPlayer->GetItemByPos(m_container, m_slotId);
+    m_pItem = *m_pPlayer->GetItemByPos(m_container, m_slotId);
     if (m_pItem)
     {
         // Anti-WPE protection. Do not move non-empty bags to bank.
@@ -880,7 +881,7 @@ void Guild::PlayerMoveItemData::RemoveItem(SQLTransaction& trans, MoveItemData* 
     }
 }
 
-Item* Guild::PlayerMoveItemData::StoreItem(SQLTransaction& trans, Item* pItem)
+ItemRef Guild::PlayerMoveItemData::StoreItem(SQLTransaction& trans, ItemRef const& pItem)
 {
     ASSERT(pItem);
     m_pPlayer->MoveItemToInventory(m_vec, pItem, true);
@@ -896,7 +897,7 @@ void Guild::PlayerMoveItemData::LogBankEvent(SQLTransaction& trans, MoveItemData
         pFrom->GetItem()->GetEntry(), count);
 }
 
-inline InventoryResult Guild::PlayerMoveItemData::CanStore(Item* pItem, bool swap)
+inline InventoryResult Guild::PlayerMoveItemData::CanStore(ItemRef const& pItem, bool swap)
 {
     return m_pPlayer->CanStoreItem(m_container, m_slotId, m_vec, pItem, swap);
 }
@@ -904,7 +905,7 @@ inline InventoryResult Guild::PlayerMoveItemData::CanStore(Item* pItem, bool swa
 // BankMoveItemData
 bool Guild::BankMoveItemData::InitItem()
 {
-    m_pItem = m_pGuild->_GetItem(m_container, m_slotId);
+    m_pItem = *m_pGuild->_GetItem(m_container, m_slotId);
     return (m_pItem != NULL);
 }
 
@@ -950,7 +951,7 @@ void Guild::BankMoveItemData::RemoveItem(SQLTransaction& trans, MoveItemData* pO
         m_pGuild->_UpdateMemberWithdrawSlots(trans, m_pPlayer->GetGUID(), m_container);
 }
 
-Item* Guild::BankMoveItemData::StoreItem(SQLTransaction& trans, Item* pItem)
+ItemRef Guild::BankMoveItemData::StoreItem(SQLTransaction& trans, ItemRef const& pItem)
 {
     if (!pItem)
         return NULL;
@@ -959,7 +960,7 @@ Item* Guild::BankMoveItemData::StoreItem(SQLTransaction& trans, Item* pItem)
     if (!pTab)
         return NULL;
 
-    Item* pLastItem = pItem;
+    ItemRef pLastItem = pItem;
     for (ItemPosCountVec::const_iterator itr = m_vec.begin(); itr != m_vec.end(); )
     {
         ItemPosCount pos(*itr);
@@ -990,11 +991,11 @@ void Guild::BankMoveItemData::LogAction(MoveItemData* pFrom) const
     MoveItemData::LogAction(pFrom);
 }
 
-Item* Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, Item* pItem, ItemPosCount& pos, bool clone) const
+ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef const& pItem, ItemPosCount& pos, bool clone) const
 {
     uint8 slotId = uint8(pos.pos);
     uint32 count = pos.count;
-    if (Item* pItemDest = pTab->GetItem(slotId))
+    if (ItemRef pItemDest = pTab->GetItem(slotId))
     {
         pItemDest->SetCount(pItemDest->GetCount() + count);
         pItemDest->FSetState(ITEM_CHANGED);
@@ -1003,18 +1004,20 @@ Item* Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, 
         {
             pItem->RemoveFromWorld();
             pItem->DeleteFromDB(trans);
-            delete pItem;
+
+            sObjectMgr->RequestItemDestroy( *pItem );
         }
         return pItemDest;
     }
 
+    ItemRef item = pItem;
     if (clone)
-        pItem = pItem->CloneItem(count);
+        item = item->CloneItem(count);
     else
-        pItem->SetCount(count);
+        item->SetCount(count);
 
-    if (pItem && pTab->SetItem(trans, slotId, pItem))
-        return pItem;
+    if ( item && pTab->SetItem(trans, slotId, item ))
+        return item;
 
     return NULL;
 }
@@ -1023,7 +1026,7 @@ Item* Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, 
 // If item in destination slot exists it must be the item of the same entry
 // and stack must have enough space to take at least one item.
 // Returns false if destination item specified and it cannot be used to reserve space.
-bool Guild::BankMoveItemData::_ReserveSpace(uint8 slotId, Item* pItem, Item* pItemDest, uint32& count)
+bool Guild::BankMoveItemData::_ReserveSpace(uint8 slotId, ItemRef const& pItem, ItemRef const& pItemDest, uint32& count)
 {
     uint32 requiredSpace = pItem->GetMaxStackCount();
     if (pItemDest)
@@ -1046,7 +1049,7 @@ bool Guild::BankMoveItemData::_ReserveSpace(uint8 slotId, Item* pItem, Item* pIt
     return true;
 }
 
-void Guild::BankMoveItemData::CanStoreItemInTab(Item* pItem, uint8 skipSlotId, bool merge, uint32& count)
+void Guild::BankMoveItemData::CanStoreItemInTab(ItemRef const& pItem, uint8 skipSlotId, bool merge, uint32& count)
 {
     for (uint8 slotId = 0; (slotId < GUILD_BANK_MAX_SLOTS) && (count > 0); ++slotId)
     {
@@ -1054,19 +1057,19 @@ void Guild::BankMoveItemData::CanStoreItemInTab(Item* pItem, uint8 skipSlotId, b
         if (slotId == skipSlotId)
             continue;
 
-        Item* pItemDest = m_pGuild->_GetItem(m_container, slotId);
+        ItemRef pItemDest = m_pGuild->_GetItem(m_container, slotId);
         if (pItemDest == pItem)
             pItemDest = NULL;
 
         // If merge skip empty, if not merge skip non-empty
-        if ((pItemDest != NULL) != merge)
+        if (bool(pItemDest) != merge)
             continue;
 
         _ReserveSpace(slotId, pItem, pItemDest, count);
     }
 }
 
-InventoryResult Guild::BankMoveItemData::CanStore(Item* pItem, bool swap)
+InventoryResult Guild::BankMoveItemData::CanStore(ItemRef const& pItem, bool swap)
 {
     ;//sLog->outDebug(LOG_FILTER_GUILD, "GUILD STORAGE: CanStore() tab = %u, slot = %u, item = %u, count = %u",
     //    m_container, m_slotId, pItem->GetEntry(), pItem->GetCount());
@@ -1083,7 +1086,7 @@ InventoryResult Guild::BankMoveItemData::CanStore(Item* pItem, bool swap)
     // Slot explicitely specified. Check it.
     if (m_slotId != NULL_SLOT)
     {
-        Item* pItemDest = m_pGuild->_GetItem(m_container, m_slotId);
+        ItemRef pItemDest = m_pGuild->_GetItem(m_container, m_slotId);
         // Ignore swapped item (this slot will be empty after move)
         if ((pItemDest == pItem) || swap)
             pItemDest = NULL;
@@ -2649,7 +2652,7 @@ void Guild::_LogBankEvent(SQLTransaction& trans, GuildBankEventLogTypes eventTyp
     sScriptMgr->OnGuildBankEvent(this, uint8(eventType), tabId, lowguid, itemOrMoney, itemStackCount, destTabId);
 }
 
-inline Item* Guild::_GetItem(uint8 tabId, uint8 slotId) const
+inline ItemRef Guild::_GetItem(uint8 tabId, uint8 slotId) const
 {
     if (const BankTab* tab = GetBankTab(tabId))
         return tab->GetItem(slotId);
@@ -2725,10 +2728,10 @@ void Guild::_MoveItems(MoveItemData* pSrc, MoveItemData* pDest, uint32 splitedAm
 
 bool Guild::_DoItemsMove(MoveItemData* pSrc, MoveItemData* pDest, bool sendError, uint32 splitedAmount)
 {
-    Item* pDestItem = pDest->GetItem();
-    bool swap = (pDestItem != NULL);
+    ItemRef pDestItem = pDest->GetItem();
+    bool swap = bool(pDestItem);
 
-    Item* pSrcItem = pSrc->GetItem(splitedAmount);
+    ItemRef pSrcItem = pSrc->GetItem(splitedAmount);
     // 1. Can store source item in destination
     if (!pDest->CanStore(pSrcItem, swap, sendError))
         return false;

@@ -41,7 +41,7 @@ public:
             {
                 if (const char* slotName = sT->GetSlotName(slot, session))
                 {
-                    Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+                    ItemRef newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
                     uint32 entry = newItem ? sT->GetFakeEntry(newItem->GetGUID()) : 0;
                     std::string icon = entry ? sT->GetItemIcon(entry, 30, 30, -18, 0) : sT->GetSlotIcon(slot, 30, 30, -18, 0);
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_MONEY_BAG, icon + std::string(slotName), EQUIPMENT_SLOT_END, slot);
@@ -92,7 +92,7 @@ public:
                 SQLTransaction trans = CharacterDatabase.BeginTransaction();
                 for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
                 {
-                    if (Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                    if (ItemRef newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
                     {
                         if (!sT->GetFakeEntry(newItem->GetGUID()))
                             continue;
@@ -112,7 +112,7 @@ public:
             } break;
             case EQUIPMENT_SLOT_END + 3: // Remove Transmogrification from single item
             {
-                if (Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, action))
+                if (ItemRef newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, action))
                 {
                     if (sT->GetFakeEntry(newItem->GetGUID()))
                     {
@@ -278,7 +278,7 @@ public:
     void ShowTransmogItems(Player* player, Creature* creature, uint8 slot) // Only checks bags while can use an item from anywhere in inventory
     {
         WorldSession* session = player->GetSession();
-        Item* oldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        ItemRef oldItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
         if (oldItem)
         {
             uint32 limit = 0;
@@ -287,7 +287,7 @@ public:
             {
                 if (limit > MAX_OPTIONS)
                     break;
-                Item* newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+                ItemRef newItem = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                 if (!newItem)
                     continue;
                 if (!sT->CanTransmogrifyItemWithItem(player, oldItem->GetTemplate(), newItem->GetTemplate()))
@@ -308,7 +308,7 @@ public:
                 {
                     if (limit > MAX_OPTIONS)
                         break;
-                    Item* newItem = player->GetItemByPos(i, j);
+                    ItemRef newItem = player->GetItemByPos(i, j);
                     if (!newItem)
                         continue;
                     if (!sT->CanTransmogrifyItemWithItem(player, oldItem->GetTemplate(), newItem->GetTemplate()))
@@ -330,7 +330,7 @@ public:
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
     }
 
-    std::string ShowPrices(Player* player, Item* item)
+    std::string ShowPrices(Player* player, ItemRef const& item)
     {
         std::ostringstream ss;
         ss << std::endl;
@@ -456,7 +456,7 @@ class PS_Transmogrification : public PlayerScript
 public:
     PS_Transmogrification() : PlayerScript("Player_Transmogrify") { }
 
-    void OnAfterSetVisibleItemSlot(Player* player, uint8 slot, Item *item) {
+    void OnAfterSetVisibleItemSlot(Player* player, uint8 slot, ItemRef const& item) {
         if (!item)
             return;
 
@@ -464,7 +464,7 @@ public:
             player->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), entry);
     }
 
-    void OnAfterMoveItemFromInventory(Player* player, Item* it, uint8 bag, uint8 slot, bool update) {
+    void OnAfterMoveItemFromInventory(Player* player, ItemRef const& it, uint8 bag, uint8 slot, bool update) {
         sT->DeleteFakeFromDB(it->GetGUIDLow());
     }
     
@@ -493,7 +493,7 @@ public:
 
             for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
             {
-                if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                if (ItemRef item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
                     player->SetVisibleItemSlot(slot, item);
             }
         }
@@ -527,7 +527,7 @@ class global_transmog_script : public GlobalScript {
             sT->DeleteFakeFromDB(itemGuid, &trans);
         }
         
-        void OnMirrorImageDisplayItem(const Item *item, uint32 &display) {
+        void OnMirrorImageDisplayItem( ItemRef const& item, uint32 &display) {
             if (uint32 entry = sTransmogrification->GetFakeEntry(item->GetGUID()))
                 display=uint32(sObjectMgr->GetItemTemplate(entry)->DisplayInfoID);
         }

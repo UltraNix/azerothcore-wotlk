@@ -384,7 +384,7 @@ class SpellScript : public _SpellScript
         GameObject* GetExplTargetGObj();
 
         // returns: Item which was selected as an explicit spell target or NULL if there's no target
-        Item* GetExplTargetItem();
+        ItemRef GetExplTargetItem();
 
         // methods useable only during spell hit on target, or during spell launch on target:
         // returns: target of current effect if it was Unit otherwise NULL
@@ -394,7 +394,7 @@ class SpellScript : public _SpellScript
         // returns: target of current effect if it was Player otherwise NULL
         Player* GetHitPlayer();
         // returns: target of current effect if it was Item otherwise NULL
-        Item* GetHitItem();
+        ItemRef GetHitItem();
         // returns: target of current effect if it was GameObject otherwise NULL
         GameObject* GetHitGObj();
         // returns: destination of current effect
@@ -431,7 +431,7 @@ class SpellScript : public _SpellScript
         void SetEffectValue(int32 value);
 
         // returns: cast item if present.
-        Item* GetCastItem();
+        ItemRef GetCastItem();
 
         // Creates item. Calls Spell::DoCreateItem method.
         void CreateItem(uint32 effIndex, uint32 itemId);

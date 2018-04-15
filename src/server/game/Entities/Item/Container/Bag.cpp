@@ -154,13 +154,13 @@ void Bag::RemoveItem(uint8 slot, bool /*update*/)
     SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), 0);
 }
 
-void Bag::StoreItem(uint8 slot, Item* pItem, bool /*update*/)
+void Bag::StoreItem(uint8 slot, ItemRef const& pItem, bool /*update*/)
 {
     ASSERT(slot < MAX_BAG_SIZE);
 
     if (pItem && pItem->GetGUID() != this->GetGUID())
     {
-        m_bagslot[slot] = pItem;
+        m_bagslot[slot] = *pItem;
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_OWNER, GetOwnerGUID());
@@ -188,9 +188,9 @@ bool Bag::IsEmpty() const
     return true;
 }
 
-uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
+uint32 Bag::GetItemCount(uint32 item, ItemRef const& eItem) const
 {
-    Item* pItem;
+    ItemRef pItem;
     uint32 count = 0;
     for (uint32 i=0; i < GetBagSize(); ++i)
     {
@@ -212,11 +212,11 @@ uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
     return count;
 }
 
-uint32 Bag::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipItem) const
+uint32 Bag::GetItemCountWithLimitCategory(uint32 limitCategory, ItemRef const& skipItem) const
 {
     uint32 count = 0;
     for (uint32 i = 0; i < GetBagSize(); ++i)
-        if (Item* pItem = m_bagslot[i])
+        if (ItemRef pItem = m_bagslot[i])
             if (pItem != skipItem)
                 if (ItemTemplate const* pProto = pItem->GetTemplate())
                     if (pProto->ItemLimitCategory == limitCategory)
@@ -235,7 +235,7 @@ uint8 Bag::GetSlotByItemGUID(uint64 guid) const
     return NULL_SLOT;
 }
 
-Item* Bag::GetItemByPos(uint8 slot) const
+ItemRef Bag::GetItemByPos(uint8 slot) const
 {
     if (slot < GetBagSize())
         return m_bagslot[slot];

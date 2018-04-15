@@ -1910,7 +1910,7 @@ void WorldSession::HandleEquipmentSetSave(WorldPacket &recvData)
         }
 
         // xinef: some cheating checks
-        Item* item = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        ItemRef item = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
         if (!item || item->GetGUID() != itemGuid)
         {
             eqSet.Items[i] = 0;
@@ -1955,7 +1955,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket &recvData)
         if (_player->IsInCombat() && i != EQUIPMENT_SLOT_MAINHAND && i != EQUIPMENT_SLOT_OFFHAND && i != EQUIPMENT_SLOT_RANGED)
             continue;
 
-        Item* item = NULL;
+        ItemRef item = NULL;
         if (itemGuid > 0)
             item = _player->GetItemByGuid(itemGuid);
 
@@ -1963,7 +1963,7 @@ void WorldSession::HandleEquipmentSetUse(WorldPacket &recvData)
 
         if (!item)
         {
-            Item* uItem = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            ItemRef uItem = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
             if (!uItem)
                 continue;
 

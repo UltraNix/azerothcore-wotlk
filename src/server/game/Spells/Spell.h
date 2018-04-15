@@ -125,9 +125,9 @@ class SpellCastTargets
         void RemoveObjectTarget();
 
         uint64 GetItemTargetGUID() const { return m_itemTargetGUID; }
-        Item* GetItemTarget() const { return m_itemTarget; }
+        ItemRef GetItemTarget() const { return m_itemTarget; }
         uint32 GetItemTargetEntry() const { return m_itemTargetEntry; }
-        void SetItemTarget(Item* item);
+        void SetItemTarget(ItemRef const& item);
         void SetTradeItemTarget(Player* caster);
         void UpdateTradeSlotItem();
 
@@ -470,7 +470,7 @@ class Spell
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
 
-        void HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOTarget, uint32 i, SpellEffectHandleMode mode);
+        void HandleEffects(Unit* pUnitTarget, ItemRef const& pItemTarget, GameObject* pGOTarget, uint32 i, SpellEffectHandleMode mode);
         void HandleThreatSpells();
 
         SpellInfo const* const m_spellInfo;
@@ -643,7 +643,7 @@ class Spell
 
         void AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid = true, bool implicit = true);
         void AddGOTarget(GameObject* target, uint32 effectMask);
-        void AddItemTarget(Item* item, uint32 effectMask);
+        void AddItemTarget(ItemRef const& item, uint32 effectMask);
         void AddDestTarget(SpellDestination const& dest, uint32 effIndex);
 
         void DoAllEffectOnTarget(TargetInfo* target);

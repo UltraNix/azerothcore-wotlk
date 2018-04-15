@@ -224,12 +224,12 @@ public:
     std::string GetItemIcon(uint32 entry, uint32 width, uint32 height, int x, int y) const;
     std::string GetSlotIcon(uint8 slot, uint32 width, uint32 height, int x, int y) const;
     const char * GetSlotName(uint8 slot, WorldSession* session) const;
-    std::string GetItemLink(Item* item, WorldSession* session) const;
+    std::string GetItemLink(ItemRef & item, WorldSession* session) const;
     std::string GetItemLink(uint32 entry, WorldSession* session) const;
     uint32 GetFakeEntry(uint64 itemGUID) const;
-    void UpdateItem(Player* player, Item* item) const;
-    void DeleteFakeEntry(Player* player, uint8 slot, Item* itemTransmogrified, SQLTransaction* trans = NULL);
-    void SetFakeEntry(Player* player, uint32 newEntry, uint8 slot, Item* itemTransmogrified);
+    void UpdateItem(Player* player, ItemRef & item) const;
+    void DeleteFakeEntry(Player* player, uint8 slot, ItemRef & itemTransmogrified, SQLTransaction* trans = NULL);
+    void SetFakeEntry(Player* player, uint32 newEntry, uint8 slot, ItemRef & itemTransmogrified);
 
     TransmogTrinityStrings Transmogrify(Player* player, uint64 itemGUID, uint8 slot /*uint32 newEntry*/);
     bool CanTransmogrifyItemWithItem(Player* player, ItemTemplate const* destination, ItemTemplate const* source) const;

@@ -250,6 +250,8 @@ ObjectMgr::ObjectMgr():
         for (uint8 j = 0; j < MAX_RACES; ++j)
             _playerInfo[j][i] = NULL;
     }
+
+    _itemsToDestroy.reserve( 1000 );
 }
 
 ObjectMgr::~ObjectMgr()
@@ -9267,6 +9269,34 @@ bool ObjectMgr::IsGameObjectStaticTransport(uint32 entry)
 {
     GameObjectTemplate const* goinfo = GetGameObjectTemplate(entry);
     return goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT;
+}
+
+
+void ObjectMgr::RequestItemDestroy( Item * item )
+{
+    std::lock_guard < std::mutex > guard( _itemDestroyMutex );
+    _itemsToDestroy.push_back( item );
+}
+
+
+void ObjectMgr::UpdateItemDestroyQueue()
+{
+    std::lock_guard < std::mutex > guard( _itemDestroyMutex );
+    for ( auto idx = 0u; idx < _itemsToDestroy.size(); )
+    {
+        Item* item = _itemsToDestroy[ idx ];
+        if ( item->m_refCounter == 0 )
+        {
+            delete item;
+
+            _itemsToDestroy[ idx ] = _itemsToDestroy.back();
+            _itemsToDestroy.pop_back();
+        }
+        else
+        {
+            ++idx;
+        }
+    }
 }
 
 CreatureTemplate const* ObjectMgr::GetCreatureTemplate(uint32 entry)

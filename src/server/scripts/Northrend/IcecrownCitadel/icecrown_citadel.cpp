@@ -2968,11 +2968,11 @@ public:
             if (Class != CLASS_DRUID)
                 if (Player* player = summoner->ToPlayer())
                 {
-                    if (Item* i = player->GetWeaponForAttack(BASE_ATTACK))
+                    if (ItemRef i = player->GetWeaponForAttack(BASE_ATTACK))
                         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, i->GetEntry());
-                    if (Item* i = player->GetWeaponForAttack(OFF_ATTACK))
+                    if (ItemRef i = player->GetWeaponForAttack(OFF_ATTACK))
                         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, i->GetEntry());
-                    if (Item* i = player->GetWeaponForAttack(RANGED_ATTACK))
+                    if (ItemRef i = player->GetWeaponForAttack(RANGED_ATTACK))
                         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 2, i->GetEntry());
 
                     player->CastSpell(me, 60352, true); // Mirror Image, clone visual appearance

@@ -921,7 +921,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket & recvData)
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
-        Item* item = _player->GetItemByGuid(itemGUID);
+        ItemRef item = _player->GetItemByGuid(itemGUID);
         if (item)
             _player->DurabilityRepair(item->GetPos(), true, discountMod, guildBank);
     }

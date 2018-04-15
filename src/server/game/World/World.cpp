@@ -2137,6 +2137,8 @@ void World::Update(uint32 diff)
 
         // copy players hashmapholder to avoid mutex
         WhoListCacheMgr::Update();
+
+        sObjectMgr->UpdateItemDestroyQueue();
     }
 
     ///- Update the game time and check for shutdown time

@@ -232,7 +232,7 @@ bool EquippedOk(Player* player, uint32 spellId)
         if (!reqSpell)
             continue;
 
-        Item* item = NULL;
+        ItemRef item = NULL;
         for (uint8 j = EQUIPMENT_SLOT_START; j < EQUIPMENT_SLOT_END; ++j)
         {
             item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, j);

@@ -437,7 +437,7 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     if (!amount && caster)
         if (uint64 itemGUID = GetBase()->GetCastItemGUID())
             if (Player* playerCaster = caster->ToPlayer())
-                if (Item* castItem = playerCaster->GetItemByGuid(itemGUID))
+                if (ItemRef castItem = playerCaster->GetItemByGuid(itemGUID))
                     if (castItem->GetItemSuffixFactor())
                     {
                         ItemRandomSuffixEntry const* item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(castItem->GetItemRandomPropertyId()));
@@ -515,8 +515,8 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 break;
             if (GetId() == 49152 && caster->ToPlayer())
             {
-                Item *item1 = caster->ToPlayer()->GetWeaponForAttack(BASE_ATTACK);
-                Item *item2 = caster->ToPlayer()->GetWeaponForAttack(OFF_ATTACK);
+                ItemRef item1 = caster->ToPlayer()->GetWeaponForAttack(BASE_ATTACK);
+                ItemRef item2 = caster->ToPlayer()->GetWeaponForAttack(OFF_ATTACK);
 
                 if (item1 && item2 && (item1->GetTemplate()->InventoryType == INVTYPE_2HWEAPON || item2->GetTemplate()->InventoryType == INVTYPE_2HWEAPON))
                     amount = -10;
@@ -2042,7 +2042,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         // and also HandleAuraModDisarm is not triggered
         if (!target->CanUseAttackType(BASE_ATTACK))
         {
-            if (Item* pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            if (ItemRef pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
             {
                 target->ToPlayer()->_ApplyWeaponDamage(EQUIPMENT_SLOT_MAINHAND, pItem->GetTemplate(), NULL, apply);
             }
@@ -2518,7 +2518,7 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const* aurApp, uint8 mode, 
     // Handle damage modification, shapeshifted druids are not affected
     if (target->GetTypeId() == TYPEID_PLAYER && (!target->IsInFeralForm() || target->GetShapeshiftForm() == FORM_GHOSTWOLF))
     {
-        if (Item* pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+        if (ItemRef pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         {
             uint8 attacktype = Player::GetAttackBySlot(slot);
 
@@ -4388,7 +4388,7 @@ void AuraEffect::HandleAuraModWeaponCritPercent(AuraApplication const* aurApp, u
         return;
 
     for (int i = 0; i < MAX_ATTACK; ++i)
-        if (Item* pItem = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true))
+        if (ItemRef pItem = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true))
             target->ToPlayer()->_ApplyWeaponDependentAuraCritMod(pItem, WeaponAttackType(i), this, apply);
 
     // mods must be applied base at equipped weapon class and subclass comparison
@@ -4708,7 +4708,7 @@ void AuraEffect::HandleModDamageDone(AuraApplication const* aurApp, uint8 mode, 
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
         for (int i = 0; i < MAX_ATTACK; ++i)
-            if (Item* pItem = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true))
+            if (ItemRef pItem = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), true))
                 target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(pItem, WeaponAttackType(i), this, apply);
     }
 
@@ -4794,7 +4794,7 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
         for (int i = 0; i < MAX_ATTACK; ++i)
-            if (Item* item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
+            if (ItemRef item = target->ToPlayer()->GetWeaponForAttack(WeaponAttackType(i), false))
                 target->ToPlayer()->_ApplyWeaponDependentAuraDamageMod(item, WeaponAttackType(i), this, apply);
     }
 
@@ -5366,7 +5366,7 @@ void AuraEffect::HandleChannelDeathItem(AuraApplication const* aurApp, uint8 mod
             return;
     }
 
-    Item* newitem = plCaster->StoreNewItem(dest, GetSpellInfo()->Effects[m_effIndex].ItemType, true);
+    ItemRef newitem = plCaster->StoreNewItem(dest, GetSpellInfo()->Effects[m_effIndex].ItemType, true);
     if (!newitem)
     {
         plCaster->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);

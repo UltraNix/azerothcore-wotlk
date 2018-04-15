@@ -198,7 +198,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recvData)
     }
 
     _player->ModifyMoney(-(int32)cost);
-    Item* charter = _player->StoreNewItem(dest, charterid, true);
+    ItemRef charter = _player->StoreNewItem(dest, charterid, true);
     if (!charter)
         return;
 
@@ -351,7 +351,7 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recvData)
     recvData >> petitionGuid;                              // guid
     recvData >> newName;                                   // new name
 
-    Item* item = _player->GetItemByGuid(petitionGuid);
+    ItemRef item = _player->GetItemByGuid(petitionGuid);
     if (!item)
         return;
 
@@ -667,7 +667,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recvData)
     recvData >> petitionGuid;
 
     // Check if player really has the required petition charter
-    Item* item = _player->GetItemByGuid(petitionGuid);
+    ItemRef item = _player->GetItemByGuid(petitionGuid);
     if (!item)
         return;
 

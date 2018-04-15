@@ -1610,12 +1610,12 @@ public:
             return false;
         }
 
-        Item* item = playerTarget->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
+        ItemRef item = playerTarget->StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
 
         // remove binding (let GM give it to another player later)
         if (player == playerTarget)
             for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
-                if (Item* item1 = player->GetItemByPos(itr->pos))
+                if (ItemRef item1 = player->GetItemByPos(itr->pos))
                     item1->SetBinding(false);
 
         if (count > 0 && item)
@@ -1668,7 +1668,7 @@ public:
                 InventoryResult msg = playerTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itr->second.ItemId, 1);
                 if (msg == EQUIP_ERR_OK)
                 {
-                    Item* item = playerTarget->StoreNewItem(dest, itr->second.ItemId, true);
+                    ItemRef item = playerTarget->StoreNewItem(dest, itr->second.ItemId, true);
 
                     // remove binding (let GM give it to another player later)
                     if (player == playerTarget)
@@ -2666,7 +2666,7 @@ public:
 
         for (ItemPairs::const_iterator itr = items.begin(); itr != items.end(); ++itr)
         {
-            if (Item* item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
+            if (ItemRef item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
             {
                 item->SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
                 draft.AddItem(item);
@@ -3258,7 +3258,7 @@ public:
         if (player->IsAlive())
         {
             // xinef: no hearthstone in bag or on cooldown
-            Item* hearthStone = player->GetItemByEntry(6948);
+            ItemRef hearthStone = player->GetItemByEntry(6948);
             if (!hearthStone || player->HasSpellCooldown(8690))
             {
                 // Blizzlike mode

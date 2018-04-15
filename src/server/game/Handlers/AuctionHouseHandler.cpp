@@ -187,14 +187,14 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    Item* items[MAX_AUCTION_ITEMS];
+    ItemRef items[MAX_AUCTION_ITEMS];
 
     uint32 finalCount = 0;
     uint32 itemEntry = 0;
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
-        Item* item = _player->GetItemByGuid(itemGUIDs[i]);
+        ItemRef item = _player->GetItemByGuid(itemGUIDs[i]);
 
         if (!item)
         {
@@ -238,7 +238,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
-        Item* item = items[i];
+        ItemRef & item = items[i];
 
         if (item->GetMaxStackCount() < finalCount)
         {
@@ -249,7 +249,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
 
     for (uint32 i = 0; i < itemsCount; ++i)
     {
-        Item* item = items[i];
+        ItemRef & item = items[i];
 
         uint32 auctionTime = uint32(etime * sWorld->getRate(RATE_AUCTION_TIME));
         AuctionHouseObject* auctionHouse = sAuctionMgr->GetAuctionsMap(creature->getFaction());
@@ -302,7 +302,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
         }
         else // Required stack size of auction does not match to current item stack size, clone item and set correct stack size
         {
-            Item* newItem = item->CloneItem(finalCount, _player);
+            ItemRef newItem = item->CloneItem(finalCount, _player);
             if (!newItem)
             {
                 sLog->outError("CMSG_AUCTION_SELL_ITEM: Could not create clone of item %u", item->GetEntry());
@@ -328,7 +328,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
 
             for (uint32 j = 0; j < itemsCount; ++j)
             {
-                Item* item2 = items[j];
+                ItemRef & item2 = items[j];
 
                 // Item stack count equals required count, ready to delete item - cloned item will be used for auction
                 if (item2->GetCount() == count[j])
@@ -339,7 +339,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
                     item2->DeleteFromInventoryDB(trans);
                     item2->DeleteFromDB(trans);
                     CharacterDatabase.CommitTransaction(trans);
-                    delete item2;
+                    sObjectMgr->RequestItemDestroy( *item2 );
                 }
                 else // Item stack count is bigger than required count, update item stack count and save to database - cloned item will be used for auction
                 {
@@ -524,7 +524,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     if (auction && auction->owner == player->GetGUIDLow())
     {
-        Item* pItem = sAuctionMgr->GetAItem(auction->item_guidlow);
+        ItemRef pItem = sAuctionMgr->GetAItem(auction->item_guidlow);
         if (pItem)
         {
             if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid

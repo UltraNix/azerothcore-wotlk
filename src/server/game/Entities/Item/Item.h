@@ -24,6 +24,7 @@
 #include "LootMgr.h"
 #include "ItemPrototype.h"
 #include "DatabaseEnv.h"
+#include <atomic>
 
 class SpellInfo;
 class Bag;
@@ -205,11 +206,16 @@ enum ItemUpdateState
 
 bool ItemCanGoIntoBag(ItemTemplate const* proto, ItemTemplate const* pBagProto);
 
+class ItemRef;
+
 class Item : public Object
 {
+    friend class ItemRef;
+    friend class ObjectMgr;
+
     public:
-        static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL);
-        Item* CloneItem(uint32 count, Player const* player = NULL) const;
+        static ItemRef CreateItem(uint32 item, uint32 count, Player const* player = NULL);
+        ItemRef CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
 
@@ -362,5 +368,36 @@ class Item : public Object
         uint32 m_paidMoney;
         uint32 m_paidExtendedCost;
         AllowedLooterSet allowedGUIDs;
+
+        std::atomic_int m_refCounter;
 };
+
+class ItemRef
+{
+public:
+    ItemRef( Item * item = nullptr );
+    ItemRef( const ItemRef & rhs );
+    ~ItemRef();
+
+    void operator=( ItemRef const& rhs );
+
+    bool operator==( ItemRef const& rhs ) const;
+    bool operator==( Item const* rhs ) const;
+
+    bool operator!=( ItemRef const& rhs ) const;
+    bool operator!=( Item const* rhs ) const;
+
+    void    Reset( Item * item = nullptr );
+
+    operator bool() const;
+
+    Item*   operator*() const;
+    Item*   operator->() const;
+
+protected:
+    Item * m_item;
+};
+
+extern const ItemRef NullItemRef;
+
 #endif

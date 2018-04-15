@@ -1041,20 +1041,20 @@ class TradeData
     public:                                                 // constructors
         TradeData(Player* player, Player* trader) :
             m_player(player),  m_trader(trader), m_accepted(false), m_acceptProccess(false),
-            m_money(0), m_spell(0), m_spellCastItem(0) { memset(m_items, 0, TRADE_SLOT_COUNT * sizeof(uint64)); }
+            m_money(0), m_spell(0), m_spellCastItem(0) { memset( m_itemsGUID, 0, TRADE_SLOT_COUNT * sizeof(uint64)); }
 
         Player* GetTrader() const { return m_trader; }
         TradeData* GetTraderData() const;
 
-        Item* GetItem(TradeSlots slot) const;
+        ItemRef GetItem(TradeSlots slot) const;
         bool HasItem(uint64 itemGuid) const;
         TradeSlots GetTradeSlotForItem(uint64 itemGuid) const;
-        void SetItem(TradeSlots slot, Item* item);
+        void SetItem(TradeSlots slot, ItemRef const& item);
 
         uint32 GetSpell() const { return m_spell; }
-        void SetSpell(uint32 spell_id, Item* castItem = NULL);
+        void SetSpell(uint32 spell_id, ItemRef const& castItem = NullItemRef);
 
-        Item*  GetSpellCastItem() const;
+        ItemRef GetSpellCastItem() const;
         bool HasSpellCastItem() const { return m_spellCastItem != 0; }
 
         uint32 GetMoney() const { return m_money; }
@@ -1083,7 +1083,7 @@ class TradeData
         uint32     m_spell;                                 // m_player apply spell to non-traded slot item
         uint64     m_spellCastItem;                         // applied spell casted by item use
 
-        uint64     m_items[TRADE_SLOT_COUNT];               // traded itmes from m_player side including non-traded slot
+        uint64     m_itemsGUID[TRADE_SLOT_COUNT];           // traded itmes from m_player side including non-traded slot
 };
 
 class KillRewarder
@@ -1295,24 +1295,24 @@ class Player : public Unit, public GridObject<Player>
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
 
-        void SetVirtualItemSlot(uint8 i, Item* item);
+        void SetVirtualItemSlot(uint8 i, ItemRef const& item);
         void SetSheath(SheathState sheathed);             // overwrite Unit version
         uint8 FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) const;
-        uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = NULL) const;
-        uint32 GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipItem = NULL) const;
-        Item* GetItemByGuid(uint64 guid) const;
-        Item* GetItemByEntry(uint32 entry) const;
-        Item* GetItemByPos(uint16 pos) const;
-        Item* GetItemByPos(uint8 bag, uint8 slot) const;
+        uint32 GetItemCount(uint32 item, bool inBankAlso = false, ItemRef const& skipItem = NULL) const;
+        uint32 GetItemCountWithLimitCategory(uint32 limitCategory, ItemRef const& skipItem = NULL) const;
+        ItemRef GetItemByGuid(uint64 guid) const;
+        ItemRef GetItemByEntry(uint32 entry) const;
+        ItemRef GetItemByPos(uint16 pos) const;
+        ItemRef GetItemByPos(uint8 bag, uint8 slot) const;
         Bag*  GetBagByPos(uint8 slot) const;
-        inline Item* GetUseableItemByPos(uint8 bag, uint8 slot) const //Does additional check for disarmed weapons
+        inline ItemRef GetUseableItemByPos(uint8 bag, uint8 slot) const //Does additional check for disarmed weapons
         {
             if (!CanUseAttackType(GetAttackBySlot(slot)))
                 return NULL;
             return GetItemByPos(bag, slot);
         }
-        Item* GetWeaponForAttack(WeaponAttackType attackType, bool useable = false) const;
-        Item* GetShield(bool useable = false) const;
+        ItemRef GetWeaponForAttack(WeaponAttackType attackType, bool useable = false) const;
+        ItemRef GetShield(bool useable = false) const;
         static uint8 GetAttackBySlot(uint8 slot);        // MAX_ATTACK if not weapon slot
         std::vector<Item*> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
         static bool IsInventoryPos(uint16 pos) { return IsInventoryPos(pos >> 8, pos & 255); }
@@ -1327,43 +1327,43 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetBankBagSlotCount() const { return GetByteValue(PLAYER_BYTES_2, 2); }
         void SetBankBagSlotCount(uint8 count) { SetByteValue(PLAYER_BYTES_2, 2, count); }
         bool HasItemCount(uint32 item, uint32 count = 1, bool inBankAlso = false) const;
-        bool HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item const* ignoreItem = NULL) const;
+        bool HasItemFitToSpellRequirements(SpellInfo const* spellInfo, ItemRef const& ignoreItem = NULL) const;
         bool CanNoReagentCast(SpellInfo const* spellInfo) const;
         bool HasItemOrGemWithIdEquipped(uint32 item, uint32 count, uint8 except_slot = NULL_SLOT) const;
         bool HasItemOrGemWithLimitCategoryEquipped(uint32 limitCategory, uint32 count, uint8 except_slot = NULL_SLOT) const;
-        InventoryResult CanTakeMoreSimilarItems(Item* pItem) const { return CanTakeMoreSimilarItems(pItem->GetEntry(), pItem->GetCount(), pItem); }
+        InventoryResult CanTakeMoreSimilarItems(ItemRef const& pItem) const { return CanTakeMoreSimilarItems(pItem->GetEntry(), pItem->GetCount(), pItem); }
         InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count) const { return CanTakeMoreSimilarItems(entry, count, NULL); }
         InventoryResult CanStoreNewItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 item, uint32 count, uint32* no_space_count = NULL) const
         {
             return CanStoreItem(bag, slot, dest, item, count, NULL, false, no_space_count);
         }
-        InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap = false) const
+        InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemRef const& pItem, bool swap = false) const
         {
             if (!pItem)
                 return EQUIP_ERR_ITEM_NOT_FOUND;
             uint32 count = pItem->GetCount();
             return CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL);
         }
-        InventoryResult CanStoreItems(Item** pItem, int32 count) const;
+        InventoryResult CanStoreItems(ItemRef * pItem, int32 count) const;
         InventoryResult CanEquipNewItem(uint8 slot, uint16& dest, uint32 item, bool swap) const;
-        InventoryResult CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool swap, bool not_loading = true) const;
+        InventoryResult CanEquipItem(uint8 slot, uint16& dest, ItemRef const& pItem, bool swap, bool not_loading = true) const;
 
-        InventoryResult CanEquipUniqueItem(Item* pItem, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1) const;
+        InventoryResult CanEquipUniqueItem(ItemRef const& pItem, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1) const;
         InventoryResult CanEquipUniqueItem(ItemTemplate const* itemProto, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1) const;
         InventoryResult CanUnequipItems(uint32 item, uint32 count) const;
         InventoryResult CanUnequipItem(uint16 src, bool swap) const;
-        InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading = true) const;
-        InventoryResult CanUseItem(Item* pItem, bool not_loading = true) const;
+        InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemRef const& pItem, bool swap, bool not_loading = true) const;
+        InventoryResult CanUseItem(ItemRef const& pItem, bool not_loading = true) const;
         bool HasItemTotemCategory(uint32 TotemCategory) const;
         bool IsTotemCategoryCompatiableWith(const ItemTemplate* pProto, uint32 requiredTotemCategoryId) const;
         InventoryResult CanUseItem(ItemTemplate const* pItem) const;
         InventoryResult CanUseAmmo(uint32 item) const;
         InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
-        Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0);
-        Item* StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters);
-        Item* StoreItem(ItemPosCountVec const& pos, Item* pItem, bool update);
-        Item* EquipNewItem(uint16 pos, uint32 item, bool update);
-        Item* EquipItem(uint16 pos, Item* pItem, bool update);
+        ItemRef StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0);
+        ItemRef StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters);
+        ItemRef StoreItem(ItemPosCountVec const& pos, ItemRef const& pItem, bool update);
+        ItemRef EquipNewItem(uint16 pos, uint32 item, bool update);
+        ItemRef EquipItem(uint16 pos, ItemRef const& pItem, bool update);
         void AutoUnequipOffhandIfNeed(bool force = false);
         bool StoreNewItemInBestSlots(uint32 item_id, uint32 item_count);
         void AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast = false);
@@ -1372,43 +1372,43 @@ class Player : public Unit, public GridObject<Player>
         void UpdateLootAchievements(LootItem *item, Loot* loot);
         void UpdateTitansGrip();
 
-        InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = NULL) const;
-        InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item* pItem = NULL, bool swap = false, uint32* no_space_count = NULL) const;
+        InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count, ItemRef const& pItem, uint32* no_space_count = NULL) const;
+        InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, ItemRef const& pItem = NULL, bool swap = false, uint32* no_space_count = NULL) const;
 
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-        void ApplyEquipCooldown(Item* pItem);
+        void ApplyEquipCooldown(ItemRef const& pItem);
         void SetAmmo(uint32 item);
         void RemoveAmmo();
         float GetAmmoDPS() const { return m_ammoDPS; }
         bool CheckAmmoCompatibility(const ItemTemplate* ammo_proto) const;
-        void QuickEquipItem(uint16 pos, Item* pItem);
-        void VisualizeItem(uint8 slot, Item* pItem);
-        void SetVisibleItemSlot(uint8 slot, Item* pItem);
-        Item* BankItem(ItemPosCountVec const& dest, Item* pItem, bool update)
+        void QuickEquipItem(uint16 pos, ItemRef const& pItem);
+        void VisualizeItem(uint8 slot, ItemRef const& pItem);
+        void SetVisibleItemSlot(uint8 slot, ItemRef const& pItem);
+        ItemRef BankItem(ItemPosCountVec const& dest, ItemRef const& pItem, bool update)
         {
             return StoreItem(dest, pItem, update);
         }
-        Item* BankItem(uint16 pos, Item* pItem, bool update);
+        ItemRef BankItem(uint16 pos, ItemRef const& pItem, bool update);
         void RemoveItem(uint8 bag, uint8 slot, bool update, bool swap = false);
         void MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
                                                             // in trade, auction, guild bank, mail....
-        void MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool update, bool in_characterInventoryDB = false);
+        void MoveItemToInventory(ItemPosCountVec const& dest, ItemRef const& pItem, bool update, bool in_characterInventoryDB = false);
                                                             // in trade, guild bank, mail....
-        void RemoveItemDependentAurasAndCasts(Item* pItem);
+        void RemoveItemDependentAurasAndCasts( ItemRef const& pItem);
         void DestroyItem(uint8 bag, uint8 slot, bool update);
         void DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check = false);
-        void DestroyItemCount(Item* item, uint32& count, bool update);
+        void DestroyItemCount( ItemRef const& item, uint32& count, bool update);
         void DestroyConjuredItems(bool update);
         void DestroyZoneLimitedItem(bool update, uint32 new_zone);
         void SplitItem(uint16 src, uint16 dst, uint32 count);
         void SwapItem(uint16 src, uint16 dst);
-        void AddItemToBuyBackSlot(Item* pItem);
-        Item* GetItemFromBuyBackSlot(uint32 slot);
+        void AddItemToBuyBackSlot( ItemRef const& pItem);
+        ItemRef GetItemFromBuyBackSlot(uint32 slot);
         void RemoveItemFromBuyBackSlot(uint32 slot, bool del);
         uint32 GetMaxKeyringSize() const { return KEYRING_SLOT_END-KEYRING_SLOT_START; }
-        void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = NULL, uint32 itemid = 0);
+        void SendEquipError(InventoryResult msg, ItemRef const& pItem, ItemRef const& pItem2 = NULL, uint32 itemid = 0);
         void SendBuyError(BuyResult msg, Creature* creature, uint32 item, uint32 param);
         void SendSellError(SellResult msg, Creature* creature, uint64 guid, uint32 param);
         void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag; }
@@ -1418,10 +1418,10 @@ class Player : public Unit, public GridObject<Player>
 
         bool IsTwoHandUsed() const
         {
-            Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            ItemRef mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             return mainItem && mainItem->GetTemplate()->InventoryType == INVTYPE_2HWEAPON && !CanTitanGrip();
         }
-        void SendNewItem(Item* item, uint32 count, bool received, bool created, bool broadcast = false);
+        void SendNewItem( ItemRef const& item, uint32 count, bool received, bool created, bool broadcast = false);
         bool BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot);
         bool _StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore);
 
@@ -1433,22 +1433,22 @@ class Player : public Unit, public GridObject<Player>
 
         void UpdateEnchantTime(uint32 time);
         void UpdateSoulboundTradeItems();
-        void AddTradeableItem(Item* item);
-        void RemoveTradeableItem(Item* item);
+        void AddTradeableItem( ItemRef const& item);
+        void RemoveTradeableItem( ItemRef const& item);
         void UpdateItemDuration(uint32 time, bool realtimeonly = false);
-        void AddEnchantmentDurations(Item* item);
-        void RemoveEnchantmentDurations(Item* item);
-        void RemoveEnchantmentDurationsReferences(Item* item); // pussywizard
+        void AddEnchantmentDurations( ItemRef const& item);
+        void RemoveEnchantmentDurations( ItemRef const& item);
+        void RemoveEnchantmentDurationsReferences( ItemRef const& item); // pussywizard
         void RemoveAllTmpEnchantmentDurations();
         void RemoveArenaEnchantments(EnchantmentSlot slot);
-        void AddEnchantmentDuration(Item* item, EnchantmentSlot slot, uint32 duration);
-        void ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
-        void ApplyEnchantment(Item* item, bool apply);
+        void AddEnchantmentDuration( ItemRef const& item, EnchantmentSlot slot, uint32 duration);
+        void ApplyEnchantment( ItemRef const& item, EnchantmentSlot slot, bool apply, bool apply_dur = true, bool ignore_condition = false);
+        void ApplyEnchantment( ItemRef const& item, bool apply);
         void UpdateSkillEnchantments(uint16 skill_id, uint16 curr_value, uint16 new_value);
         void SendEnchantmentDurations();
         void BuildEnchantmentsInfoData(WorldPacket* data);
-        void AddItemDurations(Item* item);
-        void RemoveItemDurations(Item* item);
+        void AddItemDurations( ItemRef const& item);
+        void RemoveItemDurations( ItemRef const& item);
         void SendItemDurations();
         void LoadCorpse();
         void LoadPet();
@@ -1714,17 +1714,17 @@ class Player : public Unit, public GridObject<Player>
 
         ItemMap mMitems;                                    //template defined in objectmgr.cpp
 
-        Item* GetMItem(uint32 id)
+        ItemRef GetMItem(uint32 id)
         {
             ItemMap::const_iterator itr = mMitems.find(id);
             return itr != mMitems.end() ? itr->second : NULL;
         }
 
-        void AddMItem(Item* it)
+        void AddMItem(ItemRef const& it)
         {
             ASSERT(it);
             //ASSERT deleted, because items can be added before loading
-            mMitems[it->GetGUIDLow()] = it;
+            mMitems[it->GetGUIDLow()] = *it;
         }
 
         bool RemoveMItem(uint32 id)
@@ -2096,9 +2096,9 @@ class Player : public Unit, public GridObject<Player>
         void RepopAtGraveyard();
 
         void DurabilityLossAll(double percent, bool inventory);
-        void DurabilityLoss(Item* item, double percent);
+        void DurabilityLoss(ItemRef const& item, double percent);
         void DurabilityPointsLossAll(int32 points, bool inventory);
-        void DurabilityPointsLoss(Item* item, int32 points);
+        void DurabilityPointsLoss(ItemRef const&item, int32 points);
         void DurabilityPointLossForEquipSlot(EquipmentSlots slot);
         uint32 DurabilityRepairAll(bool cost, float discountMod, bool guildBank);
         uint32 DurabilityRepair(uint16 pos, bool cost, float discountMod, bool guildBank);
@@ -2234,11 +2234,11 @@ class Player : public Unit, public GridObject<Player>
 
         void ResetAllPowers();
 
-        void _ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply);
-        void _ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
-        void _ApplyWeaponDependentAuraDamageMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
+        void _ApplyWeaponDependentAuraMods( ItemRef const& item, WeaponAttackType attackType, bool apply);
+        void _ApplyWeaponDependentAuraCritMod( ItemRef const&item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
+        void _ApplyWeaponDependentAuraDamageMod( ItemRef const& item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
 
-        void _ApplyItemMods(Item* item, uint8 slot, bool apply);
+        void _ApplyItemMods( ItemRef const& item, uint8 slot, bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
         void _ApplyAllLevelScaleItemMods(bool apply);
@@ -2250,12 +2250,12 @@ class Player : public Unit, public GridObject<Player>
         void CorrectMetaGemEnchants(uint8 slot, bool apply);
         void InitDataForForm(bool reapplyMods = false);
 
-        void ApplyItemEquipSpell(Item* item, bool apply, bool form_change = false);
-        void ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply, bool form_change = false);
+        void ApplyItemEquipSpell( ItemRef const& item, bool apply, bool form_change = false);
+        void ApplyEquipSpell(SpellInfo const* spellInfo, ItemRef const& item, bool apply, bool form_change = false);
         void UpdateEquipSpellsAtFormChange();
         void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
-        void CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex);
-        void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto);
+        void CastItemUseSpell( ItemRef const& item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex);
+        void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, ItemRef const& item, ItemTemplate const* proto);
 
         void SendEquipmentSetList();
         void SetEquipmentSet(uint32 index, EquipmentSet eqset);
@@ -3002,16 +3002,16 @@ class Player : public Unit, public GridObject<Player>
 
     private:
         // internal common parts for CanStore/StoreItem functions
-        InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
-        InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
-        InventoryResult CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
-        Item* _StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool update);
-        Item* _LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff, Field* fields);
+        InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, ItemRef const& pSrcItem) const;
+        InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, ItemRef const& pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
+        InventoryResult CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, ItemRef const& pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
+        ItemRef _StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool clone, bool update);
+        ItemRef _LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff, Field* fields);
 
         typedef std::set<uint32> RefundableItemsSet;
         RefundableItemsSet m_refundableItems;
-        void SendRefundInfo(Item* item);
-        void RefundItem(Item* item);
+        void SendRefundInfo( ItemRef const& item);
+        void RefundItem( ItemRef const& item);
 
         // know currencies are not removed at any point (0 displayed)
         void AddKnownCurrency(uint32 itemId);
@@ -3066,7 +3066,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 _pendingBindTimer;
 };
 
-void AddItemsSetItem(Player*player, Item* item);
+void AddItemsSetItem(Player*player, ItemRef const& item);
 void RemoveItemsSetItem(Player*player, ItemTemplate const* proto);
 
 // "the bodies of template functions must be made available in a header file"

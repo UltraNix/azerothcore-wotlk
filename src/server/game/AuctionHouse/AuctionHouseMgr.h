@@ -173,7 +173,7 @@ class AuctionHouseMgr
         void SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 newPrice, Player* newBidder, SQLTransaction& trans);
         void SendAuctionCancelledToBidderMail(AuctionEntry* auction, SQLTransaction& trans);
 
-        static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item* pItem, uint32 count);
+        static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, ItemRef const& pItem, uint32 count);
         static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
 
     public:
@@ -182,7 +182,7 @@ class AuctionHouseMgr
         void LoadAuctionItems();
         void LoadAuctions();
 
-        void AddAItem(Item* it);
+        void AddAItem(ItemRef const& it);
         bool RemoveAItem(uint32 id, bool deleteFromDB = false);
 
         void Update();

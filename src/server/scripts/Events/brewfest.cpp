@@ -1449,7 +1449,7 @@ public:
         {
             if (GetCaster() && GetCaster()->ToPlayer())
             {
-                if (Item* itemCaster = GetCastItem())
+                if (ItemRef itemCaster = GetCastItem())
                 {
                     Player* player = GetCaster()->ToPlayer();
                     uint32 item = 0;
@@ -1529,7 +1529,7 @@ public:
         {
             if (GetCaster() && GetCaster()->ToPlayer())
             {
-                if (Item* itemCaster = GetCastItem())
+                if (ItemRef itemCaster = GetCastItem())
                 {
                     uint32 item = GetEmptyEntry(itemCaster->GetEntry());
                     Player* player = GetCaster()->ToPlayer();

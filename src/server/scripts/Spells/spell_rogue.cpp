@@ -293,7 +293,7 @@ class spell_rog_deadly_poison : public SpellScriptLoader
                 if (Unit* target = GetHitUnit())
                 {
 
-                    Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    ItemRef item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
                     if (item == GetCastItem())
                         item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);

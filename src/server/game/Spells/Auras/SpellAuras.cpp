@@ -315,7 +315,7 @@ uint8 Aura::BuildEffectMaskForOwner( SpellInfo const* spellProto, uint8 avalible
     return effMask & avalibleEffectMask;
 }
 
-Aura* Aura::TryRefreshStackOrCreate( SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount /*= NULL*/, Item* castItem /*= NULL*/, uint64 casterGUID /*= 0*/, bool* refresh /*= NULL*/, bool periodicReset /*= false*/ )
+Aura* Aura::TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount /*= NULL*/, ItemRef const& castItem /*= NULL*/, uint64 casterGUID /*= 0*/, bool* refresh /*= NULL*/, bool periodicReset /*= false*/)
 {
     ASSERT( spellproto );
     ASSERT( owner );
@@ -341,7 +341,7 @@ Aura* Aura::TryRefreshStackOrCreate( SpellInfo const* spellproto, uint8 tryEffMa
         return Create( spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID );
 }
 
-Aura* Aura::TryCreate( SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount /*= NULL*/, Item* castItem /*= NULL*/, uint64 casterGUID /*= 0*/ )
+Aura* Aura::TryCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount /*= NULL*/, ItemRef const& castItem /*= NULL*/, uint64 casterGUID /*= 0*/)
 {
     ASSERT( spellproto );
     ASSERT( owner );
@@ -353,7 +353,7 @@ Aura* Aura::TryCreate( SpellInfo const* spellproto, uint8 tryEffMask, WorldObjec
     return Create( spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID );
 }
 
-Aura* Aura::Create( SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, uint64 casterGUID )
+Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, ItemRef const& castItem, uint64 casterGUID)
 {
     ASSERT( effMask );
     ASSERT( spellproto );
@@ -398,7 +398,7 @@ Aura* Aura::Create( SpellInfo const* spellproto, uint8 effMask, WorldObject* own
     return aura;
 }
 
-Aura::Aura( SpellInfo const* spellproto, WorldObject* owner, Unit* caster, Item* castItem, uint64 casterGUID ) :
+Aura::Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, ItemRef const& castItem, uint64 casterGUID) :
     m_spellInfo( spellproto ), m_casterGuid( casterGUID ? casterGUID : caster->GetGUID() ),
     m_castItemGuid( castItem ? castItem->GetGUID() : 0 ), m_applyTime( time( nullptr ) ),
     m_owner( owner ), m_timeCla( 0 ), m_updateTargetMapInterval( 0 ),
@@ -485,7 +485,7 @@ void Aura::_ApplyForTarget( Unit* target, Unit* caster, AuraApplication * auraAp
     {
         if ( m_spellInfo->IsCooldownStartedOnEvent() )
         {
-            Item* castItem = m_castItemGuid ? caster->ToPlayer()->GetItemByGuid( m_castItemGuid ) : NULL;
+            ItemRef castItem = m_castItemGuid ? caster->ToPlayer()->GetItemByGuid(m_castItemGuid) : ItemRef( nullptr );
             caster->ToPlayer()->AddSpellAndCategoryCooldowns( m_spellInfo, castItem ? castItem->GetEntry() : 0, NULL, true );
         }
     }
@@ -2116,7 +2116,7 @@ bool Aura::IsProcTriggeredOnEvent( AuraApplication* aurApp, ProcEventInfo& event
             if ( eventInfo.GetDamageInfo() )
             {
                 WeaponAttackType attType = eventInfo.GetDamageInfo()->GetAttackType();
-                Item* item = NULL;
+                ItemRef item = NULL;
                 if ( attType == BASE_ATTACK )
                     item = target->ToPlayer()->GetUseableItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
                 else if ( attType == OFF_ATTACK )
@@ -2131,7 +2131,7 @@ bool Aura::IsProcTriggeredOnEvent( AuraApplication* aurApp, ProcEventInfo& event
         else if ( GetSpellInfo()->EquippedItemClass == ITEM_CLASS_ARMOR )
         {
             // Check if player is wearing shield
-            Item* item = target->ToPlayer()->GetUseableItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND );
+            ItemRef item = target->ToPlayer()->GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
             if ( !item || item->IsBroken() || item->GetTemplate()->Class != ITEM_CLASS_ARMOR || !( ( 1 << item->GetTemplate()->SubClass ) & GetSpellInfo()->EquippedItemSubClassMask ) )
                 return false;
         }
@@ -2560,7 +2560,7 @@ void Aura::CallScriptAfterEffectProcHandlers( AuraEffect const* aurEff, AuraAppl
     }
 }
 
-UnitAura::UnitAura( SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID )
+UnitAura::UnitAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID)
     : Aura( spellproto, owner, caster, castItem, casterGUID )
 {
     m_AuraDRGroup = DIMINISHING_NONE;
@@ -2701,7 +2701,7 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
     }
 }
 
-DynObjAura::DynObjAura( SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, Item* castItem, uint64 casterGUID )
+DynObjAura::DynObjAura(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32 *baseAmount, ItemRef const& castItem, uint64 casterGUID)
     : Aura( spellproto, owner, caster, castItem, casterGUID )
 {
     LoadScripts();

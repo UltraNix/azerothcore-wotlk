@@ -400,7 +400,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                                     mLevelMult = CalculatePct(1.0f, aurEff->GetAmount());
                                     break;
                                 case 1: // Predatory Strikes (effect 1)
-                                    if (Item* mainHand = m_items[EQUIPMENT_SLOT_MAINHAND])
+                                    if (ItemRef mainHand = m_items[EQUIPMENT_SLOT_MAINHAND])
                                     {
                                         // also gains % attack power from equipped weapon
                                         ItemTemplate const* proto = mainHand->GetTemplate();
@@ -848,7 +848,7 @@ void Player::UpdateExpertise(WeaponAttackType attack)
 
     int32 expertise = int32(GetRatingBonusValue(CR_EXPERTISE));
 
-    Item* weapon = GetWeaponForAttack(attack, true);
+    ItemRef weapon = GetWeaponForAttack(attack, true);
 
     AuraEffectList const& expAuras = GetAuraEffectsByType(SPELL_AURA_MOD_EXPERTISE);
     for (AuraEffectList::const_iterator itr = expAuras.begin(); itr != expAuras.end(); ++itr)

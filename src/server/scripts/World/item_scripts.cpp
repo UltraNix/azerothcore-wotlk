@@ -49,7 +49,7 @@ class item_only_for_flight : public ItemScript
 public:
     item_only_for_flight() : ItemScript("item_only_for_flight") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/)
+    bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const& /*targets*/)
     {
         uint32 itemId = item->GetEntry();
         bool disabled = false;
@@ -90,7 +90,7 @@ class item_nether_wraith_beacon : public ItemScript
 public:
     item_nether_wraith_beacon() : ItemScript("item_nether_wraith_beacon") { }
 
-    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/)
+    bool OnUse(Player* player, ItemRef const& /*item*/, SpellCastTargets const& /*targets*/)
     {
         if (player->GetQuestStatus(10832) == QUEST_STATUS_INCOMPLETE)
         {
@@ -113,7 +113,7 @@ class item_gor_dreks_ointment : public ItemScript
 public:
     item_gor_dreks_ointment() : ItemScript("item_gor_dreks_ointment") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& targets)
+    bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const& targets)
     {
         if (targets.GetUnitTarget() && targets.GetUnitTarget()->GetTypeId() == TYPEID_UNIT &&
             targets.GetUnitTarget()->GetEntry() == 20748 && !targets.GetUnitTarget()->HasAura(32578))
@@ -133,7 +133,7 @@ class item_incendiary_explosives : public ItemScript
 public:
     item_incendiary_explosives() : ItemScript("item_incendiary_explosives") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const & /*targets*/)
+    bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const & /*targets*/)
     {
         if (player->FindNearestCreature(26248, 15) || player->FindNearestCreature(26249, 15))
             return false;
@@ -201,7 +201,7 @@ class item_petrov_cluster_bombs : public ItemScript
 public:
     item_petrov_cluster_bombs() : ItemScript("item_petrov_cluster_bombs") { }
 
-    bool OnUse(Player* player, Item* item, const SpellCastTargets & /*targets*/)
+    bool OnUse(Player* player, ItemRef const& item, const SpellCastTargets & /*targets*/)
     {
         if (player->GetZoneId() != ZONE_ID_HOWLING)
             return false;
@@ -231,7 +231,7 @@ class item_trident_of_nazjan : public ItemScript
 public:
     item_trident_of_nazjan() : ItemScript("item_Trident_of_Nazjan") { }
 
-    bool OnUse(Player* player, Item* item, const SpellCastTargets & /*targets*/)
+    bool OnUse(Player* player, ItemRef const& item, const SpellCastTargets & /*targets*/)
     {
         if (player->GetQuestStatus(QUEST_THE_EMISSARY) == QUEST_STATUS_INCOMPLETE)
         {
@@ -258,7 +258,7 @@ class item_captured_frog : public ItemScript
 public:
     item_captured_frog() : ItemScript("item_captured_frog") { }
 
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/)
+    bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const& /*targets*/)
     {
         if (player->GetQuestStatus(QUEST_THE_PERFECT_SPIES) == QUEST_STATUS_INCOMPLETE)
         {

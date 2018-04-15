@@ -391,7 +391,7 @@ bool OPvPCapturePointNA::HandleCustomSpell(Player* player, uint32 spellId, GameO
             return true;
         }
 
-        Item* item = player->StoreNewItem(dest, itemid, true);
+        ItemRef item = player->StoreNewItem(dest, itemid, true);
 
         if (count > 0 && item)
         {

@@ -109,7 +109,7 @@ void LootItemStorage::AddNewStoredLoot(Loot* loot, Player* player)
     CharacterDatabase.CommitTransaction(trans);
 }
 
-bool LootItemStorage::LoadStoredLoot(Item* item)
+bool LootItemStorage::LoadStoredLoot(ItemRef const& item)
 {
     Loot* loot = &item->loot;
     LootItemContainer::iterator itr = lootItemStore.find(loot->containerId);

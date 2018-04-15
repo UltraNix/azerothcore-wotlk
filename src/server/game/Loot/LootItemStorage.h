@@ -40,7 +40,7 @@ class LootItemStorage
         void RemoveEntryFromDB(uint32 containerId, uint32 itemid, uint32 count);
 
         void AddNewStoredLoot(Loot* loot, Player* player);
-        bool LoadStoredLoot(Item* item);
+        bool LoadStoredLoot(ItemRef const& item);
 
         void RemoveStoredLootItem(uint32 containerId, uint32 itemid, uint32 count);
         void RemoveStoredLootMoney(uint32 containerId);

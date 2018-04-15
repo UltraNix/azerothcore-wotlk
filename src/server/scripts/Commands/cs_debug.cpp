@@ -544,12 +544,12 @@ public:
                 if (i >= BUYBACK_SLOT_START && i < BUYBACK_SLOT_END)
                     continue;
 
-                if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                if (ItemRef item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                 {
                     if (Bag* bag = item->ToBag())
                     {
                         for (uint8 j = 0; j < bag->GetBagSize(); ++j)
-                            if (Item* item2 = bag->GetItemByPos(j))
+                            if (ItemRef item2 = bag->GetItemByPos(j))
                                 if (item2->GetState() == state)
                                     handler->PSendSysMessage("bag: 255 slot: %d guid: %d owner: %d", item2->GetSlot(), item2->GetGUIDLow(), GUID_LOPART(item2->GetOwnerGUID()));
                     }
@@ -564,7 +564,7 @@ public:
             std::vector<Item*>& updateQueue = player->GetItemUpdateQueue();
             for (size_t i = 0; i < updateQueue.size(); ++i)
             {
-                Item* item = updateQueue[i];
+                ItemRef item = updateQueue[i];
                 if (!item)
                     continue;
 
@@ -603,7 +603,7 @@ public:
                 if (i >= BUYBACK_SLOT_START && i < BUYBACK_SLOT_END)
                     continue;
 
-                Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+                ItemRef item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
                 if (!item)
                     continue;
 
@@ -645,7 +645,7 @@ public:
                         continue;
                     }
 
-                    if (updateQueue[qp] != item)
+                    if (item != updateQueue[qp])
                     {
                         handler->PSendSysMessage("The item with slot %d and guid %d has a queuepos (%d) that points to another item in the queue (bag: %d, slot: %d, guid: %d)", item->GetSlot(), item->GetGUIDLow(), qp, updateQueue[qp]->GetBagSlot(), updateQueue[qp]->GetSlot(), updateQueue[qp]->GetGUIDLow());
                         error = true;
@@ -663,7 +663,7 @@ public:
                 {
                     for (uint8 j = 0; j < bag->GetBagSize(); ++j)
                     {
-                        Item* item2 = bag->GetItemByPos(j);
+                        ItemRef item2 = bag->GetItemByPos(j);
                         if (!item2)
                             continue;
 
@@ -713,7 +713,7 @@ public:
                                 continue;
                             }
 
-                            if (updateQueue[qp] != item2)
+                            if ( item2 != updateQueue[qp] )
                             {
                                 handler->PSendSysMessage("The item in bag %d at slot %d having guid %d has a queuepos (%d) that points to another item in the queue (bag: %d, slot: %d, guid: %d)", bag->GetSlot(), item2->GetSlot(), item2->GetGUIDLow(), qp, updateQueue[qp]->GetBagSlot(), updateQueue[qp]->GetSlot(), updateQueue[qp]->GetGUIDLow());
                                 error = true;
@@ -732,7 +732,7 @@ public:
 
             for (size_t i = 0; i < updateQueue.size(); ++i)
             {
-                Item* item = updateQueue[i];
+                ItemRef item = updateQueue[i];
                 if (!item)
                     continue;
 
@@ -753,9 +753,8 @@ public:
                 if (item->GetState() == ITEM_REMOVED)
                     continue;
 
-                Item* test = player->GetItemByPos(item->GetBagSlot(), item->GetSlot());
-
-                if (test == NULL)
+                ItemRef test = player->GetItemByPos(item->GetBagSlot(), item->GetSlot());
+                if (!test)
                 {
                     handler->PSendSysMessage("queue(" SIZEFMTD "): The bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have any item at that position!", i, item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
                     error = true;
@@ -978,7 +977,7 @@ public:
         uint32 guid = (uint32)atoi(e);
         uint32 index = (uint32)atoi(f);
 
-        Item* i = handler->GetSession()->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
+        ItemRef i = handler->GetSession()->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
 
         if (!i)
             return false;
@@ -1009,7 +1008,7 @@ public:
         uint32 index = (uint32)atoi(f);
         uint32 value = (uint32)atoi(g);
 
-        Item* i = handler->GetSession()->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
+        ItemRef i = handler->GetSession()->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
 
         if (!i)
             return false;
@@ -1033,8 +1032,7 @@ public:
 
         uint32 guid = (uint32)atoi(e);
 
-        Item* i = handler->GetSession()->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
-
+        ItemRef i = handler->GetSession()->GetPlayer()->GetItemByGuid(MAKE_NEW_GUID(guid, 0, HIGHGUID_ITEM));
         if (!i)
             return false;
 
