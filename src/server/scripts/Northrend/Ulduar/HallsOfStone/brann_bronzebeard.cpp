@@ -114,7 +114,7 @@ static Yells Conversation[]=
     {14253, "So that was the problem? Now I'm makin' progress...", NPC_BRANN, 195000},
     {13767, "Critical threat index. Void analysis diverted. Initiating sanitization protocol.", NPC_ABEDNEUM, 205000},
     {14254, "Hang on! Nobody's gonna' be sanitized as long as I have a say in it!", NPC_BRANN, 215000},
-    {14255, "Ha! The old magic fingers finally won through! Now let's get down to--", NPC_BRANN, 295000}, 
+    {14255, "Ha! The old magic fingers finally won through! Now let's get down to--", NPC_BRANN, 295000},
     {13768, "Alert: security fail-safes deactivated. Beginning memory purge and... ", NPC_ABEDNEUM, 303000},
     //The fight is completed at this point.
     {14256, "Purge? No no no no no.. where did I-- Aha, this should do the trick...", NPC_BRANN, 310000},
@@ -215,7 +215,7 @@ public:
     {
 
         brann_bronzebeardAI(Creature *c) : npc_escortAI(c), summons(me)
-        {   
+        {
             AbedneumGUID = MarnakGUID = KaddrakGUID = 0;
             pInstance = c->GetInstanceScript();
             c->SetCorpseDelay(10);
@@ -237,7 +237,7 @@ public:
             Creature *cr;
             if (cr = GetAbedneum()) cr->DespawnOrUnsummon();
             if (cr = GetMarnak()) cr->DespawnOrUnsummon();
-            if (cr = GetKaddrak()) cr->DespawnOrUnsummon();    
+            if (cr = GetKaddrak()) cr->DespawnOrUnsummon();
             SwitchHeadVisaul(0x7, false);
         }
 
@@ -284,12 +284,12 @@ public:
 
         void MoveInLineOfSight(Unit* pWho) { }
         void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
-        { 
+        {
             if (damage && pInstance)
                 pInstance->SetData(DATA_BRANN_ACHIEVEMENT, false);
         }
-        
-        void Reset() 
+
+        void Reset()
         {
             RemoveEscortState(0x7); // all states
             SetDespawnAtFar(false);
@@ -304,7 +304,7 @@ public:
             {
                 pInstance->SetData(BRANN_BRONZEBEARD, 1);
                 pInstance->SetData(DATA_BRANN_ACHIEVEMENT, true);
-                
+
                 if (pInstance->GetData(BOSS_TRIBUNAL_OF_AGES) == DONE)
                     pInstance->SetData(BRANN_BRONZEBEARD, (pInstance->GetData(BOSS_SJONNIR) == DONE) ? 5 : 4);
             }
@@ -326,7 +326,7 @@ public:
                                 me->setFaction(i->GetSource()->getFaction());
                                 break;
                             }
-                    
+
                     SetEscortPaused(false);
                     InitializeEvent();
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
@@ -336,9 +336,9 @@ public:
                     SetEscortPaused(false);
                     ResetEvent();
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
+                    me->setFaction(35);
                     break;
                 case ACTION_START_SJONNIR_FIGHT:
-                    me->setFaction(35);
                     me->MonsterYell("Don't worry! Ol' Brann's got yer back! Keep that metal monstrosity busy, and I'll see if I can't sweet talk this machine into helping ye!", LANG_UNIVERSAL, 0);
                     me->PlayDirectSound(14274);
                     SetEscortPaused(false);
@@ -485,7 +485,7 @@ public:
                     }
 
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                    
+
 
                     // Spawn Chest and quest credit
                     if (Player *plr = SelectTargetFromPlayerList(200.0f))
@@ -499,7 +499,7 @@ public:
 
                         plr->GroupEventHappens(QUEST_HALLS_OF_STONE, me);
                     }
-                    
+
                     events.ScheduleEvent(EVENT_GO_TO_SJONNIR, 279000);
                     break;
                 }
@@ -513,7 +513,7 @@ public:
                 case EVENT_END:
                 {
                     events.Reset();
-                    if (pInstance) 
+                    if (pInstance)
                         pInstance->SetData(BRANN_BRONZEBEARD, 6);
 
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
@@ -543,7 +543,7 @@ public:
                         cs->PlayDirectSound(Conversation[SpeechCount].sound);
                     }
 
-                    if (SpeechCount < 38) 
+                    if (SpeechCount < 38)
                         SpeechPause = Conversation[SpeechCount++].timer;
                     else
                         TalkEvent = false;
@@ -569,7 +569,7 @@ public:
             ResetEvent();
             if(pInstance)
             {
-                if (pInstance->GetData(BOSS_TRIBUNAL_OF_AGES) != DONE) 
+                if (pInstance->GetData(BOSS_TRIBUNAL_OF_AGES) != DONE)
                     pInstance->SetData(BOSS_TRIBUNAL_OF_AGES, NOT_STARTED);
             }
         }
@@ -615,10 +615,10 @@ void brann_bronzebeard::brann_bronzebeardAI::WaypointReached(uint32 id)
     switch (id)
     {
         // Stop before stairs and ask to start
-        case 9: 
+        case 9:
             SetEscortPaused(true);
             me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-            if (pInstance) 
+            if (pInstance)
                 pInstance->SetData(BRANN_BRONZEBEARD, 2);
 
             break;
@@ -670,7 +670,7 @@ public:
         dark_rune_protectorsAI(Creature *c) : ScriptedAI(c)    { }
 
         EventMap events;
-        void Reset() 
+        void Reset()
         {
             events.Reset();
         }
@@ -684,7 +684,7 @@ public:
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
-                return;        
+                return;
 
             events.Update(diff);
             if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -728,7 +728,7 @@ public:
         dark_rune_stormcallerAI(Creature *c) : ScriptedAI(c) { }
 
         EventMap events;
-        void Reset() 
+        void Reset()
         {
             events.Reset();
         }
@@ -783,11 +783,11 @@ public:
     {
         iron_golem_custodianAI(Creature *c) : ScriptedAI(c) { }
         EventMap events;
-        void Reset() 
+        void Reset()
         {
             events.Reset();
         }
-        
+
         void EnterCombat(Unit *)
         {
             events.ScheduleEvent(EVENT_IGC_CRUSH, 6000);
