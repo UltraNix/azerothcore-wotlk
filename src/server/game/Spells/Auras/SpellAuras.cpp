@@ -480,14 +480,6 @@ void Aura::_ApplyForTarget( Unit* target, Unit* caster, AuraApplication * auraAp
 
     m_applications[ target->GetGUID() ] = auraApp;
 
-    for ( auto idx = 0u; idx < MAX_SPELL_EFFECTS; ++idx )
-    {
-        if ( auraApp->HasEffect( idx ) )
-        {
-            m_effectApplications[ idx ].insert( auraApp );
-        }
-    }
-
     // set infinity cooldown state for spells
     if ( caster && caster->GetTypeId() == TYPEID_PLAYER )
     {
@@ -518,11 +510,6 @@ void Aura::_UnapplyForTarget( Unit* target, Unit* caster, AuraApplication * aura
     // aura has to be already applied
     ASSERT( itr->second == auraApp );
     m_applications.erase( itr );
-
-    for ( auto idx = 0u; idx < MAX_SPELL_EFFECTS; ++idx )
-    {
-        m_effectApplications[ idx ].erase( auraApp );
-    }
 
     m_removedApplications.push_back( auraApp );
 
@@ -943,26 +930,20 @@ void Aura::SetStackAmount( uint8 stackAmount )
     m_stackAmount = stackAmount;
     Unit* caster = GetCaster();
 
-    std::vector<AuraApplication*> applications;
+    std::list<AuraApplication*> applications;
     GetApplicationList( applications );
 
-    for ( AuraApplication * application : applications )
-    {
-        if ( !application->GetRemoveMode() )
-            HandleAuraSpecificMods( application, caster, false, true );
-    }
+    for ( std::list<AuraApplication*>::const_iterator apptItr = applications.begin(); apptItr != applications.end(); ++apptItr )
+        if ( !( *apptItr )->GetRemoveMode() )
+            HandleAuraSpecificMods( *apptItr, caster, false, true );
 
     for ( uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i )
-    {
         if ( HasEffect( i ) )
             m_effects[ i ]->ChangeAmount( m_effects[ i ]->CalculateAmount( caster ), false, true );
-    }
 
-    for ( AuraApplication * application : applications )
-    {
-        if ( !application->GetRemoveMode() )
-            HandleAuraSpecificMods( application, caster, true, true );
-    }
+    for ( std::list<AuraApplication*>::const_iterator apptItr = applications.begin(); apptItr != applications.end(); ++apptItr )
+        if ( !( *apptItr )->GetRemoveMode() )
+            HandleAuraSpecificMods( *apptItr, caster, true, true );
 
     SetNeedClientUpdateForTargets();
 }
@@ -1205,25 +1186,19 @@ void Aura::HandleAllEffects( AuraApplication * aurApp, uint8 mode, bool apply )
             m_effects[ i ]->HandleEffect( aurApp, mode, apply );
 }
 
-void Aura::GetApplicationList(std::vector<AuraApplication*> & applicationList) const
+void Aura::GetApplicationList( std::list<AuraApplication*> & applicationList ) const
 {
-    applicationList.reserve( m_applications.size() );
-
     for ( Aura::ApplicationMap::const_iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter )
     {
         if ( appIter->second->GetEffectMask() )
-        {
             applicationList.push_back( appIter->second );
     }
-}
 }
 
 void Aura::SetNeedClientUpdateForTargets() const
 {
     for ( ApplicationMap::const_iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter )
-    {
         appIter->second->SetNeedClientUpdate();
-}
 }
 
 // trigger effects on real aura apply/remove

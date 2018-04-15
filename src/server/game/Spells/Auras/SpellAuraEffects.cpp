@@ -406,23 +406,25 @@ AuraEffect::~AuraEffect()
     delete m_channelData;
 }
 
-void AuraEffect::GetEffectTargetList(std::vector<Unit*> & targetList) const
+void AuraEffect::GetTargetList(std::list<Unit*> & targetList) const
 {
-    Aura::ApplicationSet const & auraSet = GetBase()->GetEffectApplicationSet( GetEffIndex() );
-
-    targetList.reserve( auraSet.size() );
-    std::transform( auraSet.begin(), auraSet.end(), std::back_inserter( targetList ), []( AuraApplication* application )
+    Aura::ApplicationMap const & targetMap = GetBase()->GetApplicationMap();
+    // remove all targets which were not added to new list - they no longer deserve area aura
+    for (Aura::ApplicationMap::const_iterator appIter = targetMap.begin(); appIter != targetMap.end(); ++appIter)
     {
-        return application->GetTarget();
-    });
+        if (appIter->second->HasEffect(GetEffIndex()))
+            targetList.push_back(appIter->second->GetTarget());
+    }
 }
 
-void AuraEffect::GetEffectApplicationList(std::vector<AuraApplication*> & applicationList) const
+void AuraEffect::GetApplicationList(std::list<AuraApplication*> & applicationList) const
 {
-    Aura::ApplicationSet const & auraSet = GetBase()->GetEffectApplicationSet( GetEffIndex() );
-
-    applicationList.reserve( auraSet.size() );
-    std::copy( auraSet.begin(), auraSet.end(), std::back_inserter( applicationList ) );
+    Aura::ApplicationMap const & targetMap = GetBase()->GetApplicationMap();
+    for (Aura::ApplicationMap::const_iterator appIter = targetMap.begin(); appIter != targetMap.end(); ++appIter)
+    {
+        if (appIter->second->HasEffect(GetEffIndex()))
+            applicationList.push_back(appIter->second);
+    }
 }
 
 int32 AuraEffect::CalculateAmount(Unit* caster)
@@ -699,13 +701,12 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
     if (!handleMask)
         return;
 
-    std::vector<AuraApplication*> effectApplications;
-    GetEffectApplicationList(effectApplications);
+    std::list<AuraApplication*> effectApplications;
+    GetApplicationList(effectApplications);
 
-    for ( AuraApplication * application : effectApplications )
-    {
-        HandleEffect( application, handleMask, false );
-    }
+    for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
+        if ((*apptItr)->HasEffect(GetEffIndex()))
+            HandleEffect(*apptItr, handleMask, false);
 
     if (handleMask & AURA_EFFECT_HANDLE_CHANGE_AMOUNT)
     {
@@ -713,14 +714,12 @@ void AuraEffect::ChangeAmount(int32 newAmount, bool mark, bool onStackOrReapply)
             m_amount = newAmount;
         else
             SetAmount(newAmount);
-
         CalculateSpellMod();
     }
 
-    for ( AuraApplication * application : effectApplications )
-    {
-        HandleEffect( application, handleMask, true );
-    }
+    for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
+        if ((*apptItr)->HasEffect(GetEffIndex()))
+            HandleEffect(*apptItr, handleMask, true);
 }
 
 void AuraEffect::HandleEffect(AuraApplication * aurApp, uint8 mode, bool apply)
@@ -892,14 +891,12 @@ void AuraEffect::Update(uint32 diff, Unit* caster)
             m_periodicTimer += m_amplitude;
             UpdatePeriodic(caster);
 
-            std::vector<AuraApplication*> effectApplications;
-            GetEffectApplicationList(effectApplications);
-
+            std::list<AuraApplication*> effectApplications;
+            GetApplicationList(effectApplications);
             // tick on targets of effects
-            for ( AuraApplication * application : effectApplications)
-            {
-                PeriodicTick( application, caster );
-            }
+            for (std::list<AuraApplication*>::const_iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
+                if ((*apptItr)->HasEffect(GetEffIndex()))
+                    PeriodicTick(*apptItr, caster);
         }
     }
 }
