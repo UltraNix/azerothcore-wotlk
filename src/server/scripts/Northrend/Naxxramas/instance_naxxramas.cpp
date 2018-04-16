@@ -553,12 +553,11 @@ public:
                     break;
                 case EVENT_THADDIUS:
                     if (data == NOT_STARTED)
+                    {
                         thaddiusAchievement = true;
-
-                    if (data == DONE)
                         if (GameObject* go = instance->GetGameObject(_goThaddiusEntrance))
-                            go->SetGoState(GO_STATE_ACTIVE);
-
+                            go->SetGoState(GO_STATE_READY);
+                    }
                     Encounters[id] = data;
                     break;
                 case EVENT_LOATHEB:
@@ -700,6 +699,8 @@ public:
                             go->SetGoState(GO_STATE_ACTIVE);
                         if (GameObject* go = instance->GetGameObject(_thaddiusGateGUID))
                             go->SetGoState(GO_STATE_ACTIVE);
+                        if (GameObject* go = instance->GetGameObject(_goThaddiusEntrance))
+                            go->SetGoState(GO_STATE_ACTIVE);
                         break;
                     case EVENT_NOTH:
                         if (GameObject* go = instance->GetGameObject(_nothGateGUID))
@@ -759,6 +760,8 @@ public:
                         if (GameObject* go = instance->GetGameObject(_thaddiusPortalEyeGUID))
                             go->SetGoState(GO_STATE_ACTIVE);
                         if (GameObject* go = instance->GetGameObject(_thaddiusGateGUID))
+                            go->SetGoState(GO_STATE_ACTIVE);
+                        if (GameObject* go = instance->GetGameObject(_goThaddiusEntrance))
                             go->SetGoState(GO_STATE_ACTIVE);
                         break;
                     case EVENT_HORSEMAN:

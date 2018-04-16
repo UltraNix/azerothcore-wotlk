@@ -188,8 +188,6 @@ public:
             if (pInstance)
             {
                 pInstance->SetData(EVENT_THADDIUS, NOT_STARTED);
-                if (GameObject* go = me->GetMap()->GetGameObject(pInstance->GetData64(DATA_THADDIUS_GATE)))
-                    go->SetGoState(GO_STATE_ACTIVE);
             }
 
             me->SummonCreature(NPC_STALAGG, 3450.45f, -2931.42f, 312.091f, 5.49779f);
