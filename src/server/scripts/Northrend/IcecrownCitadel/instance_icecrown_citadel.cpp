@@ -354,6 +354,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (TeamIdInInstance == TEAM_NEUTRAL)
                     TeamIdInInstance = player->GetTeamId();
 
+                // Buff should be applied only on heroic
+                if (instance->IsHeroic())
+                    SetData(DATA_BUFF_AVAILABLE, static_cast<uint32>(false));
+
                 // for professor putricide hc
                 DoRemoveAurasDueToSpellOnPlayers(74119 /*SPELL_GAS_VARIABLE*/);
                 DoRemoveAurasDueToSpellOnPlayers(74118 /*SPELL_OOZE_VARIABLE*/);
@@ -389,7 +393,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
 
                 // apply ICC buff to pets/summons
-                if (GetData(DATA_BUFF_AVAILABLE) && IS_PLAYER_GUID(creature->GetOwnerGUID()) && creature->HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && creature->CanHaveThreatList())
+                if (!instance->IsHeroic() && GetData(DATA_BUFF_AVAILABLE) && IS_PLAYER_GUID(creature->GetOwnerGUID()) && creature->HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && creature->CanHaveThreatList())
                     if (Unit* owner = creature->GetOwner())
                         if (Player* plr = owner->ToPlayer())
                         {

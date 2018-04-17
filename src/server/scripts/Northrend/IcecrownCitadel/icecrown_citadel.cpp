@@ -3305,11 +3305,6 @@ public:
     {
         if (creature->GetEntry() == NPC_GARROSH_HELLSCREAM && player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 11206 || creature->GetEntry() == NPC_KING_VARIAN_WRYNN && player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 11204)
         {
-            // OPEN BETA
-            player->CLOSE_GOSSIP_MENU();
-            ChatHandler(player->GetSession()).PSendSysMessage("You can't turn off the buff in beta!");
-            return true;
-
             if (!player->GetGroup() || !player->GetGroup()->isRaidGroup() || !player->GetGroup()->IsLeader(player->GetGUID()))
             {
                 player->CLOSE_GOSSIP_MENU();
