@@ -775,10 +775,7 @@ class npc_ice_tomb : public CreatureScript
                     {
                         _asphyxiationTimer = 0;
                         if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
-                        {
-                            player->RemoveAurasDueToSpell(SPELL_ICE_TOMB_UNTARGETABLE);
                             player->CastSpell(player, SPELL_ASPHYXIATION, true);
-                        }
                     }
                     else
                         _asphyxiationTimer -= diff;
