@@ -134,6 +134,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             bool _creditBloodQuickening;
             bool _killMinchar;
+            bool _landing;
             uint64 _tankGUID;
             uint64 _offtankGUID;
             std::set<uint64> _bloodboltedPlayers;
@@ -142,6 +143,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void Reset()
             {
+                _landing = false;
                 _creditBloodQuickening = false;
                 _killMinchar = false;
                 _tankGUID = 0;
@@ -219,6 +221,12 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 }
             }
 
+            void DamageTaken(Unit*, uint32& damage, DamageEffectType /*damageEffectType*/, SpellSchoolMask /*mask*/) override
+            {
+                if (_landing && damage >= me->GetHealth())
+                    damage = me->GetHealth() - 1;
+            }
+
             void GoToMinchar()
             {
                 if (!me->IsAlive())
@@ -286,6 +294,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         events.ScheduleEvent(EVENT_AIR_FLY_DOWN, 7000);
                         break;
                     case POINT_GROUND:
+                        _landing = false;
                         me->SetCanFly(false);
                         me->SetDisableGravity(false);
                         me->SetHover(false);
@@ -491,6 +500,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         me->GetMotionMaster()->MoveTakeoff(POINT_AIR, airPos, 0.642857f * 7.0f);
                         break;
                     case EVENT_AIR_FLY_DOWN:
+                        _landing = true;
                         me->GetMotionMaster()->MoveLand(POINT_GROUND, centerPos, 0.642857f * 7.0f);
                         break;
                 }
