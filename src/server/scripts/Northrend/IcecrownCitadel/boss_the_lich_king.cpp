@@ -1139,7 +1139,7 @@ class boss_the_lich_king : public CreatureScript
                         events.CancelEvent(EVENT_DEFILE);
                         events.CancelEvent(EVENT_SOUL_REAPER);
                         events.ScheduleEvent(EVENT_FROSTMOURNE_HEROIC, 6000, EVENT_GROUP_ABILITIES);
-                        events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), EVENT_GROUP_ABILITIES);
+                        events.ScheduleEvent(EVENT_HARVEST_SOULS, 105s, 110s, EVENT_GROUP_ABILITIES);
 
                         for (SummonList::iterator i = summons.begin(); i != summons.end(); ++i)
                             if (Creature* summon = ObjectAccessor::GetCreature(*me, *i))
