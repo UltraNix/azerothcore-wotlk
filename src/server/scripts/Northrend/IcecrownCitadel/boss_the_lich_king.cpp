@@ -377,6 +377,8 @@ public:
             return false;
         if (target == _source->GetVictim())
             return false;
+        if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+            return false;
         if (target->HasAura(SPELL_BOSS_HITTIN_YA_AURA))
             return false;
         if (_maxDist && _source->GetExactDist(target) > _maxDist)
