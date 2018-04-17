@@ -1125,7 +1125,8 @@ class spell_deathbringer_blood_nova_targeting_SpellScript : public SpellScript
         for (auto const& target : targets)
         {
             // Exclude targets with mark / boiling blood
-            if (target->ToUnit()->HasAura(SPELL_MARK_OF_THE_FALLEN_CHAMPION) || target->ToUnit()->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_BOILING_BLOOD, GetCaster())))
+            // However, there should be slight chance that target with boiling blood will be selected anyway
+            if (target->ToUnit()->HasAura(SPELL_MARK_OF_THE_FALLEN_CHAMPION) || (target->ToUnit()->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_BOILING_BLOOD, GetCaster())) && roll_chance_i(90)))
             {
                 targets.remove(target);
                 continue;
