@@ -31,7 +31,8 @@ class instance_culling_of_stratholme : public InstanceMapScript
             // GOs
             _shkafGateGUID = 0;
             _exitGateGUID = 0;
-            
+            _malganisChestGUID = 0;
+
             // Instance
             _crateCount = 0;
             _showCrateTimer = 0;
@@ -96,6 +97,11 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     _exitGateGUID = go->GetGUID();
                     if (_encounterState == COS_PROGRESS_FINISHED)
                         go->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_MALGANIS_CHEST_N:
+                case GO_MALGANIS_CHEST_H:
+                    _malganisChestGUID = go->GetGUID();
+                    go->SetVisible(false);
                     break;
             }
         }
@@ -166,7 +172,17 @@ class instance_culling_of_stratholme : public InstanceMapScript
                     else if (Creature *arthas = instance->GetCreature(_arthasGUID))
                         Reposition(arthas);
                     return;
-
+                case DATA_MALGANIS:
+                    if (data == DONE)
+                    {
+                        if (GameObject* go = instance->GetGameObject(_malganisChestGUID))
+                        {
+                            go->EnableCollision(true);
+                            go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                            go->SetVisible(true);
+                        }
+                        break;
+                    }
             }
 
             if (type == DATA_ARTHAS_EVENT)
@@ -246,7 +262,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
                 uint32 div = uint32(_guardianTimer / (MINUTE*IN_MILLISECONDS));
                 _guardianTimer -= diff;
                 uint32 divAfter = uint32(_guardianTimer / (MINUTE*IN_MILLISECONDS));
-                
+
                 if (divAfter == 0)
                 {
                     _guardianTimer = 0;
@@ -410,6 +426,7 @@ class instance_culling_of_stratholme : public InstanceMapScript
             uint32 _crateCount;
             uint32 _showCrateTimer;
             uint32 _guardianTimer;
+            uint64 _malganisChestGUID;
 
             bool _respawnAndReposition;
             uint32 _loadTimer;

@@ -1,4 +1,4 @@
-#include "ScriptMgr.h"
+﻿#include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "culling_of_stratholme.h"
 #include "Player.h"
@@ -89,6 +89,7 @@ struct boss_mal_ganisAI : public ScriptedAI
 
                 // give credit to players
                 DoCastSelf(58630, true);
+                instance->SetData(DATA_MALGANIS, DONE);
             }
 
             // quest completion
