@@ -138,26 +138,12 @@ public:
                     me->SummonCreature(NPC_YETI, -4837.61f, 1568.58f, 78.21f, 3.13f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                     me->SummonCreature(NPC_YETI, -4841.89f, 1569.95f, 76.53f, 0.68f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                     break;
-                //Second Ambush(3 Gorillas)
-                case 21:
-                    Talk(SAY_OOX_AMBUSH);
-                    me->SummonCreature(NPC_GORILLA, -4595.81f, 2005.99f, 53.08f, 3.74f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    me->SummonCreature(NPC_GORILLA, -4597.53f, 2008.31f, 52.70f, 3.78f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    me->SummonCreature(NPC_GORILLA, -4599.37f, 2010.59f, 52.77f, 3.84f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    break;
-                //Third Ambush(4 Gnolls)
-                case 30:
-                    Talk(SAY_OOX_AMBUSH);
-                    me->SummonCreature(NPC_WOODPAW_REAVER, -4425.14f, 2075.87f, 47.77f, 3.77f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    me->SummonCreature(NPC_WOODPAW_BRUTE, -4426.68f, 2077.98f, 47.57f, 3.77f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    me->SummonCreature(NPC_WOODPAW_MYSTIC, -4428.33f, 2080.24f, 47.43f, 3.87f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    me->SummonCreature(NPC_WOODPAW_ALPHA, -4430.04f, 2075.54f, 46.83f, 3.81f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
-                    break;
-                case 37:
+                case 15:
                     Talk(SAY_OOX_END);
                     // Award quest credit
                     if (Player* player = GetPlayerForEscort())
                         player->GroupEventHappens(QUEST_RESCUE_OOX22FE, me);
+                    me->DespawnOrUnsummon(2000);
                     break;
             }
         }
@@ -251,7 +237,7 @@ struct npc_shay_wanderer_AI : public ScriptedAI
         _playerGUID = 0;
         events.Reset();
     }
-    
+
     void Reset() override
     {
         me->RestoreFaction();
