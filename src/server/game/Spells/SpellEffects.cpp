@@ -996,6 +996,7 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                     if ((spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC || (spell->GetDispelMask() & dispelMask) || dmgClassNone) &&
                         // ignore positive and passive auras
                         !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive() &&
+                        !spell->HasAttribute(SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS) &&
                         // Xinef: Ignore NPC spells having INVULNERABILITY attribute
                         (!spell->HasAttribute(SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY) || spell->SpellFamilyName != SPELLFAMILY_GENERIC))
                     {

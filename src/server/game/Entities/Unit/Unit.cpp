@@ -4590,10 +4590,13 @@ void Unit::RemoveAurasWithMechanic(uint32 mechanic_mask, AuraRemoveMode removemo
         Aura const* aura = iter->second->GetBase();
         if (!except || aura->GetId() != except)
         {
-            if (aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask)
+            if (!aura->GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS))
             {
-                RemoveAura(iter, removemode);
-                continue;
+                if (aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask)
+                {
+                    RemoveAura(iter, removemode);
+                    continue;
+                }
             }
         }
         ++iter;
@@ -4606,11 +4609,14 @@ void Unit::RemoveAurasByShapeShift()
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
     {
         Aura const* aura = iter->second->GetBase();
-        if ((aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask) &&
-            (!aura->GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_AURA_CC) || (aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARRIOR && (aura->GetSpellInfo()->SpellFamilyFlags[1] & 0x20))))
+        if (!aura->GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS))
         {
-            RemoveAura(iter);
-            continue;
+            if ((aura->GetSpellInfo()->GetAllEffectsMechanicMask() & mechanic_mask) &&
+                (!aura->GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_AURA_CC) || (aura->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_WARRIOR && (aura->GetSpellInfo()->SpellFamilyFlags[1] & 0x20))))
+            {
+                RemoveAura(iter);
+                continue;
+            }
         }
         ++iter;
     }

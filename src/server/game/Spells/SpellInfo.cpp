@@ -1355,6 +1355,9 @@ bool SpellInfo::CanDispelAura(SpellInfo const* aura) const
     if (aura->HasAttribute(SPELL_ATTR1_UNAFFECTED_BY_SCHOOL_IMMUNE))
         return false;
 
+    if (aura->HasAttribute(SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS))
+        return false;
+
     return true;
 }
 
