@@ -252,6 +252,31 @@ public:
 };
 
 /*######
+## go_stasis_chamber_bashir
+######*/
+
+enum bashir
+{
+    NPC_BASHIR    = 22920
+};
+class go_stasis_chamber_bashir : public GameObjectScript
+{
+public:
+    go_stasis_chamber_bashir() : GameObjectScript("go_stasis_chamber_bashir") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        go->SetRespawnTime(60);
+        go->SetLootState(GO_JUST_DEACTIVATED);
+
+        if (Creature* creature = player->SummonCreature(NPC_BASHIR, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetAngle(player),
+            TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+
+        return false;
+    }
+};
+
+/*######
 ## go_ethereum_stasis
 ######*/
 
@@ -1256,4 +1281,5 @@ void AddSC_go_scripts()
     new go_hive_pod();
     new go_massive_seaforium_charge();
     new go_veil_skith_cage();
+    new go_stasis_chamber_bashir();
 }
