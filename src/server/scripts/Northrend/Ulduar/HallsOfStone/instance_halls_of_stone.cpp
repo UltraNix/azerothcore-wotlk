@@ -29,8 +29,6 @@ public:
         uint64 goSkyRoomFloorGUID;
         uint64 goSjonnirConsoleGUID;
         uint64 goSjonnirDoorGUID;
-        uint64 goMaidenDoorGUID;
-        uint64 goTribunalDoorGUID;
         uint64 goLeftPipeGUID;
         uint64 goRightPipeGUID;
 
@@ -51,8 +49,6 @@ public:
             goSkyRoomFloorGUID = 0;
             goSjonnirConsoleGUID = 0;
             goSjonnirDoorGUID = 0;
-            goMaidenDoorGUID = 0;
-            goTribunalDoorGUID = 0;
             goLeftPipeGUID = 0;
             goRightPipeGUID = 0;
 
@@ -103,14 +99,6 @@ public:
                     goSjonnirDoorGUID = go->GetGUID();
                     if (Encounter[BOSS_TRIBUNAL_OF_AGES] == DONE)
                         go->SetGoState(GO_STATE_ACTIVE);
-                    break;
-                case GO_MAIDEN_DOOR:
-                    goMaidenDoorGUID = go->GetGUID();
-                    go->SetGoState(GO_STATE_READY);
-                    break;
-                case GO_TRIBUNAL_DOOR:
-                    goTribunalDoorGUID = go->GetGUID();
-                    go->SetGoState(GO_STATE_READY);
                     break;
                 case GO_LEFT_PIPE:
                     goLeftPipeGUID = go->GetGUID();
@@ -184,16 +172,6 @@ public:
         {
             if (type < MAX_ENCOUNTER)
                 Encounter[type] = data;
-            if (type == BOSS_KRYSTALLUS && data == DONE)
-            {
-                if (GameObject* go = instance->GetGameObject(goMaidenDoorGUID))
-                    go->SetGoState(GO_STATE_ACTIVE);
-            }
-            if (type == BOSS_MAIDEN_OF_GRIEF && data == DONE)
-            {
-                if (GameObject* go = instance->GetGameObject(goTribunalDoorGUID))
-                    go->SetGoState(GO_STATE_ACTIVE);
-            }
             if (type == BOSS_TRIBUNAL_OF_AGES && data == DONE)
             {
                 if (GameObject* pA = instance->GetGameObject(goAbedneumGUID))
