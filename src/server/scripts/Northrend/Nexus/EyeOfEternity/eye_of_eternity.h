@@ -11,8 +11,9 @@ enum Objects
     GO_IRIS_N                    = 193958,
     GO_IRIS_H                    = 193960,
     GO_EXIT_PORTAL               = 193908,
+    GO_ALEXSTRASZA_GIFT_N        = 193905,
+    GO_ALEXSTRASZA_GIFT_H        = 193967,
 };
-#define ALEXSTRASZA_GIFT        DUNGEON_MODE(193905, 193967)
 #define HEART_OF_MAGIC          DUNGEON_MODE(194158, 194159)
 
 enum NPCs
@@ -102,7 +103,7 @@ enum sounds
     SOUND_SLAY_3_1                          = 14534,
     SOUND_SLAY_3_2                          = 14535,
     SOUND_SLAY_3_3                          = 14536,
-    
+
     SOUND_AGGRO_1                           = 14517,
     SOUND_AGGRO_2                           = 14523,
     SOUND_DEEP_BREATH                       = 14518,

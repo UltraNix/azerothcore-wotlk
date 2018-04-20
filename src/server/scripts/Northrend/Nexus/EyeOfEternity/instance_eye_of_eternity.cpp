@@ -41,6 +41,7 @@ public:
         uint64 GO_IrisGUID;
         uint64 GO_ExitPortalGUID;
         uint64 GO_PlatformGUID;
+        uint64 GO_AlexstraszaGiftGUID;
         bool bPokeAchiev;
 
         void Initialize()
@@ -51,9 +52,10 @@ public:
             GO_IrisGUID = 0;
             GO_ExitPortalGUID = 0;
             GO_PlatformGUID = 0;
+            GO_AlexstraszaGiftGUID = 0;
             bPokeAchiev = false;
         }
-        
+
         bool IsEncounterInProgress() const
         {
             return EncounterStatus == IN_PROGRESS;
@@ -110,6 +112,11 @@ public:
                 case GO_NEXUS_PLATFORM:
                     GO_PlatformGUID = go->GetGUID();
                     break;
+                case GO_ALEXSTRASZA_GIFT_N:
+                case GO_ALEXSTRASZA_GIFT_H:
+                    GO_AlexstraszaGiftGUID = go->GetGUID();
+                    go->SetVisible(false);
+                    break;
             }
         }
 
@@ -149,6 +156,12 @@ public:
                             bPokeAchiev = false;
                             if (GameObject* go = instance->GetGameObject(GO_ExitPortalGUID))
                                 go->SetPhaseMask(1, true);
+                            if (GameObject* go = instance->GetGameObject(GO_AlexstraszaGiftGUID))
+                            {
+                                go->EnableCollision(true);
+                                go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                                go->SetVisible(true);
+                            }
                             if (Creature* c = instance->GetCreature(NPC_MalygosGUID))
                                 if (Creature* alexstrasza = c->SummonCreature(NPC_ALEXSTRASZA, 798.0f, 1268.0f, 299.0f, 2.45f ,TEMPSUMMON_TIMED_DESPAWN, 604800000))
                             break;

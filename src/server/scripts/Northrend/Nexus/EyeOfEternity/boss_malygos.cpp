@@ -1448,7 +1448,6 @@ public:
                     break;
                 case 1:
                     me->CastSpell(773.98f, 1285.97f, 266.254f, SPELL_ALEXSTRASZA_GIFT, true);
-                    me->SummonGameObject(ALEXSTRASZA_GIFT, 773.98f, 1285.97f, 266.254f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
                     me->SummonGameObject(HEART_OF_MAGIC, 773.98f, 1275.97f, 266.254f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0);
 
                     me->PlayDirectSound(14406);
