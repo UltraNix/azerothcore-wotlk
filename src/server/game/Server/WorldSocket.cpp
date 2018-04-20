@@ -1001,21 +1001,24 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     // Check VPN connection
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_VPN);
-
-    if (PreparedQueryResult vpnList = LoginDatabase.Query(stmt))
+    if (sWorld->getBoolConfig(CONFIG_LATENCY_RECORD))
     {
-        do
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_VPN);
+
+        if (PreparedQueryResult vpnList = LoginDatabase.Query(stmt))
         {
-            Field* fields = vpnList->Fetch();
-            std::string vpnIP = fields[0].GetString();
+            do
+            {
+                Field* fields = vpnList->Fetch();
+                std::string vpnIP = fields[0].GetString();
 
-            if (vpnIP != GetRemoteAddress())
-                continue;
+                if (vpnIP != GetRemoteAddress())
+                    continue;
 
-            m_Session->setVPNconnection(true);
+                m_Session->setVPNconnection(true);
 
-        } while (vpnList->NextRow());
+            } while (vpnList->NextRow());
+        }
     }
 
     // Initialize Warden system only if it is enabled by config
