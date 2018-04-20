@@ -270,7 +270,7 @@ public:
         go->SetLootState(GO_JUST_DEACTIVATED);
 
         if (Creature* creature = player->SummonCreature(NPC_BASHIR, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), go->GetAngle(player),
-            TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+            TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000)) {}
 
         return false;
     }
