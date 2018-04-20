@@ -190,6 +190,7 @@ enum WorldBoolConfigs
     CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE,   // Riztazz: Same as above but for alliance
     CONFIG_MAIL_SPAM_ENABLE,                  // Sitowsky: Enables or disables the additional system of preventing low level characters mailbox spam without having a character of a required level.
     CONFIG_ADDITIONAL_MALYGOS_BOOST,          // Turns on or off additional boosts for malygos (angrathar)
+    CONFIG_ITEM_RESTORE,                      // Sitowsky: Item Restore
     BOOL_CONFIG_VALUE_COUNT
 };
 

@@ -32,7 +32,7 @@ extern LoginDatabaseWorkerPool LoginDatabase;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL), cheatLogFile(NULL), rafLogFile(NULL),
+    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL), cheatLogFile(NULL), itemRestoreLogFile(NULL), rafLogFile(NULL),
     m_gmlog_per_account(false), m_enableLogDB(false), m_colored(false)
 {
     Initialize();
@@ -99,6 +99,10 @@ Log::~Log()
     if (cheatLogFile != NULL)
         fclose(cheatLogFile);
     cheatLogFile = NULL;
+
+    if (itemRestoreLogFile != NULL)
+        fclose(itemRestoreLogFile);
+    itemRestoreLogFile = NULL;
 
     if (rafLogFile != NULL)
         fclose(rafLogFile);
@@ -189,6 +193,7 @@ void Log::Initialize()
     lootLogFile         = openLogFile("LootLogFile", "LootLogTimestamp", "a");
     rewardsLogFile      = openLogFile("RewardsLogFile", "RewardsLogTimestamp", "a");
     chinaTownLogFile    = openLogFile("ChinaTownLogFile", "ChinaTownLogTimestamp", "a");
+    itemRestoreLogFile  = openLogFile("ItemRestoreLogFile", "ItemRestoreLogTimestamp", "a");
     releaseDebugLogFile = openLogFile("ReleaseDebugLogFile", "ReleaseDebugLogTimestamp", "a");
     cheatLogFile        = openLogFile("CheatLogFile", "CheatLogTimestamp", "a");
     rafLogFile          = openLogFile("RaFLogFile", "RaFLogTimestamp", "a");
@@ -1161,6 +1166,33 @@ void Log::outChinaTown(const char * str, ...)
     }
 }
 
+
+void Log::outItemRestore(const char * str, ...)
+{
+    if (!str)
+        return;
+
+    if (m_enableLogDB)
+    {
+        va_list ap2;
+        va_start(ap2, str);
+        char nnew_str[MAX_QUERY_LEN];
+        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
+        outDB(LOG_TYPE_PERF, nnew_str);
+        va_end(ap2);
+    }
+
+    if (itemRestoreLogFile)
+    {
+        outTimestamp(itemRestoreLogFile);
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(itemRestoreLogFile, str, ap);
+        fprintf(itemRestoreLogFile, "\n");
+        fflush(itemRestoreLogFile);
+        va_end(ap);
+    }
+}
 
 void Log::outReleaseDebug(const char * str, ...)
 {

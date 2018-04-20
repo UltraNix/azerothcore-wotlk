@@ -378,6 +378,9 @@ void Item::SaveToDB(SQLTransaction& trans)
             if (!isInTransaction)
                 CharacterDatabase.CommitTransaction(trans);
 
+            // Sitowsky: Item Restore
+            ItemRestore(GUID_LOPART(GetOwnerGUID()), GetEntry(), GetCount(), ITEM_RESTORE_ACTION_INSERT);
+
             sObjectMgr->RequestItemDestroy( this );
             return;
         }
@@ -1253,6 +1256,34 @@ int32 Item::GetSpellCharges(uint8 index, bool normal) const
 void Item::SetSpellCharges(uint8 index, int32 value)
 {
     SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, (value > 0) ? -value : value);
+}
+
+
+void Item::ItemRestore(uint32 pGuidLow, uint32 pItemEntry, uint32 count, RestoreAction action)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ITEM_RESTORE))
+        return;
+
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(pItemEntry);
+    if (!proto || proto->Quality < ITEM_QUALITY_RARE || proto->Class == ITEM_CLASS_QUEST)
+        return;
+
+    switch (action)
+    {
+        case ITEM_RESTORE_ACTION_INSERT:
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ITEM_RESTORE);
+            stmt->setUInt32(0, pGuidLow);
+            stmt->setUInt32(1, pItemEntry);
+            stmt->setUInt32(2, count);
+            stmt->setUInt32(3, time(nullptr));
+            CharacterDatabase.Execute(stmt);
+            sLog->outItemRestore("Player GUID: %u has deleted item entry: %u, item count: %u", pGuidLow, pItemEntry, count);
+            break;
+        }
+        case ITEM_RESTORE_ACTION_SELECT: { /* TODO OR HANDLE BY SENDITEMS COMMAND ? */ } break;
+        case ITEM_RESTORE_ACTION_RESTORE:  { /* TODO  OR HANDLE BY SENDITEMS COMMAND ? */ } break;
+    }
 }
 
 const ItemRef NullItemRef = ItemRef( nullptr );

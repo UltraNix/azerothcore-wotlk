@@ -173,6 +173,14 @@ enum EnchantmentSlot
     MAX_ENCHANTMENT_SLOT            = 12
 };
 
+// Sitowsky: Item Restore
+enum RestoreAction
+{
+    ITEM_RESTORE_ACTION_INSERT  = 0,
+    ITEM_RESTORE_ACTION_SELECT  = 1,
+    ITEM_RESTORE_ACTION_RESTORE = 2
+};
+
 #define MAX_VISIBLE_ITEM_OFFSET       2                     // 2 fields per visible item (entry+enchantment)
 
 #define MAX_GEM_SOCKETS               MAX_ITEM_PROTO_SOCKETS// (BONUS_ENCHANTMENT_SLOT-SOCK_ENCHANTMENT_SLOT) and item proto size, equal value expected
@@ -343,6 +351,9 @@ class Item : public Object
         uint32 GetRefundRecipient() { return m_refundRecipient; }
         uint32 GetPaidMoney() { return m_paidMoney; }
         uint32 GetPaidExtendedCost() { return m_paidExtendedCost; }
+
+        // Sitowsky: Item Restore
+        void ItemRestore(uint32 pGuidLow, uint32 pItemEntry, uint32 count, RestoreAction action);
 
         void UpdatePlayedTime(Player* owner);
         uint32 GetPlayedTime();

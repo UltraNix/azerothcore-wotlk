@@ -571,4 +571,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_MAX_LEVEL_BY_ACC_ID, "SELECT MAX(level) FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_FRIEND_OF_MINE, "SELECT friend FROM character_social WHERE guid = ? AND friend = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_GUILD_MATE, "SELECT guildid FROM guild_member WHERE guid = ?", CONNECTION_SYNCH);
+    // Sitowsky: Item Restore
+    PrepareStatement(CHAR_INS_ITEM_RESTORE, "INSERT INTO item_restore (guid, item, count, date) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_ITEM_RESTORE, "SELECT item, count FROM item_restore WHERE guid = ? AND item = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_ITEM_RESTORE, "DELETE FROM item_restore WHERE guid = ? AND item = ?", CONNECTION_ASYNC);
 }
