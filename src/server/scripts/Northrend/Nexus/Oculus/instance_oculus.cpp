@@ -36,23 +36,23 @@ public:
         bool bAmberVoid;
         bool bEmeraldVoid;
         bool bRubyVoid;
-        
+
         void Initialize()
         {
-            EregosCacheGUID    = 0;
-            uiDrakosGUID    = 0;
-            uiVarosGUID        = 0;
-            uiUromGUID        = 0;
-            uiEregosGUID    = 0;
-            CentrifugeCount    = 0;
-            bAmberVoid = false;
-            bEmeraldVoid = false;
-            bRubyVoid = false;
+            EregosCacheGUID        = 0;
+            uiDrakosGUID           = 0;
+            uiVarosGUID            = 0;
+            uiUromGUID             = 0;
+            uiEregosGUID           = 0;
+            CentrifugeCount        = 0;
+            bAmberVoid             = false;
+            bEmeraldVoid           = false;
+            bRubyVoid              = false;
 
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
             memset(&DragonCageDoorGUID, 0, sizeof(DragonCageDoorGUID));
         }
-        
+
         void OnCreatureCreate(Creature* pCreature)
         {
             switch( pCreature->GetEntry() )
@@ -95,6 +95,7 @@ public:
                 case GO_CACHE_OF_EREGOS:
                 case GO_CACHE_OF_EREGOS_HERO:
                     EregosCacheGUID = pGo->GetGUID();
+                    pGo->SetVisible(false);
                     break;
             }
         }
@@ -118,7 +119,7 @@ public:
             if (unit->GetEntry() == NPC_CENTRIFUGE_CONSTRUCT)
                 SetData(DATA_CC_COUNT, DONE);
         }
-        
+
         void SetData(uint32 type, uint32 data)
         {
             switch( type )
@@ -153,7 +154,12 @@ public:
                 case DATA_EREGOS:
                     m_auiEncounter[DATA_EREGOS] = data;
                     if (data == DONE)
-                        DoRespawnGameObject(EregosCacheGUID, 7*DAY);
+                        if (GameObject* go = instance->GetGameObject(EregosCacheGUID))
+                        {
+                            go->EnableCollision(true);
+                            go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                            go->SetVisible(true);
+                        }
                     break;
                 case DATA_CC_COUNT:
                     if( CentrifugeCount < 10 )
@@ -183,7 +189,7 @@ public:
             if( data == DONE )
                 SaveToDB();
         }
-        
+
         uint32 GetData(uint32 type) const
         {
             switch( type )
@@ -199,7 +205,7 @@ public:
 
             return 0;
         }
-        
+
         uint64 GetData64(uint32 identifier) const
         {
             switch( identifier )
@@ -221,7 +227,7 @@ public:
             return 0;
         }
 
-        
+
         std::string GetSaveData()
         {
             OUT_SAVE_INST_DATA;
