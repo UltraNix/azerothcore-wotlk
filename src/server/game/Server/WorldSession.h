@@ -419,6 +419,9 @@ class WorldSession
             return _premiumServices[serviceId] > time(nullptr);
         }
 
+        bool hasVPNconnection() const { return _vpnActive;  }
+        void setVPNconnection(bool isVPNconnection) { _vpnActive = isVPNconnection; }
+
     public:                                                 // opcodes handlers
 
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -1088,6 +1091,7 @@ class WorldSession
         uint32 _offlineTime;
         bool _kicked;
         bool _shouldSetOfflineInDB;
+        bool _vpnActive;
 };
 #endif
 /// @}

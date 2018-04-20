@@ -575,4 +575,6 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_ITEM_RESTORE, "INSERT INTO item_restore (guid, item, count, date) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ITEM_RESTORE, "SELECT item, count FROM item_restore WHERE guid = ? AND item = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_ITEM_RESTORE, "DELETE FROM item_restore WHERE guid = ? AND item = ?", CONNECTION_ASYNC);
+    // Sitowsky: Latency Recorder
+    PrepareStatement(CHAR_INS_LATENCY_RECORD, "INSERT INTO latency_record (guid, latency, sunwellVPN, date) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
 }

@@ -3614,6 +3614,16 @@ ChinaTown.Spam.Timer = 10
 ItemRestore.Enable = 0
 
 #
+#     LatencyRecorder.Enable
+#     Description: Enables or disables latency recorder.
+#     Default:     0 - (Disabled)
+#                  1 - (Enabled)
+#
+
+LatencyRecorder.Enable = 0
+LatencyRecorder.onlyLogout.Enable = 0
+
+#
 #     Wintergrasp.Reminder
 #     Description: Sends reminder message before start of Wintergrasp (15, 10, 5 and 1 minute)
 #     Default:     0 - (Disabled)

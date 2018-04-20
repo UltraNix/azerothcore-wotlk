@@ -103,4 +103,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_GET_IP2NATION_PLAYER_IP, "SELECT last_ip FROM account WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_REP_MUTE_HISTORY, "REPLACE INTO account_mute_history (account_id, characterName, muteReason, muteBy, minutes, RealmID) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_MUTE_HISTORY, "SELECT characterName, muteReason, muteBy, minutes, DATE_FORMAT(mute_date, '%Y-%m-%d | %T') FROM account_mute_history WHERE account_id = ? AND RealmID = ? ORDER BY mute_date DESC", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_VPN, "SELECT vpnIp FROM vpn_list WHERE vpnActive = 1", CONNECTION_SYNCH);
 }

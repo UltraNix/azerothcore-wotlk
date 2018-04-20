@@ -191,6 +191,8 @@ enum WorldBoolConfigs
     CONFIG_MAIL_SPAM_ENABLE,                  // Sitowsky: Enables or disables the additional system of preventing low level characters mailbox spam without having a character of a required level.
     CONFIG_ADDITIONAL_MALYGOS_BOOST,          // Turns on or off additional boosts for malygos (angrathar)
     CONFIG_ITEM_RESTORE,                      // Sitowsky: Item Restore
+    CONFIG_LATENCY_RECORD,                    // Sitowsky: Latency Recorder
+    CONFIG_STATS_LATENCY_ONLY_ON_LOGOUT,      // Sitowsky: Latency Recorder only on logout?
     BOOL_CONFIG_VALUE_COUNT
 };
 

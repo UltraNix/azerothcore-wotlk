@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS `vpn_list`;
+
+CREATE TABLE `vpn_list` (
+  `vpnId` int(11) NOT NULL DEFAULT '0' COMMENT 'VPN id',
+  `vpnName` varchar(30) NOT NULL DEFAULT 'vpnName' COMMENT 'VPN name',
+  `vpnIp` varchar(120) NOT NULL DEFAULT 'vpnIP' COMMENT 'VPN IP',
+  `vpnActive` tinyint(3) NOT NULL DEFAULT '0' COMMENT 'VPN Active',
+  PRIMARY KEY (`vpnId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='VPN List';

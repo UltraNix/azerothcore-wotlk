@@ -512,6 +512,8 @@ enum CharacterDatabaseStatements
     CHAR_INS_ITEM_RESTORE,
     CHAR_SEL_ITEM_RESTORE,
     CHAR_DEL_ITEM_RESTORE,
+    // Sitowsky: Latency Recorder
+    CHAR_INS_LATENCY_RECORD,
 
     MAX_CHARACTERDATABASE_STATEMENTS
 };

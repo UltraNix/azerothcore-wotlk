@@ -19802,6 +19802,9 @@ void Player::SaveToDB(bool create, bool logout)
     if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
         _SaveStats(trans);
 
+    if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_LATENCY_ONLY_ON_LOGOUT))
+        _SaveLatency(trans);
+
     CharacterDatabase.CommitTransaction(trans);
 
     // we save the data here to prevent spamming
@@ -20489,6 +20492,22 @@ void Player::_SaveStats(SQLTransaction& trans)
 
     trans->Append(stmt);
 }
+
+void Player::_SaveLatency(SQLTransaction& trans)
+{
+    if (!sWorld->getBoolConfig(CONFIG_LATENCY_RECORD))
+        return;
+
+    PreparedStatement* stmt = NULL;
+
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LATENCY_RECORD);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, GetSession()->GetLatency());
+    stmt->setUInt32(2, GetSession()->hasVPNconnection());
+    stmt->setUInt32(3, time(nullptr));
+    trans->Append(stmt);
+}
+
 
 void Player::outDebugValues() const
 {

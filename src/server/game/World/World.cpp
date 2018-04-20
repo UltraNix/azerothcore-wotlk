@@ -1384,6 +1384,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WINTERGRASP_REMINDER] = sConfigMgr->GetIntDefault("Wintergrasp.Reminder", 0);
     m_bool_configs[CONFIG_ADDITIONAL_MALYGOS_BOOST] = sConfigMgr->GetBoolDefault("MalygosAdditionalBoost.Enable", false);
     m_bool_configs[CONFIG_ITEM_RESTORE] = sConfigMgr->GetBoolDefault("ItemRestore.Enable", false);
+    m_bool_configs[CONFIG_LATENCY_RECORD] = sConfigMgr->GetBoolDefault("LatencyRecorder.Enable", false);
+    m_bool_configs[CONFIG_STATS_LATENCY_ONLY_ON_LOGOUT] = sConfigMgr->GetBoolDefault("LatencyRecorder.onlyLogout.Enable", false);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)

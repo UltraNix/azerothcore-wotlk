@@ -110,6 +110,7 @@ isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0
     _offlineTime = 0;
     _kicked = false;
     _shouldSetOfflineInDB = true;
+    _vpnActive = false;
 
     for (uint8 i = 0; i < MAX_PREMIUM_SERVICES; i++)
     {
