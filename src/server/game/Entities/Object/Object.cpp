@@ -895,6 +895,14 @@ bool Position::HasInLine(WorldObject const* target, float width) const
     return fabs(sin(angle)) * GetExactDist2d(target->GetPositionX(), target->GetPositionY()) < width;
 }
 
+bool Position::operator==(Position const &a)
+{
+    return (G3D::fuzzyEq(a.m_positionX, m_positionX) &&
+            G3D::fuzzyEq(a.m_positionY, m_positionY) &&
+            G3D::fuzzyEq(a.m_positionZ, m_positionZ) &&
+            G3D::fuzzyEq(a.m_orientation, m_orientation));
+}
+
 std::string Position::ToString() const
 {
     std::stringstream sstr;

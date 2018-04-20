@@ -424,6 +424,13 @@ struct Position
     float m_positionZ;
     float m_orientation;
 
+    bool operator==(Position const &a);
+
+    inline bool operator!=(Position const &a)
+    {
+        return !(operator==(a));
+    }
+
     void Relocate(float x, float y)
         { m_positionX = x; m_positionY = y;}
     void Relocate(float x, float y, float z)
