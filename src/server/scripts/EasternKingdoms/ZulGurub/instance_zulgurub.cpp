@@ -254,16 +254,10 @@ public:
         void OnStateChanged(uint32 /*state*/, Unit* /*stateChanger*/) override
         {
             if (!instance)
-            {
-                std::cout << "nie weszlo 1\n";
                 return;
-            }
 
             if (instance->GetData(DATA_EDGE_OF_MADNESS) == DONE)
-            {
-                std::cout << "nie weszlo 1\n";
                 return;
-            }
 
             go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
             uint32 eventActive = 0;
@@ -276,7 +270,6 @@ public:
                 }
             }
 
-            std::cout << "eventActive: " << eventActive << std::endl;
             switch (eventActive)
             {
                 case EVENT_RENATAKI:
