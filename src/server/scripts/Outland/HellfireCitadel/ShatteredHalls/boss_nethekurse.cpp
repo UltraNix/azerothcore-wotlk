@@ -92,17 +92,21 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                     case SETDATA_PEON_AGGRO:
                         if (PeonEngagedCount >= 4)
                             return;
-                        if (EventStage == EVENT_STAGE_NONE)
-                            StartNethekurseRoleplay();
                         if (EventStage < EVENT_STAGE_TAUNT)
+                        {
                             Talk(SAY_PEON_ATTACKED);
+                            StartNethekurseRoleplay();
+                        }
                         break;
                     case SETDATA_PEON_DEATH:
                         if (PeonKilledCount >= 4)
                             return;
 
                         if (EventStage < EVENT_STAGE_TAUNT)
+                        {
                             Talk(SAY_PEON_DIES);
+                            StartNethekurseRoleplay();
+                        }
 
                         if (++PeonKilledCount == 4)
                             events2.ScheduleEvent(EVENT_START_ATTACK, 5000);
