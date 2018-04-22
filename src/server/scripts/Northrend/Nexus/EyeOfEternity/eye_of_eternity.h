@@ -12,9 +12,10 @@ enum Objects
     GO_IRIS_H                    = 193960,
     GO_EXIT_PORTAL               = 193908,
     GO_ALEXSTRASZA_GIFT_N        = 193905,
-    GO_ALEXSTRASZA_GIFT_H        = 193967
+    GO_ALEXSTRASZA_GIFT_H        = 193967,
+    GO_HEART_OF_MAGIC_N          = 194158,
+    GO_HEART_OF_MAGIC_H          = 194159
 };
-#define HEART_OF_MAGIC          DUNGEON_MODE(194158, 194159)
 
 enum NPCs
 {

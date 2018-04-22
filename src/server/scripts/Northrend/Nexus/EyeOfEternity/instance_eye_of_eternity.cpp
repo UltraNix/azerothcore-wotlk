@@ -42,6 +42,7 @@ public:
         uint64 GO_ExitPortalGUID;
         uint64 GO_PlatformGUID;
         uint64 GO_AlexstraszaGiftGUID;
+        uint64 GO_HeartOfMagicGUID;
         bool bPokeAchiev;
 
         void Initialize()
@@ -117,6 +118,11 @@ public:
                     GO_AlexstraszaGiftGUID = go->GetGUID();
                     go->SetVisible(false);
                     break;
+                case GO_HEART_OF_MAGIC_N:
+                case GO_HEART_OF_MAGIC_H:
+                    GO_HeartOfMagicGUID = go->GetGUID();
+                    go->SetVisible(false);
+                    break;
             }
         }
 
@@ -157,6 +163,12 @@ public:
                             if (GameObject* go = instance->GetGameObject(GO_ExitPortalGUID))
                                 go->SetPhaseMask(1, true);
                             if (GameObject* go = instance->GetGameObject(GO_AlexstraszaGiftGUID))
+                            {
+                                go->EnableCollision(true);
+                                go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                                go->SetVisible(true);
+                            }
+                            if (GameObject* go = instance->GetGameObject(GO_HeartOfMagicGUID))
                             {
                                 go->EnableCollision(true);
                                 go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
