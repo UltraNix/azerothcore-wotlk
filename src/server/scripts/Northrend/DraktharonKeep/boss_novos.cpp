@@ -172,7 +172,7 @@ class boss_novos : public CreatureScript
                         {
                             Talk(SAY_SUMMONING_ADDS);
                             Talk(EMOTE_SUMMONING_ADDS);
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 60.0f))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 90.0f))
                                 target->CastSpell(target, SPELL_SUMMON_CRYSTAL_HANDLER, true, NULL, NULL, me->GetGUID());
                             events.ScheduleEvent(EVENT_SUMMON_CRYSTAL_HANDLER, 20000);
                         }
