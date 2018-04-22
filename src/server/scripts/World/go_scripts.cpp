@@ -1240,6 +1240,54 @@ public:
 	}
 };
 
+enum DeadRiseClue
+{
+    GO_DEBRIS    = 187022,
+    GO_CHEST     = 187023,
+    GO_FEATHER   = 187026,
+    GO_CANNONBAL = 187027,
+
+    NPC_FENGIR   = 24874,
+    NPC_WIDAN    = 24875,
+    NPC_RODIN    = 24876,
+    NPC_ISULDOF  = 24877,
+
+    SAY_LINE_1   = 1
+};
+
+class go_dead_rise_clue : public GameObjectScript
+{
+public:
+    go_dead_rise_clue() : GameObjectScript("go_dead_rise_clue") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        go->SetRespawnTime(60);
+
+        switch (go->GetEntry())
+        {
+            case GO_DEBRIS:
+                if (Creature* npc = GetClosestCreatureWithEntry(go, NPC_FENGIR, 10.0f))
+                    npc->AI()->Talk(SAY_LINE_1);
+                break;
+            case GO_CHEST:
+                if (Creature* npc = GetClosestCreatureWithEntry(go, NPC_RODIN, 10.0f))
+                    npc->AI()->Talk(SAY_LINE_1);
+                break;
+            case GO_FEATHER:
+                if (Creature* npc = GetClosestCreatureWithEntry(go, NPC_ISULDOF, 10.0f))
+                    npc->AI()->Talk(SAY_LINE_1);
+                break;
+            case GO_CANNONBAL:
+                if (Creature* npc = GetClosestCreatureWithEntry(go, NPC_WIDAN, 10.0f))
+                    npc->AI()->Talk(SAY_LINE_1);
+                break;
+        }
+
+        return false;
+    }
+};
+
 void AddSC_go_scripts()
 {
     // Ours
@@ -1281,4 +1329,5 @@ void AddSC_go_scripts()
     new go_massive_seaforium_charge();
     new go_veil_skith_cage();
     new go_stasis_chamber_bashir();
+    new go_dead_rise_clue();
 }
