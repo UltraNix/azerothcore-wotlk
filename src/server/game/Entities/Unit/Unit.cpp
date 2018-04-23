@@ -13341,7 +13341,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
         data.Initialize(moveTypeToOpcode[mtype][0], 8 + 4);
         data.append(GetPackGUID());
         data << float(GetSpeed(mtype));
-        SendMessageToSet(&data, false);
+        SendMessageToSet(&data, true);
     }
 }
 
