@@ -411,13 +411,13 @@ public:
         void MountSelf()
         {
             me->Mount(SKARLOC_MOUNT_MODEL);
-            me->SetSpeed(MOVE_RUN, SPEED_MOUNTED);
+            me->SetSpeedRate(MOVE_RUN, SPEED_MOUNTED);
         }
 
         void UnMountSelf()
         {
             me->Dismount();
-            me->SetSpeed(MOVE_RUN, SPEED_RUNNING);
+            me->SetSpeedRate(MOVE_RUN, SPEED_RUNNING);
         }
 
         void MovementInform(uint32 type, uint32 point)

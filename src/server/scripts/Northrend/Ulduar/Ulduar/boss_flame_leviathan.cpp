@@ -1777,7 +1777,7 @@ public:
     {
         npc_mechanoliftAI(Creature *c) : NullCreatureAI(c) 
         { 
-            me->SetSpeed(MOVE_RUN, rand_norm()+0.5f);
+            me->SetSpeedRate(MOVE_RUN, rand_norm()+0.5f);
         }
 
         int32 _startTimer;

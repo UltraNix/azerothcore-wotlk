@@ -1101,7 +1101,7 @@ class npc_blood_queen_lana_thel : public CreatureScript
                 {
                     summon->SetDisplayId(11686); // it's a general npc, and the template has 2 models (first is an infernal)
                     summon->CastSpell(summon, SPELL_OOC_INVOCATION_VISUAL, true);
-                    summon->SetSpeed(MOVE_RUN, 0.15f, true);
+                    summon->SetSpeedRate(MOVE_RUN, 0.15f);
                     summon->GetMotionMaster()->MovePoint(0, triggerEndPos);
                 }
             }

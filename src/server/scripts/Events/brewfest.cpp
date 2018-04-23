@@ -121,7 +121,7 @@ public:
 
     struct npc_coren_direbrewAI : public ScriptedAI
     {
-        npc_coren_direbrewAI(Creature* c) : ScriptedAI(c), summons(me) 
+        npc_coren_direbrewAI(Creature* c) : ScriptedAI(c), summons(me)
         {
         }
 
@@ -142,7 +142,7 @@ public:
             if (param == ACTION_START_FIGHT)
             {
                 Creature* cr = NULL;
-                
+
                 for (int i = 0; i < 3; ++i)
                 {
                     float o = rand_norm()*2*M_PI;
@@ -298,7 +298,7 @@ public:
                 }
             }
         }
-                
+
 
         void EnterCombat(Unit* who)
         {
@@ -474,7 +474,7 @@ class npc_brewfest_keg_reciver : public CreatureScript
 
         if (!player->HasSpellCooldown(SPELL_COOLDOWN_CHECKER) && player->GetQuestRewardStatus(player->GetTeamId() == TEAM_ALLIANCE ? QUEST_THERE_AND_BACK_AGAIN_A : QUEST_THERE_AND_BACK_AGAIN_H))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Do you have additional work?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-        
+
         player->SEND_GOSSIP_MENU((creature->GetEntry() == NPC_NEILL_RAMSTEIN ? 8934 : 8976), creature->GetGUID());
         return true;
     }
@@ -766,7 +766,7 @@ class npc_dark_iron_attack_generator : public CreatureScript
                             sayer->MonsterSay("SOMEONE TRY THIS SUPER BREW!", LANG_UNIVERSAL, 0);
                             //sayer->CastSpell(sayer, SPELL_CREATE_SUPER_BREW, true);
                             sayer->SummonCreature(NPC_SUPER_BREW_TRIGGER, sayer->GetPositionX()+15*cos(sayer->GetOrientation()), sayer->GetPositionY()+15*sin(sayer->GetOrientation()), sayer->GetPositionZ(), 0.0f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
-                            
+
                         }
                         else
                         {
@@ -775,7 +775,7 @@ class npc_dark_iron_attack_generator : public CreatureScript
                             else
                                 sayer->MonsterSay("Down the free brew and pelt the Guzzlers with your mug!", LANG_UNIVERSAL, 0);
                         }
-                        
+
                         break;
                     }
                 }
@@ -910,11 +910,11 @@ class npc_dark_iron_attack_mole_machine : public CreatureScript
                     {
                         goTimer = 0;
                         summonTimer++;
-                        if (GameObject* drill = me->SummonGameObject(GO_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), M_PI/4, 0.0f, 0.0f, 0.0f, 0.0f, 8)) 
-                        { 
-                            //drill->SetGoAnimProgress(0); 
-                            drill->SetLootState(GO_READY); 
-                            drill->UseDoorOrButton(8); 
+                        if (GameObject* drill = me->SummonGameObject(GO_MOLE_MACHINE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), M_PI/4, 0.0f, 0.0f, 0.0f, 0.0f, 8))
+                        {
+                            //drill->SetGoAnimProgress(0);
+                            drill->SetLootState(GO_READY);
+                            drill->UseDoorOrButton(8);
                         }
                     }
                 }
@@ -931,7 +931,7 @@ class npc_dark_iron_attack_mole_machine : public CreatureScript
                         me->SummonCreature(NPC_DARK_IRON_GUZZLER, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 6000);
                         summonTimer = 0;
                         me->DespawnOrUnsummon(3000);
-                    }            
+                    }
                 }
             }
         };
@@ -967,8 +967,8 @@ class npc_dark_iron_guzzler : public CreatureScript
 
             void FindNextKeg()
             {
-                uint32 entry[3] = {0, 0, 0}; 
-                uint32 shuffled[3] = {0, 0, 0}; 
+                uint32 entry[3] = {0, 0, 0};
+                uint32 shuffled[3] = {0, 0, 0};
 
                 if (me->GetMapId() == 1) // Kalimdor
                 {
@@ -982,15 +982,15 @@ class npc_dark_iron_guzzler : public CreatureScript
                     entry[1] = NPC_BARLEYBREW_KEG;
                     entry[2] = NPC_GORDOK_KEG;
                 }
-                
-                for (uint8 i = 0; i < 3; ++i) 
-                { 
-                    uint8 index=0; 
-                    do 
-                        index = urand(0,2);
-                    while (shuffled[index]); 
 
-                    shuffled[index] = entry[i]; 
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    uint8 index=0;
+                    do
+                        index = urand(0,2);
+                    while (shuffled[index]);
+
+                    shuffled[index] = entry[i];
                 }
 
                 for (uint8 i = 0; i < 3; ++i)
@@ -1024,7 +1024,7 @@ class npc_dark_iron_guzzler : public CreatureScript
                 {
                     switch (urand(0,4))
                     {
-                        case 0: 
+                        case 0:
                             me->MonsterSay("Drink it all boys!", LANG_UNIVERSAL, 0);
                             break;
                         case 1:
@@ -1273,7 +1273,7 @@ public:
                     if (AuraEffect* aEff = base->GetEffect(EFFECT_0))
                     {
                         aEff->SetAmount(mode == 1 ? 0 : -50);
-                        caster->UpdateSpeed(MOVE_RUN, true);
+                        caster->UpdateSpeed(MOVE_RUN);
                     }
         }
 
@@ -1521,7 +1521,7 @@ public:
                 case 32920:
                     return YELLOW_EMPTY_KEG;
             }
-            
+
             return 0;
         }
 
@@ -1638,7 +1638,7 @@ public:
                 else if (cr = caster->FindNearestCreature(NPC_NORMAL_GORDOK, 40.0f))
                     cr->CastSpell(caster, SPELL_THROW_MUG_TO_PLAYER, true);
             }
-            
+
         }
 
         void Register()
@@ -1727,14 +1727,14 @@ class npc_brew_bubble : public CreatureScript
                                 aura->ModStackAmount(stacksTarget+1);
                             else
                                 me->AddAura(SPELL_BUBBLE_BUILD_UP, me);
-                            
+
                             target->ToCreature()->DespawnOrUnsummon();
                             DoAction(0);
                         }
                         else if (Aura* aura = target->GetAura(SPELL_BUBBLE_BUILD_UP))
                         {
                             aura->ModStackAmount(stacksMe);
-                            
+
                             target->ToCreature()->AI()->DoAction(0);
                             me->DespawnOrUnsummon();
                         }
