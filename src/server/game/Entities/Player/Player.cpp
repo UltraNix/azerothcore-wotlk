@@ -20495,7 +20495,7 @@ void Player::_SaveStats(SQLTransaction& trans)
 
 void Player::_SaveLatency(SQLTransaction& trans)
 {
-    if (!sWorld->getBoolConfig(CONFIG_LATENCY_RECORD))
+    if (!sWorld->getBoolConfig(CONFIG_LATENCY_RECORD) || GetSession()->GetLatency() == 0)
         return;
 
     PreparedStatement* stmt = NULL;
