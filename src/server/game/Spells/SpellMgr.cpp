@@ -3969,6 +3969,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 54178: // Goregek's Endurance
             spellInfo->procChance = 40;
             break;
+        case 50002: //Diving Helm
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_USE;
+            break;
 
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
