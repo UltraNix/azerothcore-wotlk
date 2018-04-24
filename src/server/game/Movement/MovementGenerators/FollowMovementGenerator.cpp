@@ -137,8 +137,8 @@ namespace Movement
     void FollowMovementGenerator::SynchronizeSpeed( Unit* owner ) const
     {
         //! synchronize speed
-        owner->UpdateSpeed( MOVE_WALK, true );
-        owner->UpdateSpeed( MOVE_RUN, true );
+        owner->UpdateSpeed( MOVE_WALK );
+        owner->UpdateSpeed( MOVE_RUN );
     }
 
     bool FollowMovementGenerator::IsMovementSuspended( Unit* owner ) const
