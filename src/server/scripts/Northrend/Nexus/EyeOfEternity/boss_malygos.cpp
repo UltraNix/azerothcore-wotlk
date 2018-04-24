@@ -516,7 +516,7 @@ public:
                                             data.append(pPlayer->GetPackGUID());
                                             pPlayer->SendMessageToSet(&data, true);
 
-                                            pPlayer->SetUInt64Value(PLAYER_FARSIGHT, vp->GetGUID());
+                                            //pPlayer->SetUInt64Value(PLAYER_FARSIGHT, vp->GetGUID());
                                             c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                         }
                                     }
@@ -927,7 +927,7 @@ public:
                 plr->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), speed);
                 plr->RemoveAura(SPELL_FREEZE_ANIM);
                 plr->SetDisableGravity(false, true);
-                plr->SetUInt64Value(PLAYER_FARSIGHT, 0);;
+                //plr->SetUInt64Value(PLAYER_FARSIGHT, 0);;
             }
         }
 
