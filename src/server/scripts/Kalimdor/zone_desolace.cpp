@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -189,7 +189,7 @@ class npc_cork_gizelton : public CreatureScript
                 {
                     if (Creature* summon = ObjectAccessor::GetCreature(*me, summons[i]))
                         summon->DespawnOrUnsummon();
-                    
+
                     summons[i] = 0;
                 }
             }
@@ -209,7 +209,7 @@ class npc_cork_gizelton : public CreatureScript
                     summons[1] = cr->GetGUID();
                 if (cr = me->SummonCreature(NPC_CARAVAN_KODO, *me))
                     summons[2] = cr->GetGUID();
-                
+
                 SummonsFollow();
             }
 
@@ -531,7 +531,10 @@ public:
     {
         npc_dalindaAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void Reset() { }
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        }
 
         void EnterCombat(Unit* /*who*/) { }
 
@@ -577,6 +580,7 @@ public:
             {
                 escortAI->Start(true, false, player->GetGUID());
                 creature->setFaction(113);
+                creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             }
         }
         return true;
