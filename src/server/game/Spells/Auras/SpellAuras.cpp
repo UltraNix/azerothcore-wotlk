@@ -160,14 +160,20 @@ void AuraApplication::_HandleEffect( uint8 effIndex, bool apply )
 
     if ( apply )
     {
+        GetBase()->_RegisterEffectApplication( this, effIndex );
+
         ASSERT( !( _flags & ( 1 << effIndex ) ) );
         _flags |= 1 << effIndex;
+
         aurEff->HandleEffect( this, AURA_EFFECT_HANDLE_REAL, true );
     }
     else
     {
         ASSERT( _flags & ( 1 << effIndex ) );
         _flags &= ~( 1 << effIndex );
+
+        GetBase()->_UnregisterEffectApplication( this, effIndex );
+
         aurEff->HandleEffect( this, AURA_EFFECT_HANDLE_REAL, false );
 
         // Remove all triggered by aura spells vs unlimited duration
@@ -520,6 +526,16 @@ void Aura::_UnapplyForTarget( Unit* target, Unit* caster, AuraApplication * aura
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
             caster->ToPlayer()->SendCooldownEvent( GetSpellInfo() );
     }
+}
+
+void Aura::_RegisterEffectApplication( AuraApplication * auraApp, uint8_t effIndex )
+{
+    m_effectApplications[ effIndex ].insert( auraApp );
+}
+
+void Aura::_UnregisterEffectApplication( AuraApplication * auraApp, uint8_t effIndex )
+{
+    m_effectApplications[ effIndex ].erase( auraApp );
 }
 
 // removes aura from all targets
@@ -931,20 +947,26 @@ void Aura::SetStackAmount( uint8 stackAmount )
     m_stackAmount = stackAmount;
     Unit* caster = GetCaster();
 
-    std::list<AuraApplication*> applications;
+    std::vector<AuraApplication*> applications;
     GetApplicationList( applications );
 
-    for ( std::list<AuraApplication*>::const_iterator apptItr = applications.begin(); apptItr != applications.end(); ++apptItr )
-        if ( !( *apptItr )->GetRemoveMode() )
-            HandleAuraSpecificMods( *apptItr, caster, false, true );
+    for ( AuraApplication * application : applications )
+    {
+        if ( !application->GetRemoveMode() )
+            HandleAuraSpecificMods( application, caster, false, true );
+    }
 
     for ( uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i )
+    {
         if ( HasEffect( i ) )
             m_effects[ i ]->ChangeAmount( m_effects[ i ]->CalculateAmount( caster ), false, true );
+    }
 
-    for ( std::list<AuraApplication*>::const_iterator apptItr = applications.begin(); apptItr != applications.end(); ++apptItr )
-        if ( !( *apptItr )->GetRemoveMode() )
-            HandleAuraSpecificMods( *apptItr, caster, true, true );
+    for ( AuraApplication * application : applications )
+    {
+        if ( !application->GetRemoveMode() )
+            HandleAuraSpecificMods( application, caster, true, true );
+    }
 
     SetNeedClientUpdateForTargets();
 }
@@ -1187,19 +1209,25 @@ void Aura::HandleAllEffects( AuraApplication * aurApp, uint8 mode, bool apply )
             m_effects[ i ]->HandleEffect( aurApp, mode, apply );
 }
 
-void Aura::GetApplicationList( std::list<AuraApplication*> & applicationList ) const
+void Aura::GetApplicationList(std::vector<AuraApplication*> & applicationList) const
 {
+    applicationList.reserve( m_applications.size() );
+
     for ( Aura::ApplicationMap::const_iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter )
     {
         if ( appIter->second->GetEffectMask() )
+        {
             applicationList.push_back( appIter->second );
     }
+}
 }
 
 void Aura::SetNeedClientUpdateForTargets() const
 {
     for ( ApplicationMap::const_iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter )
+    {
         appIter->second->SetNeedClientUpdate();
+}
 }
 
 // trigger effects on real aura apply/remove
