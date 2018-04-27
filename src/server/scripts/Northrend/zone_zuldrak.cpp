@@ -746,6 +746,42 @@ struct npc_drakkari_skullcrusherAI : public ScriptedAI
     }
 };
 
+enum HexedCache
+{
+    HEX_OF_TONGUES    = 52652,
+    HEX_OF_AGONY      = 52647,
+    HEX_OF_WEAKNESS   = 52645
+};
+class spell_q12709_hexed_cache : public SpellScriptLoader
+{
+public:
+    spell_q12709_hexed_cache() : SpellScriptLoader("spell_q12709_hexed_cache") { }
+
+    class spell_q12709_hexed_cache_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q12709_hexed_cache_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex effIndex)
+        {
+            std::vector<uint32> _hexSpells{ HEX_OF_AGONY, HEX_OF_TONGUES, HEX_OF_WEAKNESS };
+            uint32 spellId = Trinity::Containers::SelectRandomContainerElement(_hexSpells);
+
+            if (Player* pl = GetHitPlayer())
+                    pl->CastSpell(pl, spellId);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12709_hexed_cache_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q12709_hexed_cache_SpellScript();
+    }
+};
+
 void AddSC_zuldrak()
 {
     // Ours
@@ -755,6 +791,7 @@ void AddSC_zuldrak()
     new npc_drakuru_shackles();
     new npc_captured_rageclaw();
     new CreatureAILoader<npc_overlord_drakuru_midlevel_AI>("npc_overlord_drakuru_midlevel");
+    new spell_q12709_hexed_cache();
 
     // Theirs
     new npc_released_offspring_harkoa();
