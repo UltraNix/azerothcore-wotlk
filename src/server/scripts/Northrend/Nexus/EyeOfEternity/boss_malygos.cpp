@@ -373,8 +373,9 @@ public:
                     {
                         if (pInstance)
                         {
-                            pInstance->SetData(DATA_HIDE_IRIS_AND_PORTAL, 0);
-                            pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_YOU_DONT_HAVE_AN_ENTERNITY_EVENT);
+                           pInstance->SetData(DATA_HIDE_IRIS_AND_PORTAL, 0);
+                           pInstance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_YOU_DONT_HAVE_AN_ENTERNITY_EVENT);
+                           pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_YOU_DONT_HAVE_AN_ENTERNITY_EVENT);
                         }
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PACIFIED);
                         if (Unit* target = me->SelectNearestTarget(250.0f))
