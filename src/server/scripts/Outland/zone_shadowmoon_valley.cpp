@@ -162,28 +162,36 @@ public:
 
     struct npc_invis_infernal_casterAI : public ScriptedAI
     {
-        npc_invis_infernal_casterAI(Creature* creature) : ScriptedAI(creature)
+
+        npc_invis_infernal_casterAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
             ground = 0.f;
         }
 
         void Reset()
         {
+            summons.DespawnAll();
+            events.Reset();
+            events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, 5s);
             ground = me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-            SummonInfernal();
-            events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, urand(1000, 3000));
         }
 
-        void SetData(uint32 id, uint32 data)
+        void SetData(uint32 type, uint32 data)
         {
-            if (id == TYPE_INFERNAL && data == DATA_DIED)
-                SummonInfernal();
+            if (type == TYPE_INFERNAL && data == DATA_DIED)
+            {
+                events.Reset();
+                events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, 5s);
+            }
         }
 
-        void SummonInfernal()
+        void JustSummoned(Creature* summon) override
         {
-            if (Creature* infernal = me->SummonCreature(NPC_INFERNAL_ATTACKER, me->GetPositionX(), me->GetPositionY(), ground + 0.05f, 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
-                infernalGUID = infernal->GetGUID();
+            if (summon->GetEntry() == NPC_INFERNAL_ATTACKER)
+            {
+                summon->SetDisplayId(MODEL_INVISIBLE);
+                summons.Summon(summon);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -194,24 +202,25 @@ public:
             {
                 switch (eventId)
                 {
-                case EVENT_CAST_SUMMON_INFERNAL:
-                {
-                    if (Unit* infernal = ObjectAccessor::GetUnit(*me, infernalGUID))
-                        if (infernal->GetDisplayId() == MODEL_INVISIBLE)
-                            me->CastSpell(infernal, SPELL_SUMMON_INFERNAL, true);
-                    events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, 12000);
-                    break;
-                }
-                default:
-                    break;
+                    case EVENT_CAST_SUMMON_INFERNAL:
+                    {
+                        summons.DespawnAll();
+                        if (Unit* infernal = me->SummonCreature(NPC_INFERNAL_ATTACKER, me->GetPositionX(), me->GetPositionY(), ground + 0.05f, 0.0f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000))
+                            if (infernal->GetDisplayId() == MODEL_INVISIBLE)
+                                me->CastSpell(infernal, SPELL_SUMMON_INFERNAL, true);
+                        events.ScheduleEvent(EVENT_CAST_SUMMON_INFERNAL, 60s);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
         }
 
     private:
         EventMap events;
-        uint64 infernalGUID;
         float ground;
+        SummonList summons;
     };
 
     CreatureAI* GetAI(Creature* creature) const
@@ -235,7 +244,6 @@ public:
 
         void Reset()
         {
-            me->SetDisplayId(MODEL_INVISIBLE);
             me->GetMotionMaster()->MoveRandom(5.0f);
         }
 
