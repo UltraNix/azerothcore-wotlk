@@ -19280,7 +19280,14 @@ bool Unit::SetHover(bool enable, bool /*packetOnly = false*/)
 
 Position Unit::CalculateFuturePosition( float movingTime )
 {
-    movingTime += IsPlayer() ? ( float )ToPlayer()->GetSession()->GetLatency() / 1000.0f : 0.0f;
+    if ( IsPlayer() )
+    {
+        const float MAX_ALLOWED_LATENCY = 100.0f;
+
+        float latency = ( float )ToPlayer()->GetSession()->GetLatency();
+        movingTime += G3D::clamp( latency / 1000.0f, 0.0f, MAX_ALLOWED_LATENCY / 1000.0f );
+    }
+
 
     const float orientation = GetOrientation();
 
