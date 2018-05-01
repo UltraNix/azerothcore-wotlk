@@ -398,8 +398,10 @@ public:
                     break;
 
                 case EVENT_SPELL_ARCANE_BREATH:
-                    me->CastSpell(me->GetVictim(), SPELL_ARCANE_BREATH, false);
-                    events.RepeatEvent(urand(12000,15000));
+                    if (events.GetTimeUntilEvent(EVENT_START_VORTEX_0) > 8000)
+                        me->CastSpell(me->GetVictim(), SPELL_ARCANE_BREATH, false);
+
+                    events.RepeatEvent(urand(12000, 15000));
                     break;
                 case EVENT_SPELL_ARCANE_STORM:
                     me->CastCustomSpell(SPELL_ARCANE_STORM, SPELLVALUE_MAX_TARGETS, DUNGEON_MODE(5, 12), me, true);
