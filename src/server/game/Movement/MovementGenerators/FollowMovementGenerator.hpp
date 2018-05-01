@@ -32,7 +32,6 @@ namespace Movement
         float               GetLastTargetDistance() const;
 
     protected:
-        void                RequestPath( Unit* owner, const G3D::Vector3 & position );
         void                SynchronizeSpeed( Unit* owner ) const;
         bool                IsMovementSuspended( Unit* owner ) const;
 
@@ -44,14 +43,13 @@ namespace Movement
         void                MoveByPath( Unit* owner, Movement::Path & path );
 
         bool                IsStillMoving( Unit* owner ) const;
-        void                StopMoving( Unit* owner );
+        void                StopMoving( Unit* owner, bool movementInform = false );
 
         AsyncPathResult     m_asyncPath;
         float               m_offset;
         float               m_angle;
         TimeTrackerSmall    m_updateTimer;
 
-        bool                m_needsMovementInform;
         bool                m_targetIsUnreachable;
         float               m_lastTargetDistance;
         G3D::Vector3        m_lastTargetPosition;
