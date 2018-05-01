@@ -16,6 +16,7 @@ namespace Movement
         , m_angle( angle )
         , m_lastTargetDistance( 0.0f )
         , m_targetIsUnreachable( false )
+        , m_needsMovementInform( false )
     {
         m_offset += i_target->GetObjectSize();
     }
@@ -29,14 +30,21 @@ namespace Movement
     {
         m_asyncPath.Invalidate();
 
-        owner->AddUnitState( UNIT_STATE_FOLLOW );
+        owner->AddUnitState( UNIT_STATE_FOLLOW | UNIT_STATE_FOLLOW_MOVE );
+
+        SynchronizeSpeed( owner );
+
+        //! force fast update
+        ResetTimerAndReturn( 0 );
     }
 
     void FollowMovementGenerator::DoFinalize( Unit* owner )
     {
         m_asyncPath.Invalidate();
 
-        owner->ClearUnitState( UNIT_STATE_FOLLOW );
+        owner->ClearUnitState( UNIT_STATE_FOLLOW | UNIT_STATE_FOLLOW_MOVE );
+
+        SynchronizeSpeed( owner );
     }
 
     void FollowMovementGenerator::DoReset( Unit* owner )
@@ -55,17 +63,21 @@ namespace Movement
         if ( !m_updateTimer.Update( diff ) )
             return true;
 
+        bool isMoving = IsStillMoving( owner );
         if ( IsMovementSuspended( owner ) )
         {
-            if ( IsStillMoving( owner ) )
+            if ( isMoving )
             {
-                StopMoving( owner, false );
+                StopMoving( owner );
             }
 
             return ResetTimerAndReturn( FOLLOW_START_TIMER );
         }
 
-        SynchronizeSpeed( owner );
+        if ( isMoving )
+        {
+            SynchronizeSpeed( owner );
+        }
 
         G3D::Vector3 targetPosition = i_target->CalculateFuturePosition( ( ( float )FOLLOW_UPDATE_TIMER / IN_MILLISECONDS ) );
         G3D::Vector3 currPosition = !owner->movespline->Finalized() ? owner->movespline->CurrentDestination() : owner->GetPosition();
@@ -78,9 +90,14 @@ namespace Movement
         //! we are near target and target is not moving, we can stop our movement
         if ( abs( targetDistance - m_offset ) <= 0.25f )
         {
-            if ( IsStillMoving( owner ) && !i_target->isMoving() && owner->movespline->Finalized() )
+            if ( isMoving && !i_target->isMoving() && owner->movespline->Finalized() )
             {
-                StopMoving( owner, true );
+                StopMoving( owner );
+            }
+
+            if ( m_needsMovementInform )
+            {
+                MovementInform( owner );
             }
 
             return ResetTimerAndReturn( FOLLOW_START_TIMER );
@@ -108,15 +125,21 @@ namespace Movement
             if ( destDistance <= 0.25f )
                 return ResetTimerAndReturn( owner->movespline->timeElapsed() > FOLLOW_UPDATE_TIMER ? FOLLOW_UPDATE_TIMER : FOLLOW_START_TIMER );
         }
+        else
+        {
+            //! restore it, weir shit depends on it
+            MovementInform( owner );
+        }
 
-        AsyncPathGeneratorContext context( owner, targetPosition, false );
-        m_asyncPath = std::move( GetPathGenerator().RequestPath( context ) );
+        RequestPath( owner, targetPosition );
 
         return ResetTimerAndReturn( FOLLOW_UPDATE_TIMER );
     }
 
     void FollowMovementGenerator::MovementInform( Unit* owner )
     {
+        m_needsMovementInform = false;
+
         if ( Creature* creature = owner->ToCreature() )
         {
             CreatureAI* creatureAI = creature->AI();
@@ -134,11 +157,21 @@ namespace Movement
         return m_lastTargetDistance;
     }
 
+    void FollowMovementGenerator::RequestPath( Unit* owner, const G3D::Vector3 & position )
+    {
+        AsyncPathGeneratorContext context( owner, position, false );
+        m_asyncPath = std::move( GetPathGenerator().RequestPath( context ) );
+    }
+
     void FollowMovementGenerator::SynchronizeSpeed( Unit* owner ) const
     {
+        if ( !IS_PLAYER_GUID( owner->GetOwnerGUID() ) || !owner->IsInWorld() || !i_target.isValid() || i_target->GetGUID() != owner->GetOwnerGUID() )
+            return;
+
         //! synchronize speed
         owner->UpdateSpeed( MOVE_WALK );
         owner->UpdateSpeed( MOVE_RUN );
+        owner->UpdateSpeed( MOVE_SWIM );
     }
 
     bool FollowMovementGenerator::IsMovementSuspended( Unit* owner ) const
@@ -163,6 +196,8 @@ namespace Movement
             {
                 Path path( m_asyncPath.GetPath() );
                 MoveByPath( owner, path );
+
+                m_needsMovementInform = true;
             }
 
             return true;
@@ -211,7 +246,7 @@ namespace Movement
         return owner->HasUnitState( UNIT_STATE_FOLLOW_MOVE );
     }
 
-    void FollowMovementGenerator::StopMoving( Unit* owner, bool movementInform )
+    void FollowMovementGenerator::StopMoving( Unit* owner )
     {
         owner->ClearUnitState( UNIT_STATE_FOLLOW_MOVE );
 
@@ -221,10 +256,5 @@ namespace Movement
         }
 
         m_asyncPath.Invalidate();
-
-        if ( movementInform )
-        {
-            MovementInform( owner );
-        }
     }
 }
