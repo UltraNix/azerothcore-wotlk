@@ -1130,7 +1130,7 @@ void RandomBattlegroundSystem::Update(uint32 diff)
 
         switch (m_CurrentRandomBg)
         {
-            case BATTLEGROUND_AV: m_SwitchTimer = 60*IN_MILLISECONDS; break; // max 40 per team
+            case BATTLEGROUND_AV: m_SwitchTimer = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 60*IN_MILLISECONDS : 120*IN_MILLISECONDS; break; // max 40 per team
             case BATTLEGROUND_WS: m_SwitchTimer = 120*IN_MILLISECONDS; break; // max 10 per team
             case BATTLEGROUND_IC: m_SwitchTimer = 60*IN_MILLISECONDS; break; // max 40 per team
             case BATTLEGROUND_EY: m_SwitchTimer = 120*IN_MILLISECONDS; break; // max 15 per team
