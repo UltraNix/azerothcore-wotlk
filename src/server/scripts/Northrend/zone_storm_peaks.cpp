@@ -1129,6 +1129,7 @@ public:
 
         void UpdateAI(uint32 diff)
         {
+            VehicleAI::UpdateAI(diff);
             events.Update(diff);
 
             switch (events.ExecuteEvent())
