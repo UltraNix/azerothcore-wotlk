@@ -831,5 +831,10 @@ bool MotionMaster::GetDestination(float &x, float &y, float &z)
     x = dest.x;
     y = dest.y;
     z = dest.z;
+
+    if ( TransportBase* transport = _owner->GetDirectTransport() )
+    {
+        transport->CalculatePassengerPosition(x, y, z );
+    }
     return true;
 }

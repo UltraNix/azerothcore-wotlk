@@ -82,13 +82,23 @@ namespace Movement
         G3D::Vector3 targetPosition = i_target->CalculateFuturePosition( ( ( float )FOLLOW_UPDATE_TIMER / IN_MILLISECONDS ) );
         G3D::Vector3 currPosition = !owner->movespline->Finalized() ? owner->movespline->CurrentDestination() : owner->GetPosition();
 
+        if ( !owner->movespline->Finalized() && owner->movespline->onTransport )
+        {
+            if ( TransportBase* transport = owner->GetDirectTransport() )
+            {
+                transport->CalculatePassengerPosition( currPosition.x, currPosition.y, currPosition.z );
+            }
+        }
+
+        m_lastTargetRealPosition = targetPosition;
+
         float targetDistance = G3D::Vector3( targetPosition - currPosition ).length();
 
         targetPosition.x += m_offset * cos( i_target->GetOrientation() + m_angle );
         targetPosition.y += m_offset * sin( i_target->GetOrientation() + m_angle );
 
         //! we are near target and target is not moving, we can stop our movement
-        if ( abs( targetDistance - m_offset ) <= 0.25f )
+        if ( targetDistance < ( m_offset + 0.25f))
         {
             if ( isMoving && !i_target->isMoving() && owner->movespline->Finalized() )
             {
@@ -128,7 +138,7 @@ namespace Movement
         else
         {
             //! restore it, weir shit depends on it
-            MovementInform( owner );
+            //MovementInform( owner );
         }
 
         RequestPath( owner, targetPosition );
@@ -160,6 +170,8 @@ namespace Movement
     void FollowMovementGenerator::RequestPath( Unit* owner, const G3D::Vector3 & position )
     {
         AsyncPathGeneratorContext context( owner, position, false );
+        context.SetFallbackPosition( m_lastTargetRealPosition );
+
         m_asyncPath = std::move( GetPathGenerator().RequestPath( context ) );
     }
 

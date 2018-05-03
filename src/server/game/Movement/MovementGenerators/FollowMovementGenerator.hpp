@@ -55,6 +55,7 @@ namespace Movement
         bool                m_targetIsUnreachable;
         float               m_lastTargetDistance;
         G3D::Vector3        m_lastTargetPosition;
+        G3D::Vector3        m_lastTargetRealPosition;
     };
 }
 

@@ -91,6 +91,12 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
     ACE_RW_Thread_Mutex& mmapLock = ( base ? base->GetMMapLock() : MMAP::MMapFactory::createOrGetMMapManager()->GetMMapGeneralLock() );
     mmapLock.acquire_read();
 
+    G3D::Vector3 end2;
+    if ( m_context->GetFallbackPosition( end2 ) )
+    {
+        SetEndPosition( GetValidEndPosition( end, end2 ) );
+    }
+
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if ( !_navMesh || !_navMeshQuery ||
@@ -254,9 +260,9 @@ void PathGenerator::BuildPolyPath( G3D::Vector3 const& startPos, G3D::Vector3 co
 
         float distToStartPoly, distToEndPoly;
         float startPoint[ VERTEX_SIZE ] = { startPos.y, startPos.z, startPos.x };
-        float endPoint[ VERTEX_SIZE ] = { endPos.y, endPos.z, endPos.x };
-
         dtPolyRef startPoly = GetPolyByLocation( startPoint, &distToStartPoly );
+
+        float endPoint[ VERTEX_SIZE ] = { endPos.y, endPos.z, endPos.x };
         dtPolyRef endPoly = GetPolyByLocation( endPoint, &distToEndPoly );
 
         bool sourceIsFlying = m_context->CanSourceFly();
@@ -1032,6 +1038,28 @@ dtStatus PathGenerator::FindSmoothPath( float const* startPos, float const* endP
     return nsmoothPath < MAX_POINT_PATH_LENGTH ? DT_SUCCESS : DT_FAILURE;
 }
 
+G3D::Vector3 const & PathGenerator::GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 )
+{
+    float endPoint1[ VERTEX_SIZE ] = { end1.y, end1.z, end1.x };
+    float endPoint2[ VERTEX_SIZE ] = { end2.y, end2.z, end2.x };
+
+    float distance1 = 0.0f;
+    dtPolyRef endPoly1 = GetPolyByLocation( endPoint1, &distance1 );
+
+    float distance2 = 0.0f;
+    dtPolyRef endPoly2 = GetPolyByLocation( endPoint2, &distance2 );
+
+    if ( endPoly1 != INVALID_POLYREF )
+    {
+        if ( endPoly2 != INVALID_POLYREF )
+            return distance1 <= distance2 ? end1 : end2;
+
+        return end1;
+    }
+
+    return endPoly2 != INVALID_POLYREF ? end2 : end1;
+}
+
 bool PathGenerator::InRangeYZX( const float* v1, const float* v2, float r, float h ) const
 {
     const float dx = v2[ 0 ] - v1[ 0 ];
@@ -1208,6 +1236,8 @@ AsyncPathGeneratorContext::AsyncPathGeneratorContext( Unit const* owner, G3D::Ve
     m_canSourceWaterWalk = PathGeneratorContext::CanSourceWaterWalk();
     m_isSourceInWater = PathGeneratorContext::IsSourceInWater();
     m_isIgnoringPathFinding = PathGeneratorContext::IsIgnoringPathFinding();
+
+    m_fallBackEndPosition = m_endPosition;
 }
 
 bool AsyncPathGeneratorContext::CanSourceSwim() const
@@ -1273,4 +1303,15 @@ G3D::Vector3 const& AsyncPathGeneratorContext::GetEndPosition() const
 bool AsyncPathGeneratorContext::IsForcingShortcut() const
 {
     return m_isForcingShortcut;
+}
+
+void AsyncPathGeneratorContext::SetFallbackPosition( G3D::Vector3 const & position )
+{
+    m_fallBackEndPosition = position;
+}
+
+bool AsyncPathGeneratorContext::GetFallbackPosition( G3D::Vector3 & position ) const
+{
+    position = m_fallBackEndPosition;
+    return true;
 }

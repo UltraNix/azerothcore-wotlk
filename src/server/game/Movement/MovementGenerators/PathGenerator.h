@@ -73,6 +73,8 @@ public:
     virtual bool         IsIgnoringPathFinding() const;
     virtual bool         IsSourceInWater() const;
 
+    virtual bool         GetFallbackPosition( G3D::Vector3 & position ) const { return false; }
+
     virtual float        GetSourceSize() const;
     virtual uint32_t     GetPhaseMask() const;
     virtual Map const*   GetBaseMap() const;
@@ -105,9 +107,13 @@ public:
     virtual Map const*      GetBaseMap() const override;
     virtual Map const*      GetMap() const override;
 
+    void                    SetFallbackPosition( G3D::Vector3 const & position );
+    virtual bool            GetFallbackPosition( G3D::Vector3 & position ) const;
+
 protected:
     G3D::Vector3            m_startPosition;
     G3D::Vector3            m_endPosition;
+    G3D::Vector3            m_fallBackEndPosition;
     float                   m_sourceSize;
     uint32_t                m_phaseMask;
     Map const*              m_sourceMap;
@@ -193,6 +199,7 @@ class PathGenerator
         dtStatus    FindSmoothPath(float const* startPos, float const* endPos,
                               dtPolyRef const* polyPath, uint32 polyPathSize,
                               float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);
+        G3D::Vector3 const &   GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 );
 };
 
 #endif
