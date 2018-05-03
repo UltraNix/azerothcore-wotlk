@@ -2528,15 +2528,20 @@ class npc_wintergarde_gryphon : public CreatureScript
 {
 public: npc_wintergarde_gryphon() : CreatureScript("npc_wintergarde_gryphon") {}
 
-        struct npc_wintergarde_gryphonAI : public ScriptedAI
+        struct npc_wintergarde_gryphonAI : public VehicleAI
         {
-            npc_wintergarde_gryphonAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_wintergarde_gryphonAI(Creature* creature) : VehicleAI(creature) {}
 
             void Reset() override
             {
                 if (me->IsSummon())
                     if (Unit* owner = me->ToTempSummon()->GetSummoner())
                         me->GetMotionMaster()->MovePoint(0, owner->GetPosition());
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                VehicleAI::UpdateAI(diff);
             }
         };
 
