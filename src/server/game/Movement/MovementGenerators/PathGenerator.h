@@ -199,7 +199,7 @@ class PathGenerator
         dtStatus    FindSmoothPath(float const* startPos, float const* endPos,
                               dtPolyRef const* polyPath, uint32 polyPathSize,
                               float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);
-        G3D::Vector3 const &   GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 );
+        G3D::Vector3 GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 );
 };
 
 #endif

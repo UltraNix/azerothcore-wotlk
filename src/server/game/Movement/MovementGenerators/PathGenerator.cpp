@@ -1038,26 +1038,33 @@ dtStatus PathGenerator::FindSmoothPath( float const* startPos, float const* endP
     return nsmoothPath < MAX_POINT_PATH_LENGTH ? DT_SUCCESS : DT_FAILURE;
 }
 
-G3D::Vector3 const & PathGenerator::GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 )
+G3D::Vector3 PathGenerator::GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 )
 {
-    float endPoint1[ VERTEX_SIZE ] = { end1.y, end1.z, end1.x };
-    float endPoint2[ VERTEX_SIZE ] = { end2.y, end2.z, end2.x };
+    float startPoint[ VERTEX_SIZE ] = { end2.y, end2.z, end2.x };
+    float endPoint[ VERTEX_SIZE ] = { end1.y, end1.z, end1.x };
 
     float distance1 = 0.0f;
-    dtPolyRef endPoly1 = GetPolyByLocation( endPoint1, &distance1 );
+    dtPolyRef startPoly = GetPolyByLocation( startPoint, &distance1 );
 
-    float distance2 = 0.0f;
-    dtPolyRef endPoly2 = GetPolyByLocation( endPoint2, &distance2 );
+    float result[ VERTEX_SIZE ];
 
-    if ( endPoly1 != INVALID_POLYREF )
+    std::vector< dtPolyRef > visited;
+    visited.resize( MAX_PATH_LENGTH );
+
+    int visitedCount = 0u;
+
+    auto status = _navMeshQuery->moveAlongSurface( startPoly, startPoint, endPoint, &_filter, result, &visited[ 0 ], &visitedCount, visited.size() );
+    if ( status == DT_SUCCESS )
     {
-        if ( endPoly2 != INVALID_POLYREF )
-            return distance1 <= distance2 ? end1 : end2;
+        G3D::Vector3 newEnd;
+        newEnd.x = result[ 2 ];
+        newEnd.y = result[ 0];
+        newEnd.z = end1.z;
 
-        return end1;
+        return newEnd;
     }
 
-    return endPoly2 != INVALID_POLYREF ? end2 : end1;
+    return end1;
 }
 
 bool PathGenerator::InRangeYZX( const float* v1, const float* v2, float r, float h ) const
