@@ -68,19 +68,12 @@ PathGenerator::~PathGenerator()
 bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool forceDest )
 {
     G3D::Vector3 const start = m_context->GetStartPosition();
-    G3D::Vector3 const end( destX, destY, destZ );
+    G3D::Vector3 end( destX, destY, destZ );
 
     if ( !Trinity::IsValidMapCoord( end.x, end.y, end.z ) || !Trinity::IsValidMapCoord( start.x, start.y, start.z ) )
         return false;
 
-    SetStartPosition( start );
-    SetEndPosition( end );
-
     _forceDestination = forceDest;
-
-    //auto map = m_context->GetMap();
-    //if ( !map->IsGridLoaded( start.x, start.y ), !map->IsGridLoaded( end.x, end.y ) )
-    //    return false;
 
     UpdateFilter(); // no mmap operations inside, no mutex needed
 
@@ -91,11 +84,14 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
     ACE_RW_Thread_Mutex& mmapLock = ( base ? base->GetMMapLock() : MMAP::MMapFactory::createOrGetMMapManager()->GetMMapGeneralLock() );
     mmapLock.acquire_read();
 
-    G3D::Vector3 end2;
-    if ( m_context->GetFallbackPosition( end2 ) )
+    G3D::Vector3 origin;
+    if ( m_context->GetFallbackOrigin( origin ) )
     {
-        SetEndPosition( GetValidEndPosition( end, end2 ) );
+        end = GetValidPositionOnLine( origin, end, end );
     }
+
+    SetStartPosition( start );
+    SetEndPosition( end );
 
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
@@ -114,7 +110,6 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
     BuildPolyPath( start, end, mmapLock );
     return true;
 }
-
 
 G3D::Vector3 const& PathGenerator::GetStartPosition() const
 {
@@ -175,7 +170,7 @@ dtPolyRef PathGenerator::GetPathPolyByPosition( dtPolyRef const* polyPath, uint3
     return INVALID_POLYREF;
 }
 
-dtPolyRef PathGenerator::GetPolyByLocation( float* point, float* distance ) const
+dtPolyRef PathGenerator::GetPolyByLocation( float* point, float* distance, bool allowExtendedSearch ) const
 {
     // first we check the current path
     // if the current path doesn't contain the current poly,
@@ -190,7 +185,9 @@ dtPolyRef PathGenerator::GetPolyByLocation( float* point, float* distance ) cons
     // we don't have it in our old path
     // try to get it by findNearestPoly()
     // first try with low search box
-    float extents[ VERTEX_SIZE ] = { 3.0f, 5.0f, 3.0f };    // bounds of poly search area
+
+    float objectSize = m_context->GetSourceSize();
+    float extents[ VERTEX_SIZE ] = { objectSize, 5.0f, objectSize };    // bounds of poly search area
     float closestPoint[ VERTEX_SIZE ] = { 0.0f, 0.0f, 0.0f };
     dtStatus result = _navMeshQuery->findNearestPoly( point, extents, &_filter, &polyRef, closestPoint );
     if ( DT_SUCCESS == result && polyRef != INVALID_POLYREF )
@@ -198,6 +195,9 @@ dtPolyRef PathGenerator::GetPolyByLocation( float* point, float* distance ) cons
         *distance = dtVdist( closestPoint, point );
         return polyRef;
     }
+
+    if ( !allowExtendedSearch )
+        return INVALID_POLYREF;
 
     // still nothing ..
     // try with bigger search box
@@ -260,10 +260,10 @@ void PathGenerator::BuildPolyPath( G3D::Vector3 const& startPos, G3D::Vector3 co
 
         float distToStartPoly, distToEndPoly;
         float startPoint[ VERTEX_SIZE ] = { startPos.y, startPos.z, startPos.x };
-        dtPolyRef startPoly = GetPolyByLocation( startPoint, &distToStartPoly );
+        dtPolyRef startPoly = GetPolyByLocation( startPoint, &distToStartPoly, m_context->IsExtendedPolySearchEnabled() );
 
         float endPoint[ VERTEX_SIZE ] = { endPos.y, endPos.z, endPos.x };
-        dtPolyRef endPoly = GetPolyByLocation( endPoint, &distToEndPoly );
+        dtPolyRef endPoly = GetPolyByLocation( endPoint, &distToEndPoly, m_context->IsExtendedPolySearchEnabled() );
 
         bool sourceIsFlying = m_context->CanSourceFly();
         bool sourceCanSwim = m_context->CanSourceSwim();
@@ -282,8 +282,9 @@ void PathGenerator::BuildPolyPath( G3D::Vector3 const& startPos, G3D::Vector3 co
             }
             if ( sourceCanSwim )
             {
-                if ( startPoly == INVALID_POLYREF && LIQUID_MAP_NO_WATER == baseMap->getLiquidStatus( startPos.x, startPos.y, startPos.z, MAP_ALL_LIQUIDS, NULL ) ||
-                     endPoly == INVALID_POLYREF && LIQUID_MAP_NO_WATER == baseMap->getLiquidStatus( endPos.x, endPos.y, endPos.z, MAP_ALL_LIQUIDS, NULL ) )
+                bool startNotInWater = startPoly == INVALID_POLYREF && baseMap->getLiquidStatus( startPos.x, startPos.y, startPos.z, MAP_ALL_LIQUIDS, nullptr ) <= LIQUID_MAP_ABOVE_WATER;
+                bool endNotInWater = endPoly == INVALID_POLYREF && baseMap->getLiquidStatus( endPos.x, endPos.y, endPos.z, MAP_ALL_LIQUIDS, nullptr ) <= LIQUID_MAP_ABOVE_WATER;
+                if ( startNotInWater || endNotInWater )
                 {
                     _type = PATHFIND_NOPATH;
                     return;
@@ -1038,33 +1039,48 @@ dtStatus PathGenerator::FindSmoothPath( float const* startPos, float const* endP
     return nsmoothPath < MAX_POINT_PATH_LENGTH ? DT_SUCCESS : DT_FAILURE;
 }
 
-G3D::Vector3 PathGenerator::GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 )
+G3D::Vector3 PathGenerator::GetValidPositionOnLine( G3D::Vector3 const & start, G3D::Vector3 const & end, G3D::Vector3 const & def )
 {
-    float startPoint[ VERTEX_SIZE ] = { end2.y, end2.z, end2.x };
-    float endPoint[ VERTEX_SIZE ] = { end1.y, end1.z, end1.x };
+    float startPoint[ VERTEX_SIZE ] = { start.y, start.z, start.x };
+    float endPoint[ VERTEX_SIZE ] = { end.y, end.z, end.x };
 
-    float distance1 = 0.0f;
-    dtPolyRef startPoly = GetPolyByLocation( startPoint, &distance1 );
+    float distance = 0.0f;
 
-    float result[ VERTEX_SIZE ];
+    dtPolyRef startPoly = GetPolyByLocation( startPoint, &distance, false );
+    if ( startPoly == INVALID_POLYREF )
+        return def;
 
     std::vector< dtPolyRef > visited;
     visited.resize( MAX_PATH_LENGTH );
 
     int visitedCount = 0u;
+    float normalPos[ VERTEX_SIZE ];
 
-    auto status = _navMeshQuery->moveAlongSurface( startPoly, startPoint, endPoint, &_filter, result, &visited[ 0 ], &visitedCount, visited.size() );
+    auto status = _navMeshQuery->raycast( startPoly, startPoint, endPoint, &_filter, &distance, normalPos, &visited[ 0 ], &visitedCount, visited.size() );
     if ( status == DT_SUCCESS )
     {
-        G3D::Vector3 newEnd;
-        newEnd.x = result[ 2 ];
-        newEnd.y = result[ 0];
-        newEnd.z = end1.z;
+        if ( distance <= 1.0f )
+        {
+            distance = G3D::max( 0.0f, distance - ( m_context->GetSourceSize() / ( end - start ).length() ) );
 
-        return newEnd;
+            G3D::Vector3 newEnd;
+            newEnd.x = startPoint[ 2 ] + ( endPoint[ 2 ] - startPoint[ 2 ] ) * distance;
+            newEnd.y = startPoint[ 0 ] + ( endPoint[ 0 ] - startPoint[ 0 ] ) * distance;
+            newEnd.z = startPoint[ 1 ] + ( endPoint[ 1 ] - startPoint[ 1 ] ) * distance;
+
+            float endPoint[ VERTEX_SIZE ] = { newEnd.y, newEnd.z + ADDED_Z_FOR_POLY_LOOKUP, newEnd.x };
+
+            dtPolyRef endPoly = GetPolyByLocation( endPoint, &distance, false );
+            if ( endPoly != INVALID_POLYREF )
+            {
+                _navMeshQuery->getPolyHeight( endPoly, endPoint, &newEnd.z );
+            }
+
+            return newEnd;
+        }
     }
 
-    return end1;
+    return def;
 }
 
 bool PathGenerator::InRangeYZX( const float* v1, const float* v2, float r, float h ) const
@@ -1145,7 +1161,18 @@ G3D::Vector3 GetStartPositionForUnit( Unit const* unit )
 PathGeneratorContext::PathGeneratorContext( Unit const* owner )
     : m_source( owner )
     , m_pathLengthLimit( MAX_POINT_PATH_LENGTH * SMOOTH_PATH_STEP_SIZE )
+    , m_isExtendedSearchEnabled( true )
 {
+}
+
+void PathGeneratorContext::DisableExtendedPolySearch()
+{
+    m_isExtendedSearchEnabled = false;
+}
+
+bool PathGeneratorContext::IsExtendedPolySearchEnabled() const
+{
+    return m_isExtendedSearchEnabled;
 }
 
 void PathGeneratorContext::SetPathLengthLimit( float limit )
@@ -1232,6 +1259,7 @@ AsyncPathGeneratorContext::AsyncPathGeneratorContext( Unit const* owner, G3D::Ve
     : PathGeneratorContext( owner )
     , m_endPosition( destPos )
     , m_isForcingShortcut( forceShortcut )
+    , m_hasFallbackOrigin( false )
 {
     m_startPosition = PathGeneratorContext::GetStartPosition();
     m_sourceSize = PathGeneratorContext::GetSourceSize();
@@ -1312,13 +1340,14 @@ bool AsyncPathGeneratorContext::IsForcingShortcut() const
     return m_isForcingShortcut;
 }
 
-void AsyncPathGeneratorContext::SetFallbackPosition( G3D::Vector3 const & position )
+void AsyncPathGeneratorContext::SetFallbackOrigin( G3D::Vector3 const & position )
 {
+    m_hasFallbackOrigin = true;
     m_fallBackEndPosition = position;
 }
 
-bool AsyncPathGeneratorContext::GetFallbackPosition( G3D::Vector3 & position ) const
+bool AsyncPathGeneratorContext::GetFallbackOrigin( G3D::Vector3 & position ) const
 {
     position = m_fallBackEndPosition;
-    return true;
+    return m_hasFallbackOrigin;
 }

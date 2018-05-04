@@ -60,6 +60,9 @@ class PathGeneratorContext
 public:
     explicit PathGeneratorContext( Unit const* owner );
 
+    void                 DisableExtendedPolySearch();
+    bool                 IsExtendedPolySearchEnabled() const;
+
     void                 SetPathLengthLimit( float limit );
     float                GetPathLengthLimit() const;
 
@@ -73,7 +76,9 @@ public:
     virtual bool         IsIgnoringPathFinding() const;
     virtual bool         IsSourceInWater() const;
 
-    virtual bool         GetFallbackPosition( G3D::Vector3 & position ) const { return false; }
+    Unit const*          GetSource() const { return m_source; }
+
+    virtual bool         GetFallbackOrigin( G3D::Vector3 & position ) const { return false; }
 
     virtual float        GetSourceSize() const;
     virtual uint32_t     GetPhaseMask() const;
@@ -82,6 +87,7 @@ public:
 
 protected:
     Unit const*          m_source;
+    bool                 m_isExtendedSearchEnabled;
     float                m_pathLengthLimit;
 };
 
@@ -107,12 +113,14 @@ public:
     virtual Map const*      GetBaseMap() const override;
     virtual Map const*      GetMap() const override;
 
-    void                    SetFallbackPosition( G3D::Vector3 const & position );
-    virtual bool            GetFallbackPosition( G3D::Vector3 & position ) const;
+    void                    SetFallbackOrigin( G3D::Vector3 const & position );
+    virtual bool            GetFallbackOrigin( G3D::Vector3 & position ) const;
 
 protected:
     G3D::Vector3            m_startPosition;
     G3D::Vector3            m_endPosition;
+
+    bool                    m_hasFallbackOrigin;
     G3D::Vector3            m_fallBackEndPosition;
     float                   m_sourceSize;
     uint32_t                m_phaseMask;
@@ -181,7 +189,7 @@ class PathGenerator
         bool        InRangeYZX(float const* v1, float const* v2, float r, float h) const;
 
         dtPolyRef   GetPathPolyByPosition(dtPolyRef const* polyPath, uint32 polyPathSize, float const* Point, float* Distance = NULL) const;
-        dtPolyRef   GetPolyByLocation(float* Point, float* Distance) const;
+        dtPolyRef   GetPolyByLocation(float* Point, float* Distance, bool allowExtendedSearch = true ) const;
         NavTerrain  GetNavTerrain( float x, float y, float z );
 
 
@@ -199,7 +207,7 @@ class PathGenerator
         dtStatus    FindSmoothPath(float const* startPos, float const* endPos,
                               dtPolyRef const* polyPath, uint32 polyPathSize,
                               float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);
-        G3D::Vector3 GetValidEndPosition( G3D::Vector3 const & end1, G3D::Vector3 const & end2 );
+        G3D::Vector3 GetValidPositionOnLine( G3D::Vector3 const & start, G3D::Vector3 const & end, G3D::Vector3 const & def );
 };
 
 #endif

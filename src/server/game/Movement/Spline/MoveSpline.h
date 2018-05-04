@@ -125,8 +125,8 @@ namespace Movement
         bool isWalking() const { return splineflags.walkmode; }
         bool isParabolic() const { return splineflags.parabolic; }
 
-        Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last(), false) : Vector3(); }
-        Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1, false) : Vector3(); }
+        Vector3 FinalDestination() const;
+        Vector3 CurrentDestination() const;
         int32 currentPathIdx() const;
 
         bool onTransport;

@@ -3,7 +3,6 @@
 #include "Unit.h"
 #include "MoveSplineInit.h"
 #include "CreatureAI.h"
-
 namespace Movement
 {
     uint32 FollowMovementGenerator::FOLLOW_UPDATE_TIMER = 300;
@@ -15,7 +14,7 @@ namespace Movement
         , m_offset( std::max( 0.0f, maxOffset ) )
         , m_angle( angle )
         , m_lastTargetDistance( 0.0f )
-        , m_targetIsUnreachable( false )
+        , m_isTargetMoving( false )
         , m_needsMovementInform( false )
     {
         m_offset += i_target->GetObjectSize();
@@ -52,6 +51,20 @@ namespace Movement
         DoInitialize( owner );
     }
 
+    G3D::Vector3 GetAbsolutePositionForSpline( Unit* owner, G3D::Vector3 position )
+    {
+        //! we are on transport, position needs to be corrected
+        if ( owner->movespline->onTransport )
+        {
+            if ( TransportBase* transport = owner->GetDirectTransport() )
+            {
+                transport->CalculatePassengerPosition( position.x, position.y, position.z );
+            }
+        }
+
+        return position;
+    }
+
     bool FollowMovementGenerator::DoUpdate( Unit* owner, uint32 diff )
     {
         if ( !i_target.isValid() || !i_target->IsInWorld() )
@@ -63,44 +76,35 @@ namespace Movement
         if ( !m_updateTimer.Update( diff ) )
             return true;
 
-        bool isMoving = IsStillMoving( owner );
+        bool isOwnerMoving = owner->HasUnitState( UNIT_STATE_FOLLOW_MOVE );
         if ( IsMovementSuspended( owner ) )
         {
-            if ( isMoving )
+            if ( isOwnerMoving )
             {
-                StopMoving( owner );
+                StopMoving( owner, true );
             }
 
             return ResetTimerAndReturn( FOLLOW_START_TIMER );
         }
 
-        if ( isMoving )
+        if ( isOwnerMoving )
         {
             SynchronizeSpeed( owner );
         }
 
-        G3D::Vector3 targetPosition = i_target->CalculateFuturePosition( ( ( float )FOLLOW_UPDATE_TIMER / IN_MILLISECONDS ) );
-        G3D::Vector3 currPosition = !owner->movespline->Finalized() ? owner->movespline->CurrentDestination() : owner->GetPosition();
+        m_isTargetMoving = ( ( G3D::Vector3 )i_target->GetPosition() - m_lastTargetPosition ).length() > 0.05f && i_target->isMoving();
 
-        if ( !owner->movespline->Finalized() && owner->movespline->onTransport )
-        {
-            if ( TransportBase* transport = owner->GetDirectTransport() )
-            {
-                transport->CalculatePassengerPosition( currPosition.x, currPosition.y, currPosition.z );
-            }
-        }
+        G3D::Vector3 targetPosition = m_isTargetMoving ? i_target->CalculateFuturePosition( ( ( float )FOLLOW_UPDATE_TIMER / IN_MILLISECONDS ) ) : ( G3D::Vector3 )i_target->GetPosition();
+        G3D::Vector3 currPosition = !owner->movespline->Finalized() ? GetAbsolutePositionForSpline( owner, owner->movespline->CurrentDestination() ) : owner->GetPosition();
 
-        m_lastTargetRealPosition = targetPosition;
+        m_lastTargetPosition = targetPosition;
 
         float targetDistance = G3D::Vector3( targetPosition - currPosition ).length();
 
-        targetPosition.x += m_offset * cos( i_target->GetOrientation() + m_angle );
-        targetPosition.y += m_offset * sin( i_target->GetOrientation() + m_angle );
-
         //! we are near target and target is not moving, we can stop our movement
-        if ( targetDistance < ( m_offset + 0.25f))
+        if ( targetDistance < ( m_offset + 0.25f ) )
         {
-            if ( isMoving && !i_target->isMoving() && owner->movespline->Finalized() )
+            if ( isOwnerMoving && !m_isTargetMoving )
             {
                 StopMoving( owner );
             }
@@ -114,34 +118,23 @@ namespace Movement
         }
 
         m_lastTargetDistance = targetDistance;
-        m_lastTargetPosition = targetPosition;
+
+        m_currDestination = m_lastTargetPosition;
+        m_currDestination.x += m_offset * cos( i_target->GetOrientation() + m_angle );
+        m_currDestination.y += m_offset * sin( i_target->GetOrientation() + m_angle );
 
         //! spline in progress, check our destination for path recalculation
         if ( !owner->movespline->Finalized() )
         {
-            G3D::Vector3 destPosition = owner->movespline->FinalDestination();
-
-            //! we are on transport, destination needs to be corrected
-            if ( owner->movespline->onTransport )
-            {
-                if ( TransportBase* transport = owner->GetDirectTransport() )
-                {
-                    transport->CalculatePassengerPosition( destPosition.x, destPosition.y, destPosition.z );
-                }
-            }
+            G3D::Vector3 splineDestination = GetAbsolutePositionForSpline( owner, owner->movespline->FinalDestination() );
 
             //! spline destination is still in range, we do NOT need new path
-            const float destDistance = G3D::Vector3( targetPosition - destPosition ).length();
-            if ( destDistance <= 0.25f )
+            const float distance = G3D::Vector3( m_currDestination - splineDestination ).length();
+            if ( distance <= 0.25f )
                 return ResetTimerAndReturn( owner->movespline->timeElapsed() > FOLLOW_UPDATE_TIMER ? FOLLOW_UPDATE_TIMER : FOLLOW_START_TIMER );
         }
-        else
-        {
-            //! restore it, weir shit depends on it
-            //MovementInform( owner );
-        }
 
-        RequestPath( owner, targetPosition );
+        RequestPath( owner, m_currDestination );
 
         return ResetTimerAndReturn( FOLLOW_UPDATE_TIMER );
     }
@@ -170,7 +163,8 @@ namespace Movement
     void FollowMovementGenerator::RequestPath( Unit* owner, const G3D::Vector3 & position )
     {
         AsyncPathGeneratorContext context( owner, position, false );
-        context.SetFallbackPosition( m_lastTargetRealPosition );
+        context.SetFallbackOrigin( m_lastTargetPosition );
+        context.DisableExtendedPolySearch();
 
         m_asyncPath = std::move( GetPathGenerator().RequestPath( context ) );
     }
@@ -229,17 +223,37 @@ namespace Movement
 
         return !movementInfo.HasMovementFlag( MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR | MOVEMENTFLAG_FALLING_SLOW );
     }
-
     void FollowMovementGenerator::MoveByPath( Unit* owner, Movement::Path & path )
     {
         const float pathLength = path.GetPathLength();
-
-        bool checkPathLength = !owner->GetMap()->IsBattleArena();
+        const bool isInArena = owner->GetMap()->IsBattleArena();
 
         Movement::MoveSplineInit spline( owner );
-        if ( path.type & PATHFIND_NOPATH || checkPathLength && ( pathLength >= FOLLOW_MAX_PATH_LENGTH && ( pathLength / m_lastTargetDistance ) >= 1.5f ) )
+        if ( path.type & PATHFIND_NOPATH || ( isInArena && path.type & PATHFIND_INCOMPLETE && abs( m_currDestination.z - path.points.back().z ) > 1.0f ) )
         {
-            spline.MoveTo( m_lastTargetPosition );
+            m_currDestination = m_lastTargetPosition;
+
+            //if ( path.type & PATHFIND_INCOMPLETE )
+            //{
+            //    m_currDestination = m_lastTargetPosition;
+            //}
+            //else
+            //{
+            //    auto objectSize = owner->GetObjectSize();
+
+            //    Position pos( m_lastTargetPosition.x, m_lastTargetPosition.y, m_lastTargetPosition.z );
+            //    i_target->MovePositionToFirstCollision( pos, m_offset, m_angle );
+
+            //    m_currDestination = pos;
+            //}
+
+            m_currDestination = m_lastTargetPosition;
+
+            spline.MoveTo( m_currDestination );
+        }
+        else if ( !isInArena && ( pathLength >= FOLLOW_MAX_PATH_LENGTH && ( pathLength / m_lastTargetDistance ) >= 1.5f ) )
+        {
+            spline.MoveTo( m_currDestination );
         }
         else
         {
@@ -250,19 +264,16 @@ namespace Movement
         spline.SetSmooth();
         spline.Launch();
 
+        m_currDestination = GetAbsolutePositionForSpline( owner, owner->movespline->FinalDestination() );
+
         owner->AddUnitState( UNIT_STATE_FOLLOW_MOVE );
     }
 
-    bool FollowMovementGenerator::IsStillMoving( Unit* owner ) const
-    {
-        return owner->HasUnitState( UNIT_STATE_FOLLOW_MOVE );
-    }
-
-    void FollowMovementGenerator::StopMoving( Unit* owner )
+    void FollowMovementGenerator::StopMoving( Unit* owner, bool finalizeSpline )
     {
         owner->ClearUnitState( UNIT_STATE_FOLLOW_MOVE );
 
-        if ( !owner->movespline->Finalized() )
+        if ( finalizeSpline && !owner->movespline->Finalized() )
         {
             owner->StopMoving();
         }

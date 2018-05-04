@@ -43,8 +43,7 @@ namespace Movement
 
         void                MoveByPath( Unit* owner, Movement::Path & path );
 
-        bool                IsStillMoving( Unit* owner ) const;
-        void                StopMoving( Unit* owner );
+        void                StopMoving( Unit* owner, bool finalizeSpline = false );
 
         AsyncPathResult     m_asyncPath;
         float               m_offset;
@@ -52,10 +51,11 @@ namespace Movement
         TimeTrackerSmall    m_updateTimer;
 
         bool                m_needsMovementInform;
-        bool                m_targetIsUnreachable;
+        bool                m_isTargetMoving;
+        G3D::Vector3        m_currDestination;
+
         float               m_lastTargetDistance;
         G3D::Vector3        m_lastTargetPosition;
-        G3D::Vector3        m_lastTargetRealPosition;
     };
 }
 

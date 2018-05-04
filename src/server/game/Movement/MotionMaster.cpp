@@ -827,7 +827,7 @@ bool MotionMaster::GetDestination(float &x, float &y, float &z)
     if (_owner->movespline->Finalized())
         return false;
 
-    G3D::Vector3 const& dest = _owner->movespline->FinalDestination();
+    G3D::Vector3 const dest = _owner->movespline->FinalDestination();
     x = dest.x;
     y = dest.y;
     z = dest.z;

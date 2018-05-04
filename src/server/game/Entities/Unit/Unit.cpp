@@ -13232,7 +13232,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
                     UnitMoveType ownerMoveType = mtype;
 
                     //! owner is backpedaling :(
-                    if ( pOwner->m_movementInfo.HasMovementFlag( MOVEMENTFLAG_BACKWARD ) )
+                    if ( pOwner->m_movementInfo.HasMovementFlag( MOVEMENTFLAG_BACKWARD ) && distanceToTarget <= MIN_DISTANCE_BONUS )
                     {
                         switch ( mtype )
                         {

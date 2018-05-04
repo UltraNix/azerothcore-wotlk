@@ -314,6 +314,16 @@ void MoveSpline::_Interrupt()
     splineflags.done = true;
 }
 
+Movement::Vector3 MoveSpline::FinalDestination() const
+{
+    return Initialized() ? spline.getPoint( spline.last(), false ) : Vector3();
+}
+
+Movement::Vector3 MoveSpline::CurrentDestination() const
+{
+    return Initialized() ? spline.getPoint( point_Idx + 1, false ) : Vector3();
+}
+
 int32 MoveSpline::currentPathIdx() const
 {
     int32 point = point_Idx_offset + point_Idx - spline.first() + (int)Finalized();
