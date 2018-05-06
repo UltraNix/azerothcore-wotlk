@@ -84,15 +84,6 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
     ACE_RW_Thread_Mutex& mmapLock = ( base ? base->GetMMapLock() : MMAP::MMapFactory::createOrGetMMapManager()->GetMMapGeneralLock() );
     mmapLock.acquire_read();
 
-    G3D::Vector3 origin;
-    if ( m_context->GetFallbackOrigin( origin ) )
-    {
-        end = GetValidPositionOnLine( origin, end, end );
-    }
-
-    SetStartPosition( start );
-    SetEndPosition( end );
-
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if ( !_navMesh || !_navMeshQuery ||
@@ -106,6 +97,27 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
         mmapLock.release();
         return true;
     }
+
+    G3D::Vector3 origin;
+    if ( m_context->GetFallbackOrigin( origin ) )
+    {
+        end = GetValidPositionOnLine( origin, end, end );
+    }
+
+    if ( !_navMesh || !_navMeshQuery ||
+         m_context->IsIgnoringPathFinding() ||
+         m_context->GetSourceSize() >= SIZE_OF_GRIDS / 2.0f ||
+         ( end - start ).squaredLength() >= ( SIZE_OF_GRIDS*SIZE_OF_GRIDS / 4.0f ) ||
+         !HaveTile( start ) || !HaveTile( end ) )
+    {
+        BuildShortcut();
+        _type = PathType( PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH );
+        mmapLock.release();
+        return true;
+    }
+
+    SetStartPosition( start );
+    SetEndPosition( end );
 
     BuildPolyPath( start, end, mmapLock );
     return true;
