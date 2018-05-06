@@ -98,7 +98,7 @@ namespace Movement
         G3D::Vector3 targetPosition = m_isTargetMoving ? i_target->CalculateFuturePosition( ( ( float )FOLLOW_UPDATE_TIMER / IN_MILLISECONDS ) ) : ( G3D::Vector3 )i_target->GetPosition();
         G3D::Vector3 currPosition = !owner->movespline->Finalized() ? GetAbsolutePositionForSpline( owner, owner->movespline->CurrentDestination() ) : owner->GetPosition();
 
-        m_lastTargetPosition = targetPosition;
+        m_lastTargetPosition = i_target->GetPosition();
 
         float targetDistance = G3D::Vector3( targetPosition - currPosition ).length();
 
@@ -120,7 +120,7 @@ namespace Movement
 
         m_lastTargetDistance = targetDistance;
 
-        m_currDestination = m_lastTargetPosition;
+        m_currDestination = targetPosition;
         m_currDestination.x += m_offset * cos( i_target->GetOrientation() + m_angle );
         m_currDestination.y += m_offset * sin( i_target->GetOrientation() + m_angle );
 
@@ -163,13 +163,29 @@ namespace Movement
 
     void FollowMovementGenerator::RequestPath( Unit* owner, const G3D::Vector3 & position )
     {
-        bool forceDest = i_target->GetTypeId() == TYPEID_PLAYER && i_target->ToPlayer()->IsGameMaster(); // .npc follow
+        if ( MMAP::MMapFactory::IsPathfindingEnabled( owner->FindMap() ))
+        {
+            bool forceDest = i_target->GetTypeId() == TYPEID_PLAYER && i_target->ToPlayer()->IsGameMaster();     // .npc follow always force dest
+            forceDest |= owner->GetTypeId() == TYPEID_UNIT && owner->IsPet();                                    // pets should always force dest
+            forceDest |= owner->GetTransport() != nullptr && owner->GetTransport() == i_target->GetTransport();  // No mmaps on transports
 
-        AsyncPathGeneratorContext context( owner, position, forceDest );
-        context.SetFallbackOrigin( m_lastTargetPosition );
-        context.DisableExtendedPolySearch();
+            AsyncPathGeneratorContext context( owner, position, forceDest );
+            context.SetFallbackOrigin( m_lastTargetPosition );
+            context.DisableExtendedPolySearch();
 
-        m_asyncPath = std::move( GetPathGenerator().RequestPath( context ) );
+            m_asyncPath = std::move( GetPathGenerator().RequestPath( context ) );
+        }
+        else
+        {
+            PathPromise promise;
+            m_asyncPath = AsyncPathResult( promise.get_future() );
+
+            //! Move to target position if height diff is to big
+            Position pos( m_lastTargetPosition.x, m_lastTargetPosition.y, m_lastTargetPosition.z );
+            i_target->MovePositionToFirstCollision( pos, m_offset, m_angle );
+
+            promise.set_value( { PATHFIND_SHORTCUT, PointsArray{ owner->GetPosition(), G3D::Vector3{ pos } } } );
+        }
     }
 
     void FollowMovementGenerator::SynchronizeSpeed( Unit* owner ) const

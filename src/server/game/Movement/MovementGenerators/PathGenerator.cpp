@@ -84,6 +84,9 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
     ACE_RW_Thread_Mutex& mmapLock = ( base ? base->GetMMapLock() : MMAP::MMapFactory::createOrGetMMapManager()->GetMMapGeneralLock() );
     mmapLock.acquire_read();
 
+    SetStartPosition( start );
+    SetEndPosition( end );
+
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
     if ( !_navMesh || !_navMeshQuery ||
@@ -102,21 +105,16 @@ bool PathGenerator::CalculatePath( float destX, float destY, float destZ, bool f
     if ( m_context->GetFallbackOrigin( origin ) )
     {
         end = GetValidPositionOnLine( origin, end, end );
+
+        if ( !HaveTile( end ) )
+        {
+            BuildShortcut();
+            _type = PathType( PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH );
+            mmapLock.release();
+            return true;
+        }
     }
 
-    if ( !_navMesh || !_navMeshQuery ||
-         m_context->IsIgnoringPathFinding() ||
-         m_context->GetSourceSize() >= SIZE_OF_GRIDS / 2.0f ||
-         ( end - start ).squaredLength() >= ( SIZE_OF_GRIDS*SIZE_OF_GRIDS / 4.0f ) ||
-         !HaveTile( start ) || !HaveTile( end ) )
-    {
-        BuildShortcut();
-        _type = PathType( PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH );
-        mmapLock.release();
-        return true;
-    }
-
-    SetStartPosition( start );
     SetEndPosition( end );
 
     BuildPolyPath( start, end, mmapLock );
@@ -198,7 +196,7 @@ dtPolyRef PathGenerator::GetPolyByLocation( float* point, float* distance, bool 
     // try to get it by findNearestPoly()
     // first try with low search box
 
-    float objectSize = m_context->GetSourceSize();
+    float objectSize = allowExtendedSearch ? 3.0f : m_context->GetSourceSize();
     float extents[ VERTEX_SIZE ] = { objectSize, 5.0f, objectSize };    // bounds of poly search area
     float closestPoint[ VERTEX_SIZE ] = { 0.0f, 0.0f, 0.0f };
     dtStatus result = _navMeshQuery->findNearestPoly( point, extents, &_filter, &polyRef, closestPoint );
