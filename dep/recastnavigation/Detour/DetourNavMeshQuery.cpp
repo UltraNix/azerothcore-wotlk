@@ -26,6 +26,7 @@
 #include "DetourAlloc.h"
 #include "DetourAssert.h"
 #include <new>
+#include <unordered_set>
 
 
 dtQueryFilter::dtQueryFilter() :
@@ -1666,9 +1667,15 @@ dtStatus dtNavMeshQuery::raycast(dtPolyRef startRef, const float* startPos, cons
 	hitNormal[0] = 0;
 	hitNormal[1] = 0;
 	hitNormal[2] = 0;
+
+    std::unordered_set< dtPolyRef > visited;
 	
 	while (curRef)
 	{
+        //! already visited ref, circular dependency, SHOULD NOT HAPPEN!
+        if ( !visited.insert( curRef ).second )
+            return DT_FAILURE;
+
 		// Cast ray against current polygon.
 		
 		// The API input has been cheked already, skip checking internal data.
