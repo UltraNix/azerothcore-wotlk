@@ -3,6 +3,7 @@
 #include "Unit.h"
 #include "MoveSplineInit.h"
 #include "CreatureAI.h"
+#include "Player.h"
 namespace Movement
 {
     uint32 FollowMovementGenerator::FOLLOW_UPDATE_TIMER = 300;
@@ -152,7 +153,7 @@ namespace Movement
 
     Unit* FollowMovementGenerator::GetTarget() const
     {
-        return nullptr;
+        return *i_target;
     }
 
     float FollowMovementGenerator::GetLastTargetDistance() const
@@ -162,7 +163,9 @@ namespace Movement
 
     void FollowMovementGenerator::RequestPath( Unit* owner, const G3D::Vector3 & position )
     {
-        AsyncPathGeneratorContext context( owner, position, false );
+        bool forceDest = i_target->GetTypeId() == TYPEID_PLAYER && i_target->ToPlayer()->IsGameMaster(); // .npc follow
+
+        AsyncPathGeneratorContext context( owner, position, forceDest );
         context.SetFallbackOrigin( m_lastTargetPosition );
         context.DisableExtendedPolySearch();
 
