@@ -122,6 +122,7 @@ class boss_magus_telestra : public CreatureScript
             void JustDied(Unit* killer)
             {
                 BossAI::JustDied(killer);
+                summons.DespawnAll();
                 Talk(SAY_DEATH);
             }
 
