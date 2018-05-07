@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -232,7 +232,7 @@ class spell_hun_generic_scaling : public SpellScriptLoader
                 {
                     // xinef: by default 22% of RAP
                     int32 modifier = 22;
-                    
+
                     // xinef: Wild Hunt bonus for AP
                     if (AuraEffect* wildHuntEff = GetUnitOwner()->GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_1))
                         AddPct(modifier, wildHuntEff->GetAmount());
@@ -254,7 +254,7 @@ class spell_hun_generic_scaling : public SpellScriptLoader
                 {
                     // xinef: by default 12.87% of RAP
                     float modifier = 12.87f;
-                    
+
                     // xinef: Wild Hunt bonus for AP
                     if (AuraEffect* wildHuntEff = GetUnitOwner()->GetDummyAuraEffect(SPELLFAMILY_PET, 3748, EFFECT_1))
                         AddPct(modifier, wildHuntEff->GetAmount());
@@ -272,7 +272,7 @@ class spell_hun_generic_scaling : public SpellScriptLoader
                 isPeriodic = true;
                 amplitude = 2*IN_MILLISECONDS;
             }
-            
+
             void HandlePeriodic(AuraEffect const* aurEff)
             {
                 PreventDefaultAction();
@@ -416,10 +416,11 @@ class spell_hun_ascpect_of_the_viper : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& procInfo)
             {
                 SpellInfo const* spellInfo = procInfo.GetDamageInfo()->GetSpellInfo();
+				// Explosive trap
+				if(spellInfo && procInfo.GetTypeMask() & PROC_FLAG_DONE_TRAP_ACTIVATION)
+					return (spellInfo->SpellFamilyFlags[2] & 0x00004000) != 0;
                 // Xinef: cannot proc from volley damage
-                if (spellInfo && (spellInfo->SpellFamilyFlags[0] & 0x2000) && spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
-                    return false;
-                return true;
+                return !(spellInfo && (spellInfo->SpellFamilyFlags[0] & 0x2000) && spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE);
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -586,7 +587,7 @@ public:
             Unit* target = GetTarget();
             if(caster && target && caster->HasAura(SPELL_HUNTER_GLYPH_OF_FREEZING_TRAP))
                 //I have complety no idea why target is casting this spell, but it does work only that way ~ Monich
-                target->CastSpell(target, SPELL_HUNTER_GLYPH_OF_FREEZING_TRAP_EFFECT, true, NULL, aurEff); 
+                target->CastSpell(target, SPELL_HUNTER_GLYPH_OF_FREEZING_TRAP_EFFECT, true, NULL, aurEff);
         }
 
         void Register()

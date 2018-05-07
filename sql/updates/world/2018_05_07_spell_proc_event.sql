@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `procFlags`='2167124', `Cooldown`= 500 WHERE  `entry`=34074;
