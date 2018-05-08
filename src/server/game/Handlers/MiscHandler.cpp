@@ -321,7 +321,10 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
         // 50 is maximum player count sent to client
         if (matchcount >= 50)
         {
-            ++matchcount;
+            // Show full result only at Angrathar realm, Feronis is limited to 50 players found.
+            if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
+                ++matchcount;
+
             continue;
         }
 

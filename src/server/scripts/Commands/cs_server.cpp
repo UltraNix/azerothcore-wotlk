@@ -121,8 +121,13 @@ public:
         time_t now = sWorld->GetGameTime();
         strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
 
-        sWorld->GetRevision() != 0 ? handler->PSendSysMessage(LANG_SERVER_HASH_WITH_REVISION, sWorld->GetRealmName().c_str(), sWorld->GetRevision(), _HASH) : handler->PSendSysMessage(LANG_SERVER_HASH, sWorld->GetRealmName().c_str(), _HASH);
-        queuedSessionCount != 0 ? handler->PSendSysMessage(LANG_CONNECTED_USERS_QUE, activeSessionCount, playerCount, queuedSessionCount) : handler->PSendSysMessage(LANG_CONNECTED_USERS, activeSessionCount, playerCount);
+        // Display players online in server info only at Angrathar realm.
+        if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
+        {
+            sWorld->GetRevision() != 0 ? handler->PSendSysMessage(LANG_SERVER_HASH_WITH_REVISION, sWorld->GetRealmName().c_str(), sWorld->GetRevision(), _HASH) : handler->PSendSysMessage(LANG_SERVER_HASH, sWorld->GetRealmName().c_str(), _HASH);
+            queuedSessionCount != 0 ? handler->PSendSysMessage(LANG_CONNECTED_USERS_QUE, activeSessionCount, playerCount, queuedSessionCount) : handler->PSendSysMessage(LANG_CONNECTED_USERS, activeSessionCount, playerCount);
+        }
+
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
         handler->PSendSysMessage(LANG_SERVER_TIME, buff);
         handler->PSendSysMessage(LANG_UPDATE_DIFF, updateTime, avgUpdateTime);
