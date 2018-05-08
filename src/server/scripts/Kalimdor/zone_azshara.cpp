@@ -323,7 +323,7 @@ public:
             {
                 PlayerGUID = player->GetGUID();
                 Talk(SAY_RIZZLE_START);
-                DoCast(player, SPELL_RIZZLE_BLACKJACK, false);
+                DoCast(player, SPELL_RIZZLE_BLACKJACK, true);
                 return;
             }
         }
@@ -506,7 +506,7 @@ public:
             if (!who)
                 return;
 
-            if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 5))
+            if (who->GetTypeId() == TYPEID_PLAYER && me->IsWithinDistInMap(who, 3))
             {
                 DoCast(who, SPELL_DEPTH_CHARGE_TRAP);
                 WeMustDie = true;
