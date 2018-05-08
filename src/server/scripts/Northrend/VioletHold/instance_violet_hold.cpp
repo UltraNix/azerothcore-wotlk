@@ -131,11 +131,12 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
         DoorIntegrity       = 100;
         WaveCount           = 0;
         EventState          = NOT_STARTED;
-        ErekemGuardGUIDs[0] = 0;
 
         LastPortalLocation  = urand(0, EncouterPortalsCount - 1);
 
         Defenseless         = true;
+
+        memset(ErekemGuardGUIDs, 0, sizeof(ErekemGuardGUIDs));
     }
 
     void OnCreatureCreate(Creature* creature) override
