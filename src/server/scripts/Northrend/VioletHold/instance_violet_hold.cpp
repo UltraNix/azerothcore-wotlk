@@ -131,6 +131,7 @@ struct instance_violet_hold_InstanceMapScript : public InstanceScript
         DoorIntegrity       = 100;
         WaveCount           = 0;
         EventState          = NOT_STARTED;
+        ErekemGuardGUIDs[0] = 0;
 
         LastPortalLocation  = urand(0, EncouterPortalsCount - 1);
 
