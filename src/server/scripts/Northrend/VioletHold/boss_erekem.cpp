@@ -102,12 +102,6 @@ struct boss_erekemAI : public BossAI
                 task.Repeat(8s, 11s);
         });
 
-        scheduler.Schedule(2s, 8s, [this](TaskContext task)
-        {
-            DoCastVictim(SPELL_EARTH_SHOCK);
-            task.Repeat(8s, 13s);
-        });
-
         scheduler.Schedule(0s, [this](TaskContext task)
         {
             for (auto guid : _guardList)
@@ -221,8 +215,15 @@ struct boss_erekemAI : public BossAI
         if (_phase == 0 && !CheckGuardAlive())
         {
             _phase = 1;
+            scheduler.CancelAll();
             me->SetCanDualWield(true);
             DoCastSelf(SPELL_WINDFURY, true);
+
+            scheduler.Schedule(2s, 8s, [this](TaskContext task)
+            {
+                DoCastVictim(SPELL_EARTH_SHOCK);
+                task.Repeat(8s, 13s);
+            });
         }
 
         scheduler.Update(diff, [this]
