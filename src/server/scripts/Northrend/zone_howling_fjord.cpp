@@ -536,8 +536,12 @@ enum Lebronski
     SAY_SPOTTED        = 1,
     SAY_OUTRO          = 2,
 
-    EVENT_NONE         = 0,
-    EVENT_SPOTTED      = 1
+    PHASE_NONE         = 0,
+    PHASE_SPOTTED      = 1,
+
+    EVENT_RESET        = 0,
+    EVENT_SAY_OUTRO    = 1,
+    EVENT_SPOTTED      = 2
 };
 
 struct npc_lebronskiAI : public ScriptedAI
@@ -546,8 +550,8 @@ struct npc_lebronskiAI : public ScriptedAI
 
     void Reset() override
     {
-        _phase = EVENT_NONE;
-        _scheduler.CancelAll();
+        events.Reset();
+        _phase = PHASE_NONE;
         me->GetMotionMaster()->MovePath(LEBRONSKI_PATH, true);
     }
 
@@ -560,37 +564,53 @@ struct npc_lebronskiAI : public ScriptedAI
         if (who->ToPlayer()->GetQuestStatus(QUEST_IRON_RUNE) != QUEST_STATUS_INCOMPLETE)
             return;
 
-        if (_phase == EVENT_NONE)
+        if (_phase == PHASE_NONE)
         {
-            _phase = EVENT_SPOTTED;
-
+            _phase = PHASE_SPOTTED;
             me->StopMoving();
             me->SetFacingToObject(who);
-
-            Talk(SAY_SPOTTED);
-
-            _scheduler.Schedule(30s, [this](TaskContext task)
-            {
-                Reset();
-            });
+            events.ScheduleEvent(EVENT_SPOTTED, 2s);
         }
     }
 
     void SpellHit(Unit* caster, const SpellInfo* spellInfo)
     {
-        if (_phase != EVENT_SPOTTED)
+        if (_phase != PHASE_SPOTTED)
             return;
 
         if (caster && spellInfo->Id == SPELL_BLUFF)
         {
+            _phase = PHASE_NONE;
             caster->CastSpell(caster, SPELL_QUEST_CREDIT);
-             Talk(SAY_OUTRO);
-             Reset();
+            events.ScheduleEvent(EVENT_SAY_OUTRO, 5s);
+        }
+    }
+
+    void UpdateAI(uint32 diff)
+    {
+        events.Update(diff);
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_RESET:
+                    Reset();
+                    break;
+                case EVENT_SAY_OUTRO:
+                    Talk(SAY_OUTRO);
+                    events.ScheduleEvent(EVENT_RESET, 5s);
+                    break;
+                case EVENT_SPOTTED:
+                    Talk(SAY_SPOTTED);
+                    events.ScheduleEvent(EVENT_RESET, 30s);
+                    break;
+            }
         }
     }
 
 private:
-    TaskScheduler _scheduler;
+    EventMap events;
     uint8 _phase;
 };
 
