@@ -14,8 +14,8 @@ namespace Movement
         : TargetedMovementGeneratorBase( target )
         , m_offset( std::max( 0.0f, maxOffset ) )
         , m_angle( angle )
-        , m_lastTargetDistance( 0.0f )
         , m_isTargetMoving( false )
+        , m_lastTargetDistance( 0.0f )
         , m_needsMovementInform( false )
     {
         m_offset += i_target->GetObjectSize();
@@ -32,10 +32,7 @@ namespace Movement
 
         owner->AddUnitState( UNIT_STATE_FOLLOW | UNIT_STATE_FOLLOW_MOVE );
 
-        SynchronizeSpeed( owner );
-
-        //! force fast update
-        ResetTimerAndReturn( 0 );
+        ForceNewPath();
     }
 
     void FollowMovementGenerator::DoFinalize( Unit* owner )
@@ -88,22 +85,13 @@ namespace Movement
             return ResetTimerAndReturn( FOLLOW_START_TIMER );
         }
 
-        if ( isOwnerMoving )
-        {
-            SynchronizeSpeed( owner );
-        }
-
         m_isTargetMoving = ( ( G3D::Vector3 )i_target->GetPosition() - m_lastTargetPosition ).length() > 0.05f && i_target->isMoving();
 
         G3D::Vector3 targetPosition = m_isTargetMoving ? i_target->CalculateFuturePosition( ( ( float )FOLLOW_UPDATE_TIMER / IN_MILLISECONDS ) ) : ( G3D::Vector3 )i_target->GetPosition();
         G3D::Vector3 currPosition = !owner->movespline->Finalized() ? GetAbsolutePositionForSpline( owner, owner->movespline->CurrentDestination() ) : owner->GetPosition();
 
-        m_lastTargetPosition = i_target->GetPosition();
-
-        float targetDistance = G3D::Vector3( targetPosition - currPosition ).length();
-
-        //! we are near target and target is not moving, we can stop our movement
-        if ( targetDistance < ( m_offset + 0.25f ) )
+        m_lastTargetDistance = G3D::Vector3( targetPosition - currPosition ).length();
+        if ( !m_forceNewPath && m_lastTargetDistance < ( m_offset + 0.25f ) )
         {
             if ( isOwnerMoving && !m_isTargetMoving )
             {
@@ -118,14 +106,10 @@ namespace Movement
             return ResetTimerAndReturn( FOLLOW_START_TIMER );
         }
 
-        m_lastTargetDistance = targetDistance;
-
-        m_currDestination = targetPosition;
-        m_currDestination.x += m_offset * cos( i_target->GetOrientation() + m_angle );
-        m_currDestination.y += m_offset * sin( i_target->GetOrientation() + m_angle );
+        UpdateCurrDestination( targetPosition );
 
         //! spline in progress, check our destination for path recalculation
-        if ( !owner->movespline->Finalized() )
+        if ( !m_forceNewPath && !owner->movespline->Finalized() )
         {
             G3D::Vector3 splineDestination = GetAbsolutePositionForSpline( owner, owner->movespline->FinalDestination() );
 
@@ -135,8 +119,7 @@ namespace Movement
                 return ResetTimerAndReturn( owner->movespline->timeElapsed() > FOLLOW_UPDATE_TIMER ? FOLLOW_UPDATE_TIMER : FOLLOW_START_TIMER );
         }
 
-        RequestPath( owner, m_currDestination );
-
+        RequestPathToCurrDestination( owner );
         return ResetTimerAndReturn( FOLLOW_UPDATE_TIMER );
     }
 
@@ -156,12 +139,18 @@ namespace Movement
         return *i_target;
     }
 
-    float FollowMovementGenerator::GetLastTargetDistance() const
+    void FollowMovementGenerator::unitSpeedChanged()
     {
-        return m_lastTargetDistance;
+        ForceNewPath();
     }
 
-    void FollowMovementGenerator::RequestPath( Unit* owner, const G3D::Vector3 & position )
+    void FollowMovementGenerator::ForceNewPath()
+    {
+        m_forceNewPath = true;
+        ResetTimerAndReturn( 0 );
+    }
+
+    void FollowMovementGenerator::RequestPathToCurrDestination( Unit* owner )
     {
         if ( MMAP::MMapFactory::IsPathfindingEnabled( owner->FindMap() ))
         {
@@ -169,7 +158,7 @@ namespace Movement
             forceDest |= owner->GetTypeId() == TYPEID_UNIT && owner->IsPet();                                    // pets should always force dest
             forceDest |= owner->GetTransport() != nullptr && owner->GetTransport() == i_target->GetTransport();  // No mmaps on transports
 
-            AsyncPathGeneratorContext context( owner, position, forceDest );
+            AsyncPathGeneratorContext context( owner, m_currDestination, forceDest );
             context.SetFallbackOrigin( m_lastTargetPosition );
             context.DisableExtendedPolySearch();
 
@@ -184,8 +173,19 @@ namespace Movement
             Position pos( m_lastTargetPosition.x, m_lastTargetPosition.y, m_lastTargetPosition.z );
             i_target->MovePositionToFirstCollision( pos, m_offset, m_angle );
 
+            m_currDestination = pos;
+
             promise.set_value( { PATHFIND_SHORTCUT, PointsArray{ owner->GetPosition(), G3D::Vector3{ pos } } } );
         }
+    }
+
+    void FollowMovementGenerator::UpdateCurrDestination( const G3D::Vector3 & position )
+    {
+        m_lastTargetPosition = position;
+
+        m_currDestination = position;
+        m_currDestination.x += m_offset * cos( i_target->GetOrientation() + m_angle );
+        m_currDestination.y += m_offset * sin( i_target->GetOrientation() + m_angle );
     }
 
     void FollowMovementGenerator::SynchronizeSpeed( Unit* owner ) const
@@ -244,31 +244,15 @@ namespace Movement
     }
     void FollowMovementGenerator::MoveByPath( Unit* owner, Movement::Path & path )
     {
+        SynchronizeSpeed( owner );
+
         const float pathLength = path.GetPathLength();
         const bool isInArena = owner->GetMap()->IsBattleArena();
 
         Movement::MoveSplineInit spline( owner );
         if ( path.type & PATHFIND_NOPATH || ( isInArena && path.type & PATHFIND_INCOMPLETE && abs( m_currDestination.z - path.points.back().z ) > 1.0f ) )
         {
-            m_currDestination = m_lastTargetPosition;
-
-            //if ( path.type & PATHFIND_INCOMPLETE )
-            //{
-            //    m_currDestination = m_lastTargetPosition;
-            //}
-            //else
-            //{
-            //    auto objectSize = owner->GetObjectSize();
-
-            //    Position pos( m_lastTargetPosition.x, m_lastTargetPosition.y, m_lastTargetPosition.z );
-            //    i_target->MovePositionToFirstCollision( pos, m_offset, m_angle );
-
-            //    m_currDestination = pos;
-            //}
-
-            m_currDestination = m_lastTargetPosition;
-
-            spline.MoveTo( m_currDestination );
+            spline.MoveTo( m_lastTargetPosition );
         }
         else if ( !isInArena && ( pathLength >= FOLLOW_MAX_PATH_LENGTH && ( pathLength / m_lastTargetDistance ) >= 1.5f ) )
         {
@@ -279,10 +263,14 @@ namespace Movement
             spline.MovebyPath( path.points );
         }
 
-        spline.SetWalk( i_target->IsWalking() );
+        bool isWalking = i_target->IsWalking();
+        isWalking |= i_target->IsCreature() && i_target->movespline->isWalking();
+
+        spline.SetWalk( isWalking );
         spline.SetSmooth();
         spline.Launch();
 
+        //! real destination after movemap transform
         m_currDestination = GetAbsolutePositionForSpline( owner, owner->movespline->FinalDestination() );
 
         owner->AddUnitState( UNIT_STATE_FOLLOW_MOVE );

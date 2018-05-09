@@ -316,7 +316,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle, MovementSlo
         return;
 
     Mutate(new Movement::FollowMovementGenerator(target, dist, angle), slot);
-    }
+}
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath, bool forceDestination, MovementSlot slot)
 {

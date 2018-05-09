@@ -29,10 +29,14 @@ namespace Movement
         virtual void        MovementInform( Unit* );
 
         Unit*               GetTarget() const;
-        float               GetLastTargetDistance() const;
 
     protected:
-        void                RequestPath( Unit* owner, const G3D::Vector3 & position );
+        void                unitSpeedChanged() override;
+        void                ForceNewPath();
+
+        void                RequestPathToCurrDestination( Unit* owner );
+        void                UpdateCurrDestination( const G3D::Vector3 & position );
+
         void                SynchronizeSpeed( Unit* owner ) const;
         bool                IsMovementSuspended( Unit* owner ) const;
 
@@ -51,11 +55,11 @@ namespace Movement
         TimeTrackerSmall    m_updateTimer;
 
         bool                m_needsMovementInform;
+        bool                m_forceNewPath;
         bool                m_isTargetMoving;
         G3D::Vector3        m_currDestination;
-
-        float               m_lastTargetDistance;
         G3D::Vector3        m_lastTargetPosition;
+        float               m_lastTargetDistance;
     };
 }
 
