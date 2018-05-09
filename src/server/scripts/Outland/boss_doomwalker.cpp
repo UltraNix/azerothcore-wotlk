@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -115,9 +115,9 @@ class boss_doomwalker : public CreatureScript
                             if (!HealthAbovePct(20))
                             {
                                 DoCast(me, SPELL_ENRAGE);
-                                _events.ScheduleEvent(EVENT_ENRAGE, 6000);
                                 _inEnrage = true;
                             }
+                            _events.ScheduleEvent(EVENT_ENRAGE, 6000);
                             break;
                         case EVENT_OVERRUN:
                             Talk(SAY_OVERRUN);
