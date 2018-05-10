@@ -174,6 +174,8 @@ class CreatureAI : public UnitAI
 
         virtual bool CanBeSeen(Player const* /*seer*/) { return true; }
 
+        virtual float GetMeleeRadianRange() const { return 0.0f; }
+
     protected:
         virtual void MoveInLineOfSight(Unit* /*who*/);
 

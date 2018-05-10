@@ -1709,6 +1709,13 @@ void Player::Update(uint32 p_time)
             // default combat reach 10
             // TODO add weapon, skill check
 
+            float victimRadianRange = 0.0f;
+            if (victim->ToCreature() && victim->IsAIEnabled)
+                victimRadianRange = victim->ToCreature()->AI()->GetMeleeRadianRange();
+
+            if (!victimRadianRange)
+                victimRadianRange = 2 * M_PI / 3;
+
             if (isAttackReady(BASE_ATTACK))
             {
                 if (!IsWithinMeleeRange(victim))
@@ -1721,7 +1728,7 @@ void Player::Update(uint32 p_time)
                     }
                 }
                 //120 degrees of radiant range
-                else if (!HasInArc(2*M_PI/3, victim))
+                else if (!HasInArc(victimRadianRange, victim))
                 {
                     setAttackTimer(BASE_ATTACK, 100);
                     if (m_swingErrorMsg != 2)               // send single time (client auto repeat)
@@ -1749,7 +1756,7 @@ void Player::Update(uint32 p_time)
             {
                 if (!IsWithinMeleeRange(victim))
                     setAttackTimer(OFF_ATTACK, 100);
-                else if (!HasInArc(2*M_PI/3, victim))
+                else if (!HasInArc(victimRadianRange, victim))
                     setAttackTimer(OFF_ATTACK, 100);
                 else
                 {
