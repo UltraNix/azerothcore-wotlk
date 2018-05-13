@@ -222,6 +222,7 @@ namespace Movement
                 Path path( m_asyncPath.GetPath() );
                 MoveByPath( owner, path );
 
+                m_forceNewPath = false;
                 m_needsMovementInform = true;
             }
 
