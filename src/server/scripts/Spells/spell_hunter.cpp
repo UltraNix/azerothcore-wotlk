@@ -416,9 +416,9 @@ class spell_hun_ascpect_of_the_viper : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& procInfo)
             {
                 SpellInfo const* spellInfo = procInfo.GetDamageInfo()->GetSpellInfo();
-				// Explosive trap
-				if(spellInfo && procInfo.GetTypeMask() & PROC_FLAG_DONE_TRAP_ACTIVATION)
-					return (spellInfo->SpellFamilyFlags[2] & 0x00004000) != 0;
+                // Explosive trap
+                if(spellInfo && procInfo.GetTypeMask() & PROC_FLAG_DONE_TRAP_ACTIVATION)
+                    return (spellInfo->SpellFamilyFlags[2] & 0x00004000) != 0;
                 // Xinef: cannot proc from volley damage
                 return !(spellInfo && (spellInfo->SpellFamilyFlags[0] & 0x2000) && spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE);
             }
