@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -179,6 +179,9 @@ namespace Trinity
                     else
                         gain *= 2;
                 }
+                if (Creature* creature = u->ToCreature())
+                    if (creature->m_PlayerDamageReq) // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)
+                         gain *= 1.0f - 2.0f*creature->m_PlayerDamageReq / creature->GetMaxHealth();
 
                 gain = uint32(gain * sWorld->getRate(RATE_XP_KILL));
             }
