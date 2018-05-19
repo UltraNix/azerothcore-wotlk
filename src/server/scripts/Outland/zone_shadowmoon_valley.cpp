@@ -1140,6 +1140,9 @@ public:
                 Timers = true;
             }
 
+            if (!UpdateVictim())
+                return;
+
             if (Timers)
             {
                 if (SpellTimer1 <= diff)
@@ -1513,7 +1516,7 @@ void npc_lord_illidan_stormrage::npc_lord_illidan_stormrageAI::SummonNextWave()
             {
                 if (!sayWave3)
                 {
-                    me->AI()->Talk(8);
+                    me->AI()->Talk(9);
                     sayWave3 = true;
                 }
             }
