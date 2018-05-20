@@ -283,7 +283,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
             AH->auctionHouseEntry = auctionHouseEntry;
 
             ;//sLog->outDetail("CMSG_AUCTION_SELL_ITEM: Player %s (guid %d) is selling item %s entry %u (guid %d) to auctioneer %u with count %u with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u", _player->GetName().c_str(), _player->GetGUIDLow(), item->GetTemplate()->Name1.c_str(), item->GetEntry(), item->GetGUIDLow(), AH->auctioneer, item->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
-            sAuctionMgr->AddAItem(item);
+            AH->aitem = sAuctionMgr->AddAItem(item);
             auctionHouse->AddAuction(AH);
 
             _player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
@@ -323,7 +323,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
             AH->auctionHouseEntry = auctionHouseEntry;
 
             ;//sLog->outDetail("CMSG_AUCTION_SELL_ITEM: Player %s (guid %d) is selling item %s entry %u (guid %d) to auctioneer %u with count %u with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u", _player->GetName().c_str(), _player->GetGUIDLow(), newItem->GetTemplate()->Name1.c_str(), newItem->GetEntry(), newItem->GetGUIDLow(), AH->auctioneer, newItem->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
-            sAuctionMgr->AddAItem(newItem);
+            AH->aitem = sAuctionMgr->AddAItem(newItem);
             auctionHouse->AddAuction(AH);
 
             for (uint32 j = 0; j < itemsCount; ++j)
@@ -487,7 +487,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket & recvData)
 
         auction->DeleteFromDB(trans);
 
-        sAuctionMgr->RemoveAItem(auction->item_guidlow);
+        sAuctionMgr->RemoveAItem(auction);
         auctionHouse->RemoveAuction(auction);
     }
     player->SaveInventoryAndGoldToDB(trans);
@@ -524,8 +524,10 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     if (auction && auction->owner == player->GetGUIDLow())
     {
-        ItemRef pItem = sAuctionMgr->GetAItem(auction->item_guidlow);
-        if (pItem)
+        auto aItem = sAuctionMgr->GetAItem(auction->item_guidlow);
+
+        ItemRef pItem = aItem ? aItem->GetItem() : nullptr;
+        if ( pItem )
         {
             if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
             {
@@ -566,8 +568,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
     auction->DeleteFromDB(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    uint32 item_template = auction->item_template;
-    sAuctionMgr->RemoveAItem(auction->item_guidlow);
+    sAuctionMgr->RemoveAItem(auction);
     auctionHouse->RemoveAuction(auction);
 }
 

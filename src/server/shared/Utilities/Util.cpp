@@ -484,7 +484,7 @@ bool consoleToUtf8(const std::string& conStr, std::string& utf8str)
 #endif
 }
 
-bool Utf8FitTo(const std::string& str, std::wstring search)
+bool Utf8FitTo(const std::string& str, std::wstring const& search)
 {
     std::wstring temp;
 

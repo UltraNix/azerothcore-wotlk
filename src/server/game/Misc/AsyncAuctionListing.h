@@ -24,7 +24,7 @@ class AuctionListItemsDelayEvent
 {
 public:
     AuctionListItemsDelayEvent(uint32 msTimer, uint64 playerguid, uint64 creatureguid, std::string searchedname, uint32 listfrom, uint8 levelmin, uint8 levelmax, uint8 usable, uint32 auctionSlotID, uint32 auctionMainCategory, uint32 auctionSubCategory, uint32 quality, uint8 getAll) :
-        _msTimer(msTimer), _playerguid(playerguid), _creatureguid(creatureguid), _searchedname(searchedname), _listfrom(listfrom), _levelmin(levelmin), _levelmax(levelmax), _usable(usable), _auctionSlotID(auctionSlotID), _auctionMainCategory(auctionMainCategory), _auctionSubCategory(auctionSubCategory), _quality(quality), _getAll(getAll) { }
+        _msTimer(msTimer), _playerguid(playerguid), _creatureguid(creatureguid), _searchedname(std::move(searchedname)), _listfrom(listfrom), _levelmin(levelmin), _levelmax(levelmax), _usable(usable), _auctionSlotID(auctionSlotID), _auctionMainCategory(auctionMainCategory), _auctionSubCategory(auctionSubCategory), _quality(quality), _getAll(getAll) { }
 
     bool Execute();
 
