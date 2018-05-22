@@ -2,7 +2,7 @@ UPDATE `creature` SET `MovementType` = 2 WHERE `guid` = 15144;
 DELETE FROM `creature_formations` WHERE `leaderGUID` = 15144;
 INSERT INTO `creature_formations` VALUES
 (15144, 15144, 0, 0, 2, 0, 0),
-(15144, 15135, 10, 360, 2, 0, 0);
+(15144, 15135, 10, 180, 2, 0, 0);
 SET @PATH = 151440;
 UPDATE `creature_addon` SET `path_id` = @PATH WHERE `guid` = 15144;
 DELETE FROM `waypoint_data` WHERE `id` = @PATH;
