@@ -2,7 +2,6 @@
 REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 */
 
-
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
@@ -264,6 +263,7 @@ class boss_algalon_the_observer : public CreatureScript
             EventMap events;
             SummonList summons;
             InstanceScript* m_pInstance;
+            uint32 _fightTimer;
 
             bool _firstPull;
             bool _fightWon;
@@ -306,7 +306,7 @@ class boss_algalon_the_observer : public CreatureScript
                         if (!plr->IsGameMaster() && plr->IsInCombat() /*performance*/)
                         {
                             for (uint8 i=EQUIPMENT_SLOT_START; i<EQUIPMENT_SLOT_END; ++i) // loop through equipped items
-                                if (ItemRef item = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+                                if (Item* item = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                                     if (!IsValidHeraldItem(item->GetTemplate()))
                                     {
                                         _heraldOfTheTitans = false;
@@ -368,6 +368,7 @@ class boss_algalon_the_observer : public CreatureScript
                 if (_fightWon)
                     return;
 
+                _fightTimer = 0;
                 events.Reset();
                 summons.DespawnAll();
                 me->SetReactState(REACT_PASSIVE);
@@ -497,8 +498,8 @@ class boss_algalon_the_observer : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_STAR, 16500 + introDelay);
                 events.ScheduleEvent(EVENT_COSMIC_SMASH, 25000 + introDelay);
                 events.ScheduleEvent(EVENT_ACTIVATE_LIVING_CONSTELLATION, 50500 + introDelay);
-                events.ScheduleEvent(EVENT_BIG_BANG, 90000 + introDelay);
-                events.ScheduleEvent(EVENT_ASCEND_TO_THE_HEAVENS, 360000 + introDelay);
+                events.ScheduleEvent(EVENT_BIG_BANG, (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF)) ? 65000 : 90000 + introDelay);
+                events.ScheduleEvent(EVENT_ASCEND_TO_THE_HEAVENS, (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF)) ? 300000 + introDelay : 360000 + introDelay);
 
                 events.ScheduleEvent(EVENT_CHECK_HERALD_ITEMS, 5000);
                 DoCheckHeraldOfTheTitans();
@@ -650,6 +651,7 @@ class boss_algalon_the_observer : public CreatureScript
                         events.PopEvent();
                         break;
                     case EVENT_INTRO_TIMER_DONE:
+                        _fightTimer = getMSTime();
                         events.SetPhase(PHASE_NORMAL);
                         me->CastSpell((Unit*)NULL, SPELL_SUPERMASSIVE_FAIL, true);
                         // Hack: _IsValidTarget failed earlier due to flags, call AttackStart again
@@ -680,7 +682,7 @@ class boss_algalon_the_observer : public CreatureScript
                         break;
                     case EVENT_COSMIC_SMASH:
                         Talk(EMOTE_ALGALON_COSMIC_SMASH);
-                        me->CastCustomSpell(SPELL_COSMIC_SMASH, SPELLVALUE_MAX_TARGETS, RAID_MODE(1,3), (Unit*)NULL);
+                        me->CastCustomSpell(SPELL_COSMIC_SMASH, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) ? 5 : 3), (Unit*)NULL);
                         events.RepeatEvent(25500);
                         break;
                     case EVENT_ACTIVATE_LIVING_CONSTELLATION:
@@ -738,6 +740,8 @@ class boss_algalon_the_observer : public CreatureScript
                     case EVENT_OUTRO_3:
                         me->CastSpell((Unit*)NULL, SPELL_KILL_CREDIT);
                         m_pInstance->SetData(DATA_GIFT_OF_THE_OBSERVER, DATA_GIFT_OF_THE_OBSERVER);
+                        if (Map* map = me->GetMap())
+                            CheckCreatureRecord(me->SelectNearestPlayer(150.0f), me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
                         events.PopEvent();
                         break;
                     case EVENT_OUTRO_4:
@@ -930,6 +934,7 @@ class npc_collapsing_star : public CreatureScript
             {
                 creature->GetMotionMaster()->MoveRandom(25.0f);
                 creature->CastSpell(creature, SPELL_COLLAPSE, true);
+                _didSpawnHole = false;
             }
 
             void JustSummoned(Creature* summon)
@@ -941,12 +946,15 @@ class npc_collapsing_star : public CreatureScript
 
             void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask)
             {
-                if (damage >= me->GetHealth())
+                if (damage >= me->GetHealth() && !_didSpawnHole)
                 {
+                    _didSpawnHole = true;
                     me->CastSpell(me, SPELL_BLACK_HOLE_SPAWN_VISUAL, true);
                     me->CastSpell(me, SPELL_SUMMON_BLACK_HOLE, true);
                 }
             }
+        private:
+            bool _didSpawnHole;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1123,6 +1131,21 @@ class go_celestial_planetarium_access : public GameObjectScript
 
                 if (_locked)
                     return false;
+
+                InstanceScript* instance = go->GetInstanceScript();
+                if (!instance)
+                    return false;
+
+                //if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && go && go->GetMap()->Is25ManRaid())
+                //{
+                //    // hardmode checks, if one of those is false then return
+                //    if (!instance->GetData(DATA_MIMIRON_HARDMODE) ||
+                //        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
+                //        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
+                //        !instance->GetData(DATA_MIMIRON_HARDMODE))
+                //        return false;
+                //}
+
                 _locked = true;
                 // Start Algalon event
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
@@ -1130,15 +1153,12 @@ class go_celestial_planetarium_access : public GameObjectScript
                 if (Creature* brann = go->SummonCreature(NPC_BRANN_BRONZBEARD_ALG, BrannIntroSpawnPos))
                     brann->AI()->DoAction(ACTION_START_INTRO);
 
-                if (InstanceScript* instance = go->GetInstanceScript())
-                {
-                    instance->SetData(DATA_ALGALON_SUMMON_STATE, 1);
-                    if (GameObject* sigil = ObjectAccessor::GetGameObject(*go, instance->GetData64(GO_DOODAD_UL_SIGILDOOR_01)))
-                        sigil->SetGoState(GO_STATE_ACTIVE);
+                instance->SetData(DATA_ALGALON_SUMMON_STATE, 1);
+                if (GameObject* sigil = ObjectAccessor::GetGameObject(*go, instance->GetData64(GO_DOODAD_UL_SIGILDOOR_01)))
+                    sigil->SetGoState(GO_STATE_ACTIVE);
 
-                    if (GameObject* sigil = ObjectAccessor::GetGameObject(*go, instance->GetData64(GO_DOODAD_UL_SIGILDOOR_02)))
-                        sigil->SetGoState(GO_STATE_ACTIVE);
-                }
+                if (GameObject* sigil = ObjectAccessor::GetGameObject(*go, instance->GetData64(GO_DOODAD_UL_SIGILDOOR_02)))
+                    sigil->SetGoState(GO_STATE_ACTIVE);
 
                 return false;
             }

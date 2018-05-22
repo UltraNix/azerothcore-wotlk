@@ -193,6 +193,7 @@ enum WorldBoolConfigs
     CONFIG_ITEM_RESTORE,                      // Sitowsky: Item Restore
     CONFIG_LATENCY_RECORD,                    // Sitowsky: Latency Recorder
     CONFIG_STATS_LATENCY_ONLY_ON_LOGOUT,      // Sitowsky: Latency Recorder only on logout?
+    CONFIG_ULDUAR_PRE_NERF,                   // Turns on or off higher damage values for some spells in Ulduar (restart required)
     BOOL_CONFIG_VALUE_COUNT
 };
 

@@ -424,6 +424,7 @@ struct Position
     float m_positionZ;
     float m_orientation;
 
+    //! Doesn't check for orientation changes
     bool operator==(Position const &a);
 
     inline bool operator!=(Position const &a)

@@ -4311,7 +4311,23 @@ void AuraEffect::HandleAuraModIncreaseHealthPercent(AuraApplication const* aurAp
 
     // Unit will keep hp% after MaxHealth being modified if unit is alive.
     float percent = target->GetHealthPct();
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, float(GetAmount()), apply);
+    float amount = GetAmount();
+
+    //! ulduar boost, has to be done this way, only 1 spell for both modes
+    if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && target && target->GetMap()->Is25ManRaid() && GetSpellInfo())
+    {
+        switch (GetSpellInfo()->Id)
+        {
+            case 64582:
+                amount = 40.0f;
+                break;
+            case 62565:
+                amount = -54.0f;
+                break;
+        }
+    }
+
+    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, amount, apply);
 
     // Xinef: idiots, pct was rounded down and could "kill" creature by setting its health to 0 making npc zombie
     if (target->IsAlive())
@@ -4800,9 +4816,14 @@ void AuraEffect::HandleModDamagePercentDone(AuraApplication const* aurApp, uint8
 
     if ((GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL) && (GetSpellInfo()->EquippedItemClass == -1 || target->GetTypeId() != TYPEID_PLAYER))
     {
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND,  TOTAL_PCT, float(GetAmount()), apply);
-        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED,   TOTAL_PCT, float(GetAmount()), apply);
+        //! ulduar boost hacks, has to be done this way, only 1 spell for both modes
+        float amount = GetAmount();
+        if (GetSpellInfo()->Id == 64582/*emergencyMode*/ && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && target->GetMap()->Is25ManRaid())
+            amount = 35.f;
+
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, amount, apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, amount, apply);
+        target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, amount, apply);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
             target->ToPlayer()->ApplyPercentModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, float (GetAmount()), apply);
@@ -6570,10 +6591,6 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
     else
         powerType = Powers(GetMiscValue());
 
-    // Vezax Dispersion
-    if (target->HasAura(62692) && target->HasAura(47585))
-        return;
-
     if (!target->IsAlive() || !target->GetMaxPower(powerType))
         return;
 
@@ -6585,6 +6602,10 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
 
     // don't regen when permanent aura target has full power
     if (GetBase()->IsPermanent() && target->GetPower(powerType) == target->GetMaxPower(powerType))
+        return;
+
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    if (target->CannotRegenerateManaFromSpell(GetSpellInfo(), powerType))
         return;
 
     // ignore negative values (can be result apply spellmods to aura damage
@@ -6619,6 +6640,10 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
 
     // don't regen when permanent aura target has full power
     if (GetBase()->IsPermanent() && target->GetPower(powerType) == target->GetMaxPower(powerType))
+        return;
+
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    if (target->CannotRegenerateManaFromSpell(GetSpellInfo(), powerType))
         return;
 
     // ignore negative values (can be result apply spellmods to aura damage

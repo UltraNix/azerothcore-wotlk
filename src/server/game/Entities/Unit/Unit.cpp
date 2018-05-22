@@ -5094,6 +5094,17 @@ bool Unit::HasNegativeAuraWithAttribute(uint32 flag, uint64 guid)
     return false;
 }
 
+bool Unit::HasAuraWithAttributeCu(SpellCustomAttributes attr)
+{
+    for (AuraApplicationMap::const_iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (aura->GetSpellInfo()->HasAttribute(attr))
+            return true;
+    }
+    return false;
+}
+
 bool Unit::HasAuraWithMechanic(uint32 mechanicMask) const
 {
     for (AuraApplicationMap::const_iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
@@ -5106,6 +5117,31 @@ bool Unit::HasAuraWithMechanic(uint32 mechanicMask) const
             if (iter->second->HasEffect(i) && spellInfo->Effects[i].Effect && spellInfo->Effects[i].Mechanic)
                 if (mechanicMask & (1 << spellInfo->Effects[i].Mechanic))
                     return true;
+    }
+
+    return false;
+}
+
+bool Unit::CannotRegenerateManaFromSpell(SpellInfo const* spell, Powers powerType)
+{
+    if (powerType != POWER_MANA)
+        return false;
+
+    if (!spell)
+        return false;
+
+    // Aura of Despair
+    if (HasAuraType(SPELL_AURA_PREVENT_REGENERATE_POWER))
+    {
+        if (spell->HasAttribute(SPELL_ATTR0_CU_IGNORE_MANA_REGEN_LOCK))
+        {
+            if (spell->Id == 54428) // Divine Plea
+                if (!HasAura(53583) && !HasAura(53585)) // talent Guarded by the Light - prot paladin 
+                    return true;
+
+            return false;
+        }
+        return true;
     }
 
     return false;
@@ -8322,6 +8358,20 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         }
                         break;
                     }
+                    case 16864: // Druid omen of Clarity
+                        if (getClass() == CLASS_DRUID && HasAuraType(SPELL_AURA_PREVENT_REGENERATE_POWER)) // Aura of Despair
+                        {
+                            switch (GetShapeshiftForm())
+                            {
+                                case FORM_CAT:
+                                case FORM_BEAR:
+                                case FORM_DIREBEAR:
+                                    break;
+                                default:
+                                    return false;
+                            }
+                        }
+                        break;
                     // Druid T9 Feral Relic (Lacerate, Swipe, Mangle, and Shred)
                     case 67353:
                     {
@@ -11919,7 +11969,7 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
     uint32 effect = spellInfo->Effects[index].Effect;
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
-        if (itr->type == effect && (itr->spellId != 62692 || spellInfo->Effects[index].MiscValue == POWER_MANA))
+        if (itr->type == effect)
             return true;
 
     if (uint32 mechanic = spellInfo->Effects[index].Mechanic)
@@ -11934,7 +11984,7 @@ bool Unit::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) cons
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
-            if (itr->type == aura && (itr->spellId != 64848 || spellInfo->Effects[index].MiscValue == POWER_MANA))
+            if (itr->type == aura)
                 if (!spellInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
                     if (itr->blockType == SPELL_BLOCK_TYPE_ALL || spellInfo->IsPositive()) // xinef: added for pet scaling
                         return true;
@@ -17230,9 +17280,20 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 
     CastStop();
 
-    CombatStop();
-    getHostileRefManager().deleteReferences();
-    DeleteThreatList();
+    bool dropCombat = true;
+    if (ToCreature())
+    {
+        //! ulduar vehicles
+        if (GetEntry() == 33109 || GetEntry() == 33060 || GetEntry() == 33062)
+            dropCombat = false;
+    }
+
+    if (dropCombat)
+    {
+        CombatStop();
+        getHostileRefManager().deleteReferences();
+        DeleteThreatList();
+    }
 
     // xinef: update speed after charming
     UpdateSpeed(MOVE_RUN);

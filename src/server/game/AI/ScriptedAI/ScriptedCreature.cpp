@@ -147,7 +147,7 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
 
     if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
-        if (player->GetSession()->GetSecurity() == SEC_PLAYER)
+        //if (player->GetSession()->GetSecurity() == SEC_PLAYER)
         {
             if (creatureName == "")
                 creatureName = me->GetName();
@@ -160,13 +160,13 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
                         creatureName += " 10 normal";
                         break;
                     case RAID_DIFFICULTY_10MAN_HEROIC:
-                        creatureName += " 10 heroic";
+                        creatureName += map->GetId() == 603 ? " 10 hard mode" : " 10 heroic";
                         break;
                     case RAID_DIFFICULTY_25MAN_NORMAL:
                         creatureName += " 25 normal";
                         break;
                     case RAID_DIFFICULTY_25MAN_HEROIC:
-                        creatureName += " 25 heroic";
+                        creatureName += map->GetId() == 603 ? " 25 hard mode" : " 25 heroic";
                         break;
                     default:
                         return;

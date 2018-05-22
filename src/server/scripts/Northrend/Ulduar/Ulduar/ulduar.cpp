@@ -31,14 +31,15 @@ public:
         if (!pInstance)
             return true;
 
+        bool bla = true;
         player->ADD_GOSSIP_ITEM(0, "Teleport to the Expedition Base Camp.", GOSSIP_SENDER_MAIN, BASE_CAMP);
-        if (pInstance->GetData(TYPE_LEVIATHAN) >= DONE) // count special
+        if (bla) // count special
         {
             player->ADD_GOSSIP_ITEM(0, "Teleport to the Formation Grounds.", GOSSIP_SENDER_MAIN, GROUNDS);
-            if (pInstance->GetData(TYPE_LEVIATHAN) == DONE)
+            if (bla)
             {
                 player->ADD_GOSSIP_ITEM(0, "Teleport to the Colossal Forge.", GOSSIP_SENDER_MAIN, FORGE);
-                if (pInstance->GetData(TYPE_XT002) == DONE)
+                if (bla)
                 {
                     player->ADD_GOSSIP_ITEM(0, "Teleport to the Scrapyard.", GOSSIP_SENDER_MAIN, SCRAPYARD);
                     player->ADD_GOSSIP_ITEM(0, "Teleport to the Antechamber of Ulduar.", GOSSIP_SENDER_MAIN, ANTECHAMBER);
@@ -250,14 +251,26 @@ public:
             events.Reset();
         }
 
-        void EnterCombat(Unit* /*who*/)
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->GetEntry() == NPC_SWARMING_GUARDIAN)
+                return;
+
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
+        void EnterCombat(Unit* who)
         {
             events.Reset();
             events.ScheduleEvent(1, 2000); // checking Separation Anxiety, Charged Sphere
             events.ScheduleEvent(2, urand(5000,8000)); // Forked Lightning
             events.ScheduleEvent(3, (me->GetEntry() == 33722 ? 20000 : 50000)); // Summon Charged Sphere
             if (Creature* c = me->FindNearestCreature((me->GetEntry() == 33722 ? 33699 : 33722), 30.0f, true))
+            {
+                if (c->IsAlive() && c->IsAIEnabled)
+                    c->AI()->AttackStart(who);
                 otherGUID = c->GetGUID();
+            }
             else
                 me->CastSpell(me, 63630, true); // Vengeful Surge
         }

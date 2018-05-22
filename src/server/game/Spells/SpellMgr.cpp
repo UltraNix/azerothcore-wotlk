@@ -82,6 +82,8 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Screams of the Past
             else if (spellproto->Id == 7074)
                 return DIMINISHING_NONE;
+            else if (spellproto->Id == 64155)
+                return DIMINISHING_NONE;
             break;
         }
         // Event spells
@@ -3048,6 +3050,34 @@ void SpellMgr::LoadSpellCustomAttr()
         if (spellInfo->SpellVisual[0] == 3879)
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
+        ApplySpellFix({ 62283, 62438, 62861, 62930 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS;
+        });
+
+        //! hodirs frozen blows
+        ApplySpellFix({ 62478, 63512 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu &= ~(SPELL_ATTR0_CU_NEGATIVE);
+        });
+
+        ApplySpellFix
+        ({
+            54428, // Divine Plea
+            47755, // Rapture
+            34075, // Aspect of the Viper
+            31930, // Judgements of the Wise
+            31786, // Spiritual Attunement
+            30824, // Shamanistic Rage
+            64372, // Lifebloom
+            63337, // Saronite Vapors (regenerate mana)
+            63375, // Improved stormstrike
+            34720  // Thrill of the hunt
+         }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_MANA_REGEN_LOCK;
+        });
+
         ApplySpellFix
         ({
             1776, // Gouge
@@ -3067,6 +3097,18 @@ void SpellMgr::LoadSpellCustomAttr()
             52743 // Head Smack
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
+        });
+
+        //! Some delayed spells shouldnt take distance into consideration
+        //! didnt find proper rule
+        ApplySpellFix
+        ({
+            64639,
+            64652,
+            56737
+         }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_DISTANCE_IN_SPEED_CALC;
         });
 
         ApplySpellFix({ 45145 /* Snake Trap Effect*/ }, [](SpellInfo* spellInfo) {
@@ -3229,38 +3271,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
-            24340, // Meteor
-            26558,
-            28884,
-            36837,
-            38903,
-            41276,
-            57467,
-            26789, // Shard of the Fallen Star
-            31436, // Malevolent Cleave
-            35181, // Dive Bomb
-            40810, // Saber Lash
-            43267,
-            43268,
-            42384, // Brutal Swipe
-            45150, // Meteor Slash
-            64688, // Sonic Screech
-            72373, // Shared Suffering
-            71904, // Chaos Bane
-            70492, // Ooze Eruption
-            72505,
-            72624,
-            72625,
-            66809, // Meteor Fists
-            67331,
-            66765,
-            67333
-        }, [](SpellInfo* spellInfo) {
-            spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-        });
-
-        ApplySpellFix
-        ({
             18500, // Wing Buffet
             69293,
             33086, // Wild Bite
@@ -3377,13 +3387,67 @@ void SpellMgr::LoadSpellCustomAttr()
             71475,
             71476,
             71477, // Vampiric Bite
+            64290, // Stone grip
+            64292, // Stone grip 25
+            63720, // Stone shout 10
+            64004, // Stone shout 25
+            64710, // Overhead smash tremor
+            64715, // Overhead smash tremor 25
+            64422, // Sonic screech
+            64688, // Sonic screech 25
+            62437, // Ground tremor 10
+            62859, // Ground tremor 25
+            62325, // Ground tremor elder stonebark 10
+            62932, // Ground tremor elder stonebark 25
+            64189, // Deafening Roar
+            62311, // Cosmic Smash
+            64596, // Cosmic Smash
+            64443, // Big bang
+            64584, // Big bang
+            64697, // Earthquake (Molten colossus ulduar)
+            65071, // Mechano kick
+            64819, // Devastating leap
+            64942, // Devastating leap
+            64825, // Staggering roar
+            64944, // Staggering roar
+            63629, // Kologarn arm damage kologarn
+            63979  // Kologarn arm damage kologarn
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
 
-        ApplySpellFix({ 64422 /*Sonic Screech (Auriaya)*/}, [](SpellInfo* spellInfo) {
+        ApplySpellFix
+        ({
+            24340, // Meteor
+            26558,
+            28884,
+            36837,
+            38903,
+            41276,
+            57467,
+            26789, // Shard of the Fallen Star
+            31436, // Malevolent Cleave
+            35181, // Dive Bomb
+            40810, // Saber Lash
+            43267,
+            43268,
+            42384, // Brutal Swipe
+            45150, // Meteor Slash
+            64688, // Sonic Screech
+            64422, // Sonic Screech
+            72373, // Shared Suffering
+            71904, // Chaos Bane
+            70492, // Ooze Eruption
+            72505,
+            72624,
+            72625,
+            66809, // Meteor Fists
+            67331,
+            66765,
+            67333
+        }, [](SpellInfo* spellInfo)
+        {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SHARE_DAMAGE;
-            spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
 
         ApplySpellFix
@@ -3451,6 +3515,12 @@ void SpellMgr::LoadSpellCustomAttr()
             67472, // Fire Bomb 25 man
             67473, // Fire Bomb 10 man heroic
             67475, // Fire Bomb 25 man heroic
+            63978, // Stone nova Kologarn rubble
+            64375, // Rip flesh 10
+            64667, // Rip flesh 25
+            63059, // Pollinate
+            62326, // Low blow
+            62243  // Unstable sunbeam
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
@@ -3619,6 +3689,17 @@ void SpellMgr::LoadSpellCustomAttr()
 
         if (overrideAttr && allNonBinary)
             spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_BINARY_SPELL;
+
+        //! exceptions from the rule, reason? sunwellcore
+        switch (spellInfo->Id)
+        {
+            case 64679:
+            case 64392:
+                spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_BINARY_SPELL;
+                break;
+            default:
+                break;
+        }
     }
 
     CreatureAI::FillAISpellInfo();
@@ -5614,8 +5695,20 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63493:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+        case 64320: // rune of power
+            spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            break;
+        case 63346: // Focused eyebeam
+        case 63976: // Focused eyebeam 25
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
+            break;
         case 64619: // Ulduar, Mimiron, Emergency Fire Bot, Water Spray
             spellInfo->EffectMiscValue[1] = 800;
+            break;
+        case 63278: // mark of the faceless
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_13_YARDS;
             break;
         // Deafening Siren
         case 64616:
@@ -5652,18 +5745,31 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->MaxAffectedTargets = 1;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
-        // Growth of Nature
-        case 62716:
-            spellInfo->EffectBasePoints[0] = 29;
+        case 64528: // melt ice
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
-        // Sonic Screech
-        case 64688:
-            spellInfo->EffectBasePoints[0] += 50000;
+        case 62234: // Icicle normal selector
+        case 63545: // Icicle normal
+        case 62462: // Icicle flash freeze
+        case 62476: // flash freeze selector
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             break;
         case 65280: //  Hodir, Singed
             spellInfo->StackAmount = 30;
             break;
         // Flame Leviathan
+        case 62297: // hodirs fury
+            spellInfo->AttributesEx2 &= ~SPELL_ATTR2_CAN_TARGET_DEAD;
+            break;
+        case 62335: // Acolyte holy smite - Thorim
+        case 62443: // Acolyte holy smite - Thorim
+            spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+            break;
+        case 62038: // Hodir's biting cold - main periodic on boss
+            spellInfo->EffectAmplitude[EFFECT_0] = 4000;
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
+            break;
         // Battering Ram
         case 62376:
             spellInfo->rangeIndex = RANGE_INDEX_MEDIUM_RANGE_30YD;
@@ -5676,28 +5782,20 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64482:
         case 65075:
         case 65076:
-            spellInfo->EffectBasePoints[EFFECT_2] = 49;
+            spellInfo->EffectBasePoints[EFFECT_2] = 50;
             break;
         case 65077:
-            spellInfo->EffectBasePoints[EFFECT_0] = 49;
+            spellInfo->EffectBasePoints[EFFECT_0] = 50;
             break;
         // Flame Jets
         case 63472:
             spellInfo->EffectBasePoints[EFFECT_1] = 2598;
             break;
-        // Flame Jets silence
-        case 62681:
-            spellInfo->DurationIndex = 31;
-            break;
-        // Strength of the Creator (20 % to 15 %)
-        case 64473:
-            spellInfo->EffectBasePoints[EFFECT_0] = 15;
-            break;
         // Gravity Bomb
         case 63025:
         case 64233:
-            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_12_YARDS;
-            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_12_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_11_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_11_YARDS;
             break;
         case 64234:
             spellInfo->EffectBasePoints[EFFECT_2] = spellInfo->EffectBasePoints[EFFECT_2] + 4999;
@@ -5706,35 +5804,32 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64193:
             spellInfo->EffectBasePoints[EFFECT_2] = 39;
             break;
-        // Overload
-        case 61878:
-            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_30_YARDS;
-            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_30_YARDS;
-            break;
         // Stone Grip
         case 64292:
             spellInfo->EffectBasePoints[EFFECT_0] = 5450;
             break;
-        // Rune Of Death
-        case 63490:
-            spellInfo->EffectBasePoints[EFFECT_0] = 4999;
-            break;
         // Strength of the Pack
         case 64381:
-            spellInfo->EffectBasePoints[EFFECT_0] = 49;
-            break;
-        // Searing Light
-        case 65120:
-            spellInfo->EffectBasePoints[EFFECT_0] = 3500;
+            spellInfo->EffectBasePoints[EFFECT_0] = 50;
             break;
         // Terrifying Screech
         case 64386:
             spellInfo->DurationIndex = 28; // 5 seconds
             break;
         // Razorscale
-        // Devouring Flame
-        case 63236:
-            spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_SCHOOL_DAMAGE;
+        case 62796: // razorscale fireball
+        case 63815: // razorscale fireball
+            spellInfo->speed = 0.0f;
+            break;
+        case 63317: // flame breath target entry (just before flying up)
+        case 64021: // flame breath target entry (just before flying up)
+        case 62669: // Firebolt, visual into triggers
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_DONT_TURN_DURING_CAST;
+            break;
+        case 63018: // Searing light
+        case 63023: // Searing light
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+            spellInfo->AttributesEx3 &= ~SPELL_ATTR3_CANT_TRIGGER_PROC;
             break;
         case 64734:
             spellInfo->EffectAmplitude[EFFECT_0] = 1000;
@@ -5780,11 +5875,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[2] = EFFECT_RADIUS_3_YARDS; // 3yd
             break;
 
-        // Ulduar, General Vezax, Mark of the Faceless
-        case 63278:
-            spellInfo->Effect[0] = 0;
-            break;
-
         // XT-002 DECONSTRUCTOR
         case 62834: // Boom (XT-002)
             spellInfo->Effect[EFFECT_1] = 0;
@@ -5814,6 +5904,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64003:
             spellInfo->Attributes |= SPELL_ATTR0_ON_NEXT_SWING;
             break;
+        case 63355: // Crunch armor
+        case 64002: // Crunch armor
+            spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
 
         // AURIAYA
         // Sentinel Blast
@@ -5821,25 +5916,57 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64678:
             spellInfo->Dispel = DISPEL_MAGIC;
             break;
+        case 64496: // feral rush
+        case 64674: // feral rush 25m
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            spellInfo->Attributes &= ~SPELL_ATTR0_CU_CHARGE;
+            spellInfo->EffectMiscValue[EFFECT_0] = 100;
+            spellInfo->EffectMiscValueB[EFFECT_0] = 20;
+            break;
+        case 64399: // swarming guardian pounce
+                    // make jump look like jump not ground slide
+            spellInfo->Attributes &= ~SPELL_ATTR0_CU_CHARGE;
+            spellInfo->EffectMiscValue[EFFECT_0] = 90;
+            spellInfo->EffectMiscValueB[EFFECT_0] = 110;
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_TARGET_RANDOM;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_DEST_TARGET_RANDOM;
+            break;
+        case 64396: // Guardian Swarm
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            // Current value in dbc is 500 which causes 10 swarming guardians to spawn
+            // hotfix 2009-05-04 "the Guardian Swarm ability now summons 10 Swarming Guardians instead of 25 but their individual damage has been increased."
+            // setting it to 200 will cause 25 guardians to spawn, 5 per second
+            spellInfo->EffectAmplitude[EFFECT_0] = 200;
+            break;
+        case 64397: // Summon guardian swarm
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_150_YARDS;
+            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
+            break;
+        case 64375:
+        case 64667:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            break;
 
         // FREYA
         // Potent Pheromones
         case 62619:
             spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
             break;
-        // Healthy spore summon periodic
-        case 62566:
-            spellInfo->EffectAmplitude[0] = 2000;
-            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
-            break;
         // Brightleaf Essence trigger
         case 62968:
             spellInfo->Effect[1] = 0; // duplicate
             break;
-        // Potent Pheromones
+            // Potent Pheromones
         case 64321:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_4_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_4_YARDS;
+            break;
+        case 62532: // Conservator's grip
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             break;
 
         // THORIM
@@ -5849,14 +5976,39 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Charge Orb P2
         case 62976:
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_SRC_CASTER;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_SRC_AREA_ENTRY;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = 12; // 100y
             spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
             spellInfo->DurationIndex = 28;
             break;
-        // Sif's Blizzard
-        case 62576:
-        case 62602:
-            spellInfo->EffectRadiusIndex[0] = 14; // 8yd
-            spellInfo->EffectRadiusIndex[1] = 14; // 8yd
+        case 62042: // stormhammer
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
+        case 62017: // Lightning shock - thorim
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_34_YARDS;
+            break;
+        case 62576: // Ulduar - Sif - Blizzard
+        case 62602: // Ulduar - Sif - Blizzard
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_CASTER_LEFT;
+            break;
+        case 62470: // Ulduar - Thorim - Deafening Thunder
+            spellInfo->Attributes = SPELL_ATTR0_NEGATIVE_1;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_15_YARDS;
+            break;
+        case 62465: // Runic smash explosion
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_8_YARDS;
+            break;
+        //! mimiron
+        case 63307: // jet pack
+            spellInfo->DurationIndex = 35;
+            spellInfo->rangeIndex = RANGE_INDEX_VISION_RANGE_100YD;
+            break;
+        case 45537: // spell beam visual (thorims balcony)
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         // Chain Lightning
         case 64390:
@@ -5868,6 +6020,33 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
 
         // YOGG-SARON
+        //! general vezax
+        case 22806: // some random heal for boosted version of vezax
+            spellInfo->Attributes |= SPELL_ATTR0_HIDDEN_CLIENTSIDE | SPELL_ATTR0_HIDE_IN_COMBAT_LOG | SPELL_ATTR0_PASSIVE;
+            spellInfo->AttributesEx |= SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_CAN_CAST_WHILE_CASTING;
+            break;
+        case 63710: // void barrier
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_SCHOOL_IMMUNITY;
+            spellInfo->EffectBasePoints[0] = 0;
+            break;
+        case 62692: // aura of despair
+            spellInfo->Effect[EFFECT_2] = 0;
+            break;
+        case 63134: // Yogg-Saron Sara's Blessing
+        case 63138: // Yogg-Saron Sara's Fervor
+            spellInfo->AttributesEx |= (SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED);
+            break;
+            // Protective Gaze
+        case 65719: // Shadow nova targeting sara
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
+        case 63050: // sanity
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_SRC_AREA_ENTRY;
+            break;
         // Protective Gaze
         case 64175:
             spellInfo->RecoveryTime = 25000;
@@ -5876,9 +6055,8 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64465:
             spellInfo->EffectTriggerSpell[0] = 64467; // why do they need two script effects :/ (this one has visual effect)
             break;
-        // Sanity
-        case 63050:
-            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
+        case 63754: // ulduar trash - twilight shadowblade
+            spellInfo->powerType = 0;
             break;
         // Shadow Nova
         case 62714:
@@ -5887,6 +6065,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63883:
         case 63884:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
+        case 64147: // crush
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_15_YARDS;
             break;
 
         // ALGALON
@@ -5913,11 +6094,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
             spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
 			spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_2_YARDS;
-            break;
-        // Assembly of iron
-        case 61869: // 10
-        case 63481: // 25
-            spellInfo->Effect[EFFECT_1] = 0;
             break;
         // TRASH
         // Ground Slam
@@ -7516,6 +7692,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->ChannelInterruptFlags = 0;
             spellInfo->InterruptFlags = 0;
             spellInfo->AuraInterruptFlags = 0;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         case 63274: // Lasser barrage (Mimiron)
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_500_YARDS;
@@ -7730,7 +7907,285 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
         }
-
+        if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
+        {
+            switch (spellInfo->Id)
+            {
+                //! Thorim
+                case 62601: // frostbolt 25
+                case 62605: // frostnova 25
+                case 62604: // frostbolt volley 25
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                case 62470: // defeaning thunder ally damage
+                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
+                    break;
+                //! Mimiron
+                case 64566: // Flames
+                    spellInfo->EffectBasePoints[EFFECT_0] = 11000;
+                    break;
+                case 64582: // Emergency mode
+                    spellInfo->EffectBasePoints[EFFECT_0] = 30;
+                    spellInfo->EffectBasePoints[EFFECT_1] = 30;
+                    break;
+                case 64383: // Self repair
+                    spellInfo->CastingTimeIndex = 7; // 10s
+                    break;
+                case 66351: // Proximity mine
+                case 63009: // Proximity mine
+                    spellInfo->EffectBasePoints[EFFECT_0] = 25000;
+                    break;
+                //! Auriaya
+                case 64386: // Terrifying screech
+                    spellInfo->DurationIndex = 28;
+                    break;
+                case 64422: // Sonic screech 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 80000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 6000;
+                    break;
+                case 64688: // Sonic screech 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 250000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 18750;
+                    break;
+                case 64675: // Seeping feral essence
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9000;
+                    break;
+                case 64374: // Savage pounce
+                    spellInfo->rangeIndex = 54;
+                    break;
+                //! Kologarn
+                case 63346: // Focused eyebeam 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 3000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 225;
+                    break;
+                case 63976: // Focused eyebeam 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 4500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 337;
+                    break;
+                case 64290: // stone grip dot 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 4000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 300;
+                    break;
+                case 64292: // stone grip dot 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 5500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 137;
+                    break;
+                case 63818: // Rumble
+                    spellInfo->EffectBasePoints[EFFECT_0] = 5000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 375;
+                    break;
+                case 63978: // Stone nova
+                    spellInfo->EffectBasePoints[EFFECT_0] = 8000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 600;
+                    break;
+                //! Assembly of iron
+                case 61878: // overload damage part
+                case 63480: // overload damage part
+                    spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_30_YARDS;
+                    spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_30_YARDS;
+                    break;
+                //! did blizzard nerf it in a way that they replaced 25 man spell with 10 man version? weird
+                case 63481: // Overload channel 25 man
+                    spellInfo->EffectTriggerSpell[EFFECT_0] = 63480;
+                    break;
+                case 61916: // Lightning whirl 10 man
+                    spellInfo->EffectBasePoints[EFFECT_0] = 5000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 287;
+                    break;
+                case 63482: // Lightning whirl 25 man
+                    spellInfo->EffectBasePoints[EFFECT_0] = 7500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 431;
+                    break;
+                case 63490: // Rune Of Death
+                    spellInfo->EffectBasePoints[EFFECT_0] = 5000;
+                    break;
+                case 62269: // Rune of Death
+                    spellInfo->EffectBasePoints[EFFECT_0] = 3500;
+                    break;
+                case 63489: // Shield of runes
+                    spellInfo->EffectBasePoints[EFFECT_0] = 40000;
+                    break;
+                case 61902: // Elecrtical charge
+                    spellInfo->EffectBasePoints[EFFECT_1] = 25;
+                    break;
+                //! Ignis
+                case 62549: // Scorched Ground 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 4000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 230;
+                    break;
+                case 63475: // Scorched Ground 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 6400;
+                    spellInfo->EffectDieSides[EFFECT_0] = 368;
+                    break;
+                case 63472: // flame jets 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9500;
+                    break;
+                case 65722: // Slag pot damage 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 5000;
+                    spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                case 65723: // Slag pot damage 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 7500;
+                    spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                case 62343: // Heat
+                    spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_13_YARDS;
+                    break;
+                //! handled in spellscript
+                case 63477: // Slag pot
+                case 62717: // Slag pot
+                    spellInfo->Effect[EFFECT_1] = 0;
+                    break;
+                    //! XT-002
+                case 64193: // Heartbreak
+                    spellInfo->EffectBasePoints[EFFECT_1] = 120;
+                    spellInfo->EffectBasePoints[EFFECT_2] = 60;
+                    break;
+                case 62776: // Tympanic tantarum
+                    spellInfo->DurationIndex = 29;
+                    break;
+                case 65120: // Searing Light 25
+                    spellInfo->AttributesEx3 &= ~SPELL_ATTR3_CANT_TRIGGER_PROC;
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 3500;
+                    break;
+                case 63023: // searing light 10
+                    spellInfo->AttributesEx3 &= ~SPELL_ATTR3_CANT_TRIGGER_PROC;
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 2750;
+                    break;
+                case 63024: // gravity bomb aura trigger 10 man
+                    spellInfo->EffectBasePoints[EFFECT_2] = 18000;
+                    spellInfo->EffectDieSides[EFFECT_2] = 900;
+                    break;
+                case 64234: // gravity bomb aura trigger 25 man
+                    spellInfo->EffectBasePoints[EFFECT_2] = 20000;
+                    spellInfo->EffectDieSides[EFFECT_2] = 1000;
+                    break;
+                case 63025: // gravity bomb
+                    spellInfo->EffectBasePoints[EFFECT_0] = 18000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 900;
+                    break;
+                case 64233: // gravity bomb
+                    spellInfo->EffectBasePoints[EFFECT_0] = 20000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1000;
+                    break;
+                    //! Razorscale
+                case 62796: // Fireball 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1000;
+                    break;
+                case 63815: // Fireball 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 13000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1000;
+                    break;
+                case 64704: // Devouring flame 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 6500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 500;
+                    break;
+                case 64733: // Devouring flame 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 712;
+                    break;
+                case 64758: // Chain lightning 10
+                    spellInfo->rangeIndex = RANGE_INDEX_HUNTER_RANGE_35YD;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 8500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1500;
+                    break;
+                case 64759: // Chain lightning 25
+                    spellInfo->rangeIndex = RANGE_INDEX_HUNTER_RANGE_35YD;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 10500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1500;
+                    break;
+                    //! Flame Leviathan
+                case 62401: // Missile barrage dummy
+                    spellInfo->rangeIndex = RANGE_INDEX_ANYWHERE_50000YD;
+                    break;
+                case 62287: // Pool of Tar
+                    spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_8_YARDS;
+                    break;
+                    //! Freya
+                case 62716: // Growth of nature 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 60;
+                    break;
+                case 65584: // Growth of nature 10
+                    spellInfo->EffectBasePoints[EFFECT_0] = 30;
+                    break;
+                case 62337: // Petrified bark 10
+                    spellInfo->procCharges = 80;
+                    break;
+                case 62933: // Petrified bark 25
+                    spellInfo->procCharges = 220;
+                    break;
+                case 62653: // Tidal wave 10
+                case 62935: // Tidal wave 25
+                    spellInfo->InterruptFlags &= ~SPELL_INTERRUPT_FLAG_INTERRUPT;
+                    spellInfo->PreventionType = SPELL_PREVENTION_TYPE_NONE;
+                    break;
+                case 62859: // Ground Tremor Freya 25
+                    spellInfo->EffectBasePoints[EFFECT_0] = 11500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 500;
+                    break;
+                case 65590: // stonebark essence
+                case 62386: // stonebark essence
+                    spellInfo->EffectBasePoints[EFFECT_0] = 75;
+                    break;
+                case 65761: // bringleaf's essence
+                case 62968: // brightleaf's essence
+                    spellInfo->EffectBasePoints[EFFECT_0] = 60;
+                    spellInfo->EffectBasePoints[EFFECT_1] = 60;
+                    break;
+                case 62654: // Tidal wave
+                case 62936: // Tidal wave
+                    spellInfo->EffectBasePoints[EFFECT_0] = 11000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 825;
+                    break;
+                case 63059: // Pollinate
+                    spellInfo->EffectBasePoints[EFFECT_0] = 25;
+                    break;
+                case 63082: // Bind life
+                    spellInfo->EffectBasePoints[EFFECT_0] = 15000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1125;
+                    break;
+                case 63559: // Bind life
+                    spellInfo->EffectBasePoints[EFFECT_0] = 30000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 2250;
+                    break;
+                case 62438: // Iron roots dmg
+                case 62861: // Iron roots dmg
+                    spellInfo->EffectBasePoints[EFFECT_1] = 8000;
+                    spellInfo->EffectDieSides[EFFECT_1] = 200;
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+                    break;
+                //! General Vezax
+                case 63278: // Mark of the faceless
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                //! Yogg saron
+                case 64039: // Grim Reprisal
+                case 64189: // Deafening roar
+                case 64164: // Lunatic Gaze
+                case 64168: // Lunatic Gaze tentacle
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                case 64125: // Ulduar, Yogg-Saron, Squeeze
+                case 64126:
+                    spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                    break;
+                case 64468: // empowering shadow
+                case 64486: // empowering shadow
+                    spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_18_YARDS;
+                    break;
+                    //! Algalon
+                case 62311: // Cosmic Smash
+                case 64596: // Cosmic Smash
+                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     // Xinef: The Veiled Sea area in outlands (Draenei zone), client blocks casting flying mounts

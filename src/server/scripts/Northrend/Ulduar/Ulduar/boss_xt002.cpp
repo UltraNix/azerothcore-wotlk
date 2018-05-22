@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Opcodes.h"
 #include "GridNotifiers.h"
+#include "MoveSplineInit.h"
 
 enum XT002Spells
 {
@@ -24,6 +25,7 @@ enum XT002Spells
     SPELL_TRAMPLE                           = 5568,
     SPELL_UPPERCUT                          = 10966,
     SPELL_BOOM                              = 62834,
+    SPELL_SCRAP_REPAIR                      = 62832,
 
     // HEARTBREAK
     SPELL_HEART_OVERLOAD                    = 62789,
@@ -37,12 +39,18 @@ enum XT002Spells
     SPELL_VOID_ZONE_SUMMON_10               = 64203,
     SPELL_VOID_ZONE_SUMMON_25               = 64235,
     SPELL_VOID_ZONE_DAMAGE                  = 46262,
-    
+
     // SPARK
     SPELL_SPARK_SUMMON                      = 64210,
     SPELL_SPARK_DAMAGE_10                   = 64227,
     SPELL_SPARK_DAMAGE_25                   = 64236,
     SPELL_SPARK_MELEE                       = 64230,
+    SPELL_ARCANE_POWER_STATE                = 49411,
+
+    // Misc
+    SPELL_ANIM_TANTRUM                      = 76092, // lil xt tantrum animation, cant find proper emote IDs. works the same
+    SPELL_ANIM_TRAIN                        = 76114, // lil xt workout animation, works same on big XT
+    SPELL_SCRAPBOT_RIDE_VEHICLE             = 47020
 };
 
 #define SPELL_GRAVITY_BOMB         RAID_MODE(SPELL_GRAVITY_BOMB_10, SPELL_GRAVITY_BOMB_25)
@@ -89,6 +97,7 @@ enum Sounds
 enum Misc
 {
     HEART_VEHICLE_SEAT                      = 0,
+    HEART_VEHICLE_SEAT_EXPOSED              = 1,
 
     ACTION_AWAKEN_HEART                     = -5,
     ACTION_HIDE_HEART                       = -4,
@@ -98,7 +107,11 @@ enum Misc
 
     DATA_XT002_NERF_ENGINEERING             = 50,
     DATA_XT002_GRAVITY_ACHIEV               = 51,
+
+    DATA_SPARK_FOLLOW_TARGET                = 52
 };
+
+Position const XTArenaCenterPos = { 816.491455f, -12.355629f, 409.803619f, 5.292682f };
 
 struct boss_xt002AI : BossAI
 {
@@ -117,6 +130,7 @@ struct boss_xt002AI : BossAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         _Reset();
         me->ResetLootMode();
         me->RemoveAllAuras();
@@ -132,11 +146,13 @@ struct boss_xt002AI : BossAI
         me->SetControlled(false, UNIT_STATE_STUNNED);
 
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MUST_DECONSTRUCT_FASTER);
-        instance->SetData(TYPE_XT002, NOT_STARTED);
+        if (instance->GetData(TYPE_XT002) != DONE)
+            instance->SetData(TYPE_XT002, NOT_STARTED);
         if (auto go = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_XT002_DOORS)))
             go->SetGoState(GO_STATE_ACTIVE);
     }
 
+    //! ToDo: ten override nie jest raczej poprawny
     void MoveInLineOfSight(Unit*) override { }
     void JustSummoned(Creature* cr) override { summons.Summon(cr); }
     void SummonedCreatureDespawn(Creature* cr) override { summons.Despawn(cr); }
@@ -145,6 +161,11 @@ struct boss_xt002AI : BossAI
     {
         instance->SetData(TYPE_XT002, FAIL);
         _DespawnAtEvade();
+    }
+
+    bool CheckEvadeIfOutOfCombatArea() const override
+    {
+        return !me->IsWithinBox(XTArenaCenterPos, 106.f, 106.f, 30.0f);
     }
 
     void AttachHeart() const
@@ -159,14 +180,85 @@ struct boss_xt002AI : BossAI
         }
     }
 
+    void MovementInform(uint32 type, uint32 pointID) override
+    {
+        BossAI::MovementInform(type, pointID);
+
+        if (type == WAYPOINT_MOTION_TYPE)
+        {
+            switch (pointID)
+            {
+                case 1:
+                case 3:
+                    DoCast(SPELL_ANIM_TANTRUM);
+                    break;
+                case 2:
+                case 4:
+                    me->SetFacingTo(3.14f);
+                    DoCast(SPELL_ANIM_TRAIN);
+                    break;
+            }
+        }
+    }
+
+    void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
+    {
+        if (apply && seatId == HEART_VEHICLE_SEAT_EXPOSED && who->GetEntry() == NPC_XT002_HEART)
+        {
+            //! Riztazz: Move heart to proper offsets
+            //! remove this piece of code when we extract m_attachement from game files (bone attachments)
+            /*
+            ServerToClient: SMSG_MONSTER_MOVE_TRANSPORT (0x02AE) Length: 61 ConnIdx: 0 Time: 07/04/2010 17:33:07.000 Number: 363654
+            GUID: Full: 0xF130008231001885 Type: Creature Entry: 33329 Low: 6277
+            Transport GUID: Full: 0xF15000820D001884 Type: Vehicle Entry: 33293 Low: 6276
+            Transport Seat: 1
+            Toggle AnimTierInTrans: false
+            Position: X: 1.389038 Y: -0.01501465 Z: 20.14996
+            Move Ticks: 101081
+            Spline Type: FacingAngle (4)
+            Facing Angle: 0
+            Spline Flags: Transport (8388608)
+            Move Time: 0
+            Waypoints: 1
+            Waypoint Endpoint: X: 6.6525 Y: 0.7791 Z: 2.66805
+            */
+            Movement::MoveSplineInit init(who);
+            init.DisableTransportPathTransformations();
+            init.MoveTo(6.6525f, 0.7791f, 2.66805f, false);
+            init.Launch();
+
+            if (me->GetVehicleKit())
+                me->GetVehicleKit()->RelocatePassengers();
+        }
+    }
+
     void EnterCombat(Unit*) override
     {
+        _fightTimer = getMSTime();
+        me->RemoveAurasDueToSpell(SPELL_ANIM_TANTRUM);
+        me->RemoveAurasDueToSpell(SPELL_ANIM_TRAIN);
+        me->CastStop();
+
+        if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
+            _canCastDuringTantrum = true;
+        else
+            _canCastDuringTantrum = false;
+
         _EnterCombat();
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
-        events.ScheduleEvent(EVENT_ENRAGE, 600000, 0, 0);
+
+        if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
+        {
+            if (Is25ManRaid())
+                events.ScheduleEvent(EVENT_ENRAGE, 10min, 0, 0);
+            else
+                events.ScheduleEvent(EVENT_ENRAGE, 8min, 0, 0);
+        }
+        else
+            events.ScheduleEvent(EVENT_ENRAGE, 600000, 0, 0);
+
         RescheduleEvents(); // Other events are scheduled here
 
-        me->setActive(true);
         me->MonsterYell("New toys? For me? I promise I won't break them this time!", LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(XT_SOUND_AGGRO);
 
@@ -196,8 +288,11 @@ struct boss_xt002AI : BossAI
         }
     }
 
-    void JustDied(Unit* /*victim*/) override
+    void JustDied(Unit* killer) override
     {
+        if (Map* map = me->GetMap())
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + _hardMode, Difficulty(map->GetDifficulty() + _hardMode * 2), "", 15000, _fightTimer);
+
         _JustDied();
         me->MonsterYell("You are bad... Toys... Very... Baaaaad!", LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(XT_SOUND_DEATH);
@@ -219,7 +314,7 @@ struct boss_xt002AI : BossAI
             _gravityAchievement = false;
             return;
         }
-            
+
         if (!me->IsAlive() || _hardMode)
             return;
 
@@ -233,7 +328,7 @@ struct boss_xt002AI : BossAI
             me->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND); // emerge
 
             DoCastSelf(SPELL_HEARTBREAK, true);
-                
+
             me->MonsterTextEmote("XT-002 Deconstructor's heart is severed from his body.", nullptr, true);
             events.ScheduleEvent(EVENT_REMOVE_EMOTE, 4000);
             return;
@@ -267,9 +362,9 @@ struct boss_xt002AI : BossAI
 
         events.Update(diff);
 
-        auto _25man = me->GetMap()->Is25ManRaid() && me->HasAura(SPELL_TYMPANIC_TANTARUM);
-
-        if (me->HasUnitState(UNIT_STATE_CASTING) && !_25man)
+        auto _canContinueCasting = _canCastDuringTantrum && me->HasAura(SPELL_TYMPANIC_TANTARUM);
+        /// allow to execute stuff while tantrum is up and mode is set to preNerf
+        if (me->HasUnitState(UNIT_STATE_CASTING) && !_canContinueCasting)
             return;
 
         while (auto eventId = events.ExecuteEvent())
@@ -295,7 +390,7 @@ struct boss_xt002AI : BossAI
                     }
                     events.Repeat(1000);
                     break;
-                    // Abilities events
+                // Abilities events
                 case EVENT_GRAVITY_BOMB:
                     me->CastCustomSpell(SPELL_GRAVITY_BOMB, SPELLVALUE_MAX_TARGETS, 1, me, true);
                     events.ScheduleEvent(EVENT_SEARING_LIGHT, 10000, 1);
@@ -336,7 +431,7 @@ struct boss_xt002AI : BossAI
 
                     me->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND); // emerge
                                                                                         // Hide heart
-                    if (auto heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : nullptr)
+                    if (auto heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT_EXPOSED) : nullptr)
                         if (heart->IsAIEnabled)
                             heart->GetAI()->DoAction(ACTION_HIDE_HEART);
 
@@ -352,19 +447,22 @@ struct boss_xt002AI : BossAI
                     break;
             }
 
-            if (me->HasUnitState(UNIT_STATE_CASTING) && !_25man)
+            if (me->HasUnitState(UNIT_STATE_CASTING) && !_canCastDuringTantrum)
                 return;
         }
 
+        EnterEvadeIfOutOfCombatArea();
         // Disabled by stunned state
         DoMeleeAttackIfReady();
     }
 
 private:
     uint8 _healthCheck;
+    uint32 _fightTimer;
     bool _hardMode;
     bool _nerfAchievement;
     bool _gravityAchievement;
+    bool _canCastDuringTantrum;
 };
 
 struct npc_xt002_heartAI : PassiveAI
@@ -410,7 +508,7 @@ struct npc_xt002_heartAI : PassiveAI
             DoCastSelf(SPELL_HEART_OVERLOAD, true);
             DoCastSelf(SPELL_EXPOSED_HEART, false);    // Channeled
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-
+            me->ChangeSeat(HEART_VEHICLE_SEAT_EXPOSED, true);
             if (!summons.HasEntry(NPC_PILE_TRIGGER))
                 SummonPiles();
 
@@ -423,11 +521,15 @@ struct npc_xt002_heartAI : PassiveAI
         else if (param == ACTION_HIDE_HEART)
         {
             if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            {
                 if (pXT002->IsAIEnabled)
                 {
                     pXT002->AI()->DoAction(_damageDone);
                     _damageDone = 0;
                 }
+            }
+
+            me->ChangeSeat(HEART_VEHICLE_SEAT, false);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             me->RemoveAllAurasOnDeath();
         }
@@ -477,7 +579,7 @@ struct npc_xt002_heartAI : PassiveAI
                 case 3:
                     if(_pummelerCount < 2)
                         me->SummonCreature(NPC_XM024_PUMMELLER, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()+2, 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
-                        
+
                     _pummelerCount++;
                     _spawnSelection++;
                     break;
@@ -527,6 +629,7 @@ struct npc_xt002_scrapbotAI : PassiveAI
 
     void Reset() override
     {
+        me->SetRegeneratingHealth(false);
         me->StopMoving();
         _locked = true;
         me->SetWalk(true);
@@ -552,7 +655,6 @@ struct npc_xt002_scrapbotAI : PassiveAI
             }
     }
 
-    // tc idiots, they use updateAI, while we have movementinform :)
     void MovementInform(uint32 type, uint32 /*param*/) override
     {
         if (type == POINT_MOTION_TYPE)
@@ -569,13 +671,14 @@ struct npc_xt002_scrapbotAI : PassiveAI
                 {
                     if (pXT002->IsAIEnabled)
                         pXT002->AI()->DoAction(DATA_XT002_NERF_ENGINEERING);
-                    pXT002->ModifyHealth(pXT002->GetMaxHealth() * 0.01f);
+                    pXT002->CastSpell(me, SPELL_SCRAP_REPAIR, true);
+                    me->CastSpell(pXT002, SPELL_SCRAPBOT_RIDE_VEHICLE, true);
                 }
 
-                if (!urand(0,2))
+                if (roll_chance_i(25))
                     me->MonsterTextEmote("XT-002 Deconstructor consumes scrap bot to repair himself.", nullptr, true);
-                    
-                me->DespawnOrUnsummon(1);
+
+                me->DespawnOrUnsummon(1.5s);
             }
     }
 
@@ -667,7 +770,13 @@ class BoomEvent : public BasicEvent
             // The above situation causes the visual for this spell to be bugged, so we remove the instakill
             // effect and implement a script hack for that.
 
-            _me->CastSpell(_me, SPELL_BOOM, false);
+            WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8 + 8 + 4);
+            data << uint64(_me->GetGUID());
+            data << uint64(_me->GetGUID());
+            data << uint32(SPELL_BOOM);
+            _me->SendMessageToSet(&data, false);
+
+            Unit::Kill(_me, _me);
             return true;
         }
 
@@ -677,7 +786,10 @@ class BoomEvent : public BasicEvent
 
 struct npc_xt002_boombotAI : PassiveAI
 {
-    explicit npc_xt002_boombotAI(Creature* creature) : PassiveAI(creature), _locked(true), _boomed(false) { }
+    explicit npc_xt002_boombotAI(Creature* creature) : PassiveAI(creature), _locked(true), _boomed(false)
+    {
+        me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+    }
 
     void Reset() override
     {
@@ -703,25 +815,18 @@ struct npc_xt002_boombotAI : PassiveAI
 
             _boomed = true; // Prevent recursive calls
 
-        WorldPacket data(SMSG_SPELLINSTAKILLLOG, 8+8+4);
-        data << uint64(me->GetGUID());
-        data << uint64(me->GetGUID());
-        data << uint32(SPELL_BOOM);
-        me->SendMessageToSet(&data, false);
-
-        Unit::Kill(me, me);
-
         // Visual only seems to work if the instant kill event is delayed or the spell itself is delayed
         // Casting done from player and caster source has the same targetinfo flags,
         // so that can't be the issue
         // See BoomEvent class
         // Schedule 1s delayed
-        me->m_Events.AddEvent(new BoomEvent(me), me->m_Events.CalculateTime(1*IN_MILLISECONDS));
+        me->CastSpell(me, SPELL_BOOM, true);
+        me->m_Events.AddEvent(new BoomEvent(me), me->m_Events.CalculateTime(100));
     }
 
     void JustDied(Unit*) override
     {
-        me->m_Events.AddEvent(new BoomEvent(me), me->m_Events.CalculateTime(1*IN_MILLISECONDS));
+        Explode();
     }
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
@@ -736,7 +841,6 @@ struct npc_xt002_boombotAI : PassiveAI
         }
     }
 
-    // tc idiots, they use updateAI, while we have movementinform :)
     void MovementInform(uint32 type, uint32 /*param*/) override
     {
         if (type == POINT_MOTION_TYPE)
@@ -763,29 +867,58 @@ private:
 
 struct npc_xt002_life_sparkAI : ScriptedAI
 {
-    explicit npc_xt002_life_sparkAI(Creature* creature) : ScriptedAI(creature)
-    {
-        me->SetMaxHealth(RAID_MODE(54000, 172000 * 2));
-        me->SetHealth(me->GetMaxHealth());
-        DoCastSelf(SPELL_SPARK_DAMAGE, true);
-    }
+    explicit npc_xt002_life_sparkAI(Creature* creature) : ScriptedAI(creature) { }
 
     void Reset() override
     {
-        if (Unit *target = SelectTargetFromPlayerList(DEFAULT_COMBAT_REACH))
-            AttackStart(target);
-        else
-            me->DespawnOrUnsummon();
+        if (InstanceScript* instance = me->GetInstanceScript())
+            if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
+                if (!xt->IsInCombat() || xt->IsInEvadeMode())
+                    me->DespawnOrUnsummon();
+
+        me->SetReactState(REACT_PASSIVE);
+        scheduler.CancelAll();
+        _playerGUID = 0;
+        DoCastSelf(SPELL_ARCANE_POWER_STATE, true);
+        DoCastSelf(SPELL_SPARK_DAMAGE, true);
     }
 
-    void UpdateAI(uint32 /*diff*/) override
+    void SetGUID(uint64 guid, int32 data) override
     {
+        if (data == DATA_SPARK_FOLLOW_TARGET)
+        {
+            _playerGUID = guid;
+
+            scheduler.Schedule(2s, [this](TaskContext task)
+            {
+                me->SetReactState(REACT_AGGRESSIVE);
+                if (Unit* object = ObjectAccessor::GetUnit(*me, _playerGUID))
+                {
+                    AttackStart(object);
+                    DoZoneInCombat(me, 200.0f);
+                }
+                else // find anything
+                    DoZoneInCombat(me, 200.0f);
+            });
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        scheduler.Update(diff);
+
         if (!UpdateVictim())
             return;
 
-        DoCastVictim(SPELL_SPARK_MELEE);
-        DoMeleeAttackIfReady();
+        if (me->isAttackReady() && me->GetVictim())
+        {
+            DoCastVictim(SPELL_SPARK_MELEE, true);
+            me->resetAttackTimer();
+        }
     }
+private:
+    TaskScheduler scheduler;
+    uint64 _playerGUID;
 };
 
 class spell_xt002_tympanic_tantrum_SpellScript : public SpellScript
@@ -819,7 +952,7 @@ class spell_xt002_gravity_bomb_aura_AuraScript : public AuraScript
         if (auto player = GetOwner()->ToPlayer())
             if (auto xt002 = GetCaster())
                 if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                    if (Creature* cr = xt002->SummonCreature(NPC_VOID_ZONE, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
+                    if (Creature* cr = xt002->SummonCreature(NPC_VOID_ZONE, player->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 180000))
                         cr->CastSpell(cr, SPELL_VOID_ZONE_DAMAGE, true);
     }
 
@@ -852,7 +985,7 @@ class spell_xt002_gravity_bomb_aura_SpellScript : public SpellScript
     void SelectTarget(std::list<WorldObject*>& targets)
     {
         if (auto victim = GetCaster()->GetVictim())
-            targets.remove_if(Trinity::ObjectGUIDCheck(victim->GetGUID(), true)); 
+            targets.remove_if(Trinity::ObjectGUIDCheck(victim->GetGUID(), true));
     }
 
     void Register() override
@@ -886,19 +1019,15 @@ class spell_xt002_searing_light_spawn_life_spark_AuraScript : public AuraScript
 {
     PrepareAuraScript(spell_xt002_searing_light_spawn_life_spark_AuraScript);
 
-    bool Load() override { x = 0.0f, y = 0.0f, z = 0.0f; return true; }
-
     void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
         if (auto player = GetOwner()->ToPlayer())
         {
-            auto x = player->GetPositionX();
-            auto y = player->GetPositionY();
-            auto z = player->GetPositionZ();
-
             if (auto xt002 = GetCaster())
                 if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                    xt002->SummonCreature(NPC_LIFE_SPARK, x, y, z, 0, TEMPSUMMON_TIMED_DESPAWN, 180000);
+                    if (Creature* spark = xt002->SummonCreature(NPC_LIFE_SPARK, player->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 180000))
+                        if (spark->IsAIEnabled)
+                            spark->AI()->SetGUID(player->GetGUID(), DATA_SPARK_FOLLOW_TARGET);
         }
     }
 
@@ -906,8 +1035,6 @@ class spell_xt002_searing_light_spawn_life_spark_AuraScript : public AuraScript
     {
         OnEffectRemove += AuraEffectRemoveFn(spell_xt002_searing_light_spawn_life_spark_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
     }
-
-    float x, y, z;
 };
 
 class spell_xt002_searing_light_spawn_life_spark_SpellScript : public SpellScript
@@ -917,7 +1044,7 @@ class spell_xt002_searing_light_spawn_life_spark_SpellScript : public SpellScrip
     void SelectTarget(std::list<WorldObject*>& targets)
     {
         if (auto victim = GetCaster()->GetVictim())
-            targets.remove_if(Trinity::ObjectGUIDCheck(victim->GetGUID(), true)); 
+            targets.remove_if(Trinity::ObjectGUIDCheck(victim->GetGUID(), true));
     }
 
     void Register() override
@@ -938,7 +1065,7 @@ class achievement_xt002_nerf_engineering : public AchievementCriteriaScript
                     if (auto cr = ObjectAccessor::GetCreature(*target, instance->GetData64(TYPE_XT002)))
                         if (cr->IsAIEnabled)
                             return cr->AI()->GetData(DATA_XT002_NERF_ENGINEERING);
-                        
+
             return false;
         }
 };
@@ -955,7 +1082,7 @@ class achievement_xt002_nerf_gravity_bombs : public AchievementCriteriaScript
                     if (auto cr = ObjectAccessor::GetCreature(*target, instance->GetData64(TYPE_XT002)))
                         if (cr->IsAIEnabled)
                             return cr->AI()->GetData(DATA_XT002_GRAVITY_ACHIEV);
-                        
+
             return false;
         }
 };

@@ -410,6 +410,7 @@ bool WorldSession::HandleSocketClosed()
         m_Socket->RemoveReference();
         m_Socket = NULL;
         GetPlayer()->TradeCancel(false);
+        GetPlayer()->ExitVehicle();
         return true;
     }
     return false;

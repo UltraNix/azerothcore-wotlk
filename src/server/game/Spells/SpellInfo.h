@@ -170,7 +170,7 @@ enum SpellSpecificType
     SPELL_SPECIFIC_HAND                          = 27,
 };
 
-enum SpellCustomAttributes
+enum SpellCustomAttributes : uint32
 {
     SPELL_ATTR0_CU_ENCHANT_PROC                  = 0x00000001,
     SPELL_ATTR0_CU_CONE_BACK                     = 0x00000002,
@@ -183,7 +183,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_DIRECT_DAMAGE                 = 0x00000100,
     SPELL_ATTR0_CU_CHARGE                        = 0x00000200,
     SPELL_ATTR0_CU_PICKPOCKET                    = 0x00000400,
-    SPELL_ATTR0_CU_NONE4                         = 0x00000800,   // UNUSED
+    SPELL_ATTR0_CU_IGNORE_DISTANCE_IN_SPEED_CALC = 0x00000800, // Riztazz
     SPELL_ATTR0_CU_NEGATIVE_EFF0                 = 0x00001000,
     SPELL_ATTR0_CU_NEGATIVE_EFF1                 = 0x00002000,
     SPELL_ATTR0_CU_NEGATIVE_EFF2                 = 0x00004000,
@@ -201,6 +201,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK      = 0x04000000, // See SpellMgr::IsSpellProcEventCanTriggeredBy
     SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS          = 0x08000000, // Force bonus from talents to crit
     SPELL_ATTR0_CU_CHECK_STRONGEST_AURA_FOR_PROC = 0x10000000, // Check if there is more powerfull aura on target while proc
+    SPELL_ATTR0_CU_IGNORE_MANA_REGEN_LOCK        = 0x20000000, // Riztazz, based on ToD
 
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
 };

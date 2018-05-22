@@ -1,0 +1,1 @@
+UPDATE `smart_scripts` SET `target_type` = 5, `event_param3` = 30000, `event_param4` = 30000 WHERE `entryorguid` = 34085 AND `id` = 2;

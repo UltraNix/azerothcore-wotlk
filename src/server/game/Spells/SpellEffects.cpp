@@ -396,60 +396,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
-                    // Devouring Flame
-                    case 63236:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? urand(8700, 10200) : urand(6000, 6900));
-                        break;
-                    // Overload
-                    case 61878:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? 25000 : 20000);
-                        break;
-                    // Explosion
-                    case 66351: // 10 man
-                    case 63009: // 25 man
-                        damage = 20000;
-                        break;
-                    // Flames
-                    case 64566:
-                        damage = damage + 5000;
-                        break;
-                    // Ulduar 3.1.2
-                    // Schorch Ground 25 man
-                    case 63475:
-                        damage = damage * 2;
-                        break;
-                    // Molten 25 man
-                    case 62530:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? (damage * 2.5) : damage);
-                        break;
-                    // Slag Pot
-                    case 65723:
-                        damage = damage + 1500;
-                        break;
-                    // Gravity Bomb
-                    case 64233:
-                        //damage = (m_caster->GetMap()->Is25ManRaid() ? (damage + urand(4000, 6000)) : damage);
-                        break;
-                    // Lightning Whirl
-                    case 63482:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? urand(7000, 7900) : damage);
-                        break;
-                    // Eye Beam
-                    case 63976:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? urand(4100, 4900) : damage);
-                        break;
-                    // Stone Nova
-                    case 63978:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? urand(7400, 8600) : damage);
-                        break;
-                    // Sunbeam
-                    case 62872:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? urand(10600, 12300) : damage);
-                        break;
-                    // Ground Tremor
-                    case 62859:
-                        damage = (m_caster->GetMap()->Is25ManRaid() ? urand(9000, 11000) : damage);
-                        break;
+
                     // ToC 3.2
                     // Hellfire damage effect
                     case 65817:
@@ -1272,6 +1219,10 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     // Pre effects
     switch (m_spellInfo->Id)
     {
+        case 36563: // shadowstep
+            if (unitTarget->HasAura(63988 /*yogg saron illusion room*/))
+                return;
+            break;
         case 45367:
             if (Player* target = unitTarget->ToPlayer())
                 target->TeleportTo(uint32(530), 12782.93f, -6879.83f, 23.35f, 2.18f, TELE_TO_GM_MODE);
@@ -1478,6 +1429,10 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     Powers powerType = Powers(m_spellInfo->Effects[effIndex].MiscValue);
 
     if (!unitTarget || !unitTarget->IsAlive() || unitTarget->getPowerType() != powerType || damage < 0)
+        return;
+
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    if (m_caster->CannotRegenerateManaFromSpell(m_spellInfo, powerType))
         return;
 
     // add spell damage bonus
@@ -1983,9 +1938,6 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         return;
     if (!unitTarget->IsAlive())
         return;
-    // Vezax Water Shield
-    if (unitTarget->HasAura(62692) && unitTarget->HasAura(57960))
-        return;
 
     if (m_spellInfo->Effects[effIndex].MiscValue < 0 || m_spellInfo->Effects[effIndex].MiscValue >= int8(MAX_POWERS))
         return;
@@ -2042,6 +1994,10 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
         damage -= level_multiplier * level_diff;
 
     if (damage < 0)
+        return;
+
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    if (unitTarget->CannotRegenerateManaFromSpell(m_spellInfo, power))
         return;
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
@@ -2109,6 +2065,10 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
 
     uint32 maxPower = unitTarget->GetMaxPower(power);
     if (maxPower == 0)
+        return;
+
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    if (unitTarget->CannotRegenerateManaFromSpell(m_spellInfo, power))
         return;
 
     uint32 gain = CalculatePct(maxPower, damage);
@@ -4346,14 +4306,6 @@ void Spell::EffectSanctuary(SpellEffIndex /*effIndex*/)
 
     // Xinef: Set last sanctuary time
     unitTarget->m_lastSanctuaryTime = World::GetGameTimeMS();
-
-    // Vanish allows to remove all threat and cast regular stealth so other spells can be used
-    if (m_caster->GetTypeId() == TYPEID_PLAYER
-        && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE
-        && (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_ROGUE_VANISH))
-    {
-        m_caster->ToPlayer()->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-    }
 }
 
 void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
@@ -4872,6 +4824,9 @@ void Spell::EffectLeap(SpellEffIndex /*effIndex*/)
         return;
 
     if (!m_targets.HasDst())
+        return;
+
+    if (unitTarget->HasAura(63988 /*yogg saron illusion room*/))
         return;
 
     Position dstpos;

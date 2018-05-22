@@ -78,7 +78,7 @@ enum eEvents
 struct npc_ulduar_iron_constructAI : public ScriptedAI
 {
     npc_ulduar_iron_constructAI(Creature* creature) : ScriptedAI(creature)
-    { 
+    {
         instance = me->GetInstanceScript();
         DoCastSelf(38757, true);
     }
@@ -115,14 +115,13 @@ struct npc_ulduar_iron_constructAI : public ScriptedAI
         else if (spell->Id == SPELL_HEAT_BUFF)
         {
             if (Aura* aura = me->GetAura(SPELL_HEAT_BUFF))
-                if (aura->GetStackAmount() >= RAID_MODE(10, 20))
+            {
+                if (aura->GetStackAmount() >= 20)
                 {
-                    if (RAID_MODE(1,0) && aura->GetStackAmount() > 10) // prevent going over 10 on 10man version
-                        aura->ModStackAmount(-1);
-
                     DoCastSelf(SPELL_MOLTEN, true);
-                    me->getThreatManager().resetAllAggro();
+                    DoResetThreat();
                 }
+            }
         }
     }
 
@@ -175,19 +174,30 @@ private:
     uint32 _timer;
 };
 
+struct npc_scorched_groundAI : public ScriptedAI
+{
+    npc_scorched_groundAI(Creature* creature) : ScriptedAI(creature ) { }
+
+    void EnterCombat(Unit* /*who*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
+    void UpdateAI(uint32 /*diff*/) override { }
+    void EnterEvadeMode() override { }
+};
+
 struct boss_ignisAI : public BossAI
 {
-    boss_ignisAI(Creature* creature) : BossAI(creature, TYPE_IGNIS) {}
+    boss_ignisAI(Creature* creature) : BossAI(creature, TYPE_IGNIS) { }
 
     void Reset() override
     {
+        _fightTimer = 0;
         _Reset();
         me->SetControlled(false, UNIT_STATE_ROOT);
         me->DisableRotate(false);
         _counter = 0;
         _shattered = false;
         _lastShatterMSTime = 0;
-            
+        me->RemoveAurasDueToSpell(SPELL_STRENGTH_OF_THE_CREATOR);
         instance->SetData(TYPE_IGNIS, NOT_STARTED);
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_STOKIN_THE_FURNACE_EVENT);
     }
@@ -195,6 +205,7 @@ struct boss_ignisAI : public BossAI
     void EnterCombat(Unit* /*who*/) override
     {
         _EnterCombat();
+        _fightTimer = getMSTime();
 
         std::list<Creature*> list;
         me->GetCreaturesWithEntryInRange(list, 300.0f, NPC_IRON_CONSTRUCT);
@@ -221,10 +232,10 @@ struct boss_ignisAI : public BossAI
         _lastShatterMSTime = 0;
 
         events.Reset();
-        events.ScheduleEvent(EVENT_ACTIVATE_CONSTRUCT, RAID_MODE(40000,30000));
-        events.ScheduleEvent(EVENT_SPELL_SCORCH, 10000);
-        events.ScheduleEvent(EVENT_SPELL_FLAME_JETS, 32000);
-        events.ScheduleEvent(EVENT_GRAB, 25000);
+        events.ScheduleEvent(EVENT_ACTIVATE_CONSTRUCT, RAID_MODE(40s, 30s), 1);
+        events.ScheduleEvent(EVENT_SPELL_SCORCH, 10s);
+        events.ScheduleEvent(EVENT_SPELL_FLAME_JETS, 32s);
+        events.ScheduleEvent(EVENT_GRAB, 25s);
 
         me->MonsterYell(TEXT_AGGRO, LANG_UNIVERSAL, 0);
         me->PlayDirectSound(SOUND_AGGRO);
@@ -232,6 +243,8 @@ struct boss_ignisAI : public BossAI
         instance->SetData(TYPE_IGNIS, IN_PROGRESS);
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_STOKIN_THE_FURNACE_EVENT);
         instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_STOKIN_THE_FURNACE_EVENT);
+
+        me->RemoveAurasDueToSpell(SPELL_STRENGTH_OF_THE_CREATOR);
     }
 
     void SetData(uint32 id, uint32 /*value*/) override
@@ -270,10 +283,13 @@ struct boss_ignisAI : public BossAI
         }
     }
 
-    void JustDied(Unit* /*victim*/) override
+    void JustDied(Unit* killer) override
     {
         me->MonsterYell(TEXT_DEATH, LANG_UNIVERSAL, 0);
         me->PlayDirectSound(SOUND_DEATH);
+
+        if (Map* map = me->GetMap())
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, Difficulty(map->GetDifficulty()), "", 15000, _fightTimer);
 
         instance->SetData(TYPE_IGNIS, DONE);
 
@@ -327,7 +343,7 @@ struct boss_ignisAI : public BossAI
                         DoCastSelf(SPELL_BERSERK, true);
                         break;
                     }
-                    events.Repeat(RAID_MODE(40000, 30000));
+                    events.Repeat(RAID_MODE(40s, 30s));
                     break;
                 case EVENT_SPELL_SCORCH:
                     if (urand(0, 1))
@@ -344,8 +360,8 @@ struct boss_ignisAI : public BossAI
                     me->DisableRotate(true);
                     me->SendMovementFlagUpdate();
                     DoCastVictim(S_SCORCH);
-                    events.Repeat(20000);
-                    events.RescheduleEvent(EVENT_ENABLE_ROTATE, 3001);
+                    events.Repeat(20s);
+                    events.RescheduleEvent(EVENT_ENABLE_ROTATE, 3s);
                     break;
                 case EVENT_ENABLE_ROTATE:
                     me->SetControlled(false, UNIT_STATE_ROOT);
@@ -354,15 +370,9 @@ struct boss_ignisAI : public BossAI
                 case EVENT_SPELL_FLAME_JETS:
                     me->MonsterTextEmote(TEXT_FLAME_JETS, 0, true);
 
-                    if (me->GetMap()->Is25ManRaid() && me->GetVictim())
-                    {
-                        int32 dmg = urand(8483, 11198);
-                        me->CastCustomSpell(me->GetVictim(), S_FLAME_JETS, &dmg, nullptr, nullptr, false);
-                    }
-                    else
-                        DoCastVictim(S_FLAME_JETS);
+                    DoCastVictim(S_FLAME_JETS);
 
-                    events.Repeat(25000);
+                    events.Repeat(25s);
                     break;
                 case EVENT_GRAB:
                 {
@@ -403,8 +413,8 @@ struct boss_ignisAI : public BossAI
                         }
                     }
 
-                    events.Repeat(me->GetMap()->Is25ManRaid() ? 9000 : 24000); // +6000 below
-                    events.DelayEvents(6000);
+                    events.Repeat(me->GetMap()->Is25ManRaid() ? 9s : 24s); // +6000 below
+                    events.DelayEvents(6s, 0);
                 }
                 break;
                 default:
@@ -427,6 +437,7 @@ private:
     uint8 _counter;
     bool _shattered;
     uint32 _lastShatterMSTime;
+    uint32 _fightTimer;
 };
 
 class spell_ignis_scorch_AuraScript : public AuraScript
@@ -496,8 +507,11 @@ class spell_ignis_slag_pot_AuraScript : public AuraScript
         {
             target->ApplySpellImmune(GetId(), IMMUNITY_ID, 62549, false);
             target->ApplySpellImmune(GetId(), IMMUNITY_ID, 63475, false);
-            if (target->IsAlive())
-                target->CastSpell(target, (GetId() == 62717 ? 62836 : 63536), true);
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            {
+                if (target->IsAlive())
+                    target->CastSpell(target, (GetId() == 62717 ? 62836 : 63536), true);
+            }
         }
     }
 
@@ -518,7 +532,7 @@ class achievement_ignis_shattered : public AchievementCriteriaScript
         {
             if (!target || target->GetTypeId() != TYPEID_UNIT)
                 return false;
-            
+
             if (!target->IsAIEnabled)
                 return false;
 
@@ -530,6 +544,7 @@ void AddSC_boss_ignis()
 {
     new CreatureAILoader<boss_ignisAI>("boss_ignis");
     new CreatureAILoader<npc_ulduar_iron_constructAI>("npc_ulduar_iron_construct");
+    new CreatureAILoader<npc_scorched_groundAI>("npc_scorched_ground");
     new AuraScriptLoaderEx<spell_ignis_scorch_AuraScript>("spell_ignis_scorch");
     new SpellScriptLoaderEx<spell_ignis_grab_initial_SpellScript>("spell_ignis_grab_initial");
     new AuraScriptLoaderEx<spell_ignis_slag_pot_AuraScript>("spell_ignis_slag_pot");

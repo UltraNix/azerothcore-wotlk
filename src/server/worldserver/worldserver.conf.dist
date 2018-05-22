@@ -3577,6 +3577,14 @@ Naxxramas.Boost = 0
 MalygosAdditionalBoost.Enable = 0
 
 #
+#     UlduarPreNerf.Enable
+#        Description: Enables or disables pre-nerf version of spells on Ulduar and some AI mechanics
+#        Default:     0 - (Disabled)	
+#                     1 - (Enabled)
+
+UlduarPreNerf.Enable = 0
+
+#
 #     AngratharLaunch.Enable
 #     Description: Enables or disables Special experience gain calculations and decreased respawn times of creatures and gobjects.
 #     Default:     0 - (Disabled)

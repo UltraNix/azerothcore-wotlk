@@ -23,7 +23,7 @@ public:
 
     struct instance_ulduar_InstanceMapScript : public InstanceScript
     {
-        instance_ulduar_InstanceMapScript(Map* pMap) : InstanceScript(pMap) {Initialize();};
+        instance_ulduar_InstanceMapScript(Map* pMap) : InstanceScript(pMap) { Initialize(); };
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 C_of_Ulduar_MASK;
@@ -50,11 +50,13 @@ public:
         uint64 m_RepairSGUID[2];
         uint64 m_lightningWalls[2];
         bool m_leviathanTowers[4];
-        std::list<uint64> _leviathanVehicles;
+        std::vector<uint64> _leviathanVehicles;
+        std::vector<uint64> _leviathanDBVehicles;
         uint32 m_unbrokenAchievement;
 
         // Razorscale
         uint64 m_RazorscaleHarpoonFireStateGUID[4];
+        uint64 expeditionCommanderGUID;
 
         // XT-002
         uint64 m_xt002DoorsGUID;
@@ -79,6 +81,7 @@ public:
         // Freya
         uint64 m_FreyaElder[3];
         uint32 m_conspeedatoryAttempt;
+        std::vector<uint64> _freyaTrash;
 
         // Yogg-Saron
         uint64 m_saraGUID;
@@ -94,13 +97,37 @@ public:
         uint32 m_algalonTimer;
         uint64 m_chestGUID;
 
+        // Auriaya
+        std::vector<uint64> _sanctumSentryGUIDs;
+
         // Shared
         EventMap _events;
         bool m_mimironTramUsed;
         uint64 m_mimironTramGUID;
         uint64 m_keepersgateGUID;
         uint64 m_keepersGossipGUID[4];
+        uint64 _dellorahGUID;
+        uint64 _rhydianEntranceGUID;
+        uint64 _brannEntranceGUID;
+        uint64 _lorekeeperEntranceGUID;
+        uint64 _goranEntranceGUID;
+        uint64 _goStartingBarrierGUID;
+        uint64 _sifBlizzardTargetGUID;
+        uint64 _hodirEntranceDoorGUID;
+        uint64 _hodirFrozenDoorGUID;
+        uint64 _hodirExitDoorGUID;
+        uint8 _teamInInstance;
+        uint32 _leftHorrorCounter;
+        uint32 _rightHorrorCounter;
+        uint64 _leftHorrorGUID;
+        uint64 _rightHorrorGUID;
+        bool _mimironHardMode;
+        bool _thorimHardMode;
+        bool _freyaHardMode;
+        bool _hodirHardMode;
 
+        // Ulduar entrance event that starts stuff related to flame leviathan (machines and so on)
+        bool _eventStarted;
 
         void Initialize()
         {
@@ -133,19 +160,21 @@ public:
 
             // Razorscale
             memset(&m_RazorscaleHarpoonFireStateGUID, 0, sizeof(m_RazorscaleHarpoonFireStateGUID));
+            expeditionCommanderGUID     = 0;
 
             // XT-002
-            m_xt002DoorsGUID        = 0;
+            m_xt002DoorsGUID            = 0;
 
             // Assembly of Iron
-            m_assemblyDoorsGUID        = 0;
-            m_archivumDoorsGUID        = 0;
+            m_assemblyDoorsGUID         = 0;
+            m_archivumDoorsGUID         = 0;
 
             // Kologarn
-            m_kologarnDoorsGUID      = 0;
+            m_kologarnDoorsGUID         = 0;
 
             // Thorim
             memset(&m_thorimGameobjectsGUID, 0, sizeof(m_thorimGameobjectsGUID));
+            _sifBlizzardTargetGUID      = 0;
 
             // Mimiron
             memset(&m_MimironDoor, 0, sizeof(m_MimironDoor));
@@ -157,6 +186,7 @@ public:
             // Freya
             memset(&m_FreyaElder, 0, sizeof(m_FreyaElder));
             m_conspeedatoryAttempt    = 0;
+            _freyaTrash.clear();
 
             // Yogg-Saron
             m_saraGUID                = 0;
@@ -172,12 +202,34 @@ public:
             m_algalonTimer            = 0;
             m_chestGUID               = 0;
 
+            // Auriaya
+            _sanctumSentryGUIDs.clear();
+
             // Shared
             _events.Reset();
             memset(&m_keepersGossipGUID, 0, sizeof(m_keepersGossipGUID));
             m_mimironTramUsed        = false;
             m_mimironTramGUID        = 0;
             m_keepersgateGUID        = 0;
+            _dellorahGUID            = 0;
+            _rhydianEntranceGUID     = 0;
+            _brannEntranceGUID       = 0;
+            _lorekeeperEntranceGUID  = 0;
+            _goranEntranceGUID       = 0;
+            _goStartingBarrierGUID   = 0;
+            _leftHorrorCounter       = 0;
+            _rightHorrorCounter      = 0;
+            _leftHorrorGUID          = 0;
+            _rightHorrorGUID         = 0;
+
+            _eventStarted            = false;
+
+            //! its uint instead of TeamId for a reason
+            _teamInInstance          = 3; // random number that is not bound to any team
+            _mimironHardMode = false;
+            _thorimHardMode = false;
+            _freyaHardMode = false;
+            _hodirHardMode = false;
         }
 
         void FillInitialWorldStates(WorldPacket& packet)
@@ -188,6 +240,19 @@ public:
 
         void OnPlayerEnter(Player* player)
         {
+            //! teamId 3, never set before, assign a proper value now
+            if (_teamInInstance == 3)
+            {
+                TeamId _team = player->GetTeamId();
+
+                if (_team == TEAM_ALLIANCE)
+                    _teamInInstance = 0;
+                else if (_team == TEAM_HORDE)
+                    _teamInInstance = 1;
+                else
+                    _teamInInstance = 3;
+            }
+
             // mimiron tram:
             instance->LoadGrid(2307.0f, 284.632f);
             if (GameObject* MimironTram = instance->GetGameObject(m_mimironTramGUID))
@@ -240,6 +305,9 @@ public:
         {
             switch(creature->GetEntry())
             {
+                case NPC_SANCTUM_SENTRY:
+                    _sanctumSentryGUIDs.push_back(creature->GetGUID());
+                    break;
                 case NPC_LEVIATHAN:
                     m_uiLeviathanGUID = creature->GetGUID();
                     break;
@@ -349,6 +417,9 @@ public:
                 case NPC_BRANN_BRONZBEARD_ALG:
                     m_brannBronzebeardAlgGUID = creature->GetGUID();
                     break;
+                case NPC_EXPEDITION_COMMANDER:
+                    expeditionCommanderGUID = creature->GetGUID();
+                    break;
                 //! These creatures are summoned by something else than Algalon
                 //! but need to be controlled/despawned by him - so they need to be
                 //! registered in his summon list
@@ -359,6 +430,59 @@ public:
                     if (Creature* algalon = instance->GetCreature(m_uiAlgalonGUID))
                         algalon->AI()->JustSummoned(creature);
                     break;
+                case NPC_FREYA_TRASH_0:
+                case NPC_FREYA_TRASH_1:
+                case NPC_FREYA_TRASH_2:
+                case NPC_FREYA_TRASH_3:
+                case NPC_FREYA_TRASH_4:
+                case NPC_FREYA_TRASH_5:
+                case NPC_FREYA_TRASH_6:
+                case NPC_FREYA_TRASH_7:
+                    _freyaTrash.push_back(creature->GetGUID());
+                    break;
+                case NPC_SALVAGED_DEMOLISHER:
+                case NPC_SALVAGED_SIEGE_ENGINE:
+                case NPC_VEHICLE_CHOPPER:
+                {
+                    if (creature->GetDBTableGUIDLow() != 0)
+                    {
+                        creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_PREVENT_SPELL_CLICK);
+                        _leviathanDBVehicles.push_back(creature->GetGUID());
+                    }
+                    break;
+                }
+                case NPC_HIGH_EXPLORER_DELLORAH:
+                    _dellorahGUID = creature->GetGUID();
+                    break;
+                case NPC_ARCHMAGE_RHYDIAN:
+                    if (creature->GetDBTableGUIDLow() != 0)
+                        _rhydianEntranceGUID = creature->GetGUID();
+                    break;
+                case NPC_START_BRANN_BRONZEBEARD:
+                    if (creature->GetDBTableGUIDLow() != 0)
+                        _brannEntranceGUID = creature->GetGUID();
+                    break;
+                case NPC_LOREKEEPER_NORG:
+                    _lorekeeperEntranceGUID = creature->GetGUID();
+                    break;
+                case NPC_GORAN_STEELBREAKER:
+                    _goranEntranceGUID = creature->GetGUID();
+                    break;
+                case NPC_SIF_BLIZZARD:
+                    _sifBlizzardTargetGUID = creature->GetGUID();
+                    break;
+                case NPC_TRASH_FACELESS_HORROR:
+                {
+                    Position leftHorrorHomePos(1880.17f, 78.1934f, 342.465f, 1.62316f);
+                    Position rightHorrorHomePos(1820.83f, 76.6274f, 342.391f, 1.74533f);
+                    Position pos = creature->GetHomePosition();
+                    if (pos == leftHorrorHomePos)
+                        _leftHorrorGUID = creature->GetGUID();
+                    else if (pos == rightHorrorHomePos)
+                        _rightHorrorGUID = creature->GetGUID();
+                    // else (there is more horrors in the instance, do we need to do anything with them?)
+                    break;
+                }
             }
         }
 
@@ -396,6 +520,11 @@ public:
         {
             switch (gameObject->GetEntry())
             {
+                case 194902:
+                    if (Creature* summoner = ObjectAccessor::GetCreature(*gameObject, gameObject->GetOwnerGUID()))
+                        if (summoner->IsAIEnabled)
+                            summoner->AI()->SetGUID(gameObject->GetGUID(), 0);
+                    break;
                 // Flame Leviathan
                 case GO_REPAIR_STATION_TRAP:
                     {
@@ -516,6 +645,10 @@ public:
                             gameObject->SetLootState(GO_READY);
                             gameObject->UseDoorOrButton(0, false);
                         }
+                    if (gameObject->GetEntry() == GO_HODIR_FROZEN_DOOR)
+                        _hodirFrozenDoorGUID = gameObject->GetGUID();
+                    else
+                        _hodirExitDoorGUID = gameObject->GetGUID();
                     break;
                 case GO_VEZAX_DOOR:
                     if( GetData(TYPE_VEZAX) == DONE )
@@ -579,6 +712,14 @@ public:
                     if (GetData(TYPE_FREYA) == DONE)
                         gameObject->SetRespawnTime(7*DAY);
                     break;
+                case GO_STARTING_BARRIER:
+                    _goStartingBarrierGUID = gameObject->GetGUID();
+                    if (_eventStarted)
+                        gameObject->Delete();
+                    break;
+                case GO_HODIR_ENTRANCE_DOOR:
+                    _hodirEntranceDoorGUID = gameObject->GetGUID();
+                    break;
             }
         }
 
@@ -586,6 +727,18 @@ public:
         {
             switch(type)
             {
+                case DATA_MIMIRON_HARDMODE:
+                    _mimironHardMode = true;
+                    break;
+                case DATA_HODIR_HARDMODE:
+                    _hodirHardMode = true;
+                    break;
+                case DATA_THORIM_HARDMODE:
+                    _thorimHardMode = true;
+                    break;
+                case DATA_FREYA_HARDMODE:
+                    _freyaHardMode = true;
+                    break;
                 case TYPE_LEVIATHAN:
                     m_auiEncounter[type] = data;
                     if (data == DONE)
@@ -594,7 +747,14 @@ public:
                         for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
                             if (Vehicle* veh = itr->GetSource()->GetVehicle())
                                 veh->Dismiss();
+
+                        Position pos(162.3139f, -298.5704f, 499.2952f);
+                        instance->SummonCreature(NPC_BRANN_BRONZEBEARD_FL, pos);
+                        instance->SetVisibilityRange(200.0f);
                     }
+
+                    if (data == SPECIAL)
+                        instance->SetVisibilityRange(350.0f);
                     break;
                 case TYPE_IGNIS:
                 case TYPE_RAZORSCALE:
@@ -603,9 +763,6 @@ public:
                 case TYPE_VEZAX:
                 case TYPE_YOGGSARON:
                 case TYPE_KOLOGARN:
-                    if (GameObject* go = instance->GetGameObject(m_kologarnDoorsGUID))
-                        go->SetGoState(data == IN_PROGRESS ? GO_STATE_READY : GO_STATE_ACTIVE);
-
                     m_auiEncounter[type] = data;
                     break;
                 case TYPE_ASSEMBLY:
@@ -724,6 +881,46 @@ public:
                                 MimironTram->SetGoState(GO_STATE_ACTIVE);
                         }
                     break;
+                case DATA_FREYA_PULLED:
+                {
+                    for (auto i : _freyaTrash)
+                    {
+                        if (Creature* trash = instance->GetCreature(i))
+                            if (trash->IsAIEnabled && trash->IsAlive())
+                                trash->AI()->DoZoneInCombat(trash, 175.0f); // do a zone combat for entire room when freya is pulled and something is left alive
+                    }
+                    break;
+                }
+                case DATA_ENTRANCE_EVENT_STARTED:
+                {
+                    _eventStarted = true;
+                    SaveToDB();
+                    break;
+                }
+                case DATA_RESPAWN_SENTRIES:
+                {
+                    if (!_sanctumSentryGUIDs.empty())
+                    {
+                        for (auto creature : _sanctumSentryGUIDs)
+                        {
+                            if (Creature* sentry = instance->GetCreature(creature))
+                                sentry->Respawn();
+                        }
+                    }
+                    break;
+                }
+                case DATA_DESPAWN_SENTRIES:
+                {
+                    if (!_sanctumSentryGUIDs.empty())
+                    {
+                        for (auto creature : _sanctumSentryGUIDs)
+                        {
+                            if (Creature* sentry = instance->GetCreature(creature))
+                                sentry->DisappearAndDie();
+                        }
+                    }
+                    break;
+                }
             }
 
             // take care of herbs
@@ -812,6 +1009,9 @@ public:
                 case DATA_HARPOON_FIRE_STATE_4:
                     return m_RazorscaleHarpoonFireStateGUID[data-200];
 
+                case DATA_EXPEDITION_COMMANDER:
+                    return expeditionCommanderGUID;
+
                 // XT-002
                 case GO_XT002_DOORS:
                     return m_xt002DoorsGUID;
@@ -824,6 +1024,8 @@ public:
                 case DATA_THORIM_SECOND_DOORS:
                     return m_thorimGameobjectsGUID[data-DATA_THORIM_LEVER_GATE];
                     break;
+                case DATA_SIF_BLIZZARD:
+                    return _sifBlizzardTargetGUID;
 
                 // Freya Elders
                 case NPC_ELDER_IRONBRANCH:
@@ -870,6 +1072,24 @@ public:
                     return m_algalonTrapdoorGUID;
                 case NPC_BRANN_BRONZBEARD_ALG:
                     return m_brannBronzebeardAlgGUID;
+                case DATA_DELLORAH:
+                    return _dellorahGUID;
+                case DATA_RHYDIAN_ENTRANCE:
+                    return _rhydianEntranceGUID;
+                case DATA_BRANN_ENTRANCE:
+                    return _brannEntranceGUID;
+                case DATA_LOREKEEPER_NORG_ENTRANCE:
+                    return _lorekeeperEntranceGUID;
+                case DATA_GORAN_ENTRANCE:
+                    return _goranEntranceGUID;
+                case DATA_STARTING_BARRIER:
+                    return _goStartingBarrierGUID;
+                case GO_HODIR_ENTRANCE_DOOR:
+                    return _hodirEntranceDoorGUID;
+                case GO_HODIR_FROZEN_DOOR:
+                    return _hodirFrozenDoorGUID;
+                case GO_HODIR_DOOR:
+                    return _hodirExitDoorGUID;
             }
 
             return 0;
@@ -879,6 +1099,14 @@ public:
         {
             switch(type)
             {
+                case DATA_MIMIRON_HARDMODE:
+                    return static_cast<uint32>(_mimironHardMode);
+                case DATA_HODIR_HARDMODE:
+                    return static_cast<uint32>(_hodirHardMode);
+                case DATA_THORIM_HARDMODE:
+                    return static_cast<uint32>(_thorimHardMode);
+                case DATA_FREYA_HARDMODE:
+                    return static_cast<uint32>(_freyaHardMode);
                 case TYPE_LEVIATHAN:
                 case TYPE_IGNIS:
                 case TYPE_RAZORSCALE:
@@ -907,6 +1135,12 @@ public:
 
                 case DATA_CALL_TRAM:
                     return m_mimironTramUsed;
+
+                case DATA_ENTRANCE_EVENT_STARTED:
+                    return static_cast<uint32>(_eventStarted);
+
+                case DATA_GET_INSTANCE_TEAM_ID:
+                    return _teamInInstance;
             }
 
             return 0;
@@ -929,6 +1163,33 @@ public:
                     m_conspeedatoryAttempt = time(nullptr);
                     SaveToDB();
                 }
+            }
+
+            switch (unit->GetEntry())
+            {
+                case NPC_TRASH_TWILIGHT_GUARDIAN:
+                case NPC_TRASH_TWILIGHT_PYROMANCER:
+                case NPC_TRASH_FIRE_ELEMENTAL:
+                case NPC_TRASH_TWILIGHT_ADHERENT:
+                case NPC_TRASH_TWILIGHT_FROST_MAGE:
+                    if (unit->ToCreature())
+                    {
+                        uint32 killsRequired = instance->Is25ManRaid() ? 8 : 6;
+                        Position pos = unit->ToCreature()->GetHomePosition();
+                        if (pos.GetPositionX() > 1868.79f) // inform left faceless horror (left when looking at vezax)
+                        {
+                            if (++_leftHorrorCounter >= killsRequired)
+                                if (Creature* horror = instance->GetCreature(_leftHorrorGUID))
+                                    horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
+                        }
+                        else if (pos.GetPositionX() < 1808.42f) // inform right one
+                        {
+                            if (++_rightHorrorCounter >= killsRequired)
+                                if (Creature* horror = instance->GetCreature(_rightHorrorGUID))
+                                    horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
+                        }
+                    }
+                    break;
             }
 
             // achievement Champion/Conqueror of Ulduar
@@ -959,10 +1220,11 @@ public:
 
             std::ostringstream saveStream;
             saveStream << "U U " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' ' << m_auiEncounter[3] << ' '
-                       << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' ' << m_auiEncounter[6] << ' ' << m_auiEncounter[7] << ' '
-                       << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << ' '
-                       << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] << ' ' << m_conspeedatoryAttempt << ' '
-                       << m_unbrokenAchievement << ' ' << m_algalonTimer << ' ' << C_of_Ulduar_MASK;
+                << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' ' << m_auiEncounter[6] << ' ' << m_auiEncounter[7] << ' '
+                << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << ' '
+                << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] << ' ' << m_conspeedatoryAttempt << ' '
+                << m_unbrokenAchievement << ' ' << m_algalonTimer << ' ' << C_of_Ulduar_MASK << ' ' << _eventStarted << ' ' << _teamInInstance << _mimironHardMode << ' '
+                << _hodirHardMode << ' ' << _thorimHardMode << ' ' << _freyaHardMode;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -1010,6 +1272,13 @@ public:
 
                 // achievement Conqueror/Champion of Ulduar
                 loadStream >> C_of_Ulduar_MASK;
+
+                loadStream >> _eventStarted;
+                loadStream >> _teamInInstance;
+                loadStream >> _mimironHardMode;
+                loadStream >> _hodirHardMode;
+                loadStream >> _thorimHardMode;
+                loadStream >> _freyaHardMode;
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;
@@ -1139,17 +1408,28 @@ const Position vehiclePositions[30] =
     {119.8f, -112.37f, 409.803f, 0.0f},
 };
 
-
 void instance_ulduar::instance_ulduar_InstanceMapScript::SpawnLeviathanEncounterVehicles(uint8 mode)
 {
     if (!_leviathanVehicles.empty())
     {
-        for (std::list<uint64>::iterator itr = _leviathanVehicles.begin(); itr != _leviathanVehicles.end(); ++itr)
-            if (Creature* cr = instance->GetCreature(*itr))
+        for (auto itr : _leviathanVehicles)
+            if (Creature* cr = instance->GetCreature(itr))
                 if (Vehicle* veh = cr->GetVehicleKit())
                     veh->Dismiss();
 
         _leviathanVehicles.clear();
+    }
+
+    if (!_leviathanDBVehicles.empty())
+    {
+        for (auto itr : _leviathanDBVehicles)
+            if (Creature* cr = instance->GetCreature(itr))
+            {
+                cr->DespawnOrUnsummon();
+                cr->SaveRespawnTime();
+            }
+
+        _leviathanDBVehicles.clear();
     }
 
     if (mode < VEHICLE_POS_NONE)

@@ -4,6 +4,7 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "SpellScript.h"
 #include "ulduar.h"
 #include "Vehicle.h"
@@ -13,14 +14,16 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "SpellAuraEffects.h"
 #include "ScriptedGossip.h"
 #include "CombatAI.h"
+#include "CreatureGroups.h"
 #include "Spell.h"
 #include "GridNotifiers.h"
 #include "Player.h"
 #include "Opcodes.h"
 #include "Chat.h"
 #include "CellImpl.h"
+#include "MoveSplineInit.h"
 
-enum LeviathanSpells 
+enum LeviathanSpells
 {
     // Leviathan basic
     SPELL_PURSUED                     = 62374,
@@ -63,9 +66,13 @@ enum LeviathanSpells
     SPELL_LIQUID_PYRITE               = 62494,
     SPELL_DUSTY_EXPLOSION             = 63360,
     SPELL_DUST_CLOUD_IMPACT           = 54740,
+    SPELL_PYRITE_RIDE_VEHICLE         = 67390,
 
     // Ward of Life
-    SPELL_WARD_OF_LIFE_LASH           = 65062
+    SPELL_WARD_OF_LIFE_LASH           = 65062,
+
+    SPELL_HODIRS_FURY_AURA_FREEZE     = 62297,
+    SPELL_MACHINE_FLAMES_TRIGGERED    = 65045
 };
 
 enum GosNpcs
@@ -73,18 +80,15 @@ enum GosNpcs
     NPC_FLAME_LEVIATHAN_TURRET        = 33139,
     NPC_SEAT                          = 33114,
     NPC_MECHANOLIFT                   = 33214,
+    NPC_PYRITE_SAFETY_CONTAINER       = 33218,
     NPC_LIQUID                        = 33189,
 
     // Starting event
     NPC_ULDUAR_COLOSSUS               = 33237,
-    NPC_HIGH_EXPLORER_DELLORAH        = 33701,
-    NPC_ARCHMAGE_RHYDIAN              = 33696,
-    NPC_START_BRANN_BRONZEBEARD       = 33579,
     NPC_ARCHMAGE_PENTARUS             = 33624,
     NPC_BRANN_RADIO                   = 34054,
     NPC_ULDUAR_GAUNTLET_GENERATOR     = 33571,
     NPC_DEFENDER_GENERATED            = 33572,
-    GO_STARTING_BARRIER               = 194484,
 
     // Hard Mode
     NPC_THORIM_HAMMER_TARGET          = 33364,
@@ -94,7 +98,7 @@ enum GosNpcs
     NPC_MIMIRONS_INFERNO_TARGET       = 33369,
     NPC_MIMIRONS_INFERNO              = 33370,
     NPC_HODIRS_FURY_TARGET            = 33108,
-    NPC_HODIRS_FURY                   = 33212,
+    NPC_HODIRS_FURY                   = 33212
 };
 
 enum Events
@@ -156,7 +160,7 @@ enum Seats
 
 enum Misc
 {
-    DATA_EVENT_STARTED                = 1,
+    DATA_EVENT_STARTED                = 1, // unused
     DATA_GET_TOWER_COUNT              = 2,
     DATA_GET_SHUTDOWN                 = 3,
 
@@ -170,6 +174,10 @@ enum Misc
     ACTION_START_BRANN_EVENT          = 3,
     ACTION_DESPAWN_ADDS               = 4,
     ACTION_DELAY_CANNON               = 5,
+
+    DATA_LOREKEEPER_STARTER_GUID      = 6,
+
+    DATA_GET_FLAMES_HIT_COUNT         = 7
 };
 
 #define LV_SAY_PLAYER_RIDE    = "Unauthorized entity attempting circuit overload. Activating anti-personnel countermeasures."
@@ -210,6 +218,8 @@ public:
 
         bool _shutdown;
         bool _atWardsPhase;
+        uint32 _fightTimer;
+        bool _hardMode;
 
         // Custom
         void BindPlayers();
@@ -248,9 +258,10 @@ public:
             else
                 ScriptedAI::AttackStart(who);
         }
-       
+
         void EnterCombat(Unit*)
         {
+            _fightTimer = getMSTime();
             ScheduleEvents();
             me->MonsterYell("Hostile entities detected. Threat assessment protocol active. Primary target engaged. Time minus thirty seconds to re-evaluation.", LANG_UNIVERSAL, 0);
             me->PlayDirectSound(LV_SOUND_AGGRO);
@@ -280,6 +291,8 @@ public:
 
         void Reset()
         {
+            _hardMode = false;
+            _fightTimer = 0;
             // Special immunity case
             me->CastSpell(me, SPELL_INVIS_AND_STEALTH_DETECT, true);
 
@@ -421,13 +434,18 @@ public:
                 CheckWards();
 
             events.Update(diff);
+
             if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
+            {
+                if (Spell* spell = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                    if (spell->GetSpellInfo()->Id != SPELL_FLAME_VENTS)
+                        return;
+            }
 
             switch (events.GetEvent())
             {
                 case EVENT_POSITION_CHECK:
-                    if (me->GetPositionX() > 450 || me->GetPositionX() < 120)
+                    if (me->GetPositionX() > 450.f || me->GetPositionX() < 120.f)
                     {
                         EnterEvadeMode();
                         return;
@@ -452,9 +470,9 @@ public:
                     events.RepeatEvent(20000);
                     return;
                 case EVENT_SUMMON:
-                    if(summons.size() < 20)
+                    if(summons.size() < 27)
                         if (Creature* lift = DoSummonFlyer(NPC_MECHANOLIFT, me, 30.0f, 50.0f, 0))
-                            lift->GetMotionMaster()->MoveRandom(100);
+                            lift->GetMotionMaster()->MoveRandom(100.0f);
 
                     events.RepeatEvent(4000);
                     return;
@@ -547,25 +565,27 @@ void boss_flame_leviathan::boss_flame_leviathanAI::ActivateTowers()
             me->AddLootMode(1<<_towersCount);
             switch (i)
             {
-                case EVENT_TOWER_OF_LIFE_DESTROYED: 
+                case EVENT_TOWER_OF_LIFE_DESTROYED:
                     me->AddAura(SPELL_TOWER_OF_LIFE, me);
                     events.RescheduleEvent(EVENT_FREYA, 30000);
                     break;
-                case EVENT_TOWER_OF_STORM_DESTROYED: 
+                case EVENT_TOWER_OF_STORM_DESTROYED:
                     me->AddAura(SPELL_TOWER_OF_STORMS, me);
                     events.RescheduleEvent(EVENT_THORIMS_HAMMER, 60000);
                     break;
-                case EVENT_TOWER_OF_FROST_DESTROYED: 
+                case EVENT_TOWER_OF_FROST_DESTROYED:
                     me->AddAura(SPELL_TOWER_OF_FROST, me);
                     events.RescheduleEvent(EVENT_HODIRS_FURY, 20000);
                     break;
-                case EVENT_TOWER_OF_FLAMES_DESTROYED: 
+                case EVENT_TOWER_OF_FLAMES_DESTROYED:
                     me->AddAura(SPELL_TOWER_OF_FLAMES, me);
                     events.RescheduleEvent(EVENT_MIMIRONS_INFERNO, 42000);
                     break;
             }
         }
     }
+    if (_towersCount >= 4)
+        _hardMode = true;
 }
 
 void boss_flame_leviathan::boss_flame_leviathanAI::TurnGates(bool _start, bool _death)
@@ -699,8 +719,24 @@ void boss_flame_leviathan::boss_flame_leviathanAI::SpellHit(Unit* caster, const 
         me->InterruptNonMeleeSpells(false);
 }
 
-void boss_flame_leviathan::boss_flame_leviathanAI::JustDied(Unit*)
+void boss_flame_leviathan::boss_flame_leviathanAI::JustDied(Unit* killer)
 {
+    // We cannot store all mechanos due to one of them being spawned
+    // and others being temps, so we gotta do grid search once
+    std::list<Creature*> mechanoList;
+    std::list<Creature*> pyriteList;
+    me->GetCreatureListWithEntryInGrid(mechanoList, NPC_MECHANOLIFT, 400.0f);
+    me->GetCreatureListWithEntryInGrid(pyriteList, NPC_PYRITE_SAFETY_CONTAINER, 400.0f);
+
+    for (auto mechano : mechanoList)
+    {
+        mechano->SetRespawnDelay(604800);
+        mechano->DespawnOrUnsummon();
+    }
+
+    for (auto liquid : pyriteList)
+        liquid->DespawnOrUnsummon();
+
     // Despawn Lashers, do before summons clear
     summons.DoAction(ACTION_DESPAWN_ADDS);
     summons.DespawnAll();
@@ -716,6 +752,14 @@ void boss_flame_leviathan::boss_flame_leviathanAI::JustDied(Unit*)
 
     TurnGates(false, true);
     BindPlayers();
+
+    if (Map* map = me->GetMap())
+    {
+        if (_hardMode)
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + 1, Difficulty(map->GetDifficulty() + 2), "", 15000, _fightTimer);
+        else
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
+    }
 }
 
 void boss_flame_leviathan::boss_flame_leviathanAI::KilledUnit(Unit* who)
@@ -729,13 +773,16 @@ void boss_flame_leviathan::boss_flame_leviathanAI::SummonTowerHelpers(uint8 towe
     if (towerId == TOWER_OF_LIFE)
     {
         me->SummonCreature(NPC_FREYA_WARD_TARGET, 374, -141, 411, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD, 374, -141, 411+40, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD_TARGET, 382.9f, 74, 411.6f, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD, 382.9f, 74, 411.6f+40, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD_TARGET, 159.4f, 64.1f, 409.8f, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD, 159.4f, 64.1f, 409.8f+40, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD_TARGET, 157.7f, -140.26f, 409.8f, 0, TEMPSUMMON_MANUAL_DESPAWN);
-        me->SummonCreature(NPC_FREYA_WARD, 157.7f, -140.26f, 409.8f+40, 0, TEMPSUMMON_MANUAL_DESPAWN);
+        me->SummonCreature(NPC_FREYA_WARD, 374, -141, 411 + 40.f, 0, TEMPSUMMON_MANUAL_DESPAWN);
+
+        me->SummonCreature(NPC_FREYA_WARD_TARGET, 375.440f, 65.855f, 411.976f, 0, TEMPSUMMON_MANUAL_DESPAWN);
+        me->SummonCreature(NPC_FREYA_WARD, 375.440f, 65.855f, 411.976f + 40.f, 0, TEMPSUMMON_MANUAL_DESPAWN);
+
+        me->SummonCreature(NPC_FREYA_WARD_TARGET, 168.850f, 55.403099f, 409.799988f, 0, TEMPSUMMON_MANUAL_DESPAWN);
+        me->SummonCreature(NPC_FREYA_WARD, 168.850f, 55.403099f, 409.799988f + 40.f, 0, TEMPSUMMON_MANUAL_DESPAWN);
+
+        me->SummonCreature(NPC_FREYA_WARD_TARGET, 167.067520f, -130.377716f, 409.799988f, 0, TEMPSUMMON_MANUAL_DESPAWN);
+        me->SummonCreature(NPC_FREYA_WARD, 167.067520f, -130.377716f, 409.799988f + 40.f, 0, TEMPSUMMON_MANUAL_DESPAWN);
     }
     else if (towerId == TOWER_OF_FROST)
     {
@@ -825,6 +872,11 @@ public:
                 {
                     if (apply)
                     {
+                        Movement::MoveSplineInit init(who);
+                        init.DisableTransportPathTransformations();
+                        init.MoveTo(1.0f, 0.0f, 0.3f, false);
+                        init.SetFacing(3.141593f);
+                        init.Launch();
                         turret->SetUInt32Value(UNIT_FIELD_FLAGS, 0);
                         turret->GetAI()->AttackStart(who);
                     }
@@ -948,7 +1000,7 @@ public:
     struct npc_freya_wardAI : public NullCreatureAI
     {
         npc_freya_wardAI(Creature *c) : NullCreatureAI(c), summons(c)
-        { 
+        {
         }
 
         SummonList summons;
@@ -1011,7 +1063,7 @@ public:
                 _castTimer = 0;
             }
         }
-        
+
         void DoAction(int32 param)
         {
             if (param == ACTION_DESPAWN_ADDS)
@@ -1033,7 +1085,7 @@ public:
     struct npc_hodirs_furyAI : public NullCreatureAI
     {
         npc_hodirs_furyAI(Creature *c) : NullCreatureAI(c)
-        { 
+        {
         }
 
         uint32 _timeToHit;
@@ -1081,8 +1133,15 @@ public:
             _switchTargetTimer += diff;
             if (_switchTargetTimer >= 30000)
             {
-                if(Unit* target = me->SelectNearbyTarget(NULL, 200.0f))
+                if (Unit* target = me->SelectNearbyTarget(NULL, 200.0f))
                 {
+                    if (target->isDead())
+                    {
+                        _switchTargetTimer = 2000;
+                        return;
+
+                    }
+
                     if (target->GetVehicleBase() && target->GetVehicleBase()->GetEntry() == NPC_SEAT)
                     {
                         _switchTargetTimer = 20000;
@@ -1093,7 +1152,7 @@ public:
                     _switchTargetTimer = 0;
                 }
                 else
-                    _switchTargetTimer = 25000;        
+                    _switchTargetTimer = 25000;
             }
         }
     };
@@ -1153,7 +1212,10 @@ public:
             if (_spellTimer >= 2000)
             {
                 if (Creature* cr = me->SummonCreature(NPC_MIMIRONS_INFERNO, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+40.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000))
+                {
+                    cr->setActive(true);
                     cr->CastSpell(me, SPELL_MIMIRONS_INFERNO, true);
+                }
 
                 _spellTimer = 0;
             }
@@ -1175,7 +1237,7 @@ public:
     struct npc_thorims_hammerAI : public NullCreatureAI
     {
         npc_thorims_hammerAI(Creature *c) : NullCreatureAI(c)
-        { 
+        {
         }
 
         uint32 _beamTimer;
@@ -1237,6 +1299,7 @@ public:
         void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
         {
             damage = 0;
+            
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spellInfo)
@@ -1247,6 +1310,58 @@ public:
     };
 };
 
+enum lorekeeperNorgannon
+{
+    // Norgannon talks
+    NORG_SAY_0              = 0, // I was constructed to serve as a repository for essential information regarding this complex. My primary functions include communicating the status of the frontal defense systems and assessing the status of the entity that this complex was built to imprison.
+    NORG_SAY_1              = 1, // Access to the interior of the complex is currently restricted. Primary defensive emplacements are active. Secondary systems are currently non-active.
+    NORG_SAY_2              = 2, // Compromise of complex detected, security override enabled - query permitted.
+    NORG_SAY_3              = 3, // Primary defensive emplacements consist of iron constructs and Storm Beacons, which will generate additional constructs as necessary. Secondary systems consist of orbital defense emplacements.
+    NORG_SAY_4              = 4, // Entity designate: Yogg-Saron. Security has been compromised. Prison operational status unknown. Unable to contact Watchers for notification purposes.
+
+    DELLORAH_SAY_0          = 0, // I heard a story or two of a Lore Keeper in Uldaman that fit your description. Do you serve a similar purpose?
+    DELLORAH_SAY_1          = 1, // Frontal defense systems? Is there something I should let Brann know before he has anyone attempt to enter the complex?
+    DELLORAH_SAY_2          = 2, // Can you detail the nature of these defense systems?
+    DELLORAH_SAY_3          = 3, // Got it. At least we don\'t have to deal with those orbital emplacements.
+    DELLORAH_SAY_4          = 4, // Rhydian, make sure you let Brann and Archmage Pentarus know about those defenses immediately.
+    DELLORAH_SAY_5          = 5, // And you mentioned an imprisoned entity? What is the nature of this entity and what is its status?
+    DELLORAH_SAY_6          = 6, // Yogg-Saron is here? It sounds like we really will have our hands full then.
+    DELLORAH_SAY_7          = 7, // What... What did you just do, $n?! Brann! Braaaaannn!
+    DELLORAH_SAY_8          = 8, // Brann! $n just activated the orbital defense system! If we don't get out of here soon, we're going to be toast!
+
+    RHYDIAN_SAY_0           = 0,
+    RHYDIAN_SAY_1           = 1,
+
+    NORG_DEFAULT_GOSSIP     = 14375,
+    NORG_FIRST_STEP_GOSSIP  = 14496,
+    NORG_LAST_STEP_GOSSIP   = 14497,
+
+    EVENT_NORG_1             = 1,
+    EVENT_NORG_2             = 2,
+    EVENT_NORG_3             = 3,
+    EVENT_NORG_4             = 4,
+    EVENT_NORG_5             = 5,
+    EVENT_NORG_6             = 6,
+    EVENT_NORG_7             = 7,
+    EVENT_NORG_8             = 8,
+    EVENT_NORG_9             = 9,
+    EVENT_NORG_10            = 10,
+    EVENT_NORG_11            = 11,
+    EVENT_NORG_12            = 12,
+    EVENT_NORG_13            = 13,
+    EVENT_NORG_14            = 14,
+    EVENT_NORG_15            = 15,
+    EVENT_NORG_16            = 16
+};
+
+uint32 const rhydianMovementEntranceSize = 3;
+G3D::Vector3 const rhydianMovementEntrance[rhydianMovementEntranceSize] =
+{
+    { -761.094482f, -82.606712f, 429.839539f },
+    { -743.694885f, -53.428951f, 429.839661f },
+    { -721.041626f, -53.996769f, 429.840942f }
+};
+
 class npc_lore_keeper_of_norgannon_ulduar : public CreatureScript
 {
 public:
@@ -1254,308 +1369,540 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature)
     {
-        if (creature->GetInstanceScript() && creature->GetInstanceScript()->GetData(TYPE_LEVIATHAN) == NOT_STARTED && !creature->AI()->GetData(DATA_EVENT_STARTED))
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Activate secondary defensive systems.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+        InstanceScript* instance = creature->GetInstanceScript();
+        if (!instance)
+            return true;
 
-        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-        return true;
+        if (instance->GetData(DATA_ENTRANCE_EVENT_STARTED))
+            return true;
+
+        player->SEND_GOSSIP_MENU(NORG_DEFAULT_GOSSIP, creature->GetGUID());
+        return false;
     }
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 uiSender, uint32 uiAction)
     {
+        InstanceScript* instance = creature->GetInstanceScript();
+        if (!instance)
+            return true;
+
+        if (instance->GetData(DATA_ENTRANCE_EVENT_STARTED))
+        {
+            player->PlayerTalkClass->SendCloseGossip();
+            return true;
+        }
+
+        player->PlayerTalkClass->ClearMenus();
         switch (uiAction)
         {
-            case GOSSIP_ACTION_INFO_DEF+1:
-                creature->MonsterSay("Activating secondary defensive systems will result in the extermination of unauthorized life forms via orbital emplacements. You are an unauthorized life form.", LANG_UNIVERSAL, 0);
-                player->PlayerTalkClass->ClearMenus();
+            case 1:
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Confirmed.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-                player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+                player->SEND_GOSSIP_MENU(NORG_FIRST_STEP_GOSSIP, creature->GetGUID());
                 break;
             case GOSSIP_ACTION_INFO_DEF+2:
-                creature->MonsterSay("Security override permitted. Secondary defensive systems activated. Backup deactivation for secondary systems can be accessed via individual generators located on the concourse. ", LANG_UNIVERSAL, 0);
+                player->SEND_GOSSIP_MENU(NORG_LAST_STEP_GOSSIP, creature->GetGUID());
+                creature->AI()->SetGUID(player->GetGUID());
                 creature->AI()->DoAction(ACTION_START_NORGANNON_EVENT);
-
-                player->CLOSE_GOSSIP_MENU();
+                break;
         }
         return true;
     }
 
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_lore_keeper_of_norgannon_ulduarAI (pCreature);
-    }
-
     struct npc_lore_keeper_of_norgannon_ulduarAI : public ScriptedAI
     {
-        npc_lore_keeper_of_norgannon_ulduarAI(Creature* c) : ScriptedAI(c)
+        npc_lore_keeper_of_norgannon_ulduarAI(Creature* creature) : ScriptedAI(creature)
         {
-            _eventStarted = false;
+            instance = me->GetInstanceScript();
         }
 
-        bool _eventStarted;
-        bool _running;
-        int32 _checkTimer;
-        uint8 _step;
-        uint64 _dellorahGUID;
-
-        uint32 GetData(uint32 param) const
+        void SetGUID(uint64 guid, int32 /*data*/) override
         {
-            if (param == DATA_EVENT_STARTED)
-                return _eventStarted;
-            return 0;
+            _eventStarterGUID = guid;
         }
 
-        void Reset()
+        uint64 GetData64(uint32 /*data*/) const override
         {
-            _running = false;
-            _checkTimer = 0;
-            _step = 0;
-            _dellorahGUID = 0;
-            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        }
-
-        void NextStep(const uint32 time)
-        {
-            ++_step;
-            _checkTimer = time;
-        }
-
-        void Say(std::string text, bool self)
-        {
-            if (self)
-                me->MonsterSay(text.c_str(), LANG_UNIVERSAL, 0);
-            else if (Creature* c = ObjectAccessor::GetCreature(*me, _dellorahGUID))
-                c->MonsterSay(text.c_str(), LANG_UNIVERSAL, 0);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (_running)
-            {
-                if (_checkTimer != 0)
-                {
-                    _checkTimer -= diff;
-                    if (_checkTimer < 0 )
-                        _checkTimer = 0;
-                }
-                else
-                    switch (_step)
-                    {
-                        case 0:
-                            NextStep(14000);
-                            break;
-                        case 1:
-                            Say("I heard a story or two of a Lore Keeper in Uldaman that fit your description. Do you serve a similar purpose?", false);
-                            NextStep(10000);
-                            break;
-                        case 2:
-                            Say("I was constructed to serve as a repository for essential information regarding this complex. My primary functions include communicating the status of the frontal defense systems and assessing the status of the entity that this complex was built to imprison.", true);
-                            NextStep(14000);
-                            break;
-                        case 3:
-                            Say("Frontal defense systems? Is there something I should let Brann know before he has anyone attempt to enter the complex?", false);
-                            NextStep(11000);
-                            break;
-                        case 4:
-                            Say("Access to the interior of the complex is currently restricted. Primary defensive emplacements are active. Secondary systems are currently non-active.", true);
-                            NextStep(12000);
-                            break;
-                        case 5:
-                            Say("Can you detail the nature of these defense systems?", false);
-                            NextStep(8000);
-                            break;
-                        case 6:
-                            Say("Compromise of complex detected, security override enabled - query permitted.", true);
-                            NextStep(7000);
-                            break;
-                        case 7:
-                            Say("Primary defensive emplacements consist of iron constructs and Storm Beacons, which will generate additional constructs as necessary. Secondary systems consist of orbital defense emplacements.", true);
-                            NextStep(11000);
-                            break;
-                        case 8:
-                            Say("Got it. At least we don't have to deal with those orbital emplacements.", false);
-                            NextStep(7000);
-                            break;
-                        case 9:
-                            Say("Rhydian, make sure you let Brann and Archmage Pentarus know about those defenses immediately.", false);
-                            NextStep(7000);
-                            break;
-                        case 10:
-                            if (Creature* c = me->FindNearestCreature(NPC_ARCHMAGE_RHYDIAN, 15.0f))
-                            {
-                                c->MonsterTextEmote("Archmage Rhydian Nods.", 0, false);
-                                c->GetMotionMaster()->MovePoint(0, -720.6f, -61.7f, 429.84f);
-                            }
-                            Say("And you mentioned an imprisoned entity? What is the nature of this entity and what is its status?", false);
-                            NextStep(6000);
-                            break;
-                        case 11:
-                            Say("Entity designate: Yogg-Saron. Security has been compromised. Prison operational status unknown. Unable to contact Watchers for notification purposes.", true);
-                            NextStep(9000);
-                            break;
-                        case 12:
-                            Say("Yogg-Saron is here? It sounds like we really will have our hands full then.", false);
-                            
-                            if (Creature* c = me->FindNearestCreature(NPC_START_BRANN_BRONZEBEARD, 110.0f, true) )
-                                c->AI()->DoAction(ACTION_START_NORGANNON_BRANN);
-
-                            _running = false;
-                            _checkTimer = 0;
-                            _step = 0;
-                            _dellorahGUID = 0;
-                            return;
-                    }
-            }
+            return _eventStarterGUID;
         }
 
         void DoAction(int32 param)
         {
-            if (_eventStarted)
+            if (!instance)
+                return;
+
+            if (instance->GetData(DATA_ENTRANCE_EVENT_STARTED))
                 return;
 
             if (param == ACTION_START_NORGANNON_EVENT)
             {
-                if (Creature* cr = me->FindNearestCreature(NPC_HIGH_EXPLORER_DELLORAH, 20.0f, true))
-                    _dellorahGUID = cr->GetGUID();
+                events.Reset();
+                instance->SetData(DATA_ENTRANCE_EVENT_STARTED, DATA_ENTRANCE_EVENT_STARTED);
 
-                _eventStarted = true;
-                _running = true;
-                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGUID))
+                {
+                    if (Creature* dell = GetPartner())
+                    {
+                        dell->AI()->Talk(DELLORAH_SAY_7, player);
+                        Movement::PointsArray path(rhydianMovementEntrance, rhydianMovementEntrance + rhydianMovementEntranceSize);
+                        Movement::MoveSplineInit init(dell);
+                        init.MovebyPath(path, 0);
+                        init.SetSmooth();
+                        init.SetFacing(6.06f);
+                        auto timeToArrive = init.Launch();
+                        events.ScheduleEvent(EVENT_NORG_15, timeToArrive);
+                    }
+                }
             }
         }
+
+        void Reset() override
+        {
+            events.Reset();
+            _executeTalks = true;
+            events.ScheduleEvent(EVENT_NORG_1, 10s);
+            _eventStarterGUID = 0;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_executeTalks)
+                return;
+
+            events.Update(diff);
+
+            while (auto eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_NORG_1:
+                        if (Creature* dell = GetPartner())
+                            dell->AI()->Talk(DELLORAH_SAY_0);
+                        events.ScheduleEvent(EVENT_NORG_2, 7s);
+                        break;
+                    case EVENT_NORG_2:
+                        Talk(NORG_SAY_0);
+                        events.ScheduleEvent(EVENT_NORG_3, 10s);
+                        break;
+                    case EVENT_NORG_3:
+                        if (Creature* dell = GetPartner())
+                            dell->AI()->Talk(DELLORAH_SAY_1);
+                        events.ScheduleEvent(EVENT_NORG_4, 12s);
+                        break;
+                    case EVENT_NORG_4:
+                        Talk(NORG_SAY_1);
+                        events.ScheduleEvent(EVENT_NORG_5, 7s);
+                        break;
+                    case EVENT_NORG_5:
+                        if (Creature* dell = GetPartner())
+                            dell->AI()->Talk(DELLORAH_SAY_2);
+                        events.ScheduleEvent(EVENT_NORG_6, 7s);
+                        break;
+                    case EVENT_NORG_6:
+                        Talk(NORG_SAY_2);
+                        events.ScheduleEvent(EVENT_NORG_7, 7s);
+                        break;
+                    case EVENT_NORG_7:
+                        Talk(NORG_SAY_3);
+                        events.ScheduleEvent(EVENT_NORG_8, 16s);
+                        break;
+                    case EVENT_NORG_8:
+                        if (Creature* dell = GetPartner())
+                        {
+                            if (Creature* rhydian = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_RHYDIAN_ENTRANCE)))
+                                dell->SetFacingTo(dell->GetAngle(rhydian->GetPositionX(), rhydian->GetPositionY()));
+
+                            dell->AI()->Talk(DELLORAH_SAY_4);
+                        }
+                        events.ScheduleEvent(EVENT_NORG_9, 6s);
+                        break;
+                    case EVENT_NORG_9:
+                        if (Creature* dell = GetPartner())
+                        {
+                            dell->AI()->Talk(DELLORAH_SAY_5);
+                            dell->SetFacingTo(dell->GetAngle(me->GetPositionX(), me->GetPositionY()));
+                        }
+
+                        if (Creature* rhydian = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_RHYDIAN_ENTRANCE)))
+                        {
+                            rhydian->AI()->Talk(RHYDIAN_SAY_0);
+                            Movement::PointsArray path(rhydianMovementEntrance, rhydianMovementEntrance + rhydianMovementEntranceSize);
+                            Movement::MoveSplineInit init(rhydian);
+                            init.MovebyPath(path, 0);
+                            init.SetSmooth();
+                            init.SetFacing(6.06f);
+                            auto timer = init.Launch();
+                            events.ScheduleEvent(EVENT_NORG_13, timer);
+                        }
+                        events.ScheduleEvent(EVENT_NORG_10, 8s);
+                        break;
+                    case EVENT_NORG_10:
+                        Talk(NORG_SAY_4);
+                        events.ScheduleEvent(EVENT_NORG_11, 10s);
+                        break;
+                    case EVENT_NORG_11:
+                        if (Creature* dell = GetPartner())
+                            dell->AI()->Talk(DELLORAH_SAY_6);
+
+                        events.ScheduleEvent(EVENT_NORG_12, 2min);
+                        break;
+                    case EVENT_NORG_12:
+                        Reset();
+                        break;
+                    case EVENT_NORG_13:
+                        if (Creature* rhydian = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_RHYDIAN_ENTRANCE)))
+                            rhydian->AI()->Talk(RHYDIAN_SAY_1);
+                        events.ScheduleEvent(EVENT_NORG_14, 5s);
+                        break;
+                    case EVENT_NORG_14:
+                        if (Creature* rhydian = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_RHYDIAN_ENTRANCE)))
+                            rhydian->GetMotionMaster()->MoveTargetedHome();
+                        break;
+                    case EVENT_NORG_15:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGUID))
+                        {
+                            if (Creature* dell = GetPartner())
+                                dell->AI()->Talk(DELLORAH_SAY_8, player);
+                        }
+                        events.ScheduleEvent(EVENT_NORG_16, 2s);
+                        break;
+                    case EVENT_NORG_16:
+                        if (Creature* dell = GetPartner())
+                            dell->GetMotionMaster()->MovePoint(1, -803.492126f, -78.503876f, 429.842865f);
+                        _executeTalks = false;
+
+                        if (Creature* brann = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_BRANN_ENTRANCE)))
+                            if (brann->IsAIEnabled)
+                                brann->AI()->DoAction(ACTION_START_NORGANNON_BRANN);
+                        break;
+                }
+            }
+        }
+
+        //! can return null so make sure the pointer exists
+        Creature* GetPartner()
+        {
+            if (!instance)
+                return nullptr;
+
+            Creature* dell = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_DELLORAH));
+            return dell->IsAIEnabled ? dell : nullptr;
+        }
+
+    private:
+        InstanceScript* instance;
+        EventMap events;
+        bool _executeTalks;
+        uint64 _eventStarterGUID;
     };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_lore_keeper_of_norgannon_ulduarAI(pCreature);
+    }
 };
+
+enum BrannUlduarEvents
+{
+    EVENT_BRANN_GATE_0          = 1,
+    EVENT_BRANN_GATE_1          = 2,
+    EVENT_BRANN_GATE_2          = 3,
+    EVENT_BRANN_GATE_3          = 4,
+    EVENT_BRANN_GATE_4          = 5,
+    EVENT_BRANN_GATE_5          = 6,
+    EVENT_BRANN_GATE_6          = 7,
+    EVENT_BRANN_GATE_7          = 8,
+
+    BRANN_GATE_SAY_0            = 0,
+    BRANN_GATE_SAY_1            = 1,
+    BRANN_GATE_SAY_2            = 2,
+    BRANN_GATE_SAY_3            = 3,
+
+    PENTARUS_GATE_SAY_0         = 0,
+    PENTARUS_GATE_SAY_1         = 1,
+
+    NPC_KIRIN_TOR_MAGE          = 33672,
+    NPC_KIRIN_TOR_BATTLE_MAGE   = 33662,
+    NPC_ARCHMAGUS_PENTARUS      = 33624,
+    NPC_HIRED_ENGINEER_BRANN    = 33626,
+    NPC_ULDUAR_SHIELD_BUNNY     = 33779,
+
+    NPC_EARTHEN_STONESHAPER     = 33620,
+
+    SPELL_ARCANE_EXPLOSION_MASS = 63660,
+
+    BRANN_POST_EVENT_GOSSIP     = 14415,
+    BRANN_DEFAULT_EVENT_GOSSIP  = 14369,
+    BRANN_DEFAULT_GOSSIP_MENU   = 10355
+};
+
+uint32 const RightSidePositionsSize = 3;
+G3D::Vector3 const RightSidePositions[RightSidePositionsSize] =
+{
+    { -688.404968f, -83.754547f, 428.292725f }, // middle
+    { -688.184875f, -86.861763f, 428.282227f }, // right
+    { -688.112976f, -80.261093f, 428.240814f } // left
+};
+
+float const _finalSplineOrientation = 0.070714f;
+
+Position const brannMovePosition = { -685.316223f, -49.485359f, 427.607483f, 0.018864f };
+G3D::Vector3 const goranMovePosition = { -688.524414f, -18.821848f, 427.918304f };
+G3D::Vector3 const leftOfGoranPosition = { -688.957092f, -14.784967f, 427.979889f };
+G3D::Vector3 const rightOfGoranPosition = { -688.215576f, -21.703346f, 427.874451f };
+
+float const _finalGoranSplineOrientation = 0.061987f;
 
 class npc_brann_ulduar : public CreatureScript
 {
 public:
     npc_brann_ulduar() : CreatureScript("npc_brann_ulduar") { }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if (creature->GetInstanceScript() && creature->GetInstanceScript()->GetData(TYPE_LEVIATHAN) == NOT_STARTED && !creature->AI()->GetData(DATA_EVENT_STARTED))
-            creature->AI()->DoAction(ACTION_START_BRANN_EVENT);
-        return true;
-    }
+        player->PlayerTalkClass->ClearMenus();
+        InstanceScript* instance = creature->GetInstanceScript();
 
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_brann_ulduarAI (pCreature);
+        if (!instance)
+            return false;
+
+        if (instance->GetData(TYPE_LEVIATHAN) == NOT_STARTED && !instance->GetData(DATA_ENTRANCE_EVENT_STARTED))
+        {
+            player->PlayerTalkClass->GetGossipMenu().AddMenuItem(BRANN_DEFAULT_GOSSIP_MENU, 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+            player->PlayerTalkClass->SendGossipMenu(BRANN_DEFAULT_EVENT_GOSSIP, creature->GetGUID());
+        }
+        else
+            player->PlayerTalkClass->SendGossipMenu(BRANN_POST_EVENT_GOSSIP, creature->GetGUID());
+
+        return true;
     }
 
     struct npc_brann_ulduarAI : public ScriptedAI
     {
-        npc_brann_ulduarAI(Creature* c) : ScriptedAI(c)
+        npc_brann_ulduarAI(Creature* creature) : ScriptedAI(creature)
         {
-            _eventStarted = false;
+            instance = me->GetInstanceScript();
             Reset();
         }
 
-        bool _eventStarted;
-        bool _running;
-        int32 _checkTimer;
-        uint8 _step;
-        uint64 _pentarusGUID;
-
-        void Reset()
+        void Reset() override
         {
             _running = false;
-            _checkTimer = 0;
-            _step = 0;
+            events.Reset();
             _pentarusGUID = 0;
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
 
-        void NextStep(const uint32 time)
+        void sGossipSelect(Player* player, uint32 /*sender*/, uint32 action) override
         {
-            _step++;
-            _checkTimer = time;
-        }
-
-        void Say(std::string text, bool self)
-        {
-            WorldPacket data;
-            
-            if (self)
-                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, me, NULL, text);
-            else if (Creature* c = ObjectAccessor::GetCreature(*me, _pentarusGUID))
-                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, c, NULL, text);
-
-            me->SendMessageToSetInRange(&data, 100.0f, true);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (_running)
+            if (!action)
             {
-                if (_checkTimer != 0)
-                {
-                    _checkTimer -= diff;
-                    if (_checkTimer < 0 )
-                        _checkTimer = 0;
-                }
-                else
-                    switch (_step)
-                    {
-                        case 0:
-                            Say("Pentarus, you heard the man. Have your mages release the shield and let these brave souls through!", true);
-                            NextStep(8000);
-                            break;
-                        case 1:
-                            Say("Of course, Brann: We will have the shield down momentarily.", false);
-                            NextStep(7000);
-                            break;
-                        case 2:
-                            if (Creature* cr = me->SummonCreature(NPC_BRANN_RADIO, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 5000))
-                            {
-                                cr->PlayDirectSound(RSOUND_L0);
-                                cr->MonsterSay("Okay! Let's move out. Get into your machines; I'll speak to you from here via the radio.", LANG_UNIVERSAL, 0);
-                            }
-                            NextStep(8000);
-                            break;
-                        case 3:
-                            if (GameObject* go = me->FindNearestGameObject(GO_STARTING_BARRIER, 200.0f))
-                                go->Delete();
-
-                            Say("Mages of the Kirin Tor, on Brann's Command, release the shield! Defend this platform and our allies with your lives! For Dalaran!", false);
-                            NextStep(9000);
-                            break;
-                        case 4:
-                            Say("Our allies are ready. Bring down the shield and make way!", true);
-                            _running = false;
-                            me->MonsterTextEmote("Go to your vehicles!", 0, true);
-                            if (me->GetInstanceScript())
-                                me->GetInstanceScript()->SetData(DATA_VEHICLE_SPAWN, VEHICLE_POS_START);
-                            return;
-                    }
+                if (instance && instance->GetData(TYPE_LEVIATHAN) == NOT_STARTED && !instance->GetData(DATA_ENTRANCE_EVENT_STARTED))
+                    DoAction(ACTION_START_BRANN_EVENT);
+                player->PlayerTalkClass->SendCloseGossip();
+                _playerStarterGUID = player->GetGUID();
             }
         }
 
-        void DoAction(int32 param)
+        void UpdateAI(uint32 diff) override
         {
-            if (_eventStarted)
+            if (!_running)
                 return;
 
-            if (me->GetInstanceScript())
+            events.Update(diff);
+
+            while (auto eventId = events.ExecuteEvent())
             {
-                // deactivate towers, easy mode
-                if (param != ACTION_START_NORGANNON_BRANN)
+                switch (eventId)
                 {
-                    me->GetInstanceScript()->ProcessEvent(NULL, EVENT_TOWER_OF_STORM_DESTROYED);
-                    me->GetInstanceScript()->ProcessEvent(NULL, EVENT_TOWER_OF_FROST_DESTROYED);
-                    me->GetInstanceScript()->ProcessEvent(NULL, EVENT_TOWER_OF_FLAMES_DESTROYED);
-                    me->GetInstanceScript()->ProcessEvent(NULL, EVENT_TOWER_OF_LIFE_DESTROYED);
+                    case EVENT_BRANN_GATE_0:
+                    {
+                        Player* player = nullptr;
+                        player = ObjectAccessor::GetPlayer(*me, _playerStarterGUID);
+
+                        // Event was started by lorekeeper norgann, try getting guid of the person
+                        // who started the event from his script
+                        if (!player)
+                        {
+                            if (Creature* lorekeeper = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_LOREKEEPER_NORG_ENTRANCE)))
+                                player = ObjectAccessor::GetPlayer(*me, lorekeeper->AI()->GetData64(DATA_LOREKEEPER_STARTER_GUID));
+                        }
+
+                        if (player)
+                            Talk(BRANN_GATE_SAY_0, player);
+                        else
+                            Talk(BRANN_GATE_SAY_0);
+                        events.ScheduleEvent(EVENT_BRANN_GATE_1, 7s);
+                        break;
+                    }
+                    case EVENT_BRANN_GATE_1:
+                        if (Creature* archmage = ObjectAccessor::GetCreature(*me, _pentarusGUID))
+                            if (archmage->IsAIEnabled)
+                                archmage->AI()->Talk(PENTARUS_GATE_SAY_0);
+                        events.ScheduleEvent(EVENT_BRANN_GATE_2, 8s);
+                        break;
+                    case EVENT_BRANN_GATE_2:
+                    {
+                        std::vector<uint64> _vTemp;
+                        Talk(BRANN_GATE_SAY_1);
+                        if (Creature* battle = me->FindNearestCreature(NPC_KIRIN_TOR_BATTLE_MAGE, 5.0f))
+                            _vTemp.push_back(battle->GetGUID());
+
+                        if (Creature* mage = me->FindNearestCreature(NPC_KIRIN_TOR_MAGE, 5.0f))
+                            _vTemp.push_back(mage->GetGUID());
+
+                        if (Creature* pentarus = ObjectAccessor::GetCreature(*me, _pentarusGUID))
+                        {
+                            pentarus->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                            _vTemp.push_back(pentarus->GetGUID());
+                        }
+
+                        for (auto i = 0; i < _vTemp.size(); ++i)
+                        {
+                            if (Creature* mobToMove = ObjectAccessor::GetCreature(*me, _vTemp.at(i)))
+                            {
+                                Movement::MoveSplineInit init(mobToMove);
+                                init.MoveTo(RightSidePositions[i]);
+                                init.SetFacing(_finalSplineOrientation);
+                                init.SetWalk(true);
+                                init.Launch();
+                            }
+                        }
+                        Position pos(-808.954285f, -103.394058f, 429.843781f, 3.564962f);
+                        if (Creature* engineer = me->FindNearestCreature(NPC_HIRED_ENGINEER_BRANN, 5.0f))
+                            engineer->GetMotionMaster()->MovePoint(1, pos);
+
+                        if (Creature* goran = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_GORAN_ENTRANCE)))
+                        {
+                            goran->GetMotionMaster()->Clear();
+                            goran->GetMotionMaster()->MoveIdle();
+
+                            bool moveMembersToTheLeft = true;
+
+                            //! break formation, and move them to proper positions
+                            CreatureGroup* formation = goran->GetFormation();
+                            if (formation)
+                            {
+                                for (auto& creature : formation->GetMembers())
+                                {
+                                    if (!creature.first)
+                                        continue;
+
+                                    if (creature.first->GetGUID() == goran->GetGUID())
+                                        continue;
+
+                                    if (creature.first->GetFormation())
+                                        formation->RemoveMember(creature.first);
+
+                                    Movement::MoveSplineInit init(creature.first);
+                                    if (moveMembersToTheLeft)
+                                    {
+                                        moveMembersToTheLeft = false;
+                                        init.MoveTo(leftOfGoranPosition);
+                                    }
+                                    else
+                                        init.MoveTo(rightOfGoranPosition);
+
+                                    init.SetWalk(false);
+                                    init.SetFacing(_finalGoranSplineOrientation);
+                                    init.Launch();
+                                }
+                            }
+
+                            Movement::MoveSplineInit init(goran);
+                            init.SetFacing(0.123f);
+                            init.MoveTo(goranMovePosition);
+                            init.Launch();
+                        }
+
+                        events.ScheduleEvent(EVENT_BRANN_GATE_3, 10s);
+                        break;
+                    }
+                    case EVENT_BRANN_GATE_3:
+                    {
+                        me->SetWalk(true);
+                        me->GetMotionMaster()->MovePoint(1, brannMovePosition);
+                        events.ScheduleEvent(EVENT_BRANN_GATE_4, 10s);
+                        break;
+                    }
+                    case EVENT_BRANN_GATE_4:
+                    {
+                        if (Creature* pentarus = ObjectAccessor::GetCreature(*me, _pentarusGUID))
+                            if (pentarus->IsAIEnabled)
+                                pentarus->AI()->Talk(PENTARUS_GATE_SAY_1);
+
+                        events.ScheduleEvent(EVENT_BRANN_GATE_5, 8s);
+                        break;
+                    }
+                    case EVENT_BRANN_GATE_5:
+                    {
+                        Talk(BRANN_GATE_SAY_2);
+                        events.ScheduleEvent(EVENT_BRANN_GATE_6, 8s);
+                        break;
+                    }
+                    case EVENT_BRANN_GATE_6:
+                    {
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        if (Creature* pentarus = ObjectAccessor::GetCreature(*me, _pentarusGUID))
+                            pentarus->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+                        instance->SetData(DATA_VEHICLE_SPAWN, VEHICLE_POS_START);
+
+                        if (GameObject* go = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_STARTING_BARRIER)))
+                            go->Delete();
+
+                        if (Creature* trigger = me->FindNearestCreature(NPC_ULDUAR_SHIELD_BUNNY, 10.0f))
+                            trigger->CastSpell((Unit*)nullptr, SPELL_ARCANE_EXPLOSION_MASS, true);
+
+                        std::list<Creature*> battleMages;
+                        me->GetCreatureListWithEntryInGrid(battleMages, NPC_KIRIN_TOR_BATTLE_MAGE, 50.0f);
+                        for (auto creature : battleMages)
+                            if (creature && creature->IsCasting())
+                                creature->CastStop();
+                        break;
+                    }
+                    default:
+                        break;
                 }
+            }
+        }
+
+        void DoAction(int32 param) override
+        {
+            if (!instance)
+                return;
+
+            if (instance->GetData(DATA_ENTRANCE_EVENT_STARTED) && param != ACTION_START_NORGANNON_BRANN)
+                return;
+
+            // deactivate towers, easy mode
+            if (param != ACTION_START_NORGANNON_BRANN)
+            {
+                instance->ProcessEvent(NULL, EVENT_TOWER_OF_STORM_DESTROYED);
+                instance->ProcessEvent(NULL, EVENT_TOWER_OF_FROST_DESTROYED);
+                instance->ProcessEvent(NULL, EVENT_TOWER_OF_FLAMES_DESTROYED);
+                instance->ProcessEvent(NULL, EVENT_TOWER_OF_LIFE_DESTROYED);
             }
 
             if (Creature* cr = me->FindNearestCreature(NPC_ARCHMAGE_PENTARUS, 50.0f, true))
                 _pentarusGUID = cr->GetGUID();
 
-            _eventStarted = true;
-            _running = true;
+            instance->SetData(DATA_ENTRANCE_EVENT_STARTED, DATA_ENTRANCE_EVENT_STARTED);
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            _running = true;
+            events.ScheduleEvent(EVENT_BRANN_GATE_0, 1s);
         }
+    private:
+        uint64 _pentarusGUID;
+        uint64 _playerStarterGUID;
+        EventMap events;
+        InstanceScript* instance;
+        bool _running;
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_brann_ulduarAI(creature);
+    }
 };
 
 class npc_brann_radio : public CreatureScript
@@ -1572,9 +1919,9 @@ public:
     {
         npc_brann_radioAI(Creature* c) : NullCreatureAI(c)
         {
-            _lock = (me->GetInstanceScript() && me->GetInstanceScript()->GetData(TYPE_LEVIATHAN) > NOT_STARTED); 
+            _lock = (me->GetInstanceScript() && me->GetInstanceScript()->GetData(TYPE_LEVIATHAN) > NOT_STARTED);
             _helpLock = _lock;
-        } 
+        }
 
         bool _lock;
         bool _helpLock;
@@ -1597,19 +1944,9 @@ public:
             {
                 if (who->GetTypeId() != TYPEID_PLAYER && !who->IsVehicle())
                     return;
-            
-                // ENGAGE
-                if (!_helpLock && me->GetDistance2d(-508.898f, -32.9631f) < 5.0f)
-                {
-                    if (me->GetDistance2d(who) <= 60.0f)
-                    {
-                        Say("The iron dwarves have been seen emerging from the bunkers at the base of the pillars straight ahead of you. Destroy the bunkers and they will be forced to fall back.");
-                        me->PlayDirectSound(RSOUND_ENGAGE);
-                        _helpLock = true;
-                    }
-                }
+
                 // MIMIRON
-                else if (me->GetDistance2d(-81.9207f, 111.432f) < 5.0f)
+                if (me->GetDistance2d(-81.9207f, 111.432f) < 5.0f)
                 {
                     if (me->GetDistance2d(who) <= 60.0f && who->GetPositionZ() > 430.0f)
                     {
@@ -1673,45 +2010,113 @@ public:
     };
 };
 
+enum beaconEnum
+{
+    EVENT_SPAWN_DEFENDER                = 1,
+    EVENT_CHECK_FOR_NEARBY_PLAYERS      = 2
+};
+
 class npc_storm_beacon_spawn : public CreatureScript
 {
 public:
     npc_storm_beacon_spawn() : CreatureScript("npc_storm_beacon_spawn") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    struct npc_storm_beacon_spawnAI : public ScriptedAI
     {
-        return new npc_storm_beacon_spawnAI (pCreature);
-    }
+        npc_storm_beacon_spawnAI(Creature* creature) : ScriptedAI(creature) { }
 
-    struct npc_storm_beacon_spawnAI : public NullCreatureAI
-    {
-        npc_storm_beacon_spawnAI(Creature* c) : NullCreatureAI(c) 
+        void DamageTaken(Unit* /*who*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
         {
-            _amount = 0;
-            _checkTimer = 0;
+            damage = 0;
         }
 
-        uint8 _amount;
-        uint32 _checkTimer;
-
-        void UpdateAI(uint32 diff)
+        void Reset() override
         {
-            if (_amount < 40)
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            events.Reset();
+            _activated = false;
+        }
+
+        bool IsLeviathanVehicle(Unit* who)
+        {
+            if (!who)
+                return false;
+
+            switch (who->GetEntry())
             {
-                _checkTimer += diff;
-                if (_checkTimer >= 4000)
+                case NPC_SALVAGED_DEMOLISHER:
+                case NPC_SALVAGED_SIEGE_ENGINE:
+                case NPC_VEHICLE_CHOPPER:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!_activated && who->IsWithinDist(me, 40.0f))
+            {
+                if (who->ToPlayer() && who->ToPlayer()->IsGameMaster())
+                    return;
+
+                if (who->ToCreature() && !IsLeviathanVehicle(who))
+                    return;
+
+                _activated = true;
+                events.ScheduleEvent(EVENT_SPAWN_DEFENDER, 1s);
+                events.ScheduleEvent(EVENT_CHECK_FOR_NEARBY_PLAYERS, 10s);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_activated)
+                return;
+
+            events.Update(diff);
+
+            while (auto eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
                 {
-                    _checkTimer = 0;
-                    if (Unit* target = me->SelectNearbyTarget(NULL, 80.0f))
+                    case EVENT_SPAWN_DEFENDER:
                     {
-                        ++_amount;
-                        if (Creature* cr = me->SummonCreature(NPC_DEFENDER_GENERATED, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+4, me->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 900000))
-                            cr->AI()->AttackStart(target);
+                        float x, y, z;
+                        me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 9.0f);
+                        z = 409.860f;
+                        Position pos(x, y, z, me->GetOrientation());
+                        if (Creature* cr = me->SummonCreature(NPC_DEFENDER_GENERATED, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 25000))
+                        {
+                            if (cr->IsAIEnabled)
+                                cr->AI()->DoZoneInCombat(cr, 200.0f);
+                        }
+                        events.Repeat(2s);
+                        break;
+                    }
+                    case EVENT_CHECK_FOR_NEARBY_PLAYERS:
+                    {
+                        //! if we find a player nearby then continue the check in 10s
+                        //! else reset the entire script
+                        if (Player* player = GetPlayerAtMinimumRange(150.f))
+                            events.Repeat(10s);
+                        else
+                            Reset();
+                        break;
                     }
                 }
             }
         }
+    private:
+        EventMap events;
+        bool _activated;
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_storm_beacon_spawnAI(creature);
+    }
+
 };
 
 class boss_flame_leviathan_safety_container : public CreatureScript
@@ -1726,7 +2131,7 @@ public:
 
     struct boss_flame_leviathan_safety_containerAI : public NullCreatureAI
     {
-        boss_flame_leviathan_safety_containerAI(Creature *c) : NullCreatureAI(c) 
+        boss_flame_leviathan_safety_containerAI(Creature *c) : NullCreatureAI(c)
         {
             _allowTimer = 0;
         }
@@ -1743,7 +2148,7 @@ public:
                     liquid->CastSpell(liquid, SPELL_DUST_CLOUD_IMPACT, true);
                     liquid->DespawnOrUnsummon(60000);
                 }
-                
+
                 me->DespawnOrUnsummon(1);
             }
         }
@@ -1775,8 +2180,8 @@ public:
 
     struct npc_mechanoliftAI : public NullCreatureAI
     {
-        npc_mechanoliftAI(Creature *c) : NullCreatureAI(c) 
-        { 
+        npc_mechanoliftAI(Creature *c) : NullCreatureAI(c)
+        {
             me->SetSpeedRate(MOVE_RUN, rand_norm()+0.5f);
         }
 
@@ -1824,6 +2229,14 @@ class go_ulduar_tower : public GameObjectScript
         }
 };
 
+std::vector<std::string> LoadCatapultTexts =
+{
+    { "I am ready, let's do this!" },
+    { "I hope I don't chip my nails..." },
+    { "Ready, Steady, Go!" },
+    { "Fire in the hole!" }
+};
+
 class spell_load_into_catapult : public SpellScriptLoader
 {
     enum Spells
@@ -1841,10 +2254,14 @@ class spell_load_into_catapult : public SpellScriptLoader
             void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 Unit* owner = GetOwner()->ToUnit();
-                if (!owner)
-                    return;
+                Unit* caster = GetCaster();
 
-                owner->CastSpell(owner, SPELL_PASSENGER_LOADED, true);
+                if (owner && caster)
+                {
+                    std::string loadedText = Trinity::Containers::SelectRandomContainerElement(LoadCatapultTexts);
+                    caster->MonsterSay(loadedText.c_str(), 0, nullptr);
+                    owner->CastSpell(owner, SPELL_PASSENGER_LOADED, true);
+                }
             }
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1863,9 +2280,52 @@ class spell_load_into_catapult : public SpellScriptLoader
             }
         };
 
-        AuraScript* GetAuraScript() const
+        class spell_load_into_catapult_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_load_into_catapult_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (!GetCaster()->IsPlayer())
+                    return SPELL_FAILED_DONT_REPORT;
+
+                //! We're getting the seat we're currently on
+                //! so in theory we're getting mechanical seat on demolisher
+                Unit* vehicleBase = GetCaster()->GetVehicleBase();
+                if (!vehicleBase)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                //! Try getting vehicleBase of mechanical seat
+                Unit* vehicleBaseMain = vehicleBase->GetVehicleBase();
+                if (!vehicleBaseMain)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                //! Now try getting vehicle kit of main vehicle (demolisher) that the mechanic seat is placed upon
+                Vehicle* vehicle = vehicleBaseMain->GetVehicleKit();
+                if (!vehicle)
+                    return SPELL_FAILED_DONT_REPORT;
+
+                //! do not allow the spell to be casted if catapult is occupied currently
+                if (vehicle->GetPassenger(3))
+                    return SPELL_FAILED_DONT_REPORT;
+
+                return SPELL_CAST_OK;
+            }
+
+            void Register() override
+            {
+                OnCheckCast += SpellCheckCastFn(spell_load_into_catapult_SpellScript::CheckCast);
+            }
+        };
+
+        AuraScript* GetAuraScript() const override
         {
             return new spell_load_into_catapult_AuraScript();
+        }
+
+        SpellScript* GetSpellScript() const override
+        {
+            return new spell_load_into_catapult_SpellScript();
         }
 };
 
@@ -2174,11 +2634,24 @@ class spell_vehicle_grab_pyrite : public SpellScriptLoader
             void HandleScript(SpellEffIndex effIndex)
             {
                 if (Unit* target = GetHitUnit())
+                {
+                    if (!target->HasAura(62495))
+                        return;
+
                     if (Unit* seat = GetCaster()->GetVehicleBase())
                     {
                         if (Vehicle* vSeat = seat->GetVehicleKit())
-                            if (Unit* pyrite = vSeat->GetPassenger(1))
-                                pyrite->ExitVehicle();
+                        {
+                            //! spell has delay, vehicle base can change before the spell hits
+                            //! and if it changes to demolisher then he will drop the turret out of the entire vehicle
+                            //! just make sure its actually turret, some visuals might be lost in edge cases
+                            //! but regenerating power will still work
+                            if (vSeat->GetCreatureEntry() == NPC_SALVAGED_DEMOLISHER_TURRET)
+                            {
+                                if (Unit* pyrite = vSeat->GetPassenger(1))
+                                    pyrite->ExitVehicle();
+                            }
+                        }
 
                         if (Unit* parent = seat->GetVehicleBase())
                         {
@@ -2189,6 +2662,7 @@ class spell_vehicle_grab_pyrite : public SpellScriptLoader
                                 target->ToCreature()->DespawnOrUnsummon(1300);
                         }
                     }
+                }
             }
 
             void Register()
@@ -2215,7 +2689,9 @@ public:
         {
             if (Unit* target = GetHitUnit())
                 if (Unit* seat = GetCaster()->GetVehicleBase())
-                    target->EnterVehicle(seat, 1);
+                    if (Vehicle* chopper = seat->GetVehicleKit())
+                        if (chopper->HasEmptySeat(1))
+                            target->EnterVehicle(seat, 1);
         }
 
         void Register()
@@ -2389,7 +2865,9 @@ class spell_demolisher_ride_vehicle : public SpellScriptLoader
 
                 Vehicle* veh = target->GetVehicleKit();
                 if (veh && veh->GetPassenger(0))
+                {
                     if (Unit* target2 = veh->GetPassenger(1))
+                    {
                         if (Vehicle* veh2 = target2->GetVehicleKit())
                         {
                             if (!veh2->GetPassenger(0))
@@ -2397,7 +2875,8 @@ class spell_demolisher_ride_vehicle : public SpellScriptLoader
 
                             return SPELL_FAILED_DONT_REPORT;
                         }
-
+                    }
+                }
                 return SPELL_CAST_OK;
             }
 
@@ -2425,7 +2904,7 @@ class achievement_flame_leviathan_towers : public AchievementCriteriaScript
         {
             return target && _towerCount <= target->GetAI()->GetData(DATA_GET_TOWER_COUNT);
         }
-        
+
     private:
         uint32 const _towerCount;
 };
@@ -2459,7 +2938,7 @@ class achievement_flame_leviathan_garage : public AchievementCriteriaScript
                     return true;
             return false;
         }
-        
+
     private:
         uint32 const _entry1;
         uint32 const _entry2;
@@ -2513,7 +2992,7 @@ public:
             if (CanAIAttack(who))
                 ScriptedAI::AttackStart(who);
         }
-        
+
         void JustDied(Unit* /*who*/) { me->DisappearAndDie(); }
 
         void UpdateAI(uint32 diff)
@@ -2531,6 +3010,580 @@ public:
     };
 };
 
+struct npc_liquid_piryte_flame_leviathanAI : public ScriptedAI
+{
+    npc_liquid_piryte_flame_leviathanAI(Creature* creature) : ScriptedAI(creature)
+    {
+        me->CastSpell(me, 62495, true);
+    }
+
+    void EnterEvadeMode() {}
+
+    void SpellHit(Unit* /*caster*/, SpellInfo const* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_PYRITE_RIDE_VEHICLE)
+        {
+            me->DespawnOrUnsummon(15s);
+            me->RemoveAurasDueToSpell(SPELL_LIQUID_PYRITE);
+        }
+    }
+};
+
+struct npc_flame_leviathan_vehicles_AI : public ScriptedAI
+{
+    npc_flame_leviathan_vehicles_AI(Creature* creature) : ScriptedAI(creature)
+    {
+        me->DisableChangeAI(true);
+        me->SetReactState(REACT_PASSIVE);
+        _counter = 0;
+    }
+
+    void EnterEvadeMode() override { }
+    void AttackStart(Unit* who) override { }
+    void Reset() override { }
+    void OnCharmed(bool apply) override { }
+
+    void SpellHit(Unit* caster, const SpellInfo* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_MACHINE_FLAMES_TRIGGERED)
+            ++_counter;
+    }
+
+    uint32 GetData(uint32 data) const override
+    {
+        if (data == DATA_GET_FLAMES_HIT_COUNT)
+            return _counter;
+
+        return 0;
+    }
+
+    //! attack vehicleBase instead of turret
+    void EnterCombat(Unit* who) override
+    {
+        if (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == NPC_MECHANOLIFT)
+            return;
+
+        if (me->GetEntry() == NPC_SALVAGED_SIEGE_ENGINE_TURRET || me->GetEntry() == NPC_SALVAGED_DEMOLISHER_TURRET)
+            if (who->GetTypeId() == TYPEID_UNIT && me->GetVehicleBase())
+                who->ToCreature()->AI()->AttackStart(me->GetVehicleBase());
+    }
+
+    //! redirect all threat to vehicle base
+    void DamageDealt(Unit* victim, uint32& damage, DamageEffectType /*damageType*/) override
+    {
+        if (me->GetEntry() == NPC_SALVAGED_SIEGE_ENGINE_TURRET || me->GetEntry() == NPC_SALVAGED_DEMOLISHER_TURRET)
+            if (victim && victim->GetTypeId() == TYPEID_UNIT && victim->GetEntry() != NPC_MECHANOLIFT && me->GetVehicleBase())
+                victim->ToCreature()->AddThreat(me->GetVehicleBase(), damage + 100);
+    }
+
+    void PassengerBoarded(Unit* who, int8 seatId, bool apply) override
+    {
+        if (!apply)
+            _counter = 0;
+
+        if (me->GetEntry() != NPC_SALVAGED_SIEGE_ENGINE)
+            return;
+
+        if (who->IsPlayer())
+        {
+            if (apply)
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            else
+                me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+        }
+        else if (who->GetEntry() == NPC_SALVAGED_SIEGE_ENGINE_TURRET)
+            who->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+private:
+    uint32 _counter;
+};
+
+class spell_flames_flame_leviathan_fury_remover_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_flames_flame_leviathan_fury_remover_SpellScript);
+
+    void HandleHit(SpellEffIndex effIndex)
+    {
+        if (!GetHitUnit())
+            return;
+
+        if (GetHitUnit()->ToCreature())
+        {
+            if (GetHitUnit()->ToCreature()->GetEntry() == NPC_POOL_OF_TAR_LEVIATHAN)
+                SetHitDamage(0);
+        }
+
+        if (!GetHitUnit()->HasAura(SPELL_HODIRS_FURY_AURA_FREEZE))
+            return;
+
+        if (GetHitUnit()->IsPlayer())
+            GetHitUnit()->RemoveAurasDueToSpell(SPELL_HODIRS_FURY_AURA_FREEZE);
+        else if (GetHitUnit()->ToCreature())
+        {
+            switch (GetHitUnit()->GetEntry())
+            {
+                case NPC_SALVAGED_DEMOLISHER:
+                case NPC_SALVAGED_SIEGE_ENGINE:
+                case NPC_VEHICLE_CHOPPER:
+                {
+                    if (Creature* veh = GetHitUnit()->ToCreature())
+                    {
+                        if (veh->IsAIEnabled)
+                            if (veh->AI()->GetData(DATA_GET_FLAMES_HIT_COUNT) >= 4)
+                            {
+                                veh->RemoveAurasDueToSpell(SPELL_HODIRS_FURY_AURA_FREEZE);
+                                if (veh->GetVehicleKit())
+                                    for (int i = 0; i < 8; i++)
+                                        if (Unit* passenger = veh->GetVehicleKit()->GetPassenger(i))
+                                            passenger->RemoveAurasDueToSpell(SPELL_HODIRS_FURY_AURA_FREEZE);
+                                if (veh->GetVehicleBase())
+                                    veh->GetVehicleBase()->RemoveAurasDueToSpell(SPELL_HODIRS_FURY_AURA_FREEZE);
+                            }
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_flames_flame_leviathan_fury_remover_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
+
+/* Post Flame Leviathan Event */
+enum FL_EVENT
+{
+    SPELL_SIMPLE_TELEPORT_EFFECT_FL     = 12980,
+    NPC_BRANN_FLYING_MACHINE            = 34120,
+    NPC_ARCHMAGE_RHYDIAN_FL             = 33696,
+    SPELL_KIRIN_TOR_BATTLE_CHANNEL      = 39550,
+    SPELL_BRANN_RIDE_VEHICLE_FL         = 43671,
+    NPC_EXPEDITION_ENGINEER_FL          = 34145,
+    NPC_EXPEDITION_MERCENARY_FL         = 34144,
+    GO_PORTAL_TO_DALARAN_FL             = 194481,
+    NPC_KIRIN_TOR_MAGE_FL               = 33672,
+    NPC_KIRIN_TOR_BATTLE_MAGE_FL        = 33662,
+
+    // Bran bronzebeard talks
+    SAY_BRAN_0                          = 0,
+    SAY_BRAN_1                          = 1,
+    SAY_BRAN_2                          = 2,
+    SAY_BRAN_3                          = 3,
+    SAY_BRAN_4                          = 4,
+    SAY_BRAN_5                          = 5,
+
+    // Archmage Rhydian talks
+    SAY_ARCHMAGE_0                      = 2,
+    SAY_ARCHMAGE_1                      = 3,
+    SAY_ARCHMAGE_2                      = 4,
+    SAY_ARCHMAGE_3                      = 5,
+    SAY_ARCHMAGE_4                      = 6
+};
+
+enum FL_BRAN_EVENTS
+{
+    EVENT_BRAN_DISMOUNT                 = 1,
+    EVENT_BRAN_SUMMON_RHYDIAN,
+    EVENT_BRAN_FL_TALK_0,
+    EVENT_BRAN_FL_TALK_1,
+    EVENT_BRAN_FL_TALK_2,
+    EVENT_BRAN_FL_TALK_3,
+    EVENT_BRAN_FL_TALK_4,
+    EVENT_BRAN_FL_TALK_5,
+    EVENT_BRAN_FL_TALK_6,
+    EVENT_BRAN_FL_TALK_7,
+    EVENT_BRAN_FL_TALK_8,
+    EVENT_BRAN_FL_TALK_9,
+    EVENT_BRAN_FL_TALK_10
+};
+
+Position const portalPositionFLEvent = { 235.4194f, -138.5261f, 409.5674f, 1.57f };
+Position const brannStartingPosition = { 162.3139f, -298.5704f, 499.2952f };
+Position const vehicleExitPositionBranFL = { 243.6023f, -79.01531f, 409.7794f, 4.208384f };
+
+Position const kirinTorBattleMageFL[2] =
+{
+    { 240.250f, -136.4786f, 409.6524f, 3.455752f }, // right
+    { 230.508f, -137.1488f, 409.6508f, 5.846853f }  // left
+};
+
+Position const kirinTorMagePositions[12] =
+{
+    { 221.007355f, -127.571465f, 409.568756f, 1.573857f },
+    { 216.576416f, -127.550148f, 409.579193f, 1.522789f },
+    { 212.555832f, -127.530800f, 409.580444f, 1.565986f },
+    { 222.949249f, -118.436378f, 409.587036f, 1.565988f },
+    { 218.763290f, -118.416252f, 409.567413f, 1.565988f },
+    { 214.773331f, -118.397072f, 409.567413f, 1.565988f }, // End of kirin tor positions for left side
+    { 250.144745f, -127.903687f, 409.803650f, 1.646995f },
+    { 254.231949f, -127.990219f, 409.803650f, 1.568455f },
+    { 258.403931f, -127.999985f, 409.803650f, 1.568455f },
+    { 252.595261f, -118.692635f, 409.803650f, 1.584163f },
+    { 256.717896f, -118.637527f, 409.803650f, 1.584163f },
+    { 260.489441f, -118.972153f, 409.803650f, 1.540966f }  // End of kirin tor positions for right side
+};
+
+uint32 const brannsFlyingMachinePathSize = 14;
+G3D::Vector3 const brannsFlyingMachinePath[brannsFlyingMachinePathSize] =
+{
+    { 162.3139f, -298.5704f, 499.2952f },
+    { 163.2536f, -298.2284f, 499.2952f },
+    { 187.4006f, -142.1330f, 499.758f  },
+    { 216.5235f, -102.9176f, 475.6192f },
+    { 207.2646f, -0.70204f,  460.2581f },
+    { 201.753f,  29.9802f,   465.3137f },
+    { 231.985f,  47.57292f,  459.2859f },
+    { 247.2324f, 44.02615f,  459.1748f },
+    { 253.0585f, 22.74127f,  446.1193f },
+    { 255.5544f, -23.08404f, 431.0082f },
+    { 260.4913f, -54.52697f, 421.7027f },
+    { 246.4216f, -80.03793f, 416.2025f },
+    { 246.4216f, -80.03793f, 416.2025f },
+    { 246.4216f, -80.03793f, 409.8195f }
+};
+
+uint32 const archmageMovePositionsSize = 4;
+G3D::Vector3 const archmageMovePositions[archmageMovePositionsSize] =
+{
+    { 235.3159f, -132.4290f, 409.6924f },
+    { 239.1959f, -128.4492f, 410.2823f },
+    { 243.6766f, -126.2547f, 410.3174f },
+    { 243.0223f, -123.5293f, 410.3174f }
+};
+
+uint32 const brannMovePositionsSize = 4;
+G3D::Vector3 const brannMovePositions[brannMovePositionsSize] =
+{
+    { 243.6023f, -79.01531f, 409.7794f },
+    { 236.0326f, -102.8987f, 409.8174f },
+    { 232.6663f, -111.3207f, 409.8174f },
+    { 233.9606f, -123.4371f, 409.6924f }
+};
+
+Position const expeditionGroupOne[3] =
+{
+    { 155.992462f, -50.251137f, 409.804169f, 6.275795f },
+    { 146.416718f, -50.180374f, 409.804169f, 6.275795f },
+    { 137.979446f, -50.118023f, 409.804169f, 6.275795f }
+};
+
+Position const expeditionGroupTwo[3] =
+{
+    { 156.043152f, -43.391323f, 409.804138f, 6.275795f },
+    { 147.893875f, -43.331100f, 409.804138f, 6.275795f },
+    { 139.564606f, -43.269547f, 409.804138f, 6.275795f }
+};
+
+Position const expeditionGroupThree[3] =
+{
+    { 156.084015f, -37.861473f, 409.804138f, 6.275795f },
+    { 147.079758f, -37.794933f, 409.804138f, 6.275795f },
+    { 139.452469f, -37.738567f, 409.804138f, 6.275795f }
+};
+
+Position const expeditionGroupFour[3] =
+{
+    { 156.110397f, -34.291569f, 409.804138f, 6.275795f },
+    { 149.099594f, -34.239758f, 409.804138f, 6.275795f },
+    { 141.575806f, -34.184158f, 409.804138f, 6.275795f }
+};
+
+// final positions for expedition mobs
+Position const expeditionRowOne[3] =
+{
+    { 214.013275f, -97.513832f, 409.803680f, 4.701086f },
+    { 213.903244f, -92.399666f, 409.803680f, 4.693233f },
+    { 213.992020f, -87.765518f, 409.803680f, 4.693233f }
+};
+
+Position const expeditionRowTwo[3] =
+{
+    { 223.576248f, -97.301590f, 409.803680f, 4.693235f },
+    { 223.579483f, -92.586304f, 409.803680f, 4.728576f },
+    { 223.669128f, -87.971825f, 409.803680f, 4.685381f }
+};
+
+Position const expeditionRowThree[3] =
+{
+    { 250.864594f, -98.393715f, 409.803680f, 4.708945f },
+    { 251.168930f, -93.569145f, 409.803680f, 4.697157f },
+    { 251.242889f, -88.714211f, 409.803680f, 4.697157f }
+};
+
+Position const expeditionRowFour[3] =
+{
+    { 260.802795f, -98.680420f, 409.804230f, 4.701888f },
+    { 260.841431f, -93.244629f, 409.611877f, 4.713668f },
+    { 260.835907f, -88.938133f, 409.760468f, 4.713668f }
+};
+
+G3D::Vector3 const expeditionPathOne[2] =
+{
+    { 164.793686f, -52.793915f, 409.804230f },
+    { 212.562424f, -68.838150f, 409.802338f }
+};
+
+G3D::Vector3 const expeditionPathTwo[2] =
+{
+    { 175.779526f, -43.769566f, 409.804138f },
+    { 222.570480f, -71.293839f, 409.801697f }
+};
+
+G3D::Vector3 const expeditionPathThree[2] =
+{
+    { 189.624115f, -39.830769f, 409.530487f },
+    { 251.580994f, -67.265602f, 409.801971f }
+};
+
+G3D::Vector3 const expeditionPathFour[2] =
+{
+    { 197.288651f, -35.162113f, 409.726837f },
+    { 258.137024f, -36.326141f, 409.534363f }
+};
+
+struct npc_brann_bronzebeard_flame_leviathanAI : public ScriptedAI
+{
+    npc_brann_bronzebeard_flame_leviathanAI(Creature* creature) : ScriptedAI(creature)
+    {
+        _rhyrdianGUID = 0;
+        _eventInProgress = false;
+    }
+
+    void Reset() override
+    {
+        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        _eventInProgress = true;
+        _events.Reset();
+        me->setActive(true);
+        if (Creature* flying = me->SummonCreature(NPC_BRANN_FLYING_MACHINE, me->GetPosition()))
+        {
+            flying->SetHover(true);
+            flying->setActive(true);
+            DoCast(flying, SPELL_BRANN_RIDE_VEHICLE_FL, true);
+
+            Movement::PointsArray path(brannsFlyingMachinePath, brannsFlyingMachinePath + brannsFlyingMachinePathSize);
+
+            Movement::MoveSplineInit init(flying);
+            init.SetSmooth();
+            init.MovebyPath(path, 0);
+            auto splineDuration = init.Launch();
+            _events.ScheduleEvent(EVENT_BRAN_DISMOUNT, splineDuration + 2000);
+            _events.ScheduleEvent(EVENT_BRAN_SUMMON_RHYDIAN, 2s);
+        }
+
+        me->SummonGameObject(GO_PORTAL_TO_DALARAN_FL, portalPositionFLEvent.GetPositionX(), portalPositionFLEvent.GetPositionY(), portalPositionFLEvent.GetPositionZ(), portalPositionFLEvent.GetOrientation(),
+                             0.f, 0.f, 0.f, 1.f, 0, false);
+
+        //! spawn kirin tor mobs
+        for (auto i = 0; i < 12; ++i)
+        {
+            if (Creature* kirinTor = me->SummonCreature(NPC_KIRIN_TOR_MAGE_FL, kirinTorMagePositions[i]))
+                kirinTor->CastSpell((Unit*)nullptr, SPELL_SIMPLE_TELEPORT_EFFECT_FL, true);
+        }
+
+        for (auto i = 0; i < 2; ++i)
+        {
+            if (Creature* battleMage = me->SummonCreature(NPC_KIRIN_TOR_BATTLE_MAGE_FL, kirinTorBattleMageFL[i]))
+            {
+                battleMage->CastSpell((Unit*)nullptr, SPELL_SIMPLE_TELEPORT_EFFECT_FL, true);
+                battleMage->CastSpell((Unit*)nullptr, SPELL_KIRIN_TOR_BATTLE_CHANNEL, true);
+            }
+        }
+
+        //! spawn expedition mobs and move them to correct positions
+        for (auto i = 0; i < 3; ++i)
+        {
+            if (Creature* expedition = me->SummonCreature(roll_chance_i(50) ? NPC_EXPEDITION_ENGINEER_FL : NPC_EXPEDITION_MERCENARY_FL, expeditionGroupOne[i]))
+            {
+                Movement::PointsArray path(expeditionPathOne, expeditionPathOne + 2);
+                path.push_back(G3D::Vector3(expeditionRowOne[i].GetPositionX(), expeditionRowOne[i].GetPositionY(), expeditionRowOne[i].GetPositionZ()));
+                Movement::MoveSplineInit init(expedition);
+                init.SetSmooth();
+                init.MovebyPath(path, 0);
+                init.Launch();
+            }
+        }
+
+        for (auto i = 0; i < 3; ++i)
+        {
+            if (Creature* expedition = me->SummonCreature(roll_chance_i(50) ? NPC_EXPEDITION_ENGINEER_FL : NPC_EXPEDITION_MERCENARY_FL, expeditionGroupTwo[i]))
+            {
+                Movement::PointsArray path(expeditionPathTwo, expeditionPathTwo + 2);
+                path.push_back(G3D::Vector3(expeditionRowTwo[i].GetPositionX(), expeditionRowTwo[i].GetPositionY(), expeditionRowTwo[i].GetPositionZ()));
+                Movement::MoveSplineInit init(expedition);
+                init.SetSmooth();
+                init.MovebyPath(path, 0);
+                init.Launch();
+            }
+        }
+
+        for (auto i = 0; i < 3; ++i)
+        {
+            if (Creature* expedition = me->SummonCreature(roll_chance_i(50) ? NPC_EXPEDITION_ENGINEER_FL : NPC_EXPEDITION_MERCENARY_FL, expeditionGroupThree[i]))
+            {
+                Movement::PointsArray path(expeditionPathThree, expeditionPathThree + 2);
+                path.push_back(G3D::Vector3(expeditionRowThree[i].GetPositionX(), expeditionRowThree[i].GetPositionY(), expeditionRowThree[i].GetPositionZ()));
+                Movement::MoveSplineInit init(expedition);
+                init.SetSmooth();
+                init.MovebyPath(path, 0);
+                init.Launch();
+            }
+        }
+
+        for (auto i = 0; i < 3; ++i)
+        {
+            if (Creature* expedition = me->SummonCreature(roll_chance_i(50) ? NPC_EXPEDITION_ENGINEER_FL : NPC_EXPEDITION_MERCENARY_FL, expeditionGroupFour[i]))
+            {
+                Movement::PointsArray path(expeditionPathFour, expeditionPathFour + 2);
+                path.push_back(G3D::Vector3(expeditionRowFour[i].GetPositionX(), expeditionRowFour[i].GetPositionY(), expeditionRowFour[i].GetPositionZ()));
+                Movement::MoveSplineInit init(expedition);
+                init.SetSmooth();
+                init.MovebyPath(path, 0);
+                init.Launch();
+            }
+        }
+    }
+
+    void RhyrdianTalk(uint8 talkId)
+    {
+        if (Creature* rhyr = ObjectAccessor::GetCreature(*me, _rhyrdianGUID))
+            if (rhyr->IsAIEnabled)
+                rhyr->AI()->Talk(talkId);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!_eventInProgress)
+            return;
+
+        _events.Update(diff);
+
+        while (auto eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_BRAN_DISMOUNT:
+                {
+                    me->ExitVehicle(&vehicleExitPositionBranFL);
+
+                    Movement::PointsArray path(brannMovePositions, brannMovePositions + brannMovePositionsSize);
+                    Movement::MoveSplineInit init(me);
+                    init.SetWalk(true);
+                    init.SetSmooth();
+                    init.SetFacing(6.280275f);
+                    init.MovebyPath(path, 0);
+                    auto splineDuration = init.Launch();
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_0, splineDuration + 1000);
+                    break;
+                }
+                case EVENT_BRAN_SUMMON_RHYDIAN:
+                {
+                    if (Creature* archmage = me->SummonCreature(NPC_ARCHMAGE_RHYDIAN_FL, portalPositionFLEvent))
+                    {
+                        _rhyrdianGUID = archmage->GetGUID();
+                        archmage->CastSpell((Unit*)nullptr, SPELL_SIMPLE_TELEPORT_EFFECT_FL, true);
+
+                        Movement::PointsArray path(archmageMovePositions, archmageMovePositions + archmageMovePositionsSize);
+                        Movement::MoveSplineInit init(archmage);
+                        init.SetFacing(3.0570000f);
+                        init.SetSmooth();
+                        init.SetWalk(true);
+                        init.MovebyPath(path, 0);
+                        init.Launch();
+                    }
+                    break;
+                }
+                case EVENT_BRAN_FL_TALK_0:
+                    me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    Talk(SAY_BRAN_0);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_1, 8s);
+                    break;
+                case EVENT_BRAN_FL_TALK_1:
+                    RhyrdianTalk(SAY_ARCHMAGE_0);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_2, 9s);
+                    break;
+                case EVENT_BRAN_FL_TALK_2:
+                    Talk(SAY_BRAN_1);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_3, 9s);
+                    break;
+                case EVENT_BRAN_FL_TALK_3:
+                    RhyrdianTalk(SAY_ARCHMAGE_1);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_4, 9s);
+                    break;
+                case EVENT_BRAN_FL_TALK_4:
+                    Talk(SAY_BRAN_2);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_5, 8s);
+                    break;
+                case EVENT_BRAN_FL_TALK_5:
+                    Talk(SAY_BRAN_3);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_6, 8s);
+                    break;
+                case EVENT_BRAN_FL_TALK_6:
+                    RhyrdianTalk(SAY_ARCHMAGE_2);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_7, 9s);
+                    break;
+                case EVENT_BRAN_FL_TALK_7:
+                    RhyrdianTalk(SAY_ARCHMAGE_3);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_8, 8s);
+                    break;
+                case EVENT_BRAN_FL_TALK_8:
+                    Talk(SAY_BRAN_4);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_9, 9s);
+                    break;
+                case EVENT_BRAN_FL_TALK_9:
+                    RhyrdianTalk(SAY_ARCHMAGE_4);
+                    _events.ScheduleEvent(EVENT_BRAN_FL_TALK_10, 8s);
+                    break;
+                case EVENT_BRAN_FL_TALK_10:
+                    Talk(SAY_BRAN_5);
+                    break;
+            }
+        }
+    }
+private:
+    bool _eventInProgress;
+    EventMap _events;
+    uint64 _rhyrdianGUID;
+};
+
+class spell_hurl_boulder_leviathan_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_hurl_boulder_leviathan_SpellScript);
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (GetHitUnit() && GetHitUnit()->ToCreature())
+            if (GetHitUnit()->GetEntry() == NPC_POOL_OF_TAR_LEVIATHAN)
+                SetHitDamage(0);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_hurl_boulder_leviathan_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
+class spell_mortar_flames_leviathan_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_mortar_flames_leviathan_SpellScript);
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (GetHitUnit() && GetHitUnit()->ToCreature())
+            if (GetHitUnit()->GetEntry() == NPC_POOL_OF_TAR_LEVIATHAN)
+                SetHitDamage(0);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_mortar_flames_leviathan_SpellScript::HandleHit, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     new boss_flame_leviathan();
@@ -2538,6 +3591,7 @@ void AddSC_boss_flame_leviathan()
     new boss_flame_leviathan_defense_turret();
     new boss_flame_leviathan_overload_device();
     new npc_pool_of_tar();
+    new CreatureAILoader<npc_brann_bronzebeard_flame_leviathanAI>("npc_brann_bronzebeard_flame_leviathan");
 
     // Hard Mode
     new npc_freya_ward();
@@ -2553,6 +3607,8 @@ void AddSC_boss_flame_leviathan()
     new boss_flame_leviathan_safety_container();
     new npc_mechanolift();
     new npc_ward_of_life();
+    new CreatureAILoader<npc_liquid_piryte_flame_leviathanAI>("npc_liquid_piryte_flame_leviathan");
+    new CreatureAILoader<npc_flame_leviathan_vehicles_AI>("npc_flame_leviathan_vehicles");
 
     // GOs
     new go_ulduar_tower();
@@ -2571,6 +3627,9 @@ void AddSC_boss_flame_leviathan()
     new spell_thorims_hammer();
     new spell_shield_generator();
     new spell_demolisher_ride_vehicle();
+    new SpellScriptLoaderEx<spell_flames_flame_leviathan_fury_remover_SpellScript>("spell_flames_flame_leviathan_fury_remover");
+    new SpellScriptLoaderEx<spell_hurl_boulder_leviathan_SpellScript>("spell_hurl_boulder_leviathan");
+    new SpellScriptLoaderEx<spell_mortar_flames_leviathan_SpellScript>("spell_mortar_flames_leviathan");
 
     // Achievements
     new achievement_flame_leviathan_towers("achievement_flame_leviathan_orbital_bombardment", 1);

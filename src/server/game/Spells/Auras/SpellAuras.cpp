@@ -628,6 +628,7 @@ void Aura::UpdateTargetMap( Unit* caster, bool apply )
                     case 62821: // Ulduar, Hodir, Toasty Fire
                     case 62807: // Ulduar, Hodir, Starlight
                     case 51103: // Oculus, Mage-Lord Urom, Frostbomb
+                    case 63277: // Shadow crash
                     case 69146: case 70823: case 70824: case 70825: // Icecrown Citadel, Lord Marrowgar, Coldflame
                     {
                         if ( itr->first->HasAura( GetId() ) )
@@ -2666,7 +2667,7 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
             case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
             {
                 if ( !effect.Predicate )
-                    effect.Predicate = Trinity::AnyAoETargetUnitInObjectRangeCheck( auraOwner, auraOwner, radius );
+                    effect.Predicate = Trinity::AnyAoETargetUnitInObjectRangeCheck(auraOwner, auraOwner, radius, spellInfo->HasAttribute(SPELL_ATTR3_ONLY_TARGET_PLAYERS));
 
                 if ( spellEffectInfo.Effect != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY )
                 {

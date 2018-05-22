@@ -1059,7 +1059,7 @@ class spell_warl_demonic_circle_summon : public SpellScriptLoader
 
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DEMONIC_CIRCLE_TELEPORT);
 
-                    if (GetTarget()->IsWithinDist(circle, spellInfo->GetMaxRange(true)))
+                    if (GetTarget()->IsWithinDist(circle, spellInfo->GetMaxRange(true)) && !GetTarget()->HasAuraWithAttributeCu(SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS))
                     {
                         if (!GetTarget()->HasAura(SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST))
                             GetTarget()->CastSpell(GetTarget(), SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST, true);
@@ -1098,7 +1098,8 @@ class spell_warl_demonic_circle_teleport : public SpellScriptLoader
                 {
                     if (GameObject* circle = player->GetGameObject(SPELL_WARLOCK_DEMONIC_CIRCLE_SUMMON))
                     {
-                        player->NearTeleportTo(circle->GetPositionX(), circle->GetPositionY(), circle->GetPositionZ(), circle->GetOrientation(), false, false, false, true);
+                        if (!player->HasAura(63988 /*yogg saron illusion room*/))
+                            player->NearTeleportTo(circle->GetPositionX(), circle->GetPositionY(), circle->GetPositionZ(), circle->GetOrientation(), false, false, false, true);
                         player->RemoveAurasWithMechanic(1<<MECHANIC_SNARE);
                     }
                 }
