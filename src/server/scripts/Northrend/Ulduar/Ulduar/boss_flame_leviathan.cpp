@@ -2084,7 +2084,6 @@ public:
                     {
                         float x, y, z;
                         me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 9.0f);
-                        z = 409.860f;
                         Position pos(x, y, z, me->GetOrientation());
                         if (Creature* cr = me->SummonCreature(NPC_DEFENDER_GENERATED, pos, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 25000))
                         {
