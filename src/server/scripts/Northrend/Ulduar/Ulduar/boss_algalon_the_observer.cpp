@@ -706,7 +706,7 @@ class boss_algalon_the_observer : public CreatureScript
                         summons.DoAction(ACTION_BIG_BANG, pred);
 
                         me->CastSpell((Unit*)NULL, SPELL_BIG_BANG, false);
-                        events.RepeatEvent(90500);
+                        events.RepeatEvent((Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF)) ? 75000 : 90500);
                         break;
                     }
                     case EVENT_ASCEND_TO_THE_HEAVENS:
@@ -1136,15 +1136,15 @@ class go_celestial_planetarium_access : public GameObjectScript
                 if (!instance)
                     return false;
 
-                //if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && go && go->GetMap()->Is25ManRaid())
-                //{
-                //    // hardmode checks, if one of those is false then return
-                //    if (!instance->GetData(DATA_MIMIRON_HARDMODE) ||
-                //        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
-                //        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
-                //        !instance->GetData(DATA_MIMIRON_HARDMODE))
-                //        return false;
-                //}
+                if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && go && go->GetMap()->Is25ManRaid())
+                {
+                    // hardmode checks, if one of those is false then return
+                    if (!instance->GetData(DATA_MIMIRON_HARDMODE) ||
+                        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
+                        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
+                        !instance->GetData(DATA_MIMIRON_HARDMODE))
+                        return false;
+                }
 
                 _locked = true;
                 // Start Algalon event

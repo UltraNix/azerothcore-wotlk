@@ -1174,7 +1174,7 @@ public:
                 case NPC_TRASH_TWILIGHT_FROST_MAGE:
                     if (unit->ToCreature())
                     {
-                        uint32 killsRequired = instance->Is25ManRaid() ? 8 : 6;
+                        uint32 killsRequired = instance->Is25ManRaid() ? 7 : 5;
                         Position pos = unit->ToCreature()->GetHomePosition();
                         if (pos.GetPositionX() > 1868.79f) // inform left faceless horror (left when looking at vezax)
                         {

@@ -1736,13 +1736,6 @@ public:
             SetCombatMovement(false);
             DoCastSelf(SPELL_VOID_ZONE_LARGE, true);
             DoCastAOE(SPELL_ERUPT_TENTACLE);
-
-            if (me->GetInstanceScript())
-            {
-                if (Creature* sara = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(NPC_SARA)))
-                    if (sara->IsAIEnabled)
-                        sara->AI()->JustSummoned(me);
-            }
         }
 
         void SetData(uint32 type, uint32 value) override

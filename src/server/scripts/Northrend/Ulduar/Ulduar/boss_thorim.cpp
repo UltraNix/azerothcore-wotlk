@@ -1915,7 +1915,7 @@ public:
                     events.RepeatEvent(2500);
                     break;
                 case EVENT_DR_EVOKER_RM:
-                    if (Unit* target = DoSelectLowestHpFriendly(40.0f, 15))
+                    if (Unit* target = DoSelectLowestHpFriendly(40.0f))
                         me->CastSpell(target, SPELL_RUNIC_MENDING, false);
                     else
                         me->CastSpell(me, SPELL_RUNIC_MENDING, false);

@@ -662,8 +662,11 @@ struct boss_razorscaleAI : public BossAI
                     events.Repeat(2s, 3s);
                     break;
                 case EVENT_DEVOURING_FLAME:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
+                    if (_permaGround)
+                        DoCastVictim(SPELL_DEVOURING_FLAME);
+                    else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 300.0f, true))
                         DoCast(target, SPELL_DEVOURING_FLAME);
+
                     if (_permaGround)
                         events.Repeat(10s, 12s);
                     else

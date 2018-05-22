@@ -452,6 +452,7 @@ public:
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_KOLOGARN, IN_PROGRESS);
 
+            _fightTimer = getMSTime();
             DoZoneInCombat();
             events.ScheduleEvent(EVENT_SMASH, 8000, 1);
             events.ScheduleEvent(EVENT_SWEEP, 17000, 1);

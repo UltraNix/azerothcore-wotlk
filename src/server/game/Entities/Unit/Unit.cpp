@@ -18324,17 +18324,6 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
     ASSERT(!m_vehicle);
     m_vehicle = vehicle;
 
-    // siege vehicle hack fix
-    if (GetTypeId() == TYPEID_PLAYER && vehicle->GetCreatureEntry() == 33060 && vehicle->GetPassenger(0))
-    {
-        if (!vehicle->HasEmptySeat(7))
-        {
-            Unit* turret = vehicle->GetPassenger(7);
-            CastSpell(turret, 65031, turret->GetVehicleKit() ? TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE : TRIGGERED_NONE, NULL, NULL, GetGUID());
-            return;
-        }
-    }
-
     if (!m_vehicle->AddPassenger(this, seatId))
     {
         m_vehicle = NULL;

@@ -231,7 +231,7 @@ struct boss_auriayaAI : BossAI
         instance->SetData(DATA_DESPAWN_SENTRIES, DATA_DESPAWN_SENTRIES);
 
         if (Map* map = me->GetMap())
-            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, Difficulty(map->GetDifficulty()), "", 20 * IN_MILLISECONDS, _fightTimer);
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, Difficulty(map->GetDifficulty()), "", 15 * IN_MILLISECONDS, _fightTimer);
 
         summons.DespawnAll();
         _JustDied();

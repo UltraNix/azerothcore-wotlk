@@ -394,22 +394,6 @@ public:
                 if (m_pInstance->GetData(TYPE_FREYA) == DONE)
                     return;
 
-                me->MonsterYell("His hold on me dissipates. I can see clearly once more. Thank you, heroes.", LANG_UNIVERSAL, 0);
-                me->PlayDirectSound(SOUND_DEATH);
-
-                damage = 0;
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                me->setFaction(35);
-                me->SetHealth(me->GetMaxHealth());
-                me->CombatStop();
-                me->RemoveAllAuras();
-                events.Reset();
-
-                summons.DespawnAll();
-                events.Reset();
-                m_pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_IRON_ROOTS_FREYA_DAMAGE_10);
-                m_pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_IRON_ROOTS_FREYA_DAMAGE_25);
-
                 uint8 _elderCount = 0;
                 for (uint8 i = 0; i < 3; ++i)
                 {
@@ -423,14 +407,33 @@ public:
                 }
 
                 uint32 chestId = RAID_MODE(GO_FREYA_CHEST, GO_FREYA_CHEST_HERO);
-                chestId -= 2*_elderCount; // offset
+                chestId -= 2 * _elderCount; // offset
                 sLog->outBasic("CHEST ID: %u", chestId);
-                me->DespawnOrUnsummon(5000);
                 if (GameObject* go = me->GetMap()->SummonGameObject(chestId, 2345.61f, -71.20f, 425.104f, 3.0f, 0, 0, 0, 0, 0))
                 {
                     go->SetSpellId(1);
                     go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
                 }
+
+                if (Map* map = me->GetMap())
+                    CheckCreatureRecord(me->SelectNearestPlayer(150.0f), me->GetCreatureTemplate()->Entry + uint32(_elderCount == 3), Difficulty(map->GetDifficulty() + (_elderCount == 3 ? 2 : 0)), "", 15000, _fightTimer);
+
+                me->MonsterYell("His hold on me dissipates. I can see clearly once more. Thank you, heroes.", LANG_UNIVERSAL, 0);
+                me->PlayDirectSound(SOUND_DEATH);
+
+                damage = 0;
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->setFaction(35);
+                me->SetHealth(me->GetMaxHealth());
+                me->CombatStop();
+                me->RemoveAllAuras();
+                events.Reset();
+                me->DespawnOrUnsummon(5000);
+
+                summons.DespawnAll();
+                events.Reset();
+                m_pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_IRON_ROOTS_FREYA_DAMAGE_10);
+                m_pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_IRON_ROOTS_FREYA_DAMAGE_25);
 
                 // Defeat credit
                 me->CastSpell(me, 65074, true); // credit
@@ -439,9 +442,6 @@ public:
                 if (_elderCount >= 3)
                 {
                     m_pInstance->SetData(DATA_FREYA_HARDMODE, DATA_FREYA_HARDMODE);
-                    if (Map* map = me->GetMap())
-                        if (m_pInstance->GetData(TYPE_FREYA) != DONE)
-                            CheckCreatureRecord(me->SelectNearestPlayer(150.0f), me->GetCreatureTemplate()->Entry + uint32(_elderCount == 3), Difficulty(map->GetDifficulty() + (_elderCount == 3 ? 2 : 0)), "", 15000, _fightTimer);
                 }
             }
         }

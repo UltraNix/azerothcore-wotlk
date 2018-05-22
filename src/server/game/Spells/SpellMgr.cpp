@@ -6037,7 +6037,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63138: // Yogg-Saron Sara's Fervor
             spellInfo->AttributesEx |= (SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED);
             break;
-            // Protective Gaze
         case 65719: // Shadow nova targeting sara
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
