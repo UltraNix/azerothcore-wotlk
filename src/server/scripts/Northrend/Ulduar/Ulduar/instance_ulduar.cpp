@@ -1175,13 +1175,13 @@ public:
                     {
                         uint32 killsRequired = instance->Is25ManRaid() ? 7 : 5;
                         Position pos = unit->ToCreature()->GetHomePosition();
-                        if (pos.GetPositionX() > 1868.79f) // inform left faceless horror (left when looking at vezax)
+                        if (pos.GetPositionX() > 1868.79f && pos.GetPositionZ() < 350.f) // inform left faceless horror (left when looking at vezax)
                         {
                             if (++_leftHorrorCounter >= killsRequired)
                                 if (Creature* horror = instance->GetCreature(_leftHorrorGUID))
                                     horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
                         }
-                        else if (pos.GetPositionX() < 1808.42f) // inform right one
+                        else if (pos.GetPositionX() < 1808.42f && pos.GetPositionZ() < 350.f) // inform right one
                         {
                             if (++_rightHorrorCounter >= killsRequired)
                                 if (Creature* horror = instance->GetCreature(_rightHorrorGUID))
