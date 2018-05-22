@@ -1169,7 +1169,6 @@ public:
             {
                 case NPC_TRASH_TWILIGHT_GUARDIAN:
                 case NPC_TRASH_TWILIGHT_PYROMANCER:
-                case NPC_TRASH_FIRE_ELEMENTAL:
                 case NPC_TRASH_TWILIGHT_ADHERENT:
                 case NPC_TRASH_TWILIGHT_FROST_MAGE:
                     if (unit->ToCreature())
