@@ -184,6 +184,7 @@ namespace Movement
         PacketBuilder::WriteStopMovement(loc, args.splineId, data);
         unit->SendMessageToSet(&data, true);
     }
+
     MoveSplineInit::MoveSplineInit(Unit* m) : unit(m)
     {
         args.splineId = splineIdGen.NewId();
@@ -234,7 +235,55 @@ namespace Movement
         args.path[1] = transform(dest);
     }
 
-    Vector3 TransportPathTransform::operator()(Vector3 input)
+    void MoveSplineInit::MoveTo( float x, float y, float z, bool generatePath, bool forceDestination )
+    {
+        MoveTo( G3D::Vector3( x, y, z ), generatePath, forceDestination );
+    }
+
+    void MoveSplineInit::SetFacing( Vector3 const& spot )
+    {
+        TransportPathTransform transform( unit, args.TransformForTransport );
+        Vector3 finalSpot = transform( spot );
+        args.facing.f.x = finalSpot.x;
+        args.facing.f.y = finalSpot.y;
+        args.facing.f.z = finalSpot.z;
+        args.flags.EnableFacingPoint();
+    }
+
+    void MoveSplineInit::SetAnimation( AnimType anim )
+    {
+        args.time_perc = 0.f;
+        args.flags.EnableAnimation( ( uint8 )anim );
+    }
+
+    void MoveSplineInit::SetParabolic( float amplitude, float time_shift )
+    {
+        args.time_perc = time_shift;
+        args.parabolic_amplitude = amplitude;
+        args.flags.EnableParabolic();
+    }
+
+    void MoveSplineInit::MovebyPath( const PointsArray& controls, int32 path_offset )
+    {
+        if ( controls.empty() )
+            return;
+
+        Vector3 dest = controls.back();
+
+        args.path_Idx_offset = path_offset;
+        args.path.resize( controls.size() );
+
+        TransportPathTransform transform( unit, args.TransformForTransport );
+        std::transform( controls.begin(), controls.end(), args.path.begin(), transform );
+
+        //if ( unit->GetTransport() == nullptr )
+        //{
+        //    unit->UpdateAllowedPositionZ( dest.x, dest.y, dest.z );
+        //}
+        args.path.back() = transform( dest );
+    }
+
+    Vector3 TransportPathTransform::operator()( Vector3 input )
     {
         if (_transformForTransport)
             if (TransportBase* transport = _owner->GetDirectTransport())

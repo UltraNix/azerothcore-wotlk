@@ -174,55 +174,6 @@ namespace Movement
     inline void MoveSplineInit::SetTransportEnter() { args.flags.EnableTransportEnter(); }
     inline void MoveSplineInit::SetTransportExit() { args.flags.EnableTransportExit(); }
     inline void MoveSplineInit::SetOrientationFixed(bool enable) { args.flags.orientationFixed = enable; }
-
-    inline void MoveSplineInit::MovebyPath(const PointsArray& controls, int32 path_offset)
-    {
-        if ( controls.empty() )
-            return;
-
-        Vector3 dest = controls.back();
-
-        args.path_Idx_offset = path_offset;
-        args.path.resize(controls.size());
-
-        TransportPathTransform transform( unit, args.TransformForTransport );
-        std::transform(controls.begin(), controls.end(), args.path.begin(), transform );
-
-        if ( unit->GetTransport() == nullptr )
-        {
-            unit->UpdateAllowedPositionZ( dest.x, dest.y, dest.z );
-        }
-        args.path.back() = transform( dest );
-    }
-
-    inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
-    {
-        MoveTo(G3D::Vector3(x, y, z), generatePath, forceDestination);
-    }
-
-    inline void MoveSplineInit::SetParabolic(float amplitude, float time_shift)
-    {
-        args.time_perc = time_shift;
-        args.parabolic_amplitude = amplitude;
-        args.flags.EnableParabolic();
-    }
-
-    inline void MoveSplineInit::SetAnimation(AnimType anim)
-    {
-        args.time_perc = 0.f;
-        args.flags.EnableAnimation((uint8)anim);
-    }
-
-    inline void MoveSplineInit::SetFacing(Vector3 const& spot)
-    {
-        TransportPathTransform transform(unit, args.TransformForTransport);
-        Vector3 finalSpot = transform(spot);
-        args.facing.f.x = finalSpot.x;
-        args.facing.f.y = finalSpot.y;
-        args.facing.f.z = finalSpot.z;
-        args.flags.EnableFacingPoint();
-    }
-
     inline void MoveSplineInit::DisableTransportPathTransformations() { args.TransformForTransport = false; }
 }
 #endif // TRINITYSERVER_MOVESPLINEINIT_H
