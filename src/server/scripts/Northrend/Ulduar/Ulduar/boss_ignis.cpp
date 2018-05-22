@@ -233,7 +233,7 @@ struct boss_ignisAI : public BossAI
 
         events.Reset();
         events.ScheduleEvent(EVENT_ACTIVATE_CONSTRUCT, RAID_MODE(40s, 30s), 1);
-        events.ScheduleEvent(EVENT_SPELL_SCORCH, 10s);
+        events.ScheduleEvent(EVENT_SPELL_SCORCH, 12s);
         events.ScheduleEvent(EVENT_SPELL_FLAME_JETS, 32s);
         events.ScheduleEvent(EVENT_GRAB, 25s);
 
@@ -415,11 +415,14 @@ struct boss_ignisAI : public BossAI
 
                     events.Repeat(me->GetMap()->Is25ManRaid() ? 9s : 24s); // +6000 below
                     events.DelayEvents(6s, 0);
+                    break;
                 }
-                break;
                 default:
                     break;
             }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
 
         DoMeleeAttackIfReady();
@@ -448,7 +451,7 @@ class spell_ignis_scorch_AuraScript : public AuraScript
     {
         if (aurEff->GetTickNumber() == aurEff->GetTotalTicks())
             if (Unit* caster = GetCaster())
-                if (Creature* summon = caster->SummonCreature(NPC_SCORCHED_GROUND, caster->GetPositionX() + 20.0f*cos(caster->GetOrientation()), caster->GetPositionY() + 20.0f*sin(caster->GetOrientation()), 361.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 30000))
+                if (Creature* summon = caster->SummonCreature(NPC_SCORCHED_GROUND, caster->GetPositionX() + 20.0f*cos(caster->GetOrientation()), caster->GetPositionY() + 20.0f*sin(caster->GetOrientation()), 361.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 45000))
                 {
                     if (!summon->FindNearestCreature(NPC_WATER_TRIGGER, 25.0f, true)) // must be away from the water
                         summon->CastSpell(summon, (aurEff->GetId() == 62546 ? SPELL_SCORCHED_GROUND_10 : SPELL_SCORCHED_GROUND_25), true);

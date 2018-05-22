@@ -498,7 +498,7 @@ class boss_algalon_the_observer : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMON_COLLAPSING_STAR, 16500 + introDelay);
                 events.ScheduleEvent(EVENT_COSMIC_SMASH, 25000 + introDelay);
                 events.ScheduleEvent(EVENT_ACTIVATE_LIVING_CONSTELLATION, 50500 + introDelay);
-                events.ScheduleEvent(EVENT_BIG_BANG, (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF)) ? 65000 : 90000 + introDelay);
+                events.ScheduleEvent(EVENT_BIG_BANG, (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF)) ? 65000 + introDelay : 90000 + introDelay);
                 events.ScheduleEvent(EVENT_ASCEND_TO_THE_HEAVENS, (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF)) ? 300000 + introDelay : 360000 + introDelay);
 
                 events.ScheduleEvent(EVENT_CHECK_HERALD_ITEMS, 5000);

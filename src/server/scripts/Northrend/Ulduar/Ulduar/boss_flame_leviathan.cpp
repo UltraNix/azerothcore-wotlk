@@ -2055,7 +2055,7 @@ public:
 
         void MoveInLineOfSight(Unit* who) override
         {
-            if (!_activated && who->IsWithinDist(me, 40.0f))
+            if (!_activated && who->IsWithinDist(me, 70.0f))
             {
                 if (who->ToPlayer() && who->ToPlayer()->IsGameMaster())
                     return;
@@ -2223,9 +2223,13 @@ class go_ulduar_tower : public GameObjectScript
 
         void OnDestroyed(GameObject* go, Player* /*player*/)
         {
-            Creature* trigger = go->FindNearestCreature(NPC_ULDUAR_GAUNTLET_GENERATOR, 15.0f, true);
-            if (trigger)
-                trigger->DisappearAndDie();
+            std::list<Creature*> _triggerList;
+            go->GetCreatureListWithEntryInGrid(_triggerList, NPC_ULDUAR_GAUNTLET_GENERATOR, 30.f);
+            for (auto& creature : _triggerList)
+            {
+                if (creature && creature->IsAlive())
+                    creature->DisappearAndDie();
+            }
         }
 };
 

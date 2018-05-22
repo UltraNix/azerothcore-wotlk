@@ -590,6 +590,7 @@ struct boss_razorscaleAI : public BossAI
         HandleMusic(false);
         _EnterEvadeMode();
         _DespawnAtEvade();
+        me->m_Events.KillAllEvents(true);
         me->CastStop();
         me->SetPassive();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);

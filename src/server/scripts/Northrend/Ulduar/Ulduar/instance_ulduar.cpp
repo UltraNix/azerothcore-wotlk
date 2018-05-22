@@ -1179,13 +1179,15 @@ public:
                         {
                             if (++_leftHorrorCounter >= killsRequired)
                                 if (Creature* horror = instance->GetCreature(_leftHorrorGUID))
-                                    horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
+                                    if (!horror->IsInCombat() && horror->IsAlive())
+                                        horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
                         }
                         else if (pos.GetPositionX() < 1808.42f && pos.GetPositionZ() < 350.f) // inform right one
                         {
                             if (++_rightHorrorCounter >= killsRequired)
                                 if (Creature* horror = instance->GetCreature(_rightHorrorGUID))
-                                    horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
+                                    if (!horror->IsInCombat() && horror->IsAlive())
+                                        horror->GetMotionMaster()->MovePath(horror->GetDBTableGUIDLow() * 10, true);
                         }
                     }
                     break;

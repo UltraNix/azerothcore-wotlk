@@ -5817,10 +5817,6 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->DurationIndex = 28; // 5 seconds
             break;
         // Razorscale
-        case 62796: // razorscale fireball
-        case 63815: // razorscale fireball
-            spellInfo->speed = 0.0f;
-            break;
         case 63317: // flame breath target entry (just before flying up)
         case 64021: // flame breath target entry (just before flying up)
         case 62669: // Firebolt, visual into triggers
