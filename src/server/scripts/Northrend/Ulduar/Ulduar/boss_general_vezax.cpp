@@ -208,19 +208,25 @@ struct boss_vezaxAI : public BossAI
                 {
                     events.Repeat(urand(8000, 15000));
 
-                    std::vector<Player*> players;
+                    std::vector<Player*> _farAwayPlayers;
                     Map::PlayerList const& pl = me->GetMap()->GetPlayers();
                     for (auto itr = pl.begin(); itr != pl.end(); ++itr)
                     {
                         auto temp = itr->GetSource();
-                        if (!temp->IsGameMaster() && temp->IsAlive() && temp->GetDistance(me) > 15.0f)
-                            players.push_back(temp);
+                        if (!temp->IsGameMaster() && temp->IsAlive() && temp->GetDistance(me) > 15.0f && temp->GetDistance(me) < 300.0f)
+                            _farAwayPlayers.push_back(temp);
                     }
 
-                    if (!players.empty())
+                    size_t sizeRequired = RAID_MODE(3, 7);
+                    Unit* target = nullptr;
+                    if (_farAwayPlayers.size() >= sizeRequired)
+                        target = Trinity::Containers::SelectRandomContainerElement(_farAwayPlayers);
+                    else
+                        target = SelectTarget(SELECT_TARGET_RANDOM, 1U, 0.0f, true);
+
+                    if (target)
                     {
                         me->setAttackTimer(BASE_ATTACK, 2000);
-                        auto target = Trinity::Containers::SelectRandomContainerElement(players);
                         me->SetTarget(target->GetGUID());
                         DoCast(target, SPELL_VEZAX_SHADOW_CRASH);
                         events.ScheduleEvent(EVENT_RESTORE_TARGET, 750);
@@ -232,7 +238,11 @@ struct boss_vezaxAI : public BossAI
                         me->SetTarget(me->GetVictim()->GetGUID());
                     break;
                 case EVENT_SPELL_SEARING_FLAMES:
-                    if (!me->FindNearestCreature(NPC_SARONITE_ANIMUS, 250.0f))
+                    //! if pre-nerf just cast straight away
+                    //! otherwise check for animus, if he is nearby then do not do anything
+                    if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
+                        DoCastAOE(SPELL_SEARING_FLAMES);
+                    else if (!me->FindNearestCreature(NPC_SARONITE_ANIMUS, 250.0f))
                         DoCastAOE(SPELL_SEARING_FLAMES);
                     events.Repeat(me->GetMap()->Is25ManRaid() ? 8000 : 15000);
                     break;
