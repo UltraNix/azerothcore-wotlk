@@ -11,6 +11,8 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "Player.h"
 #include "WorldSession.h"
 
+#include <array>
+
 enum VezaxSpellData
 {
     SPELL_VEZAX_BERSERK                         = 26662,

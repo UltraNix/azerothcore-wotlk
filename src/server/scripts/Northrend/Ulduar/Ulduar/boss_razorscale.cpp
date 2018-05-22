@@ -1555,7 +1555,6 @@ struct npc_darkrune_sentinelAI : public ScriptedAI
                             {
                                 if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
                                 {
-                                    std::cout << "weszlo\n";
                                     me->AddThreat(engineer, 10000.f);
                                     AttackStart(engineer);
                                 }
