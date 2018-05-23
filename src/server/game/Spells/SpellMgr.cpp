@@ -7756,33 +7756,12 @@ void SpellMgr::LoadDbcDataCorrections()
         }
 
         //////////////////////////////////////////
-        ////////// Naxxramas - BOOST - ONLY 25 MAN! && Malygos
+        ////////// Naxxramas - BOOST - ONLY 25 MAN!
         //////////////////////////////////////////
         if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
         {
             switch (spellInfo->Id)
             {
-                case 56272: // Arcane breath normal
-                    spellInfo->EffectBasePoints[EFFECT_0] = 30000;
-                    break;
-                case 60072: // Arcane breath heroic
-                    spellInfo->EffectBasePoints[EFFECT_0] = 45000;
-                    break;
-                case 56256: // vortex
-                    spellInfo->EffectBasePoints[EFFECT_1] = 3600;
-                    break;
-                case 56548: // surge of power targeted (p2 i think)
-                    spellInfo->EffectBasePoints[EFFECT_0] = 10000;
-                    break;
-                case 61693: // arcane storm normal
-                    spellInfo->EffectBasePoints[EFFECT_0] = 12000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 1250;
-                    break;
-                case 61694: // arcane storm heroic
-                    spellInfo->EffectBasePoints[EFFECT_0] = 14000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 1250;
-                    break;
-
                 case 54363: // Poison cloud - Grobbulus
                     spellInfo->EffectBasePoints[EFFECT_0] = 10000;
                     spellInfo->EffectDieSides[EFFECT_0] = 700;
