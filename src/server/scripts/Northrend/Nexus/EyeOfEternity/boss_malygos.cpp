@@ -73,9 +73,7 @@ enum MalygosSpells
     SPELL_STATIC_FIELD_MAIN                 = 57430,
     SPELL_STATIC_FIELD_SUMMON               = 57431,
     SPELL_STATIC_FIELD_AURA                 = 57428,
-    SPELL_STATIC_FIELD_DAMAGE               = 57429,
-
-    SPELL_STRENGTH_OF_THE_PACK_BOOST        = 64369
+    SPELL_STATIC_FIELD_DAMAGE               = 57429
 };
 
 #define SPELL_ARCANE_BREATH                DUNGEON_MODE(SPELL_ARCANE_BREATH_N, SPELL_ARCANE_BREATH_H)
@@ -385,10 +383,7 @@ public:
                         }
                         events.PopEvent();
 
-                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST))
-                            events.RescheduleEvent(EVENT_BERSERK, 495000, 0);
-                        else
-                            events.RescheduleEvent(EVENT_BERSERK, 600000, 0);
+                        events.RescheduleEvent(EVENT_BERSERK, 600000, 0);
 
                         events.RescheduleEvent(EVENT_SPELL_ARCANE_BREATH, urand(9000,12000), 1);
                         events.RescheduleEvent(EVENT_SPELL_ARCANE_STORM, urand(2000,5000), 1);
@@ -405,31 +400,16 @@ public:
                     break;
                 case EVENT_SPELL_ARCANE_STORM:
                     me->CastCustomSpell(SPELL_ARCANE_STORM, SPELLVALUE_MAX_TARGETS, DUNGEON_MODE(5, 12), me, true);
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                        events.RepeatEvent(10000);
-                    else
-                        events.RepeatEvent(urand(10000, 15000));
+                    events.RepeatEvent(urand(10000, 15000));
                     break;
                 case EVENT_SUMMON_POWER_SPARK:
                 {
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
-                    {
-                        for (uint32 i = 0; i < 3; ++i)
-                        {
-                            if (Creature *c = me->SummonCreature(NPC_PORTAL, FourSidesPos[i], TEMPSUMMON_TIMED_DESPAWN, 6000))
-                                c->CastSpell(c, SPELL_PORTAL_BEAM, false);
-                            if (Creature* c = me->SummonCreature(NPC_POWER_SPARK, FourSidesPos[i], TEMPSUMMON_MANUAL_DESPAWN, 0))
-                                c->AI()->DoAction(1);
-                        }
-                    }
-                    else
-                    {
-                        uint8 random = urand(0, 3);
-                        if (Creature *c = me->SummonCreature(NPC_PORTAL, FourSidesPos[random], TEMPSUMMON_TIMED_DESPAWN, 6000))
-                            c->CastSpell(c, SPELL_PORTAL_BEAM, false);
-                        if (Creature* c = me->SummonCreature(NPC_POWER_SPARK, FourSidesPos[random], TEMPSUMMON_MANUAL_DESPAWN, 0))
-                            c->AI()->DoAction(1);
-                    }
+                    uint8 random = urand(0, 3);
+                    if (Creature *c = me->SummonCreature(NPC_PORTAL, FourSidesPos[random], TEMPSUMMON_TIMED_DESPAWN, 6000))
+                        c->CastSpell(c, SPELL_PORTAL_BEAM, false);
+                    if (Creature* c = me->SummonCreature(NPC_POWER_SPARK, FourSidesPos[random], TEMPSUMMON_MANUAL_DESPAWN, 0))
+                        c->AI()->DoAction(1);
+
                     me->MonsterTextEmote("A Power Spark forms from a nearby rift!", 0, true);
                     events.RepeatEvent(urand(20000, 30000));
                 }
@@ -545,18 +525,10 @@ public:
                     }
                     events.PopEvent();
 
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
-                        events.RescheduleEvent(EVENT_START_VORTEX_0, 40s, 1);
-                    else
-                        events.RescheduleEvent(EVENT_START_VORTEX_0, 60000, 1);
+                    events.RescheduleEvent(EVENT_START_VORTEX_0, 60000, 1);
                     break;
                 }
                 case EVENT_START_PHASE_2:
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                    {
-                        me->RemoveAllAuras();
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    }
                     me->MonsterYell("I had hoped to end your lives quickly, but you have proven more...resilient then I had anticipated. Nonetheless, your efforts are in vain, it is you reckless, careless mortals who are to blame for this war! I do what I must...And if it means your...extinction...THEN SO BE IT!", LANG_UNIVERSAL,0);
                     me->PlayDirectSound(SOUND_PHASE_1_END);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
@@ -626,10 +598,7 @@ public:
                         float posy = CenterPos.GetPositionY()+sin(angle)*dist;
                         me->SetFacingTo(me->GetAngle(posx, posy));
                         me->CastSpell(posx, posy, CenterPos.GetPositionZ()+1.5f, SPELL_ARCANE_OVERLOAD, true);
-                        if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                            events.RepeatEvent(40000);
-                        else
-                            events.RepeatEvent(15000);
+                        events.RepeatEvent(15000);
                         events.RescheduleEvent(EVENT_RESUME_FLYING_CIRCLES_PH_2, 3000, 1);
                     }
                     break;
@@ -667,10 +636,7 @@ public:
                     events.RescheduleEvent(EVENT_RESUME_FLYING_CIRCLES_PH_2, 10000, 1);
                     events.RescheduleEvent(EVENT_SPELL_ARCANE_STORM, urand(17000,25000), 1);
                     events.RescheduleEvent(EVENT_SPELL_ARCANE_OVERLOAD, 16000, 1);
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                        events.RescheduleEvent(EVENT_MOVE_TO_SURGE_OF_POWER, 30000, 1);
-                    else
-                        events.RescheduleEvent(EVENT_MOVE_TO_SURGE_OF_POWER, 55000 + 10000, 1);
+                    events.RescheduleEvent(EVENT_MOVE_TO_SURGE_OF_POWER, 55000 + 10000, 1);
                     events.RescheduleEvent(EVENT_CHECK_TRASH_DEAD, 3000, 1);
                     break;
                 case EVENT_CLEAR_TARGET:
@@ -767,31 +733,13 @@ public:
                     break;
                 case EVENT_SPELL_STATIC_FIELD:
                 {
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, false))
                     {
-                        for (uint32 i = 0; i < 2; ++i)
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, false))
-                            {
-                                me->SetFacingToObject(target);
-                                me->CastSpell(target, SPELL_STATIC_FIELD_MAIN, true);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, false))
-                        {
-                            me->SetFacingToObject(target);
-                            me->CastSpell(target, SPELL_STATIC_FIELD_MAIN, true);
-                        }
-
+                        me->SetFacingToObject(target);
+                        me->CastSpell(target, SPELL_STATIC_FIELD_MAIN, true);
                     }
 
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
-                        events.RepeatEvent(8000);
-                    else
-                        events.RepeatEvent(12000);
+                    events.RepeatEvent(12000);
                     break;
                 }
                 case EVENT_SPELL_PH3_SURGE_OF_POWER:
@@ -1040,13 +988,8 @@ public:
                     me->SetPosition(me->GetPositionX(), me->GetPositionY(), CenterPos.GetPositionZ(), me->GetOrientation());
                     me->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
                     me->RemoveAura(SPELL_POWER_SPARK_VISUAL);
-                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
-                        me->DespawnOrUnsummon();
-                    else
-                    {
-                        me->CastSpell(me, SPELL_POWER_SPARK_GROUND_BUFF, true);
-                        me->DespawnOrUnsummon(60s);
-                    }
+                    me->CastSpell(me, SPELL_POWER_SPARK_GROUND_BUFF, true);
+                    me->DespawnOrUnsummon(60s);
                 }
             }
         }
@@ -1063,12 +1006,6 @@ public:
                         if (me->IsWithinDist3d(c, 12.0f))
                         {
                             me->CastSpell(c, SPELL_POWER_SPARK_MALYGOS_BUFF, true);
-                            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
-                            {
-                                c->AddAura(65126, c); // berserk boost on boosted version
-                                if (Aura* aura = c->GetAura(65126))
-                                    aura->SetDuration(20000);
-                            }
                             me->DespawnOrUnsummon();
                             return;
                         }
@@ -1121,8 +1058,6 @@ public:
 
         void Reset() override
         {
-            // if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST))
-            //     DoCastSelf(SPELL_STRENGTH_OF_THE_PACK_BOOST, true);
             ScriptedAI::Reset();
         }
 
