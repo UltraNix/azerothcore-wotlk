@@ -5946,6 +5946,11 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
 
         // FREYA
+        case 64604: // nature bomb force cast
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
         // Potent Pheromones
         case 62619:
             spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;

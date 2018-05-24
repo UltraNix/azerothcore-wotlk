@@ -421,7 +421,8 @@ enum feralDefender
     EVENT_REVIVE,
     EVENT_APPLY_ALL_AURAS,
     EVENT_SWARM_JUMP,
-    EVENT_RESTORE_REACT
+    EVENT_RESTORE_REACT,
+    EVENT_SWARM_RESET
 };
 
 struct npc_auriaya_feral_defenderAI : public ScriptedAI
@@ -638,6 +639,7 @@ struct npc_swarming_guardian_auriaya_AI : public ScriptedAI
         instance = me->GetInstanceScript();
         attackTargetGUID = 0;
         me->SetNoCallAssistance(true);
+        me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
     }
 
     void IsSummonedBy(Unit* summoner) override
@@ -649,7 +651,13 @@ struct npc_swarming_guardian_auriaya_AI : public ScriptedAI
         {
             // Override summoner and make auriaya summoner
             if (Creature* auriaya = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_AURIAYA)))
-                auriaya->AI()->JustSummoned(me);
+            {
+                if (auriaya->IsAIEnabled)
+                    auriaya->AI()->JustSummoned(me);
+
+                if (!auriaya->IsInCombat())
+                    me->DespawnOrUnsummon();
+            }
         }
     }
 
@@ -663,19 +671,40 @@ struct npc_swarming_guardian_auriaya_AI : public ScriptedAI
     {
         events.Reset();
         events.ScheduleEvent(EVENT_SWARM_JUMP, 0.5s);
+        events.ScheduleEvent(EVENT_SWARM_RESET, 5s);
     }
 
     void UpdateAI(uint32 diff) override
     {
         events.Update(diff);
 
-        if (events.ExecuteEvent() == EVENT_SWARM_JUMP)
+        while (auto eventId = events.ExecuteEvent())
         {
-            if (Player* player = ObjectAccessor::GetPlayer(*me, attackTargetGUID))
+            switch (eventId)
             {
-                DoCast(player, SPELL_SWARM_POUNCE, true);
-                AttackStart(player);
-                player->AddThreat(me, 100000.0f);
+                case EVENT_SWARM_JUMP:
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, attackTargetGUID))
+                    {
+                        DoCast(player, SPELL_SWARM_POUNCE, true);
+                        AttackStart(player);
+                        player->AddThreat(me, 100000.0f);
+                    }
+                    break;
+                }
+                case EVENT_SWARM_RESET:
+                {
+                    if (instance)
+                    {
+                        if (Creature* auriaya = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_AURIAYA)))
+                        {
+                            if (instance->GetData(TYPE_AURIAYA) == DONE)
+                                me->DespawnOrUnsummon();
+                        }
+                    }
+                    events.Repeat(5s);
+                    break;
+                }
             }
         }
         DoMeleeAttackIfReady();

@@ -394,6 +394,8 @@ public:
                 if (m_pInstance->GetData(TYPE_FREYA) == DONE)
                     return;
 
+                m_pInstance->SetData(TYPE_FREYA, DONE);
+
                 uint8 _elderCount = 0;
                 for (uint8 i = 0; i < 3; ++i)
                 {
@@ -437,7 +439,6 @@ public:
 
                 // Defeat credit
                 me->CastSpell(me, 65074, true); // credit
-                m_pInstance->SetData(TYPE_FREYA, DONE);
                 //! 3 knocks
                 if (_elderCount >= 3)
                 {
@@ -459,6 +460,15 @@ public:
             return false;
         }
 
+        Position GenerateRandomPosition() const
+        {
+            Position finalPos;
+            finalPos.m_positionX = me->GetPositionX() + frand(5.f, 15.f);
+            finalPos.m_positionY = me->GetPositionY() + frand(5.f, 15.f);
+            finalPos.m_positionZ = me->GetMap()->GetHeight(finalPos.GetPositionX(), finalPos.GetPositionY(), MAX_HEIGHT);
+            return finalPos;
+        }
+
         void SpawnWave()
         {
             _waveNumber = _waveNumber == 1 ? 3 : _waveNumber-1;
@@ -468,16 +478,16 @@ public:
             {
                 me->MonsterYell("Children, assist me!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_TRIO);
-                me->SummonCreature(NPC_ANCIENT_WATER_SPIRIT, me->GetPositionX()+urand(5,15), me->GetPositionY()+urand(5,15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT));
-                me->SummonCreature(NPC_STORM_LASHER, me->GetPositionX()+urand(5,15), me->GetPositionY()+urand(5,15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT));
-                me->SummonCreature(NPC_SNAPLASHER, me->GetPositionX()+urand(5,15), me->GetPositionY()+urand(5,15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT));
+                me->SummonCreature(NPC_ANCIENT_WATER_SPIRIT, GenerateRandomPosition());
+                me->SummonCreature(NPC_STORM_LASHER, GenerateRandomPosition());
+                me->SummonCreature(NPC_SNAPLASHER, GenerateRandomPosition());
             }
             // Ancient Conservator
             else if (_waveNumber == 2)
             {
                 me->MonsterYell("Eonar, your servant requires aid!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_CONSERVATOR);
-                me->SummonCreature(NPC_ANCIENT_CONSERVATOR, me->GetPositionX()+urand(5,15), me->GetPositionY()+urand(5,15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7000);
+                me->SummonCreature(NPC_ANCIENT_CONSERVATOR, GenerateRandomPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7000);
             }
             // Detonating Lashers
             else if (_waveNumber == 3)
@@ -586,6 +596,9 @@ public:
             if( !m_pInstance )
                 return;
 
+            if (m_pInstance->GetData(TYPE_FREYA) == DONE)
+                return;
+
             m_pInstance->SetData(DATA_FREYA_PULLED, DATA_FREYA_PULLED);
             if (m_pInstance->GetData(TYPE_FREYA) != DONE)
                 m_pInstance->SetData(TYPE_FREYA, IN_PROGRESS);
@@ -635,12 +648,6 @@ public:
                 me->MonsterYell("The Conservatory must be protected!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_AGGRO);
             }
-        }
-
-        void SpellHitTarget(Unit *target, const SpellInfo *spell)
-        {
-            if (spell->Id == SPELL_NATURE_BOMB_FLIGHT)
-                me->SummonCreature(NPC_NATURE_BOMB, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
         }
 
         void UpdateAI(uint32 diff)
@@ -1465,17 +1472,25 @@ public:
         boss_freya_nature_bombAI(Creature* pCreature) : NullCreatureAI(pCreature)
         {
             _goGUID = 0;
+            _exploded = false;
         }
 
         uint64 _goGUID;
         uint32 _explodeTimer;
         uint32 _despawnTimer;
+        bool _exploded;
+
+        void EnterEvadeMode() override { }
+        void AttackStart(Unit* /*who*/) override { }
+        void EnterCombat(Unit* /*who*/) override { }
+        void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override { damage = 0; }
 
         void Reset() override
         {
             me->SetDisplayId(MODEL_INVISIBLE_NATURE_BOMB);
 
             _explodeTimer = 0;
+            _despawnTimer = 0;
             DoCast(SPELL_NATURE_BOMB_SUMMON);
         }
 
@@ -1489,8 +1504,9 @@ public:
             _explodeTimer += diff;
             _despawnTimer += diff;
 
-            if (_explodeTimer >= 10000)
+            if (_explodeTimer >= 10000 && !_exploded)
             {
+                _exploded = true;
                 me->CastSpell(me, me->GetMap()->Is25ManRaid() ? SPELL_NATURE_BOMB_DAMAGE_25 : SPELL_NATURE_BOMB_DAMAGE_10, false);
                 _explodeTimer = 0;
                 if (GameObject* go = ObjectAccessor::GetGameObject(*me, _goGUID))
@@ -1652,6 +1668,29 @@ class spell_freya_nature_bomb_selector_SpellScript : public SpellScript
     }
 };
 
+class spell_summon_nature_bomb_freya_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_summon_nature_bomb_freya_SpellScript);
+
+    void HandleSummon(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+
+        if (GetCaster() && GetCaster()->IsInWorld() && !GetCaster()->IsDuringRemoveFromWorld())
+        {
+            Position pos = GetCaster()->GetPosition();
+            pos.m_positionZ = GetCaster()->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), MAX_HEIGHT);
+            GetCaster()->SummonCreature(NPC_NATURE_BOMB, pos);
+            std::cout << "pos x: " << std::to_string(pos.GetPositionX()) << " " << std::to_string(pos.GetPositionY()) << " " << std::to_string(pos.GetPositionZ()) << "\n" << std::endl;
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_summon_nature_bomb_freya_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+    }
+};
+
 void AddSC_boss_freya()
 {
     new boss_freya();
@@ -1668,6 +1707,7 @@ void AddSC_boss_freya()
     new SpellScriptLoaderEx<spell_ancient_water_spirit_tidal_wave_SpellScript>("spell_ancient_water_spirit_tidal_wave");
     new SpellScriptLoaderEx<spell_freya_attuned_to_nature_dose_reduction_SpellScript>("spell_freya_attuned_to_nature_dose_reduction");
     new SpellScriptLoaderEx<spell_freya_nature_bomb_selector_SpellScript>("spell_freya_nature_bomb_selector");
+    new SpellScriptLoaderEx<spell_summon_nature_bomb_freya_SpellScript>("spell_summon_nature_bomb_freya");
 
     new achievement_freya_getting_back_to_nature();
     new achievement_freya_knock_on_wood("achievement_freya_knock_on_wood", 1);
