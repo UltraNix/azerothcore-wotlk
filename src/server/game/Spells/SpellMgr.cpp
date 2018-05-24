@@ -5946,6 +5946,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
 
         // FREYA
+        case 64606: // Summon nature bomb
         case 64604: // nature bomb force cast
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;

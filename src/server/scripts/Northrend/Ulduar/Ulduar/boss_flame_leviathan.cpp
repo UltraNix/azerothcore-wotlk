@@ -561,8 +561,6 @@ void boss_flame_leviathan::boss_flame_leviathanAI::ActivateTowers()
         if (m_pInstance->GetData(i))
         {
             ++_towersCount;
-
-            me->AddLootMode(1<<_towersCount);
             switch (i)
             {
                 case EVENT_TOWER_OF_LIFE_DESTROYED:
@@ -586,6 +584,9 @@ void boss_flame_leviathan::boss_flame_leviathanAI::ActivateTowers()
     }
     if (_towersCount >= 4)
         _hardMode = true;
+
+    if (_towersCount >= 2)
+        me->AddLootMode(1 << _towersCount);
 }
 
 void boss_flame_leviathan::boss_flame_leviathanAI::TurnGates(bool _start, bool _death)
