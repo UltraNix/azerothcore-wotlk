@@ -403,8 +403,11 @@ public:
                         continue;
 
                     if (Creature* e = ObjectAccessor::GetCreature(*me, _elderGUID[i]))
+                    {
+                        // persist thru death auras
+                        e->RemoveAllAuras();
                         Unit::Kill(e, e);
-
+                    }
                     ++_elderCount;
                 }
 

@@ -1213,21 +1213,7 @@ public:
             summons.DespawnAll();
             events.Reset();
 
-            uint8 _count = 4;
             _beaconCounter = 3;
-            me->SetLootMode(31); // 1 + 2 + 4 + 8 + 16, remove with watchers addition
-            if (m_pInstance)
-            {
-                for (uint8 i = 0; i < 4; ++i)
-                    if (m_pInstance->GetData(TYPE_WATCHERS) & (1 << i))
-                    {
-                        me->RemoveLootMode(1<<_count);
-                        --_count;
-                    }
-            }
-
-            if (!Is25ManRaid() && _count > 1)
-                me->AddLootMode(64); // emblem marker for 10 man, because emblems differ depending on watcher count and this entire loot handling sucks
         }
 
         InstanceScript* m_pInstance;
@@ -1247,6 +1233,25 @@ public:
         {
             if (type == DATA_SET_ZERO_KEEPERS)
                 _zeroKeepers = true;
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            me->ResetLootMode();
+            uint8 _count = 4;
+            me->SetLootMode(31); // 1 + 2 + 4 + 8 + 16, remove with watchers addition
+            if (m_pInstance)
+            {
+                for (uint8 i = 0; i < 4; ++i)
+                    if (m_pInstance->GetData(TYPE_WATCHERS) & (1 << i))
+                    {
+                        me->RemoveLootMode(1 << _count);
+                        --_count;
+                    }
+            }
+
+            if (!Is25ManRaid() && _count < 3)
+                me->AddLootMode(64); // emblem marker for 10 man, because emblems differ depending on watcher count and this entire loot handling sucks
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
@@ -1906,6 +1911,8 @@ public:
         {
             _zeroKeepers = false;
             SetCombatMovement(false);
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
             _checkTimer = 1;
             _playerGUID = 0;
             DoCastSelf(SPELL_VOID_ZONE_LARGE, true);

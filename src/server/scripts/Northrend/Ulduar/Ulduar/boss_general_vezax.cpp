@@ -109,6 +109,8 @@ struct boss_vezaxAI : public BossAI
         _berserk = false;
         _shadowdodger = true;
         me->SetLootMode(1);
+        if (!Is25ManRaid())
+            me->AddLootMode(4); // emblem marker
 
         if (instance)
             instance->SetData(TYPE_VEZAX, NOT_STARTED);

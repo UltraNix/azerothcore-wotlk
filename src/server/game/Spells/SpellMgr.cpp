@@ -5957,8 +5957,11 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
             break;
         // Brightleaf Essence trigger
+        case 65761:
         case 62968:
             spellInfo->Effect[1] = 0; // duplicate
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_200_YARDS;
+            spellInfo->AttributesEx3 &= ~SPELL_ATTR3_DEATH_PERSISTENT;
             break;
             // Potent Pheromones
         case 64321:
