@@ -83,6 +83,7 @@ enum YoggSpells
     SPELL_SHADOW_BARRIER                        = 63894,
     SPELL_P3_TRANSFORM_YOGG                     = 63895,
     SPELL_KNOCK_AWAY                            = 64022,
+    SPELL_YOGG_DEATH_ANIMATION                  = 64165,
 
     // TENTACLES
     SPELL_VOID_ZONE_SMALL                       = 64384,
@@ -1224,6 +1225,9 @@ public:
                         --_count;
                     }
             }
+
+            if (!Is25ManRaid() && _count > 1)
+                me->AddLootMode(64); // emblem marker for 10 man, because emblems differ depending on watcher count and this entire loot handling sucks
         }
 
         InstanceScript* m_pInstance;
@@ -1261,6 +1265,7 @@ public:
 
         void JustDied(Unit* who)
         {
+            DoCastSelf(SPELL_YOGG_DEATH_ANIMATION, true);
             summons.DespawnAll();
             events.Reset();
 
