@@ -81,6 +81,7 @@ enum YoggSpells
 
     // YOGG-SARON P2
     SPELL_SHADOW_BARRIER                        = 63894,
+    SPELL_P3_TRANSFORM_YOGG                     = 63895,
     SPELL_KNOCK_AWAY                            = 64022,
 
     // TENTACLES
@@ -1313,6 +1314,7 @@ public:
                 me->LowerPlayerDamageReq(me->GetMaxHealth() *  0.3f);
 
                 me->RemoveAura(SPELL_SHADOW_BARRIER);
+                DoCastSelf(SPELL_P3_TRANSFORM_YOGG);
 
                 events.ScheduleEvent(EVENT_YS_LUNATIC_GAZE, 7000);
                 events.ScheduleEvent(EVENT_YS_SHADOW_BEACON, 45000);

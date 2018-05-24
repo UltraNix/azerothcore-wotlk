@@ -6022,6 +6022,10 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
 
         // YOGG-SARON
+        case 63895: // phase 3 transform yogg
+            //! remove the transform because there is no reason for it due to how scripts are written
+            spellInfo->Effect[EFFECT_0] = 0;
+            break;
         //! general vezax
         case 22806: // some random heal for boosted version of vezax
             spellInfo->Attributes |= SPELL_ATTR0_HIDDEN_CLIENTSIDE | SPELL_ATTR0_HIDE_IN_COMBAT_LOG | SPELL_ATTR0_PASSIVE;
