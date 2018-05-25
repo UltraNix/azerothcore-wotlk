@@ -606,7 +606,7 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 
         if ( !wsearchedname.empty() )
         {
-            const std::wstring & wname = item->GetLocalizedName( locdbc_idx );
+            const std::wstring & wname = item->GetLocalizedName( loc_idx );
             if ( wname.empty() )
                 continue;
 
