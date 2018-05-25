@@ -19419,11 +19419,7 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
     if (plr && plr->IsInSameRaidWith(target))
         visibleFlag |= UF_FLAG_PARTY_MEMBER;
 
-    const bool ignoreTransmog = IsPlayer() && target->HasDisabledTransmogVisibility();
-
     Creature const* creature = ToCreature();
-    Player const* player = ToPlayer();
-
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {
         if (_fieldNotifyFlags & flags[index] ||
@@ -19564,10 +19560,6 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
                 }
                 else
                     fieldBuffer << m_uint32Values[index];
-            }
-            else if ( ignoreTransmog && index >= PLAYER_VISIBLE_SLOTS_START && index < ( PLAYER_VISIBLE_SLOTS_START + PLAYER_VISIBLE_SLOTS_COUNT ) )
-            {
-                fieldBuffer << player->RealVisibleItemData( index );
             }
             else
             {

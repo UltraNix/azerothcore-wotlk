@@ -2071,6 +2071,10 @@ void LFGMgr::FinishDungeon(uint64 gguid, const uint32 dungeonId, const Map* curr
         sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::FinishDungeon: [" UI64FMTD "] done dungeon %u, %s previously done.", player->GetGUID(), GetDungeon(gguid), done? " " : " not");
         LfgPlayerRewardData data = LfgPlayerRewardData(dungeon->Entry(), GetDungeon(gguid, false), done, quest);
         player->GetSession()->SendLfgPlayerReward(data);
+
+        // @Transmog
+        if (sTransmogrification->TokenRewardEnabled() && dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+            player->AddItem(sTransmogrification->GetTokenEntryRDF(), sTransmogrification->GetTokenRewardCountRDF());
     }
 }
 
