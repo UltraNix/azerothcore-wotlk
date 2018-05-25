@@ -1115,7 +1115,7 @@ public:
         {
             events.Reset();
             events.ScheduleEvent(EVENT_GUARDIAN_DARK_VOLLEY, 8s);
-            events.ScheduleEvent(EVENT_GUARDIAN_DOMINATE_MIND, urand(5000, 8000));
+            events.ScheduleEvent(EVENT_GUARDIAN_DOMINATE_MIND, 25s);
             me->SetInCombatWithZone();
         }
 
@@ -1172,7 +1172,7 @@ public:
                         CustomSpellValues val;
                         val.AddSpellMod(SPELLVALUE_MAX_TARGETS, 1);
                         me->CastCustomSpell(SPELL_DOMINATE_MIND, val, (Unit*)nullptr, TRIGGERED_NONE);
-                        events.Repeat(10s, 15s);
+                        events.Repeat(25s);
                         break;
                     }
                 }
