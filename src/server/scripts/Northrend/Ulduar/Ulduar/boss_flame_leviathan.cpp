@@ -2056,7 +2056,7 @@ public:
 
         void MoveInLineOfSight(Unit* who) override
         {
-            if (!_activated && who->IsWithinDist(me, 70.0f))
+            if (who && !_activated && who->IsWithinDist(me, 70.0f))
             {
                 if (who->ToPlayer() && who->ToPlayer()->IsGameMaster())
                     return;
