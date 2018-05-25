@@ -3258,8 +3258,9 @@ public:
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
             auto _amount = urand(2, 4);
-            for (auto i = 0; i < _amount; ++i)
-                GetCaster()->CastSpell(GetCaster(), SPELL_BLOW_APART_STONE_BLOCK, true);
+            if (Unit* caster = GetCaster())
+                for (auto i = 0; i < _amount; ++i)
+                    caster->CastSpell(caster, SPELL_BLOW_APART_STONE_BLOCK, true);
         }
             OnEffectHitTarget += SpellEffectFn(spell_q13681_throw_stone_chunk_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
