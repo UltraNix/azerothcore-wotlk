@@ -67,6 +67,9 @@ public:
         if (sender != GOSSIP_SENDER_MAIN || !player->getAttackers().empty())
             return true;
 
+        if (player->HasAuraType(SPELL_AURA_MOUNTED))
+            player->RemoveAurasByType(SPELL_AURA_MOUNTED);
+
         switch (action)
         {
             case BASE_CAMP:
