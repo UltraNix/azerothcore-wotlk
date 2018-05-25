@@ -948,28 +948,6 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
             else if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
                 player->GiveXP(0.04 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
 
-            // @Transmog
-            if (sTransmogrification->TokenRewardEnabled())
-            {
-                if (isArena() && isRated())
-                {
-                    switch (GetArenaType())
-                    {
-                        case ARENA_TYPE_2v2:
-                            player->AddItem(sTransmogrification->GetTokenEntry2V2(), sTransmogrification->GetTokenRewardCount2V2());
-                            break;
-                        case ARENA_TYPE_3v3:
-                            player->AddItem(sTransmogrification->GetTokenEntry3V3(), sTransmogrification->GetTokenRewardCount3V3());
-                            break;
-                    }
-                }
-                else
-                {
-                    bool noXPGain = player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
-                    noXPGain ? player->AddItem(sTransmogrification->GetTokenEntryTwink(), sTransmogrification->GetTokenRewardCountTwink()) : player->AddItem(sTransmogrification->GetTokenEntryBG(), sTransmogrification->GetTokenRewardCountBG());
-                }
-            }
-
             // @bgreward
             if (sWorld->getBoolConfig(CONFIG_BG_REWARD_ENABLE) && !isArena())
             {
