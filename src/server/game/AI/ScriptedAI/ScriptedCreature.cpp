@@ -147,7 +147,7 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
 
     if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
-        //if (player->GetSession()->GetSecurity() == SEC_PLAYER)
+        if (player->GetSession()->GetSecurity() == SEC_PLAYER)
         {
             if (creatureName == "")
                 creatureName = me->GetName();
