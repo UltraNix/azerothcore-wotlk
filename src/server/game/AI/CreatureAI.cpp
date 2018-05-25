@@ -119,11 +119,6 @@ void CreatureAI::MoveInLineOfSight_Safe(Unit* who)
     if (m_MoveInLineOfSight_locked == true)
         return;
     m_MoveInLineOfSight_locked = true;
-
-    std::string aiName = me->GetAIName();
-    sLog->outCrash( "CreatureAI::MoveInLineOfSight_Safe: me -> [ map: %u, entry: %u, guid: %u, type: %u, ainame: %s, x: %f, y: %f, z: %f ]", me->GetMapId(), me->GetEntry(), me->GetGUIDLow(), me->GetTypeId(), aiName.c_str(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() );
-    sLog->outCrash( "CreatureAI::MoveInLineOfSight_Safe: who-> [ map: %u, entry: %u, guid: %u, type: %u, x: %f, y: %f, z: %f ] ", who->GetMapId(), who->GetEntry(), who->GetGUIDLow(), who->GetTypeId(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() );
-
     MoveInLineOfSight(who);
     m_MoveInLineOfSight_locked = false;
 }
