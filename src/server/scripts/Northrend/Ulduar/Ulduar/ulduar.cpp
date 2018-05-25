@@ -31,15 +31,14 @@ public:
         if (!pInstance)
             return true;
 
-        bool bla = true;
         player->ADD_GOSSIP_ITEM(0, "Teleport to the Expedition Base Camp.", GOSSIP_SENDER_MAIN, BASE_CAMP);
-        if (bla) // count special
+        if (pInstance->GetData(TYPE_LEVIATHAN) >= DONE) // count special
         {
             player->ADD_GOSSIP_ITEM(0, "Teleport to the Formation Grounds.", GOSSIP_SENDER_MAIN, GROUNDS);
-            if (bla)
+            if (pInstance->GetData(TYPE_LEVIATHAN) == DONE)
             {
                 player->ADD_GOSSIP_ITEM(0, "Teleport to the Colossal Forge.", GOSSIP_SENDER_MAIN, FORGE);
-                if (bla)
+                if (pInstance->GetData(TYPE_XT002) == DONE)
                 {
                     player->ADD_GOSSIP_ITEM(0, "Teleport to the Scrapyard.", GOSSIP_SENDER_MAIN, SCRAPYARD);
                     player->ADD_GOSSIP_ITEM(0, "Teleport to the Antechamber of Ulduar.", GOSSIP_SENDER_MAIN, ANTECHAMBER);
@@ -68,7 +67,7 @@ public:
         if (sender != GOSSIP_SENDER_MAIN || !player->getAttackers().empty())
             return true;
 
-        switch(action)
+        switch (action)
         {
             case BASE_CAMP:
                 player->TeleportTo(603, -706.122f, -92.6024f, 429.876f, 0);
