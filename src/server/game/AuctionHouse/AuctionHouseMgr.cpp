@@ -572,7 +572,7 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
             continue;
 
         ItemTemplate const* proto = item->GetItemTemplate();
-        if ( proto == proto )
+        if ( proto == nullptr )
             continue;
 
         if ( itemClass != 0xffffffff && proto->Class != itemClass )
