@@ -225,7 +225,8 @@ void AuraApplication::_HandleEffect( uint8 effIndex, bool apply )
                 else if ( aurApp->IsActive( ( *iter )->GetEffIndex() ) )
                 {
                     ( *iter )->HandleEffect( aurApp, AURA_EFFECT_HANDLE_CHANGE_AMOUNT, false );
-                    ( *iter )->SetEnabled( false );
+                    if ( !( *iter )->GetSpellInfo()->HasAreaAuraEffect() )
+                        ( *iter )->SetEnabled( false );
                     aurApp->SetDisableMask( ( *iter )->GetEffIndex() );
                 }
             }
