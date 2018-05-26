@@ -3262,6 +3262,9 @@ public:
                 for (auto i = 0; i < _amount; ++i)
                     caster->CastSpell(caster, SPELL_BLOW_APART_STONE_BLOCK, true);
         }
+        
+        void Register() override
+        }
             OnEffectHitTarget += SpellEffectFn(spell_q13681_throw_stone_chunk_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
