@@ -3264,7 +3264,7 @@ public:
         }
         
         void Register() override
-        }
+        {
             OnEffectHitTarget += SpellEffectFn(spell_q13681_throw_stone_chunk_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
