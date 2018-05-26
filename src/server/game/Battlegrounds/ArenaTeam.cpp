@@ -799,12 +799,14 @@ void ArenaTeam::MemberWon(Player* player, uint32 againstMatchmakerRating, int32 
             int32 mod = GetRatingMod(itr->PersonalRating, againstMatchmakerRating, true);
             itr->ModifyPersonalRating(player, mod, GetType());
 
-            // update matchmaker rating (pussywizard: but don't allow it to go over team rating)
+            /*// update matchmaker rating (pussywizard: but don't allow it to go over team rating)
             if (itr->MatchMakerRating < Stats.Rating)
             {
                 mod = std::min(MatchmakerRatingChange, Stats.Rating - itr->MatchMakerRating);
                 itr->ModifyMatchmakerRating(mod, GetSlot());
-            }
+            }*/
+            
+            itr->ModifyMatchmakerRating(MatchmakerRatingChange, GetSlot());
 
             // update personal stats
             itr->WeekGames +=1;
