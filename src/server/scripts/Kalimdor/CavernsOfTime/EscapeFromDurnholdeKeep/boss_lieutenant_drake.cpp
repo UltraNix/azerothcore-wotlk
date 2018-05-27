@@ -1,159 +1,157 @@
-/*
-REWRITTEN BY XINEF
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "old_hillsbrad.h"
 #include "MoveSplineInit.h"
 #include "SmartScriptMgr.h"
 
-enum LieutenantDrake
+enum DrakeSays
 {
-    SAY_ENTER                = 0,
-    SAY_AGGRO                = 1,
-    SAY_SLAY                = 2,
-    SAY_MORTAL                = 3,
-    SAY_SHOUT                = 4,
-    SAY_DEATH                = 5,
-
-    SPELL_WHIRLWIND            = 31909,
-    SPELL_EXPLODING_SHOT    = 33792,
-    SPELL_HAMSTRING            = 9080,
-    SPELL_MORTAL_STRIKE        = 31911,
-    SPELL_FRIGHTENING_SHOUT    = 33789,
-
-    EVENT_WHIRLWIND            = 1,
-    EVENT_FRIGHTENING_SHOUT    = 2,
-    EVENT_MORTAL_STRIKE        = 3,
-    EVENT_HAMSTRING            = 4,
-    EVENT_EXPLODING_SHOT    = 5
+    SAY_ENTER               = 0,
+    SAY_AGGRO,
+    SAY_SLAY,
+    SAY_MORTAL,
+    SAY_SHOUT,
+    SAY_DEATH,
 };
 
-class boss_lieutenant_drake : public CreatureScript
+enum DrakeSpells
 {
-public:
-    boss_lieutenant_drake() : CreatureScript("boss_lieutenant_drake") { }
+    SPELL_WHIRLWIND         = 31909,
+    SPELL_EXPLODING_SHOT    = 33792,
+    SPELL_HAMSTRING         = 9080,
+    SPELL_MORTAL_STRIKE     = 31911,
+    SPELL_FRIGHTENING_SHOUT = 33789,
+};
 
-    CreatureAI* GetAI(Creature* creature) const
+enum DrakeEvents
+{
+    EVENT_WHIRLWIND         = 1,
+    EVENT_FRIGHTENING_SHOUT,
+    EVENT_MORTAL_STRIKE,
+    EVENT_HAMSTRING,
+    EVENT_EXPLODING_SHOT
+};
+
+struct boss_lieutenant_drakeAI : public ScriptedAI
+{
+    boss_lieutenant_drakeAI(Creature* creature) : ScriptedAI(creature)
     {
-        return new boss_lieutenant_drakeAI(creature);
+        _pathPoints.clear();
+        auto path = sSmartWaypointMgr->GetPath(me->GetEntry());
+        if (!path || path->empty())
+            return;
+
+        _pathPoints.reserve(path->size() + 1);
+        _pathPoints.emplace_back(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+
+        uint32 wpCounter = 1;
+        WPPath::const_iterator itr;
+        while ((itr = path->find(wpCounter++)) != path->end())
+        {
+            auto wp = itr->second;
+            _pathPoints.emplace_back(wp->x, wp->y, wp->z);
+        }
     }
 
-    struct boss_lieutenant_drakeAI : public ScriptedAI
+    void InitializeAI() override
     {
-        boss_lieutenant_drakeAI(Creature* creature) : ScriptedAI(creature)
+        ScriptedAI::InitializeAI();
+        JustReachedHome();
+    }
+
+    void JustReachedHome() override
+    {
+        me->SetWalk(true);
+        Movement::MoveSplineInit init(me);
+        init.MovebyPath(_pathPoints);
+        init.SetCyclic();
+        init.Launch();
+    }
+
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        Talk(SAY_AGGRO);
+        _events.ScheduleEvent(EVENT_WHIRLWIND, 4s);
+        _events.ScheduleEvent(EVENT_FRIGHTENING_SHOUT, 14s);
+        _events.ScheduleEvent(EVENT_MORTAL_STRIKE, 9s);
+        _events.ScheduleEvent(EVENT_HAMSTRING, 18s);
+        _events.ScheduleEvent(EVENT_EXPLODING_SHOT, 1s);
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (victim->IsPlayer())
+            Talk(SAY_SLAY);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        Talk(SAY_DEATH);
+        if (auto instance = me->GetInstanceScript())
+            instance->SetData(DATA_ESCORT_PROGRESS, ENCOUNTER_PROGRESS_DRAKE_KILLED);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->IsCasting())
+            return;
+
+        while (auto eventId = _events.ExecuteEvent())
         {
-            pathPoints.clear();
-            WPPath* path = sSmartWaypointMgr->GetPath(me->GetEntry());
-            if (!path || path->empty())
-                return;
-
-            pathPoints.push_back(G3D::Vector3(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()));
-
-            uint32 wpCounter = 1;
-            WPPath::const_iterator itr;
-            while ((itr = path->find(wpCounter++)) != path->end())
-            {
-                WayPoint* wp = itr->second;
-                pathPoints.push_back(G3D::Vector3(wp->x, wp->y, wp->z));
-            }
-        }
-
-        void InitializeAI()
-        {
-            ScriptedAI::InitializeAI();
-            //Talk(SAY_ENTER);
-            JustReachedHome();
-        }
-
-        void JustReachedHome()
-        {
-            me->SetWalk(true);
-            Movement::MoveSplineInit init(me);
-            init.MovebyPath(pathPoints);
-            init.SetCyclic();
-            init.Launch();
-        }
-
-        void Reset()
-        {
-            events.Reset();
-        }
-
-        void EnterCombat(Unit* /*who*/)
-        {
-            Talk(SAY_AGGRO);
-
-            events.ScheduleEvent(EVENT_WHIRLWIND, 4000);
-            events.ScheduleEvent(EVENT_FRIGHTENING_SHOUT, 14000);
-            events.ScheduleEvent(EVENT_MORTAL_STRIKE, 9000);
-            events.ScheduleEvent(EVENT_HAMSTRING, 18000);
-            events.ScheduleEvent(EVENT_EXPLODING_SHOT, 1000);
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
-                Talk(SAY_SLAY);
-        }
-
-        void JustDied(Unit* /*killer*/)
-        {
-            Talk(SAY_DEATH);
-            if (InstanceScript* instance = me->GetInstanceScript())
-                instance->SetData(DATA_ESCORT_PROGRESS, ENCOUNTER_PROGRESS_DRAKE_KILLED);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.ExecuteEvent())
+            switch (eventId)
             {
                 case EVENT_WHIRLWIND:
-                    me->CastSpell(me, SPELL_WHIRLWIND, false);
-                    events.ScheduleEvent(EVENT_WHIRLWIND, 25000);
+                    DoCastSelf(SPELL_WHIRLWIND);
+                    _events.Repeat(25s);
                     break;
                 case EVENT_EXPLODING_SHOT:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 40.0f))
-                        me->CastSpell(target, SPELL_EXPLODING_SHOT, false);
-                    events.ScheduleEvent(EVENT_EXPLODING_SHOT, 25000);
+                    if (auto target = SelectTarget(SELECT_TARGET_RANDOM, 1, 40.0f))
+                        DoCast(target, SPELL_EXPLODING_SHOT);
+                    _events.Repeat(25s);
                     break;
                 case EVENT_MORTAL_STRIKE:
                     if (roll_chance_i(40))
                         Talk(SAY_MORTAL);
-                    me->CastSpell(me->GetVictim(), SPELL_MORTAL_STRIKE, false);
-                    events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10000);
+                    DoCastVictim(SPELL_MORTAL_STRIKE);
+                    _events.Repeat(10s);
                     break;
                 case EVENT_FRIGHTENING_SHOUT:
                     if (roll_chance_i(40))
                         Talk(SAY_SHOUT);
-                    me->CastSpell(me, SPELL_FRIGHTENING_SHOUT, false);
-                    events.ScheduleEvent(EVENT_FRIGHTENING_SHOUT, 25000);
+                    DoCastSelf(SPELL_FRIGHTENING_SHOUT);
+                    _events.Repeat(25s);
                     break;
                 case EVENT_HAMSTRING:
-                    me->CastSpell(me->GetVictim(), SPELL_HAMSTRING, false);
-                    events.ScheduleEvent(EVENT_HAMSTRING, 25000);
+                    DoCastVictim(SPELL_HAMSTRING);
+                    _events.Repeat(25s);
+                    break;
+                default:
                     break;
             }
 
-            DoMeleeAttackIfReady();
+            if (me->IsCasting())
+                return;
         }
 
-        private:
-            EventMap events;
-            Movement::PointsArray pathPoints;
-    };
+        DoMeleeAttackIfReady();
+    }
 
+    private:
+        EventMap _events;
+        Movement::PointsArray _pathPoints;
 };
 
 void AddSC_boss_lieutenant_drake()
 {
-    new boss_lieutenant_drake();
+    new CreatureAILoader<boss_lieutenant_drakeAI>("boss_lieutenant_drake");
 }
