@@ -738,8 +738,8 @@ public:
             case EVENT_FREYA_GROUND_TREMOR:
             {
                 auto timerTillSunBeam = events.GetTimeUntilEvent(EVENT_FREYA_SUNBEAM);
-                if (timerTillSunBeam <= 2000)
-                    events.RescheduleEvent(EVENT_FREYA_SUNBEAM, timerTillSunBeam + urand(2000, 4000));
+                events.CancelEvent(EVENT_FREYA_SUNBEAM);
+                events.ScheduleEvent(EVENT_FREYA_SUNBEAM, timerTillSunBeam + urand(8000, 11000));
                 me->CastSpell(me, SPELL_GROUND_TREMOR_FREYA, false);
                 events.RepeatEvent(urand(25000, 30000));
                 break;
@@ -1386,8 +1386,7 @@ public:
             }
             else if (me->GetEntry() == NPC_SNAPLASHER)
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    me->CastSpell(me, SPELL_HARDENED_BARK, true);
+                me->CastSpell(me, SPELL_HARDENED_BARK, true);
 
                 _stackCount = ACTION_REMOVE_10_STACK;
             }
