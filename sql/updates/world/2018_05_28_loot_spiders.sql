@@ -1,0 +1,1 @@
+ UPDATE `creature_template` SET `lootid` = 0, `skinloot` = 0 WHERE `entry` IN (10376,10375);
