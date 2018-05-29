@@ -4991,7 +4991,8 @@ void SpellMgr::LoadDbcDataCorrections()
         case 15007:
             spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
             break;
-        // Sated
+        // Sated and Exhaustion
+        case 57723:
         case 57724:
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_FADES_WHILE_LOGGED_OUT;
             break;
