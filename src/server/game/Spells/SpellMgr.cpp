@@ -4991,6 +4991,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 15007:
             spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
             break;
+        // Sated
+        case 57724:
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_FADES_WHILE_LOGGED_OUT;
+            break;
         // Luck of the Draw
         case 72221:
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
