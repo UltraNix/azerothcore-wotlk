@@ -584,6 +584,8 @@ struct boss_razorscaleAI : public BossAI
         //if (why == EVADE_REASON_BOUNDARY && !events.IsInPhase(PHASE_PERMA_GROUND))
             //return;
 
+        if (instance->GetData(TYPE_RAZORSCALE) != DONE)
+            instance->SetData(TYPE_RAZORSCALE, NOT_STARTED);
         events.Reset();
         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         summons.DespawnAll();

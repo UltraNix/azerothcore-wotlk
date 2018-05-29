@@ -626,8 +626,11 @@ struct npc_xt002_scrapbotAI : PassiveAI
     {
         me->SetRegeneratingHealth(false);
         me->StopMoving();
+        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 6.0f);
         _locked = true;
+        _reached = false;
         me->SetWalk(true);
+        _rangeCheckTimer = 500;
 
         if (me->GetInstanceScript())
             if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
@@ -657,41 +660,56 @@ struct npc_xt002_scrapbotAI : PassiveAI
             _locked = false;
             return;
         }
-
-        // we reached the target :)
-        if (type == FOLLOW_MOTION_TYPE && me->GetInstanceScript())
-            if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
-            {
-                if (pXT002->IsAlive())
-                {
-                    if (pXT002->IsAIEnabled)
-                        pXT002->AI()->DoAction(DATA_XT002_NERF_ENGINEERING);
-                    pXT002->CastSpell(me, SPELL_SCRAP_REPAIR, true);
-                    me->CastSpell(pXT002, SPELL_SCRAPBOT_RIDE_VEHICLE, true);
-                }
-
-                if (roll_chance_i(25))
-                    me->MonsterTextEmote("XT-002 Deconstructor consumes scrap bot to repair himself.", nullptr, true);
-
-                me->DespawnOrUnsummon(1.5s);
-            }
     }
 
-    void UpdateAI(uint32 /*diff*/) override
+    void UpdateAI(uint32 diff) override
     {
+        if (_reached)
+            return;
+
         if (!_locked)
         {
             if (me->GetInstanceScript())
-                if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            {
+                if (Creature* pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
                 {
-                    me->GetMotionMaster()->MoveFollow(pXT002, 0.0f, 0.0f);
+                    me->GetMotionMaster()->MoveChase(pXT002);
                     _locked = true;
                 }
+            }
         }
+
+        if (_rangeCheckTimer <= diff)
+        {
+            if (Creature* pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            {
+                if (me->IsWithinCombatRange(pXT002, 6.f))
+                {
+                    _reached = true;
+                    if (pXT002->IsAlive())
+                    {
+                        if (pXT002->IsAIEnabled)
+                            pXT002->AI()->DoAction(DATA_XT002_NERF_ENGINEERING);
+                        pXT002->CastSpell(me, SPELL_SCRAP_REPAIR, true);
+                        me->CastSpell(pXT002, SPELL_SCRAPBOT_RIDE_VEHICLE, true);
+                    }
+
+                    if (roll_chance_i(10))
+                        me->MonsterTextEmote("XT-002 Deconstructor consumes scrap bot to repair himself.", nullptr, true);
+
+                    me->DespawnOrUnsummon(1.5s);
+                }
+                _rangeCheckTimer = 500;
+            }
+        }
+        else
+            _rangeCheckTimer -= diff;
     }
 
 private:
     bool _locked;
+    bool _reached;
+    uint32 _rangeCheckTimer;
 };
 
 enum Pummeler

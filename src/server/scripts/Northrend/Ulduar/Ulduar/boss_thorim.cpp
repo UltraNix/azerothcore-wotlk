@@ -1932,7 +1932,8 @@ public:
                     break;
                 case EVENT_DR_CHAMPION_WH:
                     if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED))
-                        me->CastSpell(me, SPELL_WHIRLWIND, false);
+                        if (!me->IsUnderCrowdControl())
+                            me->CastSpell(me, SPELL_WHIRLWIND, false);
                     events.RepeatEvent(6000);
                     break;
                 case EVENT_DR_CHAMPION_MS:

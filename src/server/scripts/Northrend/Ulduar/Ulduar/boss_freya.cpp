@@ -268,7 +268,12 @@ enum Misc
 
     ACTION_DESPAWN_COMPLETELY                   = 10,
 
-    MODEL_INVISIBLE_NATURE_BOMB                 = 11686
+    MODEL_INVISIBLE_NATURE_BOMB                 = 11686,
+
+    FREYA_EMOTE_TREE                            = 8,
+    FREYA_EMOTE_ALLIES                          = 9,
+    FREYA_EMOTE_TREMOR                          = 10,
+    FREYA_EMOTE_ROOTS                           = 11
 };
 
 std::vector<uint32> adds = { NPC_ANCIENT_WATER_SPIRIT, NPC_STORM_LASHER, NPC_SNAPLASHER, NPC_ANCIENT_CONSERVATOR, NPC_DETONATING_LASHER };
@@ -474,6 +479,7 @@ public:
 
         void SpawnWave()
         {
+            Talk(FREYA_EMOTE_ALLIES);
             _waveNumber = _waveNumber == 1 ? 3 : _waveNumber-1;
 
             // Wave of three
@@ -579,9 +585,9 @@ public:
             }
         }
 
-        void JustReachedHome() { me->setActive(false); }
+        void JustReachedHome() override { me->setActive(false); }
 
-        void EnterCombat(Unit*)
+        void EnterCombat(Unit* who) override
         {
             _fightTimer = getMSTime();
             me->setActive(true);
@@ -601,6 +607,9 @@ public:
 
             if (m_pInstance->GetData(TYPE_FREYA) == DONE)
                 return;
+
+            if (who->HasAuraType(SPELL_AURA_MOUNTED))
+                who->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
             m_pInstance->SetData(DATA_FREYA_PULLED, DATA_FREYA_PULLED);
             if (m_pInstance->GetData(TYPE_FREYA) != DONE)
@@ -690,6 +699,7 @@ public:
                 break;
             case EVENT_FREYA_LIFEBINDER:
             {
+                Talk(FREYA_EMOTE_TREE);
                 events.RepeatEvent(urand(40000, 45000));
                 float x, y, z;
                 for (uint8 i = 0; i < 10; ++i)
@@ -737,6 +747,7 @@ public:
                 break;
             case EVENT_FREYA_GROUND_TREMOR:
             {
+                Talk(FREYA_EMOTE_TREMOR);
                 auto timerTillSunBeam = events.GetTimeUntilEvent(EVENT_FREYA_SUNBEAM);
                 events.CancelEvent(EVENT_FREYA_SUNBEAM);
                 events.ScheduleEvent(EVENT_FREYA_SUNBEAM, timerTillSunBeam + urand(8000, 11000));
@@ -745,6 +756,7 @@ public:
                 break;
             }
             case EVENT_FREYA_IRON_ROOT:
+                Talk(FREYA_EMOTE_ROOTS);
                 me->CastCustomSpell(SPELL_IRON_ROOTS_FREYA, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), me, false);
                 events.RepeatEvent(urand(40000, 45000));
                 break;
