@@ -5853,6 +5853,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64566:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         // Ulduar, Mimirion, Emergency Mode
         case 64582:

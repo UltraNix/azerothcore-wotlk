@@ -583,6 +583,9 @@ public:
                     events.ScheduleEvent(EVENT_FREYA_NATURE_BOMB, 15000);
                 }
             }
+
+            if (type == DATA_BACK_TO_NATURE)
+                _backToNature = false;
         }
 
         void JustReachedHome() override { me->setActive(false); }
@@ -608,8 +611,13 @@ public:
             if (m_pInstance->GetData(TYPE_FREYA) == DONE)
                 return;
 
-            if (who->HasAuraType(SPELL_AURA_MOUNTED))
-                who->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            //! Remove all mounts right away, disallows freya kiting during p1
+            Map::PlayerList const &PlayerList = m_pInstance->instance->GetPlayers();
+
+            for (const auto &i : PlayerList)
+                if (Player* player = i.GetSource())
+                    if (player->HasAuraType(SPELL_AURA_MOUNTED))
+                        player->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
             m_pInstance->SetData(DATA_FREYA_PULLED, DATA_FREYA_PULLED);
             if (m_pInstance->GetData(TYPE_FREYA) != DONE)
@@ -1546,7 +1554,7 @@ class achievement_freya_getting_back_to_nature : public AchievementCriteriaScrip
         bool OnCheck(Player* player, Unit* target /*Freya*/)
         {
             if (target)
-                if (target->GetAI()->GetData(DATA_BACK_TO_NATURE))
+                if (target->IsAIEnabled && target->GetAI()->GetData(DATA_BACK_TO_NATURE))
                     return true;
             return false;
         }
@@ -1640,6 +1648,11 @@ class spell_freya_attuned_to_nature_dose_reduction_SpellScript : public SpellScr
                 break;
         }
 
+        if (Aura* aura = target->GetAura(GetEffectValue()))
+            if (aura->GetStackAmount() < 25)
+                if (target->IsAIEnabled)
+                    target->AI()->SetData(DATA_BACK_TO_NATURE, DATA_BACK_TO_NATURE);
+
         if (!target->HasAura(GetEffectValue()))
             if (target->IsAIEnabled && target->IsInCombat() && !target->IsInEvadeMode())
                 target->AI()->SetData(DATA_FREYA_START_PHASE_TWO, DATA_FREYA_START_PHASE_TWO);
@@ -1695,7 +1708,6 @@ class spell_summon_nature_bomb_freya_SpellScript : public SpellScript
             Position pos = GetCaster()->GetPosition();
             pos.m_positionZ = GetCaster()->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), MAX_HEIGHT);
             GetCaster()->SummonCreature(NPC_NATURE_BOMB, pos);
-            std::cout << "pos x: " << std::to_string(pos.GetPositionX()) << " " << std::to_string(pos.GetPositionY()) << " " << std::to_string(pos.GetPositionZ()) << "\n" << std::endl;
         }
     }
 

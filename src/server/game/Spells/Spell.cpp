@@ -2140,7 +2140,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     bool ThorimChain = (m_spellInfo->Id == 62131 || m_spellInfo->Id == 64390);
 
     if (ThorimChain)
-        jumpRadius = 7.5f;
+        jumpRadius = 6.5f;
 
     // max dist which spell can reach
     float searchRadius = jumpRadius;
