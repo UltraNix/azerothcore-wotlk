@@ -699,6 +699,8 @@ struct npc_xt002_scrapbotAI : PassiveAI
 
                     me->DespawnOrUnsummon(1.5s);
                 }
+                me->GetMotionMaster()->Clear();
+                _locked = false;
                 _rangeCheckTimer = 500;
             }
         }
