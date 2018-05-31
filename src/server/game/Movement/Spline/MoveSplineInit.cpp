@@ -214,7 +214,7 @@ namespace Movement
         args.flags.EnableFacingAngle();
     }
 
-    void MoveSplineInit::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination)
+    void MoveSplineInit::MoveTo(const Vector3& dest, bool generatePath, bool forceDestination, bool updateDestZ )
     {
         if (generatePath)
         {
@@ -224,7 +224,7 @@ namespace Movement
             bool result = path.CalculatePath(dest.x, dest.y, dest.z, forceDestination);
             if (result && !(path.GetPathType() & PATHFIND_NOPATH))
             {
-                MovebyPath(path.GetPath());
+                MovebyPath(path.GetPath(), 0, updateDestZ);
                 return;
             }
         }
@@ -235,9 +235,9 @@ namespace Movement
         args.path[1] = transform(dest);
     }
 
-    void MoveSplineInit::MoveTo( float x, float y, float z, bool generatePath, bool forceDestination )
+    void MoveSplineInit::MoveTo( float x, float y, float z, bool generatePath, bool forceDestination, bool updateDestZ )
     {
-        MoveTo( G3D::Vector3( x, y, z ), generatePath, forceDestination );
+        MoveTo( G3D::Vector3( x, y, z ), generatePath, forceDestination, updateDestZ );
     }
 
     void MoveSplineInit::SetFacing( Vector3 const& spot )
@@ -263,7 +263,7 @@ namespace Movement
         args.flags.EnableParabolic();
     }
 
-    void MoveSplineInit::MovebyPath( const PointsArray& controls, int32 path_offset )
+    void MoveSplineInit::MovebyPath( const PointsArray& controls, int32 path_offset, bool updateDestZ )
     {
         if ( controls.empty() )
             return;
@@ -276,11 +276,11 @@ namespace Movement
         TransportPathTransform transform( unit, args.TransformForTransport );
         std::transform( controls.begin(), controls.end(), args.path.begin(), transform );
 
-        //if ( unit->GetTransport() == nullptr )
-        //{
-        //    unit->UpdateAllowedPositionZ( dest.x, dest.y, dest.z );
-        //}
-        args.path.back() = transform( dest );
+        if ( updateDestZ && unit->GetTransport() == nullptr )
+        {
+            unit->UpdateAllowedPositionZ( dest.x, dest.y, dest.z );
+            args.path.back() = transform( dest );
+        }
     }
 
     Vector3 TransportPathTransform::operator()( Vector3 input )
