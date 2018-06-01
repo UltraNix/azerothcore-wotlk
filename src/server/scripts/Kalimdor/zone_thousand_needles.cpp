@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -164,25 +164,28 @@ public:
     {
         npc_lakota_windsongAI(Creature* creature) : npc_escortAI(creature) { }
 
-        void Reset() { }
+        void Reset()
+        {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
 
         void WaypointReached(uint32 waypointId)
         {
             switch (waypointId)
             {
-                case 8:
+                case 48:
                     Talk(SAY_LAKO_LOOK_OUT);
                     DoSpawnBandits(ID_AMBUSH_1);
                     break;
-                case 14:
+                case 102:
                     Talk(SAY_LAKO_HERE_COME);
                     DoSpawnBandits(ID_AMBUSH_2);
                     break;
-                case 21:
+                case 144:
                     Talk(SAY_LAKO_MORE);
                     DoSpawnBandits(ID_AMBUSH_3);
                     break;
-                case 45:
+                case 249:
                     if (Player* player = GetPlayerForEscort())
                         player->GroupEventHappens(QUEST_FREE_AT_LAST, me);
                     break;
