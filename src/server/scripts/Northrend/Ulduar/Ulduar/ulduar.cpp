@@ -228,6 +228,19 @@ public:
     };
 };
 
+enum storm_tempered_keeper
+{
+    NPC_STORM_TEMPERED_KEEPER_R    = 33722,
+    NPC_STORM_TEMPERED_KEEPER_L    = 33699,
+    NPC_CHARGED_SPHERE             = 33715,
+
+    SPELL_VENGEFUL_SURGE           = 63630,
+    SPELL_SEPARATION_ANXIETY       = 63539,
+    SPELL_SUPERCHARGED             = 63528,
+    SPELL_FORKED_LIGHTNING         = 63541,
+    SPELL_SUMMON_CHARGED_SPHERE    = 63527
+};
+
 class npc_ulduar_storm_tempered_keeper : public CreatureScript
 {
 public:
@@ -266,21 +279,21 @@ public:
             events.Reset();
             events.ScheduleEvent(1, 2000); // checking Separation Anxiety, Charged Sphere
             events.ScheduleEvent(2, urand(5000,8000)); // Forked Lightning
-            events.ScheduleEvent(3, (me->GetEntry() == 33722 ? 20000 : 50000)); // Summon Charged Sphere
-            if (Creature* c = me->FindNearestCreature((me->GetEntry() == 33722 ? 33699 : 33722), 30.0f, true))
+            events.ScheduleEvent(3, (me->GetEntry() == NPC_STORM_TEMPERED_KEEPER_R ? 20000 : 50000)); // Summon Charged Sphere
+            if (Creature* c = me->FindNearestCreature((me->GetEntry() == NPC_STORM_TEMPERED_KEEPER_R ? NPC_STORM_TEMPERED_KEEPER_L : NPC_STORM_TEMPERED_KEEPER_R), 30.0f, true))
             {
                 if (c->IsAlive() && c->IsAIEnabled)
                     c->AI()->AttackStart(who);
                 otherGUID = c->GetGUID();
             }
             else
-                me->CastSpell(me, 63630, true); // Vengeful Surge
+                me->CastSpell(me, SPELL_VENGEFUL_SURGE, true); // Vengeful Surge
         }
 
         void JustDied(Unit* /*killer*/)
         {
             if (Creature* c = ObjectAccessor::GetCreature(*me, otherGUID))
-                c->CastSpell(c, 63630, true); // Vengeful Surge
+                c->CastSpell(c, SPELL_VENGEFUL_SURGE, true); // Vengeful Surge
         }
 
         void JustSummoned(Creature* s)
@@ -306,20 +319,23 @@ public:
                 case 1:
                     if (Creature* c = ObjectAccessor::GetCreature(*me, otherGUID))
                         if (c->IsAlive() && me->GetExactDist2d(c) > 45.0f)
-                            me->CastSpell(me, 63539, true);
-                    if (Creature* c = me->FindNearestCreature(33715, 2.0f, true))
+                            me->CastSpell(me, SPELL_SEPARATION_ANXIETY, true);
+                    if (Creature* c = me->FindNearestCreature(NPC_CHARGED_SPHERE, 2.0f, true))
                         if (c->IsSummon())
                             if (c->ToTempSummon()->GetSummonerGUID() != me->GetGUID())
-                                me->CastSpell(me, 63528, true);
+                            {
+                                me->CastSpell(me, SPELL_SUPERCHARGED, true);
+                                c->DespawnOrUnsummon();
+                            }
                     events.RepeatEvent(2000);
                     break;
                 case 2:
-                    me->CastSpell(me->GetVictim(), 63541, false);
+                    me->CastSpell(me->GetVictim(), SPELL_FORKED_LIGHTNING, false);
                     events.RepeatEvent(urand(10000,14000));
                     break;
                 case 3:
-                    if (!me->HasAura(63630))
-                        me->CastSpell(me, 63527, false);
+                    if (!me->HasAura(SPELL_VENGEFUL_SURGE))
+                        me->CastSpell(me, SPELL_SUMMON_CHARGED_SPHERE, false);
                     events.RepeatEvent(60000);
                     break;
             }
