@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` IN (30452,30451,30449,31535,31520,31534);
