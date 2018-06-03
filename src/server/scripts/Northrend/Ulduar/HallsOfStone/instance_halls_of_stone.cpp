@@ -31,6 +31,7 @@ public:
         uint64 goSjonnirDoorGUID;
         uint64 goLeftPipeGUID;
         uint64 goRightPipeGUID;
+        uint64 goTribunalChestGUID;
 
         uint64 SjonnirGUID;
         uint64 BrannGUID;
@@ -51,6 +52,7 @@ public:
             goSjonnirDoorGUID = 0;
             goLeftPipeGUID = 0;
             goRightPipeGUID = 0;
+            goTribunalChestGUID = 0;
 
             SjonnirGUID = 0;
             BrannGUID = 0;
@@ -105,6 +107,11 @@ public:
                     break;
                 case GO_RIGHT_PIPE:
                     goRightPipeGUID = go->GetGUID();
+                    break;
+                case GO_TRIBUNAL_CHEST:
+                case GO_TRIBUNAL_CHEST_H:
+                    goTribunalChestGUID = go->GetGUID();
+                    go->SetGoAnimProgress(0);
                     break;
             }
         }
@@ -178,6 +185,12 @@ public:
                     pA->SetGoState(GO_STATE_ACTIVE);
                 if (GameObject* pF = instance->GetGameObject(goSkyRoomFloorGUID))
                     pF->SetGoState(GO_STATE_ACTIVE);
+                if (GameObject* go = instance->GetGameObject(goTribunalChestGUID))
+                {
+                    go->SetGoAnimProgress(100);
+                    go->SetLootMode(1);
+                    go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+                }
 
                 // Make sjonnir attackable
                 if (Creature *cr = instance->GetCreature(SjonnirGUID))

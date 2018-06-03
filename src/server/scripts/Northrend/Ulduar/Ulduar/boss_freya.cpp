@@ -268,7 +268,12 @@ enum Misc
 
     ACTION_DESPAWN_COMPLETELY                   = 10,
 
-    MODEL_INVISIBLE_NATURE_BOMB                 = 11686
+    MODEL_INVISIBLE_NATURE_BOMB                 = 11686,
+
+    FREYA_EMOTE_TREE                            = 8,
+    FREYA_EMOTE_ALLIES                          = 9,
+    FREYA_EMOTE_TREMOR                          = 10,
+    FREYA_EMOTE_ROOTS                           = 11
 };
 
 std::vector<uint32> adds = { NPC_ANCIENT_WATER_SPIRIT, NPC_STORM_LASHER, NPC_SNAPLASHER, NPC_ANCIENT_CONSERVATOR, NPC_DETONATING_LASHER };
@@ -474,6 +479,7 @@ public:
 
         void SpawnWave()
         {
+            Talk(FREYA_EMOTE_ALLIES);
             _waveNumber = _waveNumber == 1 ? 3 : _waveNumber-1;
 
             // Wave of three
@@ -577,11 +583,14 @@ public:
                     events.ScheduleEvent(EVENT_FREYA_NATURE_BOMB, 15000);
                 }
             }
+
+            if (type == DATA_BACK_TO_NATURE)
+                _backToNature = false;
         }
 
-        void JustReachedHome() { me->setActive(false); }
+        void JustReachedHome() override { me->setActive(false); }
 
-        void EnterCombat(Unit*)
+        void EnterCombat(Unit* who) override
         {
             _fightTimer = getMSTime();
             me->setActive(true);
@@ -601,6 +610,14 @@ public:
 
             if (m_pInstance->GetData(TYPE_FREYA) == DONE)
                 return;
+
+            //! Remove all mounts right away, disallows freya kiting during p1
+            Map::PlayerList const &PlayerList = m_pInstance->instance->GetPlayers();
+
+            for (const auto &i : PlayerList)
+                if (Player* player = i.GetSource())
+                    if (player->HasAuraType(SPELL_AURA_MOUNTED))
+                        player->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
             m_pInstance->SetData(DATA_FREYA_PULLED, DATA_FREYA_PULLED);
             if (m_pInstance->GetData(TYPE_FREYA) != DONE)
@@ -690,6 +707,7 @@ public:
                 break;
             case EVENT_FREYA_LIFEBINDER:
             {
+                Talk(FREYA_EMOTE_TREE);
                 events.RepeatEvent(urand(40000, 45000));
                 float x, y, z;
                 for (uint8 i = 0; i < 10; ++i)
@@ -737,14 +755,16 @@ public:
                 break;
             case EVENT_FREYA_GROUND_TREMOR:
             {
+                Talk(FREYA_EMOTE_TREMOR);
                 auto timerTillSunBeam = events.GetTimeUntilEvent(EVENT_FREYA_SUNBEAM);
-                if (timerTillSunBeam <= 2000)
-                    events.RescheduleEvent(EVENT_FREYA_SUNBEAM, timerTillSunBeam + urand(2000, 4000));
+                events.CancelEvent(EVENT_FREYA_SUNBEAM);
+                events.ScheduleEvent(EVENT_FREYA_SUNBEAM, timerTillSunBeam + urand(8000, 11000));
                 me->CastSpell(me, SPELL_GROUND_TREMOR_FREYA, false);
                 events.RepeatEvent(urand(25000, 30000));
                 break;
             }
             case EVENT_FREYA_IRON_ROOT:
+                Talk(FREYA_EMOTE_ROOTS);
                 me->CastCustomSpell(SPELL_IRON_ROOTS_FREYA, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), me, false);
                 events.RepeatEvent(urand(40000, 45000));
                 break;
@@ -1386,8 +1406,7 @@ public:
             }
             else if (me->GetEntry() == NPC_SNAPLASHER)
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    me->CastSpell(me, SPELL_HARDENED_BARK, true);
+                me->CastSpell(me, SPELL_HARDENED_BARK, true);
 
                 _stackCount = ACTION_REMOVE_10_STACK;
             }
@@ -1535,7 +1554,7 @@ class achievement_freya_getting_back_to_nature : public AchievementCriteriaScrip
         bool OnCheck(Player* player, Unit* target /*Freya*/)
         {
             if (target)
-                if (target->GetAI()->GetData(DATA_BACK_TO_NATURE))
+                if (target->IsAIEnabled && target->GetAI()->GetData(DATA_BACK_TO_NATURE))
                     return true;
             return false;
         }
@@ -1629,6 +1648,11 @@ class spell_freya_attuned_to_nature_dose_reduction_SpellScript : public SpellScr
                 break;
         }
 
+        if (Aura* aura = target->GetAura(GetEffectValue()))
+            if (aura->GetStackAmount() < 25)
+                if (target->IsAIEnabled)
+                    target->AI()->SetData(DATA_BACK_TO_NATURE, DATA_BACK_TO_NATURE);
+
         if (!target->HasAura(GetEffectValue()))
             if (target->IsAIEnabled && target->IsInCombat() && !target->IsInEvadeMode())
                 target->AI()->SetData(DATA_FREYA_START_PHASE_TWO, DATA_FREYA_START_PHASE_TWO);
@@ -1684,7 +1708,6 @@ class spell_summon_nature_bomb_freya_SpellScript : public SpellScript
             Position pos = GetCaster()->GetPosition();
             pos.m_positionZ = GetCaster()->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), MAX_HEIGHT);
             GetCaster()->SummonCreature(NPC_NATURE_BOMB, pos);
-            std::cout << "pos x: " << std::to_string(pos.GetPositionX()) << " " << std::to_string(pos.GetPositionY()) << " " << std::to_string(pos.GetPositionZ()) << "\n" << std::endl;
         }
     }
 

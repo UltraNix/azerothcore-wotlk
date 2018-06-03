@@ -1932,7 +1932,8 @@ public:
                     break;
                 case EVENT_DR_CHAMPION_WH:
                     if (!me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED))
-                        me->CastSpell(me, SPELL_WHIRLWIND, false);
+                        if (!me->IsUnderCrowdControl())
+                            me->CastSpell(me, SPELL_WHIRLWIND, false);
                     events.RepeatEvent(6000);
                     break;
                 case EVENT_DR_CHAMPION_MS:
@@ -2206,7 +2207,8 @@ class spell_lightning_charge_selector_SpellScript : public SpellScript
     {
         targetList.remove_if([&](WorldObject* object) -> bool
         {
-            return !object->isInFront(GetCaster(), 1.0472f) || OutOfArenaCheck()(object);
+            //return !GetCaster()->HasInArc(object, 1.0472f) || OutOfArenaCheck()(object);
+            return !GetCaster()->HasInArc(1.0472f, object) || OutOfArenaCheck()(object);
         });
     }
 

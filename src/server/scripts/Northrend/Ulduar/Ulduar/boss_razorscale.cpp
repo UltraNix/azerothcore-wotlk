@@ -584,6 +584,8 @@ struct boss_razorscaleAI : public BossAI
         //if (why == EVADE_REASON_BOUNDARY && !events.IsInPhase(PHASE_PERMA_GROUND))
             //return;
 
+        if (instance->GetData(TYPE_RAZORSCALE) != DONE)
+            instance->SetData(TYPE_RAZORSCALE, NOT_STARTED);
         events.Reset();
         instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
         summons.DespawnAll();
@@ -1399,12 +1401,15 @@ struct npc_darkrune_watcherAI : public ScriptedAI
                             {
                                 if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
                                 {
-                                    me->AddThreat(engineer, 10000.f);
                                     AttackStart(engineer);
                                 }
                             }
                         }
                     }
+
+                    if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetInCombatWithZone();
                     DoZoneInCombat(me, 200.0f);
@@ -1485,12 +1490,15 @@ struct npc_darkrune_guardianAI : public ScriptedAI
                             {
                                 if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
                                 {
-                                    me->AddThreat(engineer, 10000.f);
                                     AttackStart(engineer);
                                 }
                             }
                         }
                     }
+
+                    if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetInCombatWithZone();
                     DoZoneInCombat(me, 200.0f);
@@ -1559,12 +1567,14 @@ struct npc_darkrune_sentinelAI : public ScriptedAI
                             {
                                 if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
                                 {
-                                    me->AddThreat(engineer, 10000.f);
                                     AttackStart(engineer);
                                 }
                             }
                         }
                     }
+                    if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->SetInCombatWithZone();
                     DoZoneInCombat(me, 200.0f);

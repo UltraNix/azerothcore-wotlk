@@ -4991,6 +4991,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 15007:
             spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
             break;
+        // Sated and Exhaustion
+        case 57723:
+        case 57724:
+            spellInfo->AttributesEx4 &= ~SPELL_ATTR4_FADES_WHILE_LOGGED_OUT;
+            break;
         // Luck of the Draw
         case 72221:
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
@@ -5853,6 +5858,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64566:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
         // Ulduar, Mimirion, Emergency Mode
         case 64582:
@@ -7775,27 +7781,6 @@ void SpellMgr::LoadDbcDataCorrections()
         {
             switch (spellInfo->Id)
             {
-                case 56272: // Arcane breath normal
-                    spellInfo->EffectBasePoints[EFFECT_0] = 30000;
-                    break;
-                case 60072: // Arcane breath heroic
-                    spellInfo->EffectBasePoints[EFFECT_0] = 45000;
-                    break;
-                case 56256: // vortex
-                    spellInfo->EffectBasePoints[EFFECT_1] = 3600;
-                    break;
-                case 56548: // surge of power targeted (p2 i think)
-                    spellInfo->EffectBasePoints[EFFECT_0] = 10000;
-                    break;
-                case 61693: // arcane storm normal
-                    spellInfo->EffectBasePoints[EFFECT_0] = 12000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 1250;
-                    break;
-                case 61694: // arcane storm heroic
-                    spellInfo->EffectBasePoints[EFFECT_0] = 14000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 1250;
-                    break;
-
                 case 54363: // Poison cloud - Grobbulus
                     spellInfo->EffectBasePoints[EFFECT_0] = 10000;
                     spellInfo->EffectDieSides[EFFECT_0] = 700;

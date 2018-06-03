@@ -572,7 +572,7 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
             continue;
 
         ItemTemplate const* proto = item->GetItemTemplate();
-        if ( proto == proto )
+        if ( proto == nullptr )
             continue;
 
         if ( itemClass != 0xffffffff && proto->Class != itemClass )
@@ -606,7 +606,7 @@ bool AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 
         if ( !wsearchedname.empty() )
         {
-            const std::wstring & wname = item->GetLocalizedName( locdbc_idx );
+            const std::wstring & wname = item->GetLocalizedName( loc_idx );
             if ( wname.empty() )
                 continue;
 

@@ -75,7 +75,10 @@ enum KologarnSpells
 
     // MISC
     SPELL_STONE_GRIP_DOT_10                = 64290,
-    SPELL_STONE_GRIP_DOT_25                = 64292
+    SPELL_STONE_GRIP_DOT_25                = 64292,
+    SPELL_SHOCKWAVE_25                     = 63982,
+    SPELL_SHOCKWAVE_10                     = 63783,
+    SPELL_SHOCKWAVE_VISUAL                 = 63788
 };
 
 #define SPELL_PETRIFYING_BREATH            RAID_MODE(SPELL_PETRIFYING_BREATH_10, SPELL_PETRIFYING_BREATH_25)
@@ -510,7 +513,17 @@ public:
                         if (_left)
                         {
                             if (Creature* cr = me->FindNearestCreature(NPC_SWEEP_TRIGGER, 300.f))
-                                cr->CastSpell(cr, SPELL_ARM_SWEEP, false);
+                            {
+                                if (cr->IsAIEnabled)
+                                {
+                                    if (Is25ManRaid())
+                                        cr->AI()->DoCastAOE(SPELL_SHOCKWAVE_25, true);
+                                    else
+                                        cr->AI()->DoCastAOE(SPELL_SHOCKWAVE_10, true);
+
+                                    cr->AI()->DoCastSelf(SPELL_SHOCKWAVE_VISUAL);
+                                }
+                            }
 
                             if (urand(0, 1))
                                 Talk(SAY_SHOCKWAVE);
@@ -567,13 +580,16 @@ public:
             }
 
             //Make sure our attack is ready and we aren't currently casting before checking distance
-            if (me->isAttackReady() && me->GetVictim() && events.GetNextEventTime(EVENT_SMASH) >= 2000 && !_lockBreath) // victim could die by a spell (IMPORTANT!!!) and kologarn entered evade mode
+            if (me->isAttackReady() && me->GetVictim() && !_lockBreath) // victim could die by a spell (IMPORTANT!!!) and kologarn entered evade mode
             {
                 //If we are within range melee the target
                 if (me->IsWithinMeleeRange(me->GetVictim()))
                 {
-                    me->AttackerStateUpdate(me->GetVictim());
-                    me->resetAttackTimer();
+                    if (events.GetTimeUntilEvent(EVENT_SMASH) >= 2000)
+                    {
+                        me->AttackerStateUpdate(me->GetVictim());
+                        me->resetAttackTimer();
+                    }
                     return;
                 }
 

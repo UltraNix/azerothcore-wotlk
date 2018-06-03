@@ -1,115 +1,118 @@
-/*
-REWRITTEN BY XINEF
-*/
-
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "old_hillsbrad.h"
 
-
-enum EpochHunter
+enum EpochSays
 {
-    SAY_AGGRO                    = 3,
-    SAY_SLAY                    = 4,
-    SAY_BREATH                    = 5,
-    SAY_DEATH                    = 6,
-
-    SPELL_SAND_BREATH           = 31914,
-    SPELL_IMPENDING_DEATH       = 31916,
-    SPELL_MAGIC_DISRUPTION_AURA = 33834,
-    SPELL_WING_BUFFET           = 31475,
-
-    EVENT_SPELL_SAND_BREATH        = 1,
-    EVENT_SPELL_IMPENDING_DEATH    = 2,
-    EVENT_SPELL_DISRUPTION        = 3,
-    EVENT_SPELL_WING_BUFFET        = 4
+    SAY_AGGRO                       = 3,
+    SAY_SLAY,
+    SAY_BREATH,
+    SAY_DEATH
 };
 
-class boss_epoch_hunter : public CreatureScript
+enum EpochSpells
 {
-public:
-    boss_epoch_hunter() : CreatureScript("boss_epoch_hunter") { }
+    SPELL_SAND_BREATH               = 31914,
+    SPELL_IMPENDING_DEATH           = 31916,
+    SPELL_MAGIC_DISRUPTION_AURA     = 33834,
+    SPELL_WING_BUFFET               = 31475
+};
 
-    CreatureAI* GetAI(Creature* creature) const
+enum EpochEvents
+{
+    EVENT_SAND_BREATH               = 1,
+    EVENT_IMPENDING_DEATH,
+    EVENT_DISRUPTION,
+    EVENT_WING_BUFFET
+};
+
+struct boss_epoch_hunterAI : public ScriptedAI
+{
+    boss_epoch_hunterAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
     {
-        return GetInstanceAI<boss_epoch_hunterAI>(creature);
+        _events.Reset();
     }
 
-    struct boss_epoch_hunterAI : public ScriptedAI
+    void EnterCombat(Unit* /*attacker*/) override
     {
-        boss_epoch_hunterAI(Creature* creature) : ScriptedAI(creature) { }
+        Talk(SAY_AGGRO);
+        _events.ScheduleEvent(EVENT_SAND_BREATH, 8s);
+        _events.ScheduleEvent(EVENT_IMPENDING_DEATH, 2s);
+        _events.ScheduleEvent(EVENT_DISRUPTION, 20s);
+        _events.ScheduleEvent(EVENT_WING_BUFFET, 14s);
+    }
 
-        EventMap events;
+    void KilledUnit(Unit* victim) override
+    {
+        if (victim->IsPlayer())
+            Talk(SAY_SLAY);
+    }
 
-        void Reset()
+    void JustDied(Unit* killer) override
+    {
+        if (killer == me)
+            return;
+
+        Talk(SAY_DEATH);
+        if (auto instance = me->GetInstanceScript())
         {
-            events.Reset();
+            instance->SetData(DATA_ESCORT_PROGRESS, ENCOUNTER_PROGRESS_EPOCH_KILLED);
+            if (auto taretha = instance->GetCreature(DATA_TARETHA))
+                if (taretha->IsAIEnabled)
+                    taretha->AI()->DoAction(me->GetEntry());
         }
+    }
 
-        void EnterCombat(Unit* /*who*/)
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->IsCasting())
+            return;
+
+        while (auto eventId = _events.ExecuteEvent())
         {
-            Talk(SAY_AGGRO);
-
-            events.ScheduleEvent(EVENT_SPELL_SAND_BREATH, 8000);
-            events.ScheduleEvent(EVENT_SPELL_IMPENDING_DEATH, 2000);
-            events.ScheduleEvent(EVENT_SPELL_DISRUPTION, 20000);
-            events.ScheduleEvent(EVENT_SPELL_WING_BUFFET, 14000);
-        }
-
-        void KilledUnit(Unit* victim)
-        {
-            if (victim->GetTypeId() == TYPEID_PLAYER)
-                Talk(SAY_SLAY);
-        }
-
-        void JustDied(Unit* killer)
-        {
-            if (killer == me)
-                return;
-            Talk(SAY_DEATH);
-            me->GetInstanceScript()->SetData(DATA_ESCORT_PROGRESS, ENCOUNTER_PROGRESS_EPOCH_KILLED);
-            if (Creature* taretha = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(DATA_TARETHA_GUID)))
-                taretha->AI()->DoAction(me->GetEntry());
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-                return;
-
-            events.Update(diff);
-            if (me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-
-            switch (events.ExecuteEvent())
+            switch (eventId)
             {
-                case EVENT_SPELL_SAND_BREATH:
-                    if (roll_chance_i(50))
+                case EVENT_SAND_BREATH:
+                    if (urand(0, 1))
                         Talk(SAY_BREATH);
-                    me->CastSpell(me->GetVictim(), SPELL_SAND_BREATH, false);
-                    events.ScheduleEvent(EVENT_SPELL_SAND_BREATH, 20000);
+                    DoCastVictim(SPELL_SAND_BREATH);
+                    _events.Repeat(20s);
                     break;
-                case EVENT_SPELL_IMPENDING_DEATH:
-                    me->CastSpell(me->GetVictim(), SPELL_IMPENDING_DEATH, false);
-                    events.ScheduleEvent(EVENT_SPELL_IMPENDING_DEATH, 30000);
+                case EVENT_IMPENDING_DEATH:
+                    DoCastVictim(SPELL_IMPENDING_DEATH);
+                    _events.Repeat(30s);
                     break;
-                case EVENT_SPELL_WING_BUFFET:
-                    me->CastSpell(me, SPELL_WING_BUFFET, false);
-                    events.ScheduleEvent(EVENT_SPELL_WING_BUFFET, 30000);
+                case EVENT_WING_BUFFET:
+                    DoCastSelf(SPELL_WING_BUFFET);
+                    _events.Repeat(30s);
                     break;
-                case EVENT_SPELL_DISRUPTION:
-                    me->CastSpell(me, SPELL_MAGIC_DISRUPTION_AURA, false);
-                    events.ScheduleEvent(EVENT_SPELL_DISRUPTION, 30000);
+                case EVENT_DISRUPTION:
+                    DoCastSelf(SPELL_MAGIC_DISRUPTION_AURA);
+                    _events.Repeat(30s);
+                    break;
+                default:
                     break;
             }
 
-            DoMeleeAttackIfReady();
+            if (me->IsCasting())
+                return;
         }
-    };
 
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        EventMap _events;
 };
 
 void AddSC_boss_epoch_hunter()
 {
-    new boss_epoch_hunter();
+    new CreatureAILoader<boss_epoch_hunterAI>("boss_epoch_hunter");
 }

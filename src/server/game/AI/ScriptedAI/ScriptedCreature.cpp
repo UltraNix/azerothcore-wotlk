@@ -175,6 +175,11 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
                 if (minTimer && time < minTimer)
                     return;
 
+                // Disable creature records for previous content.
+                //                  Naxx                   OS                     EoE
+                if (map->GetId() == 533 || map->GetId() == 615 || map->GetId() == 616)
+                    return;
+
                 sObjectMgr->UpdateCreatureRecordData(entry, time, player, creatureName);
             }
         }

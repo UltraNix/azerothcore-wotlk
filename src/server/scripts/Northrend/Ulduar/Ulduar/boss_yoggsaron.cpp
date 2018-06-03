@@ -1706,9 +1706,32 @@ public:
         {
             me->CastSpell(me, SPELL_DEATH_RAY_WARNING, true);
             _startTimer = 1;
+            moving = true;
         }
 
         uint32 _startTimer;
+        bool moving;
+
+        void DoRandomMove()
+        {
+            Position pos;
+            me->GetNearPoint2D(pos.m_positionX, pos.m_positionY, 10, float(2 * M_PI*rand_norm()));
+            pos.m_positionZ = me->GetPositionZ();
+            pos.m_positionZ = me->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true, 50.0f);
+            me->SetWalk(true);
+            me->GetMotionMaster()->MovePoint(1, pos);
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id != 1)
+                return;
+
+            moving = false;
+        }
 
         void UpdateAI(uint32 diff)
         {
@@ -1723,8 +1746,15 @@ public:
                     _startTimer = 0;
                     me->SetSpeedRate(MOVE_WALK, 2);
                     me->SetSpeedRate(MOVE_RUN, 2);
-                    me->GetMotionMaster()->MoveRandom(20.0f);
+                    moving = false;
+                    //me->GetMotionMaster()->MoveRandom(20.0f);
                 }
+            }
+
+            if (!moving)
+            {
+                DoRandomMove();
+                moving = true;
             }
         }
     };

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -237,8 +237,11 @@ public:
         {
             if (Creature* pLeviroth = player->FindNearestCreature(NPC_LEVIROTH, 10.0f)) // spell range
             {
-                pLeviroth->AI()->AttackStart(player);
-                return false;
+                if (!pLeviroth->IsInEvadeMode())
+                {
+                    pLeviroth->AI()->AttackStart(player);
+                    return false;
+                }
             } else
                 player->SendEquipError(EQUIP_ERR_OUT_OF_RANGE, item, NULL);
         } else

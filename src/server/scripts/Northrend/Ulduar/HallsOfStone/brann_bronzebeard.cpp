@@ -487,16 +487,9 @@ public:
                     me->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
 
 
-                    // Spawn Chest and quest credit
+                    // quest credit
                     if (Player *plr = SelectTargetFromPlayerList(200.0f))
                     {
-                        if (GameObject* go = plr->SummonGameObject((IsHeroic() ? GO_TRIBUNAL_CHEST_H : GO_TRIBUNAL_CHEST), 880.406f, 345.164f, 203.706f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0))
-                        {
-                            plr->RemoveGameObject(go, false);
-                            go->SetLootMode(1);
-                            go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
-                        }
-
                         plr->GroupEventHappens(QUEST_HALLS_OF_STONE, me);
                     }
 

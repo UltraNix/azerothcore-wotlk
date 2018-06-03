@@ -403,7 +403,7 @@ class spell_svala_ritual_strike : public SpellScriptLoader
             {
                 if (Unit* unitTarget = GetHitUnit())
                 {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                    if (!GetCaster() || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
 
                     Unit::DealDamage(GetCaster(), unitTarget, 7000, NULL, DIRECT_DAMAGE);
@@ -427,8 +427,8 @@ class spell_svala_ritual_strike : public SpellScriptLoader
 
             void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
             {
-                // Set amount based on difficulty
-                amount = (GetCaster()->GetMap()->IsHeroic() ? 2000 : 1000);
+                if (Unit* spellCaster = GetCaster())
+                    amount = spellCaster->GetMap()->IsHeroic() ? 2000 : 1000;
             }
 
             void Register()

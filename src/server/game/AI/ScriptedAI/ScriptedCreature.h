@@ -85,7 +85,7 @@ public:
         storage_.clear();
     }
 
-    Creature* GetSummon(uint64 guid)
+    Creature* GetSummon(uint64 guid) const
     {
         return ObjectAccessor::GetCreature(*me, guid);
     }
@@ -135,6 +135,14 @@ public:
             else
                 storage_.remove(*i);
         }
+    }
+
+    template <class Function>
+    void Broadcast(Function&& action)
+    {
+        for (auto const guid : storage_)
+            if (auto summon = GetSummon(guid))
+                action(summon);
     }
 
     void DoZoneInCombat(uint32 entry = 0);

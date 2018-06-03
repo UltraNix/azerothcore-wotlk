@@ -2446,7 +2446,7 @@ class spell_item_shadowmourne : public SpellScriptLoader
                     return false;
 
                 // Xinef: Not on BG / Arena
-                if (!GetTarget()->FindMap() || GetTarget()->FindMap()->IsBattlegroundOrArena())
+                if (!GetTarget()->FindMap() || GetTarget()->FindMap()->IsBattleArena())
                     return false;
 
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())

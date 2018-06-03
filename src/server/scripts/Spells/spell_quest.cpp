@@ -3242,6 +3242,39 @@ public:
     }
 };
 
+enum ChipOfUlduarBlock
+{
+    SPELL_BLOW_APART_STONE_BLOCK    = 63385
+};
+class spell_q13681_throw_stone_chunk : public SpellScriptLoader
+{
+public:
+    spell_q13681_throw_stone_chunk() : SpellScriptLoader("spell_q13681_throw_stone_chunk") { }
+
+    class spell_q13681_throw_stone_chunk_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q13681_throw_stone_chunk_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            auto _amount = urand(2, 4);
+            if (Unit* caster = GetCaster())
+                for (auto i = 0; i < _amount; ++i)
+                    caster->CastSpell(caster, SPELL_BLOW_APART_STONE_BLOCK, true);
+        }
+        
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q13681_throw_stone_chunk_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_q13681_throw_stone_chunk_SpellScript();
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     // Ours
@@ -3317,4 +3350,5 @@ void AddSC_quest_spell_scripts()
     new spell_q12619_emblazon_runeblade_effect();
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
+    new spell_q13681_throw_stone_chunk();
 }

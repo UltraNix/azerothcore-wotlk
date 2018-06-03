@@ -1167,6 +1167,12 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void EnterEvadeMode() override
+        {
+            if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
+                LordIllidan->AI()->EnterEvadeMode();
+        }
+
         void JustDied(Unit* killer)
         {
             if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
@@ -1212,7 +1218,7 @@ public:
 
     struct npc_lord_illidan_stormrageAI : public ScriptedAI
     {
-        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
 
         uint64 PlayerGUID;
 
@@ -1225,6 +1231,8 @@ public:
         bool EventStarted;
         bool Announced;
         bool Failed;
+
+        SummonList summons;
 
         void Reset()
         {
@@ -1240,6 +1248,8 @@ public:
             Failed = false;
 
             me->SetVisible(false);
+
+            summons.DespawnAll();
         }
 
         void EnterCombat(Unit* /*who*/) { }
@@ -1248,6 +1258,11 @@ public:
         void AttackStart(Unit* /*who*/) { }
 
         void SummonNextWave();
+
+        void JustSummoned(Creature* creature)
+        {
+            summons.Summon(creature);
+        }
 
         void CheckEventFail()
         {
@@ -1359,13 +1374,14 @@ public:
         npc_illidari_spawnAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 LordIllidanGUID;
-        uint32 SpellTimer1, SpellTimer2, SpellTimer3;
+        uint32 SpellTimer1, SpellTimer2, SpellTimer3, DespawnTimer;
         bool Timers;
 
         void Reset()
         {
             LordIllidanGUID = 0;
             Timers = false;
+            DespawnTimer = 0;
         }
 
         void EnterCombat(Unit* /*who*/) { }
@@ -1378,8 +1394,25 @@ public:
                     CAST_AI(npc_lord_illidan_stormrage::npc_lord_illidan_stormrageAI, LordIllidan->AI())->LiveCounter();
         }
 
+        void EnterEvadeMode() override
+        {
+            if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
+                LordIllidan->AI()->EnterEvadeMode();
+        }
+
         void UpdateAI(uint32 diff)
         {
+            // Reset event 30 seconds OOC
+            if (!me->IsInCombat())
+            {
+                DespawnTimer += diff;
+                if (DespawnTimer >= 30000)
+                    if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
+                        LordIllidan->AI()->EnterEvadeMode();
+            }
+            else
+                DespawnTimer = 0;
+
             if (!UpdateVictim())
                 return;
 
@@ -1476,7 +1509,7 @@ void npc_lord_illidan_stormrage::npc_lord_illidan_stormrageAI::SummonNextWave()
         float Y = SpawnLocation[locIndex + i].y;
         float Z = SpawnLocation[locIndex + i].z;
         float O = SpawnLocation[locIndex + i].o;
-        Spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, X, Y, Z, O, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000);
+        Spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, X, Y, Z, O, TEMPSUMMON_MANUAL_DESPAWN);
         ++LiveCount;
 
         if (Spawn)
@@ -1879,6 +1912,166 @@ public:
     }
 };
 
+/*####
+# Dragonmaw Race quest chain
+####*/
+enum DragonmawRaceData
+{
+    SPELL_SKY_SHATTER = 40945,
+    QUEST_CAPTAIN_SKYSHATTER = 11071,
+    NPC_DRAGONMAW_RACE_SKYSHATTERS_TARGET = 23361,
+    MAX_MISSLES = 5,
+    SAY_START = 0,
+    SAY_FINISH = 1
+};
+/*####
+# Dragonmaw race 6: npc_captain_skyshatter
+####*/
+class npc_captain_skyshatter : public CreatureScript
+{
+public:
+    npc_captain_skyshatter() : CreatureScript("npc_captain_skyshatter") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest *quest) override
+    {
+        if (quest->GetQuestId() == QUEST_CAPTAIN_SKYSHATTER)
+        {
+            if (npc_captain_skyshatterAI* tropeAI = CAST_AI(npc_captain_skyshatter::npc_captain_skyshatterAI, creature->AI()))
+            {
+                tropeAI->Start(false, false, player->GetGUID(), quest, true, true);
+                tropeAI->Talk(SAY_START, player);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_captain_skyshatterAI(creature);
+    }
+
+    struct npc_captain_skyshatterAI : public npc_escortAI
+    {
+        npc_captain_skyshatterAI(Creature* creature) : npc_escortAI(creature) {}
+
+        void Reset() override
+        {
+            me->setActive(false);
+            if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            {
+                me->SetCanFly(false);
+                me->SetWalk(true);
+                SetMaxPlayerDistance(100.0f);
+                SetDespawnAtFar(false);
+                rangeCheckTimer = 2000;
+
+                for (int i = 0; i < MAX_MISSLES; i++)
+                    missleTimer[i] = 0;
+
+                if (CreatureTemplate const* cinfo = me->GetCreatureTemplate())
+                    me->SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+            }
+        }
+
+        void UpdateEscortAI(uint32 const diff) override
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+            if (rangeCheckTimer <= diff)
+            {
+                if (!me->IsWithinDistInMap(player, 60.0f))
+                {
+                    if (player->GetQuestStatus(QUEST_CAPTAIN_SKYSHATTER) == QUEST_STATUS_INCOMPLETE)
+                        player->FailQuest(QUEST_CAPTAIN_SKYSHATTER);
+
+                    me->setActive(true);
+                    float homeX, homeY, homeZ, homeOrient;
+                    me->GetRespawnPosition(homeX, homeY, homeZ, &homeOrient);
+                    me->NearTeleportTo(homeX, homeY, homeZ, homeOrient);
+                    JustRespawned();
+                }
+                rangeCheckTimer = 2000;
+            }
+            else
+                rangeCheckTimer -= diff;
+
+            for (int i = 0; i < MAX_MISSLES; i++)
+            {
+                if (missleTimer[i] != 0 && missleTimer[i] <= diff)
+                {
+                    if (target = me->SummonCreature(NPC_DRAGONMAW_RACE_SKYSHATTERS_TARGET, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ()), TEMPSUMMON_TIMED_DESPAWN, 5000)
+                    {
+                        me->CastSpell(target, SPELL_SKY_SHATTER, true);
+                        missleTimer[i] = 0;
+
+                        if (i == MAX_MISSLES - 1)
+                        {
+                            missleTimer[0] = urand(4000, 8000);
+                            for (int j = 1; j < MAX_MISSLES; j++)
+                                missleTimer[j] = missleTimer[j - 1] + urand(300, 1000);
+                        }
+                    }
+                }
+                else
+                    missleTimer[i] -= diff;
+            }
+
+        }
+
+        void WaypointReached(uint32 waypointId) override
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+            if (waypointId == 5)
+            {
+                missleTimer[0] = urand(4000, 8000);
+                for (int j = 1; j < MAX_MISSLES; j++)
+                    missleTimer[j] = missleTimer[j - 1] + urand(300, 1000);
+            }
+
+            switch (waypointId)
+            {
+            case 3:
+                Talk(2, player);
+                me->SetReactState(REACT_PASSIVE);
+            case 4:
+                me->SetWalk(false);
+                me->SetCanFly(true);
+                break;
+            case 5:
+                me->SetSpeedRate(MOVE_FLIGHT, 3.5f);
+                break;
+            case 43:
+                me->SetSpeedRate(MOVE_RUN, 1.0f);
+                for (int i = 0; i < MAX_MISSLES; i++)
+                    missleTimer[i] = 0;
+                break;
+            case 44:
+                me->SetWalk(true);
+                me->SetCanFly(false);
+                break;
+            case 45:
+                Talk(SAY_FINISH, player);
+                player->AreaExploredOrEventHappens(QUEST_CAPTAIN_SKYSHATTER);
+                break;
+            case 47:
+                me->Respawn(true);
+                break;
+            }
+        }
+
+    private:
+        uint32 missleTimer[MAX_MISSLES];
+        uint32 rangeCheckTimer;
+        TempSummon* target;
+
+    };
+};
+
 void AddSC_shadowmoon_valley()
 {
     // Ours
@@ -1902,4 +2095,5 @@ void AddSC_shadowmoon_valley()
     new npc_torloth_the_magnificent();
     new npc_enraged_spirit();
     new npc_shadowmoon_tuber_node();
+    new npc_captain_skyshatter();
 }

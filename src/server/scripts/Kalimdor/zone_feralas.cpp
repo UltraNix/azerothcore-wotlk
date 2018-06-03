@@ -353,6 +353,68 @@ private:
     EventMap events;
 };
 
+enum GrimtotemNaturalist
+{
+    SPELL_WRATH                = 9739,
+    SPELL_BEAR_FORM            = 19030,
+    SPELL_MAUL                 = 12161,
+    SPELL_DEMORALIZING_ROAR    = 15727,
+};
+
+struct npc_grimtotem_naturalistAI : public ScriptedAI
+{
+    npc_grimtotem_naturalistAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        _scheduler.CancelAll();
+        me->RemoveAurasDueToSpell(SPELL_BEAR_FORM);
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _scheduler.Schedule(0s, 10s, [this](TaskContext task)
+        {
+            DoCastVictim(SPELL_WRATH);
+            task.Repeat(4s, 5s);
+        });
+    }
+
+    void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask)
+    {
+        if (me->HealthBelowPct(51))
+        {
+            _scheduler.CancelAll();
+            DoCastSelf(SPELL_BEAR_FORM, true);
+
+            _scheduler.Schedule(3s, 4s, [this](TaskContext task)
+            {
+                DoCastVictim(SPELL_MAUL);
+                task.Repeat(12s, 13s);
+            });
+
+            _scheduler.Schedule(8s, 9s, [this](TaskContext task)
+            {
+                DoCastSelf(SPELL_DEMORALIZING_ROAR);
+                task.Repeat(24s, 25s);
+            });
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
 /*######
 ## AddSC
 ######*/
@@ -363,4 +425,5 @@ void AddSC_feralas()
     new npc_oox22fe();
     new spell_gordunni_trap();
     new CreatureAILoader<npc_shay_wanderer_AI>("npc_shay_wanderer");
+    new CreatureAILoader<npc_grimtotem_naturalistAI>("npc_grimtotem_naturalist");
 }
