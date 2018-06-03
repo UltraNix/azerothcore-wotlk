@@ -1167,6 +1167,12 @@ public:
             DoMeleeAttackIfReady();
         }
 
+        void EnterEvadeMode() override
+        {
+            if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
+                LordIllidan->AI()->EnterEvadeMode();
+        }
+
         void JustDied(Unit* killer)
         {
             if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
@@ -1212,7 +1218,7 @@ public:
 
     struct npc_lord_illidan_stormrageAI : public ScriptedAI
     {
-        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature) { }
+        npc_lord_illidan_stormrageAI(Creature* creature) : ScriptedAI(creature), summons(me) { }
 
         uint64 PlayerGUID;
 
@@ -1225,6 +1231,8 @@ public:
         bool EventStarted;
         bool Announced;
         bool Failed;
+
+        SummonList summons;
 
         void Reset()
         {
@@ -1240,6 +1248,8 @@ public:
             Failed = false;
 
             me->SetVisible(false);
+
+            summons.DespawnAll();
         }
 
         void EnterCombat(Unit* /*who*/) { }
@@ -1248,6 +1258,11 @@ public:
         void AttackStart(Unit* /*who*/) { }
 
         void SummonNextWave();
+
+        void JustSummoned(Creature* creature)
+        {
+            summons.Summon(creature);
+        }
 
         void CheckEventFail()
         {
@@ -1359,13 +1374,14 @@ public:
         npc_illidari_spawnAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint64 LordIllidanGUID;
-        uint32 SpellTimer1, SpellTimer2, SpellTimer3;
+        uint32 SpellTimer1, SpellTimer2, SpellTimer3, DespawnTimer;
         bool Timers;
 
         void Reset()
         {
             LordIllidanGUID = 0;
             Timers = false;
+            DespawnTimer = 0;
         }
 
         void EnterCombat(Unit* /*who*/) { }
@@ -1378,8 +1394,25 @@ public:
                     CAST_AI(npc_lord_illidan_stormrage::npc_lord_illidan_stormrageAI, LordIllidan->AI())->LiveCounter();
         }
 
+        void EnterEvadeMode() override
+        {
+            if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
+                LordIllidan->AI()->EnterEvadeMode();
+        }
+
         void UpdateAI(uint32 diff)
         {
+            // Reset event 30 seconds OOC
+            if (!me->IsInCombat())
+            {
+                DespawnTimer += diff;
+                if (DespawnTimer >= 30000)
+                    if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
+                        LordIllidan->AI()->EnterEvadeMode();
+            }
+            else
+                DespawnTimer = 0;
+
             if (!UpdateVictim())
                 return;
 
@@ -1476,7 +1509,7 @@ void npc_lord_illidan_stormrage::npc_lord_illidan_stormrageAI::SummonNextWave()
         float Y = SpawnLocation[locIndex + i].y;
         float Z = SpawnLocation[locIndex + i].z;
         float O = SpawnLocation[locIndex + i].o;
-        Spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, X, Y, Z, O, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 60000);
+        Spawn = me->SummonCreature(WavesInfo[WaveCount].CreatureId, X, Y, Z, O, TEMPSUMMON_MANUAL_DESPAWN);
         ++LiveCount;
 
         if (Spawn)
