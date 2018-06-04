@@ -10467,6 +10467,13 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
         if (!spellProto->ValidateAttribute6SpellDamageMods(this, *i, damagetype == DOT))
             continue;
 
+        AuraApplication* aurApp = (*i)->GetBase()->GetApplicationOfTarget(GetGUID());
+        if (!aurApp)
+            continue;
+
+        if (!aurApp->IsActive((*i)->GetEffIndex()))
+            continue;
+
         if ((*i)->GetMiscValue() & spellProto->SchoolMask || (*i)->GetMiscValueB() & spellProto->DmgClass)
         {
             if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
@@ -12078,6 +12085,13 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         for (AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
         {
             if (!spellProto->ValidateAttribute6SpellDamageMods(this, *i, false))
+                continue;
+
+            AuraApplication* aurApp = (*i)->GetBase()->GetApplicationOfTarget(GetGUID());
+            if (!aurApp)
+                continue;
+
+            if (!aurApp->IsActive((*i)->GetEffIndex()))
                 continue;
 
             if (((*i)->GetMiscValue() & spellProto->GetSchoolMask()) && !((*i)->GetMiscValue() & SPELL_SCHOOL_MASK_NORMAL))
