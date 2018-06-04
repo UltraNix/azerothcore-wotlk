@@ -22,6 +22,7 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "Chat.h"
 #include "CellImpl.h"
 #include "MoveSplineInit.h"
+#include "Group.h"
 
 enum LeviathanSpells
 {
@@ -754,12 +755,35 @@ void boss_flame_leviathan::boss_flame_leviathanAI::JustDied(Unit* killer)
     TurnGates(false, true);
     BindPlayers();
 
+    uint64 leaderGUID = 0;
+
+    auto& playerList = me->GetMap()->GetPlayers();
+
+    for (auto& i : playerList)
+    {
+        Player* player = i.GetSource();
+
+        if (!player)
+            continue;
+
+        if (!player->GetGroup())
+            continue;
+
+        leaderGUID = player->GetGroup()->GetLeaderGUID();
+
+        if (leaderGUID)
+            break;
+    }
+
     if (Map* map = me->GetMap())
     {
-        if (_hardMode)
-            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + 1, Difficulty(map->GetDifficulty() + 2), "", 15000, _fightTimer);
-        else
-            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
+        if (Player* player = ObjectAccessor::GetPlayer(*me, leaderGUID))
+        {
+            if (_hardMode)
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + 1, Difficulty(map->GetDifficulty() + 2), "", 15000, _fightTimer);
+            else
+                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
+        }
     }
 }
 

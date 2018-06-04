@@ -133,6 +133,7 @@ struct boss_xt002AI : BossAI
         _fightTimer = 0;
         _Reset();
         me->ResetLootMode();
+        me->AddLootMode(4); // normal emblem marker
         me->RemoveAllAuras();
 
         // first heart expose
@@ -318,6 +319,8 @@ struct boss_xt002AI : BossAI
         {
             _hardMode = true;
             me->SetLootMode(3); // hard mode + normal loot
+            me->RemoveLootMode(4); // remove normal mode marker
+            me->AddLootMode(8); // hardmode emblem marker
             me->SetMaxHealth(me->GetMaxHealth());
             me->SetHealth(me->GetMaxHealth());
             me->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND); // emerge
