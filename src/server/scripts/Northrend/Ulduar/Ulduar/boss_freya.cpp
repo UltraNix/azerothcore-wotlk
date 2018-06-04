@@ -1266,7 +1266,7 @@ public:
         void UpdateAI(uint32 diff)
         {
             _despawnTimer += diff;
-            if (_despawnTimer >= 20000)
+            if (_despawnTimer >= 25000)
             {
                 me->RemoveAurasDueToSpell(SPELL_AUTO_GROW);
                 me->DespawnOrUnsummon(2200);
