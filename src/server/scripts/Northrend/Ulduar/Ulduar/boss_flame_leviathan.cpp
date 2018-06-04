@@ -2768,6 +2768,8 @@ class spell_orbital_supports : public SpellScriptLoader
         }
 };
 
+uint32 const SPELL_PARACHUTE_SMOKE_TRAIL = 61242;
+
 class spell_thorims_hammer : public SpellScriptLoader
 {
     public:
@@ -2780,6 +2782,12 @@ class spell_thorims_hammer : public SpellScriptLoader
             void RecalculateDamage(SpellEffIndex effIndex)
             {
                 if (!GetHitUnit() || effIndex == EFFECT_1)
+                {
+                    PreventHitDefaultEffect(effIndex);
+                    return;
+                }
+
+                if (GetHitUnit()->HasAura(SPELL_SMOKE_TRAIL) || GetHitUnit()->HasAura(SPELL_PARACHUTE_SMOKE_TRAIL))
                 {
                     PreventHitDefaultEffect(effIndex);
                     return;

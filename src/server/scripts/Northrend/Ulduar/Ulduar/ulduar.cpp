@@ -517,6 +517,32 @@ public:
     }
 };
 
+uint32 const SPELL_BOMB_BOT_EXPLOSION_GAUNTLET = 63801;
+
+struct npc_boomer_xp500_ulduar_AI : public ScriptedAI
+{
+    npc_boomer_xp500_ulduar_AI(Creature* creature) : ScriptedAI(creature)
+    {
+        _exploded = false;
+    }
+
+    void EnterCombat(Unit* /*who*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (who && who->ToPlayer() && !who->ToPlayer()->IsGameMaster() && who->IsWithinDist(me, 10.0f) && !_exploded)
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->StopMoving();
+            _exploded = true;
+            me->DespawnOrUnsummon(3s);
+            DoCastAOE(SPELL_BOMB_BOT_EXPLOSION_GAUNTLET, true);
+        }
+    }
+private:
+    bool _exploded;
+};
 
 void AddSC_ulduar()
 {
@@ -531,4 +557,6 @@ void AddSC_ulduar()
 
     new AreaTrigger_at_celestial_planetarium_enterance();
     new go_call_tram();
+
+    new CreatureAILoader<npc_boomer_xp500_ulduar_AI>("npc_boomer_xp500_ulduar");
 }
