@@ -8529,16 +8529,7 @@ void Player::_ApplyWeaponDependentAuraMods(ItemRef const& item, WeaponAttackType
 
     AuraEffectList const& auraDamagePctList = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraEffectList::const_iterator itr = auraDamagePctList.begin(); itr != auraDamagePctList.end(); ++itr)
-    {
-        AuraApplication* aurApp = (*itr)->GetBase()->GetApplicationOfTarget(GetGUID());
-        if (!aurApp)
-            continue;
-
-        if (!aurApp->IsActive((*itr)->GetEffIndex()))
-            continue;
-
         _ApplyWeaponDependentAuraDamageMod(item, attackType, *itr, apply);
-    }
 }
 
 void Player::_ApplyWeaponDependentAuraCritMod(ItemRef const& item, WeaponAttackType attackType, AuraEffect const* aura, bool apply)
