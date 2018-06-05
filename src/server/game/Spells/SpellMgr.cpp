@@ -366,6 +366,8 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
 
 SpellMgr::SpellMgr()
 {
+    mSpellGroupMap.set_empty_key( 0 );
+    mSpellGroupStackMap.set_empty_key( 0 );
 }
 
 SpellMgr::~SpellMgr()

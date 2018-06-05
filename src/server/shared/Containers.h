@@ -19,13 +19,18 @@
 #define TRINITY_CONTAINERS_H
 
 #include "Define.h"
+
 #include <list>
+#include <sparsehash/dense_hash_map>
 
 //! Because circular includes are bad
 extern uint32 urand(uint32 min, uint32 max);
 
 namespace Trinity
 {
+    template< typename K, typename V >
+    using LookupMap = google::dense_hash_map< K, V >;
+
     namespace Containers
     {
         // replace with std::size in C++17

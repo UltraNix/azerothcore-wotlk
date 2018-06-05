@@ -5164,7 +5164,7 @@ void Player::DeleteOldCharacters()
     if (!keepDays)
         return;
 
-    Player::DeleteOldCharacters(keepDays);
+    //Player::DeleteOldCharacters(keepDays);
 }
 
 /**

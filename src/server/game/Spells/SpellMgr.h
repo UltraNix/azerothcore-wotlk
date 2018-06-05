@@ -25,6 +25,7 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Unit.h"
+#include "Containers.h"
 
 class SpellInfo;
 class Player;
@@ -366,10 +367,8 @@ struct SpellStackInfo
     SpellGroupSpecialFlags specialFlags;
 };
 //             spell_id, group_id
-typedef std::map<uint32, SpellStackInfo> SpellGroupMap;
-typedef std::map<uint32, SpellGroupStackFlags> SpellGroupStackMap;
-
-
+typedef Trinity::LookupMap<uint32, SpellStackInfo>        SpellGroupMap;
+typedef Trinity::LookupMap<uint32, SpellGroupStackFlags>  SpellGroupStackMap;
 
 struct SpellThreatEntry
 {

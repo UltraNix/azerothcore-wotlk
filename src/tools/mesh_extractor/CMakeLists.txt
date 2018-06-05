@@ -18,6 +18,7 @@ set(include_Base
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
   ${CMAKE_SOURCE_DIR}/dep/libmpq
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
+  ${CMAKE_SOURCE_DIR}/dep/google
   ${ACE_INCLUDE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
