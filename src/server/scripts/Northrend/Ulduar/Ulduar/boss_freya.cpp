@@ -1433,8 +1433,9 @@ public:
                     break;
                 case EVENT_WATER_SPIRIT_CHARGE:
                     me->CastSpell(me, SPELL_TIDAL_WAVE_AURA, true);
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 40.0f, true))
-                        me->CastSpell(target, SPELL_TIDAL_WAVE, false);
+                    me->CastSpell(me->GetVictim(), SPELL_TIDAL_WAVE, false);
+                    //if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 40.0f, true))
+                        //me->CastSpell(target, SPELL_TIDAL_WAVE, false);
                     events.RepeatEvent(12000);
                     break;
                 case EVENT_STORM_LASHER_LIGHTNING_LASH:
