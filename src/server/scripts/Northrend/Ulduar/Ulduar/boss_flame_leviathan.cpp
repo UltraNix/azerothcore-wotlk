@@ -2812,7 +2812,7 @@ class spell_thorims_hammer : public SpellScriptLoader
                 }
 
                 //if (GetHitUnit()->HasAura(SPELL_SMOKE_TRAIL) || GetHitUnit()->HasAura(SPELL_PARACHUTE_SMOKE_TRAIL))
-                {
+                //{
                     //PreventHitDefaultEffect(effIndex);
                     //return;
                 //}
