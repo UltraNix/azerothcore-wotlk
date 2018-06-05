@@ -165,10 +165,10 @@ bool Battlefield::Update(uint32 diff)
 {
     if (m_Timer <= diff)
     {
-        if (!IsEnabled() || (!IsWarTime() && sWorld->GetPlayerCount() > 3600)) // if WG is disabled or there is more than 3500 connections, switch automaticly
+        if (!IsEnabled() || (!IsWarTime() && sWorld->GetPlayerCount() > 3800)) // if WG is disabled or there is more than 3500 connections, switch automaticly
         {
             m_isActive = true;
-            EndBattle(true);
+            EndBattle(false);
             return false;
         }
         // Battlefield ends on time
