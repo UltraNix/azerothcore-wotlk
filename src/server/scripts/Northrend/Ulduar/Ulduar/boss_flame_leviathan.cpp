@@ -99,7 +99,9 @@ enum GosNpcs
     NPC_MIMIRONS_INFERNO_TARGET       = 33369,
     NPC_MIMIRONS_INFERNO              = 33370,
     NPC_HODIRS_FURY_TARGET            = 33108,
-    NPC_HODIRS_FURY                   = 33212
+    NPC_HODIRS_FURY                   = 33212,
+
+    NPC_OVERLOAD_CONTROL_DEVICE       = 33143
 };
 
 enum Events
@@ -178,7 +180,9 @@ enum Misc
 
     DATA_LOREKEEPER_STARTER_GUID      = 6,
 
-    DATA_GET_FLAMES_HIT_COUNT         = 7
+    DATA_GET_FLAMES_HIT_COUNT         = 7,
+
+    ACTION_REMOVE_PLAYERS             = 8
 };
 
 #define LV_SAY_PLAYER_RIDE    = "Unauthorized entity attempting circuit overload. Activating anti-personnel countermeasures."
@@ -354,12 +358,26 @@ public:
                         (*itr)->ToCreature()->AI()->AttackStart(me->GetVictim());
         }
 
-        void ThrowPlayers()
+        void ThrowPlayers(bool reset)
         {
-            for (uint8 i = RAID_MODE(2, 0); i < 4; i++)
-                if (Unit* seat = vehicle->GetPassenger(i))
-                    if (seat->GetTypeId() == TYPEID_UNIT)
-                        seat->ToCreature()->AI()->EnterEvadeMode();
+            if (reset)
+            {
+                for (uint8 i = RAID_MODE(2, 0); i < 4; i++)
+                    if (Unit* seat = vehicle->GetPassenger(i))
+                        if (seat->GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (seat->ToCreature()->IsAIEnabled)
+                                seat->ToCreature()->AI()->EnterEvadeMode();
+                        }
+            }
+            else
+            {
+                std::list<Creature*> _overloadedDevice;
+                me->GetCreatureListWithEntryInGrid(_overloadedDevice, NPC_OVERLOAD_CONTROL_DEVICE, 50.0f);
+                for (auto i : _overloadedDevice)
+                    if (i->IsAIEnabled)
+                        i->AI()->DoAction(ACTION_REMOVE_PLAYERS);
+            }
         }
 
         void UpdateAI(uint32 diff)
@@ -491,9 +509,12 @@ public:
                     events.PopEvent();
                     return;
                 case EVENT_REINSTALL:
+                {
+                    ThrowPlayers(true);
                     events.PopEvent();
                     me->MonsterTextEmote("Flame Leviathan reactivated. Resumming combat functions.", 0, true);
                     return;
+                }
                 case EVENT_THORIMS_HAMMER:
                     SummonTowerHelpers(TOWER_OF_STORMS);
                     events.RepeatEvent(60000+rand()%60000);
@@ -693,8 +714,7 @@ void boss_flame_leviathan::boss_flame_leviathanAI::SpellHit(Unit* caster, const 
     if (spellInfo->Id == SPELL_SYSTEMS_SHUTDOWN)
     {
         _shutdown = true; // ACHIEVEMENT
-        ThrowPlayers();
-
+        ThrowPlayers(false);
         me->MonsterTextEmote("Flame Leviathan's circuits overloaded.", 0, true);
         me->MonsterTextEmote("Automatic repair sequence initiated.", 0, true);
 
@@ -908,7 +928,7 @@ public:
                     else
                     {
                         turret->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
-                        if (turret->GetTypeId() == TYPEID_UNIT)
+                        if (turret->ToCreature() && turret->ToCreature()->IsAIEnabled)
                             turret->ToCreature()->AI()->EnterEvadeMode();
                     }
                 }
@@ -987,11 +1007,8 @@ class boss_flame_leviathan_overload_device : public CreatureScript
             {
             }
 
-            void OnSpellClick(Unit* /*clicker*/, bool& result)
+            void RemovePlayers()
             {
-                if (!result)
-                    return;
-
                 if (me->GetVehicle())
                 {
                     me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
@@ -1003,6 +1020,19 @@ class boss_flame_leviathan_overload_device : public CreatureScript
                         player->ExitVehicle();
                     }
                 }
+            }
+
+            void DoAction(int32 param) override
+            {
+                RemovePlayers();
+            }
+
+            void OnSpellClick(Unit* /*clicker*/, bool& result)
+            {
+                if (!result)
+                    return;
+
+                RemovePlayers();
             }
         };
 
