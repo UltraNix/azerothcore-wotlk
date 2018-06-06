@@ -2811,11 +2811,11 @@ class spell_thorims_hammer : public SpellScriptLoader
                     return;
                 }
 
-                //if (GetHitUnit()->HasAura(SPELL_SMOKE_TRAIL) || GetHitUnit()->HasAura(SPELL_PARACHUTE_SMOKE_TRAIL))
-                //{
-                    //PreventHitDefaultEffect(effIndex);
-                    //return;
-                //}
+                if (GetHitUnit()->HasAura(SPELL_SMOKE_TRAIL) || GetHitUnit()->HasAura(SPELL_PARACHUTE_SMOKE_TRAIL))
+                {
+                    PreventHitDefaultEffect(effIndex);
+                    return;
+                }
 
                 float dist = GetHitUnit()->GetExactDist2d(GetCaster());
                 if (dist <= 7.0f)
