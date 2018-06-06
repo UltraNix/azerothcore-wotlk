@@ -697,6 +697,15 @@ public:
                 damage = 0;
                 if (!_encounterFinished)
                 {
+                    // Defeat credit
+                    if (m_pInstance)
+                    {
+                        if (_hardMode)
+                            m_pInstance->SetData(DATA_THORIM_HARDMODE, DATA_THORIM_HARDMODE);
+                        me->CastSpell(me, 64985, true); // credit
+                        m_pInstance->SetData(TYPE_THORIM, DONE);
+                    }
+
                     _encounterFinished = true;
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     me->setFaction(35);
@@ -733,15 +742,6 @@ public:
 
                     if (Map* map = me->GetMap())
                         CheckCreatureRecord(me->SelectNearestPlayer(150.0f), me->GetCreatureTemplate()->Entry + _hardMode, Difficulty(map->GetDifficulty() + _hardMode * 2), "", 15000, _fightTimer);
-
-                    // Defeat credit
-                    if (m_pInstance)
-                    {
-                        if (_hardMode)
-                            m_pInstance->SetData(DATA_THORIM_HARDMODE, DATA_THORIM_HARDMODE);
-                        me->CastSpell(me, 64985, true); // credit
-                        m_pInstance->SetData(TYPE_THORIM, DONE);
-                    }
                 }
             }
         }
