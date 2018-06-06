@@ -382,8 +382,10 @@ public:
                     events.RepeatEvent(15000 + rand() % 5000);
                     break;
                 case EVENT_STATIC_DISRUPTION:
-                    if (Unit *pTarget = SelectTarget(SELECT_TARGET_FARTHEST, 0, 0, true))
-                        me->CastSpell(pTarget, SPELL_STATIC_DISRUPTION, false);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, DefaultTargetSelector(me, -10.0f, true, -SPELL_STATIC_DISRUPTION)))
+                        DoCast(target, SPELL_STATIC_DISRUPTION);
+                    else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(target, SPELL_STATIC_DISRUPTION);
 
                     events.RepeatEvent(20000 + rand() % 20000);
                     break;
