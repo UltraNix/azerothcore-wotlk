@@ -89,7 +89,8 @@ public:
             { "areatriggers",   SEC_ADMINISTRATOR,  false, &HandleDebugAreaTriggersCommand,    "" },
             { "los",            SEC_GAMEMASTER,      false, &HandleDebugLoSCommand,             "" },
             { "moveflags",      SEC_ADMINISTRATOR,  false, &HandleDebugMoveflagsCommand,       "" },
-            { "unitstate",      SEC_ADMINISTRATOR,  false, &HandleDebugUnitStateCommand,       "" }
+            { "unitstate",      SEC_ADMINISTRATOR,  false, &HandleDebugUnitStateCommand,       "" },
+            { "ulduar",         SEC_MODERATOR,      false, &HandleDebugUlduar,                 "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1354,9 +1355,93 @@ public:
     {
         Player* player = handler->GetSession()->GetPlayer();
 
-        sLog->outSQLDev("(@PATH, XX, %.3f, %.3f, %.5f, 0,0, 0,100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+        sLog->outSQLDev("(@PATH, XX, %.3f, %.3f, %.5f, 0, 0, 0, 100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
 
         handler->PSendSysMessage("Waypoint SQL written to SQL Developer log");
+        return true;
+    }
+
+    static bool HandleDebugUlduar(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (player->GetMapId() != 603)
+        {
+            handler->PSendSysMessage("You're not in Ulduar.");
+            return true;
+        }
+
+        InstanceScript* instance = player->GetInstanceScript();
+
+        if (!instance)
+        {
+            handler->PSendSysMessage("Instance pointer invalid, returning.");
+            return true;
+        }
+
+        std::ostringstream stream;
+        for (auto i = 0; i < 14; ++i)
+        {
+            std::cout << "weszlo\n";
+            stream << "Encounter: ";
+            switch (i)
+            {
+                case 0:
+                    stream << "Leviathan";
+                    break;
+                case 1:
+                    stream << "Ignis";
+                    break;
+                case 2:
+                    stream << "Razorscale";
+                    break;
+                case 3:
+                    stream << "XT-002";
+                    break;
+                case 4:
+                    stream << "Assembly of Iron";
+                    break;
+                case 5:
+                    stream << "Kologarn";
+                    break;
+                case 6:
+                    stream << "Auriaya";
+                    break;
+                    /*
+                    DATA_MIMIRON_HARDMODE                  = 724,
+                    DATA_HODIR_HARDMODE                    = 725,
+                    DATA_THORIM_HARDMODE                   = 726,
+                    DATA_FREYA_HARDMODE                    = 727
+                    */
+                case 7:
+                    stream << "Freya" << (instance->GetData(727) ? " hardmode" : " normal");
+                    break;
+                case 8:
+                    stream << "Hodir" << (instance->GetData(725) ? " hardmode" : " normal");
+                    break;
+                case 9:
+                    stream << "Mimiron" << (instance->GetData(724) ? " hardmode" : " normal");
+                    break;
+                case 10:
+                    stream << "Thorim" << (instance->GetData(726) ? " hardmode" : " normal");
+                    break;
+                case 11:
+                    stream << "Vezax";
+                    break;
+                case 12:
+                    stream << "Yogg-saron";
+                    break;
+                case 13:
+                    stream << "Algalon";
+                    break;
+            }
+            stream << " State: " << std::to_string(instance->GetData(i)) << "\n";
+        }
+        stream << "0 - NOT STARTED, 1 - IN_PROGRESS, 2 - FAIL (evading or respawning), 3 - DONE, 4 - SPECIAL (ie. for Leviathan it means he destroyed his gate)";
+        ChatHandler(player->GetSession()).PSendSysMessage(stream.str().c_str());
         return true;
     }
 };
