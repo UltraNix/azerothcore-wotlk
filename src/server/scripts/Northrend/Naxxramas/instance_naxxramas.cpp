@@ -1122,7 +1122,10 @@ public:
             return false;
 
         if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+        {
+            player->CastSpell(player, 72617, true);
             return false;
+        }
 
         uint8 bossCount = 0;
         for (uint8 i = 0; i < MAX_ENCOUNTERS - 2; ++i)
