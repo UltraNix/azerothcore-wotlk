@@ -2628,7 +2628,15 @@ class spell_vehicle_throw_passenger : public SpellScriptLoader
                                                     }
                                                 }
                         }
-                        if (target && target->IsWithinDist2d(targets.GetDstPos(), GetSpellInfo()->Effects[EFFECT_0].CalcRadius() * 8)) // now we use *2 because the location of the seat is not correct
+
+                        bool canEnterLeviathan = false;
+
+                        if (passenger->GetInstanceScript())
+                            if (Creature* leviathan = ObjectAccessor::GetCreature(*passenger, passenger->GetInstanceScript()->GetData64(TYPE_LEVIATHAN)))
+                                if (!leviathan->HasAura(SPELL_SYSTEMS_SHUTDOWN))
+                                    canEnterLeviathan = true;
+
+                        if (canEnterLeviathan && target && target->IsWithinDist2d(targets.GetDstPos(), GetSpellInfo()->Effects[EFFECT_0].CalcRadius() * 8)) // now we use *2 because the location of the seat is not correct
                         {
                             passenger->ExitVehicle();
                             passenger->EnterVehicle(target, 0);
