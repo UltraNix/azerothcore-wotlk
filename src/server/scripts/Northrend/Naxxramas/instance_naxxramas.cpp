@@ -1127,10 +1127,13 @@ public:
             return false;
         }
 
-        //! We're allowing to enter sapphiron without killing entire instance now
+        //! We're allowing to enter sapphiron (10) without killing entire instance now
         //! if we want to disable it in the future for whatever reason, just delete those two lines
-        player->CastSpell(player, 72617, true);
-        return true;
+        if (!player->GetMap()->Is25ManRaid())
+        {
+            player->CastSpell(player, 72617, true);
+            return true;
+        }
 
         uint8 bossCount = 0;
         for (uint8 i = 0; i < MAX_ENCOUNTERS - 2; ++i)
