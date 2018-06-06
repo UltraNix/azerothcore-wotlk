@@ -384,10 +384,10 @@ public:
                 case EVENT_STATIC_DISRUPTION:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, DefaultTargetSelector(me, -10.0f, true, -SPELL_STATIC_DISRUPTION)))
                         DoCast(target, SPELL_STATIC_DISRUPTION);
-                    else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 0.0f, true))
                         DoCast(target, SPELL_STATIC_DISRUPTION);
 
-                    events.RepeatEvent(20000 + rand() % 20000);
+                    events.RepeatEvent(urand(10000, 12000));
                     break;
                 case EVENT_OVERWHELMING_POWER:
                     me->MonsterYell("You seek the secrets of Ulduar? Then take them!", LANG_UNIVERSAL, 0);
