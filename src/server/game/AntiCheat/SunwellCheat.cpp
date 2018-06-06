@@ -18,18 +18,38 @@
 
 #include "SunwellCheat.h"
 
-SunwellCheat::SunwellCheat()
+SunwellCheatData::SunwellCheatData()
 {
-    for (uint8 i = 0; i < MAX_CHECK_TYPES; ++i)
+    for ( uint8 i = 0; i < MAX_CHECK_TYPES; ++i )
     {
-        cheaterReports[i] = 0;
-        cheaterTimer[i] = 0;
+        m_cheaterReports[ i ] = 0;
+        m_cheaterTimer[ i ] = 0;
     }
 }
 
-SunwellCheat::~SunwellCheat() 
-{ 
-    cheaterPlayers.clear();
+void SunwellCheatData::buildCheatReport( uint32 amount, SunwellCheck type )
+{
+    m_cheaterReports[ type ] = amount;
+}
+
+void SunwellCheatData::clearCheatReport( SunwellCheck type )
+{
+    m_cheaterReports[ type ] = 0;
+}
+
+void SunwellCheatData::setCheatTimer( uint32 time, SunwellCheck type )
+{
+    m_cheaterTimer[ type ] = time;
+}
+
+time_t SunwellCheatData::getCheatTimer( SunwellCheck type )
+{
+    return m_cheaterTimer[ type ];
+}
+
+uint32 SunwellCheatData::getCheaterRepors( SunwellCheck type )
+{
+    return m_cheaterReports[ type ];
 }
 
 SunwellCheat* SunwellCheat::instance()
@@ -46,15 +66,22 @@ void SunwellCheat::cleanupReports(Player* player)
     if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT) || !player || !player->IsInWorld())
         return;
 
-    time_t actualTime = time(nullptr);
+    time_t actualTime = sWorld->GetGameTime();
     uint32 nextTick   = sWorld->getIntConfig(CONFIG_SUNWELL_CHEAT_CLEAN_TIMER) * MINUTE;
 
+    auto it = m_cheaterPlayers.find( player->GetGUIDLow() );
+    if ( it == m_cheaterPlayers.end() )
+        return;
+
+    SunwellCheatData & cheatData = it->second;
     for (uint8 i = 0; i < MAX_CHECK_TYPES; ++i)
-        if (actualTime > cheaterPlayers[player->GetGUIDLow()].getCheatTimer(SunwellCheck(i)))
+    {
+        if ( actualTime > cheatData.getCheatTimer( SunwellCheck( i ) ) )
         {
-            cheaterPlayers[player->GetGUIDLow()].setCheatTimer(actualTime + nextTick, SunwellCheck(i));
-            cheaterPlayers[player->GetGUIDLow()].clearCheatReport(SunwellCheck(i));
+            cheatData.setCheatTimer( actualTime + nextTick, SunwellCheck( i ) );
+            cheatData.clearCheatReport( SunwellCheck( i ) );
         }
+    }
 }
 
 //////////////////
@@ -65,11 +92,13 @@ void SunwellCheat::buildOpcodeReport(Player* player, uint16 opCode)
     if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT) || !player || !opCode)
         return;
     
-    uint32 opCounter  = cheaterPlayers[player->GetGUIDLow()].getCheaterRepors(CHECK_DOS_OPCODE);
+    SunwellCheatData & cheatData = m_cheaterPlayers[ player->GetGUIDLow() ];
+
+    uint32 opCounter  = cheatData.getCheaterRepors(CHECK_DOS_OPCODE);
     uint32 opLimit    = sWorld->getIntConfig(CONFIG_SUNWELL_CHEAT_OPCODE_LIMIT);
 
     // Push another report.
-    cheaterPlayers[player->GetGUIDLow()].buildCheatReport(++opCounter, CHECK_DOS_OPCODE);
+    cheatData.buildCheatReport(++opCounter, CHECK_DOS_OPCODE);
 
     if (opCounter >= opLimit)
     {
@@ -125,11 +154,13 @@ void SunwellCheat::buildCastReport(Player* player, uint32 spellId)
     if (!sWorld->getBoolConfig(CONFIG_SUNWELL_CHEAT) || !player || !spellId)
         return;
 
-    uint32 castCounter = cheaterPlayers[player->GetGUIDLow()].getCheaterRepors(CHECK_CAST_ABUSE);
+    SunwellCheatData & cheatData = m_cheaterPlayers[ player->GetGUIDLow() ];
+
+    uint32 castCounter = cheatData.getCheaterRepors(CHECK_CAST_ABUSE);
     uint32 castLimit   = sWorld->getIntConfig(CONFIG_SUNWELL_CHEAT_CAST_LIMIT);
 
     // Push another report.
-    cheaterPlayers[player->GetGUIDLow()].buildCheatReport(++castCounter, CHECK_CAST_ABUSE);
+    cheatData.buildCheatReport(++castCounter, CHECK_CAST_ABUSE);
 
     if (castCounter >= castLimit)
     {

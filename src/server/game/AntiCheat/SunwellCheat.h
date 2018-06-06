@@ -25,6 +25,8 @@
 #include "Player.h"
 #include "Chat.h"
 
+#include <unordered_map>
+
 enum SunwellCheck
 {
     CHECK_DOS_OPCODE = 0,
@@ -39,36 +41,42 @@ enum SunwellAction
     SUN_ACTION_BAN  = 2
 };
 
+class SunwellCheatData
+{
+public:
+    SunwellCheatData();
+
+    void    buildCheatReport( uint32 amount, SunwellCheck type );
+
+    void    clearCheatReport( SunwellCheck type );
+    uint32  getCheaterRepors( SunwellCheck type );
+
+    void    setCheatTimer( uint32 time, SunwellCheck type );
+    time_t  getCheatTimer( SunwellCheck type );
+
+protected:
+    uint32 m_cheaterReports[ MAX_CHECK_TYPES ];
+    time_t m_cheaterTimer[ MAX_CHECK_TYPES ];
+};
+
 class SunwellCheat
 {
-    public:
-        SunwellCheat();
-        ~SunwellCheat();
+public:
+    static SunwellCheat* instance();
 
-        static SunwellCheat* instance();
+    //////////////////
+    // Cleanup
+    void cleanupReports(Player* player);
+    //////////////////
+    // opCounter
+    void buildOpcodeReport(Player* player, uint16 opCode);
+    //////////////////
+    // goldAbuse
+    void buildCastReport(Player* player, uint32 spellId);
 
-        //////////////////
-        // Cleanup
-        void cleanupReports(Player* player);
-        //////////////////
-        // opCounter
-        void buildOpcodeReport(Player* player, uint16 opCode);
-        //////////////////
-        // goldAbuse
-        void buildCastReport(Player* player, uint32 spellId);
-
-
-    private:
-        void buildCheatReport(uint32 amount, SunwellCheck type) { cheaterReports[type] = amount; }
-        void clearCheatReport(SunwellCheck type) { cheaterReports[type] = 0; }
-        void setCheatTimer(uint32 time, SunwellCheck type) { cheaterTimer[type] = time; }
-        time_t getCheatTimer(SunwellCheck type) { return cheaterTimer[type]; }
-        uint32 getCheaterRepors(SunwellCheck type) { return cheaterReports[type]; }
-
-        uint32 cheaterReports[MAX_CHECK_TYPES];
-        time_t cheaterTimer[MAX_CHECK_TYPES];
-        typedef std::map<uint32, SunwellCheat> CheatersMap;
-        CheatersMap cheaterPlayers;
+private:
+    typedef std::unordered_map<uint32, SunwellCheatData> CheatersDataMap;
+    CheatersDataMap m_cheaterPlayers;
 };
 
 #define sSunwellCheatMgr SunwellCheat::instance()
