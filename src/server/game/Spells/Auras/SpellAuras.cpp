@@ -566,7 +566,8 @@ void Aura::UpdateTargetMap( Unit* caster, bool apply )
     std::unordered_map<Unit*, uint8> targets;
     FillTargetMap( targets, caster );
 
-    UnitList targetsToRemove;
+    UnitVec targetsToRemove;
+    targetsToRemove.reserve( m_applications.size() );
 
     // mark all auras as ready to remove
     for ( ApplicationMap::iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter )
@@ -692,9 +693,11 @@ void Aura::UpdateTargetMap( Unit* caster, bool apply )
     }
 
     // remove auras from units no longer needing them
-    for ( UnitList::iterator itr = targetsToRemove.begin(); itr != targetsToRemove.end(); ++itr )
-        if ( AuraApplication * aurApp = GetApplicationOfTarget( ( *itr )->GetGUID() ) )
-            ( *itr )->_UnapplyAura( aurApp, AURA_REMOVE_BY_DEFAULT );
+    for ( Unit* target : targetsToRemove )
+    {
+        if ( AuraApplication * aurApp = GetApplicationOfTarget( target->GetGUID() ) )
+            target->_UnapplyAura( aurApp, AURA_REMOVE_BY_DEFAULT );
+    }
 
     if ( !apply )
         return;
@@ -715,24 +718,29 @@ void Aura::UpdateTargetMap( Unit* caster, bool apply )
 void Aura::_ApplyEffectForTargets( uint8 effIndex )
 {
     // prepare list of aura targets
-    UnitList targetList;
+    UnitVec targetList;
+    targetList.reserve( m_applications.size() );
+
     for ( ApplicationMap::iterator appIter = m_applications.begin(); appIter != m_applications.end(); ++appIter )
     {
         if ( ( appIter->second->GetEffectsToApply() & ( 1 << effIndex ) ) && !appIter->second->HasEffect( effIndex ) )
+        {
             targetList.push_back( appIter->second->GetTarget() );
+        }
     }
 
     // apply effect to targets
-    for ( UnitList::iterator itr = targetList.begin(); itr != targetList.end(); ++itr )
+    for ( Unit* target : targetList )
     {
-        if ( GetApplicationOfTarget( ( *itr )->GetGUID() ) )
+        if ( GetApplicationOfTarget( target->GetGUID() ) )
         {
             // owner has to be in world, or effect has to be applied to self
-            ASSERT( ( !GetOwner()->IsInWorld() && GetOwner() == *itr ) || GetOwner()->IsInMap( *itr ) );
-            ( *itr )->_ApplyAuraEffect( this, effIndex );
+            ASSERT( ( !GetOwner()->IsInWorld() && GetOwner() == target ) || GetOwner()->IsInMap( target ) );
+            target->_ApplyAuraEffect( this, effIndex );
         }
     }
 }
+
 void Aura::UpdateOwner( uint32 diff, WorldObject* owner )
 {
     if ( owner != m_owner )
@@ -2725,7 +2733,7 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
             }
         };
 
-	Trinity::UnitLambdaSearcher< decltype( Func ) > visitor( auraOwner, std::move( Func ) );
+        Trinity::UnitLambdaSearcher< decltype( Func ) > visitor( auraOwner, std::move( Func ) );
         auraOwner->VisitNearbyObject( query.MaxRadius, visitor );
     }
 }
