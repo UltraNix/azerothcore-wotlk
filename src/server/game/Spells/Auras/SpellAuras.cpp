@@ -2649,7 +2649,12 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
     SpellInfo const* spellInfo = GetSpellInfo();
 
     Unit* auraOwner = GetUnitOwner();
+    Unit* unitOwner = auraOwner->GetCharmerOrOwner();
+
     bool isAuraOwnerIsolated = auraOwner->HasUnitState( UNIT_STATE_ISOLATED );
+
+    uint32_t auraOwnerEffectMask = 0u;
+    uint32_t unitOwnerEffectMask = 0u;
 
     FillTargetMapGridQuery query;
     for ( uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex )
@@ -2662,7 +2667,7 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
         SpellEffectInfo const& spellEffectInfo = spellInfo->Effects[ effIndex ];
         if ( spellEffectInfo.Effect == SPELL_EFFECT_APPLY_AURA )
         {
-            targets[ auraOwner ] |= ( 1 << effIndex );
+            auraOwnerEffectMask |= ( 1 << effIndex );
             continue;
         }
 
@@ -2675,16 +2680,13 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
         switch ( spellEffectInfo.Effect )
         {
             case SPELL_EFFECT_APPLY_AREA_AURA_PET:
-                targets[ auraOwner ] |= ( 1 << effIndex );
+                auraOwnerEffectMask |= ( 1 << effIndex );
                 //! no break
             case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
             {
-                if ( Unit* owner = auraOwner->GetCharmerOrOwner() )
+                if ( unitOwner != nullptr && auraOwner->IsWithinDistInMap( unitOwner, radius ) )
                 {
-                    if ( auraOwner->IsWithinDistInMap( owner, radius ) )
-                    {
-                        targets[ owner ] |= ( 1 << effIndex );
-                    }
+                    unitOwnerEffectMask |= ( 1 << effIndex );
                 }
                 break;
             }
@@ -2707,7 +2709,7 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
 
                 if ( spellEffectInfo.Effect != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY )
                 {
-                    targets[ auraOwner ] |= ( 1 << effIndex );
+                    auraOwnerEffectMask |= ( 1 << effIndex );
                 }
 
                 query.Enabled = true;
@@ -2719,21 +2721,37 @@ void UnitAura::FillTargetMap( std::unordered_map<Unit*, uint8> & targets, Unit* 
         }
     }
 
+    if ( auraOwner != nullptr && auraOwnerEffectMask != 0u )
+    {
+        targets[ auraOwner ] |= auraOwnerEffectMask;
+    }
+
+    if ( unitOwner != nullptr && unitOwnerEffectMask != 0u )
+    {
+        targets[ unitOwner ] |= unitOwnerEffectMask;
+    }
+
     if ( query.Enabled )
     {
-        auto Func = [&]( Unit * unit )
+        auto func = [&]( Unit * unit )
         {
+            uint32_t effectMask = 0u;
             for ( uint8 effIndex = 0; effIndex < MAX_SPELL_EFFECTS; ++effIndex )
             {
                 auto & effect = query.Effect[ effIndex ];
                 if ( effect.Enabled && effect.Predicate( unit ) )
                 {
-                    targets[ unit ] |= ( 1 << effIndex );
+                    effectMask |= ( 1 << effIndex );
                 }
+            }
+
+            if ( effectMask != 0 )
+            {
+                targets[ unit ] |= effectMask;
             }
         };
 
-        Trinity::UnitLambdaSearcher< decltype( Func ) > visitor( auraOwner, std::move( Func ) );
+        Trinity::UnitLambdaSearcher< decltype( func ) > visitor( auraOwner, std::move( func ) );
         auraOwner->VisitNearbyObject( query.MaxRadius, visitor );
     }
 }
