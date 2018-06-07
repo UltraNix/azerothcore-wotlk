@@ -729,15 +729,19 @@ public:
             {
                 case DATA_MIMIRON_HARDMODE:
                     _mimironHardMode = true;
+                    SaveToDB();
                     break;
                 case DATA_HODIR_HARDMODE:
                     _hodirHardMode = true;
+                    SaveToDB();
                     break;
                 case DATA_THORIM_HARDMODE:
                     _thorimHardMode = true;
+                    SaveToDB();
                     break;
                 case DATA_FREYA_HARDMODE:
                     _freyaHardMode = true;
+                    SaveToDB();
                     break;
                 case TYPE_LEVIATHAN:
                     m_auiEncounter[type] = data;
@@ -1225,7 +1229,7 @@ public:
                 << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << ' '
                 << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] << ' ' << m_conspeedatoryAttempt << ' '
                 << m_unbrokenAchievement << ' ' << m_algalonTimer << ' ' << C_of_Ulduar_MASK << ' ' << _eventStarted << ' ' << _teamInInstance << _mimironHardMode << ' '
-                << _hodirHardMode << ' ' << _thorimHardMode << ' ' << _freyaHardMode;
+                << _thorimHardMode << ' ' << _freyaHardMode << ' ' << _hodirHardMode;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -1277,9 +1281,9 @@ public:
                 loadStream >> _eventStarted;
                 loadStream >> _teamInInstance;
                 loadStream >> _mimironHardMode;
-                loadStream >> _hodirHardMode;
                 loadStream >> _thorimHardMode;
                 loadStream >> _freyaHardMode;
+                loadStream >> _hodirHardMode;
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;

@@ -1385,7 +1385,6 @@ public:
         std::ostringstream stream;
         for (auto i = 0; i < 14; ++i)
         {
-            std::cout << "weszlo\n";
             stream << "Encounter: ";
             switch (i)
             {

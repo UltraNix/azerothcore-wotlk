@@ -533,10 +533,12 @@ public:
                 _aloneInTheDarknessBoost = true;
                 // hardmode checks, if one of those is false then return
                 if (!m_pInstance->GetData(DATA_MIMIRON_HARDMODE) ||
-                    !m_pInstance->GetData(DATA_MIMIRON_HARDMODE) ||
-                    !m_pInstance->GetData(DATA_MIMIRON_HARDMODE) ||
-                    !m_pInstance->GetData(DATA_MIMIRON_HARDMODE))
+                    !m_pInstance->GetData(DATA_THORIM_HARDMODE) ||
+                    !m_pInstance->GetData(DATA_FREYA_HARDMODE) ||
+                    !m_pInstance->GetData(DATA_HODIR_HARDMODE))
+                {
                     return;
+                }
             }
 
             _fightTimer = getMSTime();
@@ -776,6 +778,8 @@ public:
                             auto maxHealth = cr->GetMaxHealth();
                             cr->SetMaxHealth(maxHealth + (maxHealth * 0.2f));
                             cr->SetHealth(cr->GetMaxHealth());
+                            if (cr->IsAIEnabled)
+                                cr->AI()->SetData(DATA_SET_ZERO_KEEPERS, DATA_SET_ZERO_KEEPERS);
                         }
                         cr->SetVisible(false);
                     }
@@ -1079,8 +1083,13 @@ public:
             _checkTimer += diff;
             if (_checkTimer >= 500 && !_isSummoning)
             {
+                bool canSpawn = false;
+                if (me->GetInstanceScript())
+                    if (me->GetInstanceScript()->GetData(TYPE_YOGGSARON) == IN_PROGRESS)
+                        canSpawn = true;
+
                 Unit* who = me->SelectNearbyTarget(NULL, 6.0f);
-                if (who && who->IsInCombat() && who->GetTypeId() == TYPEID_PLAYER && !me->HasAura(SPELL_SUMMON_GUARDIAN_OF_YS) && !who->HasAura(SPELL_HODIR_FLASH_FREEZE))
+                if (who && canSpawn && who->GetTypeId() == TYPEID_PLAYER && !me->HasAura(SPELL_SUMMON_GUARDIAN_OF_YS) && !who->HasAura(SPELL_HODIR_FLASH_FREEZE))
                 {
                     _isSummoning = true;
                     Talk(0, who);
