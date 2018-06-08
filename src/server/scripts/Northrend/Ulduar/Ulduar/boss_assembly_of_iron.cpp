@@ -8,6 +8,7 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "ulduar.h"
 #include "SpellAuraEffects.h"
 #include "Player.h"
+#include "MoveSplineInit.h"
 
 enum AssemblySpells
 {
@@ -71,28 +72,29 @@ enum AssemblySpells
 enum eEnums
 {
     // Steelbreaker
-    EVENT_FUSION_PUNCH            = 1,
-    EVENT_STATIC_DISRUPTION        = 2,
-    EVENT_OVERWHELMING_POWER    = 3,
-    //EVENT_CHECK_MAIN_TANK        = 4,
+    EVENT_FUSION_PUNCH           = 1,
+    EVENT_STATIC_DISRUPTION      = 2,
+    EVENT_OVERWHELMING_POWER     = 3,
+    //EVENT_CHECK_MAIN_TANK      = 4,
 
     // Molgeim
-    EVENT_RUNE_OF_POWER            = 11,
+    EVENT_RUNE_OF_POWER          = 11,
     EVENT_SHIELD_OF_RUNES        = 12,
-    EVENT_RUNE_OF_DEATH            = 13,
-    EVENT_RUNE_OF_SUMMONING        = 14,
+    EVENT_RUNE_OF_DEATH          = 13,
+    EVENT_RUNE_OF_SUMMONING      = 14,
     EVENT_LIGHTNING_BLAST        = 15,
 
     // Brundir
-    EVENT_CHAIN_LIGHTNING        = 21,
-    EVENT_OVERLOAD                = 22,
-    EVENT_LIGHTNING_WHIRL        = 23,
+    EVENT_CHAIN_LIGHTNING       = 21,
+    EVENT_OVERLOAD              = 22,
+    EVENT_LIGHTNING_WHIRL       = 23,
     EVENT_LIGHTNING_TENDRILS    = 24,
     EVENT_LIGHTNING_LAND        = 25,
-    EVENT_LAND_LAND                = 26,
+    EVENT_LAND_LAND             = 26,
     EVENT_IMMUNE                = 27,
+    EVENT_MOVE_FLIGHT           = 28,
 
-    EVENT_ENRAGE                = 30,
+    EVENT_ENRAGE                = 30
 };
 
 enum AOISounds
@@ -721,12 +723,11 @@ public:
         EventMap events;
         InstanceScript* pInstance;
         uint32 _phase;
-        bool _flyPhase;
-        bool _needReturnFromFly;
 
         Unit* _flyTarget;
         uint32 _channelTimer;
-        uint32 _fightTimer = 0;
+        uint32 _fightTimer;
+        uint32 _flightCounter;
 
         bool _stunnedAchievement;
 
@@ -749,14 +750,14 @@ public:
             _fightTimer = 0;
             _channelTimer = 0;
             _phase = 0;
-            _flyPhase = false;
-            _needReturnFromFly = false;
+            _flightCounter = 0;
             _flyTarget = nullptr;
             _stunnedAchievement = true;
 
             events.Reset();
 
             me->SetDisableGravity(false);
+            me->SetCanFly(false);
             me->SetRegeneratingHealth(true);
             me->SetReactState(REACT_AGGRESSIVE);
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
@@ -910,31 +911,6 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (_flyPhase)
-            {
-                if (_flyTarget && me->GetDistance2d(_flyTarget) >= 6)
-                {
-                    //float speed = me->GetDistance(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ()+15) / (1500.0f * 0.001f);
-                    me->SendMonsterMove(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ()+15, 1500, SPLINEFLAG_FLYING);
-                    me->SetPosition(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ(), _flyTarget->GetOrientation());
-                }
-            }
-            else if (!_flyPhase && _needReturnFromFly)
-            {
-                _needReturnFromFly = false;
-
-                if (_flyTarget)
-                {
-                    me->SendMonsterMove(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ(), 1500, SPLINEFLAG_FLYING);
-                    me->SetPosition(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ(), _flyTarget->GetOrientation());
-                }
-                else
-                {
-                    me->SendMonsterMove(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 1500, SPLINEFLAG_FLYING);
-                    me->SetPosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                }
-            }
-
             events.Update(diff);
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -973,25 +949,27 @@ public:
                     me->MonsterYell("Let the storm clouds rise and rain down death from above!", LANG_UNIVERSAL, 0);
                     me->PlayDirectSound(SOUND_BRUNDIR_FLIGHT);
 
-                    _flyPhase = true;
-                    _needReturnFromFly = true;
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return tar->IsPlayer() && tar->IsWithinLOSInMap(me); }))
                         _flyTarget = target;
                     else
                         _flyTarget = me->GetVictim();
+
+                    me->SetCanFly(true);
                     me->SetRegeneratingHealth(false);
                     me->SetDisableGravity(true);
+                   // me->SetHover(true);
 
                     //me->CombatStop();
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->GetMotionMaster()->Clear();
                     me->StopMoving();
-                    me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-                    me->SendMonsterMove(_flyTarget->GetPositionX(), _flyTarget->GetPositionY(), _flyTarget->GetPositionZ()+15, 1500, SPLINEFLAG_FLYING);
-                    me->SetTarget(_flyTarget->GetGUID());
-
+                    Movement::MoveSplineInit init(me);
+                    init.SetVelocity(5.0f);
+                    init.MoveTo(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 15.0f);
+                    auto time = init.Launch();
+                    events.ScheduleEvent(EVENT_MOVE_FLIGHT, time + 500);
                     me->CastSpell(me, SPELL_LIGHTNING_TENDRILS, true);
                     me->CastSpell(me, 61883, true);
                     events.ScheduleEvent(EVENT_LIGHTNING_LAND, 16000);
@@ -999,11 +977,31 @@ public:
                     me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
                     break;
                 }
+                case EVENT_MOVE_FLIGHT:
+                {
+                    Position pos;
+                    if (_flyTarget && _flyTarget->IsAlive() && _flightCounter < 11)
+                        pos = _flyTarget->GetPosition();
+                    else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* tar) -> bool { return tar->IsPlayer() && tar->IsWithinLOSInMap(me); }))
+                    {
+                        _flightCounter = 0;
+                        _flyTarget = target;
+                        pos = target->GetPosition();
+                        me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+                        me->SetTarget(_flyTarget->GetGUID());
+                    }
+                    ++_flightCounter;
+                    pos.m_positionZ += 15.0f;
+                    me->GetMotionMaster()->MovePoint(10, pos);
+                    events.RepeatEvent(500);
+                    break;
+                }
                 case EVENT_LIGHTNING_LAND:
                 {
-                    float speed = me->GetDistance(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()) / (1000.0f * 0.001f);
-                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), speed);
-                    _flyPhase = false;
+                    _flightCounter = 0;
+                    events.CancelEvent(EVENT_MOVE_FLIGHT);
+                    float speed = me->GetDistance(me->GetPositionX(), me->GetPositionY(), 427.267f) / (1000.0f * 0.001f);
+                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 427.267f, speed);
                     events.ScheduleEvent(EVENT_LAND_LAND, 1000);
                     events.PopEvent();
                     break;
@@ -1051,6 +1049,24 @@ struct npc_overload_ball_assembly_AI : public ScriptedAI
     void EnterCombat(Unit* /*who*/) override { }
     void AttackStart(Unit* /*who*/) override { }
     void EnterEvadeMode() override { }
+};
+
+// 61884 - Lightning Tendrils Visual Effect
+class spell_lightning_tendrils_visual_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_lightning_tendrils_visual_SpellScript);
+
+    void ModDestHeight(SpellDestination& dest)
+    {
+        Position const offset = { frand(-10.0f, 10.0f), frand(-10.0f, 10.0f), 0.0f, 0.0f };
+        dest._position.m_positionZ = 427.272888f;
+        dest.RelocateOffset(offset);
+    }
+
+    void Register() override
+    {
+        OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_lightning_tendrils_visual_SpellScript::ModDestHeight, EFFECT_0, TARGET_DEST_CASTER_RANDOM);
+    }
 };
 
 class spell_shield_of_runes : public SpellScriptLoader
@@ -1201,6 +1217,7 @@ void AddSC_boss_assembly_of_iron()
     new AuraScriptLoaderEx<spell_assembly_overwhelming_power_AuraScript>("spell_assembly_overwhelming_power");
     new spell_assembly_rune_of_summoning();
     new SpellScriptLoaderEx<spell_summon_overload_ball_SpellScript>("spell_summon_overload_ball");
+    new SpellScriptLoaderEx<spell_lightning_tendrils_visual_SpellScript>("spell_lightning_tendrils_visual");
 
     new achievement_assembly_of_iron("achievement_but_im_on_your_side", 0);
     new achievement_assembly_of_iron("achievement_assembly_steelbreaker", NPC_STEELBREAKER);
