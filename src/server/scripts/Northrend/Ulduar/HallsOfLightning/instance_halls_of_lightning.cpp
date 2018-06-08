@@ -158,9 +158,9 @@ public:
                     break;
                 case TYPE_LOKEN:
                     HandleGameObject(m_uiLokenDoorGUID, true);
-                    //Appears to be type 5 GO with animation. Need to figure out how this work, code below only placeholder
+
                     if (GameObject* pGlobe = instance->GetGameObject(m_uiLokenGlobeGUID))
-                        pGlobe->SetGoState(GO_STATE_ACTIVE);
+                        pGlobe->SendCustomAnim(0);
 
                     break;
             }
@@ -173,7 +173,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "H L " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' 
+            saveStream << "H L " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' '
                 << m_auiEncounter[2] << ' ' << m_auiEncounter[3] << ' ' << m_auiEncounter[4];
 
             OUT_SAVE_INST_DATA_COMPLETE;
