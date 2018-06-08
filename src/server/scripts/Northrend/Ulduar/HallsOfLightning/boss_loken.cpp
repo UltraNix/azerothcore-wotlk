@@ -11,16 +11,17 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 enum LokenSpells
 {
     SPELL_ARC_LIGHTNING                = 52921,
-    SPELL_LIGHTNING_NOVA_N            = 52960,
-    SPELL_LIGHTNING_NOVA_H            = 59835,
+    SPELL_LIGHTNING_NOVA_N             = 52960,
+    SPELL_LIGHTNING_NOVA_H             = 59835,
     SPELL_LIGHTNING_NOVA_VISUAL        = 56502,
-    SPELL_LIGHTNING_NOVA_THUNDERS    = 52663,
+    SPELL_LIGHTNING_NOVA_THUNDERS      = 52663,
 
-    SPELL_PULSING_SHOCKWAVE_N        = 52961,
-    SPELL_PULSING_SHOCKWAVE_H        = 59836,
+    SPELL_PULSING_SHOCKWAVE_N          = 52961,
+    SPELL_PULSING_SHOCKWAVE_H          = 59836,
+    SPELL_PULSING_SHOCKWAVE_AURA       = 59414,
 
     // Achievement
-    ACHIEVEMENT_TIMELY_DEATH        = 20384
+    ACHIEVEMENT_TIMELY_DEATH           = 20384
 };
 
 enum Yells
@@ -122,7 +123,11 @@ public:
             Talk(SAY_DEATH);
 
             if (m_pInstance)
+            {
                 m_pInstance->SetData(TYPE_LOKEN, DONE);
+                m_pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_PULSING_SHOCKWAVE_AURA);
+
+            }
         }
 
         void LokenSpeach(bool hp)
@@ -177,7 +182,7 @@ public:
 
                     me->SetControlled(false, UNIT_STATE_STUNNED);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    
+
                     if (Player* target = SelectTargetFromPlayerList(80))
                         AttackStart(target);
                 }
