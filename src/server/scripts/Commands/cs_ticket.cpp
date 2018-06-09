@@ -141,7 +141,8 @@ public:
         if (!ticket || ticket->IsClosed() || ticket->IsCompleted())
         {
             handler->SendSysMessage(LANG_COMMAND_TICKETNOTEXIST);
-            return true;
+            handler->SetSentErrorMessage(true);
+            return false;
         }
 
         // Ticket should be assigned to the player who tries to close it.
@@ -150,7 +151,8 @@ public:
         if (player && ticket->IsAssignedNotTo(player->GetGUID()))
         {
             handler->PSendSysMessage(LANG_COMMAND_TICKETCANNOTCLOSE, ticket->GetId());
-            return true;
+            handler->SetSentErrorMessage(true);
+            return false;
         }
 
         sTicketMgr->CloseTicket(ticket->GetId(), player ? player->GetGUID() : -1);
