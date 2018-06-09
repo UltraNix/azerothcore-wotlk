@@ -267,8 +267,8 @@ public:
                     break;
                 case 10:
                     me->Dismount();
-                    me->DespawnOrUnsummon();
                     cantReset = false;
+                    me->SetCorpseDelay(0);
                     break;
             }
         }
