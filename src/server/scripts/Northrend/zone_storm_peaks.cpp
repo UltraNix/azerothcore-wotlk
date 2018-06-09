@@ -1059,6 +1059,9 @@ public:
 
         void SpellHit(Unit* caster, const SpellInfo* spell)
         {
+            if (freed)
+                return;
+
             if (spell->Id != SPELL_ICE_LANCE)
                 return;
 
