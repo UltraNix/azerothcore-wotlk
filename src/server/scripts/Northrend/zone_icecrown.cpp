@@ -2423,6 +2423,23 @@ public:
     }
 };
 
+class npc_blastbolt_brother : public CreatureScript
+{
+public:
+    npc_blastbolt_brother() : CreatureScript("npc_blastbolt_brother") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+        if (!player)
+            return true;
+        sGameEventMgr->SendWorldStateUpdate(player, 134);
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+};
+
 enum scourgeWagon
 {
     SPELL_WAGON_EXPLOSION_ROLLER       = 52325,
@@ -2473,6 +2490,7 @@ void AddSC_icecrown()
     new npc_infra_green_bomber_generic();
     new npc_cauldron_target_basic_chemistry();
     new SpellScriptLoaderEx<spell_scourgewagon_explosion_SpellScript>("spell_scourgewagon_explosion");
+    new npc_blastbolt_brother();
 
     // Theirs
     new npc_guardian_pavilion();

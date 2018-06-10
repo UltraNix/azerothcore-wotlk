@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -121,8 +121,8 @@ class GameEventMgr
         void HandleWorldEventGossip(Player* player, Creature* c);
         uint32 GetNPCFlag(Creature* cr);
         uint32 GetNpcTextId(uint32 guid);
-    private:
         void SendWorldStateUpdate(Player* player, uint16 event_id);
+    private:
         void AddActiveEvent(uint16 event_id) { m_ActiveEvents.insert(event_id); }
         void RemoveActiveEvent(uint16 event_id) { m_ActiveEvents.erase(event_id); }
         void ApplyNewEvent(uint16 event_id);
