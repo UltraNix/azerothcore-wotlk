@@ -963,7 +963,12 @@ public:
                 return;
 
             if (GetTarget() && GetTarget()->GetVehicle())
+            {
+                Position pos(1756.25f + irand(-3, 3), -8.3f + irand(-3, 3), 449.0f);
+                GetTarget()->Relocate(pos);
                 GetTarget()->ExitVehicle();
+                GetTarget()->GetMotionMaster()->MoveJump(pos, 10, 10);
+            }
         }
 
         void Register() override
