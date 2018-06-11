@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -229,7 +229,7 @@ enum LevelRequirementVsMode
 {
     LEVELREQUIREMENT_HEROIC = 70
 };
- 
+
 struct ZoneDynamicInfo
 {
     ZoneDynamicInfo() : MusicId(0), WeatherId(0), WeatherGrade(0.0f),
@@ -403,6 +403,7 @@ class Map : public GridRefManager<NGridType>
         void markCell(uint32 pCellId) { marked_cells.set(pCellId); }
 
         bool HavePlayers() const { return !m_mapRefManager.isEmpty(); }
+        uint32 GetPlayersCount() const;
         uint32 GetPlayersCountExceptGMs() const;
 
         void AddWorldObject(WorldObject* obj) { i_worldObjects.insert(obj); }
@@ -504,7 +505,7 @@ class Map : public GridRefManager<NGridType>
         void SetZoneMusic(uint32 zoneId, uint32 musicId);
         void SetZoneWeather(uint32 zoneId, uint32 weatherId, float weatherGrade);
         void SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime);
-  
+
         // Checks encounter state at kill/spellcast, originally in InstanceScript however not every map has instance script :(
         void UpdateEncounterState(EncounterCreditType type, uint32 creditEntry, Unit* source);
         void LogEncounterFinished(EncounterCreditType type, uint32 creditEntry);
@@ -703,7 +704,7 @@ class BattlegroundMap : public Map
 
 template<class T, class CONTAINER>
 inline void Map::Visit(Cell const& cell, TypeContainerVisitor<T, CONTAINER>& visitor)
-{ 
+{
     const uint32 x = cell.GridX();
     const uint32 y = cell.GridY();
     const uint32 cell_x = cell.CellX();
@@ -736,7 +737,7 @@ inline void Map::VisitAll(float const& x, float const& y, float radius, NOTIFIER
 // should be used with Searcher notifiers, tries to search world if nothing found in grid
 template<class NOTIFIER>
 inline void Map::VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier)
-{ 
+{
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();
@@ -752,7 +753,7 @@ inline void Map::VisitFirstFound(const float &x, const float &y, float radius, N
 
 template<class NOTIFIER>
 inline void Map::VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier)
-{ 
+{
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();
@@ -763,7 +764,7 @@ inline void Map::VisitWorld(const float &x, const float &y, float radius, NOTIFI
 
 template<class NOTIFIER>
 inline void Map::VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier)
-{ 
+{
     CellCoord p(Trinity::ComputeCellCoord(x, y));
     Cell cell(p);
     cell.SetNoCreate();

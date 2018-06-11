@@ -2380,6 +2380,11 @@ void Map::RemoveAllObjectsInRemoveList()
     //sLog->outDebug(LOG_FILTER_MAPS, "Object remover 2 check.");
 }
 
+uint32 Map::GetPlayersCount() const
+{
+    return m_mapRefManager.getSize();
+}
+
 uint32 Map::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
