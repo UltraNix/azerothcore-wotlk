@@ -22,7 +22,7 @@ enum Texts
     SAY_SUMMON_MAJ_1        = 9,
     SAY_SUMMON_MAJ_2        = 10,
     SAY_SUMMON_MAJ_3        = 11,
-    // Ragnaros summon (Ragnaros texts) 
+    // Ragnaros summon (Ragnaros texts)
     SAY_SUMMON_RAG_1        = 0,
     SAY_SUMMON_RAG_2        = 1
 };
@@ -32,9 +32,9 @@ enum Spells
     SPELL_MAGIC_REFLECTION  = 20619,
     SPELL_DAMAGE_REFLECTION = 21075,
     SPELL_AEGIS             = 20620,
-    SPELL_TELEPORT_RANDOM   = 20618,                     
-    SPELL_TELEPORT_TARGET   = 20534,                     
-    SPELL_IMMUNE_POLY       = 21087,                        
+    SPELL_TELEPORT_RANDOM   = 20618,
+    SPELL_TELEPORT_TARGET   = 20534,
+    SPELL_IMMUNE_POLY       = 21087,
 
     SPELL_TELEPORT_VISUAL   = 19484,
     SPELL_TELEPORT_EFFECT   = 19527,
@@ -101,25 +101,19 @@ struct boss_majordomoAI : public BossAI
     {
         _EnterEvadeMode();
         me->GetMotionMaster()->MoveTargetedHome();
-        if (!summons.empty())
+        summons.Broadcast([](Creature* summon)
         {
-            for (auto itr : summons)
-            {
-                if (Creature* summon = ObjectAccessor::GetCreature(*me, itr))
-                {
-                    summon->Respawn();
-                    summon->AI()->EnterEvadeMode();
-                    summon->GetMotionMaster()->MoveTargetedHome();
-                }
-            }
-        }
+            summon->Respawn();
+            summon->AI()->EnterEvadeMode();
+            summon->GetMotionMaster()->MoveTargetedHome();
+        });
     }
 
     void EnterCombat(Unit* /*who*/)
     {
         _EnterCombat();
         Talk(SAY_AGGRO);
-        me->CallForHelp(30.f);
+        summons.DoZoneInCombat();
         events.ScheduleEvent(EVENT_REFLECTION_SHIELD, 15000);
         events.ScheduleEvent(EVENT_TELEPORT_RANDOM, 15000);
         events.ScheduleEvent(EVENT_TELEPORT_TARGET, 30000);
@@ -132,7 +126,7 @@ struct boss_majordomoAI : public BossAI
             switch (++_addsKilled)
             {
                 case 4:
-                    DoCastAOE(SPELL_IMMUNE_POLY, true);
+                    DoCastSelf(SPELL_IMMUNE_POLY, true);
                     break;
                 case 7:
                     Talk(SAY_LAST_ADD);
@@ -142,7 +136,7 @@ struct boss_majordomoAI : public BossAI
                     me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
                     me->setFaction(35);
                     _EnterEvadeMode();
-                    me->GetMotionMaster()->MovePoint(1, me->GetHomePosition(), false); 
+                    me->GetMotionMaster()->MovePoint(1, me->GetHomePosition(), false);
                     break;
                 default:
                     break;
@@ -214,10 +208,7 @@ struct boss_majordomoAI : public BossAI
                 switch (eventId)
                 {
                     case EVENT_DEFEAT_1:
-                        if (!summons.empty())
-                            for (auto itr : summons)
-                                if (Creature* add = ObjectAccessor::GetCreature(*me, itr))
-                                    summons.Despawn(add);
+                        summons.DespawnAll();
                         me->SetFacingTo(3.12414f);
                         Talk(SAY_DEFEAT_1);
                         events.ScheduleEvent(EVENT_DEFEAT_2, 7500);
@@ -231,16 +222,16 @@ struct boss_majordomoAI : public BossAI
                         events.ScheduleEvent(EVENT_TELE_TO_RAGNAROS_VISUAL, 21500);
                         break;
                     case EVENT_TELE_TO_RAGNAROS_VISUAL:
-                        DoCast(me, SPELL_TELEPORT_VISUAL, true);
+                        DoCastSelf(SPELL_TELEPORT_VISUAL, true);
                         me->setFaction(35);
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         events.ScheduleEvent(EVENT_TELE_TO_RAGNAROS_EFFECT, 1000);
                         break;
                     case EVENT_TELE_TO_RAGNAROS_EFFECT:
                         if (Map* map = me->GetMap())
                             map->LoadGrid(854.16f, -818.87f);
                         me->setActive(true);
-                        DoCast(me, SPELL_TELEPORT_EFFECT, true);
+                        DoCastSelf(SPELL_TELEPORT_EFFECT, true);
+                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         break;
                     case EVENT_RAG_SUMMON_1:
                         me->setActive(false);

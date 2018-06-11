@@ -160,8 +160,8 @@ class InstanceScript : public ZoneScript
         //When save is needed, this function generates the data
         virtual std::string GetSaveData();
 
-        Creature* GetCreature(uint32 type);
-        GameObject* GetGameObject(uint32 type);
+        Creature* GetCreature(uint32 type) const;
+        GameObject* GetGameObject(uint32 type) const;
         uint64 GetGuidData(uint32 type) const;
         void LoadObjectData(ObjectData const * creatureData, ObjectData const * gameObjectData);
 

@@ -31,12 +31,12 @@
 #include "Opcodes.h"
 #include "Spell.h"
 
-Creature* InstanceScript::GetCreature(uint32 type)
+Creature* InstanceScript::GetCreature(uint32 type) const
 {
     return instance->GetCreature(GetGuidData(type));
 }
 
-GameObject* InstanceScript::GetGameObject(uint32 type)
+GameObject* InstanceScript::GetGameObject(uint32 type) const
 {
     return instance->GetGameObject(GetGuidData(type));
 }

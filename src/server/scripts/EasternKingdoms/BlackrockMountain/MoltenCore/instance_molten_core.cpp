@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -23,11 +23,17 @@
 #include "molten_core.h"
 #include "TemporarySummon.h"
 
+enum InstanceMoltenCore
+{
+    EVENT_CHECK_ENCOUNTER_STATE  = 1
+};
+
 ObjectData const creatureData[] =
 {
-    { NPC_GARR    , BOSS_GARR     },
-    { NPC_RAGNAROS, BOSS_RAGNAROS },
-    { 0,            0             } // END
+    { NPC_GARR              , BOSS_GARR                 },
+    { NPC_RAGNAROS          , BOSS_RAGNAROS             },
+    { NPC_MAJORDOMO_EXECUTUS, BOSS_MAJORDOMO_EXECUTUS   },
+    { 0                     , 0                         } // END
 };
 
 ObjectData const objectData[] =
@@ -40,50 +46,40 @@ struct instance_molten_core_InstanceMapScript : public InstanceScript
 {
     instance_molten_core_InstanceMapScript(Map* map) : InstanceScript(map)
     {
+        SetHeaders(DataHeader);
         SetBossNumber(MAX_ENCOUNTER);
         LoadObjectData(creatureData, objectData);
-        _executusSchedule = NULL;
-        _deadBossCount = 0;
-        _ragnarosAddDeaths = 0;
-        _isLoading = false;
-        _summonedExecutus = false;
     }
 
-    ~instance_molten_core_InstanceMapScript()
+    void OnPlayerEnter(Player* /*player*/) override
     {
-        delete _executusSchedule;
+        if (!_events.GetNextEventTime(EVENT_CHECK_ENCOUNTER_STATE))
+            _events.ScheduleEvent(EVENT_CHECK_ENCOUNTER_STATE, 10s);
     }
 
-    void OnPlayerEnter(Player* /*player*/)
+    void SummonMajordomoOrRagnaros() const
     {
-        if (_executusSchedule)
+        bool canSummon = true;
+        if (GetCreature(BOSS_MAJORDOMO_EXECUTUS))
+            canSummon = false;
+
+        if (canSummon && GetBossState(BOSS_MAJORDOMO_EXECUTUS) == DONE && !GetCreature(BOSS_RAGNAROS))
         {
-            SummonMajordomoExecutus(*_executusSchedule);
-            delete _executusSchedule;
-            _executusSchedule = NULL;
-        }
-    }
-
-    void SetData(uint32 type, uint32 data)
-    {
-        if (type == DATA_RAGNAROS_ADDS)
-        {
-            if (data == 1)
-                ++_ragnarosAddDeaths;
-            else if (data == 0)
-                _ragnarosAddDeaths = 0;
-        }
-    }
-
-    uint32 GetData(uint32 type) const
-    {
-        switch (type)
-        {
-            case DATA_RAGNAROS_ADDS:
-                return _ragnarosAddDeaths;
+            if (Creature* ragnaros = instance->SummonCreature(NPC_RAGNAROS, RagnarosSummonPos, nullptr, 172800000))
+            {
+                ragnaros->SetReactState(REACT_AGGRESSIVE);
+                ragnaros->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                return;
+            }
         }
 
-        return 0;
+        for (uint16 bossId = 0; bossId != BOSS_MAJORDOMO_EXECUTUS; ++bossId)
+            if (GetBossState(bossId) != DONE)
+                canSummon = false;
+
+        if (canSummon)
+            if (Creature* majordomo = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, MajordomoSummonPos))
+                majordomo->SummonCreatureGroup(SUMMON_GROUP_MAJORDOMO);
     }
 
     bool SetBossState(uint32 bossId, EncounterState state)
@@ -91,14 +87,7 @@ struct instance_molten_core_InstanceMapScript : public InstanceScript
         if (!InstanceScript::SetBossState(bossId, state))
             return false;
 
-        if (state == DONE && bossId < BOSS_MAJORDOMO_EXECUTUS)
-            ++_deadBossCount;
-
-        if (_isLoading)
-            return true;
-
-        if (_deadBossCount == 8)
-            SummonMajordomoExecutus(false);
+        SummonMajordomoOrRagnaros();
 
         if (bossId == BOSS_MAJORDOMO_EXECUTUS && state == DONE)
             DoRespawnGameObject(GetGameObject(DATA_CACHE_OF_THE_FIRELORD)->GetGUID(), 7 * DAY);
@@ -106,83 +95,19 @@ struct instance_molten_core_InstanceMapScript : public InstanceScript
         return true;
     }
 
-    void SummonMajordomoExecutus(bool done)
+    void Update(uint32 diff) override
     {
-        if (_summonedExecutus)
-            return;
+        _events.Update(diff);
 
-        _summonedExecutus = true;
-        if (!done)
+        if (_events.ExecuteEvent() == EVENT_CHECK_ENCOUNTER_STATE)
         {
-            if (Creature* majordomo = instance->SummonCreature(NPC_MAJORDOMO_EXECUTUS, MajordomoSummonPos))
-                majordomo->SummonCreatureGroup(SUMMON_GROUP_MAJORDOMO);
+            SummonMajordomoOrRagnaros();
+            _events.Repeat(10s);
         }
     }
 
-    std::string GetSaveData()
-    {
-        OUT_SAVE_INST_DATA;
-
-        std::ostringstream saveStream;
-        saveStream << "M C " << GetBossSaveData();
-
-        OUT_SAVE_INST_DATA_COMPLETE;
-        return saveStream.str();
-    }
-
-    void Load(char const* data)
-    {
-        if (!data)
-        {
-            OUT_LOAD_INST_DATA_FAIL;
-            return;
-        }
-
-        _isLoading = true;
-        OUT_LOAD_INST_DATA(data);
-
-        char dataHead1, dataHead2;
-
-        std::istringstream loadStream(data);
-        loadStream >> dataHead1 >> dataHead2;
-
-        if (dataHead1 == 'M' && dataHead2 == 'C')
-        {
-            EncounterState states[MAX_ENCOUNTER];
-            uint8 executusCounter = 0;
-
-            // need 2 loops to check spawning executus/ragnaros
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-            {
-                uint32 tmpState;
-                loadStream >> tmpState;
-                if (tmpState == IN_PROGRESS || tmpState > TO_BE_DECIDED)
-                    tmpState = NOT_STARTED;
-                states[i] = EncounterState(tmpState);
-
-                    if (tmpState == DONE && i < BOSS_MAJORDOMO_EXECUTUS)
-                    ++executusCounter;
-            }
-
-            if (executusCounter >= 8 && states[BOSS_RAGNAROS] != DONE)
-                _executusSchedule = new bool(states[BOSS_MAJORDOMO_EXECUTUS] == DONE);
-
-            for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-                SetBossState(i, states[i]);
-        }
-        else
-            OUT_LOAD_INST_DATA_FAIL;
-
-        OUT_LOAD_INST_DATA_COMPLETE;
-        _isLoading = false;
-    }
-
-private:
-    bool* _executusSchedule;
-    uint8 _deadBossCount;
-    uint8 _ragnarosAddDeaths;
-    bool _isLoading;
-    bool _summonedExecutus;
+    private:
+        EventMap _events;
 };
 
 void AddSC_instance_molten_core()

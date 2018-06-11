@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 
 #ifndef DEF_MOLTEN_CORE_H
 #define DEF_MOLTEN_CORE_H
+
+#define DataHeader "MC"
 
 enum Encounters
 {
@@ -45,7 +47,7 @@ enum Actions
 Position const RagnarosSummonPos = { 838.510f, -829.840f, -232.000f, 2.00000f };
 Position const MajordomoDefeatPos = { 758.089f, -1176.71f, -118.640f };
 Position const MajordomoSummonPos = { 758.089f, -1176.71f, -118.640f, 3.12414f };
-Position const MajordomoPath[3] = 
+Position const MajordomoPath[3] =
 {
     { 838.790771f, -810.536194f, -229.509171f },
     { 834.175598f, -811.452026f, -228.992126f },
@@ -66,7 +68,7 @@ enum Creatures
     NPC_RAGNAROS                    = 11502,
     NPC_FLAMEWAKER_HEALER           = 11663,
     NPC_FLAMEWAKER_ELITE            = 11664,
-    NPC_SON_OF_FLAME                = 12143,                  
+    NPC_SON_OF_FLAME                = 12143,
     NPC_FLAME_OF_RAGNAROS           = 13148,
     NPC_CORE_HOUND                  = 11671
 };
@@ -75,11 +77,6 @@ enum GameObjects
 {
     GO_CACHE_OF_THE_FIRELORD        = 179703,
     GO_LAVA_STEAM                   = 178107,
-};
-
-enum Data
-{
-    DATA_RAGNAROS_ADDS  = 0,
 };
 
 enum SummonGroups
