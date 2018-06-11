@@ -915,6 +915,12 @@ public:
             }
 
             DoMeleeAttackIfReady();
+            EnterEvadeIfOutOfCombatArea();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetPositionX() < 2135.0f;
         }
     };
 };
@@ -1035,6 +1041,12 @@ public:
             }
 
             DoMeleeAttackIfReady();
+            EnterEvadeIfOutOfCombatArea();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetPositionX() < 2135.0f;
         }
     };
 };
@@ -1145,6 +1157,12 @@ public:
             }
 
             DoMeleeAttackIfReady();
+            EnterEvadeIfOutOfCombatArea();
+        }
+
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetPositionX() < 2135.0f;
         }
     private:
         SummonList summons;
