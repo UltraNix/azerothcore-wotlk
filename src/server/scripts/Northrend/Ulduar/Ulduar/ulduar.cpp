@@ -537,8 +537,11 @@ uint32 const SPELL_BOMB_BOT_EXPLOSION_GAUNTLET = 63801;
 
 struct npc_boomer_xp500_ulduar_AI : public ScriptedAI
 {
-    npc_boomer_xp500_ulduar_AI(Creature* creature) : ScriptedAI(creature)
+    npc_boomer_xp500_ulduar_AI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
     {
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         _exploded = false;
     }
 
