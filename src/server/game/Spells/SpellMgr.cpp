@@ -8238,6 +8238,9 @@ void SpellMgr::LoadDbcDataCorrections()
     vse->m_flags &= ~VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE;
     vse = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(4693)); // Siege Engine, Accessory
     vse->m_flags &= ~VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE;
+    //! Yogg-sarons constrictor tentacle, remove Can attack flag
+    vse = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(3788));
+    vse->m_flags &= ~VEHICLE_SEAT_FLAG_CAN_ATTACK;
 
     // pussywizard: fix z offset for some vehicles:
     vse = const_cast<VehicleSeatEntry*>(sVehicleSeatStore.LookupEntry(6206)); // Marrowgar - Bone Spike
