@@ -13109,27 +13109,33 @@ void SetUInt16Value( uint32 & dst, uint8 offset, uint16 value )
 void Player::SetVisibleItemSlot(uint8 slot, ItemRef const& pItem)
 {
     int entryIdx = PLAYER_VISIBLE_ITEM_1_ENTRYID + ( slot * 2 );
+    int entryIdx2 = entryIdx - PLAYER_VISIBLE_SLOTS_START;
+
     int enchantIdx = PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + ( slot * 2 );
+    int enchantIdx2 = enchantIdx - PLAYER_VISIBLE_SLOTS_START;
+
+    ASSERT(entryIdx2 >= 0 && entryIdx2 < PLAYER_VISIBLE_SLOTS_COUNT);
+    ASSERT(enchantIdx2 >= 0 && enchantIdx2 < PLAYER_VISIBLE_SLOTS_COUNT);
 
     if (pItem)
     {
-        SetUInt32Value( entryIdx, pItem->GetEntry());
-        SetUInt16Value( enchantIdx, 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
-        SetUInt16Value( enchantIdx, 1, pItem->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
+        SetUInt32Value(entryIdx, pItem->GetEntry());
+        SetUInt16Value(enchantIdx, 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
+        SetUInt16Value(enchantIdx, 1, pItem->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
 
-        m_realVisibleSlots[ entryIdx - PLAYER_VISIBLE_SLOTS_START ] = pItem->GetEntry();
+        m_realVisibleSlots[ entryIdx2 ] = pItem->GetEntry();
 
-        uint32 & enchantSlot = m_realVisibleSlots[ enchantIdx - PLAYER_VISIBLE_SLOTS_START ];
-        ::SetUInt16Value( enchantSlot, 0, pItem->GetEnchantmentId( PERM_ENCHANTMENT_SLOT ) );
-        ::SetUInt16Value( enchantSlot, 1, pItem->GetEnchantmentId( TEMP_ENCHANTMENT_SLOT ) );
+        uint32 & enchantSlot = m_realVisibleSlots[ enchantIdx2 ];
+        ::SetUInt16Value(enchantSlot, 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
+        ::SetUInt16Value(enchantSlot, 1, pItem->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
     }
     else
     {
         SetUInt32Value( entryIdx, 0);
         SetUInt32Value( enchantIdx, 0);
 
-        m_realVisibleSlots[ entryIdx - PLAYER_VISIBLE_SLOTS_START ] = 0;
-        m_realVisibleSlots[ enchantIdx - PLAYER_VISIBLE_SLOTS_START ] = 0;
+        m_realVisibleSlots[ entryIdx2 ] = 0;
+        m_realVisibleSlots[ enchantIdx2 ] = 0;
     }
 
     sScriptMgr->OnAfterPlayerSetVisibleItemSlot(this, slot, pItem);
@@ -13137,7 +13143,10 @@ void Player::SetVisibleItemSlot(uint8 slot, ItemRef const& pItem)
 
 uint32 Player::RealVisibleItemData( uint32 index ) const
 {
-    return m_realVisibleSlots[ index - PLAYER_VISIBLE_SLOTS_START ];
+    int realIndex = (int)index - PLAYER_VISIBLE_SLOTS_START;
+    ASSERT( realIndex >= 0 && realIndex < PLAYER_VISIBLE_SLOTS_COUNT );
+
+    return m_realVisibleSlots[ realIndex ];
 }
 
 void Player::VisualizeItem(uint8 slot, ItemRef const& pItem)

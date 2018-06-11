@@ -1116,7 +1116,7 @@ private:
 };
 
 const uint32 PLAYER_VISIBLE_SLOTS_START = PLAYER_VISIBLE_ITEM_1_ENTRYID;
-const uint32 PLAYER_VISIBLE_SLOTS_COUNT = PLAYER_VISIBLE_ITEM_19_ENCHANTMENT - PLAYER_VISIBLE_ITEM_1_ENTRYID + 1;
+const uint32 PLAYER_VISIBLE_SLOTS_COUNT = ( EQUIPMENT_SLOT_END - EQUIPMENT_SLOT_START ) * 2u;
 
 class Player : public Unit, public GridObject<Player>
 {
@@ -3051,7 +3051,7 @@ class Player : public Unit, public GridObject<Player>
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
-        uint32 m_realVisibleSlots[ PLAYER_VISIBLE_SLOTS_COUNT ];
+        uint32 m_realVisibleSlots[ PLAYER_VISIBLE_SLOTS_COUNT + 1];
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);
