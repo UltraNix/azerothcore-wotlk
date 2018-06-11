@@ -1041,7 +1041,7 @@ class spell_kologarn_shockwave_SpellScript : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-        targets.remove_if(Trinity::UnitAuraCheck(true, GetCaster()->GetMap()->Is25ManRaid() ? SPELL_STONE_GRIP_DOT_10 : SPELL_STONE_GRIP_DOT_25));
+        targets.remove_if(Trinity::UnitAuraCheck(true, GetCaster()->GetMap()->Is25ManRaid() ? SPELL_STONE_GRIP_DOT_25 : SPELL_STONE_GRIP_DOT_10));
     }
 
     void Register() override
