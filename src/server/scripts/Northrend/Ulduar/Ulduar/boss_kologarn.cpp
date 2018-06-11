@@ -932,8 +932,10 @@ class spell_ulduar_squeezed_lifeless : public SpellScriptLoader
                     return;
 
                 // Hack to set correct position is in _ExitVehicle()
+                Position pos(1756.25f + frand(-3.f, 3.f), -8.3f + frand(-3.f, 3.f), 449.0f);
+                GetHitPlayer()->Relocate(pos);
                 GetHitPlayer()->ExitVehicle();
-            }
+                GetHitPlayer()->GetMotionMaster()->MoveJump(pos, 10, 10);            }
 
             void Register()
             {
@@ -964,7 +966,7 @@ public:
 
             if (GetTarget() && GetTarget()->GetVehicle())
             {
-                Position pos(1756.25f + irand(-3, 3), -8.3f + irand(-3, 3), 449.0f);
+                Position pos(1756.25f + frand(-3.f, 3.f), -8.3f + frand(-3.f, 3.f), 449.0f);
                 GetTarget()->Relocate(pos);
                 GetTarget()->ExitVehicle();
                 GetTarget()->GetMotionMaster()->MoveJump(pos, 10, 10);
