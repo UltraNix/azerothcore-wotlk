@@ -7056,6 +7056,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             {
                 target = this;
                 triggered_spell_id = 31930;
+                basepoints0 = 25;
+                if (HasAura(64646)/*Corrupted Wisdom*/)
+                    basepoints0 *= 2;
                 // replenishment
                 CastSpell(this, 57669, true, castItem, triggeredByAura);
                 break;
