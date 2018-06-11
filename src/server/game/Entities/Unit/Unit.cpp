@@ -693,8 +693,15 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         if (victim->IsAIEnabled)
             victim->GetAI()->DamageTaken(attacker, damage, damagetype, damageSchoolMask);
 
-        if (attacker && attacker->IsAIEnabled)
-            attacker->GetAI()->DamageDealt(victim, damage, damagetype);
+        if (attacker)
+        {
+            if (attacker->IsAIEnabled)
+                attacker->GetAI()->DamageDealt(victim, damage, damagetype);
+
+            if (attacker->IsPlayer() || attacker->IsVehicle() && attacker->IsControlledByPlayer())
+                if (victim->IsCreature())
+                    victim->ToCreature()->SetWasHitByPlayer(true);
+        }
     }
 
     if (victim->GetTypeId() == TYPEID_PLAYER && attacker != victim)
@@ -5136,7 +5143,7 @@ bool Unit::CannotRegenerateManaFromSpell(SpellInfo const* spell, Powers powerTyp
         if (spell->HasAttribute(SPELL_ATTR0_CU_IGNORE_MANA_REGEN_LOCK))
         {
             if (spell->Id == 54428) // Divine Plea
-                if (!HasAura(53583) && !HasAura(53585)) // talent Guarded by the Light - prot paladin 
+                if (!HasAura(53583) && !HasAura(53585)) // talent Guarded by the Light - prot paladin
                     return true;
 
             return false;

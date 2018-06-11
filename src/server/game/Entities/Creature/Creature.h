@@ -733,14 +733,36 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
         bool IsReputationGainDisabled() const { return DisableReputationGain; }
-        bool IsDamageEnoughForLootingAndReward() const { return (m_creatureInfo->flags_extra & CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ) || (m_PlayerDamageReq == 0); }
+        bool IsDamageEnoughForLootingAndReward() const
+        {
+            if (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ)
+                return true;
+
+            if (m_PlayerDamageReq == 0 && WasHitByPlayer())
+                return true;
+
+            return false;
+        }
         void LowerPlayerDamageReq(uint32 unDamage)
         {
             if (m_PlayerDamageReq)
                 m_PlayerDamageReq > unDamage ? m_PlayerDamageReq -= unDamage : m_PlayerDamageReq = 0;
         }
-        void ResetPlayerDamageReq() { m_PlayerDamageReq = GetHealth() / 2; }
+        void ResetPlayerDamageReq()
+        {
+            m_PlayerDamageReq = GetHealth() / 2;
+            SetWasHitByPlayer(false);
+        }
         uint32 m_PlayerDamageReq;
+
+        bool WasHitByPlayer() const
+        {
+            return _wasHitByPlayer;
+        }
+        void SetWasHitByPlayer(bool val)
+        {
+            _wasHitByPlayer = val;
+        }
 
         uint32 GetOriginalEntry() const { return m_originalEntry; }
         void SetOriginalEntry(uint32 entry) { m_originalEntry = entry; }
@@ -825,6 +847,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
     private:
         void ForcedDespawn(uint32 timeMSToDespawn = 0, uint32 forceRespawnTimer = 0);
+
+        bool _wasHitByPlayer;
 
         //WaypointMovementGenerator vars
         uint32 m_waypointID;
