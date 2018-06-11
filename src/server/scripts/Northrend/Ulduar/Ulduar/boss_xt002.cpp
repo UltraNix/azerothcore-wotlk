@@ -132,6 +132,7 @@ struct boss_xt002AI : BossAI
     {
         _fightTimer = 0;
         _Reset();
+        me->ResetPlayerDamageReq();
         me->ResetLootMode();
         me->AddLootMode(4); // normal emblem marker
         me->RemoveAllAuras();
