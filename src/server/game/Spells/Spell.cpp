@@ -5603,6 +5603,9 @@ SpellCastResult Spell::CheckCast(bool strict)
          case 10278:
 			 if (m_targets.GetUnitTarget() != m_caster && m_caster->isStuned())
 				 return SPELL_FAILED_STUNNED;
+        // Shouldn't be able to cast while confused
+             if (m_caster->HasUnitState(UNIT_STATE_CONFUSED))
+                 return SPELL_FAILED_CONFUSED;
              break;
          //Disengage
          case 781:
