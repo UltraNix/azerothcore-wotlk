@@ -520,7 +520,7 @@ class spell_aura_of_despair_AuraScript : public AuraScript
                 //target->CastSpell(target, SPELL_AURA_OF_DESPAIR_2, true);
                 if (target->HasSpell(SPELL_SHAMANISTIC_RAGE))
                     caster->CastSpell(target, SPELL_CORRUPTED_RAGE, true);
-                else if (target->HasSpell(SPELL_JUDGEMENTS_OF_THE_WISDOM_RANK_1) || target->HasSpell(SPELL_JUDGEMENTS_OF_THE_WISDOM_RANK_1 + 1) || target->HasSpell(SPELL_JUDGEMENTS_OF_THE_WISDOM_RANK_1 + 2))
+                else if (target->HasAura(SPELL_JUDGEMENTS_OF_THE_WISDOM_RANK_1) || target->HasAura(SPELL_JUDGEMENTS_OF_THE_WISDOM_RANK_1 + 1) || target->HasAura(SPELL_JUDGEMENTS_OF_THE_WISDOM_RANK_1 + 2))
                     caster->CastSpell(target, SPELL_CORRUPTED_WISDOM, true);
             }
     }
