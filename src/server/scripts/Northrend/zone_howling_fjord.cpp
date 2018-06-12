@@ -539,9 +539,9 @@ enum Lebronski
     PHASE_NONE         = 0,
     PHASE_SPOTTED      = 1,
 
-    EVENT_RESET        = 0,
-    EVENT_SAY_OUTRO    = 1,
-    EVENT_SPOTTED      = 2
+    EVENT_RESET        = 1,
+    EVENT_SAY_OUTRO    = 2,
+    EVENT_SPOTTED      = 3
 };
 
 struct npc_lebronskiAI : public ScriptedAI
@@ -552,6 +552,7 @@ struct npc_lebronskiAI : public ScriptedAI
     {
         events.Reset();
         _phase = PHASE_NONE;
+        me->SetControlled(false, UNIT_STATE_ROOT);
         me->GetMotionMaster()->MovePath(LEBRONSKI_PATH, true);
     }
 
@@ -567,9 +568,11 @@ struct npc_lebronskiAI : public ScriptedAI
         if (_phase == PHASE_NONE)
         {
             _phase = PHASE_SPOTTED;
-            me->StopMoving();
+            me->GetMotionMaster()->Clear();
             me->SetFacingToObject(who);
+            me->SetControlled(true, UNIT_STATE_ROOT);
             events.ScheduleEvent(EVENT_SPOTTED, 2s);
+            events.ScheduleEvent(EVENT_RESET, 30s);
         }
     }
 
@@ -580,9 +583,8 @@ struct npc_lebronskiAI : public ScriptedAI
 
         if (caster && spellInfo->Id == SPELL_BLUFF)
         {
-            _phase = PHASE_NONE;
-            caster->CastSpell(caster, SPELL_QUEST_CREDIT);
-            events.ScheduleEvent(EVENT_SAY_OUTRO, 5s);
+            caster->CastSpell(caster, SPELL_QUEST_CREDIT, true);
+            events.ScheduleEvent(EVENT_SAY_OUTRO, 2s);
         }
     }
 
@@ -603,7 +605,6 @@ struct npc_lebronskiAI : public ScriptedAI
                     break;
                 case EVENT_SPOTTED:
                     Talk(SAY_SPOTTED);
-                    events.ScheduleEvent(EVENT_RESET, 30s);
                     break;
             }
         }
