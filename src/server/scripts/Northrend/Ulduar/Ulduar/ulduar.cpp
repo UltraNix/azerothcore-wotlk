@@ -543,23 +543,58 @@ struct npc_boomer_xp500_ulduar_AI : public ScriptedAI
     {
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         _exploded = false;
+        _arcRunners = me->GetHomePosition().GetPositionZ() < 400.f;
     }
 
-    void EnterCombat(Unit* /*who*/) override { }
-    void AttackStart(Unit* /*who*/) override { }
+    void EnterCombat(Unit* who) override
+    {
+        if (!_arcRunners)
+            ScriptedAI::EnterCombat(who);
+    }
+
+    void AttackStart(Unit* who) override
+    {
+        if (!_arcRunners)
+            ScriptedAI::AttackStart(who);
+    }
+
+    void DamageDealt(Unit* who, uint32& /*damage*/, DamageEffectType /*damageType*/) override
+    {
+        if (!_arcRunners && who->IsPlayer())
+            HandleExplosion();
+    }
 
     void MoveInLineOfSight(Unit* who) override
     {
-        if (who && who->ToPlayer() && !who->ToPlayer()->IsGameMaster() && who->IsWithinDist(me, 4.0f) && !_exploded)
+        if (!_arcRunners)
         {
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->StopMoving();
-            _exploded = true;
-            me->DespawnOrUnsummon(3s);
-            DoCastAOE(SPELL_BOMB_BOT_EXPLOSION_GAUNTLET, true);
+            ScriptedAI::MoveInLineOfSight(who);
+            return;
+        }
+
+        if (who && who->ToPlayer() && !who->ToPlayer()->IsGameMaster() && who->IsWithinDist(me, 4.0f))
+        {
+            HandleExplosion();
         }
     }
+
+    void HandleExplosion()
+    {
+        if (_exploded)
+            return;
+
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        me->StopMoving();
+        me->SetReactState(REACT_PASSIVE);
+        me->AttackStop();
+        _exploded = true;
+        me->DespawnOrUnsummon(3s);
+        DoCastAOE(SPELL_BOMB_BOT_EXPLOSION_GAUNTLET, true);
+    }
 private:
+    //! check wheter they're running outside of the mimiron room
+    //! or just trash to mimiron (before mimirons tram) | false means they're not runners
+    bool _arcRunners;
     bool _exploded;
 };
 
