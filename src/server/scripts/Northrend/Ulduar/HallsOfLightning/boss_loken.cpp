@@ -27,24 +27,31 @@ enum LokenSpells
 enum Yells
 {
     SAY_INTRO_1                     = 0,
-    SAY_INTRO_2                     = 1,
-    SAY_AGGRO                       = 2,
-    SAY_NOVA                        = 3,
-    SAY_SLAY                        = 4,
-    SAY_75HEALTH                    = 5,
-    SAY_50HEALTH                    = 6,
-    SAY_25HEALTH                    = 7,
-    SAY_DEATH                       = 8,
-    EMOTE_NOVA                      = 9
+    SAY_INTRO_2,
+    SAY_AGGRO,
+    SAY_NOVA,
+    SAY_SLAY,
+    SAY_75HEALTH,
+    SAY_50HEALTH,
+    SAY_25HEALTH,
+    SAY_DEATH,
+    EMOTE_NOVA
 };
 
 enum LokenEvents
 {
     EVENT_LIGHTNING_NOVA            = 1,
-    EVENT_SHOCKWAVE                    = 2,
-    EVENT_ARC_LIGHTNING                = 3,
-    EVENT_CHECK_HEALTH                = 4,
-    EVENT_AURA_REMOVE                = 5
+    EVENT_SHOCKWAVE,
+    EVENT_ARC_LIGHTNING,
+    EVENT_AURA_REMOVE,
+    EVENT_INTRO_DIALOGUE,
+    EVENT_CHECK_HEALTH
+};
+
+enum Phases
+{
+    PHASE_INTRO                     = 1,
+    PHASE_NORMAL
 };
 
 class boss_loken : public CreatureScript
@@ -62,18 +69,28 @@ public:
         boss_lokenAI(Creature* creature) : ScriptedAI(creature)
         {
             m_pInstance = creature->GetInstanceScript();
-            if (m_pInstance)
-                isActive = m_pInstance->GetData(TYPE_LOKEN_INTRO);
+
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            _isIntroDone = false;
+            events.IsInPhase(PHASE_INTRO);
         }
 
         InstanceScript* m_pInstance;
         EventMap events;
 
-        bool isActive;
-        uint32 IntroTimer;
+        bool _isIntroDone;
         uint8 HealthCheck;
 
-        void MoveInLineOfSight(Unit*) { }
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!_isIntroDone && me->IsValidAttackTarget(who) && me->IsWithinDistInMap(who, 40.0f))
+            {
+                _isIntroDone = true;
+                Talk(SAY_INTRO_1);
+                events.ScheduleEvent(EVENT_INTRO_DIALOGUE, 20000, 0, PHASE_INTRO);
+            }
+        }
 
         void Reset()
         {
@@ -85,37 +102,20 @@ public:
             }
 
             HealthCheck = 75;
-            IntroTimer = 0;
             me->RemoveAllAuras();
-
-            if (!isActive)
-            {
-                me->SetControlled(true, UNIT_STATE_STUNNED);
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
-            else
-            {
-                me->SetControlled(false, UNIT_STATE_STUNNED);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            }
         }
 
         void EnterCombat(Unit*)
         {
-            me->SetInCombatWithZone();
             Talk(SAY_AGGRO);
-
-            events.ScheduleEvent(EVENT_ARC_LIGHTNING, 10000);
-            events.ScheduleEvent(EVENT_SHOCKWAVE, 3000);
-            events.ScheduleEvent(EVENT_LIGHTNING_NOVA, 15000);
+            events.SetPhase(PHASE_NORMAL);
+            events.ScheduleEvent(EVENT_ARC_LIGHTNING, 15000);
+            events.ScheduleEvent(EVENT_SHOCKWAVE, 1000);
+            events.ScheduleEvent(EVENT_LIGHTNING_NOVA, 20000);
 
             if (m_pInstance)
-            {
-                m_pInstance->SetData(TYPE_LOKEN, IN_PROGRESS);
-
                 if (me->GetMap()->IsHeroic())
                     m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_TIMELY_DEATH);
-            }
         }
 
         void JustDied(Unit*)
@@ -155,43 +155,8 @@ public:
 
         void UpdateAI(uint32 diff)
         {
-            if (!isActive)
-            {
-                IntroTimer += diff;
-                if (IntroTimer > 5000 && IntroTimer < 10000)
-                {
-                    if (SelectTargetFromPlayerList(60))
-                    {
-                        Talk(SAY_INTRO_1);
-                        IntroTimer = 10000;
-                    }
-                    else
-                        IntroTimer = 0;
-                }
-
-                if (IntroTimer >= 30000 && IntroTimer < 40000)
-                {
-                    Talk(SAY_INTRO_2);
-                    IntroTimer = 40000;
-                }
-                if (IntroTimer >= 60000)
-                {
-                    isActive = true;
-                    if (m_pInstance)
-                        m_pInstance->SetData(TYPE_LOKEN_INTRO, 1);
-
-                    me->SetControlled(false, UNIT_STATE_STUNNED);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-                    if (Player* target = SelectTargetFromPlayerList(80))
-                        AttackStart(target);
-                }
-
-                return;
-            }
-
             //Return since we have no target
-            if (!UpdateVictim())
+            if (events.IsInPhase(PHASE_NORMAL) && !UpdateVictim())
                 return;
 
             events.Update(diff);
@@ -233,6 +198,14 @@ public:
                 case EVENT_AURA_REMOVE:
                     me->RemoveAura(SPELL_LIGHTNING_NOVA_THUNDERS);
                     events.PopEvent();
+                    break;
+                case EVENT_INTRO_DIALOGUE:
+                    Talk(SAY_INTRO_2);
+                    events.SetPhase(PHASE_NORMAL);
+                    me->SetControlled(false, UNIT_STATE_ROOT);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    if (Player* target = me->SelectNearestPlayer(40.0f))
+                        AttackStart(target);
                     break;
             }
 
