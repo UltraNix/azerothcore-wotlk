@@ -2587,6 +2587,7 @@ bool SpellInfo::_IsPositiveEffect(uint8 effIndex, bool deep) const
                 case 61987: // Avenging Wrath Marker
                 case 61988: // Divine Shield exclude aura
                 case 72998: // Shadow Prison (Blood Prince Council, ICC Encounter)
+                case 63322: // Saronite Vapors (General Vezax, Ulduar)
                     return false;
                 case 30877: // Tag Murloc
                 case 61716: // Rabbit Costume
