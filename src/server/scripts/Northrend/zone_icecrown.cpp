@@ -2429,11 +2429,15 @@ public:
     npc_blastbolt_brother() : CreatureScript("npc_blastbolt_brother") { }
 
     bool OnGossipHello(Player* player, Creature* creature) override
+    {
         if (!player)
             return true;
+
         sGameEventMgr->SendWorldStateUpdate(player, 134);
+
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
+
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         return true;
     }
