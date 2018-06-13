@@ -5747,6 +5747,12 @@ void SpellMgr::LoadDbcDataCorrections()
         // Psychosis
         case 63795:
         case 65301:
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
         // Malady of the mind
         case 63830:
             spellInfo->MaxAffectedTargets = 1;
