@@ -1277,8 +1277,10 @@ void Battleground::AddPlayer(Player* player)
 
     //If player was in group (from WG) and doesn't leave
     if (Group *group = player->GetGroup())
-        if(group->isRaidGroup())
+    {
+        if ( group->isRaidGroup() && ( group->isBFGroup() || group->isBFGroup() ) )
             player->RemoveFromGroup();
+    }
 
     // score struct must be created in inherited class
 
