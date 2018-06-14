@@ -13342,7 +13342,9 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
                             }
                         }
                     }
-                    speed *= pOwner->GetSpeedRate( ownerMoveType ) * mult; // pets derive speed from owner when not in combat
+
+                    float speedRate = std::max( 1.0f, pOwner->GetSpeedRate( ownerMoveType ) );
+                    speed *= speedRate * mult; // pets derive speed from owner when not in combat
                 }
                 else
                     speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
