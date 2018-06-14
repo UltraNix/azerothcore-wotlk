@@ -160,6 +160,7 @@ bool Totem::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index) con
     // totems positive spells have unit_caster target
     if (spellInfo->Effects[index].Effect != SPELL_EFFECT_DUMMY &&
         spellInfo->Effects[index].Effect != SPELL_EFFECT_SCRIPT_EFFECT &&
+        spellInfo->Effects[index].Effect != SPELL_EFFECT_CHARGE &&
         spellInfo->IsPositive() && spellInfo->Effects[index].TargetA.GetTarget() != TARGET_UNIT_CASTER &&
         spellInfo->Effects[index].TargetA.GetCheckType() != TARGET_CHECK_ENTRY && spellInfo->Id != 55277 && spellInfo->Id != 6277)
         return true;
