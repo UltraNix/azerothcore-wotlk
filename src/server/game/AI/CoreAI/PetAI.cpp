@@ -51,14 +51,16 @@ bool PetAI::_needToStop()
     if (me->IsCharmed() && me->GetVictim() == me->GetCharmer())
         return true;
 
-    // xinef: dont allow to follow targets out of visibility range
-    if (me->GetExactDist(me->GetVictim()) > me->GetVisibilityRange()-5.0f)
-        return true;
-
     // dont allow pets to follow targets far away from owner
     if (Unit* owner = me->GetCharmerOrOwner())
-        if (owner->GetExactDist(me) >= (owner->GetVisibilityRange()-10.0f))
+    {
+        float ownerVisibilityRange = owner->GetVisibilityRange() - 1.0f;
+        if ( owner->GetExactDist( me->GetVictim() ) >= ownerVisibilityRange )
             return true;
+
+        if ( owner->GetExactDist( me ) >= ownerVisibilityRange )
+            return true;
+    }
 
     if (!me->_CanDetectFeignDeathOf(me->GetVictim()))
         return true;
@@ -100,7 +102,7 @@ bool PetAI::_needToStop()
         }
     }
 
-    return !me->CanCreatureAttack(me->GetVictim());
+    return !me->CanCreatureAttack(me->GetVictim(), true);
 }
 
 void PetAI::_stopAttack()
