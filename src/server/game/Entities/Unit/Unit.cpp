@@ -2011,7 +2011,7 @@ void Unit::CalcAbsorbResist(Unit* attacker, Unit* victim, SpellSchoolMask school
 
             // create procs
             createProcFlags(spellInfo, BASE_ATTACK, false, procAttacker, procVictim);
-            caster->ProcDamageAndSpellFor(true, attacker, procVictim, procEx, BASE_ATTACK, spellInfo, splitted, NULL);
+            caster->ProcDamageAndSpellFor(true, caster, procVictim, procEx, BASE_ATTACK, spellInfo, splitted, NULL);
 
             if (attacker)
                 attacker->SendSpellNonMeleeDamageLog(caster, (*itr)->GetSpellInfo()->Id, splitted+splitted_absorb, schoolMask, splitted_absorb, 0, false, 0, false);
@@ -2079,7 +2079,7 @@ void Unit::CalcAbsorbResist(Unit* attacker, Unit* victim, SpellSchoolMask school
 
             // create procs
             createProcFlags(spellInfo, BASE_ATTACK, false, procAttacker, procVictim);
-            caster->ProcDamageAndSpellFor(true, attacker, procVictim, procEx, BASE_ATTACK, spellInfo, splitted, NULL);
+            caster->ProcDamageAndSpellFor(true, caster, procVictim, procEx, BASE_ATTACK, spellInfo, splitted, NULL);
 
             if (attacker)
                 attacker->SendSpellNonMeleeDamageLog(caster, splitSpellInfo->Id, splitted+splitted_absorb, splitSchoolMask, splitted_absorb, 0, false, 0, false);
