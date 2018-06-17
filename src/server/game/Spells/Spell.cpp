@@ -5624,6 +5624,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->ToPlayer()->GetAreaId() != 4183 && m_caster->GetTypeId() == TYPEID_PLAYER && !sWorld->PatchNotes(PATCH_330))
                 return SPELL_FAILED_REQUIRES_AREA;
             break;
+        // Rogue stealth
+        case 1784:
+            // stealth can't be casted while being polymorphed
+            if (m_caster->HasAuraWithMechanic(1 << MECHANIC_POLYMORPH))
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            break;
         case 66447:
         case 66449:
         case 66448:
