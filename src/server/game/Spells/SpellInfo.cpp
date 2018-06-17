@@ -2049,8 +2049,8 @@ AuraStateType SpellInfo::LoadAuraState() const
         (SpellFamilyFlags[2] & 2)))
         return AURA_STATE_CONFLAGRATE;
 
-    // Faerie Fire (druid versions)
-    if (SpellFamilyName == SPELLFAMILY_DRUID && SpellFamilyFlags[0] & 0x400)
+    // Faerie Fire
+    if (SpellIconID == 109 && SpellVisual[0] == 192)
         return AURA_STATE_FAERIE_FIRE;
 
     // Sting (hunter's pet ability)
