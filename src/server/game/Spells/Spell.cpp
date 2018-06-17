@@ -6708,6 +6708,7 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
                             case SPELL_AURA_MOD_STUN:
                                 if (!usableInStun || !(auraInfo->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN)))
                                     return SPELL_FAILED_STUNNED;
+                                break;
                             case SPELL_AURA_MOD_CONFUSE:
                                 if (!m_spellInfo->HasAttribute(SPELL_ATTR5_USABLE_WHILE_CONFUSED))
                                     return SPELL_FAILED_CONFUSED;
