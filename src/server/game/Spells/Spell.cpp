@@ -6645,27 +6645,19 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
             // spell is usable while stunned, check if caster has only mechanic stun auras, another stun types must prevent cast spell
             if (usableInStun)
             {
+                static uint32 const allowedStunMask = 1 << MECHANIC_STUN | 1 << MECHANIC_FREEZE | 1 << MECHANIC_SAPPED | 1 << MECHANIC_SLEEP;
                 bool foundNotStun = false;
-                uint32 mask = 1<<MECHANIC_STUN;
-                // Barkskin should skip sleep effects, sap and fears
-                if (m_spellInfo->Id == 22812)
-                    mask |= 1<<MECHANIC_SAPPED | 1<<MECHANIC_HORROR | 1<<MECHANIC_SLEEP;
-                // Hand of Freedom, can be used while sapped
-                if (m_spellInfo->Id == 1044)
-                    mask |= 1<<MECHANIC_SAPPED;
-                if (m_spellInfo->Id == 47585)
-                    mask |= 1 << MECHANIC_HORROR;
-                if (m_spellInfo->Id == 33206)
-                    mask |= 1 << MECHANIC_FREEZE;
-                Unit::AuraEffectList const& stunAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
-                for (Unit::AuraEffectList::const_iterator i = stunAuras.begin(); i != stunAuras.end(); ++i)
+                auto const& stunAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
+                for (auto const& aura : stunAuras)
                 {
-                    if ((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() && !((*i)->GetSpellInfo()->GetAllEffectsMechanicMask() & mask))
+                    uint32 mechanicMask = aura->GetSpellInfo()->GetAllEffectsMechanicMask();
+                    if (mechanicMask && !(mechanicMask & allowedStunMask))
                     {
                         foundNotStun = true;
                         break;
                     }
                 }
+
                 if (foundNotStun)
                     prevented_reason = SPELL_FAILED_STUNNED;
             }
@@ -6714,19 +6706,8 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
                         switch (part->GetAuraType())
                         {
                             case SPELL_AURA_MOD_STUN:
-                            {
-                                uint32 mask = 1<<MECHANIC_STUN;
-                                // Barkskin should skip sleep effects, sap and fears
-                                if (m_spellInfo->Id == 22812)
-                                    mask |= 1<<MECHANIC_SAPPED | 1<<MECHANIC_HORROR | 1<<MECHANIC_SLEEP;
-                                // Hand of Freedom, can be used while sapped
-                                if (m_spellInfo->Id == 1044)
-                                    mask |= 1<<MECHANIC_SAPPED;
-
-                                if (!usableInStun || !(auraInfo->GetAllEffectsMechanicMask() & mask))
+                                if (!usableInStun || !(auraInfo->GetAllEffectsMechanicMask() & (1 << MECHANIC_STUN)))
                                     return SPELL_FAILED_STUNNED;
-                                break;
-                            }
                             case SPELL_AURA_MOD_CONFUSE:
                                 if (!m_spellInfo->HasAttribute(SPELL_ATTR5_USABLE_WHILE_CONFUSED))
                                     return SPELL_FAILED_CONFUSED;
