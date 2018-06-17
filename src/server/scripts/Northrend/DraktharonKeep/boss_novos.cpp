@@ -39,6 +39,7 @@ enum Misc
 {
     NPC_CRYSTAL_CHANNEL_TARGET         = 26712,
     NPC_CRYSTAL_HANDLER                = 26627,
+    NPC_CRYSTAL_HANDLER_TARGET         = 27669,
     NPC_ZOMBIE_1                       = 27598,
     NPC_ZOMBIE_2                       = 27597,
     NPC_ZOMBIE_3                       = 27600,
@@ -112,6 +113,7 @@ class boss_novos : public CreatureScript
                 me->CastSpell(me, SPELL_ARCANE_FIELD, true);
                 me->CastSpell(me, SPELL_DESPAWN_CRYSTAL_HANDLER, true);
                 me->SummonCreature(NPC_CRYSTAL_CHANNEL_TARGET, -378.40f, -813.13f, 59.74f, 0.0f);
+                me->SummonCreature(NPC_CRYSTAL_HANDLER_TARGET, -341.31f, -724.4f, 28.57f, 0.0f);
 
                 me->SetUInt64Value(UNIT_FIELD_TARGET, 0);
                 me->RemoveAllAuras();
@@ -172,8 +174,8 @@ class boss_novos : public CreatureScript
                         {
                             Talk(SAY_SUMMONING_ADDS);
                             Talk(EMOTE_SUMMONING_ADDS);
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 90.0f))
-                                target->CastSpell(target, SPELL_SUMMON_CRYSTAL_HANDLER, true, NULL, NULL, me->GetGUID());
+                            if (Creature* trigger = summons.GetCreatureWithEntry(NPC_CRYSTAL_HANDLER_TARGET))
+                                trigger->CastSpell(trigger, SPELL_SUMMON_CRYSTAL_HANDLER, true);
                             events.ScheduleEvent(EVENT_SUMMON_CRYSTAL_HANDLER, 20000);
                         }
                         break;
