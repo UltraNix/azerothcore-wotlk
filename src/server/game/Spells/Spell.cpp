@@ -6110,6 +6110,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                     || (m_spellInfo->Effects[i].TargetA.GetTarget() == TARGET_GAMEOBJECT_TARGET && !m_targets.GetGOTarget()))
                     return SPELL_FAILED_BAD_TARGETS;
 
+                // players shouldn't be able to open containers when invulnerable
+                if (m_caster->HasAuraWithMechanic((1 << MECHANIC_IMMUNE_SHIELD) | (1 << MECHANIC_POLYMORPH))
+                    || m_caster->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
+                    return SPELL_FAILED_DAMAGE_IMMUNE;
+
                 ItemRef pTempItem = NULL;
                 if (m_targets.GetTargetMask() & TARGET_FLAG_TRADE_ITEM)
                 {
