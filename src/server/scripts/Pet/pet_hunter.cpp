@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -59,6 +59,11 @@ class npc_pet_hunter_snake_trap : public CreatureScript
                     }
             }
 
+            bool CanAIAttack(Unit const* target) const override
+            {
+                return !target->IsTotem();
+            }
+
             void EnterEvadeMode()
             {
                 // _EnterEvadeMode();
@@ -67,8 +72,8 @@ class npc_pet_hunter_snake_trap : public CreatureScript
                 me->LoadCreaturesAddon(true);
                 me->SetLootRecipient(NULL);
                 me->ResetPlayerDamageReq();
-                me->SetLastDamagedTime(0); 
-                
+                me->SetLastDamagedTime(0);
+
                 me->AddUnitState(UNIT_STATE_EVADE);
                 me->GetMotionMaster()->MoveTargetedHome();
 

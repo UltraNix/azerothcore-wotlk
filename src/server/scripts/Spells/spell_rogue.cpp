@@ -140,7 +140,7 @@ public:
         bool CheckProc(ProcEventInfo& eventInfo)
         {
             _procOffOfTarget = eventInfo.GetProcTarget();
-            _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
+            _procTarget = eventInfo.GetActor()->SelectNearbyNoTotemTarget(eventInfo.GetProcTarget());
             return _procTarget && _procOffOfTarget;
         }
 
