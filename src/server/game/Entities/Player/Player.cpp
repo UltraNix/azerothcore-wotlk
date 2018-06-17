@@ -807,6 +807,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_ammoDPS = 0.0f;
 
     m_temporaryUnsummonedPetNumber = 0;
+    m_temporaryGhoulPetEnergy = 0;
     //cache for UNIT_CREATED_BY_SPELL to allow
     //returning reagents for temporarily removed pets
     //when dying/logging out
@@ -21231,6 +21232,9 @@ void Player::PetSpellInitialize()
         data << uint32(0);                                  // category cooldown
     }
 
+    if (pet->IsPetGhoul() && m_temporaryGhoulPetEnergy)
+        pet->SetPower(POWER_ENERGY, m_temporaryGhoulPetEnergy);
+
     GetSession()->SendPacket(&data);
 }
 
@@ -26049,6 +26053,8 @@ void Player::UnsummonPetTemporaryIfAny()
     {
         m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
         SetLastPetSpell(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
+        if (pet->IsPetGhoul())
+            m_temporaryGhoulPetEnergy = pet->GetPower(POWER_ENERGY);
     }
 
     RemovePet(pet, PET_SAVE_AS_CURRENT);
