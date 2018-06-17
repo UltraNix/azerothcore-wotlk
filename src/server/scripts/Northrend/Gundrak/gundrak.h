@@ -9,7 +9,7 @@ enum Data
 {
     DATA_SLAD_RAN                        = 0,
     DATA_MOORABI                        = 1,
-    DATA_DRAKKARI_COLOSSUS                = 2,
+    BOSS_DRAKKARI_COLOSSUS                = 2,
     DATA_GAL_DARAH                        = 3,
     DATA_ECK_THE_FEROCIOUS_INIT            = 4,
     DATA_ECK_THE_FEROCIOUS                = 5,
@@ -18,7 +18,8 @@ enum Data
 
 enum Creatures
 {
-    NPC_ECK_THE_FEROCIOUS                = 29932
+    NPC_ECK_THE_FEROCIOUS                = 29932,
+    NPC_DRAKKARI_COLOSSUS                = 29307
 };
 
 enum GameObjects

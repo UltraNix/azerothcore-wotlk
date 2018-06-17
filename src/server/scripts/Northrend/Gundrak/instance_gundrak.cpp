@@ -16,6 +16,12 @@ DoorData const doorData[] =
     { 0,                        0,                        DOOR_TYPE_ROOM,     BOUNDARY_NONE }
 };
 
+ObjectData const creatureData[] =
+{
+    { NPC_DRAKKARI_COLOSSUS, BOSS_DRAKKARI_COLOSSUS },
+    { 0,                  0 }
+};
+
 class instance_gundrak : public InstanceMapScript
 {
     public:
@@ -30,6 +36,7 @@ class instance_gundrak : public InstanceMapScript
         {
             instance_gundrak_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                LoadObjectData(creatureData, nullptr);
             }
 
             uint64 _sladRanAltarGUID;
@@ -62,7 +69,7 @@ class instance_gundrak : public InstanceMapScript
                         break;
                     case GO_ALTAR_OF_DRAKKARI:
                         _drakkariAltarGUID = gameobject->GetGUID();
-                        gameobject->SetGoState(GetBossState(DATA_DRAKKARI_COLOSSUS) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
+                        gameobject->SetGoState(GetBossState(BOSS_DRAKKARI_COLOSSUS) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
                         break;
                     case GO_ALTAR_OF_MOORABI:
                         _moorabiAltarGUID = gameobject->GetGUID();
@@ -74,7 +81,7 @@ class instance_gundrak : public InstanceMapScript
                         break;
                     case GO_STATUE_OF_DRAKKARI:
                         _bridgeGUIDs[1] = gameobject->GetGUID();
-                        gameobject->SetGoState(_keysInCount == 3 ? GO_STATE_ACTIVE_ALTERNATIVE : (GetBossState(DATA_DRAKKARI_COLOSSUS) == DONE ? GO_STATE_READY : GO_STATE_ACTIVE));
+                        gameobject->SetGoState(_keysInCount == 3 ? GO_STATE_ACTIVE_ALTERNATIVE : (GetBossState(BOSS_DRAKKARI_COLOSSUS) == DONE ? GO_STATE_READY : GO_STATE_ACTIVE));
                         break;
                     case GO_STATUE_OF_MOORABI:
                         _bridgeGUIDs[2] = gameobject->GetGUID();
@@ -155,7 +162,7 @@ class instance_gundrak : public InstanceMapScript
             {
                 if (!InstanceScript::SetBossState(type, state))
                 {
-                    if (state == DONE && (type == DATA_SLAD_RAN || type == DATA_MOORABI || type == DATA_DRAKKARI_COLOSSUS))
+                    if (state == DONE && (type == DATA_SLAD_RAN || type == DATA_MOORABI || type == BOSS_DRAKKARI_COLOSSUS))
                         ++_keysInCount;
                     return false;
                 }
@@ -173,7 +180,7 @@ class instance_gundrak : public InstanceMapScript
                         if (GameObject* altar = instance->GetGameObject(_moorabiAltarGUID))
                             altar->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         break;
-                    case DATA_DRAKKARI_COLOSSUS:
+                    case BOSS_DRAKKARI_COLOSSUS:
                         if (GameObject* altar = instance->GetGameObject(_drakkariAltarGUID))
                             altar->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         break;
