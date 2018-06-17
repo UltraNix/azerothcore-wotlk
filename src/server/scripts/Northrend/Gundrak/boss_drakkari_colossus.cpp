@@ -84,9 +84,12 @@ struct boss_drakkari_colossusAI : public BossAI
 {
     boss_drakkari_colossusAI(Creature* creature) : BossAI(creature, BOSS_DRAKKARI_COLOSSUS)
     {
-        _mojoGUIDs.reserve(MojoSpawnPositions.size());
-        DoCastSelf(SPELL_FREEZE_ANIM, true);
-        SummonLivingMojo();
+        if (me->IsAlive())
+        {
+            _mojoGUIDs.reserve(MojoSpawnPositions.size());
+            DoCastSelf(SPELL_FREEZE_ANIM, true);
+            SummonLivingMojo();
+        }
     }
 
     void MoveInLineOfSight(Unit* /*who*/) override { }
@@ -127,8 +130,11 @@ struct boss_drakkari_colossusAI : public BossAI
     void JustReachedHome() override
     {
         _JustReachedHome();
-        DoCastSelf(SPELL_FREEZE_ANIM, true);
-        SummonLivingMojo();
+        if (me->IsAlive())
+        {
+            DoCastSelf(SPELL_FREEZE_ANIM, true);
+            SummonLivingMojo();
+        }
     }
 
     void EnterCombat(Unit* /*attacker*/) override
