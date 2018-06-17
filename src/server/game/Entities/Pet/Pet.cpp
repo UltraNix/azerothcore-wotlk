@@ -891,6 +891,8 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             AddAura(SPELL_DK_PET_SCALING_01, this);
             AddAura(SPELL_DK_PET_SCALING_02, this);
         }
+        else // Permanent ghouls should start with 100 energy
+            SetPower(POWER_ENERGY, 100);
     }
 
     UpdateAllStats();
