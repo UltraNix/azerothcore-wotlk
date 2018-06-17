@@ -542,6 +542,7 @@ public:
             }
 
             _fightTimer = getMSTime();
+            m_pInstance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, CRITERIA_NOT_GETTING_OLDER);
             m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, CRITERIA_NOT_GETTING_OLDER);
             m_pInstance->SetData(TYPE_YOGGSARON, IN_PROGRESS);
             me->SetInCombatWithZone();

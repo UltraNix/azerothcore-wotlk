@@ -259,6 +259,7 @@ struct boss_xt002AI : BossAI
         me->MonsterYell("New toys? For me? I promise I won't break them this time!", LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(XT_SOUND_AGGRO);
 
+        instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MUST_DECONSTRUCT_FASTER);
         instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MUST_DECONSTRUCT_FASTER);
         instance->SetData(TYPE_XT002, IN_PROGRESS);
         if (auto go = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_XT002_DOORS)))
