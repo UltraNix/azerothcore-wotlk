@@ -139,10 +139,12 @@ struct boss_faerlinaAI : public ScriptedAI
             CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
     }
 
-    void SpellHit(Unit* /*caster*/, const SpellInfo *spell) override
+    void SpellHit(Unit* caster, const SpellInfo *spell) override
     {
         if (spell->Id == SPELL_WIDOWS_EMBRACE)
         {
+            if (Is25ManRaid() && caster)
+                Unit::Kill(caster, caster, false);
             me->MonsterTextEmote("%s is affected by Widow's Embrace!", 0, true);
             if (me->HasAura(RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25)))
             {

@@ -1,4 +1,5 @@
-UPDATE `creature_template` SET `spell3`=54097 WHERE `entry`=29274;
+UPDATE `creature_template` SET `spell2`=0 WHERE `entry`=16506;
+UPDATE `creature_template` SET `spell3`=0 WHERE `entry`=29274;
 
 -- Naxxramas Worshipper SAI
 SET @ENTRY := 16506;
