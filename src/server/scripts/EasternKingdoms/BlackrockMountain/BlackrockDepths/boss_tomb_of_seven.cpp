@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,51 +43,116 @@ enum Misc
 #define GOSSIP_ITEM_TEACH_3 "[PH] Continue..."
 #define GOSSIP_ITEM_TRIBUTE "I want to pay tribute"
 
+enum GroomrelSpells
+{
+    SPELL_CLEAVE            = 15284,
+    SPELL_HAMSTRING         = 9080,
+    SPELL_MORTAL_STRIKE     = 13737
+};
+
+enum GroomrelEvents
+{
+    EVENT_CLEAVE            = 1,
+    EVENT_HAMSTRING,
+    EVENT_MORTAL_STRIKE
+};
+
 class boss_gloomrel : public CreatureScript
 {
-public:
-    boss_gloomrel() : CreatureScript("boss_gloomrel") { }
+    public:
+        boss_gloomrel() : CreatureScript("boss_gloomrel") { }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
-    {
-        player->PlayerTalkClass->ClearMenus();
-        switch (action)
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
         {
-            case GOSSIP_ACTION_INFO_DEF+1:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TEACH_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11);
-                player->SEND_GOSSIP_MENU(2606, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+11:
-                player->CLOSE_GOSSIP_MENU();
-                player->CastSpell(player, SPELL_LEARN_SMELT, false);
-                break;
-            case GOSSIP_ACTION_INFO_DEF+2:
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TEACH_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
-                player->SEND_GOSSIP_MENU(2604, creature->GetGUID());
-                break;
-            case GOSSIP_ACTION_INFO_DEF+22:
-                player->CLOSE_GOSSIP_MENU();
-                if (InstanceScript* instance = creature->GetInstanceScript())
-                {
-                    //are 5 minutes expected? go template may have data to despawn when used at quest
-                    instance->DoRespawnGameObject(instance->GetData64(DATA_GO_CHALICE), MINUTE*5);
-                }
-                break;
+            player->PlayerTalkClass->ClearMenus();
+            switch (action)
+            {
+                case GOSSIP_ACTION_INFO_DEF+1:
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TEACH_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 11);
+                    player->SEND_GOSSIP_MENU(2606, creature->GetGUID());
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+11:
+                    player->CLOSE_GOSSIP_MENU();
+                    player->CastSpell(player, SPELL_LEARN_SMELT, false);
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+2:
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TEACH_3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 22);
+                    player->SEND_GOSSIP_MENU(2604, creature->GetGUID());
+                    break;
+                case GOSSIP_ACTION_INFO_DEF+22:
+                    player->CLOSE_GOSSIP_MENU();
+                    if (InstanceScript* instance = creature->GetInstanceScript())
+                    {
+                        //are 5 minutes expected? go template may have data to despawn when used at quest
+                        instance->DoRespawnGameObject(instance->GetData64(DATA_GO_CHALICE), MINUTE*5);
+                    }
+                    break;
+            }
+            return true;
         }
-        return true;
-    }
 
-    bool OnGossipHello(Player* player, Creature* creature)
-    {
-        if (player->GetQuestRewardStatus(QUEST_SPECTRAL_CHALICE) == 1 && player->GetSkillValue(SKILL_MINING) >= DATA_SKILLPOINT_MIN && !player->HasSpell(SPELL_SMELT_DARK_IRON))
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TEACH_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        bool OnGossipHello(Player* player, Creature* creature)
+        {
+            if (player->GetQuestRewardStatus(QUEST_SPECTRAL_CHALICE) == 1 && player->GetSkillValue(SKILL_MINING) >= DATA_SKILLPOINT_MIN && !player->HasSpell(SPELL_SMELT_DARK_IRON))
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TEACH_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-        if (player->GetQuestRewardStatus(QUEST_SPECTRAL_CHALICE) == 0 && player->GetSkillValue(SKILL_MINING) >= DATA_SKILLPOINT_MIN)
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TRIBUTE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            if (player->GetQuestRewardStatus(QUEST_SPECTRAL_CHALICE) == 0 && player->GetSkillValue(SKILL_MINING) >= DATA_SKILLPOINT_MIN)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TRIBUTE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-        return true;
-    }
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+
+        struct npc_gloomrelAI : public ScriptedAI
+        {
+            npc_gloomrelAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void EnterCombat(Unit* /*attacker*/) override
+            {
+                _events.ScheduleEvent(EVENT_CLEAVE, 4s, 6s);
+                _events.ScheduleEvent(EVENT_MORTAL_STRIKE, 6s, 10s);
+                _events.ScheduleEvent(EVENT_HAMSTRING, 8s, 12s);
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                if (!UpdateVictim())
+                    return;
+
+                _events.Update(diff);
+
+                while (auto eventId = _events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_CLEAVE:
+                            DoCastVictim(SPELL_CLEAVE);
+                            _events.Repeat(8s, 12s);
+                            break;
+                        case EVENT_HAMSTRING:
+                            DoCastVictim(SPELL_HAMSTRING);
+                            _events.Repeat(18s, 22s);
+                            break;
+                        case EVENT_MORTAL_STRIKE:
+                            DoCastVictim(SPELL_MORTAL_STRIKE);
+                            _events.Repeat(8s, 12s);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+
+            private:
+                EventMap _events;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return GetInstanceAI<npc_gloomrelAI>(creature);
+        }
 };
 
 enum DoomrelSpells
