@@ -7079,10 +7079,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             // Sheath of Light
             if (dummySpell->SpellIconID == 3030)
             {
+                if (!victim)
+                    return false;
+
                 // 4 healing tick
                 basepoints0 = triggerAmount * damage / 400;
                 triggered_spell_id = 54203;
-                break;
+                // Add remaining ticks to healing done
+                victim->CastDelayedSpellWithPeriodicAmount(this, triggered_spell_id, SPELL_AURA_PERIODIC_HEAL, basepoints0);
+                return true;
             }
             switch (dummySpell->Id)
             {
