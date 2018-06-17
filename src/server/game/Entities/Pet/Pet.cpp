@@ -898,10 +898,13 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     SetFullHealth();
 
     if (IsPet() && IsPetGhoul())
+    {
+        setPowerType(POWER_ENERGY);
         SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY)); // Permanent ghouls should start with 100 energy
+
+    }
     else
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-
 
     return true;
 }
