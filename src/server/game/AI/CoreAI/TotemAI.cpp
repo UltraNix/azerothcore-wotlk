@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -75,27 +75,31 @@ void TotemAI::UpdateAI(uint32 /*diff*/)
 
     // SPELLMOD_RANGE not applied in this place just because not existence range mods for attacking totems
 
-    // pointer to appropriate target if found any
-    Unit* victim = i_victimGuid ? ObjectAccessor::GetUnit(*me, i_victimGuid) : NULL;
-
-    // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
-    if (!victim ||
-        !victim->isTargetableForAttack(true, me) || !me->IsWithinDistInMap(victim, max_range) ||
-        me->IsFriendlyTo(victim) || !me->CanSeeOrDetect(victim))
+    auto IsViableTarget = [this, max_range](Unit* target) -> bool
     {
-        victim = NULL;
-        Trinity::NearestAttackableUnitInObjectRangeCheck u_check(me, me, max_range);
-        Trinity::UnitLastSearcher<Trinity::NearestAttackableUnitInObjectRangeCheck> checker(me, victim, u_check);
-        me->VisitNearbyObject(max_range, checker);
+        if (!target)
+            return false;
+
+        return target->isTargetableForAttack(true, me) && me->IsWithinDistInMap(target, max_range) && !target->IsFriendlyTo(me) && me->CanSeeOrDetect(target);
+    };
+
+    if (Unit* owner = me->ToTotem()->GetSummoner())
+    {
+        if (IsViableTarget(owner->GetVictim()))
+            i_victimGuid = owner->GetVictim()->GetGUID();
+        else
+        {
+            Unit* target = nullptr;
+            Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck u_check(me, me, owner, max_range);
+            Trinity::UnitLastSearcher<Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck> checker(me, target, u_check);
+            me->VisitNearbyObject(max_range, checker);
+            if (target)
+                i_victimGuid = target->GetGUID();
+        }
     }
 
-    // If have target
-    if (victim)
+    if (Unit* victim = ObjectAccessor::GetUnit(*me, i_victimGuid))
     {
-        // remember
-        i_victimGuid = victim->GetGUID();
-
-        // attack
         me->SetInFront(victim);                         // client change orientation by self
         me->CastSpell(victim, me->ToTotem()->GetSpell(), false);
     }
