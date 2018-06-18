@@ -926,6 +926,44 @@ namespace Trinity
             float i_range;
     };
 
+    class NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck
+    {
+        public:
+            NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, Unit const* owner, float range) : i_obj(obj), i_funit(funit), i_owner(owner), i_range(range) { }
+            bool operator()(Unit* u)
+            {
+                if (!u->IsAlive())
+                    return false;
+
+                if (u->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
+                    return false;
+
+                if (Creature* c = u->ToCreature())
+                    if (c->IsTotem() || c->IsTrigger())
+                        return false;
+
+                if (!u->isTargetableForAttack(false, i_funit))
+                    return false;
+
+                if (i_funit->IsFriendlyTo(u))
+                    return false;
+
+                if (!i_owner->IsInCombatWith(u))
+                    return false;
+
+                if (i_obj->GetExactDist(u) > i_range)
+                    return false;
+
+                i_range = i_obj->GetExactDist(u);
+                return true;
+            }
+        private:
+            WorldObject const* i_obj;
+            Unit const* i_funit;
+            Unit const* i_owner;
+            float i_range;
+    };
+
     class AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck
     {
         public:
