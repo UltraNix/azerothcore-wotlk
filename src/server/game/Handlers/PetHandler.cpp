@@ -533,12 +533,12 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
                     // Can't attack if owner is pacified
-                    if (_player->HasAuraType(SPELL_AURA_MOD_PACIFY))
-                    {
-                        //pet->SendPetCastFail(spellid, SPELL_FAILED_PACIFIED);
-                        //TODO: Send proper error message to client
-                        return;
-                    }
+                    //if (_player->HasAuraType(SPELL_AURA_MOD_PACIFY))
+                    //{
+                    //    //pet->SendPetCastFail(spellid, SPELL_FAILED_PACIFIED);
+                    //    //TODO: Send proper error message to client
+                    //    return;
+                    //}
 
                     // only place where pet can be player
                     Unit* TargetUnit = ObjectAccessor::GetUnit(*_player, guid2);
