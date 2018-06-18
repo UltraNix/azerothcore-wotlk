@@ -370,6 +370,7 @@ public:
     uint32 SpellVisual[2];
     uint32 SpellIconID;
     uint32 ActiveIconID;
+    uint32 Priority;
     char* SpellName[16];
     char* Rank[16];
     uint32 MaxTargetLevel;

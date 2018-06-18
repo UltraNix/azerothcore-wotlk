@@ -21412,12 +21412,25 @@ void Player::SendRemoveControlBar()
     GetSession()->SendPacket(&data);
 }
 
-bool Player::HasSpellMod(SpellModifier* mod, Spell* spell)
+/*static*/ void Player::ApplyModToSpell(SpellModifier* mod, Spell* spell)
 {
-    if (!mod || !spell)
+    if (!spell)
+        return;
+
+    // don't do anything with no charges
+    if (mod->ownerAura->IsUsingCharges() && !mod->ownerAura->GetCharges())
+        return;
+
+    // register inside spell, proc system uses this to drop charges
+    spell->m_appliedMods.insert(mod->ownerAura);
+}
+
+/*static*/ bool Player::HasSpellModApplied(SpellModifier* mod, Spell* spell)
+{
+    if (!spell)
         return false;
 
-    return spell->m_appliedMods.find(mod->ownerAura) != spell->m_appliedMods.end();
+    return spell->m_appliedMods.count(mod->ownerAura) != 0;
 }
 
 bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell)
@@ -21431,6 +21444,10 @@ bool Player::IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod
 
     // +duration to infinite duration spells making them limited
     if (mod->op == SPELLMOD_DURATION && spellInfo->GetDuration() == -1)
+        return false;
+
+    // mod crit to spells that can't crit
+    if (mod->op == SPELLMOD_CRITICAL_CHANCE && !spellInfo->IsCritCapable())
         return false;
 
     return spellInfo->IsAffectedBySpellMod(mod);
@@ -21633,22 +21650,6 @@ void Player::RemoveSpellMods(Spell* spell)
             if (mod->ownerAura->DropCharge(AURA_REMOVE_BY_EXPIRE))
                 itr = m_spellMods[i].begin();
         }
-    }
-}
-
-void Player::DropModCharge(SpellModifier* mod, Spell* spell)
-{
-    // don't handle spells with proc_event entry defined
-    // this is a temporary workaround, because all spellmods should be handled like that
-    if (sSpellMgr->GetSpellProcEvent(mod->spellId))
-        return;
-
-    if (spell && mod->ownerAura && mod->charges > 0)
-    {
-        if (--mod->charges == 0)
-            mod->charges = -1;
-
-        spell->m_appliedMods.insert(mod->ownerAura);
     }
 }
 

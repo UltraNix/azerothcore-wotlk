@@ -849,6 +849,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry)
         SpellVisual[i] = spellEntry->SpellVisual[i];
     SpellIconID = spellEntry->SpellIconID;
     ActiveIconID = spellEntry->activeIconID;
+    Priority = spellEntry->spellPriority;
     for (uint8 i = 0; i < 16; ++i)
         SpellName[i] = spellEntry->SpellName[i];
     for (uint8 i = 0; i < 16; ++i)
