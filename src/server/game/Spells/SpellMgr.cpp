@@ -3116,6 +3116,24 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_DISTANCE_IN_SPEED_CALC;
         });
 
+        //! Proc spells that should proc on full absorbs
+        ApplySpellFix
+        ({
+            53380, // Righteous Vengeance
+            53381, // Righteous Vengeance
+            53382, // Righteous Vengeance
+            53234, // Piercing Shots
+            53237, // Piercing Shots
+            53238, // Piercing Shots
+            12849, // Deep wounds
+            12834, // Deep wounds
+            12867, // Deep wounds
+            49194  // Unholy blight
+         }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu |= SPELL_ATTR0_CU_PROC_ON_FULL_ABSORB;
+        });
+
         ApplySpellFix({ 45145 /* Snake Trap Effect*/ }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_BINARY_SPELL;
         });

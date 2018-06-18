@@ -202,6 +202,7 @@ enum SpellCustomAttributes : uint32
     SPELL_ATTR0_CU_FORCE_DOT_CRIT_BONUS          = 0x08000000, // Force bonus from talents to crit
     SPELL_ATTR0_CU_CHECK_STRONGEST_AURA_FOR_PROC = 0x10000000, // Check if there is more powerfull aura on target while proc
     SPELL_ATTR0_CU_IGNORE_MANA_REGEN_LOCK        = 0x20000000, // Riztazz, based on ToD
+    SPELL_ATTR0_CU_PROC_ON_FULL_ABSORB           = 0x40000000,
 
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
 };
