@@ -75,18 +75,16 @@ void TotemAI::UpdateAI(uint32 /*diff*/)
 
     // SPELLMOD_RANGE not applied in this place just because not existence range mods for attacking totems
 
-    auto IsViableTarget = [this, max_range](Unit* target) -> bool
+    auto IsViableTarget = [this, max_range](Unit* target, Unit* owner) -> bool
     {
-        if (!target)
-            return false;
-
-        return target->isTargetableForAttack(true, me) && me->IsWithinDistInMap(target, max_range) && !target->IsFriendlyTo(me) && me->CanSeeOrDetect(target);
+        return target && target->IsInCombatWith(owner) && target->isTargetableForAttack(true, me) && me->IsWithinDistInMap(target, max_range)
+            && !target->IsFriendlyTo(me) && me->CanSeeOrDetect(target);
     };
 
     if (Unit* owner = me->ToTotem()->GetSummoner())
     {
-        if (IsViableTarget(owner->GetVictim()))
-            i_victimGuid = owner->GetVictim()->GetGUID();
+        if (IsViableTarget(ObjectAccessor::GetUnit(*me, owner->GetTarget()), owner))
+            i_victimGuid = owner->GetTarget();
         else
         {
             Unit* target = nullptr;
