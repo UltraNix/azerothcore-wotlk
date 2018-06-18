@@ -2952,6 +2952,8 @@ class Player : public Unit, public GridObject<Player>
         uint8 m_swingErrorMsg;
         float m_ammoDPS;
 
+        uint16 m_requiredFish;
+
         bool m_BlizzlikeMode;
         bool m_NeedAutoInvite; // @autoinvite_feature
         bool m_PvPAnnounces;

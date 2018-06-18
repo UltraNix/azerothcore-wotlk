@@ -921,6 +921,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_timeSyncClient = 0;
     m_timeSyncServer = 0;
 
+    m_requiredFish = 0;
+
     for (uint8 i = 0; i < MAX_POWERS; ++i)
         m_powerFraction[i] = 0;
 
@@ -6393,13 +6395,31 @@ bool Player::UpdateFishingSkill()
 {
     ;//sLog->outDebug(LOG_FILTER_PLAYER_SKILLS, "UpdateFishingSkill");
 
-    uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
+    uint16 SkillValue = GetPureSkillValue(SKILL_FISHING);
 
-    int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
+    auto CalcRandomAmount = [](uint16 const amount) -> uint16
+    {
+        switch (amount)
+        {
+            case 1:
+            case 2:
+                return RAND(0, 1);
+            default:
+                return RAND(-1, 0, 1);
+        }
+    };
 
-    uint32 gathering_skill_gain = (sWorld->getIntConfig(CONFIG_SKILL_GAIN_GATHERING));
+    uint16 amount = std::max<uint16>(1, std::max<int16>(1, SkillValue - 75) / 25);
+    amount += CalcRandomAmount(amount);
 
-    return UpdateSkillPro(SKILL_FISHING, chance*10, gathering_skill_gain);
+    if (++m_requiredFish >= amount)
+    {
+        uint32 gathering_skill_gain = (sWorld->getIntConfig(CONFIG_SKILL_GAIN_GATHERING));
+        m_requiredFish = 0;
+        return UpdateSkill(SKILL_FISHING, gathering_skill_gain);
+    }
+
+    return false;
 }
 
 // levels sync. with spell requirement for skill levels to learn
