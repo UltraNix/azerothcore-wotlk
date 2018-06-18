@@ -4927,8 +4927,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63944: // Rewned hope triggered spell
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             break;
-
-
+        // Mind Flay, ticks shouldn't be able to miss
+        case 58381:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
 
         /////////////////////////////////
         ///// DRUID
