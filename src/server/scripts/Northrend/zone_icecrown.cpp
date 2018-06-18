@@ -2478,6 +2478,28 @@ class spell_scourgewagon_explosion_SpellScript : public SpellScript
     }
 };
 
+enum WaterTerror
+{
+    SPELL_FROST_NOVA = 57668
+};
+
+class spell_water_terror_crahsing_wave_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_water_terror_crahsing_wave_SpellScript);
+
+    void RecalculateDamage()
+    {
+        if (Unit* target = GetHitUnit())
+            if (target->HasAura(SPELL_FROST_NOVA))
+                SetHitDamage(GetHitDamage() * 2);
+    }
+
+    void Register() override
+    {
+        OnHit += SpellHitFn(spell_water_terror_crahsing_wave_SpellScript::RecalculateDamage);
+    }
+};
+
 void AddSC_icecrown()
 {
     // Ours
@@ -2495,6 +2517,7 @@ void AddSC_icecrown()
     new npc_cauldron_target_basic_chemistry();
     new SpellScriptLoaderEx<spell_scourgewagon_explosion_SpellScript>("spell_scourgewagon_explosion");
     new npc_blastbolt_brother();
+    new SpellScriptLoaderEx<spell_water_terror_crahsing_wave_SpellScript>("spell_water_terror_crahsing_wave");
 
     // Theirs
     new npc_guardian_pavilion();
