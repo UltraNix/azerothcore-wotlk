@@ -77,8 +77,25 @@ void TotemAI::UpdateAI(uint32 /*diff*/)
 
     auto IsViableTarget = [this, max_range](Unit* target, Unit* owner) -> bool
     {
-        return target && target->IsInCombatWith(owner) && target->isTargetableForAttack(true, me) && me->IsWithinDistInMap(target, max_range)
-            && !target->IsFriendlyTo(me) && me->CanSeeOrDetect(target);
+        if (!target)
+            return false;
+
+        if (!owner->IsInCombat() || !target->IsInCombat())
+            return false;
+
+        if (!target->isTargetableForAttack(false, me))
+            return false;
+
+        if (!target->IsValidAttackTarget(owner))
+            return false;
+
+        if (!me->IsWithinDistInMap(target, max_range))
+            return false;
+
+        if (target->IsFriendlyTo(owner))
+            return false;
+
+        return true;
     };
 
     if (Unit* owner = me->ToTotem()->GetSummoner())
