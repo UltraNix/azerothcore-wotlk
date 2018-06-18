@@ -31,6 +31,7 @@
 #include "Unit.h"
 #include "Battleground.h"
 #include "WorldSession.h"
+#include "SpellAuras.h"
 
 #include <string>
 #include <vector>
@@ -602,6 +603,7 @@ typedef std::unordered_map<uint32, SkillStatusData> SkillStatusMap;
 
 class Quest;
 class Spell;
+class Aura;
 class Item;
 class WorldSession;
 
@@ -3051,6 +3053,7 @@ class Player : public Unit, public GridObject<Player>
         // Temporary removed pet cache
         uint32 m_temporaryUnsummonedPetNumber;
         uint32 m_oldpetspell;
+        uint32 m_temporaryGhoulPetEnergy;
 
         AchievementMgr* m_achievementMgr;
         ReputationMgr*  m_reputationMgr;
