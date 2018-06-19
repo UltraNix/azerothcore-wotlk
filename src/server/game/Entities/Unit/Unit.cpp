@@ -1541,61 +1541,61 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     // Do effect if any damage done to target
     if (damageInfo->damage)
     {
-		// We're going to call functions which can modify content of the list during iteration over it's elements
-		// Let's copy the list so we can prevent iterator invalidation
-		AuraEffectList vDamageShieldsCopy(victim->GetAuraEffectsByType(SPELL_AURA_DAMAGE_SHIELD));
-		if (vDamageShieldsCopy.empty()) return;
-		AuraEffectList::const_iterator largestDamageShieldItr = vDamageShieldsCopy.begin();
-		SpellInfo const* largestDamageShield = (*largestDamageShieldItr)->GetSpellInfo();
-		uint32 largestDamage = uint32(std::max(0, (*largestDamageShieldItr)->GetAmount()));
-		//Searching for the largest damaging shield
-		for (AuraEffectList::const_iterator dmgShieldItr = vDamageShieldsCopy.begin(); dmgShieldItr != vDamageShieldsCopy.end(); ++dmgShieldItr)
-		{
-			SpellInfo const* i_spellProto = (*dmgShieldItr)->GetSpellInfo();
-			uint32 damage = uint32(std::max(0, (*dmgShieldItr)->GetAmount()));
+        // We're going to call functions which can modify content of the list during iteration over it's elements
+        // Let's copy the list so we can prevent iterator invalidation
+        AuraEffectList vDamageShieldsCopy(victim->GetAuraEffectsByType(SPELL_AURA_DAMAGE_SHIELD));
+        if (vDamageShieldsCopy.empty()) return;
+        AuraEffectList::const_iterator largestDamageShieldItr = vDamageShieldsCopy.begin();
+        SpellInfo const* largestDamageShield = (*largestDamageShieldItr)->GetSpellInfo();
+        uint32 largestDamage = uint32(std::max(0, (*largestDamageShieldItr)->GetAmount()));
+        //Searching for the largest damaging shield
+        for (AuraEffectList::const_iterator dmgShieldItr = vDamageShieldsCopy.begin(); dmgShieldItr != vDamageShieldsCopy.end(); ++dmgShieldItr)
+        {
+            SpellInfo const* i_spellProto = (*dmgShieldItr)->GetSpellInfo();
+            uint32 damage = uint32(std::max(0, (*dmgShieldItr)->GetAmount()));
 
-			if (largestDamage < damage)
+            if (largestDamage < damage)
             {
-				largestDamageShield = (*dmgShieldItr)->GetSpellInfo();
-				largestDamage = damage;
-			}
-		}
-
-		// Damage shield can be resisted...
-		if (SpellMissInfo missInfo = victim->SpellHitResult(this, largestDamageShield, false))
-		{
-			victim->SendSpellMiss(this, largestDamageShield->Id, missInfo);
-			return;
-		}
-
-		// ...or immuned
-		if (IsImmunedToDamageOrSchool(largestDamageShield))
-		{
-			victim->SendSpellDamageImmune(this, largestDamageShield->Id);
-			return;
-		}
-
-		// xinef: done calculated at amount calculation
-
-		if (Unit* caster = (*largestDamageShieldItr)->GetCaster())
-			largestDamage = this->SpellDamageBonusTaken(caster, largestDamageShield, largestDamage, SPELL_DIRECT_DAMAGE);
-
-		// No Unit::CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
-		Unit::DealDamageMods(this, largestDamage, NULL);
-
-		// TODO: Move this to a packet handler
-		WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4 + 4 + 4));
-		data << uint64(victim->GetGUID());
-		data << uint64(GetGUID());
-		data << uint32(largestDamageShield->Id);
-		data << uint32(largestDamage);                  // Damage
-		int32 overkill = int32(largestDamage) - int32(GetHealth());
-		data << uint32(overkill > 0 ? overkill : 0); // Overkill
-		data << uint32(largestDamageShield->SchoolMask);
-		victim->SendMessageToSet(&data, true);
-
-		Unit::DealDamage(victim, this, largestDamage, 0, SPELL_DIRECT_DAMAGE, largestDamageShield->GetSchoolMask(), largestDamageShield, true);
+                largestDamageShield = (*dmgShieldItr)->GetSpellInfo();
+                largestDamage = damage;
+            }
         }
+
+        // Damage shield can be resisted...
+        if (SpellMissInfo missInfo = victim->SpellHitResult(this, largestDamageShield, false))
+        {
+            victim->SendSpellMiss(this, largestDamageShield->Id, missInfo);
+            return;
+        }
+
+        // ...or immuned
+        if (IsImmunedToDamageOrSchool(largestDamageShield))
+        {
+            victim->SendSpellDamageImmune(this, largestDamageShield->Id);
+            return;
+        }
+
+        // xinef: done calculated at amount calculation
+
+        if (Unit* caster = (*largestDamageShieldItr)->GetCaster())
+            largestDamage = this->SpellDamageBonusTaken(caster, largestDamageShield, largestDamage, SPELL_DIRECT_DAMAGE);
+
+        // No Unit::CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that
+        Unit::DealDamageMods(this, largestDamage, NULL);
+
+        // TODO: Move this to a packet handler
+        WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4 + 4 + 4));
+        data << uint64(victim->GetGUID());
+        data << uint64(GetGUID());
+        data << uint32(largestDamageShield->Id);
+        data << uint32(largestDamage);                  // Damage
+        int32 overkill = int32(largestDamage) - int32(GetHealth());
+        data << uint32(overkill > 0 ? overkill : 0); // Overkill
+        data << uint32(largestDamageShield->SchoolMask);
+        victim->SendMessageToSet(&data, true);
+
+        Unit::DealDamage(victim, this, largestDamage, 0, SPELL_DIRECT_DAMAGE, largestDamageShield->GetSchoolMask(), largestDamageShield, true);
+    }
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
