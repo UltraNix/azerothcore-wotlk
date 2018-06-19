@@ -1537,6 +1537,10 @@ struct npc_oil_stained_wolfAI : public ScriptedAI
     void UpdateAI(uint32 diff) override
     {
         _scheduler.Update(diff);
+
+        if (!UpdateVictim())
+            return;
+        DoMeleeAttackIfReady();
     }
 
     private:
