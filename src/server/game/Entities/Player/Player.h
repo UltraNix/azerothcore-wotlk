@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1817,14 +1817,14 @@ class Player : public Unit, public GridObject<Player>
         SpellCooldowns      & GetSpellCooldownMap()       { return m_spellCooldowns; }
 
         void AddSpellMod(SpellModifier* mod, bool apply);
-        bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = nullptr);
-        template <class T> void ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = nullptr, bool temporaryPet = false);
+        bool IsAffectedBySpellmod(SpellInfo const* spellInfo, SpellModifier* mod, Spell* spell = NULL);
+        bool HasSpellMod(SpellModifier* mod, Spell* spell);
+        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL, bool temporaryPet = false);
         void RemoveSpellMods(Spell* spell);
-        void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura* aura = nullptr);
-        void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura* aura = nullptr);
+        void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura* aura = NULL);
+        void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura* aura = NULL);
+        void DropModCharge(SpellModifier* mod, Spell* spell);
         void SetSpellModTakingSpell(Spell* spell, bool apply);
-        static void ApplyModToSpell(SpellModifier* mod, Spell* spell);
-        static bool HasSpellModApplied(SpellModifier* mod, Spell* spell);
 
         static uint32 const infinityCooldownDelay = 0x9A7EC800;  // used for set "infinity cooldowns" for spells and check, MONTH*IN_MILLISECONDS
         static uint32 const infinityCooldownDelayCheck = 0x4D3F6400; //MONTH*IN_MILLISECONDS/2;
@@ -2672,7 +2672,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool IsInDodgeMode() const { return m_ExtraFlags & PLAYER_EXTRA_DODGE_LOCATION; }
         void SetDodgeMode(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_DODGE_LOCATION; else m_ExtraFlags &= ~PLAYER_EXTRA_DODGE_LOCATION; };
-
+        
         void PrepareCharmAISpells();
         uint32 m_charmUpdateTimer;
 
@@ -2684,7 +2684,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool BlizzlikeMode() { return m_BlizzlikeMode; }
         void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
-
+   
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
         void SetAutoInviteDone(bool val) { m_NeedAutoInvite = val; }
@@ -3076,59 +3076,72 @@ void AddItemsSetItem(Player*player, ItemRef const& item);
 void RemoveItemsSetItem(Player*player, ItemTemplate const* proto);
 
 // "the bodies of template functions must be made available in a header file"
-template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell, bool temporaryPet)
-{
+template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell, bool temporaryPet)
+{ 
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
-        return;
+        return 0;
     float totalmul = 1.0f;
     int32 totalflat = 0;
-
-    auto calculateSpellMod = [&](SpellModifier* mod)
-    {
-        switch (mod->type)
-        {
-            case SPELLMOD_FLAT:
-                totalflat += mod->value;
-                break;
-            case SPELLMOD_PCT:
-                // special case (skip > 10sec spell casts for instant cast setting)
-                if (op == SPELLMOD_CASTING_TIME && mod->value <= -100 && basevalue >= T(10000))
-                    return;
-                else if (!Player::HasSpellModApplied(mod, spell) && op == SPELLMOD_GLOBAL_COOLDOWN)
-                    return;
-
-                totalmul += CalculatePct(1.0f, mod->value);
-                break;
-        }
-
-        Player::ApplyModToSpell(mod, spell);
-    };
+    int32 bonusValues = 0;
 
     // Drop charges for triggering spells instead of triggered ones
     if (m_spellModTakingSpell)
         spell = m_spellModTakingSpell;
 
-    SpellModifier* chargedMod = nullptr;
-
-    for (SpellModifier* mod : m_spellMods[op])
+    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
+        SpellModifier* mod = *itr;
+
+        // Charges can be set only for mods with auras
+        if (!mod->ownerAura)
+            ASSERT(mod->charges == 0);
+
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
 
-        if (mod->ownerAura->IsUsingCharges())
-        {
-            if (!chargedMod || (chargedMod->ownerAura->GetSpellInfo()->Priority < mod->ownerAura->GetSpellInfo()->Priority))
-                chargedMod = mod;
+        // xinef: temporary pets cannot use charged mods of owner, needed for mirror image QQ they should use their own auras
+        if (temporaryPet && mod->charges != 0)
             continue;
+
+        if (mod->type == SPELLMOD_FLAT)
+        {
+            // xinef: do not allow to consume more than one 100% crit increasing spell
+            if (mod->op == SPELLMOD_CRITICAL_CHANCE && totalflat >= 100)
+                continue;
+
+            totalflat += mod->value;
+        }
+        else if (mod->type == SPELLMOD_PCT)
+        {
+            // skip percent mods for null basevalue (most important for spell mods with charges)
+            if (basevalue == T(0) || totalmul == 0.0f)
+                continue;
+
+            // special case (skip > 10sec spell casts for instant cast setting)
+            if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10000) && mod->value <= -100)
+                continue;
+            // xinef: special exception for surge of light, dont affect crit chance if previous mods were not applied
+            else if (mod->op == SPELLMOD_CRITICAL_CHANCE && spell && !HasSpellMod(mod, spell))
+                continue;
+            // xinef: special case for backdraft gcd reduce with backlast time reduction, dont affect gcd if cast time was not applied
+            else if (mod->op == SPELLMOD_GLOBAL_COOLDOWN && spell && !HasSpellMod(mod, spell))
+                continue;
+
+            // xinef lied ~Crackaw
+            //totalmul += roundf(CalculatePct(1.0f, mod->value)*100.0f)/100.0f;
+            bonusValues += mod->value;
         }
 
-        calculateSpellMod(mod);
+        DropModCharge(mod, spell);
     }
-
-    if (chargedMod)
-        calculateSpellMod(chargedMod);
-
-    basevalue = T(float(basevalue + totalflat) * totalmul);
+    totalmul += roundf(CalculatePct(1.0f, bonusValues)*100.0f) / 100.0f;
+    float diff = 0.0f;
+    if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION)
+        diff = ((float)basevalue + totalflat) * (totalmul - 1.0f) + (float)totalflat;
+    else
+        diff = (float)basevalue * (totalmul - 1.0f) + (float)totalflat;
+    basevalue = T((float)basevalue + diff);
+    return T(diff);
 }
 #endif
