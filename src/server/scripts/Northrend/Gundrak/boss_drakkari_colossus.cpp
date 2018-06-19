@@ -196,13 +196,16 @@ struct boss_drakkari_colossusAI : public BossAI
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damageType*/, SpellSchoolMask /*mask*/) override
     {
-        if (me->HealthBelowPctDamaged(50 - _emergeCount * 30, damage))
+        if (int32 hp = std::max<int32>(0, 50 - _emergeCount * 30))
         {
-            ++_emergeCount;
-            DoCastSelf(SPELL_EMERGE);
-            DoCastSelf(SPELL_EMERGE_SUMMON, true);
-            me->GetMotionMaster()->Clear();
-            SetImmune(true);
+            if (me->HealthBelowPctDamaged(hp, damage))
+            {
+                ++_emergeCount;
+                DoCastSelf(SPELL_EMERGE);
+                DoCastSelf(SPELL_EMERGE_SUMMON, true);
+                me->GetMotionMaster()->Clear();
+                SetImmune(true);
+            }
         }
 
         if (damage >= me->GetHealth())
