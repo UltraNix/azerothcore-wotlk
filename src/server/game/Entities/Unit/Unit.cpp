@@ -5039,6 +5039,19 @@ bool Unit::HasAuraType(AuraType auraType) const
     return (!m_modAuras[auraType].empty());
 }
 
+bool Unit::HasAuraTypeWithAttribute( AuraType auraType, SpellAttr0 attr0 ) const
+{
+    AuraEffectList const& mTotalAuraList = GetAuraEffectsByType( auraType );
+    for ( AuraEffect * auraEff : mTotalAuraList )
+    {
+        SpellInfo const* spellInfo = auraEff->GetBase()->GetSpellInfo();
+        if ( spellInfo->HasAttribute( attr0 ) )
+            return true;
+    }
+
+    return false;
+}
+
 bool Unit::HasAuraTypeWithCaster(AuraType auratype, uint64 caster) const
 {
     AuraEffectList const& mTotalAuraList = GetAuraEffectsByType(auratype);

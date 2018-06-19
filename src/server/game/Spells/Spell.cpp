@@ -2994,6 +2994,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
             }
         }
+        else if ( m_spellInfo->IsDelayedSpell() && unit == m_targets.GetUnitTarget() )
+        {
+            //! Only stealth usable in combat will ignore flying spells
+            const bool isNotVisibleForHit = unit->HasAuraType( SPELL_AURA_MOD_STEALTH ) && !unit->HasAuraTypeWithAttribute( SPELL_AURA_MOD_STEALTH, SPELL_ATTR0_CANT_USED_IN_COMBAT );
+            if ( isNotVisibleForHit && !m_caster->CanSeeOrDetect( unit, false ) )
+                return SPELL_MISS_DODGE; // SPELL_MISS_EVADE generates wrong entries in combat log
+        }
     }
 
     uint8 aura_effmask = 0;

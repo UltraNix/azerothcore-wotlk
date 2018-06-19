@@ -278,7 +278,7 @@ enum ProcAttributes
 };
 
 //! 150ms of fake delay added to spells
-const uint32 SPELL_FAKE_DELAY = 150u;
+const uint32 SPELL_FAKE_DELAY = 200u;
 
 struct SpellProcEventEntry
 {
