@@ -277,6 +277,9 @@ enum ProcAttributes
     PROC_ATTR_REQ_EXP_OR_HONOR   = 0x0000010,
 };
 
+//! 150ms of fake delay added to spells
+const uint32 SPELL_FAKE_DELAY = 150u;
+
 struct SpellProcEventEntry
 {
     uint32      schoolMask;                                 // if nonzero - bit mask for matching proc condition based on spell candidate's school: Fire=2, Mask=1<<(2-1)=2

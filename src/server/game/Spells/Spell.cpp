@@ -73,6 +73,9 @@ uint64 GetCustomSpellDelay(SpellInfo const *spellEntry)
     if (spellEntry->SpellVisual[0] == 2816 && spellEntry->SpellIconID == 15)
         return 200;
 
+    if ( spellEntry->HasAttribute( SPELL_ATTR0_CU_FAKE_DELAY ) )
+        return SPELL_FAKE_DELAY;
+
     return 0;
 }
 
@@ -2403,8 +2406,8 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (dist < 5.0f)
             dist = 5.0f;
 
-        if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_IGNORE_DISTANCE_IN_SPEED_CALC))
-            targetInfo.timeDelay = (uint64)std::floor(m_spellInfo->Speed * 1000.0f);
+        if ( m_spellInfo->HasAttribute( SPELL_ATTR0_CU_IGNORE_DISTANCE_IN_SPEED_CALC ) )
+            targetInfo.timeDelay = ( uint64 )std::floor( m_spellInfo->Speed * 1000.0f );
         else
             targetInfo.timeDelay = (uint64)std::floor(dist / m_spellInfo->Speed * 1000.0f);
 
@@ -2494,12 +2497,15 @@ void Spell::AddGOTarget(GameObject* go, uint32 effectMask)
         float dist = m_caster->GetDistance(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
         if (dist < 5.0f)
             dist = 5.0f;
+
         target.timeDelay = uint64(floor(dist / m_spellInfo->Speed * 1000.0f));
         if (m_delayMoment == 0 || m_delayMoment > target.timeDelay)
             m_delayMoment = target.timeDelay;
     }
     else
         target.timeDelay = 0LL;
+
+    m_delayMoment = GetCustomSpellDelay( m_spellInfo ) ? GetCustomSpellDelay( m_spellInfo ) : target.timeDelay;
 
     // Add target to list
     m_UniqueGOTargetInfo.push_back(target);
@@ -2899,7 +2905,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         return SPELL_MISS_EVADE;
 
     // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-    if (m_spellInfo->Speed && ((m_damage > 0 && unit->IsImmunedToDamage(m_spellInfo)) || unit->IsImmunedToSchool(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)) || unit->HasAura(57835))
+    if (m_spellInfo->IsDelayedSpell() && ((m_damage > 0 && unit->IsImmunedToDamage(m_spellInfo)) || unit->IsImmunedToSchool(m_spellInfo) || unit->IsImmunedToSpell(m_spellInfo)) || unit->HasAura(57835))
         return SPELL_MISS_IMMUNE;
 
     // disable effects to which unit is immune
@@ -2950,7 +2956,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
         // Xinef: Also check evade state
-        if (m_spellInfo->Speed > 0.0f)
+        if (m_spellInfo->IsDelayedSpell())
         {
             if (unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->IsInEvadeMode())
                 return SPELL_MISS_EVADE;
@@ -2967,7 +2973,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
             // TODO: this cause soul transfer bugged
-            if(!IsTriggered() && m_spellInfo->Speed > 0.0f && unit->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->IsPositive())
+            if(!IsTriggered() && m_spellInfo->IsDelayedSpell() && unit->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->IsPositive())
                 return SPELL_MISS_EVADE;
 
             // assisting case, healing and resurrection
@@ -3787,7 +3793,7 @@ void Spell::_cast(bool skipCheck)
     SendSpellGo();
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if (((m_spellInfo->Speed > 0.0f || m_delayMoment) && !m_spellInfo->IsChanneled())/* xinef: we dont need this shit || m_spellInfo->Id == 14157*/)
+    if (((m_spellInfo->IsDelayedSpell() || m_delayMoment) && !m_spellInfo->IsChanneled())/* xinef: we dont need this shit || m_spellInfo->Id == 14157*/)
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start

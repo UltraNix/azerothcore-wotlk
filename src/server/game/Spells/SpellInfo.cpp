@@ -1287,6 +1287,12 @@ bool SpellInfo::IsAutoRepeatRangedSpell() const
     return AttributesEx2 & SPELL_ATTR2_AUTOREPEAT_FLAG;
 }
 
+
+bool SpellInfo::IsDelayedSpell() const
+{
+    return Speed > 0.0f || HasAttribute( SPELL_ATTR0_CU_FAKE_DELAY );
+}
+
 bool SpellInfo::IsAffectedBySpellMods() const
 {
     return !(AttributesEx3 & SPELL_ATTR3_NO_DONE_BONUS);
