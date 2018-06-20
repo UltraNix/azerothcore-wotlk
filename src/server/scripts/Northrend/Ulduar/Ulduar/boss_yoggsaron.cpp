@@ -184,6 +184,7 @@ enum NPCsGOs
     NPC_SANITY_WELL                         = 33991,
     NPC_YOGG_SARON                          = 33288,
     NPC_VOICE_OF_YOGG_SARON                 = 33280,
+    NPC_DEATHRAY                            = 33881,
 
     NPC_CRUSHER_TENTACLE                    = 33966, // 50 secs ?
     NPC_CONSTRICTOR_TENTACLE                = 33983, // 15-20 secs ?
@@ -919,9 +920,19 @@ public:
                     events.RepeatEvent(RAID_MODE(3000, 1100));
                     break;
                 case EVENT_SARA_P2_DEATH_RAY:
+                {
+                    Position pos = me->GetPosition();
+                    pos.m_positionZ += 2.0f;
+                    if (Creature* rayTarget = me->SummonCreature(NPC_DEATHRAY, pos, TEMPSUMMON_TIMED_DESPAWN, 17000))
+                    {
+                        rayTarget->SetDisplayId(17612);
+                        rayTarget->SetCanFly(true);
+                        rayTarget->SetDisableGravity(true);
+                    }
                     SummonDeathOrbs();
                     events.RepeatEvent(20000);
                     break;
+                }
                 case EVENT_SARA_P2_SUMMON_T1: // CRUSHER
                     DoCastAOE(SPELL_SUMMON_CRUSHER_TENTACLE, true);
                     if (_brainEventCount < 4)
