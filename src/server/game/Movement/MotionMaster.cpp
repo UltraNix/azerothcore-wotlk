@@ -264,7 +264,7 @@ void MotionMaster::MoveTargetedHome()
     }
 }
 
-void MotionMaster::MoveConfused()
+void MotionMaster::MoveConfused( float extendedRange )
 {
     // Xinef: do not allow to move with UNIT_FLAG_DISABLE_MOVE
     if (_owner->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))

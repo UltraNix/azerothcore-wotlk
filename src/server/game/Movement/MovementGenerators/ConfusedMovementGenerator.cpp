@@ -27,7 +27,7 @@
 template<class T>
 void ConfusedMovementGenerator<T>::DoInitialize(T* unit)
 {
-    float const wander_distance = 4;
+    float const wander_distance = 4.0f + i_extendedRange;
     float x = unit->GetPositionX();
     float y = unit->GetPositionY();
     float z = unit->GetPositionZ();
@@ -131,8 +131,6 @@ bool ConfusedMovementGenerator<T>::DoUpdate(T* unit, uint32 diff)
     {
         Movement::MoveSplineInit spline(unit);
         spline.MovebyPath( i_waypoints, urand( 0, MAX_CONF_WAYPOINTS - 1 ) );
-        spline.SetWalk( true );
-        spline.SetVelocity( unit->GetSpeed( MOVE_WALK ) / 2.0f );
         spline.SetCyclic();
         spline.Launch();
 

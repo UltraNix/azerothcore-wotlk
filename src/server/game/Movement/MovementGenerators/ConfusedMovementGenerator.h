@@ -28,7 +28,7 @@ template<class T>
 class ConfusedMovementGenerator : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:
-        explicit ConfusedMovementGenerator(){}
+        explicit ConfusedMovementGenerator( float extendedRange = 0.0f ) : i_extendedRange( extendedRange ) {}
 
         void                    DoInitialize( T* );
         void                    DoFinalize( T* );
@@ -40,6 +40,7 @@ class ConfusedMovementGenerator : public MovementGeneratorMedium< T, ConfusedMov
     private:
         void                    _InitSpecific(T*, bool &, bool &);
 
+        float                   i_extendedRange;
         Movement::PointsArray   i_waypoints;
 };
 #endif
