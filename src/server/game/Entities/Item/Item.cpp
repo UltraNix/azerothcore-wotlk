@@ -980,6 +980,18 @@ bool Item::GemsFitSockets() const
     return true;
 }
 
+bool Item::HasAnySocket() const
+{
+    if (GetTemplate()->Socket[0].Color)
+        return true;
+
+    //! Slot added via enchatments
+    if (GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT))
+        return true;
+
+    return false;
+}
+
 uint8 Item::GetGemCountWithID(uint32 GemID) const
 {
     uint8 count = 0;
