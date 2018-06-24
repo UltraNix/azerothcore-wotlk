@@ -1705,7 +1705,7 @@ void Player::Update(uint32 p_time)
 
     m_achievementMgr->UpdateTimedAchievements(p_time);
 
-    if (HasUnitState(UNIT_STATE_MELEE_ATTACKING) && !HasUnitState(UNIT_STATE_CASTING))
+    if (HasUnitState(UNIT_STATE_MELEE_ATTACKING) && ( !HasUnitState(UNIT_STATE_CASTING) || m_CanFinishSwingWhileCasting ))
     {
         if (Unit* victim = GetVictim())
         {

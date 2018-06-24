@@ -43,6 +43,8 @@
 #include "MoveSplineInit.h"
 #include "ArenaSpectator.h"
 
+#include <vector>
+
 class Aura;
 //
 // EFFECT HANDLER NOTES
@@ -3302,7 +3304,10 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
         return;
 
     Unit* target = aurApp->GetTarget();
-    std::list <AuraType> aura_immunity_list;
+
+    std::vector <AuraType> aura_immunity_list;
+    aura_immunity_list.reserve( 10 );
+
     uint32 mechanic_immunity_list = 0;
     int32 miscVal = GetMiscValue();
 
@@ -3593,16 +3598,20 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
     }
 
     // apply immunities
-    for (std::list <AuraType>::iterator iter = aura_immunity_list.begin(); iter != aura_immunity_list.end(); ++iter)
+    for (std::vector <AuraType>::iterator iter = aura_immunity_list.begin(); iter != aura_immunity_list.end(); ++iter)
         target->ApplySpellImmune(GetId(), IMMUNITY_STATE, *iter, apply);
 
+    //! I have no idea why it is here ....
     // Patch 3.0.3 Bladestorm now breaks all snares and roots on the warrior when activated.
     if (GetId() == 46924)
     {
         if (apply)
         {
-            target->resetAttackTimer();
-            target->resetAttackTimer(OFF_ATTACK);
+            Spell* spell = target->GetCurrentSpell( CURRENT_MELEE_SPELL );
+            if ( spell != nullptr && spell->IsNextMeleeSwingSpell() )
+            {
+                target->setSwingAllowedWhileCasting( true );
+            }
         }
 
         // Knockback and hex
@@ -3612,7 +3621,7 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
     if (apply && GetSpellInfo()->HasAttribute(SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY))
     {
         target->RemoveAurasWithMechanic(mechanic_immunity_list, AURA_REMOVE_BY_DEFAULT, GetId());
-        for (std::list <AuraType>::iterator iter = aura_immunity_list.begin(); iter != aura_immunity_list.end(); ++iter)
+        for (std::vector <AuraType>::iterator iter = aura_immunity_list.begin(); iter != aura_immunity_list.end(); ++iter)
             target->RemoveAurasByType(*iter);
     }
 }

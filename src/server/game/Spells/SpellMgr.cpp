@@ -4832,6 +4832,10 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// WARRIOR
         /////////////////////////////////
+        // Bladestorm
+        case 46924:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS;
+            break;
         // Glyph of blocking
         case 58375:
             spellInfo->EffectTriggerSpell[0] = 58374;

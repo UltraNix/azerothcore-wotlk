@@ -1403,6 +1403,7 @@ class Unit : public WorldObject
 
         virtual void Update(uint32 time);
 
+        void setSwingAllowedWhileCasting( bool value ) { m_CanFinishSwingWhileCasting = value; }
         void setAttackTimer(WeaponAttackType type, int32 time) { m_attackTimer[type] = time; }
         void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
         int32 getAttackTimer(WeaponAttackType type) const { return m_attackTimer[type]; }
@@ -2458,6 +2459,7 @@ class Unit : public WorldObject
         void _UpdateAutoRepeatSpell();
 
         bool m_AutoRepeatFirstCast;
+        bool m_CanFinishSwingWhileCasting;
 
         int32 m_attackTimer[MAX_ATTACK];
 

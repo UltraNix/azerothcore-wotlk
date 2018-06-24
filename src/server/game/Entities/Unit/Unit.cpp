@@ -173,6 +173,7 @@ m_HostileRefManager(this), m_AutoRepeatFirstCast(false)
 
     m_updateFlag = (UPDATEFLAG_LIVING | UPDATEFLAG_STATIONARY_POSITION);
 
+    m_CanFinishSwingWhileCasting = false;
     m_attackTimer[BASE_ATTACK] = 0;
     m_attackTimer[OFF_ATTACK] = 0;
     m_attackTimer[RANGED_ATTACK] = 0;
@@ -2158,7 +2159,10 @@ void Unit::CalcHealAbsorb(Unit const* victim, const SpellInfo* healSpell, uint32
 
 void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool extra)
 {
-    if (HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    if (HasUnitState(UNIT_STATE_LOST_CONTROL) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+        return;
+
+    if ( !m_CanFinishSwingWhileCasting && HasUnitState( UNIT_STATE_CASTING ) )
         return;
 
     if (!victim->IsAlive())
@@ -2196,6 +2200,8 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
             ;//sLog->outStaticDebug("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
                 GetGUIDLow(), victim->GetGUIDLow(), victim->GetTypeId(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);*/
     }
+
+    m_CanFinishSwingWhileCasting = false;
 }
 
 void Unit::HandleProcExtraAttackFor(Unit* victim)
