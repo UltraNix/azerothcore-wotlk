@@ -4879,6 +4879,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
         //Heroic throw
         case 57755:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS;
             spellInfo->AttributesEx4 |= SPELL_ATTR4_UNK15;
             break;
         // Shattering throw
