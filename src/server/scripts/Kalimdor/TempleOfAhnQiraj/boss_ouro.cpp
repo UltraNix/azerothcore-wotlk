@@ -249,6 +249,9 @@ struct npc_ouro_spawnerAI : public ScriptedAI
 
         if (_events.ExecuteEvent() == EVENT_CHECK)
         {
+            if (_summoned)
+                return;
+
             if (me->SelectNearestPlayer(2.0f))
             {
                 _summoned = true;
