@@ -134,8 +134,14 @@ MaxPingTime = 30
 #    WorldServerPort
 #        Description: TCP port to reach the world server.
 #        Default:     8085
+#
+#   WorldServerPorts
+#       Description: Additional worldserver ports available for connection, string separated by ;
+#       Default: ""
+#
 
 WorldServerPort = 8085
+#WorldServerPorts = "8086;8087"
 
 #
 #    BindIP
