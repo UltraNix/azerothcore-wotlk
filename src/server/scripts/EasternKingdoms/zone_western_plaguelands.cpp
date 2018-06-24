@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -276,6 +276,77 @@ public:
     };
 };
 
+enum GhostOfUther
+{
+    EVENT_SAY_0 = 1,
+    EVENT_SAY_1 ,
+    EVENT_SAY_2,
+    EVENT_SAY_3,
+    EVENT_DESPAWN,
+
+    SAY_0 = 0,
+    SAY_1,
+    SAY_2,
+    SAY_3
+};
+class npc_ghost_of_uther : public CreatureScript
+{
+public:
+    npc_ghost_of_uther() : CreatureScript("npc_ghost_of_uther") { }
+
+    struct npc_ghost_of_utherAI : public ScriptedAI
+    {
+        npc_ghost_of_utherAI(Creature* creature) : ScriptedAI(creature){ }
+
+        EventMap events;
+
+        void IsSummonedBy(Unit* summoner)
+        {
+            if (!summoner)
+                return;
+            if (summoner->IsPlayer())
+                if (summoner->ToPlayer()->GetTeamId() == TEAM_HORDE)
+                    events.ScheduleEvent(EVENT_SAY_0, 2s);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SAY_0:
+                        Talk(SAY_0);
+                        events.ScheduleEvent(EVENT_SAY_1, 8s);
+                        break;
+                    case EVENT_SAY_1:
+                        Talk(SAY_1);
+                        events.ScheduleEvent(EVENT_SAY_2, 8s);
+                        break;
+                    case EVENT_SAY_2:
+                        Talk(SAY_2);
+                        events.ScheduleEvent(EVENT_SAY_3, 8s);
+                        break;
+                    case EVENT_SAY_3:
+                        Talk(SAY_3);
+                        events.ScheduleEvent(EVENT_DESPAWN, 5s);
+                        break;
+                    case EVENT_DESPAWN:
+                        me->DespawnOrUnsummon();
+                        break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_ghost_of_utherAI(creature);
+    }
+};
+
 /*######
 ##
 ######*/
@@ -286,4 +357,5 @@ void AddSC_western_plaguelands()
     new npc_myranda_the_hag();
     new npc_the_scourge_cauldron();
     new npc_andorhal_tower();
+    new npc_ghost_of_uther();
 }
