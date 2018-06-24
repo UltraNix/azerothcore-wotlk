@@ -10084,6 +10084,13 @@ void Unit::SetCharm(Unit* charm, bool apply)
             charm->m_ControlledByPlayer = true;
             // TODO: maybe we can use this flag to check if controlled by player
             charm->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+            Player* player = ToPlayer();
+            if ( !player->IsPvP() && charm->IsPlayer() && player->duel == nullptr )
+            {
+                player->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE );
+                player->UpdatePvP(true);
+            }
         }
         else
             charm->m_ControlledByPlayer = false;
