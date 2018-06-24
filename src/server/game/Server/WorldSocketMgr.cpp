@@ -212,43 +212,33 @@ class ReactorRunnable : protected ACE_Task_Base
 };
 
 WorldSocketMgr::WorldSocketMgr() :
-    m_NetThreads(0),
-    m_NetThreadsCount(0),
     m_SockOutKBuff(-1),
     m_SockOutUBuff(65536),
-    m_UseNoDelay(true),
-    m_Acceptor (0)
+    m_UseNoDelay(true)
 {
 }
 
 WorldSocketMgr::~WorldSocketMgr()
 {
-    delete [] m_NetThreads;
-    delete m_Acceptor;
+    m_Acceptors.clear();
+    m_SocketThreads.clear();
 }
 
-int
-WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
+int WorldSocketMgr::StartReactiveIO( std::vector<ACE_UINT16> & ports, const char* address)
 {
     m_UseNoDelay = sConfigMgr->GetBoolDefault ("Network.TcpNodelay", true);
 
     int num_threads = sConfigMgr->GetIntDefault ("Network.Threads", 1);
-
     if (num_threads <= 0)
     {
         sLog->outError("Network.Threads is wrong in your config file");
         return -1;
     }
 
-    m_NetThreadsCount = static_cast<size_t> (num_threads + 1);
-
-    m_NetThreads = new ReactorRunnable[m_NetThreadsCount];
-
     sLog->outBasic ("Max allowed socket connections %d", ACE::max_handles());
 
     // -1 means use default
     m_SockOutKBuff = sConfigMgr->GetIntDefault ("Network.OutKBuff", -1);
-
     m_SockOutUBuff = sConfigMgr->GetIntDefault ("Network.OutUBuff", 65536);
 
     if (m_SockOutUBuff <= 0)
@@ -257,29 +247,37 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
         return -1;
     }
 
-    m_Acceptor = new WorldSocketAcceptor;
-
-    ACE_INET_Addr listen_addr (port, address);
-
-    if (m_Acceptor->open(listen_addr, m_NetThreads[0].GetReactor(), ACE_NONBLOCK) == -1)
+    for ( ACE_UINT16 port : ports )
     {
-        sLog->outError("Failed to open acceptor, check if the port is free");
-        return -1;
+        ACE_INET_Addr listen_addr( port, address );
+
+        auto context = std::make_unique< AcceptorContext >();
+        context->m_acceptor = std::make_unique< WorldSocketAcceptor >();
+        context->m_reactorThread = std::make_unique< ReactorRunnable >();
+
+        if ( context->Start( listen_addr ) == -1 )
+            return -1;
+
+        m_Acceptors.emplace_back( std::move( context ) );
     }
 
-    for (size_t i = 0; i < m_NetThreadsCount; ++i)
-        m_NetThreads[i].Start();
+    m_SocketThreads.resize( num_threads );
+    for ( size_t i = 0; i < num_threads; ++i )
+    {
+        m_SocketThreads[ i ] = std::make_unique< ReactorRunnable >();
+        m_SocketThreads[ i ]->Start();
+    }
 
     return 0;
 }
 
 int
-WorldSocketMgr::StartNetwork (ACE_UINT16 port, const char* address)
+WorldSocketMgr::StartNetwork ( std::vector<ACE_UINT16> & ports, const char* address)
 {
     if (!sLog->IsOutDebug())
         ACE_Log_Msg::instance()->priority_mask (LM_ERROR, ACE_Log_Msg::PROCESS);
 
-    if (StartReactiveIO(port, address) == -1)
+    if ( StartReactiveIO( ports, address ) == -1 )
         return -1;
 
     sScriptMgr->OnNetworkStart();
@@ -290,15 +288,14 @@ WorldSocketMgr::StartNetwork (ACE_UINT16 port, const char* address)
 void
 WorldSocketMgr::StopNetwork()
 {
-    if (m_Acceptor)
+    for ( auto && context : m_Acceptors )
     {
-        m_Acceptor->close();
+        context->Stop();
     }
 
-    if (m_NetThreadsCount != 0)
+    for ( auto && runnable : m_SocketThreads )
     {
-        for (size_t i = 0; i < m_NetThreadsCount; ++i)
-            m_NetThreads[i].Stop();
+        runnable->Stop();
     }
 
     Wait();
@@ -309,10 +306,14 @@ WorldSocketMgr::StopNetwork()
 void
 WorldSocketMgr::Wait()
 {
-    if (m_NetThreadsCount != 0)
+    for ( auto && context : m_Acceptors )
     {
-        for (size_t i = 0; i < m_NetThreadsCount; ++i)
-            m_NetThreads[i].Wait();
+        context->Wait();
+    }
+
+    for ( auto && runnable : m_SocketThreads )
+    {
+        runnable->Wait();
     }
 }
 
@@ -349,14 +350,36 @@ WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
 
     sock->m_OutBufferSize = static_cast<size_t> (m_SockOutUBuff);
 
-    // we skip the Acceptor Thread
-    size_t min = 1;
+    ASSERT( !m_SocketThreads.empty() );
 
-    ACE_ASSERT (m_NetThreadsCount >= 1);
+    auto runnable = std::min_element( m_SocketThreads.begin(), m_SocketThreads.end(), []( auto && lhs, auto && rhs )
+    {
+        return lhs->Connections() < rhs->Connections();
+    } );
 
-    for (size_t i = 1; i < m_NetThreadsCount; ++i)
-        if (m_NetThreads[i].Connections() < m_NetThreads[min].Connections())
-            min = i;
+    return (*runnable)->AddSocket( sock );
+}
 
-    return m_NetThreads[min].AddSocket (sock);
+int WorldSocketMgr::AcceptorContext::Start( ACE_INET_Addr addr )
+{
+    if ( m_acceptor->open( addr, m_reactorThread->GetReactor(), ACE_NONBLOCK ) == -1 )
+    {
+        sLog->outError( "Failed to open acceptor, check if the port is free" );
+        return -1;
+    }
+
+    m_reactorThread->Start();
+
+    return 0;
+}
+
+void WorldSocketMgr::AcceptorContext::Stop()
+{
+    m_acceptor->close();
+    m_reactorThread->Stop();
+}
+
+void WorldSocketMgr::AcceptorContext::Wait()
+{
+    m_reactorThread->Wait();
 }

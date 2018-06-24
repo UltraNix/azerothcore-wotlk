@@ -278,8 +278,21 @@ int Master::Run()
 
     ///- Launch the world listener socket
     uint16 worldPort = uint16(sWorld->getIntConfig(CONFIG_PORT_WORLD));
+    std::vector< ACE_UINT16 > ports;
+    ports.push_back( worldPort );
+
+    std::string additionalPorts = sConfigMgr->GetStringDefault( "WorldServerPorts2", "" );
+    if ( !additionalPorts.empty() )
+    {
+        Tokenizer tokens( additionalPorts, ';' );
+        for ( auto && token : tokens )
+        {
+            ports.push_back( atoi( token ) );
+        }
+    }
+
     std::string bindIp = sConfigMgr->GetStringDefault("BindIP", "0.0.0.0");
-    if (sWorldSocketMgr->StartNetwork(worldPort, bindIp.c_str()) == -1)
+    if (sWorldSocketMgr->StartNetwork( ports, bindIp.c_str()) == -1)
     {
         sLog->outError("Failed to start network");
         World::StopNow(ERROR_EXIT_CODE);
