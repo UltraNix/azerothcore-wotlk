@@ -237,6 +237,9 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
     // interrupt cast
     if (GetPlayer()->IsNonMeleeSpellCast(false))
         GetPlayer()->InterruptNonMeleeSpells(false);
+
+    // Remove stealth while looting
+    GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
 }
 
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
@@ -316,8 +319,6 @@ void WorldSession::DoLootRelease(uint64 lguid)
             if (player->GetGUID() == loot->roundRobinPlayer)
                 loot->roundRobinPlayer = 0;
         }
-        // Remove stealth while looting
-        GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
     }
     else if (IS_CORPSE_GUID(lguid))        // ONLY remove insignia at BG
     {
@@ -333,8 +334,6 @@ void WorldSession::DoLootRelease(uint64 lguid)
             loot->clear();
             corpse->RemoveFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
         }
-        // Remove stealth while looting
-        GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
     }
     else if (IS_ITEM_GUID(lguid))
     {
@@ -372,8 +371,6 @@ void WorldSession::DoLootRelease(uint64 lguid)
         bool lootAllowed = creature && creature->IsAlive() == (player->getClass() == CLASS_ROGUE && creature->loot.loot_type == LOOT_PICKPOCKETING);
         if (!lootAllowed || !creature->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
             return;
-        if(!(creature->loot.loot_type == LOOT_PICKPOCKETING)) // Remove stealth while looting
-            GetPlayer()->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
 
         loot = &creature->loot;
         if (loot->isLooted())
