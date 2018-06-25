@@ -278,13 +278,10 @@ void BattlefieldWG::OnBattleStart()
     }
 
     // Rebuild all wall
-    for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
+    for (auto const& building : BuildingsInZone)
     {
-        if (*itr)
-        {
-            (*itr)->Rebuild();
-            (*itr)->UpdateTurretAttack(false);
-        }
+        building->Rebuild();
+        building->UpdateTurretAttack(false);
     }
 
     SetData(BATTLEFIELD_WG_DATA_INTACT_TOWER_ATT, WG_MAX_ATTACKTOWERS);
@@ -435,11 +432,10 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
         (*itr)->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
 
     // Saving data
-    for (GameObjectBuilding::const_iterator itr = BuildingsInZone.begin(); itr != BuildingsInZone.end(); ++itr)
+    for (auto const& building : BuildingsInZone)
     {
-        (*itr)->Rebuild();
-        (*itr)->Save();
-        (*itr)->UpdateTurretAttack(true);
+        building->Save();
+        building->UpdateTurretAttack(true);
     }
 
     for (Workshop::const_iterator itr = WorkshopsList.begin(); itr != WorkshopsList.end(); ++itr)
