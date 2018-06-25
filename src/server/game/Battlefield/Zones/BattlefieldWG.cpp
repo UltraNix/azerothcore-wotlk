@@ -848,14 +848,17 @@ void BattlefieldWG::OnPlayerJoinWar(Player* player)
     player->CastSpell(player, SPELL_RECRUIT, true);
     AddUpdateTenacity(player);
 
-    if (player->GetTeamId() == GetDefenderTeam())
-        player->TeleportTo(571, 5345, 2842, 410, 3.14f);
-    else
+    if (!player->IsInWintergrasp())
     {
-        if (player->GetTeamId() == TEAM_HORDE)
-            player->TeleportTo(571, 5025.857422f, 3674.628906f, 362.737122f, 4.135169f);
+        if (player->GetTeamId() == GetDefenderTeam())
+            player->TeleportTo(571, 5345, 2842, 410, 3.14f);
         else
-            player->TeleportTo(571, 5101.284f, 2186.564f, 373.549f, 3.812f);
+        {
+            if (player->GetTeamId() == TEAM_HORDE)
+                player->TeleportTo(571, 5025.857422f, 3674.628906f, 362.737122f, 4.135169f);
+            else
+                player->TeleportTo(571, 5101.284f, 2186.564f, 373.549f, 3.812f);
+        }
     }
 
     if (player->GetTeamId() == GetAttackerTeam())
