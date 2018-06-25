@@ -26,6 +26,7 @@ DELETE FROM `disables` WHERE `entry` IN (
 14092,
 13627,
 13681,
+14143,
 13820);
 
 INSERT INTO `disables` VALUES
