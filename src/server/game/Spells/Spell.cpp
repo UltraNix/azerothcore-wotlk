@@ -6826,7 +6826,7 @@ SpellCastResult Spell::CheckRange(bool strict)
             {
                 // Because of lag, we can not check too strictly here.
                 float real_max_range = m_caster->GetTypeId() == TYPEID_UNIT ? max_range - 2*MIN_MELEE_REACH : max_range - MIN_MELEE_REACH;
-                if (!m_caster->IsWithinMeleeRange(target, std::max(real_max_range, 0.0f)))
+                if (!m_caster->IsWithinMeleeRange(target, std::max(real_max_range, 0.0f)) && !CanUseOutsideOfRange())
                     return SPELL_FAILED_OUT_OF_RANGE;
             }
             else if (!m_caster->IsWithinCombatRange(target, max_range))
@@ -7739,6 +7739,20 @@ bool Spell::IsAutoActionResetSpell() const
 {
     // TODO: changed SPELL_INTERRUPT_FLAG_AUTOATTACK -> SPELL_INTERRUPT_FLAG_INTERRUPT to fix compile - is this check correct at all?
     return !IsTriggered() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT);
+}
+
+bool Spell::CanUseOutsideOfRange() const
+{
+    if (!m_caster || !m_spellInfo)
+        return false;
+
+    if (!m_caster->IsPlayer())
+        return false;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) || m_spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2))
+        return true;
+
+    return false;
 }
 
 bool Spell::IsNeedSendToClient(bool go) const
