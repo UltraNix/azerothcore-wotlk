@@ -25,7 +25,8 @@ DELETE FROM `disables` WHERE `entry` IN (
 14076,
 14092,
 13627,
-13681);
+13681,
+13820);
 
 INSERT INTO `disables` VALUES
 (1, 14102, 0, '', '', 'AT 3.2 Quest'),
