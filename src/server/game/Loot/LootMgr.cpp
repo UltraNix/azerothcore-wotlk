@@ -482,7 +482,7 @@ void Loot::AddItem(LootStoreItem const& item)
     }
 }
 
-bool Loot::IsBadgeOrEmblem(uint32 itemId)
+static bool IsBadgeOrEmblem(uint32 itemId)
 {
     switch (itemId)
     {
@@ -499,7 +499,7 @@ bool Loot::IsBadgeOrEmblem(uint32 itemId)
     }
 }
 
-bool Loot::WrathRaids(uint32 mapId)
+static bool WrathRaids(uint32 mapId)
 {
     switch (mapId)
     {
@@ -529,6 +529,10 @@ void Loot::setCreatureGUID(Creature *pCreature)
         return;
 
     m_creatureGUID = pCreature->GetGUID();
+    m_mapID = MapID( pCreature->GetMapId(), pCreature->GetInstanceId() );
+
+    Map* map = pCreature->GetMap();
+    m_isLootLogEnabled = map != nullptr && map->IsRaidOrHeroicDungeon();
 
     //! @Riztazz: Commented out because it doesnt work for now, but i need creatureGUID for some lootRate magic
     //if (!sWorld->getBoolConfig(CONFIG_SAVE_LOOT_SYSTEM))
@@ -540,7 +544,18 @@ void Loot::setCreatureGUID(Creature *pCreature)
     //    return;
 
     //m_creatureGUID = pCreature->GetGUID();
-    //m_mapID = MapID(pCreature->GetMapId(), pCreature->GetInstanceId());
+}
+
+void Loot::setGameobjectGUID( GameObject *pGameobject )
+{
+    if ( !pGameobject )
+        return;
+
+    m_gameobjectGUID = pGameobject->GetGUID();
+    m_mapID = MapID( pGameobject->GetMapId(), pGameobject->GetInstanceId() );
+
+    Map* map = pGameobject->GetMap();
+    m_isLootLogEnabled = map != nullptr && map->IsRaidOrHeroicDungeon();
 }
 
 void Loot::FillLootFromDB(Creature *pCreature, Player* pLootOwner, uint32 mapId, uint8 mode)
@@ -858,6 +873,11 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     else
         FillNotNormalLootFor(lootOwner, true);
 
+    if ( m_isLootLogEnabled )
+    {
+        logLootToDB();
+    }
+
     if (m_creatureGUID)
         saveLootToDB(lootOwner);
 
@@ -995,6 +1015,55 @@ QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player, bool pres
     return ql;
 }
 
+static bool IsItemValidForLog( LootItem * item )
+{
+    if ( !item->conditions.empty() )
+        return false;
+
+    if ( IsBadgeOrEmblem( item->itemid ) )
+        return false;
+
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate( item->itemid );
+    if ( !proto || proto->Flags & ITEM_PROTO_FLAG_PARTY_LOOT )
+        return false;
+
+    if ( proto->Quality < ITEM_QUALITY_EPIC )
+        return false;
+
+    return true;
+}
+
+void Loot::logLootToDB()
+{
+    Map * map = sMapMgr->FindMap( m_mapID.nMapId, m_mapID.nInstanceId );
+    if ( map == nullptr )
+        return;
+
+    WorldObject * object = m_creatureGUID ?
+        ( WorldObject * )map->GetCreature( m_creatureGUID ) :
+        ( WorldObject * )map->GetGameObject( m_gameobjectGUID );
+
+    if ( object == nullptr || items.empty() )
+        return;
+
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    //(map_id, instance_id, owner_entry, item_entry )
+    for ( LootItem & item : items )
+    {
+        if ( !IsItemValidForLog( &item ) )
+            continue;
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement( CHAR_INS_LOOT_LOG_LOOT_CREATED );
+        stmt->setUInt32( 0, m_mapID.nMapId );
+        stmt->setUInt32( 1, m_mapID.nInstanceId );
+        stmt->setUInt32( 2, object->GetEntry() );
+        stmt->setUInt32( 3, item.itemid );
+        trans->Append( stmt );
+    }
+
+    CharacterDatabase.CommitTransaction( trans );
+}
+
 //===================================================
 
 void Loot::NotifyItemRemoved(uint8 lootIndex)
@@ -1084,9 +1153,33 @@ void Loot::setItemLooted(LootItem *pLootItem, Player* looter)
 
     removeItemFromSavedLoot(pLootItem);
 
-    if (looter && m_creatureGUID)
-        sLog->outLoot("Loot::setItemLooted: Map Id: %u Instance Id: %u Item Id: [%u] looted by: %s Guid: (%u)",
-            m_mapID.nMapId, m_mapID.nInstanceId, pLootItem->itemid, looter->GetName().c_str(), looter->GetGUIDLow());
+    if (looter && m_isLootLogEnabled )
+    {
+        if ( !IsItemValidForLog( pLootItem ) )
+            return;
+
+        sLog->outLoot( "Loot::setItemLooted: Map Id: %u Instance Id: %u Item Id: [%u] looted by: %s Guid: (%u)", m_mapID.nMapId, m_mapID.nInstanceId, pLootItem->itemid, looter->GetName().c_str(), looter->GetGUIDLow() );
+
+        Map * map = sMapMgr->FindMap( m_mapID.nMapId, m_mapID.nInstanceId );
+        if ( map == nullptr )
+            return;
+
+        WorldObject * object = m_creatureGUID ?
+            ( WorldObject * )map->GetCreature( m_creatureGUID ) :
+            ( WorldObject * )map->GetGameObject( m_gameobjectGUID );
+
+        if ( object == nullptr )
+            return;
+
+        //(map_id, instance_id, owner_entry, item_entry, looter_guid)
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement( CHAR_INS_LOOT_LOG_ITEM_LOOTED );
+        stmt->setUInt32( 0, m_mapID.nMapId );
+        stmt->setUInt32( 1, m_mapID.nInstanceId );
+        stmt->setUInt32( 2, object->GetEntry() );
+        stmt->setUInt32( 3, pLootItem->itemid );
+        stmt->setUInt32( 4, looter->GetGUIDLow() );
+        CharacterDatabase.Execute( stmt );
+    }
 }
 
 LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem* *qitem, QuestItem* *ffaitem, QuestItem* *conditem)

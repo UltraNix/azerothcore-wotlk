@@ -559,7 +559,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_LOOT_SYSTEM_ITEM, "INSERT INTO group_saved_loot VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_CREATURE_LOOT, "DELETE FROM group_saved_loot WHERE creatureId = ? AND instanceId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_ITEM, "DELETE FROM group_saved_loot WHERE instanceId = ? AND itemId = ? AND creatureId = ?", CONNECTION_ASYNC);
+
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_LOOT, "DELETE FROM group_saved_loot WHERE instanceId = ?", CONNECTION_ASYNC);
+    // LOG LOOT SYSTEM
+    PrepareStatement(CHAR_INS_LOOT_LOG_LOOT_CREATED, "INSERT INTO log_loot (map_id, instance_id, owner_entry, item_entry) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC );
+    PrepareStatement(CHAR_INS_LOOT_LOG_ITEM_LOOTED, "INSERT INTO log_loot (map_id, instance_id, owner_entry, item_entry, looter_guid) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC );
     // NINJA LOOTERS
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK, "SELECT guid FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT name FROM characters WHERE ninjaLooter = 1", CONNECTION_SYNCH);

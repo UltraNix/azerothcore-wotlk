@@ -9292,6 +9292,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (groupRules)
                     group->UpdateLooterGuid(go, true);
 
+                loot->setGameobjectGUID( go );
                 loot->FillLoot(lootid, LootTemplates_Gameobject, this, !groupRules, false, go->GetLootMode());
                 go->SetLootGenerationTime();
 

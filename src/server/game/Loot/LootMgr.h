@@ -329,7 +329,7 @@ struct Loot
     // GUIDLow of container that holds this loot (item_instance.entry), set for items that can be looted
     uint32 containerId;
 
-    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), roundRobinPlayer(0), loot_type(LOOT_NONE), containerId(0), m_lootLoadedFromDB(false), m_creatureGUID(0), m_mapID(0, 0) {}
+    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), roundRobinPlayer(0), loot_type(LOOT_NONE), containerId(0), m_lootLoadedFromDB(false), m_creatureGUID(0), m_gameobjectGUID(0), m_mapID(0, 0), m_isLootLogEnabled( false ){}
     ~Loot() { clear(); }
 
     // if loot becomes invalid this reference is used to inform the listener
@@ -375,13 +375,11 @@ struct Loot
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT);
 
-
+    void logLootToDB();
     void saveLootToDB(Player *owner);
     void RemoveSavedLootFromDB();
 
     bool IsPlayerAllowedToLoot(Player *player, WorldObject *object);
-    bool IsBadgeOrEmblem(uint32 itemId);
-    bool WrathRaids(uint32 mapId);
 
     // Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const & item);
@@ -390,6 +388,7 @@ struct Loot
     void removeItemFromSavedLoot(LootItem *pLootItem);
 
     void setCreatureGUID(Creature *pCreature);
+    void setGameobjectGUID(GameObject *pGameobject);
 
     void FillLootFromDB(Creature *pCreature, Player* pLootOwner, uint32 mapId, uint8 mode);
     bool LootLoadedFromDB() { return m_lootLoadedFromDB; }
@@ -416,6 +415,9 @@ struct Loot
         QuestItemMap PlayerNonQuestNonFFAConditionalItems;
 
         uint64 m_creatureGUID;
+        uint64 m_gameobjectGUID;
+
+        bool m_isLootLogEnabled;
         bool m_lootLoadedFromDB;
 
         MapID m_mapID;
