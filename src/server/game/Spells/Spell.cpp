@@ -6651,7 +6651,7 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
             // spell is usable while stunned, check if caster has only mechanic stun auras, another stun types must prevent cast spell
             if (usableInStun)
             {
-                static uint32 const allowedStunMask = 1 << MECHANIC_STUN | 1 << MECHANIC_FREEZE | 1 << MECHANIC_SAPPED | 1 << MECHANIC_SLEEP | 1 << MECHANIC_HORROR;
+                static uint32 const allowedStunMask = 1 << MECHANIC_STUN | 1 << MECHANIC_FREEZE | 1 << MECHANIC_SAPPED | 1 << MECHANIC_SLEEP | 1 << MECHANIC_HORROR | 1 << MECHANIC_KNOCKOUT;
                 bool foundNotStun = false;
                 auto const& stunAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
                 for (auto const& aura : stunAuras)
