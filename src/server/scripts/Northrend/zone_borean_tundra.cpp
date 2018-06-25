@@ -1499,7 +1499,7 @@ struct npc_oil_stained_wolfAI : public ScriptedAI
     {
         if (spellInfo->Id == SPELL_THROW_WOLF_BAIT)
         {
-            me->setFaction(35);
+            me->setFaction(7);
             Position pos(*me);
             me->MovePositionToFirstCollision(pos, 10.0f, Position::RandomOrientation());
             me->GetMotionMaster()->MovePoint(0, pos);
