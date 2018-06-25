@@ -6352,6 +6352,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (bg->GetStatus() == STATUS_IN_PROGRESS)
                             return SPELL_FAILED_NOT_IN_BATTLEGROUND;
                 break;
+            case SPELL_EFFECT_APPLY_AURA:
+                if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags[1] & 0x00000020) // cyclone
+                    if (Unit* target = m_targets.GetUnitTarget())
+                        if (target->IsTotem()) // shouldn't target totems
+                            return SPELL_FAILED_BAD_TARGETS;
+                break;
             default:
                 break;
         }
