@@ -628,16 +628,22 @@ public:
         if (!*args)
             return false;
 
-        uint64 tempGuid = 0;
-
         char* input = strtok((char*)args, " ");
         if (!input || !atoi(input) && input != "0")
             return false;
 
-        tempGuid = atoi(input);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
+        stmt->setUInt32(0, atoi(input));
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+            handler->PSendSysMessage("Player GUID: %u going to be removed from the Ninja List.", atoi(input));
+        else
+        {
+            handler->PSendSysMessage("Cannot find player with GUID: %u on the list, maybe already removed?", atoi(input));
+            return true;
+        }
 
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NINJA_LOOTER);
-        stmt->setUInt32(0, GUID_LOPART(tempGuid));
+        PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NINJA_LOOTER);
+        stmt2->setUInt32(0, atoi(input));
         CharacterDatabase.Execute(stmt);
         return true;
     }
