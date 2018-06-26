@@ -1180,6 +1180,8 @@ public:
                                 {
                                     if (!pPlayer->IsAlive() || pPlayer->IsGameMaster())
                                         continue;
+                                    if (pPlayer->GetVehicle())
+                                        continue;
                                     guids.push_back(pPlayer->GetGUID());
                                 }
                         if (!guids.empty())
