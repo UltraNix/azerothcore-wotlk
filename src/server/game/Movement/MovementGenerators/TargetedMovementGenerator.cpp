@@ -41,17 +41,14 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
     {
-        if ( Creature * creature = owner->ToCreature() )
-            creature->SetCannotReachTarget( false );
-
+        if (owner->GetTypeId() == TYPEID_UNIT)
+            owner->ToCreature()->SetCannotReachTarget(false);
         return;
     }
 
     if (owner->GetTypeId() == TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
     {
-        if ( Creature * creature = owner->ToCreature() )
-            creature->SetCannotReachTarget( true );
-
+        owner->ToCreature()->SetCannotReachTarget(true);
         return;
     }
 
@@ -75,8 +72,8 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
         float allowedRange = MELEE_RANGE;
         if ((!initial || (owner->movespline->Finalized() && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinMeleeRange(owner) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
         {
-            if ( Creature * creature = owner->ToCreature() )
-                creature->SetCannotReachTarget( false );
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->ToCreature()->SetCannotReachTarget(false);
             return;
         }
 
@@ -84,8 +81,8 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
         if (useMMaps && !inRange && (!isPlayerPet || i_target->GetPositionZ()-z > 50.0f))
         {
             //useMMaps = false;
-            if ( Creature * creature = owner->ToCreature() )
-                creature->SetCannotReachTarget( true );
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->ToCreature()->SetCannotReachTarget(true);
             return;
         }
     }
@@ -113,8 +110,8 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
 
         if ((!initial || (owner->movespline->Finalized() && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinDistInMap(owner, dist) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
         {
-            if ( Creature * creature = owner->ToCreature() )
-                creature->SetCannotReachTarget(false);
+            if (owner->GetTypeId() == TYPEID_UNIT)
+                owner->ToCreature()->SetCannotReachTarget(false);
             return;
         }
 
@@ -195,8 +192,8 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     if (i_angle == 0.f)
         init.SetFacing(i_target.getTarget());
 
-    if ( Creature * creature = owner->ToCreature() )
-        creature->SetCannotReachTarget( false );
+    if (owner->GetTypeId() == TYPEID_UNIT)
+        owner->ToCreature()->SetCannotReachTarget(false);
 
     init.SetWalk(((D*)this)->EnableWalking());
     init.Launch();
@@ -214,6 +211,9 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
 
             auto path = std::move( request.GetPath() );
 
+            if ( Creature * creature = owner->ToCreature() )
+                creature->SetCannotReachTarget( false );
+
             float maxDist = MELEE_RANGE + owner->GetCombatReach() + i_target->GetCombatReach();
 
             auto & points = path.points;
@@ -227,21 +227,21 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
                 return true;
             }
 
-            // Fix for Algalon
+                // Fix for Algalon
             if ( owner->GetTypeId() == TYPEID_UNIT && owner->GetEntry() == 32871 )
             {
                 if ( i_target->GetPositionZ() >= 418.5f )
                     return true;
             }
 
-            // Fix for Razorscale
+                // Fix for Razorscale
             if ( owner->IsSummon() && i_target->GetEntry() == 33186 )
             {
                 if ( i_target->GetPositionZ() >= 395.0f )
                     return true;
             }
 
-            // Ring of Valor
+                // Ring of Valor
             if ( owner->IsSummon() && owner->GetMapId() == 618 )  // pussywizard: 618 Ring of Valor
             {
                     float petZ = owner->GetPositionZ();
@@ -250,9 +250,6 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
                 if ( petZ > 32.0f && i_target->IsFalling() || fabs( petZ - tarZ ) > 3.0f )
                     return true;
             }
-
-            if ( Creature * creature = owner->ToCreature() )
-                creature->SetCannotReachTarget( false );
 
             Movement::MoveSplineInit init( owner );
             init.MovebyPath( points );
