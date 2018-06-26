@@ -38,9 +38,6 @@ public:
         static std::vector<ChatCommand> commandTable =
         {
             { "service",            SEC_ADMINISTRATOR,      true,  &HandleServiceCommand,               "" },
-            { "addninja",           SEC_GAMEMASTER,         false, &HandleAddNinjaCommand,              "" },
-            { "removeninja",        SEC_GAMEMASTER,         false, &HandleRemoveNinjaCommand,           "" },
-            { "listninja",          SEC_PLAYER,             false, HandleListNinjaCommand,              "" },
             { "blizzlike",          SEC_PLAYER,             false, HandleBlizzlikeCommand,              "" },
             { "pvpinfo",            SEC_PLAYER,             false, HandlePvPInfoCommand,                "" },
             { "dodge",              SEC_PLAYER,             false, HandleDodgeModeCommand,              "" },
@@ -49,7 +46,10 @@ public:
             { "speedban",           SEC_MODERATOR,          false, &HandleSpeedBanCommand,              "" },
             { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" },
             { "iccreset",           SEC_MODERATOR,          false, HandleICCResetCommand,               "" },
-            { "bonusxp",            SEC_ADMINISTRATOR,     true,  &HandleBonusXpCommand,                "" },
+            { "bonusxp",            SEC_ADMINISTRATOR,      true,  &HandleBonusXpCommand,               "" },
+            { "ninjains",           SEC_GAMEMASTER,         false, &HandleInsertNinjaCommand,           "" },
+            { "ninjalist",          SEC_GAMEMASTER,         false, &HandleSelectNinjaCommand,           "" },
+            { "ninjadel",           SEC_GAMEMASTER,         false, &HandleDeleteNinjaCommand,           "" },
         };
         return commandTable;
     }
@@ -234,118 +234,6 @@ public:
 
         handler->PSendSysMessage("You have enabled service '%s' on account %s for %s", serviceName.c_str(), accName.c_str(), secsToTimeString(TimeStringToSecs(durationStr), true).c_str());
         sLog->outPremium("Service '%s' has been enabled on account %s for %s", serviceName.c_str(), accName.c_str(), secsToTimeString(TimeStringToSecs(durationStr), true).c_str());
-        return true;
-    }
-
-    static bool HandleAddNinjaCommand(ChatHandler* handler, char const* args)
-    {
-        if (!*args)
-            return false;
-
-        Player* player = handler->GetSession()->GetPlayer();
-
-        if (!player)
-            return false;
-
-        // Account Name
-        char* inputGuid = strtok((char*)args, " ");
-        if (!inputGuid || !atoi(inputGuid) && inputGuid != "0")
-            return false;
-
-        uint32 ninjaGuid = atoi(inputGuid);
-
-        if (!ninjaGuid || ninjaGuid <= 0)
-            return false;
-
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK);
-        stmt->setUInt32(0, ninjaGuid);
-        PreparedQueryResult result = CharacterDatabase.Query(stmt);
-
-        if (!result)
-        {
-            handler->PSendSysMessage(LANG_NINJA_ADD_FAILED);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_NINJA_LOOTER);
-        stmt->setUInt8(0, 1);
-        stmt->setUInt32(1, ninjaGuid);
-        CharacterDatabase.Execute(stmt);
-
-        handler->PSendSysMessage(LANG_NINJA_ADD_SUCCESS, ninjaGuid);
-
-        return true;
-    }
-
-    static bool HandleRemoveNinjaCommand(ChatHandler* handler, char const* args)
-    {
-        if (!*args)
-            return false;
-
-        Player* player = handler->GetSession()->GetPlayer();
-
-        if (!player)
-            return false;
-
-        // Account Name
-        char* inputGuid = strtok((char*)args, " ");
-        if (!inputGuid || !atoi(inputGuid) && inputGuid != "0")
-            return false;
-
-        uint32 ninjaGuid = atoi(inputGuid);
-
-        if (!ninjaGuid || ninjaGuid <= 0)
-            return false;
-
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK);
-        stmt->setUInt32(0, ninjaGuid);
-        PreparedQueryResult result = CharacterDatabase.Query(stmt);
-
-        if (!result)
-        {
-            handler->PSendSysMessage(LANG_NINJA_REMOVE_FAILED);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_NINJA_LOOTER);
-        stmt->setUInt8(0, 0);
-        stmt->setUInt32(1, ninjaGuid);
-        CharacterDatabase.Execute(stmt);
-
-        handler->PSendSysMessage(LANG_NINJA_REMOVE_SUCCESS, ninjaGuid);
-
-        return true;
-    }
-
-    static bool HandleListNinjaCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-
-        if (!player)
-            return false;
-
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER);
-        PreparedQueryResult result = CharacterDatabase.Query(stmt);
-
-        if (!result)
-        {
-            handler->PSendSysMessage(LANG_NINJA_NOT_FOUND);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-        else
-        {
-            do
-            {
-                Field *fields = result->Fetch();
-                std::string name = fields[0].GetString();
-                handler->PSendSysMessage(LANG_NINJA_FOUND, name.c_str());
-
-            } while (result->NextRow());
-        }
-
         return true;
     }
 
@@ -689,6 +577,98 @@ public:
 
         handler->PSendSysMessage("You have enabled service '%s' on account %s for 4 days.", serviceName.c_str(), accName.c_str());
         sLog->outPremium("Service '%s' has been enabled on account %s for 4 days.", serviceName.c_str(), accName.c_str());
+        return true;
+    }
+
+    static bool HandleInsertNinjaCommand(ChatHandler* handler, char const* args)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_NINJA_LOOTER_LIST))
+        {
+            handler->SendSysMessage("Feature disabled.");
+            return true;
+        }
+
+        char* nameStr;
+        char* postStr;
+        handler->extractOptFirstArg((char*)args, &nameStr, &postStr);
+        if (!postStr || !atoi(postStr) && postStr != "0")
+            return false;
+
+        Player* target;
+        uint64 targetGuid;
+        std::string targetName;
+        if (!handler->extractPlayerTarget(nameStr, &target, &targetGuid, &targetName))
+            return false;
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_NINJA_LOOTER);
+        stmt->setUInt32(0, GUID_LOPART(targetGuid));
+        stmt->setString(1, targetName);
+        stmt->setUInt32(2, atoi(postStr));
+        CharacterDatabase.Execute(stmt);
+
+        PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
+        stmt2->setUInt32(0, GUID_LOPART(targetGuid));
+
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt2))
+            handler->PSendSysMessage("Player: %s (Guid: %u) has been added to ninja looter list with forum report ID: %u", targetName, targetGuid, atoi(postStr));
+        else
+            handler->PSendSysMessage("Something went wrong! Probably wrong name or missing report Id?");
+
+        return true;
+    }
+
+    static bool HandleDeleteNinjaCommand(ChatHandler* handler, char const* args)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_NINJA_LOOTER_LIST))
+        {
+            handler->SendSysMessage("Feature disabled.");
+            return true;
+        }
+
+        if (!*args)
+            return false;
+
+        uint64 tempGuid = 0;
+
+        char* input = strtok((char*)args, " ");
+        if (!input || !atoi(input) && input != "0")
+            return false;
+
+        tempGuid = atoi(input);
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NINJA_LOOTER);
+        stmt->setUInt32(0, GUID_LOPART(tempGuid));
+        CharacterDatabase.Execute(stmt);
+        return true;
+    }
+
+    static bool HandleSelectNinjaCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        if (!sWorld->getBoolConfig(CONFIG_NINJA_LOOTER_LIST))
+        {
+            handler->SendSysMessage("Feature disabled.");
+            return true;
+        }
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER);
+
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+        {
+            handler->PSendSysMessage("--- Sunwell Ninja List begin ---");
+            do
+            {
+                Field *fields = result->Fetch();
+                uint32 guid      = fields[0].GetUInt32();
+                std::string name = fields[1].GetString();
+                uint32 reportId  = fields[2].GetUInt32();
+
+                handler->PSendSysMessage("Player: %s (GUID: %u) is on Ninja List! Report ID: %u", name, guid, reportId);
+
+            } while (result->NextRow());
+
+            handler->PSendSysMessage("--- Sunwell Ninja List end ---");
+        }
+
         return true;
     }
 };

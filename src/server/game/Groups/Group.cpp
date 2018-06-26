@@ -41,6 +41,7 @@
 #include "SharedDefines.h"
 #include "MapManager.h"
 #include "UpdateFieldFlags.h"
+#include "Chat.h"
 
 Roll::Roll(uint64 _guid, LootItem const& li) : itemGUID(_guid), itemid(li.itemid),
 itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix), itemCount(li.count),
@@ -441,6 +442,38 @@ bool Group::AddMember(Player* player)
 
     if (player)
     {
+        // Sitowsky: Ninja Announce
+        if (sWorld->getBoolConfig(CONFIG_NINJA_LOOTER_LIST))
+        {
+            if (!isBGGroup() && !isBFGroup() && !isLFGGroup())
+            {
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
+                stmt->setUInt32(0, GUID_LOPART(member.guid));
+
+                if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+                {
+                    Field *fields = result->Fetch();
+                    uint32 guid = fields[0].GetUInt32();
+                    std::string name = fields[1].GetString();
+                    uint32 reportId = fields[2].GetUInt32();
+
+                    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+                    {
+                        if (Player* member = itr->GetSource())
+                        {
+                            if (member->GetGUIDLow() == guid)
+                                continue;
+
+                            if (IsLeader(member->GetGUID()))
+                                ChatHandler(member->GetSession()).PSendSysMessage("A Ninja Looter has been added to your raid! <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name, reportId);
+                            else
+                                ChatHandler(member->GetSession()).PSendSysMessage("You've joined a raid in which there is a Ninja Looter - <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name, reportId);
+                        }
+                    }
+                }
+            }
+        }
+
         if (!IsLeader(player->GetGUID()) && !isBGGroup() && !isBFGroup())
         {
             Player::ResetInstances(player->GetGUIDLow(), INSTANCE_RESET_GROUP_JOIN, false);

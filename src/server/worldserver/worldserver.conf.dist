@@ -3664,6 +3664,15 @@ LatencyRecorder.onlyLogout.Enable = 0
 Wintergrasp.Reminder = 0
 
 #
+#     NinjaList.Enable
+#     Description: Enable or disable Ninja List and announcement at group join.
+#     Default:     0 - (Disabled)
+#                  1 - (Enabled)
+#
+
+NinjaList.Enable = 0
+
+#
 ###################################################################################################
 
 ###################################################################################################

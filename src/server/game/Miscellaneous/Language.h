@@ -1147,11 +1147,7 @@ enum TrinityStrings
     LANG_SERVER_RECORD_DIFF                 = 11004,
     LANG_SUNWELLCHEAT_DOS                   = 11005,
     LANG_SUNWELLCHEAT_GOLD                  = 11006,
-    LANG_NINJA_ADD_FAILED                   = 11007,
-    LANG_NINJA_ADD_SUCCESS                  = 11008,
-    LANG_NINJA_REMOVE_FAILED                = 11009,
-    LANG_NINJA_REMOVE_SUCCESS               = 11010,
-    LANG_NINJA_NOT_FOUND                    = 11011,
+    // Not used 11007 - 11012
     LANG_NINJA_FOUND                        = 11012,
     LANG_BLIZZLIKE_ON                       = 11013,
     LANG_BLIZZLIKE_OFF                      = 11014,

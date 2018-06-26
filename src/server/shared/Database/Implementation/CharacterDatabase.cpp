@@ -559,15 +559,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_LOOT_SYSTEM_ITEM, "INSERT INTO group_saved_loot VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_CREATURE_LOOT, "DELETE FROM group_saved_loot WHERE creatureId = ? AND instanceId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_ITEM, "DELETE FROM group_saved_loot WHERE instanceId = ? AND itemId = ? AND creatureId = ?", CONNECTION_ASYNC);
-
     PrepareStatement(CHAR_DEL_LOOT_SYSTEM_LOOT, "DELETE FROM group_saved_loot WHERE instanceId = ?", CONNECTION_ASYNC);
     // LOG LOOT SYSTEM
     PrepareStatement(CHAR_INS_LOOT_LOG_LOOT_CREATED, "INSERT INTO log_loot (map_id, instance_id, owner_entry, item_entry) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC );
     PrepareStatement(CHAR_INS_LOOT_LOG_ITEM_LOOTED, "INSERT INTO log_loot (map_id, instance_id, owner_entry, item_entry, looter_guid) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC );
-    // NINJA LOOTERS
-    PrepareStatement(CHAR_SEL_NINJA_LOOTER_GUID_CHECK, "SELECT guid FROM characters WHERE guid = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT name FROM characters WHERE ninjaLooter = 1", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_UPD_NINJA_LOOTER, "UPDATE characters SET ninjaLooter = ? WHERE guid = ?", CONNECTION_ASYNC);
     //! boss records
     PrepareStatement(CHAR_UPD_CREATURE_RECORD, "UPDATE creature_records SET BestKillTime = ?, BestTimeGuild = ?, PrevBestTimeGuild = ? WHERE entry = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_CREATURE_RECORD, "INSERT INTO creature_records VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
@@ -581,4 +576,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_ITEM_RESTORE, "DELETE FROM item_restore WHERE guid = ? AND item = ?", CONNECTION_ASYNC);
     // Sitowsky: Latency Recorder
     PrepareStatement(CHAR_INS_LATENCY_RECORD, "INSERT INTO latency_record (guid, latency, sunwellVPN, date) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    // Sitowsky: Ninja Looters V2
+    PrepareStatement(CHAR_REP_NINJA_LOOTER, "REPLACE INTO characters_ninja (guid, name, postId) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT guid, name, postId FROM characters_ninja", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID, "SELECT guid, name, postId FROM characters_ninja WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_NINJA_LOOTER, "DELETE FROM characters_ninja WHERE guid = ?", CONNECTION_ASYNC);
 }
