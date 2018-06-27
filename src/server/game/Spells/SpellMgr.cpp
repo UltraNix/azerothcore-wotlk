@@ -2901,7 +2901,8 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_AOE_CHARM:
                 case SPELL_AURA_MOD_FEAR:
                 case SPELL_AURA_MOD_STUN:
-                    spellInfo->AttributesCu |= ( SPELL_ATTR0_CU_AURA_CC | SPELL_ATTR0_CU_FAKE_DELAY );
+                    //spellInfo->AttributesCu |= ( SPELL_ATTR0_CU_AURA_CC | SPELL_ATTR0_CU_FAKE_DELAY );
+			        spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                     break;
                 case SPELL_AURA_PERIODIC_HEAL:
                 case SPELL_AURA_PERIODIC_DAMAGE:
