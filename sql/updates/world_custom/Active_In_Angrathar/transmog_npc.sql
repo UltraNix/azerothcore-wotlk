@@ -5,8 +5,8 @@ INSERT INTO `creature_template` VALUES
 DELETE FROM `npc_vendor` WHERE `entry` = 80003;
 INSERT INTO `npc_vendor` VALUES
 (80003, 0, 37711, 0, 0, 2604), 
-(80003, 0, 37742, 0, 0, 2570),
-(80003, 0, 37711, 0, 0, 2607),
+(80003, 0, 37711, 0, 0, 2570),
+(80003, 0, 37742, 0, 0, 2607),
 (80003, 0, 37742, 0, 0, 2431);
 
 UPDATE `item_template` SET `name` = "Armor Transmog Token" WHERE `entry` = 37711;
