@@ -30,11 +30,50 @@
 #include <ace/Thread_Mutex.h>
 #include <vector>
 #include <memory>
+#include "ace/Atomic_Op_T.h"
+#include "WorldSocketAcceptor.h"
 
 class WorldSocket;
 class ReactorRunnable;
 class ACE_Event_Handler;
-class WorldSocketAcceptor;
+
+class ReactorRunnable : protected ACE_Task_Base
+{
+public:
+
+    ReactorRunnable();
+    virtual ~ReactorRunnable();
+
+    void    Stop();
+    int     Start();
+
+    void    Wait();
+
+    long    Connections();
+
+    int     AddSocket( WorldSocket* sock );
+
+    ACE_Reactor* GetReactor();
+
+protected:
+
+    void AddNewSockets();
+
+    virtual int svc();
+
+private:
+    typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicInt;
+    typedef std::set<WorldSocket*> SocketSet;
+
+    ACE_Reactor* m_Reactor;
+    AtomicInt m_Connections;
+    int m_ThreadId;
+
+    SocketSet m_Sockets;
+
+    SocketSet m_NewSockets;
+    ACE_Thread_Mutex m_NewSockets_Lock;
+};
 
 /// Manages all sockets connected to peers and network threads
 class WorldSocketMgr
