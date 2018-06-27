@@ -1241,7 +1241,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
             }
             return;
         case 72617: // Naxxramas Teleport - Sapphiron Entry
-            if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
+            //if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
                 if (Player* target = unitTarget->ToPlayer())
                     target->TeleportTo(533, 3498.3f, -5349.49f, 144.968f, 1.36891f, TELE_TO_GM_MODE);
             return;
