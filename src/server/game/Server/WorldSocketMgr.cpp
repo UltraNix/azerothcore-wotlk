@@ -225,3 +225,147 @@ void WorldSocketMgr::AcceptorContext::Wait()
 {
     m_reactorThread->Wait();
 }
+
+
+ReactorRunnable::ReactorRunnable() :
+    m_Reactor( 0 ),
+    m_Connections( 0 ),
+    m_ThreadId( -1 )
+{
+    ACE_Reactor_Impl* imp;
+
+#if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
+
+    imp = new ACE_Dev_Poll_Reactor();
+
+    imp->max_notify_iterations( 128 );
+    imp->restart( 1 );
+
+#else
+
+    imp = new ACE_TP_Reactor();
+    imp->max_notify_iterations( 128 );
+
+#endif
+
+    m_Reactor = new ACE_Reactor( imp, 1 );
+}
+
+ReactorRunnable::~ReactorRunnable()
+{
+    Stop();
+    Wait();
+
+    delete m_Reactor;
+}
+
+void ReactorRunnable::Stop()
+{
+    m_Reactor->end_reactor_event_loop();
+}
+
+int ReactorRunnable::Start()
+{
+    if ( m_ThreadId != -1 )
+        return -1;
+
+    return ( m_ThreadId = activate() );
+}
+
+void ReactorRunnable::Wait()
+{
+    ACE_Task_Base::wait();
+}
+
+long ReactorRunnable::Connections()
+{
+    return static_cast< long > ( m_Connections.value() );
+}
+
+int ReactorRunnable::AddSocket( WorldSocket* sock )
+{
+    TRINITY_GUARD( ACE_Thread_Mutex, m_NewSockets_Lock );
+
+    ++m_Connections;
+    sock->AddReference();
+    sock->reactor( m_Reactor );
+    m_NewSockets.insert( sock );
+
+    sScriptMgr->OnSocketOpen( sock );
+
+    return 0;
+}
+
+ACE_VERSIONED_NAMESPACE_NAME::ACE_Reactor* ReactorRunnable::GetReactor()
+{
+    return m_Reactor;
+}
+
+void ReactorRunnable::AddNewSockets()
+{
+    TRINITY_GUARD( ACE_Thread_Mutex, m_NewSockets_Lock );
+
+    if ( m_NewSockets.empty() )
+        return;
+
+    for ( SocketSet::const_iterator i = m_NewSockets.begin(); i != m_NewSockets.end(); ++i )
+    {
+        WorldSocket* sock = ( *i );
+
+        if ( sock->IsClosed() )
+        {
+            sScriptMgr->OnSocketClose( sock, true );
+
+            sock->RemoveReference();
+            --m_Connections;
+        }
+        else
+            m_Sockets.insert( sock );
+    }
+
+    m_NewSockets.clear();
+}
+
+int ReactorRunnable::svc()
+{
+    ;//sLog->outStaticDebug ("Network Thread Starting");
+
+    ACE_ASSERT( m_Reactor );
+
+    SocketSet::iterator i, t;
+
+    while ( !m_Reactor->reactor_event_loop_done() )
+    {
+        // dont be too smart to move this outside the loop
+        // the run_reactor_event_loop will modify interval
+        ACE_Time_Value interval( 0, 10000 );
+
+        if ( m_Reactor->run_reactor_event_loop( interval ) == -1 )
+            break;
+
+        AddNewSockets();
+
+        for ( i = m_Sockets.begin(); i != m_Sockets.end();)
+        {
+            if ( ( *i )->Update() == -1 )
+            {
+                t = i;
+                ++i;
+
+                ( *t )->CloseSocket();
+
+                sScriptMgr->OnSocketClose( ( *t ), false );
+
+                ( *t )->RemoveReference();
+                --m_Connections;
+                m_Sockets.erase( t );
+            }
+            else
+                ++i;
+        }
+    }
+
+    ;//sLog->outStaticDebug ("Network Thread exits");
+
+    return 0;
+}
