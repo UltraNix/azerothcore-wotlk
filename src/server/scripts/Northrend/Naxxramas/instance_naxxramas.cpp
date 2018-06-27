@@ -1121,12 +1121,6 @@ public:
         if (!instance)
             return false;
 
-        if (!sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-        {
-            player->CastSpell(player, 72617, true);
-            return false;
-        }
-
         //! We're allowing to enter sapphiron (10) without killing entire instance now
         //! if we want to disable it in the future for whatever reason, just delete those two lines
         if (!player->GetMap()->Is25ManRaid())
