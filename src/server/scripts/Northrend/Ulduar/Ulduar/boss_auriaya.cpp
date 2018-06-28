@@ -353,6 +353,7 @@ struct npc_auriaya_sanctum_sentryAI : ScriptedAI
     void EnterCombat(Unit* /*attacker*/) override
     {
         DoZoneInCombat(me, 350.0f);
+        _events.Reset();
         _events.ScheduleEvent(EVENT_SAVAGE_POUNCE, 0);
         _events.ScheduleEvent(EVENT_RIP_FLESH, 10000);
     }
