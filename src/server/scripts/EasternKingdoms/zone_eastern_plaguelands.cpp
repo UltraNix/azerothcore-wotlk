@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -467,6 +467,38 @@ public:
     }
 };
 
+enum haunted
+{
+    NPC_GHOST = 11296
+};
+
+class spell_haunted_darrowshire : public SpellScriptLoader
+{
+public:
+    spell_haunted_darrowshire() : SpellScriptLoader("spell_haunted_darrowshire") { }
+
+    class spell_haunted_darrowshire_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_haunted_darrowshire_AuraScript);
+
+        void OnPeriodic(AuraEffect const* aurEff)
+            PreventDefaultAction();
+            if (Unit* target = GetTarget())
+                target->SummonCreature(NPC_GHOST, target->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 60000);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_haunted_darrowshire_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_haunted_darrowshire_AuraScript();
+    }
+};
+
 void AddSC_eastern_plaguelands()
 {
     // Ours
@@ -478,4 +510,5 @@ void AddSC_eastern_plaguelands()
     new npc_augustus_the_touched();
     new npc_darrowshire_spirit();
     new npc_tirion_fordring();
+    new spell_haunted_darrowshire();
 }
