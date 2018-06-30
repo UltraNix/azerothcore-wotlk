@@ -482,6 +482,7 @@ public:
         PrepareAuraScript(spell_haunted_darrowshire_AuraScript);
 
         void OnPeriodic(AuraEffect const* aurEff)
+        {
             PreventDefaultAction();
             if (Unit* target = GetTarget())
                 target->SummonCreature(NPC_GHOST, target->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 60000);
