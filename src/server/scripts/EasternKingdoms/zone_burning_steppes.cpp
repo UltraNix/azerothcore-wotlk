@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -161,7 +161,48 @@ public:
     }
 };
 
+enum ChambermaidPillaclencher
+{
+    NPC_CHAMBERMAID    = 14636,
+    GO_PILLOW          = 179832,
+
+    TYPE_CHAMBERMAID   = 1,
+    DATA_SUMMON        = 1,
+    DATA_KILLED        = 2
+};
+
+struct npc_chambermaid_pillaclencher_triggerAI : ScriptedAI
+{
+    npc_chambermaid_pillaclencher_triggerAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void Reset() override
+    {
+        chambermaidGUID = 0;
+    }
+
+    void SetData(uint32 Type, uint32 Data)
+    {
+        if (Type == TYPE_CHAMBERMAID && Data == DATA_SUMMON)
+        {
+            if (Creature* cr = me->SummonCreature(NPC_CHAMBERMAID, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
+                chambermaidGUID = cr->GetGUID();
+        }
+
+        if (Type == TYPE_CHAMBERMAID && Data == DATA_KILLED)
+        {
+            if (chambermaidGUID)
+                if (Player* player = me->SelectNearestPlayer(100.0f))
+                    if (Creature* cr = ObjectAccessor::GetCreature(*me, chambermaidGUID))
+                        player->SummonGameObject(GO_PILLOW, cr->GetPositionX(), cr->GetPositionY(), cr->GetPositionZ(), 0, 0, 0, 0, 0, 180);
+        }
+    }
+
+private:
+    uint64 chambermaidGUID;
+};
+
 void AddSC_burning_steppes()
 {
     new npc_ragged_john();
+    new CreatureAILoader<npc_chambermaid_pillaclencher_triggerAI>("npc_chambermaid_pillaclencher_trigger");
 }
