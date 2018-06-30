@@ -504,6 +504,84 @@ private:
     EventMap _events;
 };
 
+
+enum TwilightFrostMage
+{
+    SPELL_ARCANE_BURST = 64663,
+    SPELL_FROSTBOLT_VOLLEY = 63758,
+    SPELL_FROSTNOVA = 63912,
+    SPELL_FROSTBOLT = 63913,
+
+    EVENT_ARCANE_BURST = 1,
+    EVENT_FROSTBOLT_VOLLEY = 2,
+    EVENT_FROSTNOVA = 3,
+    EVENT_FROSTBOLT = 4
+};
+
+struct npc_twilight_frost_mageAI : ScriptedAI
+{
+    npc_twilight_frost_mageAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        _events.Reset();
+        _events.ScheduleEvent(EVENT_ARCANE_BURST, 6000);
+        _events.ScheduleEvent(EVENT_FROSTBOLT_VOLLEY, 8000);
+        _events.ScheduleEvent(EVENT_FROSTNOVA, 10000);
+        _events.ScheduleEvent(EVENT_FROSTBOLT, 2000);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+        _events.Update(diff);
+
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+        if (me->IsUnderCrowdControl())
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+            case EVENT_ARCANE_BURST:
+                DoCastVictim(SPELL_ARCANE_BURST);
+                _events.Repeat(urand(10000, 15000));
+                break;
+            case EVENT_FROSTBOLT_VOLLEY:
+                DoCastVictim(SPELL_FROSTBOLT_VOLLEY);
+                _events.Repeat(urand(15000, 20000));
+                break;
+            case EVENT_FROSTNOVA:
+                DoCastAOE(SPELL_FROSTNOVA);
+                _events.Repeat(urand(10000, 20000));
+                break;
+            case EVENT_FROSTBOLT:
+                DoCastVictim(SPELL_FROSTBOLT);
+                _events.Repeat(urand(3000, 5000));
+                break;
+            default:
+                break;
+            }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+            if (me->GetPower(POWER_MANA) * 100 / me->GetMaxPower(POWER_MANA) < 10)
+                DoMeleeAttackIfReady();
+        }
+    }
+
+private:
+    EventMap _events;
+};
+
 class spell_aura_of_despair_AuraScript : public AuraScript
 {
     PrepareAuraScript(spell_aura_of_despair_AuraScript)
@@ -788,6 +866,7 @@ void AddSC_boss_vezax()
     new CreatureAILoader<boss_vezaxAI>("boss_vezax");
     new CreatureAILoader<npc_ulduar_saronite_vaporsAI>("npc_ulduar_saronite_vapors");
     new CreatureAILoader<npc_ulduar_saronite_animusAI>("npc_ulduar_saronite_animus");
+    new CreatureAILoader<npc_twilight_frost_mageAI>("npc_twilight_frost_mage");
 
     new AuraScriptLoaderEx<spell_aura_of_despair_AuraScript>("spell_aura_of_despair");
     new AuraScriptLoaderEx<spell_mark_of_the_faceless_periodic_AuraScript>("spell_mark_of_the_faceless_periodic");
