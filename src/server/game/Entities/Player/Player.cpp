@@ -8173,7 +8173,7 @@ void Player::_ApplyItemMods(ItemRef const& item, uint8 slot, bool apply)
 
     uint8 attacktype = Player::GetAttackBySlot(slot);
 
-    if (item->HasAnySocket())                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
+    if (proto->Socket[0].Color)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
         CorrectMetaGemEnchants(slot, apply);
 
     if (attacktype < MAX_ATTACK)
@@ -22721,7 +22721,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
         if (i == slot)
             continue;
         ItemRef pItem2 = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
-        if (pItem2 && !pItem2->IsBroken() && pItem2->HasAnySocket())
+        if (pItem2 && !pItem2->IsBroken() && pItem2->GetTemplate()->Socket[0].Color)
         {
             for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot <= PRISMATIC_ENCHANTMENT_SLOT; ++enchant_slot)
             {
@@ -22801,10 +22801,7 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
 
         ItemRef pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
 
-        if (!pItem)
-            continue;
-
-        if (!pItem->HasAnySocket())
+        if (!pItem || !pItem->GetTemplate()->Socket[0].Color)
             continue;
 
         for (uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
@@ -22846,11 +22843,7 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
 
         ItemRef pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
 
-        if (!pItem)
-            continue;
-
-        // if it doesnt have any sockets, skip
-        if (!pItem->HasAnySocket())
+        if (!pItem || !pItem->GetTemplate()->Socket[0].Color)   //if item has no sockets or no item is equipped go to next item
             continue;
 
         //cycle all (gem)enchants

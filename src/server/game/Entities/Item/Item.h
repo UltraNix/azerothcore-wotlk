@@ -274,7 +274,6 @@ class Item : public Object
         bool IsFitToSpellRequirements(SpellInfo const* spellInfo) const;
         bool IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) const;
         bool GemsFitSockets() const;
-        bool HasAnySocket() const;
 
         uint32 GetCount() const { return GetUInt32Value(ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value(ITEM_FIELD_STACK_COUNT, value); }
