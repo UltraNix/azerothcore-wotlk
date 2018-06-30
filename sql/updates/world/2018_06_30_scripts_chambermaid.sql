@@ -20,3 +20,7 @@ INSERT INTO `creature_template` VALUES
 (70101, 0, 0, 0, 0, 0, 16480, 13069, 0, 0, 'Chambermaid Pillaclencher Event Trigger', NULL, NULL, 0, 70, 70, 1, 35, 0, 1.125, 1.14286, 1, 0, 252, 357, 0, 304, 1, 2000, 2000, 1, 33555200, 2048, 0, 0, 0, 0, 0, 0, 215, 320, 44, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 4, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 265, 1, 0, 130, 'npc_chambermaid_pillaclencher_trigger', 0);
 
 UPDATE `gameobject_loot_template` SET `ChanceOrQuestChance` = 100 WHERE `entry` = 16841 AND `item` = 18950;
+
+DELETE FROM `creature` WHERE `guid` = 249574;
+INSERT INTO `creature` VALUES
+(249574, 70101, 0, 1, 1, 0, 0, -6519.40, -1353.18, 209.00, 2.89, 120, 0, 0, 0, 0, 0, 0, 0, 0);
