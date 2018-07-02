@@ -875,8 +875,8 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
         return false;
     }
 
-    CreatureTemplate const* cinfo = GetCreatureTemplate();
-    switch ( cinfo->rank )
+    CreatureTemplate const* cTemplate = GetCreatureTemplate();
+    switch (cTemplate->rank )
     {
         case CREATURE_ELITE_RARE:
             m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RARE);
@@ -899,7 +899,7 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
             break;
     }
 
-    if ( cinfo->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS )
+    if (cTemplate->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS )
     {
         m_corpseDelay = sWorld->getIntConfig( CONFIG_CORPSE_DECAY_WORLDBOSS );
     }
