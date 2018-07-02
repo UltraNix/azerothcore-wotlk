@@ -33,6 +33,7 @@
 #include "GossipDef.h"
 #include "Cryptography/BigNumber.h"
 #include "AccountMgr.h"
+#include "Item.h"
 
 class Creature;
 class GameObject;
