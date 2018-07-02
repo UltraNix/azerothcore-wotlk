@@ -25,6 +25,7 @@
 #include <ace/Singleton.h>
 #include "SpellAuras.h"
 #include "Chat.h"
+#include "Item.h"
 
 enum CustomEvents
 {
