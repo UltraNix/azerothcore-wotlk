@@ -457,6 +457,17 @@ bool Group::AddMember(Player* player)
                     std::string name = fields[1].GetString();
                     uint32 reportId = fields[2].GetUInt32();
 
+                    if ( isRaidGroup() )
+                    {
+                        std::stringstream msg;
+                        msg << "A Ninja Looter has been added to raid! ";
+                        msg << "<" << name << "> was added to the ninja looter list due to the following proofs: number of topic: " << reportId << "/ sunwell-community.com/forum/88-ninja-looters-list-of-proofs";
+
+                        WorldPacket data;
+                        ChatHandler::BuildChatPacket( data, CHAT_MSG_RAID_WARNING, LANG_UNIVERSAL, nullptr, nullptr, msg.str() );
+                        BroadcastPacket( &data, false, -1, guid );
+                    }
+
                     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
                     {
                         if (Player* member = itr->GetSource())

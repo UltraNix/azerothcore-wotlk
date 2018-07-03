@@ -685,7 +685,7 @@ public:
                 std::string name = fields[1].GetString();
                 uint32 reportId  = fields[2].GetUInt32();
 
-                handler->PSendSysMessage("Player: %s (GUID: %u) is on Ninja List! Report ID: %u", name, guid, reportId);
+                handler->PSendSysMessage("Player: %s (GUID: %u) is on Ninja List! Report ID: %u", name.c_str(), guid, reportId);
 
             } while (result->NextRow());
 
