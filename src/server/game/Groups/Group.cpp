@@ -465,9 +465,9 @@ bool Group::AddMember(Player* player)
                                 continue;
 
                             if (IsLeader(member->GetGUID()))
-                                ChatHandler(member->GetSession()).PSendSysMessage("A Ninja Looter has been added to your raid! <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name, reportId);
+                                ChatHandler(member->GetSession()).PSendSysMessage("A Ninja Looter has been added to your raid! <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name.c_str(), reportId);
                             else
-                                ChatHandler(member->GetSession()).PSendSysMessage("You've joined a raid in which there is a Ninja Looter - <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name, reportId);
+                                ChatHandler(member->GetSession()).PSendSysMessage("You've joined a raid in which there is a Ninja Looter - <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name.c_str(), reportId);
                         }
                     }
                 }

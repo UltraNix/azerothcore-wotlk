@@ -577,7 +577,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     // Sitowsky: Latency Recorder
     PrepareStatement(CHAR_INS_LATENCY_RECORD, "INSERT INTO latency_record (guid, latency, sunwellVPN, date) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     // Sitowsky: Ninja Looters V2
-    PrepareStatement(CHAR_REP_NINJA_LOOTER, "REPLACE INTO characters_ninja (guid, name, postId) VALUES (?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_NINJA_LOOTER, "REPLACE INTO characters_ninja (guid, name, postId) VALUES (?, ?, ?)", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT guid, name, postId FROM characters_ninja", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID, "SELECT guid, name, postId FROM characters_ninja WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_NINJA_LOOTER, "DELETE FROM characters_ninja WHERE guid = ?", CONNECTION_ASYNC);

@@ -580,6 +580,14 @@ public:
         return true;
     }
 
+    static PreparedQueryResult SelectNinjaLooter( uint32 loGuid )
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
+        stmt->setUInt32(0, loGuid);
+
+        return std::move(CharacterDatabase.Query(stmt));
+    };
+
     static bool HandleInsertNinjaCommand(ChatHandler* handler, char const* args)
     {
         if (!sWorld->getBoolConfig(CONFIG_NINJA_LOOTER_LIST))
@@ -591,26 +599,35 @@ public:
         char* nameStr;
         char* postStr;
         handler->extractOptFirstArg((char*)args, &nameStr, &postStr);
-        if (!postStr || !atoi(postStr) && postStr != "0")
+
+        if (postStr == nullptr || ( !atoi(postStr) && postStr != "0" ))
             return false;
 
-        Player* target;
         uint64 targetGuid;
         std::string targetName;
-        if (!handler->extractPlayerTarget(nameStr, &target, &targetGuid, &targetName))
+        if (!handler->extractPlayerTarget(nameStr, nullptr, &targetGuid, &targetName))
             return false;
 
+        uint32 loGuid = GUID_LOPART(targetGuid);
+        uint32 postId = atoi(postStr);
+
+        if (PreparedQueryResult result = SelectNinjaLooter(loGuid))
+        {
+            Field* fields = result->Fetch();
+
+            uint32 postId = fields[2].GetUInt32();
+            handler->PSendSysMessage( "Player: %s (Guid: %u) has already been added to ninja looter list with forum report ID: %u", targetName.c_str(), loGuid, postId);
+            return true;
+        }
+
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_NINJA_LOOTER);
-        stmt->setUInt32(0, GUID_LOPART(targetGuid));
+        stmt->setUInt32(0, loGuid);
         stmt->setString(1, targetName);
-        stmt->setUInt32(2, atoi(postStr));
-        CharacterDatabase.Execute(stmt);
+        stmt->setUInt32(2, postId);
+        CharacterDatabase.DirectExecute(stmt);
 
-        PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
-        stmt2->setUInt32(0, GUID_LOPART(targetGuid));
-
-        if (PreparedQueryResult result = CharacterDatabase.Query(stmt2))
-            handler->PSendSysMessage("Player: %s (Guid: %u) has been added to ninja looter list with forum report ID: %u", targetName, targetGuid, atoi(postStr));
+        if (PreparedQueryResult result = SelectNinjaLooter(loGuid))
+            handler->PSendSysMessage("Player: %s (Guid: %u) has been added to ninja looter list with forum report ID: %u", targetName.c_str(), loGuid, postId);
         else
             handler->PSendSysMessage("Something went wrong! Probably wrong name or missing report Id?");
 
@@ -629,21 +646,21 @@ public:
             return false;
 
         char* input = strtok((char*)args, " ");
-        if (!input || !atoi(input) && input != "0")
+        if (input == nullptr || (!atoi(input) && input != "0"))
             return false;
 
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
-        stmt->setUInt32(0, atoi(input));
-        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-            handler->PSendSysMessage("Player GUID: %u going to be removed from the Ninja List.", atoi(input));
+        uint32 loGuid = GUID_LOPART( atoi( input ) );
+
+        if (PreparedQueryResult result = SelectNinjaLooter(loGuid))
+            handler->PSendSysMessage("Player GUID: %u going to be removed from the Ninja List.", loGuid);
         else
         {
-            handler->PSendSysMessage("Cannot find player with GUID: %u on the list, maybe already removed?", atoi(input));
+            handler->PSendSysMessage("Cannot find player with GUID: %u on the list, maybe already removed?", loGuid);
             return true;
         }
 
-        PreparedStatement* stmt2 = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NINJA_LOOTER);
-        stmt2->setUInt32(0, atoi(input));
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_NINJA_LOOTER);
+        stmt->setUInt32(0, loGuid);
         CharacterDatabase.Execute(stmt);
         return true;
     }
@@ -658,9 +675,9 @@ public:
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER);
 
+        handler->PSendSysMessage( "--- Sunwell Ninja List begin ---" );
         if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
         {
-            handler->PSendSysMessage("--- Sunwell Ninja List begin ---");
             do
             {
                 Field *fields = result->Fetch();
@@ -672,8 +689,9 @@ public:
 
             } while (result->NextRow());
 
-            handler->PSendSysMessage("--- Sunwell Ninja List end ---");
         }
+
+        handler->PSendSysMessage( "--- Sunwell Ninja List end ---" );
 
         return true;
     }
