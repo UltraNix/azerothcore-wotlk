@@ -2051,16 +2051,19 @@ struct npc_ulduar_magnetic_coreAI : public NullCreatureAI
     npc_ulduar_magnetic_coreAI(Creature *pCreature) : NullCreatureAI(pCreature)
     {
         pInstance = me->GetInstanceScript();
-        if (Creature* c = GetACU())
-            if (c->GetExactDist2d(me) <= 10.0f)
-            {
-                me->SendMonsterMove(c->GetPositionX(), c->GetPositionY(), 364.313f, 1);
-                me->UpdatePosition(c->GetPositionX(), c->GetPositionY(), 364.313f, me->GetOrientation(), true);
-                me->StopMovingOnCurrentPos();
-                c->AI()->SetData(2, 1);
-                despawnTimer = 20000;
-                return;
-            }
+        if (pInstance && me->IsAIEnabled)
+        {
+            if (Creature* c = GetACU())
+                if (c->GetExactDist2d(me) <= 10.0f)
+                {
+                    me->SendMonsterMove(c->GetPositionX(), c->GetPositionY(), 364.313f, 1);
+                    me->UpdatePosition(c->GetPositionX(), c->GetPositionY(), 364.313f, me->GetOrientation(), true);
+                    me->StopMovingOnCurrentPos();
+                    c->AI()->SetData(2, 1);
+                    despawnTimer = 20000;
+                    return;
+                }
+        }
         despawnTimer = 60000;
     }
 
