@@ -474,7 +474,7 @@ static void ReportNinjasInRaid( Group* group, uint32 memberGUID )
                 {
                     ChatHandler( member->GetSession() ).PSendSysMessage( msgNinjasHereStr.c_str() );
                 }
-                else if ( group->IsLeader( member->GetGUID() ) && !msgNinjaAddedStr.empty() )
+                else if ( !group->isRaidGroup() && !msgNinjaAddedStr.empty() )
                 {
                     ChatHandler( member->GetSession() ).PSendSysMessage( msgNinjaAddedStr.c_str() );
                 }
