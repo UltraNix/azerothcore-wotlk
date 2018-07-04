@@ -256,7 +256,7 @@ TransmogTrinityStrings Transmogrification::Transmogrify(Player* player, uint64 i
             else
                 return LANG_ERR_TRANSMOG_MISSING_MATERIAL;
         }
-        else if (itemTransmogrifier->GetTemplate()->Class == ITEM_CLASS_WEAPON && itemTransmogrifier->GetTemplate()->Quality <= ITEM_QUALITY_EPIC)
+        else if (itemTransmogrifier->GetTemplate()->Class == ITEM_CLASS_WEAPON && itemTransmogrifier->GetTemplate()->Quality != ITEM_QUALITY_LEGENDARY)
         {
 
             if (EffortModel(player, WEAPON_TRANSMOG))
@@ -335,7 +335,9 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
     {
         if (source->Class == ITEM_CLASS_ARMOR && !AllowMixedArmorTypes)
             return false;
-        if (source->Class == ITEM_CLASS_WEAPON && !AllowMixedWeaponTypes)
+        if ((source->InventoryType == INVTYPE_WEAPON && target->InventoryType == INVTYPE_WEAPONMAINHAND) || (target->InventoryType == INVTYPE_WEAPON && source->InventoryType == INVTYPE_WEAPONMAINHAND))
+            return true;
+        if (source->Class == ITEM_CLASS_WEAPON && source->InventoryType != target->InventoryType)
             return false;
     }
 
@@ -343,13 +345,13 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
     {
         if (source->Class == ITEM_CLASS_WEAPON && !(IsRangedWeapon(target->Class, target->SubClass) ||
             (
-                (target->InventoryType == INVTYPE_WEAPON 
-                    || target->InventoryType == INVTYPE_2HWEAPON 
-                    || target->InventoryType == INVTYPE_WEAPONMAINHAND 
+                (target->InventoryType == INVTYPE_WEAPON
+                    || target->InventoryType == INVTYPE_2HWEAPON
+                    || target->InventoryType == INVTYPE_WEAPONMAINHAND
                     || target->InventoryType == INVTYPE_WEAPONOFFHAND)
-                && (source->InventoryType == INVTYPE_WEAPON 
-                    || source->InventoryType == INVTYPE_2HWEAPON 
-                    || source->InventoryType == INVTYPE_WEAPONMAINHAND 
+                && (source->InventoryType == INVTYPE_WEAPON
+                    || source->InventoryType == INVTYPE_2HWEAPON
+                    || source->InventoryType == INVTYPE_WEAPONMAINHAND
                     || source->InventoryType == INVTYPE_WEAPONOFFHAND)
             )
         ))
@@ -434,7 +436,6 @@ bool Transmogrification::SuitableForTransmogrification(Player* player, ItemTempl
                 return false;
         }
     }
-
     return true;
 }
 
@@ -588,7 +589,7 @@ bool Transmogrification::EffortModel(Player* player, uint8 model) const
         case WEAPON_TRANSMOG:
             return player->HasItemCount(GetTokenEntryWeapon(), 1);
         case LEGEND_TRANSMOG:
-            return player->HasItemCount(GetTokenEntryLegend(), 1);
+            return player->HasItemCount(GetTokenEntryWeapon(), 10);
     }
 
     return false;
@@ -608,7 +609,7 @@ void Transmogrification::ChargeModelCost(Player* player, uint8 model) const
             player->DestroyItemCount(GetTokenEntryWeapon(), 1, true, false);
             break;
         case LEGEND_TRANSMOG:
-            player->DestroyItemCount(GetTokenEntryLegend(), 1, true, false);
+            player->DestroyItemCount(GetTokenEntryWeapon(), 10, true, false);
             break;
     }
 }

@@ -51,7 +51,7 @@ public:
         std::ostringstream ss;
         if (player->HasDisabledTransmogVisibility())
         {
-            ss << ((sT->GetVisibilityTransmogCost() / GOLD) / 2) << " gold." << std::endl;
+            ss << ((sT->GetVisibilityTransmogCost() / GOLD) * 2) << " gold." << std::endl;
             player->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_MONEY_BAG, "|TInterface/ICONS/INV_Enchant_Disenchant:30:30:-18:0|tEnable transmog visibility.", EQUIPMENT_SLOT_END + 900, 0, "Are you sure you want to enable visibility of transmogs?\nIt will cost you: " + ss.str(), 0, false);
         }
         else {
@@ -123,7 +123,7 @@ public:
             } break;
             case EQUIPMENT_SLOT_END + 900:
             {
-                if (!player->HasEnoughMoney(player->HasDisabledTransmogVisibility() ? (sT->GetVisibilityTransmogCost() / 2) : (sT->GetVisibilityTransmogCost())))
+                if (!player->HasEnoughMoney(player->HasDisabledTransmogVisibility() ? (sT->GetVisibilityTransmogCost() * 2) : (sT->GetVisibilityTransmogCost())))
                 {
                     ChatHandler(player->GetSession()).PSendSysMessage("You don't have enough money for that.");
                     break;
@@ -134,7 +134,7 @@ public:
                 else
                     ChatHandler(player->GetSession()).PSendSysMessage("Transmog visibility has been disabled, please relog to apply.");
 
-                player->ModifyMoney(player->HasDisabledTransmogVisibility() ? -(sT->GetVisibilityTransmogCost() / 2) : -(sT->GetVisibilityTransmogCost()));
+                player->ModifyMoney(player->HasDisabledTransmogVisibility() ? -(sT->GetVisibilityTransmogCost() * 2) : -(sT->GetVisibilityTransmogCost()));
                 player->SetDisabledTransmogVisibility(player->HasDisabledTransmogVisibility() ? false : true);
 
                 OnGossipHello(player, creature);
@@ -164,7 +164,7 @@ public:
         }
         return true;
     }
-    
+
     void ShowTransmogItems(Player* player, Creature* creature, uint8 slot) // Only checks bags while can use an item from anywhere in inventory
     {
         WorldSession* session = player->GetSession();
@@ -231,10 +231,10 @@ public:
 
         if (item->GetTemplate()->Class == ITEM_CLASS_ARMOR)
             sT->GetTokenEntryArmor() != 0 ? (ss << std::endl << "1" << " x " << sT->GetItemLink(sT->GetTokenEntryArmor(), session)) : ss << "";
-        else if (item->GetTemplate()->Class == WEAPON_TRANSMOG && item->GetTemplate()->Quality <= ITEM_QUALITY_EPIC)
+        else if (item->GetTemplate()->Class == WEAPON_TRANSMOG && item->GetTemplate()->Quality != ITEM_QUALITY_LEGENDARY)
             sT->GetTokenEntryArmor() != 0 ? (ss << std::endl << "1" << " x " << sT->GetItemLink(sT->GetTokenEntryWeapon(), session)) : ss << "";
         else if (item->GetTemplate()->Class == WEAPON_TRANSMOG && item->GetTemplate()->Quality == ITEM_QUALITY_LEGENDARY)
-            sT->GetTokenEntryArmor() != 0 ? (ss << std::endl << "1" << " x " << sT->GetItemLink(sT->GetTokenEntryLegend(), session)) : ss << "";
+            sT->GetTokenEntryArmor() != 0 ? (ss << std::endl << "10" << " x " << sT->GetItemLink(sT->GetTokenEntryWeapon(), session)) : ss << "";
 
         return ss.str();
     }
@@ -256,7 +256,7 @@ public:
     void OnAfterMoveItemFromInventory(Player* player, ItemRef const& it, uint8 bag, uint8 slot, bool update) {
         sT->DeleteFakeFromDB(it->GetGUIDLow());
     }
-    
+
     void OnLogin(Player* player)
     {
         uint64 playerGUID = player->GetGUID();
@@ -311,11 +311,11 @@ public:
 class global_transmog_script : public GlobalScript {
     public:
         global_transmog_script() : GlobalScript("global_transmog_script") { }
-        
+
         void OnItemDelFromDB(SQLTransaction& trans, uint32 itemGuid) {
             sT->DeleteFakeFromDB(itemGuid, &trans);
         }
-        
+
         void OnMirrorImageDisplayItem( ItemRef const& item, uint32 &display) {
             if (uint32 entry = sTransmogrification->GetFakeEntry(item->GetGUID()))
                 display=uint32(sObjectMgr->GetItemTemplate(entry)->DisplayInfoID);
