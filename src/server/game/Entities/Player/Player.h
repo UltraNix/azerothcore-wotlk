@@ -532,12 +532,7 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_SHOW_DK_PET              = 0x0400,         // Marks if player should see ghoul on login screen
     PLAYER_EXTRA_DODGE_LOCATION           = 0x0800,         // Marks if player should hide own location at who list
 
-    // @Transmog
-    PLAYER_EXTRA_MODEL_PVE                = 0x20000,
-    PLAYER_EXTRA_MODEL_PVP                = 0x40000,
-    PLAYER_EXTRA_MODEL_MIX                = 0x80000,
-    PLAYER_EXTRA_MODEL_TWK                = 0x100000,
-
+    PLAYER_EXTRA_IGNORE_TRANSMOG          = 0x100000,
     PLAYER_EXTRA_STH_HIDE                 = 0x200000,
     PLAYER_EXTRA_ACCEPT_CHANNEL_INV       = 0x400000,
 };
@@ -1120,6 +1115,9 @@ private:
     bool _isPvP;
 };
 
+const uint32 PLAYER_VISIBLE_SLOTS_START = PLAYER_VISIBLE_ITEM_1_ENTRYID;
+const uint32 PLAYER_VISIBLE_SLOTS_COUNT = PLAYER_VISIBLE_ITEM_19_ENCHANTMENT - PLAYER_VISIBLE_ITEM_1_ENTRYID + 1;
+
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
@@ -1237,27 +1235,8 @@ class Player : public Unit, public GridObject<Player>
         bool HasBlockChannelInvite() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_CHANNEL_INV; }
 
         // @Transmog
-        bool HasTransmogModelPvE()   const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVE; }
-        bool HasTransmogModelPvP()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_PVP; }
-        bool HasTransmogModelMIX()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_MIX; }
-        bool HasTransmogModelTWK()  const { return m_ExtraFlags & PLAYER_EXTRA_MODEL_TWK; }
-
-        void SetTransmogModelPvE() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_PVE; }
-        void SetTransmogModelPvP() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_PVP; }
-        void SetTransmogModelMIX() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_MIX; }
-        void SetTransmogModelTWK() { m_ExtraFlags |= PLAYER_EXTRA_MODEL_TWK; }
-
-        void ResetTransmogModel()
-        {
-            if (HasTransmogModelPvE())
-                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_PVE;
-            else if (HasTransmogModelPvP())
-                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_PVP;
-            else if (HasTransmogModelMIX())
-                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_MIX;
-            else if (HasTransmogModelTWK())
-                m_ExtraFlags &= ~PLAYER_EXTRA_MODEL_TWK;
-        }
+        bool HasDisabledTransmogVisibility()   const { return m_ExtraFlags & PLAYER_EXTRA_IGNORE_TRANSMOG; }
+        void SetDisabledTransmogVisibility(bool disable) { if (disable) m_ExtraFlags |= PLAYER_EXTRA_IGNORE_TRANSMOG; else m_ExtraFlags &= ~PLAYER_EXTRA_IGNORE_TRANSMOG; }
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool bgExtra = false);
         void GiveLevel(uint8 level);
@@ -1388,6 +1367,8 @@ class Player : public Unit, public GridObject<Player>
         void QuickEquipItem(uint16 pos, ItemRef const& pItem);
         void VisualizeItem(uint8 slot, ItemRef const& pItem);
         void SetVisibleItemSlot(uint8 slot, ItemRef const& pItem);
+        uint32 RealVisibleItemData( uint32 index ) const;
+
         ItemRef BankItem(ItemPosCountVec const& dest, ItemRef const& pItem, bool update)
         {
             return StoreItem(dest, pItem, update);
@@ -3070,6 +3051,7 @@ class Player : public Unit, public GridObject<Player>
         InstanceTimeMap _instanceResetTimes;
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
+        uint32 m_realVisibleSlots[ PLAYER_VISIBLE_SLOTS_COUNT ];
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);

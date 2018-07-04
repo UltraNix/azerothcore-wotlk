@@ -13097,21 +13097,47 @@ void Player::QuickEquipItem(uint16 pos, ItemRef const& pItem)
     }
 }
 
+void SetUInt16Value( uint32 & dst, uint8 offset, uint16 value )
+{
+    if ( uint16( dst >> ( offset * 16 ) ) != value )
+    {
+        dst &= ~uint32( uint32( 0xFFFF ) << ( offset * 16 ) );
+        dst |= uint32( uint32( value ) << ( offset * 16 ) );
+    }
+}
+
 void Player::SetVisibleItemSlot(uint8 slot, ItemRef const& pItem)
 {
+    int entryIdx = PLAYER_VISIBLE_ITEM_1_ENTRYID + ( slot * 2 );
+    int enchantIdx = PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + ( slot * 2 );
+
     if (pItem)
     {
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), pItem->GetEntry());
-        SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
-        SetUInt16Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 1, pItem->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
+        SetUInt32Value( entryIdx, pItem->GetEntry());
+        SetUInt16Value( enchantIdx, 0, pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
+        SetUInt16Value( enchantIdx, 1, pItem->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT));
+
+        m_realVisibleSlots[ entryIdx - PLAYER_VISIBLE_SLOTS_START ] = pItem->GetEntry();
+
+        uint32 & enchantSlot = m_realVisibleSlots[ enchantIdx - PLAYER_VISIBLE_SLOTS_START ];
+        ::SetUInt16Value( enchantSlot, 0, pItem->GetEnchantmentId( PERM_ENCHANTMENT_SLOT ) );
+        ::SetUInt16Value( enchantSlot, 1, pItem->GetEnchantmentId( TEMP_ENCHANTMENT_SLOT ) );
     }
     else
     {
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * 2), 0);
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + (slot * 2), 0);
+        SetUInt32Value( entryIdx, 0);
+        SetUInt32Value( enchantIdx, 0);
+
+        m_realVisibleSlots[ entryIdx - PLAYER_VISIBLE_SLOTS_START ] = 0;
+        m_realVisibleSlots[ enchantIdx - PLAYER_VISIBLE_SLOTS_START ] = 0;
     }
 
     sScriptMgr->OnAfterPlayerSetVisibleItemSlot(this, slot, pItem);
+}
+
+uint32 Player::RealVisibleItemData( uint32 index ) const
+{
+    return m_realVisibleSlots[ index - PLAYER_VISIBLE_SLOTS_START ];
 }
 
 void Player::VisualizeItem(uint8 slot, ItemRef const& pItem)
@@ -18410,14 +18436,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     // @Transmog
     // if (AccountMgr::IsPlayerAccount(GetSession()->GetSecurity()))
     {
-        if (extraflags & PLAYER_EXTRA_MODEL_PVE)
-            SetTransmogModelPvE();
-        else if (extraflags & PLAYER_EXTRA_MODEL_PVP)
-            SetTransmogModelPvP();
-        else if (extraflags & PLAYER_EXTRA_MODEL_MIX)
-            SetTransmogModelMIX();
-        else if (extraflags & PLAYER_EXTRA_MODEL_TWK)
-            SetTransmogModelTWK();
+        if (extraflags & PLAYER_EXTRA_IGNORE_TRANSMOG)
+            SetDisabledTransmogVisibility(true);
     }
 
     // RaF stuff.

@@ -1,0 +1,3 @@
+UPDATE `item_template` SET `name` = 'Armor Transmog Token', `description` = 'Armor Transmog Token - allow you to transmog Armor once.' WHERE `item_template`.`entry` = 38644;
+UPDATE `item_template` SET `name` = 'Weapon Transmog Token', `description` = 'Weapon Transmog Token - allow you to transmog Weapon once.' WHERE `item_template`.`entry` = 37742;
+UPDATE `item_template` SET `name` = 'Legendary Transmog Token', `description` = 'Legendary Transmog Token - allow you to transmog Legendary once.' WHERE `item_template`.`entry` = 37711;
