@@ -27,6 +27,7 @@ EndScriptData */
 #include "Language.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "ObjectMgr.h"
 
 class custom_commandscript : public CommandScript
 {
@@ -48,7 +49,7 @@ public:
             { "iccreset",           SEC_MODERATOR,          false, HandleICCResetCommand,               "" },
             { "bonusxp",            SEC_ADMINISTRATOR,      true,  &HandleBonusXpCommand,               "" },
             { "ninjains",           SEC_GAMEMASTER,         false, &HandleInsertNinjaCommand,           "" },
-            { "ninjalist",          SEC_GAMEMASTER,         false, &HandleSelectNinjaCommand,           "" },
+            { "ninjalist",          SEC_PLAYER,             false, &HandleSelectNinjaCommand,           "" },
             { "ninjadel",           SEC_GAMEMASTER,         false, &HandleDeleteNinjaCommand,           "" },
         };
         return commandTable;
@@ -681,14 +682,25 @@ public:
             do
             {
                 Field *fields = result->Fetch();
+
                 uint32 guid      = fields[0].GetUInt32();
                 std::string name = fields[1].GetString();
                 uint32 reportId  = fields[2].GetUInt32();
 
-                handler->PSendSysMessage("Player: %s (GUID: %u) is on Ninja List! Report ID: %u", name.c_str(), guid, reportId);
+                //! Check for real player name
+                sObjectMgr->GetPlayerNameByGUID( guid, name );
+
+                WorldSession* session = handler->GetSession();
+                if ( session != nullptr && session->GetSecurity() > SEC_PLAYER )
+                {
+                    handler->PSendSysMessage( "Player: %s (GUID: %u) is on Ninja List! Report ID: %u", name.c_str(), guid, reportId );
+                }
+                else
+                {
+                    handler->PSendSysMessage( "Player: %s is on Ninja List! Report ID: %u", name.c_str(), reportId );
+                }
 
             } while (result->NextRow());
-
         }
 
         handler->PSendSysMessage( "--- Sunwell Ninja List end ---" );

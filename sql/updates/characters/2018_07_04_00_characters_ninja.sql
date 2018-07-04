@@ -1,0 +1,2 @@
+ALTER TABLE `characters_ninja`
+	ADD COLUMN `timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP AFTER `postId`;

@@ -371,6 +371,118 @@ Player* Group::GetInvited(const std::string& name) const
     return NULL;
 }
 
+static std::string PrepareNinjaListQuery( Group* group, uint32 newGuid )
+{
+    std::stringstream query;
+    query << "SELECT guid, name, postId FROM characters_ninja WHERE guid IN(";
+    query << newGuid;
+
+    for ( GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next() )
+    {
+        if ( Player* member = itr->GetSource() )
+        {
+            if ( member->GetGUIDLow() != newGuid )
+            {
+                query << ", " << member->GetGUIDLow();
+            }
+        }
+    }
+
+    query << ")";
+
+    return query.str();
+}
+
+enum class NinjaMessage
+{
+    Added,
+    IsPresent,
+};
+
+static std::string PrepareNinjaMessage( NinjaMessage msgType, std::string const& ninjaName, uint32 postId, bool skipHeader )
+{
+    std::stringstream msg;
+    if ( !skipHeader )
+    {
+        switch ( msgType )
+        {
+            case NinjaMessage::Added:
+            {
+                msg << "A Ninja Looter has been added to raid! ";
+                break;
+            }
+            case NinjaMessage::IsPresent:
+            {
+                msg << "You've joined a raid in which there is a Ninja Looter!";
+                break;
+            }
+        }
+    }
+
+    msg << "\n * <" << ninjaName << "> was added to the ninja looter list due to the following proofs: number of topic: " << postId << "/ sunwell-community.com/forum/88-ninja-looters-list-of-proofs";
+    return msg.str();
+}
+
+static void ReportNinjasInRaid( Group* group, uint32 memberGUID )
+{
+    std::string query = PrepareNinjaListQuery( group, memberGUID );
+    if ( QueryResult result = CharacterDatabase.PQuery( query.c_str() ) )
+    {
+        std::stringstream msgNinjasHere;
+        std::stringstream msgNinjasAdded;
+
+        uint32 presentNinjaCount = 0;
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 ninjaGUID = fields[ 0 ].GetUInt32();
+            std::string ninjaName = fields[ 1 ].GetString();
+            uint32 reportId = fields[ 2 ].GetUInt32();
+
+            //! check for real player name
+            sObjectMgr->GetPlayerNameByGUID( ninjaGUID, ninjaName );
+
+            if ( ninjaGUID == memberGUID )
+            {
+                msgNinjasAdded << PrepareNinjaMessage( NinjaMessage::Added, ninjaName, reportId, false );
+
+                if ( group->isRaidGroup() )
+                {
+                    std::string msg = msgNinjasAdded.str();
+
+                    WorldPacket data;
+                    ChatHandler::BuildChatPacket( data, CHAT_MSG_RAID_WARNING, LANG_UNIVERSAL, nullptr, nullptr, msg.c_str() );
+                    group->BroadcastPacket( &data, false, -1, ninjaGUID );
+                }
+            }
+            else
+            {
+                msgNinjasHere << PrepareNinjaMessage( NinjaMessage::IsPresent, ninjaName, reportId, presentNinjaCount != 0u );
+                ++presentNinjaCount;
+            }
+        } while ( result->NextRow() );
+
+        std::string msgNinjasHereStr = msgNinjasHere.str();
+        std::string msgNinjaAddedStr = msgNinjasAdded.str();
+
+        for ( GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next() )
+        {
+            if ( Player* member = itr->GetSource() )
+            {
+                if ( member->GetGUIDLow() == memberGUID && presentNinjaCount != 0u )
+                {
+                    ChatHandler( member->GetSession() ).PSendSysMessage( msgNinjasHereStr.c_str() );
+                }
+                else if ( group->IsLeader( member->GetGUID() ) && !msgNinjaAddedStr.empty() )
+                {
+                    ChatHandler( member->GetSession() ).PSendSysMessage( msgNinjaAddedStr.c_str() );
+                }
+            }
+        }
+    }
+}
+
 bool Group::AddMember(Player* player)
 {
     // Get first not-full group
@@ -447,41 +559,8 @@ bool Group::AddMember(Player* player)
         {
             if (!isBGGroup() && !isBFGroup() && !isLFGGroup())
             {
-                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID);
-                stmt->setUInt32(0, GUID_LOPART(member.guid));
-
-                if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-                {
-                    Field *fields = result->Fetch();
-                    uint32 guid = fields[0].GetUInt32();
-                    std::string name = fields[1].GetString();
-                    uint32 reportId = fields[2].GetUInt32();
-
-                    if ( isRaidGroup() )
-                    {
-                        std::stringstream msg;
-                        msg << "A Ninja Looter has been added to raid! ";
-                        msg << "<" << name << "> was added to the ninja looter list due to the following proofs: number of topic: " << reportId << "/ sunwell-community.com/forum/88-ninja-looters-list-of-proofs";
-
-                        WorldPacket data;
-                        ChatHandler::BuildChatPacket( data, CHAT_MSG_RAID_WARNING, LANG_UNIVERSAL, nullptr, nullptr, msg.str() );
-                        BroadcastPacket( &data, false, -1, guid );
-                    }
-
-                    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-                    {
-                        if (Player* member = itr->GetSource())
-                        {
-                            if (member->GetGUIDLow() == guid)
-                                continue;
-
-                            if (IsLeader(member->GetGUID()))
-                                ChatHandler(member->GetSession()).PSendSysMessage("A Ninja Looter has been added to your raid! <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name.c_str(), reportId);
-                            else
-                                ChatHandler(member->GetSession()).PSendSysMessage("You've joined a raid in which there is a Ninja Looter - <%s> was added to the ninja looter list due to the following proofs: number of topic: %u / sunwell-community.com/forum/88-ninja-looters-list-of-proofs", name.c_str(), reportId);
-                        }
-                    }
-                }
+                uint32 memberGUID = GUID_LOPART( member.guid );
+                ReportNinjasInRaid( this, memberGUID );
             }
         }
 
