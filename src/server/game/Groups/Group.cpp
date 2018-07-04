@@ -377,14 +377,11 @@ static std::string PrepareNinjaListQuery( Group* group, uint32 newGuid )
     query << "SELECT guid, name, postId FROM characters_ninja WHERE guid IN(";
     query << newGuid;
 
-    for ( GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next() )
+    for ( const Group::MemberSlot & slot : group->GetMemberSlots() )
     {
-        if ( Player* member = itr->GetSource() )
+        if ( slot.guid != newGuid )
         {
-            if ( member->GetGUIDLow() != newGuid )
-            {
-                query << ", " << member->GetGUIDLow();
-            }
+            query << ", " << slot.guid;
         }
     }
 
