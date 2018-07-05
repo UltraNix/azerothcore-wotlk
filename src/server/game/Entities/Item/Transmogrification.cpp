@@ -337,6 +337,8 @@ bool Transmogrification::CanTransmogrifyItemWithItem(Player* player, ItemTemplat
             return false;
         if ((source->InventoryType == INVTYPE_WEAPON && target->InventoryType == INVTYPE_WEAPONMAINHAND) || (target->InventoryType == INVTYPE_WEAPON && source->InventoryType == INVTYPE_WEAPONMAINHAND))
             return true;
+        if ((source->ItemId == 32837 || source->ItemId == 32838) && target->InventoryType == INVTYPE_2HWEAPON && player->getClass() == CLASS_WARRIOR)
+            return true;
         if (source->Class == ITEM_CLASS_WEAPON && source->InventoryType != target->InventoryType)
             return false;
     }
@@ -436,6 +438,104 @@ bool Transmogrification::SuitableForTransmogrification(Player* player, ItemTempl
                 return false;
         }
     }
+
+    if (proto->Class == ITEM_CLASS_WEAPON && !IsAllowedToEquip(player, proto))
+        return false;
+
+
+    return true;
+}
+
+bool Transmogrification::IsAllowedToEquip(Player* player, ItemTemplate const* proto) const
+{
+    if (!player || !proto)
+        return false;
+
+    switch (proto->SubClass)
+    {
+    case ITEM_SUBCLASS_WEAPON_AXE:
+        if (player->HasSpell(196))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_AXE2:
+        if (player->HasSpell(197))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_BOW:
+        if (player->HasSpell(264))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_GUN:
+        if (player->HasSpell(266))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_MACE:
+        if (player->HasSpell(198))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_MACE2:
+        if (player->HasSpell(199))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_POLEARM:
+        if (player->HasSpell(200))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_SWORD:
+        if (player->HasSpell(201))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_SWORD2:
+        if (player->HasSpell(202))
+            break;
+        else
+            return false;
+        //case ITEM_SUBCLASS_WEAPON_obsolete:
+    case ITEM_SUBCLASS_WEAPON_STAFF:
+        if (player->HasSpell(227))
+            break;
+        else
+            return false;
+        //case ITEM_SUBCLASS_WEAPON_EXOTIC:
+        //case ITEM_SUBCLASS_WEAPON_EXOTIC2 :
+    case ITEM_SUBCLASS_WEAPON_FIST:
+        if (player->HasSpell(15590))
+            break;
+        else
+            return false;
+    //case ITEM_SUBCLASS_WEAPON_MISC:
+    case ITEM_SUBCLASS_WEAPON_DAGGER:
+        if (player->HasSpell(1180))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_THROWN:
+        if (player->HasSpell(2567))
+            break;
+        else
+            return false;
+    //case ITEM_SUBCLASS_WEAPON_SPEAR:
+    case ITEM_SUBCLASS_WEAPON_CROSSBOW:
+        if (player->HasSpell(5011))
+            break;
+        else
+            return false;
+    case ITEM_SUBCLASS_WEAPON_WAND:
+        if (player->HasSpell(5009))
+            break;
+        else
+            return false;
+        //case ITEM_SUBCLASS_WEAPON_FISHING_POLE:
+    }
+
     return true;
 }
 
