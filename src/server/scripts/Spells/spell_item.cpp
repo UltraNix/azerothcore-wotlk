@@ -3978,9 +3978,32 @@ public:
     }
 };
 
+class spell_baby_spices_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_baby_spices_SpellScript);
+
+    SpellCastResult CheckCast()
+    {
+        if (GetCaster()->GetTypeId() != TYPEID_PLAYER)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        Unit* target = GetCaster()->ToPlayer()->GetSelectedUnit();
+        if (target && target->ToCreature() && target->ToCreature()->isWorldBoss())
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_baby_spices_SpellScript::CheckCast);
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // Ours
+    new SpellScriptLoaderEx<spell_baby_spices_SpellScript>("spell_baby_spices");
     new spell_item_massive_seaforium_charge();
     new spell_item_titanium_seal_of_dalaran();
     new spell_item_mind_amplify_dish();
