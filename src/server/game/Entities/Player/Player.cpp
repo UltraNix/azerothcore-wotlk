@@ -27871,3 +27871,27 @@ bool Player::IsFriendOfMine(uint64 guid, bool checkGuildMate)
 
     return true;
 }
+
+void Player::SetDisabledTransmogVisibility(bool disable)
+{
+    if (!GetSession())
+        return;
+
+    PreparedStatement* stmt;
+    // logic is inversed
+    if (disable)
+    {
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_TRANSMOG_VISIBILITY);
+        m_ExtraFlags |= PLAYER_EXTRA_IGNORE_TRANSMOG;
+    }
+    else
+    {
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_REMOVE_TRANSMOG_VISIBILITY);
+        m_ExtraFlags &= ~PLAYER_EXTRA_IGNORE_TRANSMOG;
+    }
+
+    stmt->setUInt32(0, PLAYER_EXTRA_IGNORE_TRANSMOG);
+    stmt->setUInt32(1, GetSession()->GetAccountId());
+    CharacterDatabase.Execute(stmt);
+}
+

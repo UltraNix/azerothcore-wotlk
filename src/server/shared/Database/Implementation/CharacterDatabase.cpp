@@ -581,4 +581,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_NINJA_LOOTER, "SELECT guid, name, postId FROM characters_ninja", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_NINJA_LOOTER_PER_GUID, "SELECT guid, name, postId FROM characters_ninja WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_NINJA_LOOTER, "DELETE FROM characters_ninja WHERE guid = ?", CONNECTION_ASYNC);
+    // Transmog visibility
+    PrepareStatement(CHAR_UPD_ADD_TRANSMOG_VISIBILITY, "UPDATE characters SET extra_flags = extra_flags | ? WHERE account = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_REMOVE_TRANSMOG_VISIBILITY, "UPDATE characters SET extra_flags = extra_flags & ~ ? WHERE account = ?", CONNECTION_ASYNC);
 }

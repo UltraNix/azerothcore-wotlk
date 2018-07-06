@@ -1236,7 +1236,7 @@ class Player : public Unit, public GridObject<Player>
 
         // @Transmog
         bool HasDisabledTransmogVisibility()   const { return m_ExtraFlags & PLAYER_EXTRA_IGNORE_TRANSMOG; }
-        void SetDisabledTransmogVisibility(bool disable) { if (disable) m_ExtraFlags |= PLAYER_EXTRA_IGNORE_TRANSMOG; else m_ExtraFlags &= ~PLAYER_EXTRA_IGNORE_TRANSMOG; }
+        void SetDisabledTransmogVisibility(bool disable);
 
         void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool bgExtra = false);
         void GiveLevel(uint8 level);
