@@ -582,13 +582,11 @@ void GameObject::Update(uint32 diff)
                         if (owner->IsInSanctuary() && owner->GetTypeId() == TYPEID_PLAYER && !owner->ToPlayer()->duel)
                             return;
 
-                        float radius_temp = radius * 1.8f;
-
-                        Trinity::NearestUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius_temp);
-                        Trinity::UnitLastSearcher<Trinity::NearestUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(this, target, checker);
-                        VisitNearbyGridObject(radius_temp, searcher);
+                        Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck checker(this, owner, radius);
+                        Trinity::UnitSearcher<Trinity::AnyUnfriendlyNoTotemUnitInObjectRangeCheck> searcher(this, target, checker);
+                        VisitNearbyGridObject(radius, searcher);
                         if (!target)
-                            VisitNearbyWorldObject(radius_temp, searcher);
+                            VisitNearbyWorldObject(radius, searcher);
                     }
                     else                                        // environmental trap
                     {
