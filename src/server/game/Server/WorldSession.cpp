@@ -1566,7 +1566,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case MSG_TALENT_WIPE_CONFIRM:
         case MSG_SET_DUNGEON_DIFFICULTY:
         case MSG_SET_RAID_DIFFICULTY:
-        case MSG_RANDOM_ROLL:
         case MSG_PARTY_ASSIGNMENT:
         case MSG_RAID_READY_CHECK:
         {
