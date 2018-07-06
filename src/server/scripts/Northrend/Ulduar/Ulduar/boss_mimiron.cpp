@@ -2051,7 +2051,7 @@ struct npc_ulduar_magnetic_coreAI : public NullCreatureAI
     npc_ulduar_magnetic_coreAI(Creature *pCreature) : NullCreatureAI(pCreature)
     {
         pInstance = me->GetInstanceScript();
-        if (pInstance && me->IsAIEnabled)
+        if (pInstance)
         {
             if (Creature* c = GetACU())
                 if (c->GetExactDist2d(me) <= 10.0f)
