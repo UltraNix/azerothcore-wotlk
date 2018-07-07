@@ -316,7 +316,6 @@ class WorldSession
         // Pet
         void SendPetNameQuery(uint64 guid, uint32 petnumber);
         void SendStablePet(uint64 guid);
-        void SendStablePetCallback(PreparedQueryResult result, uint64 guid);
         void SendStableResult(uint8 guid);
         bool CheckStableMaster(uint64 guid);
 
@@ -624,13 +623,10 @@ class WorldSession
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
         void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
         void HandleStablePet(WorldPacket& recvPacket);
-        void HandleStablePetCallback(PreparedQueryResult result);
         void HandleUnstablePet(WorldPacket& recvPacket);
-        void HandleUnstablePetCallback(PreparedQueryResult result, uint32 petId);
         void HandleBuyStableSlot(WorldPacket& recvPacket);
         void HandleStableRevivePet(WorldPacket& recvPacket);
         void HandleStableSwapPet(WorldPacket& recvPacket);
-        void HandleStableSwapPetCallback(PreparedQueryResult result, uint32 petId);
         void HandleOpenWrappedItemCallback(PreparedQueryResult result, uint8 bagIndex, uint8 slot, uint32 itemLowGUID);
         void HandleLoadActionsSwitchSpec(PreparedQueryResult result);
         void HandleCharacterAuraFrozen(PreparedQueryResult result);
@@ -978,11 +974,8 @@ class WorldSession
         void ProcessQueryCallbackLogin();
 
         PreparedQueryResultFuture _charEnumCallback;
-        PreparedQueryResultFuture _stablePetCallback;
         QueryCallback<PreparedQueryResult, std::string> _charRenameCallback;
-        QueryCallback<PreparedQueryResult, uint32> _unstablePetCallback;
         QueryCallback<PreparedQueryResult, uint32> _stableSwapCallback;
-        QueryCallback<PreparedQueryResult, uint64> _sendStabledPetCallback;
         QueryCallback<PreparedQueryResult, CharacterCreateInfo*, true> _charCreateCallback;
 
         QueryResultHolderFuture _charLoginCallback;

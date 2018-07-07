@@ -18468,6 +18468,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS));
 
     _LoadBrewOfTheMonth(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BREW_OF_THE_MONTH));
+    _LoadPetSlotsData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_PET_SLOTS));
 
     // Players are immune to taunt
     ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
@@ -27674,6 +27675,60 @@ void Player::_LoadBrewOfTheMonth(PreparedQueryResult result)
 
         CharacterDatabase.CommitTransaction(trans);
     }
+}
+
+PetSlotData* Player::GetPetSlotData( PetSaveMode mode, bool allowEmpty )
+{
+    int index = mode;
+    if ( index == PET_SAVE_NOT_IN_SLOT )
+        index = PET_SAVE_LAST_STABLE_SLOT + 1;
+
+    if ( index < 0 || index >( PET_SAVE_LAST_STABLE_SLOT + 1 ) )
+        return nullptr;
+
+    PetSlotData * data = &m_petSlots[ index ];
+    if ( !allowEmpty && data->Empty )
+        return nullptr;
+
+    return data;
+}
+
+void Player::ClearPetSlotData( uint32 id )
+{
+    for ( PetSlotData & data : m_petSlots )
+    {
+        if ( data.Id == id )
+        {
+            data = PetSlotData{true};
+        }
+    }
+}
+
+void Player::_LoadPetSlotsData( PreparedQueryResult result )
+{
+    for ( PetSlotData & slot : m_petSlots )
+    {
+        slot.Empty = true;
+    }
+
+    if ( !result )
+        return;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        PetSlotData * data = GetPetSlotData( PetSaveMode( fields[ 5 ].GetInt8() ), true );
+        if ( data == nullptr )
+            continue;
+
+        data->Empty = false;
+        data->Type = PetType( fields[ 6 ].GetUInt8() );
+        data->Id = uint32( fields[ 1 ].GetUInt32() );
+        data->Entry = uint32( fields[ 2 ].GetUInt32() );
+        data->Level = uint32( fields[ 3 ].GetUInt16() );              // level
+        data->Name = fields[ 4 ].GetString();                        // name
+    } while ( result->NextRow() );
 }
 
 void Player::_SaveInstanceTimeRestrictions(SQLTransaction& trans)

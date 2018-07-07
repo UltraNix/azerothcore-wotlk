@@ -201,6 +201,8 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
     _SaveSpellCooldowns(trans, logout);
     CharacterDatabase.CommitTransaction(trans);
 
+    owner->ClearPetSlotData( m_charmInfo->GetPetNumber() );
+
     // current/stable/not_in_slot
     if (mode >= PET_SAVE_AS_CURRENT)
     {
@@ -230,6 +232,15 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
             stmt->setUInt8(1, uint8(PET_SAVE_AS_CURRENT));
             stmt->setUInt8(2, uint8(PET_SAVE_LAST_STABLE_SLOT));
             trans->Append(stmt);
+
+            for ( PetSaveMode slot : { PET_SAVE_AS_CURRENT, PET_SAVE_NOT_IN_SLOT } )
+            {
+                PetSlotData* data = owner->GetPetSlotData( slot );
+                if ( data != nullptr )
+                {
+                    data->Empty = true;
+                }
+            }
         }
 
         // save pet
@@ -259,6 +270,17 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
 
         trans->Append(stmt);
         CharacterDatabase.CommitTransaction(trans);
+
+        PetSlotData* data = owner->GetPetSlotData( mode, true );
+        if ( data != nullptr )
+        {
+            data->Empty = false;
+            data->Id = m_charmInfo->GetPetNumber();
+            data->Entry = GetEntry();
+            data->Level = getLevel();
+            data->Type = getPetType();
+            data->Name = GetName();
+        }
     }
     // delete
     else
@@ -2003,7 +2025,14 @@ void Pet::HandleAsynchLoadSucceed()
 
 void Pet::HandleAsynchLoadFailed(AsynchPetSummon* info, Player* player, uint8 asynchLoadType, uint8 loadResult)
 {
-    if (loadResult == PET_LOAD_ERROR && asynchLoadType == PET_LOAD_HANDLE_UNSTABLE_CALLBACK)
+    if (loadResult == PET_LOAD_EXOTIC_NOT_ALLOWED)
+    {
+        if ( asynchLoadType == PET_LOAD_SUMMON_PET )
+        {
+            //! find first valid pet in stable
+        }
+    }
+    else if (loadResult == PET_LOAD_ERROR && asynchLoadType == PET_LOAD_HANDLE_UNSTABLE_CALLBACK)
     {
         player->GetSession()->SendStableResult(0x06 /*STABLE_ERR_STABLE*/);
     }

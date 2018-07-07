@@ -200,6 +200,13 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, m_accountId);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SLOTS_DETAIL);
+    stmt->setUInt32( 0, lowGuid );
+    stmt->setUInt8( 1, PET_SAVE_AS_CURRENT );
+    stmt->setUInt8( 2, PET_SAVE_LAST_STABLE_SLOT );
+    stmt->setUInt8( 3, PET_SAVE_NOT_IN_SLOT );
+    res &= SetPreparedQuery( PLAYER_LOGIN_QUERY_LOAD_PET_SLOTS, stmt );
+
     return res;
 }
 

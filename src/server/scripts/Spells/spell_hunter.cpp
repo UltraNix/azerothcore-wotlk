@@ -29,6 +29,7 @@
 #include "GridNotifiersImpl.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "Player.h"
 
 enum HunterSpells
 {
@@ -1148,12 +1149,25 @@ class spell_hun_tame_beast : public SpellScriptLoader
 
             SpellCastResult CheckCast()
             {
-                Unit* caster = GetCaster();
-                if (caster->GetTypeId() != TYPEID_PLAYER)
+                Player* caster = GetCaster()->ToPlayer();
+                if ( caster == nullptr )
                     return SPELL_FAILED_DONT_REPORT;
 
                 if (!GetExplTargetUnit())
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+                if ( caster->GetPetGUID() )
+                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
+                if ( caster->GetCharmGUID() )
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+
+                for ( PetSaveMode slot : { PET_SAVE_AS_CURRENT, PET_SAVE_NOT_IN_SLOT } )
+                {
+                    PetSlotData* data = caster->GetPetSlotData( slot, false );
+                    if ( data && data->Type == HUNTER_PET )
+                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                }
 
                 if (Creature* target = GetExplTargetUnit()->ToCreature())
                 {
@@ -1163,12 +1177,6 @@ class spell_hun_tame_beast : public SpellScriptLoader
                     // use SMSG_PET_TAME_FAILURE?
                     if (!target->GetCreatureTemplate()->IsTameable(caster->ToPlayer()->CanTameExoticPets()))
                         return SPELL_FAILED_BAD_TARGETS;
-
-                    if (caster->GetPetGUID())
-                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
-
-                    if (caster->GetCharmGUID())
-                        return SPELL_FAILED_ALREADY_HAVE_CHARM;
                 }
                 else
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;

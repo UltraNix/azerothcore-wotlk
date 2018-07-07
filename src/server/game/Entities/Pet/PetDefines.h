@@ -35,7 +35,8 @@ enum PetSaveMode
     PET_SAVE_AS_CURRENT        =  0,                        // in current slot (with player)
     PET_SAVE_FIRST_STABLE_SLOT =  1,
     PET_SAVE_LAST_STABLE_SLOT  =  MAX_PET_STABLES,          // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
-    PET_SAVE_NOT_IN_SLOT       =  100                       // for avoid conflict with stable size grow will use 100
+    PET_SAVE_NOT_IN_SLOT       =  100,                      // for avoid conflict with stable size grow will use 100
+    PET_SAVE_SWAP_TEMP         =  101
 };
 
 enum HappinessState
@@ -86,17 +87,18 @@ enum PetLoadQueryIndex
 enum PetLoadStage
 {
     PET_LOAD_DEFAULT                            = 0,
-    PET_LOAD_HANDLE_UNSTABLE_CALLBACK            = 1, // used also in HandleStableSwapPetCallback, uses same error / ok messages
-    PET_LOAD_BG_RESURRECT                        = 2,
-    PET_LOAD_SUMMON_PET                            = 3,
+    PET_LOAD_HANDLE_UNSTABLE_CALLBACK           = 1, // used also in HandleStableSwapPetCallback, uses same error / ok messages
+    PET_LOAD_BG_RESURRECT                       = 2,
+    PET_LOAD_SUMMON_PET                         = 3,
     PET_LOAD_SUMMON_DEAD_PET                    = 4
 };
 
 enum PetLoadState
 {
-    PET_LOAD_OK                                    = 0,
+    PET_LOAD_OK                                   = 0,
     PET_LOAD_NO_RESULT                            = 1,
-    PET_LOAD_ERROR                                = 2
+    PET_LOAD_ERROR                                = 2,
+    PET_LOAD_EXOTIC_NOT_ALLOWED                   = 3
 };
 
 enum NPCEntries

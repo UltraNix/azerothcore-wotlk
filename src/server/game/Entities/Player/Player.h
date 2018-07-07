@@ -846,6 +846,8 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_MONTHLY_QUEST_STATUS    = 32,
     PLAYER_LOGIN_QUERY_LOAD_MAIL                    = 33,
     PLAYER_LOGIN_QUERY_LOAD_BREW_OF_THE_MONTH       = 34,
+    PLAYER_LOGIN_QUERY_LOAD_PET_SLOTS               = 35,
+
     MAX_PLAYER_LOGIN_QUERY,
 };
 
@@ -999,6 +1001,26 @@ class PlayerTaxi
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
 
 class Player;
+
+struct PetSlotData
+{
+    void operator=( const PetSlotData  & rhs )
+    {
+        Empty = rhs.Empty;
+        Id = rhs.Id;
+        Entry = rhs.Entry;
+        Level = rhs.Level;
+        Name = rhs.Name;
+        Type = rhs.Type;
+    }
+
+    bool            Empty = true;
+    uint32          Id    = 0;
+    uint32          Entry = 0;
+    uint32          Level = 0;
+    std::string     Name;
+    PetType         Type = MAX_PET_TYPE;
+};
 
 // holder for Battleground data (pussywizard: not stored in db)
 struct BGData
@@ -1611,7 +1633,6 @@ class Player : public Unit, public GridObject<Player>
         void SaveGoldToDB(SQLTransaction& trans);
 
         static void SetUInt32ValueInArray(Tokenizer& data, uint16 index, uint32 value);
-        static void SetFloatValueInArray(Tokenizer& data, uint16 index, float value);
         static void Customize(uint64 guid, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair);
         static void SavePositionInDB(uint32 mapid, float x, float y, float z, float o, uint32 zone, uint64 guid);
 
@@ -1625,7 +1646,6 @@ class Player : public Unit, public GridObject<Player>
         void SetBindPoint(uint64 guid);
         void SendTalentWipeConfirm(uint64 guid);
         void ResetPetTalents();
-        void CalcRage(uint32 damage, bool attacker);
         void RegenerateAll();
         void Regenerate(Powers power);
         void RegenerateHealth();
@@ -2694,6 +2714,9 @@ class Player : public Unit, public GridObject<Player>
         bool HasRequiredCharacterLevel(uint8 level);
         bool IsFriendOfMine(uint64 guid, bool checkGuildMate);
 
+        void         ClearPetSlotData( uint32 id );
+        PetSlotData* GetPetSlotData( PetSaveMode mode, bool allowEmpty = false );
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -2769,7 +2792,6 @@ class Player : public Unit, public GridObject<Player>
         void _LoadGroup();
         void _LoadSkills(PreparedQueryResult result);
         void _LoadSpells(PreparedQueryResult result);
-        void _LoadFriendList(PreparedQueryResult result);
         bool _LoadHomeBind(PreparedQueryResult result);
         void _LoadDeclinedNames(PreparedQueryResult result);
         void _LoadArenaTeamInfo();
@@ -2779,6 +2801,7 @@ class Player : public Unit, public GridObject<Player>
         void _LoadTalents(PreparedQueryResult result);
         void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
         void _LoadBrewOfTheMonth(PreparedQueryResult result);
+        void _LoadPetSlotsData( PreparedQueryResult result );
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -3052,6 +3075,8 @@ class Player : public Unit, public GridObject<Player>
         uint32 _pendingBindId;
         uint32 _pendingBindTimer;
         uint32 m_realVisibleSlots[ PLAYER_VISIBLE_SLOTS_COUNT + 1];
+
+        PetSlotData m_petSlots[ PET_SAVE_LAST_STABLE_SLOT + 2 ] = {};
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);

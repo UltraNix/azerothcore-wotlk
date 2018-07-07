@@ -133,7 +133,19 @@ uint8 WorldSession::HandleLoadPetFromDBFirstCallback(PreparedQueryResult result,
     {
         CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(petentry);
         if (!creatureInfo || !creatureInfo->IsTameable(owner->CanTameExoticPets()))
-            return PET_LOAD_ERROR;
+        {
+            if ( asynchLoadType != PET_LOAD_SUMMON_DEAD_PET )
+            {
+                WorldPacket data( SMSG_CAST_FAILED, 1 + 4 + 1 + 4 );
+                data << uint8( 0 );
+                data << uint32( 883 );
+                data << uint8( SPELL_FAILED_NO_PET );
+                SendPacket( &data );
+                owner->RemoveSpellCooldown( 883, false );
+            }
+
+            return PET_LOAD_EXOTIC_NOT_ALLOWED;
+        }
     }
 
     Map* map = owner->GetMap();
