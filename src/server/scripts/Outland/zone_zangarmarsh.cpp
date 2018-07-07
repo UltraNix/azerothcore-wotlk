@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -320,6 +320,17 @@ public:
 #define GOSSIP_ITEM_KUR2 "I did not mean to deceive you, elder. The draenei of Telredor thought to approach you in a way that would seem familiar to you."
 #define GOSSIP_ITEM_KUR3 "I will tell them. Farewell, elder."
 
+enum ElderKuruti
+{
+    SPELL_CHAIN_LIGHTNING    = 12058,
+    SPELL_HEALING_WAVE       = 11986,
+    SPELL_LIGHTNING_SHIELD   = 12550,
+
+    EVENT_CHAIN_LIGHTNING    = 1,
+    EVENT_HEALING_WAVE,
+    EVENT_LIGHTNING_SHIELD
+};
+
 class npc_elder_kuruti : public CreatureScript
 {
 public:
@@ -367,6 +378,66 @@ public:
             }
         }
         return true;
+    }
+
+    struct npc_elder_kurutiAI : public ScriptedAI
+    {
+        npc_elder_kurutiAI(Creature* creature) : ScriptedAI(creature) {}
+        void Reset() override
+        {
+            _events.Reset();
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            _events.Reset();
+            _events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, 3000);
+            _events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 8000);
+            _events.ScheduleEvent(EVENT_HEALING_WAVE, 15000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+            _events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+            if (me->IsUnderCrowdControl())
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHAIN_LIGHTNING:
+                        DoCastVictim(SPELL_CHAIN_LIGHTNING);
+                        _events.Repeat(urand(10000, 15000));
+                        break;
+                    case EVENT_LIGHTNING_SHIELD:
+                        DoCastSelf(SPELL_LIGHTNING_SHIELD);
+                        _events.Repeat(urand(15000, 20000));
+                        break;
+                    case EVENT_HEALING_WAVE:
+                        if (me->GetHealthPct() < 80)
+                            DoCastSelf(SPELL_HEALING_WAVE);
+                        _events.Repeat(urand(10000, 20000));
+                        break;
+                    default:
+                        break;
+                }
+                DoMeleeAttackIfReady();
+            }
+        }
+
+        private:
+            EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_elder_kurutiAI(creature);
     }
 };
 
@@ -530,7 +601,7 @@ enum ParalyticPoison
 class spell_paralytic_poison_AuraScript : public AuraScript
 {
     PrepareAuraScript(spell_paralytic_poison_AuraScript);
-    
+
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
