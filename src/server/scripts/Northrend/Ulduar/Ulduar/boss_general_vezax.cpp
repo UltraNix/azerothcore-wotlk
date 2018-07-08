@@ -550,31 +550,33 @@ struct npc_twilight_frost_mageAI : ScriptedAI
         while (uint32 eventId = _events.ExecuteEvent())
         {
             switch (eventId)
-            {
-            case EVENT_ARCANE_BURST:
-                DoCastVictim(SPELL_ARCANE_BURST);
-                _events.Repeat(urand(10000, 15000));
-                break;
-            case EVENT_FROSTBOLT_VOLLEY:
-                DoCastVictim(SPELL_FROSTBOLT_VOLLEY);
-                _events.Repeat(urand(15000, 20000));
-                break;
-            case EVENT_FROSTNOVA:
-                DoCastAOE(SPELL_FROSTNOVA);
-                _events.Repeat(urand(10000, 20000));
-                break;
-            case EVENT_FROSTBOLT:
-                DoCastVictim(SPELL_FROSTBOLT);
-                _events.Repeat(urand(3000, 5000));
-                break;
-            default:
-                break;
+                {
+                case EVENT_ARCANE_BURST:
+                    DoCastVictim(SPELL_ARCANE_BURST);
+                    _events.Repeat(urand(10000, 15000));
+                    break;
+                case EVENT_FROSTBOLT_VOLLEY:
+                    DoCastVictim(SPELL_FROSTBOLT_VOLLEY);
+                    _events.Repeat(urand(15000, 20000));
+                    break;
+                case EVENT_FROSTNOVA:
+                    DoCastAOE(SPELL_FROSTNOVA);
+                    _events.Repeat(urand(10000, 20000));
+                    break;
+                case EVENT_FROSTBOLT:
+                    DoCastVictim(SPELL_FROSTBOLT);
+                    _events.Repeat(urand(3000, 5000));
+                    break;
+                default:
+                    break;
             }
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
             if (me->GetPower(POWER_MANA) * 100 / me->GetMaxPower(POWER_MANA) < 10)
+            {
                 DoMeleeAttackIfReady();
+            }
         }
     }
 
