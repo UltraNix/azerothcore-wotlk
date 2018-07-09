@@ -1321,37 +1321,42 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             break;
         case TARGET_DEST_CASTER_FISHING:
         {
-             float min_dis = m_spellInfo->GetMinRange(true);
-             float max_dis = m_spellInfo->GetMaxRange(true);
-             float dis = (float)rand_norm() * (max_dis - min_dis) + min_dis;
-             float x, y, z, angle;
-             angle = (float)rand_norm() * static_cast<float>(M_PI * 35.0f / 180.0f) - static_cast<float>(M_PI * 17.5f / 180.0f);
-             m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE, dis, angle, 0, false, false);
-
+            float dist = frand(m_spellInfo->GetMinRange(true), m_spellInfo->GetMaxRange(true));
+            float x, y, z;
+            m_caster->GetNearPoint(m_caster, x, y, z, m_caster->GetObjectSize(), dist, m_caster->GetOrientation() + frand(static_cast<float>(M_PI * -17.5f / 180.0f), static_cast<float>(M_PI * 17.5f / 180.0f)));
             float ground = m_caster->GetMap()->GetHeight(m_caster->GetPhaseMask(), x, y, z, true, 120.0f);
             float liquidLevel = VMAP_INVALID_HEIGHT_VALUE;
             LiquidData liquidData;
             if (m_caster->GetMap()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquidData))
                 liquidLevel = liquidData.level;
 
-             if (liquidLevel <= ground) // When there is no liquid Map::GetWaterOrGroundLevel returns ground level
-             {
-                 SendCastResult(SPELL_FAILED_NOT_HERE);
-                 SendChannelUpdate(0);
-                 finish(false);
-                 return;
-             }
+            auto FailAndSendCastResult = [this](SpellCastResult const result)
+            {
+                SendCastResult(result);
+                SendChannelUpdate(0);
+                finish(false);
+            };
 
-             if (ground + 0.75 > liquidLevel)
-             {
-                 SendCastResult(SPELL_FAILED_TOO_SHALLOW);
-                 SendChannelUpdate(0);
-                 finish(false);
-                 return;
-             }
+            if (liquidLevel <= ground) // When there is no liquid Map::GetWaterOrGroundLevel returns ground level
+            {
+                FailAndSendCastResult(SPELL_FAILED_NOT_HERE);
+                return;
+            }
 
-             dest = SpellDestination(x, y, liquidLevel, m_caster->GetOrientation());
-             break;
+            if (!m_caster->IsWithinLOS(x, y, z))
+            {
+                FailAndSendCastResult(SPELL_FAILED_LINE_OF_SIGHT);
+                return;
+            }
+
+            if (ground + 0.75f > liquidLevel)
+            {
+                FailAndSendCastResult(SPELL_FAILED_TOO_SHALLOW);
+                return;
+            }
+
+            dest = SpellDestination(x, y, liquidLevel, m_caster->GetOrientation());
+            break;
         }
         case TARGET_DEST_CASTER_FRONT_LEAP:
         {
