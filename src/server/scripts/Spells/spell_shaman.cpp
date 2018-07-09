@@ -1432,6 +1432,26 @@ public:
     }
 };
 
+class spell_sha_elemental_devastation_AuraScript : public AuraScript
+{
+    public:
+        PrepareAuraScript(spell_sha_elemental_devastation_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (SpellInfo const* spell = eventInfo.GetDamageInfo()->GetSpellInfo())
+                if (spell->SpellFamilyFlags[0] & (0x00800000 | 0x00200000 | 0x01000000))
+                    return false;
+
+            return true;
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_sha_elemental_devastation_AuraScript::CheckProc);
+        }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     // ours
@@ -1442,6 +1462,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_feral_spirit_scaling();
     new spell_sha_fire_elemental_scaling();
     new spell_shaman_t8_elemental_4p_bonus();
+    new AuraScriptLoaderEx<spell_sha_elemental_devastation_AuraScript>("spell_sha_elemental_devastation");
 
     // theirs
     new spell_sha_ancestral_awakening_proc();
