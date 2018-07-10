@@ -494,7 +494,10 @@ void WorldSession::HandlePetCancelAuraOpcode(WorldPacket& recvPacket)
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
-        sLog->outError("WORLD: unknown PET spell id %u", spellId);
+        if (_player)
+            sLog->outError("WORLD HandlePetCancelAuraOpcode: Unknown PET spell id %u, player(GUID: %u Name: %s)", spellId, _player->GetGUID(), _player->GetName().c_str());
+        else
+            sLog->outError("WORLD HandlePetCancelAuraOpcode: unknown PET spell id %u", spellId);
         return;
     }
 

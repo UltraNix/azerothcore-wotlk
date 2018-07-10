@@ -667,7 +667,11 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellid);
             if (!spellInfo)
             {
-                sLog->outError("WORLD: unknown PET spell id %i", spellid);
+                if (pet && pet->GetCharmerOrOwner())
+                    sLog->outReleaseDebug("World HandlePetActionHelper: Unknown PET spell Id %u GetcharmerOrOwner: %s And Guid: %u", spellid, pet->GetCharmerOrOwner()->GetName().c_str(), pet->GetCharmerOrOwner()->GetGUID());
+                else
+                    sLog->outError("WORLD HandlePetActionHelper: unknown PET spell id %i", spellid);
+
                 return;
             }
 
@@ -1170,7 +1174,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {
-        sLog->outError("WORLD: unknown PET spell id %i", spellId);
+        if (GetPlayer())
+            sLog->outError("World HandlePetCastSpellOpcode: Unknown PET Spell Id %i Player: (GUID: %u Name: %s).", spellId, GetPlayer()->GetGUID(), GetPlayer()->GetName().c_str());
+        else
+            sLog->outError("WORLD HandlePetCastSpellOpcode: unknown PET spell id %i", spellId);
         return;
     }
 
