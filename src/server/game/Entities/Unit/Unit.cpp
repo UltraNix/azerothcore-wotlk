@@ -6790,7 +6790,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 // Glyph of Rejuvenation
                 case 54754:
                 {
-                    if (!victim || !victim->HealthBelowPct(uint32(triggerAmount)))
+                    if (!victim || !victim->HealthBelowPctDamaged(uint32(triggerAmount), damage))
                         return false;
                     basepoints0 = CalculatePct(int32(damage), triggerAmount);
                     triggered_spell_id = 54755;
