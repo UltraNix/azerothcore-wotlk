@@ -4023,7 +4023,13 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectBasePoints[EFFECT_0] = 100; // 100% chance of procc'ing, not -10% (chance calculated in PrepareTriggersExecutedOnHit)
             break;
         case 12721: // Deep Wounds - should be affected by resilience
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
             spellInfo->AttributesEx4 &= ~SPELL_ATTR4_FIXED_DAMAGE;
+            break;
+        case 12162: // Deep Wounds
+        case 12850: // Deep Wounds
+        case 12868: // Deep Wounds
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
             break;
         case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
