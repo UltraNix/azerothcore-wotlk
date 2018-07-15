@@ -6835,6 +6835,9 @@ SpellCastResult Spell::CheckRange(bool strict)
     if (range_type != SPELL_RANGE_MELEE && !strict)
         max_range += std::min(3.0f, max_range*0.1f); // 10% but no more than 3yd
 
+    if (target && m_caster && m_caster->isMoving() && target->isMoving() && !m_caster->IsWalking() && !target->IsWalking() && (range_type == SPELL_RANGE_MELEE || target->IsPlayer()))
+        max_range += 8.0f / 3.0f;
+
     if (target)
     {
         if (target != m_caster)
@@ -6844,6 +6847,7 @@ SpellCastResult Spell::CheckRange(bool strict)
             {
                 // Because of lag, we can not check too strictly here.
                 float real_max_range = m_caster->GetTypeId() == TYPEID_UNIT ? max_range - 2*MIN_MELEE_REACH : max_range - MIN_MELEE_REACH;
+
                 if (!m_caster->IsWithinMeleeRange(target, std::max(real_max_range, 0.0f)) && !CanUseOutsideOfRange())
                     return SPELL_FAILED_OUT_OF_RANGE;
             }
