@@ -424,6 +424,8 @@ public:
         }
 
         void Reset() { }
+
+        void EnterEvadeMode() override { }
     };
 };
 

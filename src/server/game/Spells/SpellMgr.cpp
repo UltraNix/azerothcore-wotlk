@@ -5317,6 +5317,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 44335:
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
             break;
+        case 34444:
+            spellInfo->EffectMiscValueB[0] = 64;
+            break;
 
         //////////////////////////////////////////
         ////////// Old Scarlet Monastery
