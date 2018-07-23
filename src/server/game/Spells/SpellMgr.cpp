@@ -2747,7 +2747,6 @@ std::vector<uint32> partialCorrection =
     63671,  // Black Arrow r5
     63672,  // Black Arrow r6
     47528,  // Mind Freeze r1
-    57994,  // Wind Shear  r1
     60103,  // Lava Lash r1
     8042,   // Earth Shock r1
     8044,   // Earth Shock r2
