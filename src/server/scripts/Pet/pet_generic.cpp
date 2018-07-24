@@ -355,16 +355,18 @@ public:
     {
         if (player->GetGUID() != creature->GetOwnerGUID())
             return true;
-
-        if (!creature->HasAura(player->GetTeamId() ? SPELL_AURA_TIRED_G : SPELL_AURA_TIRED_S))
+        if (player->HasAchieved(ACHIEVEMENT_PONY_UP))
         {
-            uint8 _state = creature->AI()->GetData(0 /*GET_DATA_STATE*/);
-            if (_state == ARGENT_PONY_STATE_ENCH || _state == ARGENT_PONY_STATE_VENDOR)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Visit a trader.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
-            if (_state == ARGENT_PONY_STATE_ENCH || _state == ARGENT_PONY_STATE_BANK)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Visit a bank.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_BANK);
-            if (_state == ARGENT_PONY_STATE_ENCH || _state == ARGENT_PONY_STATE_MAILBOX)
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Visit a mailbox.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_MAILBOX);
+            if (!creature->HasAura(player->GetTeamId() ? SPELL_AURA_TIRED_G : SPELL_AURA_TIRED_S))
+            {
+                uint8 _state = creature->AI()->GetData(0 /*GET_DATA_STATE*/);
+                if (_state == ARGENT_PONY_STATE_ENCH || _state == ARGENT_PONY_STATE_VENDOR)
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, "Visit a trader.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRADE);
+                if (_state == ARGENT_PONY_STATE_ENCH || _state == ARGENT_PONY_STATE_BANK)
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_INTERACT_1, "Visit a bank.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_BANK);
+                if (_state == ARGENT_PONY_STATE_ENCH || _state == ARGENT_PONY_STATE_MAILBOX)
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Visit a mailbox.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_MAILBOX);
+            }
         }
 
         for (uint8 i = RACE_HUMAN; i < MAX_RACES; ++i)
