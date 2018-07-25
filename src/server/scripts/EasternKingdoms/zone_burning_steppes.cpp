@@ -178,14 +178,24 @@ struct npc_chambermaid_pillaclencher_triggerAI : ScriptedAI
     void Reset() override
     {
         chambermaidGUID = 0;
+        counter = 0;
     }
 
     void SetData(uint32 Type, uint32 Data)
     {
         if (Type == TYPE_CHAMBERMAID && Data == DATA_SUMMON)
         {
-            if (Creature* cr = me->SummonCreature(NPC_CHAMBERMAID, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
-                chambermaidGUID = cr->GetGUID();
+            if (chambermaidGUID)
+                return;
+            if (counter == 20)
+            {
+                if (Creature* cr = me->SummonCreature(NPC_CHAMBERMAID, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
+                {
+                    counter = 0;
+                    chambermaidGUID = cr->GetGUID();
+                }
+            }
+            counter++;
         }
 
         if (Type == TYPE_CHAMBERMAID && Data == DATA_KILLED)
@@ -199,6 +209,7 @@ struct npc_chambermaid_pillaclencher_triggerAI : ScriptedAI
 
 private:
     uint64 chambermaidGUID;
+    uint8 counter;
 };
 
 void AddSC_burning_steppes()
