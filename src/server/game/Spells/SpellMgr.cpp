@@ -5853,10 +5853,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64234:
             spellInfo->EffectBasePoints[EFFECT_2] = spellInfo->EffectBasePoints[EFFECT_2] + 4999;
             break;
-        // Heartbreak
-        case 64193:
-            spellInfo->EffectBasePoints[EFFECT_2] = 39;
-            break;
         // Stone Grip
         case 64292:
             spellInfo->EffectBasePoints[EFFECT_0] = 5450;
@@ -8076,11 +8072,6 @@ void SpellMgr::LoadDbcDataCorrections()
                 case 63477: // Slag pot
                 case 62717: // Slag pot
                     spellInfo->Effect[EFFECT_1] = 0;
-                    break;
-                    //! XT-002
-                case 64193: // Heartbreak
-                    spellInfo->EffectBasePoints[EFFECT_1] = 120;
-                    spellInfo->EffectBasePoints[EFFECT_2] = 60;
                     break;
                 case 62776: // Tympanic tantarum
                     spellInfo->DurationIndex = 29;
