@@ -181,21 +181,21 @@ struct npc_chambermaid_pillaclencher_triggerAI : ScriptedAI
         counter = 0;
     }
 
+    void SummonedCreatureDespawn(Creature* /*summon*/) override
+    {
+        Reset();
+    }
+
     void SetData(uint32 Type, uint32 Data)
     {
         if (Type == TYPE_CHAMBERMAID && Data == DATA_SUMMON)
         {
             if (chambermaidGUID)
                 return;
-            if (counter == 20)
-            {
-                if (Creature* cr = me->SummonCreature(NPC_CHAMBERMAID, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000))
-                {
-                    counter = 0;
-                    chambermaidGUID = cr->GetGUID();
-                }
-            }
             counter++;
+            if (counter == 20)
+                if (Creature* cr = me->SummonCreature(NPC_CHAMBERMAID, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 120000))
+                    chambermaidGUID = cr->GetGUID();
         }
 
         if (Type == TYPE_CHAMBERMAID && Data == DATA_KILLED)
