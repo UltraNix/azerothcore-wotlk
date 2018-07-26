@@ -8079,7 +8079,6 @@ void SpellMgr::LoadDbcDataCorrections()
                     break;
                     //! XT-002
                 case 64193: // Heartbreak
-                    spellInfo->EffectBasePoints[EFFECT_1] = 120;
                     spellInfo->EffectBasePoints[EFFECT_2] = 60;
                     break;
                 case 62776: // Tympanic tantarum
