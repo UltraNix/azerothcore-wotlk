@@ -428,6 +428,7 @@ public:
                 eventInRun = true;
                 SetRun(true);
                 actionEvents.ScheduleEvent(EVENT_ACTION_PHASE2+9, 10000);
+                me->SetReactState(REACT_PASSIVE);
             }
             else if (param == ACTION_START_TOWN_HALL)
             {
@@ -570,6 +571,7 @@ public:
                     actionEvents.ScheduleEvent(EVENT_ACTION_PHASE3, 0);
                     eventInRun = true;
                     SetEscortPaused(true);
+                    me->SetReactState(REACT_DEFENSIVE);
                     break;
                 // Town Hall, upper floor first fight
                 case 26:
