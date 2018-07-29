@@ -6188,7 +6188,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     bool canFailAtMax = skillId == SKILL_LOCKPICKING;
 
                     // chance for failure in orange gather
-                    if ((canFailAtMax && skillValue < sWorld->GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37))
+                    if ((canFailAtMax || skillValue < sWorld->GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37))
                         return SPELL_FAILED_TRY_AGAIN;
                 }
                 break;
