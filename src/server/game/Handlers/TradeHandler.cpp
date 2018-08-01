@@ -574,7 +574,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     if (GetPlayer()->IsSpectator())
         return;
 
-    if (GetPlayer()->GetSession() && GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
+    if (GetPlayer()->GetSession() && GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER && AccountMgr::GetSecurity(GetPlayer()->GetSession()->GetAccountId()) < 10)
     {
         SendTradeStatus(TRADE_STATUS_WRONG_FACTION);
         return;

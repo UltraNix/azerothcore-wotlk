@@ -23252,7 +23252,8 @@ bool Player::ModifyMoney(int32 amount, bool sendError /*= true*/)
 
     sScriptMgr->OnPlayerMoneyChanged(this, amount);
 
-    if (amount > 0 && GetSession() && GetSession()->GetSecurity() > SEC_PLAYER)
+    //! @Piootrek's request, if player is GM and has GMLevel lower than 10, prevent this action
+    if (amount > 0 && GetSession() && GetSession()->GetSecurity() > SEC_PLAYER && AccountMgr::GetSecurity(GetSession()->GetAccountId()) < 10)
         return false;
 
     if (amount < 0)

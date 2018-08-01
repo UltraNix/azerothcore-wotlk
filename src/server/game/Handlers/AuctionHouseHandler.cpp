@@ -61,7 +61,7 @@ void WorldSession::SendAuctionHello(uint64 guid, Creature* unit)
         return;
     }
 
-    if (GetPlayer()->GetSession() && GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
+    if (GetPlayer()->GetSession() && GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER && AccountMgr::GetSecurity(GetPlayer()->GetSession()->GetAccountId()) < 10)
         return;
 
     AuctionHouseEntry const* ahEntry = AuctionHouseMgr::GetAuctionHouseEntry(unit->getFaction());
