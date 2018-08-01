@@ -23252,6 +23252,9 @@ bool Player::ModifyMoney(int32 amount, bool sendError /*= true*/)
 
     sScriptMgr->OnPlayerMoneyChanged(this, amount);
 
+    if (amount > 0 && GetSession() && GetSession()->GetSecurity() > SEC_PLAYER)
+        return false;
+
     if (amount < 0)
         SetMoney (GetMoney() > uint32(-amount) ? GetMoney() + amount : 0);
     else

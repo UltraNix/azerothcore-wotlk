@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -574,6 +574,12 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     if (GetPlayer()->IsSpectator())
         return;
 
+    if (GetPlayer()->GetSession() && GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
+    {
+        SendTradeStatus(TRADE_STATUS_WRONG_FACTION);
+        return;
+    }
+
     Player* pOther = ObjectAccessor::FindPlayer(ID);
 
     if (!pOther)
@@ -633,6 +639,12 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     if (pOther->getLevel() < sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ))
     {
         SendNotification(GetTrinityString(LANG_TRADE_OTHER_REQ), sWorld->getIntConfig(CONFIG_TRADE_LEVEL_REQ));
+        return;
+    }
+
+    if (pOther->GetSession() && pOther->GetSession()->GetSecurity() > SEC_PLAYER)
+    {
+        SendTradeStatus(TRADE_STATUS_WRONG_FACTION);
         return;
     }
 
