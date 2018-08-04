@@ -4000,6 +4000,45 @@ class spell_baby_spices_SpellScript : public SpellScript
     }
 };
 
+enum TikiHexRemover
+{
+    HEX_OF_TONGUES = 52652,
+    HEX_OF_AGONY = 52647,
+    HEX_OF_WEAKNESS = 52645
+};
+class spell_item_tiki_hex_remover : public SpellScriptLoader
+{
+public:
+    spell_item_tiki_hex_remover() : SpellScriptLoader("spell_item_tiki_hex_remover") {}
+
+    class spell_item_tiki_hex_remover_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_tiki_hex_remover_SpellScript)
+
+        void OnScriptEffect(SpellEffIndex effIndex)
+            PreventHitDefaultEffect(effIndex);
+
+            Unit* caster = GetCaster();
+            if (Player* player = caster->ToPlayer())
+            {
+                player->RemoveAurasDueToSpell(HEX_OF_TONGUES);
+                player->RemoveAurasDueToSpell(HEX_OF_AGONY);
+                player->RemoveAurasDueToSpell(HEX_OF_WEAKNESS);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_item_tiki_hex_remover_SpellScript::OnScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_item_tiki_hex_remover_SpellScript();
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // Ours
@@ -4105,4 +4144,5 @@ void AddSC_item_spell_scripts()
     new spell_item_chicken_cover();
     new spell_item_muisek_vessel();
     new spell_item_greatmothers_soulcatcher();
+    new spell_item_tiki_hex_remover();
 }
