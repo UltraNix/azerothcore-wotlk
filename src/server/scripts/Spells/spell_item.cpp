@@ -4016,6 +4016,7 @@ public:
         PrepareSpellScript(spell_item_tiki_hex_remover_SpellScript)
 
         void OnScriptEffect(SpellEffIndex effIndex)
+        {
             PreventHitDefaultEffect(effIndex);
 
             Unit* caster = GetCaster();
