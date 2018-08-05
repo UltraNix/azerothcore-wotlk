@@ -1,4 +1,4 @@
-# Sunwell Core - No support, this is served as is.
+# Sunwell Core - No support, this is served as is. 
 
 If you want the improved core with active developers:
 https://github.com/azerothcore/azerothcore-wotlk
