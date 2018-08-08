@@ -758,7 +758,10 @@ void BattlefieldWG::HandleKill(Player* killer, Unit* victim)
 
         // Xinef: Allow to Skin non-released corpse
         if (victim->GetTypeId() == TYPEID_PLAYER)
+        {
             victim->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            killer->RewardPlayerAndGroupAtEvent(NPC_QUEST_PVP_PLAYER_KILL, 0);
+        }
     }
     else if (victim->IsVehicle() && !killer->IsFriendlyTo(victim))
     {
