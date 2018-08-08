@@ -88,6 +88,13 @@ public:
 
             if (InstanceScript* pInstance = me->GetInstanceScript())
                 pInstance->SetData(DATA_SHOW_INFINITE_TIMER, 0);
+
+            Map::PlayerList const &players = me->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+            {
+                if (Player* pPlayer = i->GetSource())
+                    pPlayer->RemoveAurasDueToSpell(SPELL_CORRUPTING_BLIGHT);
+            }
         }
 
         void DoAction(int32 param)
