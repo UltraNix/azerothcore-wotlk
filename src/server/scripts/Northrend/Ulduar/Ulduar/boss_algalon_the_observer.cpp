@@ -287,8 +287,8 @@ class boss_algalon_the_observer : public CreatureScript
                 if (!item) // should not happen, but checked in GetAverageItemLevel()
                     return true;
                 if (item->ItemLevel <= 226 || item->ItemLevel <= 232 && (
-                    item->InventoryType == INVTYPE_SHIELD || 
-                    item->Class == ITEM_CLASS_WEAPON || 
+                    item->InventoryType == INVTYPE_SHIELD ||
+                    item->Class == ITEM_CLASS_WEAPON ||
                     item->Class == ITEM_CLASS_ARMOR && (item->InventoryType == INVTYPE_RELIC || item->InventoryType == INVTYPE_HOLDABLE)
                     ))
                     return true;
@@ -661,7 +661,7 @@ class boss_algalon_the_observer : public CreatureScript
                             AttackStart(target);
                         me->SetInCombatWithZone();
                         events.PopEvent();
-                        
+
                         for (uint32 i = 0; i < LIVING_CONSTELLATION_COUNT; ++i)
                             me->SummonCreature(NPC_LIVING_CONSTELLATION, ConstellationPos[i], TEMPSUMMON_DEAD_DESPAWN);
                         break;
@@ -998,7 +998,7 @@ class npc_living_constellation : public CreatureScript
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         _isActive = true;
-                        
+
                         if (Player* target = SelectTargetFromPlayerList(250.0f))
                         {
                             AttackStart(target);
@@ -1135,16 +1135,6 @@ class go_celestial_planetarium_access : public GameObjectScript
                 InstanceScript* instance = go->GetInstanceScript();
                 if (!instance)
                     return false;
-
-                if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && go && go->GetMap()->Is25ManRaid())
-                {
-                    // hardmode checks, if one of those is false then return
-                    if (!instance->GetData(DATA_MIMIRON_HARDMODE) ||
-                        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
-                        !instance->GetData(DATA_MIMIRON_HARDMODE) ||
-                        !instance->GetData(DATA_MIMIRON_HARDMODE))
-                        return false;
-                }
 
                 _locked = true;
                 // Start Algalon event

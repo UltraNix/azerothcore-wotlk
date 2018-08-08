@@ -532,14 +532,6 @@ public:
             if (!_keeperCount && Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
             {
                 _aloneInTheDarknessBoost = true;
-                // hardmode checks, if one of those is false then return
-                if (!m_pInstance->GetData(DATA_MIMIRON_HARDMODE) ||
-                    !m_pInstance->GetData(DATA_THORIM_HARDMODE) ||
-                    !m_pInstance->GetData(DATA_FREYA_HARDMODE) ||
-                    !m_pInstance->GetData(DATA_HODIR_HARDMODE))
-                {
-                    return;
-                }
             }
 
             _fightTimer = getMSTime();
@@ -3486,7 +3478,7 @@ class spell_squeeze_tentacle_AuraScript : public AuraScript
                 PreventDefaultAction();
         }
     }
-    
+
     void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         if (GetTarget())
