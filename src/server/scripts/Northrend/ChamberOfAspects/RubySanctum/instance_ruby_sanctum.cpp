@@ -45,6 +45,7 @@ class instance_ruby_sanctum : public InstanceMapScript
                 OrbCarrierGUID           = 0;
                 HalionControllerGUID     = 0;
                 FlameRingGUID            = 0;
+                OrbRotationGUID          = 0;
             }
 
             void OnPlayerEnter(Player* /*player*/)
@@ -87,6 +88,9 @@ class instance_ruby_sanctum : public InstanceMapScript
                         break;
                     case NPC_ORB_CARRIER:
                         OrbCarrierGUID = creature->GetGUID();
+                        break;
+                    case NPC_ROTATION_FOCUS:
+                        OrbRotationGUID = creature->GetGUID();
                         break;
 
                     case NPC_LIVING_INFERNO:
@@ -160,9 +164,11 @@ class instance_ruby_sanctum : public InstanceMapScript
                         return TwilightHalionGUID;
                     case NPC_ORB_CARRIER:
                         return OrbCarrierGUID;
-                    
+
                     case GO_FLAME_RING:
                         return FlameRingGUID;
+                    case DATA_ORB_ROTATION_FOCUS:
+                        return OrbRotationGUID;
                 }
 
                 return 0;
@@ -266,6 +272,7 @@ class instance_ruby_sanctum : public InstanceMapScript
             uint64 HalionControllerGUID;
             uint64 OrbCarrierGUID;
             uint64 FlameRingGUID;
+            uint64 OrbRotationGUID;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

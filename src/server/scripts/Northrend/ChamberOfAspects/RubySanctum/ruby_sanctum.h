@@ -21,12 +21,13 @@ enum DataTypes
     DATA_HALION_INTRO2                        = 4,
     DATA_HALION_INTRO_DONE                    = 5,
     DATA_HALION                             = 6,
-    
+
     MAX_ENCOUNTERS                            = 7,
 
     // Etc
     DATA_ZARITHRIAN_SPAWN_STALKER_1         = 8,
-    DATA_ZARITHRIAN_SPAWN_STALKER_2         = 9
+    DATA_ZARITHRIAN_SPAWN_STALKER_2         = 9,
+    DATA_ORB_ROTATION_FOCUS                 = 10
 };
 
 enum SharedActions
@@ -64,7 +65,8 @@ enum CreaturesIds
     NPC_METEOR_STRIKE_FLAME                 = 40055,
     NPC_COMBUSTION                          = 40001,
     NPC_CONSUMPTION                         = 40135,
-    NPC_COMBAT_STALKER                      = 40151 // Seen in sniffs but not used, so no wonder.
+    NPC_COMBAT_STALKER                      = 40151, // Seen in sniffs but not used, so no wonder.
+    NPC_ROTATION_FOCUS                      = 40091
 };
 
 enum GameObjectsIds
