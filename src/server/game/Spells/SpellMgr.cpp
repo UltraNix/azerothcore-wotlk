@@ -8141,7 +8141,7 @@ void SpellMgr::LoadDbcDataCorrections()
                     break;
                     //! Freya
                 case 62716: // Growth of nature 25
-                    spellInfo->EffectBasePoints[EFFECT_0] = 24;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 29;
                     break;
                 case 65584: // Growth of nature 10
                     spellInfo->EffectBasePoints[EFFECT_0] = 30;
