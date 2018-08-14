@@ -6,7 +6,7 @@ UPDATE `creature_template` SET `health_mod` = @STEELBREAKER_25_BASE + (@STEELBRE
 SET @THORIM_25:= 33147;
 SET @THORIM_25_BASE:= 1500;
 
-UPDATE `creature_template` SET `health_mod` = @THORIM_25_BASE + (@THORIM_25_BASE * 0.5) WHERE `entry` = @THORIM_25;
+UPDATE `creature_template` SET `health_mod` = @THORIM_25_BASE + (@THORIM_25_BASE * 0) WHERE `entry` = @THORIM_25;
 
 SET @GENERAL_VEZAX_25:= 33449;
 SET @GENERAL_VEZAX_25_BASE:= 2191.96;

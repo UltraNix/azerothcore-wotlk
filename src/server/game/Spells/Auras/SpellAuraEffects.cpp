@@ -4325,20 +4325,6 @@ void AuraEffect::HandleAuraModIncreaseHealthPercent(AuraApplication const* aurAp
     float percent = target->GetHealthPct();
     float amount = GetAmount();
 
-    //! ulduar boost, has to be done this way, only 1 spell for both modes
-    if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && target && target->GetMap()->Is25ManRaid() && GetSpellInfo())
-    {
-        switch (GetSpellInfo()->Id)
-        {
-            case 64582:
-                amount = 40.0f;
-                break;
-            case 62565:
-                amount = -54.0f;
-                break;
-        }
-    }
-
     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_PCT, amount, apply);
 
     // Xinef: idiots, pct was rounded down and could "kill" creature by setting its health to 0 making npc zombie
@@ -6616,7 +6602,7 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
     if (GetBase()->IsPermanent() && target->GetPower(powerType) == target->GetMaxPower(powerType))
         return;
 
-    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells
     if (target->CannotRegenerateManaFromSpell(GetSpellInfo(), powerType))
         return;
 
@@ -6654,7 +6640,7 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
     if (GetBase()->IsPermanent() && target->GetPower(powerType) == target->GetMaxPower(powerType))
         return;
 
-    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells
     if (target->CannotRegenerateManaFromSpell(GetSpellInfo(), powerType))
         return;
 

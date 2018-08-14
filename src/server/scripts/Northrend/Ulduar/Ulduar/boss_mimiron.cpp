@@ -1930,8 +1930,6 @@ struct npc_ulduar_aerial_command_unitAI : public ScriptedAI
     void JustSummoned(Creature* s)
     {
         summons.Summon(s);
-        if (s->GetEntry() == NPC_BOMB_BOT && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-            s->CastSpell(s, SPELL_EMERGENCY_MODE, true);
     }
 
     void SummonedCreatureDespawn(Creature* s)
@@ -2130,9 +2128,6 @@ struct npc_ulduar_bot_summon_triggerAI : public NullCreatureAI
                 {
                     if (option < 3)
                         bot->SetInCombatWithZone();
-                    if (Creature* m = GetMimiron())
-                        if (m->AI()->GetData(1)) // hardmode
-                            bot->CastSpell(bot, SPELL_EMERGENCY_MODE, true);
                 }
 
             me->DespawnOrUnsummon(500);

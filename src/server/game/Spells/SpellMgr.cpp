@@ -7953,17 +7953,12 @@ void SpellMgr::LoadDbcDataCorrections()
             switch (spellInfo->Id)
             {
                 //! Thorim
-                case 62601: // frostbolt 25
-                case 62605: // frostnova 25
-                case 62604: // frostbolt volley 25
-                    spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
-                    break;
                 case 62470: // defeaning thunder ally damage
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
                     break;
                 //! Mimiron
                 case 64566: // Flames
-                    spellInfo->EffectBasePoints[EFFECT_0] = 11000;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 10000;
                     break;
                 case 64582: // Emergency mode
                     spellInfo->EffectBasePoints[EFFECT_0] = 30;
@@ -8146,7 +8141,7 @@ void SpellMgr::LoadDbcDataCorrections()
                     break;
                     //! Freya
                 case 62716: // Growth of nature 25
-                    spellInfo->EffectBasePoints[EFFECT_0] = 60;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 24;
                     break;
                 case 65584: // Growth of nature 10
                     spellInfo->EffectBasePoints[EFFECT_0] = 30;
