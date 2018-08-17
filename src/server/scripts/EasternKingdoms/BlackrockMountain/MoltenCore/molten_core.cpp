@@ -307,6 +307,40 @@ private:
     SummonList summons;
 };
 
+struct npc_majordomo_summonerAI : public ScriptedAI
+{
+    npc_majordomo_summonerAI(Creature* creature) : ScriptedAI(creature) 
+    { 
+        instance = creature->GetInstanceScript();
+    }
+
+    void Reset() override
+    {
+    }
+
+    void MoveInLineOfSight(Unit* who)
+    {
+        if (instance->GetBossState(BOSS_MAJORDOMO_EXECUTUS) != DONE)
+            return;
+        if (who->GetTypeId() != TYPEID_PLAYER || me->GetDistance(who) > 120.0f)
+            return;
+        if (me->FindNearestCreature(NPC_MAJORDOMO_EXECUTUS, 40.0f))
+            return;
+        if (Creature* majordomo = me->SummonCreature(NPC_MAJORDOMO_EXECUTUS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+        {
+            majordomo->setFaction(35);
+            majordomo->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+    }
+private:
+    InstanceScript* instance;
+};
+
+
 enum Firewalker
 {
     SPELL_FIREBLOSSOM_DAMAGE    = 19637,
@@ -340,5 +374,6 @@ void AddSC_molten_core()
     new CreatureAILoader<npc_core_houndAI>("npc_core_hound");
     new CreatureAILoader<npc_ancient_core_houndAI>("npc_ancient_core_hound");
     new CreatureAILoader<npc_firelordAI>("npc_firelord");
+    new CreatureAILoader<npc_majordomo_summonerAI>("npc_majordomo_summoner");
     new AuraScriptLoaderEx<spell_firewalker_fireblossom_AuraScript>("spell_firewalker_fireblossom");
 }
