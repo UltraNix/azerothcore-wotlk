@@ -661,10 +661,14 @@ public:
 ## npc_greengill_slave
 ######*/
 
-#define ENRAGE  45111
-#define ORB     45109
-#define QUESTG  11541
-#define DM      25060
+enum GreengillSlave
+{
+    SPELL_ENRAGE = 45111,
+    SPELL_ORB = 45109,
+    QUEST_DISRUPT_GREENGILL_COAST = 11541,
+    NPC_MYRMIDON = 25060,
+    NPC_FREED_GREENGILL_SLAVE = 25085
+};
 
 class npc_greengill_slave : public CreatureScript
 {
@@ -688,18 +692,27 @@ public:
             if (!player)
                 return;
 
-            if (spellInfo->Id == ORB && !me->HasAura(ENRAGE))
+            if (spellInfo->Id == SPELL_ORB && !me->HasAura(SPELL_ENRAGE))
             {
-                if (player->GetQuestStatus(QUESTG) == QUEST_STATUS_INCOMPLETE)
+                if (player->GetQuestStatus(QUEST_DISRUPT_GREENGILL_COAST) == QUEST_STATUS_INCOMPLETE)
                     DoCast(player, 45110, true);
 
-                DoCast(me, ENRAGE);
-
-                if (Creature* Myrmidon = me->FindNearestCreature(DM, 70))
+                if (Creature* freedGreengill = me->SummonCreature(NPC_FREED_GREENGILL_SLAVE, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 10000))
                 {
-                    me->AddThreat(Myrmidon, 100000.0f);
-                    AttackStart(Myrmidon);
+                    DoCast(me, SPELL_ENRAGE);
+                    freedGreengill->AI()->DoCastSelf(SPELL_ENRAGE);
+
+                    if (Creature* Myrmidon = freedGreengill->FindNearestCreature(NPC_MYRMIDON, 70))
+                    {
+                        freedGreengill->AddThreat(Myrmidon, 100000.0f);
+                        freedGreengill->AI()->AttackStart(Myrmidon);
+                    }
+                    else
+                    {
+                        freedGreengill->GetMotionMaster()->MoveFleeing(caster, 5000);
+                    }
                 }
+                me->DespawnOrUnsummon();
             }
         }
 
