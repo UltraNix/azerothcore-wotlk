@@ -520,7 +520,14 @@ static bool WrathRaids(uint32 mapId)
 
 bool Loot::IsPlayerAllowedToLoot(Player *player, WorldObject *object)
 {
-    return players_allowed_to_loot.empty() ? true : players_allowed_to_loot.find(player->GetGUID()) != players_allowed_to_loot.end();
+    if (players_allowed_to_loot.empty())
+    {
+        std::cout << "loayers allowed to loot empty\n";
+        return true;
+    }
+
+    return players_allowed_to_loot.find(player->GetGUID()) != players_allowed_to_loot.end();
+    //return players_allowed_to_loot.empty() ? true : players_allowed_to_loot.find(player->GetGUID()) != players_allowed_to_loot.end();
 }
 
 void Loot::setCreatureGUID(Creature *pCreature)

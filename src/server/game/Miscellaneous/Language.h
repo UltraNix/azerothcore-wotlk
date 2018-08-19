@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -775,7 +775,7 @@ enum TrinityStrings
     LANG_NPCINFO_SPELLCLICK             = 840,
     LANG_NPCINFO_MAILBOX                = 841,
     LANG_NPCINFO_PLAYER_VEHICLE         = 842,
-    
+
     // Room for in-game strings           843-999 not used
 
     // Level 4 (CLI only commands)
@@ -1147,6 +1147,8 @@ enum TrinityStrings
     LANG_SERVER_RECORD_DIFF                 = 11004,
     LANG_SUNWELLCHEAT_DOS                   = 11005,
     LANG_SUNWELLCHEAT_GOLD                  = 11006,
+    LANG_SUNWELL_ML_LOOT_CHEAT              = 11035,
+    LANG_SUWNELL_GL_LOOT_CHEAT              = 11036,
     // Not used 11007 - 11012
     LANG_NINJA_FOUND                        = 11012,
     LANG_BLIZZLIKE_ON                       = 11013,
