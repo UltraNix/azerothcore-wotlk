@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -42,7 +42,6 @@
 #include "MapManager.h"
 #include "UpdateFieldFlags.h"
 #include "Chat.h"
-#include "Language.h"
 
 Roll::Roll(uint64 _guid, LootItem const& li) : itemGUID(_guid), itemid(li.itemid),
 itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix), itemCount(li.count),
@@ -1095,15 +1094,6 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
                 Player* member = itr->GetSource();
                 if (!member)
                     continue;
-
-                //! Just a temp fix till we rewrite loot handling
-                //! which will happen on TBC realm or MoP realm and will be ported back into Wotlk
-                if (member->HasPendingBind())
-                {
-                    sWorld->SendGMText(LANG_SUWNELL_GL_LOOT_CHEAT, member->GetName().c_str());
-                    continue;
-                }
-
                 if (member->IsAtGroupRewardDistance(pLootedObject))
                 {
                     if (i->AllowedForPlayer(member) && loot->IsPlayerAllowedToLoot(member, pLootedObject))

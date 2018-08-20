@@ -32,7 +32,6 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "InstanceScript.h"
-#include "Language.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 {
@@ -422,14 +421,6 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     if (!target)
     {
         _player->SendLootError(lootguid, LOOT_ERROR_PLAYER_NOT_FOUND);
-        return;
-    }
-
-    if (target->HasPendingBind())
-    {
-        _player->SendLootError(lootguid, LOOT_ERROR_DIDNT_KILL);
-        _player->SendLootRelease(lootguid);
-        sWorld->SendGMText(LANG_SUNWELL_ML_LOOT_CHEAT, _player->GetName().c_str(), target->GetName().c_str());
         return;
     }
 
