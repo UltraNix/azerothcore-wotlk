@@ -16594,19 +16594,13 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         if (lr && lr->IsInMap(creature))
             player = creature->GetLootRecipient();
         else if (Group* lrg = creature->GetLootRecipientGroup())
-        {
             for (GroupReference* itr = lrg->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
                 if (Player* member = itr->GetSource())
-                {
                     if (member->IsAtGroupRewardDistance(creature))
                     {
                         player = member;
                         break;
                     }
-                }
-            }
-        }
     }
 
     // Exploit fix

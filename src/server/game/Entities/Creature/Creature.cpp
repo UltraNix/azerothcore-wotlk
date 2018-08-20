@@ -996,12 +996,12 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
 
     if (!unit)
     {
+        loot.RemoveSavedLootFromDB();
+
         m_lootRecipient = 0;
-        m_lootRecipientGroup = 0;
         m_playersAllowedToLoot.clear();
 
-        loot.RemoveSavedLootFromDB();
-        loot.SetLootRecipients(m_playersAllowedToLoot);
+        m_lootRecipientGroup = 0;
         RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE|UNIT_DYNFLAG_TAPPED);
         return;
     }
@@ -1028,11 +1028,9 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
                 {
                     Map::PlayerList const &PlayerList = map->GetPlayers();
                     for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
-                    {
                         if (Player* i_pl = i->GetSource())
                             if (i_pl->GetGroup() == player->GetGroup())
                                 m_playersAllowedToLoot.insert(i_pl->GetGUID());
-                    }
                 }
             }
         }
@@ -1045,7 +1043,6 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
             m_playersAllowedToLoot.insert(player->GetGUID());
     }
 
-    loot.SetLootRecipients(m_playersAllowedToLoot);
     SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
 }
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -325,7 +325,7 @@ struct Loot
     uint8 unlootedCount;
     uint64 roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     LootType loot_type;                                     // required for achievement system
-
+    
     // GUIDLow of container that holds this loot (item_instance.entry), set for items that can be looted
     uint32 containerId;
 
@@ -387,7 +387,6 @@ struct Loot
     void setItemLooted(LootItem *pLootItem, Player* looter);
     void removeItemFromSavedLoot(LootItem *pLootItem);
 
-    void SetLootRecipients(std::set<uint64> & players);
     void setCreatureGUID(Creature *pCreature);
     void setGameobjectGUID(GameObject *pGameobject);
 
