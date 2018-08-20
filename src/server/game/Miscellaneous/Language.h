@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -775,7 +775,7 @@ enum TrinityStrings
     LANG_NPCINFO_SPELLCLICK             = 840,
     LANG_NPCINFO_MAILBOX                = 841,
     LANG_NPCINFO_PLAYER_VEHICLE         = 842,
-    
+
     // Room for in-game strings           843-999 not used
 
     // Level 4 (CLI only commands)
@@ -1171,6 +1171,7 @@ enum TrinityStrings
     LANG_SEND_PREMIUM_ACTIVE                = 11032,
     LANG_SEND_AUTOINVITE_PL                 = 11033,
     LANG_SEND_AUTOINVITE_EN                 = 11034,
+    LANG_SUNWELL_LOOT_CHEAT                 = 11035, // Master looter tried to give target an item and that target has instance bind pending right now - possible cheater
 
     //                                      = 10500,
     //                                      = 10501,

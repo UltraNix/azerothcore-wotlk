@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1094,8 +1094,13 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
                 Player* member = itr->GetSource();
                 if (!member)
                     continue;
+
                 if (member->IsAtGroupRewardDistance(pLootedObject))
                 {
+                    //if (member->HasPendingBind())
+                        //! We do not have to skip this player, he will not pass IsPlayerAllowedToLoot
+                        //sLog->outCheat("GroupLoot: Player %s has pending instance bind during loot distribution.", member->GetName().c_str());
+
                     if (i->AllowedForPlayer(member) && loot->IsPlayerAllowedToLoot(member, pLootedObject))
                     {
                         r->totalPlayersRolling++;
@@ -1389,7 +1394,8 @@ void Group::MasterLoot(Loot* loot, WorldObject* pLootedObject)
         if (!looter->IsInWorld())
             continue;
 
-        if (looter->IsAtGroupRewardDistance(pLootedObject))
+        //if (looter->IsAtGroupRewardDistance(pLootedObject))
+        if (loot->IsPlayerAllowedToLoot(looter, nullptr))
         {
             data << uint64(looter->GetGUID());
             ++real_count;
@@ -1401,7 +1407,8 @@ void Group::MasterLoot(Loot* loot, WorldObject* pLootedObject)
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* looter = itr->GetSource();
-        if (looter->IsAtGroupRewardDistance(pLootedObject))
+        //if (looter->IsAtGroupRewardDistance(pLootedObject))
+        if (loot->IsPlayerAllowedToLoot(looter, nullptr))
             looter->GetSession()->SendPacket(&data);
     }
 }

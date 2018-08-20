@@ -32,6 +32,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "InstanceScript.h"
+#include "Language.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 {
@@ -464,6 +465,22 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     if (slotid >= loot->items.size() + loot->quest_items.size())
     {
         sLog->outDebug(LOG_FILTER_LOOT, "MasterLootItem: Player %s might be using a hack! (slot %d, size %lu)", GetPlayer()->GetName().c_str(), slotid, (unsigned long)loot->items.size());
+        return;
+    }
+
+    if (target->HasPendingBind())
+    {
+        _player->SendLootRelease(lootguid);
+        _player->SendLootError(lootguid, LOOT_ERROR_DIDNT_KILL);
+        sWorld->SendGMText(LANG_SUNWELL_LOOT_CHEAT, _player->GetName().c_str(), target->GetName().c_str());
+        return;
+    }
+
+    if (!loot->IsPlayerAllowedToLoot(target, nullptr))
+    {
+        _player->SendLootRelease(lootguid);
+        _player->SendLootError(lootguid, LOOT_ERROR_DIDNT_KILL);
+        sLog->outDebug(LOG_FILTER_LOOT, "MasterLootItem: Player (%s) tried to give an item to Player (%s), but he is not eligible for that item.", _player->GetName().c_str(), target->GetName().c_str());
         return;
     }
 
