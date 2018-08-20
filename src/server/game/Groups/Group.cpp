@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1094,6 +1094,10 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
                 Player* member = itr->GetSource();
                 if (!member)
                     continue;
+
+                if (member->HasPendingBind())
+                    continue;
+
                 if (member->IsAtGroupRewardDistance(pLootedObject))
                 {
                     if (i->AllowedForPlayer(member) && loot->IsPlayerAllowedToLoot(member, pLootedObject))
@@ -1389,6 +1393,9 @@ void Group::MasterLoot(Loot* loot, WorldObject* pLootedObject)
         if (!looter->IsInWorld())
             continue;
 
+        if (looter->HasPendingBind())
+            continue;
+
         if (looter->IsAtGroupRewardDistance(pLootedObject))
         {
             data << uint64(looter->GetGUID());
@@ -1401,6 +1408,13 @@ void Group::MasterLoot(Loot* loot, WorldObject* pLootedObject)
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* looter = itr->GetSource();
+
+        if (!looter->IsInWorld())
+            continue;
+
+        if (looter->HasPendingBind())
+            continue;
+
         if (looter->IsAtGroupRewardDistance(pLootedObject))
             looter->GetSession()->SendPacket(&data);
     }
