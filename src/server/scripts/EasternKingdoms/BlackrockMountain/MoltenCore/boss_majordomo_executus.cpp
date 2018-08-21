@@ -227,11 +227,7 @@ struct boss_majordomoAI : public BossAI
                         events.ScheduleEvent(EVENT_TELE_TO_RAGNAROS_EFFECT, 1000);
                         break;
                     case EVENT_TELE_TO_RAGNAROS_EFFECT:
-                        if (Map* map = me->GetMap())
-                            map->LoadGrid(854.16f, -818.87f);
-                        me->setActive(true);
-                        DoCastSelf(SPELL_TELEPORT_EFFECT, true);
-                        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        me->DespawnOrUnsummon();                        
                         break;
                     case EVENT_RAG_SUMMON_1:
                         me->setActive(false);

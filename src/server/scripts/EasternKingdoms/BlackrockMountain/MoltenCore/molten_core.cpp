@@ -312,32 +312,35 @@ struct npc_majordomo_summonerAI : public ScriptedAI
     npc_majordomo_summonerAI(Creature* creature) : ScriptedAI(creature) 
     { 
         instance = creature->GetInstanceScript();
+        summoned = false;
     }
 
-    void Reset() override
-    {
-    }
+    void Reset() override {}
 
     void MoveInLineOfSight(Unit* who)
     {
+        if (summoned)
+            return;
         if (instance->GetBossState(BOSS_MAJORDOMO_EXECUTUS) != DONE)
             return;
         if (who->GetTypeId() != TYPEID_PLAYER || me->GetDistance(who) > 120.0f)
             return;
-        if (me->FindNearestCreature(NPC_MAJORDOMO_EXECUTUS, 40.0f))
+        if (me->FindNearestCreature(NPC_MAJORDOMO_EXECUTUS, 100.0f))
             return;
-        if (Creature* majordomo = me->SummonCreature(NPC_MAJORDOMO_EXECUTUS, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN))
+        if (Creature* majordomo = me->SummonCreature(NPC_MAJORDOMO_EXECUTUS, 847.103f, -816.153f, -229.775f, 4.344f, TEMPSUMMON_CORPSE_DESPAWN))
         {
             majordomo->setFaction(35);
             majordomo->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            majordomo->setActive(true);
+            summoned = true;
         }
     }
 
-    void UpdateAI(uint32 diff) override
-    {
-    }
+    void UpdateAI(uint32 diff) override  {}
+
 private:
     InstanceScript* instance;
+    bool summoned;
 };
 
 
