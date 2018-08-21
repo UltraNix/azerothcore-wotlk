@@ -475,25 +475,8 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
 
         if (_events.ExecuteEvent() == EVENT_PROFOUND_DARKNESS)
         {
-            // boosted
-            if (instance)
-            {
-                if (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-                {
-                    if (auto vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
-                    {
-                        CustomSpellValues val;
-                        val.AddSpellMod(SPELLVALUE_BASE_POINT0, vezax->GetMaxHealth() * 0.005);
-                        vezax->CastCustomSpell(22806, val, vezax, TRIGGERED_FULL_MASK);
-                    }
-                }
-            }
-
             DoCastSelf(SPELL_PROFOUND_DARKNESS, true);
-            if (Is25ManRaid() && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-                _events.Repeat(1.2s);
-            else
-                _events.Repeat(2s);
+            _events.Repeat(2s);
         }
 
         DoMeleeAttackIfReady();

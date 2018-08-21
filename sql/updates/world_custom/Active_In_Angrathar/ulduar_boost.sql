@@ -13,8 +13,8 @@ SET @GENERAL_VEZAX_25_BASE:= 2191.96;
 SET @ANIMUS_25:= 34152;
 SET @ANIMUS_25_BASE:= 996.82;
 
-UPDATE `creature_template` SET `health_mod` = @GENERAL_VEZAX_25_BASE + (@GENERAL_VEZAX_25_BASE * 0.40) WHERE `entry` = @GENERAL_VEZAX_25;
-UPDATE `creature_template` SET `health_mod` = @ANIMUS_25_BASE + (@ANIMUS_25_BASE * 0.5) WHERE `entry` = @ANIMUS_25;
+UPDATE `creature_template` SET `health_mod` = @GENERAL_VEZAX_25_BASE + (@GENERAL_VEZAX_25_BASE * 0) WHERE `entry` = @GENERAL_VEZAX_25;
+UPDATE `creature_template` SET `health_mod` = @ANIMUS_25_BASE + (@ANIMUS_25_BASE * 0) WHERE `entry` = @ANIMUS_25;
 
 SET @COLLAPSING_STAR_25:= 34215;
 SET @COLLAPSING_STAR_25_BASE:= 14;
