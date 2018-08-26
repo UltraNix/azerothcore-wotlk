@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -215,6 +215,21 @@ public:
         stmt->setUInt32(1, delInfo.accountId);
         stmt->setUInt32(2, delInfo.lowGuid);
         CharacterDatabase.Execute(stmt);
+
+        PreparedStatement* nameStmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_NAME_DATA);
+        nameStmt->setUInt32(0, delInfo.lowGuid);
+        PreparedQueryResult result = CharacterDatabase.Query(nameStmt);
+
+        if (result)
+        {
+            Field* field = result->Fetch();
+
+            uint8 gender = field[2].GetUInt8();
+            uint8 race = field[0].GetUInt8();
+            uint8 playerClass = field[1].GetUInt8();
+            uint8 level = field[3].GetUInt8();
+            sWorld->AddGlobalPlayerData(delInfo.lowGuid, delInfo.accountId, nameReserved ? "Default" : delInfo.name, gender, race, playerClass, level, 0, 0);
+        }
     }
 
     /**
