@@ -149,7 +149,10 @@ struct boss_majordomoAI : public BossAI
         if (me->movespline->Finalized())
             me->SetFacingTo(5.2f);
         if (id == POINT_DEFEAT && type == POINT_MOTION_TYPE)
+        {
             events.ScheduleEvent(EVENT_DEFEAT_1, 1);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
     }
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damagetype*/, SpellSchoolMask /*spellschoolmask*/) override
