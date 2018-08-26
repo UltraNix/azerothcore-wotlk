@@ -137,6 +137,7 @@ struct boss_majordomoAI : public BossAI
                     me->setFaction(35);
                     _EnterEvadeMode();
                     me->GetMotionMaster()->MovePoint(1, me->GetHomePosition(), false);
+                    me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     break;
                 default:
                     break;
