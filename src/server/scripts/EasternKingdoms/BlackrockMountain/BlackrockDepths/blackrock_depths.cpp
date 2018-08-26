@@ -727,6 +727,54 @@ public:
     }
 };
 
+enum Nagmanra
+{
+    TYPE_NAGMANRA    = 1,
+    DATA_NAGMANRA    = 1,
+    SAY_LINE_0       = 0
+};
+
+struct npc_nagmanraAI : public CreatureAI
+{
+    npc_nagmanraAI(Creature* creature) : CreatureAI(creature)
+    {
+        instance = creature->GetInstanceScript();
+    }
+
+    InstanceScript* instance;
+    EventMap events;
+
+    void Reset() override
+    {
+        events.Reset();
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+    }
+
+    void SetData(uint32 type, uint32 data)
+    {
+        if (type == TYPE_NAGMANRA && data == DATA_NAGMANRA)
+            Talk(SAY_LINE_0);
+    }
+
+    void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) override
+    {
+        if (!me->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
+            return;
+        player->CLOSE_GOSSIP_MENU();
+        if (GameObject* go = instance->instance->GetGameObject(instance->GetData64(DATA_GO_BAR_DOOR)))
+            go->SetGoState((GOState)2);
+        if (Creature* tmp = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PHALANX)))
+            tmp->DespawnOrUnsummon();
+        if (Creature* rocknot = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ROCKNOT)))
+            rocknot->DespawnOrUnsummon();
+        me->DespawnOrUnsummon();
+    }
+};
+
+
 void AddSC_blackrock_depths()
 {
     new go_shadowforge_brazier();
@@ -736,4 +784,5 @@ void AddSC_blackrock_depths()
     new npc_lokhtos_darkbargainer();
     new npc_rocknot();
     new npc_commander_gorshak();
+    new CreatureAILoader<npc_nagmanraAI>("npc_nagmanra");
 }

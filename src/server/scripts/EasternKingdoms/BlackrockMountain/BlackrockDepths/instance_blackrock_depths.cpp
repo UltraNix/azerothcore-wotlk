@@ -38,6 +38,7 @@ enum Creatures
     NPC_DOOMREL             = 9039,
     NPC_MAGMUS              = 9938,
     NPC_MOIRA               = 8929,
+    NPC_ROCKNOT             = 9503,
 
     NPC_WATCHMAN_DOOMGRIP    = 9476,
 };
@@ -88,6 +89,7 @@ public:
         uint64 PhalanxGUID;
         uint64 MagmusGUID;
         uint64 MoiraGUID;
+        uint64 RocknotGUID;
 
         uint64 GoArena1GUID;
         uint64 GoArena2GUID;
@@ -127,6 +129,7 @@ public:
             PhalanxGUID = 0;
             MagmusGUID = 0;
             MoiraGUID = 0;
+            RocknotGUID = 0;
 
             GoArena1GUID = 0;
             GoArena2GUID = 0;
@@ -168,6 +171,7 @@ public:
             case NPC_EMPEROR: EmperorGUID = creature->GetGUID(); break;
             case NPC_PHALANX: PhalanxGUID = creature->GetGUID(); break;
             case NPC_MOIRA: MoiraGUID = creature->GetGUID(); break;
+            case NPC_ROCKNOT: RocknotGUID = creature->GetGUID(); break;
             case NPC_DOOMREL: TombBossGUIDs[0] = creature->GetGUID(); break;
             case NPC_DOPEREL: TombBossGUIDs[1] = creature->GetGUID(); break;
             case NPC_HATEREL: TombBossGUIDs[2] = creature->GetGUID(); break;
@@ -333,6 +337,8 @@ public:
                 return PhalanxGUID;
             case DATA_MOIRA:
                 return MoiraGUID;
+            case DATA_ROCKNOT:
+                return RocknotGUID;
             case DATA_ARENA1:
                 return GoArena1GUID;
             case DATA_ARENA2:
