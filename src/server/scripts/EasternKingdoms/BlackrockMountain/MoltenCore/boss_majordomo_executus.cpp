@@ -255,10 +255,13 @@ struct boss_majordomoAI : public BossAI
                         events.ScheduleEvent(EVENT_RAG_SUMMON_4, 8000);
                         break;
                     case EVENT_RAG_SUMMON_4:
-                        instance->instance->SummonCreature(NPC_RAGNAROS, RagnarosSummonPos, nullptr, 172800000);
-                        if (Creature* ragnaros = _GetRagnaros())
-                            ragnaros->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-                        events.ScheduleEvent(EVENT_RAG_SUMMON_5, 8700);
+                        if (instance->GetBossState(BOSS_RAGNAROS) != DONE)
+                        {
+                            instance->instance->SummonCreature(NPC_RAGNAROS, RagnarosSummonPos, nullptr, 172800000);
+                            if (Creature* ragnaros = _GetRagnaros())
+                                ragnaros->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+                            events.ScheduleEvent(EVENT_RAG_SUMMON_5, 8700);
+                        }
                         break;
                     case EVENT_RAG_SUMMON_5:
                         if (Creature* ragnaros = _GetRagnaros())

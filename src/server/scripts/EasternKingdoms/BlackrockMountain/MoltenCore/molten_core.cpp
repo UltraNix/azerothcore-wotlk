@@ -323,6 +323,8 @@ struct npc_majordomo_summonerAI : public ScriptedAI
             return;
         if (instance->GetBossState(BOSS_MAJORDOMO_EXECUTUS) != DONE)
             return;
+        if (instance->GetBossState(BOSS_RAGNAROS) == DONE)
+            return;
         if (who->GetTypeId() != TYPEID_PLAYER || me->GetDistance(who) > 120.0f)
             return;
         if (me->FindNearestCreature(NPC_MAJORDOMO_EXECUTUS, 150.0f))
