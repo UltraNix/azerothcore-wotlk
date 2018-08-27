@@ -37,7 +37,7 @@ EndContentData */
 #include "SpellScript.h"
 #include "Player.h"
 #include "WorldSession.h"
-
+#include "GameObjectAI.h"
 /*######
 ## npc_lady_jaina_proudmoore
 ######*/
@@ -415,6 +415,32 @@ class spell_energize_aoe : public SpellScriptLoader
         }
 };
 
+enum ShipwrecDebris
+{
+    SPELL_SALVAGE_WRECKAGE    = 42287,
+    GO_BURNING_WRECKAGE       = 186278
+};
+struct go_shipwreck_debrisAI : public GameObjectAI
+{
+public:
+    go_shipwreck_debrisAI(GameObject* go) : GameObjectAI(go) { }
+
+    void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
+    {
+        if (!caster)
+            return;
+        if (caster->GetTypeId() != TYPEID_PLAYER)
+            return;
+        if (spellInfo->Id != SPELL_SALVAGE_WRECKAGE)
+            return;
+
+        go->SetRespawnTime(30);
+        if (GameObject* wreckage = go->FindNearestGameObject(GO_BURNING_WRECKAGE, 5.f))
+            wreckage->SetRespawnTime(30);
+        return;
+    }
+};
+
 void AddSC_dustwallow_marsh()
 {
     new npc_lady_jaina_proudmoore();
@@ -424,4 +450,5 @@ void AddSC_dustwallow_marsh()
     new spell_ooze_zap();
     new spell_ooze_zap_channel_end();
     new spell_energize_aoe();
+    new GameObjectAILoader<go_shipwreck_debrisAI>("go_shipwreck_debris");
 }
