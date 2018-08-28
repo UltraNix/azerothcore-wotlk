@@ -490,6 +490,7 @@ struct boss_razorscaleAI : public BossAI
                         commander->AI()->DoAction(ACTION_GROUND_PHASE);
                     events.ScheduleEvent(EVENT_FLAME_BREATH, Seconds(30), 0, PHASE_GROUND);
                 }
+                me->SetFacingTo(RazorscaleLand.GetOrientation());
                 break;
             case POINT_RAZORSCALE_TAKEOFF:
                 me->StopMovingOnCurrentPos();
@@ -694,7 +695,7 @@ struct boss_razorscaleAI : public BossAI
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAurasDueToSpell(SPELL_STUN_SELF);
-                    me->SetOrientation(1.5603f);
+                    me->SetFacingTo(RazorscaleLand.GetOrientation());
                     Talk(EMOTE_BREATH, me);
                     DoCast(FLAME_BREATH);
                     events.ScheduleEvent(EVENT_WING_BUFFET, Seconds(2), 0, PHASE_GROUND);
@@ -1454,6 +1455,7 @@ struct npc_darkrune_guardianAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        me->LowerPlayerDamageReq(me->GetMaxHealth());
         _events.ScheduleEvent(EVENT_STORMSTRIKE, Seconds(23));
     }
 
