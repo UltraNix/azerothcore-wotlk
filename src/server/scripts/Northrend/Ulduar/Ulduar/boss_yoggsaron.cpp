@@ -388,13 +388,6 @@ public:
             }
             else if (cr->GetEntry() == NPC_SANITY_WELL)
                 cr->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_SCALE, true);
-
-            if (_aloneInTheDarknessBoost && (cr->GetEntry() == NPC_CRUSHER_TENTACLE || cr->GetEntry() == NPC_GUARDIAN_OF_YS))
-            {
-                auto maxHealth = cr->GetMaxHealth();
-                cr->SetMaxHealth(maxHealth + (maxHealth * 0.2f));
-                cr->SetHealth(cr->GetMaxHealth());
-            }
         }
 
         void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
@@ -1232,13 +1225,6 @@ public:
         void JustSummoned(Creature* cr)
         {
             summons.Summon(cr);
-
-            if (cr->GetEntry() == NPC_IMMORTAL_GUARDIAN && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && Is25ManRaid() && _zeroKeepers)
-            {
-                auto maxHealth = cr->GetMaxHealth();
-                cr->SetMaxHealth(maxHealth + (maxHealth * 0.2f));
-                cr->SetHealth(cr->GetMaxHealth());
-            }
         }
 
         void SetData(uint32 type, uint32 value) override
