@@ -546,7 +546,7 @@ public:
             SaveKeepers();
 
             events.ScheduleEvent(EVENT_SARA_P1_DOORS_CLOSE, 15000, 0, EVENT_PHASE_ONE);
-            events.ScheduleEvent(EVENT_SARA_P1_BERSERK, (!_keeperCount && sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && Is25ManRaid()) ? 10min : 15min);
+            events.ScheduleEvent(EVENT_SARA_P1_BERSERK, 15min);
             events.ScheduleEvent(EVENT_SARA_P1_SUMMON, 0, 0, EVENT_PHASE_ONE);
             events.SetPhase(EVENT_PHASE_ONE);
 
@@ -769,9 +769,6 @@ public:
                     {
                         if (_aloneInTheDarknessBoost)
                         {
-                            auto maxHealth = cr->GetMaxHealth();
-                            cr->SetMaxHealth(maxHealth + (maxHealth * 0.2f));
-                            cr->SetHealth(cr->GetMaxHealth());
                             if (cr->IsAIEnabled)
                                 cr->AI()->SetData(DATA_SET_ZERO_KEEPERS, DATA_SET_ZERO_KEEPERS);
                         }
@@ -882,15 +879,7 @@ public:
                     events.RescheduleEvent(EVENT_SARA_P2_SPAWN_START_TENTACLES, 500, 0, EVENT_PHASE_TWO);
 
                     // Spawn Brain!
-                    if (Creature* brain = me->SummonCreature(NPC_BRAIN_OF_YOGG_SARON, 1981.3f, -25.43f, 265))
-                    {
-                        if (_aloneInTheDarknessBoost)
-                        {
-                            auto maxHealth = brain->GetMaxHealth();
-                            brain->SetMaxHealth(maxHealth + (maxHealth * 0.2f));
-                            brain->SetHealth(brain->GetMaxHealth());
-                        }
-                    }
+                    me->SummonCreature(NPC_BRAIN_OF_YOGG_SARON, 1981.3f, -25.43f, 265);
                     break;
                 }
                 case EVENT_SARA_P2_MALADY:
