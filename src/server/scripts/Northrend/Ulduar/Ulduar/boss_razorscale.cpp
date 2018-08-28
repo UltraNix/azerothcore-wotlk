@@ -1769,7 +1769,10 @@ class spell_razorscale_flame_breath_SpellScript : public SpellScript
             return;
 
         if (GetHitDamage() >= int32(target->GetHealth()))
+        {
             target->AI()->SetData(DATA_IRON_DWARF_MEDIUM_RARE, 1);
+            target->LowerPlayerDamageReq(GetHitDamage());
+        }
     }
 
     void FilterTargets(std::list<WorldObject*>& targets)
