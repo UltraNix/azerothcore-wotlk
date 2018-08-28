@@ -694,6 +694,7 @@ struct boss_razorscaleAI : public BossAI
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAurasDueToSpell(SPELL_STUN_SELF);
+                    me->SetOrientation(1.5603f);
                     Talk(EMOTE_BREATH, me);
                     DoCast(FLAME_BREATH);
                     events.ScheduleEvent(EVENT_WING_BUFFET, Seconds(2), 0, PHASE_GROUND);
