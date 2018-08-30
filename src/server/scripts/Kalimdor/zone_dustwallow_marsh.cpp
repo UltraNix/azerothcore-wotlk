@@ -418,7 +418,8 @@ class spell_energize_aoe : public SpellScriptLoader
 enum ShipwrecDebris
 {
     SPELL_SALVAGE_WRECKAGE    = 42287,
-    GO_BURNING_WRECKAGE       = 186278
+    GO_BURNING_WRECKAGE       = 186278,
+    ITEM_SALVAGED_STRONGBOX   = 33041
 };
 struct go_shipwreck_debrisAI : public GameObjectAI
 {
@@ -434,6 +435,7 @@ public:
         if (spellInfo->Id != SPELL_SALVAGE_WRECKAGE)
             return;
 
+        caster->ToPlayer()->AddItem(ITEM_SALVAGED_STRONGBOX, 1);
         go->SetRespawnTime(30);
         if (GameObject* wreckage = go->FindNearestGameObject(GO_BURNING_WRECKAGE, 5.f))
             wreckage->SetRespawnTime(30);
