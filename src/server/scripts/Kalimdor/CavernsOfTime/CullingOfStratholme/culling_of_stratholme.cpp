@@ -1172,7 +1172,7 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         me->CastSpell(target, DUNGEON_MODE(SPELL_ARTHAS_EXORCISM_N, SPELL_ARTHAS_EXORCISM_H), false);
 
-                    combatEvents.RepeatEvent(7300);
+                    combatEvents.RepeatEvent(15000);
                     break;
                 case EVENT_COMBAT_HEALTH_CHECK:
                     if (HealthBelowPct(40))
