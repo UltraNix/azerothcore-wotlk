@@ -465,7 +465,7 @@ public:
                 ScriptedAI::MoveInLineOfSight(who);
             else if (_isActive && who->GetTypeId() == TYPEID_PLAYER)
             {
-                if ((who->GetPositionX() < me->GetPositionX() || who->GetPositionY() < -220.0f) && me->GetDistance2d(who) < 40)
+                if ((who->GetPositionX() > me->GetPositionX() || who->GetPositionY() < -220.0f) && me->GetDistance2d(who) < 30.0f)
                 {
                     _isActive = false;
                     _attackGUID = who->GetGUID();
