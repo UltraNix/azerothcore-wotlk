@@ -130,6 +130,13 @@ class boss_gal_darah : public CreatureScript
             {
                 Talk(SAY_DEATH);
                 BossAI::JustDied(killer);
+
+                Map::PlayerList const &players = me->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator i = players.begin(); i != players.end(); ++i)
+                {
+                    if (Player* pPlayer = i->GetSource())
+                        pPlayer->RemoveAurasDueToSpell(SPELL_PUNCTURE);
+                }
             }
 
             void KilledUnit(Unit*)
