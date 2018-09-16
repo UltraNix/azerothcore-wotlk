@@ -45,6 +45,7 @@ EndContentData */
 #include "SpellScript.h"
 #include "PassiveAI.h"
 #include "SpellAuras.h"
+#include "Group.h"
 
 // Ours
 enum eDrakeHunt
@@ -504,7 +505,17 @@ public:
 
                         case 6:
                             if (Player* player = GetPlayerForEscort())
-                                player->AreaExploredOrEventHappens(QUEST_ESCAPE_WINTERFIN_CAVERNS);
+                            {
+                                if (Group* group = player->GetGroup())
+                                {
+                                    for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                                        if (Player* member = itr->GetSource())
+                                            if (member->IsWithinDistInMap(player, 20.0f) && !member->isDead())
+                                                player->AreaExploredOrEventHappens(QUEST_ESCAPE_WINTERFIN_CAVERNS);
+                                }
+                                else
+                                    player->AreaExploredOrEventHappens(QUEST_ESCAPE_WINTERFIN_CAVERNS);
+                            }
                             IntroPhase = 7;
                             IntroTimer = 2500;
                             break;
