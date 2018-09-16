@@ -759,6 +759,9 @@ struct npc_nagmanraAI : public CreatureAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (events.Empty())
+            return;
+
         events.Update(diff);
 
         while (uint32 eventId = events.ExecuteEvent())
@@ -766,12 +769,10 @@ struct npc_nagmanraAI : public CreatureAI
             switch (eventId)
             {
                 case EVENT_CRAFT_POTION:
-                    printf("Craft potions\n");
                     me->HandleEmoteCommand(69);
                     events.ScheduleEvent(EVENT_APPROACH_ROCKNOT, 3s);
                     break;
                 case EVENT_APPROACH_ROCKNOT:
-                    printf("Approach\n");
                     me->GetMotionMaster()->MovePoint(1, 888.2f, -197.77f, -43.7f, 0.0f);
                     events.ScheduleEvent(EVENT_CHARM_ROCKNOT, 5s);
                     break;
