@@ -729,9 +729,16 @@ public:
 
 enum Nagmanra
 {
-    TYPE_NAGMANRA    = 1,
-    DATA_NAGMANRA    = 1,
-    SAY_LINE_0       = 0
+    SPELL_ROCKNOT_NAGMANA   = 15064,
+    SPELL_NAGMANA_DESPAWN   = 15341,
+    TYPE_NAGMANRA           = 1,
+    DATA_NAGMANRA           = 1,
+    SAY_LINE_0              = 0,
+    EVENT_CRAFT_POTION      = 1,
+    EVENT_APPROACH_ROCKNOT,
+    EVENT_CHARM_ROCKNOT,
+    EVENT_WALK_AWAY,
+    EVENT_DESPAWN
 };
 
 struct npc_nagmanraAI : public CreatureAI
@@ -739,6 +746,7 @@ struct npc_nagmanraAI : public CreatureAI
     npc_nagmanraAI(Creature* creature) : CreatureAI(creature)
     {
         instance = creature->GetInstanceScript();
+        me->GetMotionMaster()->MovePath(466130, true);
     }
 
     InstanceScript* instance;
@@ -751,6 +759,41 @@ struct npc_nagmanraAI : public CreatureAI
 
     void UpdateAI(uint32 diff) override
     {
+        events.Update(diff);
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_CRAFT_POTION:
+                    printf("Craft potions\n");
+                    me->HandleEmoteCommand(69);
+                    events.ScheduleEvent(EVENT_APPROACH_ROCKNOT, 3s);
+                    break;
+                case EVENT_APPROACH_ROCKNOT:
+                    printf("Approach\n");
+                    me->GetMotionMaster()->MovePoint(1, 888.2f, -197.77f, -43.7f, 0.0f);
+                    events.ScheduleEvent(EVENT_CHARM_ROCKNOT, 5s);
+                    break;
+                case EVENT_CHARM_ROCKNOT:
+                    DoCastSelf(SPELL_ROCKNOT_NAGMANA, true);
+                    if (Creature* rocknot = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ROCKNOT)))
+                        rocknot->CastSpell(rocknot, SPELL_ROCKNOT_NAGMANA, true);
+                    events.ScheduleEvent(EVENT_WALK_AWAY, 3s);
+                    break;
+                case EVENT_WALK_AWAY:
+                    if (Creature* rocknot = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ROCKNOT)))
+                        rocknot->GetMotionMaster()->MoveFollow(me, 3.f, 90.f);
+                    me->GetMotionMaster()->MoveRandom(30.0f);
+                    events.ScheduleEvent(EVENT_DESPAWN, 5s);
+                    break;
+                case EVENT_DESPAWN:
+                    DoCastSelf(SPELL_NAGMANA_DESPAWN, true);
+                    if (Creature* rocknot = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ROCKNOT)))
+                        rocknot->DespawnOrUnsummon();
+                    me->DespawnOrUnsummon();
+            }
+        }
     }
 
     void SetData(uint32 type, uint32 data)
@@ -768,9 +811,8 @@ struct npc_nagmanraAI : public CreatureAI
             go->SetGoState((GOState)2);
         if (Creature* tmp = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PHALANX)))
             tmp->DespawnOrUnsummon();
-        if (Creature* rocknot = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ROCKNOT)))
-            rocknot->DespawnOrUnsummon();
-        me->DespawnOrUnsummon();
+        me->GetMotionMaster()->Clear();
+        events.ScheduleEvent(EVENT_CRAFT_POTION, 0);
     }
 };
 
