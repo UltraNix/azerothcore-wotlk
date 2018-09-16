@@ -4085,7 +4085,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 50002: //Diving Helm
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_USE;
             break;
-
+        case 54647: // Spirit Burn
+            spellInfo->procChance = 20;
+            break;
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
         /////////////////////////////////////////////
