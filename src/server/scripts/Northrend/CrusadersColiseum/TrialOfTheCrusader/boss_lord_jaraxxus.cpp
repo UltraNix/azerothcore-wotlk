@@ -84,6 +84,7 @@ struct boss_jaraxxusAI : public BossAI
     void Reset() override
     {
         _Reset();
+        _fightTimer = 0;
         instance->SetData(TYPE_JARAXXUS, NOT_STARTED);
 
         // checked for safety
@@ -95,6 +96,7 @@ struct boss_jaraxxusAI : public BossAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        _fightTimer = getMSTime();
         _EnterCombat();
         events.Reset();
         events.RescheduleEvent(EVENT_SPELL_FEL_FIREBALL, 5000);
@@ -103,6 +105,8 @@ struct boss_jaraxxusAI : public BossAI
         events.RescheduleEvent(EVENT_SPELL_NETHER_POWER, urand(25000, 45000));
         events.RescheduleEvent(EVENT_SPELL_LEGION_FLAME, 30000);
         events.RescheduleEvent(EVENT_SUMMON_NETHER_PORTAL, 20000); // it schedules EVENT_SUMMON_VOLCANO
+        if (IsHeroic() && Is25ManRaid())
+            events.RescheduleEvent(EVENT_SPELL_TOUCH_OF_JARAXXUS, 10000);
 
         Talk(SAY_AGGRO);
         instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
@@ -189,7 +193,7 @@ struct boss_jaraxxusAI : public BossAI
             events.Repeat(30000);
             break;
         case EVENT_SPELL_TOUCH_OF_JARAXXUS:
-            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_LEGION_FLAME))
                 DoCast(target, SPELL_TOUCH_OF_JARAXXUS);
             events.Repeat(urand(10000, 15000));
             break;
@@ -212,7 +216,7 @@ struct boss_jaraxxusAI : public BossAI
         }
     }
 
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* killer)
     {
         std::list<Creature*> flameList;
         me->GetCreatureListWithEntryInGrid(flameList, NPC_LEGION_FLAME, 250.0f);
@@ -229,6 +233,7 @@ struct boss_jaraxxusAI : public BossAI
         Talk(SAY_DEATH);
         instance->SetData(TYPE_JARAXXUS, DONE);
         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_LEGION_FLAME);
+        CheckCreatureRecord(killer, static_cast<uint32>(60000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
     }
 
     void JustSummoned(Creature* summon) override
@@ -245,11 +250,13 @@ struct boss_jaraxxusAI : public BossAI
     }
 
     void MoveInLineOfSight(Unit* /*who*/) override {}
+private:
+    uint32 _fightTimer;
 };
 
 struct npc_fel_infernalAI : public ScriptedAI
 {
-    npc_fel_infernalAI(Creature* creature) : ScriptedAI(creature) 
+    npc_fel_infernalAI(Creature* creature) : ScriptedAI(creature)
     {
         if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
         {

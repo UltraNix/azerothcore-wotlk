@@ -141,6 +141,7 @@ struct boss_anubarak_trialAI : public BossAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         _Reset();
         me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -169,6 +170,7 @@ struct boss_anubarak_trialAI : public BossAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        _fightTimer = getMSTime();
         _EnterCombat();
         events.Reset();
         events.RescheduleEvent(EVENT_ENRAGE, 600000);
@@ -393,6 +395,8 @@ struct boss_anubarak_trialAI : public BossAI
                     (*itr).is_looted = true;
                     --me->loot.unlootedCount;
                 }
+
+        CheckCreatureRecord(plr, static_cast<uint32>(90000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
     }
 
     void KilledUnit(Unit* who) override
@@ -437,6 +441,7 @@ private:
     bool _phase3;
     uint64 _sphereGUID[6];
     uint64 _burrowGUID[4];
+    uint32 _fightTimer;
 };
 
 struct npc_swarm_scarabAI : public ScriptedAI
@@ -564,7 +569,7 @@ struct npc_frost_sphereAI : public NullCreatureAI
             51427, // pestilence rank 3
             51426, // pestilence rank 2
             50842, // pestilence rank 1
-            49271, // chain lightning rank 8 
+            49271, // chain lightning rank 8
             49270, // chain lightning rank 7
         };
 

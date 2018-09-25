@@ -61,6 +61,8 @@ public:
         uint64 GO_WebDoorGUID;
         uint64 GO_FloorGUID;
 
+        uint32 _fightTimer;
+
         bool IsValidDedicatedInsanityItem(const ItemTemplate* item)
         {
             if (!item) // should not happen, but checked in GetAverageItemLevel()
@@ -253,6 +255,9 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
+            if (type == DATA_START_FIGHT_TIMER && data == DATA_START_FIGHT_TIMER)
+                _fightTimer = getMSTime();
+
             switch( type )
             {
                 case TYPE_FAILED:
@@ -266,6 +271,7 @@ public:
                             if( Player* plr = itr->GetSource() )
                                 plr->SendUpdateWorldState(UPDATE_STATE_UI_COUNT, AttemptsLeft);
                     }
+                    _fightTimer = 0;
                     InstanceCleanup(true);
                     SaveToDB();
                     break;
@@ -384,6 +390,9 @@ public:
                         events.CancelEvent(EVENT_NORTHREND_BEASTS_ENRAGE);
                         events.RescheduleEvent(EVENT_SCENE_BEASTS_DONE, 2500);
                         SaveToDB();
+                        if (Creature* c = instance->GetCreature(NPC_BarrettGUID))
+                            if (c->IsAIEnabled)
+                                c->AI()->SetData(TYPE_NORTHREND_BEASTS_ALL, _fightTimer);
                     }
                     break;
                 case TYPE_JARAXXUS:
@@ -453,7 +462,9 @@ public:
                             if( AchievementTimer+60 >= time(nullptr) )
                                 DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_RESILIENCE_WILL_FIX_IT_CREDIT);
                             AchievementTimer = 0;
-
+                            if (Creature* c = instance->GetCreature(NPC_BarrettGUID))
+                                if (c->IsAIEnabled)
+                                    c->AI()->SetData(TYPE_FACTION_CHAMPIONS, _fightTimer);
                             SaveToDB();
                         }
                         else if( Counter == 1 )
@@ -462,6 +473,7 @@ public:
                     break;
                 case TYPE_FACTION_CHAMPIONS_START:
                     {
+                        _fightTimer = getMSTime();
                         EncounterStatus = IN_PROGRESS;
                         AchievementTimer = 0;
                         for( std::vector<uint64>::iterator itr = NPC_ChampionGUIDs.begin(); itr != NPC_ChampionGUIDs.end(); ++itr )
@@ -495,6 +507,9 @@ public:
                         events.RescheduleEvent(EVENT_SCENE_VALKYR_DEAD, 2500);
                         HandleGameObject(GO_EnterGateGUID, true);
                         SaveToDB();
+                        if (Creature* c = instance->GetCreature(NPC_BarrettGUID))
+                            if (c->IsAIEnabled)
+                                c->AI()->SetData(TYPE_VALKYR, _fightTimer);
                     }
                     break;
                 case TYPE_ANUBARAK:
@@ -531,6 +546,7 @@ public:
             switch( type )
             {
                 case TYPE_INSTANCE_PROGRESS:        return InstanceProgress;
+                case DATA_GET_FIGHT_TIMER:          return _fightTimer;
             }
             return 0;
         }
@@ -618,8 +634,8 @@ public:
                         {
                             events.RescheduleEvent(EVENT_SCENE_005, 150000);
                             events.RescheduleEvent(EVENT_SCENE_006, 340000);
-                            events.RescheduleEvent(EVENT_NORTHREND_BEASTS_ENRAGE, 520000);
                         }
+                        events.RescheduleEvent(EVENT_NORTHREND_BEASTS_ENRAGE, 900000);
                     }
                     break;
                 case EVENT_NORTHREND_BEASTS_ENRAGE:
@@ -684,7 +700,11 @@ public:
                             if( Creature* dreadscale = c->SummonCreature(NPC_DREADSCALE, Locs[LOC_BEHIND_GATE].GetPositionX(), Locs[LOC_BEHIND_GATE].GetPositionY(), Locs[LOC_BEHIND_GATE].GetPositionZ(), Locs[LOC_BEHIND_GATE].GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN) )
                                 dreadscale->GetMotionMaster()->MovePoint(0, Locs[LOC_BEHIND_GATE].GetPositionX(), Locs[LOC_BEHIND_GATE].GetPositionY()-25.0f, Locs[LOC_BEHIND_GATE].GetPositionZ());
                             if( Creature* acidmaw = c->SummonCreature(NPC_ACIDMAW, Locs[LOC_ACIDMAW].GetPositionX(), Locs[LOC_ACIDMAW].GetPositionY(), Locs[LOC_ACIDMAW].GetPositionZ(), Locs[LOC_ACIDMAW].GetOrientation(), TEMPSUMMON_MANUAL_DESPAWN) )
+                            {
+                                acidmaw->SetVisible(false);
                                 acidmaw->AddAura(53421, acidmaw);
+                                acidmaw->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            }
                         }
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_SCENE_005_2, 4000);
@@ -715,10 +735,11 @@ public:
                         if( Creature* c = instance->GetCreature(NPC_AcidmawGUID) )
                         {
                             c->SetReactState(REACT_AGGRESSIVE);
-                            c->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                            c->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                             c->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
                             if( Unit* target = c->SelectNearestTarget(200.0f) )
                             {
+                                c->SetVisible(true);
                                 c->RemoveAura(53421);
                                 c->CastSpell(c, 66947, false);
                                 c->AI()->AttackStart(target);
@@ -1566,10 +1587,18 @@ public:
                 case INSTANCE_PROGRESS_FACTION_CHAMPIONS_INTRO_DONE:
                 case INSTANCE_PROGRESS_JARAXXUS_DEAD:
                     if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
+                    {
                         c->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        if (Creature* zha = c->FindNearestCreature(35465, 250.f))
+                            zha->DespawnOrUnsummon();
+                        if (Creature* cat = c->FindNearestCreature(35610, 250.f))
+                            cat->DespawnOrUnsummon();
+                    }
                     for( std::vector<uint64>::iterator itr = NPC_ChampionGUIDs.begin(); itr != NPC_ChampionGUIDs.end(); ++itr )
                         if( Creature* c = instance->GetCreature(*itr) )
+                        {
                             c->DespawnOrUnsummon();
+                        }
                     NPC_ChampionGUIDs.clear();
                     break;
                 case INSTANCE_PROGRESS_VALKYR_INTRO_DONE:
@@ -1767,7 +1796,7 @@ public:
                         uint8 count = 0;
                         c->GetCreaturesWithEntryInRange(L, 200.0f, 34800); // find all snobolds
                         for( std::list<Creature*>::const_iterator itr = L.begin(); itr != L.end(); ++itr )
-                            if( (*itr)->GetVehicle() )
+                            if ((*itr)->IsAlive())
                                 ++count;
                         return (count >= 2);
                     }
@@ -1779,8 +1808,8 @@ public:
                         std::list<Creature*> L;
                         uint8 count = 0;
                         c->GetCreaturesWithEntryInRange(L, 200.0f, 34800); // find all snobolds
-                        for( std::list<Creature*>::const_iterator itr = L.begin(); itr != L.end(); ++itr )
-                            if( (*itr)->GetVehicle() )
+                        for (std::list<Creature*>::const_iterator itr = L.begin(); itr != L.end(); ++itr)
+                            if ((*itr)->IsAlive())
                                 ++count;
                         return (count >= 4);
                     }

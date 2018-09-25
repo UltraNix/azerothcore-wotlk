@@ -201,6 +201,79 @@ class npc_announcer_toc10 : public CreatureScript
 
             return true;
         }
+
+        struct npc_announcer_toc10_AI : public ScriptedAI
+        {
+            npc_announcer_toc10_AI(Creature* creature) : ScriptedAI(creature) { }
+
+            void EnterCombat(Unit* /*who*/) override { }
+            void MoveInLineOfSight(Unit* /*who*/) override { }
+            void AttackStart(Unit* /*who*/) override { }
+            void UpdateAI(uint32 diff) override { }
+
+            void SetData(uint32 type, uint32 value) override
+            {
+                InstanceScript* instance = me->GetInstanceScript();
+                if (!instance)
+                    return;
+
+                std::string encounterName = "";
+                uint32 entry = 0;
+                switch (type)
+                {
+                    case TYPE_NORTHREND_BEASTS_ALL:
+                    {
+                        encounterName = "Northrend Beasts";
+                        entry = static_cast<uint32>(50000 + me->GetMap()->GetDifficulty());
+                        break;
+                    }
+                    case TYPE_FACTION_CHAMPIONS:
+                    {
+                        encounterName = "Faction champions";
+                        entry = static_cast<uint32>(70000 + me->GetMap()->GetDifficulty());
+                        break;
+                    }
+                    case TYPE_VALKYR:
+                    {
+                        encounterName = "Twin Valkyrs";
+                        entry = static_cast<uint32>(80000 + me->GetMap()->GetDifficulty());
+                        break;
+                    }
+                    default:
+                        return;
+                }
+
+                Player* player = GetRandomPlayerInMap();
+                if (!player)
+                    return;
+
+                CheckCreatureRecord(player, entry, me->GetMap()->GetDifficulty(), encounterName, 1, value);
+            }
+
+            Player* GetRandomPlayerInMap()
+            {
+                Map::PlayerList const& players = me->GetMap()->GetPlayers();
+                if (players.isEmpty())
+                    return nullptr;
+
+                for (auto itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    Player* _player = itr->GetSource();
+
+                    if (!_player)
+                        continue;
+
+                    return _player;
+                }
+                return nullptr;
+            }
+
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return new npc_announcer_toc10_AI(creature);
+        }
 };
 
 void AddSC_trial_of_the_crusader()

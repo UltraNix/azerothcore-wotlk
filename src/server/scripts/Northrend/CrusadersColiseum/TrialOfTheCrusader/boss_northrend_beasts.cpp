@@ -308,6 +308,9 @@ public:
 
         void EnterCombat(Unit* /*who*/)
         {
+            if (pInstance)
+                pInstance->SetData(DATA_START_FIGHT_TIMER, DATA_START_FIGHT_TIMER);
+
             me->setActive(true);
             events.Reset();
             events.RescheduleEvent(EVENT_SPELL_IMPALE, urand(9000,10000));
@@ -436,6 +439,7 @@ public:
 
             if( pInstance )
                 pInstance->SetData(TYPE_GORMOK, DONE);
+            me->RemoveAllAuras();
         }
 
         void JustSummoned(Creature* summon)
@@ -459,7 +463,10 @@ public:
             summons.DespawnAll();
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             if( pInstance )
+            {
                 pInstance->SetData(TYPE_FAILED, 1);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SNOBOLLED);
+            }
         }
     };
 };
@@ -1077,6 +1084,14 @@ public:
                 return;
 
             pInstance->SetData(TYPE_ICEHOWL, DONE);
+
+            std::list<Creature*> snobolds;
+            me->GetCreaturesWithEntryInRange(snobolds, 200.0f, 34800); // find all snobolds
+            for (auto& creature : snobolds)
+            {
+                if (creature)
+                    creature->DespawnOrUnsummon();
+            }
 
             Player* plr = NULL;
             if( !pInstance->instance->GetPlayers().isEmpty() )

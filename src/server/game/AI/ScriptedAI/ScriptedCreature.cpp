@@ -147,7 +147,7 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
 
     if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
     {
-        if (player->GetSession()->GetSecurity() == SEC_PLAYER)
+        //if (player->GetSession()->GetSecurity() == SEC_PLAYER)
         {
             if (creatureName == "")
                 creatureName = me->GetName();
@@ -176,8 +176,8 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
                     return;
 
                 // Disable creature records for previous content.
-                //                  Naxx                   OS                     EoE
-                if (map->GetId() == 533 || map->GetId() == 615 || map->GetId() == 616)
+                //                  Naxx                   OS                     EoE                   Ulduar
+                if (map->GetId() == 533 || map->GetId() == 615 || map->GetId() == 616 || map->GetId() == 603)
                     return;
 
                 sObjectMgr->UpdateCreatureRecordData(entry, time, player, creatureName);
@@ -509,7 +509,7 @@ BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
      scheduler.SetValidator([this]
     {
         return !me->HasUnitState(UNIT_STATE_CASTING);
-    });   
+    });
 }
 
 void BossAI::_DespawnAtEvade(uint32 delayToRespawn /*= 30*/, Creature* who /*= nullptr*/)

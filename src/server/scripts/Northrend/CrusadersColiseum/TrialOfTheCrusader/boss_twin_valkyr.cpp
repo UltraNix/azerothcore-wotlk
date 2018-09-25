@@ -97,6 +97,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
         _lastSynchroHP = (int32)me->GetMaxHealth();
         _specialMask = 0;
         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+        _ballCount = 0;
 
         _events.Reset();
         if (me->GetEntry() == NPC_LIGHTBANE)
@@ -201,7 +202,10 @@ struct boss_twin_valkyrAI : public ScriptedAI
         DoCastSelf(me->GetEntry() == NPC_LIGHTBANE ? SPELL_LIGHT_SURGE : SPELL_DARK_SURGE, true);
 
         if (instance && me->GetEntry() == NPC_LIGHTBANE)
+        {
+            instance->SetData(DATA_START_FIGHT_TIMER, DATA_START_FIGHT_TIMER);
             instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, 21853);
+        }
     }
 
     void JustReachedHome() override
@@ -265,7 +269,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
                 for (uint8 i = 0; i<count; ++i)
                 {
                     float angle = Position::RandomOrientation();
-                    if (Creature* ball = me->SummonCreature((i % 2) ? NPC_CONCENTRATED_DARK : NPC_CONCENTRATED_LIGHT, Locs[LOC_CENTER].GetPositionX() + cos(angle)*47.0f, Locs[LOC_CENTER].GetPositionY() + sin(angle)*47.0f, Locs[LOC_CENTER].GetPositionZ() + 1.5f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1500))
+                    if (Creature* ball = me->SummonCreature((i % 2) ? NPC_CONCENTRATED_DARK : NPC_CONCENTRATED_LIGHT, Locs[LOC_CENTER].GetPositionX() + cos(angle)*48.0f, Locs[LOC_CENTER].GetPositionY() + sin(angle)*48.0f, Locs[LOC_CENTER].GetPositionZ() + 1.5f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1500))
                         boss_twin_valkyrAI::JustSummoned(ball);
                 }
                 _events.PopEvent();
@@ -289,8 +293,65 @@ struct boss_twin_valkyrAI : public ScriptedAI
                 break;
             case EVENT_SPELL_TOUCH:
             {
-                DoCastAOE(me->GetEntry() == NPC_LIGHTBANE ? SPELL_LIGHT_TOUCH : SPELL_DARK_TOUCH);
-                _events.RepeatEvent(45000);
+                //! remove when boost is over
+                uint32 essenceId = 0;
+                switch (me->GetEntry())
+                {
+                    case NPC_LIGHTBANE:
+                        switch (GetDifficulty())
+                        {
+                            case 0:
+                                essenceId = 65684;
+                                break;
+                            case 1:
+                                essenceId = 67176;
+                                break;
+                            case 2:
+                                essenceId = 67177;
+                                break;
+                            case 3:
+                                essenceId = 67178;
+                                break;
+                        }
+                        break;
+                    case NPC_DARKBANE:
+                        switch (GetDifficulty())
+                        {
+                            case 0:
+                                essenceId = 65686;
+                                break;
+                            case 1:
+                                essenceId = 67222;
+                                break;
+                            case 2:
+                                essenceId = 67223;
+                                break;
+                            case 3:
+                                essenceId = 67224;
+                                break;
+                        }
+                        break;
+                }
+                std::vector<uint64> tList;
+                Map::PlayerList const &pList = me->GetMap()->GetPlayers();
+                if (pList.getSize())
+                {
+                    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                        if (Player* plr = itr->GetSource())
+                            if (Creature* sister = GetSister())
+                                if ((!me->GetVictim() || me->GetVictim()->GetGUID() != plr->GetGUID()) && (!sister->GetVictim() || sister->GetVictim()->GetGUID() != plr->GetGUID()) && plr->HasAura(essenceId))
+                                    tList.push_back(plr->GetGUID());
+                    if (!tList.empty())
+                        if (Player* target = ObjectAccessor::GetPlayer(*me, Trinity::Containers::SelectRandomContainerElement(tList)))
+                        {
+                            DoCast(target, me->GetEntry() == NPC_LIGHTBANE ? SPELL_LIGHT_TOUCH : SPELL_DARK_TOUCH, false);
+                            _events.RepeatEvent(urand(45000, 50000));
+                            break;
+                        }
+                }
+                _events.RepeatEvent(10000);
+                //DoCastAOE(me->GetEntry() == NPC_LIGHTBANE ? SPELL_LIGHT_TOUCH : SPELL_DARK_TOUCH);
+                //_events.RepeatEvent(45000);
                 break;
             }
             case EVENT_SPECIAL:
@@ -369,7 +430,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
         instance->DoRemoveAurasDueToSpellOnPlayers(67604);
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* killer) override
     {
         RemovePoweringUp();
         DoAction(-1);
@@ -379,22 +440,33 @@ struct boss_twin_valkyrAI : public ScriptedAI
             instance->SetData(TYPE_VALKYR, DONE);
             instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_POWERING_UP);
         }
+
         if (Creature* twin = GetSister())
+        {
             if (twin->IsAlive())
             {
                 twin->SetHealth(1);
                 Unit::Kill(twin, twin);
             }
+        }
     }
 
     void JustSummoned(Creature* summon) override
     {
         summons.Summon(summon);
+        if (summon->GetEntry() == NPC_CONCENTRATED_DARK || summon->GetEntry() == NPC_CONCENTRATED_LIGHT)
+        {
+            ++_ballCount;
+            if (_ballCount >= 75)
+                summons.Despawn(summon);
+        }
     }
 
     void SummonedCreatureDespawn(Creature* summon) override
     {
         summons.Despawn(summon);
+        if (summon->GetEntry() == NPC_CONCENTRATED_DARK || summon->GetEntry() == NPC_CONCENTRATED_LIGHT)
+            --_ballCount;
     }
 
     void KilledUnit(Unit* who) override
@@ -411,6 +483,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
 
     void EnterEvadeMode()
     {
+        summons.DespawnAll();
         RemovePoweringUp();
         if (instance)
             instance->SetData(TYPE_FAILED, 0);
@@ -422,6 +495,8 @@ private:
     EventMap _events;
     int32 _lastSynchroHP;
     uint8 _specialMask;
+    uint32 _ballCount;
+    uint32 _fightTimer;
 };
 
 struct boss_eydisAI : public boss_twin_valkyrAI
@@ -567,7 +642,13 @@ struct npc_concentrated_ballAI : public ScriptedAI
     {
         me->SetReactState(REACT_PASSIVE);
         _despawning = false;
+        _initialWaitDone = false;
         me->SetSpeedRate(MOVE_RUN, 0.5f);
+        _scheduler.CancelAll();
+        _scheduler.Schedule(2s, [this](TaskContext /*context*/)
+        {
+            _initialWaitDone = true;
+        });
     }
 
     void DoAction(int32 param) override
@@ -576,25 +657,27 @@ struct npc_concentrated_ballAI : public ScriptedAI
             _despawning = true;
     }
 
-    void MovementInform(uint32 type, uint32 id) override
-    {
-        if (type != POINT_MOTION_TYPE || id != 0)
-            return;
+    //void MovementInform(uint32 type, uint32 id) override
+    //{
+    //    if (type != POINT_MOTION_TYPE || id != 0)
+    //        return;
 
-        if (urand(0, 2))
-            me->DespawnOrUnsummon(0);
-    }
+    //    if (roll_chance_i(33))
+    //        me->DespawnOrUnsummon();
+    //}
 
     void MoveToNextPoint()
     {
         float angle = Position::RandomOrientation();
-        me->GetMotionMaster()->MovePoint(0, Locs[LOC_CENTER].GetPositionX() + cos(angle)*47.0f, Locs[LOC_CENTER].GetPositionY() + sin(angle)*47.0f, me->GetPositionZ());
+        me->GetMotionMaster()->MovePoint(0, Locs[LOC_CENTER].GetPositionX() + cos(angle)*49.0f, Locs[LOC_CENTER].GetPositionY() + sin(angle)*49.0f, me->GetPositionZ());
     }
 
     void UpdateAI(uint32 diff) override
     {
         if (_despawning)
             return;
+
+        _scheduler.Update(diff);
 
         if (Player* target = SelectTargetFromPlayerList(2.75f))
         {
@@ -605,12 +688,17 @@ struct npc_concentrated_ballAI : public ScriptedAI
             me->DespawnOrUnsummon(1500);
         }
 
+        if (!_initialWaitDone)
+            return;
+
         if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
             MoveToNextPoint();
     }
 
 private:
+    bool _initialWaitDone;
     bool _despawning;
+    TaskScheduler _scheduler;
 };
 
 class spell_valkyr_essence_auraAuraScript : public AuraScript
@@ -708,54 +796,102 @@ class spell_valkyr_essence_auraAuraScript : public AuraScript
     }
 };
 
-enum spellValkyrTouchHelpers
+//! Removed during boost on TOTGC and replaced with a hack that pussy and xinef wrote
+//enum spellValkyrTouchHelpers
+//{
+//    SPELL_LIGHT_ESSENCE_HELPER_10MAN = 67223,
+//    SPELL_LIGHT_ESSENCE_HELPER_25MAN = 67224,
+//
+//    SPELL_DARK_ESSENCE_HELPER_10MAN = 67177,
+//    SPELL_DARK_ESSENCE_HELPER_25MAN = 67178
+//};
+//
+//class spell_valkyr_touch_light_SpellScript : public SpellScript
+//{
+//    PrepareSpellScript(spell_valkyr_touch_light_SpellScript);
+//
+//    void FilterTargets(std::list<WorldObject*>& targets)
+//    {
+//        targets.remove_if([](WorldObject* target)
+//        {
+//            return target->ToPlayer()->HasAura(target->GetMap()->Is25ManRaid() ? SPELL_LIGHT_ESSENCE_HELPER_25MAN : SPELL_LIGHT_ESSENCE_HELPER_10MAN) ||
+//                target->ToPlayer()->HasAura(SPELL_VALKYR_HITTING_YA_PROC);
+//        });
+//
+//        Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
+//    }
+//
+//    void Register() override
+//    {
+//        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_valkyr_touch_light_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+//    }
+//};
+//
+//class spell_valkyr_touch_dark_SpellScript : public SpellScript
+//{
+//    PrepareSpellScript(spell_valkyr_touch_dark_SpellScript);
+//
+//    void FilterTargets(std::list<WorldObject*>& targets)
+//    {
+//        targets.remove_if([](WorldObject* target)
+//        {
+//            return target->ToPlayer()->HasAura(target->GetMap()->Is25ManRaid() ? SPELL_DARK_ESSENCE_HELPER_25MAN : SPELL_DARK_ESSENCE_HELPER_10MAN) ||
+//                target->ToPlayer()->HasAura(SPELL_VALKYR_HITTING_YA_PROC);
+//        });
+//
+//        Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
+//    }
+//
+//    void Register() override
+//    {
+//        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_valkyr_touch_dark_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+//    }
+//};
+
+class spell_valkyr_touchAuraScript : public AuraScript
 {
-    SPELL_LIGHT_ESSENCE_HELPER_10MAN = 67223,
-    SPELL_LIGHT_ESSENCE_HELPER_25MAN = 67224,
+    PrepareAuraScript(spell_valkyr_touchAuraScript);
 
-    SPELL_DARK_ESSENCE_HELPER_10MAN = 67177,
-    SPELL_DARK_ESSENCE_HELPER_25MAN = 67178
-};
-
-class spell_valkyr_touch_light_SpellScript : public SpellScript
-{
-    PrepareSpellScript(spell_valkyr_touch_light_SpellScript);
-
-    void FilterTargets(std::list<WorldObject*>& targets)
+    void HandleEffectPeriodic(AuraEffect const* aurEff)
     {
-        targets.remove_if([](WorldObject* target)
+        PreventDefaultAction();
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+        if (caster->GetMap()->GetId() == 649)
         {
-            return target->ToPlayer()->HasAura(target->GetMap()->Is25ManRaid() ? SPELL_LIGHT_ESSENCE_HELPER_25MAN : SPELL_LIGHT_ESSENCE_HELPER_10MAN) ||
-                target->ToPlayer()->HasAura(SPELL_VALKYR_HITTING_YA_PROC);
-        });
-
-        Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
+            uint32 excludedID = GetSpellInfo()->ExcludeTargetAuraSpell;
+            Map::PlayerList const &pl = caster->GetMap()->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+            {
+                if (Player* plr = itr->GetSource())
+                {
+                    if (plr->IsAlive() && !plr->HasAura(excludedID) && !plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+                    {
+                        uint32 absorb = 0;
+                        uint32 resist = 0;
+                        CleanDamage cleanDamage = CleanDamage(0, 0, BASE_ATTACK, MELEE_HIT_NORMAL);
+                        int32 dmg = urand(2925, 3075)*(caster->GetMap()->GetDifficulty() - 1);
+                        if (caster->CanApplyResilience())
+                            Unit::ApplyResilience(plr, nullptr, &dmg, false, CR_CRIT_TAKEN_SPELL);
+                        uint32 damage = dmg;
+                        Unit::CalcAbsorbResist(caster, plr, GetSpellInfo()->GetSchoolMask(), DOT, damage, &absorb, &resist, GetSpellInfo());
+                        Unit::DealDamageMods(plr, damage, &absorb);
+                        int32 overkill = damage - plr->GetHealth();
+                        if (overkill < 0)
+                            overkill = 0;
+                        SpellPeriodicAuraLogInfo pInfo(aurEff, damage, overkill, absorb, resist, 0.0f, false);
+                        plr->SendPeriodicAuraLog(&pInfo);
+                        Unit::DealDamage(caster, plr, damage, 0, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
+                    }
+                }
+            }
+        }
     }
 
     void Register() override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_valkyr_touch_light_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-    }
-};
-
-class spell_valkyr_touch_dark_SpellScript : public SpellScript
-{
-    PrepareSpellScript(spell_valkyr_touch_dark_SpellScript);
-
-    void FilterTargets(std::list<WorldObject*>& targets)
-    {
-        targets.remove_if([](WorldObject* target)
-        {
-            return target->ToPlayer()->HasAura(target->GetMap()->Is25ManRaid() ? SPELL_DARK_ESSENCE_HELPER_25MAN : SPELL_DARK_ESSENCE_HELPER_10MAN) ||
-                target->ToPlayer()->HasAura(SPELL_VALKYR_HITTING_YA_PROC);
-        });
-
-        Trinity::Containers::RandomResize(targets, GetCaster()->GetMap()->Is25ManRaid() ? 2 : 1);
-    }
-
-    void Register() override
-    {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_valkyr_touch_dark_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_valkyr_touchAuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
     }
 };
 
@@ -766,6 +902,5 @@ void AddSC_boss_twin_valkyr()
     new npc_essence_of_twin();
     new CreatureAILoader<npc_concentrated_ballAI>("npc_concentrated_ball");
     new AuraScriptLoaderEx<spell_valkyr_essence_auraAuraScript>("spell_valkyr_essence");
-    new SpellScriptLoaderEx<spell_valkyr_touch_light_SpellScript>("spell_valkyr_touch_light");
-    new SpellScriptLoaderEx<spell_valkyr_touch_dark_SpellScript>("spell_valkyr_touch_dark");
+    new AuraScriptLoaderEx<spell_valkyr_touchAuraScript>("spell_valkyr_touch");
 }
