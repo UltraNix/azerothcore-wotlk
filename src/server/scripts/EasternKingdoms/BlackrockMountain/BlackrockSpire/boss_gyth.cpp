@@ -100,9 +100,9 @@ public:
         void UpdateAI(uint32 diff)
         {
 
-            if (!SummonedRend && HealthBelowPct(5))
+            if (!SummonedRend && HealthBelowPct(50))
             {
-                DoCast(me, SPELL_SUMMON_REND);
+                DoCast(me, SPELL_SUMMON_REND, true);
                 me->RemoveAura(SPELL_REND_MOUNTS);
                 SummonedRend = true;
             }
