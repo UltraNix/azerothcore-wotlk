@@ -7630,6 +7630,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Stormchops
         case 43730:
+            spellInfo->procChance = 30;
             spellInfo->EffectImplicitTargetA[1] = 1;
             spellInfo->EffectImplicitTargetB[1] = 0;
             break;
