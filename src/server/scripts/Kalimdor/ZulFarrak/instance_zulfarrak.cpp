@@ -347,7 +347,10 @@ public:
             {
                 if (Creature* add = instance->GetCreature(*addsAtBase.begin()))
                 {
-                    add->GetMotionMaster()->MovePath(PATH_ADDS, false);
+                    if (add->IsAlive())
+                        add->GetMotionMaster()->MovePath(PATH_ADDS, false);
+                    else
+                        addCount--;
                     movedadds.push_back(add->GetGUID());
                 }
                 addsAtBase.erase(addsAtBase.begin());
