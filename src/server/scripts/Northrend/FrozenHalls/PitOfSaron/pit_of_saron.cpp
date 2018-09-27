@@ -1375,10 +1375,16 @@ class spell_pos_rimefang_frost_nova_SpellScript : public SpellScript
 {
     PrepareSpellScript(spell_pos_rimefang_frost_nova_SpellScript)
 
-    void HandleDummy(SpellEffIndex /*effIndex*/)
+    void HandleDummy(SpellEffIndex effIndex)
     {
         if (Unit* target = GetHitUnit())
         {
+            //! someone misused this spell in pit of saron, it belongs to lich king in totgc
+            if (target->GetMapId() == 649)
+            {
+                PreventHitDefaultEffect(effIndex);
+                return;
+            }
             Unit::Kill(GetCaster(), target);
             if (target->GetTypeId() == TYPEID_UNIT)
                 target->ToCreature()->DespawnOrUnsummon(30s);

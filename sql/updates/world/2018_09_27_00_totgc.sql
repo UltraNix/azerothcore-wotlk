@@ -1,0 +1,18 @@
+DELETE FROM `conditions` WHERE `SourceEntry` = 68198;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES (13, 1, 68198, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 0, 31, 0, 3, 37577, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 1, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 1, 31, 0, 3, 37578, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 2, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 2, 31, 0, 3, 37579, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 3, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 3, 31, 0, 3, 37572, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 4, 31, 0, 3, 37575, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 4, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 5, 31, 0, 3, 37576, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 5, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 6, 31, 0, 3, 37580, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 6, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 7, 31, 0, 3, 37581, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 7, 36, 0, 0, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (Pit of Saron)'),
+(13, 1, 68198, 0, 8, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Rimefang Frost Nova (TOTGC - someone misused this spell for pit of saron)');

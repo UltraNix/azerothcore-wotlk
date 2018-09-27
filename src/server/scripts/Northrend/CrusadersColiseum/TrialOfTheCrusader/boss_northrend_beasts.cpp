@@ -37,6 +37,7 @@ enum GormokEvents
     EVENT_SPELL_BATTER,
     EVENT_SPELL_FIRE_BOMB,
     EVENT_SPELL_HEAD_CRACK,
+    EVENT_BEASTS_BERSERK_15_MIN
 };
 
 enum GormokNPCs
@@ -316,6 +317,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_IMPALE, urand(9000,10000));
             events.RescheduleEvent(EVENT_SPELL_STAGGERING_STOMP, 15000);
             events.RescheduleEvent(EVENT_PICK_SNOBOLD_TARGET, urand(16000,24000));
+            events.RescheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 900000);
 
             // refresh snobold position
             if( Vehicle* vk = me->GetVehicleKit() )
@@ -345,6 +347,12 @@ public:
             {
                 case 0:
                     break;
+                case EVENT_BEASTS_BERSERK_15_MIN:
+                {
+                    DoCastSelf(26662, true);
+                    events.PopEvent();
+                    break;
+                }
                 case EVENT_SPELL_IMPALE:
                     if( !me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED) )
                     {
@@ -466,6 +474,7 @@ public:
             {
                 pInstance->SetData(TYPE_FAILED, 1);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_SNOBOLLED);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_CHANGE_VEHICLE);
             }
         }
     };
@@ -584,6 +593,8 @@ struct boss_jormungarAI : public ScriptedAI
         }
         if( !me->HasAura(SPELL_ENRAGE) )
             events.RescheduleEvent(EVENT_SUBMERGE, urand(45000,50000));
+
+        events.RescheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 900000);
     }
 
     void EnterCombat(Unit* /*who*/)
@@ -624,6 +635,12 @@ struct boss_jormungarAI : public ScriptedAI
         {
             case 0:
                 break;
+            case EVENT_BEASTS_BERSERK_15_MIN:
+            {
+                DoCastSelf(26662, true);
+                events.PopEvent();
+                break;
+            }
             case EVENT_SUBMERGE:
                 {
                     bIsStationary = me->GetDisplayId() == _MODEL_STATIONARY ? true : false;
@@ -871,6 +888,8 @@ public:
             events.RescheduleEvent(EVENT_JUMP_MIDDLE, 30000);
             if (IsHeroic())
                 events2.RescheduleEvent(EVENT_BERSERK, Is25ManRaid() ? 150000 : 210000);
+            else
+                events2.RescheduleEvent(EVENT_BERSERK, 900000);
         }
 
         void JustReachedHome()

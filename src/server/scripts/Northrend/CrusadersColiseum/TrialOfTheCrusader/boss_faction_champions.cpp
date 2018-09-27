@@ -98,7 +98,7 @@ struct boss_faction_championsAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/)
     {
-        if (pInstance && mAIType != AI_PET)
+        if (pInstance && mAIType != AI_PET && !IsPet(me))
             pInstance->SetData(TYPE_FACTION_CHAMPIONS, DONE);
     }
 
@@ -220,8 +220,8 @@ struct boss_faction_championsAI : public ScriptedAI
 
     Creature* GetPet()
     {
-        if (Creature* first = me->FindNearestCreature(35465, 40.0f))
-            if (Creature* second = me->FindNearestCreature(35610, 40.0f))
+        if (Creature* first = me->FindNearestCreature(35465, 80.0f))
+            if (Creature* second = me->FindNearestCreature(35610, 80.0f))
             {
                 if (first->GetHealthPct() == 100.0f && second->GetHealthPct() == 100.0f)
                     return nullptr;

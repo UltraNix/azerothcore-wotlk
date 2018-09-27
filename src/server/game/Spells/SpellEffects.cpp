@@ -1431,7 +1431,7 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     if (!unitTarget || !unitTarget->IsAlive() || unitTarget->getPowerType() != powerType || damage < 0)
         return;
 
-    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells
     if (m_caster->CannotRegenerateManaFromSpell(m_spellInfo, powerType))
         return;
 
@@ -1878,7 +1878,7 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
         }
         else
             player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);    // create some random items
-   
+
         player->UpdateCraftSkill(m_spellInfo->Id);
     }
     // TODO: ExecuteLogEffectCreateItem(i, m_spellInfo->Effects[i].ItemType);
@@ -1998,7 +1998,7 @@ void Spell::EffectEnergize(SpellEffIndex effIndex)
     if (damage < 0)
         return;
 
-    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells
     if (unitTarget->CannotRegenerateManaFromSpell(m_spellInfo, power))
         return;
 
@@ -2069,7 +2069,7 @@ void Spell::EffectEnergizePct(SpellEffIndex effIndex)
     if (maxPower == 0)
         return;
 
-    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells 
+    // if player has aura type SPELL_AURA_PREVENT_REGENERATE_POWER, he cannot regenerate mana from spells
     if (unitTarget->CannotRegenerateManaFromSpell(m_spellInfo, power))
         return;
 
@@ -5113,7 +5113,8 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
         return;
 
     // Xinef: allow entry specific spells to skip those checks                                                                                                     // @ulduar Flame Leviathan
-    if (m_spellInfo->Effects[effIndex].TargetA.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Effects[effIndex].TargetB.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Id != 62376)
+    if (m_spellInfo->Effects[effIndex].TargetA.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Effects[effIndex].TargetB.GetCheckType() != TARGET_CHECK_ENTRY && m_spellInfo->Id != 62376 &&
+        m_spellInfo->Id != 66683 && m_spellInfo->Id != 67660 && m_spellInfo->Id != 67661 && m_spellInfo->Id != 67662) // massive crash Northrend Beasts
     {
         if (unitTarget->IsVehicle() && unitTarget->GetCreatureType() != CREATURE_TYPE_BEAST)
             return;

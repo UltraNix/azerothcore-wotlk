@@ -86,6 +86,8 @@ enum ValkyrEvents
     EVENT_REMOVE_DUAL_WIELD,
 };
 
+Position const ArenaCenterPos = { 563.606323f, 139.583267f, 393.908661f };
+
 struct boss_twin_valkyrAI : public ScriptedAI
 {
     boss_twin_valkyrAI(Creature* creature) : ScriptedAI(creature), summons(me)
@@ -263,13 +265,17 @@ struct boss_twin_valkyrAI : public ScriptedAI
                 uint8 eventId = _events.GetEvent();
                 uint8 count = 0;
                 if (IsHeroic())
-                    count = eventId == EVENT_SUMMON_BALLS_3 ? 45 : 10;
+                    count = eventId == EVENT_SUMMON_BALLS_3 ? 25 : 10;
                 else
-                    count = eventId == EVENT_SUMMON_BALLS_3 ? 30 : 6;
+                    count = eventId == EVENT_SUMMON_BALLS_3 ? 15 : 6;
                 for (uint8 i = 0; i<count; ++i)
                 {
                     float angle = Position::RandomOrientation();
-                    if (Creature* ball = me->SummonCreature((i % 2) ? NPC_CONCENTRATED_DARK : NPC_CONCENTRATED_LIGHT, Locs[LOC_CENTER].GetPositionX() + cos(angle)*48.0f, Locs[LOC_CENTER].GetPositionY() + sin(angle)*48.0f, Locs[LOC_CENTER].GetPositionZ() + 1.5f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1500))
+                    Position pos = ArenaCenterPos;
+                    pos.m_positionX = pos.GetPositionX() + cos(angle) * 46.5f;
+                    pos.m_positionY = pos.GetPositionY() + sin(angle) * 46.5f;
+                    pos.m_positionZ += 1.5f;
+                    if (Creature* ball = me->SummonCreature((i % 2) ? NPC_CONCENTRATED_DARK : NPC_CONCENTRATED_LIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1500))
                         boss_twin_valkyrAI::JustSummoned(ball);
                 }
                 _events.PopEvent();
@@ -435,6 +441,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
         RemovePoweringUp();
         DoAction(-1);
         Talk(SAY_DEATH);
+        summons.DespawnAll();
         if (instance)
         {
             instance->SetData(TYPE_VALKYR, DONE);
@@ -458,15 +465,15 @@ struct boss_twin_valkyrAI : public ScriptedAI
         {
             ++_ballCount;
             if (_ballCount >= 75)
-                summons.Despawn(summon);
+                boss_twin_valkyrAI::SummonedCreatureDespawn(summon);
         }
     }
 
     void SummonedCreatureDespawn(Creature* summon) override
     {
-        summons.Despawn(summon);
         if (summon->GetEntry() == NPC_CONCENTRATED_DARK || summon->GetEntry() == NPC_CONCENTRATED_LIGHT)
             --_ballCount;
+        summons.Despawn(summon);
     }
 
     void KilledUnit(Unit* who) override
@@ -481,7 +488,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
         }
     }
 
-    void EnterEvadeMode()
+    void EnterEvadeMode() override
     {
         summons.DespawnAll();
         RemovePoweringUp();
@@ -649,6 +656,21 @@ struct npc_concentrated_ballAI : public ScriptedAI
         {
             _initialWaitDone = true;
         });
+
+        _scheduler.Schedule(2s, [this](TaskContext context)
+        {
+            if (InstanceScript* instance = me->GetInstanceScript())
+            {
+                if (Creature* lightbane = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_LIGHTBANE)))
+                {
+                    if (!lightbane->IsAlive())
+                        me->DespawnOrUnsummon();
+                }
+                else
+                    me->DespawnOrUnsummon();
+            }
+            context.Repeat(5s);
+        });
     }
 
     void DoAction(int32 param) override
@@ -669,7 +691,12 @@ struct npc_concentrated_ballAI : public ScriptedAI
     void MoveToNextPoint()
     {
         float angle = Position::RandomOrientation();
-        me->GetMotionMaster()->MovePoint(0, Locs[LOC_CENTER].GetPositionX() + cos(angle)*49.0f, Locs[LOC_CENTER].GetPositionY() + sin(angle)*49.0f, me->GetPositionZ());
+        Position pos = ArenaCenterPos;
+        pos.m_positionX = pos.GetPositionX() + cos(angle) * 46.5f;
+        pos.m_positionY = pos.GetPositionY() + sin(angle) * 46.5f;
+        pos.m_positionZ += 0.5f;
+
+        me->GetMotionMaster()->MovePoint(0, pos);
     }
 
     void UpdateAI(uint32 diff) override

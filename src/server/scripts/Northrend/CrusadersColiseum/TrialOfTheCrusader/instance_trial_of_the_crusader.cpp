@@ -390,6 +390,8 @@ public:
                         events.CancelEvent(EVENT_NORTHREND_BEASTS_ENRAGE);
                         events.RescheduleEvent(EVENT_SCENE_BEASTS_DONE, 2500);
                         SaveToDB();
+                        DoRemoveAurasDueToSpellOnPlayers(/*SPELL_SNOBOLLED*/66406);
+                        DoRemoveAurasDueToSpellOnPlayers(/*SPELL_CHANGE_VEHICLE*/66342);
                         if (Creature* c = instance->GetCreature(NPC_BarrettGUID))
                             if (c->IsAIEnabled)
                                 c->AI()->SetData(TYPE_NORTHREND_BEASTS_ALL, _fightTimer);
@@ -634,8 +636,8 @@ public:
                         {
                             events.RescheduleEvent(EVENT_SCENE_005, 150000);
                             events.RescheduleEvent(EVENT_SCENE_006, 340000);
+                            events.RescheduleEvent(EVENT_NORTHREND_BEASTS_ENRAGE, 900000);
                         }
-                        events.RescheduleEvent(EVENT_NORTHREND_BEASTS_ENRAGE, 900000);
                     }
                     break;
                 case EVENT_NORTHREND_BEASTS_ENRAGE:
@@ -1360,7 +1362,10 @@ public:
                         {
                             InstanceProgress = INSTANCE_PROGRESS_ANUBARAK_INTRO_DONE;
                             if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
+                            {
                                 floor->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);//floor->ModifyHealth(-10000000, c);
+                                c->CastSpell(floor->GetPositionX(), floor->GetPositionY(), floor->GetPositionZ(), 68198, true);
+                            }
                             c->CastSpell((Unit*)NULL, 68193, true);
                             c->SetVisible(false);
                             c->SetDisplayId(11686);
@@ -1667,8 +1672,8 @@ public:
                     }
                     break;
                 case INSTANCE_PROGRESS_DONE:
-                    if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
-                        floor->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
+                    //if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
+                        //floor->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
                     if( Creature* c = instance->GetCreature(NPC_BarrettGUID) )
                     {
                         c->SetVisible(false);
