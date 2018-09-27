@@ -17765,7 +17765,11 @@ float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, i
     //calculate miss chance
     float missChance = victim->GetUnitMissChance(attType);
 
-    if (!spellId && haveOffhandWeapon())
+    //! while NextMeleeSwingSpell is queued you do not get dual-wield penalty
+    //! https://github.com/SunwellTracker/issues/issues/1804
+    Spell* spell = GetCurrentSpell(CURRENT_MELEE_SPELL);
+    bool hasNextMeleeSwingSpellQueued = spell && spell->IsNextMeleeSwingSpell();
+    if (!spellId && haveOffhandWeapon() && !hasNextMeleeSwingSpellQueued)
         missChance += 19;
 
     // bonus from skills is 0.04%
