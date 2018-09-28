@@ -6399,6 +6399,9 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->excludeTargetAuraSpell = 66209; // exclude Touch of Jaraxxus
             spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
             break;
+        case 66209: // touch of jaraxxus
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            break;
         // Trial of the Crusader, Jaraxxus, Summon Volcano
         case 66258:
         case 67901:

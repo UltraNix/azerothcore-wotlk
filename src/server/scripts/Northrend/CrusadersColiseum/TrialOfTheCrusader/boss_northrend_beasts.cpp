@@ -37,7 +37,8 @@ enum GormokEvents
     EVENT_SPELL_BATTER,
     EVENT_SPELL_FIRE_BOMB,
     EVENT_SPELL_HEAD_CRACK,
-    EVENT_BEASTS_BERSERK_15_MIN
+
+    EVENT_BEASTS_BERSERK_15_MIN         = 100
 };
 
 enum GormokNPCs
@@ -317,7 +318,8 @@ public:
             events.RescheduleEvent(EVENT_SPELL_IMPALE, urand(9000,10000));
             events.RescheduleEvent(EVENT_SPELL_STAGGERING_STOMP, 15000);
             events.RescheduleEvent(EVENT_PICK_SNOBOLD_TARGET, urand(16000,24000));
-            events.RescheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 900000);
+            if (!IsHeroic() && Is25ManRaid())
+                events.ScheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 15min);
 
             // refresh snobold position
             if( Vehicle* vk = me->GetVehicleKit() )
@@ -594,7 +596,8 @@ struct boss_jormungarAI : public ScriptedAI
         if( !me->HasAura(SPELL_ENRAGE) )
             events.RescheduleEvent(EVENT_SUBMERGE, urand(45000,50000));
 
-        events.RescheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 900000);
+        if (!IsHeroic() && Is25ManRaid())
+            events.ScheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 15min);
     }
 
     void EnterCombat(Unit* /*who*/)

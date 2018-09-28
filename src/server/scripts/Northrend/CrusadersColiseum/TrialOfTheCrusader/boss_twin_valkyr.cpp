@@ -88,6 +88,72 @@ enum ValkyrEvents
 
 Position const ArenaCenterPos = { 563.606323f, 139.583267f, 393.908661f };
 
+Position const bulletSpawnAndMovePositions[62] =
+{
+    { 619.771f, 143.710f, 395.244f },
+    { 515.352f, 115.349f, 395.288f },
+    { 605.514f, 103.863f, 395.290f },
+    { 615.137f, 156.997f, 395.280f },
+    { 539.179f, 184.132f, 395.282f },
+    { 547.760f, 184.634f, 395.289f },
+    { 549.764f, 86.4444f, 395.266f },
+    { 511.417f, 127.158f, 395.266f },
+    { 597.380f, 183.672f, 395.280f },
+    { 573.578f, 187.665f, 395.492f },
+    { 620.465f, 134.660f, 395.233f },
+    { 560.484f, 187.743f, 395.959f },
+    { 577.299f, 186.854f, 395.289f },
+    { 563.467f, 81.9323f, 395.288f },
+    { 534.748f, 92.6424f, 395.289f },
+    { 518.503f, 170.649f, 395.289f },
+    { 514.566f, 159.918f, 395.287f },
+    { 568.049f, 187.670f, 395.563f },
+    { 522.955f, 102.127f, 395.290f },
+    { 611.656f, 114.281f, 395.288f },
+    { 616.432f, 126.418f, 395.264f },
+    { 526.833f, 181.783f, 395.285f },
+    { 578.722f, 87.4444f, 395.272f },
+    { 509.743f, 149.005f, 395.253f },
+    { 592.736f, 93.6667f, 395.289f },
+    { 506.038f, 139.517f, 395.288f },
+    { 608.116f, 171.731f, 395.289f },
+    { 586.344f, 184.078f, 395.283f },
+    { 554.818f, 187.568f, 395.288f },
+    { 557.743f, 187.729f, 395.915f },
+    { 544.094f, 184.648f, 395.286f },
+    { 551.328f, 187.646f, 395.596f },
+    { 615.137f, 150.818f, 395.269f },
+    { 571.158f, 187.691f, 395.629f },
+    { 606.686f, 106.731f, 395.289f },
+    { 612.118f, 118.844f, 395.287f },
+    { 546.057f, 88.7691f, 395.284f },
+    { 517.722f, 169.069f, 395.289f },
+    { 507.181f, 142.285f, 395.255f },
+    { 515.399f, 159.750f, 395.287f },
+    { 592.151f, 183.800f, 395.279f },
+    { 510.759f, 127.333f, 395.263f },
+    { 524.257f, 178.134f, 395.290f },
+    { 570.779f, 86.2986f, 395.253f },
+    { 588.675f, 93.0938f, 395.289f },
+    { 603.528f, 175.476f, 395.289f },
+    { 509.639f, 133.260f, 395.247f },
+    { 618.965f, 139.174f, 395.288f },
+    { 514.785f, 118.731f, 395.287f },
+    { 581.243f, 184.062f, 395.287f },
+    { 577.757f, 184.436f, 395.289f },
+    { 580.486f, 89.6910f, 395.287f },
+    { 511.132f, 151.156f, 395.264f },
+    { 615.401f, 130.816f, 395.263f },
+    { 599.307f, 98.8003f, 395.290f },
+    { 520.212f, 108.429f, 395.289f },
+    { 610.983f, 164.696f, 395.288f },
+    { 526.337f, 99.5556f, 395.290f },
+    { 563.997f, 187.644f, 395.489f },
+    { 555.695f, 86.0208f, 395.253f },
+    { 535.924f, 184.207f, 395.279f },
+    { 538.024f, 92.4410f, 395.289f }
+};
+
 struct boss_twin_valkyrAI : public ScriptedAI
 {
     boss_twin_valkyrAI(Creature* creature) : ScriptedAI(creature), summons(me)
@@ -270,11 +336,7 @@ struct boss_twin_valkyrAI : public ScriptedAI
                     count = eventId == EVENT_SUMMON_BALLS_3 ? 15 : 6;
                 for (uint8 i = 0; i<count; ++i)
                 {
-                    float angle = Position::RandomOrientation();
-                    Position pos = ArenaCenterPos;
-                    pos.m_positionX = pos.GetPositionX() + cos(angle) * 46.5f;
-                    pos.m_positionY = pos.GetPositionY() + sin(angle) * 46.5f;
-                    pos.m_positionZ += 1.5f;
+                    Position pos = Trinity::Containers::SelectRandomContainerElement(bulletSpawnAndMovePositions);
                     if (Creature* ball = me->SummonCreature((i % 2) ? NPC_CONCENTRATED_DARK : NPC_CONCENTRATED_LIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1500))
                         boss_twin_valkyrAI::JustSummoned(ball);
                 }
@@ -690,11 +752,7 @@ struct npc_concentrated_ballAI : public ScriptedAI
 
     void MoveToNextPoint()
     {
-        float angle = Position::RandomOrientation();
-        Position pos = ArenaCenterPos;
-        pos.m_positionX = pos.GetPositionX() + cos(angle) * 46.5f;
-        pos.m_positionY = pos.GetPositionY() + sin(angle) * 46.5f;
-        pos.m_positionZ += 0.5f;
+        Position pos = Trinity::Containers::SelectRandomContainerElement(bulletSpawnAndMovePositions);
 
         me->GetMotionMaster()->MovePoint(0, pos);
     }

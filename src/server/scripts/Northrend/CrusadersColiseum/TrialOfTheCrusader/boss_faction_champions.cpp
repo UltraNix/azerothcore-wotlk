@@ -218,18 +218,39 @@ struct boss_faction_championsAI : public ScriptedAI
         return false;
     }
 
+    //! Riztazz's refactor, could be done a lot better but i just dont have time rn
     Creature* GetPet()
     {
-        if (Creature* first = me->FindNearestCreature(35465, 80.0f))
-            if (Creature* second = me->FindNearestCreature(35610, 80.0f))
-            {
-                if (first->GetHealthPct() == 100.0f && second->GetHealthPct() == 100.0f)
-                    return nullptr;
-                if (first->GetHealthPct() > second->GetHealthPct())
-                    return second;
-                else
-                    return first;
-            }
+        Creature* first = me->FindNearestCreature(35465, 80.0f);
+        Creature* second = me->FindNearestCreature(35610, 80.0f);
+
+        if (!first && !second)
+            return nullptr;
+
+        if (first && !second)
+        {
+            if (first->GetHealthPct() == 100.f)
+                return nullptr;
+            else
+                return first;
+        }
+
+        if (!first && second)
+        {
+            if (second->GetHealthPct() == 100.f)
+                return nullptr;
+            else
+                return second;
+        }
+
+        if (first->GetHealthPct() == 100.0f && second->GetHealthPct() == 100.0f)
+            return nullptr;
+
+        if (first->GetHealthPct() > second->GetHealthPct())
+            return second;
+        else
+            return first;
+
         return nullptr;
     }
 
@@ -944,19 +965,19 @@ public:
                     case EVENT_SPELL_RENEW:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_RENEW, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_PENANCE:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_PENANCE, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     case EVENT_SPELL_FLASH_HEAL:
                         if (Creature* target = GetPet())
                             me->CastSpell(target, SPELL_FLASH_HEAL, false);
-                        events.RepeatEvent(urand(10000, 15000));
+                        events.Repeat(urand(10000, 15000));
                         EventMapGCD(events, 1500);
                         break;
                     default:

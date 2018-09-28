@@ -536,8 +536,8 @@ public:
                             c->SetFacingTo(Locs[LOC_TIRION_FINAL].GetOrientation());
                             events.RescheduleEvent(EVENT_SCENE_501, 20000);
                         }
-                        if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
-                            floor->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
+                        //if( GameObject* floor = instance->GetGameObject(GO_FloorGUID) )
+                        //    floor->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
                     }
                     break;
             }

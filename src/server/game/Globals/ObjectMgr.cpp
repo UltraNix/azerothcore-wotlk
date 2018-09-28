@@ -49,6 +49,8 @@
 #include "WaypointManager.h"
 #include "World.h"
 
+#include <iomanip>
+
 ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
 ScriptMapMap sWaypointScripts;
@@ -1450,7 +1452,7 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
         {
             std::ostringstream msg;
             msg << creatureName << " has been killed for the first time " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
-                << " in " << time / 1000 << "." << time % 1000 << " seconds!";
+                << " in " << time / 1000 << "." << std::setfill('0') << std::setw(3) << time % 1000 << " seconds!";
             sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
         }
 
