@@ -130,7 +130,7 @@ public:
 		                    ++count;
 		                    continue;
 		                }
-									
+
                         if (Unit* veh = player->GetVehicleBase())
                         {
                             if (veh->GetEntry() == VEHICLE_ARGENT_WARHORSE || veh->GetEntry() == VEHICLE_ARGENT_BATTLEWORG)
@@ -286,7 +286,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 diff)
         {
             _events.Update(diff);
 
@@ -373,7 +373,7 @@ public:
                             _events.Repeat(40000);
                         break;
                     default:
-                        break;               
+                        break;
                 }
             }
         }

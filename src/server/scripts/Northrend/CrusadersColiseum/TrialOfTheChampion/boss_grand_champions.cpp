@@ -470,6 +470,20 @@ struct boss_grand_championAI : public npc_escortAI
         }
     }
 
+    void AttackStart(Unit* who) override
+    {
+        if (_mountPhase)
+        {
+            npc_escortAI::AttackStart(who);
+            return;
+        }
+
+        if (me->GetEntry() == NPC_JAELYNE || me->GetEntry() == NPC_ZULTORE)
+            npc_escortAI::AttackStartCaster(who, 10.f);
+        else
+            npc_escortAI::AttackStart(who);
+    }
+
     void AddCreatureAddonAuras()
     {
         CreatureAddon const *cainfo = me->GetCreatureAddon();

@@ -3437,7 +3437,11 @@ void SpellMgr::LoadSpellCustomAttr()
             64825, // Staggering roar
             64944, // Staggering roar
             63629, // Kologarn arm damage kologarn
-            63979  // Kologarn arm damage kologarn
+            63979, // Kologarn arm damage kologarn
+            66330, // staggering stomp
+            67647, // staggering stomp
+            67648, // staggering stomp
+            67649  // staggering stomp
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
@@ -6398,6 +6402,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 66211:
             spellInfo->excludeTargetAuraSpell = 66209; // exclude Touch of Jaraxxus
             spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            break;
+        case 66210: // curse of nether
+            spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_6_YARDS;
             break;
         case 66209: // touch of jaraxxus
             spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
