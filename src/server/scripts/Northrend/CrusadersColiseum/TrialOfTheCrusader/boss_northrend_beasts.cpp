@@ -541,13 +541,13 @@ struct boss_jormungarAI : public ScriptedAI
     boss_jormungarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         pInstance = pCreature->GetInstanceScript();
-        events2.Reset();
+        //events2.Reset();
         me->SetReactState(REACT_PASSIVE);
     }
 
     InstanceScript* pInstance;
     EventMap events;
-    EventMap events2;
+    //EventMap events2;
     bool bIsStationary;
 
     uint32 _SPELL_BITE;
@@ -598,8 +598,8 @@ struct boss_jormungarAI : public ScriptedAI
         if( !me->HasAura(SPELL_ENRAGE) )
             events.RescheduleEvent(EVENT_SUBMERGE, urand(45000,50000));
 
-        if (!IsHeroic() && Is25ManRaid())
-            events2.ScheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 15min);
+        //if (!IsHeroic() && Is25ManRaid())
+            //events2.ScheduleEvent(EVENT_BEASTS_BERSERK_15_MIN, 15min);
     }
 
     void EnterCombat(Unit* /*who*/)
@@ -632,15 +632,15 @@ struct boss_jormungarAI : public ScriptedAI
             return;
 
         events.Update(diff);
-        events2.Update(diff);
+        //events2.Update(diff);
 
         if( me->HasUnitState(UNIT_STATE_CASTING) )
             return;
 
-        if (events.ExecuteEvent() == EVENT_BEASTS_BERSERK_15_MIN)
-        {
-            DoCastSelf(26662, true);
-        }
+        //if (events2.ExecuteEvent() == EVENT_BEASTS_BERSERK_15_MIN)
+        //{
+        //    DoCastSelf(26662, true);
+        //}
 
         switch( events.GetEvent() )
         {

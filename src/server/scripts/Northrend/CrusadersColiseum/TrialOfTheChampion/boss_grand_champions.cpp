@@ -452,6 +452,7 @@ struct boss_grand_championAI : public npc_escortAI
             case NPC_ZULTORE: // Zul'tore
                 _events.RescheduleEvent(EVENT_HUNTER_SPELL_LIGHTNING_ARROWS, 7000);
                 _events.RescheduleEvent(EVENT_HUNTER_SPELL_MULTI_SHOT, 12000);
+                _events.RescheduleEvent(EVENT_HUNTER_SPELL_SHOOT, 2500);
                 break;
             case NPC_LANA: // Lana Stouthammer
             case NPC_VISCERI: // Deathstalker Visceri
@@ -892,38 +893,21 @@ struct boss_grand_championAI : public npc_escortAI
                     DoCastAOE(SPELL_LIGHTNING_ARROWS);
                     _events.Repeat(urand(20000, 25000));
                     break;
+                case EVENT_HUNTER_SPELL_SHOOT:
+                {
+                    if (me->GetVictim() && me->GetVictim()->IsInRange(me, 5.f, 30.f))
+                        DoCastVictim(SPELL_SHOOT);
+                    _events.Repeat(2.5s);
+                    break;
+                }
                 case EVENT_HUNTER_SPELL_MULTI_SHOT:
                 {
-                    if (!_unitTargetGUID)
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](WorldObject* object)
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0, 30.0f, true))
-                        {
-                            DoCast(target, SPELL_SHOOT);
-                            _unitTargetGUID = target->GetGUID();
-                        }
-                        _events.Repeat(2000);
-                        break;
-                    }
-                    else
-                    {
-                        Unit* target = ObjectAccessor::GetUnit(*me, _unitTargetGUID);
-                        if (target && me->IsInRange(target, 5.0f, 30.0f, false))
-                            DoCast(target, SPELL_MULTI_SHOT);
-                        else
-                        {
-                            Map::PlayerList const& players = me->GetMap()->GetPlayers();
-                            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                            {
-                                Player* player = itr->GetSource();
-                                if (player && me->IsInRange(player, 5.0f, 30.0f, false))
-                                {
-                                    DoCast(player, SPELL_MULTI_SHOT);
-                                    break;
-                                }
-                            }
-                        }
-                        _unitTargetGUID = 0;
-                    }
+                        return object->IsInRange(me, 5.f, 30.f);
+                    }))
+                        DoCast(target, SPELL_MULTI_SHOT);
+
                     _events.Repeat(urand(15000, 20000));
                 }
                 break;
