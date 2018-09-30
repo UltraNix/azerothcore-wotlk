@@ -263,6 +263,9 @@ class npc_announcer_toc10 : public CreatureScript
                     if (!_player)
                         continue;
 
+                    if (_player->IsGameMaster())
+                        continue;
+
                     return _player;
                 }
                 return nullptr;
