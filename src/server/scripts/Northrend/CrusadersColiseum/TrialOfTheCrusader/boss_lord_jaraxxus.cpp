@@ -250,6 +250,13 @@ struct boss_jaraxxusAI : public BossAI
     }
 
     void MoveInLineOfSight(Unit* /*who*/) override {}
+
+    void KilledUnit(Unit* who) override
+    {
+        if (who->GetTypeId() == TYPEID_PLAYER)
+            Talk(SAY_KILL_PLAYER);
+    }
+    
 private:
     uint32 _fightTimer;
 };
