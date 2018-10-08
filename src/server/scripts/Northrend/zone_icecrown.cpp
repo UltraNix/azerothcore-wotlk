@@ -2452,6 +2452,68 @@ enum scourgeWagon
     SPELL_WAGON_EXPLOSION_WHEEL        = 52332
 };
 
+// Ours
+enum BattlePriest
+{
+    SPELL_BOK        = 58054,
+    SPELL_HOLY_LIGHT = 58053
+};
+
+struct npc_battle_priestAI : public ScriptedAI
+{
+    npc_battle_priestAI(Creature* creature) : ScriptedAI(creature) 
+    {
+        scheduler.Schedule(0s, [this](TaskContext task)
+        {
+            DoCastSelf(SPELL_BOK);
+            task.Repeat(1800s);
+        });
+    }
+
+    void Reset() override
+    {
+        healed = false;
+    }
+
+    void EnterCombat(Unit* /*who*/) override
+    {
+        scheduler.Schedule(10s, [this](TaskContext task)
+        {
+            if (Unit* ally = DoSelectLowestHpFriendly(30.0f))
+                DoCast(ally, SPELL_HOLY_LIGHT);
+        });
+    }
+
+    void DamageTaken(Unit* who, uint32&, DamageEffectType, SpellSchoolMask) override
+    {
+        if (me->GetHealthPct() < 51 && !healed)
+        {
+            DoCastSelf(SPELL_HOLY_LIGHT);
+            healed = true;
+
+            scheduler.Schedule(20s, [this](TaskContext task)
+            {
+                healed = false;
+            });
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        scheduler.Update(diff);
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+    void EnterEvadeMode() override {}
+
+private:
+    TaskScheduler scheduler;
+    bool healed;
+};
+
 uint32 const wagonExploSpellIds[4] =
 {
     SPELL_WAGON_EXPLOSION_ROLLER,
@@ -2518,6 +2580,7 @@ void AddSC_icecrown()
     new SpellScriptLoaderEx<spell_scourgewagon_explosion_SpellScript>("spell_scourgewagon_explosion");
     new npc_blastbolt_brother();
     new SpellScriptLoaderEx<spell_water_terror_crahsing_wave_SpellScript>("spell_water_terror_crahsing_wave");
+    new CreatureAILoader<npc_battle_priestAI>("npc_battle_priest");
 
     // Theirs
     new npc_guardian_pavilion();
