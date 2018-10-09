@@ -935,36 +935,20 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
                         multiplier = 68;
                 }
             }
-            std::ostringstream stream;
 
             int32 lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
             if (lifeLeeched < 250)
                 lifeLeeched = 250;
-            stream << "multiplier to: " << multiplier << std::endl;
-            stream << "lifeLeeched base: " << lifeLeeched << std::endl;
 
             // Damage
             caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
-            stream << "leeching swarm dmg zaatakowal gracza za: " << lifeLeeched << std::endl;
 
-            // Heal
-            uint32 resist = 0;
-            uint32 absorb = 0;
-            GetTarget()->CalcAbsorbResist(caster, GetTarget(), sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)->GetSchoolMask(), DIRECT_DAMAGE, lifeLeeched, &absorb, &resist, sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG));
-
-            stream << "resist to: " << resist << " a absorb to: " << absorb << std::endl;
             if (Unit* target = GetTarget())
             {
                 if (!target->IsImmunedToDamage(sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)))
                 {
-                    lifeLeeched -= resist;
-                    stream << "lifeLeeched - resist = " << lifeLeeched << std::endl;
                     int32 value = lifeLeeched * multiplier / 100.0f;
-                    stream << "finalny heal dmg w anuba to: " << value << " <- to wynik dzialania LifeLeeched * multiplier / 100.0" << std::endl;
                     caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
-                    if (GetTarget()->ToPlayer() && GetTarget()->ToPlayer()->GetSession())
-                        if (GetTarget()->ToPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
-                            GetTarget()->MonsterSay(stream.str().c_str(), 0, nullptr);
                 }
             }
         }
