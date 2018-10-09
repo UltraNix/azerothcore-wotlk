@@ -3950,7 +3950,12 @@ public:
 
             //! beacon healing, it doesnt cost mana but its supposed to trigger
             if (spellInfo->Id == 53652 || spellInfo->Id == 53654)
+            {
+                //! sad little hack, paladin should get 2 stacks due to beacon heal
+                if (Unit* auraHolder = eventInfo.GetActor())
+                    auraHolder->CastSpell(auraHolder, 65000, TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD);
                 return true;
+            }
 
             if (spellInfo->HasAttribute(SPELL_ATTR3_DISABLE_PROC) || spellInfo->HasAttribute(SPELL_ATTR3_CANT_TRIGGER_PROC))
                 return false;
