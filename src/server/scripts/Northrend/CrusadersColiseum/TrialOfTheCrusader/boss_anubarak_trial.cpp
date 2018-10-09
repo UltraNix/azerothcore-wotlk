@@ -964,7 +964,7 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
                     caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
                     if (GetTarget()->ToPlayer() && GetTarget()->ToPlayer()->GetSession())
                         if (GetTarget()->ToPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
-                            GetTarget()->MonsterSay(stream.str().c_str(), LANG_NEUTRAL, nullptr);
+                            GetTarget()->MonsterSay(stream.str().c_str(), 0, nullptr);
                 }
             }
         }
