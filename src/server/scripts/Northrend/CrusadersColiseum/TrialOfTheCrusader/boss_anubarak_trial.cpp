@@ -920,58 +920,48 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
             if (!GetTarget()->IsPlayer())
                 return;
 
+            int32 multiplier = 68;
+            if (auto caster = GetCaster())
+            {
+                if (auto map = caster->GetMap())
+                {
+                    if (map->Is25ManRaid() && map->IsHeroic()) // 25 hc
+                        multiplier = 250;
+                    else if (map->Is25ManRaid() && !map->IsHeroic()) // 25 n
+                        multiplier = 155;
+                    else if (!map->Is25ManRaid() && map->IsHeroic()) // 10 hc
+                        multiplier = 92;
+                    else if (!map->Is25ManRaid() && !map->IsHeroic()) // 10 n
+                        multiplier = 68;
+                }
+            }
+
             int32 lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
+            if (lifeLeeched < 250)
+                lifeLeeched = 250;
 
             // Damage
             caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
+
+            // Heal
+            uint32 resist = 0;
+            uint32 absorb = 0;
+            GetTarget()->CalcAbsorbResist(caster, GetTarget(), sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)->GetSchoolMask(), DIRECT_DAMAGE, lifeLeeched, &absorb, &resist, sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG));
+            if (Unit* target = GetTarget())
+            {
+                if (!target->IsImmunedToDamage(sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)))
+                {
+                    lifeLeeched -= resist;
+                    int32 value = lifeLeeched * multiplier / 100.0f;
+                    caster->CastCustomSpell(caster, SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
+                }
+            }
         }
     }
 
     void Register() override
     {
         OnEffectPeriodic += AuraEffectPeriodicFn(spell_gen_leeching_swarm_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-    }
-};
-
-class spell_anub_arak_leeching_swarm_damage_SpellScript : public SpellScript
-{
-    PrepareSpellScript(spell_anub_arak_leeching_swarm_damage_SpellScript);
-
-    void HandleHit(SpellEffIndex /*EffIndex*/)
-    {
-        if (!GetCaster() || !GetHitUnit())
-            return;
-
-        uint32 lifeLeeched = GetHitDamage();
-        if (!lifeLeeched)
-            return;
-
-        lifeLeeched = std::max(250U, lifeLeeched);
-
-        int32 multiplier = 68;
-
-        if (auto caster = GetCaster())
-        {
-            if (auto map = caster->GetMap())
-            {
-                if (map->Is25ManRaid() && map->IsHeroic()) // 25 hc
-                    multiplier = 250;
-                else if (map->Is25ManRaid() && !map->IsHeroic()) // 25 n
-                    multiplier = 155;
-                else if (!map->Is25ManRaid() && map->IsHeroic()) // 10 hc
-                    multiplier = 92;
-                else if (!map->Is25ManRaid() && !map->IsHeroic()) // 10 n
-                    multiplier = 68;
-            }
-        }
-
-        int32 value = lifeLeeched * multiplier / 100.0f;
-        GetCaster()->CastCustomSpell(GetCaster(), SPELL_LEECHING_SWARM_HEAL, &value, 0, 0, true);
-    }
-
-    void Register() override
-    {
-        OnEffectHitTarget += SpellEffectFn(spell_anub_arak_leeching_swarm_damage_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
 };
 
@@ -1000,5 +990,4 @@ void AddSC_boss_anubarak_trial()
     new AuraScriptLoaderEx<spell_pursuing_spikesAuraScript>("spell_pursuing_spikes");
     new AuraScriptLoaderEx<spell_gen_leeching_swarm_AuraScript>("spell_gen_leeching_swarm");
     new SpellScriptLoaderEx<spell_anubarak_permafrost_SpellScript>("spell_anubarak_permafrost");
-    new SpellScriptLoaderEx< spell_anub_arak_leeching_swarm_damage_SpellScript>("spell_anub_arak_leeching_swarm_damage");
 }
