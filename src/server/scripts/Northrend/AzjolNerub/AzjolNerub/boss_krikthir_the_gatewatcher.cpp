@@ -156,7 +156,18 @@ struct boss_krik_thirAI : public BossAI
         events.ScheduleEvent(EVENT_SWARM, 5000);
         events.ScheduleEvent(EVENT_MIND_FLAY, urand(1000, 3000));
 
-        _EnterCombat();
+        me->setActive(true);
+        DoZoneInCombat(0, 200.0f);
+
+        if (instance)
+        {
+            if (!instance->CheckRequiredBosses(DATA_KRIKTHIR_THE_GATEWATCHER_EVENT))
+            {
+                EnterEvadeMode();
+                return;
+            }
+            instance->SetBossState(DATA_KRIKTHIR_THE_GATEWATCHER_EVENT, IN_PROGRESS);
+        }
     }
 
     void MoveInLineOfSight(Unit* who) override
