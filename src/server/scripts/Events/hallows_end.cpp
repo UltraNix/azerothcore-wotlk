@@ -678,11 +678,11 @@ class npc_hallows_end_soh : public CreatureScript
                     me->SetUInt32Value(UNIT_FIELD_FLAGS, 0);
                     me->RemoveAllAuras();
                     me->Dismount();
+                    me->SetAggressive();
                     if (Unit* target = me->SelectNearestPlayer(30.0f))
                         AttackStart(target);
+                    Unmount = false;
                 }
-                if (me->IsMounted())
-                    return;
 
                 if (!UpdateVictim())
                     return;
@@ -728,6 +728,7 @@ class npc_hallows_end_soh : public CreatureScript
                     me->PlayDirectSound(11968);
                     float x, y, z;
                     GetPosToLand(x, y, z);
+                    me->SetPassive();
                     me->GetMotionMaster()->MovePoint(8, x, y, z);
                 }
             }
