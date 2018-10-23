@@ -1288,6 +1288,133 @@ public:
     }
 };
 
+enum scarabGong
+{
+    EVENT_SCARAB_LORD       = 135,
+    QUEST_BANG_A_GONG       = 8743,
+    EVENT_ANNOUNCE_PLAYER   = 11037,
+    EVENT_ANNOUNCE_TIME     = 11038,
+    EVENT_ANNOUNCE_END      = 11039,
+    NPC_JONATHAN_REV        = 15693
+};
+
+class go_the_scarab_gong : public GameObjectScript
+{
+public:
+    go_the_scarab_gong() : GameObjectScript("go_the_scarab_gong") { }
+
+    bool OnQuestReward(Player* player, GameObject* go, Quest const* quest, uint32 /*opt*/) override
+    {
+        if (!IsEventActive(EVENT_SCARAB_LORD) && quest->GetQuestId() == QUEST_BANG_A_GONG)
+        {
+            GameEventMgr::GameEventDataMap const& gameEvent = sGameEventMgr->GetEventMap();
+            GameEventData const& eventData = gameEvent[EVENT_SCARAB_LORD];
+            if (!eventData.isValid())
+                return false;
+
+            if (eventData.start != 0)
+                return false;
+
+            WorldDatabase.PExecute("UPDATE `game_event` SET `start_time` = CURRENT_TIMESTAMP() WHERE `eventEntry` = 135");
+            sGameEventMgr->StartEvent(EVENT_SCARAB_LORD, true);
+            sWorld->SendWorldText(EVENT_ANNOUNCE_PLAYER, player->GetName().c_str());
+            go->AI()->Reset();
+        }
+        return true;
+    }
+
+    struct go_the_scarab_gongAI : public GameObjectAI
+    {
+        go_the_scarab_gongAI(GameObject* gameObject) : GameObjectAI(gameObject) { }
+
+        void Reset() override
+        {
+            if (IsEventActive(EVENT_SCARAB_LORD))
+                events.ScheduleEvent(1, 1min);
+
+            GameEventMgr::GameEventDataMap const& gameEvent = sGameEventMgr->GetEventMap();
+            GameEventData const& eventData = gameEvent[EVENT_SCARAB_LORD];
+            if (!eventData.isValid())
+                return;
+
+            if (eventData.start > 0 && !IsEventActive(EVENT_SCARAB_LORD))
+                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+        }
+
+        void OnGameEvent(bool start, uint16 eventId) override
+        {
+            if (eventId == EVENT_SCARAB_LORD && !start)
+            {
+                sWorld->SendWorldText(EVENT_ANNOUNCE_END);
+                go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                events.Reset();
+                if (Creature* jon = go->FindNearestCreature(NPC_JONATHAN_REV, 50.f))
+                    if (jon->IsAIEnabled)
+                        jon->AI()->Reset();
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (events.Empty())
+                return;
+
+            events.Update(diff);
+
+            while (auto eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case 1:
+                        if (!IsEventActive(EVENT_SCARAB_LORD))
+                            return;
+
+                        GameEventMgr::GameEventDataMap const& gameEvent = sGameEventMgr->GetEventMap();
+                        GameEventData const& eventData = gameEvent[EVENT_SCARAB_LORD];
+                        if (eventData.isValid())
+                        {
+                            time_t currenttime = time(nullptr);
+                            uint32 timeDiff = difftime(eventData.start + (eventData.length * 60), currenttime);
+                            uint32 hours = timeDiff / 3600;
+                            uint32 minutes = (timeDiff % 3600) / 60;
+                            sWorld->SendWorldText(EVENT_ANNOUNCE_TIME, hours, minutes);
+                            events.Repeat(1min);
+                        }
+                        break;
+                }
+            }
+        }
+    private:
+        EventMap events;
+    };
+
+    GameObjectAI* GetAI(GameObject* go) const
+    {
+        return new go_the_scarab_gongAI(go);
+    }
+};
+
+// its npc but its connected so gonna leave it here
+struct npc_jonathan_the_revelator_AI : public ScriptedAI
+{
+    npc_jonathan_the_revelator_AI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        GameEventMgr::GameEventDataMap const& gameEvent = sGameEventMgr->GetEventMap();
+        GameEventData const& eventData = gameEvent[EVENT_SCARAB_LORD];
+        if (!eventData.isValid())
+            return;
+
+        if (eventData.start == 0)
+            return;
+
+        if (eventData.start > 0 && !IsEventActive(EVENT_SCARAB_LORD))
+            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    }
+};
+
 void AddSC_go_scripts()
 {
     // Ours
@@ -1304,6 +1431,8 @@ void AddSC_go_scripts()
     new go_war_horn_of_jotunheim();
     new go_dirt_mound();
 	new go_huge_seaforium_bombs();
+    new go_the_scarab_gong();
+    new CreatureAILoader<npc_jonathan_the_revelator_AI>("npc_jonathan_the_revelator");
 
     // Theirs
     new go_cat_figurine();
