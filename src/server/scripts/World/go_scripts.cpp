@@ -1375,6 +1375,9 @@ public:
                         {
                             time_t currenttime = time(nullptr);
                             uint32 timeDiff = difftime(eventData.start + (eventData.length * 60), currenttime);
+                            if (timeDiff <= 120)
+                                return;
+
                             uint32 hours = timeDiff / 3600;
                             uint32 minutes = (timeDiff % 3600) / 60;
                             sWorld->SendWorldText(EVENT_ANNOUNCE_TIME, hours, minutes);
