@@ -1,7 +1,6 @@
 DELETE FROM `game_event` WHERE `eventEntry`=135;
-DELETE FROM `game_event` WHERE `eventEntry`=136;
 INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`) VALUES 
-(135, '0000-00-00 00:00:00', '2020-10-22 14:29:29', 5184000, 60, 0, 'The Scarab Lord', 0);
+(135, '0000-00-00 00:00:00', '2020-10-22 14:29:29', 5184000, 600, 0, 'The Scarab Lord', 0);
 
 DELETE FROM `gameobject_queststarter` WHERE `id`=180718 AND `quest`=8743;
 INSERT INTO `gameobject_queststarter` (`id`, `quest`) VALUES

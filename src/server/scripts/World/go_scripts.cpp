@@ -1330,7 +1330,7 @@ public:
         void Reset() override
         {
             if (IsEventActive(EVENT_SCARAB_LORD))
-                events.ScheduleEvent(1, 1min);
+                events.ScheduleEvent(1, 30min);
 
             GameEventMgr::GameEventDataMap const& gameEvent = sGameEventMgr->GetEventMap();
             GameEventData const& eventData = gameEvent[EVENT_SCARAB_LORD];
@@ -1381,7 +1381,7 @@ public:
                             uint32 hours = timeDiff / 3600;
                             uint32 minutes = (timeDiff % 3600) / 60;
                             sWorld->SendWorldText(EVENT_ANNOUNCE_TIME, hours, minutes);
-                            events.Repeat(1min);
+                            events.Repeat(30min);
                         }
                         break;
                 }
