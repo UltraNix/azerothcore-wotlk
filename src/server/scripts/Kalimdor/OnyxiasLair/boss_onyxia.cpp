@@ -129,6 +129,7 @@ struct boss_onyxiaAI : public BossAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         _Reset();
         _deepBreath = true;
         _currentWP = 0;
@@ -171,12 +172,21 @@ struct boss_onyxiaAI : public BossAI
 
     void EnterCombat(Unit* /*who*/) override
     {
+        _fightTimer = getMSTime();
         _EnterCombat();
         Talk(SAY_AGGRO);
         SetPhase(1);
 
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MORE_DOTS); // just in case at reset some players already left the instance
         instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MORE_DOTS);
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        BossAI::JustDied(killer);
+
+        if (Map* map = me->GetMap())
+            CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
     }
 
     uint32 GetData(uint32 type) const override
@@ -493,6 +503,7 @@ private:
     int32 _whelpSpamTimer;
     bool _manyWhelpsAvailable;
     uint32 _manyWhelpsCounter;
+    uint32 _fightTimer;
 };
 
 struct npc_onyxian_lair_guardAI : public ScriptedAI
