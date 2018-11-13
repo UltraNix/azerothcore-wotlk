@@ -151,6 +151,7 @@ struct boss_majordomoAI : public BossAI
             me->SetFacingTo(5.2f);
         if (id == POINT_DEFEAT && type == POINT_MOTION_TYPE)
         {
+            me->SummonGameObject(GO_CACHE_OF_THE_FIRELORD, 751.893f, -1184.72f, -118.249f, 2.88729f, 0.0f, 0.0f, 0.991927f, 0.126809f, 7 * DAY);
             events.ScheduleEvent(EVENT_DEFEAT_1, 1);
             me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }

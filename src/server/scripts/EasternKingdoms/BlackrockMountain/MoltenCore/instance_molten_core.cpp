@@ -118,9 +118,10 @@ struct instance_molten_core_InstanceMapScript : public InstanceScript
             _ragnarosEngaged = true;
             SaveToDB();
         }
-
+        /*
         if (bossId == BOSS_MAJORDOMO_EXECUTUS && state == DONE)
             DoRespawnGameObject(GetGameObject(DATA_CACHE_OF_THE_FIRELORD)->GetGUID(), 7 * DAY);
+        */
 
         return true;
     }
