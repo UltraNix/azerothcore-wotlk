@@ -323,13 +323,13 @@ struct npc_majordomo_summonerAI : public ScriptedAI
             return;
         if (instance->GetBossState(BOSS_MAJORDOMO_EXECUTUS) != DONE)
             return;
-        if (instance->GetBossState(BOSS_RAGNAROS) == DONE)
+        if (instance->GetBossState(BOSS_RAGNAROS) == DONE || instance->GetBossState(BOSS_RAGNAROS) == IN_PROGRESS)
             return;
         if (who->GetTypeId() != TYPEID_PLAYER || me->GetDistance(who) > 120.0f)
             return;
         if (me->FindNearestCreature(NPC_MAJORDOMO_EXECUTUS, 150.0f))
             return;
-        if (me->FindNearestCreature(NPC_RAGNAROS, 100.0f))
+        if (me->FindNearestCreature(NPC_RAGNAROS, 150.0f))
             return;
         if (Creature* majordomo = me->SummonCreature(NPC_MAJORDOMO_EXECUTUS, 847.103f, -816.153f, -229.775f, 4.344f, TEMPSUMMON_CORPSE_DESPAWN))
         {
