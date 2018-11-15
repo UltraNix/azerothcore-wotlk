@@ -151,10 +151,10 @@ struct boss_thekal_baseAI : public BossAI
             }
 
             if (CheckAllDead())
-                for (uint32 const data : { DATA_THEKAL, DATA_LORKHAN, DATA_ZATH })
-                    if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(data)))
-                        if (creature->IsAIEnabled)
-                            creature->AI()->DoAction(ACTION_SET_PHASE_2);
+            {
+                me->AI()->DoAction(ACTION_SET_PHASE_2);
+                me->SetFullHealth();
+            }
         }
     }
 
