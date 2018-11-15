@@ -644,7 +644,7 @@ enum GlobalPlayerUpdateMask
     PLAYER_UPDATE_DATA_RACE             = 0x02,
     PLAYER_UPDATE_DATA_CLASS            = 0x04,
     PLAYER_UPDATE_DATA_GENDER           = 0x08,
-    PLAYER_UPDATE_DATA_NAME             = 0x10,
+    PLAYER_UPDATE_DATA_NAME             = 0x10
 };
 
 typedef std::map<uint32, GlobalPlayerData> GlobalPlayerDataMap;
@@ -877,7 +877,9 @@ class World
         void UpdateGlobalPlayerGroup(uint32 guid, uint32 groupId);
         void UpdateGlobalPlayerArenaTeam(uint32 guid, uint8 slot, uint32 arenaTeamId);
         void UpdateGlobalNameData(uint32 guidLow, std::string const& oldName, std::string const& newName);
+        void UpdateGlobalPlayerAccountId(uint32 guid, uint32 accountId);
         void DeleteGlobalPlayerData(uint32 guid, std::string const& name);
+        uint32 GetGlobalDataAccountId(uint32 guid);
 
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }

@@ -3444,6 +3444,28 @@ void World::UpdateGlobalPlayerData(uint32 guid, uint8 mask, std::string const& n
     SendGlobalMessage(&data);
 }
 
+uint32 World::GetGlobalDataAccountId(uint32 guid)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return 0;
+
+    return itr->second.accountId;
+}
+
+void World::UpdateGlobalPlayerAccountId(uint32 guid, uint32 account)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    itr->second.accountId = account;
+
+    WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+    data << MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER);
+    SendGlobalMessage(&data);
+}
+
 void World::UpdateGlobalPlayerMails(uint32 guid, int16 count, bool add)
 {
     GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);

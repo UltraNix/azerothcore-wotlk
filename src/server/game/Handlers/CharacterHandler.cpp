@@ -1531,6 +1531,9 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
     // xinef: update global data
     sWorld->UpdateGlobalNameData(guidLow, oldName, newName);
     sWorld->UpdateGlobalPlayerData(guidLow, PLAYER_UPDATE_DATA_NAME, newName);
+    //! accountId changed, probably character transfer
+    if (sWorld->GetGlobalDataAccountId(guidLow) != GetAccountId())
+        sWorld->UpdateGlobalPlayerAccountId(guidLow, GetAccountId());
 }
 
 void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
