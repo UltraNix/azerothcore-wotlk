@@ -583,7 +583,8 @@ public:
                             switching = true;
                             me->RemoveAllAuras();
                             me->CastSpell(me, SPELL_JAWS_OF_DEATH, true);
-                            player->CastSpell(me, SPELL_FIGHT_WYRM_NEXT, true);
+                            if (me->GetVehicle() && me->GetVehicleKit())
+                                player->CastSpell(me, SPELL_FIGHT_WYRM_NEXT, true);
                             checkTimer = 10000;
                             return;
                         }
