@@ -97,7 +97,8 @@ enum CreatureIds
     NPC_FREED_SLAVE_3_ALLIANCE      = 37572, // warr
     NPC_FREED_SLAVE_1_HORDE         = 37579, // mage
     NPC_FREED_SLAVE_2_HORDE         = 37578, // warr
-    NPC_FREED_SLAVE_3_HORDE         = 37577  // warr
+    NPC_FREED_SLAVE_3_HORDE         = 37577, // warr
+    NPC_GEIST_AMBUSHER              = 36886
 };
 
 enum GameObjectIds

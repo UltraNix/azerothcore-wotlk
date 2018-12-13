@@ -248,7 +248,7 @@ struct npc_spitefula_apparition_kamikazeAI : public ScriptedAI
     {
         if (who->IsPlayer() && who->IsWithinDist(me, 10.0f) && !_spited && !who->ToPlayer()->IsGameMaster())
         {
-            _events.ScheduleEvent(EVENT_SPITEFUL_SPITE, 3s);
+            _events.ScheduleEvent(EVENT_SPITEFUL_SPITE, 0s);
             _spited = true;
             me->RemoveAurasDueToSpell(SPELL_GREATER_INVIS_APPAR);
             AttackStart(who);
@@ -270,7 +270,7 @@ struct npc_spitefula_apparition_kamikazeAI : public ScriptedAI
         if (_events.ExecuteEvent() == EVENT_SPITEFUL_SPITE)
         {
             DoCastAOE(IsHeroic() ? SPELL_SPITE_HEROIC : SPELL_SPITE_NORMAL);
-            _events.Repeat(5s, 7s);
+            me->DespawnOrUnsummon(5s);
         }
 
         DoMeleeAttackIfReady();

@@ -199,6 +199,9 @@ struct instance_pit_of_saron_InstanceMapScript : public InstanceScript
                 if (GetBossState(DATA_TYRANNUS) == DONE)
                     creature->SetVisible(false);
                 break;
+            case NPC_GEIST_AMBUSHER:
+                creature->setActive(true);
+                break;
         }
 
         InstanceScript::OnCreatureCreate(creature);

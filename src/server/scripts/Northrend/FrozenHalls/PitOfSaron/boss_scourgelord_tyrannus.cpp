@@ -37,6 +37,37 @@ enum Events
     EVENT_KILL_TALK
 };
 
+class SpawnTyrannus : public BasicEvent
+{
+public:
+    SpawnTyrannus(Creature* summoner) : _summoner(summoner) { }
+
+    bool Execute(uint64 /*time*/, uint32 /*diff*/)
+    {
+        if (Creature* tyrannus = _summoner->SummonCreature(36658, _summoner->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN))
+            tyrannus->CastSpell(_summoner, 46598, true);
+        return true;
+    }
+
+private:
+    Creature* _summoner;
+};
+
+struct boss_rimefangAI : public NullCreatureAI
+{
+    boss_rimefangAI(Creature* creature) : NullCreatureAI(creature) { }
+
+    void EnterEvadeMode() override
+    {
+        CreatureAI::EnterEvadeMode();
+    }
+
+    void Reset() override
+    {
+        me->m_Events.AddEvent(new SpawnTyrannus(me), me->m_Events.CalculateTime(2000));
+    }
+};
+
 struct boss_tyrannusAI : public BossAI
 {
     boss_tyrannusAI(Creature* creature) : BossAI(creature, DATA_TYRANNUS)
@@ -63,10 +94,8 @@ struct boss_tyrannusAI : public BossAI
                 rimefang->GetMotionMaster()->Clear();
                 rimefang->GetMotionMaster()->MoveIdle();
                 rimefang->RemoveAllAuras();
-                rimefang->UpdatePosition(1017.3f, 168.974f, 642.926f, 5.2709f, true);
-                rimefang->StopMovingOnCurrentPos();
-                if (Vehicle* vehicle = rimefang->GetVehicleKit())
-                    vehicle->InstallAllAccessories(false);
+                rimefang->SetHomePosition({ 1017.3f, 168.974f, 642.926f, 5.2709f });
+                rimefang->AI()->EnterEvadeMode();
             }
         }
     }
@@ -84,6 +113,7 @@ struct boss_tyrannusAI : public BossAI
             rimefang->GetMotionMaster()->Clear();
             rimefang->GetMotionMaster()->MovePath(PATH_BEGIN_VALUE + 18, true);
         }
+        me->SetReactState(REACT_AGGRESSIVE);
         me->SetHomePosition(exitPos);
         me->GetMotionMaster()->MoveJump(exitPos, 10.0f, 2.0f);
 
@@ -189,4 +219,5 @@ struct boss_tyrannusAI : public BossAI
 void AddSC_boss_tyrannus()
 {
     new CreatureAILoader<boss_tyrannusAI>("boss_tyrannus");
+    new CreatureAILoader<boss_rimefangAI>("boss_rimefang");
 }
