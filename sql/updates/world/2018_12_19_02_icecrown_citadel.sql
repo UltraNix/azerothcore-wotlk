@@ -8,7 +8,7 @@ DELETE FROM `creature_text` WHERE `entry` = 37188;
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `TextRange`, `comment`) VALUES
 (37188, 0, 0, '%s cries.', 16, 0, 0, 18, 0, 16651, 0, 'Lady Jaina Proudmoore - SAY_OUTRO_ALLIANCE_17'),
 (37188, 1, 0, 'It was nothing, your majesty. Just... I\'m proud of my king.', 12, 0, 0, 0, 0, 16652, 0, 'Lady Jaina Proudmoore - SAY_OUTRO_ALLIANCE_19'),
-(37188, 2, 0, '%s wipes her tears away and smiles at King Varian Wrynn.', 12, 0, 0, 0, 0, 0, 0, 'Lady Jaina Proudmoore');
+(37188, 2, 0, '%s wipes her tears away and smiles at King Varian Wrynn.', 16, 0, 0, 0, 0, 0, 0, 'Lady Jaina Proudmoore');
 
 DELETE FROM `spell_area` WHERE `spell` IN (73818, 73824, 73822, 73828) AND `area` = 4812;
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spell`, `racemask`, `gender`, `autocast`, `quest_start_status`, `quest_end_status`) VALUES
