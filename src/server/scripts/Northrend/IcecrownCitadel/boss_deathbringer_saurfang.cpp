@@ -260,13 +260,14 @@ Position const chokePos[6] =
     {-510.7041f, 2211.069f, 546.5298f, 0.0f}  // back right
 };
 
-Position const lookAtZeppelinPos[5][2] =
+Position const lookAtZeppelinPos[6][2] =
 {
     {{-520.0f, 2231.07f, 539.29f, 1.67f}, {-532.93f, 2227.87f, 539.29f, 5.89f}}, // Muradin Bronzebeard
     {{-523.88f, 2227.71f, 539.289f, 1.86f}, {-535.35f, 2231.36f, 539.29f, 5.65f}}, //soldier 1
     {{-521.2f, 2228.67f, 539.29f, 1.86f}, {-537.02f, 2229.01f, 539.29f, 5.66f}}, //soldier 2
     {{-517.32f, 2229.82f, 539.29f, 1.86f}, {-538.55f, 2226.56f, 539.29f, 5.65f}}, //soldier 3
     {{-514.55f, 2230.43f, 539.289f, 1.86f}, {-540.15f, 2224.16f, 539.29f, 5.65f}}, //soldier 4
+    {{-540.463f, 2221.641f, 539.29f, 6.21f}, {-540.463f, 2221.641f, 539.29f, 6.21f}} // soldier 5
 };
 
 Position const ZeppelinEntrencePosition = { -521.36f, 2250.41f, 539.316f, 5.25f };
@@ -1176,7 +1177,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     break;
                 case 1000:
                 {
-                    if (Creature* sau = me->SummonCreature(NPC_SE_HIGH_OVERLORD_SAURFANG, { -522.150f, 2249.66f, 539.29f }, TEMPSUMMON_MANUAL_DESPAWN, 360000))
+                    if (Creature* sau = me->SummonCreature(NPC_SE_HIGH_OVERLORD_SAURFANG, { -522.150f, 2249.66f, 539.29f, 4.946f }, TEMPSUMMON_MANUAL_DESPAWN, 360000))
                         sau->AI()->DoAction(ACTION_OUTRO_GET_OUT_ZEPPELIN);
                     break;
                 }
@@ -1265,11 +1266,11 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     DoAction(ACTION_OUTRO_GO_TO_EXIT);
                     break;
                 case EVENT_OUTRO_ALLIANCE_20:
-                    if (Transport* SaurfangZeppelin = ObjectAccessor::GetTransport(*me, _instance->GetData64(DATA_SAURFANG_ZEPPELIN)))
-                        if (MotionTransport* transport = SaurfangZeppelin->ToMotionTransport())
-                            transport->EnableMovement(false);
+                    if (mTrans)
+                        mTrans->EnableMovement(false);
                     break;
                 case EVENT_OUTRO_ALLIANCE_21:
+
                     if (Creature* c = me->SummonCreature(NPC_ALLIANCE_MASON, TeleporterPos[0]))
                         c->AI()->DoAction(ACTION_START_PATH_RIGHT);
                     if (Creature* c = me->SummonCreature(NPC_ALLIANCE_MASON, TeleporterPos[1]))
@@ -1378,7 +1379,7 @@ struct npc_saurfang_eventAI : public ScriptedAI
         else if (action == ACTION_DESPAWN)
             me->DespawnOrUnsummon(1);
         else if (action == ACTION_LOOK_AT_ZEPPELIN)
-            me->GetMotionMaster()->MovePoint(POINT_LOOK_AT_ZEPPELIN, lookAtZeppelinPos[_index][0].GetPositionX(), lookAtZeppelinPos[_index][0].GetPositionY(), lookAtZeppelinPos[_index][0].GetPositionZ());
+            me->GetMotionMaster()->MovePoint(POINT_LOOK_AT_ZEPPELIN, lookAtZeppelinPos[_index - 1][0].GetPositionX(), lookAtZeppelinPos[_index - 1][0].GetPositionY(), lookAtZeppelinPos[_index - 1][0].GetPositionZ());
         else if (action == ACTION_OUTRO_SHOVE_SOLDIERS_UP)
             me->GetMotionMaster()->MovePoint(POINT_SHOVE_SOLDIERS_UP, lookAtZeppelinPos[_index][1].GetPositionX(), lookAtZeppelinPos[_index][1].GetPositionY(), lookAtZeppelinPos[_index][1].GetPositionZ());
         else if (action == ACTION_OUTRO_GO_TO_EXIT)
@@ -1998,6 +1999,7 @@ public:
     {
         npc_saurfang_vendorAI(Creature* creature) : ScriptedAI(creature)
         {
+            me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
             _instance = me->GetInstanceScript();
         }
 
@@ -2017,6 +2019,7 @@ public:
                     me->SetOrientation(AllianceVendorPos[0].GetOrientation());
                     me->SendMovementFlagUpdate();
                     _isInFrontOfTent = true;
+                    me->SetUInt32Value(UNIT_NPC_FLAGS, 4225); // restore db values
                 }
             }
         }

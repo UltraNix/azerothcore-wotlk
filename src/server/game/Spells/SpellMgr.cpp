@@ -3634,15 +3634,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->_requireCooldownInfo = true;
         });
 
-        // Transmute: Titanium
-        ApplySpellFix({ 60350 }, [](SpellInfo* spellInfo) {
-            if (!sWorld->PatchNotes(PATCH_320))
-            {
-                spellInfo->RecoveryTime = 8 * HOUR * IN_MILLISECONDS;
-                spellInfo->_requireCooldownInfo = true;
-            }
-        });
-
         // Detect Undead
         ApplySpellFix({ 11389 }, [](SpellInfo* spellInfo)
         {
@@ -7867,15 +7858,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 17456:    // Red and Blue Mechanostrider
             spellInfo->EffectMiscValue[EFFECT_0] = 90033;
             spellInfo->EffectBasePoints[EFFECT_1] = 99;
-            break;
-        case 62242:     // Icy Prism
-            if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
-            {
-                spellInfo->ReagentCount[0] = 1;
-                spellInfo->ReagentCount[1] = 3;
-                spellInfo->ReagentCount[2] = 3;
-                spellInfo->ReagentCount[3] = 3;
-            }
             break;
         case 47214:    // Burninate Effect
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
