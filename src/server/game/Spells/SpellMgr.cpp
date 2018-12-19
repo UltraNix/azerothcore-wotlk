@@ -3634,20 +3634,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->_requireCooldownInfo = true;
         });
 
-        ApplySpellFix
-        ({
-            56001, // Ebonweave
-            56002, // Moonshroud
-            56003, // Spellweave
-            55208, // Smelt Titansteel
-        }, [](SpellInfo* spellInfo) {
-            if (!sWorld->PatchNotes(PATCH_330))
-            {
-                spellInfo->RecoveryTime = 20 * HOUR * IN_MILLISECONDS;
-                spellInfo->_requireCooldownInfo = true;
-            }
-        });
-
         // Transmute: Titanium
         ApplySpellFix({ 60350 }, [](SpellInfo* spellInfo) {
             if (!sWorld->PatchNotes(PATCH_320))
