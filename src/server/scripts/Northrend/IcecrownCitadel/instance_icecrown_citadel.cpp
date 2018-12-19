@@ -51,7 +51,7 @@ DoorData const doorData[] =
     {GO_ICEWALL,                             DATA_LORD_MARROWGAR,        DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
     {GO_DOODAD_ICECROWN_ICEWALL02,           DATA_LORD_MARROWGAR,        DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
     {GO_ORATORY_OF_THE_DAMNED_ENTRANCE,      DATA_LADY_DEATHWHISPER,     DOOR_TYPE_ROOM,       BOUNDARY_N   },
-    {GO_SAURFANG_S_DOOR,                     DATA_DEATHBRINGER_SAURFANG, DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
+    //{GO_SAURFANG_S_DOOR,                     DATA_DEATHBRINGER_SAURFANG, DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
     {GO_ORANGE_PLAGUE_MONSTER_ENTRANCE,      DATA_FESTERGUT,             DOOR_TYPE_ROOM,       BOUNDARY_E   },
     {GO_GREEN_PLAGUE_MONSTER_ENTRANCE,       DATA_ROTFACE,               DOOR_TYPE_ROOM,       BOUNDARY_E   },
     //{GO_SCIENTIST_ENTRANCE,                  DATA_PROFESSOR_PUTRICIDE,   DOOR_TYPE_ROOM,       BOUNDARY_E   },
@@ -316,6 +316,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                 FrozenThroneEdgeGUID = 0;
                 FrozenThroneWindGUID = 0;
                 FrozenThroneWarningGUID = 0;
+                SaurfangZeppelinGUID = 0;
+                vrynnGUID = 0;
                 IsBonedEligible = true;
                 IsOozeDanceEligible = true;
                 IsNauseaEligible = true;
@@ -355,7 +357,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     TeamIdInInstance = player->GetTeamId();
 
                 // Buff should be applied only on heroic
-                if (instance->IsHeroic())
+                if (instance->GetDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL)
                     SetData(DATA_BUFF_AVAILABLE, static_cast<uint32>(false));
 
                 // for professor putricide hc
@@ -537,6 +539,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         DeathbringerSaurfangGUID = creature->GetGUID();
                         break;
                     case NPC_SE_HIGH_OVERLORD_SAURFANG:
+                        if (creature->ToTempSummon())
+                            break;
                         if (TeamIdInInstance == TEAM_ALLIANCE)
                         {
                             creature->UpdateEntry(NPC_SE_MURADIN_BRONZEBEARD, creature->GetCreatureData());
@@ -666,6 +670,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_ORGRIMS_HAMMER_CREW:
                         if (!creature->IsAlive())
                             creature->Respawn();
+                        break;
+                    case NPC_SE_KING_VARIAN_WRYNN:
+                        vrynnGUID = creature->GetGUID();
                         break;
                     default:
                         break;
@@ -1227,6 +1234,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return ArthasPlatformGUID;
                     case DATA_TERENAS_MENETHIL:
                         return TerenasMenethilGUID;
+                    case DATA_SAURFANG_ZEPPELIN:
+                        return SaurfangZeppelinGUID;
+                    case DATA_SE_VARIAN_WRYNN:
+                        return vrynnGUID;
                     default:
                         break;
                 }
@@ -2196,6 +2207,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 FrozenBolvarGUID;
             uint64 PillarsChainedGUID;
             uint64 PillarsUnchainedGUID;
+            uint64 SaurfangZeppelinGUID;
+            uint64 vrynnGUID;
             TeamId TeamIdInInstance;
             uint32 ColdflameJetsState;
             std::set<uint32> FrostwyrmGUIDs;

@@ -6,6 +6,8 @@
 #include "icecrown_citadel.h"
 #include "Player.h"
 #include "Group.h"
+#include "Transport.h"
+#include "MoveSplineInit.h"
 
 enum DeathbringerSays
 {
@@ -56,17 +58,7 @@ enum DeathbringerSays
     SAY_OUTRO_ALLIANCE_7            = 9,
     SAY_OUTRO_ALLIANCE_9            = 10,
     SAY_OUTRO_ALLIANCE_10           = 11,
-    SAY_OUTRO_ALLIANCE_21           = 12,
-
-    // Lady Jaina Proudmoore
-    SAY_OUTRO_ALLIANCE_17           = 0,
-    SAY_OUTRO_ALLIANCE_19           = 1,
-
-    // King Varian Wrynn
-    SAY_OUTRO_ALLIANCE_11           = 0,
-    SAY_OUTRO_ALLIANCE_16           = 1,
-    SAY_OUTRO_ALLIANCE_18           = 2,
-    SAY_OUTRO_ALLIANCE_20           = 3,
+    SAY_OUTRO_ALLIANCE_21           = 12
 };
 
 enum DeathbringerSpells
@@ -97,6 +89,9 @@ enum DeathbringerSpells
 
     SPELL_RIDE_VEHICLE                  = 70640, // Outro
     SPELL_ACHIEVEMENT                   = 72928,
+    // Outro
+    SPELL_SIMPLE_TELEPORT               = 70618,
+    SPELL_STORMWIND_PORTAL_STATE        = 59425
 };
 
 // Helper to get id of the aura on different modes (HasAura(baseId) wont work)
@@ -159,6 +154,7 @@ enum DeathbringerEvents
     EVENT_OUTRO_HORDE_3         = 46,
     EVENT_OUTRO_HORDE_4         = 47,
     EVENT_OUTRO_HORDE_5         = 48,
+    EVENT_OUTRO_HORDE_6         = 49,
 };
 
 enum DeathbringerPhases
@@ -179,8 +175,26 @@ enum DeathbringerActions
     ACTION_DESPAWN                      = -3781304,
     ACTION_INTRO_DONE                   = -3781305,
     ACTION_EVADE                        = -3781306,
-    ACTION_GAIN_SCENT_OF_BLOOD            = -3781307,
+    ACTION_GAIN_SCENT_OF_BLOOD          = -3781307,
+    ACTION_OUTRO_GET_OUT_ZEPPELIN       = -3781308,
+    ACTION_OUTRO_SHOVE_SOLDIERS_UP      = -3781309,
+    ACTION_OUTRO_GO_TO_EXIT             = -3781310,
+    ACTION_START_PATH_LEFT              = -3793000,
+    ACTION_START_PATH_RIGHT             = -3793001,
+    ACTION_PEON_RETURN_PATH_LEFT        = -3793002,
+    ACTION_PEON_RETURN_PATH_RIGHT       = -3793003,
+    ACTION_PEON_BUILD_TENT              = -3793004,
+    ACTION_PEON_RETURN                  = -3793005,
+    ACTION_SAURFANGED_WALKED_UP         = -3793006,
+    ACTION_MURADIN_FUCK_OFF             = -3793007,
+    ACTION_RESTART_TRANSPORT            = -3793008,
+    ACTION_LOOK_AT_ZEPPELIN             = -3793009,
     ACTION_MARK_OF_THE_FALLEN_CHAMPION  = -72293,
+};
+
+enum DeathbringerDatas
+{
+    DATA_WRYNN_START_TALKING            = 1
 };
 
 #define DATA_MADE_A_MESS 45374613 // 4537, 4613 are achievement IDs
@@ -194,10 +208,37 @@ enum DeathbringerMovePoints
     POINT_CHOKE             = 3781303,
     POINT_CORPSE            = 3781304,
     POINT_FINAL             = 3781305,
+    POINT_LOOK_AT_ZEPPELIN  = 3781306,
+    POINT_SHOVE_SOLDIERS_UP = 3781307,
+    POINT_CORPSE_ALLIANCE   = 3781308,
+    POINT_THANK_TO_VARIAN   = 3781309,
+    POINT_FINAL_ALLIANCE    = 3781310,
+    POINT_HOME              = 3781311,
+    POINT_WALK_TO_MURADIN   = 3781312,
+    POINT_EXIT              = 5 // waypoint id
 };
 
 Position const deathbringerPos = {-496.3542f, 2211.33f, 541.1138f, 0.0f};
 Position const firstStepPos = {-541.3177f, 2211.365f, 539.2921f, 0.0f};
+Position const StormwindPortalPos = { -535.08f, 2232.77f, 539.291f, 5.58f };
+Position const VarianPos = { -529.85f, 2232.56f, 539.29f, 6.15f };
+Position const JainaPos = { -531.32f, 2230.25f, 539.29f, 6.15f };
+Position const AllianceVendorPos[2] = { { -530.81f, 2229.33f, 539.316f, 5.4f }, { -524.3f, 2236.81f, 539.316f, 5.5f } };
+Position const AllianceVendorTentPos[2] = { { -532.88f, 2231.58f, 539.29f, 5.5f }, { -526.26f, 2238.83f, 539.29f, 5.5f } };
+Position const AllianceVendorToolsPos[2] = { { -522.54f, 2241.08f, 539.29f, 5.2f }, {-523.8f, 2243.29f, 539.29f, 5.2f } };
+Position const HordeVendorPos[2] = { { -531.76f, 2229.71f, 539.316f, 5.4f }, { -523.6f, 2238.71f, 539.316f, 5.5f } };
+Position const HordeVendorTentPos[2] = { { -532.88f, 2231.58f, 539.29f, 0.0f }, { -524.61f, 2240.39f, 539.29f, 0.0f } };
+Position const HordeVendorToolsPos[2] = { { -517.65f, 2244.27f, 539.01f, 5.2f }, { -518.82f, 2245.85f, 539.01f, 5.2f } };
+Position const VendorBannerPos = { -529.89f, 2235.23f, 539.29f, 5.6f };
+Position const TeleporterPos[2] = { { -560.33f, 2202.60f, 539.00f, 0.0f }, { -560.32f, 2220.14f, 539.00f, 0.0f } };
+
+uint32 const LeftPathSize = 3;
+uint32 const RightPathSize = 4;
+G3D::Vector3 const LeftPath[LeftPathSize] = { { -560.32f, 2220.14f, 539.316f }, { -538.18f, 2222.97f, 539.316f }, { -528.86f, 2228.42f, 539.316f } };
+G3D::Vector3 const RightPath[RightPathSize] = { { -560.33f, 2202.60f, 539.316f }, { -543.56f, 2204.08f, 539.316f }, { -537.54f, 2207.33f, 539.316f }, { -523.14f, 2235.36f, 539.316f } };
+G3D::Vector3 const LeftReturnPath[LeftPathSize] = { { -528.86f, 2228.42f, 539.316f }, { -538.18f, 2222.97f, 539.316f }, { -560.32f, 2220.14f, 539.316f } };
+G3D::Vector3 const RightReturnPath[RightPathSize] = { { -521.23f, 2234.34f, 539.316f }, { -537.54f, 2207.33f, 539.316f }, { -543.56f, 2204.08f, 539.316f }, { -560.33f, 2202.60f, 539.316f } };
+
 
 Position const chargePos[6] =
 {
@@ -219,6 +260,17 @@ Position const chokePos[6] =
     {-510.7041f, 2211.069f, 546.5298f, 0.0f}  // back right
 };
 
+Position const lookAtZeppelinPos[5][2] =
+{
+    {{-520.0f, 2231.07f, 539.29f, 1.67f}, {-532.93f, 2227.87f, 539.29f, 5.89f}}, // Muradin Bronzebeard
+    {{-523.88f, 2227.71f, 539.289f, 1.86f}, {-535.35f, 2231.36f, 539.29f, 5.65f}}, //soldier 1
+    {{-521.2f, 2228.67f, 539.29f, 1.86f}, {-537.02f, 2229.01f, 539.29f, 5.66f}}, //soldier 2
+    {{-517.32f, 2229.82f, 539.29f, 1.86f}, {-538.55f, 2226.56f, 539.29f, 5.65f}}, //soldier 3
+    {{-514.55f, 2230.43f, 539.289f, 1.86f}, {-540.15f, 2224.16f, 539.29f, 5.65f}}, //soldier 4
+};
+
+Position const ZeppelinEntrencePosition = { -521.36f, 2250.41f, 539.316f, 5.25f };
+Position const ZeppelinPassengerPos = { -1.5f, -1.5f, -17.0f, 1.3f };
 Position const finalPos = {-563.7552f, 2211.328f, 538.7848f, 0.0f};
 
 struct boss_deathbringer_saurfangAI : public BossAI
@@ -233,6 +285,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         events.Reset();
         _introDone = false;
         _frenzied = false;
+        _dead = false;
         _fallenChampionCastCount = 0;
         _transportCheckTimer = 1000;
         me->SetPower(POWER_ENERGY, 0);
@@ -284,13 +337,6 @@ struct boss_deathbringer_saurfangAI : public BossAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        _JustDied();
-        DoCast(me, SPELL_ACHIEVEMENT, true);
-        Talk(SAY_DEATH);
-
-        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-        if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
-            creature->AI()->DoAction(ACTION_START_OUTRO);
     }
 
     bool CanAIAttack(const Unit* target) const override
@@ -320,13 +366,33 @@ struct boss_deathbringer_saurfangAI : public BossAI
             Talk(SAY_KILL);
     }
 
-    void DamageTaken(Unit*, uint32& /*damage*/, DamageEffectType, SpellSchoolMask) override
+    void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
+        if (damage >= me->GetHealth())
+            damage = me->GetHealth() - 1;
+
         if (!_frenzied && HealthBelowPct(31)) // AT 30%, not below
         {
             _frenzied = true;
             DoCastSelf(SPELL_FRENZY);
             Talk(SAY_FRENZY);
+        }
+
+        if (!_dead && me->GetHealth() < 10000)
+        {
+            _dead = true;
+            _JustDied();
+            DoCast(me, SPELL_ACHIEVEMENT, true);
+
+            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+            if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+                creature->AI()->DoAction(ACTION_START_OUTRO);
+            _EnterEvadeMode();
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+            DoCast(me, SPELL_ACHIEVEMENT, true);
+            Talk(SAY_DEATH);
+            instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, DONE);
+            DoCast(me, 70628);
         }
     }
 
@@ -365,6 +431,11 @@ struct boss_deathbringer_saurfangAI : public BossAI
                 Talk(SAY_MARK_OF_THE_FALLEN_CHAMPION);
                 break;
         }
+    }
+
+    bool CanSeeAlways(WorldObject const* /*obj*/) override
+    {
+        return true;
     }
 
     void UpdateAI(uint32 diff) override
@@ -489,6 +560,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         bool _introDone;
         bool _frenzied;   // faster than iterating all auras to find Frenzy
         uint16 _transportCheckTimer;
+        bool _dead;
 };
 
 class npc_high_overlord_saurfang_icc : public CreatureScript
@@ -538,7 +610,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         _events.SetPhase(PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_2, 5s, 0, PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_3, 22s, 0, PHASE_INTRO_H);
-                        _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                        //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
 
                         if (GameObject* teleporter = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
                         {
@@ -552,13 +624,21 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                     }
                     break;
                 case ACTION_START_OUTRO:
-                    {
-                        me->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
-                        me->SetDisableGravity(false);
-                        me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 539.2917f, 10.0f);
-                        for (auto &itr : _guardList)
-                            itr->AI()->DoAction(ACTION_DESPAWN);
-                    }
+                {
+                    me->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
+                    Talk(SAY_OUTRO_HORDE_1);
+                    _events.ScheduleEvent(EVENT_OUTRO_HORDE_2, 10000);   // say
+                    _events.ScheduleEvent(EVENT_OUTRO_HORDE_3, 18000);   // say
+                    _events.ScheduleEvent(EVENT_OUTRO_HORDE_4, 24000);   // cast
+                    me->SetDisableGravity(false);
+                    me->GetMotionMaster()->MoveFall();
+
+                    for (auto &itr : _guardList)
+                        itr->AI()->DoAction(ACTION_DESPAWN);
+                    break;
+                }
+                case ACTION_OUTRO_GET_OUT_ZEPPELIN:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_8, 2000);
                     break;
                 case ACTION_EVADE:
                     {
@@ -610,6 +690,56 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_8, 57s, 0, PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_9, 59s, 0, PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_FINISH, 72s, 0, PHASE_INTRO_H);
+                        break;
+                    case POINT_CORPSE:
+                        if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                        {
+                            deathbringer->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
+                            deathbringer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            deathbringer->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                        }
+                        _events.ScheduleEvent(EVENT_OUTRO_HORDE_5, 1000);    // move
+                        _events.ScheduleEvent(EVENT_OUTRO_HORDE_6, 4000);    // say
+                        break;
+                    case POINT_FINAL:
+                        if (Creature* c = me->SummonCreature(NPC_WARSONG_PEON, TeleporterPos[0]))
+                            c->AI()->DoAction(ACTION_START_PATH_RIGHT);
+                        if (Creature* c = me->SummonCreature(NPC_WARSONG_PEON, TeleporterPos[1]))
+                            c->AI()->DoAction(ACTION_START_PATH_LEFT);
+
+                        if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                            deathbringer->DespawnOrUnsummon();
+                        me->DespawnOrUnsummon();
+                        break;
+                    case POINT_CORPSE_ALLIANCE:
+                        if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                            me->SetFacingTo(me->GetAngle(deathbringer->GetPositionX(), deathbringer->GetPositionY()));
+                        me->SetStandState(UNIT_STAND_STATE_KNEEL);
+
+                        Talk(SAY_OUTRO_ALLIANCE_13);
+                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_14, 6000);
+                        break;
+                    case POINT_THANK_TO_VARIAN:
+                        me->SetFacingTo(2.86f);
+
+                        Talk(SAY_OUTRO_ALLIANCE_15);
+                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_16, 34000);
+                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_17, 7000);
+                        if (Creature* wrynn = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SE_VARIAN_WRYNN)))
+                            wrynn->AI()->SetData(DATA_WRYNN_START_TALKING, DATA_WRYNN_START_TALKING);
+                        break;
+                    case POINT_FINAL_ALLIANCE:
+                        if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                            deathbringer->DespawnOrUnsummon();
+                        if (Creature* muradin = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+                            muradin->AI()->DoAction(ACTION_RESTART_TRANSPORT);
+                        me->CastSpell(me, SPELL_SIMPLE_TELEPORT);
+                        me->DespawnOrUnsummon();
+                        break;
+                    case POINT_WALK_TO_MURADIN:
+                        if (Creature* muradin = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+                            muradin->AI()->DoAction(ACTION_SAURFANGED_WALKED_UP);
+                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_9, 9000);
                         break;
                     default:
                         break;
@@ -666,6 +796,83 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         if (Player* target = deathbringer->SelectNearestPlayer(100.0f))
                             deathbringer->AI()->AttackStart(target);
                     }
+                    break;
+                case EVENT_OUTRO_HORDE_2:   // say
+                    if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                        me->SetFacingToObject(deathbringer);
+                    Talk(SAY_OUTRO_HORDE_2);
+                    _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+                    _instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, DONE);
+                    //! remove after 1st wing
+                    //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                    break;
+                case EVENT_OUTRO_HORDE_3:   // say
+                    Talk(SAY_OUTRO_HORDE_3);
+                    break;
+                case EVENT_OUTRO_HORDE_4:   // move
+                    if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                    {
+                        float x, y, z;
+                        deathbringer->GetClosePoint(x, y, z, deathbringer->GetObjectSize());
+                        me->SetWalk(true);
+                        me->GetMotionMaster()->MovePoint(POINT_CORPSE, x, y, z);
+                    }
+                    break;
+                case EVENT_OUTRO_HORDE_5:   // move
+                    me->GetMotionMaster()->MovePoint(POINT_FINAL, finalPos);
+                    break;
+                case EVENT_OUTRO_HORDE_6:   // say
+                    Talk(SAY_OUTRO_HORDE_4);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_8:
+                    if (Creature* bronzebeard = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+                    {
+                        float x, y, z;
+                        me->SetWalk(true);
+                        bronzebeard->GetClosePoint(x, y, z, 2.0f);
+                        me->GetMotionMaster()->MovePoint(POINT_WALK_TO_MURADIN, x, y, z);
+                    }
+
+                    break;
+                case EVENT_OUTRO_ALLIANCE_9:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_13, 35000);
+                    Talk(6);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_13:
+                    if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                    {
+                        float x, y, z;
+                        deathbringer->GetClosePoint(x, y, z, deathbringer->GetObjectSize());
+                        me->SetWalk(true);
+                        me->GetMotionMaster()->MovePoint(POINT_CORPSE_ALLIANCE, x, y, z);
+                    }
+                    break;
+                case EVENT_OUTRO_ALLIANCE_14:
+                    if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                    {
+                        deathbringer->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
+                        deathbringer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        deathbringer->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                    }
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_15, 2000);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_15:
+                    if (Creature* wrynn = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SE_VARIAN_WRYNN)))
+                    {
+
+                        float x, y, z;
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                        wrynn->GetClosePoint(x, y, z, 3.0f);
+                        me->GetMotionMaster()->MovePoint(POINT_THANK_TO_VARIAN, x, y, z);
+                    }
+                    break;
+                case EVENT_OUTRO_ALLIANCE_16:
+                    me->GetMotionMaster()->MovePoint(POINT_FINAL_ALLIANCE, ZeppelinEntrencePosition);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_17:
+                    if (Transport* SaurfangZeppelin = ObjectAccessor::GetTransport(*me, _instance->GetData64(DATA_SAURFANG_ZEPPELIN)))
+                        if (MotionTransport* transport = SaurfangZeppelin->ToMotionTransport())
+                            transport->EnableMovement(true);
                     break;
             }
         }
@@ -735,6 +942,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
 
         void Reset() override
         {
+            stormwindPortalGUID = 0;
             _events.Reset();
             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             me->SetReactState(REACT_PASSIVE);
@@ -769,7 +977,8 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_2, 1s, 0, PHASE_INTRO_A);
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_3, 19s, 0, PHASE_INTRO_A);
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_4, 33s, 0, PHASE_INTRO_A);
-                        _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                        //! remove after first wing
+                        //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
 
                         if (GameObject* teleporter = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
                         {
@@ -784,11 +993,31 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     break;
                 case ACTION_START_OUTRO:
                 {
-                    me->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
-                    me->SetDisableGravity(false);
-                    me->MonsterMoveWithSpeed(me->GetPositionX(), me->GetPositionY(), 539.2917f, 10.0f);
+                    //for (auto &itr : _guardList)
+                    //    itr->AI()->DoAction(ACTION_DESPAWN);
                     for (auto &itr : _guardList)
-                        itr->AI()->DoAction(ACTION_DESPAWN);
+                    {
+                        if (itr)
+                            if (itr->IsAIEnabled)
+                            {
+                                itr->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
+                                itr->SetDisableGravity(false);
+                                itr->GetMotionMaster()->MoveFall();
+                            }
+                    }
+
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_1, 3000);
+                    me->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
+                    Talk(SAY_OUTRO_ALLIANCE_1);
+                    me->SetDisableGravity(false);
+                    me->GetMotionMaster()->MoveFall();
+                    break;
+                }
+                case ACTION_OUTRO_GO_TO_EXIT:
+                {
+                    Position const home = me->GetHomePosition();
+                    me->GetMotionMaster()->MovePoint(POINT_HOME, home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+
                     break;
                 }
                 case ACTION_EVADE:
@@ -810,6 +1039,16 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                             itr->AI()->EnterEvadeMode();
                         }
                     }
+                    break;
+                case ACTION_SAURFANGED_WALKED_UP:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_7, 1000);
+                    break;
+                case ACTION_MURADIN_FUCK_OFF:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_18, 2s);
+                    break;
+                case ACTION_RESTART_TRANSPORT:
+                    if (mTrans)
+                        mTrans->EnableMovement(true);
                     break;
                 default:
                     break;
@@ -839,6 +1078,27 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_6, 9s, 0, PHASE_INTRO_A);
                         _events.ScheduleEvent(EVENT_INTRO_FINISH, 11s, 0, PHASE_INTRO_A);
                         break;
+                    case POINT_LOOK_AT_ZEPPELIN:
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY1H);
+                        break;
+                    case POINT_SHOVE_SOLDIERS_UP:
+                        me->SetOrientation(lookAtZeppelinPos[0][1].GetOrientation());
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                        me->SendMovementFlagUpdate();
+                        break;
+                    case POINT_CORPSE:
+                        if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                            me->SetFacingTo(me->GetAngle(deathbringer->GetPositionX(), deathbringer->GetPositionY()));
+                        break;
+                    case POINT_HOME:
+                    {
+                        Position const home = me->GetHomePosition();
+                        me->SetOrientation(home.GetOrientation());
+                        me->SendMovementFlagUpdate();
+
+                        _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_21, 5000);
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -892,6 +1152,129 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                             deathbringer->AI()->AttackStart(target);
                     }
                     break;
+                case EVENT_OUTRO_ALLIANCE_1:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_2, 5000);
+                    if (Creature *deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
+                    {
+                        float x, y, z;
+                        deathbringer->GetClosePoint(x, y, z, deathbringer->GetObjectSize());
+                        me->SetWalk(true);
+                        me->GetMotionMaster()->MovePoint(POINT_CORPSE, x, y, z);
+
+                        mTrans = nullptr;
+                        if (Transport* transport = sTransportMgr->CreateTransport(GO_SAURFANG_ZEPPELIN, 0, me->GetMap()))
+                        {
+                            if (MotionTransport* zepp = transport->ToMotionTransport())
+                            {
+                                mTrans = zepp;
+                                zepp->setActive(true);
+                                zepp->EnableMovement(true);
+                            }
+                        }
+                        _events.ScheduleEvent(1000, 47s);
+                    }
+                    break;
+                case 1000:
+                {
+                    if (Creature* sau = me->SummonCreature(NPC_SE_HIGH_OVERLORD_SAURFANG, { -522.150f, 2249.66f, 539.29f }, TEMPSUMMON_MANUAL_DESPAWN, 360000))
+                        sau->AI()->DoAction(ACTION_OUTRO_GET_OUT_ZEPPELIN);
+                    break;
+                }
+                case EVENT_OUTRO_ALLIANCE_2:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_3, 12000);
+                    _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+                    Talk(SAY_OUTRO_ALLIANCE_2);
+                    //! remove after first wing
+                    //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                    _instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, DONE);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_3:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_4, 2000);
+                    Talk(SAY_OUTRO_ALLIANCE_3);
+                    me->SetWalk(false);
+                    me->SetOrientation(2.39f);
+                    me->SendMovementFlagUpdate();
+                    //me->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_4:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_5, 14000);
+                    me->GetMotionMaster()->MovePoint(POINT_LOOK_AT_ZEPPELIN, lookAtZeppelinPos[0][0]);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_5:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_6, 13000);
+                    Talk(SAY_OUTRO_ALLIANCE_5);
+                    me->SetOrientation(lookAtZeppelinPos[0][0].GetOrientation());
+
+                    for (auto &itr : _guardList)
+                        itr->AI()->DoAction(ACTION_LOOK_AT_ZEPPELIN);
+
+                    break;
+                case EVENT_OUTRO_ALLIANCE_6:
+                    if (mTrans)
+                        mTrans->EnableMovement(false);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_7:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_10, 19000);
+                    Talk(SAY_OUTRO_ALLIANCE_7);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_10:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_11, 10000);
+                    Talk(SAY_OUTRO_ALLIANCE_9);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_11:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_12, 500);
+                    if (Creature* portal = me->SummonCreature(NPC_PORTAL_STALKER, StormwindPortalPos, TEMPSUMMON_TIMED_DESPAWN, 15000))
+                    {
+                        stormwindPortalGUID = portal->GetGUID();
+                        portal->CastSpell(portal, SPELL_SIMPLE_TELEPORT);
+                        portal->CastSpell(portal, SPELL_STORMWIND_PORTAL_STATE);
+                    }
+                    break;
+                case EVENT_OUTRO_ALLIANCE_12:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_13, 10000);
+                    if (Creature* varian = me->SummonCreature(NPC_SE_KING_VARIAN_WRYNN, VarianPos, TEMPSUMMON_TIMED_DESPAWN, 600000))
+                    {
+                        varian->CastSpell(varian, SPELL_SIMPLE_TELEPORT);
+                        varian->AI()->DoAction(ACTION_START_OUTRO);
+                    }
+
+                    if (Creature* jaina = me->SummonCreature(NPC_SE_JAINA_PROUDMOORE, JainaPos, TEMPSUMMON_TIMED_DESPAWN, 600000))
+                    {
+                        jaina->CastSpell(jaina, SPELL_SIMPLE_TELEPORT);
+                        jaina->AI()->DoAction(ACTION_START_OUTRO);
+                    }
+
+                    break;
+                case EVENT_OUTRO_ALLIANCE_13:
+                    me->GetMotionMaster()->MovePoint(POINT_SHOVE_SOLDIERS_UP, lookAtZeppelinPos[0][1].GetPositionX(), lookAtZeppelinPos[0][1].GetPositionY(), lookAtZeppelinPos[0][1].GetPositionZ());
+
+                    for (auto &itr : _guardList)
+                        itr->AI()->DoAction(ACTION_OUTRO_SHOVE_SOLDIERS_UP);
+
+                    if (Creature* portal = ObjectAccessor::GetCreature(*me, stormwindPortalGUID))
+                        portal->RemoveAurasDueToSpell(SPELL_STORMWIND_PORTAL_STATE);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_18:
+                    Talk(SAY_OUTRO_ALLIANCE_21);
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_19, 3000);
+                    for (auto &itr : _guardList)
+                        itr->AI()->DoAction(ACTION_OUTRO_GO_TO_EXIT);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_19:
+                    _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_20, 10000);
+                    DoAction(ACTION_OUTRO_GO_TO_EXIT);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_20:
+                    if (Transport* SaurfangZeppelin = ObjectAccessor::GetTransport(*me, _instance->GetData64(DATA_SAURFANG_ZEPPELIN)))
+                        if (MotionTransport* transport = SaurfangZeppelin->ToMotionTransport())
+                            transport->EnableMovement(false);
+                    break;
+                case EVENT_OUTRO_ALLIANCE_21:
+                    if (Creature* c = me->SummonCreature(NPC_ALLIANCE_MASON, TeleporterPos[0]))
+                        c->AI()->DoAction(ACTION_START_PATH_RIGHT);
+                    if (Creature* c = me->SummonCreature(NPC_ALLIANCE_MASON, TeleporterPos[1]))
+                        c->AI()->DoAction(ACTION_START_PATH_LEFT);
+                    break;
             }
         }
 
@@ -899,6 +1282,8 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
             EventMap _events;
             InstanceScript* _instance;
             std::list<Creature*> _guardList;
+            uint64 stormwindPortalGUID;
+            MotionTransport* mTrans;
     };
 
     bool OnGossipHello(Player* player, Creature* creature) override
@@ -934,6 +1319,11 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
     }
 };
 
+enum soldiersMisc
+{
+    EVENT_TURN_BACK_SOLDIER = 1,
+};
+
 struct npc_saurfang_eventAI : public ScriptedAI
 {
     npc_saurfang_eventAI(Creature* creature) : ScriptedAI(creature)
@@ -956,6 +1346,28 @@ struct npc_saurfang_eventAI : public ScriptedAI
         }
     }
 
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type == POINT_MOTION_TYPE)
+        {
+            switch (id)
+            {
+                case POINT_SHOVE_SOLDIERS_UP:
+                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                    _events.ScheduleEvent(EVENT_TURN_BACK_SOLDIER, 1000);
+                    break;
+                case POINT_LOOK_AT_ZEPPELIN:
+                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY1H);
+                    break;
+                case POINT_HOME:
+                    Position const home = me->GetHomePosition();
+                    me->SetOrientation(home.GetOrientation());
+                    me->SendMovementFlagUpdate();
+                    break;
+            }
+        }
+    }
+
     void DoAction(int32 action) override
     {
         if (action == ACTION_CHARGE && _index)
@@ -965,10 +1377,38 @@ struct npc_saurfang_eventAI : public ScriptedAI
         }
         else if (action == ACTION_DESPAWN)
             me->DespawnOrUnsummon(1);
+        else if (action == ACTION_LOOK_AT_ZEPPELIN)
+            me->GetMotionMaster()->MovePoint(POINT_LOOK_AT_ZEPPELIN, lookAtZeppelinPos[_index][0].GetPositionX(), lookAtZeppelinPos[_index][0].GetPositionY(), lookAtZeppelinPos[_index][0].GetPositionZ());
+        else if (action == ACTION_OUTRO_SHOVE_SOLDIERS_UP)
+            me->GetMotionMaster()->MovePoint(POINT_SHOVE_SOLDIERS_UP, lookAtZeppelinPos[_index][1].GetPositionX(), lookAtZeppelinPos[_index][1].GetPositionY(), lookAtZeppelinPos[_index][1].GetPositionZ());
+        else if (action == ACTION_OUTRO_GO_TO_EXIT)
+        {
+            Position const home = me->GetHomePosition();
+            me->GetMotionMaster()->MovePoint(POINT_HOME, home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _events.Update(diff);
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_TURN_BACK_SOLDIER:
+                    if (_index)
+                    {
+                        me->SetOrientation(lookAtZeppelinPos[_index][1].GetOrientation());
+                        me->SendMovementFlagUpdate();
+                    }
+                    break;
+            }
+        }
     }
 
     private:
         uint32 _index;
+        EventMap _events;
 };
 
 // 72178 - Blood Link
@@ -1245,8 +1685,416 @@ struct npc_icc_blood_beastAI : public ScriptedAI
         uint16 _timer;
 };
 
+enum WrynnEvents
+{
+    EVENT_WRYNN_TALK_0          = 1,
+    EVENT_WRYNN_TALK_1          = 2,
+    EVENT_WRYNN_TALK_2          = 3,
+    EVENT_WRYNN_TALK_3          = 4,
+    EVENT_WRYNN_TALK_4          = 5,
+    EVENT_WRYNN_TALK_5          = 6,
+    EVENT_WRYNN_TALK_6          = 7,
+    EVENT_WRYNN_TALK_7          = 8,
+    EVENT_WRYNN_TALK_RESET      = 9,
+
+    // Lady Jaina Proudmoore
+    SAY_OUTRO_ALLIANCE_17       = 0,
+    SAY_OUTRO_ALLIANCE_19       = 1,
+    SAY_JAINA_TEARS             = 2,
+    // King Varian Wrynn
+    SAY_OUTRO_ALLIANCE_11       = 0,
+    SAY_OUTRO_ALLIANCE_16       = 1,
+    SAY_OUTRO_ALLIANCE_18       = 2,
+    SAY_OUTRO_ALLIANCE_20       = 3,
+};
+
+struct npc_king_wrynn_saurfang_iccAI : public ScriptedAI
+{
+    npc_king_wrynn_saurfang_iccAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        events.ScheduleEvent(EVENT_WRYNN_TALK_RESET, 1.5s);
+    }
+
+    void SetData(uint32 type, uint32 value) override
+    {
+        if (type == DATA_WRYNN_START_TALKING && value == DATA_WRYNN_START_TALKING)
+        {
+            events.Reset();
+            events.ScheduleEvent(EVENT_WRYNN_TALK_0, 10s);
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (events.Empty())
+            return;
+
+        events.Update(diff);
+
+        while (auto eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_WRYNN_TALK_0:
+                    Talk(SAY_OUTRO_ALLIANCE_16);
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_1, 30s);
+                    break;
+                case EVENT_WRYNN_TALK_1:
+                    if (Creature* jaina = me->FindNearestCreature(NPC_SE_JAINA_PROUDMOORE, 15.f))
+                    {
+                        jaina->AI()->Talk(SAY_OUTRO_ALLIANCE_17);
+                        jaina->HandleEmoteCommand(18);
+                    }
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_2, 3s);
+                    break;
+                case EVENT_WRYNN_TALK_2:
+                    if (Creature* jaina = me->FindNearestCreature(NPC_SE_JAINA_PROUDMOORE, 15.f))
+                    {
+                        me->SetFacingTo(me->GetAngle(jaina->GetPositionX(), jaina->GetPositionY()));
+                        Talk(SAY_OUTRO_ALLIANCE_18);
+                    }
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_3, 8s);
+                    break;
+                case EVENT_WRYNN_TALK_3:
+                    if (Creature* jaina = me->FindNearestCreature(NPC_SE_JAINA_PROUDMOORE, 15.f))
+                    {
+                        jaina->SetFacingTo(me->GetAngle(me->GetPositionX(), me->GetPositionY()));
+                        jaina->AI()->Talk(SAY_JAINA_TEARS);
+                    }
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_4, 1.5s);
+                    break;
+                case EVENT_WRYNN_TALK_4:
+                    if (Creature* jaina = me->FindNearestCreature(NPC_SE_JAINA_PROUDMOORE, 15.f))
+                    {
+                        jaina->AI()->Talk(SAY_OUTRO_ALLIANCE_19);
+                    }
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_5, 11s);
+                    break;
+                case EVENT_WRYNN_TALK_5:
+                    Talk(SAY_OUTRO_ALLIANCE_20);
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_6, 15s);
+                    break;
+                case EVENT_WRYNN_TALK_6:
+                    if (Creature* muradin = me->FindNearestCreature(37200, 20.f))
+                        muradin->AI()->DoAction(ACTION_MURADIN_FUCK_OFF);
+                    events.ScheduleEvent(EVENT_WRYNN_TALK_7, 3s);
+                    break;
+                case EVENT_WRYNN_TALK_7:
+                    if (Creature* jaina = me->FindNearestCreature(NPC_SE_JAINA_PROUDMOORE, 15.f))
+                    {
+                        jaina->DespawnOrUnsummon(1500);
+                        jaina->CastSpell(jaina, SPELL_SIMPLE_TELEPORT, true);
+                    }
+                    me->DespawnOrUnsummon(1500);
+                    me->CastSpell(me, SPELL_SIMPLE_TELEPORT, true);
+                    break;
+                case EVENT_WRYNN_TALK_RESET:
+                    Talk(SAY_OUTRO_ALLIANCE_17);
+                    break;
+            }
+        }
+    }
+
+private:
+    EventMap events;
+};
+
+enum WorkersEvents
+{
+    EVENT_START_PATH_LEFT = 500,
+    EVENT_START_PATH_RIGHT,
+    EVENT_PEON_BUILD_TENT_LEFT,
+    EVENT_PEON_BUILD_TENT_RIGHT,
+    EVENT_PEON_SUMMON_VENDOR_TENT_LEFT,
+    EVENT_PEON_SUMMON_VENDOR_TENT_RIGHT,
+    EVENT_PEON_SUMMON_VENDOR_LEFT,
+    EVENT_PEON_SUMMON_VENDOR_RIGHT,
+    EVENT_PEON_RETURN_PATH_LEFT,
+    EVENT_PEON_RETURN_PATH_RIGHT,
+    EVENT_VENDOR_CORRECT_POSITION_LEFT,
+    EVENT_VENDOR_CORRECT_POSITION_RIGHT
+};
+
+class npc_saurfang_peon : public CreatureScript
+{
+public:
+    npc_saurfang_peon() : CreatureScript("npc_saurfang_peon") { }
+
+    struct npc_saurfang_peonAI : public ScriptedAI
+    {
+        npc_saurfang_peonAI(Creature* creature) : ScriptedAI(creature) {
+            _instance = me->GetInstanceScript();
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+        }
+
+        void DoAction(int32 action) override
+        {
+            switch (action)
+            {
+                case ACTION_START_PATH_LEFT:
+                {
+                    me->CastSpell(me, SPELL_SIMPLE_TELEPORT);
+                    _events.ScheduleEvent(EVENT_START_PATH_LEFT, 2000);
+                    break;
+                }
+                case ACTION_START_PATH_RIGHT:
+                {
+                    me->CastSpell(me, SPELL_SIMPLE_TELEPORT);
+                    _events.ScheduleEvent(EVENT_START_PATH_RIGHT, 2000);
+                    break;
+                }
+                case ACTION_PEON_RETURN_PATH_LEFT:
+                {
+                    Movement::PointsArray path(LeftReturnPath, LeftReturnPath + LeftPathSize);
+                    Movement::MoveSplineInit init(me);
+                    init.MovebyPath(path, 0);
+                    init.Launch();
+                    break;
+                }
+                case ACTION_PEON_RETURN_PATH_RIGHT:
+                {
+                    Movement::PointsArray path(RightReturnPath, RightReturnPath + RightPathSize);
+                    Movement::MoveSplineInit init(me);
+                    init.MovebyPath(path, 0);
+                    init.Launch();
+                    break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_PATH_RIGHT:
+                    {
+                        Movement::PointsArray path(RightPath, RightPath + RightPathSize);
+                        Movement::MoveSplineInit init(me);
+                        init.MovebyPath(path, 0);
+                        init.Launch();
+
+                        _events.ScheduleEvent(EVENT_PEON_BUILD_TENT_RIGHT, 5000);
+                        break;
+                    }
+                    case EVENT_START_PATH_LEFT:
+                    {
+                        Movement::PointsArray path(LeftPath, LeftPath + LeftPathSize);
+                        Movement::MoveSplineInit init(me);
+                        init.MovebyPath(path, 0);
+                        init.Launch();
+
+                        _events.ScheduleEvent(EVENT_PEON_BUILD_TENT_LEFT, 5000);
+                        break;
+                    }
+                    case EVENT_PEON_BUILD_TENT_LEFT:
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_WORK);
+                        _events.ScheduleEvent(EVENT_PEON_SUMMON_VENDOR_TENT_LEFT, 10000);
+                        break;
+                    case EVENT_PEON_BUILD_TENT_RIGHT:
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_WORK);
+                        _events.ScheduleEvent(EVENT_PEON_SUMMON_VENDOR_TENT_RIGHT, 10000);
+                        break;
+                    case EVENT_PEON_SUMMON_VENDOR_TENT_LEFT:
+                        if (Creature* c = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+                        {
+                            if (_instance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_HORDE)
+                            {
+                                c->SummonGameObject(GO_HORDE_VENDOR_TENT, HordeVendorTentPos[0].GetPositionX(), HordeVendorTentPos[0].GetPositionY(), HordeVendorTentPos[0].GetPositionZ(), HordeVendorTentPos[0].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_HORDE_VENDOR_TENT_2, HordeVendorTentPos[1].GetPositionX(), HordeVendorTentPos[1].GetPositionY(), HordeVendorTentPos[1].GetPositionZ(), HordeVendorTentPos[1].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_VENDOR_ANVIL, HordeVendorToolsPos[0].GetPositionX(), HordeVendorToolsPos[0].GetPositionY(), HordeVendorToolsPos[0].GetPositionZ(), HordeVendorToolsPos[0].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_VENDOR_FORGE, HordeVendorToolsPos[1].GetPositionX(), HordeVendorToolsPos[1].GetPositionY(), HordeVendorToolsPos[1].GetPositionZ(), HordeVendorToolsPos[1].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+
+                            }
+                            else
+                            {
+                                c->SummonGameObject(GO_ALLIANCE_VENDOR_TENT, AllianceVendorTentPos[0].GetPositionX(), AllianceVendorTentPos[0].GetPositionY(), AllianceVendorTentPos[0].GetPositionZ(), AllianceVendorTentPos[0].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_ALLIANCE_VENDOR_TENT, AllianceVendorTentPos[1].GetPositionX(), AllianceVendorTentPos[1].GetPositionY(), AllianceVendorTentPos[1].GetPositionZ(), AllianceVendorTentPos[1].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_ALLIANCE_VENDOR_BANNER, VendorBannerPos.GetPositionX(), VendorBannerPos.GetPositionY(), VendorBannerPos.GetPositionZ(), VendorBannerPos.GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_VENDOR_ANVIL, AllianceVendorToolsPos[0].GetPositionX(), AllianceVendorToolsPos[0].GetPositionY(), AllianceVendorToolsPos[0].GetPositionZ(), AllianceVendorToolsPos[0].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                                c->SummonGameObject(GO_VENDOR_FORGE, AllianceVendorToolsPos[1].GetPositionX(), AllianceVendorToolsPos[1].GetPositionY(), AllianceVendorToolsPos[1].GetPositionZ(), AllianceVendorToolsPos[1].GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 0);
+                            }
+                        }
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                        _events.ScheduleEvent(EVENT_PEON_RETURN_PATH_LEFT, 2000);
+                        break;
+                    case EVENT_PEON_SUMMON_VENDOR_TENT_RIGHT:
+                        me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                        _events.ScheduleEvent(EVENT_PEON_RETURN_PATH_RIGHT, 2000);
+                        break;
+                    case EVENT_PEON_RETURN_PATH_LEFT:
+                        _events.ScheduleEvent(EVENT_PEON_SUMMON_VENDOR_LEFT, 5000);
+                        me->AI()->DoAction(ACTION_PEON_RETURN_PATH_LEFT);
+                        break;
+                    case EVENT_PEON_RETURN_PATH_RIGHT:
+                        _events.ScheduleEvent(EVENT_PEON_SUMMON_VENDOR_RIGHT, 5000);
+                        me->AI()->DoAction(ACTION_PEON_RETURN_PATH_RIGHT);
+                        break;
+                    case EVENT_PEON_SUMMON_VENDOR_LEFT:
+                        if (Creature *c = me->SummonCreature(_instance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_HORDE ? NPC_HORDE_VENDOR_1 : NPC_ALLIANCE_VENDOR_2, TeleporterPos[1], TEMPSUMMON_MANUAL_DESPAWN))
+                            c->AI()->DoAction(ACTION_START_PATH_LEFT);
+                        me->DespawnOrUnsummon(2000);
+                        break;
+                    case EVENT_PEON_SUMMON_VENDOR_RIGHT:
+                        if (Creature *c = me->SummonCreature(_instance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_HORDE ? NPC_HORDE_VENDOR_2 : NPC_ALLIANCE_VENDOR_1, TeleporterPos[0], TEMPSUMMON_MANUAL_DESPAWN))
+                            c->AI()->DoAction(ACTION_START_PATH_RIGHT);
+                        me->DespawnOrUnsummon(2000);
+                        break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        InstanceScript* _instance;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return GetIcecrownCitadelAI<npc_saurfang_peonAI>(creature);
+    }
+};
+
+#define GOSSIP_OPTION_VENDOR "I'm not into any of that creepy stuff you like, Brazie. Just show me the \"legal\" wares."
+#define GOSSIP_OPTION_EXIT "You're an odd little guy."
+enum Brazie
+{
+    GOSSIP_TEXTID_BRAZIE = 15214
+};
+
+class npc_saurfang_vendor : public CreatureScript
+{
+public:
+    npc_saurfang_vendor() : CreatureScript("npc_saurfang_vendor") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->GetEntry() != NPC_ALLIANCE_VENDOR_2) return true;
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_VENDOR, GOSSIP_OPTION_VENDOR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_OPTION_EXIT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_BRAZIE, creature->GetGUID());
+
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        player->CLOSE_GOSSIP_MENU();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            player->GetSession()->SendListInventory(creature->GetGUID());
+        return true;
+    }
+    struct npc_saurfang_vendorAI : public ScriptedAI
+    {
+        npc_saurfang_vendorAI(Creature* creature) : ScriptedAI(creature)
+        {
+            _instance = me->GetInstanceScript();
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            me->SetWalk(true);
+            _isInFrontOfTent = false;
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type == POINT_MOTION_TYPE)
+            {
+                if (id == 0)
+                {
+                    me->SetOrientation(AllianceVendorPos[0].GetOrientation());
+                    me->SendMovementFlagUpdate();
+                    _isInFrontOfTent = true;
+                }
+            }
+        }
+
+        void DoAction(int32 action) override
+        {
+            switch (action)
+            {
+                case ACTION_START_PATH_LEFT:
+                {
+                    me->CastSpell(me, SPELL_SIMPLE_TELEPORT);
+                    _events.ScheduleEvent(EVENT_START_PATH_LEFT, 1000);
+                    break;
+                }
+                case ACTION_START_PATH_RIGHT:
+                {
+                    me->CastSpell(me, SPELL_SIMPLE_TELEPORT);
+                    _events.ScheduleEvent(EVENT_START_PATH_RIGHT, 1000);
+                    break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_isInFrontOfTent) return;
+            _events.Update(diff);
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_START_PATH_LEFT:
+                    {
+                        _events.ScheduleEvent(EVENT_VENDOR_CORRECT_POSITION_LEFT, 15000);
+                        Movement::PointsArray path(LeftPath, LeftPath + LeftPathSize);
+                        Movement::MoveSplineInit init(me);
+                        init.MovebyPath(path, 0);
+                        init.SetWalk(true);
+                        init.Launch();
+                        break;
+                    }
+                    case EVENT_START_PATH_RIGHT:
+                    {
+                        _events.ScheduleEvent(EVENT_VENDOR_CORRECT_POSITION_RIGHT, 22000);
+                        Movement::PointsArray path(RightPath, RightPath + RightPathSize);
+                        Movement::MoveSplineInit init(me);
+                        init.MovebyPath(path, 0);
+                        init.SetWalk(true);
+                        init.Launch();
+                        break;
+                    }
+                    case EVENT_VENDOR_CORRECT_POSITION_LEFT:
+                        me->GetMotionMaster()->MovePoint(0, _instance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_HORDE ? HordeVendorPos[0] : AllianceVendorPos[0]);
+                        break;
+                    case EVENT_VENDOR_CORRECT_POSITION_RIGHT:
+                        me->GetMotionMaster()->MovePoint(0, _instance->GetData(DATA_TEAMID_IN_INSTANCE) == TEAM_HORDE ? HordeVendorPos[1] : AllianceVendorPos[1]);
+                        break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        bool _isInFrontOfTent;
+        InstanceScript* _instance;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return GetIcecrownCitadelAI<npc_saurfang_vendorAI>(creature);
+    }
+};
+
 void AddSC_boss_deathbringer_saurfang()
 {
+    new npc_saurfang_vendor();
+    new npc_saurfang_peon();
+    new CreatureAILoader<npc_king_wrynn_saurfang_iccAI>("npc_king_wrynn_saurfang_icc");
     new CreatureAILoader<boss_deathbringer_saurfangAI>("boss_deathbringer_saurfang");
     new npc_high_overlord_saurfang_icc();
     new npc_muradin_bronzebeard_icc();

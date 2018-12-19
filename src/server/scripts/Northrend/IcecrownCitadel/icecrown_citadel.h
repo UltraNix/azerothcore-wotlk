@@ -124,7 +124,9 @@ enum DataTypes
 
     DATA_LIGHTS_HAMMER_TRASH        = 301,
     DATA_HANDLE_FIRST_GROUP_EVENT   = 302,
-    DATA_EVENT_SERVANT              = 303
+    DATA_EVENT_SERVANT              = 303,
+    DATA_SAURFANG_ZEPPELIN          = 304,
+    DATA_SE_VARIAN_WRYNN            = 305
 };
 
 enum CreaturesIds
@@ -226,6 +228,7 @@ enum CreaturesIds
     NPC_SE_KOR_KRON_REAVER                      = 37920,
     NPC_SE_SKYBREAKER_MARINE                    = 37830,
     NPC_FROST_FREEZE_TRAP                       = 37744,
+    NPC_PORTAL_STALKER                          = 22868,
 
     // Festergut
     NPC_FESTERGUT                               = 36626,
@@ -348,6 +351,12 @@ enum CreaturesIds
     NPC_INVISIBLE_STALKER                       = 30298,
     NPC_SPIRE_FROSTWYRM                         = 37230,
     NPC_VENGEFUL_FLESHREAPER                    = 37038,
+    NPC_ALLIANCE_MASON                          = 37902,
+    NPC_WARSONG_PEON                            = 37930,
+    NPC_ALLIANCE_VENDOR_1                       = 37903,
+    NPC_ALLIANCE_VENDOR_2                       = 37904,
+    NPC_HORDE_VENDOR_1                          = 37935,
+    NPC_HORDE_VENDOR_2                          = 37936
 };
 
 enum GameObjectsIds
@@ -394,6 +403,14 @@ enum GameObjectsIds
     GO_DEATHBRINGER_S_CACHE_10H             = 202238,
     GO_DEATHBRINGER_S_CACHE_25H             = 202241,
     GO_SCOURGE_TRANSPORTER_SAURFANG         = 202244,
+    GO_SAURFANG_ZEPPELIN                    = 201834,
+    GO_ALLIANCE_TELEPORTER                  = 201858,
+    GO_ALLIANCE_VENDOR_BANNER               = 201869,
+    GO_ALLIANCE_VENDOR_TENT                 = 201868,
+    GO_HORDE_VENDOR_TENT                    = 201886,
+    GO_HORDE_VENDOR_TENT_2                  = 201887,
+    GO_VENDOR_ANVIL                         = 1684,
+    GO_VENDOR_FORGE                         = 1685,
 
     // Professor Putricide
     GO_ORANGE_PLAGUE_MONSTER_ENTRANCE       = 201371,

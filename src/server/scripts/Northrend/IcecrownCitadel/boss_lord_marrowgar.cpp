@@ -207,7 +207,7 @@ class boss_lord_marrowgar : public CreatureScript
                                 events.RepeatEvent(1);
                                 break;
                             }
-                            Unit* unit = SelectTarget(SELECT_TARGET_FARTHEST, 0, BoneStormMoveTargetSelector(me));
+                            Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 0, BoneStormMoveTargetSelector(me));
                             if (!unit)
                             {
                                 if (unit = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 175.0f, true))

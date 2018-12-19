@@ -6897,6 +6897,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 71123: // Decimate (Stinky & Precious)
             spellInfo->EffectRadiusIndex[0] = 12;   // 100yd
             break;
+        case 70640: // ride vehicle
+            spellInfo->Attributes |= SPELL_ATTR0_CASTABLE_WHILE_DEAD;
+            break;
         case 72380: // Blood Nova
         case 72438:
         case 72439:

@@ -1208,6 +1208,58 @@ class at_icc_lady_deathwhisper_entrance : public AreaTriggerScript
         }
 };
 
+class spell_deathwhisper_summon_spirit : public SpellScriptLoader
+{
+public:
+    spell_deathwhisper_summon_spirit() : SpellScriptLoader("spell_deathwhisper_summon_spirit") { }
+
+    class spell_deathwhisper_summon_spirit_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_deathwhisper_summon_spirit_SpellScript);
+
+        bool Load() override
+        {
+            target = nullptr;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            target = GetExplTargetUnit();
+        }
+
+        void HandleSummon(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            uint32 triggerSpellId = GetSpellInfo()->Effects[effIndex].TriggerSpell;
+            if (!triggerSpellId)
+                return;
+
+            WorldLocation const* summonPos = GetExplTargetDest();
+            Unit* caster = GetCaster();
+
+            if (!summonPos || !target || !caster)
+                return;
+
+            caster->CastSpell(summonPos->GetPositionX(), summonPos->GetPositionY(), summonPos->GetPositionZ(), triggerSpellId, true, NULL, NULL, target->GetGUID());
+        }
+
+        void Register() override
+        {
+            OnEffectLaunch += SpellEffectFn(spell_deathwhisper_summon_spirit_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+            OnEffectHit += SpellEffectFn(spell_deathwhisper_summon_spirit_SpellScript::HandleSummon, EFFECT_1, SPELL_EFFECT_TRIGGER_MISSILE);
+        }
+
+        Unit* target;
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_deathwhisper_summon_spirit_SpellScript();
+    }
+};
+
 void AddSC_boss_lady_deathwhisper()
 {
     new boss_lady_deathwhisper();
@@ -1219,4 +1271,5 @@ void AddSC_boss_lady_deathwhisper()
     new spell_cultist_dark_martyrdom();
     new AuraScriptLoaderEx<spell_deathwhisper_dominate_mind_AuraScript>("spell_deathwhisper_dominate_mind");
     new at_icc_lady_deathwhisper_entrance();
+    new spell_deathwhisper_summon_spirit();
 }
