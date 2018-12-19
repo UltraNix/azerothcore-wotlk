@@ -1,0 +1,1 @@
+UPDATE creature_loot_template SET ChanceOrQuestChance = -25 WHERE item = 50274 AND entry IN (38106, 37957, 37504, 38390, 38431, 38401, 38434, 38265, 39166);
