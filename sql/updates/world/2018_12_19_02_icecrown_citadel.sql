@@ -17,3 +17,7 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spe
 
 UPDATE creature_template SET ScriptName = "npc_saurfang_peon" WHERE entry IN (37930, 37902);
 UPDATE creature_template SET ScriptName = "npc_saurfang_vendor" WHERE entry IN (37904, 37903, 37935, 37936);
+
+DELETE FROM `creature` WHERE `guid` = 202600;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(202600, 38433, 624, 3, 1, 0, 1, -43.3316, -288.708, 91.2511, 1.58825, 604800, 0, 0, 1, 0, 0, 0, 0, 0);

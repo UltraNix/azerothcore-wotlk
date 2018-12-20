@@ -238,7 +238,7 @@ G3D::Vector3 const LeftPath[LeftPathSize] = { { -560.32f, 2220.14f, 539.316f }, 
 G3D::Vector3 const RightPath[RightPathSize] = { { -560.33f, 2202.60f, 539.316f }, { -543.56f, 2204.08f, 539.316f }, { -537.54f, 2207.33f, 539.316f }, { -523.14f, 2235.36f, 539.316f } };
 G3D::Vector3 const LeftReturnPath[LeftPathSize] = { { -528.86f, 2228.42f, 539.316f }, { -538.18f, 2222.97f, 539.316f }, { -560.32f, 2220.14f, 539.316f } };
 G3D::Vector3 const RightReturnPath[RightPathSize] = { { -521.23f, 2234.34f, 539.316f }, { -537.54f, 2207.33f, 539.316f }, { -543.56f, 2204.08f, 539.316f }, { -560.33f, 2202.60f, 539.316f } };
-
+constexpr uint32 NPC_FAKE_DEATHBRINGER{ 3460604 };
 
 Position const chargePos[6] =
 {
@@ -280,6 +280,9 @@ struct boss_deathbringer_saurfangAI : public BossAI
 
     void Reset() override
     {
+        if (instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
+            return;
+
         _Reset();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_DEFENSIVE);
@@ -338,6 +341,13 @@ struct boss_deathbringer_saurfangAI : public BossAI
 
     void JustDied(Unit* /*killer*/) override
     {
+        _JustDied();
+        DoCast(me, SPELL_ACHIEVEMENT, true);
+        Talk(SAY_DEATH);
+
+        instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+        if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
+            creature->AI()->DoAction(ACTION_START_OUTRO);
     }
 
     bool CanAIAttack(const Unit* target) const override
@@ -369,31 +379,11 @@ struct boss_deathbringer_saurfangAI : public BossAI
 
     void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
-        if (damage >= me->GetHealth())
-            damage = me->GetHealth() - 1;
-
         if (!_frenzied && HealthBelowPct(31)) // AT 30%, not below
         {
             _frenzied = true;
             DoCastSelf(SPELL_FRENZY);
             Talk(SAY_FRENZY);
-        }
-
-        if (!_dead && me->GetHealth() < 10000)
-        {
-            _dead = true;
-            _JustDied();
-            DoCast(me, SPELL_ACHIEVEMENT, true);
-
-            instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-            if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
-                creature->AI()->DoAction(ACTION_START_OUTRO);
-            _EnterEvadeMode();
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
-            DoCast(me, SPELL_ACHIEVEMENT, true);
-            Talk(SAY_DEATH);
-            instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, DONE);
-            DoCast(me, 70628);
         }
     }
 
@@ -695,9 +685,14 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                     case POINT_CORPSE:
                         if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
                         {
-                            deathbringer->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
-                            deathbringer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            deathbringer->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                            if (Creature* fakeDB = me->SummonCreature(NPC_FAKE_DEATHBRINGER, deathbringer->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN))
+                            {
+                                _summonGUID = fakeDB->GetGUID();
+                                fakeDB->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
+                                fakeDB->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                fakeDB->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                            }
+                            deathbringer->DespawnOrUnsummon();
                         }
                         _events.ScheduleEvent(EVENT_OUTRO_HORDE_5, 1000);    // move
                         _events.ScheduleEvent(EVENT_OUTRO_HORDE_6, 4000);    // say
@@ -710,6 +705,9 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
 
                         if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
                             deathbringer->DespawnOrUnsummon();
+
+                        if (Creature* fakeDB = ObjectAccessor::GetCreature(*me, _summonGUID))
+                            fakeDB->DespawnOrUnsummon();
                         me->DespawnOrUnsummon();
                         break;
                     case POINT_CORPSE_ALLIANCE:
@@ -851,9 +849,14 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                 case EVENT_OUTRO_ALLIANCE_14:
                     if (Creature* deathbringer = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_DEATHBRINGER_SAURFANG)))
                     {
-                        deathbringer->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
-                        deathbringer->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        deathbringer->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                        if (Creature* fakeDB = me->SummonCreature(NPC_FAKE_DEATHBRINGER, deathbringer->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN))
+                        {
+                            _summonGUID = fakeDB->GetGUID();
+                            fakeDB->CastSpell(me, SPELL_RIDE_VEHICLE, true);  // for the packet logs.
+                            fakeDB->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            fakeDB->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DROWNED);
+                        }
+                        deathbringer->DespawnOrUnsummon();
                     }
                     _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_15, 2000);
                     break;
@@ -881,6 +884,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
         private:
             EventMap _events;
             InstanceScript* _instance;
+            uint64 _summonGUID;
             std::list<Creature*> _guardList;
     };
 
@@ -1999,6 +2003,7 @@ public:
     {
         npc_saurfang_vendorAI(Creature* creature) : ScriptedAI(creature)
         {
+            baseFlags = me->GetUInt32Value(UNIT_NPC_FLAGS);
             me->SetUInt32Value(UNIT_NPC_FLAGS, 0);
             _instance = me->GetInstanceScript();
         }
@@ -2019,7 +2024,7 @@ public:
                     me->SetOrientation(AllianceVendorPos[0].GetOrientation());
                     me->SendMovementFlagUpdate();
                     _isInFrontOfTent = true;
-                    me->SetUInt32Value(UNIT_NPC_FLAGS, 4225); // restore db values
+                    me->SetUInt32Value(UNIT_NPC_FLAGS, baseFlags); // restore db values
                 }
             }
         }
@@ -2085,6 +2090,7 @@ public:
         EventMap _events;
         bool _isInFrontOfTent;
         InstanceScript* _instance;
+        uint32 baseFlags;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
