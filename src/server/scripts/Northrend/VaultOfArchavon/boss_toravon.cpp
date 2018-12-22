@@ -155,7 +155,10 @@ class spell_toravon_random_aggro_SpellScript : public SpellScript
 
         caster->getThreatManager().resetAllAggro();
 
-        if (Unit* target = caster->AI()->SelectTarget(SELECT_TARGET_RANDOM, 1))
+        if (Unit* target = caster->AI()->SelectTarget(SELECT_TARGET_RANDOM, 1, [&](WorldObject* object)
+        {
+            return object->IsPlayer();
+        }))
             caster->getThreatManager().addThreat(target, 1000000.0f);
     }
 

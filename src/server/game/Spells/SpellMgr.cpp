@@ -3550,7 +3550,8 @@ void SpellMgr::LoadSpellCustomAttr()
             64667, // Rip flesh 25
             63059, // Pollinate
             62326, // Low blow
-            62243  // Unstable sunbeam
+            62243, // Unstable sunbeam
+            69579  // arcing smash
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
