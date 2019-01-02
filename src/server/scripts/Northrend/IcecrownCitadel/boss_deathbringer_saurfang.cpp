@@ -601,7 +601,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                         _events.SetPhase(PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_2, 5s, 0, PHASE_INTRO_H);
                         _events.ScheduleEvent(EVENT_INTRO_HORDE_3, 22s, 0, PHASE_INTRO_H);
-                        //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                        _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
 
                         if (GameObject* teleporter = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
                         {
@@ -802,8 +802,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
                     Talk(SAY_OUTRO_HORDE_2);
                     _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                     _instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, DONE);
-                    //! remove after 1st wing
-                    //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                    _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
                     break;
                 case EVENT_OUTRO_HORDE_3:   // say
                     Talk(SAY_OUTRO_HORDE_3);
@@ -982,8 +981,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_2, 1s, 0, PHASE_INTRO_A);
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_3, 19s, 0, PHASE_INTRO_A);
                         _events.ScheduleEvent(EVENT_INTRO_ALLIANCE_4, 33s, 0, PHASE_INTRO_A);
-                        //! remove after first wing
-                        //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                        _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
 
                         if (GameObject* teleporter = ObjectAccessor::GetGameObject(*me, _instance->GetData64(GO_SCOURGE_TRANSPORTER_SAURFANG)))
                         {
@@ -1189,8 +1187,7 @@ class npc_muradin_bronzebeard_icc : public CreatureScript
                     _events.ScheduleEvent(EVENT_OUTRO_ALLIANCE_3, 12000);
                     _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                     Talk(SAY_OUTRO_ALLIANCE_2);
-                    //! remove after first wing
-                    //_instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
+                    _instance->HandleGameObject(_instance->GetData64(GO_SAURFANG_S_DOOR), true);
                     _instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, DONE);
                     break;
                 case EVENT_OUTRO_ALLIANCE_3:
