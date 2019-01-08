@@ -1219,7 +1219,7 @@ bool PathGeneratorContext::CanSourceFly() const
     if ( Creature const* creature = m_source->ToCreature() )
         return creature->CanFly();
 
-    return true;
+    return false;
 }
 
 bool PathGeneratorContext::CanSourceWalk() const
