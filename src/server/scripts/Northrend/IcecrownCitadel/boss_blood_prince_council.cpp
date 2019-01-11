@@ -199,6 +199,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                     }
 
                     me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+                    me->CastSpell(me, SPELL_FEIGN_DEATH, me);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
                     me->SetReactState(REACT_PASSIVE);
                 }
@@ -372,6 +373,7 @@ class boss_prince_keleseth_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         summons.DespawnEntry(WORLD_TRIGGER);
+                        me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->SetReactState(REACT_AGGRESSIVE);
@@ -473,6 +475,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                         c->CastSpell(c, SPELL_FEIGN_DEATH, true);
                     }
 
+                    me->CastSpell(me, SPELL_FEIGN_DEATH, me);
                     me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
                     me->SetReactState(REACT_PASSIVE);
@@ -637,6 +640,7 @@ class boss_prince_taldaram_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         summons.DespawnEntry(WORLD_TRIGGER);
+                        me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->SetReactState(REACT_AGGRESSIVE);
@@ -753,6 +757,7 @@ class boss_prince_valanar_icc : public CreatureScript
                         c->CastSpell(c, SPELL_FEIGN_DEATH, true);
                     }
 
+                    me->CastSpell(me, SPELL_FEIGN_DEATH, me);
                     me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC|UNIT_FLAG_IMMUNE_TO_NPC);
                     me->SetReactState(REACT_PASSIVE);
@@ -923,6 +928,7 @@ class boss_prince_valanar_icc : public CreatureScript
                 {
                     case ACTION_STAND_UP:
                         summons.DespawnEntry(WORLD_TRIGGER);
+                        me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29 | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                         me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                         me->SetReactState(REACT_AGGRESSIVE);
