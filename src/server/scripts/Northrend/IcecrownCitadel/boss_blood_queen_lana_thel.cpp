@@ -120,6 +120,25 @@ Position const centerPos  = {4595.7090f, 2769.4190f, 400.6368f, 0.000000f};
 Position const airPos     = {4595.7090f, 2769.4190f, 422.3893f, 0.000000f};
 Position const mincharPos = {4629.3711f, 2782.6089f, 424.6390f, 0.000000f};
 
+class GrateFallEvent : public BasicEvent
+{
+public:
+    GrateFallEvent(Creature* me) : _me(me) { }
+
+    bool Execute(uint64 /*time*/, uint32 /*diff*/)
+    {
+        if (_me->GetInstanceScript())
+        {
+            if (GameObject* go = ObjectAccessor::GetGameObject(*_me, _me->GetInstanceScript()->GetData64(DATA_BLOOD_QUEEN_GRATE)))
+                go->SetGoState(GO_STATE_ACTIVE);
+        }
+        return true;
+    }
+
+private:
+    Creature* _me;
+};
+
 class boss_blood_queen_lana_thel : public CreatureScript
 {
     public:
@@ -156,6 +175,14 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 summons.DespawnAll();
                 if (instance->GetBossState(DATA_BLOOD_QUEEN_LANA_THEL) != DONE)
                     instance->SetBossState(DATA_BLOOD_QUEEN_LANA_THEL, NOT_STARTED);
+            }
+
+            void AttackStart(Unit* who) override
+            {
+                if (!instance->CheckRequiredBosses(DATA_BLOOD_QUEEN_LANA_THEL, who->ToPlayer()))
+                    return;
+
+                BossAI::AttackStart(who);
             }
 
             void EnterCombat(Unit* who)
@@ -201,6 +228,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     DoCastAOE(SPELL_BLOOD_INFUSION_CREDIT, true);
 
                 CleanAuras();
+
+                me->m_Events.AddEvent(new GrateFallEvent(me), me->m_Events.CalculateTime(10000));
 
                 if (_creditBloodQuickening)
                 {

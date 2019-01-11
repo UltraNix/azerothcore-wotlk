@@ -126,7 +126,8 @@ enum DataTypes
     DATA_HANDLE_FIRST_GROUP_EVENT   = 302,
     DATA_EVENT_SERVANT              = 303,
     DATA_SAURFANG_ZEPPELIN          = 304,
-    DATA_SE_VARIAN_WRYNN            = 305
+    DATA_SE_VARIAN_WRYNN            = 305,
+    DATA_BLOOD_QUEEN_GRATE          = 306
 };
 
 enum CreaturesIds

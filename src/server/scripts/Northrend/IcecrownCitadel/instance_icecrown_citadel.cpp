@@ -60,7 +60,7 @@ DoorData const doorData[] =
     {GO_BLOOD_ELF_COUNCIL_DOOR,              DATA_BLOOD_PRINCE_COUNCIL,  DOOR_TYPE_PASSAGE,    BOUNDARY_W   },
     {GO_BLOOD_ELF_COUNCIL_DOOR_RIGHT,        DATA_BLOOD_PRINCE_COUNCIL,  DOOR_TYPE_PASSAGE,    BOUNDARY_E   },
     {GO_DOODAD_ICECROWN_BLOODPRINCE_DOOR_01, DATA_BLOOD_QUEEN_LANA_THEL, DOOR_TYPE_ROOM,       BOUNDARY_S   },
-    {GO_DOODAD_ICECROWN_GRATE_01,            DATA_BLOOD_QUEEN_LANA_THEL, DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
+    //{GO_DOODAD_ICECROWN_GRATE_01,            DATA_BLOOD_QUEEN_LANA_THEL, DOOR_TYPE_PASSAGE,    BOUNDARY_NONE},
     {GO_GREEN_DRAGON_BOSS_ENTRANCE,          DATA_SISTER_SVALNA,         DOOR_TYPE_PASSAGE,    BOUNDARY_S   },
     {GO_GREEN_DRAGON_BOSS_ENTRANCE,          DATA_VALITHRIA_DREAMWALKER, DOOR_TYPE_ROOM,       BOUNDARY_N   },
     {GO_GREEN_DRAGON_BOSS_EXIT,              DATA_VALITHRIA_DREAMWALKER, DOOR_TYPE_PASSAGE,    BOUNDARY_S   },
@@ -267,6 +267,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 DarkwhisperElevatorTimer = 3000;
                 memset(&WeeklyQuestNpcGUID, 0, sizeof(WeeklyQuestNpcGUID));
                 ScourgeTransporterFirstGUID = 0;
+                BloodQueenGrateGUID = 0;
 
                 SetBossNumber(MAX_ENCOUNTERS);
                 LoadDoorData(doorData);
@@ -918,7 +919,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_BLOOD_ELF_COUNCIL_DOOR:
                     case GO_BLOOD_ELF_COUNCIL_DOOR_RIGHT:
                     case GO_DOODAD_ICECROWN_BLOODPRINCE_DOOR_01:
-                    case GO_DOODAD_ICECROWN_GRATE_01:
+                    //case GO_DOODAD_ICECROWN_GRATE_01:
                     case GO_GREEN_DRAGON_BOSS_ENTRANCE:
                     case GO_GREEN_DRAGON_BOSS_EXIT:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_02:
@@ -1078,6 +1079,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (GetBossState(DATA_LORD_MARROWGAR) == DONE)
                             go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                         break;
+                    case GO_DOODAD_ICECROWN_GRATE_01:
+                        BloodQueenGrateGUID = go->GetGUID();
+                        break;
                     default:
                         break;
                 }
@@ -1099,7 +1103,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_BLOOD_ELF_COUNCIL_DOOR:
                     case GO_BLOOD_ELF_COUNCIL_DOOR_RIGHT:
                     case GO_DOODAD_ICECROWN_BLOODPRINCE_DOOR_01:
-                    case GO_DOODAD_ICECROWN_GRATE_01:
+                    //case GO_DOODAD_ICECROWN_GRATE_01:
                     case GO_GREEN_DRAGON_BOSS_ENTRANCE:
                     case GO_GREEN_DRAGON_BOSS_EXIT:
                     case GO_DOODAD_ICECROWN_ROOSTPORTCULLIS_01:
@@ -1238,6 +1242,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return SaurfangZeppelinGUID;
                     case DATA_SE_VARIAN_WRYNN:
                         return vrynnGUID;
+                    case DATA_BLOOD_QUEEN_GRATE:
+                        return BloodQueenGrateGUID;
                     default:
                         break;
                 }
@@ -2156,6 +2162,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint32 LichKingRandomWhisperTimer;
             uint32 DarkwhisperElevatorTimer;
             uint64 ScourgeTransporterFirstGUID;
+            uint64 BloodQueenGrateGUID;
 
             EventMap Events;
             TaskScheduler Scheduler;
