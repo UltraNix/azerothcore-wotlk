@@ -451,21 +451,35 @@ class boss_lady_deathwhisper : public CreatureScript
                         events.RepeatEvent(45000);
                         break;
                     case EVENT_SPELL_SUMMON_SHADE:
-                        {
-                            uint8 count = 1;
-                            if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-                                count = 2;
-                            else if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                                count = 3;
+                    {
+                        uint8 count = 1;
+                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                            count = 2;
+                        else if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                            count = 3;
 
-                            std::list<Unit*> targets;
-                            SelectTargetList(targets, NonTankTargetSelector(me, true), count, SELECT_TARGET_RANDOM);
-                            if (!targets.empty())
-                                for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                                    me->CastSpell(*itr, SPELL_SUMMON_SHADE, true);
+                        std::vector<uint64> targets;
+                        ThreatContainer::StorageType const& threatlist = me->getThreatManager().getThreatList();
+                        if (threatlist.empty())
+                            break;
+
+                        for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+                            targets.push_back((*itr)->getUnitGuid());
+
+                        if (!me->GetVictim() || targets.empty())
+                            break;
+
+                        targets.erase(std::remove(targets.begin(), targets.end(), me->GetVictim()->GetGUID()), targets.end());
+                        Trinity::Containers::RandomResize(targets, count);
+
+                        for (auto & guid : targets)
+                        {
+                            if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
+                                me->CastSpell(target, SPELL_SUMMON_SHADE, true);
                         }
-                        events.RepeatEvent(12000);
-                        break;
+                    }
+                    events.RepeatEvent(12000);
+                    break;
                 }
 
                 if (me->HasAura(SPELL_MANA_BARRIER))
@@ -916,10 +930,25 @@ public:
             me->AddAura(SPELL_VENGEFUL_BLAST_PASSIVE, me);
         }
 
-        void AttackStart(Unit* who)
+        void AttackStart(Unit* /*who*/)
         {
-            if (!who)
+            bool noValidTarget = false;
+            if (!me->ToTempSummon())
+                noValidTarget = true;
+
+            if (!me->ToTempSummon()->GetSummoner())
+                noValidTarget = true;
+
+            if (me->ToTempSummon()->GetSummoner()->IsCreature())
+                noValidTarget = true;
+
+            if (noValidTarget)
+            {
+                me->DespawnOrUnsummon();
                 return;
+            }
+
+            Unit* who = me->ToTempSummon()->GetSummoner();
             ScriptedAI::AttackStart(who);
             if (!targetGUID)
             {
