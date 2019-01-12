@@ -1289,7 +1289,7 @@ class npc_ball_of_flame : public CreatureScript
                     if (me->GetEntry() == NPC_BALL_OF_INFERNO_FLAME)
                         me->CastSpell(me, SPELL_BALL_OF_FLAMES_PERIODIC, true);
                     me->ClearUnitState(UNIT_STATE_CASTING | UNIT_STATE_STUNNED);
-                    me->AddThreat(target, 1000.0f);
+                    me->AddThreat(target, 1000000.0f);
                     me->SetCanFly(true);
                     me->SetDisableGravity(true);
                     me->SetHover(true);
