@@ -1479,6 +1479,7 @@ struct gunship_npc_AI : public ScriptedAI
     gunship_npc_AI(Creature* creature) : ScriptedAI(creature), Instance(creature->GetInstanceScript()), Slot(NULL), Index(uint32(-1))
     {
         me->SetRegeneratingHealth(false);
+        burningPitchTimer = urand(12000, 15000);
     }
 
     void SetData(uint32 type, uint32 data)
@@ -1534,12 +1535,14 @@ protected:
     InstanceScript* Instance;
     SlotInfo const* Slot;
     uint32 Index;
+    uint32 burningPitchTimer;
 };
 
 struct npc_gunship_boarding_addAI : public ScriptedAI
 {
     npc_gunship_boarding_addAI(Creature* creature) : ScriptedAI(creature), Instance(creature->GetInstanceScript()), Slot(NULL), Index(uint32(-1))
     {
+        burningPitchTimer = urand(12000, 15000);
         anyValid = true;
         checkTimer = 1000;
         _usedDesperateResolve = false;
@@ -1649,6 +1652,7 @@ protected:
     InstanceScript* Instance;
     SlotInfo const* Slot;
     uint32 Index;
+    uint32 burningPitchTimer;
 };
 
 class npc_gunship_boarding_leader : public CreatureScript
@@ -1658,9 +1662,7 @@ class npc_gunship_boarding_leader : public CreatureScript
 
         struct npc_gunship_boarding_leaderAI : public npc_gunship_boarding_addAI
         {
-            npc_gunship_boarding_leaderAI(Creature* creature) : npc_gunship_boarding_addAI(creature)
-            {
-            }
+            npc_gunship_boarding_leaderAI(Creature* creature) : npc_gunship_boarding_addAI(creature) { }
 
             void EnterCombat(Unit* target)
             {
@@ -1673,18 +1675,31 @@ class npc_gunship_boarding_leader : public CreatureScript
             {
                 if (Instance->GetBossState(DATA_ICECROWN_GUNSHIP_BATTLE) != IN_PROGRESS)
                     return;
+
                 if (me->GetReactState() == REACT_PASSIVE)
                     return;
+
                 npc_gunship_boarding_addAI::UpdateAI(diff);
                 _events.Update(diff);
                 UpdateVictim();
+
                 if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_BLADESTORM))
                     return;
+
                 if (!anyValid)
                 {
                     TriggerBurningPitch(me);
                     return;
                 }
+
+                if (burningPitchTimer <= diff)
+                {
+                    TriggerBurningPitch(me);
+                    burningPitchTimer = urand(12000, 15000);
+                    return;
+                }
+                else burningPitchTimer -= diff;
+
                 if (!me->GetVictim())
                     return;
                 switch (_events.ExecuteEvent())
@@ -1730,20 +1745,34 @@ class npc_gunship_boarding_add : public CreatureScript
             {
                 if (Instance->GetBossState(DATA_ICECROWN_GUNSHIP_BATTLE) != IN_PROGRESS)
                     return;
+
                 if (me->GetReactState() == REACT_PASSIVE)
                     return;
+
                 npc_gunship_boarding_addAI::UpdateAI(diff);
                 _events.Update(diff);
                 UpdateVictim();
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
+
                 if (!anyValid)
                 {
                     TriggerBurningPitch(me);
                     return;
                 }
+
+                if (burningPitchTimer <= diff)
+                {
+                    TriggerBurningPitch(me);
+                    burningPitchTimer = urand(12000, 15000);
+                    return;
+                }
+                else burningPitchTimer -= diff;
+
                 if (!me->GetVictim())
                     return;
+
                 DoMeleeAttackIfReady();
             }
 
@@ -1847,8 +1876,10 @@ class npc_gunship_gunner : public CreatureScript
             {
                 if (Instance->GetBossState(DATA_ICECROWN_GUNSHIP_BATTLE) != IN_PROGRESS)
                     return;
+
                 if (me->GetReactState() == REACT_PASSIVE)
                     return;
+
                 if (checkTimer <= diff)
                 {
                     checkTimer = 1000;
@@ -1866,16 +1897,30 @@ class npc_gunship_gunner : public CreatureScript
                 }
                 else
                     checkTimer -= diff;
+
                 UpdateVictim();
+
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
+
                 if (!anyValid)
                 {
+                    std::cout << "weszlo w pitch, brak valid targetow\n";
                     TriggerBurningPitch(me);
                     return;
                 }
+
+                if (burningPitchTimer <= diff)
+                {
+                    TriggerBurningPitch(me);
+                    burningPitchTimer = urand(12000, 15000);
+                    return;
+                }
+                else burningPitchTimer -= diff;
+
                 if (!me->GetVictim())
                     return;
+
                 DoSpellAttackIfReady(me->GetEntry() == NPC_SKYBREAKER_RIFLEMAN ? SPELL_SHOOT : SPELL_HURL_AXE);
             }
 
