@@ -10,6 +10,9 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "SpellInfo.h"
 #include "Player.h"
 
+#include <algorithm>
+#include <random>
+
 enum ScriptTexts
 {
     // Lady Deathwhisper
@@ -453,9 +456,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     case EVENT_SPELL_SUMMON_SHADE:
                     {
                         uint8 count = 1;
-                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
-                            count = 2;
-                        else if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                             count = 3;
 
                         std::vector<uint64> targets;
@@ -464,17 +465,38 @@ class boss_lady_deathwhisper : public CreatureScript
                             break;
 
                         for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                            targets.push_back((*itr)->getUnitGuid());
-
-                        if (!me->GetVictim() || targets.empty())
-                            break;
-
-                        targets.erase(std::remove(targets.begin(), targets.end(), me->GetVictim()->GetGUID()), targets.end());
-                        Trinity::Containers::RandomResize(targets, count);
-
-                        for (auto & guid : targets)
                         {
-                            if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
+                            if (Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
+                            {
+                                if (Player* player = unit->ToPlayer())
+                                {
+                                    if (!me->GetVictim())
+                                        break;
+
+                                    if (player->GetGUID() == me->GetVictim()->GetGUID())
+                                        continue;
+
+                                    if (player->IsCharmed() || player->isPossessed())
+                                        continue;
+
+                                    targets.push_back((*itr)->getUnitGuid());
+                                }
+                            }
+                        }
+
+                        if (targets.empty())
+                        {
+                            events.RepeatEvent(12000);
+                            break;
+                        }
+
+                        auto rng = std::default_random_engine{};
+                        std::shuffle(targets.begin(), targets.end(), rng);
+
+                        for (auto i = 0; i < count; ++i)
+                        {
+                            std::rotate(targets.begin(), targets.begin() + 1, targets.end());
+                            if (Unit* target = ObjectAccessor::GetUnit(*me, targets.at(0)))
                                 me->CastSpell(target, SPELL_SUMMON_SHADE, true);
                         }
                     }
