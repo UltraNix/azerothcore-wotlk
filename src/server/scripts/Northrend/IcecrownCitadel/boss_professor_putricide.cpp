@@ -1718,6 +1718,47 @@ class spell_putricide_regurgitated_ooze : public SpellScriptLoader
         }
 };
 
+static bool IsPutricideTypeOfCreature(uint32 entry)
+{
+    switch (entry)
+    {
+        case 38285:
+        case 37672:
+        case 38159:
+        case 37697:
+        case 37562:
+        case 37690:
+            return true;
+    }
+
+    return false;
+};
+
+class spell_putricide_tear_gas_cancel_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_putricide_tear_gas_cancel_SpellScript);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([&](WorldObject* object) -> bool
+        {
+            if (object->ToCreature())
+                if (object->ToCreature()->IsPet() || IsPutricideTypeOfCreature(object->ToCreature()->GetEntry()))
+                    return false;
+
+            if (object->ToPlayer())
+                return false;
+
+            return true;
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_putricide_tear_gas_cancel_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+    }
+};
+
 void AddSC_boss_professor_putricide()
 {
     new boss_professor_putricide();
@@ -1742,4 +1783,6 @@ void AddSC_boss_professor_putricide()
     new spell_putricide_mutated_transformation_dmg();
     new spell_putricide_eat_ooze();
     new spell_putricide_regurgitated_ooze();
+
+    new SpellScriptLoaderEx<spell_putricide_tear_gas_cancel_SpellScript>("spell_putricide_tear_gas_cancel");
 }
