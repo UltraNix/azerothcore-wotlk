@@ -352,6 +352,36 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 target->CastSpell(target, SPELL_PRESENCE_OF_THE_DARKFALLEN_SE, TRIGGERED_FULL_MASK);
             }
 
+            uint32 GetBiteIdForDifficulty() const
+            {
+                switch (me->GetMap()->GetDifficulty())
+                {
+                    case RAID_DIFFICULTY_10MAN_NORMAL:
+                        return 70867;
+                    case RAID_DIFFICULTY_10MAN_HEROIC:
+                        return 71532;
+                    case RAID_DIFFICULTY_25MAN_NORMAL:
+                        return 71473;
+                    case RAID_DIFFICULTY_25MAN_HEROIC:
+                        return 71533;
+                }
+
+                return 0;
+            }
+
+            bool IsSomeoneAfflictedByVampiricBite() const
+            {
+                auto const& players = me->GetMap()->GetPlayers();
+                return std::any_of(players.begin(), players.end(), [&](auto const& ref) -> bool
+                {
+                    Player* player = ref.GetSource();
+                    if (!player)
+                        return false;
+
+                    return player->HasAura(GetBiteIdForDifficulty());
+                });
+            }
+
             void UpdateAI(uint32 diff)
             {
                 if (!UpdateVictim() || !CheckInRoom())
@@ -370,13 +400,20 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         me->CastSpell(me, SPELL_BERSERK, true);
                         break;
                     case EVENT_VAMPIRIC_BITE:
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, [this](Unit* tar) { return tar->IsPlayer() && me->GetVictim()->GetGUID() != tar->GetGUID() && tar->GetGUID() != _offtankGUID; }))
-                                CastBite(target);
-                            else if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                CastBite(tar);
-                        }
-                        break;
+                    {
+                        if (IsSomeoneAfflictedByVampiricBite())
+                            break;
+
+                        if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, [this](Unit* tar) { return tar->IsPlayer() && me->GetVictim()->GetGUID() != tar->GetGUID() && tar->GetGUID() != _offtankGUID; }))
+                            CastBite(target);
+                        else if (Unit* tar = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            CastBite(tar);
+
+                        //! Bite sometimes fail apparently, i cannot reproduce that issue locally
+                        //! just repeat again in 5 seconds, IsSomeoneAFflictedByVampiricBite will break the event if it finds anything
+                        events.ScheduleEvent(EVENT_VAMPIRIC_BITE, 5000);
+                    }
+                    break;
                     case EVENT_BLOOD_MIRROR:
                         if (me->GetVictim())
                         {
