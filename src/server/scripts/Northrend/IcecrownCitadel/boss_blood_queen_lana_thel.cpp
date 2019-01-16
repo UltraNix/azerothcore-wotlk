@@ -10,6 +10,8 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "GridNotifiers.h"
 #include "icecrown_citadel.h"
 
+#include <algorithm>
+
 enum Texts
 {
     SAY_AGGRO                   = 0,
@@ -412,8 +414,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         //! Bite sometimes fail apparently, i cannot reproduce that issue locally
                         //! just repeat again in 5 seconds, IsSomeoneAFflictedByVampiricBite will break the event if it finds anything
                         events.ScheduleEvent(EVENT_VAMPIRIC_BITE, 5000);
+                        break;
                     }
-                    break;
                     case EVENT_BLOOD_MIRROR:
                         if (me->GetVictim())
                         {
