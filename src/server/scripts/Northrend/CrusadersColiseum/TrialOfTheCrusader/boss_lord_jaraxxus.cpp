@@ -105,8 +105,8 @@ struct boss_jaraxxusAI : public BossAI
         events.RescheduleEvent(EVENT_SPELL_NETHER_POWER, urand(25000, 45000));
         events.RescheduleEvent(EVENT_SPELL_LEGION_FLAME, 30000);
         events.RescheduleEvent(EVENT_SUMMON_NETHER_PORTAL, 20000); // it schedules EVENT_SUMMON_VOLCANO
-        if (IsHeroic() && Is25ManRaid())
-            events.RescheduleEvent(EVENT_SPELL_TOUCH_OF_JARAXXUS, 10000);
+        //if (IsHeroic() && Is25ManRaid())
+            //events.RescheduleEvent(EVENT_SPELL_TOUCH_OF_JARAXXUS, 10000);
 
         Talk(SAY_AGGRO);
         instance->SetData(TYPE_JARAXXUS, IN_PROGRESS);
@@ -256,7 +256,7 @@ struct boss_jaraxxusAI : public BossAI
         if (who->GetTypeId() == TYPEID_PLAYER)
             Talk(SAY_KILL_PLAYER);
     }
-    
+
 private:
     uint32 _fightTimer;
 };
