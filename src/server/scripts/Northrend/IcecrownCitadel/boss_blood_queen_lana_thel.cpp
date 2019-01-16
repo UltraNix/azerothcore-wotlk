@@ -380,7 +380,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     if (!player)
                         return false;
 
-                    return player->HasAura(GetBiteIdForDifficulty());
+                    return player->HasAura(70867) || player->HasAura(71532) || player->HasAura(71473) || player->HasAura(71533);
+                    //return player->HasAura(GetBiteIdForDifficulty());
                 });
             }
 
