@@ -1479,7 +1479,7 @@ struct gunship_npc_AI : public ScriptedAI
     gunship_npc_AI(Creature* creature) : ScriptedAI(creature), Instance(creature->GetInstanceScript()), Slot(NULL), Index(uint32(-1))
     {
         me->SetRegeneratingHealth(false);
-        burningPitchTimer = urand(12000, 15000);
+        burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
     }
 
     void SetData(uint32 type, uint32 data)
@@ -1542,7 +1542,7 @@ struct npc_gunship_boarding_addAI : public ScriptedAI
 {
     npc_gunship_boarding_addAI(Creature* creature) : ScriptedAI(creature), Instance(creature->GetInstanceScript()), Slot(NULL), Index(uint32(-1))
     {
-        burningPitchTimer = urand(12000, 15000);
+        burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
         anyValid = true;
         checkTimer = 1000;
         _usedDesperateResolve = false;
@@ -1695,7 +1695,7 @@ class npc_gunship_boarding_leader : public CreatureScript
                 if (burningPitchTimer <= diff)
                 {
                     TriggerBurningPitch(me);
-                    burningPitchTimer = urand(12000, 15000);
+                    burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
                     return;
                 }
                 else burningPitchTimer -= diff;
@@ -1765,7 +1765,7 @@ class npc_gunship_boarding_add : public CreatureScript
                 if (burningPitchTimer <= diff)
                 {
                     TriggerBurningPitch(me);
-                    burningPitchTimer = urand(12000, 15000);
+                    burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
                     return;
                 }
                 else burningPitchTimer -= diff;
@@ -1905,7 +1905,6 @@ class npc_gunship_gunner : public CreatureScript
 
                 if (!anyValid)
                 {
-                    std::cout << "weszlo w pitch, brak valid targetow\n";
                     TriggerBurningPitch(me);
                     return;
                 }
@@ -1913,7 +1912,7 @@ class npc_gunship_gunner : public CreatureScript
                 if (burningPitchTimer <= diff)
                 {
                     TriggerBurningPitch(me);
-                    burningPitchTimer = urand(12000, 15000);
+                    burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
                     return;
                 }
                 else burningPitchTimer -= diff;
