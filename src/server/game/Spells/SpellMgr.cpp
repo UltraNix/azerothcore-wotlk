@@ -6481,85 +6481,34 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             break;
 
-            //! remove when boost is over
-            // Trial of the Crusader, Twin Valkyr, Touch of Light/Darkness, Light/Dark Surge
-        case 65950: // light 0
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
+       /* ! Touch of light/darkness
+        ! Removed EFFECT_1 (didnt exist anyway, just making sure) and EFFECT_2 because
+        ! it caused more visuals to be sent even when targets were filtered
+        ! i suspected its caused by effect execution order which is messed up*/
+        case 65950: // Touch of light 10 normal
+        case 67297: // Touch of light 10 heroic
+            spellInfo->MaxAffectedTargets = 1;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
-        case 67296: // light 1
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
+        case 67296: // touch of light 25 normal
+        case 67298: // Touch of light 25 heroic
+            spellInfo->MaxAffectedTargets = 2;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
-        case 67297: // light 2
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
+        case 66001: // Touch of darkness 10 normal
+        case 67282: // Touch of darkness 10 heroic
+            spellInfo->MaxAffectedTargets = 1;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
-        case 67298: // light 3
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
+        case 67281: // Touch of darkness 25 normal
+        case 67283: // Touch of darkness 25 heroic
+            spellInfo->MaxAffectedTargets = 2;
+            spellInfo->Effect[1] = 0;
+            spellInfo->Effect[2] = 0;
             break;
-        case 66001: // dark 0
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
-        case 67281: // dark 1
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
-        case 67282: // dark 2
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
-        case 67283: // dark 3
-            //spellInfo->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DUMMY;
-            spellInfo->EffectImplicitTargetA[0] = 6;
-            spellInfo->EffectImplicitTargetB[0] = 0;
-            spellInfo->Effect[1] = 0; spellInfo->Effect[2] = 0;
-            break;
-        //! Touch of light/darkness
-        //! Removed EFFECT_1 (didnt exist anyway, just making sure) and EFFECT_2 because
-        //! it caused more visuals to be sent even when targets were filtered
-        //! i suspected its caused by effect execution order which is messed up
-            //! Commented out during boost
-        //case 65950: // Touch of light 10 normal
-        //case 67297: // Touch of light 10 heroic
-        //    spellInfo->MaxAffectedTargets = 1;
-        //    spellInfo->Effect[1] = 0;
-        //    spellInfo->Effect[2] = 0;
-        //    break;
-        //case 67296: // touch of light 25 normal
-        //case 67298: // Touch of light 25 heroic
-        //    spellInfo->MaxAffectedTargets = 2;
-        //    spellInfo->Effect[1] = 0;
-        //    spellInfo->Effect[2] = 0;
-        //    break;
-        //case 66001: // Touch of darkness 10 normal
-        //case 67282: // Touch of darkness 10 heroic
-        //    spellInfo->MaxAffectedTargets = 1;
-        //    spellInfo->Effect[1] = 0;
-        //    spellInfo->Effect[2] = 0;
-        //    break;
-        //case 67281: // Touch of darkness 25 normal
-        //case 67283: // Touch of darkness 25 heroic
-        //    spellInfo->MaxAffectedTargets = 2;
-        //    spellInfo->Effect[1] = 0;
-        //    spellInfo->Effect[2] = 0;
-        //    break;
 
         // Trial of the Crusader, Twin Valkyr, Twin's Pact
         case 65875: case 67303: case 67304: case 67305: case 65876: case 67306: case 67307: case 67308:
