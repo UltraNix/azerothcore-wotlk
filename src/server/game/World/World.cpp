@@ -3179,7 +3179,7 @@ void World::ResetWeeklyQuests()
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetWeeklyQuestStatus();
 
-    m_NextWeeklyQuestReset = GetNextTimeWithDayAndHourAndMinute(4, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
+    m_NextWeeklyQuestReset = GetNextTimeWithDayAndHourAndMinute(3, (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 9 : 6), (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? 30 : 0));
     sWorld->setWorldState(WS_WEEKLY_QUEST_RESET_TIME, uint64(m_NextWeeklyQuestReset));
 
     // change available weeklies
