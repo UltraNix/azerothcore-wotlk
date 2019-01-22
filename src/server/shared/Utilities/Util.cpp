@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -21,7 +21,6 @@
 #include "utf8.h"
 #include "Errors.h" // for ASSERT
 #include <ace/TSS_T.h>
-#include <random>
 
 std::mt19937& GetGenerator()
 {

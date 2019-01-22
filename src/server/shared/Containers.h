@@ -106,6 +106,19 @@ namespace Trinity
         {
             container.erase(std::remove_if(std::begin(container), std::end(container), pred), std::end(container));
         }
+
+         /**
+         * @fn void Trinity::Containers::RandomShuffle(C& container)
+         *
+         * @brief Reorder the elements of the container randomly.
+         *
+         * @param container Container to reorder
+         */
+        template <class C>
+        void RandomShuffle(C& container)
+        {
+            std::shuffle(container.begin(), container.end(), GetGenerator());
+        }
     }
     //! namespace Containers
 }

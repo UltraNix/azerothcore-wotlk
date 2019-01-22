@@ -676,7 +676,13 @@ class spell_marrowgar_bone_slice : public SpellScriptLoader
 
             void CountTargets(std::list<WorldObject*>& targets)
             {
-                _targetCount = std::min<uint32>(targets.size(), GetSpellInfo()->MaxAffectedTargets);
+                //! ICC Boost
+                uint32 maxTargets = GetSpellInfo()->MaxAffectedTargets;
+                if (GetCaster())
+                    if (GetCaster()->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                        maxTargets = 5;
+
+                _targetCount = std::min<uint32>(targets.size(), maxTargets);
             }
 
             void SplitDamage()

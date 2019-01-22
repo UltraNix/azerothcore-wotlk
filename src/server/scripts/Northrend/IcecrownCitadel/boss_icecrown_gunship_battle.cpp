@@ -359,6 +359,7 @@ class BattleExperienceEvent : public BasicEvent
 public:
     static uint32 const ExperiencedSpells[5];
     static uint32 const ExperiencedTimes[5];
+    static uint32 const ExperiencedTimesHeroic[5];
 
     BattleExperienceEvent(Creature* creature) : _creature(creature), _level(0) { }
 
@@ -371,9 +372,10 @@ public:
         ++_level;
 
         _creature->CastSpell(_creature, ExperiencedSpells[_level], true);
+        bool Is25ManHeroic = _creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ? true : false;
         if (_level < (_creature->GetMap()->IsHeroic() ? 4 : 3))
         {
-            _creature->m_Events.AddEvent(this, timer + ExperiencedTimes[_level]);
+            _creature->m_Events.AddEvent(this, timer + Is25ManHeroic ? ExperiencedTimesHeroic[_level] : ExperiencedTimes[_level]);
             return false;
         }
 
@@ -387,6 +389,7 @@ private:
 
 uint32 const BattleExperienceEvent::ExperiencedSpells[5] = { 0, SPELL_EXPERIENCED, SPELL_VETERAN, SPELL_ELITE, SPELL_ADDS_BERSERK };
 uint32 const BattleExperienceEvent::ExperiencedTimes[5] = { 100000, 70000, 60000, 90000, 0 };
+uint32 const BattleExperienceEvent::ExperiencedTimesHeroic[5] = { 30000, 60000, 90000, 120000, 0 };
 
 class PassengerController
 {

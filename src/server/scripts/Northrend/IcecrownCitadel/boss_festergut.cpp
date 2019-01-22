@@ -242,9 +242,58 @@ struct boss_festergutAI : public BossAI
                     DoCastSelf(SPELL_GASTRIC_BLOAT, true);
                     break;
                 case EVENT_FESTERGUT_GOO:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
-                        if (Creature* professor = GetPutricide())
-                            professor->CastSpell(target, SPELL_MALLABLE_GOO_H, true);
+                    if (me->GetMap()->GetDifficulty() != RAID_DIFFICULTY_25MAN_HEROIC)
+                    {
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                            if (Creature* professor = GetPutricide())
+                                professor->CastSpell(target, SPELL_MALLABLE_GOO_H, true);
+                    }
+                    //! ICC Boost
+                    else
+                    {
+                        std::vector<uint64> targets;
+                        ThreatContainer::StorageType const& threatlist = me->getThreatManager().getThreatList();
+                        if (threatlist.empty())
+                        {
+                            events.Repeat(15s, 20s);
+                            break;
+                        }
+
+                        for (ThreatContainer::StorageType::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+                        {
+                            if (Unit* unit = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
+                            {
+                                if (Player* player = unit->ToPlayer())
+                                {
+                                    if (!me->GetVictim())
+                                        break;
+
+                                    if (player->GetGUID() == me->GetVictim()->GetGUID())
+                                        continue;
+
+                                    if (player->IsCharmed() || player->isPossessed())
+                                        continue;
+
+                                    targets.push_back((*itr)->getUnitGuid());
+                                }
+                            }
+                        }
+
+                        if (targets.empty())
+                        {
+                            events.Repeat(15s, 20s);
+                            break;
+                        }
+
+                        Trinity::Containers::RandomShuffle(targets);
+                        for (auto i = 0; i < 3; ++i)
+                        {
+                            std::rotate(targets.begin(), targets.begin() + 1, targets.end());
+                            if (Unit* target = ObjectAccessor::GetUnit(*me, targets.at(0)))
+                                if (Creature* professor = GetPutricide())
+                                    professor->CastSpell(target, SPELL_MALLABLE_GOO_H, true);
+                        }
+                    }
                     events.Repeat(15s, 20s);
                 default:
                     break;

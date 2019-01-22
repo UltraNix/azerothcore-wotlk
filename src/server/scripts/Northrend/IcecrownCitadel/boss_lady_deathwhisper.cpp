@@ -456,8 +456,11 @@ class boss_lady_deathwhisper : public CreatureScript
                     case EVENT_SPELL_SUMMON_SHADE:
                     {
                         uint8 count = 1;
-                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                             count = 3;
+                        //! ICC Boost
+                        else if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                            count = 5;
 
                         std::vector<uint64> targets;
                         ThreatContainer::StorageType const& threatlist = me->getThreatManager().getThreatList();
@@ -490,9 +493,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             break;
                         }
 
-                        auto rng = std::default_random_engine{};
-                        std::shuffle(targets.begin(), targets.end(), rng);
-
+                        Trinity::Containers::RandomShuffle(targets);
                         for (auto i = 0; i < count; ++i)
                         {
                             std::rotate(targets.begin(), targets.begin() + 1, targets.end());
