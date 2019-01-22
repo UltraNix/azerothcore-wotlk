@@ -1522,7 +1522,8 @@ struct gunship_npc_AI : public ScriptedAI
         if (type == POINT_MOTION_TYPE && pointId == EVENT_CHARGE_PREPATH && Slot)
         {
             me->SetFacingTo(Slot->TargetPosition.GetOrientation());
-            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(BattleExperienceEvent::ExperiencedTimes[0]));
+            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ?
+                                  BattleExperienceEvent::ExperiencedTimesHeroic[0] : BattleExperienceEvent::ExperiencedTimes[0]));
             me->CastSpell(me, SPELL_BATTLE_EXPERIENCE, true);
             me->SetReactState(REACT_AGGRESSIVE);
         }
@@ -1588,7 +1589,9 @@ struct npc_gunship_boarding_addAI : public ScriptedAI
         if (type == POINT_MOTION_TYPE && pointId == EVENT_CHARGE_PREPATH && Slot)
         {
             me->SetFacingTo(Slot->TargetPosition.GetOrientation());
-            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(BattleExperienceEvent::ExperiencedTimes[0]));
+            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ?
+                                  BattleExperienceEvent::ExperiencedTimesHeroic[0] : BattleExperienceEvent::ExperiencedTimes[0]));
+            //me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(BattleExperienceEvent::ExperiencedTimes[0]));
             me->CastSpell(me, SPELL_BATTLE_EXPERIENCE, true);
             me->SetReactState(REACT_AGGRESSIVE);
 
