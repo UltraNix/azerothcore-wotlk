@@ -135,6 +135,7 @@ struct boss_rotfaceAI : public BossAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         _infectionCooldown = 14000;
         memset(&_oozeFloodDummyGUIDs, 0, sizeof(_oozeFloodDummyGUIDs));
         _oozeFloodStage = 0;
@@ -151,6 +152,7 @@ struct boss_rotfaceAI : public BossAI
             return;
         }
 
+        _fightTimer = getMSTime();
         // schedule events
         events.Reset();
         events.ScheduleEvent(EVENT_SLIME_SPRAY, 20s);
@@ -186,13 +188,14 @@ struct boss_rotfaceAI : public BossAI
         }
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* killer) override
     {
         instance->DoRemoveAurasDueToSpellOnPlayers(sSpellMgr->GetSpellIdForDifficulty(SPELL_MUTATED_INFECTION, me));
         _JustDied();
         Talk(SAY_DEATH);
         if (Creature* professor = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
             professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
+        CheckCreatureRecord(killer, static_cast<uint32>(95800 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
     }
 
     void JustReachedHome() override
@@ -328,6 +331,7 @@ struct boss_rotfaceAI : public BossAI
         uint32 _infectionCooldown;
         uint64 _oozeFloodDummyGUIDs[4][2];
         uint8 _oozeFloodStage;
+        uint32 _fightTimer;
 };
 
 struct npc_little_oozeAI : public ScriptedAI

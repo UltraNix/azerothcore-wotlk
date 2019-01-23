@@ -268,6 +268,7 @@ class boss_sindragosa : public CreatureScript
 
             void Reset()
             {
+                _fightTimer = 0;
                 _isBelow20Pct = false;
                 _isThirdPhase = false;
                 _bombCount = 0;
@@ -293,7 +294,7 @@ class boss_sindragosa : public CreatureScript
                     BossAI::MoveInLineOfSight(who);
             }
 
-            void JustDied(Unit* /* killer */)
+            void JustDied(Unit* killer)
             {
                 _JustDied();
                 Talk(SAY_DEATH);
@@ -307,6 +308,7 @@ class boss_sindragosa : public CreatureScript
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_UNTARGETABLE);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_DAMAGE);
                 instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ASPHYXIATION);
+                CheckCreatureRecord(killer, static_cast<uint32>(95900 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void EnterCombat(Unit* victim)
@@ -318,6 +320,7 @@ class boss_sindragosa : public CreatureScript
                     return;
                 }
 
+                _fightTimer = getMSTime();
                 _isBelow20Pct = false;
                 _isThirdPhase = false;
                 _bombCount = 0;
@@ -696,6 +699,7 @@ class boss_sindragosa : public CreatureScript
             uint8 _mysticBuffetStack;
             bool _isBelow20Pct;
             bool _isThirdPhase;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const

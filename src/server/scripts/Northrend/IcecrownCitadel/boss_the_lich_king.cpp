@@ -613,9 +613,11 @@ class boss_the_lich_king : public CreatureScript
             uint32 _lastTalkTimeBuff;
             bool _bFrostmournePhase;
             bool _bFordringMustFallYell;
+            uint32 _fightTimer;
 
             void Reset()
             {
+                _fightTimer = 0;
                 _phase = PHASE_NONE;
                 _necroticPlagueStack = 0;
                 _vileSpiritExplosions = 0;
@@ -632,11 +634,12 @@ class boss_the_lich_king : public CreatureScript
                     me->SetStandState(UNIT_STAND_STATE_SIT);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* killer)
             {
                 _JustDied();
                 DoAction(ACTION_RESTORE_LIGHT);
                 me->PlayDirectSound(17374);
+                CheckCreatureRecord(killer, static_cast<uint32>(96000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void EnterCombat(Unit* target)
@@ -648,6 +651,7 @@ class boss_the_lich_king : public CreatureScript
                     return;
                 }
 
+                _fightTimer = getMSTime();
                 _phase = PHASE_ONE;
                 instance->SetBossState(DATA_THE_LICH_KING, IN_PROGRESS);
                 me->setActive(true);

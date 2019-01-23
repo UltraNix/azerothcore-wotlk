@@ -161,9 +161,11 @@ class boss_blood_queen_lana_thel : public CreatureScript
             std::set<uint64> _bloodboltedPlayers;
             std::set<uint64> _vampires;
             bool bEnteredCombat; // needed for failing an attempt in JustReachedHome()
+            uint32 _fightTimer;
 
             void Reset()
             {
+                _fightTimer = 0;
                 _landing = false;
                 _creditBloodQuickening = false;
                 _killMinchar = false;
@@ -196,6 +198,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     return;
                 }
 
+                _fightTimer = getMSTime();
                 bEnteredCombat = true;
                 me->CastSpell(me, SPELL_SHROUD_OF_SORROW, true);
                 me->CastSpell(me, SPELL_FRENZIED_BLOODTHIRST_VISUAL, true);
@@ -250,6 +253,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         minchar->GetMotionMaster()->MoveCharge(4629.3711f, 2782.6089f, 401.5301f, SPEED_CHARGE/3.0f);
                     }
                 }
+                CheckCreatureRecord(killer, static_cast<uint32>(95100 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void DamageTaken(Unit*, uint32& damage, DamageEffectType /*damageEffectType*/, SpellSchoolMask /*mask*/) override

@@ -99,9 +99,11 @@ class boss_lord_marrowgar : public CreatureScript
             bool _introDone;
             bool _boneSlice;
             uint64 _lastBoneSliceTargets[3];
+            uint32 _fightTimer;
 
             void Reset()
             {
+                _fightTimer = 0;
                 me->SetReactState(REACT_AGGRESSIVE);
                 _Reset();
                 events.ScheduleEvent(EVENT_ENABLE_BONE_SLICE, 10000);
@@ -118,6 +120,7 @@ class boss_lord_marrowgar : public CreatureScript
 
             void EnterCombat(Unit* /*who*/)
             {
+                _fightTimer = getMSTime();
                 Talk(SAY_AGGRO);
                 me->setActive(true);
                 DoZoneInCombat();
@@ -262,10 +265,11 @@ class boss_lord_marrowgar : public CreatureScript
                 events.ScheduleEvent(EVENT_SPELL_COLDFLAME_BONE_STORM, 0);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* killer)
             {
                 Talk(SAY_DEATH);
                 _JustDied();
+                CheckCreatureRecord(killer, static_cast<uint32>(95600 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void JustReachedHome()

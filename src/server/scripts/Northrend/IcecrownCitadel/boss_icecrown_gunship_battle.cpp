@@ -186,7 +186,9 @@ enum EncounterActions
     ACTION_SHIP_VISITS_SELF     = 5,
     ACTION_SHIP_VISITS_ENEMY    = 6,
     ACTION_SHIP_VISITS_SELF_2   = 7,
-    ACTION_SHIP_VISITS_ENEMY_2  = 8
+    ACTION_SHIP_VISITS_ENEMY_2  = 8,
+
+    DATA_GUNSHIP_VICTORY        = 100
 };
 
 Position const SkybreakerAddsSpawnPos = { 15.91131f, 0.0f, 20.4628f, M_PI };
@@ -528,7 +530,8 @@ class npc_gunship : public CreatureScript
 
         struct npc_gunshipAI : public NullCreatureAI
         {
-            npc_gunshipAI(Creature* creature) : NullCreatureAI(creature), _instance(creature->GetInstanceScript()), _teamIdInInstance(TeamId(creature->GetInstanceScript()->GetData(DATA_TEAMID_IN_INSTANCE))), _died(false), _summonedFirstMage(false)
+            npc_gunshipAI(Creature* creature) : NullCreatureAI(creature), _instance(creature->GetInstanceScript()), _teamIdInInstance(TeamId(creature->GetInstanceScript()->GetData(DATA_TEAMID_IN_INSTANCE))),
+                _died(false), _summonedFirstMage(false), _fightTimer(0)
             {
                 me->SetRegeneratingHealth(false);
             }
@@ -562,7 +565,7 @@ class npc_gunship : public CreatureScript
                     captain->AI()->DoAction(ACTION_SPAWN_MAGE);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* killer)
             {
                 if (_died || _instance->GetBossState(DATA_ICECROWN_GUNSHIP_BATTLE) != IN_PROGRESS)
                     return;
@@ -623,7 +626,11 @@ class npc_gunship : public CreatureScript
                     textId = isVictory ? SAY_SAURFANG_VICTORY : SAY_SAURFANG_WIPE;
                 }
                 if (Creature* creature = me->FindNearestCreature(creatureEntry, 200.0f))
+                {
                     creature->AI()->Talk(textId);
+                    if (isVictory)
+                        creature->AI()->SetData(DATA_GUNSHIP_VICTORY, DATA_GUNSHIP_VICTORY);
+                }
 
                 if (isVictory)
                 {
@@ -715,6 +722,7 @@ class npc_gunship : public CreatureScript
             std::map<uint64, uint32> _shipVisits;
             bool _died;
             bool _summonedFirstMage;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -735,6 +743,7 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
         {
             npc_high_overlord_saurfang_igbAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
+                _fightTimer = 0;
                 _events.Reset();
                 _controller.ResetSlots(TEAM_HORDE, creature->GetTransport()->ToMotionTransport());
                 me->SetRegeneratingHealth(false);
@@ -792,6 +801,7 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
             {
                 if (action == ACTION_ENEMY_GUNSHIP_TALK)
                 {
+                    _fightTimer = getMSTime();
                     _instance->SetBossState(DATA_ICECROWN_GUNSHIP_BATTLE, IN_PROGRESS);
                     me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_ENCOUNTER);
 
@@ -859,6 +869,23 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
                     _controller.ClearSlot(PassengerSlots(data));
                     if (data == SLOT_FREEZE_MAGE)
                         _events.ScheduleEvent(EVENT_SUMMON_MAGE, urand(30000, 33500));
+                }
+                else if (type == DATA_GUNSHIP_VICTORY)
+                {
+                    Unit* killer = nullptr;
+                    Map::PlayerList const& pList = me->GetMap()->GetPlayers();
+                    //! find anyone and then break
+                    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                    {
+                        if (Player* player = itr->GetSource())
+                        {
+                            killer = player;
+                            break;
+                        }
+                    }
+
+                    if (killer)
+                        CheckCreatureRecord(killer, static_cast<uint32>(95400 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "Gunship Battle", 1, _fightTimer);
                 }
             }
 
@@ -1062,6 +1089,7 @@ class npc_high_overlord_saurfang_igb : public CreatureScript
             time_t _axethrowersYellCooldown;
             time_t _rocketeersYellCooldown;
             uint16 checkTimer;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const
@@ -1079,6 +1107,7 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
         {
             npc_muradin_bronzebeard_igbAI(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
             {
+                _fightTimer = 0;
                 _events.Reset();
                 _controller.ResetSlots(TEAM_ALLIANCE, creature->GetTransport()->ToMotionTransport());
                 me->SetRegeneratingHealth(false);
@@ -1138,6 +1167,7 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
                 if (action == ACTION_ENEMY_GUNSHIP_TALK)
                 {
                     _instance->SetBossState(DATA_ICECROWN_GUNSHIP_BATTLE, IN_PROGRESS);
+                    _fightTimer = getMSTime();
                     me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_ENCOUNTER);
 
                     if (Creature* saurfang = me->FindNearestCreature(NPC_IGB_HIGH_OVERLORD_SAURFANG, 200.0f))
@@ -1204,6 +1234,23 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
                     _controller.ClearSlot(PassengerSlots(data));
                     if (data == SLOT_FREEZE_MAGE)
                         _events.ScheduleEvent(EVENT_SUMMON_MAGE, urand(30000, 33500));
+                }
+                else if (type == DATA_GUNSHIP_VICTORY)
+                {
+                    Unit* killer = nullptr;
+                    Map::PlayerList const& pList = me->GetMap()->GetPlayers();
+                    //! find anyone and then break
+                    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                    {
+                        if (Player* player = itr->GetSource())
+                        {
+                            killer = player;
+                            break;
+                        }
+                    }
+
+                    if (killer)
+                        CheckCreatureRecord(killer, static_cast<uint32>(95400 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "Gunship Battle", 1, _fightTimer);
                 }
             }
 
@@ -1410,6 +1457,7 @@ class npc_muradin_bronzebeard_igb : public CreatureScript
             time_t _riflemanYellCooldown;
             time_t _mortarYellCooldown;
             uint16 checkTimer;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const

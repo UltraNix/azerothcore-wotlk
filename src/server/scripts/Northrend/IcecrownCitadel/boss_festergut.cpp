@@ -67,6 +67,7 @@ struct boss_festergutAI : public BossAI
 
     void Reset() override
     {
+        _fightTimer = 0;
         _maxInoculatedStack = 0;
         _inhaleCounter = 0;
         _Reset();
@@ -93,6 +94,7 @@ struct boss_festergutAI : public BossAI
             return;
         }
 
+        _fightTimer = getMSTime();
         events.ScheduleEvent(EVENT_BERSERK, 5min);
         events.ScheduleEvent(EVENT_INHALE_BLIGHT, 25s, 30s);
         events.ScheduleEvent(EVENT_GAS_SPORE, 20s, 25s);
@@ -111,7 +113,7 @@ struct boss_festergutAI : public BossAI
             professor->AI()->DoAction(ACTION_FESTERGUT_COMBAT);
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* killer) override
     {
         for (uint32 spellId : { sSpellMgr->GetSpellIdForDifficulty(SPELL_INOCULATED, me), sSpellMgr->GetSpellIdForDifficulty(SPELL_GASTRIC_BLOAT, me) })
             instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
@@ -121,6 +123,7 @@ struct boss_festergutAI : public BossAI
             professor->AI()->DoAction(ACTION_FESTERGUT_DEATH);
 
         RemoveBlight();
+        CheckCreatureRecord(killer, static_cast<uint32>(95300 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
     }
 
     void JustReachedHome() override
@@ -324,6 +327,7 @@ struct boss_festergutAI : public BossAI
         uint64 _gasDummyGUID;
         uint32 _maxInoculatedStack;
         uint32 _inhaleCounter;
+        uint32 _fightTimer;
 };
 
 class spell_festergut_pungent_blight_SpellScript : public SpellScript

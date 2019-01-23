@@ -283,6 +283,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         if (instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) == DONE)
             return;
 
+        _fightTimer = 0;
         _Reset();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
         me->SetReactState(REACT_DEFENSIVE);
@@ -322,6 +323,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
             return;
         }
 
+        _fightTimer = getMSTime();
         // oh just screw intro, enter combat - no exploits please
         me->setActive(true);
         DoZoneInCombat();
@@ -339,7 +341,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         instance->SetBossState(DATA_DEATHBRINGER_SAURFANG, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*killer*/) override
+    void JustDied(Unit* killer) override
     {
         _JustDied();
         DoCast(me, SPELL_ACHIEVEMENT, true);
@@ -348,6 +350,8 @@ struct boss_deathbringer_saurfangAI : public BossAI
         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MARK_OF_THE_FALLEN_CHAMPION);
         if (Creature* creature = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SAURFANG_EVENT_NPC)))
             creature->AI()->DoAction(ACTION_START_OUTRO);
+
+        CheckCreatureRecord(killer, static_cast<uint32>(95200 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
     }
 
     bool CanAIAttack(const Unit* target) const override
@@ -552,6 +556,7 @@ struct boss_deathbringer_saurfangAI : public BossAI
         bool _frenzied;   // faster than iterating all auras to find Frenzy
         uint16 _transportCheckTimer;
         bool _dead;
+        uint32 _fightTimer;
 };
 
 class npc_high_overlord_saurfang_icc : public CreatureScript

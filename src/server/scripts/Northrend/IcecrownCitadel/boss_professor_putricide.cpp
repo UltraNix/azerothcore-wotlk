@@ -217,9 +217,11 @@ class boss_professor_putricide : public CreatureScript
             uint8 _phase;
             bool bChangePhase;
             bool bEnteredCombat; // needed for failing an attempt in JustReachedHome()
+            uint32 _fightTimer;
 
             void Reset()
             {
+                _fightTimer = 0;
                 sayFestergutDeathTimer = 0;
                 sayRotfaceDeathTimer = 0;
                 _experimentState = 0;
@@ -281,6 +283,7 @@ class boss_professor_putricide : public CreatureScript
                     return;
                 }
 
+                _fightTimer = getMSTime();
                 bEnteredCombat = true;
                 me->CastSpell(me, SPELL_OOZE_TANK_PROTECTION, true);
                 events.Reset();
@@ -319,7 +322,7 @@ class boss_professor_putricide : public CreatureScript
                     Talk(SAY_KILL);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* killer)
             {
                 _JustDied();
                 Talk(SAY_DEATH);
@@ -329,6 +332,7 @@ class boss_professor_putricide : public CreatureScript
 
                 me->CastSpell((Unit*)NULL, SPELL_MUTATED_PLAGUE_CLEAR, true);
                 instance->DoRemoveAurasDueToSpellOnPlayers(RAID_MODE(70911, 72854, 72855, 72856));
+                CheckCreatureRecord(killer, static_cast<uint32>(95700 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void JustSummoned(Creature* summon)

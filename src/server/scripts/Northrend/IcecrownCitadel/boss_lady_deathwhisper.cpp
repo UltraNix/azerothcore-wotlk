@@ -216,6 +216,7 @@ class boss_lady_deathwhisper : public CreatureScript
 
             void Reset()
             {
+                _fightTimer = 0;
                 if (Creature* darnavan = ObjectAccessor::GetCreature(*me, _darnavanGUID))
                     darnavan->DespawnOrUnsummon();
                 _darnavanGUID = 0;
@@ -242,6 +243,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     return;
                 }
 
+                _fightTimer = getMSTime();
                 me->setActive(true);
                 DoZoneInCombat();
 
@@ -590,6 +592,7 @@ class boss_lady_deathwhisper : public CreatureScript
                 }
 
                 _JustDied();
+                CheckCreatureRecord(killer, static_cast<uint32>(95500 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void KilledUnit(Unit* victim)
@@ -719,6 +722,7 @@ class boss_lady_deathwhisper : public CreatureScript
             std::deque<uint64> _reanimationQueue;
             uint32 _waveCounter;
             bool _introDone;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const

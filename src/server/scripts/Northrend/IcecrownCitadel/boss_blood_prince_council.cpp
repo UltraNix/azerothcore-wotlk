@@ -769,9 +769,11 @@ class boss_prince_valanar_icc : public CreatureScript
             bool _canDie;
             uint32 invocationOrder[3];
             uint8 currentInvocationIndex;
+            uint32 _fightTimer;
 
             void Reset()
             {
+                _fightTimer = 0;
                 events.Reset();
                 summons.DespawnAll();
                 _isEmpowered = false;
@@ -799,6 +801,7 @@ class boss_prince_valanar_icc : public CreatureScript
                     return;
                 }
 
+                _fightTimer = getMSTime();
                 instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
                 instance->SetData(DATA_ORB_WHISPERER_ACHIEVEMENT, 1);
                 me->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH); // just in case
@@ -829,7 +832,7 @@ class boss_prince_valanar_icc : public CreatureScript
                 events.ScheduleEvent(EVENT_INVOCATION_OF_BLOOD, 45000);
             }
 
-            void JustDied(Unit* /*killer*/)
+            void JustDied(Unit* killer)
             {
                 events.Reset();
                 summons.DespawnAll();
@@ -850,6 +853,7 @@ class boss_prince_valanar_icc : public CreatureScript
 
                 Talk(SAY_VALANAR_DEATH);
                 instance->SetBossState(DATA_BLOOD_PRINCE_COUNCIL, DONE);
+                CheckCreatureRecord(killer, static_cast<uint32>(95000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "Blood Prince Council", 1, _fightTimer);
                 if (Creature* keleseth = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_PRINCE_KELESETH_GUID)))
                     if (keleseth->IsAlive())
                         Unit::Kill(keleseth, keleseth);

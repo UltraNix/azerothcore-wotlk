@@ -287,6 +287,7 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void Reset()
             {
+                _fightTimer = 0;
                 _events.Reset();
                 //! ICC BOOST
                 if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
@@ -319,6 +320,8 @@ class boss_valithria_dreamwalker : public CreatureScript
                 if (action != ACTION_ENTER_COMBAT)
                     return;
 
+                std::cout << "weszlo\n";
+                _fightTimer = getMSTime();
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15s);
@@ -336,6 +339,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 // encounter complete
                 if (me->HealthAbovePctHealed(100, heal) && !_done)
                 {
+                    CheckCreatureRecord(healer, static_cast<uint32>(96100 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
                     _done = true;
                     Talk(SAY_VALITHRIA_SUCCESS);
                     _instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -483,6 +487,7 @@ class boss_valithria_dreamwalker : public CreatureScript
             bool _over75PercentTalkDone;
             bool _justDied;
             bool _done;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const

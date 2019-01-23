@@ -1451,7 +1451,14 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
         if (sWorld->getBoolConfig(CONFIG_BOSS_RECORDS_ANNOUNCES))
         {
             std::ostringstream msg;
-            msg << creatureName << " has been killed for the first time " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+            //! Valithria
+            std::string defeatMessage = "killed";
+            if (entry >= 96100 && entry <= 96150)
+                defeatMessage = "saved";
+            else if (entry >= 95400 && entry <= 95450)
+                defeatMessage = "won";
+
+            msg << creatureName << " has been " << defeatMessage << " for the first time " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
                 << " in " << time / 1000 << "." << std::setfill('0') << std::setw(3) << time % 1000 << " seconds!";
             sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
         }
@@ -1495,7 +1502,14 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
     if (sWorld->getBoolConfig(CONFIG_BOSS_RECORDS_ANNOUNCES))
     {
         std::ostringstream msg;
-        msg << creatureName << " has been killed " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
+        //! Valithria
+        std::string defeatMessage = "killed";
+        if (entry >= 96100 && entry <= 96150)
+            defeatMessage = "saved";
+        else if (entry >= 95400 && entry <= 95450)
+            defeatMessage = "won";
+
+        msg << creatureName << " has been " << defeatMessage << " " << (guildName != "" ? std::string("by guild: ") + guildName : std::string("by ") + leaderName + std::string(" and his group"))
             << " in " << time / 1000 << "." << time % 1000 << " seconds! Previous record: " << oldTime / 1000 << "." << oldTime % 1000 << " seconds." << " (Previous record holder: " << oldGuild << ")";
         sWorld->SendServerMessage(SERVER_MSG_STRING, msg.str().c_str());
     }
