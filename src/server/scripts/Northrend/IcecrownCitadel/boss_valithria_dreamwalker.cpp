@@ -320,7 +320,6 @@ class boss_valithria_dreamwalker : public CreatureScript
                 if (action != ACTION_ENTER_COMBAT)
                     return;
 
-                std::cout << "weszlo\n";
                 _fightTimer = getMSTime();
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _events.Reset();
