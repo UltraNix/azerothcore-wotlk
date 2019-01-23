@@ -287,6 +287,7 @@ class boss_valithria_dreamwalker : public CreatureScript
 
             void Reset()
             {
+                std::cout << "difficulty to: " << me->GetMap()->GetDifficulty() << std::endl;
                 //! ICC BOOST
                 if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                 {
