@@ -915,7 +915,7 @@ class npc_blazing_skeleton : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_FIREBALL, 2s, 4s);
-                _events.ScheduleEvent(EVENT_LEY_WASTE, 15s, 20s);
+                _events.ScheduleEvent(EVENT_LEY_WASTE, 8s);
             }
 
             void UpdateAI(uint32 diff)
@@ -937,7 +937,7 @@ class npc_blazing_skeleton : public CreatureScript
                         break;
                     case EVENT_LEY_WASTE:
                         DoCastSelf(SPELL_LEY_WASTE);
-                        _events.Repeat(15s, 20s);
+                        _events.Repeat(15s);
                         break;
                     default:
                         break;
