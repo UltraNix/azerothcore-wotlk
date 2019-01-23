@@ -10,11 +10,11 @@ SET @RIFLEMAN_BASE:= 22.4;
 
 UPDATE `creature_template` SET `health_mod` = @RIFLEMAN_BASE + (@RIFLEMAN_BASE * 0.5) WHERE `entry` = @RIFLEMAN;
 
-SET @SORCERER:= 37116;
-SET @SORCERER_BASE:= 15;
+SET @SORCERER:= 38694;
+SET @SORCERER_BASE:= 84;
 
-SET @BATTLEMAGE:= 37117;
-SET @BATTLEMAGE_BASE:= 15;
+SET @BATTLEMAGE:= 38678;
+SET @BATTLEMAGE_BASE:= 84;
 
 UPDATE `creature_template` SET `health_mod` = @SORCERER_BASE + (@SORCERER_BASE * 0.8) WHERE `entry` = @SORCERER;
 UPDATE `creature_template` SET `health_mod` = @BATTLEMAGE_BASE + (@BATTLEMAGE_BASE * 0.8) WHERE `entry` = @BATTLEMAGE;
@@ -101,7 +101,7 @@ SET @RISEN_ARCH_BASE:= 30;
 
 UPDATE `creature_template` SET `health_mod` = @RISEN_ARCH_BASE + (@RISEN_ARCH_BASE * 0.2) WHERE `entry` = @RISEN_ARCH;
 
-SET @SIDNRA:= 38267;
+SET @SINDRA:= 38267;
 SET @SINDRA_BASE:= 3300;
 
 UPDATE `creature_template` SET `health_mod` = @SINDRA_BASE + (@SINDRA_BASE * 0.287) WHERE `entry` = @SINDRA;
@@ -125,25 +125,3 @@ SET @WICKED:= 39289;
 SET @WICKED_BASE:= 0.634921;
 
 UPDATE `creature_template` SET `health_mod` = @WICKED_BASE + (@WICKED_BASE * 0.75) WHERE `entry` = @WICKED;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
