@@ -502,6 +502,10 @@ class npc_green_dragon_combat_trigger : public CreatureScript
 
             void Reset()
             {
+                if (Creature* dragon = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_VALITHRIA_DREAMWALKER)))
+                    if (dragon->IsAIEnabled)
+                        dragon->AI()->Reset();
+
                 events.Reset();
                 summons.DespawnAll();
                 if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) != DONE)
