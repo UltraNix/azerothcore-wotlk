@@ -542,7 +542,7 @@ public:
                 bool didHit = false;
                 CreatureAI* marrowgarAI = marrowgar->AI();
                 uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
-                if (marrowgar->GetMap()->GetDifficulty() == RAID_STATUSFLAG_25MAN_HEROIC)
+                if (marrowgar->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                     boneSpikeCount = 5;
 
                 std::vector<Player*> validPlayers;
