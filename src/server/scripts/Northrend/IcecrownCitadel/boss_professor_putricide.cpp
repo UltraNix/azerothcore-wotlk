@@ -800,18 +800,19 @@ class npc_putricide_oozeAI : public ScriptedAI
                 }
             }
 
-            if (me->GetEntry() == NPC_VOLATILE_OOZE)
-                if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
-                    if (target->HasAura(45438) || target->HasAura(642))
-                    {
-                        _stopped = true;
-                        me->StopMoving();
-                    }
-                    else if (_stopped)
-                    {
-                        me->GetMotionMaster()->MoveChase(target);
-                        _stopped = false;
-                    }
+            //! Restore after ICC boost is over
+            //if (me->GetEntry() == NPC_VOLATILE_OOZE)
+            //    if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
+            //        if (target->HasAura(45438) || target->HasAura(642))
+            //        {
+            //            _stopped = true;
+            //            me->StopMoving();
+            //        }
+            //        else if (_stopped)
+            //        {
+            //            me->GetMotionMaster()->MoveChase(target);
+            //            _stopped = false;
+            //        }
 
             DoMeleeAttackIfReady();
 
