@@ -542,6 +542,8 @@ public:
                 bool didHit = false;
                 CreatureAI* marrowgarAI = marrowgar->AI();
                 uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
+                if (marrowgar->GetMap()->GetDifficulty() == RAID_STATUSFLAG_25MAN_HEROIC)
+                    boneSpikeCount = 5;
 
                 std::vector<Player*> validPlayers;
                 Map::PlayerList const &pList = marrowgar->GetMap()->GetPlayers();
@@ -680,13 +682,7 @@ class spell_marrowgar_bone_slice : public SpellScriptLoader
 
             void CountTargets(std::list<WorldObject*>& targets)
             {
-                //! ICC Boost
-                uint32 maxTargets = GetSpellInfo()->MaxAffectedTargets;
-                if (GetCaster())
-                    if (GetCaster()->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                        maxTargets = 5;
-
-                _targetCount = std::min<uint32>(targets.size(), maxTargets);
+                _targetCount = std::min<uint32>(targets.size(), GetSpellInfo()->MaxAffectedTargets);
             }
 
             void SplitDamage()
