@@ -634,12 +634,26 @@ class boss_the_lich_king : public CreatureScript
                     me->SetStandState(UNIT_STAND_STATE_SIT);
             }
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* /*killer*/)
             {
                 _JustDied();
                 DoAction(ACTION_RESTORE_LIGHT);
                 me->PlayDirectSound(17374);
-                CheckCreatureRecord(killer, static_cast<uint32>(96000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
+
+                Unit* killer = nullptr;
+                Map::PlayerList const& pList = me->GetMap()->GetPlayers();
+                //! find anyone and then break
+                for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+                {
+                    if (Player* player = itr->GetSource())
+                    {
+                        killer = player;
+                        break;
+                    }
+                }
+
+                if (killer)
+                    CheckCreatureRecord(killer, static_cast<uint32>(96000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void EnterCombat(Unit* target)

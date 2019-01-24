@@ -163,7 +163,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
             bool bEnteredCombat; // needed for failing an attempt in JustReachedHome()
             uint32 _fightTimer;
 
-            void Reset()
+            void Reset() override
             {
                 _fightTimer = 0;
                 _landing = false;
@@ -189,7 +189,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 BossAI::AttackStart(who);
             }
 
-            void EnterCombat(Unit* who)
+            void EnterCombat(Unit* who) override
             {
                 if (!instance->CheckRequiredBosses(DATA_BLOOD_QUEEN_LANA_THEL, who->ToPlayer()) || !me->IsVisible())
                 {
@@ -221,7 +221,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 _creditBloodQuickening = instance->GetData(DATA_BLOOD_QUICKENING_STATE) == IN_PROGRESS;
             }
 
-            void JustDied(Unit* killer)
+            void JustDied(Unit* killer) override
             {
                 _JustDied();
                 Talk(SAY_DEATH);
@@ -278,7 +278,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 me->GetMotionMaster()->MovePoint(POINT_MINCHAR, mincharPos);
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 action) override
             {
                 if (action != ACTION_KILL_MINCHAR)
                     return;
@@ -289,7 +289,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     GoToMinchar();
             }
 
-            void JustReachedHome()
+            void JustReachedHome() override
             {
                 me->SetCanFly(false);
                 me->SetDisableGravity(false);
@@ -304,15 +304,18 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 }
             }
 
-            void KilledUnit(Unit* victim)
+            void KilledUnit(Unit* victim) override
             {
                 if (victim->GetTypeId() == TYPEID_PLAYER)
                     Talk(SAY_KILL);
             }
 
-            void MovementInform(uint32 type, uint32 id)
+            void MovementInform(uint32 type, uint32 id) override
             {
                 if (type != EFFECT_MOTION_TYPE && type != POINT_MOTION_TYPE)
+                    return;
+
+                if (me->IsInEvadeMode())
                     return;
 
                 switch (id)
@@ -389,7 +392,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 });
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) override
             {
                 if (!UpdateVictim() || !CheckInRoom())
                     return;
@@ -629,7 +632,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 return 0;
             }
 
-            void EnterEvadeMode()
+            void EnterEvadeMode() override
             {
                 const Map::PlayerList &pl = me->GetMap()->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
@@ -650,7 +653,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 BossAI::EnterEvadeMode();
             }
 
-            bool CanAIAttack(const Unit* target) const
+            bool CanAIAttack(const Unit* target) const override
             {
                 return me->IsVisible();
             }
