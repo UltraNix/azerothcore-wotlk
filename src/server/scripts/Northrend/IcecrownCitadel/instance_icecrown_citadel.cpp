@@ -1288,8 +1288,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case DATA_LORD_MARROWGAR:
                         if (state == DONE)
                         {
-                            //WeeklyQuestId10 = RAND(QUEST_BLOOD_QUICKENING_10, QUEST_RESIDUE_RENDEZVOUS_10, QUEST_RESPITE_FOR_A_TORMENTED_SOUL_10, QUEST_DEPROGRAMMING_10, QUEST_SECURING_THE_RAMPARTS_10);
-                            WeeklyQuestId10 = QUEST_BLOOD_QUICKENING_10;
+                            WeeklyQuestId10 = RAND(QUEST_BLOOD_QUICKENING_10, QUEST_RESIDUE_RENDEZVOUS_10, QUEST_RESPITE_FOR_A_TORMENTED_SOUL_10, QUEST_DEPROGRAMMING_10, QUEST_SECURING_THE_RAMPARTS_10);
                             SetData(DATA_WEEKLY_QUEST_ID, 0); // show required hidden npcs
                             if (GameObject* transporter = instance->GetGameObject(ScourgeTransporterFirstGUID))
                                 transporter->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
@@ -1653,7 +1652,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         {
                             case IN_PROGRESS:
                                 Events.ScheduleEvent(EVENT_UPDATE_EXECUTION_TIME, 60000);
-                                BloodQuickeningMinutes = 2;
+                                BloodQuickeningMinutes = 30;
                                 DoUpdateWorldState(WORLDSTATE_SHOW_TIMER, 1);
                                 DoUpdateWorldState(WORLDSTATE_EXECUTION_TIME, BloodQuickeningMinutes);
                                 break;
