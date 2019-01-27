@@ -315,9 +315,6 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 if (type != EFFECT_MOTION_TYPE && type != POINT_MOTION_TYPE)
                     return;
 
-                if (me->IsInEvadeMode())
-                    return;
-
                 switch (id)
                 {
                     case POINT_CENTER:
@@ -326,6 +323,9 @@ class boss_blood_queen_lana_thel : public CreatureScript
                         events.ScheduleEvent(EVENT_AIR_START_FLYING, 2500);
                         break;
                     case POINT_AIR:
+                        if (me->IsInEvadeMode())
+                            return;
+
                         _bloodboltedPlayers.clear();
                         me->CastSpell(me, SPELL_BLOODBOLT_WHIRL, false);
                         Talk(SAY_AIR_PHASE);
