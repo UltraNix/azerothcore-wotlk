@@ -1181,8 +1181,11 @@ struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
                 case EVENT_SPELL_PLASMA_BLAST:
                     if (Unit* victim = me->GetVictim())
                     {
-                        me->MonsterTextEmote("Leviathan Mk II begins to cast Plasma Blast!", 0, true);
-                        cannon->CastSpell(victim, SPELL_PLASMA_BLAST, false);
+                        if (cannon)
+                        {
+                            me->MonsterTextEmote("Leviathan Mk II begins to cast Plasma Blast!", 0, true);
+                            cannon->CastSpell(victim, SPELL_PLASMA_BLAST, false);
+                        }
                     }
                     events.Repeat(45000);
                     break;
