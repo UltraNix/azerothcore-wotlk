@@ -943,8 +943,6 @@ class boss_the_lich_king : public CreatureScript
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, 8000, EVENT_GROUP_ABILITIES);
                         std::vector<std::chrono::duration<long long>> timers = { 6s, 23s, 41s, 59s };
-                        if (GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL)
-                            timers = { 6s, 25s, 43s };
                         for (auto time : timers)
                             events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, time, EVENT_GROUP_ABILITIES);
                         break;
