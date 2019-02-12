@@ -151,6 +151,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
             boss_blood_queen_lana_thelAI(Creature* creature) : BossAI(creature, DATA_BLOOD_QUEEN_LANA_THEL)
             {
                 bEnteredCombat = false;
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             }
 
             bool _creditBloodQuickening;

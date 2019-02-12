@@ -276,7 +276,10 @@ Position const finalPos = {-563.7552f, 2211.328f, 538.7848f, 0.0f};
 
 struct boss_deathbringer_saurfangAI : public BossAI
 {
-    boss_deathbringer_saurfangAI(Creature* creature) : BossAI(creature, DATA_DEATHBRINGER_SAURFANG) { }
+    boss_deathbringer_saurfangAI(Creature* creature) : BossAI(creature, DATA_DEATHBRINGER_SAURFANG)
+    {
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+    }
 
     void Reset() override
     {

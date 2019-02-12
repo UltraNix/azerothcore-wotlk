@@ -212,6 +212,7 @@ class boss_lady_deathwhisper : public CreatureScript
         {
             boss_lady_deathwhisperAI(Creature* creature) : BossAI(creature, DATA_LADY_DEATHWHISPER), _introDone(false), _darnavanGUID(0)
             {
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             }
 
             void Reset()

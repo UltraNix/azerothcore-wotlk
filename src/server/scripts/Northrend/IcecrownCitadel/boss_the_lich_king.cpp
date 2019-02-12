@@ -603,6 +603,7 @@ class boss_the_lich_king : public CreatureScript
                 me->AddAura(SPELL_EMOTE_SIT_NO_SHEATH, me);
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->SetReactState(REACT_PASSIVE);
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             }
 
             uint8 _phase;

@@ -62,6 +62,7 @@ struct boss_festergutAI : public BossAI
 {
     boss_festergutAI(Creature* creature) : BossAI(creature, DATA_FESTERGUT)
     {
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
         _gasDummyGUID = 0;
     }
 

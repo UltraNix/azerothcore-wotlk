@@ -131,7 +131,10 @@ class StartMovementEventRotface : public BasicEvent
 
 struct boss_rotfaceAI : public BossAI
 {
-    boss_rotfaceAI(Creature* creature) : BossAI(creature, DATA_ROTFACE) { }
+    boss_rotfaceAI(Creature* creature) : BossAI(creature, DATA_ROTFACE)
+    {
+        me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+    }
 
     void Reset() override
     {

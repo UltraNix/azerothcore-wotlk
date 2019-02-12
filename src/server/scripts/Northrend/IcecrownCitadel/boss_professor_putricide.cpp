@@ -208,6 +208,7 @@ class boss_professor_putricide : public CreatureScript
             {
                 bCallEvade = false;
                 bEnteredCombat = false;
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
             }
 
             uint16 sayFestergutDeathTimer;

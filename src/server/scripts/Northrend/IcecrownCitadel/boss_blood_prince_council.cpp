@@ -184,6 +184,8 @@ class boss_prince_keleseth_icc : public CreatureScript
                     me->IsAIEnabled = false;
                     me->AddUnitState(UNIT_STATE_EVADE);
                 }
+
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
                 _canDie = true;
             }
 
@@ -461,6 +463,8 @@ class boss_prince_taldaram_icc : public CreatureScript
                     me->IsAIEnabled = false;
                     me->AddUnitState(UNIT_STATE_EVADE);
                 }
+
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
                 _canDie = true;
             }
 
@@ -743,6 +747,8 @@ class boss_prince_valanar_icc : public CreatureScript
                     me->IsAIEnabled = false;
                     me->AddUnitState(UNIT_STATE_EVADE);
                 }
+
+                me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
                 _canDie = true;
             }
 
