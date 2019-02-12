@@ -7778,6 +7778,26 @@ void SpellMgr::LoadDbcDataCorrections()
         case 7764:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
+        case 32049: // hellfire superiority
+        case 32071: // hellfire superiority
+        case 33377: // Blessing of Auchindoun
+        case 33795: // Strength of the Halaani
+        case 33779: // Twin Spire Blessing
+        //! echoes of lordaeron
+        case 1386:
+        case 6964:
+        case 6966:
+        case 6998:
+        case 8878:
+        case 11413:
+        case 11414:
+        case 11415:
+        case 29520:
+        case 30682:
+        case 30683:
+        case 30880:
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+            break;
 
         /////////////////////////////////////////////
         ///////////////// GNOMEREGAN ////////////////
