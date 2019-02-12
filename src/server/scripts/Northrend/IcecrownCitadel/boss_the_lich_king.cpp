@@ -2699,24 +2699,35 @@ class npc_valkyr_shadowguard : public CreatureScript
                         me->GetMotionMaster()->MovePoint(POINT_START_SIPHON, _destPoint);
                         break;
                     case EVENT_LIFE_SIPHON:
-                        {
-                            Unit* target = NULL;
-                            Unit::AuraEffectList const& tauntAuras = me->GetAuraEffectsByType(SPELL_AURA_MOD_TAUNT);
-                            if (!tauntAuras.empty())
-                                for (Unit::AuraEffectList::const_reverse_iterator itr = tauntAuras.rbegin(); itr != tauntAuras.rend(); ++itr)
-                                    if (Unit* caster = (*itr)->GetCaster())
-                                        if (me->IsValidAttackTarget(caster))
-                                        {
-                                            target = caster;
-                                            break;
-                                        }
-                            if (!target)
-                                if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
-                                    target = lichKing->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankLKTargetSelector(lichKing, true, false, 100.0f));
-                            if (target)
-                                me->CastSpell(target, SPELL_LIFE_SIPHON, false);
-                            _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2400);
-                        }
+                    {
+                        Unit* target = nullptr;
+                        //! this is useless now, we're working on our own threatlist
+                        //! leaving as is for now
+                        //Unit::AuraEffectList const& tauntAuras = me->GetAuraEffectsByType(SPELL_AURA_MOD_TAUNT);
+                        //if (!tauntAuras.empty())
+                        //{
+                        //    for (Unit::AuraEffectList::const_reverse_iterator itr = tauntAuras.rbegin(); itr != tauntAuras.rend(); ++itr)
+                        //        if (Unit* caster = (*itr)->GetCaster())
+                        //            if (me->IsValidAttackTarget(caster))
+                        //            {
+                        //                target = caster;
+                        //                break;
+                        //            }
+                        //}
+
+                        //! find target off of our own threatlist
+                        if (!target)
+                            target = SelectTarget(SELECT_TARGET_TOPAGGRO);
+
+                        //! we found nothing on our threatlist, find something via LK threatlist
+                        if (!target)
+                            if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                                target = lichKing->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankLKTargetSelector(lichKing, true, false, 100.0f));
+
+                        if (target)
+                            me->CastSpell(target, SPELL_LIFE_SIPHON, false);
+                        _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2400);
+                    }
                         break;
                     default:
                         break;
