@@ -868,31 +868,81 @@ class spell_sindragosa_s_fury : public SpellScriptLoader
         }
 };
 
-class UnchainedMagicTargetSelector
+enum SpecSpells
+{
+    // Priest
+    SPELL_SHADOWFORM            = 15473, // shadow
+    SPELL_SPIRIT_OF_REDEMPITION = 20711, // holy
+    SPELL_PENANCE               = 47540, // disci
+    // Druid
+    SPELL_SWIFTMEND             = 18562, // resto
+    SPELL_MOONKIN_FORM          = 24858, // balance
+    // Paladin
+    SPELL_HOLY_SHOCK            = 20473, // holy
+    // Shaman
+    SPELL_ELEMENTAL_MASTERY     = 16166, // elemental
+    SPELL_EARTH_SHIELD          = 974    // resto
+};
+
+class UnchainedMagicRangedSelector
 {
 public:
-    UnchainedMagicTargetSelector(bool removeHealers) : _removeHealers(removeHealers) { }
+    UnchainedMagicRangedSelector() { }
 
     bool operator()(WorldObject* object) const
     {
-        if (Player* p = object->ToPlayer())
+        if (Unit* unit = object->ToUnit())
         {
-            if (p->getPowerType() != POWER_MANA)
-                return true;
-            if (p->getClass() == CLASS_HUNTER)
-                return true;
-            uint8 maxIndex = p->GetMostPointsTalentTree();
-            if (p->getClass() == CLASS_PALADIN && maxIndex >= 1 || p->getClass() == CLASS_SHAMAN && maxIndex == 1 || p->getClass() == CLASS_DRUID && maxIndex == 1)
-                return true;
-            if (_removeHealers == (p->getClass() == CLASS_DRUID && maxIndex == 2 || p->getClass() == CLASS_PALADIN && maxIndex == 0 || p->getClass() == CLASS_PRIEST && maxIndex <= 1 || p->getClass() == CLASS_SHAMAN && maxIndex == 2))
+            if (!unit->getPowerType() == POWER_MANA)
                 return true;
 
-            return false;
+            switch (unit->getClass())
+            {
+                case CLASS_MAGE:
+                case CLASS_WARLOCK:
+                    return false;
+                case CLASS_PRIEST:
+                    return !unit->HasSpell(SPELL_SHADOWFORM);
+                case CLASS_SHAMAN:
+                    return !unit->HasSpell(SPELL_ELEMENTAL_MASTERY);
+                case CLASS_DRUID:
+                    return !unit->HasSpell(SPELL_MOONKIN_FORM);
+                default:
+                    return true;
+            }
         }
         return true;
     }
-private:
-    bool _removeHealers;
+};
+
+class UnchainedMagicHealerSelector
+{
+public:
+    UnchainedMagicHealerSelector() { }
+
+    bool operator()(WorldObject* object) const
+    {
+        if (Unit* unit = object->ToUnit())
+        {
+            if (!unit->getPowerType() == POWER_MANA)
+                return true;
+
+            switch (unit->getClass())
+            {
+                case CLASS_PRIEST:
+                    return !unit->HasSpell(SPELL_SPIRIT_OF_REDEMPITION) && !unit->HasSpell(SPELL_PENANCE);
+                case CLASS_SHAMAN:
+                    return !unit->HasSpell(SPELL_EARTH_SHIELD);
+                case CLASS_DRUID:
+                    return !unit->HasSpell(SPELL_SWIFTMEND);
+                case CLASS_PALADIN:
+                    return !unit->HasSpell(SPELL_HOLY_SHOCK);
+                default:
+                    return true;
+            }
+        }
+        return true;
+    }
 };
 
 class spell_sindragosa_unchained_magic : public SpellScriptLoader
@@ -906,18 +956,18 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
-                std::list<WorldObject*> healList = unitList;
-                std::list<WorldObject*> dpsList = unitList;
-                unitList.clear();
                 uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
-                healList.remove_if(UnchainedMagicTargetSelector(false));
-                if (healList.size() > maxSize)
-                    Trinity::Containers::RandomResize(healList, maxSize);
-                dpsList.remove_if(UnchainedMagicTargetSelector(true));
-                if (dpsList.size() > maxSize)
-                    Trinity::Containers::RandomResize(dpsList, maxSize);
-                unitList.splice(unitList.begin(), healList);
-                unitList.splice(unitList.begin(), dpsList);
+                std::list<WorldObject*> healersList = std::list<WorldObject*>(unitList);
+                std::list<WorldObject*> rangedList = std::list<WorldObject*>(unitList);
+                healersList.remove_if(UnchainedMagicHealerSelector());
+                rangedList.remove_if(UnchainedMagicRangedSelector());
+                if (healersList.size() > maxSize)
+                    Trinity::Containers::RandomResize(healersList, maxSize);
+                if (rangedList.size() > maxSize)
+                    Trinity::Containers::RandomResize(rangedList, maxSize);
+                unitList.clear();
+                unitList.merge(rangedList);
+                unitList.merge(healersList);
             }
 
             void Register()
