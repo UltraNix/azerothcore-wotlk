@@ -961,13 +961,22 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 std::list<WorldObject*> rangedList = std::list<WorldObject*>(unitList);
                 healersList.remove_if(UnchainedMagicHealerSelector());
                 rangedList.remove_if(UnchainedMagicRangedSelector());
-                if (healersList.size() > maxSize)
+                //! we need 6 targets
+                //! prioritize targets from healersList so maxSize * 2
+                if (healersList.size() > (maxSize * 2))
                     Trinity::Containers::RandomResize(healersList, maxSize);
                 if (rangedList.size() > maxSize)
                     Trinity::Containers::RandomResize(rangedList, maxSize);
+
+                //! proof of concept
                 unitList.clear();
-                unitList.merge(rangedList);
                 unitList.merge(healersList);
+                if (unitList.size() >= maxSize * 2)
+                    return;
+
+                unitList.merge(rangedList);
+                if (unitList.size() >= maxSize * 2)
+                    Trinity::Containers::RandomResize(unitList, maxSize * 2);
             }
 
             void Register()
