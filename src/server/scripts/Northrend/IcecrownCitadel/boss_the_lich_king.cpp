@@ -659,12 +659,12 @@ class boss_the_lich_king : public CreatureScript
 
             void EnterCombat(Unit* target)
             {
-                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()) || !me->IsVisible())
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
+                //if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()) || !me->IsVisible())
+                //{
+                //    EnterEvadeMode();
+                //    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                //    return;
+                //}
 
                 _fightTimer = getMSTime();
                 _phase = PHASE_ONE;
@@ -2516,24 +2516,17 @@ class npc_valkyr_shadowguard : public CreatureScript
     public:
         npc_valkyr_shadowguard() : CreatureScript("npc_valkyr_shadowguard") { }
 
-        struct npc_valkyr_shadowguardAI : public NullCreatureAI
+        struct npc_valkyr_shadowguardAI : public ScriptedAI
         {
-            npc_valkyr_shadowguardAI(Creature* creature) : NullCreatureAI(creature), _grabbedPlayer(0), didbelow50pct(false), dropped(false), _instance(creature->GetInstanceScript())
+            npc_valkyr_shadowguardAI(Creature* creature) : ScriptedAI(creature), _grabbedPlayer(0), didbelow50pct(false), dropped(false), _instance(creature->GetInstanceScript())
             {
-                me->SetReactState(REACT_PASSIVE);
+                //me->SetReactState(REACT_PASSIVE);
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_GRAB_PLAYER, 2500);
                 me->SetWalk(false);
             }
-
-            EventMap _events;
-            InstanceScript* _instance;
-            Position _destPoint;
-            uint64 _grabbedPlayer;
-            bool didbelow50pct;
-            bool dropped;
 
             bool IsHeroic() { return me->GetMap()->IsHeroic(); }
 
@@ -2549,7 +2542,9 @@ class npc_valkyr_shadowguard : public CreatureScript
                 _events.ScheduleEvent(EVENT_MOVE_TO_SIPHON_POS, 0);
             }
 
-            void OnCharmed(bool apply) {}
+            void OnCharmed(bool apply) { }
+            void AttackStart(Unit* /*who*/) override { }
+            void EnterCombat(Unit* /*who*/) override { }
 
             void PassengerBoarded(Unit* pass, int8 seat, bool apply)
             {
@@ -2701,23 +2696,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                     case EVENT_LIFE_SIPHON:
                     {
                         Unit* target = nullptr;
-                        //! this is useless now, we're working on our own threatlist
-                        //! leaving as is for now
-                        //Unit::AuraEffectList const& tauntAuras = me->GetAuraEffectsByType(SPELL_AURA_MOD_TAUNT);
-                        //if (!tauntAuras.empty())
-                        //{
-                        //    for (Unit::AuraEffectList::const_reverse_iterator itr = tauntAuras.rbegin(); itr != tauntAuras.rend(); ++itr)
-                        //        if (Unit* caster = (*itr)->GetCaster())
-                        //            if (me->IsValidAttackTarget(caster))
-                        //            {
-                        //                target = caster;
-                        //                break;
-                        //            }
-                        //}
-
-                        //! find target off of our own threatlist
-                        if (!target)
-                            target = SelectTarget(SELECT_TARGET_TOPAGGRO);
+                        target = SelectTarget(SELECT_TARGET_TOPAGGRO);
 
                         //! we found nothing on our threatlist, find something via LK threatlist
                         if (!target)
@@ -2727,12 +2706,21 @@ class npc_valkyr_shadowguard : public CreatureScript
                         if (target)
                             me->CastSpell(target, SPELL_LIFE_SIPHON, false);
                         _events.ScheduleEvent(EVENT_LIFE_SIPHON, 2400);
-                    }
                         break;
+                    }
                     default:
                         break;
                 }
+
+                UpdateVictim();
             }
+            private:
+                EventMap _events;
+                InstanceScript* _instance;
+                Position _destPoint;
+                uint64 _grabbedPlayer;
+                bool didbelow50pct;
+                bool dropped;
         };
 
         CreatureAI* GetAI(Creature* creature) const
