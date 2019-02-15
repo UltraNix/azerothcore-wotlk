@@ -659,12 +659,12 @@ class boss_the_lich_king : public CreatureScript
 
             void EnterCombat(Unit* target)
             {
-                //if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()) || !me->IsVisible())
-                //{
-                //    EnterEvadeMode();
-                //    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                //    return;
-                //}
+                if (!instance->CheckRequiredBosses(DATA_THE_LICH_KING, target->ToPlayer()) || !me->IsVisible())
+                {
+                    EnterEvadeMode();
+                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                    return;
+                }
 
                 _fightTimer = getMSTime();
                 _phase = PHASE_ONE;
