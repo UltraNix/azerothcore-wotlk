@@ -959,24 +959,19 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
                 std::list<WorldObject*> healersList = std::list<WorldObject*>(unitList);
                 std::list<WorldObject*> rangedList = std::list<WorldObject*>(unitList);
-                healersList.remove_if(UnchainedMagicHealerSelector());
-                rangedList.remove_if(UnchainedMagicRangedSelector());
-                //! we need 6 targets
-                //! prioritize targets from healersList so maxSize * 2
-                if (healersList.size() > (maxSize * 2))
-                    Trinity::Containers::RandomResize(healersList, maxSize);
-                if (rangedList.size() > maxSize)
-                    Trinity::Containers::RandomResize(rangedList, maxSize);
 
-                //! proof of concept
+                //! we need maxSize * 2 targets but prioritize healers
+                //! try shoving list full of healers first
+                Trinity::Containers::RandomResize(healersList, maxSize * 2);
                 unitList.clear();
                 unitList.merge(healersList);
-                if (unitList.size() >= maxSize * 2)
-                    return;
-
-                unitList.merge(rangedList);
-                if (unitList.size() >= maxSize * 2)
-                    Trinity::Containers::RandomResize(unitList, maxSize * 2);
+                if (unitList.size() < maxSize * 2)
+                {
+                    //! not enough healers, get rangeds
+                    auto missingAmount = (maxSize * 2) - unitList.size();
+                    Trinity::Containers::RandomResize(rangedList, std::size_t((maxSize * 2) - unitList.size()));
+                    unitList.merge(rangedList);
+                }
             }
 
             void Register()
