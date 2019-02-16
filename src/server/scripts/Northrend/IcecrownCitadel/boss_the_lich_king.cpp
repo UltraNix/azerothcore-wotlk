@@ -2659,6 +2659,21 @@ class npc_valkyr_shadowguard : public CreatureScript
                 _grabbedPlayer = guid;
             }
 
+            void ValkyrVictimUpdate()
+            {
+                if (!me->IsInCombat())
+                    return;
+
+                if (me->getThreatManager().isThreatListEmpty())
+                {
+                    EnterEvadeMode();
+                    return;
+                }
+
+                if (Unit* victim = me->SelectVictim())
+                    AttackStart(victim);
+            }
+
             void UpdateAI(uint32 diff)
             {
                 _events.Update(diff);
@@ -2671,6 +2686,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                     case EVENT_GRAB_PLAYER:
                         if (!_grabbedPlayer)
                         {
+                            DoZoneInCombat();
                             me->CastSpell((Unit*)NULL, SPELL_VALKYR_TARGET_SEARCH, false);
                             _events.ScheduleEvent(EVENT_GRAB_PLAYER, 2000);
                         }
@@ -2686,6 +2702,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                         break;
                     case EVENT_MOVE_TO_SIPHON_POS:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); // just in case if passenger disappears so quickly that EVENT_MOVE_TO_DROP_POS is never executed
+                        DoZoneInCombat(me, 250.f);
                         { int32 bp0 = 80; me->CastCustomSpell(me, 1557, &bp0, NULL, NULL, true); }
                         me->SetDisableGravity(true);
                         me->SetHover(true);
@@ -2695,13 +2712,32 @@ class npc_valkyr_shadowguard : public CreatureScript
                         break;
                     case EVENT_LIFE_SIPHON:
                     {
-                        Unit* target = nullptr;
-                        target = SelectTarget(SELECT_TARGET_TOPAGGRO);
+                        //! Update threatlists so targets actually change
+                        ValkyrVictimUpdate();
 
-                        //! we found nothing on our threatlist, find something via LK threatlist
-                        if (!target)
-                            if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
-                                target = lichKing->AI()->SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankLKTargetSelector(lichKing, true, false, 100.0f));
+                        //! Get highest threat actor from our list
+                        //! it might return a target that is currently tanking lich king
+                        //! but it is up to the raid group to sort it out
+                        //! ignore targets that are carried by another valkyr currently
+                        Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, [](WorldObject* object) { return object->ToUnit() && !object->ToUnit()->HasAura(SPELL_HARVEST_SOUL_VALKYR); });
+
+                        //! We might have a taunt on us but valkyr is ranged at this point, so target has to have 30% more threat
+                        //! so we're checking for current taunts and force to attack taunter instead
+                        Unit::AuraEffectList const& tauntAuras = me->GetAuraEffectsByType(SPELL_AURA_MOD_TAUNT);
+                        if (!tauntAuras.empty())
+                        {
+                            for (Unit::AuraEffectList::const_reverse_iterator itr = tauntAuras.rbegin(); itr != tauntAuras.rend(); ++itr)
+                            {
+                                if (Unit* caster = (*itr)->GetCaster())
+                                {
+                                    if (me->IsValidAttackTarget(caster))
+                                    {
+                                        target = caster;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
 
                         if (target)
                             me->CastSpell(target, SPELL_LIFE_SIPHON, false);
@@ -2711,8 +2747,6 @@ class npc_valkyr_shadowguard : public CreatureScript
                     default:
                         break;
                 }
-
-                UpdateVictim();
             }
             private:
                 EventMap _events;
