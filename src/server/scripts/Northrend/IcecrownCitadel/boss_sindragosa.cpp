@@ -977,7 +977,7 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 //! one of the lists is lacking elements
                 bool healersLacking = healersList.size() < maxSize;
                 //! determine how many elements we're missing
-                auto amountOfElements = maxSize - (healersLacking ? rangedList.size() : healersList.size());
+                auto amountOfElements = maxSize - (healersLacking ? healersList.size() : rangedList.size());
                 std::cout << "amount of elements lacking: " << std::to_string(amountOfElements) << std::endl;
 
                 if (healersLacking)
