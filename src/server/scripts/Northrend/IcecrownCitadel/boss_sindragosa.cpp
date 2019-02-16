@@ -960,18 +960,39 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 std::list<WorldObject*> healersList = std::list<WorldObject*>(unitList);
                 std::list<WorldObject*> rangedList = std::list<WorldObject*>(unitList);
 
-                //! we need maxSize * 2 targets but prioritize healers
-                //! try shoving list full of healers first
-                Trinity::Containers::RandomResize(healersList, maxSize * 2);
                 unitList.clear();
-                unitList.merge(healersList);
-                if (unitList.size() < maxSize * 2)
+                //! if both lists have over maxSize elements
+                //! OR both lists lack some elements
+                //! then just merge them both and exit silently
+                if ((healersList.size() >= maxSize && rangedList.size() >= maxSize) ||
+                    (healersList.size() < maxSize && rangedList.size() < maxSize))
                 {
-                    //! not enough healers, get rangeds
-                    auto missingAmount = (maxSize * 2) - unitList.size();
-                    Trinity::Containers::RandomResize(rangedList, std::size_t((maxSize * 2) - unitList.size()));
+                    Trinity::Containers::RandomResize(healersList, maxSize);
+                    Trinity::Containers::RandomResize(rangedList, maxSize);
+                    unitList.merge(healersList);
                     unitList.merge(rangedList);
+                    return;
                 }
+
+                //! one of the lists is lacking elements
+                bool healersLacking = healersList.size() < maxSize;
+                //! determine how many elements we're missing
+                auto amountOfElements = maxSize - (healersLacking ? rangedList.size() : healersList.size());
+                std::cout << "amount of elements lacking: " << std::to_string(amountOfElements) << std::endl;
+
+                if (healersLacking)
+                {
+                    Trinity::Containers::RandomResize(healersList, maxSize);
+                    Trinity::Containers::RandomResize(rangedList, maxSize + amountOfElements);
+                }
+                else
+                {
+                    Trinity::Containers::RandomResize(healersList, maxSize + amountOfElements);
+                    Trinity::Containers::RandomResize(rangedList, maxSize);
+                }
+
+                unitList.merge(healersList);
+                unitList.merge(rangedList);
             }
 
             void Register()
