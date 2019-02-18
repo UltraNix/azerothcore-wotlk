@@ -1,4 +1,4 @@
-/*
+﻿/*
 REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 */
 
@@ -959,13 +959,17 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
                 std::list<WorldObject*> healersList = std::list<WorldObject*>(unitList);
                 std::list<WorldObject*> rangedList = std::list<WorldObject*>(unitList);
-
+                healersList.remove_if(UnchainedMagicHealerSelector());
+                rangedList.remove_if(UnchainedMagicRangedSelector());
                 unitList.clear();
+
                 //! if both lists have over maxSize elements
                 //! OR both lists lack some elements
                 //! then just merge them both and exit silently
-                if ((healersList.size() >= maxSize && rangedList.size() >= maxSize) ||
-                    (healersList.size() < maxSize && rangedList.size() < maxSize))
+                bool overSize = healersList.size() >= maxSize && rangedList.size() >= maxSize;
+                bool underSize = healersList.size() < maxSize && rangedList.size() < maxSize;
+
+                if (overSize || underSize)
                 {
                     Trinity::Containers::RandomResize(healersList, maxSize);
                     Trinity::Containers::RandomResize(rangedList, maxSize);
@@ -978,7 +982,6 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 bool healersLacking = healersList.size() < maxSize;
                 //! determine how many elements we're missing
                 auto amountOfElements = maxSize - (healersLacking ? healersList.size() : rangedList.size());
-                std::cout << "amount of elements lacking: " << std::to_string(amountOfElements) << std::endl;
 
                 if (healersLacking)
                 {
@@ -994,6 +997,7 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 unitList.merge(healersList);
                 unitList.merge(rangedList);
             }
+
 
             void Register()
             {
