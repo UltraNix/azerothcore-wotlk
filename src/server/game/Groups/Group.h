@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -129,9 +129,10 @@ enum lfgGroupFlags
 
 enum DifficultyPreventionChangeType
 {
-    DIFFICULTY_PREVENTION_CHANGE_NONE                    = 0,
-    DIFFICULTY_PREVENTION_CHANGE_RECENTLY_CHANGED        = 1,
-    DIFFICULTY_PREVENTION_CHANGE_BOSS_KILLED            = 2
+    DIFFICULTY_PREVENTION_CHANGE_NONE                   = 0,
+    DIFFICULTY_PREVENTION_CHANGE_RECENTLY_CHANGED       = 1,
+    DIFFICULTY_PREVENTION_CHANGE_BOSS_KILLED            = 2,
+    DIFFICULTY_PREVENTION_ROLL_ACTIVE                   = 3
 };
 
 #define GROUP_UPDATE_FLAGS_COUNT          20
@@ -315,7 +316,8 @@ class Group
         DifficultyPreventionChangeType GetDifficultyChangePreventionReason() const { return _difficultyChangePreventionType; }
         void SetDifficultyChangePrevention(DifficultyPreventionChangeType type)
         {
-            _difficultyChangePreventionTime = time(nullptr) + MINUTE;
+            uint32 preventionTime = type == DifficultyPreventionChangeType::DIFFICULTY_PREVENTION_CHANGE_BOSS_KILLED ? (2 * MINUTE) : MINUTE;
+            _difficultyChangePreventionTime = time(nullptr) + preventionTime;
             _difficultyChangePreventionType = type;
         }
 

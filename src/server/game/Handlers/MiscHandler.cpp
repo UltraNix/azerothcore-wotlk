@@ -1448,6 +1448,8 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket & recv_data)
             std::set<uint32> foundMaps;
             std::set<Map*> foundMapsPtr;
             Map* currMap = NULL;
+            if (group->isRollLootActive())
+                group->SetDifficultyChangePrevention(DIFFICULTY_PREVENTION_ROLL_ACTIVE);
 
             if (uint32 preventionTime = group->GetDifficultyChangePreventionTime())
             {
@@ -1455,6 +1457,9 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket & recv_data)
                 {
                     case DIFFICULTY_PREVENTION_CHANGE_BOSS_KILLED:
                         ChatHandler(this).PSendSysMessage("Raid was in combat recently and may not change difficulty again for %u sec.", preventionTime);
+                        break;
+                    case DIFFICULTY_PREVENTION_ROLL_ACTIVE:
+                        ChatHandler(this).PSendSysMessage("Group roll is currently in progress, cannot change difficulty right now.");
                         break;
                     case DIFFICULTY_PREVENTION_CHANGE_RECENTLY_CHANGED:
                     default:
