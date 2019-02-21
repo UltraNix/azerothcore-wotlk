@@ -316,7 +316,12 @@ class Group
         DifficultyPreventionChangeType GetDifficultyChangePreventionReason() const { return _difficultyChangePreventionType; }
         void SetDifficultyChangePrevention(DifficultyPreventionChangeType type)
         {
-            uint32 preventionTime = type == DifficultyPreventionChangeType::DIFFICULTY_PREVENTION_CHANGE_BOSS_KILLED ? (2 * MINUTE) : MINUTE;
+            //! if active roll is current reason and the timer didn't pass yet, exit silently instead of settings time to 1 minute again
+            if (type == DIFFICULTY_PREVENTION_ROLL_ACTIVE && GetDifficultyChangePreventionReason() == DIFFICULTY_PREVENTION_ROLL_ACTIVE &&
+                GetDifficultyChangePreventionTime())
+                return;
+
+            uint32 preventionTime = type == DIFFICULTY_PREVENTION_CHANGE_BOSS_KILLED ? (2 * MINUTE) : MINUTE;
             _difficultyChangePreventionTime = time(nullptr) + preventionTime;
             _difficultyChangePreventionType = type;
         }
