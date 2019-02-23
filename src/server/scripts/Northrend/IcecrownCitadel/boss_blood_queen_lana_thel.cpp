@@ -242,8 +242,17 @@ class boss_blood_queen_lana_thel : public CreatureScript
                     instance->SetData(DATA_BLOOD_QUICKENING_STATE, DONE);
                     Map::PlayerList const& pl = me->GetMap()->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+                    {
                         if (Player* p = itr->GetSource())
-                            p->KilledMonsterCredit(RAID_MODE(NPC_INFILTRATOR_MINCHAR_BQ, NPC_BLOOD_QUICKENING_CREDIT_25), 0);
+                        {
+                            auto questId = (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ||
+                                            me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC) ?
+                                            NPC_INFILTRATOR_MINCHAR_BQ : NPC_BLOOD_QUICKENING_CREDIT_25;
+
+                            p->KilledMonsterCredit(questId, 0);
+                        }
+                    }
+
                     if (Creature* minchar = me->FindNearestCreature(NPC_INFILTRATOR_MINCHAR_BQ, 200.0f))
                     {
                         minchar->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
