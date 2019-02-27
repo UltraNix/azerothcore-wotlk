@@ -927,16 +927,24 @@ public:
             if (!unit->getPowerType() == POWER_MANA)
                 return true;
 
+            if (!unit->ToPlayer())
+                return true;
+
+            uint8 talentCount[3] = { 0, 0, 0 };
+            //! if talent count in specific talent tab is higher than 21
+            //! then player has to be a healer, do not remove him from the list
+            unit->ToPlayer()->GetTalentTreePoints(talentCount);
+
             switch (unit->getClass())
             {
                 case CLASS_PRIEST:
-                    return !unit->HasSpell(SPELL_SPIRIT_OF_REDEMPITION) && !unit->HasSpell(SPELL_PENANCE);
+                    return !(talentCount[0] >= 21 || talentCount[1] >= 21);
                 case CLASS_SHAMAN:
-                    return !unit->HasSpell(SPELL_EARTH_SHIELD);
+                    return !(talentCount[2] >= 21);
                 case CLASS_DRUID:
-                    return !unit->HasSpell(SPELL_SWIFTMEND);
+                    return !(talentCount[2] >= 21);
                 case CLASS_PALADIN:
-                    return !unit->HasSpell(SPELL_HOLY_SHOCK);
+                    return !(talentCount[0] >= 21);
                 default:
                     return true;
             }

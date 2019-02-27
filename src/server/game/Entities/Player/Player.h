@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -2673,7 +2673,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool IsInDodgeMode() const { return m_ExtraFlags & PLAYER_EXTRA_DODGE_LOCATION; }
         void SetDodgeMode(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_DODGE_LOCATION; else m_ExtraFlags &= ~PLAYER_EXTRA_DODGE_LOCATION; };
-        
+
         void PrepareCharmAISpells();
         uint32 m_charmUpdateTimer;
 
@@ -2685,7 +2685,7 @@ class Player : public Unit, public GridObject<Player>
 
         bool BlizzlikeMode() { return m_BlizzlikeMode; }
         void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
-   
+
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
         void SetAutoInviteDone(bool val) { m_NeedAutoInvite = val; }
@@ -3084,7 +3084,7 @@ void RemoveItemsSetItem(Player*player, ItemTemplate const* proto);
 
 // "the bodies of template functions must be made available in a header file"
 template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell, bool temporaryPet)
-{ 
+{
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
         return 0;
