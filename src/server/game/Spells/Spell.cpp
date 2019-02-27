@@ -5621,18 +5621,6 @@ SpellCastResult Spell::CheckCast(bool strict)
              if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED))
                  return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
              break;
-        case 56001: // Moonshroud - Emerald Dragonshire w Dragonblight
-            if (m_caster->ToPlayer()->GetAreaId() != 4179 && m_caster->GetTypeId() == TYPEID_PLAYER && !sWorld->PatchNotes(PATCH_330))
-                return SPELL_FAILED_REQUIRES_AREA;
-            break;
-        case 56002: // Ebonweave - Obsidian Dragonshire w Dragonblight
-            if (m_caster->ToPlayer()->GetAreaId() != 4167 && m_caster->GetTypeId() == TYPEID_PLAYER && !sWorld->PatchNotes(PATCH_330))
-                return SPELL_FAILED_REQUIRES_AREA;
-            break;
-        case 56003: // Spellweave - Azure Dragonshrine w Dragonblight
-            if (m_caster->ToPlayer()->GetAreaId() != 4183 && m_caster->GetTypeId() == TYPEID_PLAYER && !sWorld->PatchNotes(PATCH_330))
-                return SPELL_FAILED_REQUIRES_AREA;
-            break;
         // Rogue stealth
         case 1784:
             // stealth can't be casted while being polymorphed
