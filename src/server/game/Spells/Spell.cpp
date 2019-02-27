@@ -4320,15 +4320,6 @@ void Spell::WriteCastResultInfo(WorldPacket& data, Player* caster, SpellInfo con
                 case 45373:                                 // Bloodberry Elixir
                     data << uint32(4075);
                     break;
-                case 56001:                                 // Moonshroud - Emerald Dragonshire w Dragonblight
-                    data << uint32(4179);
-                    break;
-                case 56002:                                 //  Ebonweave - Obsidian Dragonshire w Dragonblight
-                    data << uint32(4167);
-                    break;
-                case 56003:                                 // Spellweave - Azure Dragonshrine w Dragonblight
-                    data << uint32(4183);
-                    break;
                 default:                                    // default case (don't must be)
                     data << uint32(0);
                     break;
