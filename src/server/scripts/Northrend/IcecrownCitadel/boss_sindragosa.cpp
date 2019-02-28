@@ -969,6 +969,10 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
                 std::list<WorldObject*> rangedList = std::list<WorldObject*>(unitList);
                 healersList.remove_if(UnchainedMagicHealerSelector());
                 rangedList.remove_if(UnchainedMagicRangedSelector());
+                //! we might have duplicates in some cases
+                //! keep em in healersList and remove duplicates in rangedList
+                for (auto && actor : healersList)
+                    rangedList.remove(actor);
                 unitList.clear();
 
                 //! if both lists have over maxSize elements
