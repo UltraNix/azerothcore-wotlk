@@ -51,7 +51,8 @@ struct boss_elder_nadoxAI : public BossAI
 {
     boss_elder_nadoxAI(Creature* creature) : BossAI(creature, BOSS_NADOX)
     {
-        _preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
+        //_preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
+		_preNerf = false;
     }
 
     void Reset() override

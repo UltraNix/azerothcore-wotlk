@@ -67,7 +67,8 @@ class boss_anomalus : public CreatureScript
         {
             boss_anomalusAI(Creature* creature) : BossAI(creature, DATA_ANOMALUS_EVENT)
             {
-                preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
+                //preNerf = sWorld->PatchNotes(PATCH_MIN, PATCH_332);
+				preNerf = false;
             }
 
             bool achievement;
