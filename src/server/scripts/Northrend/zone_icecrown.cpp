@@ -652,6 +652,9 @@ class npc_boneguard_footman : public CreatureScript
                         {
                             me->LowerPlayerDamageReq(me->GetMaxHealth());
                             Unit::Kill(victim, me);
+							if (Unit* owner = victim->GetOwner())
+								if (Player* pl = owner->ToPlayer())
+									pl->KilledMonsterCredit(me->GetEntry(), 0);
                             return;
                         }
                     }
