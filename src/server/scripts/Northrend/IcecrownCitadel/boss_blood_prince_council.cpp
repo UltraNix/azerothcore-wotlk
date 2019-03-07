@@ -1127,6 +1127,9 @@ class npc_blood_queen_lana_thel : public CreatureScript
                 }
             }
 
+            void AttackStart(Unit* /*who*/) override { }
+            void EnterCombat(Unit* /*who*/) override { }
+
             void MovementInform(uint32 type, uint32 id)
             {
                 if (type == POINT_MOTION_TYPE && id == POINT_INTRO_DESPAWN)
