@@ -716,19 +716,23 @@ class spell_marrowgar_bone_slice : public SpellScriptLoader
         }
 };
 
-class spell_cold_flames_damage_aura_SpellScript : public SpellScript
+class spell_cold_flames_damage_aura_SpellScript : public AuraScript
 {
-    PrepareSpellScript(spell_cold_flames_damage_aura_SpellScript);
+    PrepareAuraScript(spell_cold_flames_damage_aura_SpellScript);
 
-    void FilterTargets(std::list<WorldObject*> & targets)
+
+    void HandlePeriodicFlame(AuraEffect const* /*aurEff*/)
     {
-        for (auto i = 0; i < 3; ++i)
-            targets.remove_if(Trinity::UnitAuraCheck(true, boneSpikeSummonId[i]));
+        if (!GetTarget())
+            return;
+
+        if (GetTarget()->HasAura(SPELL_IMPALED))
+            PreventDefaultAction();
     }
 
     void Register() override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_cold_flames_damage_aura_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_cold_flames_damage_aura_SpellScript::HandlePeriodicFlame, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
     }
 };
 
@@ -743,5 +747,5 @@ void AddSC_boss_lord_marrowgar()
     new spell_marrowgar_bone_spike_graveyard();
     new spell_marrowgar_bone_storm();
     new spell_marrowgar_bone_slice();
-    new SpellScriptLoaderEx<spell_cold_flames_damage_aura_SpellScript>("spell_cold_flames_damage_aura");
+    new AuraScriptLoaderEx<spell_cold_flames_damage_aura_SpellScript>("spell_cold_flames_damage_aura");
 }
