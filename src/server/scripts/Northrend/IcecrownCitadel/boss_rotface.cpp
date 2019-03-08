@@ -780,16 +780,16 @@ class spell_rotface_vile_gas_trigger_SpellScript : public SpellScript
         auto itr = targets.begin();
         while (itr != targets.end() && (*itr)->GetDistance(GetCaster()) < 5.0f)
         {
-			if ((*itr)->GetTypeId() != TYPEID_PLAYER)
-				continue;
+            if ((*itr)->GetTypeId() != TYPEID_PLAYER)
+                continue;
             melee.push_back((*itr)->ToUnit());
             ++itr;
         }
 
         while (itr != targets.end())
         {
-			if ((*itr)->GetTypeId() != TYPEID_PLAYER)
-				continue;
+            if ((*itr)->GetTypeId() != TYPEID_PLAYER)
+                continue;
             ranged.push_back((*itr)->ToUnit());
             ++itr;
         }
