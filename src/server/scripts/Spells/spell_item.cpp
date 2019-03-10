@@ -2445,10 +2445,6 @@ class spell_item_shadowmourne : public SpellScriptLoader
                 if (GetTarget()->HasAura(SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF)) // cant collect shards while under effect of Chaos Bane buff
                     return false;
 
-                // Xinef: Not on BG / Arena
-                if (!GetTarget()->FindMap() || GetTarget()->FindMap()->IsBattleArena())
-                    return false;
-
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
                     if (!eventInfo.GetDamageInfo()->GetDamage())
                     {
