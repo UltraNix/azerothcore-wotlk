@@ -62,6 +62,7 @@ struct boss_bronjahmAI : public BossAI
         me->RemoveAurasDueToSpell(SPELL_SOULSTORM_CHANNEL_OOC);
         events.ScheduleEvent(EVENT_MAGICS_BANE, 7s, 12s);
         events.ScheduleEvent(EVENT_CORRUPT_SOUL, 14s, 20s);
+        me->PlayDirectSound(17280);
     }
 
     bool IsInPhase2() const
