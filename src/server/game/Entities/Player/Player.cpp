@@ -16723,8 +16723,6 @@ bool Player::CanShareQuest(uint32 quest_id) const
         QuestStatusMap::const_iterator itr = m_QuestStatus.find(quest_id);
         if (itr != m_QuestStatus.end())
         {
-            if (itr->second.Status != QUEST_STATUS_INCOMPLETE)
-                return false;
 
             // pussywizard: in pool and not currently available (wintergrasp weekly, dalaran weekly) - can't share
             if (sPoolMgr->IsPartOfAPool<Quest>(quest_id) && !sPoolMgr->IsSpawnedObject<Quest>(quest_id))
