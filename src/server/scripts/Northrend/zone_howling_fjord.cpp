@@ -615,6 +615,41 @@ private:
     uint8 _phase;
 };
 
+enum RiverWidowCoccon
+{
+    SPELL_SUMMON_FREED_SCOUT    = 43289,
+    SPELL_WINTERSKOM_BERSERKER  = 43283,
+    SPELL_WINTERSKOM_TRIBESMAN  = 43284,
+    SPELL_WINTERSKOM_ORACLE     = 43285,
+
+    NPC_RIVENWOOD_CAPTIVES_CREDIT = 24211
+};
+struct npc_riven_widow_cocconAI : public ScriptedAI
+{
+    npc_riven_widow_cocconAI(Creature* creature) : ScriptedAI(creature) {}
+
+    void JustDied(Unit* killer)
+    {
+        if (summonSpellId = Trinity::Containers::SelectRandomContainerElement(summonsSpells))
+        {
+            DoCastSelf(summonSpellId, true);
+            if (summonSpellId == SPELL_SUMMON_FREED_SCOUT)
+                if (killer->GetTypeId() == TYPEID_PLAYER)
+                    killer->ToPlayer()->KilledMonsterCredit(NPC_RIVENWOOD_CAPTIVES_CREDIT, 0);
+        }
+    }
+
+private:
+    uint32 summonSpellId;
+    std::vector<uint32> summonsSpells =
+    {
+        SPELL_SUMMON_FREED_SCOUT,
+        SPELL_WINTERSKOM_BERSERKER,
+        SPELL_WINTERSKOM_TRIBESMAN,
+        SPELL_WINTERSKOM_ORACLE
+    };
+};
+
 void AddSC_howling_fjord()
 {
     // Ours
@@ -628,4 +663,5 @@ void AddSC_howling_fjord()
     new CreatureAILoader<npc_valgarde_event_attackerAI>("npc_valgarde_event_attacker");
     new CreatureAILoader<npc_valgarde_event_defenderAI>("npc_valgarde_event_defender");
     new CreatureAILoader<npc_lebronskiAI>("npc_lebronski");
+    new CreatureAILoader<npc_riven_widow_cocconAI> ("npc_riven_widow_coccon");
  }
