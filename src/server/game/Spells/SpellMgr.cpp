@@ -5144,6 +5144,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 21064:
             spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 1.80; // 45k instead of 25k
             break;
+        case 33924:
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            break;
 
         // ///////////////////////////////////////////
         // ////////////////BOSS SPELLS////////////////
