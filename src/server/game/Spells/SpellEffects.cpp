@@ -6026,6 +6026,14 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
     if (!caster)
         return;
 
+    Creature * oldSummon = ObjectAccessor::GetCreature(*caster, caster->m_SummonSlot[properties->Slot]);
+    if (oldSummon)
+    {
+        if (TempSummon* temp = oldSummon->ToTempSummon())
+            temp->UnSummon();
+        return;
+    }
+
     if (caster->IsTotem())
         caster = caster->ToTotem()->GetOwner();
 
