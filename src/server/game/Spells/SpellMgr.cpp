@@ -3602,6 +3602,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->_requireCooldownInfo = true;
         });
 
+        // Regurigitated Ooze
+        ApplySpellFix({ 70539, 72457, 72875, 72876 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->RecoveryTime = 1500;
+            spellInfo->_requireCooldownInfo = true;
+        });
+
         ApplySpellFix
         ({
             56513, // Jormungar Strike
