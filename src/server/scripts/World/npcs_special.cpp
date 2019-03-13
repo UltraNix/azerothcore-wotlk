@@ -1198,6 +1198,33 @@ public:
         return true;
     }
 
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+        if (player->HasSkill(SKILL_FIRST_AID) && player->GetSkillValue(SKILL_FIRST_AID) > 260 && !player->HasSpell(18629))
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Learn Runecloth Bandage", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->PlayerTalkClass->SendGossipMenu(6414, creature->GetGUID());
+            return true;
+        }
+
+        player->PlayerTalkClass->SendGossipMenu(6415, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF +1:
+                creature->CastSpell(player, 18631, true);
+                break;
+        }
+        return true;
+    }
+
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_doctorAI(creature);
