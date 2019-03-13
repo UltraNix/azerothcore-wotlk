@@ -16306,18 +16306,25 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit* victim, Aura* aura, SpellInfo const
     if (!EventProcFlag)
         return false;
 
-    // Additional checks for triggered spells (ignore trap casts)
-    //if (procExtra & PROC_EX_INTERNAL_TRIGGERED && !(procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION))
-    //{
-    //    if (!spellProto->HasAttribute(SPELL_ATTR3_CAN_PROC_TRIGGERED))
-    //        return false;
-    //}
+    bool IsGeneric = procSpell && procSpell->SpellFamilyName == SPELLFAMILY_GENERIC;
+    //! If aura can be triggered with triggered spells
+    //! and proccing spell is generic AND is not a trap
+    //! then allow to proc the aura
+    if (IsGeneric &&
+        spellProto->HasAttribute(SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED) &&
+        procExtra & PROC_EX_INTERNAL_TRIGGERED &&
+        !(procFlag & PROC_FLAG_DONE_TRAP_ACTIVATION))
+        IsGeneric = false;
 
     // Xinef: additional check for player auras - only player spells can trigger player proc auras
     // Xinef: skip victim auras
     if (!isVictim && GetTypeId() == TYPEID_PLAYER) //spellProto->SpellFamilyName != SPELLFAMILY_GENERIC)
-        if (!(EventProcFlag & (PROC_FLAG_KILL|PROC_FLAG_DEATH)) && procSpell && procSpell->SpellFamilyName == SPELLFAMILY_GENERIC && (!eventInfo.GetTriggerAuraSpell() || eventInfo.GetTriggerAuraSpell()->SpellFamilyName == SPELLFAMILY_GENERIC))
+    {
+        if (!(EventProcFlag & (PROC_FLAG_KILL | PROC_FLAG_DEATH)) &&
+            IsGeneric &&
+            (!eventInfo.GetTriggerAuraSpell() || eventInfo.GetTriggerAuraSpell()->SpellFamilyName == SPELLFAMILY_GENERIC))
             return false;
+    }
 
     // Check spellProcEvent data requirements
     if (!sSpellMgr->IsSpellProcEventCanTriggeredBy(spellProto, spellProcEvent, EventProcFlag, procSpell, procFlag, procExtra, active))
