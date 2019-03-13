@@ -723,8 +723,8 @@ class boss_the_lich_king : public CreatureScript
                 switch (action)
                 {
                     case ACTION_RESTORE_LIGHT:
-                        me->GetMap()->SetZoneOverrideLight(AREA_THE_FROZEN_THRONE, 0, 5000);
-                        me->GetMap()->SetZoneWeather(AREA_THE_FROZEN_THRONE, WEATHER_STATE_FINE, 0.5f);
+                        me->GetMap()->SetZoneOverrideLight(AREA_ICECROWN_CITADEL, 0, 5000);
+                        me->GetMap()->SetZoneWeather(AREA_ICECROWN_CITADEL, WEATHER_STATE_FINE, 0.5f);
                         break;
                     case ACTION_START_ATTACK:
                         events.ScheduleEvent(EVENT_START_ATTACK, 5250);
@@ -790,7 +790,7 @@ class boss_the_lich_king : public CreatureScript
                     summons.DespawnAll();
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
-                    me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_FURY_OF_FROSTMOURNE);
+                    me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_FURY_OF_FROSTMOURNE);
                     me->InterruptNonMeleeSpells(true);
                     me->CastSpell((Unit*)NULL, SPELL_FURY_OF_FROSTMOURNE, false);
                     me->SetWalk(true);
@@ -910,8 +910,8 @@ class boss_the_lich_king : public CreatureScript
             {
                 if (spell->Id == REMORSELESS_WINTER_1 || spell->Id == REMORSELESS_WINTER_2)
                 {
-                    me->GetMap()->SetZoneOverrideLight(AREA_THE_FROZEN_THRONE, LIGHT_SNOWSTORM, 5000);
-                    me->GetMap()->SetZoneWeather(AREA_THE_FROZEN_THRONE, WEATHER_STATE_LIGHT_SNOW, 0.5f);
+                    me->GetMap()->SetZoneOverrideLight(AREA_ICECROWN_CITADEL, LIGHT_SNOWSTORM, 5000);
+                    me->GetMap()->SetZoneWeather(AREA_ICECROWN_CITADEL, WEATHER_STATE_LIGHT_SNOW, 0.5f);
                     summons.DespawnEntry(NPC_SHADOW_TRAP_TRIGGER);
                 }
             }
@@ -926,7 +926,7 @@ class boss_the_lich_king : public CreatureScript
                     case POINT_CENTER_1:
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
-                        me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                        me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                         me->CastSpell(me, SPELL_REMORSELESS_WINTER_1, false);
                         events.ScheduleEvent(EVENT_QUAKE, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
@@ -938,7 +938,7 @@ class boss_the_lich_king : public CreatureScript
                     {
                         me->SetFacingTo(0.0f);
                         Talk(SAY_LK_REMORSELESS_WINTER);
-                        me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                        me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                         me->CastSpell(me, SPELL_REMORSELESS_WINTER_2, false);
                         events.ScheduleEvent(EVENT_QUAKE_2, 62500);
                         events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, 3500, EVENT_GROUP_ABILITIES);
@@ -1020,7 +1020,7 @@ class boss_the_lich_king : public CreatureScript
                         me->ClearUnitState(UNIT_STATE_CASTING);
                         me->SetFacingTo(0.0f);
                         me->CastSpell((Unit*)NULL, SPELL_QUAKE, false);
-                        me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                        me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                         Talk(SAY_LK_QUAKE);
                         break;
                     case EVENT_QUAKE_2:
@@ -1036,14 +1036,14 @@ class boss_the_lich_king : public CreatureScript
                         me->ClearUnitState(UNIT_STATE_CASTING);
                         me->SetFacingTo(0.0f);
                         me->CastSpell((Unit*)NULL, SPELL_QUAKE, false);
-                        me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                        me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                         Talk(SAY_LK_QUAKE);
                         break;
 
                     // ABILITIES:
                     case EVENT_SUMMON_SHAMBLING_HORROR:
                         me->CastSpell(me, SPELL_SUMMON_SHAMBLING_HORROR, false);
-                        me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                        me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                         events.ScheduleEvent(EVENT_SUMMON_SHAMBLING_HORROR, 60000, EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_SUMMON_DRUDGE_GHOUL:
@@ -1121,7 +1121,7 @@ class boss_the_lich_king : public CreatureScript
                         break;
                     case EVENT_SUMMON_VALKYR:
                         {
-                            me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                            me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                             Talk(SAY_LK_SUMMON_VALKYR);
                             me->CastSpell((Unit*)NULL, SUMMON_VALKYR, false);
                             events.ScheduleEvent(EVENT_SUMMON_VALKYR, 45s, EVENT_GROUP_ABILITIES);
@@ -1133,7 +1133,7 @@ class boss_the_lich_king : public CreatureScript
                         }
                         break;
                     case EVENT_VILE_SPIRITS:
-                        me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_SPECIAL);
+                        me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_SPECIAL);
                         me->CastSpell((Unit*)NULL, SPELL_VILE_SPIRITS, false);
                         events.ScheduleEvent(EVENT_VILE_SPIRITS, 30000, EVENT_GROUP_VILE_SPIRITS);
                         break;
@@ -1290,7 +1290,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                             theLichKing->SetSheath(SHEATH_STATE_MELEE);
                             theLichKing->RemoveAurasDueToSpell(SPELL_EMOTE_SIT_NO_SHEATH);
                             theLichKing->AI()->Talk(SAY_LK_INTRO_1);
-                            me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_FROZEN_THRONE);
+                            me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_FROZEN_THRONE);
                             _events.ScheduleEvent(EVENT_INTRO_LK_MOVE, 3000);
                         }
                         break;
@@ -1508,7 +1508,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                         {
                             theLichKing->CastSpell((Unit*)NULL, SPELL_RAISE_DEAD, false);
                             theLichKing->ClearUnitState(UNIT_STATE_CASTING);
-                            me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_FINAL);
+                            me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_FINAL);
                         }
                         break;
                     case EVENT_OUTRO_LK_TALK_5:
@@ -1528,8 +1528,8 @@ class npc_tirion_fordring_tft : public CreatureScript
                             me->SetFacingToObject(theLichKing);
                             theLichKing->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, EQUIP_UNEQUIP);
                             theLichKing->CastSpell((Unit*)NULL, SPELL_SUMMON_BROKEN_FROSTMOURNE_3, true);
-                            me->GetMap()->SetZoneOverrideLight(AREA_THE_FROZEN_THRONE, LIGHT_SOULSTORM, 10000);
-                            me->GetMap()->SetZoneWeather(AREA_THE_FROZEN_THRONE, WEATHER_STATE_BLACKSNOW, 0.5f);
+                            me->GetMap()->SetZoneOverrideLight(AREA_ICECROWN_CITADEL, LIGHT_SOULSTORM, 10000);
+                            me->GetMap()->SetZoneWeather(AREA_ICECROWN_CITADEL, WEATHER_STATE_BLACKSNOW, 0.5f);
 
                             _events.ScheduleEvent(EVENT_OUTRO_AFTER_SUMMON_BROKEN_FROSTMOURNE, 1000);
                             _events.ScheduleEvent(EVENT_OUTRO_KNOCK_BACK, 3000);
@@ -1618,7 +1618,7 @@ class npc_tirion_fordring_tft : public CreatureScript
                         if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
                         {
                             me->SetFacingToObject(lichKing);
-                            me->GetMap()->SetZoneMusic(AREA_THE_FROZEN_THRONE, MUSIC_FINAL);
+                            me->GetMap()->SetZoneMusic(AREA_ICECROWN_CITADEL, MUSIC_FINAL);
                         }
                         break;
                     case EVENT_OUTRO_FORDRING_MOVE_1:
