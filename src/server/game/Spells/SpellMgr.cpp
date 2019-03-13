@@ -5831,6 +5831,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63472:
             spellInfo->EffectBasePoints[EFFECT_1] = 2598;
             break;
+        case 63024: // Gravity Bomb
+        case 65121: // Searing light
+            spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
+            break;
         // Gravity Bomb
         case 63025:
         case 64233:
@@ -5838,6 +5842,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_11_YARDS;
             break;
         case 64234:
+            spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
             spellInfo->EffectBasePoints[EFFECT_2] = spellInfo->EffectBasePoints[EFFECT_2] + 4999;
             break;
         // Heartbreak
@@ -5864,6 +5869,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 63018: // Searing light
         case 63023: // Searing light
+            spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
             spellInfo->AttributesEx3 &= ~SPELL_ATTR3_CANT_TRIGGER_PROC;
             break;
