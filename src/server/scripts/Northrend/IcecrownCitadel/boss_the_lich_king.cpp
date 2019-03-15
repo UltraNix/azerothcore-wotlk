@@ -946,6 +946,7 @@ class boss_the_lich_king : public CreatureScript
                         std::vector<std::chrono::duration<long long>> timers = { 6s, 23s, 41s, 59s };
                         for (auto time : timers)
                             events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, time, EVENT_GROUP_ABILITIES);
+                        summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         break;
                     }
                     default:
@@ -1024,7 +1025,6 @@ class boss_the_lich_king : public CreatureScript
                         Talk(SAY_LK_QUAKE);
                         break;
                     case EVENT_QUAKE_2:
-                        summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         _phase = PHASE_THREE;
                         events.CancelEventGroup(EVENT_GROUP_ABILITIES);
                         events.ScheduleEvent(EVENT_SOUL_REAPER, 20s, 22s, EVENT_GROUP_ABILITIES);
