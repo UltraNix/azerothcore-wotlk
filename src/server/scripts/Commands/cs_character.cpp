@@ -228,7 +228,7 @@ public:
             uint8 race = field[0].GetUInt8();
             uint8 playerClass = field[1].GetUInt8();
             uint8 level = field[3].GetUInt8();
-            sWorld->AddGlobalPlayerData(delInfo.lowGuid, delInfo.accountId, nameReserved ? "Default" : delInfo.name, gender, race, playerClass, level, 0, 0);
+            sWorld->AddGlobalPlayerData(delInfo.lowGuid, delInfo.accountId, nameReserved ? "Default" : delInfo.name, gender, race, playerClass, level, 0, 0, delInfo.accountName);
         }
     }
 

@@ -636,6 +636,7 @@ struct GlobalPlayerData
     uint32 guildId;
     uint32 groupId;
     uint32 arenaTeamId[3];
+    std::string accountName;
 };
 
 enum GlobalPlayerUpdateMask
@@ -870,7 +871,7 @@ class World
         void LoadGlobalPlayerDataStore();
         uint32 GetGlobalPlayerGUID(std::string const& name) const;
         GlobalPlayerData const* GetGlobalPlayerData(uint32 guid) const;
-        void AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint16 mailCount, uint32 guildId);
+        void AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint16 mailCount, uint32 guildId, std::string const& accountName);
         void UpdateGlobalPlayerData(uint32 guid, uint8 mask, std::string const& name, uint8 level = 0, uint8 gender = 0, uint8 race = 0, uint8 playerClass = 0);
         void UpdateGlobalPlayerMails(uint32 guid, int16 count, bool add = true);
         void UpdateGlobalPlayerGuild(uint32 guid, uint32 guildId);

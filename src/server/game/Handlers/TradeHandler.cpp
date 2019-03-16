@@ -458,13 +458,24 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         // execute trade: 2. store
         moveItems(myItems, hisItems);
 
-        if( my_trade->GetMoney() >= 10*GOLD )
+        const GlobalPlayerData* myData = sWorld->GetGlobalPlayerData(_player->GetGUIDLow());
+        const GlobalPlayerData* hisData = sWorld->GetGlobalPlayerData(trader->GetGUIDLow());
+
+        if (myData && hisData)
         {
-            CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<TRADE>\", NOW())", GetAccountId(), _player->GetGUIDLow(), _player->GetName().c_str(), GetRemoteAddress().c_str(), trader->GetSession()->GetAccountId(), trader->GetName().c_str(), my_trade->GetMoney());
-        }
-        if( his_trade->GetMoney() >= 10*GOLD )
-        {
-            CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<TRADE>\", NOW())", trader->GetSession()->GetAccountId(), trader->GetGUIDLow(), trader->GetName().c_str(), trader->GetSession()->GetRemoteAddress().c_str(), GetAccountId(), _player->GetName().c_str(), his_trade->GetMoney());
+            if (my_trade->GetMoney() >= 10 * GOLD)
+            {
+                CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
+                    "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<TRADE>\", NOW(), \"%s\", \"%s\")",
+                    GetAccountId(), _player->GetGUIDLow(), _player->GetName().c_str(), GetRemoteAddress().c_str(), trader->GetSession()->GetAccountId(), trader->GetName().c_str(), my_trade->GetMoney(), myData->accountName, hisData->accountName);
+            }
+
+            if (his_trade->GetMoney() >= 10 * GOLD)
+            {
+                CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
+                    "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<TRADE>\", NOW(), \"%s\", \"%s\")",
+                    trader->GetSession()->GetAccountId(), trader->GetGUIDLow(), trader->GetName().c_str(), trader->GetSession()->GetRemoteAddress().c_str(), GetAccountId(), _player->GetName().c_str(), his_trade->GetMoney(), hisData->accountName, myData->accountName);
+            }
         }
 
         // update money
