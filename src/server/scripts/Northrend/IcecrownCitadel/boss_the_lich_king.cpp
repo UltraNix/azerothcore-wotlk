@@ -913,6 +913,10 @@ class boss_the_lich_king : public CreatureScript
                     me->GetMap()->SetZoneOverrideLight(AREA_ICECROWN_CITADEL, LIGHT_SNOWSTORM, 5000);
                     me->GetMap()->SetZoneWeather(AREA_ICECROWN_CITADEL, WEATHER_STATE_LIGHT_SNOW, 0.5f);
                     summons.DespawnEntry(NPC_SHADOW_TRAP_TRIGGER);
+
+                    //! second transition, despawn any valkyrs
+                    if (spell->Id == REMORSELESS_WINTER_2)
+                        summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                 }
             }
 
@@ -946,7 +950,6 @@ class boss_the_lich_king : public CreatureScript
                         std::vector<std::chrono::duration<long long>> timers = { 6s, 23s, 41s, 59s };
                         for (auto time : timers)
                             events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, time, EVENT_GROUP_ABILITIES);
-                        summons.DespawnEntry(NPC_VALKYR_SHADOWGUARD);
                         break;
                     }
                     default:
