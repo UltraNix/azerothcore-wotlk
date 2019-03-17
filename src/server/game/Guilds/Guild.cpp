@@ -1736,7 +1736,7 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
         if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
         {
             CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB DEPOSIT> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW(), \"%s\", \"<GuildName> %s\")",
+                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB DEPOSIT> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW(), \"%s\", \"<GuildBank> %s\")",
                 data->accountId, player->GetGUIDLow(), data->name, session->GetRemoteAddress().c_str(), 0, "",
                 amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID() & 0xFFFFFFFF), player->getLevel(), data->accountName, GetName());
         }
@@ -1787,9 +1787,9 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
         if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
         {
             CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB WITHDRAW> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW(), \"%s\", \"<GuildName> %s\")",
+                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB WITHDRAW> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW(), \"%s\", \"<GuildBank> %s\")",
                 data->accountId, player->GetGUIDLow(), data->name, session->GetRemoteAddress().c_str(), 0, "",
-                amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID() & 0xFFFFFFFF), player->getLevel(), data->accountName, GetName());
+                amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID() & 0xFFFFFFFF), player->getLevel(), GetName(), data->accountName);
         }
     }
 
