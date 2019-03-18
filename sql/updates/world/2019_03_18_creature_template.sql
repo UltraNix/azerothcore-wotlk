@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask` & ~16384 where entry IN (36980, 38320, 38321, 38322, 36619, 38233, 38459, 38460, 38711, 38970, 38971, 38972, 38712, 38973, 38974, 38975);
