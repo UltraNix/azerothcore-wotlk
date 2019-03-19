@@ -58,7 +58,11 @@ public:
 
     struct npc_oox09hlAI : public npc_escortAI
     {
-        npc_oox09hlAI(Creature* creature) : npc_escortAI(creature) { }
+        npc_oox09hlAI(Creature* creature) : npc_escortAI(creature) 
+        {
+            vileGroupSummoned = false;
+            owlGroupSummoned = false;
+        }
 
         void Reset() { }
 
@@ -83,6 +87,8 @@ public:
                 me->setFaction(player->GetTeamId() == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
                 Talk(SAY_OOX_START, player);
                 npc_escortAI::Start(false, false, player->GetGUID(), quest);
+                vileGroupSummoned = false;
+                owlGroupSummoned = false;
             }
         }
 
@@ -109,25 +115,36 @@ public:
             switch (pointId)
             {
                 case 27:
-                    for (uint8 i = 0; i < 3; ++i)
+                    if (!owlGroupSummoned)
                     {
-                        const Position src = {147.927444f, -3851.513428f, 130.893f, 0};
-                        Position dst;
-                        me->GetRandomPoint(src, 7.0f, dst);
-                        DoSummon(NPC_MARAUDING_OWL, dst, 30000, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
+                        for (uint8 i = 0; i < 3; ++i)
+                        {
+                            const Position src = { 147.927444f, -3851.513428f, 130.893f, 0 };
+                            Position dst;
+                            me->GetRandomPoint(src, 7.0f, dst);
+                            DoSummon(NPC_MARAUDING_OWL, dst, 30000, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
+                        }
+                        owlGroupSummoned = true;
                     }
                     break;
                 case 44:
-                    for (uint8 i = 0; i < 3; ++i)
+                    if (!vileGroupSummoned)
                     {
-                        const Position src = {-141.151581f, -4291.213867f, 120.130f, 0};
-                        Position dst;
-                        me->GetRandomPoint(src, 7.0f, dst);
-                        me->SummonCreature(NPC_VILE_AMBUSHER, dst, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        for (uint8 i = 0; i < 3; ++i)
+                        {
+                            const Position src = { -141.151581f, -4291.213867f, 120.130f, 0 };
+                            Position dst;
+                            me->GetRandomPoint(src, 7.0f, dst);
+                            me->SummonCreature(NPC_VILE_AMBUSHER, dst, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                        }
+                        vileGroupSummoned = true;
                     }
                     break;
             }
         }
+    private:
+        bool owlGroupSummoned;
+        bool vileGroupSummoned;
     };
 
     CreatureAI* GetAI(Creature* creature) const
