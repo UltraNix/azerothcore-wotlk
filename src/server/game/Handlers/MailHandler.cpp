@@ -302,16 +302,8 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
 
         if( money >= 10*GOLD )
         {
-            if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
-            {
-                std::string rcAccountName = "";
-                AccountMgr::GetName(rc_account, rcAccountName);
-                CleanStringForMysqlQuery(subject);
-                CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                    "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<MAIL> %s\", NOW(), \"%s\", \"%s\")",
-                    GetAccountId(), player->GetGUIDLow(), player->GetName().c_str(), player->GetSession()->GetRemoteAddress().c_str(),
-                    rc_account, receiver.c_str(), money, subject.c_str(), data->accountName, rcAccountName);
-            }
+            CleanStringForMysqlQuery(subject);
+            CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<MAIL> %s\", NOW())", GetAccountId(), player->GetGUIDLow(), player->GetName().c_str(), player->GetSession()->GetRemoteAddress().c_str(), rc_account, receiver.c_str(), money, subject.c_str());
         }
     }
 
@@ -523,21 +515,9 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
                     std::string senderName;
                     if (!sObjectMgr->GetPlayerNameByGUID(sender_guid, senderName))
                         senderName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
-
                     std::string subj = m->subject;
-                    std::string
-
                     CleanStringForMysqlQuery(subj);
-                    if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
-                    {
-                        if (const GlobalPlayerData* senderData = sWorld->GetGlobalPlayerData(sender_guid))
-                        {
-                            CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<COD> %s\", NOW(), \"%s\", \"%s\")",
-                                data->accountId, player->GetGUIDLow(), player->GetName().c_str(), player->GetSession()->GetRemoteAddress().c_str(),
-                                sender_accId, senderName.c_str(), m->COD, subj.c_str(), data->accountName, senderData->accountName);
-                        }
-                    }
+                    CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<COD> %s\", NOW())", GetAccountId(), player->GetGUIDLow(), player->GetName().c_str(), player->GetSession()->GetRemoteAddress().c_str(), sender_accId, senderName.c_str(), m->COD, subj.c_str());
                 }
             }
 

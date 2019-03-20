@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -165,22 +165,13 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransa
                 uint64 bidder_guid = MAKE_NEW_GUID(auction->bidder, 0, HIGHGUID_PLAYER);
                 Player* bidder = ObjectAccessor::FindPlayerInOrOutOfWorld(bidder_guid);
                 std::string owner_name = "";
-
-                std::string sender_account_name = gpd->accountName;
-                std::string receiver_account_name = "";
                 uint8 owner_level = 0;
                 if (const GlobalPlayerData* gpd_owner = sWorld->GetGlobalPlayerData(auction->owner))
                 {
-                    receiver_account_name = gpd_owner->accountName;
                     owner_name = gpd_owner->name;
                     owner_level = gpd_owner->level;
                 }
-
-                CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                    "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<AH> profit: %ug, bidder: %s %u lvl (guid: %u), seller: %s %u lvl (guid: %u), item %u (%u)\", NOW(), \"%s\", \"%s\")",
-                    gpd->accountId, auction->bidder, gpd->name.c_str(), bidder ? bidder->GetSession()->GetRemoteAddress().c_str() : "",
-                    owner_accId, owner_name.c_str(), auction->bid, (profit / GOLD), gpd->name.c_str(), gpd->level, auction->bidder, owner_name.c_str(),
-                    owner_level, auction->owner, auction->item_template, auction->itemCount, sender_account_name, receiver_account_name);
+                CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<AH> profit: %ug, bidder: %s %u lvl (guid: %u), seller: %s %u lvl (guid: %u), item %u (%u)\", NOW())", gpd->accountId, auction->bidder, gpd->name.c_str(), bidder ? bidder->GetSession()->GetRemoteAddress().c_str() : "", owner_accId, owner_name.c_str(), auction->bid, (profit/GOLD), gpd->name.c_str(), gpd->level, auction->bidder, owner_name.c_str(), owner_level, auction->owner, auction->item_template, auction->itemCount);
             }
     }
 }
@@ -351,7 +342,7 @@ const AuctionItem* AuctionHouseMgr::AddAItem(ItemRef const& it)
 {
     ASSERT(it);
     ASSERT(mAitems.find(it->GetGUIDLow()) == mAitems.end());
-
+    
     auto it2 = mAitems.emplace( std::make_pair( it->GetGUIDLow(), AuctionItem{ *it } ) );
     return &(it2.first->second);
 }

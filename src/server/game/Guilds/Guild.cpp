@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1731,16 +1731,8 @@ void Guild::HandleMemberDepositMoney(WorldSession* session, uint32 amount)
     std::string aux = ByteArrayToHexStr(reinterpret_cast<uint8*>(&m_bankMoney), 8, true);
     _BroadcastEvent(GE_BANK_MONEY_SET, 0, aux.c_str());
 
-    if (amount > 10 * GOLD)
-    {
-        if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
-        {
-            CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB DEPOSIT> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW(), \"%s\", \"<GuildName> %s\")",
-                data->accountId, player->GetGUIDLow(), data->name, session->GetRemoteAddress().c_str(), 0, "",
-                amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID() & 0xFFFFFFFF), player->getLevel(), data->accountName, GetName());
-        }
-    }
+    if (amount > 10*GOLD)
+        CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB DEPOSIT> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW())", session->GetAccountId(), player->GetGUIDLow(), player->GetName().c_str(), session->GetRemoteAddress().c_str(), 0, "", amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID()&0xFFFFFFFF), player->getLevel());
 }
 
 bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool repair)
@@ -1782,16 +1774,8 @@ bool Guild::HandleMemberWithdrawMoney(WorldSession* session, uint32 amount, bool
     _LogBankEvent(trans, repair ? GUILD_BANK_LOG_REPAIR_MONEY : GUILD_BANK_LOG_WITHDRAW_MONEY, uint8(0), player->GetGUIDLow(), amount);
     CharacterDatabase.CommitTransaction(trans);
 
-    if (amount > 10 * GOLD)
-    {
-        if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
-        {
-            CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB WITHDRAW> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW(), \"%s\", \"<GuildName> %s\")",
-                data->accountId, player->GetGUIDLow(), data->name, session->GetRemoteAddress().c_str(), 0, "",
-                amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID() & 0xFFFFFFFF), player->getLevel(), data->accountName, GetName());
-        }
-    }
+    if (amount > 10*GOLD)
+        CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date) VALUES(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<GB WITHDRAW> %s (guild id: %u, members: %u, new amount: " UI64FMTD", leader guid low: %u, char level: %u)\", NOW())", session->GetAccountId(), player->GetGUIDLow(), player->GetName().c_str(), session->GetRemoteAddress().c_str(), 0, "", amount, GetName().c_str(), GetId(), GetMemberCount(), GetTotalBankMoney(), (uint32)(GetLeaderGUID()&0xFFFFFFFF), player->getLevel());
 
     std::string aux = ByteArrayToHexStr(reinterpret_cast<uint8*>(&m_bankMoney), 8, true);
     _BroadcastEvent(GE_BANK_MONEY_SET, 0, aux.c_str());

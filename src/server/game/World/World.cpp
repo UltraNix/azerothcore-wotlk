@@ -3374,10 +3374,6 @@ void World::LoadGlobalPlayerDataStore()
     {
         Field* fields = result->Fetch();
         uint32 guidLow = fields[0].GetUInt32();
-        uint32 accountId = fields[1].GetUInt32();
-
-        std::string accountName = "";
-        AccountMgr::GetName(accountId, accountName);
 
         // count mails
         uint16 mailCount = 0;
@@ -3387,15 +3383,14 @@ void World::LoadGlobalPlayerDataStore()
 
         AddGlobalPlayerData(
             guidLow,               /*guid*/
-            accountId,             /*accountId*/
+            fields[1].GetUInt32(), /*accountId*/
             fields[2].GetString(), /*name*/
             fields[3].GetUInt8(),  /*gender*/
             fields[4].GetUInt8(),  /*race*/
             fields[5].GetUInt8(),  /*class*/
             fields[6].GetUInt8(),  /*level*/
             mailCount,             /*mail count*/
-            0,                     /*guild id*/
-            accountName            /*account name*/);
+            0                      /*guild id*/);
 
         ++count;
     }
@@ -3405,7 +3400,7 @@ void World::LoadGlobalPlayerDataStore()
     sLog->outString();
 }
 
-void World::AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint16 mailCount, uint32 guildId, std::string const& accountName)
+void World::AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint16 mailCount, uint32 guildId)
 {
     GlobalPlayerData data;
 
@@ -3422,7 +3417,6 @@ void World::AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const
     data.arenaTeamId[0] = 0;
     data.arenaTeamId[1] = 0;
     data.arenaTeamId[2] = 0;
-    data.accountName = accountName;
 
     _globalPlayerDataStore[guid] = data;
     _globalPlayerNameStore[name] = guid;
