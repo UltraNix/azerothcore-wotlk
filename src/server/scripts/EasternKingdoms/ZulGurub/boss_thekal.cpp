@@ -153,6 +153,8 @@ struct boss_thekal_baseAI : public BossAI
             if (CheckAllDead())
             {
                 me->AI()->DoAction(ACTION_SET_PHASE_2);
+                if (Creature* cr = me->FindNearestCreature(NPC_HIGH_PRIEST_THEKAL, 100.f))
+                    cr->AI()->DoAction(ACTION_SET_PHASE_2);
                 me->SetFullHealth();
             }
         }
