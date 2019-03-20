@@ -177,7 +177,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransa
                 }
 
                 CharacterDatabase.PExecute("INSERT INTO log_money (sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_name, money, topic, date, sender_account_name, receiver_account_name) VALUES"
-                    "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<AH> profit: %ug, bidder: %s %u lvl (guid: %u), seller: %s %u lvl (guid: %u), item %u (%u)\", NOW(), \"%s\", \"%s\")",
+                    "(%u, %u, \"%s\", \"%s\", %u, \"%s\", %u, \"<AH> profit: %ug, bidder: %s %u lvl (guid: %u), seller: %s %u lvl (guid: %u), item %u (%u)\", NOW(), \"<Buyer acc name: %s>\", \"<Seller acc name: %s> \")",
                     gpd->accountId, auction->bidder, gpd->name.c_str(), bidder ? bidder->GetSession()->GetRemoteAddress().c_str() : "",
                     owner_accId, owner_name.c_str(), auction->bid, (profit / GOLD), gpd->name.c_str(), gpd->level, auction->bidder, owner_name.c_str(),
                     owner_level, auction->owner, auction->item_template, auction->itemCount, sender_account_name, receiver_account_name);
