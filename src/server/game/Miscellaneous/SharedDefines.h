@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,7 +35,7 @@ enum Days
     DAY_SATURDAY     = 6
 };
 
-// custom things that're really helpful
+// custom things that're really helpful 
 enum ReallyMisc
 {
     INVISIBLE_DISPLAY_ID = 0x4E38 // 20024
@@ -3394,7 +3394,7 @@ enum ServiceType
     SERVICE_EXP_BOOST                   = 2,
     SERVICE_NO_DURABILITY_LOSS          = 3,
     SERVICE_INSTANT_FLIGHT_PATHS        = 4,
-    SERVICE_EXP_BOOST_X4                = 5,
+    SERVICE_EXP_BOOST_X4                = 5,   
     SERVICE_TELEPORT_INPUT              = 6, // To allow input from command
 };
 

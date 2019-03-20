@@ -525,6 +525,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
                         senderName = sObjectMgr->GetTrinityStringForDBCLocale(LANG_UNKNOWN);
 
                     std::string subj = m->subject;
+                    std::string
 
                     CleanStringForMysqlQuery(subj);
                     if (const GlobalPlayerData* data = sWorld->GetGlobalPlayerData(player->GetGUIDLow()))
