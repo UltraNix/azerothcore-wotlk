@@ -155,6 +155,10 @@ struct boss_thekal_baseAI : public BossAI
                 me->AI()->DoAction(ACTION_SET_PHASE_2);
                 if (Creature* cr = me->FindNearestCreature(NPC_HIGH_PRIEST_THEKAL, 100.f))
                     cr->AI()->DoAction(ACTION_SET_PHASE_2);
+                if (Creature* cr = me->FindNearestCreature(NPC_ZEALOT_ZATH, 100.f))
+                    cr->AI()->DoAction(ACTION_SET_PHASE_2);
+                if (Creature* cr = me->FindNearestCreature(NPC_ZEALOT_LORKHAN, 100.f))
+                    cr->AI()->DoAction(ACTION_SET_PHASE_2);
                 me->SetFullHealth();
             }
         }
@@ -308,7 +312,7 @@ struct npc_zealot_lorkhanAI : public boss_thekal_baseAI
                 events.Repeat(15s, 25s);
                 break;
             case EVENT_CHECK_TIMER:
-                if (!CheckAllDead())
+                if (!CheckAllDead() && !events.IsInPhase(PHASE_TWO))
                 {
                     DoCastSelf(SPELL_RESURRECT, true);
                     ScheduleCombatEvents();
@@ -338,7 +342,7 @@ struct npc_zealot_zathAI : public boss_thekal_baseAI
         switch (eventId)
         {
             case EVENT_CHECK_TIMER:
-                if (!CheckAllDead())
+                if (!CheckAllDead() && !events.IsInPhase(PHASE_TWO))
                 {
                     DoCastSelf(SPELL_RESURRECT, true);
                     ScheduleCombatEvents();
