@@ -404,7 +404,7 @@ public:
                 return false;
 
             if (AccountMgr::GetName(target->GetSession()->GetAccountId(), accountName))
-                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "30d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
+                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "7d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
         }
         else
         {
@@ -413,10 +413,10 @@ public:
                 return false;
 
             if (AccountMgr::GetName(accountId, accountName))
-                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "30d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
+                sWorld->BanAccount(BAN_ACCOUNT, accountName.c_str(), "7d", "Speed Hack.", handler->GetSession() ? handler->GetSession()->GetPlayerName() : "");
         }
 
-        sLog->outBan("Game Master: [%s] has banned player: [%s] for speed hack. (30 days)", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
+        sLog->outBan("Game Master: [%s] has banned player: [%s] for speed hack. (7 days)", handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
         sWorld->SendGMText(LANG_SPEED_BAN, handler->GetSession()->GetPlayerName().c_str(), targetName.c_str());
 
         return true;
