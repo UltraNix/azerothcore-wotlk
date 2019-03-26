@@ -563,14 +563,9 @@ public:
                 {
                     Unit* target = validPlayers[i];
                     didHit = true;
-                    //! ICC boost
-                    uint32 boneSpikeSpellID = 0;
-                    if (i <= 2)
-                        boneSpikeSpellID = boneSpikeSummonId[i];
-                    else
-                        boneSpikeSpellID = boneSpikeSummonId[0];
-                    //target->CastCustomSpell(boneSpikeSummonId[i], SPELLVALUE_BASE_POINT0, 0, target, true);
-                    target->CastSpell(target, boneSpikeSpellID, true);
+
+                    if (target)
+                        target->CastSpell(target, boneSpikeSummonId[i], true);
                 }
 
                 if (didHit)

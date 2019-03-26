@@ -461,9 +461,6 @@ class boss_lady_deathwhisper : public CreatureScript
                         uint8 count = 1;
                         if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
                             count = 3;
-                        //! ICC Boost
-                        else if (GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                            count = 5;
 
                         std::vector<uint64> targets;
                         ThreatContainer::StorageType const& threatlist = me->getThreatManager().getThreatList();

@@ -361,7 +361,6 @@ class BattleExperienceEvent : public BasicEvent
 public:
     static uint32 const ExperiencedSpells[5];
     static uint32 const ExperiencedTimes[5];
-    static uint32 const ExperiencedTimesHeroic[5];
 
     BattleExperienceEvent(Creature* creature) : _creature(creature), _level(0) { }
 
@@ -374,10 +373,9 @@ public:
         ++_level;
 
         _creature->CastSpell(_creature, ExperiencedSpells[_level], true);
-        bool Is25ManHeroic = _creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ? true : false;
         if (_level < (_creature->GetMap()->IsHeroic() ? 4 : 3))
         {
-            _creature->m_Events.AddEvent(this, timer + Is25ManHeroic ? ExperiencedTimesHeroic[_level] : ExperiencedTimes[_level]);
+            _creature->m_Events.AddEvent(this, timer + ExperiencedTimes[_level]);
             return false;
         }
 
@@ -391,7 +389,6 @@ private:
 
 uint32 const BattleExperienceEvent::ExperiencedSpells[5] = { 0, SPELL_EXPERIENCED, SPELL_VETERAN, SPELL_ELITE, SPELL_ADDS_BERSERK };
 uint32 const BattleExperienceEvent::ExperiencedTimes[5] = { 100000, 70000, 60000, 90000, 0 };
-uint32 const BattleExperienceEvent::ExperiencedTimesHeroic[5] = { 30000, 60000, 90000, 120000, 0 };
 
 class PassengerController
 {
@@ -1530,7 +1527,7 @@ struct gunship_npc_AI : public ScriptedAI
     gunship_npc_AI(Creature* creature) : ScriptedAI(creature), Instance(creature->GetInstanceScript()), Slot(NULL), Index(uint32(-1))
     {
         me->SetRegeneratingHealth(false);
-        burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
+        burningPitchTimer = urand(12000, 15000);
     }
 
     void SetData(uint32 type, uint32 data)
@@ -1570,8 +1567,7 @@ struct gunship_npc_AI : public ScriptedAI
         if (type == POINT_MOTION_TYPE && pointId == EVENT_CHARGE_PREPATH && Slot)
         {
             me->SetFacingTo(Slot->TargetPosition.GetOrientation());
-            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ?
-                                  BattleExperienceEvent::ExperiencedTimesHeroic[0] : BattleExperienceEvent::ExperiencedTimes[0]));
+            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(BattleExperienceEvent::ExperiencedTimes[0]));
             me->CastSpell(me, SPELL_BATTLE_EXPERIENCE, true);
             me->SetReactState(REACT_AGGRESSIVE);
         }
@@ -1594,7 +1590,7 @@ struct npc_gunship_boarding_addAI : public ScriptedAI
 {
     npc_gunship_boarding_addAI(Creature* creature) : ScriptedAI(creature), Instance(creature->GetInstanceScript()), Slot(NULL), Index(uint32(-1))
     {
-        burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
+        burningPitchTimer = urand(12000, 15000);
         anyValid = true;
         checkTimer = 1000;
         _usedDesperateResolve = false;
@@ -1637,9 +1633,7 @@ struct npc_gunship_boarding_addAI : public ScriptedAI
         if (type == POINT_MOTION_TYPE && pointId == EVENT_CHARGE_PREPATH && Slot)
         {
             me->SetFacingTo(Slot->TargetPosition.GetOrientation());
-            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ?
-                                  BattleExperienceEvent::ExperiencedTimesHeroic[0] : BattleExperienceEvent::ExperiencedTimes[0]));
-            //me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(BattleExperienceEvent::ExperiencedTimes[0]));
+            me->m_Events.AddEvent(new BattleExperienceEvent(me), me->m_Events.CalculateTime(BattleExperienceEvent::ExperiencedTimes[0]));
             me->CastSpell(me, SPELL_BATTLE_EXPERIENCE, true);
             me->SetReactState(REACT_AGGRESSIVE);
 
@@ -1675,6 +1669,7 @@ struct npc_gunship_boarding_addAI : public ScriptedAI
             anyValid = false;
             Map::PlayerList const& pl = me->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
+            {
                 if (Player* p = itr->GetSource())
                     if (CanAIAttack(p) && me->IsValidAttackTarget(p))
                     {
@@ -1683,6 +1678,7 @@ struct npc_gunship_boarding_addAI : public ScriptedAI
                         p->SetInCombatWith(me);
                         me->AddThreat(p, 0.0f);
                     }
+            }
         }
         else
             checkTimer -= diff;
@@ -1749,7 +1745,7 @@ class npc_gunship_boarding_leader : public CreatureScript
                 if (burningPitchTimer <= diff)
                 {
                     TriggerBurningPitch(me);
-                    burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
+                    burningPitchTimer = urand(12000, 15000);
                     return;
                 }
                 else burningPitchTimer -= diff;
@@ -1819,7 +1815,7 @@ class npc_gunship_boarding_add : public CreatureScript
                 if (burningPitchTimer <= diff)
                 {
                     TriggerBurningPitch(me);
-                    burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
+                    burningPitchTimer = urand(12000, 15000);
                     return;
                 }
                 else burningPitchTimer -= diff;
@@ -1966,7 +1962,7 @@ class npc_gunship_gunner : public CreatureScript
                 if (burningPitchTimer <= diff)
                 {
                     TriggerBurningPitch(me);
-                    burningPitchTimer = IsHeroic() ? urand(8000, 10000) : urand(12000, 15000);
+                    burningPitchTimer = urand(12000, 15000);
                     return;
                 }
                 else burningPitchTimer -= diff;
