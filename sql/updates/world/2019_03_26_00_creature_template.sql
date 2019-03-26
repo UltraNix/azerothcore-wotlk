@@ -1,0 +1,43 @@
+SET @AXETHROWER:= 38676;
+SET @AXETHROWER_BASE:= 22.4;
+
+UPDATE `creature_template` SET `health_mod` = @AXETHROWER_BASE + (@AXETHROWER_BASE * 0) WHERE `entry` = @AXETHROWER;
+
+SET @RIFLEMAN:= 38690;
+SET @RIFLEMAN_BASE:= 22.4;
+
+UPDATE `creature_template` SET `health_mod` = @RIFLEMAN_BASE + (@RIFLEMAN_BASE * 0) WHERE `entry` = @RIFLEMAN;
+
+SET @SORCERER:= 38694;
+SET @SORCERER_BASE:= 84;
+
+SET @BATTLEMAGE:= 38678;
+SET @BATTLEMAGE_BASE:= 84;
+
+UPDATE `creature_template` SET `health_mod` = @SORCERER_BASE + (@SORCERER_BASE * 0) WHERE `entry` = @SORCERER;
+UPDATE `creature_template` SET `health_mod` = @BATTLEMAGE_BASE + (@BATTLEMAGE_BASE * 0) WHERE `entry` = @BATTLEMAGE;
+
+SET @REAVER:= 38680;
+SET @REAVER_BASE:= 22.4;
+
+SET @MARINE:= 38686;
+SET @MARINE_BASE:= 22.4;
+
+UPDATE `creature_template` SET `health_mod` = @REAVER_BASE + (@REAVER_BASE * 0) WHERE `entry` = @REAVER;
+UPDATE `creature_template` SET `health_mod` = @MARINE_BASE + (@MARINE_BASE * 0) WHERE `entry` = @MARINE;
+
+
+SET @MARROWGAR:= 37959;
+SET @MARROWGAR_BASE:= 2250;
+
+UPDATE `creature_template` SET `health_mod` = @MARROWGAR_BASE + (@MARROWGAR_BASE * 0) WHERE `entry` = @MARROWGAR;
+
+SET @DEATHWHISPER:= 38297;
+SET @DEATHWHISPER_BASE:= 2400;
+
+UPDATE `creature_template` SET `health_mod` = @DEATHWHISPER_BASE + (@DEATHWHISPER_BASE * 0) WHERE `entry` = @DEATHWHISPER;
+
+SET @DEATHBRINGER:= 38583;
+SET @DEATHBRINGER_BASE:= 3150;
+
+UPDATE `creature_template` SET `health_mod` = @DEATHBRINGER_BASE + (@DEATHBRINGER_BASE * 0) WHERE `entry` = @DEATHBRINGER;
