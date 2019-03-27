@@ -396,7 +396,7 @@ class spell_thekal_tiger_form_AuraScript : public AuraScript
 
     void OnRemove(AuraEffect const* /*auraEffect*/, AuraEffectHandleModes /*handleModes*/)
     {
-        GetCaster()->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, 100.0f, true); // hack
+        GetCaster()->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, 40.f, false); // hack
     }
 
     void Register()
