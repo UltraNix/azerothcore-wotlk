@@ -579,7 +579,8 @@ struct SpawnAssociation
 enum AirFoceBots
 {
     SPELL_GUARDS_MARK               = 38067,
-    AURA_DURATION_TIME_LEFT         = 5000
+    AURA_DURATION_TIME_LEFT         = 5000,
+    EVENT_SUMMON_GUARD_COOLDOWN     = 1
 };
 
 float const RANGE_TRIPWIRE          = 15.0f;
@@ -658,14 +659,22 @@ public:
         SpawnAssociation* SpawnAssoc;
         uint64 SpawnedGUID;
 
-        void Reset() {}
+        void Reset()
+        {
+            events.Reset();
+            canSummonGuard = true;
+        }
 
         Creature* SummonGuard()
         {
             Creature* summoned = me->SummonCreature(SpawnAssoc->spawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 300000);
 
             if (summoned)
+            {
                 SpawnedGUID = summoned->GetGUID();
+                canSummonGuard = false;
+                events.ScheduleEvent(EVENT_SUMMON_GUARD_COOLDOWN, 60s);
+            }
             else
             {
                 sLog->outErrorDb("TCSR: npc_air_force_bots: wasn't able to spawn Creature %u", SpawnAssoc->spawnedCreatureEntry);
@@ -686,9 +695,10 @@ public:
         }
 
         void MoveInLineOfSight(Unit* who)
-
         {
             if (!SpawnAssoc)
+                return;
+            if (!canSummonGuard)
                 return;
 
             if (me->IsValidAttackTarget(who))
@@ -760,6 +770,23 @@ public:
                 }
             }
         }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!events.Empty())
+            {
+                events.Update(diff);
+                if (events.ExecuteEvent() == EVENT_SUMMON_GUARD_COOLDOWN)
+                {
+                    canSummonGuard = true;
+                }
+            }
+
+        }
+
+        private:
+            EventMap events;
+            bool canSummonGuard;
     };
 
     CreatureAI* GetAI(Creature* creature) const
