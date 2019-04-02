@@ -1,0 +1,9 @@
+SET @FESTERGUT:= 37506;
+SET @FESTERGUT_BASE:= 3750;
+
+UPDATE `creature_template` SET `health_mod` = @FESTERGUT_BASE + (@FESTERGUT_BASE * 0) WHERE `entry` = @FESTERGUT;
+
+SET @ROTFACE:= 38550;
+SET @ROTFACE_BASE:= 3400;
+
+UPDATE `creature_template` SET `health_mod` = @ROTFACE_BASE + (@ROTFACE_BASE * 0) WHERE `entry` = @ROTFACE;
