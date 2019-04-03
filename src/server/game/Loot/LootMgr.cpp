@@ -1050,7 +1050,7 @@ void Loot::logLootToDB()
     //(map_id, instance_id, owner_entry, item_entry )
     for ( LootItem & item : items )
     {
-        if ( !IsItemValidForLog( &item ) )
+        if (!IsItemValidForLog(&item))
             continue;
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement( CHAR_INS_LOOT_LOG_LOOT_CREATED );
@@ -1059,6 +1059,19 @@ void Loot::logLootToDB()
         stmt->setUInt32( 2, object->GetEntry() );
         stmt->setUInt32( 3, item.itemid );
         trans->Append( stmt );
+    }
+
+    for (LootItem & qItem : quest_items)
+    {
+        if (!IsItemValidForLog(&qItem))
+            continue;
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOOT_LOG_LOOT_CREATED);
+        stmt->setUInt32(0, m_mapID.nMapId);
+        stmt->setUInt32(1, m_mapID.nInstanceId);
+        stmt->setUInt32(2, object->GetEntry());
+        stmt->setUInt32(3, qItem.itemid);
+        trans->Append(stmt);
     }
 
     CharacterDatabase.CommitTransaction( trans );
