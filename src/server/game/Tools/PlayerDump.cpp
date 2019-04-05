@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -676,7 +676,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     CharacterDatabase.CommitTransaction(trans);
 
     // in case of name conflict player has to rename at login anyway
-    sWorld->AddGlobalPlayerData(guid, account, name, gender, race, playerClass, level, mails.size(), 0);
+    sWorld->AddGlobalPlayerData(guid, account, name, gender, race, playerClass, level, mails.size(), 0, AccountMgr::GetName(account));
 
     sObjectMgr->_hiItemGuid += items.size();
     sObjectMgr->_mailId     += mails.size();

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -44,6 +44,7 @@ namespace AccountMgr
     uint32 GetSecurity(uint32 accountId, int32 realmId);
 
     bool GetName(uint32 accountId, std::string& name);
+    std::string const GetName(uint32 accountId);
     uint32 GetCharactersCount(uint32 accountId);
     std::string CalculateShaPassHash(std::string const& name, std::string const& password);
 

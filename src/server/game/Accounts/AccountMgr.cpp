@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -68,6 +68,18 @@ bool GetName(uint32 accountId, std::string& name)
     }
 
     return false;
+}
+
+std::string const GetName(uint32 accountId)
+{
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_USERNAME_BY_ID);
+    stmt->setUInt32(0, accountId);
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+
+    if (result)
+        return (*result)[0].GetString();
+
+    return {};
 }
 
 bool CheckPassword(uint32 accountId, std::string password)
