@@ -1931,6 +1931,11 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         error = LFG_TELEPORTERROR_IN_VEHICLE;
     else if (player->GetCharmGUID())
         error = LFG_TELEPORTERROR_CHARMING;
+    else if (player->IsInCombat())
+    {
+        error = LFG_TELEPORTERROR_NO_CLIENT_REACTION;
+        player->GetSession()->SendNotification("You can't do that while in combat.");
+    }
     else if (player->GetMapId() != uint32(dungeon->map))  // Do not teleport players in dungeon to the entrance
     {
         uint32 mapid = dungeon->map;

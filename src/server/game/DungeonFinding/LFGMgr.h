@@ -89,6 +89,7 @@ enum LfgTeleportError
     LFG_TELEPORTERROR_FALLING                    = 2,
     LFG_TELEPORTERROR_IN_VEHICLE                 = 3,
     LFG_TELEPORTERROR_FATIGUE                    = 4,
+    LFG_TELEPORTERROR_NO_CLIENT_REACTION         = 5,
     LFG_TELEPORTERROR_INVALID_LOCATION           = 6,
     LFG_TELEPORTERROR_CHARMING                   = 8       // FIXME - It can be 7 or 8 (Need proper data)
 };
