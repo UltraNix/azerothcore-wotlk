@@ -753,7 +753,13 @@ class boss_the_lich_king : public CreatureScript
 
             void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType, SpellSchoolMask)
             {
-                if (!attacker || (_bFrostmournePhase && attacker->GetExactDistSq(495.708f, -2523.76f, 1049.95f) > 40.0f*40.0f)) // frostmourne room, prevent exploiting (tele hack to get back and damage him)
+                //! if attacker is null OR
+                //! it's frostmournePhase and player is outside of frostmourne room and has frostmourne aura
+                //! set damage to zero. Otherwise ignore, player might have died before frostmourne room and
+                //! ressurected via soulstone or something else and keeps on damaging the boss
+                if (!attacker ||
+                    (_bFrostmournePhase && attacker->GetExactDistSq(495.708f, -2523.76f, 1049.95f) > 40.0f*40.0f)
+                    && attacker->HasAura(SPELL_HARVEST_SOULS_TELEPORT)) // frostmourne room, prevent exploiting (tele hack to get back and damage him)
                 {
                     damage = 0;
                     return;
