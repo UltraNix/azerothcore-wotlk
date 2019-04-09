@@ -1,0 +1,6 @@
+SET @KELE:= 38770;
+SET @TALDRAM:= 38772;
+SET @VALANAR:= 38785;
+SET @PRINCE_BASE:= 2187;
+
+UPDATE `creature_template` SET `health_mod` = @PRINCE_BASE + (@PRINCE_BASE * 0) WHERE `entry` IN (@KELE, @TALDRAM, @VALANAR);

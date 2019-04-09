@@ -1030,11 +1030,7 @@ class boss_prince_valanar_icc : public CreatureScript
                             Talk(SAY_VALANAR_SPECIAL);
                         }
 
-                        //! ICC BOOST
-                        if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                            events.ScheduleEvent(EVENT_KINETIC_BOMB, 13000);
-                        else
-                            events.ScheduleEvent(EVENT_KINETIC_BOMB, me->GetMap()->Is25ManRaid() ? 20500 : 30500);
+                        events.ScheduleEvent(EVENT_KINETIC_BOMB, me->GetMap()->Is25ManRaid() ? 20500 : 30500);
                         break;
                     case EVENT_SHOCK_VORTEX:
                         if (_isEmpowered)
