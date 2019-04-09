@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -389,23 +389,23 @@ enum SummonPropGroup
 // SummonProperties.dbc, col 5
 enum SummonPropFlags
 {
-    SUMMON_PROP_FLAG_NONE            = 0x00000000,          // 1342 spells in 3.0.3
-    SUMMON_PROP_FLAG_UNK1            = 0x00000001,          // 75 spells in 3.0.3, something unfriendly
-    SUMMON_PROP_FLAG_UNK2            = 0x00000002,          // 616 spells in 3.0.3, something friendly
-    SUMMON_PROP_FLAG_UNK3            = 0x00000004,          // 22 spells in 3.0.3, no idea...
-    SUMMON_PROP_FLAG_UNK4            = 0x00000008,          // 49 spells in 3.0.3, some mounts
-    SUMMON_PROP_FLAG_UNK5            = 0x00000010,          // 25 spells in 3.0.3, quest related?
-    SUMMON_PROP_FLAG_UNK6            = 0x00000020,          // 0 spells in 3.3.5, unused
-    SUMMON_PROP_FLAG_UNK7            = 0x00000040,          // 12 spells in 3.0.3, no idea
-    SUMMON_PROP_FLAG_UNK8            = 0x00000080,          // 4 spells in 3.0.3, no idea
-    SUMMON_PROP_FLAG_UNK9            = 0x00000100,          // 51 spells in 3.0.3, no idea, many quest related
-    SUMMON_PROP_FLAG_UNK10           = 0x00000200,          // 51 spells in 3.0.3, something defensive
-    SUMMON_PROP_FLAG_UNK11           = 0x00000400,          // 3 spells, requires something near?
-    SUMMON_PROP_FLAG_UNK12           = 0x00000800,          // 30 spells in 3.0.3, no idea
-    SUMMON_PROP_FLAG_UNK13           = 0x00001000,          // Lightwell, Jeeves, Gnomish Alarm-o-bot, Build vehicles(wintergrasp)
-    SUMMON_PROP_FLAG_UNK14           = 0x00002000,          // Guides, player follows
-    SUMMON_PROP_FLAG_UNK15           = 0x00004000,          // Force of Nature, Shadowfiend, Feral Spirit, Summon Water Elemental
-    SUMMON_PROP_FLAG_UNK16           = 0x00008000,          // Light/Dark Bullet, Soul/Fiery Consumption, Twisted Visage, Twilight Whelp. Phase related?
+    SUMMON_PROP_FLAG_NONE                   = 0x00000000,          // 1342 spells in 3.0.3
+    SUMMON_PROP_FLAG_UNK1                   = 0x00000001,          // 75 spells in 3.0.3, something unfriendly
+    SUMMON_PROP_FLAG_UNK2                   = 0x00000002,          // 616 spells in 3.0.3, something friendly
+    SUMMON_PROP_FLAG_SUMMONED_BY_ITEM       = 0x00000004,          // 22 spells in 3.0.3, no idea...
+    SUMMON_PROP_FLAG_UNK4                   = 0x00000008,          // 49 spells in 3.0.3, some mounts
+    SUMMON_PROP_FLAG_PERSONAL_SPAWN         = 0x00000010,          // 25 spells in 3.0.3, quest related?
+    SUMMON_PROP_FLAG_UNK6                   = 0x00000020,          // 0 spells in 3.3.5, unused
+    SUMMON_PROP_FLAG_UNK7                   = 0x00000040,          // 12 spells in 3.0.3, no idea
+    SUMMON_PROP_FLAG_UNK8                   = 0x00000080,          // 4 spells in 3.0.3, no idea
+    SUMMON_PROP_FLAG_UNK9                   = 0x00000100,          // 51 spells in 3.0.3, no idea, many quest related
+    SUMMON_PROP_FLAG_UNK10                  = 0x00000200,          // 51 spells in 3.0.3, something defensive
+    SUMMON_PROP_FLAG_UNK11                  = 0x00000400,          // 3 spells, requires something near?
+    SUMMON_PROP_FLAG_UNK12                  = 0x00000800,          // 30 spells in 3.0.3, no idea
+    SUMMON_PROP_FLAG_UNK13                  = 0x00001000,          // Lightwell, Jeeves, Gnomish Alarm-o-bot, Build vehicles(wintergrasp)
+    SUMMON_PROP_FLAG_UNK14                  = 0x00002000,          // Guides, player follows
+    SUMMON_PROP_FLAG_UNK15                  = 0x00004000,          // Force of Nature, Shadowfiend, Feral Spirit, Summon Water Elemental | Riztazz: probably something related to react states
+    SUMMON_PROP_FLAG_UNK16                  = 0x00008000,          // Light/Dark Bullet, Soul/Fiery Consumption, Twisted Visage, Twilight Whelp. Phase related?
 };
 
 enum VehicleSeatFlags
