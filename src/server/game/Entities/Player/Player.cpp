@@ -22662,6 +22662,14 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
                 if (*i_scset == spellInfo->Id)                    // skip main spell, already handled above
                     continue;
 
+                SpellInfo const* catSpellInfo = sSpellMgr->GetSpellInfo(*i_scset);
+                if (!catSpellInfo)
+                    continue;
+
+                // category cooldowns only for same families
+                if (spellInfo->SpellFamilyName != catSpellInfo->SpellFamilyName)
+                    continue;
+
                 AddSpellCooldown(*i_scset, itemId, catrecTime, !spellInfo->IsCooldownStartedOnEvent() && spellInfo->CategoryRecoveryTime != spellInfo->RecoveryTime && spellInfo->RecoveryTime && spellInfo->CategoryRecoveryTime); // Xinef: send category cooldowns on login if category cooldown is different from base cooldown
             }
         }
