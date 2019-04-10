@@ -1505,7 +1505,8 @@ void World::SetInitialWorldSettings()
     sObjectMgr->LoadInstanceTemplate();
 
     // xinef: Global Storage, should be loaded asap
-    sLog->outString("Load Global Player Data...");
+    //! Riztazz: very slow currently due to loading of accountNames during global player data load
+    sLog->outString("Load Global Player Data...(This will take a while to load!)");
     sWorld->LoadGlobalPlayerDataStore();
 
     // Must be called before `creature_respawn`/`gameobject_respawn` tables
