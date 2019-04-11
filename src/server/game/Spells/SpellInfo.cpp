@@ -2060,7 +2060,10 @@ AuraStateType SpellInfo::LoadAuraState() const
         return AURA_STATE_FAERIE_FIRE;
 
     // Sting (hunter's pet ability)
-    if (GetCategory() == 1133 || Id == 35325)
+    if (GetCategory() == 1133)
+        return AURA_STATE_FAERIE_FIRE;
+
+    if (Id == 9991 || Id == 35331 || Id == 9806 || Id == 35325)
         return AURA_STATE_FAERIE_FIRE;
 
     // Victorious
