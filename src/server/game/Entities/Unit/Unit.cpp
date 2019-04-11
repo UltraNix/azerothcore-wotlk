@@ -10955,7 +10955,11 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     AuraEffectList const& mDummyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
     for (AuraEffectList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
-        switch ((*i)->GetSpellInfo()->SpellIconID)
+        auto sInfo = (*i)->GetSpellInfo();
+        if (!sInfo)
+            continue;
+
+        switch (sInfo->SpellIconID)
         {
             // Cheat Death
             case 2109:
@@ -12310,7 +12314,11 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
     AuraEffectList const& mDummyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
     for (AuraEffectList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
-        switch ((*i)->GetSpellInfo()->SpellIconID)
+        auto sInfo = (*i)->GetSpellInfo();
+        if (!sInfo)
+            continue;
+
+        switch (sInfo->SpellIconID)
         {
             // Cheat Death
             case 2109:
