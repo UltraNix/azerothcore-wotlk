@@ -2602,7 +2602,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     bool canParry = true;                                                                                                     // Rogue: Gouge
     bool canBlock = ((spell->HasAttribute(SPELL_ATTR3_BLOCKABLE_SPELL) && !spell->HasAttribute(SPELL_ATTR0_CU_DIRECT_DAMAGE)) || spell->Id == 1776);
 
-    // Same spells cannot be parry/dodge
+    // Some spells cannot be parry/dodge
     if (spell->HasAttribute(SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK))
         return SPELL_MISS_NONE;
 
@@ -10955,7 +10955,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     AuraEffectList const& mDummyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
     for (AuraEffectList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
-        auto sInfo = (*i)->GetSpellInfo();
+        const auto* sInfo = (*i)->GetSpellInfo();
         if (!sInfo)
             continue;
 
@@ -12314,7 +12314,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
     AuraEffectList const& mDummyAuras = GetAuraEffectsByType(SPELL_AURA_DUMMY);
     for (AuraEffectList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
-        auto sInfo = (*i)->GetSpellInfo();
+        const auto* sInfo = (*i)->GetSpellInfo();
         if (!sInfo)
             continue;
 
