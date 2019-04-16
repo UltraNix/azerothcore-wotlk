@@ -289,14 +289,7 @@ class boss_valithria_dreamwalker : public CreatureScript
             {
                 _fightTimer = 0;
                 _events.Reset();
-                //! ICC BOOST
-                if (me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                {
-                    me->SetMaxHealth(static_cast<uint32>(39599994));
-                    me->SetHealth(me->GetMaxHealth() / 2);
-                }
-                else
-                    me->SetHealth(_spawnHealth);
+                me->SetHealth(_spawnHealth);
 
                 me->LoadCreaturesAddon(true);
                 // immune to percent heals
@@ -432,11 +425,8 @@ class boss_valithria_dreamwalker : public CreatureScript
                 // does not enter combat
                 if (_instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == NOT_STARTED)
                 {
-                    //! icc boost
-                    uint32 health = me->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ? me->GetMaxHealth() / 2 : _spawnHealth;
-
-                    if (me->GetHealth() != health) // healing when boss cannot be engaged (lower spire not finished, cheating) doesn't start the fight, prevent winning this way
-                        me->SetHealth(health);
+                    if (me->GetHealth() != _spawnHealth) // healing when boss cannot be engaged (lower spire not finished, cheating) doesn't start the fight, prevent winning this way
+                        me->SetHealth(_spawnHealth);
                     return;
                 }
 
