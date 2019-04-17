@@ -4903,6 +4903,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 25236:
         case 47470:
         case 47471:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             break;
 
