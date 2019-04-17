@@ -358,7 +358,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     TeamIdInInstance = player->GetTeamId();
 
                 // Buff should be applied only on heroic
-                if (instance->GetDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL)
+                if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                     SetData(DATA_BUFF_AVAILABLE, static_cast<uint32>(false));
 
                 // for professor putricide hc
@@ -396,7 +396,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 }
 
                 // apply ICC buff to pets/summons
-                if (!instance->IsHeroic() && GetData(DATA_BUFF_AVAILABLE) && IS_PLAYER_GUID(creature->GetOwnerGUID()) && creature->HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && creature->CanHaveThreatList())
+                if (instance->GetDifficulty() != RAID_DIFFICULTY_25MAN_HEROIC && GetData(DATA_BUFF_AVAILABLE) && IS_PLAYER_GUID(creature->GetOwnerGUID()) && creature->HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && creature->CanHaveThreatList())
                     if (Unit* owner = creature->GetOwner())
                         if (Player* plr = owner->ToPlayer())
                         {
