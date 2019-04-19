@@ -17778,6 +17778,10 @@ void Unit::ApplyResilience(Unit const* victim, float* crit, int32* damage, bool 
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, int32 skillDiff, uint32 spellId) const
 {
+    auto sInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (sInfo && sInfo->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
+        return 0.0f;
+
     //calculate miss chance
     float missChance = victim->GetUnitMissChance(attType);
 
