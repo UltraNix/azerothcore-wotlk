@@ -221,6 +221,7 @@ enum WorldFloatConfigs
     CONFIG_DYNAMIC_RESPAWN_21_60,
     CONFIG_DYNAMIC_RESPAWN_61_80,
     CONFIG_BONUS_HONOR_FOR_FACTION_RATE, // in order for this to work, you need to enable per side honor bonus in bool configs
+    CONFIG_DUEL_DEBUFF_RESET,
     FLOAT_CONFIG_VALUE_COUNT
 };
 

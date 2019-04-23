@@ -91,6 +91,7 @@
 #include "CustomEventMgr.h"
 #include "ThreadedPathGenerator.hpp"
 #include "FollowMovementGenerator.hpp"
+#include "WorldCache.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1398,6 +1399,7 @@ void World::LoadConfigSettings(bool reload)
     Movement::FollowMovementGenerator::FOLLOW_UPDATE_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ];
     Movement::FollowMovementGenerator::FOLLOW_START_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ];
     Movement::FollowMovementGenerator::FOLLOW_MAX_PATH_LENGTH = m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ];
+    m_bool_configs[CONFIG_DUEL_DEBUFF_RESET] = sConfigMgr->GetBoolDefault("DuelResetDebuffs", false);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)
@@ -2009,6 +2011,9 @@ void World::SetInitialWorldSettings()
     mgr->LoadChannels();
     mgr = ChannelMgr::forTeam(TEAM_HORDE);
     mgr->LoadChannels();
+
+    sLog->outString("Load World Cache...");
+    WorldCache::GetInstance().Initialize();
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog->outString();

@@ -3865,3 +3865,19 @@ Transmogrification.IgnoreReqStats = 0
  
 #
 ###################################################################################################
+
+#
+#   DuelResetDebuffs
+#       Description: Reset players debuffs after duel ends.
+#        Default:     1  - (Enabled)
+#                     0  - (Disabled)
+
+DuelResetDebuffs    = 1
+
+#
+#   DuelResetDebuffs
+#       Description: List of debuff ids used to reset.
+#       Default:    "57723;57724;25771;41425;61987;66233;11196;47986"
+#
+
+DuelResetSpellIds   = "57723;57724;25771;41425;61987;66233;11196;47986"

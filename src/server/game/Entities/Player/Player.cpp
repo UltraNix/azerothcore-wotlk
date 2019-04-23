@@ -86,6 +86,7 @@
 #include "PoolMgr.h"
 #include "SavingSystem.h"
 #include "SunwellCheat.h"
+#include "WorldCache.h"
 
 #define ZONE_UPDATE_INTERVAL (2*IN_MILLISECONDS)
 
@@ -8114,6 +8115,19 @@ void Player::DuelComplete(DuelCompleteType type)
             RemoveAura(i);
         else
             ++i;
+    }
+
+    std::vector<uint32> spellIds = WorldCache::GetInstance().GetAurasToResetAfterDuel();
+    for (auto && id : spellIds)
+    {
+        Aura const* aura = GetAura(id);
+        Aura const* opponentAura = duel->opponent->GetAura(id);
+
+        if (aura && aura->GetApplyTime() >= duel->startTime)
+            RemoveAurasDueToSpell(id);
+
+        if (opponentAura && opponentAura->GetApplyTime() >= duel->startTime)
+            duel->opponent->RemoveAurasDueToSpell(id);
     }
 
     // cleanup combo points
