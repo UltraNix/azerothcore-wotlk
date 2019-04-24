@@ -28,6 +28,8 @@
 #include "SpellAuraEffects.h"
 #include "Containers.h"
 
+#include <array>
+
 enum DruidSpells
 {
     // Ours
@@ -1430,12 +1432,23 @@ public:
     }
 };
 
-// 50334 - Berserk
+//! all ranks of tiger's fury
+std::array<uint32, 6> tigersFurySpells
+{
+    5217,
+    6793,
+    9845,
+    9846,
+    50212,
+    50213
+};
 
+// 50334 - Berserk
 class spell_dru_berserk : public SpellScriptLoader
 {
     public:
         spell_dru_berserk() : SpellScriptLoader("spell_dru_berserk") { }
+
         class spell_dru_berserk_SpellScript : public SpellScript
         {
             PrepareSpellScript(spell_dru_berserk_SpellScript);
@@ -1443,8 +1456,13 @@ class spell_dru_berserk : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 if (Player* caster = GetCaster()->ToPlayer())
+                {
                     caster->RemoveCategoryCooldown(COOLDOWN_CATEGORY_MANGLE);
+                    for (auto && i : tigersFurySpells)
+                        caster->RemoveAurasDueToSpell(i);
+                }
             }
+
             void Register() override
             {
                 OnEffectHit += SpellEffectFn(spell_dru_berserk_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
