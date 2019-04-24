@@ -3142,10 +3142,13 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &bas
 
         DropModCharge(mod, spell);
     }
+
     totalmul += roundf(CalculatePct(1.0f, bonusValues)*100.0f) / 100.0f;
     float diff = 0.0f;
     if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION)
         diff = ((float)basevalue + totalflat) * (totalmul - 1.0f) + (float)totalflat;
+    else if (op == SPELLMOD_COST)
+        diff = (float)basevalue * (totalmul - 1.0f) + ((float)totalflat*totalmul);
     else
         diff = (float)basevalue * (totalmul - 1.0f) + (float)totalflat;
     basevalue = T((float)basevalue + diff);
