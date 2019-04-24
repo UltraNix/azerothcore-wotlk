@@ -3448,7 +3448,10 @@ void SpellMgr::LoadSpellCustomAttr()
             9904,  //RakeRank4 - initial dmg should ignore armor
             1824,  //RakeRank3 - initial dmg should ignore armor
             1823,  //RakeRank2 - initial dmg should ignore armor
-            1822  //RakeRank1 - initial dmg should ignore armor
+            1822,  //RakeRank1 - initial dmg should ignore armor
+            48568, //LacerateRank3 - initial dmg ignore armor
+            48567, //LacerateRank2 - initial dmg ignore armor
+            33745  //LacerateRank1 - initial dmg ignore armor
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
