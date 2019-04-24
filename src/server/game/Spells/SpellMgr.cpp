@@ -3441,7 +3441,14 @@ void SpellMgr::LoadSpellCustomAttr()
             66330, // staggering stomp
             67647, // staggering stomp
             67648, // staggering stomp
-            67649  // staggering stomp
+            67649, // staggering stomp
+            48574, //RakeRank7 - initial dmg should ignore armor
+            48573, //RakeRank6 - initial dmg should ignore armor
+            27003, //RakeRank5 - initial dmg should ignore armor
+            9904,  //RakeRank4 - initial dmg should ignore armor
+            1824,  //RakeRank3 - initial dmg should ignore armor
+            1823,  //RakeRank2 - initial dmg should ignore armor
+            1822  //RakeRank1 - initial dmg should ignore armor
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
