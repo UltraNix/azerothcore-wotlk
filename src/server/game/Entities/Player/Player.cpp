@@ -23593,14 +23593,23 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
 
 void Player::ApplyEquipCooldown(ItemRef const& pItem)
 {
-
     if (uint32 enchant_id = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT))
     {
         SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if (pEnchant)
+        {
             for (uint8 i = 0; i < MAX_ITEM_ENCHANTMENT_EFFECTS; i++)
+            {
                 if (uint32 spellEnchId = pEnchant->spellid[i])
-                    AddSpellCooldown(spellEnchId, uint32(-1), 30 * IN_MILLISECONDS);
+                {
+                    if (pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
+                        continue;
+
+                    auto cooldown = std::max(static_cast<uint32>(30 * IN_MILLISECONDS), GetSpellCooldownDelay(spellEnchId));
+                    AddSpellCooldown(spellEnchId, uint32(-1), cooldown);
+                }
+            }
+        }
     }
 
     if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_PROTO_FLAG_NO_EQUIP_COOLDOWN))
