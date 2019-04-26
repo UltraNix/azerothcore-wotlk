@@ -203,6 +203,7 @@ class boss_halion : public CreatureScript
 
             void Reset()
             {
+                _fightTimer = 0;
                 _livingEmberCount = 0;
                 BossAI::Reset();
                 me->RemoveAurasDueToSpell(SPELL_TWILIGHT_PHASING);
@@ -280,6 +281,7 @@ class boss_halion : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+                _fightTimer = getMSTime();
                 BossAI::EnterCombat(who);
                 Talk(SAY_AGGRO);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me, 1);
@@ -317,6 +319,8 @@ class boss_halion : public CreatureScript
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(NPC_HALION_CONTROLLER)))
                     if (controller->IsAlive())
                         Unit::Kill(controller, controller);
+
+                CheckCreatureRecord(killer, static_cast<uint32>(97000 + me->GetMap()->GetDifficulty()), me->GetMap()->GetDifficulty(), "", 1, _fightTimer);
             }
 
             void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType, SpellSchoolMask)
@@ -405,6 +409,7 @@ class boss_halion : public CreatureScript
         private:
             EventMap _events2;
             uint32 _livingEmberCount;
+            uint32 _fightTimer;
         };
 
         CreatureAI* GetAI(Creature* creature) const
