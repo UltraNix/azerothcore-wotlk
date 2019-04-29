@@ -560,7 +560,6 @@ public:
 // Currently not used!
 ///////////////////////////
 
-/*
 enum HungerGames
 {
     ACTION_ADD_TO_QUEUE        = 1,
@@ -921,7 +920,7 @@ public:
     }
 };
 
-***/
+
 
 class npc_gmisl_teleporter : public CreatureScript
 {
@@ -1310,9 +1309,9 @@ void AddSC_npcs_custom()
     new npc_schody();
     // new npc_lore();
     new npc_dala_tele();
-    // new npc_hunger_games();
-    // new npc_hunger_games_control();
-    // new player_script_hunger_games();
+    new npc_hunger_games();
+    new npc_hunger_games_control();
+    new player_script_hunger_games();
     new npc_gmisl_teleporter();
     new npc_test_server();
 }

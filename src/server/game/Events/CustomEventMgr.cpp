@@ -260,7 +260,7 @@ void CustomEventMgr::removePlayerFromHungerGames(uint64 guid)
     auto itr = std::find(hungerGamesPlayers.begin(), hungerGamesPlayers.end(), guid);
     if (itr != hungerGamesPlayers.end())
         hungerGamesPlayers.erase(itr);
-    if (hungerGamesPlayers.size() == 1)
+    if (hungerGamesState != HUNGER_GAMES_NOT_STARTED && hungerGamesPlayers.size() == 1)
     {
         if (Player *winner = ObjectAccessor::FindPlayer(hungerGamesPlayers[0]))
         {
