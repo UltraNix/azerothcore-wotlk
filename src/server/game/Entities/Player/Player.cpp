@@ -23605,8 +23605,7 @@ void Player::ApplyEquipCooldown(ItemRef const& pItem)
                     if (pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
                         continue;
 
-                    auto cooldown = std::max(static_cast<uint32>(30 * IN_MILLISECONDS), GetSpellCooldownDelay(spellEnchId));
-                    AddSpellCooldown(spellEnchId, uint32(-1), cooldown);
+                    AddSpellCooldown(spellEnchId, uint32(-1), 30 * IN_MILLISECONDS);
                 }
             }
         }
