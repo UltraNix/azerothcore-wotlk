@@ -8607,10 +8607,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 {
                     if (!procSpell)
                         return false;
+
+                    //! we overrode procFlags and added periodic flag as well
+                    //! but periodics can be positive (HoTs)
+                    if (procSpell->IsPositive())
+                        return false;
+
                     switch (GetFirstSchoolInMask(procSpell->GetSchoolMask()))
                     {
                         case SPELL_SCHOOL_NORMAL:
                             return false;                   // ignore
+
                         case SPELL_SCHOOL_HOLY:   trigger_spell_id = 50490; break;
                         case SPELL_SCHOOL_FIRE:   trigger_spell_id = 50362; break;
                         case SPELL_SCHOOL_NATURE: trigger_spell_id = 50488; break;

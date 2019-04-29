@@ -4549,6 +4549,12 @@ void SpellMgr::LoadDbcDataCorrections()
         case 55268:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_BLOCKABLE_SPELL;
             break;
+        //! Acclimation
+        case 49200:
+        case 50151:
+        case 50152:
+            spellInfo->procFlags |= PROC_FLAG_TAKEN_PERIODIC;
+            break;
 
 
 
