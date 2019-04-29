@@ -96,63 +96,6 @@ class spell_item_titanium_seal_of_dalaran : public SpellScriptLoader
         }
 };
 
-enum AmplifyDish
-{
-    SPELL_AMPLIFY_30S                = 13180,
-    SPELL_AMPLIFY_10S                = 67799,
-    SPELL_MENTAL_BATTLE                = 67810,
-    SPELL_AMPLIFY_CHARM_30S            = 13181,
-    SPELL_AMPLIFY_CHARM_10S            = 26740,
-};
-
-class spell_item_mind_amplify_dish : public SpellScriptLoader
-{
-    public:
-        spell_item_mind_amplify_dish() : SpellScriptLoader("spell_item_mind_amplify_dish") {}
-
-        class spell_item_mind_amplify_dish_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_item_mind_amplify_dish_SpellScript)
-
-            void OnDummyEffect(SpellEffIndex effIndex)
-            {
-                PreventHitDefaultEffect(effIndex);
-
-                Unit* caster = GetCaster();
-                if (Player* player = caster->ToPlayer())
-                {
-                    if (Unit *target = GetHitUnit())
-                    {
-                        // little protection
-                        if (target->ToCreature())
-                            if (target->ToCreature()->GetCreatureTemplate()->rank > CREATURE_ELITE_NORMAL)
-                                return;
-
-                        if (GetSpellInfo()->Id != SPELL_AMPLIFY_10S)
-                            if (target->getLevel() > 60)
-                                return;
-
-                        uint8 pct = std::max(0, 20+player->getLevel()-target->getLevel());
-                        if (roll_chance_i(pct))
-                            player->CastSpell(target, SPELL_MENTAL_BATTLE, true);
-                        else if (roll_chance_i(pct))
-                            player->CastSpell(target, GetSpellInfo()->Id == SPELL_AMPLIFY_10S ? SPELL_AMPLIFY_CHARM_10S : SPELL_AMPLIFY_CHARM_30S, true);
-                    }
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_item_mind_amplify_dish_SpellScript::OnDummyEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_item_mind_amplify_dish_SpellScript();
-        }
-};
-
 class spell_item_runescroll_of_fortitude : public SpellScriptLoader
 {
     public:
@@ -774,44 +717,6 @@ class spell_item_fish_feast : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_item_fish_feast_SpellScript();
-        }
-};
-
-class spell_item_gnomish_universal_remote : public SpellScriptLoader
-{
-    public:
-        spell_item_gnomish_universal_remote() : SpellScriptLoader("spell_item_gnomish_universal_remote") {}
-
-        class spell_item_gnomish_universal_remote_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_item_gnomish_universal_remote_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                Unit* target = GetHitUnit();
-                if (!target)
-                    return;
-
-                uint32 spellId = 0;
-                switch (urand(0,2))
-                {
-                    case 0: spellId = 8345; break; // charm
-                    case 1: spellId = 8346; break; // root
-                    case 2: spellId = 8347; break; // threat
-                }
-                if (spellId)
-                    GetCaster()->CastSpell(target, spellId, true);
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_item_gnomish_universal_remote_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_item_gnomish_universal_remote_SpellScript();
         }
 };
 
@@ -4041,13 +3946,121 @@ public:
     }
 };
 
+// 13180 - Gnomish Mind Control Cap
+enum MindControlCap
+{
+    ROLL_CHANCE_DULLARD = 32,
+    ROLL_CHANCE_NO_BACKFIRE = 95,
+    SPELL_GNOMISH_MIND_CONTROL_CAP = 13181,
+    SPELL_DULLARD = 67809
+};
+
+class spell_item_mind_control_cap : public SpellScriptLoader
+{
+public:
+    spell_item_mind_control_cap() : SpellScriptLoader("spell_item_mind_control_cap") { }
+
+    class spell_item_mind_control_cap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_mind_control_cap_SpellScript);
+
+        bool Load() override
+        {
+            if (!GetCastItem())
+                return false;
+            return true;
+        }
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo({ SPELL_GNOMISH_MIND_CONTROL_CAP, SPELL_DULLARD });
+        }
+
+        void HandleDummy(SpellEffIndex /* effIndex */)
+        {
+            Unit* caster = GetCaster();
+            if (Unit* target = GetHitUnit())
+            {
+                if (roll_chance_i(ROLL_CHANCE_NO_BACKFIRE))
+                    caster->CastSpell(target, roll_chance_i(ROLL_CHANCE_DULLARD) ? SPELL_DULLARD : SPELL_GNOMISH_MIND_CONTROL_CAP, true, GetCastItem());
+                else
+                    target->CastSpell(caster, SPELL_GNOMISH_MIND_CONTROL_CAP, true); // backfire - 5% chance
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_item_mind_control_cap_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_item_mind_control_cap_SpellScript();
+    }
+};
+
+// 8344 - Universal Remote (Gnomish Universal Remote)
+enum UniversalRemote
+{
+    SPELL_CONTROL_MACHINE = 8345,
+    SPELL_MOBILITY_MALFUNCTION = 8346,
+    SPELL_TARGET_LOCK = 8347
+};
+
+class spell_item_universal_remote : public SpellScriptLoader
+{
+public:
+    spell_item_universal_remote() : SpellScriptLoader("spell_item_universal_remote") { }
+
+    class spell_item_universal_remote_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_universal_remote_SpellScript);
+
+        bool Load() override
+        {
+            if (!GetCastItem())
+                return false;
+            return true;
+        }
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo({ SPELL_CONTROL_MACHINE, SPELL_MOBILITY_MALFUNCTION, SPELL_TARGET_LOCK });
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+            {
+                uint8 chance = urand(0, 99);
+                if (chance < 15)
+                    GetCaster()->CastSpell(target, SPELL_TARGET_LOCK, true, GetCastItem());
+                else if (chance < 25)
+                    GetCaster()->CastSpell(target, SPELL_MOBILITY_MALFUNCTION, true, GetCastItem());
+                else
+                    GetCaster()->CastSpell(target, SPELL_CONTROL_MACHINE, true, GetCastItem());
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_item_universal_remote_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_item_universal_remote_SpellScript();
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // Ours
     new SpellScriptLoaderEx<spell_baby_spices_SpellScript>("spell_baby_spices");
     new spell_item_massive_seaforium_charge();
     new spell_item_titanium_seal_of_dalaran();
-    new spell_item_mind_amplify_dish();
     new spell_item_runescroll_of_fortitude();
     new spell_item_branns_communicator();
     new spell_item_goblin_gumbo_kettle();
@@ -4065,7 +4078,6 @@ void AddSC_item_spell_scripts()
     new spell_item_skull_of_impeding_doom();
     new spell_item_carrot_on_a_stick();
     new spell_item_fish_feast();
-    new spell_item_gnomish_universal_remote();
     new spell_item_strong_anti_venom();
     new spell_item_gnomish_shrink_ray();
     new spell_item_goblin_weather_machine();
@@ -4082,6 +4094,8 @@ void AddSC_item_spell_scripts()
     new spell_item_direbrew_remote();
     new spell_item_goblin_rocket_boots();
     new spell_item_meteorite_crystal();
+    new spell_item_mind_control_cap();
+    new spell_item_universal_remote();
 
     // Theirs
     // 23074 Arcanite Dragonling
