@@ -7879,6 +7879,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 47214:    // Burninate Effect
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
             break;
+        case 48365:    //Wintergarde Gryphon Commander
+            spellInfo->DurationIndex = 21; // Duration -1            
+            break;
         }
 
         //////////////////////////////////////////
