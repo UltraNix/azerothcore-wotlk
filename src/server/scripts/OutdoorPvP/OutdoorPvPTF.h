@@ -140,6 +140,7 @@ class OPvPCapturePointTF : public OPvPCapturePoint
         void HandlePlayerLeave(Player* player);
 
         void UpdateTowerState();
+        void ChangeTeam(TeamId oldTeam) override;
 
     protected:
 

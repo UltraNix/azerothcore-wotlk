@@ -174,6 +174,16 @@ bool OutdoorPvPTF::Update(uint32 diff)
             SendUpdateWorldState(TF_UI_LOCKED_DISPLAY_NEUTRAL, uint32(0));
             SendUpdateWorldState(TF_UI_LOCKED_DISPLAY_HORDE, uint32(0));
             SendUpdateWorldState(TF_UI_LOCKED_DISPLAY_ALLIANCE, uint32(0));
+
+            // reset towers back to neutral
+            SendUpdateWorldState(TF_UI_TOWER_COUNT_A, uint32(0));
+            SendUpdateWorldState(TF_UI_TOWER_COUNT_H, uint32(0));
+            m_AllianceTowersControlled = 0;
+            m_HordeTowersControlled = 0;
+            for (OPvPCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
+            {
+                itr->second->ChangeTeam(TEAM_NEUTRAL);
+            }
         }
         else
         {
@@ -355,6 +365,23 @@ void OPvPCapturePointTF::SendChangePhase()
     SendUpdateWorldState(TF_UI_TOWER_SLIDER_POS, phase);
     // send this too, sometimes it resets :S
     SendUpdateWorldState(TF_UI_TOWER_SLIDER_N, m_neutralValuePct);
+}
+
+void OPvPCapturePointTF::ChangeTeam(TeamId teamId)
+{
+    switch (teamId)
+    {
+    case TEAM_NEUTRAL:
+        m_State = OBJECTIVESTATE_NEUTRAL;
+        break;
+    case TEAM_HORDE:
+        m_State = OBJECTIVESTATE_HORDE;
+        break;
+    case TEAM_ALLIANCE:
+        m_State = OBJECTIVESTATE_ALLIANCE;
+        break;
+    }
+    ChangeState();
 }
 
 class OutdoorPvP_terokkar_forest : public OutdoorPvPScript
