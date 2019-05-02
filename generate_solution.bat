@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy Bypass -command .\generate_solution_vcpkg.ps1

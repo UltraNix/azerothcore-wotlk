@@ -530,7 +530,7 @@ bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
     {
         case CR_SERVER_GONE_ERROR:
         case CR_SERVER_LOST:
-        case CR_INVALID_CONN_HANDLE:
+        //case CR_INVALID_CONN_HANDLE:
         case CR_SERVER_LOST_EXTENDED:
         {
             m_reconnecting = true;
