@@ -5601,7 +5601,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_caster->ToPlayer()->GetZoneId() == 268 &&
             (m_spellInfo->Id == 21169 || //soulstone
                 m_spellInfo->Id == 47882 || //reincarnation
-                m_spellInfo->RecoveryTime >= 10 * MINUTE * IN_MILLISECONDS) //cooldown longer than 10 minutes
+                m_spellInfo->GetRecoveryTime() >= 10 * MINUTE * IN_MILLISECONDS) //cooldown longer than 10 minutes
             )
             return SPELL_FAILED_NOT_HERE;
     }

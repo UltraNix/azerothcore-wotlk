@@ -619,7 +619,7 @@ public:
             else
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Usun mnie z GM listy.", GOSSIP_SENDER_MAIN, ACTION_REMOVE_FROM_GMLIST);
         }
-        if (player->getLevel() < 80) 
+        if (player->getLevel() < 79) 
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me more about Hunger Games", GOSSIP_SENDER_MAIN, ACTION_INFO);
             player->SEND_GOSSIP_MENU(GOSSIP_LVL, creature->GetGUID());

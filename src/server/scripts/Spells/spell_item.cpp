@@ -2349,6 +2349,8 @@ class spell_item_shadowmourne : public SpellScriptLoader
             {
                 if (GetTarget()->HasAura(SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF)) // cant collect shards while under effect of Chaos Bane buff
                     return false;
+                if (GetTarget()->GetMap()->GetId() == 37) // Azshara Crater - Hunger Games Event
+                    return false;
 
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
                     if (!eventInfo.GetDamageInfo()->GetDamage())
@@ -3434,7 +3436,7 @@ class spell_item_nitro_boots : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                caster->CastSpell(caster, caster->GetMap()->IsDungeon() || roll_chance_i(95) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
+                caster->CastSpell(caster, caster->GetMap()->IsDungeon() || caster->GetMap()->GetId() == 37 /*Azshara Crater - Hunger Games */ || roll_chance_i(95) ? SPELL_NITRO_BOOTS_SUCCESS : SPELL_NITRO_BOOTS_BACKFIRE, true, GetCastItem());
             }
 
             void Register()

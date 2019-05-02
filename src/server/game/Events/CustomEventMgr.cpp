@@ -279,9 +279,12 @@ bool CustomEventMgr::isPlayerInHungerGames(uint64 guid) const
 void CustomEventMgr::teleportHungerGamesPlayersToAzshara()
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(8326);
-    for (auto &guid : hungerGamesPlayers) {
-        if (Player *p = ObjectAccessor::FindPlayer(guid)) {
-            if (Group *group = p->GetGroup()) group->RemoveMember(p->GetGUID());
+    for (auto &guid : hungerGamesPlayers) 
+    {
+        if (Player *p = ObjectAccessor::FindPlayer(guid)) 
+        {
+            if (Group *group = p->GetGroup()) 
+                group->RemoveMember(p->GetGUID());
             if (p->GetTeamId() == TEAM_ALLIANCE)
                 p->TeleportTo(37, 1038.33f, 293.55f, 335.30f, 3.39f);
             else
@@ -293,6 +296,7 @@ void CustomEventMgr::teleportHungerGamesPlayersToAzshara()
             if (p->getPowerType() == POWER_MANA)
                 p->SetPower(POWER_MANA, p->GetMaxPower(POWER_MANA));
             p->RemoveArenaSpellCooldowns();
+            p->setDeathState(DEAD); // players won't receive fall dmg while being in ghost mode
         }
     }
     hungerGamesState = HUNGER_GAMES_PREPARATION;
@@ -303,6 +307,7 @@ void CustomEventMgr::reviveHungerGamesPlayers()
     for (auto &guid : hungerGamesPlayers) {
         if (Player *p = ObjectAccessor::FindPlayer(guid)) {
             p->RemoveAurasDueToSpell(8326);
+            p->setDeathState(ALIVE);
         }
     }
     hungerGamesState = HUNGER_GAMES_STARTED;
