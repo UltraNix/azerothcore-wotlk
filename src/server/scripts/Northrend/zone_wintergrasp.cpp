@@ -825,7 +825,7 @@ public:
             if (!unit)
                 return;
             std::string cheatType;
-            if (unit->GetPositionX() > 5405)
+            if (unit->GetPositionX() > 5405.f)
                 cheatType = "relic room";
             else if (unit->GetPositionZ() < 405.f)
                 cheatType = "under textures";

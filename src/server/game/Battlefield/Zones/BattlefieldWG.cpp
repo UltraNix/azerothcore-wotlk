@@ -280,7 +280,7 @@ void BattlefieldWG::OnBattleStart()
     // Rebuild all wall
     for (auto const& building : BuildingsInZone)
     {
-        building->Rebuild();
+        building->Refresh(true);
         building->UpdateTurretAttack(false);
     }
 
@@ -436,6 +436,7 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
     {
         building->Save();
         building->UpdateTurretAttack(true);
+        building->Refresh();
     }
 
     for (Workshop::const_iterator itr = WorkshopsList.begin(); itr != WorkshopsList.end(); ++itr)

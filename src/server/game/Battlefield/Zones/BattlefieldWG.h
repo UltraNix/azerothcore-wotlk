@@ -1146,7 +1146,7 @@ struct BfWGGameObjectBuilding
     GuidSet m_TowerCannonBottomList;
     GuidSet m_TurretTopList;
 
-    void Rebuild()
+    void Refresh(bool rebuild = false)
     {
         switch (m_Type)
         {
@@ -1164,14 +1164,16 @@ struct BfWGGameObjectBuilding
                 break;
         }
 
-        GameObject* go = ObjectAccessor::GetObjectInWorld(m_Build, (GameObject*)NULL);
-        if (go)
+        if (rebuild)
         {
-         // Rebuild gameobject
-            go->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
-            go->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[m_Team]);
+            GameObject* go = ObjectAccessor::GetObjectInWorld(m_Build, (GameObject*)NULL);
+            if (go)
+            {
+                // Rebuild gameobject
+                go->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING, NULL, true);
+                go->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[m_Team]);
+            }
         }
-
         // Update worldstate
         m_State = BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT - (m_Team * 3);
         m_WG->SendUpdateWorldState(m_WorldState, m_State);
