@@ -45,42 +45,109 @@ EndContentData */
 enum LadyJaina
 {
     QUEST_JAINAS_AUTOGRAPH = 558,
-    SPELL_JAINAS_AUTOGRAPH = 23122
+    QUEST_SURVEY_ALCATRAZ_ISLAND = 11142,
+    SPELL_JAINAS_AUTOGRAPH = 23122,
+    ACTION_START_EVENT = 1,
+
+    EVENT_SAY_0 = 1,
+    EVENT_SAY_1,
+    EVENT_SAY_2,
+    EVENT_SAY_3,
+    EVENT_SAY_4,
+    EVENT_SAY_5,
+
+    JAINA_SAY_0 = 0,
+    JAINA_SAY_1,
+    JAINA_SAY_2,
+    JAINA_SAY_3,
+    JAINA_SAY_4,
+    JAINA_SAY_5,
 };
 
 #define GOSSIP_ITEM_JAINA "I know this is rather silly but i have a young ward who is a bit shy and would like your autograph."
 
-class npc_lady_jaina_proudmoore : public CreatureScript
+struct npc_lady_jaina_proudmooreAI : public ScriptedAI
 {
-public:
-    npc_lady_jaina_proudmoore() : CreatureScript("npc_lady_jaina_proudmoore") { }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+    npc_lady_jaina_proudmooreAI(Creature *c) : ScriptedAI(c)
     {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_SENDER_INFO)
-        {
-            player->SEND_GOSSIP_MENU(7012, creature->GetGUID());
-            player->CastSpell(player, SPELL_JAINAS_AUTOGRAPH, false);
-        }
-        return true;
+        events.Reset();
     }
 
-    bool OnGossipHello(Player* player, Creature* creature)
+    void DoAction(int32 param) override
     {
-        if (creature->IsQuestGiver())
-            player->PrepareQuestMenu(creature->GetGUID());
+        if (param == ACTION_START_EVENT)
+            events.ScheduleEvent(EVENT_SAY_0, 2s);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!events.Empty())
+        {
+            events.Update(diff);
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_SAY_0:
+                        Talk(JAINA_SAY_0);
+                        events.ScheduleEvent(EVENT_SAY_1, 3s);
+                        break;
+                    case EVENT_SAY_1:
+                        Talk(JAINA_SAY_1);
+                        events.ScheduleEvent(EVENT_SAY_2, 3s);
+                        break;
+                    case EVENT_SAY_2:
+                        Talk(JAINA_SAY_2);
+                        events.ScheduleEvent(EVENT_SAY_3, 3s);
+                        break;
+                    case EVENT_SAY_3:
+                        Talk(JAINA_SAY_3);
+                        events.ScheduleEvent(EVENT_SAY_4, 3s);
+                        break;
+                    case EVENT_SAY_4:
+                        Talk(JAINA_SAY_4);
+                        events.ScheduleEvent(EVENT_SAY_5, 3s);
+                        break;
+                    case EVENT_SAY_5:
+                        Talk(JAINA_SAY_5);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (!UpdateVictim())
+            return;
+        DoMeleeAttackIfReady();
+    }
+
+    void sGossipHello(Player* player) override
+    {
+        if (me->IsQuestGiver())
+            player->PrepareQuestMenu(me->GetGUID());
 
         if (player->GetQuestStatus(QUEST_JAINAS_AUTOGRAPH) == QUEST_STATUS_INCOMPLETE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_JAINA, GOSSIP_SENDER_MAIN, GOSSIP_SENDER_INFO);
 
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-
-        return true;
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(me), me->GetGUID());
     }
 
-};
+    void sGossipSelect(Player* player, uint32 sender, uint32 action) override
+    {
+        player->SEND_GOSSIP_MENU(7012, me->GetGUID());
+        player->CastSpell(player, SPELL_JAINAS_AUTOGRAPH, false);
+    }
 
+    void sQuestReward(Player* player, Quest const* quest, uint32 opt) override
+    {
+        if (quest->GetQuestId() == QUEST_SURVEY_ALCATRAZ_ISLAND)
+            DoAction(ACTION_START_EVENT);
+    }
+
+private:
+    EventMap events;
+};
 /*######
 ## npc_nat_pagle
 ######*/
@@ -445,7 +512,7 @@ public:
 
 void AddSC_dustwallow_marsh()
 {
-    new npc_lady_jaina_proudmoore();
+    new CreatureAILoader<npc_lady_jaina_proudmooreAI>("npc_lady_jaina_proudmoore");
     new npc_nat_pagle();
     new npc_private_hendel();
     new npc_zelfrax();
