@@ -1390,6 +1390,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_STATS_LATENCY_ONLY_ON_LOGOUT] = sConfigMgr->GetBoolDefault("LatencyRecorder.onlyLogout.Enable", false);
     m_bool_configs[CONFIG_ULDUAR_PRE_NERF] = sConfigMgr->GetBoolDefault("UlduarPreNerf.Enable", false);
     m_bool_configs[CONFIG_NINJA_LOOTER_LIST] = sConfigMgr->GetBoolDefault("NinjaList.Enable", false);
+    m_bool_configs[CONFIG_ANTICHEAT_WINTERGRASP] = sConfigMgr->GetBoolDefault("Anticheat.Wintergrasp.Enable", false);
 
     /* Follow movegen params */
     m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ] = sConfigMgr->GetIntDefault( "Movement.FollowUpdateInterval", 300 );

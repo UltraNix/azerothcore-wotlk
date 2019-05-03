@@ -3415,6 +3415,12 @@ Anticheat.DetectionsEnabled = 31
 
 Anticheat.MaxReportsForDailyReport = 70
 
+#     Anticheat.Wintergrasp.Enable
+#        Description:  Turns on or off notifications about someone trying to attack final gate from under textures or relic room.
+#        Default:     0
+
+Anticheat.Wintergrasp.Enable = 0
+
 #
 #     SaveLootSystem.Enable
 #        Description: Enables or disables the Save Loot System functionality for Creatures.

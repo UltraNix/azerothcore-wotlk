@@ -29,6 +29,7 @@
 #include "CombatAI.h"
 #include "Player.h"
 #include "PoolMgr.h"
+#include "Language.h"
 
 #define GOSSIP_HELLO_DEMO1  "Build catapult."
 #define GOSSIP_HELLO_DEMO2  "Build demolisher."
@@ -806,6 +807,45 @@ class go_wg_vehicle_teleporter : public GameObjectScript
         }
 };
 
+class go_wg_fortress_door : public GameObjectScript
+{
+public:
+    go_wg_fortress_door() : GameObjectScript("go_wg_fortress_door") { }
+
+    struct go_wg_fortress_doorAI : public GameObjectAI
+    {
+        go_wg_fortress_doorAI(GameObject* gameObject) : GameObjectAI(gameObject)
+        {
+        }
+
+        void SpellHit(Unit* unit, const SpellInfo* spellInfo)
+        {
+            if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_WINTERGRASP))
+                return;
+            if (!unit)
+                return;
+            std::string cheatType;
+            if (unit->GetPositionX() > 5405)
+                cheatType = "relic room";
+            else if (unit->GetPositionZ() < 405.f)
+                cheatType = "under textures";
+
+            if (!cheatType.empty())
+                if (Vehicle *vehicle = unit->GetVehicleKit())
+                    if (Unit* player = vehicle->GetPassenger(0))
+                    {
+                        sWorld->SendGMText(LANG_WINTERGRASP_CHEAT, cheatType.c_str(), player->GetName().c_str(), player->GetGUID());
+                        sLog->outCheat("Wintergrasp possible cheater! Attacking Fortress Door from %s. Nick: %s (guid: %u)", cheatType.c_str(), player->GetName().c_str(), player->GetGUID());
+                    }
+        }
+    };
+
+    GameObjectAI* GetAI(GameObject* go) const
+    {
+        return new go_wg_fortress_doorAI(go);
+    }
+};
+
 ////////////////////////////////////////////////
 /////// SPELLs
 ////////////////////////////////////////////////
@@ -1141,6 +1181,7 @@ void AddSC_wintergrasp()
 
     // GOs
     new go_wg_vehicle_teleporter();
+    new go_wg_fortress_door();
 
     // SPELLs
     new spell_wintergrasp_force_building();
