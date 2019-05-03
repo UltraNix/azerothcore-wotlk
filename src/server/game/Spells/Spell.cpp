@@ -6412,7 +6412,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 // Sitowsky: Black Qiraji Battle Tank.
                 // Special case: Allow to use in Dalaran and Wintergrasp.
-                if (m_spellInfo->Id == 31700 && m_caster->GetZoneId() == 4395 || m_caster->GetZoneId() == 4197)
+                if (m_spellInfo->Id == 31700 && (m_caster->GetZoneId() == 4395 || m_caster->GetZoneId() == 4197))
                     return SPELL_CAST_OK;
 
                 // not allow cast fly spells if not have req. skills  (all spells is self target)
