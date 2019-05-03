@@ -229,6 +229,13 @@ enum WintergraspNpcs
     NPC_QUEST_VEHICLE_PROTECTED                     = 31284,
     NPC_QUEST_PVP_KILL_VEHICLE                      = 31093,
     NPC_QUEST_PVP_PLAYER_KILL                       = 31086,
+    NPC_QUEST_NO_MERCY_CREDIT                       = 39019
+};
+
+enum WintergraspQuests
+{
+    QUEST_NO_MERCY_FOR_THE_MERCILESS                = 13177,
+    QUEST_SLAY_THEM_ALL                             = 13180
 };
 
 struct BfWGCoordGY

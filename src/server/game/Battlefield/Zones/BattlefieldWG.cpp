@@ -760,7 +760,10 @@ void BattlefieldWG::HandleKill(Player* killer, Unit* victim)
         if (victim->GetTypeId() == TYPEID_PLAYER)
         {
             victim->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-            killer->RewardPlayerAndGroupAtEvent(NPC_QUEST_PVP_PLAYER_KILL, 0);
+            if (killer->GetQuestStatus(QUEST_SLAY_THEM_ALL) == QUEST_STATUS_INCOMPLETE)
+                killer->RewardPlayerAndGroupAtEvent(NPC_QUEST_PVP_PLAYER_KILL, victim);
+            if (killer->GetQuestStatus(QUEST_NO_MERCY_FOR_THE_MERCILESS) == QUEST_STATUS_INCOMPLETE)
+                killer->RewardPlayerAndGroupAtEvent(NPC_QUEST_NO_MERCY_CREDIT, victim);
         }
     }
     else if (victim->IsVehicle() && !killer->IsFriendlyTo(victim))
