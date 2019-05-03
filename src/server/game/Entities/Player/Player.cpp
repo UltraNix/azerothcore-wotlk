@@ -2473,7 +2473,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 oldmap->RemovePlayerFromMap(this, false);
 
             // xinef: do this before setting fall information!
-            if (IsMounted() && (!GetMap()->GetEntry()->IsDungeon() && !GetMap()->GetEntry()->IsBattlegroundOrArena()))
+            if (IsMounted() && ((!GetMap()->GetEntry()->IsDungeon() || HasAura(31700)/* Flying Black Qiraji Battle Tank exploit */) && !GetMap()->GetEntry()->IsBattlegroundOrArena()))
             {
                 AuraEffectList const& auras = GetAuraEffectsByType(SPELL_AURA_MOUNTED);
                 if (!auras.empty())

@@ -17,6 +17,7 @@
 
 #include "ScriptMgr.h"
 #include "SpellScript.h"
+#include "BattlefieldMgr.h"
 
 // @kruulevent
 class spell_cust_shadow_crash_SpellScript : public SpellScript
@@ -100,10 +101,6 @@ public:
             if (player->GetMap()->IsBattleArena())
                 return SPELL_FAILED_NOT_IN_ARENA;
 
-            // Disallow to use on Wintergrasp due to instant cast.
-            if (player->GetZoneId() == 4197)
-                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-
             // Dalaran usage at Spell.cpp due to lack of CheckCast hook.
             return SPELL_CAST_OK;
         }
@@ -129,7 +126,7 @@ public:
 
             // Special Case: Disallow to fly on Outland non-flying zones.
             //                                       Eversong Woods                 Ghostland                      Azuremyst Isle                 Bloodmyst Isle                 Silvermoon City                The Exodar                     // Isle of Quel'Danas
-            if (target->GetMapId() == 530 && target->GetZoneId() == 3433 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557 || target->GetZoneId() == 4080)
+            if (target->GetMapId() == 530 && target->GetZoneId() == 3430 || target->GetZoneId() == 3433 || target->GetZoneId() == 3524 || target->GetZoneId() == 3525 || target->GetZoneId() == 3487 || target->GetZoneId() == 3557 || target->GetZoneId() == 4080)
                 HandleScript(target);
 
             // Special Case: Allow to fly on Northrend map with Cold Weather Flying.
@@ -139,6 +136,11 @@ public:
             // Special Case: Allow to fly in Dalaran Krasus' Landing.
             if (target->GetZoneId() == 4395 && target->GetAreaId() != 4564)
                 HandleScript(target);
+
+            // Don't allow to fly in Wintergrasp during battle
+            if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(target->GetZoneId()))
+                if (bf->IsWarTime())
+                    HandleScript(target);
         }
 
         void HandleScript(Unit* caster)
