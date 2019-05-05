@@ -277,6 +277,7 @@ class WintergraspCapturePoint : public BfCapturePoint
         void LinkToWorkshop(WGWorkshop* workshop) { m_Workshop = workshop; }
 
         void ChangeTeam(TeamId oldteam);
+        void ForceChangeTeam(TeamId newteam) override;
         TeamId GetTeam() const { return m_team; }
 
     protected:
@@ -564,6 +565,16 @@ enum WintergraspGameObject
     GO_WINTERGRASP_SHADOWSIGHT_TOWER             = 190356,
     GO_WINTERGRASP_WINTER_S_EDGE_TOWER           = 190357,
     GO_WINTERGRASP_FLAMEWATCH_TOWER              = 190358,
+};
+
+const uint8 WG_CAPTURE_POINTS_COUNT = 4;
+const uint32 WintergraspCapturePointId[WG_CAPTURE_POINTS_COUNT] = { GO_WINTERGRASP_FACTORY_BANNER_NE, GO_WINTERGRASP_FACTORY_BANNER_NW, GO_WINTERGRASP_FACTORY_BANNER_SE, GO_WINTERGRASP_FACTORY_BANNER_SW };
+const Position WintergraspCapturePointPos[WG_CAPTURE_POINTS_COUNT] = 
+{
+    {4949.34f, 2432.59f, 320.177f, 1.38621f},   //NE
+    {4948.52f, 3342.34f, 376.875f, 4.40057f},   //NW
+    {4398.08f, 2356.5f, 376.19f, 0.525406f},    //SE
+    {4390.78f, 3304.09f, 372.429f, 6.09702f}    //SW
 };
 
 struct WintergraspObjectPositionData
@@ -1477,6 +1488,9 @@ struct WGWorkshop
     // for worldstate
     uint32 state;
 
+    // don't send warning about captured workshop if team change was forced
+    bool forcedTeamChange;
+
     WGWorkshop(BattlefieldWG* _bf, uint8 _workshopId)
     {
         ASSERT(_bf || _workshopId < WG_MAX_WORKSHOP);
@@ -1503,10 +1517,11 @@ struct WGWorkshop
             {
                 // Updating worldstate
                 state = team == TEAM_ALLIANCE ? BATTLEFIELD_WG_OBJECTSTATE_ALLIANCE_INTACT : BATTLEFIELD_WG_OBJECTSTATE_HORDE_INTACT;
-                bf->SendUpdateWorldState(WorkshopsData[workshopId].worldstate, state);
+                if (!forcedTeamChange)
+                    bf->SendUpdateWorldState(WorkshopsData[workshopId].worldstate, state);
 
                 // Warning message
-                if (!init)                              // workshop taken - alliance
+                if (!init && !forcedTeamChange)                              // workshop taken - alliance
                     bf->SendWarningToAllInZone(team == TEAM_ALLIANCE ? WorkshopsData[workshopId].takenText : (WorkshopsData[workshopId].takenText + 2));
 
                 // Found associate graveyard and update it
@@ -1524,6 +1539,7 @@ struct WGWorkshop
             bf->UpdateCounterVehicle(false);
             bf->CapturePointTaken(bf->GetAreaByGraveyardId(workshopId));
         }
+        forcedTeamChange = false;
     }
 
     void UpdateGraveyardAndWorkshop()
@@ -1537,6 +1553,11 @@ struct WGWorkshop
     void Save()
     {
         sWorld->setWorldState(WorkshopsData[workshopId].worldstate, state);
+    }
+
+    void SetForcedTeamChange(bool forced)
+    {
+        forcedTeamChange = forced;
     }
 };
 

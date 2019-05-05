@@ -106,6 +106,7 @@ class BfCapturePoint
         // Returns true if the state of the objective has changed, in this case, the OutdoorPvP must send a world state ui update.
         virtual bool Update(uint32 diff);
         virtual void ChangeTeam(TeamId /*oldTeam*/) {}
+        virtual void ForceChangeTeam(TeamId newTeam) {}
         virtual void SendChangePhase();
 
         bool SetCapturePointData(GameObject* capturePoint);

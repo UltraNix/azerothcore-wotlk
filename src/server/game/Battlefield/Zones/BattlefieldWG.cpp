@@ -189,6 +189,10 @@ bool BattlefieldWG::SetupBattlefield()
         go->SetUInt32Value(GAMEOBJECT_FACTION, WintergraspFaction[GetDefenderTeam()]);
     }
 
+    // Spawn capture points
+    for (uint8 i = 0; i < WG_CAPTURE_POINTS_COUNT; ++i)
+        SpawnGameObject(WintergraspCapturePointId[i], WintergraspCapturePointPos[i].GetPositionX(), WintergraspCapturePointPos[i].GetPositionY(), WintergraspCapturePointPos[i].GetPositionZ(), WintergraspCapturePointPos[i].GetOrientation());
+
     UpdateCounterVehicle(true);
 
     for (uint8 i = 0; i < 4; i++)
@@ -287,6 +291,24 @@ void BattlefieldWG::OnBattleStart()
     SetData(BATTLEFIELD_WG_DATA_INTACT_TOWER_ATT, WG_MAX_ATTACKTOWERS);
     SetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT, 0);
     SetData(BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT, 0);
+
+    // Upper workshops should be controlled by defenders, lower by attackers.
+    for (auto itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetCapturePointGo())
+            continue;
+        switch (itr->second->GetCapturePointGo()->GetEntry())
+        {
+        case GO_WINTERGRASP_FACTORY_BANNER_NE:
+        case GO_WINTERGRASP_FACTORY_BANNER_NW:
+            itr->second->ForceChangeTeam(GetDefenderTeam());
+            break;
+        case GO_WINTERGRASP_FACTORY_BANNER_SE:
+        case GO_WINTERGRASP_FACTORY_BANNER_SW:
+            itr->second->ForceChangeTeam(GetAttackerTeam());
+            break;
+        }
+    }
 
     // Update graveyard (in no war time all graveyard is to deffender, in war time, depend of base)
     for (Workshop::const_iterator itr = WorkshopsList.begin(); itr != WorkshopsList.end(); ++itr)
@@ -1236,6 +1258,23 @@ void WintergraspCapturePoint::ChangeTeam(TeamId /*oldTeam*/)
 {
     ASSERT(m_Workshop);
     m_Workshop->GiveControlTo(m_team, false);
+}
+
+void WintergraspCapturePoint::ForceChangeTeam(TeamId newteam)
+{
+    m_Workshop->SetForcedTeamChange(true);
+    m_Workshop->GiveControlTo(newteam, false);
+
+    if (newteam == TEAM_ALLIANCE)
+    {
+        m_value = m_maxValue;
+        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_ALLIANCE;
+    }
+    else
+    {
+        m_value = -m_maxValue;
+        m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_HORDE;
+    }
 }
 
 BfGraveyardWG::BfGraveyardWG(BattlefieldWG* battlefield) : BfGraveyard(battlefield)
