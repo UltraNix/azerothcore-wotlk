@@ -24,6 +24,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Language.h"
+#include "Formulas.h"
 
 const uint32 HP_LANG_LOSE_A[HP_TOWER_NUM] = {LANG_OPVP_HP_LOSE_BROKENHILL_A, LANG_OPVP_HP_LOSE_OVERLOOK_A, LANG_OPVP_HP_LOSE_STADIUM_A};
 
@@ -333,9 +334,9 @@ void OutdoorPvPHP::HandleKillImpl(Player* player, Unit* killed)
     if (killed->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (player->GetTeamId() == TEAM_ALLIANCE && killed->ToPlayer()->GetTeamId() != TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE && killed->ToPlayer()->GetTeamId() != TEAM_ALLIANCE && killed->getLevel() > Trinity::XP::GetGrayLevel(player->getLevel()))
         player->CastSpell(player, AlliancePlayerKillReward, true);
-    else if (player->GetTeamId() == TEAM_HORDE && killed->ToPlayer()->GetTeamId() != TEAM_HORDE)
+    else if (player->GetTeamId() == TEAM_HORDE && killed->ToPlayer()->GetTeamId() != TEAM_HORDE && killed->getLevel() > Trinity::XP::GetGrayLevel(player->getLevel()))
         player->CastSpell(player, HordePlayerKillReward, true);
 }
 
