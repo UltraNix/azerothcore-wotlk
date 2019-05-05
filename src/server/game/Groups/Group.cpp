@@ -696,10 +696,6 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
             CharacterDatabase.Execute(stmt);
         }
 
-        // Reevaluate group enchanter if the leaving player had enchanting skill or the player is offline
-        if ((player && player->GetSkillValue(SKILL_ENCHANTING)) || !player)
-            ResetMaxEnchantingLevel();
-
         // Remove player from loot rolls
         for (Rolls::iterator it = RollId.begin(); it != RollId.end();)
         {
@@ -740,6 +736,10 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
             if (!isBGGroup() && !isBFGroup())
                 sWorld->UpdateGlobalPlayerGroup(GUID_LOPART(guid), 0);
         }
+
+        // Reevaluate group enchanter if the leaving player had enchanting skill or the player is offline
+        if ((player && player->GetSkillValue(SKILL_ENCHANTING)) || !player)
+            ResetMaxEnchantingLevel();
 
         // Pick new leader if necessary
         bool validLeader = true;
