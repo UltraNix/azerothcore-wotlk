@@ -1352,6 +1352,12 @@ public:
             if (Failed)
                 EnterEvadeMode();
         }
+
+        void SummonedCreatureDespawn(Creature* summon) override
+        {
+            // If any of summoned creatures was despawned for some reason - reset
+            Failed = true;
+        }
     };
 };
 
