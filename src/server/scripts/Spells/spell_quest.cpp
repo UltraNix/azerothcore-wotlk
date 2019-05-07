@@ -3275,6 +3275,39 @@ public:
     }
 };
 
+class spell_q21884_collect_orange_crystal_liquid : public SpellScriptLoader
+{
+public:
+    spell_q21884_collect_orange_crystal_liquid() : SpellScriptLoader("spell_q21884_collect_orange_crystal_liquid") { }
+
+    class spell_q21884_collect_orange_crystal_liquid_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q21884_collect_orange_crystal_liquid_SpellScript);
+
+        void HandleFinish()
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+            if (caster->ToPlayer())
+            {
+                caster->SummonCreature(13696, { caster->GetPositionX() + urand(2, 10), caster->GetPositionY() + urand(2, 10), caster->GetPositionZ(), caster->GetOrientation() }, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+                caster->SummonCreature(13696, { caster->GetPositionX() + urand(2, 10), caster->GetPositionY() + urand(2, 10), caster->GetPositionZ(), caster->GetOrientation() }, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 10000);
+            }
+        }
+
+        void Register()
+        {
+            AfterCast += SpellCastFn(spell_q21884_collect_orange_crystal_liquid_SpellScript::HandleFinish);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q21884_collect_orange_crystal_liquid_SpellScript();
+    };
+};
+
 void AddSC_quest_spell_scripts()
 {
     // Ours
@@ -3351,4 +3384,5 @@ void AddSC_quest_spell_scripts()
     new spell_q12919_gymers_grab();
     new spell_q12919_gymers_throw();
     new spell_q13681_throw_stone_chunk();
+    new spell_q21884_collect_orange_crystal_liquid();
 }
