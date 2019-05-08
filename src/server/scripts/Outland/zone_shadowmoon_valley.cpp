@@ -1356,7 +1356,8 @@ public:
         void SummonedCreatureDespawn(Creature* summon) override
         {
             // If any of summoned creatures was despawned for some reason - reset
-            Failed = true;
+            if (summon->IsAlive())
+                Failed = true;
         }
     };
 };
