@@ -511,6 +511,14 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
     return bg;
 }
 
+const bool BattlegroundMgr::GetArenaListByType(BattlegroundContainer& arenaContainer, ArenaType type) const
+{
+    for (auto &bg : m_Battlegrounds)
+        if (bg.second->isArena() && bg.second->GetArenaType() == type)
+            arenaContainer[bg.first] = bg.second;
+    return !arenaContainer.empty();
+}
+
 // used to create the BG templates
 bool BattlegroundMgr::CreateBattleground(CreateBattlegroundData& data)
 {

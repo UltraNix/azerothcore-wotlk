@@ -49,6 +49,8 @@ EndScriptData
 #include "DBCStructure.h"
 #include "Language.h"
 #include "CustomEventMgr.h"
+#include "BattlegroundMgr.h"
+#include "ArenaTeamMgr.h"
 
 /* ######
 ## npc_schody
@@ -1304,6 +1306,158 @@ private:
 
 };
 
+enum ArenaSpectatorData
+{
+    GOSSIP_ACTION_2V2               = 1000,
+    GOSSIP_ACTION_3V3               = 2000,
+    GOSSIP_ACTION_5V5               = 3000,
+    GOSSIP_ACTION_BACK              = 4000,
+    GOSSIP_ACTION_SPECTATE_ARENA    = 1000000,
+
+    GOSSIP_AS_MAIN                  = 1100000,
+    GOSSIP_AS_NO_TEAMS              = 1100001,
+    GOSSIP_AS_CHOOSE_TEAM           = 1100002,
+
+    ARENAS_PER_PAGE                 = 25,
+};
+
+class npc_arena_spectator : public CreatureScript
+{
+public:
+    npc_arena_spectator() : CreatureScript("npc_arena_spectator") { }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        DisplayHelloGossips(player);
+       
+        player->SEND_GOSSIP_MENU(GOSSIP_AS_MAIN, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        ArenaType type;
+        uint8 page;
+        if (action == GOSSIP_ACTION_BACK)
+        {
+            DisplayHelloGossips(player);
+            player->SEND_GOSSIP_MENU(GOSSIP_AS_MAIN, creature->GetGUID());
+            return true;
+        }
+        else if (action > GOSSIP_ACTION_SPECTATE_ARENA)
+        {
+            uint64 playerGuid = action - GOSSIP_ACTION_SPECTATE_ARENA;
+            if (Player* arenaPlayer = sObjectAccessor->FindPlayer(playerGuid))
+            {
+                std::ostringstream os;
+                os << ".spec spec " << arenaPlayer->GetName();
+                ChatHandler(player->GetSession()).ParseCommands(os.str().c_str());
+            }
+            player->PlayerTalkClass->SendCloseGossip();
+            return true;
+        }
+        else if (action >= GOSSIP_ACTION_5V5)
+        {
+            type = ARENA_TYPE_5v5;
+            page = action - GOSSIP_ACTION_5V5;
+        }
+        else if (action >= GOSSIP_ACTION_3V3)
+        {
+            type = ARENA_TYPE_3v3;
+            page = action - GOSSIP_ACTION_3V3;
+        }
+        else if (action >= GOSSIP_ACTION_2V2)
+        {
+            type = ARENA_TYPE_2v2;
+            page = action - GOSSIP_ACTION_2V2;
+        }
+        uint32 size;
+        if(DisplayArenas(player, type, page, size))
+        {
+            if (page != 0)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show previous page", GOSSIP_SENDER_MAIN, action - 1);
+            if (size > (page+1) * ARENAS_PER_PAGE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show next page", GOSSIP_SENDER_MAIN, action + 1);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Back", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_BACK);
+            player->SEND_GOSSIP_MENU(GOSSIP_AS_CHOOSE_TEAM, creature->GetGUID());
+        }
+        else
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Back", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_BACK);
+            player->SEND_GOSSIP_MENU(GOSSIP_AS_NO_TEAMS, creature->GetGUID());
+        }
+        return true;
+    }
+
+    bool DisplayArenas(Player* player, ArenaType type, uint8 page, uint32 &size)
+    {
+        BattlegroundContainer arenaContainer;
+        
+        uint32 begin = page * ARENAS_PER_PAGE;
+        uint32 end = (page + 1) * ARENAS_PER_PAGE - 1;
+        uint32 count = 0;
+        if (sBattlegroundMgr->GetArenaListByType(arenaContainer, type))
+        {
+            size = arenaContainer.size();
+            for (auto &arena : arenaContainer)
+            {
+                if (count < begin)
+                {
+                    ++count;
+                    continue;
+                }
+                else if (count > end)
+                    break;
+                ++count;
+
+                if (!arena.second)
+                    continue;
+                uint32 teamId1 = 0;
+                uint32 teamId2 = 0;
+                uint64 playerGuid = 0;
+
+                // Get arena teams from players in arena
+                for (auto &arenaPlayer : arena.second->GetPlayers())
+                {
+                    if (!arenaPlayer.second)
+                        continue;
+                    playerGuid = arenaPlayer.second->GetGUID();
+                    uint32 teamId = arenaPlayer.second->GetArenaTeamId(ArenaTeam::GetSlotByType(type));
+                    if (!teamId)
+                        continue;
+
+                    if (!teamId1)
+                        teamId1 = teamId;
+                    else if (teamId != teamId1)
+                    {
+                        teamId2 = teamId;
+                        break;
+                    }
+                }
+                ArenaTeam *arenaTeam1 = sArenaTeamMgr->GetArenaTeamById(teamId1);
+                ArenaTeam *arenaTeam2 = sArenaTeamMgr->GetArenaTeamById(teamId2);
+                if (!arenaTeam1 || !arenaTeam2)
+                    continue;
+
+                std::ostringstream os;
+                os << arenaTeam1->GetName() << " (Rating: " << arenaTeam1->GetRating() << ") vs " << arenaTeam2->GetName() << " (Rating: " << arenaTeam2->GetRating() << ")";
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, os.str().c_str(), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_SPECTATE_ARENA + playerGuid);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    void DisplayHelloGossips(Player* player)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "2v2", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_2V2);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "3v3", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_3V3);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "5v5", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_5V5);
+    }
+};
+
 void AddSC_npcs_custom()
 {
     new npc_schody();
@@ -1314,4 +1468,5 @@ void AddSC_npcs_custom()
     new player_script_hunger_games();
     new npc_gmisl_teleporter();
     new npc_test_server();
+    new npc_arena_spectator();
 }
