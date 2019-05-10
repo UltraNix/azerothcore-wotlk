@@ -143,7 +143,7 @@ class BattlegroundMgr
         }
 
         const BattlegroundContainer& GetBattlegroundList() { return m_Battlegrounds; } // pussywizard
-        const bool GetArenaListByType(BattlegroundContainer& arenaContainer, ArenaType type) const;
+        const bool GetArenaListByType(BattlegroundContainer& arenaContainer, ArenaType type, bool onlyRated = true) const;
         RandomBattlegroundSystem RandomSystem; // pussywizard
 
     private:

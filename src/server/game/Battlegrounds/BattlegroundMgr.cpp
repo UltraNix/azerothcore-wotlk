@@ -511,10 +511,10 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
     return bg;
 }
 
-const bool BattlegroundMgr::GetArenaListByType(BattlegroundContainer& arenaContainer, ArenaType type) const
+const bool BattlegroundMgr::GetArenaListByType(BattlegroundContainer& arenaContainer, ArenaType type, bool onlyRated) const
 {
     for (auto &bg : m_Battlegrounds)
-        if (bg.second->isArena() && bg.second->GetArenaType() == type)
+        if (bg.second->isArena() && bg.second->GetArenaType() == type && (!onlyRated || bg.second->isRated()))
             arenaContainer[bg.first] = bg.second;
     return !arenaContainer.empty();
 }
