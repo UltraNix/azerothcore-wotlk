@@ -1317,6 +1317,7 @@ enum ArenaSpectatorData
     GOSSIP_AS_MAIN                  = 1100000,
     GOSSIP_AS_NO_TEAMS              = 1100001,
     GOSSIP_AS_CHOOSE_TEAM           = 1100002,
+    GOSSIP_AS_LEAVE_ARENA           = 1100003,
 
     ARENAS_PER_PAGE                 = 25,
 };
@@ -1458,6 +1459,48 @@ public:
     }
 };
 
+class npc_arena_spectator_leave : public CreatureScript
+{
+public:
+    npc_arena_spectator_leave() : CreatureScript("npc_arena_spectator_leave") {}
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Yes", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "No", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->SEND_GOSSIP_MENU(GOSSIP_AS_LEAVE_ARENA, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        switch(action)
+        {
+        case GOSSIP_ACTION_INFO_DEF:
+            if (!player->IsSpectator() || !player->FindMap() || !player->FindMap()->IsBattleArena())
+                return true;
+            player->TeleportToEntryPoint();
+            break;
+        }
+        player->PlayerTalkClass->SendCloseGossip();
+        return true;
+    }
+
+    struct npc_arena_spectator_leaveAI : public ScriptedAI
+    {
+        npc_arena_spectator_leaveAI(Creature* creature) : ScriptedAI(creature) {}
+        bool CanBeSeen(Player const* player)
+        {
+            return player->IsSpectator() || player->IsGameMaster();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_arena_spectator_leaveAI(creature);
+    }
+};
+
 void AddSC_npcs_custom()
 {
     new npc_schody();
@@ -1469,4 +1512,5 @@ void AddSC_npcs_custom()
     new npc_gmisl_teleporter();
     new npc_test_server();
     new npc_arena_spectator();
+    new npc_arena_spectator_leave();
 }
