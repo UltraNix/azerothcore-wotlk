@@ -326,7 +326,7 @@ SET @ID := 405000;
 DELETE FROM `gameobject_template` WHERE entry = @ID;
 INSERT INTO `gameobject_template` VALUES (@ID,3,259,'Hunger Games Treasure Chest','','','',94,0,3,0,0,0,0,0,0,1599,@ID,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',12340);
 DELETE FROM `gameobject_loot_template` WHERE entry = @ID;
-INSERT INTO `gameobject_loot_template` VALUES (@ID, 13325, 100, 1, 0, 1, 1);
+INSERT INTO `gameobject_loot_template` VALUES (@ID, 64999, 100, 1, 0, 1, 1);
 
 DELETE FROM `gameobject` WHERE `map` = 37;
 SET @GUID := 400000;
