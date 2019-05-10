@@ -574,10 +574,14 @@ bool Battlefield::AddOrSetPlayerToCorrectBfGroup(Player* player)
     if (!player->IsInWorld())
         return false;
 
-    if (player->GetGroup() && (player->GetGroup()->isBGGroup() || player->GetGroup()->isBFGroup()))
+    if (Group* group = player->GetGroup())
     {
-        sLog->outMisc("Battlefield::AddOrSetPlayerToCorrectBfGroup - player is already in %s group!", (player->GetGroup()->isBGGroup() ? "BG" : "BF"));
-        return false;
+        if(group->isBGGroup())
+        {
+            sLog->outMisc("Battlefield::AddOrSetPlayerToCorrectBfGroup - player is already in BG group!");
+            return false;
+        }
+        group->RemoveMember(player->GetGUID());
     }
 
     Group* group = GetFreeBfRaid(player->GetTeamId());
