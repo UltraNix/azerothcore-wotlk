@@ -174,7 +174,7 @@ public:
                 allowedArenas.insert(BATTLEGROUND_BE);
                 allowedArenas.insert(BATTLEGROUND_RL);
                 allowedArenas.insert(BATTLEGROUND_DS);
-                allowedArenas.insert(BATTLEGROUND_RV);
+                //allowedArenas.insert(BATTLEGROUND_RV);
             }
             else if (tmpStr == "NA")
                 allowedArenas.insert(BATTLEGROUND_NA);

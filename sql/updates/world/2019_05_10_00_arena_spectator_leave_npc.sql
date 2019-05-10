@@ -1,3 +1,4 @@
+SET @ENTRY := 1100003;
 DELETE FROM `npc_text` WHERE ID = @ENTRY;
 INSERT INTO `npc_text` VALUES 
 (@ENTRY,'Do you want to stop being a spectator and leave the arena? You\'ll be able to rejoin to spectate this match.',NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,NULL,NULL,0,0,0,0,0,0,0,0,1);
