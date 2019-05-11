@@ -655,16 +655,11 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
                     data = DONE;
                     InstanceProgress = INSTANCE_PROGRESS_CHAMPIONS_DEAD;
                     m_auiEncounter[0] = DONE;
-                    bool creditCasted = false;
                     for (uint8 i = 0; i<3; ++i)
                         if (Creature* c = instance->GetCreature(NPC_GrandChampionGUID[i]))
                         {
                             c->GetMotionMaster()->MovePoint(9, 747.36f, 670.07f, 411.9f);
-                            if (!creditCasted)
-                            {
-                                c->CastSpell((Unit*)NULL, 68572, true);
-                                creditCasted = true;
-                            }
+                            c->CastSpell((Unit*)NULL, 68572, true);
                         }
 
                     if (Creature* announcer = instance->GetCreature(NPC_AnnouncerGUID))
