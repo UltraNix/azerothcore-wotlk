@@ -8245,6 +8245,12 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
         if (val == 0)
             continue;
 
+        //! Update melee crit rating no matter what kind of stats weapon has
+        //! crit rating depends on weapon skill as well
+        //! and in some cases when we swap weapons
+        //! it's not updated till we equip an item with Crit rating on it
+        UpdateRating(CR_CRIT_MELEE);
+
         switch (statType)
         {
             case ITEM_MOD_MANA:
@@ -13872,8 +13878,8 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
     // anti-wpe
     if (pSrcItem->IsBag() && pSrcItem->IsNotEmptyBag() && !IsBagPos(dst))
-     {
-         SendEquipError(EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS, pSrcItem, pDstItem);
+    {
+        SendEquipError(EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS, pSrcItem, pDstItem);
         return;
     }
 
@@ -13892,7 +13898,6 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     // DST checks
-
     if (pDstItem)
     {
         // Xinef: Removed next bullshit loot generated check
