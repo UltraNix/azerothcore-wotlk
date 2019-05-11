@@ -856,12 +856,57 @@ public:
     }
 };
 
+enum CenarionSparrowhawk
+{
+    GO_RAVEN_STONE = 185541,
+    POINT_ID = 1
+};
+
+class npc_cenarion_sparrowhawk : public CreatureScript
+{
+public:
+    npc_cenarion_sparrowhawk() : CreatureScript("npc_cenarion_sparrowhawk") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_cenarion_sparrowhawkAI(creature);
+    }
+
+    struct npc_cenarion_sparrowhawkAI : public ScriptedAI
+    {
+        npc_cenarion_sparrowhawkAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            if (GameObject* go = me->FindNearestGameObject(GO_RAVEN_STONE, 40.f))
+                me->GetMotionMaster()->MovePoint(POINT_ID, go->GetPosition());
+            else
+                me->DespawnOrUnsummon(10s);
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == POINT_ID)
+            {
+                me->DespawnOrUnsummon(5s);
+            }
+        }
+    };
+};
+
 void AddSC_terokkar_forest()
 {
     // Ours
     new spell_q10930_big_bone_worm();
     new spell_q10929_fumping();
     new npc_greatfather_aldrimus();
+    new npc_cenarion_sparrowhawk();
     new spell_q10036_torgos();
     new spell_q10923_evil_draws_near_summon();
     new spell_q10923_evil_draws_near_periodic();
