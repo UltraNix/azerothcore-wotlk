@@ -99,5 +99,11 @@ if ( NOJEM )
   message(" *** DO NOT DISABLE IT UNLESS YOU KNOW WHAT YOU'RE DOING!")
 endif()
 
+if (DISABLE_DRESSNPCS_CORESOUNDS)
+  message("")
+  message("DressNPCs sound workaround disabled. Live without sounds or use a client side patch.")
+  add_definitions(-DDISABLE_DRESSNPCS_CORESOUNDS)
+endif()
+
 message("")
 

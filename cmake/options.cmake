@@ -19,4 +19,5 @@ option(WITH_MESHEXTRACTOR "Build meshextractor (alpha)"                         
 option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
 set(WITH_SOURCE_TREE    "hierarchical" CACHE STRING "Build the source tree for IDE's.")
 set_property(CACHE WITH_SOURCE_TREE PROPERTY STRINGS no flat hierarchical hierarchical-folders)
-option(WITH_VS_FOLDERS  "Enables Organizational Folders in Visual Studio"             0) 
+option(WITH_VS_FOLDERS  "Enables Organizational Folders in Visual Studio"             0)
+option(DISABLE_DRESSNPC_CORESOUNDS "Disable server side 'missing sounds' workaround"  0)

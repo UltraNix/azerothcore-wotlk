@@ -672,6 +672,8 @@ class ObjectMgr
 
         typedef std::map<uint32, uint32> CharacterConversionMap;
 
+        typedef std::unordered_map<uint32, std::shared_ptr<CreatureOutfit>> CreatureOutfitContainer;
+
         GameObjectTemplate const* GetGameObjectTemplate(uint32 entry);
         bool IsGameObjectStaticTransport(uint32 entry);
         GameObjectTemplateContainer const* GetGameObjectTemplates() const { return &_gameObjectTemplateStore; }
@@ -1177,6 +1179,11 @@ class ObjectMgr
         bool AddGameTele(GameTele& data);
         bool DeleteGameTele(std::string const& name);
 
+        const CreatureOutfitContainer& GetCreatureOutfitMap() const { return _creatureOutfitStore; }
+        std::shared_ptr<CreatureOutfit> const & GetOutfit(uint32 modelid) const;
+        uint32 GetRealDisplayId(uint32 modelid) const;
+        void LoadCreatureOutfits();
+
         TrainerSpellData const* GetNpcTrainerSpells(uint32 entry) const
         {
             CacheTrainerSpellContainer::const_iterator  iter = _cacheTrainerSpellStore.find(entry);
@@ -1324,6 +1331,8 @@ class ObjectMgr
 
         PageTextContainer _pageTextStore;
         InstanceTemplateContainer _instanceTemplateStore;
+
+        CreatureOutfitContainer _creatureOutfitStore;
 
         WorldZoneScriptContainer _worldZoneScriptStore;
 

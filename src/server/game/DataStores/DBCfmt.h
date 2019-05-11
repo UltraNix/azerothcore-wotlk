@@ -87,6 +87,7 @@ char const MailTemplateEntryfmt[] = "nxxxxxxxxxxxxxxxxxssssssssssssssssx";
 char const MapEntryfmt[] = "nxiixssssssssssssssssxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixiffxiii";
 char const MapDifficultyEntryfmt[] = "diisxxxxxxxxxxxxxxxxiix";
 char const MovieEntryfmt[] = "nxx";
+char const NPCSoundsEntryfmt[] = "niiii";
 char const OverrideSpellDatafmt[] = "niiiiiiiiiix";
 char const PowerDisplayfmt[] = "nixxxx";
 char const QuestSortEntryfmt[] = "nxxxxxxxxxxxxxxxxx";

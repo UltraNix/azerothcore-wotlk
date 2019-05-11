@@ -56,6 +56,13 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket & recvData)
     uint64 guid;
     recvData >> guid;
 
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(guid) || IS_PET_GUID(guid) || IS_VEHICLE_GUID(guid);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
+
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TABARDDESIGNER);
     if (!unit)
     {
@@ -84,6 +91,13 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket & recvData)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received CMSG_BANKER_ACTIVATE");
 
     recvData >> guid;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(guid) || IS_PET_GUID(guid) || IS_VEHICLE_GUID(guid);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_BANKER);
     if (!unit)
@@ -119,6 +133,15 @@ void WorldSession::HandleTrainerListOpcode(WorldPacket & recvData)
     uint64 guid;
 
     recvData >> guid;
+
+    Creature* npc = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER);
+    if (!npc)
+        return;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    npc->SendMirrorSound(_player, 0);
+#endif
+
     SendTrainerList(guid);
 }
 
@@ -315,6 +338,13 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recvData)
 
     time_t now = time(nullptr);
     tm* aTm = localtime(&now);
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(guid) || IS_PET_GUID(guid) || IS_VEHICLE_GUID(guid);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
@@ -531,6 +561,13 @@ void WorldSession::HandleListStabledPetsOpcode(WorldPacket & recvData)
     uint64 npcGUID;
 
     recvData >> npcGUID;
+
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(npcGUID) || IS_PET_GUID(npcGUID) || IS_VEHICLE_GUID(npcGUID);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(npcGUID))
+            creature->SendMirrorSound(_player, 0);
+#endif
 
     if (!CheckStableMaster(npcGUID))
         return;

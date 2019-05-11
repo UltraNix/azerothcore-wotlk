@@ -82,6 +82,7 @@ public:
             { "creature_onkill_reputation",   SEC_ADMINISTRATOR, true,  &HandleReloadOnKillReputationCommand,           "" },
             { "creature_queststarter",        SEC_ADMINISTRATOR, true,  &HandleReloadCreatureQuestStarterCommand,       "" },
             { "creature_template",            SEC_ADMINISTRATOR, true,  &HandleReloadCreatureTemplateCommand,           "" },
+            { "creature_template_outfits",    SEC_ADMINISTRATOR, true,  &HandleReloadCreatureTemplateOutfitsCommand,    "" },
             //{ "db_script_string",             SEC_ADMINISTRATOR, true,  &HandleReloadDbScriptStringCommand,            "" },
             { "disables",                     SEC_ADMINISTRATOR, true,  &HandleReloadDisablesCommand,                   "" },
             { "disenchant_loot_template",     SEC_ADMINISTRATOR, true,  &HandleReloadLootTemplatesDisenchantCommand,    "" },
@@ -417,6 +418,15 @@ public:
         }
 
         handler->SendGlobalGMSysMessage("Creature template reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadCreatureTemplateOutfitsCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        sLog->outString("Loading Creature Outfits... (`creature_template_outfits`)");
+        sObjectMgr->LoadCreatureOutfits();
+
+        handler->SendGlobalGMSysMessage("DB table `creature_template_outfits` reloaded.");
         return true;
     }
 

@@ -330,6 +330,13 @@ void WorldSession::HandleGuildBankerActivate(WorldPacket& recvData)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_BANKER_ACTIVATE [%s]: Go: [" UI64FMTD "] AllSlots: %u"
         , GetPlayerInfo().c_str(), guid, sendAllSlots);
 
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(guid) || IS_PET_GUID(guid) || IS_VEHICLE_GUID(guid);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
+
     Guild * const guild = GetPlayer()->GetGuild();
     if (!guild)
     {

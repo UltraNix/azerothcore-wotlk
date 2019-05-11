@@ -1589,6 +1589,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Creature Model Based Info Data...");
     sObjectMgr->LoadCreatureModelInfo();
 
+    sLog->outString("Loading Creature template outfits...");    // must be before LoadCreatureTemplates   
+    sObjectMgr->LoadCreatureOutfits();
+
     sLog->outString("Loading Creature templates...");
     sObjectMgr->LoadCreatureTemplates();
 

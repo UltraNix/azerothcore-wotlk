@@ -1334,6 +1334,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_PET_NAME_QUERY:
         case CMSG_CREATURE_QUERY:
         case CMSG_NPC_TEXT_QUERY:
+        case CMSG_GET_MIRRORIMAGE_DATA:
         {
             maxPacketCounterAllowed = 5000;
             break;

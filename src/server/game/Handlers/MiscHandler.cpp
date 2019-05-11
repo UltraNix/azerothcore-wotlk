@@ -475,6 +475,13 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket & recv_data)
     uint64 guid;
     recv_data >> guid;
 
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(guid) || IS_PET_GUID(guid) || IS_VEHICLE_GUID(guid);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
+
     _player->SetSelection(guid);
 }
 

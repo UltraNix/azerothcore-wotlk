@@ -38,6 +38,10 @@ class Player;
 class WorldSession;
 class CreatureGroup;
 
+//! CrossDress NPCs
+class CreatureOutfit;
+#include <memory>
+
 enum CreatureFlagsExtra
 {
     CREATURE_FLAG_EXTRA_INSTANCE_BIND        = 0x00000001,       // creature kill bind instance with killer and killer's group
@@ -454,6 +458,12 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         void SetObjectScale(float scale);
         void SetDisplayId(uint32 modelId);
+        uint32 GetDisplayId() const final;
+        void SetDisplayIdRaw(uint32 modelId);
+        std::shared_ptr<CreatureOutfit> & GetOutfit() { return m_outfit; };
+        void SetOutfit(std::shared_ptr<CreatureOutfit> const & outfit);
+        void SetMirrorImageFlag(bool on) { if (on) SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE); else RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_MIRROR_IMAGE); };
+        void SendMirrorSound(Player* target, uint8 type);
 
         void DisappearAndDie();
 
@@ -780,6 +790,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void SetTarget(uint64 guid);
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
         void ReleaseFocus(Spell const* focusSpell);
+
+        std::shared_ptr<CreatureOutfit> m_outfit;
 
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }

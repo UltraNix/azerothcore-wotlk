@@ -1316,7 +1316,8 @@ public:
         if (!*args)
             return false;
 
-        uint16 display_id = (uint16)atoi((char*)args);
+        //! volatile, check this before going live
+        uint16 display_id = (uint32)atoi((char*)args);
 
         Unit* target = handler->getSelectedUnit();
         if (!target)

@@ -866,6 +866,13 @@ void WorldSession::HandleListInventoryOpcode(WorldPacket & recvData)
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Recvd CMSG_LIST_INVENTORY");
 
+#ifndef DISABLE_DRESSNPCS_CORESOUNDS
+    bool IsAnyTypeCreature = IS_CREATURE_GUID(guid) || IS_PET_GUID(guid) || IS_VEHICLE_GUID(guid);
+    if (IsAnyTypeCreature)
+        if (Creature* creature = _player->GetMap()->GetCreature(guid))
+            creature->SendMirrorSound(_player, 0);
+#endif
+
     SendListInventory(guid);
 }
 
