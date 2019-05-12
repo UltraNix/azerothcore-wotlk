@@ -2351,6 +2351,8 @@ class spell_item_shadowmourne : public SpellScriptLoader
                     return false;
                 if (GetTarget()->GetMap()->GetId() == 37) // Azshara Crater - Hunger Games Event
                     return false;
+                if (!GetTarget()->FindMap() || GetTarget()->FindMap()->IsBattlegroundOrArena()) // Disabled on BGs and Arenas
+                    return false;
 
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
                     if (!eventInfo.GetDamageInfo()->GetDamage())
