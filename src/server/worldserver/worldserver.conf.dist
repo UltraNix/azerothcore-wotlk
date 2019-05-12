@@ -2154,6 +2154,14 @@ GM.LowerSecurity = 0
 GM.TicketSystem.ChanceOfGMSurvey = 50
 
 #
+#    GM.AntiAbuse.Money
+#        Description: Disallow GT to have any gold
+#        Default:     1 - (Enabled)
+#                     0  - (Disabled)
+
+GM.AntiAbuse.Money = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

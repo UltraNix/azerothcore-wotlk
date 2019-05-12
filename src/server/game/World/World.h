@@ -196,6 +196,7 @@ enum WorldBoolConfigs
     CONFIG_ULDUAR_PRE_NERF,                   // Turns on or off higher damage values for some spells in Ulduar (restart required)
     CONFIG_NINJA_LOOTER_LIST,                 // Sitowsky: Ninja Looter list.
     CONFIG_ANTICHEAT_WINTERGRASP,             // Turns on or off notifications about someone trying to attack final gate from under textures or relic room.
+    CONFIG_GM_ANTIABUSE_MONEY,                // Disallow GM to have any gold
     BOOL_CONFIG_VALUE_COUNT
 };
 

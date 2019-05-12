@@ -1391,6 +1391,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ULDUAR_PRE_NERF] = sConfigMgr->GetBoolDefault("UlduarPreNerf.Enable", false);
     m_bool_configs[CONFIG_NINJA_LOOTER_LIST] = sConfigMgr->GetBoolDefault("NinjaList.Enable", false);
     m_bool_configs[CONFIG_ANTICHEAT_WINTERGRASP] = sConfigMgr->GetBoolDefault("Anticheat.Wintergrasp.Enable", false);
+    m_bool_configs[CONFIG_GM_ANTIABUSE_MONEY] = sConfigMgr->GetBoolDefault("GM.AntiAbuse.Money", true);
 
     /* Follow movegen params */
     m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ] = sConfigMgr->GetIntDefault( "Movement.FollowUpdateInterval", 300 );
