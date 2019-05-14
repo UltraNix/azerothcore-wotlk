@@ -2701,6 +2701,11 @@ class spell_gen_magic_rooster : public SpellScriptLoader
                 PreventHitDefaultEffect(effIndex);
                 if (Player* target = GetHitPlayer())
                 {
+                    if (target->HasAura(SPELL_MAGIC_ROOSTER_TAUREN_MALE))
+                    {
+                        target->RemoveAurasDueToSpell(SPELL_MAGIC_ROOSTER_TAUREN_MALE);
+                        return;
+                    }
                     uint32 petNumber = target->GetTemporaryUnsummonedPetNumber();
                     target->SetTemporaryUnsummonedPetNumber(0);
 
