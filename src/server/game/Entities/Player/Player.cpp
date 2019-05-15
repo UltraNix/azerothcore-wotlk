@@ -613,7 +613,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         if (!_isBattleGround)
         {
             // If killer is in dungeon then all members receive full reputation at kill.
-            _RewardReputation(player, 1.0f);
+            _RewardReputation(player, isDungeon ? 1.0f : rate);
             _RewardKillCredit(player);
         }
     }
