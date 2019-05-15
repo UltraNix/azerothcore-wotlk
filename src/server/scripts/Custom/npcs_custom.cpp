@@ -1374,11 +1374,11 @@ public:
             page = action - GOSSIP_ACTION_2V2;
         }
         uint32 size;
-        if(DisplayArenas(player, type, page, size))
+        if (DisplayArenas(player, type, page, size))
         {
             if (page != 0)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show previous page", GOSSIP_SENDER_MAIN, action - 1);
-            if (size > (page+1) * ARENAS_PER_PAGE)
+            if (size > static_cast<uint32>((page+1) * ARENAS_PER_PAGE))
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Show next page", GOSSIP_SENDER_MAIN, action + 1);
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Back", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_BACK);
             player->SEND_GOSSIP_MENU(GOSSIP_AS_CHOOSE_TEAM, creature->GetGUID());
@@ -1501,6 +1501,31 @@ public:
     }
 };
 
+//! Make sure to make those NPCs immune to everything in DB
+//! NPCs & PC as well
+struct npc_custom_guild_bank_companion_AI : public ScriptedAI
+{
+    npc_custom_guild_bank_companion_AI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        //! test
+        me->SetPassive();
+        me->SetImmuneToAll(true);
+        me->setFaction(35);
+        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUILD_BANKER);
+        if (!me->ToTempSummon())
+        {
+            me->DespawnOrUnsummon();
+            return;
+        }
+
+        if (Unit* owner = me->ToTempSummon()->GetSummoner())
+            me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        me->DespawnOrUnsummon(120s);
+    }
+};
+
 void AddSC_npcs_custom()
 {
     new npc_schody();
@@ -1513,4 +1538,5 @@ void AddSC_npcs_custom()
     new npc_test_server();
     new npc_arena_spectator();
     new npc_arena_spectator_leave();
+    new CreatureAILoader<npc_custom_guild_bank_companion_AI>("npc_custom_guild_bank_companion");
 }

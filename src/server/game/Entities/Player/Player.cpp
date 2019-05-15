@@ -2926,7 +2926,7 @@ bool Player::CanInteractWithQuestGiver(Object* questGiver)
     return false;
 }
 
-Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
+Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask) const
 {
     // unit checks
     if (!guid)
@@ -2980,7 +2980,50 @@ Creature* Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
     if (npcflagmask & (UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_TRAINER_CLASS) && creature->GetCreatureTemplate()->trainer_type == TRAINER_TYPE_CLASS && getClass() != creature->GetCreatureTemplate()->trainer_class)
         return NULL;
 
+    //! if guild banker is not summoned by us, disallow interaction
+    //! we can safely do that because no NPCs in world act as guild banker in current state
+    //! and we're creating a custom one, so we can do whatever with interaction logic
+    if (npcflagmask & UNIT_NPC_FLAG_GUILD_BANKER)
+    {
+        if (!creature->IsGuildBanker())
+            return nullptr;
+
+        //! Currently only summons can be guild bankers (custom npc)
+        if (!creature->ToTempSummon())
+            return nullptr;
+
+        Unit* summoner = creature->ToTempSummon()->GetSummoner();
+        if (!summoner)
+            return nullptr;
+
+        if (summoner->GetGUID() != GetGUID())
+            return nullptr;
+
+        if (summoner->IsInCombat())
+            return nullptr;
+
+        if (summoner->GetInstanceScript() && summoner->GetInstanceScript()->IsEncounterInProgress())
+            return nullptr;
+    }
+
     return creature;
+}
+
+bool Player::CaninteractWithGuildBank(uint64 guid) const
+{
+    if (IS_CREATURE_GUID(guid))
+    {
+        if (GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_GUILD_BANKER))
+            return true;
+    }
+
+    if (IS_GAMEOBJECT_GUID(guid))
+    {
+        if (GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_GUILD_BANK))
+            return true;
+    }
+
+    return false;
 }
 
 GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes type) const
