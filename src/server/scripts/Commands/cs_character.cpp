@@ -60,7 +60,8 @@ public:
             { "level",          SEC_ADMINISTRATOR,  true,  &HandleCharacterLevelCommand,           "" },
             { "rename",         SEC_GAMEMASTER,     true,  &HandleCharacterRenameCommand,          "" },
             { "reputation",     SEC_GAMEMASTER,     true,  &HandleCharacterReputationCommand,      "" },
-            { "titles",         SEC_GAMEMASTER,     true,  &HandleCharacterTitlesCommand,          "" }
+            { "titles",         SEC_GAMEMASTER,     true,  &HandleCharacterTitlesCommand,          "" },
+            { "getnewid",       SEC_ADMINISTRATOR,  true,  &HandleCharacterGetNewIdCommand,        "" }
         };
 
         static std::vector<ChatCommand> commandTable =
@@ -916,6 +917,12 @@ public:
                 return false;
         }
 
+        return true;
+    }
+
+    static bool HandleCharacterGetNewIdCommand(ChatHandler* handler, char const* args)
+    {
+        handler->PSendSysMessage("%u", sObjectMgr->GenerateLowGuid(HIGHGUID_PLAYER));
         return true;
     }
 };
