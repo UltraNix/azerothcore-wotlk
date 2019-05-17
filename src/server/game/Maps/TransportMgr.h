@@ -147,7 +147,7 @@ class TransportMgr
 
         TransportAnimationContainer _transportAnimations;
 
-        // Transport map for continent transports
+        // Transport map for continent motion transports
         ContinentTransportMap _continentTransportMap;
 };
 

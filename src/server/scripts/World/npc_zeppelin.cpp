@@ -92,7 +92,7 @@ private:
     KeyFrame const& m_secondStop;
 };
 
-class npc_zapettaAI : public ScriptedAI
+struct npc_zapettaAI : public ScriptedAI
 {
 public:
     npc_zapettaAI(Creature* creature) : ScriptedAI(creature),
