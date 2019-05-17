@@ -4729,7 +4729,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 5697:
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_NONE;
             break;
-
+        //Demonic Knowledge
+        case 35691:
+        case 35692:
+        case 35693:
+            spellInfo->EffectBasePoints[EFFECT_0] += 1;
         /////////////////////////////////
         ///// MAGE
         /////////////////////////////////
