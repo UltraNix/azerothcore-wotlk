@@ -1,0 +1,1 @@
+UPDATE `smart_scripts` SET `action_param1` = 9297 WHERE `entryorguid` = 18942 AND `source_type` = 0 AND id IN(0,1);
