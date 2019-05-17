@@ -10,17 +10,20 @@ INSERT INTO `creature` VALUES
 
 DELETE FROM `npc_vendor` WHERE `entry` = @NPC;
 
--- Move items from s7 vendor
+-- Add Relentless weapons
 INSERT INTO npc_vendor 
-(SELECT @NPC, `slot`, `item`, `maxcount`, `incrtime`, `extendedcost` FROM `npc_vendor` WHERE `entry` = 34092);
+(SELECT @NPC, 0, entry, 0, 0, 0 FROM item_template i WHERE i.NAME LIKE 'Relentless%' AND i.class = 2);
 
--- Delete tabard
-DELETE FROM `npc_vendor` WHERE `entry` = @NPC AND `item` = 49086;
+-- Delete Relentless Scythe (not pvp item)
+DELETE FROM `npc_vendor` WHERE `entry` = @NPC AND `item` = 13163;
 
 -- Set cost of ranged and 2h weapons to 24k honor and 700ap
 UPDATE `npc_vendor` n SET `ExtendedCost` = 2438 WHERE `entry` = @NPC AND 
-EXISTS (SELECT * FROM item_template i WHERE i.entry = n.item AND i.inventorytype IN (15, 17));
+EXISTS (SELECT * FROM item_template i WHERE i.entry = n.item AND i.inventorytype IN (15, 25, 26, 17));
 
 -- Set cost of mainhand, 1h weapons and offhands to 12k honor and 350 arena points
 UPDATE `npc_vendor` n SET `ExtendedCost` = 2440 WHERE `entry` = @NPC AND 
 EXISTS (SELECT * FROM item_template i WHERE i.entry = n.item AND i.inventorytype IN (21, 13, 22));
+
+-- Just in case delete free items
+DELETE FROM `npc_vendor` WHERE `entry` = @NPC AND `ExtendedCost` = 0;
