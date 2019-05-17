@@ -426,9 +426,16 @@ void TransportMgr::SpawnContinentTransports()
             uint32 entry = fields[1].GetUInt32();
 
             if (TransportTemplate const* tInfo = GetTransportTemplate(entry))
+            {
                 if (!tInfo->inInstance)
-                    if (CreateTransport(entry, guid))
+                {
+                    if (Transport* transport = CreateTransport(entry, guid))
+                    {
+                        _continentTransportMap[entry] = transport;
                         ++count;
+                    }
+                }
+            }
 
         } while (result->NextRow());
     }
@@ -527,4 +534,30 @@ void TransportAnimation::GetAnimRotation(uint32 time, G3D::Quat &curr, G3D::Quat
     curr = G3D::Quat(0.0f, 0.0f, 0.0f, 1.0f);
     next = G3D::Quat(0.0f, 0.0f, 0.0f, 1.0f);
     percRot = 0.0f;
+}
+
+TransportTemplate const * TransportMgr::GetTransportTemplate(uint32 entry) const
+{
+    TransportTemplates::const_iterator itr = _transportTemplates.find(entry);
+    if (itr != _transportTemplates.end())
+        return &itr->second;
+    return nullptr;
+}
+
+TransportAnimation const * TransportMgr::GetTransportAnimInfo(uint32 entry) const
+{
+    TransportAnimationContainer::const_iterator itr = _transportAnimations.find(entry);
+    if (itr != _transportAnimations.end())
+        return &itr->second;
+
+    return nullptr;
+}
+
+Transport const * TransportMgr::GetContinentTransport(uint32 entry) const
+{
+    ContinentTransportMap::const_iterator itr = _continentTransportMap.find(entry);
+    if (itr != _continentTransportMap.end())
+        return itr->second;
+
+    return nullptr;
 }

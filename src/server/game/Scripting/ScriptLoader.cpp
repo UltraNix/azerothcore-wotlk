@@ -95,6 +95,7 @@ void AddSC_npc_innkeeper();
 void AddSC_npcs_special();
 void AddSC_npc_taxi();
 void AddSC_achievement_scripts();
+void AddSC_npc_zeppelin_scripts();
 
 //events
 void AddSC_event_brewfest_scripts();
@@ -736,6 +737,7 @@ void AddWorldScripts()
     AddSC_npcs_special();
     AddSC_npc_taxi();
     AddSC_achievement_scripts();
+    AddSC_npc_zeppelin_scripts();
 #endif
 }
 

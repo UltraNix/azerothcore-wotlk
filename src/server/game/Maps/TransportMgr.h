@@ -31,12 +31,13 @@ class StaticTransport;
 class MotionTransport;
 class Map;
 
-typedef Movement::Spline<double>                 TransportSpline;
-typedef std::vector<KeyFrame>                    KeyFrameVec;
-typedef std::unordered_map<uint32, TransportTemplate> TransportTemplates;
-typedef std::set<MotionTransport*>               TransportSet;
-typedef std::unordered_map<uint32, TransportSet>      TransportMap;
-typedef std::unordered_map<uint32, std::set<uint32> > TransportInstanceMap;
+typedef Movement::Spline<double>                        TransportSpline;
+typedef std::vector<KeyFrame>                           KeyFrameVec;
+typedef std::unordered_map<uint32, TransportTemplate>   TransportTemplates;
+typedef std::set<MotionTransport*>                      TransportSet;
+typedef std::unordered_map<uint32, TransportSet>        TransportMap;
+typedef std::unordered_map<uint32, std::set<uint32> >   TransportInstanceMap;
+typedef std::unordered_map<uint32, Transport*>          ContinentTransportMap;
 
 struct KeyFrame
 {
@@ -117,23 +118,11 @@ class TransportMgr
         // creates all transports for instance
         void CreateInstanceTransports(Map* map);
 
-        TransportTemplate const* GetTransportTemplate(uint32 entry) const
-        {
-            TransportTemplates::const_iterator itr = _transportTemplates.find(entry);
-            if (itr != _transportTemplates.end())
-                return &itr->second;
-            return NULL;
-        }
+        TransportTemplate const * GetTransportTemplate(uint32 entry) const;
 
-        TransportAnimation const* GetTransportAnimInfo(uint32 entry) const
-        {
-            TransportAnimationContainer::const_iterator itr = _transportAnimations.find(entry);
-            if (itr != _transportAnimations.end())
-                return &itr->second;
+        TransportAnimation const * GetTransportAnimInfo(uint32 entry) const;
 
-            return NULL;
-        }
-
+        Transport const * GetContinentTransport(uint32 entry) const;
     private:
         TransportMgr();
         ~TransportMgr();
@@ -157,6 +146,9 @@ class TransportMgr
         TransportInstanceMap _instanceTransports;
 
         TransportAnimationContainer _transportAnimations;
+
+        // Transport map for continent transports
+        ContinentTransportMap _continentTransportMap;
 };
 
 #define sTransportMgr ACE_Singleton<TransportMgr, ACE_Thread_Mutex>::instance()
