@@ -4731,9 +4731,14 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         //Demonic Knowledge
         case 35691:
+            spellInfo->EffectBasePoints[EFFECT_0] = 4;
+            break;
         case 35692:
+            spellInfo->EffectBasePoints[EFFECT_0] = 8;
+            break;
         case 35693:
-            spellInfo->EffectBasePoints[EFFECT_0] += 1;
+            spellInfo->EffectBasePoints[EFFECT_0] = 12;
+            break;
         /////////////////////////////////
         ///// MAGE
         /////////////////////////////////
