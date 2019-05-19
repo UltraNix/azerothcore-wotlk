@@ -1793,6 +1793,61 @@ public:
     }
 };
 
+enum MysteryCrystal
+{
+    NPC_FRENZYHEART_RAVAGER = 28078
+};
+
+class npc_mystery_crystal : public CreatureScript
+{
+public:
+    npc_mystery_crystal() : CreatureScript("npc_mystery_crystal") { }
+
+    struct npc_mystery_crystalAI : public NullCreatureAI
+    {
+        npc_mystery_crystalAI(Creature* creature) : NullCreatureAI(creature)
+        {
+            spell = me->m_spells[0] ? sSpellMgr->GetSpellInfo(me->m_spells[0]) : NULL;
+            interval = me->GetAttackTime(BASE_ATTACK);
+            timer = interval;
+        }
+
+        uint32 timer, interval;
+        const SpellInfo* spell;
+
+        void UpdateAI(uint32 diff)
+        {
+            if (timer <= diff)
+            {
+                if (spell)
+                    me->CastSpell(me, spell, true);
+                timer = interval;
+            }
+            else
+                timer -= diff;
+        }
+
+        void KilledUnit(Unit* victim) override
+        {
+            if (victim->ToCreature() && victim->GetEntry() == NPC_FRENZYHEART_RAVAGER)
+            {
+                if (Unit* owner = me->GetOwner())
+                {
+                    if (Player* pl = owner->ToPlayer())
+                    {
+                        pl->KilledMonsterCredit(NPC_FRENZYHEART_RAVAGER, 0);
+                    }
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_mystery_crystalAI(creature);
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     // Ours
@@ -1805,6 +1860,7 @@ void AddSC_sholazar_basin()
     new spell_q12915_mending_fences();
     new npc_rejek_sholazar_event();
     new go_raised_mud_scholazar_river();
+    new npc_mystery_crystal();
 
     // Theirs
     new npc_vekjik();
