@@ -817,6 +817,7 @@ class spell_pal_glyph_of_holy_light : public SpellScriptLoader
             {
                 uint32 const maxTargets = GetSpellInfo()->MaxAffectedTargets;
 
+                targets.remove(GetCaster());
                 if (targets.size() > maxTargets)
                 {
                     targets.sort(Trinity::HealthPctOrderPred());
