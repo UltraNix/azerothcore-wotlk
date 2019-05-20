@@ -79,6 +79,7 @@ void AddSC_ticket_commandscript();
 void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
 void AddSC_reset_commandscript();
+void AddSC_transfer_commandscript();
 
 
 #ifdef SCRIPTS
@@ -718,6 +719,7 @@ void AddCommandScripts()
     AddSC_titles_commandscript();
     AddSC_wp_commandscript();
     AddSC_reset_commandscript();
+    AddSC_transfer_commandscript();
     sAnticheatMgr->StartScripts();
 }
 

@@ -39,6 +39,7 @@ set(scripts_STAT_SRCS
   Commands/cs_server.cpp
   Commands/cs_ticket.cpp
   Commands/cs_titles.cpp
+  Commands/cs_transfer.cpp
   Commands/cs_wp.cpp
   Commands/cs_spectator.cpp
   Commands/cs_premium.cpp
