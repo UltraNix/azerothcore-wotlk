@@ -1526,6 +1526,256 @@ struct npc_custom_guild_bank_companion_AI : public ScriptedAI
     }
 };
 
+struct WandererDalaranNPC
+{
+    uint32 guid;
+    uint32 entry;
+};
+
+const uint32 WANDERER_DALARAN_NPC_COUNT = 79;
+
+const WandererDalaranNPC wandererDalaranNPCs[WANDERER_DALARAN_NPC_COUNT] =
+{
+    {12402,32720},{28686,32719},{85208,33938},{85210,33936},{85214,35471},{96496,32515},{97931,28691},{97932,29715},{97989,28692},{98070,28694},{98178,28697},
+    {98346,28699},{98421,28700},{98866,28704},{99029,28706},{99201,28708},{100897,31031},{100940,29496},{101236,37776},{101356,29499},{101811,28990},{102033,28993},
+    {102048,29505},{102070,28994},{102323,31557},{102325,28997},{102387,29254},{102397,29254},{102399,28742},{102417,29255},{102418,29255},{102419,29255},{102420,29255},
+    {102427,29255},{102428,29255},{102430,29255},{102500,29512},{102516,32329},{102530,29513},{102606,29514},{102673,32332},{102693,32333},{102700,29261},{103296,29523},
+    {104242,29533},{104358,29534},{105534,29547},{105660,29548},{107612,29568},{111283,32675},{111306,32420},{111374,32677},{111461,32678},{111691,32679},{111719,32680},
+    {111858,32681},{112052,32683},{112329,32685},{112385,32686},{112609,32688},{112639,32689},{112686,32690},{112852,32691},{112965,32693},{113397,30137},{114292,32706},
+    {114331,32451},{114781,29640},{115281,32718},{116617,32216},{117830,32743},{119625,32251},{120324,32253},{133649,37780},{137702,36670},{207871,30567},{207873,30567},
+    {249558,190010},{249559,80003}
+};
+
+enum WandererData
+{
+    WANDERER_EVENT_CHECKHOUR        = 1,
+    WANDERER_EVENT_CAST_FIRE        = 2,
+    WANDERER_EVENT_SUMMON_SKELETON  = 3,
+    WANDERER_EVENT_DESPAWN          = 4,
+    WANDERER_EVENT_SAY              = 5,
+
+    WANDERER_SPELL_FIRE             = 39199,
+    WANDERER_SPELL_FEIGN_DEATH      = 74490,
+
+    WANDERER_GOSSIP_HELLO           = 1110000,
+
+    SKELETON_EVENT_CLEAVE           = 1,
+    SKELETON_EVENT_FIRE_NOVA        = 2,
+
+    SKELETON_SPELL_CLEAVE           = 20677,
+    SKELETON_SPELL_FIRE_NOVA        = 68969,
+
+    WANDERER_NPC_SKELETON           = 200001,
+};
+
+class npc_wanderer : public CreatureScript
+{
+public:
+    npc_wanderer() : CreatureScript("npc_wanderer") {}
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Who are you?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        //player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "***DEBUG*** Start event", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 100);
+        player->SEND_GOSSIP_MENU(WANDERER_GOSSIP_HELLO, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "What brings you here?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            player->SEND_GOSSIP_MENU(WANDERER_GOSSIP_HELLO + 1, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Maybe I can help you?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            player->SEND_GOSSIP_MENU(WANDERER_GOSSIP_HELLO + 2, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 3:
+            player->SEND_GOSSIP_MENU(WANDERER_GOSSIP_HELLO + 3, creature->GetGUID());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 100:
+            creature->GetAI()->DoAction(1);
+            player->PlayerTalkClass->SendCloseGossip();
+            break;
+        }
+        return true;
+    }
+
+    struct npc_wandererAI : public ScriptedAI
+    {
+        npc_wandererAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset() override
+        {
+            events.Reset();
+            events.ScheduleEvent(WANDERER_EVENT_CHECKHOUR, 1s);
+            events.ScheduleEvent(WANDERER_EVENT_SAY, 1min, 5min);
+        }
+
+        void DoAction(int32 /*param*/) override
+        {
+            StartEvent();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+            switch (events.GetEvent())
+            {
+            case WANDERER_EVENT_CHECKHOUR:
+            {
+                time_t now = time(nullptr);
+                tm* aTm = localtime(&now);
+                if (aTm->tm_min == 0)
+                {
+                    if (aTm->tm_hour % 3 == 1) // 10, 13, 16, 19, 22
+                    {
+                        StartEvent();
+                    }
+                }
+                events.RescheduleEvent(WANDERER_EVENT_CHECKHOUR, 1min);
+                break;
+            }
+            case WANDERER_EVENT_SAY:
+                Talk(urand(0, 3));
+                events.RescheduleEvent(WANDERER_EVENT_SAY, 1min, 5min);
+                break;
+            }
+        }
+
+        void StartEvent()
+        {
+            Talk(urand(4, 7));
+            for (uint8 i = 0; i < 5; ++i)
+            {
+                uint32 id = urand(0, WANDERER_DALARAN_NPC_COUNT - 1);
+                if (Unit* npc = sObjectAccessor->FindUnit(MAKE_NEW_GUID(wandererDalaranNPCs[id].guid, wandererDalaranNPCs[id].entry, HIGHGUID_UNIT)))
+                {
+                    if (npc->IsAIEnabled)
+                        npc->GetAI()->DoAction(100);
+                }
+            }
+        }
+
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_wandererAI(creature);
+    }
+};
+
+
+class npc_wanderer_dalaranNPC : public CreatureScript
+{
+public:
+    npc_wanderer_dalaranNPC() : CreatureScript("npc_wanderer_dalaranNPC") {}
+    struct npc_wanderer_dalaranNPCAI : public ScriptedAI
+    {
+        npc_wanderer_dalaranNPCAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void DoAction(int32 param) override
+        {
+            if (param == 100)
+            {
+                me->CastSpell(me, WANDERER_SPELL_FEIGN_DEATH);
+                events.ScheduleEvent(WANDERER_EVENT_CAST_FIRE, 2s);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+            switch (events.GetEvent())
+            {
+            case WANDERER_EVENT_CAST_FIRE:
+                me->CastSpell(me, WANDERER_SPELL_FIRE, true);
+                events.ScheduleEvent(WANDERER_EVENT_SUMMON_SKELETON, 5s);
+                events.PopEvent();
+                break;
+            case WANDERER_EVENT_SUMMON_SKELETON:
+                if (Creature* c = me->SummonCreature(WANDERER_NPC_SKELETON, me->GetPosition()))
+                {
+                    if (Unit* victim = c->SelectNearestTarget(50.f, true))
+                        c->CombatStart(victim);
+                }
+                me->DespawnOrUnsummon(5s);
+                events.PopEvent();
+                break;
+            }
+        }
+
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_wanderer_dalaranNPCAI(creature);
+    }
+};
+
+class npc_wanderer_skeleton : public CreatureScript
+{
+public:
+    npc_wanderer_skeleton() : CreatureScript("npc_wanderer_skeleton") {}
+    struct npc_wanderer_skeletonAI : public ScriptedAI
+    {
+        npc_wanderer_skeletonAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void Reset() override
+        {
+            events.Reset();
+            events.ScheduleEvent(SKELETON_EVENT_CLEAVE, 5s, 10s);
+            events.ScheduleEvent(SKELETON_EVENT_FIRE_NOVA, 10s, 15s);
+        }
+
+        void EnterEvadeMode() override
+        {
+            me->SetHealth(me->GetMaxHealth());
+            Reset();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            events.Update(diff);
+            switch (events.GetEvent())
+            {
+            case SKELETON_EVENT_CLEAVE:
+                me->CastSpell(me->GetVictim(), SKELETON_SPELL_CLEAVE);
+                events.RescheduleEvent(SKELETON_EVENT_CLEAVE, 5s, 10s);
+                break;
+            case SKELETON_EVENT_FIRE_NOVA:
+                me->CastCustomSpell(SKELETON_SPELL_FIRE_NOVA, SPELLVALUE_RADIUS_MOD, 5000, me->GetVictim());
+                events.RescheduleEvent(SKELETON_EVENT_FIRE_NOVA, 5s, 10s);
+                break;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_wanderer_skeletonAI(creature);
+    }
+};
+
 void AddSC_npcs_custom()
 {
     new npc_schody();
@@ -1539,4 +1789,7 @@ void AddSC_npcs_custom()
     new npc_arena_spectator();
     new npc_arena_spectator_leave();
     new CreatureAILoader<npc_custom_guild_bank_companion_AI>("npc_custom_guild_bank_companion");
+    new npc_wanderer();
+    new npc_wanderer_dalaranNPC();
+    new npc_wanderer_skeleton();
 }
