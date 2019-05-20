@@ -19,6 +19,8 @@
 #ifndef _OBJECTMGR_H
 #define _OBJECTMGR_H
 
+#include <atomic>
+
 #include "Log.h"
 #include "Object.h"
 #include "Bag.h"
@@ -1272,7 +1274,7 @@ class ObjectMgr
         uint32 _hiPetNumber; ACE_Thread_Mutex _hiPetNumberMutex;
 
         // first free low guid for selected guid type
-        uint32 _hiCharGuid; // pussywizard: accessed by a single thread
+        std::atomic<uint32> _hiCharGuid; // pussywizard: accessed by a single thread
         uint32 _hiCreatureGuid; ACE_Thread_Mutex _hiCreatureGuidMutex;
         uint32 _hiPetGuid; ACE_Thread_Mutex _hiPetGuidMutex;
         uint32 _hiVehicleGuid; ACE_Thread_Mutex _hiVehicleGuidMutex;

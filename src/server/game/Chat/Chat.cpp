@@ -228,6 +228,7 @@ void ChatHandler::PSendSysMessage(int32 entry, ...)
     const char *format = GetTrinityString(entry);
     va_list ap;
     char str [2048];
+    memset(str, '\0', 2048);
     va_start(ap, entry);
     vsnprintf(str, 2048, format, ap);
     va_end(ap);
@@ -238,6 +239,7 @@ void ChatHandler::PSendSysMessage(const char *format, ...)
 {
     va_list ap;
     char str [2048];
+    memset(str, '\0', 2048);
     va_start(ap, format);
     vsnprintf(str, 2048, format, ap);
     va_end(ap);
