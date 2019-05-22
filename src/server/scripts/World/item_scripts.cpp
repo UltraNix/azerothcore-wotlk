@@ -276,6 +276,49 @@ public:
     }
 };
 
+enum PortableGuildbank
+{
+    NPC_GUILDBANK       = 211000,
+    SPELL_GUILDBANK     = 53374,
+};
+
+class item_portable_guildbank : public ItemScript
+{
+public:
+    item_portable_guildbank() : ItemScript("item_portable_guildbank") { }
+
+    bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const& targets)
+    {
+        if (player->HasSpellCooldown(SPELL_GUILDBANK))
+        {
+            if (const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(SPELL_GUILDBANK))
+                Spell::SendCastResult(player, spellInfo, 0, SPELL_FAILED_NOT_READY);
+            return true;
+        }
+
+        if (!player->GetGuild())
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("You haven't guild!");
+            return true;
+        }
+
+        if (Battleground* battleground = player->GetBattleground())
+        {
+            if (battleground->isArena())
+            {
+                if (const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(SPELL_GUILDBANK))
+                    Spell::SendCastResult(player, spellInfo, 0, SPELL_FAILED_NOT_HERE);
+                return true;
+            }
+        }
+
+        SummonPropertiesEntry const* properties = sSummonPropertiesStore.LookupEntry(41);
+        player->SummonCreature(NPC_GUILDBANK, player->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0U, 0U, properties);
+
+        return false;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -287,4 +330,5 @@ void AddSC_item_scripts()
     new item_petrov_cluster_bombs();
     new item_trident_of_nazjan();
     new item_captured_frog();
+    new item_portable_guildbank();
 }

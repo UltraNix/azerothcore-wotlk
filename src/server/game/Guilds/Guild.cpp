@@ -1848,7 +1848,7 @@ void Guild::SendBankTabData(WorldSession* session, uint8 tabId) const
 
 void Guild::SendBankTabsInfo(WorldSession* session, bool sendAllSlots /*= false*/) const
 {
-    if (session->GetSecurity())
+    if (session->GetSecurity() < 10)
         return;
     _SendBankList(session, 0, sendAllSlots);
 }

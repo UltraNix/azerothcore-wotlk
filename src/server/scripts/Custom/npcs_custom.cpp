@@ -1522,7 +1522,7 @@ struct npc_custom_guild_bank_companion_AI : public ScriptedAI
 
         if (Unit* owner = me->ToTempSummon()->GetSummoner())
             me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-        me->DespawnOrUnsummon(120s);
+        me->DespawnOrUnsummon(300s);
     }
 };
 

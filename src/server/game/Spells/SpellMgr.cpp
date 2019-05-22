@@ -3660,6 +3660,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->ManaPerSecond = 0;
         });
 
+        // Test Whisper - Spell used for Portable Guildbank item
+        ApplySpellFix({ 53374 }, [](SpellInfo* spellInfo) {
+            spellInfo->RecoveryTime = 60 * MINUTE * IN_MILLISECONDS;
+            spellInfo->_requireCooldownInfo = true;
+        });
+
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
