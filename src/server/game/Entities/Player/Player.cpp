@@ -18694,6 +18694,7 @@ void Player::_LoadAuras(PreparedQueryResult result, uint32 timediff)
             int32 maxduration = fields[11].GetInt32();
             int32 remaintime = fields[12].GetInt32();
             uint8 remaincharges = fields[13].GetUInt8();
+            bool dontfadewhileoffline = false;
 
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellid);
             if (!spellInfo)
@@ -18710,12 +18711,36 @@ void Player::_LoadAuras(PreparedQueryResult result, uint32 timediff)
             }
 
             // negative effects should continue counting down after logout
-            if (remaintime != -1 && ((!spellInfo->IsPositive() && spellInfo->Id != 15007 && spellInfo->Id != 57724 && spellInfo->Id != 57723) || spellInfo->HasAttribute(SPELL_ATTR4_FADES_WHILE_LOGGED_OUT))) // Resurrection sickness & Sated/Exhaustion should not tick when logged off
+            if (remaintime != -1 && (!spellInfo->IsPositive() || spellInfo->HasAttribute(SPELL_ATTR4_FADES_WHILE_LOGGED_OUT)))
             {
-                if (remaintime/IN_MILLISECONDS <= int32(timediff))
-                    continue;
+                switch (spellInfo->Id)
+                {
+                    // Bloodlust
+                    case 57723:
+                    // Sated
+                    case 57724:
+                    // Resurrection Sickness
+                    case 15007:
+                    // Toshley's Station Transporter debuffs
+                    case 36900:
+                    case 36901:
+                    case 36895:
+                    case 36893:
+                    case 36897:
+                    case 36899:
+                    case 36940:
+                    case 23445:
+                        dontfadewhileoffline = true;
+                        break;
+                }
 
-                remaintime -= timediff*IN_MILLISECONDS;
+                if (!dontfadewhileoffline)
+                {
+                    if (remaintime / IN_MILLISECONDS <= int32(timediff))
+                        continue;
+
+                    remaintime -= timediff * IN_MILLISECONDS;
+                }
             }
 
             // prevent wrong values of remaincharges
