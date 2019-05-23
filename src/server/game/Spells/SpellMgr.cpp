@@ -4756,6 +4756,22 @@ void SpellMgr::LoadDbcDataCorrections()
         case 11129:
             spellInfo->Dispel = DISPEL_NONE;
             break;
+        // Arcane Missiles
+        case 5143:
+        case 5144:
+        case 5145:
+        case 8416:
+        case 8417:
+        case 10211:
+        case 10212:
+        case 25345:
+        case 27075:
+        case 38699:
+        case 38704:
+        case 42843:
+        case 42846:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            break;
         ////Arcane Missile mana cost (Master of Elements)
         //case 7268:
         //case 7269:
