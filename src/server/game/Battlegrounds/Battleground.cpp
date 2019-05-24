@@ -911,7 +911,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
 
                     winnerArenaTeam->MemberWon(player, loserMatchmakerRating, winnerMatchmakerChange);
 
-                    // The Wanderer’s Call: Blood and Sand
+                    // The Wanderer's Call: Blood and Sand
                     if (player->GetQuestStatus(30006) == QUEST_STATUS_INCOMPLETE)
                         player->KilledMonsterCredit(200002, 0);
                 }
@@ -1080,7 +1080,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                     break;
             }
 
-            // The Wanderer’s Call: Fight for Glory
+            // The Wanderer's Call: Fight for Glory
             if (!isArena())
             {
                 if (player->GetQuestStatus(30005) == QUEST_STATUS_INCOMPLETE)

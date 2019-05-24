@@ -1532,7 +1532,7 @@ struct WandererDalaranNPC
     uint32 entry;
 };
 
-const uint32 WANDERER_DALARAN_NPC_COUNT = 79;
+constexpr uint32 WANDERER_DALARAN_NPC_COUNT = 79;
 
 const WandererDalaranNPC wandererDalaranNPCs[WANDERER_DALARAN_NPC_COUNT] =
 {
