@@ -298,7 +298,7 @@ public:
 
         if (!player->GetGuild())
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("You haven't guild!");
+            ChatHandler(player->GetSession()).PSendSysMessage("You are not in a guild.");
             return true;
         }
 
