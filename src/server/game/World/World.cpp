@@ -3403,7 +3403,7 @@ void World::LoadGlobalPlayerDataStore()
             fields[6].GetUInt8(),           /*level*/
             mailCount,                      /*mail count*/
             0,                              /*guild id*/
-            AccountMgr::GetName(accountId)  /*account name*/);
+            /*AccountMgr::GetName(accountId)*/""  /*account name*/);
 
         ++count;
     }
