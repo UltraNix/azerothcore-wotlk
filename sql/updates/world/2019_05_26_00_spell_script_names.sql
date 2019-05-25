@@ -1,0 +1,4 @@
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (-588, 43338);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES 
+(-588, 'spell_pri_inner_fire'),
+(43338, 'spell_sha_shamanistic_focus');

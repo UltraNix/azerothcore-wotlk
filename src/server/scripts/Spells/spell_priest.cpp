@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -988,10 +988,35 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
         }
 };
 
+class spell_pri_inner_fire_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_pri_inner_fire_AuraScript);
+
+    void HandleProc(ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+
+        if (!eventInfo.GetDamageInfo()->GetSpellInfo() || !eventInfo.GetDamageInfo()->GetSpellInfo()->IsTargetingArea())
+        {
+            if (!GetAura()->IsProcOnCooldown())
+            {
+                GetAura()->AddProcCooldown(1);
+                DropCharge();
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnProc += AuraProcFn(spell_pri_inner_fire_AuraScript::HandleProc);
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     // Ours
     new spell_pri_shadowfiend_scaling();
+    new AuraScriptLoaderEx<spell_pri_inner_fire_AuraScript>("spell_pri_inner_fire");
 
     // Theirs
     new spell_pri_circle_of_healing();

@@ -2859,7 +2859,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         m_caster->CombatStart(effectUnit, !m_spellInfo->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO));
 
         if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_AURA_CC))
-            if (!effectUnit->IsStandState())
+            if (!effectUnit->IsStandState() && !m_spellInfo->HasAttribute(SPELL_ATTR0_CU_PICKPOCKET))
                 effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
