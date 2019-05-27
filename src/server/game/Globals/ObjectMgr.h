@@ -997,6 +997,7 @@ class ObjectMgr
         uint64 GenerateEquipmentSetGuid();
         uint32 GenerateMailID();
         uint32 GeneratePetNumber();
+        uint64 GenerateCharterGuid();
 
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         typedef std::pair<ExclusiveQuestGroups::const_iterator, ExclusiveQuestGroups::const_iterator> ExclusiveQuestGroupsBounds;
@@ -1283,6 +1284,7 @@ class ObjectMgr
         uint32 _hiDoGuid; ACE_Thread_Mutex _hiDoGuidMutex;
         uint32 _hiCorpseGuid; ACE_Thread_Mutex _hiCorpseGuidMutex;
         uint32 _hiMoTransGuid; ACE_Thread_Mutex _hiMoTransGuidMutex;
+        std::atomic<uint32> _hiCharterGuid;
 
         QuestMap _questTemplates;
         std::vector<Quest*> _questTemplatesFast; // pussywizard

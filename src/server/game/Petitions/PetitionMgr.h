@@ -12,7 +12,8 @@ typedef std::map<uint32, uint32> SignatureMap;
 
 struct Petition
 {
-    uint32 petitionGuid;
+    uint32 petitionItemGuid; // actual item, item_instance | inventory
+    uint32 petitionGuid; // per charter GUID
     uint32 ownerGuid;
     uint8  petitionType;
     std::string petitionName;
@@ -40,11 +41,12 @@ class PetitionMgr
         void LoadSignatures();
         
         // Petitions
-        void AddPetition(uint32 petitionId, uint32 ownerGuid, std::string const& name, uint8 type);
+        void AddPetition(uint32 petitionId, uint32 ownerGuid, std::string const& name, uint8 type, uint32 petitionGuid);
         void RemovePetition(uint32 petitionId);
         void RemovePetitionByOwnerAndType(uint32 ownerGuid, uint8 type);
         Petition const* GetPetition(uint32 petitionId) const;
         Petition const* GetPetitionByOwnerWithType(uint32 ownerGuid, uint8 type) const;
+        Petition const* GetPetitionByGuid(uint32 petitionGUID) const;
         PetitionContainer* GetPetitionStore() { return &PetitionStore; }
 
         // Signatures

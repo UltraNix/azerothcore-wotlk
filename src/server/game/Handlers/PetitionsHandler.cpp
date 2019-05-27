@@ -219,25 +219,28 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recvData)
 
     if (petition)
     {
-        trans->PAppend("DELETE FROM petition WHERE petitionguid = %u", petition->petitionGuid);
-        trans->PAppend("DELETE FROM petition_sign WHERE petitionguid = %u", petition->petitionGuid);
+        trans->PAppend("DELETE FROM petition WHERE petitionItemGuid = %u", petition->petitionItemGuid);
+        trans->PAppend("DELETE FROM petition_sign WHERE petitionguid = %u", petition->petitionItemGuid);
         // xinef: clear petition store
-        sPetitionMgr->RemovePetition(petition->petitionGuid);
+        //! delete by id (items low guid)
+        sPetitionMgr->RemovePetition(petition->petitionItemGuid);
     }
 
     // xinef: petition pointer is invalid from now on
 
+    uint32 petitionGUID = sObjectMgr->GenerateCharterGuid();
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PETITION);
     stmt->setUInt32(0, _player->GetGUIDLow());
     stmt->setUInt32(1, charter->GetGUIDLow());
     stmt->setString(2, name);
     stmt->setUInt8(3, uint8(type));
+    stmt->setUInt32(4, petitionGUID);
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
 
     // xinef: fill petition store
-    sPetitionMgr->AddPetition(charter->GetGUIDLow(), _player->GetGUIDLow(), name, uint8(type));
+    sPetitionMgr->AddPetition(charter->GetGUIDLow(), _player->GetGUIDLow(), name, uint8(type), petitionGUID);
 }
 
 void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
@@ -268,7 +271,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+1+signs*12));
     data << uint64(petitionguid);                           // petition guid
     data << uint64(_player->GetGUID());                     // owner guid
-    data << uint32(petitionGuidLow);                        // guild guid
+    data << uint32(petition->petitionGuid);                        // guild guid
     data << uint8(signs);                                   // sign's count
 
     if (signs)
@@ -305,7 +308,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
 
     uint8 type = petition->petitionType;
     WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+petition->petitionName.size()+1+1+4*12+2+10));
-    data << uint32(GUID_LOPART(petitionguid));              // guild/team guid (in Trinity always same as GUID_LOPART(petition guid)
+    data << uint32(petition->petitionGuid);              // guild/team guid (in Trinity always same as GUID_LOPART(petition guid)
     data << MAKE_NEW_GUID(petition->ownerGuid, 0, HIGHGUID_PLAYER);    // charter owner guid
     data << petition->petitionName;                                    // name (guild/arena team)
     data << uint8(0);                                                  // some string
@@ -351,16 +354,16 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recvData)
     recvData >> petitionGuid;                              // guid
     recvData >> newName;                                   // new name
 
-    ItemRef item = _player->GetItemByGuid(petitionGuid);
-    if (!item)
-        return;
-
-    Petition const* petition = sPetitionMgr->GetPetition(GUID_LOPART(petitionGuid));
+    Petition const* petition = sPetitionMgr->GetPetitionByGuid(petition->petitionGuid);
     if (!petition)
     {
         sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_PETITION_QUERY failed for petition (GUID: %u)", GUID_LOPART(petitionGuid));
         return;
     }
+
+    ItemRef item = _player->GetItemByLowGuid(petition->petitionItemGuid);
+    if (!item)
+        return;
 
     if (petition->petitionType == GUILD_CHARTER_TYPE)
     {
@@ -430,7 +433,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
     if (petition->ownerGuid == playerGuid)
         return;
 
-    Signatures const* signatures = sPetitionMgr->GetSignature(GUID_LOPART(petitionGuid));
+    Signatures const* signatures = sPetitionMgr->GetSignature(petition->petitionItemGuid);
     if (!signatures)
         return;
 
@@ -501,7 +504,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
     if (found)
     {
         WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
-        data << uint64(petitionGuid);
+        data << uint64(petition->petitionGuid);
         data << uint64(_player->GetGUID());
         data << (uint32)PETITION_SIGN_ALREADY_SIGNED;
 
@@ -517,19 +520,19 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PETITION_SIGNATURE);
 
     stmt->setUInt32(0, GUID_LOPART(ownerGuid));
-    stmt->setUInt32(1, GUID_LOPART(petitionGuid));
+    stmt->setUInt32(1, uint32(petition->petitionItemGuid));
     stmt->setUInt32(2, playerGuid);
     stmt->setUInt32(3, GetAccountId());
 
     CharacterDatabase.Execute(stmt);
 
     // xinef: fill petition store
-    sPetitionMgr->AddSignature(GUID_LOPART(petitionGuid), GetAccountId(), playerGuid);
+    sPetitionMgr->AddSignature(uint32(petition->petitionItemGuid), GetAccountId(), playerGuid);
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)", GUID_LOPART(petitionGuid), _player->GetName().c_str(), playerGuid, GetAccountId());
 
     WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
-    data << uint64(petitionGuid);
+    data << uint64(petition->petitionGuid);
     data << uint64(_player->GetGUID());
     data << uint32(PETITION_SIGN_OK);
 
@@ -643,7 +646,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recvData)
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+signs+signs*12));
     data << uint64(petitionguid);                           // petition guid
     data << uint64(_player->GetGUID());                     // owner guid
-    data << uint32(GUID_LOPART(petitionguid));              // guild guid
+    data << uint32(petition->petitionGuid);                 // guild guid
     data << uint8(signs);                                   // sign's count
 
     if (signs)

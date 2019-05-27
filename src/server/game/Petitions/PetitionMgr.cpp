@@ -20,7 +20,7 @@ void PetitionMgr::LoadPetitions()
     uint32 oldMSTime = getMSTime();
     PetitionStore.clear();
 
-    QueryResult result = CharacterDatabase.Query("SELECT ownerguid, petitionguid, name, type FROM petition");
+    QueryResult result = CharacterDatabase.Query("SELECT ownerguid, petitionItemGuid, name, type, petitionGUID FROM petition");
     if (!result)
     {
         sLog->outString(">>  Loaded 0 Petitions!");
@@ -32,7 +32,7 @@ void PetitionMgr::LoadPetitions()
     do
     {
         Field* fields = result->Fetch();
-        AddPetition(fields[1].GetUInt32(), fields[0].GetUInt32(), fields[2].GetString(), fields[3].GetUInt8());
+        AddPetition(fields[1].GetUInt32(), fields[0].GetUInt32(), fields[2].GetString(), fields[3].GetUInt8(), fields[4].GetUInt32());
         ++count;
     } while (result->NextRow());
 
@@ -65,10 +65,11 @@ void PetitionMgr::LoadSignatures()
     sLog->outString();
 }
 
-void PetitionMgr::AddPetition(uint32 petitionId, uint32 ownerGuid, std::string const& name, uint8 type)
+void PetitionMgr::AddPetition(uint32 petitionId, uint32 ownerGuid, std::string const& name, uint8 type, uint32 petitionGuid)
 {
     Petition& p = PetitionStore[petitionId];
-    p.petitionGuid = petitionId;
+    p.petitionItemGuid = petitionId;
+    p.petitionGuid = petitionGuid;
     p.ownerGuid = ownerGuid;
     p.petitionName = name;
     p.petitionType = type;
@@ -106,7 +107,8 @@ Petition const* PetitionMgr::GetPetition(uint32 petitionId) const
     PetitionContainer::const_iterator itr = PetitionStore.find(petitionId);
     if (itr != PetitionStore.end())
         return &itr->second;
-    return NULL;
+
+    return nullptr;
 }
 
 Petition const* PetitionMgr::GetPetitionByOwnerWithType(uint32 ownerGuid, uint8 type) const
@@ -115,7 +117,16 @@ Petition const* PetitionMgr::GetPetitionByOwnerWithType(uint32 ownerGuid, uint8 
         if (itr->second.ownerGuid == ownerGuid && itr->second.petitionType == type)
             return &itr->second;
 
-    return NULL;
+    return nullptr;
+}
+
+Petition const* PetitionMgr::GetPetitionByGuid(uint32 petitionGUID) const
+{
+    for (PetitionContainer::const_iterator itr = PetitionStore.begin(); itr != PetitionStore.end(); ++itr)
+        if (itr->second.petitionGuid == petitionGUID)
+            return &itr->second;
+
+    return nullptr;
 }
 
 void PetitionMgr::AddSignature(uint32 petitionId, uint32 accountId, uint32 playerGuid)
