@@ -1555,7 +1555,7 @@ enum WandererData
     WANDERER_EVENT_SAY              = 5,
 
     WANDERER_SPELL_FIRE             = 39199,
-    WANDERER_SPELL_FEIGN_DEATH      = 74490,
+    WANDERER_SPELL_FEIGN_DEATH      = 71598,
 
     WANDERER_GOSSIP_HELLO           = 1110000,
 
