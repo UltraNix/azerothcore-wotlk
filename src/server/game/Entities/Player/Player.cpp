@@ -21849,29 +21849,24 @@ void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 
 void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
 {
-    SignatureContainer* signatureStore = sPetitionMgr->GetSignatureStore();
     uint32 playerGuid = GUID_LOPART(guid);
 
-    for (SignatureContainer::iterator itr = signatureStore->begin(); itr != signatureStore->end(); ++itr)
+    auto petitions = sPetitionMgr->GetSignedPetitionsForPlayer( playerGuid );
+    for (uint32 petitionId : petitions)
     {
-        SignatureMap::iterator signItr = itr->second.signatureMap.find(playerGuid);
-        if (signItr != itr->second.signatureMap.end())
-        {
-            Petition const* petition = sPetitionMgr->GetPetition(itr->first);
-            if (!petition || (type != 10 && type != petition->petitionType))
-                continue;
+        Petition const* petition = sPetitionMgr->GetPetitionById(petitionId);
+        if (!petition || (type != 10 && type != petition->petitionType))
+            continue;
 
-            // erase this
-            itr->second.signatureMap.erase(signItr);
+        if ( !sPetitionMgr->RemoveSignature(petitionId, playerGuid) )
+            continue;
 
-            uint64 ownerguid   = MAKE_NEW_GUID(petition->ownerGuid, 0, HIGHGUID_PLAYER);
-            uint64 petitionguid = MAKE_NEW_GUID(petition->petitionGuid, 0, HIGHGUID_ITEM);
+        uint64 ownerguid   = MAKE_NEW_GUID(petition->ownerGuid, 0, HIGHGUID_PLAYER);
 
-            // send update if charter owner in game
-            Player* owner = ObjectAccessor::FindPlayerInOrOutOfWorld(ownerguid);
-            if (owner)
-                owner->GetSession()->SendPetitionQueryOpcode(petitionguid);
-        }
+        // send update if charter owner in game
+        Player* owner = ObjectAccessor::FindPlayerInOrOutOfWorld(ownerguid);
+        if (owner)
+            owner->GetSession()->SendPetitionQueryOpcode(petition->petitionId);
     }
 
     if (type == 10)
