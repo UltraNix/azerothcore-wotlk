@@ -10843,7 +10843,55 @@ ItemRef Player::GetItemByGuid(uint64 guid) const
             }
     }
 
-    return NULL;
+    return nullptr;
+}
+
+ItemRef Player::GetItemByLowGuid(uint32 guid) const
+{
+    for (uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        if (ItemRef pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUIDLow() == guid)
+                return pItem;
+    }
+
+    for (uint8 i = KEYRING_SLOT_START; i < CURRENCYTOKEN_SLOT_END; ++i)
+    {
+        if (ItemRef pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUIDLow() == guid)
+                return pItem;
+    }
+
+    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
+    {
+        if (ItemRef pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            if (pItem->GetGUIDLow() == guid)
+                return pItem;
+    }
+
+    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = GetBagByPos(i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (ItemRef pItem = pBag->GetItemByPos(j))
+                    if (pItem->GetGUIDLow() == guid)
+                        return pItem;
+            }
+    }
+
+    for (uint8 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+    {
+        if (Bag* pBag = GetBagByPos(i))
+            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
+            {
+                if (ItemRef pItem = pBag->GetItemByPos(j))
+                    if (pItem->GetGUIDLow() == guid)
+                        return pItem;
+            }
+    }
+
+    return nullptr;
 }
 
 ItemRef Player::GetItemByPos(uint16 pos) const
@@ -21801,29 +21849,24 @@ void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 
 void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
 {
-    SignatureContainer* signatureStore = sPetitionMgr->GetSignatureStore();
     uint32 playerGuid = GUID_LOPART(guid);
 
-    for (SignatureContainer::iterator itr = signatureStore->begin(); itr != signatureStore->end(); ++itr)
+    auto petitions = sPetitionMgr->GetSignedPetitionsForPlayer( playerGuid );
+    for (uint32 petitionId : petitions)
     {
-        SignatureMap::iterator signItr = itr->second.signatureMap.find(playerGuid);
-        if (signItr != itr->second.signatureMap.end())
-        {
-            Petition const* petition = sPetitionMgr->GetPetition(itr->first);
-            if (!petition || (type != 10 && type != petition->petitionType))
-                continue;
+        Petition const* petition = sPetitionMgr->GetPetitionById(petitionId);
+        if (!petition || (type != 10 && type != petition->petitionType))
+            continue;
 
-            // erase this
-            itr->second.signatureMap.erase(signItr);
+        if ( !sPetitionMgr->RemoveSignature(petitionId, playerGuid) )
+            continue;
 
-            uint64 ownerguid   = MAKE_NEW_GUID(petition->ownerGuid, 0, HIGHGUID_PLAYER);
-            uint64 petitionguid = MAKE_NEW_GUID(petition->petitionGuid, 0, HIGHGUID_ITEM);
+        uint64 ownerguid   = MAKE_NEW_GUID(petition->ownerGuid, 0, HIGHGUID_PLAYER);
 
-            // send update if charter owner in game
-            Player* owner = ObjectAccessor::FindPlayerInOrOutOfWorld(ownerguid);
-            if (owner)
-                owner->GetSession()->SendPetitionQueryOpcode(petitionguid);
-        }
+        // send update if charter owner in game
+        Player* owner = ObjectAccessor::FindPlayerInOrOutOfWorld(ownerguid);
+        if (owner)
+            owner->GetSession()->SendPetitionQueryOpcode(petition->petitionId);
     }
 
     if (type == 10)

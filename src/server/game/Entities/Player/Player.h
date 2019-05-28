@@ -1304,6 +1304,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) const;
         uint32 GetItemCount(uint32 item, bool inBankAlso = false, ItemRef const& skipItem = NULL) const;
         uint32 GetItemCountWithLimitCategory(uint32 limitCategory, ItemRef const& skipItem = NULL) const;
+        ItemRef GetItemByLowGuid(uint32 lowGuid) const;
         ItemRef GetItemByGuid(uint64 guid) const;
         ItemRef GetItemByEntry(uint32 entry) const;
         ItemRef GetItemByPos(uint16 pos) const;
