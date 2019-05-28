@@ -217,7 +217,7 @@ void PetitionMgr::RemoveSignaturesByPlayerAndType(uint32 playerGuid, uint8 type)
     for ( uint32 petitionId : petitions )
     {
         Petition* petition = GetPetitionById( petitionId );
-        if ( petition->petitionType != type )
+        if (!petition || petition->petitionType != type )
             continue;
 
         RemoveSignature( petitionId, playerGuid );

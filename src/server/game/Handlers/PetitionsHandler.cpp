@@ -267,7 +267,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recvData)
     data << uint64(petitionguid);                                       // petition guid
     data << uint64(_player->GetGUID());                                 // owner guid
     data << uint32(petition->petitionId);                               // guild guid
-    data << uint8(signatures.size());                                   // sign's count
+    data << uint8(signs);                                               // sign's count
 
     for ( const Signature & signature : signatures )
     {
@@ -289,7 +289,10 @@ void WorldSession::HandlePetitionQueryOpcode(WorldPacket & recvData)
 
     Petition const* petition = sPetitionMgr->GetPetitionByItemGuid( petitionguid );
     if ( !petition )
+    {
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_PETITION_QUERY requested by %s and petition(GUID: %u LoGUID: %u) doesn't exist", GetPlayer()->GetName().c_str(), petitionguid, GUID_LOPART(petitionguid));
         return;
+    }
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_PETITION_QUERY Petition GUID %u Guild GUID %u", petition->petitionId, guildguid);
 
@@ -483,7 +486,13 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
 
     uint32 signs = signatures.size();
     if (++signs > type)                                        // client signs maximum
+    {
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_PETITION_SIGN failed, signs count exceeds maximum possible signs for this charter. Petition GUID: %u, Petition low GUID: %u, Petition owner: %s"
+            " signing player: %s",
+            petitionGuid, GUID_LOPART(petitionGuid), GetPlayer()->GetName().c_str(), _player->GetName().c_str());
+
         return;
+    }
 
     // Client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
     // not allow sign another player from already sign player account
@@ -495,7 +504,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
     if (found)
     {
         WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
-        data << uint64(petition->petitionId);
+        data << uint64(petitionGuid);
         data << uint64(_player->GetGUID());
         data << (uint32)PETITION_SIGN_ALREADY_SIGNED;
 
@@ -528,11 +537,6 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
 
     // close at signer side
     SendPacket(&data);
-
-    // update signs count on charter, required testing...
-    //Item* item = _player->GetItemByGuid(petitionguid));
-    //if (item)
-    //    item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT_1_1+1, signs);
 
     // update for owner if online
     if (Player* owner = ObjectAccessor::FindPlayerInOrOutOfWorld(ownerGuid))
@@ -575,11 +579,17 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recvData)
 
     player = ObjectAccessor::FindPlayerInOrOutOfWorld(plguid);
     if (!player)
+    {
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_OFFER_PETITION called by player %s failed because target is not in world.", GetPlayer()->GetName().c_str());
         return;
+    }
 
     Petition const* petition = sPetitionMgr->GetPetitionByItemGuid(petitionguid);
     if (!petition)
+    {
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "CMSG_OFFER_PETITION failed, petition doesnt exist in petition cache, GUID: %u , LowGuid: %u", petitionguid, GUID_LOPART(petitionguid));
         return;
+    }
 
     if (GetPlayer()->GetTeamId() != player->GetTeamId())
     {
