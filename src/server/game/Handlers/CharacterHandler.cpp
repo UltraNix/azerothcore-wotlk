@@ -1113,6 +1113,8 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
     if (pCurrChar->IsGameMaster())
         SendNotification(LANG_GM_ON);
 
+    pCurrChar->SendPremiumInfo();
+
     // show auto invite only for players above level 1 (players with level 1st has auto join at Player::GiveXP())
     if (pCurrChar->getLevel() > 1)
         pCurrChar->SendAutoJoin();
@@ -1332,6 +1334,8 @@ void WorldSession::HandlePlayerLoginToCharInWorld(Player* pCurrChar)
 
     if (pCurrChar->IsGameMaster())
         SendNotification(LANG_GM_ON);
+
+    pCurrChar->SendPremiumInfo();
 
     m_playerLoading = false;
 }

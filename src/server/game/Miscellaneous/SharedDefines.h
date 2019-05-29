@@ -3399,24 +3399,24 @@ enum ServiceType
     SERVICE_TELEPORT_INPUT              = 6, // To allow input from command
 };
 
-#define SERVICE_TYPE_COUNT 7
-
-// Premium services
-inline const char* PremiumName(ServiceType serviceId)
-{
-    switch (serviceId)
-    {
-        case 0: return "Teleportation";
-        case 1: return "Down with the Sickness";
-        case 2: return "Experience Boost";
-        case 3: return "Unbreakable Equipment";
-        case 4: return "Instant Taxi";
-        case 5: return "Experience Boost";
-        case 6: return "Teleportation by command";
-        default:
-            return "Unknown";
-    }
-}
+//#define SERVICE_TYPE_COUNT 7
+//
+//// Premium services
+//inline const char* PremiumName(ServiceType serviceId)
+//{
+//    switch (serviceId)
+//    {
+//        case 0: return "Teleportation";
+//        case 1: return "Down with the Sickness";
+//        case 2: return "Experience Boost";
+//        case 3: return "Unbreakable Equipment";
+//        case 4: return "Instant Taxi";
+//        case 5: return "Experience Boost";
+//        case 6: return "Teleportation by command";
+//        default:
+//            return "Unknown";
+//    }
+//}
 
 // indexes of BattlemasterList.dbc
 enum BattlegroundTypeId

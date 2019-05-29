@@ -602,19 +602,19 @@ void World::LoadConfigSettings(bool reload)
         rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
     }
 
-    rate_values[RATE_PREMIUM_XP_BOOST_RATE] = sConfigMgr->GetFloatDefault("Premium.Rate.XP", 3.0f);
-    if (rate_values[RATE_PREMIUM_XP_BOOST_RATE] < 0.0f)
-    {
-        sLog->outError("Premium.Rate.XP (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_PREMIUM_XP_BOOST_RATE]);
-        rate_values[RATE_PREMIUM_XP_BOOST_RATE] = 0.0f;
-    }
+    //rate_values[RATE_PREMIUM_XP_BOOST_RATE] = sConfigMgr->GetFloatDefault("Premium.Rate.XP", 3.0f);
+    //if (rate_values[RATE_PREMIUM_XP_BOOST_RATE] < 0.0f)
+    //{
+    //    sLog->outError("Premium.Rate.XP (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_PREMIUM_XP_BOOST_RATE]);
+    //    rate_values[RATE_PREMIUM_XP_BOOST_RATE] = 0.0f;
+    //}
 
-    rate_values[RATE_PREMIUM_XP_BOOST_RATE2] = sConfigMgr->GetFloatDefault("Premium.Rate.XP2", 4.0f);
-    if (rate_values[RATE_PREMIUM_XP_BOOST_RATE2] < 0.0f)
-    {
-        sLog->outError("Premium.Rate.XP2 (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_PREMIUM_XP_BOOST_RATE2]);
-        rate_values[RATE_PREMIUM_XP_BOOST_RATE2] = 0.0f;
-    }
+    //rate_values[RATE_PREMIUM_XP_BOOST_RATE2] = sConfigMgr->GetFloatDefault("Premium.Rate.XP2", 4.0f);
+    //if (rate_values[RATE_PREMIUM_XP_BOOST_RATE2] < 0.0f)
+    //{
+    //    sLog->outError("Premium.Rate.XP2 (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_PREMIUM_XP_BOOST_RATE2]);
+    //    rate_values[RATE_PREMIUM_XP_BOOST_RATE2] = 0.0f;
+    //}
 
     ///- Read other configuration items from the config file
 
@@ -1415,9 +1415,9 @@ void World::LoadConfigSettings(bool reload)
     m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ] = sConfigMgr->GetFloatDefault( "Movement.FollowMaxPathLength", 60.0f );
 
     m_bool_configs[CONFIG_EXTERNAL_MAIL] = sConfigMgr->GetBoolDefault("Mail.External", false);
-    m_bool_configs[CONFIG_PREMIUM_SERVICES] = sConfigMgr->GetBoolDefault("Premium.Enabled", true);
+    //m_bool_configs[CONFIG_PREMIUM_SERVICES] = sConfigMgr->GetBoolDefault("Premium.Enabled", true);
     m_int_configs[CONFIG_EXTERNAL_MAIL_INTERVAL] = sConfigMgr->GetIntDefault("Mail.ExternalInterval", 1);
-    m_int_configs[CONFIG_PREMIUM_SERVICES_UPDATE_INTERVAL] = sConfigMgr->GetIntDefault("Premium.UpdateInterval", 1);
+    //m_int_configs[CONFIG_PREMIUM_SERVICES_UPDATE_INTERVAL] = sConfigMgr->GetIntDefault("Premium.UpdateInterval", 1);
 
     Movement::FollowMovementGenerator::FOLLOW_UPDATE_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ];
     Movement::FollowMovementGenerator::FOLLOW_START_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ];

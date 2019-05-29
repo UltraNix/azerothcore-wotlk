@@ -127,6 +127,18 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
+enum PremiumServiceTypes
+{
+    PREMIUM_TELEPORT                    = 0,
+    PREMIUM_NO_RESSURECTION_SICKNESS    = 1,
+    PREMIUM_EXP_BOOST                   = 2,
+    PREMIUM_NO_DURABILITY_LOSS          = 3,
+    PREMIUM_INSTANT_FLIGHT_PATHS        = 4,
+    PREMIUM_EXP_BOOST_X4                = 5
+};
+
+#define MAX_PREMIUM_SERVICES            6
+
 //class to deal with packet processing
 //allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -207,7 +219,8 @@ struct PacketCounter
 class WorldSession
 {
     public:
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue);
+        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue,
+            time_t premium_services[MAX_PREMIUM_SERVICES]);
         ~WorldSession();
 
         bool PlayerLoading() const { return m_playerLoading; }
@@ -245,11 +258,11 @@ class WorldSession
         void SetPlayer(Player* player);
         uint8 Expansion() const { return m_expansion; }
 
-        bool HasActiveService(ServiceType serviceType);
+       /* bool HasActiveService(ServiceType serviceType);
         const PremiumService& GetService(ServiceType serviceType);
 
         void SetPremiumDebug(bool debug);
-        bool HasPremiumDebug();
+        bool HasPremiumDebug();*/
 
         void InitWarden(BigNumber* k, std::string const& os);
 
@@ -361,9 +374,9 @@ class WorldSession
 
         // External Mail
         void SendExternalMails();
-        void UpdatePremiumServices();
+        //void UpdatePremiumServices();
         TimeTrackerSmall _mailSendTimer;
-        TimeTrackerSmall _premiumCheckTimer;
+        //TimeTrackerSmall _premiumCheckTimer;
 
         // Account mute time
         time_t m_muteTime;
@@ -409,6 +422,14 @@ class WorldSession
         // Recruit-A-Friend Handling
         uint32 GetRecruiterId() const { return recruiterId; }
         bool IsARecruiter() const { return isRecruiter; }
+
+        // Premium services
+        time_t* GetPremiumServices() { return _premiumServices; }
+        time_t GetPremiumService(PremiumServiceTypes serviceId) { return _premiumServices[serviceId]; }
+        bool IsPremiumServiceActive(PremiumServiceTypes serviceId) const
+        {
+            return _premiumServices[serviceId] > time(nullptr);
+        }
 
         bool hasVPNconnection() const { return _vpnActive;  }
         void setVPNconnection(bool isVPNconnection) { _vpnActive = isVPNconnection; }
@@ -952,6 +973,8 @@ class WorldSession
         void SetShouldSetOfflineInDB(bool val) { _shouldSetOfflineInDB = val; }
         bool GetShouldSetOfflineInDB() const { return _shouldSetOfflineInDB; }
 
+        // Premium services
+        time_t _premiumServices[MAX_PREMIUM_SERVICES];
     /***
     CALLBACKS
     ***/
@@ -1075,8 +1098,8 @@ class WorldSession
         bool _kicked;
         bool _shouldSetOfflineInDB;
         bool _vpnActive;
-        PremiumService m_premiumServices[SERVICE_TYPE_COUNT];
-        time_t m_premiumDebug = 0;
+        //PremiumService m_premiumServices[SERVICE_TYPE_COUNT];
+        //time_t m_premiumDebug = 0;
 };
 #endif
 /// @}
