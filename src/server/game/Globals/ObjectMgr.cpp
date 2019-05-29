@@ -2343,7 +2343,7 @@ void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data
 uint64 ObjectMgr::GetPlayerGUIDByName(std::string const& name) const
 {
     // Get data from global storage
-    if (uint32 guidLow = sWorld->GetGlobalPlayerGUID(name))
+    if (uint32 guidLow = sGlobalPlayerStore.GetGUID(name))
         return MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
     return 0;
 }
@@ -2351,7 +2351,7 @@ uint64 ObjectMgr::GetPlayerGUIDByName(std::string const& name) const
 bool ObjectMgr::GetPlayerNameByGUID(uint64 guid, std::string &name) const
 {
     // Get data from global storage
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid)))
     {
         name = playerData->name;
         return true;
@@ -2363,7 +2363,7 @@ bool ObjectMgr::GetPlayerNameByGUID(uint64 guid, std::string &name) const
 TeamId ObjectMgr::GetPlayerTeamIdByGUID(uint64 guid) const
 {
     // xinef: Get data from global storage
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid)))
         return Player::TeamIdForRace(playerData->race);
 
     return TEAM_NEUTRAL;
@@ -2372,7 +2372,7 @@ TeamId ObjectMgr::GetPlayerTeamIdByGUID(uint64 guid) const
 uint32 ObjectMgr::GetPlayerAccountIdByGUID(uint64 guid) const
 {
     // xinef: Get data from global storage
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid)))
         return playerData->accountId;
 
     return 0;
@@ -2381,8 +2381,8 @@ uint32 ObjectMgr::GetPlayerAccountIdByGUID(uint64 guid) const
 uint32 ObjectMgr::GetPlayerAccountIdByPlayerName(const std::string& name) const
 {
     // Get data from global storage
-    if (uint32 guidLow = sWorld->GetGlobalPlayerGUID(name))
-        if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guidLow))
+    if (uint32 guidLow = sGlobalPlayerStore.GetGUID(name))
+        if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guidLow))
             return playerData->accountId;
 
     return 0;
@@ -5732,8 +5732,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 }
 
                 // xinef: update global data
-                sWorld->UpdateGlobalPlayerMails(m->sender, 1);
-                sWorld->UpdateGlobalPlayerMails(m->receiver, -1);
+                sGlobalPlayerStore.UpdateMails(m->sender, 1);
+                sGlobalPlayerStore.UpdateMails(m->receiver, -1);
 
                 delete m;
                 ++returnedCount;
@@ -5742,7 +5742,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         }
 
         // xinef: update global data
-        sWorld->UpdateGlobalPlayerMails(m->receiver, -1);
+        sGlobalPlayerStore.UpdateMails(m->receiver, -1);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_BY_ID);
         stmt->setUInt32(0, m->messageID);

@@ -519,11 +519,11 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: %s asked to add friend : '%s'", GetPlayer()->GetName().c_str(), friendName.c_str());
 
     // xinef: Get Data From global storage
-    uint32 guidLow = sWorld->GetGlobalPlayerGUID(friendName);
+    uint32 guidLow = sGlobalPlayerStore.GetGUID(friendName);
     if (!guidLow)
         return;
 
-    GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guidLow);
+    GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guidLow);
     if (!playerData)
         return;
 
@@ -593,7 +593,7 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket & recv_data)
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName().c_str(), ignoreName.c_str());
 
-    uint32 lowGuid = sWorld->GetGlobalPlayerGUID(ignoreName);
+    uint32 lowGuid = sGlobalPlayerStore.GetGUID(ignoreName);
     if (!lowGuid)
         return;
 

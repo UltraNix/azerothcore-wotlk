@@ -65,6 +65,8 @@
 #include "ArenaSpectator.h"
 #include "DynamicVisibility.h"
 #include <math.h>
+#include "Cache/GlobalPlayerData.h"
+#include "Cache/GlobalPlayerStore.h"
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
 {
@@ -14399,7 +14401,7 @@ void Unit::SetLevel(uint8 lvl, bool showLevelChange)
 
     // xinef: update global data
     if (GetTypeId() == TYPEID_PLAYER)
-        sWorld->UpdateGlobalPlayerData(ToPlayer()->GetGUIDLow(), PLAYER_UPDATE_DATA_LEVEL, "", lvl);
+        sGlobalPlayerStore.UpdateData(ToPlayer()->GetGUIDLow(), PLAYER_UPDATE_DATA_LEVEL, "", lvl);
 }
 
 void Unit::SetHealth(uint32 val)

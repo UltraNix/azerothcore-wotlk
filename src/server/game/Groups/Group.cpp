@@ -236,7 +236,7 @@ void Group::LoadMemberFromDB(uint32 guidLow, uint8 memberFlags, uint8 subgroup, 
 
     m_memberSlots.push_back(member);
     if (!isBGGroup() && !isBFGroup())
-        sWorld->UpdateGlobalPlayerGroup(guidLow, GetLowGUID());
+        sGlobalPlayerStore.UpdateGroup(guidLow, GetLowGUID());
 
     SubGroupCounterIncrease(subgroup);
 
@@ -508,7 +508,7 @@ bool Group::AddMember(Player* player)
     member.roles     = 0;
     m_memberSlots.push_back(member);
     if (!isBGGroup() && !isBFGroup())
-        sWorld->UpdateGlobalPlayerGroup(player->GetGUIDLow(), GetLowGUID());
+        sGlobalPlayerStore.UpdateGroup(player->GetGUIDLow(), GetLowGUID());
 
     SubGroupCounterIncrease(subGroup);
 
@@ -734,7 +734,7 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod &method /*= GROUP_REMOV
             SubGroupCounterDecrease(slot->group);
             m_memberSlots.erase(slot);
             if (!isBGGroup() && !isBFGroup())
-                sWorld->UpdateGlobalPlayerGroup(GUID_LOPART(guid), 0);
+                sGlobalPlayerStore.UpdateGroup(GUID_LOPART(guid), 0);
         }
 
         // Reevaluate group enchanter if the leaving player had enchanting skill or the player is offline
@@ -850,7 +850,7 @@ void Group::Disband(bool hideDestroy /* = false */)
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         if (!isBGGroup() && !isBFGroup())
-            sWorld->UpdateGlobalPlayerGroup(GUID_LOPART(citr->guid), 0);
+            sGlobalPlayerStore.UpdateGroup(GUID_LOPART(citr->guid), 0);
 
         player = ObjectAccessor::FindPlayerInOrOutOfWorld(citr->guid);
 

@@ -160,13 +160,13 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransa
             .SendMailTo(trans, MailReceiver(owner, auction->owner), auction, MAIL_CHECK_MASK_COPIED, sWorld->getIntConfig(CONFIG_MAIL_DELIVERY_DELAY));
 
         if (auction->bid >= 500*GOLD)
-            if (const GlobalPlayerData* gpd = sWorld->GetGlobalPlayerData(auction->bidder))
+            if (const GlobalPlayerData* gpd = sGlobalPlayerStore.GetData(auction->bidder))
             {
                 uint64 bidder_guid = MAKE_NEW_GUID(auction->bidder, 0, HIGHGUID_PLAYER);
                 Player* bidder = ObjectAccessor::FindPlayerInOrOutOfWorld(bidder_guid);
                 std::string owner_name = "";
                 uint8 owner_level = 0;
-                if (const GlobalPlayerData* gpd_owner = sWorld->GetGlobalPlayerData(auction->owner))
+                if (const GlobalPlayerData* gpd_owner = sGlobalPlayerStore.GetData(auction->owner))
                 {
                     owner_name = gpd_owner->name;
                     owner_level = gpd_owner->level;

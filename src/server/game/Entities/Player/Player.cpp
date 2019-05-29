@@ -547,13 +547,13 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
         { // Heirloom and premium stuff.
             uint8 division = 0;
             bool recruitAFriend = player->GetsRecruitAFriendBonus(true);
-            bool premiumBonus = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
-            bool premiumBonusX4 = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+            bool premiumBonus = player->GetSession()->HasActiveService(SERVICE_EXP_BOOST);
+            bool premiumBonusX4 = player->GetSession()->HasActiveService(SERVICE_EXP_BOOST_X4);
             bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
             int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-            if (premiumBonusX4)    division = 3;
-            else if (premiumBonus) division = 2;
+            if (premiumBonusX4)    division = sWorld->getRate(RATE_PREMIUM_XP_BOOST_RATE2);
+            else if (premiumBonus) division = sWorld->getRate(RATE_PREMIUM_XP_BOOST_RATE);
             else if (recruitAFriend) division = 2;
             else if (eventBonus)   division = eventMultipler;
 
@@ -3303,8 +3303,10 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
 
     uint32 bonus_xp = 0;
     bool recruitAFriend = GetsRecruitAFriendBonus(true);
-    bool premiumBonus = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
-    bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+    bool premiumBonus = GetSession()->HasActiveService(SERVICE_EXP_BOOST);
+    bool premiumBonusX4 = GetSession()->HasActiveService(SERVICE_EXP_BOOST_X4);
+    float premiumBonusRate = sWorld->getRate(RATE_PREMIUM_XP_BOOST_RATE);
+    float premiumBonusRatex4 = sWorld->getRate(RATE_PREMIUM_XP_BOOST_RATE2);
     bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
     int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
@@ -3312,9 +3314,9 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
 
     // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
     if (premiumBonusX4 && !IsBlizzlike)
-        bonus_xp = (bgExtra ? 1.5 : 3) * xp + (victim ? GetXPRestBonus(xp) : 0);
+        bonus_xp = (bgExtra ? 1.5 : premiumBonusRatex4) * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (premiumBonus && !IsBlizzlike)
-        bonus_xp = (bgExtra ? 1.5 : 2) * xp + (victim ? GetXPRestBonus(xp) : 0);
+        bonus_xp = (bgExtra ? 1.5 : premiumBonusRate) * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (eventBonus && !IsBlizzlike)
         bonus_xp = (bgExtra ? 1.5 : eventMultipler) * xp + (victim ? GetXPRestBonus(xp) : 0);
     else if (recruitAFriend && !IsBlizzlike)
@@ -5370,7 +5372,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 
     // Premium service
     bool allowPremium = sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) ? getLevel() < 80 /* Angrthar affect only below 80 level */ : true /* Feronis affect every1 */;
-    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_RESSURECTION_SICKNESS) && allowPremium)
+    if (GetSession()->HasActiveService(SERVICE_NO_RESSURECTION_SICKNESS) && allowPremium)
         return;
 
     if(!applySickness)
@@ -5533,7 +5535,7 @@ Corpse* Player::GetCorpse() const
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
     // Premium service or test server
-    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS) || sWorld->getBoolConfig(CONFIG_PTR_REALM))
+    if (GetSession()->HasActiveService(SERVICE_NO_DURABILITY_LOSS) || sWorld->getBoolConfig(CONFIG_PTR_REALM))
         return;
 
     for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
@@ -5606,7 +5608,7 @@ void Player::DurabilityPointsLossAll(int32 points, bool inventory)
 
 void Player::DurabilityPointsLoss(ItemRef const& item, int32 points)
 {
-    if (GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS))
+    if (GetSession()->HasActiveService(SERVICE_NO_DURABILITY_LOSS))
         return;
 
     int32 pMaxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
@@ -7747,21 +7749,21 @@ void Player::ModifyArenaPoints(int32 value, SQLTransaction* trans /*=NULL*/)
 
 uint32 Player::GetGuildIdFromStorage(uint32 guid)
 {
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guid))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guid))
         return playerData->guildId;
     return 0;
 }
 
 uint32 Player::GetGroupIdFromStorage(uint32 guid)
 {
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guid))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guid))
         return playerData->groupId;
     return 0;
 }
 
 uint32 Player::GetArenaTeamIdFromStorage(uint32 guid, uint8 slot)
 {
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guid))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guid))
         return playerData->arenaTeamId[slot];
     return 0;
 }
@@ -7815,7 +7817,7 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
 uint32 Player::GetLevelFromStorage(uint64 guid)
 {
     // xinef: Get data from global storage
-    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
+    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid)))
         return playerData->level;
 
     return 0;
@@ -16159,13 +16161,13 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     { // Heirloom and premium stuff.
         uint8 division = 0;
         bool recruitAFriend = GetsRecruitAFriendBonus(true);
-        bool premiumBonus = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
-        bool premiumBonusX4 = GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+        bool premiumBonus = GetSession()->HasActiveService(SERVICE_EXP_BOOST);
+        bool premiumBonusX4 = GetSession()->HasActiveService(SERVICE_EXP_BOOST_X4);
         bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
         int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-        if (premiumBonusX4)    division = 3;
-        else if (premiumBonus) division = 2;
+        if (premiumBonusX4)    division = sWorld->getRate(RATE_PREMIUM_XP_BOOST_RATE2);
+        else if (premiumBonus) division = sWorld->getRate(RATE_PREMIUM_XP_BOOST_RATE);
         else if (recruitAFriend) division = 2;
         else if (eventBonus)   division = eventMultipler;
 
@@ -19285,7 +19287,7 @@ void Player::_LoadMailAsynch(PreparedQueryResult result)
         m_mail.push_back(m);
     }
     // Xinef: this is stored during storage initialization
-    sWorld->UpdateGlobalPlayerMails(GetGUIDLow(), m_mail.size(), false);
+    sGlobalPlayerStore.UpdateMails(GetGUIDLow(), m_mail.size(), false);
     m_mailsLoaded = true;
 }
 
@@ -19675,33 +19677,18 @@ void Player::SendRaidInfo()
     GetSession()->SendPacket(&data);
 }
 
-// Premium services
-inline const char* PremiumName(PremiumServiceTypes serviceId)
-{
-    switch (serviceId)
-    {
-        case 0: return "Teleportation";
-        case 1: return "Down with the Sickness";
-        case 2: return "Experience Boost";
-        case 3: return "Unbreakable Equipment";
-        case 4: return "Instant Taxi";
-        case 5: return "Experience Boost";
-        default:
-            return "Unknown";
-    }
-}
-
 void Player::SendPremiumInfo()
 {
     char buff[20];
     uint8 activePremium = 0;
-    for (uint8 i = 0; i < MAX_PREMIUM_SERVICES; i++)
+    for (uint8 i = 0; i < SERVICE_TYPE_COUNT; i++)
     {
-        if (GetSession()->IsPremiumServiceActive(PremiumServiceTypes(i)))
+        if (GetSession()->HasActiveService(ServiceType(i)))
         {
-            time_t now = GetSession()->GetPremiumService(PremiumServiceTypes(i));
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
-            ChatHandler(GetSession()).PSendSysMessage(LANG_SEND_PREMIUM_ACTIVE, PremiumName(PremiumServiceTypes(i)), buff);
+            auto& service = GetSession()->GetService(ServiceType(i));
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
+            ChatHandler(GetSession()).PSendSysMessage(LANG_SEND_PREMIUM_ACTIVE, PremiumName(ServiceType(i)), buff);
             ++activePremium;
         }
     }
@@ -22143,7 +22130,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     // Xinef: dont use instant flight paths if spellid is present (custom calls use spellid = 1)
     // Premium service
-	if ((sWorld->getBoolConfig(CONFIG_INSTANT_TAXI) || GetSession()->IsPremiumServiceActive(PREMIUM_INSTANT_FLIGHT_PATHS)) && !spellid && sWorld->getBoolConfig(CONFIG_PREMIUM_TELEPORT_ENABLE))
+	if ((sWorld->getBoolConfig(CONFIG_INSTANT_TAXI) || GetSession()->HasActiveService(SERVICE_INSTANT_FLIGHT_PATHS)) && !spellid && sWorld->getBoolConfig(CONFIG_PREMIUM_TELEPORT_ENABLE))
     {
         TaxiNodesEntry const* lastPathNode = sTaxiNodesStore.LookupEntry(nodes[nodes.size()-1]);
         m_taxi.ClearTaxiDestinations();

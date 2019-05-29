@@ -1963,7 +1963,7 @@ bool Guild::LoadMemberFromDB(Field* fields)
         return false;
     }
     m_members[lowguid] = member;
-    sWorld->UpdateGlobalPlayerGuild(lowguid, GetId());
+    sGlobalPlayerStore.UpdateGuild(lowguid, GetId());
     return true;
 }
 
@@ -2250,7 +2250,7 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
             return false;
         }
         m_members[lowguid] = member;
-        sWorld->UpdateGlobalPlayerGuild(lowguid, m_id);
+        sGlobalPlayerStore.UpdateGuild(lowguid, m_id);
     }
 
     SQLTransaction trans(NULL);
@@ -2320,7 +2320,7 @@ void Guild::DeleteMember(uint64 guid, bool isDisbanding, bool isKicked, bool can
         player->SetRank(0);
     }
     else
-        sWorld->UpdateGlobalPlayerGuild(lowguid, 0);
+        sGlobalPlayerStore.UpdateGuild(lowguid, 0);
 
     _DeleteMemberFromDB(lowguid);
     if (!isDisbanding)

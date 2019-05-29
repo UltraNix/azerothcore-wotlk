@@ -166,7 +166,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     else
     {
         // xinef: get data from global storage
-        if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(rc)))
+        if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(rc)))
         {
             rc_teamId = Player::TeamIdForRace(playerData->race);
             mails_count = playerData->mailCount;
@@ -373,7 +373,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recvData)
 
         m->state = MAIL_STATE_DELETED;
         // xinef: update global data
-        sWorld->UpdateGlobalPlayerMails(player->GetGUIDLow(), -1);
+        sGlobalPlayerStore.UpdateMails(player->GetGUIDLow(), -1);
     }
     player->SendMailResult(mailId, MAIL_DELETED, MAIL_OK);
 }
@@ -437,7 +437,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recvData)
     player->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, MAIL_OK);
 
     // xinef: update global data
-    sWorld->UpdateGlobalPlayerMails(player->GetGUIDLow(), -1);
+    sGlobalPlayerStore.UpdateMails(player->GetGUIDLow(), -1);
 }
 
 //called when player takes item attached in mail

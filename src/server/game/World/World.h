@@ -197,6 +197,11 @@ enum WorldBoolConfigs
     CONFIG_NINJA_LOOTER_LIST,                 // Sitowsky: Ninja Looter list.
     CONFIG_ANTICHEAT_WINTERGRASP,             // Turns on or off notifications about someone trying to attack final gate from under textures or relic room.
     CONFIG_GM_ANTIABUSE_MONEY,                // Disallow GM to have any gold
+
+    CONFIG_EXTERNAL_MAIL,                     // Enables or disabled sending external mails
+    CONFIG_PREMIUM_SERVICES,                  // Enables or disabled premium services
+
+
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -414,6 +419,9 @@ enum WorldIntConfigs
     CONFIG_WINTERGRASP_REMINDER,
     CONFIG_ICC_STAGE,                           // Afgann: Sets amount of opened wings on heroic in ICC.
     CONFIG_ICC_ATTEMPTS,                        // Afgann: Sets amount of heroic attempts in ICC.
+    CONFIG_EXTERNAL_MAIL_INTERVAL,              // Interval for sending external mails
+    CONFIG_PREMIUM_SERVICES_UPDATE_INTERVAL,    // Interval for updating premium services
+
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -483,6 +491,10 @@ enum Rates
     RATE_DURABILITY_LOSS_ABSORB,
     RATE_DURABILITY_LOSS_BLOCK,
     RATE_MOVESPEED,
+
+    RATE_PREMIUM_XP_BOOST_RATE,
+    RATE_PREMIUM_XP_BOOST_RATE2,
+
     MAX_RATES
 };
 
@@ -624,35 +636,6 @@ struct CliCommandHolder
 typedef std::unordered_map<uint32, WorldSession*> SessionMap;
 
 #define WORLD_SLEEP_CONST 10
-
-// xinef: global storage
-struct GlobalPlayerData
-{
-    uint32 guidLow;
-    uint32 accountId;
-    std::string accountName;
-    std::string name;
-    uint8 race;
-    uint8 playerClass;
-    uint8 gender;
-    uint8 level;
-    uint16 mailCount;
-    uint32 guildId;
-    uint32 groupId;
-    uint32 arenaTeamId[3];
-};
-
-enum GlobalPlayerUpdateMask
-{
-    PLAYER_UPDATE_DATA_LEVEL            = 0x01,
-    PLAYER_UPDATE_DATA_RACE             = 0x02,
-    PLAYER_UPDATE_DATA_CLASS            = 0x04,
-    PLAYER_UPDATE_DATA_GENDER           = 0x08,
-    PLAYER_UPDATE_DATA_NAME             = 0x10
-};
-
-typedef std::map<uint32, GlobalPlayerData> GlobalPlayerDataMap;
-typedef std::map<std::string, uint32> GlobalPlayerNameMap;
 
 // xinef: petitions storage
 struct PetitionData
@@ -870,21 +853,6 @@ class World
             return uint32(ceil(t/1000.0f));
         }
 
-        // xinef: Global Player Data Storage system
-        void LoadGlobalPlayerDataStore();
-        uint32 GetGlobalPlayerGUID(std::string const& name) const;
-        GlobalPlayerData const* GetGlobalPlayerData(uint32 guid) const;
-        void AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level, uint16 mailCount, uint32 guildId, std::string const& accName);
-        void UpdateGlobalPlayerData(uint32 guid, uint8 mask, std::string const& name, uint8 level = 0, uint8 gender = 0, uint8 race = 0, uint8 playerClass = 0);
-        void UpdateGlobalPlayerMails(uint32 guid, int16 count, bool add = true);
-        void UpdateGlobalPlayerGuild(uint32 guid, uint32 guildId);
-        void UpdateGlobalPlayerGroup(uint32 guid, uint32 groupId);
-        void UpdateGlobalPlayerArenaTeam(uint32 guid, uint8 slot, uint32 arenaTeamId);
-        void UpdateGlobalNameData(uint32 guidLow, std::string const& oldName, std::string const& newName);
-        void UpdateGlobalPlayerAccountId(uint32 guid, uint32 accountId);
-        void DeleteGlobalPlayerData(uint32 guid, std::string const& name);
-        uint32 GetGlobalDataAccountId(uint32 guid);
-
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
 
@@ -988,10 +956,6 @@ class World
         static float m_MaxVisibleDistanceOnContinents;
         static float m_MaxVisibleDistanceInInstances;
         static float m_MaxVisibleDistanceInBGArenas;
-
-        // our speed ups
-        GlobalPlayerDataMap _globalPlayerDataStore; // xinef
-        GlobalPlayerNameMap _globalPlayerNameStore; // xinef
 
         uint32 _revision;
         std::string _realmName;

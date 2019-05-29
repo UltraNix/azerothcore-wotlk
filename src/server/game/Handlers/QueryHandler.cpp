@@ -33,7 +33,7 @@
 
 void WorldSession::SendNameQueryOpcode(uint64 guid)
 {
-    GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid));
+    GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid));
 
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+10));
     data.appendPackGUID(guid);

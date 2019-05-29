@@ -22,6 +22,8 @@ Comment: All character related commands
 Category: commandscripts
 EndScriptData */
 
+#include <string>
+
 #include "AccountMgr.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
@@ -29,6 +31,7 @@ EndScriptData */
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
+#include "GlobalPlayerStore.h"
 
 class character_commandscript : public CommandScript
 {
@@ -51,6 +54,12 @@ public:
             { "old",            SEC_CONSOLE,        true,  &HandleCharacterDeletedOldCommand,      "" }
         };
 
+        static std::vector<ChatCommand> characterCacheCommandTable =
+        {
+            { "update",         SEC_ADMINISTRATOR,  true,  &HandleCharacterCacheUpdateCommand,     "" },
+            { "reload",         SEC_ADMINISTRATOR,  true,  &HandleCharacterCacheReloadCommand,     "" }
+        };
+
         static std::vector<ChatCommand> characterCommandTable =
         {
             { "customize",      SEC_GAMEMASTER,     true,  &HandleCharacterCustomizeCommand,       "" },
@@ -61,7 +70,8 @@ public:
             { "rename",         SEC_GAMEMASTER,     true,  &HandleCharacterRenameCommand,          "" },
             { "reputation",     SEC_GAMEMASTER,     true,  &HandleCharacterReputationCommand,      "" },
             { "titles",         SEC_GAMEMASTER,     true,  &HandleCharacterTitlesCommand,          "" },
-            { "getnewid",       SEC_ADMINISTRATOR,  true,  &HandleCharacterGetNewIdCommand,        "" }
+            { "getnewid",       SEC_ADMINISTRATOR,  true,  &HandleCharacterGetNewIdCommand,        "" },
+            { "cache",          SEC_ADMINISTRATOR,  true,  NULL,                                   "", characterCacheCommandTable }
         };
 
         static std::vector<ChatCommand> commandTable =
@@ -229,7 +239,7 @@ public:
             uint8 race = field[0].GetUInt8();
             uint8 playerClass = field[1].GetUInt8();
             uint8 level = field[3].GetUInt8();
-            sWorld->AddGlobalPlayerData(delInfo.lowGuid, delInfo.accountId, nameReserved ? "Default" : delInfo.name,
+            sGlobalPlayerStore.Add(delInfo.lowGuid, delInfo.accountId, nameReserved ? "Default" : delInfo.name,
                 gender, race, playerClass, level, 0, 0, AccountMgr::GetName(delInfo.accountId));
         }
     }
@@ -425,7 +435,7 @@ public:
             CharacterDatabase.Execute(stmt);
 
             // xinef: update global storage
-            sWorld->UpdateGlobalPlayerData(GUID_LOPART(playerGuid), PLAYER_UPDATE_DATA_LEVEL, "", newLevel);
+            sGlobalPlayerStore.UpdateData(GUID_LOPART(playerGuid), PLAYER_UPDATE_DATA_LEVEL, "", newLevel);
         }
     }
 
@@ -923,6 +933,29 @@ public:
     static bool HandleCharacterGetNewIdCommand(ChatHandler* handler, char const* args)
     {
         handler->PSendSysMessage("%u", sObjectMgr->GenerateLowGuid(HIGHGUID_PLAYER));
+        return true;
+    }
+
+    static bool HandleCharacterCacheUpdateCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        std::string arg = strtok((char*)args, " ");
+        if (arg.empty())
+            return false;
+
+        if (!isNumeric(arg.c_str()))
+            return false;
+
+        sGlobalPlayerStore.UpdateFromDB(static_cast<uint32>(std::stoul(arg)));
+
+        return true;
+    }
+
+    static bool HandleCharacterCacheReloadCommand(ChatHandler* handler, char const* args)
+    {
+        sGlobalPlayerStore.Load();
         return true;
     }
 };

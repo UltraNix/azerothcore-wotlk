@@ -52,6 +52,7 @@ file(GLOB_RECURSE sources_Weather Weather/*.cpp Weather/*.h)
 file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
 file(GLOB_RECURSE sources_ArenaSpectator ArenaSpectator/*.cpp ArenaSpectator/*.h)
 file(GLOB_RECURSE sources_Misc Misc/*.cpp Misc/*.h)
+file(GLOB_RECURSE sources_Cache Cache/*.cpp Cache/*.h)
 
 # Create game-libary
 
@@ -106,6 +107,7 @@ set(game_STAT_SRCS
   ${sources_World}
   ${sources_ArenaSpectator}
   ${sources_Misc}
+  ${sources_Cache}
 )
 
 include_directories(
@@ -150,6 +152,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Calendar
   ${CMAKE_CURRENT_SOURCE_DIR}/Chat
   ${CMAKE_CURRENT_SOURCE_DIR}/Chat/Channels
+  ${CMAKE_CURRENT_SOURCE_DIR}/Cache
   ${CMAKE_CURRENT_SOURCE_DIR}/Combat
   ${CMAKE_CURRENT_SOURCE_DIR}/Conditions
   ${CMAKE_CURRENT_SOURCE_DIR}/DataStores
@@ -169,6 +172,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Unit
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Vehicle
   ${CMAKE_CURRENT_SOURCE_DIR}/Entities/Transport
+  ${CMAKE_CURRENT_SOURCE_DIR}/Entities/PremiumService
   ${CMAKE_CURRENT_SOURCE_DIR}/Events
   ${CMAKE_CURRENT_SOURCE_DIR}/Globals
   ${CMAKE_CURRENT_SOURCE_DIR}/Grids/Cells

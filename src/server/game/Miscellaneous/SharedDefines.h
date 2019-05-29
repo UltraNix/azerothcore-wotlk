@@ -3389,14 +3389,34 @@ enum BanReturn
 /// Premium function types
 enum ServiceType
 {
+    SERVICE_UNKNOWN                     = -1,
     SERVICE_TELEPORT                    = 0,
     SERVICE_NO_RESSURECTION_SICKNESS    = 1,
     SERVICE_EXP_BOOST                   = 2,
     SERVICE_NO_DURABILITY_LOSS          = 3,
     SERVICE_INSTANT_FLIGHT_PATHS        = 4,
-    SERVICE_EXP_BOOST_X4                = 5,   
+    SERVICE_EXP_BOOST_X4                = 5,
     SERVICE_TELEPORT_INPUT              = 6, // To allow input from command
 };
+
+#define SERVICE_TYPE_COUNT 7
+
+// Premium services
+inline const char* PremiumName(ServiceType serviceId)
+{
+    switch (serviceId)
+    {
+        case 0: return "Teleportation";
+        case 1: return "Down with the Sickness";
+        case 2: return "Experience Boost";
+        case 3: return "Unbreakable Equipment";
+        case 4: return "Instant Taxi";
+        case 5: return "Experience Boost";
+        case 6: return "Teleportation by command";
+        default:
+            return "Unknown";
+    }
+}
 
 // indexes of BattlemasterList.dbc
 enum BattlegroundTypeId

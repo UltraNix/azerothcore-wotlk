@@ -24,7 +24,7 @@
 #include "Field.h"
 #include "DatabaseWorkerPool.h"
 #include "Implementation/WorldDatabase.h"
-#include "DatabaseEnv.h"
+#include "Database/DatabaseEnv.h"
 
 struct SqlDbc
 {

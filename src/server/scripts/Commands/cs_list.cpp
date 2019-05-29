@@ -60,18 +60,19 @@ public:
         
         char buff[20];
 
-        bool isActiveTeleport = player->GetSession()->IsPremiumServiceActive(PREMIUM_TELEPORT);
-        bool isActiveSickness = player->GetSession()->IsPremiumServiceActive(PREMIUM_NO_RESSURECTION_SICKNESS);
-        bool isActiveExpBoost = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST);
-        bool isActiveNoDurLoss = player->GetSession()->IsPremiumServiceActive(PREMIUM_NO_DURABILITY_LOSS);
-        bool isActiveInstantFly = player->GetSession()->IsPremiumServiceActive(PREMIUM_INSTANT_FLIGHT_PATHS);
-        bool isActiveBoostX4 = player->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4);
+        bool isActiveTeleport = player->GetSession()->HasActiveService(SERVICE_TELEPORT);
+        bool isActiveSickness = player->GetSession()->HasActiveService(SERVICE_NO_RESSURECTION_SICKNESS);
+        bool isActiveExpBoost = player->GetSession()->HasActiveService(SERVICE_EXP_BOOST);
+        bool isActiveNoDurLoss = player->GetSession()->HasActiveService(SERVICE_NO_DURABILITY_LOSS);
+        bool isActiveInstantFly = player->GetSession()->HasActiveService(SERVICE_INSTANT_FLIGHT_PATHS);
+        bool isActiveBoostX4 = player->GetSession()->HasActiveService(SERVICE_EXP_BOOST_X4);
 
-        ChatHandler(handler->GetSession()).PSendSysMessage("Selected player privileges (%s):", player->GetName());
+        ChatHandler(handler->GetSession()).PSendSysMessage("Selected player privileges (%s):", player->GetName().c_str());
         if (isActiveTeleport)
         {
-            time_t now = player->GetSession()->GetPremiumService(PREMIUM_TELEPORT);
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            auto& service = player->GetSession()->GetService(SERVICE_TELEPORT);
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Teleport' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
@@ -80,8 +81,9 @@ public:
 
         if (isActiveSickness)
         {
-            time_t now = player->GetSession()->GetPremiumService(PREMIUM_NO_RESSURECTION_SICKNESS);
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            auto& service = player->GetSession()->GetService(SERVICE_NO_RESSURECTION_SICKNESS);
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Sickness' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
@@ -91,8 +93,9 @@ public:
         if (isActiveExpBoost)
         {
             char buff[20];
-            time_t now = player->GetSession()->GetPremiumService(PREMIUM_EXP_BOOST);
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            auto& service = player->GetSession()->GetService(SERVICE_EXP_BOOST);
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
@@ -102,8 +105,9 @@ public:
         if (isActiveBoostX4)
         {
             char buff[20];
-            time_t now = player->GetSession()->GetPremiumService(PREMIUM_EXP_BOOST_X4);
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            auto& service = player->GetSession()->GetService(SERVICE_EXP_BOOST_X4);
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost X4' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
@@ -112,8 +116,9 @@ public:
 
         if (isActiveNoDurLoss)
         {
-            time_t now = player->GetSession()->GetPremiumService(PREMIUM_NO_DURABILITY_LOSS);
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            auto& service = player->GetSession()->GetService(SERVICE_NO_DURABILITY_LOSS);
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Durability' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
@@ -123,8 +128,9 @@ public:
 
         if (isActiveInstantFly)
         {
-            time_t now = player->GetSession()->GetPremiumService(PREMIUM_INSTANT_FLIGHT_PATHS);
-            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            auto& service = player->GetSession()->GetService(SERVICE_INSTANT_FLIGHT_PATHS);
+            time_t endTime = service.GetEndTime();
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Instant Flying' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }

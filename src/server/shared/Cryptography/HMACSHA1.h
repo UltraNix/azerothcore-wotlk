@@ -40,7 +40,11 @@ class HmacHash
         uint8 *GetDigest() { return (uint8*)m_digest; }
         int GetLength() const { return SHA_DIGEST_LENGTH; }
     private:
-        HMAC_CTX m_ctx;
+#if (defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
+    HMAC_CTX* m_ctx;
+#else
+    HMAC_CTX m_ctx;
+#endif
         uint8 m_digest[SHA_DIGEST_LENGTH];
 };
 #endif

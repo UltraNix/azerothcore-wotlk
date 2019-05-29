@@ -23,6 +23,7 @@
 #include "ObjectMgr.h"
 #include "AccountMgr.h"
 #include "World.h"
+#include "Cache/GlobalPlayerStore.h"
 
 #define DUMP_TABLE_COUNT 27
 struct DumpTable
@@ -676,7 +677,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     CharacterDatabase.CommitTransaction(trans);
 
     // in case of name conflict player has to rename at login anyway
-    sWorld->AddGlobalPlayerData(guid, account, name, gender, race, playerClass, level, mails.size(), 0, AccountMgr::GetName(account));
+    sGlobalPlayerStore.Add(guid, account, name, gender, race, playerClass, level, mails.size(), 0, AccountMgr::GetName(account));
 
     sObjectMgr->_hiItemGuid += items.size();
     sObjectMgr->_mailId     += mails.size();

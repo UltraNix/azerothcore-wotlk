@@ -20,6 +20,7 @@
     \ingroup u2w
 */
 
+#include <Miscellaneous/Language.h>
 #include "WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 #include "DatabaseEnv.h"
@@ -46,6 +47,7 @@
 #include "WardenWin.h"
 #include "WardenMac.h"
 #include "SavingSystem.h"
+#include "Chat.h"
 
 namespace {
 
@@ -94,8 +96,7 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue,
-    time_t premium_services[MAX_PREMIUM_SERVICES]):
+WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue):
 m_muteTime(mute_time), m_timeOutTime(0), m_GUIDLow(0), _player(NULL), m_Socket(sock),
 _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
 m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerSave(false),
@@ -112,9 +113,12 @@ isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0
     _shouldSetOfflineInDB = true;
     _vpnActive = false;
 
-    for (uint8 i = 0; i < MAX_PREMIUM_SERVICES; i++)
+    _mailSendTimer.Reset(5*IN_MILLISECONDS);
+    _premiumCheckTimer.Reset(5 * IN_MILLISECONDS);
+
+    for (int i = 0; i < SERVICE_TYPE_COUNT; ++i)
     {
-        _premiumServices[i] = premium_services[i];
+        m_premiumServices[ServiceType(i)].SetServiceType(ServiceType(i));
     }
 
     if (sock)
@@ -240,6 +244,71 @@ void ReportMalformedPacket( WorldPacket* packet, const std::string& address, uin
     }
 }
 
+
+const PremiumService& WorldSession::GetService(ServiceType serviceType)
+{
+    return m_premiumServices[serviceType];
+}
+
+bool WorldSession::HasActiveService(ServiceType serviceType)
+{
+    if (serviceType <= SERVICE_UNKNOWN)
+        return false;
+
+    if (serviceType >= SERVICE_TYPE_COUNT)
+        return false;
+
+    if (sWorld->GetGameTime() < m_premiumDebug)
+        return true;
+
+    return m_premiumServices[serviceType].IsActive();
+}
+
+void WorldSession::UpdatePremiumServices()
+{
+    if (!sWorld->getBoolConfig(CONFIG_PREMIUM_SERVICES))
+        return;
+
+    auto stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PREMIUM_SERVICES);
+    stmt->setUInt32(0, GetAccountId());
+    stmt->setUInt32(1, realmID);
+
+    auto result = LoginDatabase.Query(stmt);
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint8 type = fields[0].GetUInt8();
+            uint32 startTime = fields[1].GetUInt32();
+            time_t endTime = fields[2].GetUInt32();
+
+            if (type >= SERVICE_TYPE_COUNT)
+                continue;
+
+            auto serviceType = ServiceType(type);
+            if (m_premiumServices[serviceType].Update(startTime, endTime) && m_premiumServices[serviceType].IsActive())
+            {
+                char buff[20];
+                strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&endTime));
+                ChatHandler(this).PSendSysMessage(LANG_SEND_PREMIUM_ACTIVE, PremiumName(serviceType), buff);
+            }
+        }
+        while(result -> NextRow());
+    }
+}
+
+bool WorldSession::HasPremiumDebug()
+{
+    return m_premiumDebug > sWorld->GetGameTime();
+}
+
+void WorldSession::SetPremiumDebug(bool debug)
+{
+    m_premiumDebug = debug ? sWorld->GetGameTime() + 20 * MINUTE : 0;
+}
+
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 {
@@ -248,6 +317,26 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         UpdateTimeOutTime(diff);
         if (IsConnectionIdle())
             m_Socket->CloseSocket();
+    }
+
+    if (!IsConnectionIdle())
+    {
+        if ( GetPlayer() && GetPlayer()->IsInWorld() )
+        {
+            _mailSendTimer.Update(diff);
+            _premiumCheckTimer.Update(diff);
+            if (_mailSendTimer.Passed())
+            {
+                SendExternalMails();
+                _mailSendTimer.Reset(sWorld->getIntConfig(CONFIG_EXTERNAL_MAIL_INTERVAL) * MINUTE * IN_MILLISECONDS);
+            }
+
+            if (_premiumCheckTimer.Passed())
+            {
+                UpdatePremiumServices();
+                _premiumCheckTimer.Reset(sWorld->getIntConfig(CONFIG_PREMIUM_SERVICES_UPDATE_INTERVAL) * MINUTE * IN_MILLISECONDS);
+            }
+        }
     }
 
     HandleTeleportTimeout(updater.ProcessLogout());
