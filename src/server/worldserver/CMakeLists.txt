@@ -101,7 +101,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Unit
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Vehicle
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Transport
-  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/PremiumService
   ${CMAKE_SOURCE_DIR}/src/server/game/Events
   ${CMAKE_SOURCE_DIR}/src/server/game/Globals
   ${CMAKE_SOURCE_DIR}/src/server/game/Grids/Cells
@@ -135,7 +134,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server/game/Weather
   ${CMAKE_SOURCE_DIR}/src/server/game/World
   ${CMAKE_SOURCE_DIR}/src/server/game/Misc
-  ${CMAKE_SOURCE_DIR}/src/server/game/Cache
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Server
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Realms
   ${CMAKE_CURRENT_SOURCE_DIR}

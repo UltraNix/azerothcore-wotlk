@@ -454,9 +454,9 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     else
     {
         // xinef: Get Data From global storage
-        if (uint32 guidLow = sGlobalPlayerStore.GetGUID(name))
+        if (uint32 guidLow = sWorld->GetGlobalPlayerGUID(name))
         {
-            if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guidLow))
+            if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guidLow))
             {
                 inviteeGuid = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
                 inviteeTeamId = Player::TeamIdForRace(playerData->race);

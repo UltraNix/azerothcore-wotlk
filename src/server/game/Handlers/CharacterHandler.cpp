@@ -51,7 +51,6 @@
 #include "WorldSession.h"
 #include "Transport.h"
 #include "ChannelMgr.h"
-#include "Cache/GlobalPlayerStore.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -620,7 +619,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             }
 
             // pussywizard:
-            if (sGlobalPlayerStore.GetGUID(createInfo->Name))
+            if (sWorld->GetGlobalPlayerGUID(createInfo->Name))
             {
                 WorldPacket data(SMSG_CHAR_CREATE, 1);
                 data << uint8(CHAR_CREATE_NAME_IN_USE);
@@ -677,7 +676,7 @@ void WorldSession::HandleCharCreateCallback(PreparedQueryResult result, Characte
             ;//sLog->outDetail("Account: %d (IP: %s) Create Character:[%s] (GUID: %u)", GetAccountId(), IP_str.c_str(), createInfo->Name.c_str(), newChar.GetGUIDLow());
             sLog->outChar("Account: %d (IP: %s) Create Character:[%s] (GUID: %u)", GetAccountId(), IP_str.c_str(), createInfo->Name.c_str(), newChar.GetGUIDLow());
             sScriptMgr->OnPlayerCreate(&newChar);
-            sGlobalPlayerStore.Add(newChar.GetGUIDLow(), GetAccountId(), newChar.GetName(), newChar.getGender(),
+            sWorld->AddGlobalPlayerData(newChar.GetGUIDLow(), GetAccountId(), newChar.GetName(), newChar.getGender(),
                 newChar.getRace(), newChar.getClass(), newChar.getLevel(), 0, 0, AccountMgr::GetName(GetAccountId()));
 
             newChar.CleanupsBeforeDelete();
@@ -723,7 +722,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid)))
+    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
     {
         accountId     = playerData->accountId;
         name          = playerData->name;
@@ -748,7 +747,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
     sCalendarMgr->RemoveAllPlayerEventsAndInvites(guid);
     Player::DeleteFromDB(guid, GetAccountId(), true, false);
 
-    sGlobalPlayerStore.DeletePlayerData(GUID_LOPART(guid), name);
+    sWorld->DeleteGlobalPlayerData(GUID_LOPART(guid), name);
     WorldPacket data(SMSG_CHAR_DELETE, 1);
     data << (uint8)CHAR_DELETE_SUCCESS;
     SendPacket(&data);
@@ -1531,11 +1530,11 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(PreparedQueryResult resu
     SendPacket(&data);
 
     // xinef: update global data
-    sGlobalPlayerStore.UpdateNameData(guidLow, oldName, newName);
-    sGlobalPlayerStore.UpdateData(guidLow, PLAYER_UPDATE_DATA_NAME, newName);
+    sWorld->UpdateGlobalNameData(guidLow, oldName, newName);
+    sWorld->UpdateGlobalPlayerData(guidLow, PLAYER_UPDATE_DATA_NAME, newName);
     //! accountId changed, probably character transfer
-    if (sGlobalPlayerStore.GetAccountId(guidLow) != GetAccountId())
-        sGlobalPlayerStore.UpdateAccountId(guidLow, GetAccountId());
+    if (sWorld->GetGlobalDataAccountId(guidLow) != GetAccountId())
+        sWorld->UpdateGlobalPlayerAccountId(guidLow, GetAccountId());
 }
 
 void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
@@ -1779,7 +1778,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     }
 
     // get the players old (at this moment current) race
-    GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid));
+    GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid));
     if (!playerData)
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
@@ -1860,8 +1859,8 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
     }
 
     // xinef: update global data
-    sGlobalPlayerStore.UpdateNameData(GUID_LOPART(guid), playerData->name, newName);
-    sGlobalPlayerStore.UpdateData(GUID_LOPART(guid), PLAYER_UPDATE_DATA_NAME|PLAYER_UPDATE_DATA_GENDER, newName, 0, gender);
+    sWorld->UpdateGlobalNameData(GUID_LOPART(guid), playerData->name, newName);
+    sWorld->UpdateGlobalPlayerData(GUID_LOPART(guid), PLAYER_UPDATE_DATA_NAME|PLAYER_UPDATE_DATA_GENDER, newName, 0, gender);
 
     WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1+8+(newName.size()+1)+6);
     data << uint8(RESPONSE_SUCCESS);
@@ -2035,7 +2034,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     uint32 lowGuid = GUID_LOPART(guid);
 
     // get the players old (at this moment current) race
-    GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(lowGuid);
+    GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(lowGuid);
     if (!playerData) // pussywizard: restoring character via www spoils nameData (it's not restored so it may be null)
     {
         WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
@@ -2237,8 +2236,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     sLog->outChar("Account: %d (IP: %s), Character [%s] (guid: %u) Changed Race/Faction to: %s", GetAccountId(), GetRemoteAddress().c_str(), playerData->name.c_str(), lowGuid, newname.c_str());
 
     // xinef: update global data
-    sGlobalPlayerStore.UpdateNameData(GUID_LOPART(guid), playerData->name, newname);
-    sGlobalPlayerStore.UpdateData(GUID_LOPART(guid),
+    sWorld->UpdateGlobalNameData(GUID_LOPART(guid), playerData->name, newname);
+    sWorld->UpdateGlobalPlayerData(GUID_LOPART(guid),
         PLAYER_UPDATE_DATA_NAME|PLAYER_UPDATE_DATA_RACE|PLAYER_UPDATE_DATA_GENDER, newname, 0, gender, race);
 
     if (oldRace != race)

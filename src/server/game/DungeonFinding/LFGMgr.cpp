@@ -981,7 +981,7 @@ void LFGMgr::UpdateRaidBrowser(uint32 diff)
                     talents[0] = 0;
                     talents[1] = 0;
                     talents[2] = 0;
-                    if (const GlobalPlayerData* gpd = sGlobalPlayerStore.GetData(mitr->guid))
+                    if (const GlobalPlayerData* gpd = sWorld->GetGlobalPlayerData(mitr->guid))
                     {
                         level = gpd->level;
                         Class = gpd->playerClass;

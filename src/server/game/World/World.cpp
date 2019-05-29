@@ -92,7 +92,6 @@
 #include "ThreadedPathGenerator.hpp"
 #include "FollowMovementGenerator.hpp"
 #include "WorldCache.h"
-#include "Cache/GlobalPlayerStore.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -601,21 +600,6 @@ void World::LoadConfigSettings(bool reload)
         sLog->outError("DurabilityLossChance.Block (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_DURABILITY_LOSS_BLOCK]);
         rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
     }
-
-    //rate_values[RATE_PREMIUM_XP_BOOST_RATE] = sConfigMgr->GetFloatDefault("Premium.Rate.XP", 3.0f);
-    //if (rate_values[RATE_PREMIUM_XP_BOOST_RATE] < 0.0f)
-    //{
-    //    sLog->outError("Premium.Rate.XP (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_PREMIUM_XP_BOOST_RATE]);
-    //    rate_values[RATE_PREMIUM_XP_BOOST_RATE] = 0.0f;
-    //}
-
-    //rate_values[RATE_PREMIUM_XP_BOOST_RATE2] = sConfigMgr->GetFloatDefault("Premium.Rate.XP2", 4.0f);
-    //if (rate_values[RATE_PREMIUM_XP_BOOST_RATE2] < 0.0f)
-    //{
-    //    sLog->outError("Premium.Rate.XP2 (%f) must be >=0. Using 0.0 instead.", rate_values[RATE_PREMIUM_XP_BOOST_RATE2]);
-    //    rate_values[RATE_PREMIUM_XP_BOOST_RATE2] = 0.0f;
-    //}
-
     ///- Read other configuration items from the config file
 
     m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = sConfigMgr->GetBoolDefault("DurabilityLoss.InPvP", false);
@@ -1414,11 +1398,6 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ] = sConfigMgr->GetIntDefault( "Movement.FollowStartTimer", 100 );
     m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ] = sConfigMgr->GetFloatDefault( "Movement.FollowMaxPathLength", 60.0f );
 
-    m_bool_configs[CONFIG_EXTERNAL_MAIL] = sConfigMgr->GetBoolDefault("Mail.External", false);
-    //m_bool_configs[CONFIG_PREMIUM_SERVICES] = sConfigMgr->GetBoolDefault("Premium.Enabled", true);
-    m_int_configs[CONFIG_EXTERNAL_MAIL_INTERVAL] = sConfigMgr->GetIntDefault("Mail.ExternalInterval", 1);
-    //m_int_configs[CONFIG_PREMIUM_SERVICES_UPDATE_INTERVAL] = sConfigMgr->GetIntDefault("Premium.UpdateInterval", 1);
-
     Movement::FollowMovementGenerator::FOLLOW_UPDATE_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ];
     Movement::FollowMovementGenerator::FOLLOW_START_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ];
     Movement::FollowMovementGenerator::FOLLOW_MAX_PATH_LENGTH = m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ];
@@ -1532,7 +1511,7 @@ void World::SetInitialWorldSettings()
     // xinef: Global Storage, should be loaded asap
     //! Riztazz: very slow currently due to loading of accountNames during global player data load
     sLog->outString("Load Global Player Data...(This will take a while to load!)");
-    sGlobalPlayerStore.Load();
+    sWorld->LoadGlobalPlayerDataStore();
 
     // Must be called before `creature_respawn`/`gameobject_respawn` tables
     sLog->outString("Loading instances...");
@@ -2719,7 +2698,7 @@ BanReturn World::BanCharacter(std::string const& name, std::string const& durati
     /// Pick a player to ban if not online
     if (!pBanned)
     {
-        guid = sGlobalPlayerStore.GetGUID(name);
+        guid = sWorld->GetGlobalPlayerGUID(name);
         if (!guid)
             return BAN_NOTFOUND;
     }
@@ -2752,7 +2731,7 @@ bool World::RemoveBanCharacter(std::string const& name)
 
     /// Pick a player to ban if not online
     if (!pBanned)
-        guid = sGlobalPlayerStore.GetGUID(name);
+        guid = sWorld->GetGlobalPlayerGUID(name);
     else
         guid = pBanned->GetGUIDLow();
 
@@ -3372,4 +3351,206 @@ void World::ProcessQueryCallbacks()
             lResult.cancel();
         }
     }
+}
+
+void World::LoadGlobalPlayerDataStore()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _globalPlayerDataStore.clear();
+    QueryResult result = CharacterDatabase.Query("SELECT guid, account, name, gender, race, class, level FROM characters WHERE deleteDate IS NULL");
+    if (!result)
+    {
+        sLog->outString();
+        sLog->outErrorDb(">>  Loaded 0 Players data!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    // query to load number of mails by receiver
+    std::map<uint32, uint16> _mailCountMap;
+    QueryResult mailCountResult = CharacterDatabase.Query("SELECT receiver, COUNT(receiver) FROM mail GROUP BY receiver");
+    if (mailCountResult)
+    {
+        do
+        {
+            Field* fields = mailCountResult->Fetch();
+            _mailCountMap[fields[0].GetUInt32()] = uint16(fields[1].GetUInt64());
+        }
+        while (mailCountResult->NextRow());
+    }
+
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 guidLow = fields[0].GetUInt32();
+        uint32 accountId = fields[1].GetUInt32();
+
+        // count mails
+        uint16 mailCount = 0;
+        std::map<uint32, uint16>::const_iterator itr = _mailCountMap.find(guidLow);
+        if (itr != _mailCountMap.end())
+            mailCount = itr->second;
+
+        AddGlobalPlayerData(
+            guidLow,                        /*guid*/
+            accountId,                      /*accountId*/
+            fields[2].GetString(),          /*name*/
+            fields[3].GetUInt8(),           /*gender*/
+            fields[4].GetUInt8(),           /*race*/
+            fields[5].GetUInt8(),           /*class*/
+            fields[6].GetUInt8(),           /*level*/
+            mailCount,                      /*mail count*/
+            0,                              /*guild id*/
+            /*AccountMgr::GetName(accountId)*/""  /*account name*/);
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    sLog->outString(">> Loaded %d Players data in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
+}
+
+void World::AddGlobalPlayerData(uint32 guid, uint32 accountId, std::string const& name, uint8 gender, uint8 race, uint8 playerClass, uint8 level,
+    uint16 mailCount, uint32 guildId, std::string const& accName)
+{
+    GlobalPlayerData data;
+
+    data.guidLow = guid;
+    data.accountId = accountId;
+    data.name = name;
+    data.accountName = accName;
+    data.level = level;
+    data.race = race;
+    data.playerClass = playerClass;
+    data.gender = gender;
+    data.mailCount = mailCount;
+    data.guildId = guildId;
+    data.groupId = 0;
+    data.arenaTeamId[0] = 0;
+    data.arenaTeamId[1] = 0;
+    data.arenaTeamId[2] = 0;
+
+    _globalPlayerDataStore[guid] = data;
+    _globalPlayerNameStore[name] = guid;
+}
+
+void World::UpdateGlobalPlayerData(uint32 guid, uint8 mask, std::string const& name, uint8 level, uint8 gender, uint8 race, uint8 playerClass)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    if (mask & PLAYER_UPDATE_DATA_LEVEL)
+        itr->second.level = level;
+    if (mask & PLAYER_UPDATE_DATA_RACE)
+        itr->second.race = race;
+    if (mask & PLAYER_UPDATE_DATA_CLASS)
+        itr->second.playerClass = playerClass;
+    if (mask & PLAYER_UPDATE_DATA_GENDER)
+        itr->second.gender = gender;
+    if (mask & PLAYER_UPDATE_DATA_NAME)
+        itr->second.name = name;
+
+    WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+    data << MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER);
+    SendGlobalMessage(&data);
+}
+
+uint32 World::GetGlobalDataAccountId(uint32 guid)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return 0;
+
+    return itr->second.accountId;
+}
+
+void World::UpdateGlobalPlayerAccountId(uint32 guid, uint32 account)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    itr->second.accountId = account;
+
+    WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+    data << MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER);
+    SendGlobalMessage(&data);
+}
+
+void World::UpdateGlobalPlayerMails(uint32 guid, int16 count, bool add)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    if (!add)
+    {
+        itr->second.mailCount = count;
+        return;
+    }
+
+    int16 icount = (int16)itr->second.mailCount;
+    if (count < 0 && abs(count) > icount)
+        count = -icount;
+    itr->second.mailCount = uint16(icount + count); // addition or subtraction
+}
+
+void World::UpdateGlobalPlayerGuild(uint32 guid, uint32 guildId)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    itr->second.guildId = guildId;
+}
+void World::UpdateGlobalPlayerGroup(uint32 guid, uint32 groupId)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    itr->second.groupId = groupId;
+}
+
+void World::UpdateGlobalPlayerArenaTeam(uint32 guid, uint8 slot, uint32 arenaTeamId)
+{
+    GlobalPlayerDataMap::iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr == _globalPlayerDataStore.end())
+        return;
+
+    itr->second.arenaTeamId[slot] = arenaTeamId;
+}
+
+void World::UpdateGlobalNameData(uint32 guidLow, std::string const& oldName, std::string const& newName)
+{
+    _globalPlayerNameStore.erase(oldName);
+    _globalPlayerNameStore[newName] = guidLow;
+}
+
+void World::DeleteGlobalPlayerData(uint32 guid, std::string const& name)
+{
+    if (guid)
+        _globalPlayerDataStore.erase(guid);
+    if (!name.empty())
+        _globalPlayerNameStore.erase(name);
+}
+
+GlobalPlayerData const* World::GetGlobalPlayerData(uint32 guid) const
+{
+    GlobalPlayerDataMap::const_iterator itr = _globalPlayerDataStore.find(guid);
+    if (itr != _globalPlayerDataStore.end())
+        return &itr->second;
+    return NULL;
+}
+
+uint32 World::GetGlobalPlayerGUID(std::string const& name) const
+{
+    GlobalPlayerNameMap::const_iterator itr = _globalPlayerNameStore.find(name);
+    if (itr != _globalPlayerNameStore.end())
+        return itr->second;
+    return 0;
 }

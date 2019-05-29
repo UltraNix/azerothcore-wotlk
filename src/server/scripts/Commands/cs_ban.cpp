@@ -293,7 +293,7 @@ public:
 
         if (!target)
         {
-            targetGuid = sGlobalPlayerStore.GetGUID(name);
+            targetGuid = sWorld->GetGlobalPlayerGUID(name);
             if (!targetGuid)
             {
                 handler->PSendSysMessage(LANG_BANINFO_NOCHARACTER);

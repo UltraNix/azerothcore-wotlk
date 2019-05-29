@@ -352,8 +352,8 @@ void Channel::KickOrBan(Player const* player, std::string const& badname, bool b
     {
         if (ban && (AccountMgr::IsGMAccount(sec) || isGoodConstantModerator))
         {
-            if (uint32 lowGuid = sGlobalPlayerStore.GetGUID(badname))
-                if (const GlobalPlayerData* gpd = sGlobalPlayerStore.GetData(lowGuid))
+            if (uint32 lowGuid = sWorld->GetGlobalPlayerGUID(badname))
+                if (const GlobalPlayerData* gpd = sWorld->GetGlobalPlayerData(lowGuid))
                 {
                     if (Player::TeamIdForRace(gpd->race) == Player::TeamIdForRace(player->getRace()))
                     {
@@ -497,7 +497,7 @@ void Channel::UnBan(Player const* player, std::string const& badname)
     }
 
     uint64 victim = 0;
-    if (uint32 guidLow = sGlobalPlayerStore.GetGUID(badname))
+    if (uint32 guidLow = sWorld->GetGlobalPlayerGUID(badname))
         victim = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
 
     if (!victim || !IsBanned(victim))

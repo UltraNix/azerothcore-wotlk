@@ -7747,21 +7747,21 @@ void Player::ModifyArenaPoints(int32 value, SQLTransaction* trans /*=NULL*/)
 
 uint32 Player::GetGuildIdFromStorage(uint32 guid)
 {
-    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guid))
+    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guid))
         return playerData->guildId;
     return 0;
 }
 
 uint32 Player::GetGroupIdFromStorage(uint32 guid)
 {
-    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guid))
+    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guid))
         return playerData->groupId;
     return 0;
 }
 
 uint32 Player::GetArenaTeamIdFromStorage(uint32 guid, uint8 slot)
 {
-    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(guid))
+    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(guid))
         return playerData->arenaTeamId[slot];
     return 0;
 }
@@ -7815,7 +7815,7 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
 uint32 Player::GetLevelFromStorage(uint64 guid)
 {
     // xinef: Get data from global storage
-    if (GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(guid)))
+    if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
         return playerData->level;
 
     return 0;
@@ -19285,7 +19285,7 @@ void Player::_LoadMailAsynch(PreparedQueryResult result)
         m_mail.push_back(m);
     }
     // Xinef: this is stored during storage initialization
-    sGlobalPlayerStore.UpdateMails(GetGUIDLow(), m_mail.size(), false);
+    sWorld->UpdateGlobalPlayerMails(GetGUIDLow(), m_mail.size(), false);
     m_mailsLoaded = true;
 }
 
@@ -22143,7 +22143,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     // Xinef: dont use instant flight paths if spellid is present (custom calls use spellid = 1)
     // Premium service
-	if((sWorld->getBoolConfig(CONFIG_INSTANT_TAXI) || GetSession()->IsPremiumServiceActive(PREMIUM_INSTANT_FLIGHT_PATHS)) && !spellid && sWorld->getBoolConfig(CONFIG_PREMIUM_TELEPORT_ENABLE))
+	if ((sWorld->getBoolConfig(CONFIG_INSTANT_TAXI) || GetSession()->IsPremiumServiceActive(PREMIUM_INSTANT_FLIGHT_PATHS)) && !spellid && sWorld->getBoolConfig(CONFIG_PREMIUM_TELEPORT_ENABLE))
     {
         TaxiNodesEntry const* lastPathNode = sTaxiNodesStore.LookupEntry(nodes[nodes.size()-1]);
         m_taxi.ClearTaxiDestinations();

@@ -32,7 +32,6 @@
 #include "Battleground.h"
 #include "WorldSession.h"
 #include "SpellAuras.h"
-#include "GlobalPlayerStore.h"
 
 #include <string>
 #include <vector>
@@ -1951,7 +1950,7 @@ class Player : public Unit, public GridObject<Player>
         {
             SetUInt32Value(PLAYER_GUILDID, GuildId);
             // xinef: update global storage
-            sGlobalPlayerStore.UpdateGuild(GetGUIDLow(), GuildId);
+            sWorld->UpdateGlobalPlayerGuild(GetGUIDLow(), GuildId);
         }
         void SetRank(uint8 rankId) { SetUInt32Value(PLAYER_GUILDRANK, rankId); }
         uint8 GetRank() const { return uint8(GetUInt32Value(PLAYER_GUILDRANK)); }

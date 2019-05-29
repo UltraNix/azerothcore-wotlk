@@ -34,10 +34,6 @@
 #include "Timer.h"
 #include "Log.h"
 
-#ifndef CR_INVALID_CONN_HANDLE
-#define CR_INVALID_CONN_HANDLE 2048
-#endif
-
 MySQLConnection::MySQLConnection(MySQLConnectionInfo& connInfo, uint32_t maxPingTime ) :
 m_reconnecting(false),
 m_prepareError(false),

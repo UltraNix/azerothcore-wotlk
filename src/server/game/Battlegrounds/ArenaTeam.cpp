@@ -103,7 +103,7 @@ bool ArenaTeam::AddMember(uint64 playerGuid)
     }
     else
     {
-        GlobalPlayerData const* playerData = sGlobalPlayerStore.GetData(GUID_LOPART(playerGuid));
+        GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(playerGuid));
         if (!playerData)
             return false;
 
@@ -165,7 +165,7 @@ bool ArenaTeam::AddMember(uint64 playerGuid)
     newMember.MaxMMR           = maxMMR;
 
     Members.push_back(newMember);
-    sGlobalPlayerStore.UpdateArenaTeam(GUID_LOPART(playerGuid), GetSlot(), GetId());
+    sWorld->UpdateGlobalPlayerArenaTeam(GUID_LOPART(playerGuid), GetSlot(), GetId());
 
     // Save player's arena team membership to db
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ARENA_TEAM_MEMBER);
@@ -260,7 +260,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult result)
 
         // Put the player in the team
         Members.push_back(newMember);
-        sGlobalPlayerStore.UpdateArenaTeam(GUID_LOPART(newMember.Guid), GetSlot(), GetId());
+        sWorld->UpdateGlobalPlayerArenaTeam(GUID_LOPART(newMember.Guid), GetSlot(), GetId());
     }
     while (result->NextRow());
 
@@ -310,7 +310,7 @@ void ArenaTeam::DelMember(uint64 guid, bool cleanDb)
         if (itr->Guid == guid)
         {
             Members.erase(itr);
-            sGlobalPlayerStore.UpdateArenaTeam(GUID_LOPART(guid), GetSlot(), 0);
+            sWorld->UpdateGlobalPlayerArenaTeam(GUID_LOPART(guid), GetSlot(), 0);
             break;
         }
 

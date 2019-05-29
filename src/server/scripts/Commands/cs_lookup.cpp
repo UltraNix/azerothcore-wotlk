@@ -1292,7 +1292,7 @@ public:
                     uint8 plevel = 0, prace = 0, pclass = 0;
                     bool online = (ObjectAccessor::FindPlayerInOrOutOfWorld(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER)) != NULL);
 
-                    if (const GlobalPlayerData* gpd = sGlobalPlayerStore.GetData(guid))
+                    if (const GlobalPlayerData* gpd = sWorld->GetGlobalPlayerData(guid))
                     {
                         plevel = gpd->level;
                         prace = gpd->race;

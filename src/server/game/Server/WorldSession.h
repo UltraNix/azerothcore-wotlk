@@ -34,7 +34,6 @@
 #include "Cryptography/BigNumber.h"
 #include "AccountMgr.h"
 #include "Item.h"
-#include "PremiumService.h"
 
 class Creature;
 class GameObject;
@@ -126,6 +125,7 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_3v3_TYPE                   = 3,
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
+
 
 enum PremiumServiceTypes
 {
@@ -258,12 +258,6 @@ class WorldSession
         void SetPlayer(Player* player);
         uint8 Expansion() const { return m_expansion; }
 
-       /* bool HasActiveService(ServiceType serviceType);
-        const PremiumService& GetService(ServiceType serviceType);
-
-        void SetPremiumDebug(bool debug);
-        bool HasPremiumDebug();*/
-
         void InitWarden(BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
@@ -371,12 +365,6 @@ class WorldSession
         void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data);
 
         void DoLootRelease(uint64 lguid);
-
-        // External Mail
-        void SendExternalMails();
-        //void UpdatePremiumServices();
-        TimeTrackerSmall _mailSendTimer;
-        //TimeTrackerSmall _premiumCheckTimer;
 
         // Account mute time
         time_t m_muteTime;
@@ -1098,8 +1086,6 @@ class WorldSession
         bool _kicked;
         bool _shouldSetOfflineInDB;
         bool _vpnActive;
-        //PremiumService m_premiumServices[SERVICE_TYPE_COUNT];
-        //time_t m_premiumDebug = 0;
 };
 #endif
 /// @}

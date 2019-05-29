@@ -1853,7 +1853,7 @@ public:
         bool guildIsLeader      = false;
         uint64 guildMoney       = 0;
         uint32 guildMemberCount = 0;
-        if (const GlobalPlayerData* gpd = sGlobalPlayerStore.GetData(targetGuid))
+        if (const GlobalPlayerData* gpd = sWorld->GetGlobalPlayerData(targetGuid))
             if (gpd->guildId)
                 if (Guild* targetGuild = sGuildMgr->GetGuildById(gpd->guildId))
                 {
@@ -2979,7 +2979,7 @@ public:
         }
         else if (targetName)
         {
-            if (uint64 playerGUID = sGlobalPlayerStore.GetGUID(name))
+            if (uint64 playerGUID = sWorld->GetGlobalPlayerGUID(name))
             {
                 PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_AURA_FROZEN);
                 stmt->setUInt32(0, GUID_LOPART(playerGUID));

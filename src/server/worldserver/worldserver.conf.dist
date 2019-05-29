@@ -1425,19 +1425,6 @@ MaxRecruitAFriendBonusDistance = 100
 
 MailDeliveryDelay = 3600
 
-#    Mail.External
-#        Enable external mail delivery from mail_external table.
-#        Default: 0 (disabled)
-#                 1 (enabled)
-
-Mail.External = 0
-
-#    Mail.ExternalInterval
-#        Mail delivery delay time for item sending from mail_external table, in minutes.
-#        Default: 1 minute
-
-Mail.ExternalInterval = 1
-
 #
 #    SkillChance.Prospecting
 #        Description: Allow skill increase from prospecting.
@@ -3474,13 +3461,6 @@ PTR.Realm = 0
 
 Premium.Teleport.Enable = 1
 Premium.InstantFlying.Enable = 1
-
-#
-#     Premium.Rate.XP / Premium.Rate.XP2
-#        Description: Rate of premium bonuses (it's added to base calculated xp)
-
-Premium.Rate.XP = 2.0
-Premium.Rate.XP2 = 3.0
 
 #
 #     PhasedDuels.Enable

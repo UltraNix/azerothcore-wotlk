@@ -107,7 +107,7 @@ class TaskScheduler
     /// Container which provides Task order, insert and reschedule operations.
     struct Compare
     {
-        bool operator() (TaskContainer const& left, TaskContainer const& right) const
+        bool operator() (TaskContainer const& left, TaskContainer const& right)
         {
             return (*left.get()) < (*right.get());
         };
