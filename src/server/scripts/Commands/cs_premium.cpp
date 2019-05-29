@@ -55,7 +55,7 @@ public:
     static bool HandlePremiumTeleportCommand(ChatHandler* handler, char const* args)
     {
         std::list<std::string> errors;
-        if (!handler->GetSession()->HasActiveService(SERVICE_TELEPORT))
+        if (!handler->GetSession()->IsPremiumServiceActive(PREMIUM_TELEPORT))
         {
             handler->SendSysMessage("You don't have this VIP service enabled");
             handler->SetSentErrorMessage(true);

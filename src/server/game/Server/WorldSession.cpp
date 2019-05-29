@@ -328,7 +328,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         if ( GetPlayer() && GetPlayer()->IsInWorld() )
         {
             _mailSendTimer.Update(diff);
-            _premiumCheckTimer.Update(diff);
+            //_premiumCheckTimer.Update(diff);
             if (_mailSendTimer.Passed())
             {
                 SendExternalMails();
