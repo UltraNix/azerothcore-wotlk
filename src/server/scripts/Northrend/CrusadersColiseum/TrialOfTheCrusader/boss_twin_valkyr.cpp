@@ -911,6 +911,23 @@ class spell_valkyr_touch_light_SpellScript : public SpellScript
     }
 };
 
+class spell_valkyr_touch_light_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_valkyr_touch_light_AuraScript);
+
+    void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        if (GetAura() && target->IsPlayer() && target->ToPlayer()->HasAura(target->GetMap()->Is25ManRaid() ? SPELL_LIGHT_ESSENCE_HELPER_25MAN : SPELL_LIGHT_ESSENCE_HELPER_10MAN))
+            GetAura()->Remove();
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_valkyr_touch_light_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 class spell_valkyr_touch_dark_SpellScript : public SpellScript
 {
     PrepareSpellScript(spell_valkyr_touch_dark_SpellScript);
@@ -932,6 +949,22 @@ class spell_valkyr_touch_dark_SpellScript : public SpellScript
     }
 };
 
+class spell_valkyr_touch_dark_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_valkyr_touch_dark_AuraScript);
+
+    void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* target = GetTarget();
+        if (GetAura() && target->IsPlayer() && target->ToPlayer()->HasAura(target->GetMap()->Is25ManRaid() ? SPELL_DARK_ESSENCE_HELPER_25MAN : SPELL_DARK_ESSENCE_HELPER_10MAN))
+            GetAura()->Remove();
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_valkyr_touch_dark_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+    }
+};
 
 void AddSC_boss_twin_valkyr()
 {
@@ -940,6 +973,6 @@ void AddSC_boss_twin_valkyr()
     new npc_essence_of_twin();
     new CreatureAILoader<npc_concentrated_ballAI>("npc_concentrated_ball");
     new AuraScriptLoaderEx<spell_valkyr_essence_auraAuraScript>("spell_valkyr_essence");
-    new SpellScriptLoaderEx<spell_valkyr_touch_light_SpellScript>("spell_valkyr_touch_light");
-    new SpellScriptLoaderEx<spell_valkyr_touch_dark_SpellScript>("spell_valkyr_touch_dark");
+    new SpellAuraScriptLoaderEx<spell_valkyr_touch_light_SpellScript, spell_valkyr_touch_light_AuraScript>("spell_valkyr_touch_light");
+    new SpellAuraScriptLoaderEx<spell_valkyr_touch_dark_SpellScript, spell_valkyr_touch_dark_AuraScript>("spell_valkyr_touch_dark");
 }

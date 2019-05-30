@@ -40,7 +40,6 @@ enum WarlockSpells
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_FELHUNTER     = 54509,
     SPELL_WARLOCK_DEMONIC_EMPOWERMENT_IMP           = 54444,
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
-    SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME              = 63311,
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 56216,
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
@@ -120,6 +119,12 @@ class spell_warl_eye_of_kilrogg : public SpellScriptLoader
         }
 };
 
+enum Shadowflame
+{
+    SPELL_SHADOWFLAME_GLYPH_SLOW    = 63311,
+    SPELL_SHADOWFLAME_GLYPH_AURA    = 63310
+};
+
 class spell_warl_shadowflame : public SpellScriptLoader
 {
     public:
@@ -132,7 +137,13 @@ class spell_warl_shadowflame : public SpellScriptLoader
             void HandleSchoolDMG(SpellEffIndex /*effIndex*/)
             {
                 if (Unit* target = GetHitUnit())
+                {
                     GetCaster()->CastSpell(target, (GetSpellInfo()->Id == 47897 ? 47960 : 61291), true);
+                    // Glyph of Shadowflame
+                    if (Aura* aura = GetCaster()->GetAura(SPELL_SHADOWFLAME_GLYPH_AURA, GetCaster()->GetGUID()))
+                        GetCaster()->CastSpell(target, SPELL_SHADOWFLAME_GLYPH_SLOW, true, NullItemRef, aura->GetEffect(EFFECT_0));
+                }
+
             }
 
             void Register()
@@ -1389,41 +1400,6 @@ class spell_warl_shadow_ward : public SpellScriptLoader
         }
 };
 
-// 63310 - Glyph of Shadowflame
-class spell_warl_glyph_of_shadowflame : public SpellScriptLoader
-{
-    public:
-        spell_warl_glyph_of_shadowflame() : SpellScriptLoader("spell_warl_glyph_of_shadowflame") { }
-
-        class spell_warl_glyph_of_shadowflame_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_glyph_of_shadowflame_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME))
-                    return false;
-                return true;
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-                GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_WARLOCK_GLYPH_OF_SHADOWFLAME, true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                OnEffectProc += AuraEffectProcFn(spell_warl_glyph_of_shadowflame_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_glyph_of_shadowflame_AuraScript();
-        }
-};
-
 class spell_wrl_fire_bolt : public SpellScriptLoader
 {
 public:
@@ -1528,7 +1504,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_empowerment();
     new spell_warl_everlasting_affliction();
     new spell_warl_fel_synergy();
-    new spell_warl_glyph_of_shadowflame();
     new spell_warl_haunt();
     new spell_warl_health_funnel();
     new spell_warl_life_tap();

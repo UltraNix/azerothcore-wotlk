@@ -7196,8 +7196,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                         if (aur->GetStackAmount() == 5)
                         {
-                            if (stacker)
+                            if (stacker && aur->HasEffect(EFFECT_0))
+                            {
+                                aur->GetEffect(EFFECT_0)->RecalculateAmount();
                                 aur->RefreshDuration();
+                            }
 
                             return true;
                         }
@@ -7240,8 +7243,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                         if (aur->GetStackAmount() == 5)
                         {
-                            if (stacker)
+                            if (stacker && aur->HasEffect(EFFECT_0))
+                            {
+                                aur->GetEffect(EFFECT_0)->RecalculateAmount();
                                 aur->RefreshDuration();
+                            }
 
                             return true;
                         }
