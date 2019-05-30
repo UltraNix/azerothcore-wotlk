@@ -675,8 +675,17 @@ void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, uint32 zone)
 
 void OutdoorPvPEP::HandlePlayerResurrects(Player* player, uint32 zone)
 {
-    // Add buffs upon resurrect
-    OutdoorPvPEP::HandlePlayerEnterZone(player, zone);
+    // add buffs
+    if (player->GetTeamId() == TEAM_ALLIANCE)
+    {
+        if (m_AllianceTowersControlled && m_AllianceTowersControlled < 5)
+            player->CastSpell(player, EP_AllianceBuffs[m_AllianceTowersControlled - 1], true);
+    }
+    else
+    {
+        if (m_HordeTowersControlled && m_HordeTowersControlled < 5)
+            player->CastSpell(player, EP_HordeBuffs[m_HordeTowersControlled - 1], true);
+    }
 }
 
 void OutdoorPvPEP::HandlePlayerLeaveZone(Player* player, uint32 zone)
