@@ -1555,7 +1555,6 @@ enum WandererData
     WANDERER_EVENT_SAY              = 5,
 
     WANDERER_SPELL_FIRE             = 39199,
-    WANDERER_SPELL_FEIGN_DEATH      = 71598,
 
     WANDERER_GOSSIP_HELLO           = 1110000,
 
@@ -1677,15 +1676,22 @@ class npc_wanderer_dalaranNPC : public CreatureScript
 {
 public:
     npc_wanderer_dalaranNPC() : CreatureScript("npc_wanderer_dalaranNPC") {}
-    struct npc_wanderer_dalaranNPCAI : public ScriptedAI
+    struct npc_wanderer_dalaranNPCAI : public SmartAI
     {
-        npc_wanderer_dalaranNPCAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_wanderer_dalaranNPCAI(Creature* creature) : SmartAI(creature) {}
+
+        void Reset() override
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+            me->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
+        }
 
         void DoAction(int32 param) override
         {
             if (param == 100)
             {
-                me->CastSpell(me, WANDERER_SPELL_FEIGN_DEATH);
+                me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+                me->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                 events.ScheduleEvent(WANDERER_EVENT_CAST_FIRE, 2s);
             }
         }
