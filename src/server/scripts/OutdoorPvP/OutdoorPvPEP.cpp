@@ -673,6 +673,12 @@ void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, uint32 zone)
     OutdoorPvP::HandlePlayerEnterZone(player, zone);
 }
 
+void OutdoorPvPEP::HandlePlayerResurrects(Player* player, uint32 zone)
+{
+    // Add buffs upon resurrect
+    OutdoorPvPEP::HandlePlayerEnterZone(player, zone);
+}
+
 void OutdoorPvPEP::HandlePlayerLeaveZone(Player* player, uint32 zone)
 {
     // remove buffs

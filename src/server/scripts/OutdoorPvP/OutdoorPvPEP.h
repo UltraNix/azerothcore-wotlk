@@ -308,6 +308,7 @@ class OutdoorPvPEP : public OutdoorPvP
 
         void HandlePlayerEnterZone(Player* player, uint32 zone);
         void HandlePlayerLeaveZone(Player* player, uint32 zone);
+        void HandlePlayerResurrects(Player* player, uint32 zone);
 
         bool Update(uint32 diff);
 
