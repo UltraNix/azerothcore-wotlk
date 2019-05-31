@@ -283,7 +283,45 @@ class spell_item_toy_train_set : public SpellScriptLoader
             {
                 PreventHitDefaultEffect(effIndex);
                 if (Unit* target = GetHitUnit())
+                {
+                    uint8 gender = target->getGender();
+                    switch (target->getRace())
+                    {
+                    case RACE_BLOODELF:
+                        target->PlayDistanceSound(gender ? 9644 : 9672);
+                        break;
+                    case RACE_DRAENEI:
+                        target->PlayDistanceSound(gender ? 9697 : 9722);
+                        break;
+                    case RACE_DWARF:
+                        target->PlayDistanceSound(gender ? 7637 : 7636);
+                        break;
+                    case RACE_HUMAN:
+                        target->PlayDistanceSound(gender ? 7635 : 7634);
+                        break;
+                    case RACE_ORC:
+                        target->PlayDistanceSound(gender ? 7639 : 7638);
+                        break;
+                    case RACE_GNOME:
+                        target->PlayDistanceSound(gender ? 7641 : 7640);
+                        break;
+                    case RACE_NIGHTELF:
+                        target->PlayDistanceSound(gender ? 7643 : 7642);
+                        break;
+                    case RACE_UNDEAD_PLAYER:
+                        target->PlayDistanceSound(gender ? 7645 : 7644);
+                        break;
+                    case RACE_TAUREN:
+                        target->PlayDistanceSound(gender ? 7647 : 7646);
+                        break;
+                    case RACE_TROLL:
+                        target->PlayDistanceSound(gender ? 7649 : 7648);
+                        break;
+                    default:
+                        break;
+                    }
                     target->HandleEmoteCommand(EMOTE_ONESHOT_TRAIN);
+                }
             }
 
             void Register()
