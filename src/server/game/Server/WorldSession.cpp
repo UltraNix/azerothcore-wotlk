@@ -250,6 +250,19 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             m_Socket->CloseSocket();
     }
 
+    if (!IsConnectionIdle())
+    {
+        if (GetPlayer() && GetPlayer()->IsInWorld())
+        {
+            _mailSendTimer.Update(diff);
+            if (_mailSendTimer.Passed())
+            {
+                SendExternalMails();
+                _mailSendTimer.Reset(sWorld->getIntConfig(CONFIG_EXTERNAL_MAIL_INTERVAL) * MINUTE * IN_MILLISECONDS);
+            }
+        }
+    }
+
     HandleTeleportTimeout(updater.ProcessLogout());
 
     uint32 _startMSTime = getMSTime();

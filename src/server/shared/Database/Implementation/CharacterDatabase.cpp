@@ -585,4 +585,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     // Transmog visibility
     PrepareStatement(CHAR_UPD_ADD_TRANSMOG_VISIBILITY, "UPDATE characters SET extra_flags = extra_flags | ? WHERE account = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_REMOVE_TRANSMOG_VISIBILITY, "UPDATE characters SET extra_flags = extra_flags & ~ ? WHERE account = ?", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_MAIL_EXTERNAL,
+        "SELECT id, subject, message, money, item, item_count FROM mail_external WHERE receiver = ?",
+        CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_MAIL_EXTERNAL, "DELETE FROM mail_external WHERE id = ?", CONNECTION_ASYNC);
 }

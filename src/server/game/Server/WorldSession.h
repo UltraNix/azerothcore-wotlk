@@ -364,7 +364,11 @@ class WorldSession
 
         void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data);
 
+        // External Mail
         void DoLootRelease(uint64 lguid);
+        TimeTrackerSmall _mailSendTimer;
+
+        void SendExternalMails();
 
         // Account mute time
         time_t m_muteTime;

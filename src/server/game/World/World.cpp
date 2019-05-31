@@ -1398,6 +1398,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ] = sConfigMgr->GetIntDefault( "Movement.FollowStartTimer", 100 );
     m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ] = sConfigMgr->GetFloatDefault( "Movement.FollowMaxPathLength", 60.0f );
 
+    m_bool_configs[CONFIG_EXTERNAL_MAIL] = sConfigMgr->GetBoolDefault("Mail.External", false);
+    m_int_configs[CONFIG_EXTERNAL_MAIL_INTERVAL] = sConfigMgr->GetIntDefault("Mail.ExternalInterval", 1);
+
     Movement::FollowMovementGenerator::FOLLOW_UPDATE_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWUPDATE_INTERVAL ];
     Movement::FollowMovementGenerator::FOLLOW_START_TIMER = m_int_configs[ CONFIG_MOVEMENT_FOLLOWSTART_TIMER ];
     Movement::FollowMovementGenerator::FOLLOW_MAX_PATH_LENGTH = m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ];

@@ -197,6 +197,7 @@ enum WorldBoolConfigs
     CONFIG_NINJA_LOOTER_LIST,                 // Sitowsky: Ninja Looter list.
     CONFIG_ANTICHEAT_WINTERGRASP,             // Turns on or off notifications about someone trying to attack final gate from under textures or relic room.
     CONFIG_GM_ANTIABUSE_MONEY,                // Disallow GM to have any gold
+    CONFIG_EXTERNAL_MAIL,                     // Enables or disabled sending external mails
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -414,6 +415,7 @@ enum WorldIntConfigs
     CONFIG_WINTERGRASP_REMINDER,
     CONFIG_ICC_STAGE,                           // Afgann: Sets amount of opened wings on heroic in ICC.
     CONFIG_ICC_ATTEMPTS,                        // Afgann: Sets amount of heroic attempts in ICC.
+    CONFIG_EXTERNAL_MAIL_INTERVAL,              // Interval for sending external mails
     INT_CONFIG_VALUE_COUNT
 };
 

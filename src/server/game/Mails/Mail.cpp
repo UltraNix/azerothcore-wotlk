@@ -285,3 +285,55 @@ void MailDraft::SendMailTo(SQLTransaction& trans, MailReceiver const& receiver, 
         deleteIncludedItems(temp);
     }
 }
+
+void WorldSession::SendExternalMails()
+{
+    auto player = GetPlayer();
+    if (!sWorld->getBoolConfig(CONFIG_EXTERNAL_MAIL) || !player)
+        return;
+
+    auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MAIL_EXTERNAL);
+    stmt->setUInt32(0, player->GetGUIDLow());
+
+    auto result = CharacterDatabase.Query(stmt);
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint64 id = fields[0].GetUInt64();
+            std::string subject = fields[1].GetString();
+            std::string message = fields[2].GetString();
+            uint64 money = fields[3].GetUInt64();
+            uint32 ItemID = fields[4].GetUInt64();
+            uint32 ItemCount = fields[5].GetUInt64();
+
+            sLog->outDebug(LOG_FILTER_NONE, "EXTERNAL MAIL> Sending mail to %u, Item:%u", player->GetGUID(), ItemID);
+
+            auto transaction = CharacterDatabase.BeginTransaction();
+
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_EXTERNAL);
+            stmt->setUInt64(0, id);
+            CharacterDatabase.ExecuteOrAppend(transaction, stmt);
+
+            if (ItemID != 0)
+            {
+                auto mailItem = Item::CreateItem(ItemID, ItemCount, player);
+                mailItem->SaveToDB(transaction);
+
+                MailDraft(subject, message)
+                    .AddItem(mailItem)
+                    .AddMoney(money)
+                    .SendMailTo(transaction, MailReceiver(player), MailSender(MAIL_NORMAL, uint32(0), MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+            }
+            else
+            {
+                MailDraft(subject, message)
+                    .AddMoney(money)
+                    .SendMailTo(transaction, MailReceiver(player), MailSender(MAIL_NORMAL, uint32(0), MAIL_STATIONERY_GM), MAIL_CHECK_MASK_RETURNED);
+            }
+
+            CharacterDatabase.CommitTransaction(transaction);
+        } while (result->NextRow());
+    }
+}
