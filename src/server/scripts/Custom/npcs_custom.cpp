@@ -1680,6 +1680,11 @@ public:
     {
         npc_wanderer_dalaranNPCAI(Creature* creature) : SmartAI(creature) {}
 
+        void JustReachedHome() override
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
         void Reset() override
         {
             me->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
