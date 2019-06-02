@@ -4253,15 +4253,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 1543:
             spellInfo->speed = 0;
             break;
-        // Exlosive trap
-        case 13812:
-        case 14314:
-        case 14315:
-        case 27026:
-        case 49064:
-        case 49065:
-            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
-            break;
         // Furious Howl
         case 64491:
         case 64492:
@@ -7911,7 +7902,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_10_YARDS;
             break;
         case 48365:    //Wintergarde Gryphon Commander
-            spellInfo->DurationIndex = 21; // Duration -1            
+            spellInfo->DurationIndex = 21; // Duration -1
             break;
         }
 
