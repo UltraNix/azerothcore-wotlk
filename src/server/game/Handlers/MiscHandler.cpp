@@ -1758,7 +1758,7 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
 
     if(Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
     {
-        // bf->PlayerAskToLeave(_player); FIXME
+        _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->GetOrientation());
         return;
     }
 
