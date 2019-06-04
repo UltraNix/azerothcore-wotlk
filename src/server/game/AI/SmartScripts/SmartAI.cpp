@@ -73,6 +73,7 @@ SmartAI::SmartAI(Creature* c) : CreatureAI(c)
     mInvincibilityHpLevel = 0;
 
     mJustReset = false;
+    mEvadeDisabled = false;
 
     // Xinef: Vehicle conditions
     m_ConditionsTimer = 0;
@@ -629,6 +630,12 @@ void SmartAI::EnterEvadeMode()
     if (!me->IsAlive() || me->IsInEvadeMode())
         return;
 
+    if (mEvadeDisabled)
+    {
+        GetScript()->ProcessEventsFor(SMART_EVENT_EVADE);
+        return;
+    }
+
     if (IS_PLAYER_GUID(me->GetCharmerGUID()) || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
         me->AttackStop();
@@ -945,6 +952,11 @@ void SmartAI::SetFly(bool fly)
 void SmartAI::SetSwim(bool swim)
 {
     me->SetSwim(swim);
+}
+
+void SmartAI::SetEvadeDisabled(bool disable)
+{
+    mEvadeDisabled = disable;
 }
 
 void SmartAI::sGossipHello(Player* player)

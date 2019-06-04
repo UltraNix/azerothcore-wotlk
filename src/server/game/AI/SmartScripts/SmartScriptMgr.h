@@ -556,7 +556,7 @@ enum SMART_ACTION
     SMART_ACTION_RISE_UP                            = 114,    // distance
     // RESERVED                                        = 115,
     // RESERVED                                        = 116,
-    // RESERVED                                        = 117,
+    SMART_ACTION_DISABLE_EVADE                      = 117,
     // RESERVED                                        = 118,
     // RESERVED                                        = 119,
     // RESERVED                                        = 120,
@@ -1150,6 +1150,11 @@ struct SmartAction
             uint32 stopMovement;
             uint32 movementExpired;
         } stopMotion;
+
+        struct
+        {
+            uint32 disable;
+        } disableEvade;
 
         //! Note for any new future actions
         //! All parameters must have type uint32

@@ -2769,6 +2769,13 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 me->FindMap()->LoadGrid(e.target.x, e.target.y);
             break;
         }
+        case SMART_ACTION_DISABLE_EVADE:
+        {
+            if (!IsSmart())
+                break;
+            ENSURE_AI(SmartAI, me->AI())->SetEvadeDisabled(e.action.disableEvade.disable != 0);
+            break;
+        }
         default:
             sLog->outErrorDb("SmartScript::ProcessAction: Entry %d SourceType %u, Event %u, Unhandled Action type %u", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
             break;

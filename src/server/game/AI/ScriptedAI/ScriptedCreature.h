@@ -26,6 +26,15 @@
 #include "TaskScheduler.h"
 
 #define CAST_AI(a, b)   (dynamic_cast<a*>(b))
+#define ENSURE_AI(a,b) (EnsureAI<a>(b))
+
+template<class T, class U>
+inline T* EnsureAI(U* ai)
+{
+    T* cast_ai = dynamic_cast<T*>(ai);
+    ASSERT(cast_ai);
+    return cast_ai;
+}
 
 class InstanceScript;
 
