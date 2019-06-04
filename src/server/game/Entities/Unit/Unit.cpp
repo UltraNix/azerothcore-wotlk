@@ -11166,7 +11166,7 @@ float Unit::SpellDoneCritChance(Unit const* /*victim*/, SpellInfo const* spellPr
             {
                 // Explosive Trap exception
                 if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags == flag96(0x00000004, 0x00000000, 0x00004000))
-                    crit_chance = crit_chance = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
+                    crit_chance = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
                 else
                     crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
             }
