@@ -3002,8 +3002,15 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         else if ( m_spellInfo->IsDelayedSpell() && unit == m_targets.GetUnitTarget() )
         {
             //! Only stealth usable in combat will ignore flying spells
-            const bool isNotVisibleForHit = unit->HasAuraType( SPELL_AURA_MOD_STEALTH ) && !unit->HasAuraTypeWithAttribute( SPELL_AURA_MOD_STEALTH, SPELL_ATTR0_CANT_USED_IN_COMBAT );
-            if ( isNotVisibleForHit && !m_caster->CanSeeOrDetect( unit, false ) )
+            auto & stealthAuras = unit->GetAuraEffectsByType(SPELL_AURA_MOD_STEALTH);
+
+            const bool isNotVisibleForHit = !stealthAuras.empty() && std::any_of(stealthAuras.begin(), stealthAuras.end(), [](AuraEffect * auraEff)
+            {
+                SpellInfo const* spellInfo = auraEff->GetBase()->GetSpellInfo();
+                return !spellInfo->HasAttribute(SPELL_ATTR0_CANT_USED_IN_COMBAT);
+            });
+
+            if (isNotVisibleForHit && !m_caster->CanSeeOrDetect(unit, false))
                 return SPELL_MISS_DODGE; // SPELL_MISS_EVADE generates wrong entries in combat log
         }
     }
