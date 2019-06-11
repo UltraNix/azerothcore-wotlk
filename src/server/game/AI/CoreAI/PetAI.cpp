@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -137,7 +137,7 @@ bool PetAI::_canMeleeAttack() const
 {
     return me->GetEntry() != 416 /*ENTRY_IMP*/ &&
         me->GetEntry() != 510 /*ENTRY_WATER_ELEMENTAL*/ &&
-        me->GetEntry() != 37994 /*ENTRY_WATER_ELEMENTAL_PERM*/;    
+        me->GetEntry() != 37994 /*ENTRY_WATER_ELEMENTAL_PERM*/;
 }
 
 void PetAI::UpdateAI(uint32 diff)
@@ -252,7 +252,8 @@ void PetAI::UpdateAI(uint32 diff)
                 if (spellInfo->CanBeUsedInCombat())
                 {
                     // Check if we're in combat or commanded to attack
-                    if (!me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack())
+                    // Blood Pact exception
+                    if (!me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack() && !(spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags[0] & 0x00800000 && spellInfo->HasAttribute(SPELL_ATTR7_CONSOLIDATED_RAID_BUFF)))
                         continue;
                 }
 
@@ -524,7 +525,7 @@ void PetAI::HandleReturnMovement()
     if (me->isPossessed())
         return;
 
-    // Ring of Valor    
+    // Ring of Valor
     if (me->GetMapId() == 618)
     {
         float petZ = me->GetPositionZ();
@@ -714,7 +715,7 @@ bool PetAI::CanAttack(Unit* target, const SpellInfo* spellInfo)
     // Stay - can attack if target is within range or commanded to
     if (me->GetCharmInfo()->HasCommandState(COMMAND_STAY))
         return (me->IsWithinMeleeRange(target) || me->GetCharmInfo()->IsCommandAttack());
-    
+
     //  Pets attacking something (or chasing) should only switch targets if owner tells them to
     if (me->GetVictim() && me->GetVictim() != target)
     {
@@ -724,14 +725,14 @@ bool PetAI::CanAttack(Unit* target, const SpellInfo* spellInfo)
             ownerTarget = owner->GetSelectedUnit();
         else
             ownerTarget = me->GetCharmerOrOwner()->GetVictim();
-     
+
         if (ownerTarget && me->GetCharmInfo()->IsCommandAttack())
             return (target->GetGUID() == ownerTarget->GetGUID());
     }
 
     // Follow
     if (me->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-        return !me->GetCharmInfo()->IsReturning();        
+        return !me->GetCharmInfo()->IsReturning();
 
     // default, though we shouldn't ever get here
     return false;
