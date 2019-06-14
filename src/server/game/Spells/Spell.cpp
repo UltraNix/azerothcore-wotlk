@@ -3869,6 +3869,18 @@ void Spell::_cast(bool skipCheck)
         m_caster->resetAttackTimer(BASE_ATTACK);
         m_caster->resetAttackTimer(OFF_ATTACK);
     }
+
+    // Explicitly send cooldown event for those spells
+    // TODO: add custom flag for this
+    if (m_spellInfo->Id == 62960)
+    {
+        if (Player* owner = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+        {
+            WorldPacket data;
+            m_caster->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, m_spellInfo->Id, m_spellInfo->RecoveryTime);
+            owner->SendDirectMessage(&data);
+        }
+    }
 }
 
 void Spell::handle_immediate()
