@@ -1633,8 +1633,8 @@ public:
                 time_t now = time(nullptr);
                 tm* aTm = localtime(&now);
 
-                // Event should start at 10, 13, 16, 19, 22;
-                if (aTm->tm_min == 0 && aTm->tm_hour > 9 && aTm->tm_hour < 23 && aTm->tm_hour % 3 == 1)
+                // Event should start at 10, 15, 20;
+                if (aTm->tm_min == 0 && aTm->tm_hour >= 10 && aTm->tm_hour <= 20 && aTm->tm_hour % 5 == 0)
                     StartEvent();
 
                 events.RescheduleEvent(WANDERER_EVENT_CHECKHOUR, 1min);
