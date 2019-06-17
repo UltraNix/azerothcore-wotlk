@@ -442,10 +442,11 @@ void WorldSession::HandlePetAction(WorldPacket & recvData)
     {
         //If a pet is dismissed, m_Controlled will change
         std::vector<Unit*> controlled;
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellid);
         for (Unit::ControlSet::iterator itr = GetPlayer()->m_Controlled.begin(); itr != GetPlayer()->m_Controlled.end(); ++itr)
         {
-            // xinef: allow to dissmis dead pets and to use Heart of The Phoenix spell on dead pets
-            if ((*itr)->GetEntry() == pet->GetEntry() && ((*itr)->IsAlive() || (flag == ACT_COMMAND && spellid == COMMAND_ABANDON) || spellid == 55709))
+            // xinef: allow to dissmis dead pets and to use castable while dead spells
+            if ((*itr)->GetEntry() == pet->GetEntry() && ((*itr)->IsAlive() || (flag == ACT_COMMAND && spellid == COMMAND_ABANDON) || (spellInfo && spellInfo->CanCastWhileDead())))
                 controlled.push_back(*itr);
             // xinef: mirror image blizzard crappness
             else if ((*itr)->GetEntry() == NPC_MIRROR_IMAGE && flag == ACT_COMMAND && spellid == COMMAND_FOLLOW)
