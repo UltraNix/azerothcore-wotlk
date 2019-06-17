@@ -444,8 +444,8 @@ void WorldSession::HandlePetAction(WorldPacket & recvData)
         std::vector<Unit*> controlled;
         for (Unit::ControlSet::iterator itr = GetPlayer()->m_Controlled.begin(); itr != GetPlayer()->m_Controlled.end(); ++itr)
         {
-            // xinef: allow to dissmis dead pets
-            if ((*itr)->GetEntry() == pet->GetEntry() && ((*itr)->IsAlive() || (flag == ACT_COMMAND && spellid == COMMAND_ABANDON)))
+            // xinef: allow to dissmis dead pets and to use Heart of The Phoenix spell on dead pets
+            if ((*itr)->GetEntry() == pet->GetEntry() && ((*itr)->IsAlive() || (flag == ACT_COMMAND && spellid == COMMAND_ABANDON) || spellid == 55709))
                 controlled.push_back(*itr);
             // xinef: mirror image blizzard crappness
             else if ((*itr)->GetEntry() == NPC_MIRROR_IMAGE && flag == ACT_COMMAND && spellid == COMMAND_FOLLOW)
