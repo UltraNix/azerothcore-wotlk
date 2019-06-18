@@ -5215,10 +5215,13 @@ uint32 Unit::GetDiseasesByCaster(uint64 casterGUID, uint8 mode)
                 // used for glyph of scourge strike
                 else if (mode == 2)
                 {
-                    Aura* aura = (*i)->GetBase();
-                    if (aura && !aura->IsRemoved() && aura->GetDuration() > 0)
-                        if ((aura->GetApplyTime() + aura->GetMaxDuration()/1000 + 8) > (time(nullptr) + aura->GetDuration()/1000))
-                            aura->SetDuration(aura->GetDuration()+3000);
+                    if (Aura* aura = (*i)->GetBase())
+                    {
+                        uint32 maxDuration = (*i)->GetSpellInfo()->GetMaxDuration();
+                        uint32 duration = std::min(aura->GetDuration() + 3000U, maxDuration);
+                        aura->SetDuration(duration);
+                        aura->SetMaxDuration(duration);
+                    }
                 }
             }
             ++i;
