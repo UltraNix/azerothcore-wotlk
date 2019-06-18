@@ -24,6 +24,7 @@ ObjectData const creatureData[] =
 {
     { NPC_THRALL    , DATA_THRALL   },
     { NPC_TARETHA   , DATA_TARETHA  },
+    { NPC_LIEUTENANT_DRAKE, DATA_LIEUTENANT_DRAKE },
     { 0             , 0             } // END
 };
 
@@ -230,6 +231,10 @@ struct instance_old_hillsbrad_InstanceMapScript : public InstanceScript
                     DoUpdateWorldState(WORLD_STATE_BARRELS_PLANTED, 0);
                     break;
                 case EVENT_SUMMON_LIEUTENANT:
+                    if (auto lieutenantDrake = GetCreature(DATA_LIEUTENANT_DRAKE))
+                        if (lieutenantDrake->IsAlive())
+                            break;
+
                     instance->LoadGrid(instancePositions[2].GetPositionX(), instancePositions[2].GetPositionY());
                     if (auto drake = instance->SummonCreature(NPC_LIEUTENANT_DRAKE, instancePositions[2]))
                         if (drake->IsAIEnabled)
