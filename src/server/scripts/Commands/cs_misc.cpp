@@ -136,6 +136,7 @@ public:
             { "mutehistory",        SEC_GAMEMASTER,         false, &HandleMuteHistoryCommand,           "" },
             { "gmhelp",             SEC_MODERATOR,          false, &HandleGmhelpCommand,                "" },
             { "blockinvite",        SEC_PLAYER,             false, HandleBlockInviteCommand,            "" },
+            { "pvpstats",           SEC_GAMEMASTER,         true,  &HandlePvPstatsCommand,              ""},
         };
         return commandTable;
     }
@@ -3566,6 +3567,35 @@ public:
             player->SetBlockChannelInvite(true);
             handler->PSendSysMessage("You no longer receive channel invites.");
         }
+        return true;
+    }
+
+    static bool HandlePvPstatsCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_STORE_STATISTICS_ENABLE))
+        {
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PVPSTATS_FACTIONS_OVERALL);
+            PreparedQueryResult result = CharacterDatabase.Query(stmt);
+
+            if (result)
+            {
+                Field* fields = result->Fetch();
+                uint32 horde_victories = fields[1].GetUInt32();
+
+                if (!(result->NextRow()))
+                    return false;
+
+                fields = result->Fetch();
+                uint32 alliance_victories = fields[1].GetUInt32();
+
+                handler->PSendSysMessage(LANG_PVPSTATS, alliance_victories, horde_victories);
+            }
+            else
+                return false;
+        }
+        else
+            handler->PSendSysMessage(LANG_PVPSTATS_DISABLED);
+
         return true;
     }
 };

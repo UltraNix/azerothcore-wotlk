@@ -1558,6 +1558,13 @@ struct BattlegroundAVScore : public BattlegroundScore
 {
     BattlegroundAVScore(Player* player) : BattlegroundScore(player), GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), MinesCaptured(0), LeadersKilled(0), SecondaryObjectives(0) { }
     ~BattlegroundAVScore() { }
+
+    uint32 GetAttr1() const final override { return GraveyardsAssaulted; }
+    uint32 GetAttr2() const final override { return GraveyardsDefended; }
+    uint32 GetAttr3() const final override { return TowersAssaulted; }
+    uint32 GetAttr4() const final override { return TowersDefended; }
+    uint32 GetAttr5() const final override { return MinesCaptured; }
+
     uint32 GraveyardsAssaulted;
     uint32 GraveyardsDefended;
     uint32 TowersAssaulted;

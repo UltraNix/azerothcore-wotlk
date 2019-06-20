@@ -286,7 +286,9 @@ enum TrinityStrings
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
     LANG_COMMAND_CREATGUIDNOTFOUND      = 287,
-      // TICKET STRINGS NEED REWRITE // 288-296 FREE
+    LANG_PVPSTATS                       = 288,
+    LANG_PVPSTATS_DISABLED              = 289,
+      // TICKET STRINGS NEED REWRITE // 290-296 FREE
 
       // END
     LANG_COMMAND_SPAWNDIST              = 297,

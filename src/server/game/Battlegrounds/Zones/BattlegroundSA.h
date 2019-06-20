@@ -25,6 +25,10 @@ struct BattlegroundSAScore : public BattlegroundScore
 {
     BattlegroundSAScore(Player* player) : BattlegroundScore(player), demolishers_destroyed(0), gates_destroyed(0) { }
     ~BattlegroundSAScore() { }
+
+    uint32 GetAttr1() const final override { return demolishers_destroyed; }
+    uint32 GetAttr2() const final override { return gates_destroyed; }
+
     uint8 demolishers_destroyed;
     uint8 gates_destroyed;
 };
