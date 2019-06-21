@@ -1575,7 +1575,7 @@ class spell_dk_death_grip : public SpellScriptLoader
                     if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(52283))
                         return SPELL_FAILED_BAD_TARGETS;
 
-                    if (caster->IsFalling())
+                    if (caster->IsFalling() || caster->IsFlying())
                         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 }
                 return SPELL_CAST_OK;
