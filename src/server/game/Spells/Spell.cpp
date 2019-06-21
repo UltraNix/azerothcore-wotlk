@@ -5699,6 +5699,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 ChatHandler(m_caster->ToPlayer()->GetSession()).PSendSysMessage("You need to be on top of arena before you can use this spell.");
                 return SPELL_FAILED_DONT_REPORT;
             }
+            break;
         case 47939: // Gather Lumber
         {
             Unit* target = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
