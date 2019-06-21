@@ -1084,6 +1084,12 @@ class spell_item_blade_ward_enchant : public SpellScriptLoader
         }
 };
 
+enum BloodReserve
+{
+    SPELL_GEN_BLOOD_RESERVE_AURA = 64568,
+    SPELL_GEN_BLOOD_RESERVE_HEAL = 64569
+};
+
 class spell_item_blood_draining_enchant : public SpellScriptLoader
 {
     public:
@@ -1093,20 +1099,26 @@ class spell_item_blood_draining_enchant : public SpellScriptLoader
         {
             PrepareAuraScript(spell_item_blood_draining_enchant_AuraScript);
 
-            void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+            bool CheckProc(ProcEventInfo& eventInfo)
             {
-                PreventDefaultAction();
-                if ((eventInfo.GetActionTarget()->GetHealth() - eventInfo.GetDamageInfo()->GetDamage()) >= eventInfo.GetActionTarget()->CountPctFromMaxHealth(35))
-                    return;
+                if (Unit* caster = eventInfo.GetActionTarget())
+                    if (caster->HealthBelowPct(35))
+                        return true;
 
-                const SpellInfo* spellInfo = sSpellMgr->GetSpellInfo(64569 /*SPELL_BLOOD_RESERVE*/);
-                int32 basepoints = spellInfo->Effects[EFFECT_0].CalcValue() * this->GetStackAmount();
-                eventInfo.GetActionTarget()->CastCustomSpell(spellInfo->Id, SPELLVALUE_BASE_POINT0, basepoints, eventInfo.GetActionTarget(), true);
-                eventInfo.GetActionTarget()->RemoveAurasDueToSpell(GetSpellInfo()->Id); // Remove rest auras
+                return false;
             }
 
-            void Register()
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
+                PreventDefaultAction();
+                Unit* caster = eventInfo.GetActionTarget();
+                caster->CastCustomSpell(SPELL_GEN_BLOOD_RESERVE_HEAL, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), caster, TRIGGERED_FULL_MASK);
+                caster->RemoveAura(SPELL_GEN_BLOOD_RESERVE_AURA);
+            }
+
+            void Register() override
+            {
+                DoCheckProc += AuraCheckProcFn(spell_item_blood_draining_enchant_AuraScript::CheckProc);
                 OnEffectProc += AuraEffectProcFn(spell_item_blood_draining_enchant_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
             }
         };
