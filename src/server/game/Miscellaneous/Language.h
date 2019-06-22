@@ -286,9 +286,7 @@ enum TrinityStrings
     LANG_COMMAND_WHISPERON              = 285,
     LANG_COMMAND_WHISPEROFF             = 286,
     LANG_COMMAND_CREATGUIDNOTFOUND      = 287,
-    LANG_PVPSTATS                       = 288,
-    LANG_PVPSTATS_DISABLED              = 289,
-      // TICKET STRINGS NEED REWRITE // 290-296 FREE
+      // TICKET STRINGS NEED REWRITE // 288-296 FREE
 
       // END
     LANG_COMMAND_SPAWNDIST              = 297,
@@ -353,7 +351,9 @@ enum TrinityStrings
     LANG_TITLE_REMOVE_RES               = 354,
     LANG_TITLE_CURRENT_RES              = 355,
     LANG_CURRENT_TITLE_RESET            = 356,
-    // Room for more level 2              357-399 not used
+    LANG_PVPSTATS                       = 357,
+    LANG_PVPSTATS_DISABLED              = 358,
+    // Room for more level 2              359-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
