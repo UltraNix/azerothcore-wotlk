@@ -1567,6 +1567,16 @@ class spell_dk_death_grip : public SpellScriptLoader
             SpellCastResult CheckPvPRange()
             {
                 Unit* caster = GetCaster();
+                if (caster->IsPlayer() && caster->IsInWorld())
+                {
+                    float ground_z = caster->GetMap()->GetHeight(caster->GetPhaseMask(), caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), true);
+                    if ((ground_z > INVALID_HEIGHT && (ground_z + 4.0f) < caster->GetPositionZ()))
+                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                }
+
+                if (caster->IsFalling())
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
                 if (Unit* target = GetExplTargetUnit())
                 {
                     if (target->GetTypeId() == TYPEID_PLAYER && caster->GetExactDist(target) < 8.0f) // xinef: should be 8.0f, but we have to add target size (1.5f)
@@ -1574,9 +1584,6 @@ class spell_dk_death_grip : public SpellScriptLoader
 
                     if (target->GetTypeId() == TYPEID_PLAYER && target->HasAura(52283))
                         return SPELL_FAILED_BAD_TARGETS;
-
-                    if (caster->IsFalling() || caster->IsFlying())
-                        return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 }
                 return SPELL_CAST_OK;
             }
