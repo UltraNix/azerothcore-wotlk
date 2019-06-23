@@ -501,6 +501,8 @@ public:
         sLog->outString("Re-Loading Quest Templates...");
         sObjectMgr->LoadQuests();
         handler->SendGlobalGMSysMessage("DB table `quest_template` (quest definitions) reloaded.");
+        sGameEventMgr->LoadSeasonalQuestRelations();
+        handler->SendGlobalGMSysMessage("Game event seasonal quest relations reloaded.");
 
         /// dependent also from `gameobject` but this table not reloaded anyway
         sLog->outString("Re-Loading GameObjects for quests...");

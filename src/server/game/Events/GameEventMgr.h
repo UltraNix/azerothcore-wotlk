@@ -108,6 +108,7 @@ class GameEventMgr
         bool CheckOneGameEvent(uint16 entry) const;
         uint32 NextCheck(uint16 entry) const;
         void LoadFromDB();
+        void LoadSeasonalQuestRelations();
         void LoadHolidayDates();
         uint32 Update();
         bool IsActiveEvent(uint16 event_id) { return (m_ActiveEvents.find(event_id) != m_ActiveEvents.end()); }

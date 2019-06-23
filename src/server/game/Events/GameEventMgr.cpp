@@ -770,51 +770,7 @@ void GameEventMgr::LoadFromDB()
         }
     }
 
-    sLog->outString("Loading Game Event Seasonal Quest Relations...");
-    {
-        uint32 oldMSTime = getMSTime();
-
-        //                                                  0          1
-        QueryResult result = WorldDatabase.Query("SELECT questId, eventEntry FROM game_event_seasonal_questrelation");
-
-        if (!result)
-        {
-            sLog->outString(">> Loaded 0 seasonal quests additions in game events. DB table `game_event_seasonal_questrelation` is empty.");
-            sLog->outString();
-        }
-        else
-        {
-            uint32 count = 0;
-            do
-            {
-                Field* fields = result->Fetch();
-
-                uint32 questId  = fields[0].GetUInt32();
-                uint16 eventEntry = fields[1].GetUInt8();
-
-                Quest* questTemplate = const_cast<Quest*>(sObjectMgr->GetQuestTemplate(questId));
-
-                if (!questTemplate)
-                {
-                    sLog->outErrorDb("`game_event_seasonal_questrelation` quest id (%u) does not exist in `quest_template`", questId);
-                    continue;
-                }
-
-                if (eventEntry >= mGameEvent.size())
-                {
-                    sLog->outErrorDb("`game_event_seasonal_questrelation` event id (%u) is out of range compared to max event in `game_event`", eventEntry);
-                    continue;
-                }
-
-                questTemplate->SetEventIdForQuest(eventEntry);
-                ++count;
-            }
-            while (result->NextRow());
-
-            sLog->outString(">> Loaded %u quests additions in game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-            sLog->outString();
-        }
-    }
+    LoadSeasonalQuestRelations();
 
     sLog->outString("Loading Game Event Vendor Additions Data...");
     {
@@ -965,6 +921,54 @@ void GameEventMgr::LoadFromDB()
             while (result->NextRow());
 
             sLog->outString(">> Loaded %u pools for game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+            sLog->outString();
+        }
+    }
+}
+
+void GameEventMgr::LoadSeasonalQuestRelations()
+{
+    sLog->outString("Loading Game Event Seasonal Quest Relations...");
+    {
+        uint32 oldMSTime = getMSTime();
+
+        //                                                  0          1
+        QueryResult result = WorldDatabase.Query("SELECT questId, eventEntry FROM game_event_seasonal_questrelation");
+
+        if (!result)
+        {
+            sLog->outString(">> Loaded 0 seasonal quests additions in game events. DB table `game_event_seasonal_questrelation` is empty.");
+            sLog->outString();
+        }
+        else
+        {
+            uint32 count = 0;
+            do
+            {
+                Field* fields = result->Fetch();
+
+                uint32 questId = fields[0].GetUInt32();
+                uint16 eventEntry = fields[1].GetUInt8();
+
+                Quest* questTemplate = const_cast<Quest*>(sObjectMgr->GetQuestTemplate(questId));
+
+                if (!questTemplate)
+                {
+                    sLog->outErrorDb("`game_event_seasonal_questrelation` quest id (%u) does not exist in `quest_template`", questId);
+                    continue;
+                }
+
+                if (eventEntry >= mGameEvent.size())
+                {
+                    sLog->outErrorDb("`game_event_seasonal_questrelation` event id (%u) is out of range compared to max event in `game_event`", eventEntry);
+                    continue;
+                }
+
+                questTemplate->SetEventIdForQuest(eventEntry);
+                ++count;
+            } while (result->NextRow());
+
+            sLog->outString(">> Loaded %u quests additions in game events in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
             sLog->outString();
         }
     }
