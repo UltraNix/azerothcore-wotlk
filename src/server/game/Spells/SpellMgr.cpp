@@ -4561,7 +4561,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 50152:
             spellInfo->procFlags |= PROC_FLAG_TAKEN_PERIODIC;
             break;
-
+        // Winged Steed of the Ebon Blade
+        case 54729:
+            spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED;
+            break;
 
 
         /////////////////////////////////
