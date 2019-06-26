@@ -1116,7 +1116,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
                 return false;
 
             // Sitdev: legendary mount
-            if (player->HasAura(31700) && !player->IsFlying() && Bf->IsWarTime())
+            if (player->HasAura(31700) && !player->IsFlying())
                 return false;
             break;
         }
