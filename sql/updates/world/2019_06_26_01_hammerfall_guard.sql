@@ -1,0 +1,41 @@
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 2621 AND `source_type` = 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (6800, 6801, 6802, 6803, 6804) AND `source_type` = 9;
+
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 2621;
+
+INSERT INTO `smart_scripts` VALUES 
+(2621,0,0,0,0,0,100,0,0,0,2000,4000,11,6660,64,0,0,0,0,2,0,0,0,0,0,0,0,'Hammerfall Guardian - In Combat - Cast \'Shoot\''),
+(2621,0,1,0,9,0,100,0,0,5,11000,14000,11,12169,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - Within 0-5 Range - Cast \'Shield Block\''),
+(2621,0,2,0,0,0,100,0,5000,9000,8000,13000,11,12170,0,0,0,0,0,2,0,0,0,0,0,0,0,'Hammerfall Guardian - In Combat - Cast \'Revenge\''),
+(2621,0,3,0,22,0,100,0,101,5000,5000,0,80,6800,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Wave\' - Run Script'),
+(2621,0,4,0,22,0,100,0,78,5000,5000,0,80,6801,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Salute\' - Run Script'),
+(2621,0,5,0,22,0,100,0,58,5000,5000,0,80,6802,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Kiss\' - Run Script'),
+(2621,0,6,0,22,0,100,0,84,5000,5000,0,80,6803,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Shy\' - Run Script'),
+(2621,0,7,0,22,0,100,0,77,5000,5000,0,80,6804,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Rude\' - Run Script'),
+(2621,0,8,0,22,0,100,0,22,5000,5000,0,80,6804,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Chicken\' - Run Script'),
+(2621,0,9,0,22,0,100,0,17,5000,5000,0,80,6802,0,0,0,0,0,1,0,0,0,0,0,0,0,'Hammerfall Guardian - On Received Emote \'Bow\' - Run Script'),
+(6800,9,0,0,0,0,100,0,0,0,0,0,103,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted On'),
+(6800,9,1,0,0,0,100,0,0,0,0,0,66,0,0,0,0,0,0,7,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6800,9,2,0,0,0,100,0,2000,2000,0,0,5,3,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Play Emote \'Wave\''),
+(6800,9,3,0,0,0,100,0,4000,4000,0,0,66,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6800,9,4,0,0,0,100,0,0,0,0,0,103,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted Off'),
+(6801,9,0,0,0,0,100,0,0,0,0,0,103,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted On'),
+(6801,9,1,0,0,0,100,0,0,0,0,0,66,0,0,0,0,0,0,7,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6801,9,2,0,0,0,100,0,2000,2000,0,0,5,66,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Play Emote \'Salute\''),
+(6801,9,3,0,0,0,100,0,4000,4000,0,0,66,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6801,9,4,0,0,0,100,0,0,0,0,0,103,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted Off'),
+(6802,9,0,0,0,0,100,0,0,0,0,0,103,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted On'),
+(6802,9,1,0,0,0,100,0,0,0,0,0,66,0,0,0,0,0,0,7,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6802,9,2,0,0,0,100,0,2000,2000,0,0,5,2,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Play Emote \'Bow\''),
+(6802,9,3,0,0,0,100,0,4000,4000,0,0,66,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6802,9,4,0,0,0,100,0,0,0,0,0,103,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted Off'),
+(6803,9,0,0,0,0,100,0,0,0,0,0,103,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted On'),
+(6803,9,1,0,0,0,100,0,0,0,0,0,66,0,0,0,0,0,0,7,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6803,9,2,0,0,0,100,0,2000,2000,0,0,5,23,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Play Emote \'Flex\''),
+(6803,9,3,0,0,0,100,0,4000,4000,0,0,66,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6803,9,4,0,0,0,100,0,0,0,0,0,103,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted Off'),
+(6804,9,0,0,0,0,100,0,0,0,0,0,103,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted On'),
+(6804,9,1,0,0,0,100,0,0,0,0,0,66,0,0,0,0,0,0,7,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6804,9,2,0,0,0,100,0,2000,2000,0,0,5,25,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Play Emote \'Point\''),
+(6804,9,3,0,0,0,100,0,4000,4000,0,0,66,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Orientation'),
+(6804,9,4,0,0,0,100,0,0,0,0,0,103,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Stormwind City Guard - On Script - Set Rooted Off');
