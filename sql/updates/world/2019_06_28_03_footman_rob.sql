@@ -48,8 +48,10 @@ INSERT INTO `smart_scripts` VALUES
 (2525803,9,2,0,0,0,100,0,0,0,0,0,41,1,0,0,0,0,0,12,1,0,0,0,0,0,0,'Footman Rob - On Script - Despawn Instant'),
 (2525803,9,3,0,0,0,100,0,100,100,0,0,41,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Footman Rob - On Script - Despawn Instant');
 
-DELETE FROM `creature_text` WHERE `entry` IN (25261, 25259, 25258);
+DELETE FROM `creature_text` WHERE `entry` IN (25261, 25259, 25258, 25245);
 INSERT INTO `creature_text` VALUES 
+(25245,0,0,'You lads know the drill.  No alcohol to servicemen on duty.  You want the general to kill me himself?',12,7,100,274,0,0,0,'James Deacon'),
+(25245,1,0,'All right, all right... but you didn\'t get these from me!',12,7,100,6,0,0,0,'James Deacon'),
 (25258,0,0,'One last drink before we head to the front?',12,7,100,1,0,0,0,'Footman Rob'),
 (25258,1,0,'Barkeep!  Bring out your strongest ale.  We\'re off to the front.',12,7,100,1,0,0,0,'Footman Rob'),
 (25258,2,0,'You\'ll surely make an exception for us, eh?  We might not come back.',12,7,100,1,0,0,0,'Footman Rob'),
