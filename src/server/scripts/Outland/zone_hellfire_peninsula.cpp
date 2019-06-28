@@ -719,6 +719,197 @@ struct npc_abyssal_shelfAI : public ScriptedAI
     }
 };
 
+#define GOSSIP_ITEM_ATTUNE    "Yes, Scryer. You may possess me."
+
+enum DemoniacScryer
+{
+    GOSSIP_TEXTID_PROTECT           = 10659,
+    GOSSIP_TEXTID_ATTUNED           = 10643,
+
+    QUEST_DEMONIAC                  = 10838,
+    NPC_HELLFIRE_WARDLING           = 22259,
+    NPC_ORC_HA                      = 22273,
+    NPC_BUTTRESS                    = 22267,
+    NPC_BUTTRESS_SPAWNER            = 22260,
+
+    SPELL_SUMMONED                  = 7741,
+    SPELL_DEMONIAC_VISITATION       = 38708,
+    SPELL_BUTTRESS_APPERANCE        = 38719,
+    SPELL_SUCKER_CHANNEL            = 38721,
+    SPELL_SUCKER_DESPAWN_MOB        = 38691,
+    SPELL_SUCKER_SPAWN_MOB          = 38679,
+    SPELL_SUCKER_SPAWN_BOSS         = 38709,
+    SPELL_SUCKER_SPAWN_BUTRESS_N    = 38675,
+    SPELL_SUCKER_SPAWN_BUTRESS_S    = 38676,
+    SPELL_SUCKER_SPAWN_BUTRESS_E    = 38677,
+    SPELL_SUCKER_SPAWN_BUTRESS_W    = 38678,
+    SPELL_SUCKER_SPAWN_SPAWNER      = 38681,
+    SPELL_SPAWNER_VISUAL_EFFECT     = 38727,
+    SPELL_SUCKER_APPEARANCE         = 38690,
+    SPELL_MOB_DESPAWN_VISUAL        = 38891,
+
+    EVENT_SUMMON_IMP                = 1,
+    EVENT_SUMMON_ORC,
+    EVENT_SUMMON_BUTTRESS,
+    EVENT_START_ATTACK,
+    EVENT_DESPAWN
+};
+
+static const std::vector<uint32> ButressSpells = { SPELL_SUCKER_SPAWN_BUTRESS_N, SPELL_SUCKER_SPAWN_BUTRESS_S, SPELL_SUCKER_SPAWN_BUTRESS_E, SPELL_SUCKER_SPAWN_BUTRESS_W, SPELL_SUCKER_SPAWN_SPAWNER };
+
+struct npc_demoniac_scryerAI : public ScriptedAI
+{
+    npc_demoniac_scryerAI(Creature* creature) : ScriptedAI(creature), _summons(creature) { }
+
+    void Reset() override
+    {
+        _summons.DespawnAll();
+        _events.Reset();
+        _events.ScheduleEvent(EVENT_SUMMON_IMP, 15s);
+        _events.ScheduleEvent(EVENT_SUMMON_ORC, 2min + 15s);
+        _events.ScheduleEvent(EVENT_SUMMON_BUTTRESS, 45s);
+        _buttressCount = 0;
+        _completed = false;
+        me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        DoCastSelf(SPELL_SUCKER_APPEARANCE, true);
+    }
+
+    void AttackStart(Unit* /*enemy*/) override { }
+
+    void JustSummoned(Creature* summon) override
+    {
+        switch (summon->GetEntry())
+        {
+            case NPC_HELLFIRE_WARDLING:
+            case NPC_ORC_HA:
+                summon->SetPassive();
+                summon->CastSpell(summon, SPELL_SUMMONED, false);
+                _events.RescheduleEvent(EVENT_START_ATTACK, 2s);
+                break;
+            case NPC_BUTTRESS:
+                summon->SetFacingToObject(me);
+                summon->CastSpell(summon, SPELL_BUTTRESS_APPERANCE, false);
+                summon->CastSpell(me, SPELL_SUCKER_CHANNEL, false);
+                break;
+            case NPC_BUTTRESS_SPAWNER:
+                summon->CastSpell(summon, SPELL_SPAWNER_VISUAL_EFFECT, true);
+                break;
+            default:
+                break;
+        }
+
+        _summons.Summon(summon);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        _summons.DespawnAll();
+    }
+
+    void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+    {
+        _summons.Despawn(summon);
+        summon->DespawnOrUnsummon();
+    }
+
+    void sGossipHello(Player* player) override
+    {
+        if (_completed)
+        {
+            if (player->GetQuestStatus(QUEST_DEMONIAC) == QUEST_STATUS_INCOMPLETE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ATTUNE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_ATTUNED, me->GetGUID());
+            return;
+        }
+
+        player->SEND_GOSSIP_MENU(GOSSIP_TEXTID_PROTECT, me->GetGUID());
+        return;
+    }
+
+    void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) override
+    {
+        player->CLOSE_GOSSIP_MENU();
+        DoCast(player, SPELL_DEMONIAC_VISITATION);
+        _events.RescheduleEvent(EVENT_DESPAWN, 2.5min);
+    }
+
+    void UpdateAI(uint32 const diff) override
+    {
+        if (_events.Empty())
+            return;
+
+        _events.Update(diff);
+
+        switch (_events.ExecuteEvent())
+        {
+            case EVENT_SUMMON_IMP:
+                DoCastAOE(SPELL_SUCKER_SPAWN_MOB);
+                _events.Repeat(15s);
+                break;
+            case EVENT_SUMMON_ORC:
+                DoCastAOE(SPELL_SUCKER_SPAWN_BOSS);
+                break;
+            case EVENT_SUMMON_BUTTRESS:
+                if (_buttressCount < ButressSpells.size())
+                {
+                    DoCastSelf(ButressSpells[_buttressCount]);
+                    ++_buttressCount;
+                }
+
+                if (_buttressCount == 5)
+                {
+                    _completed = true;
+                    _events.Reset();
+                    _events.ScheduleEvent(EVENT_DESPAWN, 2min);
+                    break;
+                }
+
+                _events.Repeat(45s);
+                break;
+            case EVENT_START_ATTACK:
+                _summons.Broadcast([this](Creature* summon)
+                {
+                    if (summon->GetEntry() == NPC_HELLFIRE_WARDLING || summon->GetEntry() == NPC_ORC_HA && summon->GetReactState() == REACT_PASSIVE)
+                    {
+                        summon->SetAggressive();
+                        if (summon->IsAIEnabled)
+                            summon->AI()->AttackStart(me);
+                    }
+                });
+                break;
+            case EVENT_DESPAWN:
+                _summons.DespawnAll();
+                me->DespawnOrUnsummon();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private:
+        EventMap _events;
+        uint32 _buttressCount;
+        bool _completed;
+        SummonList _summons;
+};
+
+// 38708 - Demonaic Visitation
+class spell_demonaic_visitation_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_demonaic_visitation_AuraScript);
+
+    void OnAuraRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && GetCaster() && GetCaster()->IsInMap(GetTarget()) && GetTarget()->IsPlayer())
+            GetCaster()->MonsterWhisper("Thank you for allowing me to visit, $N. You have a very colorful soul, but it's a little brighter than I prefer... or I might have stayed longer!", GetTarget()->ToPlayer());
+    }
+
+    void Register() override
+    {
+        OnEffectRemove += AuraEffectRemoveFn(spell_demonaic_visitation_AuraScript::OnAuraRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     // Ours
@@ -733,4 +924,6 @@ void AddSC_hellfire_peninsula()
     new npc_fel_guard_hound();
     new CreatureAILoader<npc_colonel_julesAI>("npc_colonel_jules");
     new CreatureAILoader<npc_abyssal_shelfAI>("npc_abyssal_shelf");
+    new CreatureAILoader<npc_demoniac_scryerAI>("npc_demoniac_scryer");
+    new AuraScriptLoaderEx<spell_demonaic_visitation_AuraScript>("spell_demonaic_visitation");
 }

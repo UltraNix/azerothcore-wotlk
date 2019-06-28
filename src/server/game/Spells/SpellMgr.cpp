@@ -5150,6 +5150,11 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetB[EFFECT_2] = TARGET_UNIT_SRC_AREA_ALLY;
             spellInfo->DurationIndex = 367; // 2 Hours
             break;
+        case 38709: // Spawn Magic Sucker Device Boss
+        case 38679: // Spawn Magic Sucker Device Mob
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_DEST_CASTER_RANDOM;
+            spellInfo->EffectRadiusIndex[EFFECT_0] = 18; // 15yd
+            break;
         // Wintergrasp spells
         case 51422: // Cannon (Tower Cannon)
             spellInfo->EffectRadiusIndex[EFFECT_0] = 13; // 10yd
