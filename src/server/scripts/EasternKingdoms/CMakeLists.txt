@@ -138,6 +138,11 @@ set(scripts_STAT_SRCS
   EasternKingdoms/zone_loch_modan.cpp
   EasternKingdoms/ShadowfangKeep/instance_shadowfang_keep.cpp
   EasternKingdoms/ShadowfangKeep/shadowfang_keep.h
+  EasternKingdoms/ShadowfangKeep/shadowfang_keep.cpp
+  EasternKingdoms/ShadowfangKeep/boss_wolf_master_nandos.cpp
+  EasternKingdoms/ShadowfangKeep/boss_archmage_arugal.cpp
+  EasternKingdoms/ShadowfangKeep/boss_fenrus_the_devourer.cpp
+  EasternKingdoms/ShadowfangKeep/boss_rethilgore.cpp
   EasternKingdoms/zone_burning_steppes.cpp
   EasternKingdoms/zone_blasted_lands.cpp
   EasternKingdoms/zone_stormwind_city.cpp

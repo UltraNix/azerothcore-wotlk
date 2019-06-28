@@ -1,6 +1,19 @@
 /*
-REWRITTEN BY XINEF
-*/
+ * Copyright (C) 2018-2019 Sunwell <https://sunwell.pl/>
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
@@ -10,212 +23,255 @@ REWRITTEN BY XINEF
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
-
-enum Creatures
+ObjectData const creatureData[] =
 {
-    NPC_ASH                 = 3850,
-    NPC_ADA                 = 3849,
-    NPC_ARCHMAGE_ARUGAL     = 4275,
-    NPC_ARUGAL_VOIDWALKER   = 4627
+    { NPC_HORDE_ESCORT   , DATA_HORDE_ESCORT    },
+    { NPC_ALLIANCE_ESCORT, DATA_ALLIANCE_ESCORT },
+    { NPC_ARCHMAGE_ARUGAL, BOSS_ARUGAL          },
+    { NPC_FENRUS         , BOSS_FENRUS          },
+    { 0                  , 0                    } // END
 };
 
-
-class instance_shadowfang_keep : public InstanceMapScript
+ObjectData const gameObjectData[] =
 {
-    public:
-        instance_shadowfang_keep() : InstanceMapScript("instance_shadowfang_keep", 33) { }
+    { GO_HORDE_LEVER     , DATA_HORDE_LEVER     },
+    { GO_ALLIANCE_LEVER  , DATA_ALLIANCE_LEVER  },
+    { GO_COURTYARD_DOOR  , DATA_COURTYARD       },
+    { GO_SORCERER_DOOR   , DATA_SORCERER_DOOR   },
+    { 0                  , 0                    } // END
+};
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
+DoorData const doorData[] =
+{
+    { GO_ARUGAL_DOOR  , BOSS_NANDOS, DOOR_TYPE_PASSAGE  },
+    { 0               , 0          , DOOR_TYPE_ROOM     } // END
+};
+
+struct instance_shadowfang_keep_InstanceMapScript : public InstanceScript
+{
+    instance_shadowfang_keep_InstanceMapScript(Map* map) : InstanceScript(map)
+    {
+        SetHeaders(DataHeader);
+        SetBossNumber(MAX_ENCOUNTERS);
+        LoadDoorData(doorData);
+        LoadObjectData(creatureData, gameObjectData);
+        _courtyardDone = false;
+        _fenrusGateOpen = false;
+        _voidwalkerCount = 0;
+    }
+
+    void OnCreatureCreate(Creature* creature) override
+    {
+        switch (creature->GetEntry())
         {
-            return new instance_shadowfang_keep_InstanceMapScript(map);
-        }
-
-        struct instance_shadowfang_keep_InstanceMapScript : public InstanceScript
-        {
-            instance_shadowfang_keep_InstanceMapScript(Map* map) : InstanceScript(map) { }
-
-            void Initialize()
-            {
-                memset(&_encounters, 0, sizeof(_encounters));
-            }
-
-            void OnCreatureCreate(Creature* creature) override
-            {
+            case NPC_HORDE_ESCORT:
+            case NPC_ALLIANCE_ESCORT:
                 if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
                 {
-                    if (creature->GetEntry() == NPC_ADA || creature->GetEntry() == NPC_ASH)
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                    creature->setFaction(31);
+                }
+                break;
+            case NPC_ARUGAL_VOIDWALKER:
+                _voidwalkers.emplace_back(creature->GetGUID());
+                break;
+            case NPC_FENRUS:
+                if (GetBossState(BOSS_FENRUS) == DONE && !_fenrusGateOpen)
+                {
+                    _fenrusGateOpen = true;
+                    if (GameObject* door = GetGameObject(DATA_SORCERER_DOOR))
+                        HandleGameObject(0, true, door);
+                }
+
+                break;
+            default:
+                break;
+        }
+
+        InstanceScript::OnCreatureCreate(creature);
+    }
+
+    void OnGameObjectCreate(GameObject* go) override
+    {
+        switch (go->GetEntry())
+        {
+            case GO_HORDE_LEVER:
+            case GO_ALLIANCE_LEVER:
+            {
+                TeamId team = GetTeamIdOfPlayers(sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF));
+                if (GetBossState(BOSS_RETHILGORE) == DONE)
+                    if ((team == TEAM_HORDE && go->GetEntry() == GO_HORDE_LEVER) || (team == TEAM_ALLIANCE && go->GetEntry() == GO_ALLIANCE_LEVER))
+                        go->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+                break;
+            }
+            case GO_COURTYARD_DOOR:
+                HandleGameObject(0, _courtyardDone, go);
+                break;
+            case GO_SORCERER_DOOR:
+                HandleGameObject(0, _fenrusGateOpen, go);
+                break;
+            default:
+                break;
+        }
+
+        InstanceScript::OnGameObjectCreate(go);
+    }
+
+    void SetData(uint32 type, uint32 /*data*/) override
+    {
+        switch (type)
+        {
+            case DATA_COURTYARD:
+                _courtyardDone = true;
+                if (GameObject* door = GetGameObject(DATA_COURTYARD))
+                    HandleGameObject(0, true, door);
+                SaveToDB();
+                break;
+            case DATA_VOIDWALKER_EVENT:
+                _events.ScheduleEvent(EVENT_ARUGAL_FENRUS, 0s);
+                break;
+            case DATA_VOIDWALKER_DIES:
+                if (++_voidwalkerCount == 4)
+                {
+                    _fenrusGateOpen = true;
+                    if (GameObject* door = GetGameObject(DATA_SORCERER_DOOR))
+                        HandleGameObject(0, true, door);
+                }
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    uint32 GetData(uint32 type) const override
+    {
+        if (type == DATA_COURTYARD)
+            return _courtyardDone;
+        return 0;
+    }
+
+    TeamId GetTeamIdOfPlayers(bool crossFaction)
+    {
+        if (crossFaction)
+        {
+            uint32 hordePlayers = 0;
+            uint32 alliancePlayers = 0;
+            for (auto const& ref : instance->GetPlayers())
+                if (Player* player = ref.GetSource())
+                {
+                    switch (player->GetTeamId())
                     {
-                        creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                        creature->setFaction(31);
+                        case TEAM_ALLIANCE:
+                            ++alliancePlayers;
+                            break;
+                        case TEAM_HORDE:
+                            ++hordePlayers;
+                            break;
+                        default:
+                            break;
                     }
                 }
 
-                InstanceScript::OnCreatureCreate(creature);
-            }
+            if (hordePlayers == alliancePlayers)
+                return RAND(TEAM_HORDE, TEAM_ALLIANCE);
+            else
+                return hordePlayers > alliancePlayers ? TEAM_HORDE : TEAM_ALLIANCE;
+        }
 
-            void OnGameObjectCreate(GameObject* gameobject)
+        for (auto const& ref : instance->GetPlayers())
+            if (Player* player = ref.GetSource())
+                return player->GetTeamId();
+
+        return TEAM_NEUTRAL;
+    }
+
+    bool SetBossState(uint32 type, EncounterState state) override
+    {
+        if (!InstanceScript::SetBossState(type, state))
+            return false;
+
+        if (type == BOSS_RETHILGORE && state == DONE)
+        {
+            if (Creature* horde = GetCreature(DATA_HORDE_ESCORT))
+                if (horde->IsAIEnabled)
+                    horde->AI()->Talk(4);
+
+            _events.ScheduleEvent(EVENT_TALK_ALLIANCE, 4s);
+
+            TeamId team = GetTeamIdOfPlayers(sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF));
+            if (GameObject* lever = GetGameObject(team == TEAM_HORDE ? DATA_HORDE_LEVER : DATA_ALLIANCE_LEVER))
+                lever->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
+
+            return true;
+        }
+
+        return true;
+    }
+
+    void Update(uint32 diff) override
+    {
+        if (_events.Empty())
+            return;
+
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
             {
-                switch (gameobject->GetEntry())
-                {
-                    case GO_COURTYARD_DOOR:
-                        if (_encounters[TYPE_COURTYARD] == DONE)
-                            HandleGameObject(0, true, gameobject);
-                        break;
-                    case GO_SORCERER_DOOR:
-                        if (_encounters[TYPE_FENRUS_THE_DEVOURER] == DONE)
-                            HandleGameObject(0, true, gameobject);
-                        break;
-                    case GO_ARUGAL_DOOR:
-                        if (_encounters[TYPE_WOLF_MASTER_NANDOS] == DONE)
-                            HandleGameObject(0, true, gameobject);
-                        break;
-                }
-            }
-
-            void SetData(uint32 type, uint32 data)
-            {
-                switch (type)
-                {
-                    case TYPE_COURTYARD:
-                    case TYPE_FENRUS_THE_DEVOURER:
-                    case TYPE_WOLF_MASTER_NANDOS:
-                        _encounters[type] = data;
-                        break;
-                }
-
-                if (data == DONE)
-                    SaveToDB();
-            }
-
-            std::string GetSaveData()
-            {
-                std::ostringstream saveStream;
-                saveStream << "S K " << _encounters[0] << ' ' << _encounters[1] << ' ' << _encounters[2];
-                return saveStream.str();
-            }
-
-            void Load(const char* in)
-            {
-                if (!in)
-                    return;
-
-                char dataHead1, dataHead2;
-                std::istringstream loadStream(in);
-                loadStream >> dataHead1 >> dataHead2;
-                if (dataHead1 == 'S' && dataHead2 == 'K')
-                {
-                    for (uint8 i = 0; i < MAX_ENCOUNTERS; ++i)
+                case EVENT_ARUGAL_FENRUS:
+                    if (Creature* archmage = GetCreature(BOSS_ARUGAL))
                     {
-                        loadStream >> _encounters[i];
-                        if (_encounters[i] == IN_PROGRESS)
-                            _encounters[i] = NOT_STARTED;
+                        if (Creature* summon = archmage->SummonCreature(archmage->GetEntry(), { -138.640f, 2170.159f, 136.577f, 2.737f }, TEMPSUMMON_TIMED_DESPAWN, 10000))
+                        {
+                            summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            summon->SetReactState(REACT_DEFENSIVE);
+                            if (summon->IsAIEnabled)
+                            {
+                                summon->AI()->DoCast(summon, 15742, true); // visual spawn
+                                summon->AI()->Talk(0);
+                            }
+
+                            _events.ScheduleEvent(EVENT_ARUGAL_FENRUS_SPAWN, 4s);
+                        }
                     }
-                }
+                    break;
+                case EVENT_ARUGAL_FENRUS_SPAWN:
+                    if (Creature* archmage = GetCreature(BOSS_ARUGAL))
+                        archmage->SummonCreatureGroup(0);
+                    break;
+                case EVENT_TALK_ALLIANCE:
+                    if (Creature* alliance = GetCreature(DATA_ALLIANCE_ESCORT))
+                        if (alliance->IsAIEnabled)
+                            alliance->AI()->Talk(4);
+                    break;
+                default:
+                    break;
             }
-
-        private:
-            uint32 _encounters[MAX_ENCOUNTERS];
-        };
-
-};
-
-class spell_shadowfang_keep_haunting_spirits : public SpellScriptLoader
-{
-    public:
-        spell_shadowfang_keep_haunting_spirits() : SpellScriptLoader("spell_shadowfang_keep_haunting_spirits") { }
-
-        class spell_shadowfang_keep_haunting_spirits_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_shadowfang_keep_haunting_spirits_AuraScript);
-
-            void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
-            {
-                isPeriodic = true;
-                amplitude = irand(30*IN_MILLISECONDS, 90*IN_MILLISECONDS);
-            }
-
-            void HandleDummyTick(AuraEffect const* aurEff)
-            {
-                GetTarget()->CastSpell((Unit*)NULL, aurEff->GetAmount(), true);
-            }
-
-            void HandleUpdatePeriodic(AuraEffect* aurEff)
-            {
-                aurEff->CalculatePeriodic(GetCaster());
-            }
-
-            void Register()
-            {
-                DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_shadowfang_keep_haunting_spirits_AuraScript::CalcPeriodic, EFFECT_0, SPELL_AURA_DUMMY);
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_shadowfang_keep_haunting_spirits_AuraScript::HandleDummyTick, EFFECT_0, SPELL_AURA_DUMMY);
-                OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_shadowfang_keep_haunting_spirits_AuraScript::HandleUpdatePeriodic, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_shadowfang_keep_haunting_spirits_AuraScript();
         }
-};
+    }
 
-enum ForsakenSpells
-{
-    SPELL_FORSAKEN_SKILL_SWORD            = 7038,
-    SPELL_FORSAKEN_SKILL_SHADOW            = 7053
-};
+    void WriteSaveDataMore(std::ostringstream& data) override
+    {
+        data << _courtyardDone << ' ' << _fenrusGateOpen;
+    }
 
-class spell_shadowfang_keep_forsaken_skills : public SpellScriptLoader
-{
-    public:
-        spell_shadowfang_keep_forsaken_skills() : SpellScriptLoader("spell_shadowfang_keep_forsaken_skills") { }
+    void ReadSaveDataMore(std::istringstream& data) override
+    {
+        data >> _courtyardDone;
+        data >> _fenrusGateOpen;
+    }
 
-        class spell_shadowfang_keep_forsaken_skills_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_shadowfang_keep_forsaken_skills_AuraScript);
-
-            bool Load()
-            {
-                _forsakenSpell = 0;
-                return true;
-            }
-
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                _forsakenSpell = urand(SPELL_FORSAKEN_SKILL_SWORD, SPELL_FORSAKEN_SKILL_SHADOW);
-                if (_forsakenSpell == SPELL_FORSAKEN_SKILL_SHADOW - 1)
-                    ++_forsakenSpell;
-                GetUnitOwner()->CastSpell(GetUnitOwner(), _forsakenSpell, true);
-            }
-
-            void HandleDummyTick(AuraEffect const* aurEff)
-            {
-                PreventDefaultAction();
-                GetUnitOwner()->RemoveAurasDueToSpell(_forsakenSpell);
-                _forsakenSpell = urand(SPELL_FORSAKEN_SKILL_SWORD, SPELL_FORSAKEN_SKILL_SHADOW);
-                if (_forsakenSpell == SPELL_FORSAKEN_SKILL_SHADOW - 1)
-                    ++_forsakenSpell;
-                GetUnitOwner()->CastSpell(GetUnitOwner(), _forsakenSpell, true);
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_shadowfang_keep_forsaken_skills_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                OnEffectPeriodic += AuraEffectPeriodicFn(spell_shadowfang_keep_forsaken_skills_AuraScript::HandleDummyTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-            }
-
-        private:
-            uint32 _forsakenSpell;
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_shadowfang_keep_forsaken_skills_AuraScript();
-        }
+    private:
+        bool _courtyardDone;
+        bool _fenrusGateOpen;
+        EventMap _events;
+        uint32 _voidwalkerCount;
+        std::vector<uint64> _voidwalkers;
 };
 
 void AddSC_instance_shadowfang_keep()
 {
-    new instance_shadowfang_keep();
-    new spell_shadowfang_keep_haunting_spirits();
-    new spell_shadowfang_keep_forsaken_skills();
+    new InstanceMapScriptLoader<instance_shadowfang_keep_InstanceMapScript>("instance_shadowfang_keep", 33);
 }

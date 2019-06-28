@@ -197,6 +197,11 @@ void AddSC_instance_scarlet_monastery();     //Scarlet Monastery
 void AddSC_boss_kirtonos_the_herald();
 void AddSC_instance_scholomance();           //Scholomance
 void AddSC_instance_shadowfang_keep();       //Shadowfang keep
+void AddSC_boss_archmage_arugal();
+void AddSC_boss_fenrus_the_devourer();
+void AddSC_boss_wolf_master_nandos();
+void AddSC_boss_rethilgore();
+void AddSC_shadowfang_keep();
 void AddSC_instance_stratholme();            //Stratholme
 void AddSC_instance_sunken_temple();         //Sunken Temple
 void AddSC_instance_sunwell_plateau();       //Sunwell Plateau
@@ -848,6 +853,11 @@ void AddEasternKingdomsScripts()
     AddSC_boss_kirtonos_the_herald();
     AddSC_instance_scholomance();           //Scholomance
     AddSC_instance_shadowfang_keep();       //Shadowfang keep
+    AddSC_boss_archmage_arugal();
+    AddSC_boss_fenrus_the_devourer();
+    AddSC_boss_wolf_master_nandos();
+    AddSC_boss_rethilgore();
+    AddSC_shadowfang_keep();
     AddSC_instance_stratholme();            //Stratholme
     AddSC_instance_sunken_temple();         //Sunken Temple
     AddSC_instance_sunwell_plateau();       //Sunwell Plateau
