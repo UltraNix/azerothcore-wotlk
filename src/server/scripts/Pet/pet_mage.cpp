@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,7 @@
 #include "Unit.h"
 #include "SpellAuras.h"
 #include "Player.h"
+#include "PetAI.h"
 
 enum MageSpells
 {
@@ -229,7 +230,41 @@ class npc_pet_mage_mirror_image : public CreatureScript
         }
 };
 
+struct npc_pet_mage_water_elementalAI : PetAI
+{
+    npc_pet_mage_water_elementalAI(Creature* creature) : PetAI(creature) { }
+
+    void EnterCombat(Unit* attacker) override
+    {
+        PetAI::EnterCombat(attacker);
+        _scheduler.Schedule(1s, [this](TaskContext task)
+        {
+            if (!me->IsInCombat())
+                return;
+
+            float ground_z = me->GetMap()->GetHeight(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), true);
+            if ((ground_z > INVALID_HEIGHT && (ground_z + 4.0f) < me->GetPositionZ()) && me->GetVictim())
+                me->GetMotionMaster()->MoveFall();
+            else
+                task.Repeat(1s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        PetAI::UpdateAI(diff);
+        if (!UpdateVictim())
+            return;
+
+        _scheduler.Update(diff);
+    }
+
+    private:
+        TaskScheduler _scheduler;
+};
+
 void AddSC_mage_pet_scripts()
 {
     new npc_pet_mage_mirror_image();
+    new CreatureAILoader<npc_pet_mage_water_elementalAI>("npc_pet_mage_water_elemental");
 }
