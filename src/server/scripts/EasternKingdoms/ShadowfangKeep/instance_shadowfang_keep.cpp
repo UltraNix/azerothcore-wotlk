@@ -36,7 +36,7 @@ ObjectData const gameObjectData[] =
 {
     { GO_HORDE_LEVER     , DATA_HORDE_LEVER     },
     { GO_ALLIANCE_LEVER  , DATA_ALLIANCE_LEVER  },
-    { GO_COURTYARD_DOOR  , DATA_COURTYARD       },
+    { GO_COURTYARD_DOOR  , DATA_COURTYARD_DOOR  },
     { GO_SORCERER_DOOR   , DATA_SORCERER_DOOR   },
     { 0                  , 0                    } // END
 };
@@ -123,7 +123,7 @@ struct instance_shadowfang_keep_InstanceMapScript : public InstanceScript
         {
             case DATA_COURTYARD:
                 _courtyardDone = true;
-                if (GameObject* door = GetGameObject(DATA_COURTYARD))
+                if (GameObject* door = GetGameObject(DATA_COURTYARD_DOOR))
                     HandleGameObject(0, true, door);
                 SaveToDB();
                 break;
