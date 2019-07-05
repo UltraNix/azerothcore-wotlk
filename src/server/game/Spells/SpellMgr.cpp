@@ -4565,8 +4565,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 54729:
             spellInfo->EffectApplyAuraName[2] = SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED;
             break;
-
-
+            // Summon Frigid Bones (Acherus RP Event)
+        case 53525:
+            spellInfo->DurationIndex = 4; // 2 minutes
+            break;
         /////////////////////////////////
         ///// SHAMAN
         /////////////////////////////////
