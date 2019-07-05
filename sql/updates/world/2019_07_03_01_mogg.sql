@@ -99,7 +99,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@ENTRY,9,1,0,0,0,100,0,1000,1000,0,0,5,18,0,0,0,0,0,1,0,0,0,0,0,0,0,"On Script - Play Emote 18"),
 (@ENTRY,9,2,0,0,0,100,0,2000,2000,0,0,5,18,0,0,0,0,0,1,0,0,0,0,0,0,0,"On Script - Play Emote 18");
 
-DELETE FROM `creature_text` WHERE `id` IN (14908, 14909);
+DELETE FROM `creature_text` WHERE `entry` IN (14908, 14909);
 INSERT INTO `creature_text` (`entry`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `comment`) VALUES 
 (14908, 0, 0, 'I am going to practice and become a warrior like my father!', 12, 0, 100, 1, 0, 0, 'Mogg'),
 (14908, 1, 0, 'Now to find an unsuspecting Harpy!', 12, 0, 100, 1, 0, 0, 'Mogg'),
