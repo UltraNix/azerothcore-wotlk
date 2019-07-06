@@ -78,6 +78,15 @@ public:
             instance->SetData(DATA_EGG_EVENT, NOT_STARTED);
         }
 
+        void JustReachedHome() override
+        {
+            std::list<GameObject*> eggs;
+            me->GetGameObjectListWithEntryInGrid(eggs, GO_EGG, 150.f);
+            for (auto& egg : eggs)
+                if (egg)
+                    egg->ResetDoorOrButton();
+        }
+
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
@@ -189,6 +198,8 @@ class spell_egg_event : public SpellScriptLoader
             {
                 if (InstanceScript* instance = GetCaster()->GetInstanceScript())
                     instance->SetData(DATA_EGG_EVENT, SPECIAL);
+                if (GameObject * gob = GetHitGObj())
+                    gob->UseDoorOrButton(7 * DAY * IN_MILLISECONDS);
             }
 
             void Register()
