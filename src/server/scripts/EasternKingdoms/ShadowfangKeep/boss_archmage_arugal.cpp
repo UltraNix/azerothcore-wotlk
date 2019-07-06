@@ -48,7 +48,7 @@ struct boss_archmage_arugalAI : public BossAI
 
     void KilledUnit(Unit* who) override
     {
-        if (who->IsCasting())
+        if (who->IsPlayer())
             Talk(SAY_SLAY);
     }
 
