@@ -6029,7 +6029,8 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
     Creature * oldSummon = ObjectAccessor::GetCreature(*caster, caster->m_SummonSlot[properties->Slot]);
     if (oldSummon)
     {
-        if (oldSummon->GetEntry() == entry) {
+        if (oldSummon->GetEntry() == entry)
+        {
             if (TempSummon* temp = oldSummon->ToTempSummon())
                 temp->UnSummon();
             return;
