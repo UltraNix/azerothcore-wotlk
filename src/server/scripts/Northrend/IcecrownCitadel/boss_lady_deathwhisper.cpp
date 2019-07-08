@@ -459,7 +459,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     case EVENT_SPELL_SUMMON_SHADE:
                     {
                         uint8 count = 1;
-                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                        if (GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
                             count = 3;
 
                         std::vector<uint64> targets;
@@ -497,7 +497,7 @@ class boss_lady_deathwhisper : public CreatureScript
                         for (auto i = 0; i < count; ++i)
                         {
                             std::rotate(targets.begin(), targets.begin() + 1, targets.end());
-                            if (Unit* target = ObjectAccessor::GetUnit(*me, targets.at(0)))
+                            if (Unit* target = ObjectAccessor::GetUnit(*me, targets[0]))
                                 me->CastSpell(target, SPELL_SUMMON_SHADE, true);
                         }
                     }
