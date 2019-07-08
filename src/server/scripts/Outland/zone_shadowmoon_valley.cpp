@@ -768,24 +768,48 @@ class npc_karynaku : public CreatureScript
 # npc_earthmender_wilda
 ####*/
 
-enum Earthmender
+enum EarthmenderWilda
 {
     SAY_WIL_START               = 0,
-    SAY_WIL_AGGRO               = 1,
-    SAY_WIL_PROGRESS1           = 2,
-    SAY_WIL_PROGRESS2           = 3,
-    SAY_WIL_FIND_EXIT           = 4,
-    SAY_WIL_JUST_AHEAD          = 5,
-    SAY_WIL_END                 = 6,
+    SAY_WIL_AGGRO,
+    SAY_WIL_PROGRESS1,
+    SAY_WIL_PROGRESS2,
+    SAY_WIL_FIND_EXIT,
+    SAY_WIL_JUST_AHEAD,
+    SAY_WIL_END,
+    SAY_END,
+    SAY_PROGRESS6,
+    SAY_PROGRESS5,
+    SAY_PROGRESS4,
+    SAY_PROGRESS3,
+    SAY_PROGRESS2,
+    SAY_PROGRESS1,
+    ASSASSIN_SAY_AGGRO2,
+    ASSASSIN_SAY_AGGRO1,
+    SAY_AGGRO2,
+    SAY_AGGRO1,
+    SAY_START_2,
 
-    SPELL_CHAIN_LIGHTNING       = 16006,
-    SPELL_EARTHBING_TOTEM       = 15786,
-    SPELL_FROST_SHOCK           = 12548,
-    SPELL_HEALING_WAVE          = 12491,
+    SPELL_CHAIN_LIGHTNING               = 16006,
+    SPELL_EARTHBING_TOTEM               = 15786,
+    SPELL_FROST_SHOCK                   = 12548,
+    SPELL_HEALING_WAVE                  = 12491,
+    SPELL_BUBBLE                        = 35929,
+    SPELL_WATERY_PRISON                 = 35928,
 
-    QUEST_ESCAPE_COILSCAR       = 10451,
-    NPC_COILSKAR_ASSASSIN       = 21044,
-    FACTION_EARTHEN             = 1726                      //guessed
+    QUEST_ESCAPE_FROM_COILSKAR_CISTERN  = 10451,
+    QUEST_ESCAPE_COILSCAR               = 10451,
+    FACTION_EARTHEN                     = 1726, //guessed
+
+    NPC_COILSKAR_ASSASSIN               = 21044,
+    NPC_VISUAL_TRIGGER                  = 21310,
+    NPC_WATER_SPIRIT                    = 21029,
+
+    EVENT_PRISON_WILDA                  = 1,
+    EVENT_FREED_WILDA,
+    EVENT_RESTORE_NPC_FLAG,
+    EVENT_FREE_ELEMENTAL,
+    EVENT_ELEMENTAL_FOLLOW
 };
 
 class npc_earthmender_wilda : public CreatureScript
@@ -795,12 +819,10 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest)
     {
-        if (quest->GetQuestId() == QUEST_ESCAPE_COILSCAR)
+        if (quest->GetQuestId() == QUEST_ESCAPE_FROM_COILSKAR_CISTERN)
         {
-            creature->AI()->Talk(SAY_WIL_START, player);
-            creature->setFaction(FACTION_EARTHEN);
-
-            if (npc_earthmender_wildaAI* pEscortAI = CAST_AI(npc_earthmender_wilda::npc_earthmender_wildaAI, creature->AI()))
+            creature->setFaction(113);
+            if (npc_earthmender_wildaAI* pEscortAI = CAST_AI(npc_earthmender_wildaAI, creature->AI()))
                 pEscortAI->Start(false, false, player->GetGUID(), quest);
         }
         return true;
@@ -808,18 +830,74 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const
     {
+        npc_earthmender_wildaAI* earthmender_wildaAI = new npc_earthmender_wildaAI(creature);
+        earthmender_wildaAI->AddWaypoint(0, -2648.3, 1355.91, 35.2048);
+        earthmender_wildaAI->AddWaypoint(1, -2648.3, 1355.91, 35.2048);
+        earthmender_wildaAI->AddWaypoint(2, -2668.9, 1347.68, 34.4454);
+        earthmender_wildaAI->AddWaypoint(3, -2687.85, 1338.78, 34.4454);
+        earthmender_wildaAI->AddWaypoint(4, -2704.67, 1330.64, 34.4454);
+        earthmender_wildaAI->AddWaypoint(5, -2726.72, 1319.96, 33.3934);
+        earthmender_wildaAI->AddWaypoint(6, -2745.86, 1311.33, 33.6216);
+        earthmender_wildaAI->AddWaypoint(7, -2761.46, 1297.27, 33.2179);
+        earthmender_wildaAI->AddWaypoint(8, -2753.54, 1277.31, 33.4097);
+        earthmender_wildaAI->AddWaypoint(9, -2737.02, 1253.25, 33.4268);
+        earthmender_wildaAI->AddWaypoint(10, -2723.61, 1237.14, 33.4294, 10000); // FREE ELEMENTALS
+        earthmender_wildaAI->AddWaypoint(11, -2733.69, 1251.44, 33.7245);
+        earthmender_wildaAI->AddWaypoint(12, -2753.47, 1278.85, 33.3997);
+        earthmender_wildaAI->AddWaypoint(13, -2762.9, 1293.56, 33.209);
+        earthmender_wildaAI->AddWaypoint(14, -2737.7, 1314.38, 33.4618);
+        earthmender_wildaAI->AddWaypoint(15, -2721.36, 1323.13, 33.847);
+        earthmender_wildaAI->AddWaypoint(16, -2708.74, 1307.83, 33.0673);
+        earthmender_wildaAI->AddWaypoint(17, -2697.79, 1291.25, 33.9619);
+        earthmender_wildaAI->AddWaypoint(18, -2677.01, 1283.67, 30.2953);
+        earthmender_wildaAI->AddWaypoint(19, -2661.24, 1279.51, 26.5944);
+        earthmender_wildaAI->AddWaypoint(20, -2644.76, 1264.76, 23.5552, 3000); // SAY PROGRESS
+        earthmender_wildaAI->AddWaypoint(21, -2630.88, 1250.65, 17.73);
+        earthmender_wildaAI->AddWaypoint(22, -2638.11, 1237.29, 13.4125);
+        earthmender_wildaAI->AddWaypoint(23, -2648.96, 1214.01, 7.92752);
+        earthmender_wildaAI->AddWaypoint(24, -2660.74, 1199.59, 5.47501);
+        earthmender_wildaAI->AddWaypoint(25, -2677.96, 1179.13, 4.84202);
+        earthmender_wildaAI->AddWaypoint(26, -2693.49, 1166.91, 5.37836);
+        earthmender_wildaAI->AddWaypoint(27, -2706.32, 1153.42, 4.42537);
+        earthmender_wildaAI->AddWaypoint(28, -2715.87, 1141.6, 1.452);
+        earthmender_wildaAI->AddWaypoint(29, -2735.48, 1138.9, 3.05414);
+        earthmender_wildaAI->AddWaypoint(30, -2753.81, 1146.88, 5.83016);
+        earthmender_wildaAI->AddWaypoint(31, -2771.29, 1162.3, 6.46434);
+        earthmender_wildaAI->AddWaypoint(32, -2782.89, 1173.76, 6.0197);
+        earthmender_wildaAI->AddWaypoint(33, -2795, 1189.45, 5.22805);
+        earthmender_wildaAI->AddWaypoint(34, -2803.13, 1200.84, 6.33987);
+        earthmender_wildaAI->AddWaypoint(35, -2813.41, 1216.36, 6.26596);
+        earthmender_wildaAI->AddWaypoint(36, -2826.56, 1231.18, 6.17901);
+        earthmender_wildaAI->AddWaypoint(37, -2839.15, 1243.21, 6.48784);
+        earthmender_wildaAI->AddWaypoint(38, -2850.29, 1253.52, 7.05257);
+        earthmender_wildaAI->AddWaypoint(39, -2852.3, 1266.18, 6.88055);
+        earthmender_wildaAI->AddWaypoint(40, -2845.29, 1276.82, 6.96451);
+        earthmender_wildaAI->AddWaypoint(41, -2843.1, 1283.38, 7.68115);
+        earthmender_wildaAI->AddWaypoint(42, -2843.73, 1291.55, 6.5211);
+        earthmender_wildaAI->AddWaypoint(43, -2856.87, 1296.37, 6.80744);
+        earthmender_wildaAI->AddWaypoint(44, -2874.1, 1303.6, 6.66064, 5000); // END
+
         return new npc_earthmender_wildaAI(creature);
     }
-
     struct npc_earthmender_wildaAI : public npc_escortAI
     {
-        npc_earthmender_wildaAI(Creature* creature) : npc_escortAI(creature) { }
-
-        uint32 m_uiHealingTimer;
+        npc_earthmender_wildaAI(Creature* creature) : npc_escortAI(creature) 
+        {
+            me->SetDisableGravity(true);
+            me->SetHover(true);
+            me->SetCanFly(true);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            events.Reset();
+            events.ScheduleEvent(EVENT_PRISON_WILDA, 3s);
+            elementalCounter = 0;
+            angle = 0.0f;
+            dist = 0.0f;
+        }
 
         void Reset()
         {
-            m_uiHealingTimer = 0;
+            me->setFaction(1726);
+            Completed = false;
         }
 
         void WaypointReached(uint32 waypointId)
@@ -830,53 +908,51 @@ public:
 
             switch (waypointId)
             {
-                case 13:
-                    Talk(SAY_WIL_PROGRESS1, player);
-                    DoSpawnAssassin();
-                    break;
-                case 14:
-                    DoSpawnAssassin();
-                    break;
-                case 15:
-                    Talk(SAY_WIL_FIND_EXIT, player);
-                    break;
-                case 19:
-                    DoRandomSay();
-                    break;
-                case 20:
-                    DoSpawnAssassin();
-                    break;
-                case 26:
-                    DoRandomSay();
-                    break;
-                case 27:
-                    DoSpawnAssassin();
-                    break;
-                case 33:
-                    DoRandomSay();
-                    break;
-                case 34:
-                    DoSpawnAssassin();
-                    break;
-                case 37:
-                    DoRandomSay();
-                    break;
-                case 38:
-                    DoSpawnAssassin();
-                    break;
-                case 39:
-                    Talk(SAY_WIL_JUST_AHEAD, player);
-                    break;
-                case 43:
-                    DoRandomSay();
-                    break;
-                case 44:
-                    DoSpawnAssassin();
-                    break;
-                case 50:
-                    Talk(SAY_WIL_END, player);
-                    player->GroupEventHappens(QUEST_ESCAPE_COILSCAR, me);
-                    break;
+            case 0: Talk(SAY_START_2); break;
+            case 10:
+                events.ScheduleEvent(EVENT_FREE_ELEMENTAL, 1s); break;
+            case 15: Talk(SAY_PROGRESS1);
+                SummonAssassin();
+                break;
+            case 20: SummonAssassin(); break;
+            case 25:
+                Talk(RAND(SAY_PROGRESS2, SAY_PROGRESS4, SAY_PROGRESS5));
+                break;
+            case 28: SummonAssassin(); break;
+            case 31: Talk(SAY_PROGRESS6); break;
+            case 35:
+                Talk(RAND(SAY_PROGRESS2, SAY_PROGRESS4, SAY_PROGRESS5));
+                break;
+            case 40: SummonAssassin(); break;
+            case 44:
+                Talk(SAY_END);
+                std::list<Creature*> _creatures;
+                me->GetCreatureListWithEntryInGrid(_creatures, NPC_WATER_SPIRIT, 35.0f);
+                std::for_each(_creatures.begin(), _creatures.end(), [](Creature* creature)
+                {
+                    creature->DespawnOrUnsummon();
+                });
+                player->GroupEventHappens(QUEST_ESCAPE_FROM_COILSKAR_CISTERN, 0);
+                Completed = true;
+                break;
+            }
+        }
+
+        void JustRespawned()
+        {
+            npc_escortAI::JustRespawned();
+            me->SetDisableGravity(true);
+            me->SetHover(true);
+            me->SetCanFly(true);
+        }
+
+        void JustDied(Unit* killer)
+        {
+            if (!Completed)
+            {
+                Player* player = GetPlayerForEscort();
+                if (player)
+                    player->FailQuest(QUEST_ESCAPE_FROM_COILSKAR_CISTERN);
             }
         }
 
@@ -886,52 +962,122 @@ public:
                 summoned->AI()->AttackStart(me);
         }
 
-        //this is very unclear, random say without no real relevance to script/event
-        void DoRandomSay()
+        void SummonAssassin()
         {
-            Talk(SAY_WIL_PROGRESS2);
-        }
+            Player* player = GetPlayerForEscort();
 
-        void DoSpawnAssassin()
-        {
-            //unknown where they actually appear
-            DoSummon(NPC_COILSKAR_ASSASSIN, me, 15.0f, 5000, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
-        }
-
-        void EnterCombat(Unit* who)
-        {
-            //don't always use
-            if (rand()%5)
-                return;
-
-            //only aggro text if not player
-            if (who->GetTypeId() != TYPEID_PLAYER)
+            Unit* CoilskarAssassin = me->SummonCreature(NPC_COILSKAR_ASSASSIN, me->GetPositionX() - 1.0f, me->GetPositionY() - 1.0f, me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+            if (CoilskarAssassin)
             {
-                //appears to be random
-                if (urand(0, 1))
-                    Talk(SAY_WIL_AGGRO);
+                CoilskarAssassin->ToCreature()->AI()->Talk(RAND(ASSASSIN_SAY_AGGRO1, ASSASSIN_SAY_AGGRO2));
+
+                ((Creature*)CoilskarAssassin)->AI()->AttackStart(me);
             }
         }
 
+        void SetData(uint32 type, uint32 data)
+        {
+            if (type == 4 && data == 4)
+            {
+                events.ScheduleEvent(EVENT_FREED_WILDA, 10s);
+            }
+        }
         void UpdateAI(uint32 uiDiff)
         {
             npc_escortAI::UpdateAI(uiDiff);
 
-            if (!UpdateVictim())
-                return;
-
-            /// @todo add more abilities
-            if (!HealthAbovePct(30))
+            if (!events.Empty())
             {
-                if (m_uiHealingTimer <= uiDiff)
+                events.Update(uiDiff);
+                std::list<Creature*> _creatures;
+
+                while (uint32 eventId = events.ExecuteEvent())
                 {
-                    DoCast(me, SPELL_HEALING_WAVE);
-                    m_uiHealingTimer = 15000;
+                    switch (eventId)
+                    {
+                        case EVENT_PRISON_WILDA:
+                            me->GetCreatureListWithEntryInGrid(_creatures, NPC_VISUAL_TRIGGER, 35.0f);
+                            for (std::list<Creature*>::const_iterator i = _creatures.begin(); i != _creatures.end(); ++i)
+                            {
+                                (*i)->CastSpell(me, SPELL_WATERY_PRISON, true);
+                            };
+                            DoCastSelf(SPELL_BUBBLE, true);
+                            break;
+                        case EVENT_FREED_WILDA:
+                            me->GetMotionMaster()->MovePoint(70, { -2638.74f, 1359.6f, 35.94f, 3.62f });
+                            me->GetCreatureListWithEntryInGrid(_creatures, NPC_VISUAL_TRIGGER, 35.0f);
+                            std::for_each(_creatures.begin(), _creatures.end(), [](Creature* creature)
+                            {
+                                creature->DespawnOrUnsummon();
+                            });
+                            events.ScheduleEvent(EVENT_RESTORE_NPC_FLAG, 3s);
+                            break;
+                        case EVENT_RESTORE_NPC_FLAG:
+                            me->RemoveAurasDueToSpell(SPELL_BUBBLE);
+                            me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            me->SetDisableGravity(false);
+                            me->SetHover(false);
+                            me->SetCanFly(false);
+                            break;
+                        case EVENT_FREE_ELEMENTAL:
+                            me->GetCreatureListWithEntryInGrid(_creatures, NPC_WATER_SPIRIT, 50.0f);
+                            for (std::list<Creature*>::const_iterator i = _creatures.begin(); i != _creatures.end(); ++i)
+                            {
+                                switch (elementalCounter)
+                                {
+                                case 0:
+                                    dist = 4.0f;
+                                    angle = 0.6f * M_PI;
+                                    break;
+                                case 1:
+                                    dist = 3.5f;
+                                    angle = 0.8f * M_PI;
+                                    break;
+                                case 2:
+                                    dist = 3.0f;
+                                    angle = M_PI;
+                                    break;
+                                case 3:
+                                    dist = 3.5f;
+                                    angle = 1.2f * M_PI;
+                                    break;
+                                case 4:
+                                    dist = 4.0f;
+                                    angle = 1.4f * M_PI;
+                                    break;
+                                default:
+                                    dist = urand(1, 4);
+                                    angle = M_PI;
+                                    break;
+                                }
+
+                                (*i)->RemoveAurasDueToSpell(SPELL_BUBBLE);
+                                (*i)->GetMotionMaster()->MoveFollow(me, dist, angle);
+                                elementalCounter++;
+                            }
+                            events.ScheduleEvent(EVENT_ELEMENTAL_FOLLOW, 3s);
+                            break;
+                        case EVENT_ELEMENTAL_FOLLOW:
+                            std::list<Creature*> _creatures;
+                            me->GetCreatureListWithEntryInGrid(_creatures, NPC_WATER_SPIRIT, 35.0f);
+                            std::for_each(_creatures.begin(), _creatures.end(), [](Creature* creature)
+                            {
+                                creature->SetDisableGravity(false);
+                                creature->SetHover(false);
+                                creature->SetCanFly(false);
+                            });
+                            break;
+                    }
                 }
-                else
-                    m_uiHealingTimer -= uiDiff;
             }
         }
+
+        private:
+            bool Completed;
+            EventMap events;
+            uint8 elementalCounter;
+            float angle;
+            float dist;
     };
 };
 
