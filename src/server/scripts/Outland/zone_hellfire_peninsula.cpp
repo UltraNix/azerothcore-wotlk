@@ -759,9 +759,7 @@ static const std::vector<uint32> ButressSpells = { SPELL_SUCKER_SPAWN_BUTRESS_N,
 
 struct npc_demoniac_scryerAI : public ScriptedAI
 {
-    npc_demoniac_scryerAI(Creature* creature) : ScriptedAI(creature), _summons(creature) { }
-
-    void Reset() override
+    npc_demoniac_scryerAI(Creature* creature) : ScriptedAI(creature), _summons(creature)
     {
         _summons.DespawnAll();
         _events.Reset();
@@ -772,9 +770,14 @@ struct npc_demoniac_scryerAI : public ScriptedAI
         _completed = false;
         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         DoCastSelf(SPELL_SUCKER_APPEARANCE, true);
+        me->SetRegeneratingHealth(false);
     }
 
     void AttackStart(Unit* /*enemy*/) override { }
+    void EnterEvadeMode() override
+    {
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    }
 
     void JustSummoned(Creature* summon) override
     {
@@ -835,6 +838,7 @@ struct npc_demoniac_scryerAI : public ScriptedAI
 
     void UpdateAI(uint32 const diff) override
     {
+        UpdateVictim();
         if (_events.Empty())
             return;
 
