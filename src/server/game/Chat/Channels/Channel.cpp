@@ -328,7 +328,7 @@ void Channel::KickOrBan(Player const* player, std::string const& badname, bool b
         return;
     }
 
-    if (!isGoodConstantModerator)
+    if (!isGoodConstantModerator && !AccountMgr::IsGMAccount(sec))
     {
         ChatHandler(player->GetSession()).PSendSysMessage("Channel: Ban or Kick option is available only for Game Masters.");
         return;
