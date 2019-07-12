@@ -54,6 +54,8 @@ namespace AccountMgr
     bool IsGMAccount(uint32 gmlevel);
     bool IsAdminAccount(uint32 gmlevel);
     bool IsConsoleAccount(uint32 gmlevel);
+    std::string GetLastIp(uint32 acc_id);
+
 };
 
 #endif

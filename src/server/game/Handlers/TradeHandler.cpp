@@ -150,6 +150,22 @@ void WorldSession::moveItems(ItemRef myItems[], ItemRef hisItems[])
             // A roll back is not possible after we stored it
             if (myItems[i])
             {
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOG_TRADE);
+                stmt->setUInt32(0, realmID);
+                stmt->setUInt32(1, _player->GetSession()->GetAccountId());
+                stmt->setUInt32(2, _player->GetGUIDLow());
+                stmt->setString(3, _player->GetName());
+                stmt->setString(4, _player->GetSession()->GetRemoteAddress());
+                stmt->setUInt32(5, trader->GetSession()->GetAccountId());
+                stmt->setUInt32(6, trader->GetGUIDLow());
+                stmt->setString(7, trader->GetName());
+                stmt->setString(8, trader->GetSession()->GetRemoteAddress());
+                stmt->setUInt32(9, myItems[i]->GetGUIDLow());
+                stmt->setUInt32(10, myItems[i]->GetEntry());
+                stmt->setUInt32(11, myItems[i]->GetCount());
+                stmt->setString(12, "<TRADE>");
+                CharacterDatabase.Execute(stmt);
+
                 // logging
                 sLog->outDebug(LOG_FILTER_NETWORKIO, "partner storing: %u", myItems[i]->GetGUIDLow());
 
@@ -161,6 +177,22 @@ void WorldSession::moveItems(ItemRef myItems[], ItemRef hisItems[])
             }
             if (hisItems[i])
             {
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOG_TRADE);
+                stmt->setUInt32(0, realmID);
+                stmt->setUInt32(1, trader->GetSession()->GetAccountId());
+                stmt->setUInt32(2, trader->GetGUIDLow());
+                stmt->setString(3, trader->GetName());
+                stmt->setString(4, trader->GetSession()->GetRemoteAddress());
+                stmt->setUInt32(5, trader->GetSession()->GetAccountId());
+                stmt->setUInt32(6, _player->GetGUIDLow());
+                stmt->setString(7, _player->GetName());
+                stmt->setString(8, _player->GetSession()->GetRemoteAddress());
+                stmt->setUInt32(9, hisItems[i]->GetGUIDLow());
+                stmt->setUInt32(10, hisItems[i]->GetEntry());
+                stmt->setUInt32(11, hisItems[i]->GetCount());
+                stmt->setString(12, "<TRADE>");
+                CharacterDatabase.Execute(stmt);
+
                 // logging
                 sLog->outDebug(LOG_FILTER_NETWORKIO, "player storing: %u", hisItems[i]->GetGUIDLow());
 

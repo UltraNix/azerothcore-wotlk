@@ -276,13 +276,36 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
+    std::string receiverIp;
+    if (receive)
+        receiverIp = receive->GetSession()->GetRemoteAddress();
+   
     if (items_count > 0 || money > 0)
     {
+        if (receiverIp.empty())
+            receiverIp = AccountMgr::GetLastIp(rc_account);
+
         if (items_count > 0)
         {
             for (uint8 i = 0; i < items_count; ++i)
             {
                 ItemRef const& item = items[i];
+
+                PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOG_TRADE);
+                stmt->setUInt32(0, realmID);
+                stmt->setUInt32(1, _player->GetSession()->GetAccountId());
+                stmt->setUInt32(2, _player->GetGUIDLow());
+                stmt->setString(3, _player->GetName());
+                stmt->setString(4, _player->GetSession()->GetRemoteAddress());
+                stmt->setUInt32(5, rc_account);
+                stmt->setUInt32(6, GUID_LOPART(rc));
+                stmt->setString(7, receiver);
+                stmt->setString(8, receiverIp);
+                stmt->setUInt32(9, item->GetGUIDLow());
+                stmt->setUInt32(10, item->GetEntry());
+                stmt->setUInt32(11, item->GetCount());
+                stmt->setString(12,"<MAIL> " + subject);
+                CharacterDatabase.Execute(stmt);
 
                 item->SetNotRefundable(GetPlayer()); // makes the item no longer refundable
                 player->MoveItemFromInventory( item->GetBagSlot(), item->GetSlot(), true);

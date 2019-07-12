@@ -201,4 +201,16 @@ bool IsConsoleAccount(uint32 gmlevel)
     return gmlevel == SEC_CONSOLE;
 }
 
+std::string GetLastIp(uint32 acc_id)
+{
+    auto stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_LAST_IP_BY_ACCOUNT);
+    stmt->setUInt32(0, acc_id);
+
+    auto result = LoginDatabase.Query(stmt);
+    if (result)
+        return (*result)[0].GetString();
+
+    return "";
+}
+
 } // Namespace AccountMgr
