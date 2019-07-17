@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -49,6 +49,14 @@ enum CreatureIds
     NPC_CHROMAGGUS              = 14020,
     NPC_VICTOR_NEFARIUS         = 10162,
     NPC_NEFARIAN                = 11583
+};
+
+enum BWLGameobjectIds
+{
+    GO_RAZORGORE_ORB            = 177808,
+    GO_RAZORGORE_EGG            = 177807,
+    GO_RAZORGORE_GATE_EXIT      = 175946,
+    GO_RAZORGORE_GATE_ENTER     = 176964
 };
 
 enum BWLData64
