@@ -56,3 +56,5 @@ This should be enough to support real 9k players online with average update time
 9) There's a very small chance something got broken when we cleaned up some of our custom changes in the core.
 
 10) There is absolutely no reason for servers to be so bugged in 2016. More fixing, less promotional videos guys.
+
+bot test
