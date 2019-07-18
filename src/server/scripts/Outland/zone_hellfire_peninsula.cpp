@@ -331,7 +331,8 @@ public:
 enum FelGuard
 {
     SPELL_SUMMON_POO            = 37688,
-    NPC_DERANGED_HELBOAR        = 16863
+    NPC_DERANGED_HELBOAR        = 16863,
+    QUEST_SHIZZ_WORK            = 10629
 };
 
 class npc_fel_guard_hound : public CreatureScript
@@ -376,6 +377,10 @@ public:
                         me->GetMotionMaster()->MovePoint(1, helboar->GetPositionX(), helboar->GetPositionY(), helboar->GetPositionZ());
                     }
                 }
+                // Despawn if quest Shizz Work completed
+                if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (owner->GetQuestStatus(QUEST_SHIZZ_WORK) == QUEST_STATUS_COMPLETE || owner->GetQuestStatus(QUEST_SHIZZ_WORK) == QUEST_STATUS_REWARDED)
+                        me->DespawnOrUnsummon();
                 checkTimer = 5000;
             }
             else checkTimer -= diff;
