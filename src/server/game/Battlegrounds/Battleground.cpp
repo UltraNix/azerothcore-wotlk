@@ -823,6 +823,10 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                     stmt->setUInt32(8, itr->second.HealingDone);
                     stmt->setUInt32(9, itr->second.KillingBlows);
                     trans->Append(stmt);
+
+                    // AntiWintrading system - notifies GMs when player didn't do enough damage/healing
+                    if (sWorld->getBoolConfig(CONFIG_ANTIWINTRADING_ENABLE) && itr->second.DamageDone < sWorld->getIntConfig(CONFIG_ANTIWINTRADING_MINDMG) && itr->second.HealingDone < sWorld->getIntConfig(CONFIG_ANTIWINTRADING_MINHEALING))
+                        sWorld->SendGMText(LANG_POSSIBLE_WINTRADER, itr->second.Name.c_str(), itr->second.Guid, itr->second.DamageDone, itr->second.HealingDone);
                 }
 
                 CharacterDatabase.CommitTransaction(trans);

@@ -1,0 +1,2 @@
+DELETE FROM `trinity_string` WHERE `entry` = 10509;
+INSERT INTO `trinity_string`(`entry`, `content_default`) VALUES (10509, 'Possible arena wintrader! Nick %s (guid: %u). Damage done: %u, healing done: %u')

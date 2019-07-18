@@ -3916,3 +3916,27 @@ DuelResetDebuffs    = 1
 #
 
 DuelResetSpellIds   = "57723;57724;25771;41425;61987;66233;11196;47986"
+
+###################################################################################################
+
+#
+#	AntiWintrading.Enable
+#       Description: Notifies GMs about possible arena wintraders
+#       Default:     1  -  (Enabled)
+#                    0  -  (Disabled)
+
+AntiWintrading.Enable = 1
+
+#
+#	AntiWintrading.MinDMG
+#       Description: Minimum damage which player must do to don't be considered as wintrader
+#       Default:     3000
+
+AntiWintrading.MinDMG = 3000
+
+#
+#	AntiWintrading.MinHealing
+#       Description: Minimum healing which player must do to don't be considered as wintrader
+#       Default:     3000
+
+AntiWintrading.MinHealing = 3000

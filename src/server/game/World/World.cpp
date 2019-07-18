@@ -1407,6 +1407,11 @@ void World::LoadConfigSettings(bool reload)
     Movement::FollowMovementGenerator::FOLLOW_MAX_PATH_LENGTH = m_float_configs[ CONFIG_MOVEMENT_FOLLOWPATH_LENGTH ];
     m_bool_configs[CONFIG_DUEL_DEBUFF_RESET] = sConfigMgr->GetBoolDefault("DuelResetDebuffs", false);
 
+    m_bool_configs[CONFIG_ANTIWINTRADING_ENABLE] = sConfigMgr->GetBoolDefault("AntiWintrading.Enable", true);
+    m_int_configs[CONFIG_ANTIWINTRADING_MINDMG] = sConfigMgr->GetIntDefault("AntiWintrading.MinDMG", 3000);
+    m_int_configs[CONFIG_ANTIWINTRADING_MINHEALING] = sConfigMgr->GetIntDefault("AntiWintrading.MinHealing", 3000);
+
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
