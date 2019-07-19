@@ -325,81 +325,136 @@ public:
 };
 
 /*######
-## npc_fel_guard_hound
+## npc_deranged_helboar
 ######*/
 
-enum FelGuard
+enum ShizzWork
 {
-    SPELL_SUMMON_POO            = 37688,
-    NPC_DERANGED_HELBOAR        = 16863,
-    QUEST_SHIZZ_WORK            = 10629
+    SPELL_BURNING_SPOKES            = 33908,
+    SPELL_ENRAGE                    = 8599,
+    SPELL_SUMMON_POODAD             = 37688,
+
+    NPC_FEL_GUARD_HOUND             = 21847,
+
+    QUEST_SHIZZ_WORK                = 10629,
+
+    EVENT_STOP_EATING               = 1,
+    EVENT_SUMMON_GOB
 };
 
-class npc_fel_guard_hound : public CreatureScript
+struct npc_fel_guard_houndAI : public ScriptedAI
 {
-public:
-    npc_fel_guard_hound() : CreatureScript("npc_fel_guard_hound") { }
+    npc_fel_guard_houndAI(Creature* creature) : ScriptedAI(creature), _helboarGUID(0) { }
 
-    struct npc_fel_guard_houndAI : public ScriptedAI
+    void MovementInform(uint32 type, uint32 id) override
     {
-        npc_fel_guard_houndAI(Creature* creature) : ScriptedAI(creature) { }
-
-        void Reset()
+        if (type == POINT_MOTION_TYPE && id == 1)
         {
-            checkTimer = 5000; //check for creature every 5 sec
-            helboarGUID = 0;
+            if (Creature* helboar = ObjectAccessor::GetCreature(*me, _helboarGUID))
+                me->SetFacingToObject(helboar);
+            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_ATTACK_UNARMED);
+            _events.ScheduleEvent(EVENT_STOP_EATING, 3s);
         }
+    }
 
-        void MovementInform(uint32 type, uint32 id)
+    void SetGUID(uint64 guid, int32 id) override
+    {
+        if (id == 1)
+            _helboarGUID = guid;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (_events.Empty())
+            return;
+
+        _events.Update(diff);
+
+        switch (_events.ExecuteEvent())
         {
-            if (type != POINT_MOTION_TYPE || id != 1)
-                return;
-
-            if (Creature* helboar = ObjectAccessor::GetCreature(*me, helboarGUID))
-            {
-                helboar->RemoveCorpse();
-                DoCast(SPELL_SUMMON_POO);
-
-                if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    me->GetMotionMaster()->MoveFollow(owner, 0.0f, 0.0f);
-            }
+            case EVENT_STOP_EATING:
+                me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                if (Unit* owner = me->GetOwner())
+                    me->GetMotionMaster()->MoveFollow(owner, owner->GetObjectSize(), owner->GetFollowAngle());
+                _events.ScheduleEvent(EVENT_SUMMON_GOB, 2s);
+                break;
+            case EVENT_SUMMON_GOB:
+                DoCastSelf(SPELL_SUMMON_POODAD, true);
+                _helboarGUID = 0;
+                break;
+            default:
+                break;
         }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (checkTimer <= diff)
-            {
-                if (Creature* helboar = me->FindNearestCreature(NPC_DERANGED_HELBOAR, 10.0f, false))
-                {
-                    if (helboar->GetGUID() != helboarGUID && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE && !me->FindCurrentSpellBySpellId(SPELL_SUMMON_POO))
-                    {
-                        helboarGUID = helboar->GetGUID();
-                        me->GetMotionMaster()->MovePoint(1, helboar->GetPositionX(), helboar->GetPositionY(), helboar->GetPositionZ());
-                    }
-                }
-                // Despawn if quest Shizz Work completed
-                if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    if (owner->GetQuestStatus(QUEST_SHIZZ_WORK) == QUEST_STATUS_COMPLETE || owner->GetQuestStatus(QUEST_SHIZZ_WORK) == QUEST_STATUS_REWARDED)
-                        me->DespawnOrUnsummon();
-                checkTimer = 5000;
-            }
-            else checkTimer -= diff;
-
-            if (!UpdateVictim())
-                return;
-
-            DoMeleeAttackIfReady();
-        }
+    }
 
     private:
-        uint32 checkTimer;
-        uint64 helboarGUID;
-    };
+        EventMap _events;
+        uint64 _helboarGUID;
+};
 
-    CreatureAI* GetAI(Creature* creature) const
+struct npc_deranged_helboarAI : public ScriptedAI
+{
+    npc_deranged_helboarAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
     {
-        return new npc_fel_guard_houndAI(creature);
+        _enraged = false;
     }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damageType*/, SpellSchoolMask /*mask*/) override
+    {
+        if (!_enraged && me->HealthBelowPctDamaged(30, damage))
+        {
+            _enraged = true;
+            DoCastSelf(SPELL_ENRAGE, true);
+        }
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        // spell 37689 should be used to inform hound about helboar
+        // right now it can't be done, we don't have any way to ensure that hound belongs to loot recipient
+        if (Player* player = me->GetLootRecipient())
+            if (player->GetQuestStatus(QUEST_SHIZZ_WORK) == QUEST_STATUS_INCOMPLETE)
+            {
+                std::list<Creature*> minions;
+                player->GetAllMinionsByEntry(minions, NPC_FEL_GUARD_HOUND);
+                if (Creature* hound = minions.front())
+                    if (hound->IsInWorld())
+                    {
+                        if (hound->IsAIEnabled)
+                            hound->AI()->SetGUID(me->GetGUID(), 1);
+                        hound->SetWalk(true);
+                        Position pos;
+                        me->GetNearPosition(pos, hound->GetObjectSize() + 1.5f, hound->GetRelativeAngle(me));
+                        hound->GetMotionMaster()->MovePoint(1, pos, true, false);
+                    }
+            }
+    }
+
+    private:
+        bool _enraged;
+};
+
+
+class npc_foreman_razelcraz : public CreatureScript
+{
+    public:
+        npc_foreman_razelcraz() : CreatureScript("npc_foreman_razelcraz") { }
+
+        bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*opt*/)
+        {
+            if (quest->GetQuestId() == QUEST_SHIZZ_WORK)
+            {
+                std::list<Creature*> minions;
+                player->GetAllMinionsByEntry(minions, NPC_FEL_GUARD_HOUND);
+                if (Creature* hound = minions.front())
+                    if (hound->IsInWorld())
+                        hound->DespawnOrUnsummon();
+            }
+
+            return false;
+        }
 };
 
 /*######
@@ -930,7 +985,9 @@ void AddSC_hellfire_peninsula()
     new npc_aeranas();
     new npc_ancestral_wolf();
     new npc_wounded_blood_elf();
-    new npc_fel_guard_hound();
+    new CreatureAILoader<npc_fel_guard_houndAI>("npc_fel_guard_hound");
+    new CreatureAILoader<npc_deranged_helboarAI>("npc_deranged_helboar");
+    new npc_foreman_razelcraz();
     new CreatureAILoader<npc_colonel_julesAI>("npc_colonel_jules");
     new CreatureAILoader<npc_abyssal_shelfAI>("npc_abyssal_shelf");
     new CreatureAILoader<npc_demoniac_scryerAI>("npc_demoniac_scryer");
