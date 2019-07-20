@@ -275,234 +275,203 @@ public:
     }
 };
 
-
-enum hourglass
+enum MysteryOfTheInfinite
 {
-    NPC_FUTURE_HOURGLASS            = 27840,
-    NPC_FUTURE_YOU                    = 27899,
-
-    NPC_PAST_HOURGLASS                = 32327,
-    NPC_PAST_YOU                    = 32331,
-
-    NPC_INFINITE_ASSAILANT            = 27896,
-    NPC_INFINITE_CHRONO_MAGUS        = 27898,
-    NPC_INFINITE_DESTROYER            = 27897,
-    NPC_INFINITE_TIMERENDER            = 27900,
-
-    SPELL_CLONE_CASTER                = 49889,
-    SPELL_TELEPORT_EFFECT            = 52096,
-
-    EVENT_START_EVENT                = 1,
-    EVENT_FIGHT_1                    = 2,
-    EVENT_FIGHT_2                    = 3,
-    EVENT_CHECK_FINISH                = 4,
-    EVENT_FINISH_EVENT                = 5,
-
-    QUEST_MYSTERY_OF_THE_INFINITE    = 12470,
+    QUEST_MYSTERY_OF_THE_INFINITE       = 12470,
     QUEST_MYSTERY_OF_THE_INFINITE_REDUX = 13343,
+
+    NPC_FUTURE_HOURGLASS                = 27840,
+    NPC_FUTURE_YOU                      = 27899,
+    NPC_PAST_YOU                        = 32331,
+
+    SPELL_SUMMON_FUTURE_YOU             = 49931,
+    SPELL_SUMMON_PAST_YOU               = 60791,
+    SPELL_CLONE_ME                      = 45204,
+    SPELL_SUMMON_INFINITE_ASSAILANT     = 49900,
+    SPELL_SUMMON_INFINITE_DESTROYER     = 49901,
+    SPELL_SUMMON_INFINITE_CHRONO_MAGUS  = 49902,
+    SPELL_SUMMON_INFINITE_TIMERENDER    = 49905,
+    SPELL_TELEPORT_EFFECT               = 52096,
+
+    NPC_INFINITE_ASSAILANT              = 27896,
+    NPC_INFINITE_CHRONO_MAGUS           = 27898,
+    NPC_INFINITE_DESTROYER              = 27897,
+    NPC_INFINITE_TIMERENDER             = 27900,
+
+    EVENT_SUMMON_WAVE                   = 1,
+    EVENT_TALK_CLONE,
+    EVENT_CREDIT_PLAYER,
+    EVENT_END_EVENT
 };
 
-class npc_hourglass_of_eternity : public CreatureScript
+struct npc_hourglass_of_eternityAI : public ScriptedAI
 {
-public:
-    npc_hourglass_of_eternity() : CreatureScript("npc_hourglass_of_eternity") { }
+    npc_hourglass_of_eternityAI(Creature* creature) : ScriptedAI(creature) { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    bool IsFuture() const { return me->GetEntry() == NPC_FUTURE_HOURGLASS; }
+
+    void IsSummonedBy(Unit* summoner) override
     {
-        return new npc_hourglass_of_eternityAI (pCreature);
-    }
-
-    struct npc_hourglass_of_eternityAI : public ScriptedAI
-    {
-        npc_hourglass_of_eternityAI(Creature* c) : ScriptedAI(c) {}
-
-        uint64 summonerGUID;
-        uint64 futureGUID;
-        EventMap events;
-        uint8 count[3];
-        uint8 phase;
-
-        bool IsFuture() { return me->GetEntry() == NPC_FUTURE_HOURGLASS; }
-        void InitializeAI()
+        if (summoner)
         {
-            if (me->ToTempSummon())
-                if (Unit* summoner = me->ToTempSummon()->GetSummoner())
-                {
-                    summonerGUID = summoner->GetGUID();
-                    float x,y,z;
-                    me->GetNearPoint(summoner, x, y, z, me->GetCombatReach(), 0.0f, rand_norm()*2*M_PI);
-                    if (Creature* cr = summoner->SummonCreature((IsFuture() ? NPC_FUTURE_YOU : NPC_PAST_YOU), x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 210000))
-                    {
-                        futureGUID = cr->GetGUID();
-                        summoner->CastSpell(cr, SPELL_CLONE_CASTER, true);
-                        cr->setFaction(summoner->getFaction());
-                        cr->SetReactState(REACT_AGGRESSIVE);
-                    }
-                }
-
-            count[0] = 2;
-            count[1] = 2;
-            count[2] = 3;
-
-            phase = 0;
-            events.Reset();
-            events.ScheduleEvent(EVENT_START_EVENT, 4000);
-        }
-
-        Player* getSummoner() { return ObjectAccessor::GetPlayer(*me, summonerGUID); }
-        Creature* getFuture() { return ObjectAccessor::GetCreature(*me, futureGUID); }
-
-
-        uint32 randEntry()
-        {
-            return NPC_INFINITE_ASSAILANT+urand(0,2);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            events.Update(diff);
-            switch (events.GetEvent())
+            _waveIndex = 0;
+            _summonerGUID = summoner->GetGUID();
+            Position pos;
+            summoner->GetNearPosition(pos, 3.0f, static_cast<float>(M_PI / 4));
+            if (Creature* clone = summoner->SummonCreature(IsFuture() ? NPC_FUTURE_YOU : NPC_PAST_YOU, pos, TEMPSUMMON_TIMED_DESPAWN, 210000))
             {
-                case EVENT_START_EVENT:
-                    if (Creature* cr = getFuture())
-                        cr->MonsterWhisper(IsFuture() ? "Hey there, $N, don't be alarmed. It's me... you... from the future. I'm here to help." : "Whoa! You're me, but from the future! Hey, my equipment got an upgrade! Cool!", getSummoner());
-                    events.PopEvent();
-                    events.ScheduleEvent(EVENT_FIGHT_1, 7000);
-                    break;
-                case EVENT_FIGHT_1:
-                    if (Creature* cr = getFuture())
-                        cr->MonsterWhisper(IsFuture() ? "Heads up... here they come. I'll help as much as I can. Let's just keep them off the hourglass!" : "Here come the Infinites! I've got to keep the hourglass safe. Can you help?", getSummoner());
-                    events.PopEvent();
-                    events.ScheduleEvent(EVENT_FIGHT_2, 6000);
-                    break;
-                case EVENT_FIGHT_2:
+                _cloneGUID = clone->GetGUID();
+                if (clone->IsAIEnabled)
                 {
-                    if (phase)
-                        randomWhisper();
-
-                    Creature* cr = NULL;
-                    float x, y, z;
-                    if (phase < 3)
-                    {
-                        for (uint8 i = 0; i < count[phase]; ++i)
-                        {
-                            me->GetNearPoint(me, x, y, z, me->GetCombatReach(), 10.0f, rand_norm()*2*M_PI);
-                            if (cr = me->SummonCreature(randEntry(), x, y, z+2.0f, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                            {
-                                cr->CastSpell(cr, SPELL_TELEPORT_EFFECT, true);
-                                cr->AI()->AttackStart(me);
-                                cr->AddThreat(me, 100.0f);
-                            }
-                        }
-                    }
-                    else if (phase == 3)
-                    {
-                        me->GetNearPoint(me, x, y, z, me->GetCombatReach(), 20.0f, rand_norm()*2*M_PI);
-                        if (cr = me->SummonCreature(NPC_INFINITE_TIMERENDER, x, y, z, 0.0f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
-                        {
-                            cr->CastSpell(cr, SPELL_TELEPORT_EFFECT, true);
-                            cr->AI()->AttackStart(me);
-                        }
-
-                        events.PopEvent();
-                        events.ScheduleEvent(EVENT_CHECK_FINISH, 20000);
-                        return;
-                    }
-
-                    phase++;
-                    events.PopEvent();
-                    events.ScheduleEvent(EVENT_FIGHT_2, 35000);
-                    break;
-                }
-                case EVENT_CHECK_FINISH:
-                {
-                    if (me->FindNearestCreature(NPC_INFINITE_TIMERENDER, 50.0f))
-                    {
-                        events.RepeatEvent(5000);
-                        return;
-                    }
-
-                    if (Player* player = getSummoner())
-                        player->GroupEventHappens(IsFuture() ? QUEST_MYSTERY_OF_THE_INFINITE : QUEST_MYSTERY_OF_THE_INFINITE_REDUX, me);
-
-                    me->MonsterWhisper(IsFuture() ? "Look, $N, the hourglass has revealed Nozdormu!" : "What the heck? Nozdormu is up there!", getSummoner());
-                    events.PopEvent();
-                    events.ScheduleEvent(EVENT_FINISH_EVENT, 6000);
-                    break;
-                }
-                case EVENT_FINISH_EVENT:
-                {
-                    me->MonsterWhisper(IsFuture() ? "Farewell, $N. Keep us alive and get some better equipment!" : "I feel like I'm being pulled away through time. Thanks for the help....", getSummoner());
-                    events.PopEvent();
-                    me->DespawnOrUnsummon(500);
-                    if (getFuture())
-                        getFuture()->DespawnOrUnsummon(500);
-                    break;
+                    clone->AI()->Talk(1, summoner);
+                    clone->AI()->SetGUID(me->GetGUID(), 1);
                 }
             }
+
+            _events.ScheduleEvent(EVENT_SUMMON_WAVE, 10s);
+            _events.ScheduleEvent(EVENT_TALK_CLONE, 6s);
         }
-
-        void randomWhisper()
-        {
-            std::string text = "";
-            switch(urand(0, IsFuture() ? 7 : 5))
-            {
-                case 0:    text = IsFuture() ? "What? Am I here alone. We both have a stake at this, you know!" : "This equipment looks cool and all, but couldn't we have done a little better? Are you even raiding?"; break;
-                case 1: text = IsFuture() ? "No matter what, you can't die, because would mean that I would cease to exist, right? But, I was here before when I was you. I'm so confused!" : "Chromie said that if I don't do this just right, I might wink out of existence. If I go, then you go!"; break;
-                case 2: text = IsFuture() ? "Sorry, but Chromie said that I couldn't reveal anything about your future to you. She said that if I did, I would cease to exist." : "I just want you to know that if we get through this alive, I'm making sure that we turn out better than you. No offense."; break;
-                case 3: text = IsFuture() ? "Look at you fight; no wonder I turned to drinking." : "Looks like I'm an underachiever."; break;
-                case 4: text = IsFuture() ? "Wow, I'd forgotten how inexperienced I used to be." : "Wait a minute! If you're here, then that means that in the not-so-distant future I'm going to be you helping me? Are we stuck in a time loop?!"; break;
-                case 5: text = IsFuture() ? "I can't believe that I used to wear that." : "I think I'm going to turn to drinking after this."; break;
-                case 6: text = "Listen. I'm not supposed to tell you this, but there's going to be this party that you're invited to. Whatever you do, DO NOT DRINK THE PUNCH!"; break;
-                case 7: text = "Wish I could remember how many of the Infinite Dragonflight were going to try to stop you. This fight was so long ago."; break;
-            }
-
-            if (Creature* cr = getFuture())
-                cr->MonsterWhisper(text.c_str(), getSummoner());
-        }
-    };
-};
-
-class npc_future_you : public CreatureScript
-{
-public:
-    npc_future_you() : CreatureScript("npc_future_you") { }
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_future_youAI (pCreature);
     }
 
-    struct npc_future_youAI : public ScriptedAI
+    void CloneTalk(uint8 textId)
     {
-        npc_future_youAI(Creature* c) : ScriptedAI(c) {}
+        if (Creature* clone = ObjectAccessor::GetCreature(*me, _cloneGUID))
+            if (Player* player = ObjectAccessor::GetPlayer(*me, _summonerGUID))
+                if (clone->IsAIEnabled)
+                    clone->AI()->Talk(textId, player);
+    }
 
-        void EnterEvadeMode()
-        {
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
-            me->ClearUnitState(UNIT_STATE_EVADE);
-        }
+    void JustSummoned(Creature* summon) override
+    {
+        summon->CastSpell(summon, SPELL_TELEPORT_EFFECT, true);
+        if (summon->IsAIEnabled)
+            summon->AI()->AttackStart(me);
+        if (Creature* clone = ObjectAccessor::GetCreature(*me, _cloneGUID))
+            if (clone->IsAIEnabled)
+                clone->AI()->AttackStart(summon);
+    }
 
-        void Reset()
-        {
-            if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
-                me->setFaction(me->ToTempSummon()->GetSummoner()->getFaction());
-        }
+    void SummonedCreatureDies(Creature* summon, Unit* /*killer*/) override
+    {
+        if (summon->GetEntry() == NPC_INFINITE_TIMERENDER)
+            _events.ScheduleEvent(EVENT_CREDIT_PLAYER, 15s);
+        summon->DespawnOrUnsummon(5000);
+    }
 
-        void MoveInLineOfSight(Unit* who)
+    void SummonWave()
+    {
+        std::vector<uint32> spellIds;
+        switch (_waveIndex)
         {
-            if (!me->GetVictim() && who->GetEntry() >= NPC_INFINITE_ASSAILANT && who->GetEntry() <= NPC_INFINITE_TIMERENDER)
-                AttackStart(who);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
+            case 0:
+                spellIds = { SPELL_SUMMON_INFINITE_CHRONO_MAGUS, SPELL_SUMMON_INFINITE_ASSAILANT };
+                break;
+            case 1:
+                spellIds = { SPELL_SUMMON_INFINITE_CHRONO_MAGUS, SPELL_SUMMON_INFINITE_CHRONO_MAGUS };
+                break;
+            case 2:
+            case 3:
+                spellIds = { SPELL_SUMMON_INFINITE_CHRONO_MAGUS, SPELL_SUMMON_INFINITE_ASSAILANT, SPELL_SUMMON_INFINITE_DESTROYER };
+                break;
+            case 4:
+                spellIds = { SPELL_SUMMON_INFINITE_TIMERENDER };
+                break;
+            default:
                 return;
-
-            DoMeleeAttackIfReady();
         }
-    };
+
+        for (uint32 spellId : spellIds)
+            DoCastSelf(spellId, true);
+
+        CloneTalk(urand(3, 10));
+        ++_waveIndex;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (_events.Empty())
+            return;
+
+        _events.Update(diff);
+
+        switch (_events.ExecuteEvent())
+        {
+            case EVENT_SUMMON_WAVE:
+                SummonWave();
+                if (_waveIndex <= 4)
+                    _events.Repeat(30s);
+                break;
+            case EVENT_TALK_CLONE:
+                CloneTalk(2);
+                break;
+            case EVENT_CREDIT_PLAYER:
+                if (Player* player = ObjectAccessor::GetPlayer(*me, _summonerGUID))
+                {
+                    player->CompleteQuest(IsFuture() ? QUEST_MYSTERY_OF_THE_INFINITE : QUEST_MYSTERY_OF_THE_INFINITE_REDUX);
+                    CloneTalk(11);
+                }
+
+                _events.ScheduleEvent(EVENT_END_EVENT, 6s);
+                break;
+            case EVENT_END_EVENT:
+                me->DespawnOrUnsummon();
+                CloneTalk(12);
+                if (Creature* clone = ObjectAccessor::GetCreature(*me, _cloneGUID))
+                    clone->DespawnOrUnsummon(500);
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    private:
+        uint64 _summonerGUID;
+        uint64 _cloneGUID;
+        EventMap _events;
+        uint32 _waveIndex;
+};
+
+struct npc_future_youAI : public ScriptedAI
+{
+    npc_future_youAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void IsSummonedBy(Unit* summoner) override
+    {
+        _hourglassGUID = 0;
+        summoner->CastSpell(me, SPELL_CLONE_ME, true);
+    }
+
+    void SetGUID(uint64 guid, int32 id) override
+    {
+        if (id == 1)
+            _hourglassGUID = guid;
+    }
+
+    void EnterEvadeMode() override
+    {
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+        me->ClearUnitState(UNIT_STATE_EVADE);
+    }
+
+    bool CanAIAttack(Unit const* target) const override
+    {
+        if (Creature* hourglass = ObjectAccessor::GetCreature(*me, _hourglassGUID))
+            return target->ToTempSummon() && target->ToTempSummon()->GetSummonerGUID() == hourglass->GetGUID();
+
+        return false;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        uint64 _hourglassGUID;
 };
 
 enum chainGun
@@ -2556,8 +2525,8 @@ void AddSC_dragonblight()
     // Ours
     new npc_conversing_with_the_depths_trigger();
     new go_the_pearl_of_the_depths();
-    new npc_hourglass_of_eternity();
-    new npc_future_you();
+    new CreatureAILoader<npc_hourglass_of_eternityAI>("npc_hourglass_of_eternity");
+    new CreatureAILoader<npc_future_youAI>("npc_future_you");
     new npc_mindless_ghoul();
     new npc_injured_7th_legion_soldier();
     new npc_heated_battle();
