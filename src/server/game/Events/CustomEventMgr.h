@@ -88,10 +88,6 @@ class CustomEventMgr
     ///////////////////////
     bool FlushStatus = false;
     ///////////////////////
-    // Arena PvP Event 
-    ///////////////////////
-    bool ArenaEventStatus = false;
-    ///////////////////////
     // Hunger Games Event
     ///////////////////////
     std::vector<uint64> hungerGamesPlayers;
@@ -132,17 +128,6 @@ class CustomEventMgr
         int32 GetFlushMinute() const;
         bool   GetFlushStatus() const;
         void   SetFlushStatus(bool flushed) { FlushStatus = flushed; }
-
-        ///////////////////////
-        // Arena PvP Event 
-        ///////////////////////
-        int32 GetArenaEventDay() const;
-        int32 GetArenaEventHour() const;
-        int32 GetArenaEventMinute() const;
-        std::string GetEventPvPAnnouncesPL() const;
-        std::string GetEventPvPAnnouncesEN() const;
-        bool GetArenaEventStatus() const;
-        void SetArenaEventStatus(bool started) { ArenaEventStatus = started; }
 
         ///////////////////////
         // Hunger Games Event

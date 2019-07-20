@@ -343,10 +343,10 @@ enum WorldIntConfigs
     CONFIG_PVP_TOKEN_COUNT,
     CONFIG_BG_ITEM_REWARD_ID,
     CONFIG_BG_ITEM_REWARD_COUNT,
-    CONFIG_ARENA_ITEM_REWARD_ID_2V2,
-    CONFIG_ARENA_ITEM_REWARD_ID_3V3,
-    CONFIG_ARENA_ITEM_REWARD_ID_5V5,
-    CONFIG_ARENA_ITEM_REWARD_COUNT,
+    CONFIG_ARENA_WIN_ITEM_REWARD_ID,
+    CONFIG_ARENA_LOSS_ITEM_REWARD_ID,
+    CONFIG_ARENA_WIN_ITEM_REWARD_COUNT,
+    CONFIG_ARENA_LOSS_ITEM_REWARD_COUNT,
     CONFIG_INTERVAL_LOG_UPDATE,
     CONFIG_MIN_LOG_UPDATE,
     CONFIG_ENABLE_SINFO_LOGIN,
@@ -401,9 +401,6 @@ enum WorldIntConfigs
     CONFIG_CURRENT_BUILD, // Maczuga
     CONFIG_EVENT_BONUS_MULTIPLER,
     CONFIG_AUTO_GLOBAL_GUID,
-    CONFIG_ARENA_EVENT_DAY,
-    CONFIG_ARENA_EVENT_HOUR,
-    CONFIG_ARENA_EVENT_MINUTE,
     CONFIG_KRUUL_EVENT_DAY,
     CONFIG_KRUUL_EVENT_HOUR,
     CONFIG_KRUUL_EVENT_MINUTE,
@@ -925,9 +922,6 @@ class World
 
         std::string const& GetWinnerMessage() const { return _winnerMessage; }             // Sitowsky: @bgreward
         void SetWinnerMessage(std::string message) { _winnerMessage = message; }           // Sitowsky: @bgreward
-
-        std::string const& GetWinnerMessageArena() const { return _winnerMessageArena; }   // Sitowsky: @pvpevent
-        void SetWinnerMessageArena(std::string message) { _winnerMessageArena = message; } // Sitowsky: @pvpevent
 
         void SetPhasedDuelsZones(std::string zones);
         bool IsPhasedDuelsZone(uint32 zone) const { if (m_phasedDuelsZones.empty()) return true; return std::find(m_phasedDuelsZones.begin(), m_phasedDuelsZones.end(), zone) != m_phasedDuelsZones.end(); }

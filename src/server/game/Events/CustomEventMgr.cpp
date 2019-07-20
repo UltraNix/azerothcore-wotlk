@@ -119,25 +119,6 @@ void CustomEventMgr::Update(uint32 diff, uint8 eventUpdate)
         }
         break;
         ///////////////////////
-        // Arena PvP Event 
-        ///////////////////////
-        case CUSTOM_EVENT_PVP:
-        {
-            if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE))
-            {
-                if (aTm->tm_wday == GetArenaEventDay() && aTm->tm_hour == GetArenaEventHour() && aTm->tm_min == GetArenaEventMinute() && !GetArenaEventStatus())
-                {
-                    SetArenaEventStatus(true);
-                    sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetEventPvPAnnouncesPL().c_str());
-                    sWorld->SendWorldText(LANG_AUTO_BROADCAST, GetEventPvPAnnouncesEN().c_str());
-                }
-
-                if (aTm->tm_wday != GetArenaEventDay() && GetArenaEventStatus())
-                    SetArenaEventStatus(false);
-            }
-        }
-        break;
-        ///////////////////////
         // Hunger Games Event
         ///////////////////////
         case CUSTOM_EVENT_HUNGER_GAMES:
@@ -216,17 +197,6 @@ int32 CustomEventMgr::GetFlushDay() const { return uint32(sWorld->getIntConfig(C
 int32 CustomEventMgr::GetFlushHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_HOUR)); }
 int32 CustomEventMgr::GetFlushMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_AUTO_FLUSH_ENABLE_MINUTE)); }
 bool CustomEventMgr::GetFlushStatus() const { return FlushStatus; }
-
-///////////////////////
-// Arena PvP Event 
-///////////////////////
-
-int32 CustomEventMgr::GetArenaEventDay() const {  return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_DAY)); }
-int32 CustomEventMgr::GetArenaEventHour() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_HOUR)); }
-int32 CustomEventMgr::GetArenaEventMinute() const { return uint32(sWorld->getIntConfig(CONFIG_ARENA_EVENT_MINUTE)); }
-std::string CustomEventMgr::GetEventPvPAnnouncesPL() const { return  "Event PvP wlasnie wystartowal! Do wygrania sa miedzy innymi epickie companiony oraz Swift Nether Drake - mount 310%"; }
-std::string CustomEventMgr::GetEventPvPAnnouncesEN() const { return  "Event PvP has just launched! Play 2v2 or 3v3 and win fantastic rewards like epic companions or Swift Nether Drake - mount 310%."; }
-bool CustomEventMgr::GetArenaEventStatus() const { return ArenaEventStatus; }
 
 ///////////////////////
 // Hunger Games Event

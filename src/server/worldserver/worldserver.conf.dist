@@ -3161,33 +3161,20 @@ BattleGroundReward.Message = "You have been awarded for winning the battleground
 #                     1 - (Enabled)
 
 ArenaReward.Enable = 0
-ArenaRewardEvent.Day = 5
-ArenaRewardEvent.Hour = 15
-ArenaRewardEvent.Minute = 0
 	
 #
 #    ArenaReward2v2.ItemID
-#        Description: Item characters will receive after winning arena
-#                     system is enabled.
-#        Default:     29434 - (Badge of justice)
+#        Description: Item for winning arena
+#        Default:     1672 
 
-ArenaReward2v2.ItemID = 29434
+ArenaRewardWin.ItemID = 1672
 
 #
 #    ArenaReward3v3.ItemID
-#        Description: Item characters will receive after winning arena
-#                     system is enabled.
-#        Default:     29434 - (Badge of justice)
+#        Description: Item for lossing arena
+#        Default:     4868 
 
-ArenaReward3v3.ItemID = 29434
-
-#
-#    ArenaReward5v5.ItemID
-#        Description: Item characters will receive after winning arena
-#                     system is enabled.
-#        Default:     29434 - (Badge of justice)
-
-ArenaReward5v5.ItemID = 29434
+ArenaRewardLoss.ItemID = 4868
 
 #
 #    ArenaReward.ItemCount
@@ -3196,12 +3183,6 @@ ArenaReward5v5.ItemID = 29434
 
 ArenaReward.ItemCount = 1
 
-#
-#     ArenaReward.Message 
-#        Description: Message that is send to player after winning the arena
-#        Default:     "You have been awarded for winning the arena fight."
-
-ArenaReward.Message = "You have been awarded for winning the arena fight."
 
 #
 #    NoResetTalentsCost

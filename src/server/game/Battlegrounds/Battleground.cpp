@@ -1017,67 +1017,6 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
                     ChatHandler(player->GetSession()).PSendSysMessage(winnerMessage.c_str());
             }
 
-            // @TODO: Move this to CustomEventMgr
-            if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE) && isArena() && isRated())
-            {
-                time_t now = time(nullptr);
-                tm* aTm = localtime(&now);
-
-                uint32 itemId = 0;
-
-                switch (GetArenaType())
-                {
-                    case ARENA_TYPE_2v2:
-                        itemId = sWorld->getIntConfig(CONFIG_ARENA_ITEM_REWARD_ID_2V2);
-                        break;
-                    case ARENA_TYPE_3v3:
-                        itemId = sWorld->getIntConfig(CONFIG_ARENA_ITEM_REWARD_ID_3V3);
-                        break;
-                    case ARENA_TYPE_5v5:
-                        itemId = sWorld->getIntConfig(CONFIG_ARENA_ITEM_REWARD_ID_5V5);
-                        break;
-                }
-
-                int32 count = sWorld->getIntConfig(CONFIG_ARENA_ITEM_REWARD_COUNT);
-                std::string winnerMessageArena = sWorld->GetWinnerMessageArena();
-
-                switch (aTm->tm_wday)
-                {
-                    case DAY_FRIDAY:
-                    {
-                        switch (aTm->tm_hour)
-                        {
-                            case 15:
-                            case 16:
-                            case 17:
-                            case 18:
-                            case 19:
-                            case 20:
-                            case 21:
-                            case 22:
-                            case 23:
-                            {
-                                if (player->AddItem(itemId, count))
-                                    ChatHandler(player->GetSession()).PSendSysMessage(winnerMessageArena.c_str());
-                            }  break;
-
-                            default:
-                                break;
-                        }
-                    } break;
-                    case DAY_SATURDAY:
-                    case DAY_SUNDAY:
-                    {
-                        if (player->AddItem(itemId, count))
-                            ChatHandler(player->GetSession()).PSendSysMessage(winnerMessageArena.c_str());
-                    } break;
-
-                    default:
-                        break;
-                }
-            }
-
-
             // Reward Call to Arms quests - here due to fact those quests gonna be removed ;)
             switch (player->GetMapId())
             {
@@ -1152,6 +1091,18 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
         if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
             player->GiveXP(0.03 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
 
+        // BG Reward
+        if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE) && isArena() && isRated() && bValidArena)
+        {
+            uint32 rewardId = (bgTeamId == winnerTeamId) ? sWorld->getIntConfig(CONFIG_ARENA_WIN_ITEM_REWARD_ID) : sWorld->getIntConfig(CONFIG_ARENA_LOSS_ITEM_REWARD_ID);
+            uint32 count = (bgTeamId == winnerTeamId) ? sWorld->getIntConfig(CONFIG_ARENA_WIN_ITEM_REWARD_COUNT) : sWorld->getIntConfig(CONFIG_ARENA_LOSS_ITEM_REWARD_COUNT);
+            if (player->AddItem(rewardId, count))
+            {
+                ChatHandler handler(player->GetSession());
+                handler.PSendSysMessage(bgTeamId == winnerTeamId ? LANG_ARENA_WIN_REWARD : LANG_ARENA_LOSS_REWARD);
+            }
+        }
+
         player->ResetAllPowers();
         player->CombatStopWithPets(true);
 
@@ -1164,6 +1115,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
         player->GetSession()->SendPacket(&data);
 
         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND, player->GetMapId());
+
     }
 
     if (isArena() && isRated() && winnerArenaTeam && loserArenaTeam && winnerArenaTeam != loserArenaTeam)

@@ -1219,17 +1219,14 @@ void World::LoadConfigSettings(bool reload)
     SetWinnerMessage(sConfigMgr->GetStringDefault("BattleGroundReward.Message", "You have been awarded for winning the battleground."));
 
     m_bool_configs[CONFIG_ARENA_REWARD_ENABLE] = sConfigMgr->GetBoolDefault("ArenaReward.Enable", 0);
-    m_int_configs[CONFIG_ARENA_EVENT_DAY] = sConfigMgr->GetIntDefault("ArenaRewardEvent.Day", DAY_FRIDAY);
-    m_int_configs[CONFIG_ARENA_EVENT_HOUR] = sConfigMgr->GetIntDefault("ArenaRewardEvent.Hour", 15);
-    m_int_configs[CONFIG_ARENA_EVENT_MINUTE] = sConfigMgr->GetIntDefault("ArenaRewardEvent.Minute", 0);
-    m_int_configs[CONFIG_ARENA_ITEM_REWARD_ID_2V2] = sConfigMgr->GetIntDefault("ArenaReward2v2.ItemID", 29434);
-    m_int_configs[CONFIG_ARENA_ITEM_REWARD_ID_3V3] = sConfigMgr->GetIntDefault("ArenaReward3v3.ItemID", 29434);
-    m_int_configs[CONFIG_ARENA_ITEM_REWARD_ID_5V5] = sConfigMgr->GetIntDefault("ArenaReward5v5.ItemID", 29434);
-    m_int_configs[CONFIG_ARENA_ITEM_REWARD_COUNT] = sConfigMgr->GetIntDefault("ArenaReward.ItemCount", 1);
-    if (m_int_configs[CONFIG_ARENA_ITEM_REWARD_COUNT] < 1)
-        m_int_configs[CONFIG_ARENA_ITEM_REWARD_COUNT] = 1;
-
-    SetWinnerMessageArena(sConfigMgr->GetStringDefault("ArenaReward.Message", "You have been awarded for winning the arena fight."));
+    m_int_configs[CONFIG_ARENA_WIN_ITEM_REWARD_ID] = sConfigMgr->GetIntDefault("ArenaRewardWin.ItemID", 1672);
+    m_int_configs[CONFIG_ARENA_LOSS_ITEM_REWARD_ID] = sConfigMgr->GetIntDefault("ArenaRewardLoss.ItemID", 4868);
+    m_int_configs[CONFIG_ARENA_WIN_ITEM_REWARD_COUNT] = sConfigMgr->GetIntDefault("ArenaRewardWin.ItemCount", 1);
+    if (m_int_configs[CONFIG_ARENA_WIN_ITEM_REWARD_COUNT] < 1)
+        m_int_configs[CONFIG_ARENA_WIN_ITEM_REWARD_COUNT] = 1;
+    m_int_configs[CONFIG_ARENA_LOSS_ITEM_REWARD_COUNT] = sConfigMgr->GetIntDefault("ArenaRewardLoss.ItemCount", 1);
+    if (m_int_configs[CONFIG_ARENA_LOSS_ITEM_REWARD_COUNT] < 1)
+        m_int_configs[CONFIG_ARENA_LOSS_ITEM_REWARD_COUNT] = 1;
 
     m_bool_configs[CONFIG_NO_RESET_TALENT_COST] = sConfigMgr->GetBoolDefault("NoResetTalentsCost", false);
     m_bool_configs[CONFIG_SHOW_KICK_IN_WORLD] = sConfigMgr->GetBoolDefault("ShowKickInWorld", false);
