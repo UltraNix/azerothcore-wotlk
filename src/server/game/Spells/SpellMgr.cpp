@@ -7354,6 +7354,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_100_YARDS;
             spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_100_YARDS;
             break;
+        case 74610: // Fiery Combustion
+        case 74800: // Soul Consumption
+            spellInfo->DurationIndex = 64; // 40 seconds
+            break;
         // Fiery Combustion
         case 74562:
         // Soul Consumption
@@ -7686,7 +7690,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 74960:
             spellInfo->EffectRadiusIndex[EFFECT_0] = 9; // 20yd
             break;
-
+        // Thorim Story Kill Credit
+        case 56940:
+            spellInfo->AttributesEx |= SPELL_ATTR0_CASTABLE_WHILE_MOUNTED;
+            break;
 
         // ///////////////////////////////////////////
         // ////////////////EVENTS/////////////////////
