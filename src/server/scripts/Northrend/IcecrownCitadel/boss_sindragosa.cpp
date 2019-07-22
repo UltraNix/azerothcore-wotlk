@@ -461,6 +461,8 @@ class boss_sindragosa : public CreatureScript
                         me->SetReactState(REACT_AGGRESSIVE);
                         if (Unit* target = me->SelectVictim())
                             AttackStart(target);
+                        // trigger Asphyxiation
+                        summons.DoAction(1, [](uint64 guid) { return GUID_ENPART(guid) == NPC_ICE_TOMB; });
                         break;
                     }
                     default:
@@ -720,17 +722,22 @@ class npc_ice_tomb : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 _trappedPlayerGUID = 0;
                 _existenceCheckTimer = 1000;
-                _asphyxiationTimer = 22500;
             }
 
             uint64 _trappedPlayerGUID;
             uint32 _existenceCheckTimer;
-            uint16 _asphyxiationTimer;
 
             void SetGUID(uint64 guid, int32 type)
             {
                 if (type == DATA_TRAPPED_PLAYER)
                     _trappedPlayerGUID = guid;
+            }
+
+            void DoAction(int32 actionId) override
+            {
+                if (actionId == 1)
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
+                        player->CastSpell(player, SPELL_ASPHYXIATION, true);
             }
 
             void DamageTaken(Unit*, uint32 &dmg, DamageEffectType, SpellSchoolMask)
@@ -772,18 +779,6 @@ class npc_ice_tomb : public CreatureScript
                 }
                 else
                     _existenceCheckTimer -= diff;
-
-                if (_asphyxiationTimer)
-                {
-                    if (_asphyxiationTimer <= diff)
-                    {
-                        _asphyxiationTimer = 0;
-                        if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
-                            player->CastSpell(player, SPELL_ASPHYXIATION, true);
-                    }
-                    else
-                        _asphyxiationTimer -= diff;
-                }
             }
         };
 
