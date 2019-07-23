@@ -358,8 +358,8 @@ class instance_icecrown_citadel : public InstanceMapScript
                     TeamIdInInstance = player->GetTeamId();
 
                 // Buff should be applied only on heroic
-                if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
-                    SetData(DATA_BUFF_AVAILABLE, static_cast<uint32>(false));
+                /*if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
+                    SetData(DATA_BUFF_AVAILABLE, static_cast<uint32>(false));*/
 
                 // for professor putricide hc
                 DoRemoveAurasDueToSpellOnPlayers(74119 /*SPELL_GAS_VARIABLE*/);

@@ -1199,7 +1199,15 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         case 73828:
             if (player)
                 if (InstanceScript* s = const_cast<Player*>(player)->GetInstanceScript())
-                    return s->GetData(251 /*DATA_BUFF_AVAILABLE*/) != 0;
+                {
+                    bool available = true;
+                    // +15% buffs should be available only on non-heroic ICC versions 
+                    if (spellId == 73819 || spellId == 73825)
+                        available = player->GetMap() && !player->GetMap()->IsHeroic();
+                    else 
+                        available = player->GetMap() && player->GetMap()->IsHeroic();
+                    return available && s->GetData(251 /*DATA_BUFF_AVAILABLE*/) != 0;
+                }
             return false;
             break;
     }
