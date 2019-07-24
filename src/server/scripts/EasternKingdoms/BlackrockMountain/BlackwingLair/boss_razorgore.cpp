@@ -121,6 +121,11 @@ struct boss_razorgoreAI : public BossAI
         if (GameObject* orb = me->FindNearestGameObject(GO_RAZORGORE_ORB, 250.0f))
             if (orb->AI())
                 orb->AI()->DoAction(ACTION_CAST_TRIGGER);
+
+        std::list<GameObject*> eggs;
+        me->GetGameObjectListWithEntryInGrid(eggs, GO_RAZORGORE_EGG, 150.f);
+        for (GameObject* egg : eggs)
+            egg->SetGoState(GO_STATE_READY);
     }
 
     void EnterCombat(Unit* /*attacker*/) override
@@ -415,30 +420,54 @@ class spell_razorgore_destroy_egg_SpellScript : public SpellScript
 {
     PrepareSpellScript(spell_razorgore_destroy_egg_SpellScript);
 
+    bool Load() override
+    {
+        _eggGUID = 0;
+        return GetCaster()->GetEntry() == NPC_RAZORGORE;
+    }
+
+    SpellCastResult CheckTarget()
+    {
+        std::list<GameObject*> eggs;
+        GetCaster()->GetGameObjectListWithEntryInGrid(eggs, GO_RAZORGORE_EGG, 10.0f);
+        for (GameObject* egg : eggs)
+            if (egg->GetGoState() == GO_STATE_READY)
+            {
+                _eggGUID = egg->GetGUID();
+                return SPELL_CAST_OK;
+            }
+
+        return SPELL_FAILED_BAD_TARGETS;
+    }
+
     void HandleOnHit()
     {
         if (Creature* razorgore = GetCaster()->ToCreature())
         {
-            if (GameObject* orb = razorgore->FindNearestGameObject(GO_RAZORGORE_ORB, 250.0f))
+            if (GameObject* egg = ObjectAccessor::GetGameObject(*razorgore, _eggGUID))
             {
-                if (razorgore->IsAIEnabled && orb->AI())
+                if (GameObject* orb = razorgore->FindNearestGameObject(GO_RAZORGORE_ORB, 250.0f))
                 {
-                    if (urand(0, 1))
-                        razorgore->AI()->Talk(SAY_EGGS_BROKEN);
+                    if (razorgore->IsAIEnabled && orb->AI())
+                    {
+                        if (urand(0, 1))
+                            razorgore->AI()->Talk(SAY_EGGS_BROKEN);
 
-                    orb->AI()->DoAction(ACTION_EGG_DESTROYED);
+                        orb->AI()->DoAction(ACTION_EGG_DESTROYED);
+                        egg->SetGoState(GO_STATE_ACTIVE);
+                    }
                 }
             }
-
-            if (GameObject* egg = razorgore->FindNearestGameObject(GO_RAZORGORE_EGG, 10.0f))
-                egg->SetGoState(GO_STATE_ACTIVE);
         }
     }
 
     void Register() override
     {
+        OnCheckCast += SpellCheckCastFn(spell_razorgore_destroy_egg_SpellScript::CheckTarget);
         OnHit += SpellHitFn(spell_razorgore_destroy_egg_SpellScript::HandleOnHit);
     }
+
+    uint64 _eggGUID;
 };
 
 // 19832 - Possess
