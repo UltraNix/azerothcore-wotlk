@@ -2732,7 +2732,7 @@ void Creature::SetCannotReachTarget(bool cannotReach)
          return;
      m_cannotReachTarget = cannotReach;
      m_cannotReachTimer = 0;
-     if (cannotReach && IsInWorld() && GetMap()->IsDungeon() && !CanFly() && !IsFlying() && CanFreeMove())
+     if (cannotReach && IsInWorld() && GetMap()->IsDungeon() && !CanFly() && !IsFlying() && CanFreeMove() && !HasUnitState(UNIT_STATE_NOT_MOVE))
          if (Unit* victim = GetVictim())
              if (victim->IsPlayer())
                  CastSpell(victim, 21463, true); // teleport
