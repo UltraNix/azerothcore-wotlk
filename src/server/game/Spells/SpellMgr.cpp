@@ -1201,11 +1201,11 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
                 if (InstanceScript* s = const_cast<Player*>(player)->GetInstanceScript())
                 {
                     bool available = true;
-                    // +15% buffs should be available only on non-heroic ICC versions 
+                    // +15% buffs should be available only on non-25heroic ICC versions 
                     if (spellId == 73819 || spellId == 73825)
-                        available = player->GetMap() && !player->GetMap()->IsHeroic();
+                        available = player->GetMap() && player->GetMap()->GetDifficulty() != RAID_DIFFICULTY_25MAN_HEROIC;
                     else 
-                        available = player->GetMap() && player->GetMap()->IsHeroic();
+                        available = player->GetMap() && player->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC;
                     return available && s->GetData(251 /*DATA_BUFF_AVAILABLE*/) != 0;
                 }
             return false;
