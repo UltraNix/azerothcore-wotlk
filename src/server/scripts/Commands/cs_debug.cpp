@@ -1507,12 +1507,25 @@ public:
         return true;
     }
 
-    static bool HandleDebugMajordomo(ChatHandler* handler, char const* /*args*/)
+    static bool HandleDebugMajordomo(ChatHandler* handler, char const* args)
     {
         Player* player = handler->GetSession()->GetPlayer();
 
         if (!player)
             return false;
+
+        if (!*args)
+        {
+            handler->PSendSysMessage("Available functions\n0 - teleport to Majordomo\n1 - summon Majordomo to Ragnaros room\n2 - despawn Majordomo");
+            return true;
+        }
+        uint32 function = atoi(strtok((char*)args, " "));
+
+        if (function > 3)
+        {
+            handler->PSendSysMessage("Available functions\n0 - teleport to Majordomo\n1 - summon Majordomo to Ragnaros room\n2 - despawn Majordomo");
+            return true;
+        }
 
         if (player->GetMapId() != 409)
         {
@@ -1529,12 +1542,37 @@ public:
         }
 
         if (Unit * majordomo = instance->GetCreature(8))
-            player->TeleportTo(majordomo->GetWorldLocation());
+        {
+            bool encounterFinished = instance->GetBossState(8) == DONE && majordomo->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            switch(function)
+            {
+            case 0:
+                player->TeleportTo(majordomo->GetWorldLocation());
+                return true;
+            case 1:
+                if (encounterFinished)
+                {
+                    majordomo->NearTeleportTo(847.103f, -816.153f, -229.775f, 4.344f);
+                    handler->PSendSysMessage("Majordomo has been summoned to Ragnaros room");
+                }
+                else
+                    handler->PSendSysMessage("Majodromo encounter not finished");
+                return true;
+            case 2:
+                if (encounterFinished)
+                {
+                    majordomo->ToCreature()->DespawnOrUnsummon();
+                    handler->PSendSysMessage("Majordomo has been despawned");
+                }
+                else
+                    handler->PSendSysMessage("Majodromo encounter not finished");
+                return true;
+            }
+        }
         else
             handler->PSendSysMessage("Majordomo isn't summoned in this instance.");
         return true;
     }
-
 };
 
 void AddSC_debug_commandscript()
