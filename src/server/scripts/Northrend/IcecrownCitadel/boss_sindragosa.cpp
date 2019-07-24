@@ -459,10 +459,11 @@ class boss_sindragosa : public CreatureScript
                         me->SetCanFly(false);
                         me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run);
                         me->SetReactState(REACT_AGGRESSIVE);
-                        if (Unit* target = me->SelectVictim())
+                        if (Unit * target = me->SelectVictim())
                             AttackStart(target);
                         // trigger Asphyxiation
-                        summons.DoAction(1, [](uint64 guid) { return GUID_ENPART(guid) == NPC_ICE_TOMB; });
+                        std::function<bool(uint64)> _function = [](uint64 guid) { return GUID_ENPART(guid) == NPC_ICE_TOMB; };
+                        summons.DoAction(1, _function);
                         break;
                     }
                     default:
