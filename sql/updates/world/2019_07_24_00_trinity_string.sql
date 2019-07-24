@@ -1,0 +1,2 @@
+DELETE FROM `trinity_string` WHERE `entry` = 517;
+INSERT INTO `trinity_string`(`entry`, `content_default`) VALUES (517, '%d (Entry: %d) - |cffffffff|Hgameobject:%llu|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r');
