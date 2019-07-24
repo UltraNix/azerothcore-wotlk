@@ -232,7 +232,7 @@ struct boss_majordomoAI : public BossAI
                         events.ScheduleEvent(EVENT_TELE_TO_RAGNAROS_EFFECT, 1000);
                         break;
                     case EVENT_TELE_TO_RAGNAROS_EFFECT:
-                        me->SetVisible(false);
+                        me->DespawnOrUnsummon();
                         break;
                     case EVENT_RAG_SUMMON_1:
                         me->setActive(false);

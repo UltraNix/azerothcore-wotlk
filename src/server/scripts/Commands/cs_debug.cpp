@@ -90,7 +90,9 @@ public:
             { "los",            SEC_GAMEMASTER,      false, &HandleDebugLoSCommand,             "" },
             { "moveflags",      SEC_ADMINISTRATOR,  false, &HandleDebugMoveflagsCommand,       "" },
             { "unitstate",      SEC_ADMINISTRATOR,  false, &HandleDebugUnitStateCommand,       "" },
-            { "ulduar",         SEC_MODERATOR,      false, &HandleDebugUlduar,                 "" }
+            { "ulduar",         SEC_MODERATOR,      false, &HandleDebugUlduar,                 "" },
+            { "moltencore",     SEC_GAMEMASTER,     false, &HandleDebugMoltenCore,            ""},
+            { "majordomo",      SEC_GAMEMASTER,     false, &HandleDebugMajordomo,             ""},
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1443,6 +1445,96 @@ public:
         ChatHandler(player->GetSession()).PSendSysMessage(stream.str().c_str());
         return true;
     }
+    
+    static bool HandleDebugMoltenCore(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (player->GetMapId() != 409)
+        {
+            handler->PSendSysMessage("You're not in Molten Core.");
+            return true;
+        }
+
+        InstanceScript* instance = player->GetInstanceScript();
+
+        if (!instance)
+        {
+            handler->PSendSysMessage("Instance pointer invalid, returning.");
+            return true;
+        }
+
+        std::ostringstream stream;
+
+        stream << "Majordomo state: ";
+        EncounterState state = instance->GetBossState(8);
+        switch (state)
+        {
+        case NOT_STARTED:
+            stream << "not started";
+            break;
+        case IN_PROGRESS:
+            stream << "in progress";
+            break;
+        case DONE:
+            stream << "done";
+            break;
+        case EncounterState::FAIL:
+            stream << "fail";
+            break;
+        case EncounterState::SPECIAL:
+            stream << "special";
+            break;
+        case EncounterState::TO_BE_DECIDED:
+            stream << "to be decided";
+            break;
+        }
+
+        stream << "\nMajordomo summoned: ";
+        Unit* majordomo = instance->GetCreature(8);
+        stream << (majordomo ? "true" : "false");
+
+        if (majordomo)
+        {
+            stream << "\nMajordomo position - x: " << majordomo->GetPositionX() << " y: " << majordomo->GetPositionY() << " z: " << majordomo->GetPositionZ();
+        }
+
+        handler->PSendSysMessage(stream.str().c_str());
+
+        return true;
+    }
+
+    static bool HandleDebugMajordomo(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (player->GetMapId() != 409)
+        {
+            handler->PSendSysMessage("You're not in Molten Core.");
+            return true;
+        }
+
+        InstanceScript* instance = player->GetInstanceScript();
+
+        if (!instance)
+        {
+            handler->PSendSysMessage("Instance pointer invalid, returning.");
+            return true;
+        }
+
+        if (Unit * majordomo = instance->GetCreature(8))
+            player->TeleportTo(majordomo->GetWorldLocation());
+        else
+            handler->PSendSysMessage("Majordomo isn't summoned in this instance.");
+        return true;
+    }
+
 };
 
 void AddSC_debug_commandscript()
