@@ -11,6 +11,8 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "SpellAuraEffects.h"
 #include "PassiveAI.h"
 
+#include <functional>
+
 enum Texts
 {
     SAY_AGGRO                           = 0, // You are fools to have come to this place! The icy winds of Northrend will consume your souls!
