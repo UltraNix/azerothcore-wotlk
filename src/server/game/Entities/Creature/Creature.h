@@ -713,7 +713,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
                 return m_charmInfo->GetCharmSpell(pos)->GetAction();
         }
 
-        void SetCannotReachTarget(bool cannotReach);
+        void SetCannotReachTarget(bool cannotReach) { if (cannotReach == m_cannotReachTarget) return; m_cannotReachTarget = cannotReach; m_cannotReachTimer = 0; }
         bool CanNotReachTarget() const { return m_cannotReachTarget; }
 
         void SetPosition(float x, float y, float z, float o);

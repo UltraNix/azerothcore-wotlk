@@ -2726,18 +2726,6 @@ std::string const& Creature::GetNameForLocaleIdx(LocaleConstant loc_idx) const
     return GetName();
 }
 
-void Creature::SetCannotReachTarget(bool cannotReach)
-{
-     if (cannotReach == m_cannotReachTarget)
-         return;
-     m_cannotReachTarget = cannotReach;
-     m_cannotReachTimer = 0;
-     if (cannotReach && IsInWorld() && GetMap()->IsDungeon() && !CanFly() && !IsFlying() && CanFreeMove() && !HasUnitState(UNIT_STATE_NOT_MOVE))
-         if (Unit* victim = GetVictim())
-             if (victim->IsPlayer())
-                 CastSpell(victim, 21463, true); // teleport
-}
-
 void Creature::SetPosition(float x, float y, float z, float o)
 {
     if (!Trinity::IsValidMapCoord(x, y, z, o))
