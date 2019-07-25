@@ -197,6 +197,8 @@ m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false)
     TriggerJustRespawned = false;
     m_isTempWorldObject = false;
     _focusSpell = NULL;
+
+    _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
 }
 
 Creature::~Creature()
@@ -2735,8 +2737,11 @@ void Creature::SetCannotReachTarget(bool cannotReach)
     m_cannotReachTimer = 0;
     if (sWorld->getBoolConfig(CONFIG_LOG_CREATURE_CANT_REACH) && cannotReach && IsInWorld() && GetMap()->IsDungeon() && !CanFly() && !IsFlying() && CanFreeMove() && !HasUnitState(UNIT_STATE_NOT_MOVE))
         if (Unit* victim = GetVictim())
-            if (victim->IsPlayer())
+            if (victim->IsPlayer() && --_creatureCantMoveThreshold == 0)
+            {
+                _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
                 sWorld->SendGMText(LANG_REPORT_CREATURE_CANT_REACH, GetName(), victim->GetName());
+            }
 }
 
 void Creature::SetPosition(float x, float y, float z, float o)

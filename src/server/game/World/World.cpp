@@ -1409,6 +1409,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTIWINTRADING_MINHEALING] = sConfigMgr->GetIntDefault("AntiWintrading.MinHealing", 3000);
 
     m_bool_configs[CONFIG_LOG_CREATURE_CANT_REACH] = sConfigMgr->GetBoolDefault("CreatureCantReachLog.Enable", true);
+    m_int_configs[CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD] = sConfigMgr->GetIntDefault("CreatureCantReachLogThreshold.Amount", 5);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)

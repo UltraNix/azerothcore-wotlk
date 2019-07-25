@@ -873,6 +873,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         time_t _lastDamagedTime;  // Part of Evade mechanics
 
         Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
+
+        uint32 _creatureCantMoveThreshold;
 };
 
 class AssistDelayEvent : public BasicEvent
