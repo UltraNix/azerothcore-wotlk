@@ -200,6 +200,7 @@ enum WorldBoolConfigs
     CONFIG_GM_ANTIABUSE_MONEY,                // Disallow GM to have any gold
     CONFIG_EXTERNAL_MAIL,                     // Enables or disabled sending external mails
     CONFIG_ANTIWINTRADING_ENABLE,             // Notifies GMs about possible arena wintraders
+    CONFIG_LOG_CREATURE_CANT_REACH,           // Notifies GMs when some creature can't reach player and stands still
     BOOL_CONFIG_VALUE_COUNT
 };
 

@@ -1408,6 +1408,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTIWINTRADING_MINDMG] = sConfigMgr->GetIntDefault("AntiWintrading.MinDMG", 3000);
     m_int_configs[CONFIG_ANTIWINTRADING_MINHEALING] = sConfigMgr->GetIntDefault("AntiWintrading.MinHealing", 3000);
 
+    m_bool_configs[CONFIG_LOG_CREATURE_CANT_REACH] = sConfigMgr->GetBoolDefault("CreatureCantReachLog.Enable", true);
 
     // call ScriptMgr if we're reloading the configuration
     if (reload)
@@ -1596,7 +1597,7 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Creature Model Based Info Data...");
     sObjectMgr->LoadCreatureModelInfo();
 
-    sLog->outString("Loading Creature template outfits...");    // must be before LoadCreatureTemplates   
+    sLog->outString("Loading Creature template outfits...");    // must be before LoadCreatureTemplates
     sObjectMgr->LoadCreatureOutfits();
 
     sLog->outString("Loading Creature templates...");

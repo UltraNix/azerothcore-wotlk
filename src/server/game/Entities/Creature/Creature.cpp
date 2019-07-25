@@ -53,6 +53,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "Transport.h"
+#include "Language.h"
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
@@ -2724,6 +2725,18 @@ std::string const& Creature::GetNameForLocaleIdx(LocaleConstant loc_idx) const
                 return cl->Name[loc_idx];
 
     return GetName();
+}
+
+void Creature::SetCannotReachTarget(bool cannotReach)
+{
+    if (cannotReach == m_cannotReachTarget)
+        return;
+    m_cannotReachTarget = cannotReach;
+    m_cannotReachTimer = 0;
+    if (sWorld->getBoolConfig(CONFIG_LOG_CREATURE_CANT_REACH) && cannotReach && IsInWorld() && GetMap()->IsDungeon() && !CanFly() && !IsFlying() && CanFreeMove() && !HasUnitState(UNIT_STATE_NOT_MOVE))
+        if (Unit* victim = GetVictim())
+            if (victim->IsPlayer())
+                sWorld->SendGMText(LANG_REPORT_CREATURE_CANT_REACH, GetName(), victim->GetName());
 }
 
 void Creature::SetPosition(float x, float y, float z, float o)
