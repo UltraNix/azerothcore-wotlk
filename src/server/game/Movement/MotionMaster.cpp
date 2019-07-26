@@ -419,18 +419,37 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
     float dist = 2 * moveTimeHalf * speedXY;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
 
-    Position pos;
-    _owner->GetNearPoint(_owner, pos.m_positionX, pos.m_positionY, pos.m_positionZ, _owner->GetObjectSize(), dist, _owner->GetAngle(srcX, srcY) + M_PI);
-
-    // xinef: check LoS!
-    if (!_owner->IsWithinLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ))
+    auto IsUnderTextures = [](WorldObject* src, Position const& pos)
     {
-        _owner->GetPosition(&pos);
-        _owner->MovePositionToFirstCollision(pos, dist, _owner->GetAngle(srcX, srcY) + M_PI);
+        Map* map = src->GetMap();
+        float ground = map->GetHeight(src->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), MAX_HEIGHT, true);
+        float floor = map->GetHeight(src->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true);
+        float proper_z = fabs(ground - pos.GetPositionZ()) <= fabs(floor - pos.GetPositionZ()) ? ground : floor;
+        if (G3D::fuzzyEq(pos.GetPositionZ(), proper_z))
+            return false;
+
+        return pos.GetPositionZ() < proper_z;
+    };
+
+    constexpr int KNOCKBACK_STEP_AMOUNT = 10;
+    float angle = _owner->GetAngle(srcX, srcY) + M_PI;
+    Position pos = *_owner;
+    Position lastGoodPosition = *_owner;
+    float step = dist / KNOCKBACK_STEP_AMOUNT;
+    for (uint32 idx = 0; idx < KNOCKBACK_STEP_AMOUNT; ++idx)
+    {
+        pos.m_positionX += std::cos(angle) * step;
+        pos.m_positionY += std::sin(angle) * step;
+        pos.m_positionZ += 2.5f;
+        _owner->UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+        if (!_owner->IsWithinLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ) || IsUnderTextures(_owner, pos))
+            break;
+
+        lastGoodPosition = pos;
     }
 
     Movement::MoveSplineInit init(_owner);
-    init.MoveTo(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+    init.MoveTo(lastGoodPosition);
     init.SetParabolic(max_height, 0);
     init.SetOrientationFixed(true);
     init.SetVelocity(speedXY);
