@@ -2740,7 +2740,7 @@ void Creature::SetCannotReachTarget(bool cannotReach)
             if (victim->IsPlayer() && --_creatureCantMoveThreshold == 0)
             {
                 _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
-                sWorld->SendGMText(LANG_REPORT_CREATURE_CANT_REACH, GetName(), victim->GetName());
+                sWorld->SendGMText(LANG_REPORT_CREATURE_CANT_REACH, GetName().c_str(), victim->GetName().c_str());
             }
 }
 
