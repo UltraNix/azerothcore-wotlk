@@ -604,14 +604,14 @@ Position const elitePos[3] =
     { 305.65f, 183.96f, 235.7f }
 };
 
-class npc_hunger_games : public CreatureScript 
+class npc_hunger_games : public CreatureScript
 {
 public:
     npc_hunger_games() : CreatureScript("npc_hunger_games") {}
 
-    bool OnGossipHello(Player* player, Creature* creature) override 
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE)) 
+        if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE))
             return false;
 
         if (player->IsGameMaster())
@@ -621,7 +621,7 @@ public:
             else
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Usun mnie z GM listy.", GOSSIP_SENDER_MAIN, ACTION_REMOVE_FROM_GMLIST);
         }
-        if (player->getLevel() < 79) 
+        if (player->getLevel() < 79)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me more about Hunger Games", GOSSIP_SENDER_MAIN, ACTION_INFO);
             player->SEND_GOSSIP_MENU(GOSSIP_LVL, creature->GetGUID());
@@ -651,9 +651,9 @@ public:
         player->SEND_GOSSIP_MENU(GOSSIP_MAIN, creature->GetGUID());
         return true;
     }
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override 
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
-        switch (action) 
+        switch (action)
         {
             case ACTION_ADD_TO_QUEUE:
                 sCustomEventMgr->addPlayerToHungerGames(player->GetGUID());
@@ -688,20 +688,20 @@ public:
     }
 };
 
-class npc_hunger_games_control : public CreatureScript 
+class npc_hunger_games_control : public CreatureScript
 {
 public:
     npc_hunger_games_control() : CreatureScript("npc_hunger_games_control") {}
 
-    bool OnGossipHello(Player* player, Creature* creature) override 
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
-        if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE)) 
+        if (!sWorld->getBoolConfig(CONFIG_HUNGER_GAMES_ENABLE))
             return false;
 
         if (player->GetSession()->GetSecurity() < 4)
             return false;
 
-        if (sCustomEventMgr->isHungerGamesEventInProgress()) 
+        if (sCustomEventMgr->isHungerGamesEventInProgress())
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "****Event w trakcie****", GOSSIP_SENDER_MAIN, ACTION_QUIT);
             player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
@@ -818,18 +818,18 @@ public:
         return true;
     }
 
-    struct npc_hunger_games_controlAI : public ScriptedAI 
+    struct npc_hunger_games_controlAI : public ScriptedAI
     {
         npc_hunger_games_controlAI(Creature *creature) : ScriptedAI(creature) {}
 
-        void spawnElite(uint8 loc) 
+        void spawnElite(uint8 loc)
         {
-            if (me->GetMapId() != 37) 
+            if (me->GetMapId() != 37)
                 return;
 
-            if (loc >= 3) 
+            if (loc >= 3)
                 return;
-            
+
             if (Creature *c = me->SummonCreature(NPC_ELITE, elitePos[loc].m_positionX, elitePos[loc].m_positionY, elitePos[loc].m_positionZ, 0.f, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 600000))
             {
                 std::string msg = "Kozrum, the Hunger Giant, has emerged from the depths! He is under the ";
@@ -865,9 +865,9 @@ class player_script_hunger_games : public PlayerScript {
 public:
     player_script_hunger_games() : PlayerScript("player_script_hunger_games") {}
 
-    void OnPVPKill(Player* killer, Player* killed) override 
+    void OnPVPKill(Player* killer, Player* killed) override
     {
-        if (sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || !killer || !killed || killed->GetMapId() != 37 || !sCustomEventMgr->isPlayerInHungerGames(killer->GetGUID())) 
+        if (sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || !killer || !killed || killed->GetMapId() != 37 || !sCustomEventMgr->isPlayerInHungerGames(killer->GetGUID()))
             return;
 
         std::string msg = "Player " + killed->GetName() + " has been killed by player " + killer->GetName() + ". " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount() - 1) + " left!";
@@ -875,7 +875,7 @@ public:
         sCustomEventMgr->removePlayerFromHungerGames(killed->GetGUID());
     }
 
-    void OnPlayerKilledByCreature(Creature* killer, Player* killed) override 
+    void OnPlayerKilledByCreature(Creature* killer, Player* killed) override
     {
         if (sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || !killer || !killed || !sCustomEventMgr->isPlayerInHungerGames(killed->GetGUID()) || killed->GetMapId() != 37)
             return;
@@ -886,9 +886,9 @@ public:
 
     }
 
-    void OnLogin(Player* player) override 
+    void OnLogin(Player* player) override
     {
-        if (!player || sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED) 
+        if (!player || sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED)
             return;
 
         if (player->GetMapId() == 37)
@@ -913,7 +913,7 @@ public:
     }
     void OnMapChanged(Player* player) override
     {
-        if (!player || sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || player->GetMapId() == 37 || !sCustomEventMgr->isPlayerInHungerGames(player->GetGUID())) 
+        if (!player || sCustomEventMgr->getHungerGamesState() == HUNGER_GAMES_NOT_STARTED || player->GetMapId() == 37 || !sCustomEventMgr->isPlayerInHungerGames(player->GetGUID()))
             return;
 
         std::string msg = "Player " + player->GetName() + " has left Hunger Games. " + std::to_string(sCustomEventMgr->getHungerGamesPlayersCount() - 1) + " left!";
@@ -929,14 +929,14 @@ class npc_gmisl_teleporter : public CreatureScript
 public:
     npc_gmisl_teleporter() : CreatureScript("npc_gmisl_teleporter"){}
 
-    bool OnGossipHello(Player* player, Creature* creature) 
+    bool OnGossipHello(Player* player, Creature* creature)
     {
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport me to GM Island.", GOSSIP_SENDER_MAIN, 1);
         player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) 
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
     {
         switch (action) {
             case 1:
@@ -998,7 +998,7 @@ const uint32 DeathKnightQuests[46] =
     13166   // [The Battle For The Ebon Hold]
 };
 
-enum TestNpcData 
+enum TestNpcData
 {
     COMPLETE_DK_CHAIN    = 0,
     TEACH_WEAPON_SKILLS  = 1,
@@ -1036,12 +1036,12 @@ enum riding
     COLD_WEATHER = 54197
 };
 
-class npc_test_server : CreatureScript 
+class npc_test_server : CreatureScript
 {
 public:
     npc_test_server() : CreatureScript("npc_test_server") {}
 
-    bool OnGossipHello(Player* player, Creature* creature) override 
+    bool OnGossipHello(Player* player, Creature* creature) override
     {
         if (!sWorld->getBoolConfig(CONFIG_PTR_REALM))
             return false;
@@ -1058,9 +1058,9 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override 
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
     {
-        switch (action) 
+        switch (action)
         {
             case COMPLETE_DK_CHAIN:
                 CompleteDeathKnightChain(player);
@@ -1085,7 +1085,7 @@ public:
     }
 
 private:
-    bool CompleteDeathKnightChain(Player *player) 
+    bool CompleteDeathKnightChain(Player *player)
     {
             if (!player)
                 return false;
@@ -1330,7 +1330,7 @@ public:
     bool OnGossipHello(Player* player, Creature* creature)
     {
         DisplayHelloGossips(player);
-       
+
         player->SEND_GOSSIP_MENU(GOSSIP_AS_MAIN, creature->GetGUID());
         return true;
     }
@@ -1394,7 +1394,7 @@ public:
     bool DisplayArenas(Player* player, ArenaType type, uint8 page, uint32 &size)
     {
         BattlegroundContainer arenaContainer;
-        
+
         uint32 begin = page * ARENAS_PER_PAGE;
         uint32 end = (page + 1) * ARENAS_PER_PAGE - 1;
         uint32 count = 0;
@@ -1532,15 +1532,15 @@ struct WandererDalaranNPC
     uint32 entry;
 };
 
-constexpr uint32 WANDERER_DALARAN_NPC_COUNT = 77;
+constexpr uint32 WANDERER_DALARAN_NPC_COUNT = 75;
 
 const WandererDalaranNPC wandererDalaranNPCs[WANDERER_DALARAN_NPC_COUNT] =
 {
-    {12402,32720},{28686,32719},{85208,33938},{85210,33936},{85214,35471},{96496,32515},{97931,28691},{97932,29715},{97989,28692},{98070,28694},{98178,28697},
+    {12402,32720},{28686,32719},{85208,33938},{85210,33936},{85214,35471},{96496,32515},{97931,28691},{97989,28692},{98070,28694},{98178,28697},
     {98346,28699},{98421,28700},{98866,28704},{99029,28706},{99201,28708},{100897,31031},{100940,29496},{101236,37776},{101356,29499},{101811,28990},{102033,28993},
     {102048,29505},{102070,28994},{102323,31557},{102325,28997},{102387,29254},{102397,29254},{102399,28742},{102417,29255},{102418,29255},{102419,29255},{102420,29255},
     {102427,29255},{102428,29255},{102430,29255},{102500,29512},{102516,32329},{102530,29513},{102606,29514},{102673,32332},{102693,32333},{102700,29261},{103296,29523},
-    {104242,29533},{105534,29547},{105660,29548},{107612,29568},{111283,32675},{111306,32420},{111374,32677},{111461,32678},{111691,32679},{111719,32680},
+    {104242,29533},{105660,29548},{107612,29568},{111283,32675},{111306,32420},{111374,32677},{111461,32678},{111691,32679},{111719,32680},
     {111858,32681},{112052,32683},{112329,32685},{112385,32686},{112609,32688},{112639,32689},{112686,32690},{112852,32691},{112965,32693},{113397,30137},{114292,32706},
     {114331,32451},{114781,29640},{115281,32718},{116617,32216},{117830,32743},{119625,32251},{120324,32253},{133649,37780},{137702,36670},{207871,30567},{207873,30567},
     {249559,80003}
