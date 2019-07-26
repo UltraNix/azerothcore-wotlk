@@ -564,6 +564,10 @@ void WorldSession::HandleListStabledPetsOpcode(WorldPacket & recvData)
     if (GetPlayer()->IsMounted())
         GetPlayer()->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
+    // Wait until old pet loaded
+    if (GetPlayer()->GetTemporaryUnsummonedPetNumber())
+        return;
+
     SendStablePet(npcGUID);
 }
 
@@ -641,6 +645,16 @@ void WorldSession::HandleStablePet(WorldPacket & recvData)
 
     if (!CheckStableMaster(npcGUID))
     {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    // Wait until old pet loaded
+    if (GetPlayer()->GetTemporaryUnsummonedPetNumber())
+    {
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "WORLD: HandleStablePet - Player (GUID: %u) got unsummoned pet %d",
+                      GetPlayer()->GetGUIDLow(), GetPlayer()->GetTemporaryUnsummonedPetNumber());
+
         SendStableResult(STABLE_ERR_STABLE);
         return;
     }
@@ -744,6 +758,16 @@ void WorldSession::HandleUnstablePet(WorldPacket & recvData)
         return;
     }
 
+    // Wait until old pet loaded
+    if (GetPlayer()->GetTemporaryUnsummonedPetNumber())
+    {
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "WORLD: HandleUnstablePet - Player (GUID: %u) got unsummoned pet %d",
+                      GetPlayer()->GetGUIDLow(), GetPlayer()->GetTemporaryUnsummonedPetNumber());
+
+        SendStableResult( STABLE_ERR_STABLE );
+        return;
+    }
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
@@ -792,6 +816,7 @@ void WorldSession::HandleUnstablePet(WorldPacket & recvData)
 
             if ( !Pet::LoadPetFromDB( _player, PET_LOAD_HANDLE_UNSTABLE_CALLBACK, petEntry, petId ) )
             {
+                sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Cannot unstable pet: Id: %u, Entry: %u, Owner: [%u]", petId, petEntry, _player->GetGUIDLow());
                 return SendStableResult( STABLE_ERR_STABLE );
             }
 
@@ -854,6 +879,16 @@ void WorldSession::HandleStableSwapPet(WorldPacket & recvData)
         return;
     }
 
+    // Wait until old pet loaded
+    if (GetPlayer()->GetTemporaryUnsummonedPetNumber())
+    {
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "WORLD: HandleStableSwapPet - Player (GUID: %u) got unsummoned pet %d",
+                      GetPlayer()->GetGUIDLow(), GetPlayer()->GetTemporaryUnsummonedPetNumber());
+
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
@@ -902,6 +937,8 @@ void WorldSession::HandleStableSwapPet(WorldPacket & recvData)
             // summon unstabled pet
             if ( !Pet::LoadPetFromDB( _player, PET_LOAD_HANDLE_UNSTABLE_CALLBACK, data->Entry, petId ) )
             {
+                sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Unable to swap pet:  Owner: [%u] with new pet: Id: %u, Entry: %u, Slot %d",
+                            _player->GetGUIDLow(), petId, data->Entry, slot);
                 SendStableResult( STABLE_ERR_STABLE );
             }
             else

@@ -59,7 +59,7 @@ class Pet : public Guardian
         bool CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map, uint32 phaseMask);
         static bool LoadPetFromDB(Player* owner, uint8 asynchLoadType, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, AsynchPetSummon* info = NULL);
         bool isBeingLoaded() const { return m_loading;}
-        void SavePetToDB(PetSaveMode mode, bool logout);
+        void SavePetToDB(PetSaveMode mode, bool logout, bool playerSave = false);
         void Remove(PetSaveMode mode, bool returnreagent = false);
         static void DeleteFromDB(uint32 guidlow);
 

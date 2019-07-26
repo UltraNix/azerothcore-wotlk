@@ -136,16 +136,25 @@ bool Pet::LoadPetFromDB(Player* owner, uint8 asynchLoadType, uint32 petentry, ui
     return true;
 }
 
-void Pet::SavePetToDB(PetSaveMode mode, bool logout)
+
+void Pet::SavePetToDB(PetSaveMode mode, bool logout, bool playerSave /*= false*/)
 {
     // not save not player pets
     if (!IS_PLAYER_GUID(GetOwnerGUID()))
+    {
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Pet (Id: %u, Entry: %u, Slot: %u, Owner: [%lu], Name: %s) cannot be saved to DB because owner is not player!",
+                       m_charmInfo->GetPetNumber(), GetEntry(), uint32(mode), GetOwnerGUID(), m_name.c_str());
         return;
+    }
 
     // dont allow to save pet when it is loaded, possibly bugs action bar!, save only fully controlled creature
     Player* owner = GetOwner()->ToPlayer();
     if (!owner || m_loading || !GetEntry() || !isControlled())
+    {
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Pet (Id: %u, Entry: %u, Slot: %u, Owner: [%lu], Name: %s) cannot be saved to DB!",
+                       m_charmInfo->GetPetNumber(), GetEntry(), uint32(mode), GetOwnerGUID(), m_name.c_str());
         return;
+    }
 
     // not save pet as current if another pet temporary unsummoned
     if (mode == PET_SAVE_AS_CURRENT && owner->GetTemporaryUnsummonedPetNumber() &&
@@ -183,7 +192,7 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
         trans = CharacterDatabase.BeginTransaction();
         // remove current data
 
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_ID);
+        PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_ID);
         stmt->setUInt32(0, m_charmInfo->GetPetNumber());
         trans->Append(stmt);
 
@@ -206,10 +215,10 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
             stmt->setUInt8(2, uint8(PET_SAVE_LAST_STABLE_SLOT));
             trans->Append(stmt);
 
-            for ( PetSaveMode slot : { PET_SAVE_AS_CURRENT, PET_SAVE_NOT_IN_SLOT } )
+            for (PetSaveMode slot : { PET_SAVE_AS_CURRENT, PET_SAVE_NOT_IN_SLOT })
             {
-                PetSlotData* data = owner->GetPetSlotData( slot );
-                if ( data != nullptr )
+                PetSlotData *data = owner->GetPetSlotData(slot);
+                if (data != nullptr)
                 {
                     data->Empty = true;
                 }
@@ -244,6 +253,12 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
         trans->Append(stmt);
         CharacterDatabase.CommitTransaction(trans);
 
+        if (!playerSave)
+        {
+            sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Saving pet to database: Id: %u, Entry: %u, Slot: %u, Owner: [%s], Level: %u, Name: %s",
+                        m_charmInfo->GetPetNumber(), GetEntry(), uint32(mode), owner->GetGUIDLow(), getLevel(), m_name.c_str());
+        }
+
         PetSlotData* data = owner->GetPetSlotData( mode, true );
         if ( data != nullptr )
         {
@@ -258,6 +273,12 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout)
     // delete
     else
     {
+        Unit* owner = GetOwner();
+
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Deleting pet from database: Id: %u, Entry: %u, Slot: %u, Owner: [%lu], Name: %s, Guid [%lu], OwnerPetGuid [%lu], Duration %d",
+                    m_charmInfo->GetPetNumber(), GetEntry(), uint32(mode), GetOwnerGUID(), m_name.c_str(), GetGUIDLow(),
+                    owner ? owner->GetPetGUID() : 0, m_duration);
+
         RemoveAllAuras();
         DeleteFromDB(m_charmInfo->GetPetNumber());
     }

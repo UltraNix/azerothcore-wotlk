@@ -20273,7 +20273,7 @@ void Player::SaveToDB(bool create, bool logout)
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
-        pet->SavePetToDB(PET_SAVE_AS_CURRENT, logout);
+        pet->SavePetToDB(PET_SAVE_AS_CURRENT, logout, true);
 
     // our: saving system
     if (!create && !logout)
