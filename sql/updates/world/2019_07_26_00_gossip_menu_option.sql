@@ -1,0 +1,1 @@
+UPDATE `gossip_menu_option` SET `option_text`='Teach me the way of the spirits.' WHERE `menu_id` = 5123 AND `id` = 0;
