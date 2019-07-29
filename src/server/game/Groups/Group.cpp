@@ -1104,7 +1104,7 @@ void Group::GroupLoot(Loot* loot, WorldObject* pLootedObject)
                     {
                         r->totalPlayersRolling++;
 
-                        if (member->GetPassOnGroupLoot())
+                        if (member->GetPassOnGroupLoot() || (item->Bonding == BIND_WHEN_PICKED_UP && item->MaxCount && int32(member->GetItemCount(item->ItemId, true)) >= item->MaxCount))
                         {
                             r->playerVote[member->GetGUID()] = PASS;
                             r->totalPass++;
@@ -1246,7 +1246,7 @@ void Group::NeedBeforeGreed(Loot* loot, WorldObject* lootedObject)
                 if (i->AllowedForPlayer(playerToRoll) && loot->IsPlayerAllowedToLoot(playerToRoll, lootedObject) && playerToRoll->IsAtGroupRewardDistance(lootedObject))
                 {
                     r->totalPlayersRolling++;
-                    if (playerToRoll->GetPassOnGroupLoot())
+                    if (playerToRoll->GetPassOnGroupLoot() || (item->Bonding == BIND_WHEN_PICKED_UP && item->MaxCount && int32(playerToRoll->GetItemCount(item->ItemId, true)) >= item->MaxCount))
                     {
                         r->playerVote[playerToRoll->GetGUID()] = PASS;
                         r->totalPass++;
