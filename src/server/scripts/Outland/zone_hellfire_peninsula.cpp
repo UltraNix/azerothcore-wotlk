@@ -419,6 +419,8 @@ struct npc_deranged_helboarAI : public ScriptedAI
             {
                 std::list<Creature*> minions;
                 player->GetAllMinionsByEntry(minions, NPC_FEL_GUARD_HOUND);
+                if (minions.empty())
+                    return;
                 if (Creature* hound = minions.front())
                     if (hound->IsInWorld())
                     {
