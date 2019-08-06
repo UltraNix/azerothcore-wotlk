@@ -566,7 +566,7 @@ bool Unit::IsWithinCombatRange(const Unit* obj, float dist2compare) const
     return distsq < maxdist * maxdist;
 }
 
-bool Unit::IsWithinMeleeRange(const Unit* obj, float dist) const
+bool Unit::IsWithinMeleeRange(const Unit* obj, float dist, bool leeway) const
 {
     if (!obj || !IsInMap(obj) || !InSamePhase(obj))
         return false;
@@ -578,6 +578,8 @@ bool Unit::IsWithinMeleeRange(const Unit* obj, float dist) const
 
     float sizefactor = GetMeleeReach() + obj->GetMeleeReach();
     float maxdist = dist + sizefactor;
+    if (leeway && IsPlayer() && obj->IsPlayer() && isMoving() && obj->isMoving() && !IsWalking() && !obj->IsWalking())
+        maxdist += 8.0f / 3.0f;
 
     return distsq < maxdist * maxdist;
 }
@@ -8795,7 +8797,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
                 plr->AddSpellCooldown(16459, 0, cooldown);
 
-                if (plr->IsWithinMeleeRange(victim))
+                if (plr->IsWithinMeleeRange(victim, MELEE_RANGE, true))
                     plr->AttackerStateUpdate(victim);
                 return true;
             }
