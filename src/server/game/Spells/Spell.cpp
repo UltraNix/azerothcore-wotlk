@@ -8648,15 +8648,16 @@ WorldObjectSpellAreaTargetCheck::WorldObjectSpellAreaTargetCheck(float range, Po
 
 bool WorldObjectSpellAreaTargetCheck::operator()(WorldObject* target)
 {
-    if (target->GetTypeId() == TYPEID_GAMEOBJECT)
-    {
-        if (!target->ToGameObject()->IsInRange(_position->GetPositionX(), _position->GetPositionY(), _position->GetPositionZ(), _range))
-            return false;
-    }
+    if (target->IsPlayer() && _caster->IsPlayer() && target->ToPlayer()->isMoving() && _caster->isMoving() && !target->ToPlayer()->IsWalking() && !_caster->IsWalking())
+        _range += 8.0f / 3.0f;
+
+    if (target->IsCreature() && target->ToCreature()->IsAvoidingAOE())
+        return false;
+    else if (target->IsGameObject() && !target->ToGameObject()->IsInRange(_position->GetPositionX(), _position->GetPositionY(), _position->GetPositionZ(), _range))
+        return false;
     else if (!target->IsWithinDist3d(_position, _range))
         return false;
-    else if (target->GetTypeId() == TYPEID_UNIT && target->ToCreature()->IsAvoidingAOE()) // pussywizard
-        return false;
+
     return WorldObjectSpellTargetCheck::operator ()(target);
 }
 
