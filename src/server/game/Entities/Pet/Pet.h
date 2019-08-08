@@ -186,5 +186,9 @@ class Pet : public Guardian
         {
             ASSERT(false);
         }
+
+        //! /*hack*/ spellarea works for player only
+        //! apply buffs to pet as well
+        void HandleIcecrownCitadelBuffs();
 };
 #endif
