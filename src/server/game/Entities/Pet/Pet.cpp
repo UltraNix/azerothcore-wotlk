@@ -74,16 +74,44 @@ void Pet::AddToWorld()
 
     // pussywizard: apply ICC buff to pets
     if (IS_PLAYER_GUID(GetOwnerGUID()) && GetMapId() == 631 && FindMap() && FindMap()->ToInstanceMap() && FindMap()->ToInstanceMap()->GetInstanceScript() && FindMap()->ToInstanceMap()->GetInstanceScript()->GetData(251 /*DATA_BUFF_AVAILABLE*/))
+    {
+        std::unordered_map<uint32 /*spellId*/, uint32 /*value*/> _spellIdMap;
         if (Unit* owner = GetOwner())
+        {
             if (Player* plr = owner->ToPlayer())
             {
                 SpellAreaForAreaMapBounds saBounds = sSpellMgr->GetSpellAreaForAreaMapBounds(4812);
                 for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+                {
                     if ((itr->second->raceMask & plr->getRaceMask()) && !HasAura(itr->second->spellId))
+                    {
                         if (const SpellInfo* si = sSpellMgr->GetSpellInfo(itr->second->spellId))
+                        {
                             if (si->HasAura(SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT))
-                                AddAura(itr->second->spellId, this);
+                            {
+                                uint32 buffValue = si->Effects[EFFECT_0].CalcValue();
+                                _spellIdMap[itr->second->spellId] = buffValue;
+                            }
+                        }
+                    }
+                }
+
+                //! [if] map is heroic then we have to select a lowest possible buff (buff value)
+                auto itr = plr->GetMap()->IsHeroic() ?
+                    std::min_element(_spellIdMap.begin(), _spellIdMap.end(), [](const auto& left, const auto& right)
+                {
+                    return left.second < right.second;
+                }) : // [else] choose a highest value
+                    std::max_element(_spellIdMap.begin(), _spellIdMap.end(), [](const auto& left, const auto& right)
+                {
+                    return left.second < right.second;
+                });
+
+                if (itr->first)
+                    AddAura(itr->first, this);
             }
+        }
+    }
 
     // Prevent stuck pets when zoning. Pets default to "follow" when added to world
     // so we'll reset flags and let the AI handle things
