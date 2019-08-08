@@ -2095,7 +2095,7 @@ void Creature::CallAssistance()
 
 void Creature::CallForHelp(float radius)
 {
-    if (radius <= 0.0f || !GetVictim() || IsPet() || IsCharmed())
+    if (radius <= 0.0f || !GetVictim() || !IsAlive() || IsPet() || IsCharmed())
         return;
 
     CellCoord p(Trinity::ComputeCellCoord(GetPositionX(), GetPositionY()));
