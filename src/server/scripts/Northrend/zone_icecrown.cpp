@@ -719,6 +719,7 @@ class npc_tirions_gambit_tirion : public CreatureScript
         {
             npc_tirions_gambit_tirionAI(Creature* creature) : npc_escortAI(creature), summons(me)
             {
+                me->setActive(false);
             }
 
             EventMap events;
@@ -726,7 +727,6 @@ class npc_tirions_gambit_tirion : public CreatureScript
 
             void Reset()
             {
-                me->setActive(false);
                 me->SetStandState(UNIT_STAND_STATE_STAND);
             }
 
