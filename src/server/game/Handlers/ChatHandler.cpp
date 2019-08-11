@@ -338,7 +338,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             // @ChinaTown
             LookForGoldMessage(sender, msg, lang);
 
-            if (!normalizePlayerName(to))
+            if (!normalizePlayerName(to, "HandleMessagechatOpcode"))
             {
                 SendPlayerNotFoundNotice(to);
                 break;

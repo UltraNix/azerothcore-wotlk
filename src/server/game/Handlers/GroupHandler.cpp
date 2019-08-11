@@ -68,7 +68,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     // attempt add selected player
 
     // cheating
-    if (!normalizePlayerName(membername))
+    if (!normalizePlayerName(membername, "HandleGroupInviteOpcode"))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_BAD_PLAYER_NAME_S);
         return;
@@ -366,7 +366,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recvData)
     recvData >> membername;
 
     // player not found
-    if (!normalizePlayerName(membername))
+    if (!normalizePlayerName(membername, "HandleGroupUninviteOpcode"))
         return;
 
     // can't uninvite yourself

@@ -119,7 +119,7 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_SET_OWNER %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelSetOwner"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -148,7 +148,7 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_MODERATOR %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelModerator"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -164,7 +164,7 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_UNMODERATOR %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelUnmoderator"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -180,7 +180,7 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_MUTE %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelMute"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -196,7 +196,7 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_UNMUTE %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelUnmute"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -212,7 +212,7 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_INVITE %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelInvite"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -228,7 +228,7 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_KICK %s Channel: %s, Target: %s",
        GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelKick"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -244,7 +244,7 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_BAN %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelBan"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -260,7 +260,7 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_UNBAN %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName))
+    if (!normalizePlayerName(targetName, "HandleChannelUnban"))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))

@@ -117,7 +117,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     }
 
     uint64 rc = 0;
-    if (normalizePlayerName(receiver))
+    if (normalizePlayerName(receiver, "HandleSendMail"))
         rc = sObjectMgr->GetPlayerGUIDByName(receiver);
 
     if (!rc)

@@ -133,10 +133,13 @@ std::string ScriptInfo::GetDebugInfo() const
     return std::string(sz);
 }
 
-bool normalizePlayerName(std::string& name)
+bool normalizePlayerName(std::string& name, std::string calledFrom)
 {
     if (name.empty())
         return false;
+
+    //for crashlogs
+    std::string test = calledFrom;
 
     wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME+1];
     size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;

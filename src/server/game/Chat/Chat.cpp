@@ -1041,7 +1041,7 @@ uint64 ChatHandler::extractGuidFromLink(char* text)
         case SPELL_LINK_PLAYER:
         {
             std::string name = idS;
-            if (!normalizePlayerName(name))
+            if (!normalizePlayerName(name, "extractGuidFromLink"))
                 return 0;
 
             if (Player* player = ObjectAccessor::FindPlayerByName(name, false))
@@ -1084,7 +1084,7 @@ std::string ChatHandler::extractPlayerNameFromLink(char* text)
         return "";
 
     std::string name = name_str;
-    if (!normalizePlayerName(name))
+    if (!normalizePlayerName(name, "extractPlayerNameFromLink"))
         return "";
 
     return name;
@@ -1259,7 +1259,7 @@ bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player* &player
         std::string name = cname;
         if (!name.empty())
         {
-            if (!normalizePlayerName(name))
+            if (!normalizePlayerName(name, "GetPlayerGroupAndGUIDByName"))
             {
                 PSendSysMessage(LANG_PLAYER_NOT_FOUND);
                 SetSentErrorMessage(true);
