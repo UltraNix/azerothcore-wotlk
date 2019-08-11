@@ -29,6 +29,7 @@
 #include "Item.h"
 #include "AccountMgr.h"
 #include "Chat.h"
+#include "utf8.h"
 
 bool WorldSession::CanOpenMailBox(uint64 guid)
 {
@@ -117,6 +118,12 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     }
 
     uint64 rc = 0;
+    if (!utf8::is_valid(receiver.begin(), receiver.end()))
+    {
+        sLog->outError("Player %s tried to send mail to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (normalizePlayerName(receiver, "HandleSendMail"))
         rc = sObjectMgr->GetPlayerGUIDByName(receiver);
 
@@ -279,7 +286,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     std::string receiverIp;
     if (receive)
         receiverIp = receive->GetSession()->GetRemoteAddress();
-   
+
     if (items_count > 0 || money > 0)
     {
         if (receiverIp.empty())

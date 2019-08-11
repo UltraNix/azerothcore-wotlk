@@ -55,6 +55,7 @@
 #include "AccountMgr.h"
 #include "Spell.h"
 #include "WhoListCache.h"
+#include "utf8.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket & recv_data)
 {
@@ -513,6 +514,12 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
 
     recv_data >> friendNote;
 
+    if (!utf8::is_valid(friendName.begin(), friendName.end()))
+    {
+        sLog->outError("Player %s tried to add to friends player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (!normalizePlayerName(friendName, "HandleAddFriendOpcode"))
         return;
 
@@ -586,6 +593,12 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket & recv_data)
     std::string ignoreName = GetTrinityString(LANG_FRIEND_IGNORE_UNKNOWN);
 
     recv_data >> ignoreName;
+
+    if (!utf8::is_valid(ignoreName.begin(), ignoreName.end()))
+    {
+        sLog->outError("Player %s tried to add to ignore list player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (!normalizePlayerName(ignoreName, "HandleAddIgnoreOpcode"))
         return;
@@ -1206,6 +1219,12 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
     if (!AccountMgr::IsAdminAccount(GetSecurity()))
     {
         SendNotification(LANG_YOU_NOT_HAVE_PERMISSION);
+        return;
+    }
+
+    if (!utf8::is_valid(charname.begin(), charname.end()))
+    {
+        sLog->outError("Player %s tried to whois a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
         return;
     }
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -19,6 +19,7 @@
 #include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "ChannelMgr.h"
 #include "Player.h"
+#include "utf8.h"
 
 #include <cctype>
 
@@ -119,6 +120,12 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_SET_OWNER %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to set channel owner to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (!normalizePlayerName(targetName, "HandleChannelSetOwner"))
         return;
 
@@ -148,6 +155,12 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_MODERATOR %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to set channel moderator to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (!normalizePlayerName(targetName, "HandleChannelModerator"))
         return;
 
@@ -163,6 +176,12 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_UNMODERATOR %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
+
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to unset channel moderator to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (!normalizePlayerName(targetName, "HandleChannelUnmoderator"))
         return;
@@ -180,6 +199,12 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_MUTE %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to set channel mute to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (!normalizePlayerName(targetName, "HandleChannelMute"))
         return;
 
@@ -195,6 +220,12 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_UNMUTE %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
+
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to set channel unmute to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (!normalizePlayerName(targetName, "HandleChannelUnmute"))
         return;
@@ -212,6 +243,12 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_INVITE %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to invite to channel a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (!normalizePlayerName(targetName, "HandleChannelInvite"))
         return;
 
@@ -227,6 +264,12 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_KICK %s Channel: %s, Target: %s",
        GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
+
+    if (!utf8::is_valid(targetName.begin(), targetName.end()))
+    {
+        sLog->outError("Player %s tried to set kick from channel a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (!normalizePlayerName(targetName, "HandleChannelKick"))
         return;

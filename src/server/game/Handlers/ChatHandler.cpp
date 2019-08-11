@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -41,6 +41,7 @@
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
 #include "ChinaTown.h"
+#include "utf8.h"
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
 {
@@ -161,7 +162,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 }
                 break;
             default:
-                sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid language/message type combination", 
+                sLog->outError("Player %s (GUID: %u) sent a chatmessage with an invalid language/message type combination",
                                                      GetPlayer()->GetName().c_str(), GetPlayer()->GetGUIDLow());
 
                 recvData.rfinish();
@@ -337,6 +338,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
 
             // @ChinaTown
             LookForGoldMessage(sender, msg, lang);
+
+            if (!utf8::is_valid(to.begin(), to.end()))
+            {
+                sLog->outError("Player %s tried to whisper to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+                return;
+            }
 
             if (!normalizePlayerName(to, "HandleMessagechatOpcode"))
             {

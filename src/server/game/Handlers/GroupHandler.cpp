@@ -32,6 +32,7 @@
 #include "Util.h"
 #include "SpellAuras.h"
 #include "Vehicle.h"
+#include "utf8.h"
 
 class Aura;
 
@@ -68,6 +69,11 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     // attempt add selected player
 
     // cheating
+    if (!utf8::is_valid(membername.begin(), membername.end()))
+    {
+        sLog->outError("Player %s tried to add to group a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
     if (!normalizePlayerName(membername, "HandleGroupInviteOpcode"))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_BAD_PLAYER_NAME_S);
@@ -364,6 +370,12 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recvData)
 
     std::string membername;
     recvData >> membername;
+
+    if (!utf8::is_valid(membername.begin(), membername.end()))
+    {
+        sLog->outError("Player %s tried to remove from group a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     // player not found
     if (!normalizePlayerName(membername, "HandleGroupUninviteOpcode"))

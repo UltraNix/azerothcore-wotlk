@@ -51,6 +51,7 @@
 #include "WorldSession.h"
 #include "Transport.h"
 #include "ChannelMgr.h"
+#include "utf8.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -345,7 +346,11 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
             return;
         }
     }
-
+    if (!utf8::is_valid(name.begin(), name.end()))
+    {
+        sLog->outError("WorldSession::HandleCharCreateOpcode invalid UTF8 sequence - blocked");
+        return;
+    }
     // prevent character creating with invalid name
     if (!normalizePlayerName(name, "Handle char create opcode"))
     {
@@ -1432,6 +1437,12 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     recvData >> guid;
     recvData >> newName;
 
+    if (!utf8::is_valid(newName.begin(), newName.end()))
+    {
+        sLog->outError("Player %s tried to rename himself to name with invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName, "HandleCharRenameOpcode"))
     {
@@ -1594,6 +1605,13 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
     for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
     {
         recvData >> declinedname.name[i];
+
+        if (!utf8::is_valid(declinedname.name[i].begin(), declinedname.name[i].end()))
+        {
+            sLog->outError("Player %s WorldSession::HandleSetPlayerDeclinedNames invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+            return;
+        }
+
         if (!normalizePlayerName(declinedname.name[i], "HandleSetPlayerDeclinedNames"))
         {
             WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
@@ -1798,6 +1816,12 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
         return;
     }
 
+
+    if (!utf8::is_valid(newName.begin(), newName.end()))
+    {
+        sLog->outError("Player %s tried to rename himself to name with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
     // prevent character rename to invalid name
     if (!normalizePlayerName(newName, "HandleCharCustomize"))
     {
@@ -2177,6 +2201,12 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
             SendPacket(&data);
             return;
         }
+    }
+
+    if (!utf8::is_valid(newname.begin(), newname.end()))
+    {
+        sLog->outError("Player %s tried to rename himself to name with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
     }
 
     // prevent character rename to invalid name

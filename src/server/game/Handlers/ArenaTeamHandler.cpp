@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,6 +28,7 @@
 #include "SocialMgr.h"
 #include "ArenaTeamMgr.h"
 #include "Opcodes.h"
+#include "utf8.h"
 
 void WorldSession::HandleInspectArenaTeamsOpcode(WorldPacket & recvData)
 {
@@ -88,6 +89,11 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket & recvData)
 
     if (!invitedName.empty())
     {
+        if (!utf8::is_valid(invitedName.begin(), invitedName.end()))
+        {
+            sLog->outError("Player %s tried to invite to arena team a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+            return;
+        }
         if (!normalizePlayerName(invitedName, "HandleArenaTeamInviteOpcode"))
             return;
 
@@ -286,6 +292,12 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket & recvData)
         return;
     }
 
+    if (!utf8::is_valid(name.begin(), name.end()))
+    {
+        sLog->outError("Player %s tried to add to remove from arena team a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (!normalizePlayerName(name, "Handle arena team remove opcode"))
         return;
 
@@ -333,6 +345,12 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket & recvData)
     if (arenaTeam->GetCaptain() != _player->GetGUID())
     {
         SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, "", "", ERR_ARENA_TEAM_PERMISSIONS);
+        return;
+    }
+
+    if (!utf8::is_valid(name.begin(), name.end()))
+    {
+        sLog->outError("Player %s tried to pass arena team leader to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
         return;
     }
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,6 +35,7 @@
 #include "SpellMgr.h"
 #include "ScriptMgr.h"
 #include "ChatLink.h"
+#include "utf8.h"
 
 bool ChatHandler::load_command_table = true;
 
@@ -1041,6 +1042,11 @@ uint64 ChatHandler::extractGuidFromLink(char* text)
         case SPELL_LINK_PLAYER:
         {
             std::string name = idS;
+            if (!utf8::is_valid(name.begin(), name.end()))
+            {
+                sLog->outError("ChatHandler::extractGuidFromLink invalid UTF8 sequence - blocked");
+                return 0;
+            }
             if (!normalizePlayerName(name, "extractGuidFromLink"))
                 return 0;
 
@@ -1084,6 +1090,11 @@ std::string ChatHandler::extractPlayerNameFromLink(char* text)
         return "";
 
     std::string name = name_str;
+    if (!utf8::is_valid(name.begin(), name.end()))
+    {
+        sLog->outError("ChatHandler::extractPlayerNameFromLink invalid UTF8 sequence - blocked");
+        return "";
+    }
     if (!normalizePlayerName(name, "extractPlayerNameFromLink"))
         return "";
 
@@ -1259,6 +1270,11 @@ bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player* &player
         std::string name = cname;
         if (!name.empty())
         {
+            if (!utf8::is_valid(name.begin(), name.end()))
+            {
+                sLog->outError("ChatHandler::GetPlayerGroupAndGUIDByName invalid UTF8 sequence - blocked");
+                return false;
+            }
             if (!normalizePlayerName(name, "GetPlayerGroupAndGUIDByName"))
             {
                 PSendSysMessage(LANG_PLAYER_NOT_FOUND);

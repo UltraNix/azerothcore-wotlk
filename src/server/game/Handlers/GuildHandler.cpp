@@ -27,6 +27,7 @@
 #include "Guild.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
+#include "utf8.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
@@ -55,6 +56,13 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     recvPacket >> invitedName;
 
     ;sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_INVITE [%s]: Invited: %s", GetPlayerInfo().c_str(), invitedName.c_str());
+
+    if (!utf8::is_valid(invitedName.begin(), invitedName.end()))
+    {
+        sLog->outError("Player %s tried to invite to guild a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (normalizePlayerName(invitedName, "HandleGuildInviteOpcode"))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleInviteMember(this, invitedName);
@@ -66,6 +74,12 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     recvPacket >> playerName;
 
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_REMOVE [%s]: Target: %s", GetPlayerInfo().c_str(), playerName.c_str());
+
+    if (!utf8::is_valid(playerName.begin(), playerName.end()))
+    {
+        sLog->outError("Player %s tried to remove from guild a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (normalizePlayerName(playerName, "HandleGuildRemoveOpcode"))
         if (Guild* guild = GetPlayer()->GetGuild())
@@ -114,6 +128,12 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_PROMOTE [%s]: Target: %s", GetPlayerInfo().c_str(), playerName.c_str());
 
+    if (!utf8::is_valid(playerName.begin(), playerName.end()))
+    {
+        sLog->outError("Player %s tried to guild promote a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
+
     if (normalizePlayerName(playerName, "HandleGuildPromoteOpcode"))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleUpdateMemberRank(this, playerName, false);
@@ -125,6 +145,12 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     recvPacket >> playerName;
 
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_DEMOTE [%s]: Target: %s", GetPlayerInfo().c_str(), playerName.c_str());
+
+    if (!utf8::is_valid(playerName.begin(), playerName.end()))
+    {
+        sLog->outError("Player %s tried to guild demote a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (normalizePlayerName(playerName, "HandleGuildDemoteOpcode"))
         if (Guild* guild = GetPlayer()->GetGuild())
@@ -153,6 +179,12 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     recvPacket >> name;
 
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_LEADER [%s]: Target: %s", GetPlayerInfo().c_str(), name.c_str());
+
+    if (!utf8::is_valid(name.begin(), name.end()))
+    {
+        sLog->outError("Player %s tried to pass guild leader to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        return;
+    }
 
     if (normalizePlayerName(name, "HandleGuildLeaderOPcode"))
         if (Guild* guild = GetPlayer()->GetGuild())
