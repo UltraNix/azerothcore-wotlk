@@ -922,6 +922,19 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     else
         RemoveCreatureFromMoveList(creature);
 
+    if (!creature->GetVehicle() && creature->GetUnitTypeMask() & (UNIT_MASK_GUARDIAN | UNIT_MASK_PET | UNIT_MASK_HUNTER_PET) && creature->IsControlledByPlayer())
+    {
+        float old_orientation = creature->GetOrientation();
+        float current_z = creature->GetPositionZ();
+        bool turn = (old_orientation != o);
+        bool relocated = (creature->GetPositionX() != x || creature->GetPositionY() != y || current_z != z);
+        uint32 mask = 0;
+        if (turn) mask |= AURA_INTERRUPT_FLAG_TURNING;
+        if (relocated) mask |= AURA_INTERRUPT_FLAG_MOVE;
+        if (mask)
+            creature->RemoveAurasWithInterruptFlags(mask);
+    }
+
     creature->Relocate(x, y, z, o);
     if (creature->IsVehicle())
         creature->GetVehicleKit()->RelocatePassengers();
