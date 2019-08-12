@@ -133,7 +133,7 @@ std::string ScriptInfo::GetDebugInfo() const
     return std::string(sz);
 }
 
-bool normalizePlayerName(std::string& name, std::string calledFrom)
+bool normalizePlayerName(std::string& name, std::string calledFrom, size_t max_len)
 {
     if (name.empty())
         return false;
@@ -141,24 +141,26 @@ bool normalizePlayerName(std::string& name, std::string calledFrom)
     //for crashlogs
     std::string test = calledFrom;
 
-    wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME+1];
-    size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
+    std::wstring wstr_buf;
+    if (!Utf8toWStr(name, wstr_buf))
+        return false;
 
-    if (!Utf8toWStr(name, &wstr_buf[0], wstr_len))
+    size_t len = wstr_buf.size();
+    if (len > max_len)
         return false;
 
     wstr_buf[0] = wcharToUpper(wstr_buf[0]);
-    for (size_t i = 1; i < wstr_len; ++i)
+    for (size_t i = 1; i < len; ++i)
         wstr_buf[i] = wcharToLower(wstr_buf[i]);
 
     // if there's "gm" at the end, uppercase it!
-    if (wstr_len>=2 && wstr_buf[wstr_len-2]==L'g' && wstr_buf[wstr_len-1]==L'm')
+    if (len>=2 && wstr_buf[len-2]==L'g' && wstr_buf[len-1]==L'm')
     {
-        wstr_buf[wstr_len-2]=L'G';
-        wstr_buf[wstr_len-1]=L'M';
+        wstr_buf[len-2]=L'G';
+        wstr_buf[len-1]=L'M';
     }
 
-    if (!WStrToUtf8(wstr_buf, wstr_len, name))
+    if (!WStrToUtf8(wstr_buf, name))
         return false;
 
     return true;
