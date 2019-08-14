@@ -267,9 +267,9 @@ INSERT INTO `waypoint_data` VALUES
 SET @LEADERGUID = @CGUID+39;
 DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
 INSERT INTO `creature_formations` VALUES
-(@LEADERGUID, @LEADERGUID, 0, 0, 2, 0, 0),
-(@LEADERGUID, @CGUID+44, 3, 300, 2, 0, 0),
-(@LEADERGUID, @CGUID+43, 3, 60, 2, 0, 0);
+(@LEADERGUID, @LEADERGUID, 0, 0, 515, 0, 0),
+(@LEADERGUID, @CGUID+44, 3, 300, 515, 0, 0),
+(@LEADERGUID, @CGUID+43, 3, 60, 515, 0, 0);
 
 UPDATE `creature` SET `MovementType` = 2 WHERE `guid` = @CGUID+39;
 SET @PATH = (@CGUID+39)*10;
@@ -295,8 +295,8 @@ SET @LEADERGUID = @CGUID+40;
 DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
 INSERT INTO `creature_formations` VALUES
 (@LEADERGUID, @LEADERGUID, 0, 0, 2, 0, 0),
-(@LEADERGUID, @CGUID+46, 3, 300, 2, 0, 0),
-(@LEADERGUID, @CGUID+45, 3, 60, 2, 0, 0);
+(@LEADERGUID, @CGUID+46, 515, 300, 2, 0, 0),
+(@LEADERGUID, @CGUID+45, 515, 60, 2, 0, 0);
 
 UPDATE `creature` SET `MovementType` = 2 WHERE `guid` = @CGUID+40;
 SET @PATH = (@CGUID+40)*10;
@@ -319,9 +319,9 @@ INSERT INTO `waypoint_data` VALUES
 SET @LEADERGUID = @CGUID+41;
 DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
 INSERT INTO `creature_formations` VALUES
-(@LEADERGUID, @LEADERGUID, 0, 0, 2, 0, 0),
-(@LEADERGUID, @CGUID+47, 3, 60, 2, 0, 0),
-(@LEADERGUID, @CGUID+48, 3, 300, 2, 0, 0);
+(@LEADERGUID, @LEADERGUID, 0, 0, 515, 0, 0),
+(@LEADERGUID, @CGUID+47, 3, 60, 515, 0, 0),
+(@LEADERGUID, @CGUID+48, 3, 300, 515, 0, 0);
 
 UPDATE `creature` SET `MovementType` = 2 WHERE `guid` = @CGUID+41;
 SET @PATH = (@CGUID+41)*10;
@@ -348,9 +348,9 @@ UPDATE `creature` SET `spawndist` = 5, `MovementType` = 1 WHERE `id` IN (@ENTRY+
 SET @LEADERGUID = @CGUID+42;
 DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
 INSERT INTO `creature_formations` VALUES
-(@LEADERGUID, @LEADERGUID, 0, 0, 2, 0, 0),
-(@LEADERGUID, @CGUID+50, 3, 60, 2, 0, 0),
-(@LEADERGUID, @CGUID+49, 3, 300, 2, 0, 0);
+(@LEADERGUID, @LEADERGUID, 0, 0, 515, 0, 0),
+(@LEADERGUID, @CGUID+50, 3, 60, 515, 0, 0),
+(@LEADERGUID, @CGUID+49, 3, 300, 515, 0, 0);
 
 UPDATE `creature` SET `MovementType` = 2 WHERE `guid` = @CGUID+42;
 SET @PATH = (@CGUID+42)*10;
@@ -488,3 +488,56 @@ INSERT INTO `creature_loot_template` VALUES
 UPDATE `creature` SET `spawntimesecs` = 604800 WHERE `id` BETWEEN @ENTRY AND @ENTRY+13;
 UPDATE `creature_template` SET `rank` = 1, `mechanic_immune_mask` = `mechanic_immune_mask` | 2048 WHERE `entry` BETWEEN @ENTRY AND @ENTRY+13;
 UPDATE `creature` SET `equipment_id` = 1 WHERE id BETWEEN 250050 AND 250063;
+
+SET @LEADERGUID = @CGUID+20;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+14, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+35, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+36;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+31, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+10, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+26;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+15, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+21, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+11;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+6, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+23;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+29, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+8;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+28, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+17, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+9;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+13, 0, 0, 3, 0, 0);
+
+SET @LEADERGUID = @CGUID+18;
+DELETE FROM `creature_formations` WHERE `leaderGUID` = @LEADERGUID;
+INSERT INTO `creature_formations` VALUES
+(@LEADERGUID, @LEADERGUID, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+30, 0, 0, 3, 0, 0),
+(@LEADERGUID, @CGUID+24, 0, 0, 3, 0, 0);
