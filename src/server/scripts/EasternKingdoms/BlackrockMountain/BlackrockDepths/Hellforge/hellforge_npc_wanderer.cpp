@@ -548,7 +548,9 @@ struct npc_hellforge_wanderer_champion_cocoonAI : public ScriptedAI
                     snake->AI()->SetData(11, 11);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 }
-                me->CombatStop();
+                me->DeleteThreatList();
+                me->CombatStop(true);
+                me->getHostileRefManager().deleteReferences();
                 damage = 0;
             }
         }
