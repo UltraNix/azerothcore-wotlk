@@ -1090,7 +1090,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
                         if (!target || !target->IsPlayer() || target->ToPlayer()->IsGameMaster())
                             continue;
 
-                        if (target->IsAlive())
+                        if (target->IsAlive() && target->IsWithinDistInMap(me, 150.f))
                         {
                             evade = false;
                             break;

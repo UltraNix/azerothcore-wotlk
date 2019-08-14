@@ -456,7 +456,7 @@ struct boss_hellforge_boss_three_AI : public BossAI
                         if (!target->IsPlayer() || target->ToPlayer()->IsGameMaster())
                             continue;
 
-                        if (target->IsAlive())
+                        if (target->IsAlive() && target->IsWithinDistInMap(me, 150.f))
                         {
                             evade = false;
                             break;
