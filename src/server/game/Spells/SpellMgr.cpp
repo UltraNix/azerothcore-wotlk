@@ -7948,6 +7948,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 40639: // Arcane beam
             spellInfo->rangeIndex = 6; // 100y
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         case 57465: // Holy bolt naxxramas
             spellInfo->rangeIndex = 6;

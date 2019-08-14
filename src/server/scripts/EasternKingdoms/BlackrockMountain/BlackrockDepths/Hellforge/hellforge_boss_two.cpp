@@ -214,6 +214,10 @@ struct boss_hellforge_boss_two_AI : public BossAI
         if (GameObject* cage = instance->GetGameObject(DATA_GO_BOSS_TWO_CAGE))
             cage->SetGoState(GO_STATE_ACTIVE);
 
+        std::list<Creature*> _temp;
+        me->GetCreatureListWithEntryInGrid(_temp, NPC_ADD_DELAYED_EXPLOSION, 200.f);
+        for (auto const& explo : _temp)
+            explo->DespawnOrUnsummon();
         me->NearTeleportTo(me->GetHomePosition());
         _DespawnAtEvade();
     }
@@ -1144,6 +1148,11 @@ struct npc_boss_two_crossfire_trigger_AI : public ScriptedAI
 
             me->DespawnOrUnsummon(1s);
         });
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        damage = 0;
     }
 
     void AttackStart(Unit* /*attacker*/) override { }
