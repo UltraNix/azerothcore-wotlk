@@ -1307,7 +1307,7 @@ struct npc_boss_four_pillar_protection : public ScriptedAI
         if (who->GetPositionZ() >= -72.35f && me->IsWithinDistInMap(who, 5.5f, false))
         {
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 75);
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50);
             me->CastCustomSpell(66797, val, who, TRIGGERED_FULL_MASK);
         }
     }

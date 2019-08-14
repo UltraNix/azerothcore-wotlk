@@ -106,4 +106,5 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (78, 5700000, 1, "Frost Worgen health"),
 (79, 1, 0.5, "Boss one add one buffet chance"),
 
-(80, 5000, 1.0, "Boss three slay time timer, in miliseconds");
+(80, 5000, 1.0, "Boss three slay time timer, in miliseconds"),
+(81, 20000, 1.5, "Boss five worgen melee dmg");

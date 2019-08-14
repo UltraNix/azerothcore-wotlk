@@ -126,7 +126,8 @@ enum BossFiveStatIDs
     BOSS_FIVE_ADD_MINDMASTER_WITHER_DOT_DMG = 66,
 
     BOSS_FIVE_ADD_CASTER_MELEE_DAMAGE       = 67,
-    BOSS_FIVE_ADD_WORGEN_HEALTH             = 78
+    BOSS_FIVE_ADD_WORGEN_HEALTH             = 78,
+    BOSS_FIVE_ADD_WORGEN_MELEE_DMG          = 81,
 };
 
 Position const _wandererPosition{ 1025.720f, -228.156f, -61.860f, 3.90f };
@@ -881,6 +882,7 @@ struct npc_boss_five_frosty_worgen_AI : public ScriptedAI
 
     void Reset() override
     {
+        LoadStats();
         HellforgeStatValues val;
         sWorldCache.GetStatValue(BOSS_FIVE_ADD_WORGEN_HEALTH, val);
         me->SetMaxHealth(val.StatValue);
@@ -891,6 +893,33 @@ struct npc_boss_five_frosty_worgen_AI : public ScriptedAI
             DoCastSelf(spellId);
         ScriptedAI::Reset();
         _meleeAttackExplosion = true;
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues({ BOSS_FIVE_ADD_WORGEN_HEALTH, BOSS_FIVE_ADD_WORGEN_MELEE_DMG });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case BOSS_FIVE_ADD_WORGEN_HEALTH:
+                {
+                    me->SetMaxHealth(ref.second.StatValue);
+                    me->SetFullHealth();
+                    break;
+                }
+                case BOSS_FIVE_ADD_WORGEN_MELEE_DMG:
+                {
+                    uint32 minDamage = ref.second.StatValue;
+                    uint32 maxDamage = ref.second.StatValue * ref.second.StatVariance;
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                    me->UpdateDamagePhysical(BASE_ATTACK);
+                    break;
+                }
+            }
+        }
     }
 
     void UpdateAI(uint32 diff) override
