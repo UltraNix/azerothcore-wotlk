@@ -1476,6 +1476,10 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     if (damageInfo->blocked_amount && damageInfo->TargetState != VICTIMSTATE_BLOCKS)
         victim->HandleEmoteCommand(EMOTE_ONESHOT_PARRY_SHIELD);
 
+    if (Creature* creature = ToCreature())
+        if (creature->IsAIEnabled)
+            creature->AI()->OnMeleeAttack(static_cast<VictimState>(damageInfo->TargetState), damageInfo->attackType, victim);
+
     if (damageInfo->TargetState == VICTIMSTATE_PARRY && victim->IsParryHasteAllowed())
     {
         // Get attack timers
@@ -1547,7 +1551,9 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
         // We're going to call functions which can modify content of the list during iteration over it's elements
         // Let's copy the list so we can prevent iterator invalidation
         AuraEffectList vDamageShieldsCopy(victim->GetAuraEffectsByType(SPELL_AURA_DAMAGE_SHIELD));
-        if (vDamageShieldsCopy.empty()) return;
+        if (vDamageShieldsCopy.empty())
+            return;
+
         AuraEffectList::const_iterator largestDamageShieldItr = vDamageShieldsCopy.begin();
         SpellInfo const* largestDamageShield = (*largestDamageShieldItr)->GetSpellInfo();
         uint32 largestDamage = uint32(std::max(0, (*largestDamageShieldItr)->GetAmount()));
@@ -6230,6 +6236,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 case 62337:
                 {
                     if (!victim)
+                        return false;
+
+                    if (victim->GetMapId() == 230 /* hellforge */ && victim->GetTypeId() != TYPEID_PLAYER)
                         return false;
 
                     int32 dmg = damage;
@@ -15435,7 +15444,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                 case SPELL_AURA_PROC_TRIGGER_DAMAGE:
                 {
                     // target has to be valid
-                    if (!eventInfo.GetProcTarget())
+                    Unit* target = eventInfo.GetProcTarget();
+                    if (!target)
                         break;
 
                     triggeredByAura->HandleProcTriggerDamageAuraProc(aurApp, eventInfo); // this function is part of the new proc system
@@ -18690,6 +18700,11 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
         UpdateObjectVisibility();
         GetMotionMaster()->ReinitializeMovement();
     }
+}
+
+void Unit::NearTeleportTo(Position const& pos, bool casting, bool vehicleTeleport, bool withPet, bool removeTransport)
+{
+    NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), casting, vehicleTeleport, withPet, removeTransport);
 }
 
 void Unit::SendTeleportPacket(Position& pos)

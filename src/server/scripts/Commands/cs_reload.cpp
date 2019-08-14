@@ -39,6 +39,7 @@ EndScriptData */
 #include "TicketMgr.h"
 #include "WardenCheckMgr.h"
 #include "WaypointManager.h"
+#include "WorldCache.h"
 
 class reload_commandscript : public CommandScript
 {
@@ -150,7 +151,8 @@ public:
             { "waypoint_scripts",             SEC_ADMINISTRATOR, true,  &HandleReloadWpScriptsCommand,                  "" },
             { "waypoint_data",                SEC_ADMINISTRATOR, true,  &HandleReloadWpCommand,                         "" },
             { "vehicle_accessory",            SEC_ADMINISTRATOR, true,  &HandleReloadVehicleAccessoryCommand,           "" },
-            { "vehicle_template_accessory",   SEC_ADMINISTRATOR, true,  &HandleReloadVehicleTemplateAccessoryCommand,   "" }
+            { "vehicle_template_accessory",   SEC_ADMINISTRATOR, true,  &HandleReloadVehicleTemplateAccessoryCommand,   "" },
+            { "hellforge_boss_stats",         SEC_ADMINISTRATOR, true,  &HandleReloadHellforgeBossStatsCommand,        "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1117,6 +1119,14 @@ public:
         sLog->outString("Reloading vehicle_template_accessory table...");
         sObjectMgr->LoadVehicleTemplateAccessories();
         handler->SendGlobalGMSysMessage("Vehicle template accessories reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadHellforgeBossStatsCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        sLog->outString("Reloading hellforge boss stats table...");
+        WorldCache::GetInstance().LoadHellforgeBossValues();
+        handler->SendGlobalGMSysMessage("Hellforge boss stats reloaded.");
         return true;
     }
 };

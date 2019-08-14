@@ -373,11 +373,23 @@ public:
                     events.RepeatEvent((me->GetEntry() == NPC_LADY_BLAUMEUX || me->GetEntry() == NPC_SIR_ZELIEK) ? 15000 : 12000);
                     return;
                 case EVENT_SPELL_PRIMARY:
-                    if (!urand(0,10))
+                {
+                    if (!urand(0, 10))
                         Talk(SAY_TAUNT);
-                    me->CastSpell(me->GetVictim(), RAID_MODE(TABLE_SPELL_PRIMARY_10[horsemanId], TABLE_SPELL_PRIMARY_25[horsemanId]), false);
+                    //! overrode holy wraths 10/25 range in dbc corrections
+                    //! make sure players are actually within proper spell range
+                    auto spellId = RAID_MODE(TABLE_SPELL_PRIMARY_10[horsemanId], TABLE_SPELL_PRIMARY_25[horsemanId]);
+                    if (spellId == SPELL_ZELIEK_HOLY_WRATH_10 || spellId == SPELL_ZELIEK_HOLY_WRATH_25)
+                    {
+                        if (me->IsWithinDist(me->GetVictim(), 40.f))
+                            me->CastSpell(me->GetVictim(), RAID_MODE(TABLE_SPELL_PRIMARY_10[horsemanId], TABLE_SPELL_PRIMARY_25[horsemanId]), false);
+                    }
+                    else
+                        me->CastSpell(me->GetVictim(), RAID_MODE(TABLE_SPELL_PRIMARY_10[horsemanId], TABLE_SPELL_PRIMARY_25[horsemanId]), false);
+
                     events.RepeatEvent(15000);
                     return;
+                }
                 case EVENT_SPELL_PUNISH:
                     if (!SelectTarget(SELECT_TARGET_NEAREST, 0, 45.0f, true))
                         me->CastSpell(me, TABLE_SPELL_PUNISH[horsemanId], false);

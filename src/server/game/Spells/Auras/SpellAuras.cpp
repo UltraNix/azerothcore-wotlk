@@ -647,6 +647,8 @@ void Aura::UpdateTargetMap( Unit* caster, bool apply )
                     case 51103: // Oculus, Mage-Lord Urom, Frostbomb
                     case 63277: // Shadow crash
                     case 69146: case 70823: case 70824: case 70825: // Icecrown Citadel, Lord Marrowgar, Coldflame
+                    case 54115: // Blight crystal explosion
+                    case 19099: // blizzard
                     {
                         if ( itr->first->HasAura( GetId() ) )
                             addUnit = false;

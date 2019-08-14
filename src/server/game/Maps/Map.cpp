@@ -3347,3 +3347,34 @@ void Map::SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime)
                     player->SendDirectMessage(&data);
     }
 }
+
+GameObject* Map::SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport)
+{
+    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
+    if (!goinfo)
+    {
+        sLog->outErrorDb("Gameobject template %u not found in database!", entry);
+        return NULL;
+    }
+
+    GameObject* go = sObjectMgr->IsGameObjectStaticTransport(entry) ? new StaticTransport() : new GameObject();
+    if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, this, PHASEMASK_NORMAL, x, y, z, ang, G3D::Quat(rotation0, rotation1, rotation2, rotation3), 100, GO_STATE_READY))
+    {
+        delete go;
+        return NULL;
+    }
+
+    // Xinef: if gameobject is temporary, set custom spellid
+    if (respawnTime)
+        go->SetSpellId(1);
+
+    go->SetRespawnTime(respawnTime);
+    go->SetSpawnedByDefault(false);
+    AddToMap(go, checkTransport);
+    return go;
+}
+
+GameObject* Map::SummonGameObject(uint32 entry, const Position& pos, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport)
+{
+    return SummonGameObject(entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), rotation0, rotation1, rotation2, rotation3, respawnTime, checkTransport);
+}

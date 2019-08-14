@@ -2245,6 +2245,11 @@ void Player::SendTeleportAckPacket()
     GetSession()->SendPacket(&data);
 }
 
+bool Player::TeleportTo(uint32 mapid, Position const& pos, uint32 options)
+{
+    return TeleportTo(mapid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), options);
+}
+
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
@@ -5758,6 +5763,15 @@ void Player::RepopAtGraveyard()
         SpawnCorpseBones();
         TeleportTo(0, 2698.505859f, -732.688904f, 145.148428f, 0.114146f);
 
+        return;
+    }
+
+    if (GetMapId() == 230 && GetDifficulty(false) == DUNGEON_DIFFICULTY_HEROIC) // hellforge
+    {
+        m_deathTimer = 0;
+        ResurrectPlayer(1.0f);
+        SpawnCorpseBones();
+        TeleportTo(571, { 3538.170f, 275.510f, 45.61191f, 1.578f });
         return;
     }
 
@@ -18267,10 +18281,24 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         {
             sLog->outError("Player (guidlow %d) is teleported to gobacktrigger (Map: %u X: %f Y: %f Z: %f O: %f).", guid, mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 
-            Relocate( areaTrigger->target_X, areaTrigger->target_Y, areaTrigger->target_Z, GetOrientation() );
-            if ( mapId != areaTrigger->target_mapId )
+            float x = areaTrigger->target_X;
+            float y = areaTrigger->target_Y;
+            float z = areaTrigger->target_Z;
+            float o = GetOrientation();
+            uint32 at_mapId = areaTrigger->target_mapId;
+            if (mapId == 230 && map && map->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
             {
-                mapId = areaTrigger->target_mapId;
+                at_mapId = 571;
+                x = 3538.170f;
+                y = 275.510f;
+                z = 45.61191f;
+                o = 1.578f;
+            }
+
+            Relocate( x, y, z, o );
+            if ( mapId != at_mapId )
+            {
+                mapId = at_mapId;
                 map = sMapMgr->CreateMap( mapId, this );
             }
         }

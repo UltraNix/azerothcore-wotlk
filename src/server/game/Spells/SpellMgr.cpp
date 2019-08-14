@@ -3066,7 +3066,7 @@ void SpellMgr::LoadSpellCustomAttr()
         if (spellInfo->SpellVisual[0] == 3879)
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
-        ApplySpellFix({ 62283, 62438, 62861, 62930 }, [](SpellInfo* spellInfo)
+        ApplySpellFix({ 62283, 62438, 62861, 62930, 61186 }, [](SpellInfo* spellInfo)
         {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS;
         });
@@ -3459,7 +3459,8 @@ void SpellMgr::LoadSpellCustomAttr()
             1822,  //RakeRank1 - initial dmg should ignore armor
             48568, //LacerateRank3 - initial dmg ignore armor
             48567, //LacerateRank2 - initial dmg ignore armor
-            33745  //LacerateRank1 - initial dmg ignore armor
+            33745, //LacerateRank1 - initial dmg ignore armor
+            10093  // Harsh Winds hellforge
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
@@ -5311,6 +5312,8 @@ void SpellMgr::LoadDbcDataCorrections()
         case 29973: // Arcane Explosion (Shade of Aran)
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_20_YARDS;   // effect radius from 21 to 20 yd
             spellInfo->EffectRadiusIndex[EFFECT_1] = EFFECT_RADIUS_20_YARDS;   // effect radius from 21 to 20 yd
+            // for hellforge, its old content, doesnt matter
+            spellInfo->manaCost = 0;
             break;
         case 29962: // Summon Water Elementals (Shade of Aran)
         case 37051:
@@ -7937,6 +7940,79 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 48365:    //Wintergarde Gryphon Commander
             spellInfo->DurationIndex = 21; // Duration -1
+            break;
+
+        /* HellForge */
+        case 52656: // cosmetic self stun, freeze anim
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
+        case 40639: // Arcane beam
+            spellInfo->rangeIndex = 6; // 100y
+            break;
+        case 57465: // Holy bolt naxxramas
+            spellInfo->rangeIndex = 6;
+            break;
+        case 74395: // Lava Gout
+        case 74394: // Lava Gout
+            //! Changing this so it can be used as visual for HellForge
+            //! Its usually used by 39814, and it casts it on victim only
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
+            break;
+        case 42438: // Headless Horseman Climax - Enraged Visual
+            spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
+            break;
+        case 70274: // toxic waste
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+            break;
+        case 11351: // Fire shield
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
+        case 12470: // Fire nova
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+            break;
+        case 45730: // throw spear
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+            spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_SCHOOL_DAMAGE;
+            spellInfo->EffectBasePoints[EFFECT_1] = 1;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            break;
+        case 29849: // frost nova
+            spellInfo->CastingTimeIndex = 7;
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+            break;
+        case 38047: // mind wrap
+            spellInfo->Dispel = DISPEL_NONE;
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
+            break;
+        case 5543: // fade out
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            break;
+        case 65431: // dans vehicle
+            spellInfo->AttributesEx |= SPELL_ATTR1_DONT_DISPLAY_IN_AURA_BAR;
+            spellInfo->Attributes |= SPELL_ATTR0_NEGATIVE_1;
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
+            break;
+        case 11350: // Fire shield
+            spellInfo->Attributes |= SPELL_ATTR0_PASSIVE;
+            break;
+        case 46198: // cold slap
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_CAN_CAST_WHILE_CASTING;
+            break;
+        case 39066: // Chain lightning
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            break;
+        case 38222: // Mark of corruption
+            spellInfo->StackAmount = 5;
             break;
         }
 

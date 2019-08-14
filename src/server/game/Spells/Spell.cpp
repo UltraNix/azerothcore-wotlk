@@ -553,6 +553,7 @@ SpellValue::SpellValue(SpellInfo const* proto)
     RadiusMod = 1.0f;
     AuraStackAmount = 1;
     ForcedCritResult = false;
+    TargetPlayersOnly = false;
 }
 
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
@@ -663,6 +664,12 @@ m_caster((info->HasAttribute(SPELL_ATTR6_CAST_BY_CHARMER) && caster->GetCharmerO
     m_canReflect = m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR0_ABILITY)
         && !m_spellInfo->HasAttribute(SPELL_ATTR1_CANT_BE_REFLECTED) && !m_spellInfo->HasAttribute(SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
         && !m_spellInfo->IsPassive() && (!m_spellInfo->IsPositive() || m_spellInfo->HasEffect(SPELL_EFFECT_DISPEL));
+
+    if (m_caster && m_caster->GetMapId() == 230/*hellforge*/ && m_caster->IsCreature())
+    {
+        if (m_caster->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+            m_canReflect = false;
+    }
 
     CleanupTargetList();
     memset(m_effectExecuteData, 0, MAX_SPELL_EFFECTS * sizeof(ByteBuffer*));
@@ -2047,7 +2054,7 @@ uint32 Spell::GetSearcherTypeMask(SpellTargetObjectTypes objType, ConditionList*
     }
     if (!m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_DEAD))
         retMask &= ~GRID_MAP_TYPE_MASK_CORPSE;
-    if (m_spellInfo->HasAttribute(SPELL_ATTR3_ONLY_TARGET_PLAYERS))
+    if (m_spellInfo->HasAttribute(SPELL_ATTR3_ONLY_TARGET_PLAYERS) || m_spellValue->TargetPlayersOnly)
         retMask &= GRID_MAP_TYPE_MASK_CORPSE | GRID_MAP_TYPE_MASK_PLAYER;
     if (m_spellInfo->HasAttribute(SPELL_ATTR3_ONLY_TARGET_GHOSTS))
         retMask &= GRID_MAP_TYPE_MASK_PLAYER;
@@ -8097,6 +8104,9 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_FORCED_CRIT_RESULT:
             m_spellValue->ForcedCritResult = (bool)value;
+            break;
+        case SPELLVALUE_TARGET_PLAYERS_ONLY:
+            m_spellValue->TargetPlayersOnly = (bool)value;
             break;
     }
 }

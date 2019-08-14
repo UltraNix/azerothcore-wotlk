@@ -368,12 +368,43 @@ void LoadDBCStores(const std::string& dataPath)
     const_cast<MapEntry*>(sMapStore.LookupEntry(44))->map_type = MAP_RAID; // old sm hack
     LoadDBC(availableDbcLocales, bad_dbc_files, sMapDifficultyStore,          dbcPath, "MapDifficulty.dbc");
     // fill data
+    bool _onyxiaHack = false;
     for (uint32 i = 1; i < sMapDifficultyStore.GetNumRows(); ++i)
+    {
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
+        {
+            switch (entry->MapId)
+            {
+                case 44: // old scarlet monastery
+                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(604800, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                    break;
+                case 230:
+                    // Blackrock depths - create base blizzlike map
+                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                    // Blackrock depths - create heroic mode for our custom instance - HellForge
+                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 1)] = MapDifficulty(604800, 10U, entry->areaTriggerText[0] != '\0');
+                    break;
+                case 249:
+                {
+                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                    if (!_onyxiaHack)
+                    {
+                        _onyxiaHack = true;
+                        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 3)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                    }
+                    break;
+                }
+                default:
+                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                    break;
+            }
             if (entry->MapId == 44) // old sm hack
                 sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(604800, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
             else
                 sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+        }
+    }
+    //! clear, no longer used
     sMapDifficultyStore.Clear();
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sMovieStore,                  dbcPath, "Movie.dbc");

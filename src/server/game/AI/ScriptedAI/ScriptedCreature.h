@@ -416,6 +416,7 @@ class BossAI : public ScriptedAI
         void EnterCombat(Unit* /*who*/) { _EnterCombat(); }
         void JustDied(Unit* /*killer*/) { _JustDied(); }
         void JustReachedHome() { _JustReachedHome(); }
+        virtual void HandleRequiredBossFail();
 
     protected:
         void _DespawnAtEvade(uint32 delayToRespawn = 30, Creature* who = nullptr);

@@ -3257,9 +3257,9 @@ public:
 
         void HandleHit(SpellEffIndex /*effIndex*/)
         {
-            auto _amount = urand(2, 4);
+            uint16 _amount = urand(2, 4);
             if (Unit* caster = GetCaster())
-                for (auto i = 0; i < _amount; ++i)
+                for (uint16 i = 0; i < _amount; ++i)
                     caster->CastSpell(caster, SPELL_BLOW_APART_STONE_BLOCK, true);
         }
         

@@ -204,6 +204,7 @@ struct SpellValue
     float     RadiusMod;
     uint8     AuraStackAmount;
     bool      ForcedCritResult;
+    bool      TargetPlayersOnly; // only for AoE casts
 };
 
 enum SpellState

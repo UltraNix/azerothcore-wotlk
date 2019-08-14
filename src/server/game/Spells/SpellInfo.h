@@ -205,7 +205,7 @@ enum SpellCustomAttributes : uint32
     SPELL_ATTR0_CU_PROC_ON_FULL_ABSORB           = 0x40000000,
     SPELL_ATTR0_CU_FAKE_DELAY                    = 0x80000000, // Introduces fake delay to spell, that allows it to process hit effects on next ticks which can allow ex. Vanish "instant" spells
 
-    SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
+    SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);

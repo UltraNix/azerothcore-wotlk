@@ -265,6 +265,15 @@ void AddSC_battle_for_undercity_horde();
 void AddSC_battle_for_undercity();
 void AddSC_worldzone_trisfal_glades();
 
+// Hellforge
+void AddSC_hellforge_trash();
+void AddSC_hellforge_boss_one();
+void AddSC_hellforge_boss_two();
+void AddSC_hellforge_boss_three();
+void AddSC_hellforge_boss_four();
+void AddSC_hellforge_boss_five();
+void AddSC_hellforge_npc_wanderer();
+
 //kalimdor
 void AddSC_instance_blackfathom_deeps();     //Blackfathom Depths
 void AddSC_hyjal();                          //CoT Battle for Mt. Hyjal
@@ -919,6 +928,15 @@ void AddEasternKingdomsScripts()
     AddSC_battle_for_undercity_horde();
     AddSC_battle_for_undercity();
     AddSC_worldzone_trisfal_glades();
+
+    // Hellforge
+    AddSC_hellforge_trash();
+    AddSC_hellforge_boss_one();
+    AddSC_hellforge_boss_two();
+    AddSC_hellforge_boss_three();
+    AddSC_hellforge_boss_four();
+    AddSC_hellforge_boss_five();
+    AddSC_hellforge_npc_wanderer();
 #endif
 }
 

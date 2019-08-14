@@ -128,7 +128,8 @@ enum SpellValueMod
     SPELLVALUE_RADIUS_MOD,
     SPELLVALUE_MAX_TARGETS,
     SPELLVALUE_AURA_STACK,
-    SPELLVALUE_FORCED_CRIT_RESULT
+    SPELLVALUE_FORCED_CRIT_RESULT,
+    SPELLVALUE_TARGET_PLAYERS_ONLY
 };
 
 typedef std::pair<SpellValueMod, int32>     CustomSpellValueMod;
@@ -400,7 +401,7 @@ enum TriggerCastFlags
     TRIGGERED_DISALLOW_PROC_EVENTS                  = 0x00020000,   //! Disallows proc events from triggered spell (default)
     TRIGGERED_DONT_REPORT_CAST_ERROR                = 0x00040000,   //! Will return SPELL_FAILED_DONT_REPORT in CheckCast functions
     TRIGGERED_IGNORE_EQUIPPED_ITEM_REQUIREMENT      = 0x00080000,   //! Will ignore equipped item requirements
-    TRIGGERED_NO_PERIODIC_RESET                        = 0x00100000,    //! Periodic aura tick wont be reset on override
+    TRIGGERED_NO_PERIODIC_RESET                     = 0x00100000,    //! Periodic aura tick wont be reset on override
     TRIGGERED_FULL_MASK                             = 0xFFFFFFFF
 };
 
@@ -1782,6 +1783,7 @@ class Unit : public WorldObject
         void SendSpellDamageImmune(Unit* target, uint32 spellId);
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false, bool vehicleTeleport = false, bool withPet = false, bool removeTransport = false);
+        void NearTeleportTo(Position const& pos, bool casting = false, bool vehicleTeleport = false, bool withPet = false, bool removeTransport = false);
         void SendTeleportPacket(Position& pos);
         virtual bool UpdatePosition(float x, float y, float z, float ang, bool teleport = false);
         // returns true if unit's position really changed

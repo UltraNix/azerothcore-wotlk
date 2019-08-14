@@ -797,6 +797,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
 
+        //! returns Creature that summoned us, otherwise nullptr
+        Creature* GetSummoner() const;
+
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = NULL);
         bool InitEntry(uint32 entry, const CreatureData* data=NULL);

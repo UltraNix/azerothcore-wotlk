@@ -547,6 +547,7 @@ struct Position
         return fmod(o, 2.0f * static_cast<float>(M_PI));
     }
 };
+
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer);
 ByteBuffer& operator<<(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZStreamer const& streamer);
@@ -759,6 +760,13 @@ class WorldObject : public Object, public WorldLocation
             MovePosition(pos, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
         }
 
+        Position const GetNearPositionFromPos(Position sourcePosition, float radius)
+        {
+            Position temp = sourcePosition;
+            MovePosition(temp, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
+            return temp;
+        }
+
         void GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const;
         void GetChargeContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const;
 
@@ -929,6 +937,8 @@ class WorldObject : public Object, public WorldLocation
             return SummonCreature(id, pos, spwtype, despwtime, 0, properties);
         }
         GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport = true);
+        GameObject* SummonGameObject(uint32 entry, const Position& pos, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport = true);
+
         Creature*   SummonTrigger(float x, float y, float z, float ang, uint32 dur, bool setLevel = false, CreatureAI* (*GetAI)(Creature*) = NULL);
         void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
 
@@ -1036,14 +1046,26 @@ namespace Trinity
     class ObjectDistanceOrderPred
     {
         public:
-            ObjectDistanceOrderPred(const WorldObject* pRefObj, bool ascending = true) : m_refObj(pRefObj), m_ascending(ascending) {}
-            bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const
-            {
-                return m_ascending ? m_refObj->GetDistanceOrder(pLeft, pRight) : !m_refObj->GetDistanceOrder(pLeft, pRight);
-            }
+            ObjectDistanceOrderPred(const WorldObject* pRefObj, bool ascending = true) : m_refObj(pRefObj), m_ascending(ascending) { }
+
+            bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const;
+
         private:
             const WorldObject* m_refObj;
             const bool m_ascending;
+    };
+
+    class PositionDistanceOrderPred
+    {
+    public:
+        PositionDistanceOrderPred(Position const pos, bool ascending = true) : m_refPosition(pos), m_ascending(ascending) { }
+
+        bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const;
+        bool PositionDistanceOrder(Position const fromPosition, WorldObject const* obj, WorldObject const* obj2) const;
+
+    private:
+        Position const m_refPosition;
+        const bool m_ascending;
     };
 }
 

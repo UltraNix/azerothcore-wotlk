@@ -152,7 +152,7 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
             if (creatureName == "")
                 creatureName = me->GetName();
             Map* map = me->GetMap();
-            if (map && map->IsRaid())
+            if (map && (map->IsRaid() || map->GetId() == 230))
             {
                 switch (difficulty)
                 {
@@ -572,12 +572,18 @@ void BossAI::_EnterCombat()
         // bosses do not respawn, check only on enter combat
         if (!instance->CheckRequiredBosses(_bossId))
         {
-            EnterEvadeMode();
+            HandleRequiredBossFail();
             return;
         }
+
         instance->SetBossState(_bossId, IN_PROGRESS);
     }
 }
+
+void BossAI::HandleRequiredBossFail()
+{
+    EnterEvadeMode();
+};
 
 void BossAI::TeleportCheaters()
 {

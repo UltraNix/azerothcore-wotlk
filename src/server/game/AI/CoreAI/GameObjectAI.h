@@ -62,6 +62,7 @@ class GameObjectAI
         virtual void OnStateChanged(uint32 /*state*/, Unit* /*unit*/) {}
         virtual void EventInform(uint32 /*eventId*/) {}
         virtual void SpellHit(Unit* unit, const SpellInfo* spellInfo) {}
+        virtual void OnUnlockAttempt(SpellCastResult res, Player* /*unlocker*/) { }
 };
 
 class NullGameObjectAI : public GameObjectAI

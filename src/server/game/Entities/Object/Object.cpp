@@ -2144,32 +2144,6 @@ void Map::SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list /*= NULL
                 list->push_back(summon);
 }
 
-GameObject* Map::SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport)
-{
-    GameObjectTemplate const* goinfo = sObjectMgr->GetGameObjectTemplate(entry);
-    if (!goinfo)
-    {
-        sLog->outErrorDb("Gameobject template %u not found in database!", entry);
-        return NULL;
-    }
-
-    GameObject* go = sObjectMgr->IsGameObjectStaticTransport(entry) ? new StaticTransport() : new GameObject();
-    if (!go->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, this, PHASEMASK_NORMAL, x, y, z, ang, G3D::Quat(rotation0, rotation1, rotation2, rotation3), 100, GO_STATE_READY))
-    {
-        delete go;
-        return NULL;
-    }
-
-    // Xinef: if gameobject is temporary, set custom spellid
-    if (respawnTime)
-        go->SetSpellId(1);
-
-    go->SetRespawnTime(respawnTime);
-    go->SetSpawnedByDefault(false);
-    AddToMap(go, checkTransport);
-    return go;
-}
-
 void WorldObject::SetZoneScript()
 {
     if (Map* map = FindMap())
@@ -2236,6 +2210,11 @@ GameObject* WorldObject::SummonGameObject(uint32 entry, float x, float y, float 
 
     map->AddToMap(go, checkTransport);
     return go;
+}
+
+GameObject* WorldObject::SummonGameObject(uint32 entry, const Position& pos, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport)
+{
+    return SummonGameObject(entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), rotation0, rotation1, rotation2, rotation3, respawnTime, checkTransport);
 }
 
 Creature* WorldObject::SummonTrigger(float x, float y, float z, float ang, uint32 duration, bool setLevel, CreatureAI* (*GetAI)(Creature*))
@@ -3070,4 +3049,35 @@ uint64 WorldObject::GetTransGUID() const
     if (GetTransport())
         return GetTransport()->GetGUID();
     return 0;
+}
+
+bool Trinity::ObjectDistanceOrderPred::operator()(const WorldObject* pLeft, const WorldObject* pRight) const
+{
+    return m_ascending ? m_refObj->GetDistanceOrder(pLeft, pRight) : !m_refObj->GetDistanceOrder(pLeft, pRight);
+}
+
+bool Trinity::PositionDistanceOrderPred::operator()(const WorldObject* pLeft, const WorldObject* pRight) const
+{
+    return m_ascending ? PositionDistanceOrder(m_refPosition, pLeft, pRight) : !PositionDistanceOrder(m_refPosition, pLeft, pRight);
+}
+
+bool Trinity::PositionDistanceOrderPred::PositionDistanceOrder(Position const fromPosition, WorldObject const* obj, WorldObject const* obj2) const
+{
+    float dx1 = fromPosition.GetPositionX() - obj->GetPositionX();
+    float dy1 = fromPosition.GetPositionY() - obj->GetPositionY();
+    float distsq1 = dx1 * dx1 + dy1 * dy1;
+
+    /* 3D */
+    float dz1 = fromPosition.GetPositionZ() - obj->GetPositionZ();
+    distsq1 += dz1 * dz1;
+
+    float dx2 = fromPosition.GetPositionX() - obj2->GetPositionX();
+    float dy2 = fromPosition.GetPositionY() - obj2->GetPositionY();
+    float distsq2 = dx2 * dx2 + dy2 * dy2;
+
+    /* 3D */
+    float dz2 = fromPosition.GetPositionZ() - obj2->GetPositionZ();
+    distsq2 += dz2 * dz2;
+
+    return distsq1 < distsq2;
 }

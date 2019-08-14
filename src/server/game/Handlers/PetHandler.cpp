@@ -621,6 +621,9 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                     break;
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
+                    if (pet->GetEntry() == 250011)
+                        return;
+
                     if (pet->GetCharmerGUID() == GetPlayer()->GetGUID())
                     {
                         //! @Riztazz: only unsummon pet if player is owner, otherwise we will despawn

@@ -2217,6 +2217,10 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     int32 skillValue;
 
     SpellCastResult res = CanOpenLock(effIndex, lockId, skillId, reqSkillValue, skillValue);
+
+    if (gameObjTarget && gameObjTarget->AI())
+        gameObjTarget->AI()->OnUnlockAttempt(res, player);
+
     if (res != SPELL_CAST_OK)
     {
         SendCastResult(res);
@@ -2253,6 +2257,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
             }
         }
     }
+
     ExecuteLogEffectOpenLock(effIndex, gameObjTarget ? (Object*)gameObjTarget : (Object*)itemTarget);
 }
 
@@ -5666,6 +5671,9 @@ void Spell::EffectStealBeneficialBuff(SpellEffIndex effIndex)
     ;//sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Effect: StealBeneficialBuff");
 
     if (!unitTarget || unitTarget == m_caster)                 // can't steal from self
+        return;
+
+    if (m_caster->ToPlayer() && m_caster->GetMapId() == 230/*hellforge*/ && m_caster->ToPlayer()->GetDifficulty(false) == DUNGEON_DIFFICULTY_HEROIC)
         return;
 
     DispelChargesList steal_list;

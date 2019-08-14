@@ -31,6 +31,14 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BlackrockMountain/BlackrockDepths/blackrock_depths.h
   EasternKingdoms/BlackrockMountain/BlackrockDepths/boss_emperor_dagran_thaurissan.cpp
   EasternKingdoms/BlackrockMountain/BlackrockDepths/boss_magmus.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge.hpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_boss_one.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_boss_two.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_boss_three.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_boss_four.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_boss_five.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_trash.cpp
+  EasternKingdoms/BlackrockMountain/BlackrockDepths/Hellforge/hellforge_npc_wanderer.cpp
   EasternKingdoms/BlackrockMountain/BlackwingLair/boss_chromaggus.cpp
   EasternKingdoms/BlackrockMountain/BlackwingLair/boss_razorgore.cpp
   EasternKingdoms/BlackrockMountain/BlackwingLair/boss_firemaw.cpp

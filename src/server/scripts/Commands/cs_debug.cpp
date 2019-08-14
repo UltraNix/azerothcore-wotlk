@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -93,6 +93,7 @@ public:
             { "ulduar",         SEC_MODERATOR,      false, &HandleDebugUlduar,                 "" },
             { "moltencore",     SEC_GAMEMASTER,     false, &HandleDebugMoltenCore,            ""},
             { "majordomo",      SEC_GAMEMASTER,     false, &HandleDebugMajordomo,             ""},
+            { "hellforge",      SEC_GAMEMASTER,     false, &HandleDebugHellforge,               ""}
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1357,7 +1358,7 @@ public:
     {
         Player* player = handler->GetSession()->GetPlayer();
 
-        sLog->outSQLDev("(@PATH, XX, %.3f, %.3f, %.5f, 0, 0, 0, 100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+        sLog->outSQLDev("(@PATH, XX, %.3f, %.3f, %.5f, %.3f, 0, 0, 100, 0),", player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
 
         handler->PSendSysMessage("Waypoint SQL written to SQL Developer log");
         return true;
@@ -1445,7 +1446,7 @@ public:
         ChatHandler(player->GetSession()).PSendSysMessage(stream.str().c_str());
         return true;
     }
-    
+
     static bool HandleDebugMoltenCore(ChatHandler* handler, char const* /*args*/)
     {
         Player* player = handler->GetSession()->GetPlayer();
@@ -1573,6 +1574,33 @@ public:
             handler->PSendSysMessage("Majordomo isn't summoned in this instance.");
         return true;
     }
+
+    static bool HandleDebugHellforge(ChatHandler* handler, char const* /*args*/)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (player->GetMapId() != 230)
+        {
+            handler->PSendSysMessage("You're not in Hellforge.");
+            return true;
+        }
+
+        InstanceScript* instance = player->GetInstanceScript();
+
+        if (!instance)
+        {
+            handler->PSendSysMessage("Instance pointer invalid, returning.");
+            return true;
+        }
+
+        if (Unit * u = instance->GetCreature(7))
+            player->TeleportTo(u->GetWorldLocation());
+        return true;
+    }
+
 };
 
 void AddSC_debug_commandscript()

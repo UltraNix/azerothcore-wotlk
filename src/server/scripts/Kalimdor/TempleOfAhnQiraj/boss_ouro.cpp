@@ -154,7 +154,7 @@ struct boss_ouroAI : public BossAI
                     events.SetPhase(PHASE_FIGHT);
                     Schedule();
                     if (Creature* trigger = me->FindNearestCreature(NPC_OURO_TRIGGER, 250.0f))
-                        me->NearTeleportTo(trigger->GetPositionX(), trigger->GetPositionY(), trigger->GetPositionZ(), false);
+                        me->NearTeleportTo(trigger->GetPosition());
                     DoCastSelf(SPELL_BIRTH);
                     DoCastAOE(SPELL_GROUND_RUPTURE);
                     me->RemoveAurasDueToSpell(SPELL_SUBMERGE_VISUAL);

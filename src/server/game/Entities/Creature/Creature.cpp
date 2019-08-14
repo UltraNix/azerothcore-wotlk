@@ -3046,3 +3046,19 @@ void Creature::ReleaseFocus(Spell const* focusSpell)
     if (focusSpell->GetSpellInfo()->HasAttribute(SPELL_ATTR5_DONT_TURN_DURING_CAST))
         ClearUnitState(UNIT_STATE_ROTATING);
 }
+
+Creature* Creature::GetSummoner() const
+{
+    if (!ToTempSummon())
+        return nullptr;
+
+    Unit* _uSummoner = ToTempSummon()->GetSummoner();
+
+    if (!_uSummoner)
+        return nullptr;
+
+    if (!_uSummoner->ToCreature())
+        return nullptr;
+
+    return _uSummoner->ToCreature();
+}

@@ -2025,8 +2025,11 @@ void World::SetInitialWorldSettings()
     mgr = ChannelMgr::forTeam(TEAM_HORDE);
     mgr->LoadChannels();
 
-    sLog->outString("Load World Cache...");
-    WorldCache::GetInstance().Initialize();
+    sLog->outString("Load duel reset auras...");
+    sWorldCache.LoadDuelResetAuras();
+
+    sLog->outString("Load hellforge boss stats...");
+    sWorldCache.LoadHellforgeBossValues();
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog->outString();
