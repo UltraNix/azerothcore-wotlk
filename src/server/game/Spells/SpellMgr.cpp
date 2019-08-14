@@ -7986,7 +7986,6 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 29849: // frost nova
             spellInfo->CastingTimeIndex = 7;
-            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
             break;
