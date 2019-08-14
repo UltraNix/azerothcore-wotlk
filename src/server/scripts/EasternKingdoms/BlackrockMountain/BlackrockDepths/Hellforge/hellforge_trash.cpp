@@ -979,6 +979,9 @@ struct npc_hellforge_priestAI : public hellforge_trash_AI
                 if (Creature* target = me->FindNearestCreature(entry, 30.0f, false))
                 {
                     DoCast(target, SPELL_REVIVE);
+                    target->Respawn();
+                    if (InstanceScript * instance = me->GetInstanceScript())
+                        instance->SetData64(DATA_REVIVE_TRASH, target->GetGUID());
                     _repeatTimer = 60s;
                     break;
                 }

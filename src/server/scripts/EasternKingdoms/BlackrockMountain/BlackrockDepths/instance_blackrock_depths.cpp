@@ -377,6 +377,9 @@ public:
                     else
                         TombOfSevenStart();//start
                     break;
+                case DATA_REVIVE_TRASH:
+                    HandleTrashRevive(data);
+                    break;
             }
         }
 
@@ -671,6 +674,36 @@ public:
         {
             Position pos = creature->GetHomePosition();
             return (pos.GetPositionX() > 1073.69f && pos.GetPositionX() < 1199.39f && pos.GetPositionY() < -112.59f && pos.GetPositionY() > -225.46f);
+        }
+
+        void HandleTrashRevive(uint64 guid)
+        {
+            Unit* unit = sObjectAccessor->FindUnit(guid);
+            if (!unit || !unit->IsCreature())
+                return;
+
+            Creature* creature = unit->ToCreature();
+            switch (unit->GetEntry())
+            {
+                case NPC_TRASH_HELLFORGE_BERSERKER:
+                case NPC_TRASH_HELLFORGE_ADHERENT:
+                case NPC_TRASH_UNLIVING_DRUID:
+                case NPC_TRASH_HELLFORGE_FALLEN_FANATIC:
+                case NPC_TRASH_HELLFORGE_WITCH_DOCTOR:
+                case NPC_TRASH_HELLFORGE_CHAMPION:
+                case NPC_TRASH_HELLFORGE_PRIEST:
+                case NPC_TRASH_HELLFORGE_KNIGHT:
+                case NPC_TRASH_HELLFORGE_SPY:
+                    if (!creature->IsAlive())
+                        break;
+                    if (IsInFirstRoom(creature))
+                        ++_hellforgeFirstRoomTrashCount;
+                    else if (IsInSnakeRoom(creature))
+                        ++_hellforgeSnakeRoomTrashCount;
+                    else if (IsInDwarfRoom(creature))
+                        ++_hellforgeDwarfRoomTrashCount;
+                    break;
+            }
         }
 
     private:
