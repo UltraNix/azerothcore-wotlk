@@ -72,12 +72,6 @@ INSERT INTO `creature_template` VALUES
 (@ENTRY+12, 0, 0, 0, 0, 0, 21114, 0, 0, 0, 'Abyssal Knight', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, '', 12340),
 (@ENTRY+13, 0, 0, 0, 0, 0, 16632, 0, 0, 0, 'Pit Lord', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, '', 12340);
 
-DELETE FROM `creature_equip_template` WHERE `entry` BETWEEN @ENTRY AND @ENTRY + 13;
-INSERT INTO `creature_equip_template` VALUES 
-(@ENTRY + 10, 1, 48043, 48043, 0, 0), -- Hellforge Berserker
-(@ENTRY + 8, 1, 24044, 0, 0, 0), -- Hellforge Knight
-(@ENTRY + 9, 1, 22317, 22317, 0, 0); -- Hellforge Spy
-
 DELETE FROM `hellforge_boss_stats` WHERE `StatId` BETWEEN 500 AND 556;
 INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `StatComment`) VALUES
 -- Hellforge Champion
@@ -139,13 +133,16 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (555, 399000, 1.0, "Hellforge Hound max health"),
 (556, 21000, 0.7, "Hellforge Hound melee damage");
 
-DELETE FROM `creature_equip_template` WHERE `entry` IN (@ENTRY, @ENTRY+1, @ENTRY+3, @ENTRY+4, @ENTRY+5);
+DELETE FROM `creature_equip_template` WHERE `entry` IN (@ENTRY, @ENTRY+1, @ENTRY+3, @ENTRY+4, @ENTRY+5, @ENTRY + 10, @ENTRY + 8, @ENTRY + 9);
 INSERT INTO `creature_equip_template` VALUES
 (@ENTRY, 1, 52062, 0, 0, 0),
 (@ENTRY+1, 1, 41342, 0, 0, 0),
 (@ENTRY+3, 1, 41342, 0, 0, 0),
 (@ENTRY+4, 1, 52062, 0, 0, 0),
-(@ENTRY+5, 1, 41342, 0, 0, 0);
+(@ENTRY+5, 1, 41342, 0, 0, 0),
+(@ENTRY + 10, 1, 48043, 48043, 0, 0), -- Hellforge Berserker
+(@ENTRY + 8, 1, 24044, 0, 0, 0), -- Hellforge Knight
+(@ENTRY + 9, 1, 22317, 22317, 0, 0); -- Hellforge Spy
 
 
 UPDATE `creature` SET `MovementType` = 2 WHERE `guid` = @CGUID;
@@ -490,3 +487,4 @@ INSERT INTO `creature_loot_template` VALUES
 
 UPDATE `creature` SET `spawntimesecs` = 604800 WHERE `id` BETWEEN @ENTRY AND @ENTRY+13;
 UPDATE `creature_template` SET `rank` = 1, `mechanic_immune_mask` = `mechanic_immune_mask` | 2048 WHERE `entry` BETWEEN @ENTRY AND @ENTRY+13;
+UPDATE `creature` SET `equipment_id` = 1 WHERE id BETWEEN 250050 AND 250063;
