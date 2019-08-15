@@ -965,7 +965,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
                         val.AddSpellMod(SPELLVALUE_BASE_POINT1, damage);
                         me->CastCustomSpell(SPELL_BOSS_FOUR_THROW_SPEAR, val, target, TRIGGERED_FULL_MASK);
                         if (target->IsPlayer())
-                            me->MonsterWhisper("Hephasto is aiming on you!", target->ToPlayer(), true);
+                            me->MonsterWhisper("Hephasto is aiming at you!", target->ToPlayer(), true);
                     }
                     if (_hammerCount >= 10 )
                         events.ScheduleEvent(EVENT_BOSS_FOUR_SWITCH_PHASE, 2s);

@@ -735,9 +735,20 @@ public:
                         {
                             if (Creature * dwarf = _instance->GetCreature(DATA_BOSS_FOUR))
                             {
-                                if (Unit * victim = dwarf->SelectNearestPlayer(100.f))
+                                Player* victim = nullptr;
+                                auto const& pl = _instance->instance->GetPlayers();
+                                for (auto itr = pl.begin(); itr != pl.end(); ++itr)
+                                {
+                                    if (itr->GetSource()->IsGameMaster())
+                                        continue;
+                                    victim = itr->GetSource();
+                                    break;
+                                }
+                                if (victim)
+                                {
                                     dwarf->Attack(victim, false);
-                                DoZoneInCombat(dwarf, 100.f);
+                                    DoZoneInCombat(dwarf, 100.f);
+                                }
                                 if (!dwarf->IsInCombat())
                                     DoAction(ACTION_DWARF_WIPE);
                             }
