@@ -575,7 +575,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
             auto threatList = me->getThreatManager().getThreatList();
             for (auto ref : threatList)
             {
-                Unit* target = sObjectAccessor->FindUnit(ref->getUnitGuid());
+                Unit* target = ObjectAccessor::GetUnit(*me, ref->getUnitGuid());
                 if (!target)
                     continue;
 
