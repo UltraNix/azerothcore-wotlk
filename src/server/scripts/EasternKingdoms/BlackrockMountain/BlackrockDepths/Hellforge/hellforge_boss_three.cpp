@@ -547,6 +547,9 @@ struct npc_boss_three_tornado_AI : public ScriptedAI
                 if (player->IsGameMaster())
                     continue;
 
+                if (player->isDead())
+                    continue;
+
                 _possibleTargets.push_back(player->GetGUID());
             }
 
