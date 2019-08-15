@@ -1018,7 +1018,6 @@ struct boss_dwarf_boss_four_AI : public BossAI
                     val.AddSpellMod(SPELLVALUE_BASE_POINT0, _frostNovaDamage);
                     val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 500000.f);
                     me->CastCustomSpell(SPELL_BOSS_FOUR_FROST_NOVA, val, (Unit*)nullptr);
-                    DoCastAOE(SPELL_BOSS_FOUR_FROST_NOVA);
                     events.Repeat(60s);
                     break;
                 }
