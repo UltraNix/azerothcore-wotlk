@@ -59,7 +59,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (47, 100, 1.0, "Boss four lightning shield charges count"),
 
 -- boss five
-(48, 29499000, 1.0, "Boss five max health"),
+(48, 24500000, 1.0, "Boss five max health"),
 (49, 65000, 0.86, "Boss five melee damage"),
 (50, 1, 0.95, "Boss five shadow word: death"),
 (51, 55000, 1.0, "Boss five sonic screech"),
@@ -73,7 +73,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (56, 112000, 1.0, "Boss five add mindmaster health"),
 (57, 89000, 1.0, "Boss five add mindmaster mana"),
 
-(58, 798000, 1.0, "Boss five add slaughter health"),
+(58, 698000, 1.0, "Boss five add slaughter health"),
 (59, 41000, 0.82, "Boss five add slaugther melee"),
 
 (60, 109000, 1.0, "Boss five add warlock health"),
@@ -103,7 +103,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (75, 10, 1.0, "boss one add count first wave"),
 (76, 20, 1.0, "boss one add count second wave"),
 (77, 30, 1.0, "boss one add count third wave"),
-(78, 8849700, 1, "Frost Worgen health"),
+(78, 7350000, 1, "Frost Worgen health"),
 (79, 1, 0.5, "Boss one add one buffet chance"),
 
 (80, 5000, 1.0, "Boss three slay time timer, in miliseconds"),
