@@ -114,6 +114,7 @@ UPDATE `creature_template` SET `ScriptName` = "npc_hellforge_teleporter" WHERE `
 UPDATE `creature_template` SET `ScriptName` = "npc_boss_four_pillar_protection" WHERE `entry` = @ENTRY + 34;
 UPDATE `creature_template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` IN (@ENTRY + 21, @ENTRY + 22, @ENTRY + 27, @ENTRY + 28, @ENTRY + 26, @ENTRY + 29);
 UPDATE `creature_template` SET `scale` = 1.5 WHERE `entry` IN (@ENTRY + 25,  @ENTRY + 24);
+UPDATE `creature_template` SET `unit_flags` = `unit_flags` | 33554432, `type` = 0 WHERE `entry` IN (@ENTRY + 13, @ENTRY + 19, @ENTRY + 30);
 
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @ENTRY + 32;
