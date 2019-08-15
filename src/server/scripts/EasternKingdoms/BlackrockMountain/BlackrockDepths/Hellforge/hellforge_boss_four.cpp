@@ -572,10 +572,10 @@ struct boss_dwarf_boss_four_AI : public BossAI
 
         scheduler.Schedule(3s, [this](TaskContext func)
         {
-            auto& threatList = me->getThreatManager().getThreatList();
-            for (auto && ref : threatList)
+            auto threatList = me->getThreatManager().getThreatList();
+            for (auto ref : threatList)
             {
-                Unit* target = ObjectAccessor::GetUnit(*me, ref->getUnitGuid());
+                Unit* target = sObjectAccessor->FindUnit(ref->getUnitGuid());
                 if (!target)
                     continue;
 
@@ -785,14 +785,14 @@ struct boss_dwarf_boss_four_AI : public BossAI
                 case EVENT_BOSS_FOUR_CHAIN_LIGHTNING:
                 {
                     std::vector<uint64> _possibleTargets;
-                    auto& threatList = me->getThreatManager().getThreatList();
+                    auto threatList = me->getThreatManager().getThreatList();
                     if (threatList.empty())
                     {
                         events.Repeat(10s, 15s);
                         break;
                     }
 
-                    for (auto && ref : threatList)
+                    for (auto ref : threatList)
                     {
                         Unit* source = ObjectAccessor::GetUnit(*me, ref->getUnitGuid());
                         if (!source)
@@ -846,8 +846,8 @@ struct boss_dwarf_boss_four_AI : public BossAI
                     _chainedPlayers.clear();
                     _chainedPlayers.shrink_to_fit();
                     std::vector<uint64> _targets;
-                    auto& threat = me->getThreatManager().getThreatList();
-                    for (auto && ref : threat)
+                    auto threatList = me->getThreatManager().getThreatList();
+                    for (auto ref : threatList)
                     {
                         Unit* target = ObjectAccessor::GetUnit(*me, ref->getUnitGuid());
                         if (!target)
@@ -901,6 +901,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
                 {
                     CustomSpellValues val;
                     val.AddSpellMod(SPELLVALUE_BASE_POINT0, 500000);
+                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 50000);
                     me->CastCustomSpell(SPELL_BOSS_FOUR_VORTEX_ENEMY, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
                     me->RemoveAurasDueToSpell(SPELL_BOSS_FOUR_CLOUD_VISUAL);
                     instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BOSS_FOUR_CLOUD_VISUAL);
@@ -1093,8 +1094,8 @@ struct boss_dwarf_boss_four_AI : public BossAI
                 case EVENT_BOSS_FOUR_CHECK_ALIVE_PLAYERS:
                 {
                     bool evade = true;
-                    auto& threatList = me->getThreatManager().getThreatList();
-                    for (auto && ref : threatList)
+                    auto threatList = me->getThreatManager().getThreatList();
+                    for (auto ref : threatList)
                     {
                         Unit* target = ref->getTarget();
 

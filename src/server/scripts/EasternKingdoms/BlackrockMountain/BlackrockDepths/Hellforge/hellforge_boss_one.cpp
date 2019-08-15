@@ -258,13 +258,13 @@ struct boss_hellforge_one_AI : public BossAI
 
     uint64 SelectExplodeVictim() const
     {
-        auto const& threatList = me->getThreatManager().getThreatList();
+        auto threatList = me->getThreatManager().getThreatList();
         if (threatList.empty())
             return 0;
 
         std::vector<uint64> _tempGUIDs;
 
-        for (auto && t : threatList)
+        for (auto t : threatList)
         {
             if (Unit* target = ObjectAccessor::GetUnit(*me, t->getUnitGuid()))
             {

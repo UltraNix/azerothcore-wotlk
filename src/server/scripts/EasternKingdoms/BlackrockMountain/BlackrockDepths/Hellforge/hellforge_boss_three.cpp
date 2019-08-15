@@ -457,8 +457,8 @@ struct boss_hellforge_boss_three_AI : public BossAI
                 case EVENT_CHECK_ALIVE_PLAYERS:
                 {
                     bool evade = true;
-                    auto& threatList = me->getThreatManager().getThreatList();
-                    for (auto && ref : threatList)
+                    auto threatList = me->getThreatManager().getThreatList();
+                    for (auto ref : threatList)
                     {
                         Unit* target = ref->getTarget();
                         if (!target)

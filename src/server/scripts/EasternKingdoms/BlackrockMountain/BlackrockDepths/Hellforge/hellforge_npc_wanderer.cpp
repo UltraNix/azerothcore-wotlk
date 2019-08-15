@@ -739,7 +739,7 @@ public:
                                 auto const& pl = _instance->instance->GetPlayers();
                                 for (auto itr = pl.begin(); itr != pl.end(); ++itr)
                                 {
-                                    if (itr->GetSource()->IsGameMaster())
+                                    if (itr->GetSource()->IsGameMaster() || !itr->GetSource()->IsInWorld())
                                         continue;
                                     victim = itr->GetSource();
                                     break;

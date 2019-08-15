@@ -409,9 +409,9 @@ struct boss_hellforge_boss_two_AI : public BossAI
                 case EVENT_FIRE_BLIGHT_CRYSTAL:
                 {
                     std::vector<Player*> _tempTargets;
-                    auto& threatList = me->getThreatManager().getThreatList();
 
-                    for (auto && ref : threatList)
+                    auto threatList = me->getThreatManager().getThreatList();
+                    for (auto ref : threatList)
                     {
                         if (Unit* obj = ObjectAccessor::GetUnit(*me, ref->getUnitGuid()))
                         {
