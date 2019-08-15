@@ -73,8 +73,8 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (56, 112000, 1.0, "Boss five add mindmaster health"),
 (57, 89000, 1.0, "Boss five add mindmaster mana"),
 
-(58, 698000, 1.0, "Boss five add slaughter health"),
-(59, 41000, 0.82, "Boss five add slaugther melee"),
+(58, 648000, 1.0, "Boss five add slaughter health"),
+(59, 39000, 0.82, "Boss five add slaugther melee"),
 
 (60, 109000, 1.0, "Boss five add warlock health"),
 (61, 99000, 1.0, "boss five add warlock mana"),
