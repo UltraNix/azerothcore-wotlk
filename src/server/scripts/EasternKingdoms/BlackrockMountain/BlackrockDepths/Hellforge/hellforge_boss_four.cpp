@@ -506,6 +506,9 @@ struct boss_dwarf_boss_four_AI : public BossAI
             {
                 for (auto && player : targets)
                 {
+                    if (player->IsGameMaster())
+                        continue;
+
                     me->AddAura(SPELL_BOSS_FOUR_SOUL_CHARGE, player);
                     if (Aura* aura = player->GetAura(SPELL_BOSS_FOUR_SOUL_CHARGE))
                     {
