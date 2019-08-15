@@ -375,3 +375,5 @@ UPDATE `gameobject` SET `SpawnMask` = 3 WHERE `guid` IN (35862, 335812, 17122, 1
 DELETE FROM `spell_proc_event` WHERE `entry` = 61185;
 INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`) VALUES
 (61185, 4, 9343); 
+
+UPDATE creature_template SET unit_flags = unit_flags | 33554432 WHERE entry = @ENTRY + 27;
