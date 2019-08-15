@@ -233,6 +233,14 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
         }
     }
 
+    if (entry->MapID == 230 /* Blackrock Depths - Hellforge */ && targetDifficulty == DUNGEON_DIFFICULTY_HEROIC)
+    {
+        bool _canEnter = player->GetQuestStatus( 30012 /*QUEST_MEETING_IN_HELLFORGE*/) == QUEST_STATUS_COMPLETE ||
+            player->GetQuestStatus( 30012 /*QUEST_MEETING_IN_HELLFORGE*/) == QUEST_STATUS_REWARDED;
+        if (!_canEnter)
+            return false;
+    }
+
     //Other requirements
     return player->Satisfy(sObjectMgr->GetAccessRequirement(mapid, targetDifficulty), mapid, true);
 }
