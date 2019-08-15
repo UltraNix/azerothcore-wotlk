@@ -467,6 +467,9 @@ struct hellforge_trash_AI : public ScriptedAI
             if (!player)
                 continue;
 
+            if (player->IsGameMaster())
+                continue;
+
             if (!player->IsAlive())
                 continue;
 
@@ -493,6 +496,9 @@ struct hellforge_trash_AI : public ScriptedAI
         {
             Player* player = source.GetSource();
             if (!player)
+                continue;
+
+            if (player->IsGameMaster())
                 continue;
 
             if (!player->IsAlive())
@@ -556,6 +562,7 @@ struct hellforge_trash_AI : public ScriptedAI
     {
         _task.CancelAll();
         ScheduleTasks();
+        DoZoneInCombat();
     }
 
     virtual void ScheduleTasks() { };
@@ -621,6 +628,7 @@ struct npc_hellforge_championAI : public hellforge_trash_AI
         ScheduleTasks();
         if (Player* player = GetRandomPlayerInRange(me, 20.0f))
             me->CastSpell(player, SPELL_CHARGE);
+        DoZoneInCombat();
     }
 
     void ScheduleTasks() override
@@ -1897,6 +1905,7 @@ struct npc_hellforge_houndAI : public hellforge_trash_AI
         _task.CancelAll();
         ScheduleTasks();
         DoCastSelf(SPELL_STRENGHT_OF_PACK);
+        DoZoneInCombat();
     }
 
     void LoadStats()
