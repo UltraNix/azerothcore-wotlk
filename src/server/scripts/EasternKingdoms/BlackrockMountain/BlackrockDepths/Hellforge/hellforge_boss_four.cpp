@@ -1101,7 +1101,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
                         if (!target || !target->IsPlayer() || target->ToPlayer()->IsGameMaster())
                             continue;
 
-                        if (target->IsAlive() && target->IsWithinDistInMap(me, 150.f))
+                        if (target->IsAlive() && IsInRoom(target->ToPlayer()))
                         {
                             evade = false;
                             break;
@@ -1140,6 +1140,12 @@ struct boss_dwarf_boss_four_AI : public BossAI
         me->MonsterYell("Black Witch.. forgive me.. he.. he is coming...", LANG_UNIVERSAL, nullptr);
         CheckCreatureRecord(killer, HELLFORGE_CREATURE_RECORD_MIN_VALUE + 3, RAID_DIFFICULTY_10MAN_NORMAL, "", 1, _fightTimer);
         BossAI::JustDied(killer);
+    }
+
+    bool IsInRoom(Player* player) const
+    {
+        Position pos = player->GetPosition();
+        return (pos.GetPositionX() > 1073.69f && pos.GetPositionX() < 1199.39f && pos.GetPositionY() < -112.59f && pos.GetPositionY() > -225.46f);
     }
 
 private:

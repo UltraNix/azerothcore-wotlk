@@ -699,7 +699,7 @@ static const std::unordered_map<uint32 /*emoteId*/, std::string /*dbcEmoteName*/
     { 440,"Wanderer is here? It's quite suspicious." },
     { 442,"What about truce?" },
     { 444,"I warn you, it won't be easy." },
-    { 445,"Snap of his fingers… just like that…" },
+    { 445,"Snap of his fingers... just like that..." },
     { 449,"Look over there!" },
     { 451,"I just want to make you sweat." }
 };

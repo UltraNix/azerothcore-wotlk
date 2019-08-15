@@ -178,9 +178,13 @@ struct boss_hellforge_boss_three_AI : public BossAI
                 champion->RemoveAurasDueToSpell(SPELL_COSMETIC_FREEZE_ANIM_STUN);
                 champion->RemoveAurasDueToSpell(SPELL_GREEN_GHOST_VISUAL);
 
-                champion->NearTeleportTo(1250.13f, -284.04f, -78.21f, 1.25f);
+                champion->AttackStop();
                 champion->setFaction(35);
                 champion->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                champion->SetFullHealth();
+                champion->GetMotionMaster()->Clear();
+                champion->GetMotionMaster()->MoveIdle();
+                champion->NearTeleportTo(1250.13f, -284.04f, -78.21f, 1.25f);
             }
         }
 

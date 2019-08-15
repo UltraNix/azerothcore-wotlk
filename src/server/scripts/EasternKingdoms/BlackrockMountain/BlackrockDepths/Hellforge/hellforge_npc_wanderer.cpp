@@ -720,7 +720,7 @@ public:
             {
                 switch (id)
                 {
-                    case POINT_SIMON_DOOR:
+                    case POINT_SIMON_ROOM:
                     {
                         me->SetFacingTo(1.25f);
                         break;
@@ -975,6 +975,8 @@ public:
                     me->CombatStop();
                     me->getThreatManager().clearReferences();
                     me->AttackStop();
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveIdle();
                     me->NearTeleportTo({ 1231.81f, -207.f, -85.5f, 2.37f });
                     me->SetReactState(REACT_PASSIVE);
                     break;
@@ -1048,7 +1050,7 @@ public:
                         me->MonsterSay("Aye! Follow me, heroes!", LANG_UNIVERSAL, me);
                         _scheduler.Schedule(2s, [&](TaskContext /*func*/)
                         {
-                            me->GetMotionMaster()->MovePoint(POINT_SIMON_DOOR, 1250.13f, -284.04f, -78.21f);
+                            me->GetMotionMaster()->MovePoint(POINT_SIMON_ROOM, 1250.13f, -284.04f, -78.21f);
                         });
                     });
                     break;
