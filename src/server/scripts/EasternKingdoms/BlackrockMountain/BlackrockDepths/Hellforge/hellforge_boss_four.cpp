@@ -58,7 +58,9 @@ enum BossFourSpells
     SPELL_BOSS_FOUR_ARCANE_EXPLOSION    = 29973,
     SPELL_BOSS_FOUR_SHIELD_VISUAL       = 74621,
     SPELL_BOSS_FOUR_MARK_OF_CORRU       = 38222,
-    SPELL_BOSS_FOUR_VORTEX_ENEMY        = 73037
+    SPELL_BOSS_FOUR_VORTEX_ENEMY        = 73037,
+    SPELL_BOSS_FOUR_HAMMER_DROP         = 57759,
+    SPELL_BOSS_FOUR_KEEPER_ACTIVE       = 62647
 };
 
 enum BossFourCreatures
@@ -66,7 +68,8 @@ enum BossFourCreatures
     NPC_BOSS_FOUR_LIGHTNING_TARGET      = 250017,
     NPC_BOSS_FOUR_BLIZZARD_TARGET       = 250018,
     NPC_BOSS_FOUR_FIERY_ORB             = 250032,
-    NPC_BOSS_FOUR_PILLAR_PROTECTION     = 250034
+    NPC_BOSS_FOUR_PILLAR_PROTECTION     = 250034,
+    NPC_BOSS_FOUR_HAMMER_HIT_POOL       = 250035
 };
 
 enum BossFourMisc
@@ -333,6 +336,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
             knocker->SetCanFly(true);
             knocker->SetDisableGravity(true);
         }
+
         me->SetImmuneToPC(true);
         _fightTimer = 0;
     }
@@ -578,6 +582,9 @@ struct boss_dwarf_boss_four_AI : public BossAI
                 if (!target->ToPlayer())
                     continue;
 
+                if (target->ToPlayer()->IsGameMaster())
+                    continue;
+
                 CustomSpellValues val;
                 val.AddSpellMod(SPELLVALUE_BASE_POINT0, _coldSnapDamage);
                 target->CastCustomSpell(SPELL_BOSS_FOUR_COLD_SLAP, val, target, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, me->GetGUID());
@@ -764,7 +771,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
                         me->GetMotionMaster()->MovePath(me->GetEntry() * 10, false);
                     }
                     else
-                        events.Repeat(2s);
+                        events.Repeat(3.5s);
                     break;
                 }
                 case EVENT_BOSS_FOUR_LIGHTNING_SHIELD:
@@ -893,7 +900,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
                 case EVENT_BOSS_FOUR_CHAINED_TARGETS_FAILURE:
                 {
                     CustomSpellValues val;
-                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, 10000000);
+                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
                     me->CastCustomSpell(SPELL_BOSS_FOUR_VORTEX_ENEMY, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
                     me->RemoveAurasDueToSpell(SPELL_BOSS_FOUR_CLOUD_VISUAL);
                     instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BOSS_FOUR_CLOUD_VISUAL);
@@ -964,11 +971,15 @@ struct boss_dwarf_boss_four_AI : public BossAI
                         CustomSpellValues val;
                         val.AddSpellMod(SPELLVALUE_BASE_POINT1, damage);
                         me->CastCustomSpell(SPELL_BOSS_FOUR_THROW_SPEAR, val, target, TRIGGERED_FULL_MASK);
+                        me->SummonCreature(NPC_BOSS_FOUR_HAMMER_HIT_POOL, target->GetPosition());
                         if (target->IsPlayer())
                             me->MonsterWhisper("Hephasto is aiming at you!", target->ToPlayer(), true);
                     }
-                    if (_hammerCount >= 10 )
+                    if (_hammerCount >= 10)
+                    {
+                        summons.DespawnEntry(NPC_BOSS_FOUR_HAMMER_HIT_POOL);
                         events.ScheduleEvent(EVENT_BOSS_FOUR_SWITCH_PHASE, 2s);
+                    }
                     else
                         events.Repeat(4s);
                     ++_hammerCount;
@@ -1473,6 +1484,51 @@ class spell_gen_proc_on_players_only_hellforge : public AuraScript
     }
 };
 
+struct npc_boss_four_hammer_hit_pool : public ScriptedAI
+{
+    npc_boss_four_hammer_hit_pool(Creature* creature) : ScriptedAI(creature)
+    {
+        me->SetCanMissSpells(false);
+        me->SetSelectable(false);
+    }
+
+    void Reset() override
+    {
+        DoCastSelf(SPELL_BOSS_FOUR_KEEPER_ACTIVE);
+        _scheduler.CancelAll();
+        _scheduler.Schedule(3s, [this](TaskContext func)
+        {
+            std::list<Player*> targets;
+            Trinity::AnyPlayerInObjectRangeCheck check(me, 3.5f, true);
+            Trinity::PlayerListSearcherWithSharedVision<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, check);
+            me->VisitNearbyWorldObject(3.5f, searcher);
+
+            for (auto const& player : targets)
+            {
+                if (player->IsGameMaster() || player->isDead())
+                    continue;
+
+                player->AddAura(SPELL_BOSS_FOUR_HAMMER_DROP, player);
+                if (Aura* aura = player->GetAura(SPELL_BOSS_FOUR_HAMMER_DROP))
+                {
+                    aura->SetMaxDuration(300000);
+                    aura->RefreshDuration();
+                }
+            }
+            func.Repeat(2s);
+        });
+    }
+
+    void AttackStart(Unit* /*who*/) override { }
+    void EnterCombat(Unit* /*who*/) override { }
+    void MoveInLineOfSight(Unit* /*who*/) override { }
+    void EnterEvadeMode() override { }
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override { damage = 0; }
+    void UpdateAI(uint32 diff) override { _scheduler.Update(diff); }
+private:
+    TaskScheduler _scheduler;
+};
+
 void AddSC_hellforge_boss_four()
 {
     new CreatureAILoader<boss_dwarf_boss_four_AI>("boss_dwarf_boss_four");
@@ -1480,6 +1536,7 @@ void AddSC_hellforge_boss_four()
     new CreatureAILoader<npc_boss_four_blizzard_target_AI>("npc_boss_four_blizzard_target");
     new CreatureAILoader<npc_boss_fiery_orb_AI>("npc_boss_fiery_orb");
     new CreatureAILoader<npc_boss_four_pillar_protection>("npc_boss_four_pillar_protection");
+    new CreatureAILoader<npc_boss_four_hammer_hit_pool>("npc_boss_four_hammer_hit_pool");
 
     new AuraScriptLoaderEx<spell_boss_four_frost_armor_AuraScript>("spell_boss_four_frost_armor");
     new AuraScriptLoaderEx<spell_boss_four_lightning_shield>("spell_boss_four_lightning_shield");

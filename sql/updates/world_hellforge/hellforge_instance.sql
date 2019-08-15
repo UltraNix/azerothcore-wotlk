@@ -5,7 +5,7 @@ SET @GO_ENTRY:= 400500;
 SET @OGUID:= 550000;
 SET @CGUID:= 2073700;
 
-DELETE FROM `creature_template` WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 34;
+DELETE FROM `creature_template` WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 35;
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `mindmg`, `maxdmg`, `dmgschool`, `attackpower`, `dmg_multiplier`, `baseattacktime`, `rangeattacktime`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `minrangedmg`, `maxrangedmg`, `rangedattackpower`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `Health_mod`, `Mana_mod`, `Armor_mod`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 -- boss one stuff
 (@ENTRY, 0, 0, 0, 0, 0, 16896, 0, 0, 0, 'Phyrrocoris', '', '', 0, 80, 80, 2, 14, 0, 1, 1.14286, 4, 0, 0, 0, 0, 0, 1, 2000, 2000, 2, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 12340),
@@ -61,7 +61,8 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 
 -- teleport to hellforge
 (@ENTRY + 33, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Hellforge teleport', '', '', 0, 80, 80, 2, 35, 0, 1, 1.14286, 1, 0, 356, 503, 0, 432, 1, 2000, 2000, 1, 32768, 2048, 0, 24, 0, 0, 0, 0, 305, 452, 74, 1, 1, 28233, 0, 70211, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 12340),
-(@ENTRY + 34, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Boss four pillar protection', '', '', 0, 83, 83, 2, 35, 0, 1, 1.14286, 1, 0, 356, 503, 0, 432, 1, 2000, 2000, 1, 32768, 2048, 0, 24, 0, 0, 0, 0, 305, 452, 74, 1, 1, 28233, 0, 70211, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 12340);
+(@ENTRY + 34, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Boss four pillar protection', '', '', 0, 83, 83, 2, 35, 0, 1, 1.14286, 1, 0, 356, 503, 0, 432, 1, 2000, 2000, 1, 32768, 2048, 0, 24, 0, 0, 0, 0, 305, 452, 74, 1, 1, 28233, 0, 70211, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 12340),
+(@ENTRY + 35, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Boss four hammer hit trigger', '', '', 0, 83, 83, 2, 35, 0, 1, 1.14286, 5, 0, 356, 503, 0, 432, 1, 2000, 2000, 1, 32768, 2048, 0, 24, 0, 0, 0, 0, 305, 452, 74, 1, 1, 28233, 0, 70211, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'npc_boss_four_hammer_hit_pool', 12340);
 
 DELETE FROM `creature_equip_template` WHERE `entry` IN (@ENTRY + 24, @ENTRY + 26, 250005);
 INSERT INTO `creature_equip_template` VALUES 
@@ -225,7 +226,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`
 
 UPDATE `creature` SET `spawntimesecs` = 604800 WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 52;
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (56505, 32361, 31256, 23272, 22662, 11350, 61186, 29973, 29849, 54115, 19099, 62470, 42171, 25656, 39067);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (56505, 32361, 31256, 23272, 22662, 11350, 61186, 29973, 29849, 54115, 19099, 62470, 42171, 25656, 39067, 72635);
 INSERT INTO `spell_script_names` VALUES
 (56505, "spell_surge_of_power_periodic"),
 (32361, "spell_boss_two_crystal_prison"),
@@ -239,7 +240,8 @@ INSERT INTO `spell_script_names` VALUES
 (62470, "spell_defeaning_thunder_boss_four"),
 (42171, "spell_evidence_marker_hellforge"),
 (25656, "spell_hellforge_sandtrap"),
-(39067, "spell_boss_four_lightning_shield");
+(39067, "spell_boss_four_lightning_shield"),
+(72635, "spell_hellforge_boss_five_flame");
 
 UPDATE `gameobject_template` SET `data2` = 1, `data7` = 4 WHERE `entry` = 180647;
 
@@ -369,3 +371,6 @@ INSERT INTO `access_requirement` VALUES
 
 UPDATE `gameobject` SET `SpawnMask` = 3 WHERE `guid` IN (35862, 335812, 17122, 15620, 15302, 17124, 15642, 15629, 15577, 15552, 15550, 15547);
 
+DELETE FROM `spell_proc_event` WHERE `entry` = 61185;
+INSERT INTO `spell_proc_event` (`entry`, `procFlags`, `procEx`) VALUES
+(61185, 4, 9343); 

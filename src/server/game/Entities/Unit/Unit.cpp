@@ -279,6 +279,7 @@ m_HostileRefManager(this), m_AutoRepeatFirstCast(false)
     _lastLiquid = NULL;
 
     _oldFactionId = 0;
+    m_canMissSpells = true;
 }
 
 ////////////////////////////////////////////////////////////
@@ -2610,6 +2611,9 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     bool canParry = true;                                                                                                     // Rogue: Gouge
     bool canBlock = ((spell->HasAttribute(SPELL_ATTR3_BLOCKABLE_SPELL) && !spell->HasAttribute(SPELL_ATTR0_CU_DIRECT_DAMAGE)) || spell->Id == 1776);
 
+    if (!CanMissSpells())
+        return SPELL_MISS_NONE;
+
     // Some spells cannot be parry/dodge
     if (spell->HasAttribute(SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK))
         return SPELL_MISS_NONE;
@@ -2749,6 +2753,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     // resist and deflect chances
     // xinef: skip all calculations, proof: Toxic Tolerance quest
     if (spell->HasAttribute(SPELL_ATTR3_IGNORE_HIT_RESULT))
+        return SPELL_MISS_NONE;
+
+    if (!CanMissSpells())
         return SPELL_MISS_NONE;
 
     // @todo: move this out of this function

@@ -106,7 +106,7 @@ enum BossThreeStats
 
 struct boss_hellforge_boss_three_AI : public BossAI
 {
-    boss_hellforge_boss_three_AI(Creature* creature) : BossAI(creature, DATA_BOSS_THREE), _emoteMap(_emoteList) { }
+    boss_hellforge_boss_three_AI(Creature* creature) : BossAI(creature, DATA_BOSS_THREE) { }
 
     void ScheduleCombatEvents()
     {
@@ -204,6 +204,7 @@ struct boss_hellforge_boss_three_AI : public BossAI
         LoadBossStats();
         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 0);
         _fightTimer = 0;
+        _emoteMap = _emoteList;
     }
 
     void HandleRequiredBossFail() override
@@ -359,8 +360,9 @@ struct boss_hellforge_boss_three_AI : public BossAI
                     auto iterator = std::next(_emoteMap.begin(), urand(0, _emoteMap.size() - 1));
                     _currentRequiredEmote = iterator->first;
                     me->MonsterYell(iterator->second.c_str(), 0, nullptr);
+                    _emoteMap.erase(iterator);
+                    std::cout << "size of emotemap po erase: " << _emoteMap.size() << std::endl;
                     events.ScheduleEvent(EVENT_SIMON_SLAYS, std::chrono::milliseconds(_slayTimer));
-                    //events.ScheduleEvent(EVENT_WANDERER_RESPONSE, 2.5s); ToDo
                     ++_round;
                     break;
                 }

@@ -2,7 +2,7 @@
  * Copyright (C)
  * Copyright (C)
  *
- * This program is free software; you can redistribute it and/or modify it
+ * This program is free software; you + redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or (at your
  * option) any later version.
@@ -182,6 +182,9 @@ public:
         void OnCreatureCreate(Creature* creature) override
         {
             InstanceScript::OnCreatureCreate(creature);
+            if ((creature->IsDungeonBoss() || creature->isWorldBoss()) && creature->GetEntry() >= NPC_BOSS_ONE)
+                creature->SetCanMissSpells(false);
+
             switch (creature->GetEntry())
             {
                 case NPC_EMPEROR: EmperorGUID = creature->GetGUID(); break;

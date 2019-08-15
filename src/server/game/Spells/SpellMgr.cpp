@@ -7980,9 +7980,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
             spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_SCHOOL_DAMAGE;
             spellInfo->EffectBasePoints[EFFECT_1] = 1;
-            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
-            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;;
             break;
         case 29849: // frost nova
             spellInfo->CastingTimeIndex = 7;

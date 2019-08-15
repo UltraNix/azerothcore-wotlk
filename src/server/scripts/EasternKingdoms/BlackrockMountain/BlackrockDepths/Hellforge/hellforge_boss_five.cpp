@@ -128,6 +128,8 @@ enum BossFiveStatIDs
     BOSS_FIVE_ADD_CASTER_MELEE_DAMAGE       = 67,
     BOSS_FIVE_ADD_WORGEN_HEALTH             = 78,
     BOSS_FIVE_ADD_WORGEN_MELEE_DMG          = 81,
+    BOSS_FIVE_STAT_ID_SHADOW_BREATH         = 82,
+    BOSS_FIVE_STAT_ID_FLAMES                = 83
 };
 
 Position const _wandererPosition{ 1025.720f, -228.156f, -61.860f, 3.90f };
@@ -232,7 +234,7 @@ struct boss_hellforge_five_AI : public BossAI
     void LoadBossStats()
     {
         HellforgeStats _stats = sWorldCache.GetStatValues({ BOSS_FIVE_STAT_ID_HEALTH, BOSS_FIVE_STAT_ID_MELEE_DAMAGE, BOSS_FIVE_STAT_ID_SHADOW_WORD,
-            BOSS_FIVE_STAT_ID_SONIC_SCREECH, BOSS_FIVE_STAT_ID_SHADOW_BOLT });
+            BOSS_FIVE_STAT_ID_SONIC_SCREECH, BOSS_FIVE_STAT_ID_SHADOW_BOLT, BOSS_FIVE_STAT_ID_SHADOW_BREATH });
 
         for (auto const& ref : _stats)
         {
@@ -266,6 +268,11 @@ struct boss_hellforge_five_AI : public BossAI
                 case BOSS_FIVE_STAT_ID_SHADOW_BOLT:
                 {
                     _shadowBoltDamage = urand((ref.second.StatValue * ref.second.StatVariance), ref.second.StatValue);
+                    break;
+                }
+                case BOSS_FIVE_STAT_ID_SHADOW_BREATH:
+                {
+                    _shadowbreathDamage = ref.second.StatValue;
                     break;
                 }
             }
@@ -695,6 +702,9 @@ struct boss_hellforge_five_AI : public BossAI
                 {
                     scheduler.Schedule(1s, GROUP_CANCELABLE, [&](TaskContext func)
                     {
+                        CustomSpellValues val;
+                        val.AddSpellMod(SPELLVALUE_BASE_POINT0, _shadowbreathDamage);
+                        me->CastCustomSpell(SPELL_BOSS_FIVE_SHADOW_BREATH, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
                         DoCastAOE(SPELL_BOSS_FIVE_SHADOW_BREATH, true);
                         func.Repeat(1s);
                     });
@@ -832,6 +842,7 @@ private:
     uint32 _sonicScreechDamage;
     uint32 _shadowBoltDamage;
     uint32 _fightTimer;
+    uint32 _shadowbreathDamage;
 };
 
 //struct npc_boss_five_flame_spreader_AI : public ScriptedAI
@@ -1025,7 +1036,7 @@ struct npc_boss_five_fearer_AI : public ScriptedAI
     void LoadBossStats()
     {
         HellforgeStats _stats = sWorldCache.GetStatValues({ BOSS_FIVE_ADD_MINDMASTER_HEALTH, BOSS_FIVE_ADD_MINDMASTER_MANA, BOSS_FIVE_ADD_MINDMASTER_WITHER_DAMAGE,
-            BOSS_FIVE_ADD_MINDMASTER_WITHER_DOT_DMG, BOSS_FIVE_ADD_CASTER_MELEE_DAMAGE });
+            BOSS_FIVE_ADD_MINDMASTER_WITHER_DOT_DMG, BOSS_FIVE_ADD_CASTER_MELEE_DAMAGE,  });
         for (auto const& _ref : _stats)
         {
             switch (_ref.first)
@@ -1402,6 +1413,26 @@ struct npc_boss_five_flame_spreader_AI : public ScriptedAI
     }
 };
 
+class spell_hellforge_boss_five_flame : public SpellScript
+{
+    PrepareSpellScript(spell_hellforge_boss_five_flame);
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        if (GetCaster() && GetCaster()->GetMapId() == HELLFORGE_MAP_ID)
+        {
+            HellforgeStatValues val;
+            sWorldCache.GetStatValue(BOSS_FIVE_STAT_ID_FLAMES, val);
+            SetEffectValue(val.StatValue);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_hellforge_boss_five_flame::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 void AddSC_hellforge_boss_five()
 {
     new CreatureAILoader<boss_hellforge_five_AI>("boss_hellforge_five");
@@ -1412,4 +1443,6 @@ void AddSC_hellforge_boss_five()
     new CreatureAILoader<npc_boss_five_burner_AI>("npc_boss_five_burner");
     new CreatureAILoader<npc_boss_five_big_add_AI>("npc_boss_five_big_add");
     new CreatureAILoader<npc_boss_five_bat_AI>("npc_boss_five_bat");
+
+    new SpellScriptLoaderEx<spell_hellforge_boss_five_flame>("spell_hellforge_boss_five_flame");
 }

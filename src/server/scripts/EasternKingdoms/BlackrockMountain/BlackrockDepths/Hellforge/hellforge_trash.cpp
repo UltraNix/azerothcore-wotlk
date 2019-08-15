@@ -109,10 +109,10 @@ struct npc_gauntlet_controller_hellforge_AI : public ScriptedAI
                 _eventRunning = false;
                 _eventDone = true;
                 _instance->SetData(DATA_HELLFORGE_GAUNTLET_DONE, DONE);
-                GameObject* door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2);
-                if (GameObject * door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2))
+
+                if (GameObject* door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2))
                     door2->SetGoState(GO_STATE_ACTIVE);
-                if (Unit * champion = _instance->GetCreature(DATA_NPC_WANDERER_CHAMPION))
+                if (Unit* champion = _instance->GetCreature(DATA_NPC_WANDERER_CHAMPION))
                     if (champion->IsAIEnabled && champion->GetAI()->GetData(0) == STATE_DWARF_KILLED)
                         champion->GetAI()->DoAction(ACTION_GAUNTLET_DONE);
             }

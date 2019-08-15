@@ -34,11 +34,11 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 -- boss three
 (25, 3499000, 1.0, "Simon max health"),
 (26, 71000, 0.84, "Simon melee damage"),
-(27, 60, 1.0, "Simon petrified bark charges"),
+(27, 15, 1.0, "Simon petrified bark charges"),
 (28, 25000, 0.85, "Simon arctic winds"),
 
 -- boss four
-(29, 16749000, 1.0, "Boss four max health"),
+(29, 25123500, 1.0, "Boss four max health"),
 (30, 92000, 0.77, "Boss four melee damage"),
 (31, 60, 1.0, "Boss four first transition percentage"),
 (32, 20, 1.0, "Boss four second transition percentage"),
@@ -53,7 +53,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (41, 30000, 1.0, "Boss four lightning nova damage"),
 (42, 6000, 0.83, "boss four blizzard damage"),
 (43, 300000, 1.0, "Boss four soul charge duration"),
-(44, 6000, 1.0, "Boss four cold slap damage"),
+(44, 8000, 1.0, "Boss four cold slap damage"),
 (45, 6000, 0.83, "Boss four chain lightning"),
 (46, 10000, 1.0, "Boss four lightning nova 2"),
 (47, 100, 1.0, "Boss four lightning shield charges count"),
@@ -107,4 +107,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (79, 1, 0.5, "Boss one add one buffet chance"),
 
 (80, 5000, 1.0, "Boss three slay time timer, in miliseconds"),
-(81, 20000, 1.5, "Boss five worgen melee dmg");
+(81, 20000, 1.5, "Boss five worgen melee dmg"),
+
+(82, 50000, 1.0, "Boss five shadowbreath damage"),
+(83, 10000, 1.0, "Boss five flame damage");
