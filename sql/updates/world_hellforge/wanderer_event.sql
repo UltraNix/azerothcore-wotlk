@@ -14,7 +14,7 @@ UPDATE `gameobject` SET `spawnMask`=15 WHERE  `guid`=17906;
 SET @QUEST_ENTRY := 31000;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
 INSERT INTO `quest_template` VALUES 
-(@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30012,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,2,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'What a Mess','Kill all creatures in first hall','Warriors’ armors ahead of us seems familiar… Is it possible for him to be here…? Nevermind, we have to clear our path through this hall. Return to me once all enemies are dead.
+(@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30012,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,2,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'What a Mess','Kill all creatures in first hall','Warriors\' armors ahead of us seems familiar... Is it possible for him to be here...? Nevermind, we have to clear our path through this hall. Return to me once all enemies are dead.
 ','','It was just a warm up. Time to dive into these catacombs.', 'I smell some foul stench, something around here is certainly still alive..','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Kill all creatures in first hall','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY AND `quest` = @QUEST_ENTRY;
@@ -25,7 +25,7 @@ INSERT INTO `creature_questender` VALUES(@ENTRY, @QUEST_ENTRY);
 
 SET @QUEST_ENTRY := @QUEST_ENTRY + 1;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
-INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Heat','Slain Phyrrocoris','I have never seen something like this… What a heat… It seems like this hallway belongs to this creature, everything around is burnt to ash. We shall burn too, if we’ll just avoid it and pass by. We have to annihilate it.', '', 'Great job! I hope you have some strength left yet, because something tells me that Hellforge is full of surprises.', 'It’s so hot around here...','',250000,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Phyrrocoris slain','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Heat','Slain Phyrrocoris','I have never seen something like this... What a heat... It seems like this hallway belongs to this creature, everything around is burnt to ash. We shall burn too, if we\'ll just avoid it and pass by. We have to annihilate it.', '', 'Great job! I hope you have some strength left yet, because something tells me that Hellforge is full of surprises.', 'It\'s so hot around here...','',250000,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Phyrrocoris slain','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY AND `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_queststarter` VALUES(@ENTRY, @QUEST_ENTRY);
@@ -35,7 +35,7 @@ INSERT INTO `creature_questender` VALUES(@ENTRY, @QUEST_ENTRY);
 
 SET @QUEST_ENTRY := @QUEST_ENTRY + 1;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
-INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,2,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Reunion','Find Jonas Dark','I’ve heard of this place… If I recall it correctly, we should meet my friend somewhere around here. He arrived to Hellforge some time ago. I feel disturbing aura of this place as well… Someone or something… has been summoning ancient creatures here. It’s truly an aberrant place… Finish off remaining enemies and let’s find my companion.', '', 'Thank you..', 'He is somewhere around here, we have to find him!','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Find Jonas Dark','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,2,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Reunion','Find Jonas Dark','I\'ve heard of this place... If I recall it correctly, we should meet my friend somewhere around here. He arrived to Hellforge some time ago. I feel disturbing aura of this place as well... Someone or something... has been summoning ancient creatures here. It\'s truly an aberrant place... Finish off remaining enemies and let\'s find my companion.', '', 'Thank you..', 'He is somewhere around here, we have to find him!','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Find Jonas Dark','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY AND `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_queststarter` VALUES(@ENTRY, @QUEST_ENTRY);
@@ -45,7 +45,7 @@ INSERT INTO `creature_questender` VALUES(@ENTRY + 2, @QUEST_ENTRY);
 
 SET @QUEST_ENTRY := @QUEST_ENTRY + 1;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
-INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Treason','Speak with The Wanderer','Thank you for your help, I thought that they will finally sacrifice me. Deity called Slythe daily offers captives to his god and I was supposed to be next one, so you arrived here just in time… But let’s not talk about that now! The Wanderer, where is he? You have to let him know, that Hephasto betrayed him! It was he, who stole his stone and escaped to Hellforge. I was following him but they caught me in this hall. Hephasto is here for sure, I have seen him several times. It is time to settle the score between us! You can count on my help!', '', 'Hephasto… You’ll regret it...', 'He must know the truth…','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Speak with The Wanderer','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Treason','Speak with The Wanderer','Thank you for your help, I thought that they will finally sacrifice me. Deity called Slythe daily offers captives to his god and I was supposed to be next one, so you arrived here just in time... But let\'s not talk about that now! The Wanderer, where is he? You have to let him know, that Hephasto betrayed him! It was he, who stole his stone and escaped to Hellforge. I was following him but they caught me in this hall. Hephasto is here for sure, I have seen him several times. It is time to settle the score between us! You can count on my help!', '', 'Hephasto... You\'ll regret it...', 'He must know the truth...','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Speak with The Wanderer','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY + 2 AND `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_queststarter` VALUES(@ENTRY + 2, @QUEST_ENTRY);
@@ -55,7 +55,7 @@ INSERT INTO `creature_questender` VALUES(@ENTRY, @QUEST_ENTRY);
 
 SET @QUEST_ENTRY := @QUEST_ENTRY + 1;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
-INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Hephasto the Armorer','Slain Hephasto the Armorer','How dare he… He has been accompanying me for ages, I can’t believe he actually did betray me! Kill this wretch!', '', 'Black Witch? So he works for her… I’ve heard about her...', 'Damned smith, we have to get him!','',250015,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Hephasto the Armorer Slain','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Hephasto the Armorer','Slain Hephasto the Armorer','How dare he... He has been accompanying me for ages, I can\'t believe he actually did betray me! Kill this wretch!', '', 'Black Witch? So he works for her... I\'ve heard about her...', 'Damned smith, we have to get him!','',250015,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Hephasto the Armorer Slain','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY AND `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_queststarter` VALUES(@ENTRY, @QUEST_ENTRY);
@@ -65,10 +65,20 @@ INSERT INTO `creature_questender` VALUES(@ENTRY + 2, @QUEST_ENTRY);
 
 SET @QUEST_ENTRY := @QUEST_ENTRY + 1;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
-INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,13584,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Role Reversal','Aid me and discover the truth.','Black Witch… so Hephasto stole the Wanderer’s Stone for her. Winged vampire is dangerous adversary, but she has been living for thousands of years already and got completely blind… Maybe we can use this against her. If she has the Stone we must succeed, prepare yourself for a savage battle. Before we start… Could you heal me, please? Hephasto was an extremely challenging opponent.','','What have you done, mortals?! You let great evil and terror enter your realm. We have to hurry if we want to avoid unimaginable tragedy!','I’m afraid of Black Witch a bit…','',260003,250023,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Heal Jonas to full health','Truth discovered','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,13584,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Role Reversal','Aid me and discover the truth.','Black Witch... so Hephasto stole the Wanderer\'s Stone for her. Winged vampire is dangerous adversary, but she has been living for thousands of years already and got completely blind... Maybe we can use this against her. If she has the Stone we must succeed, prepare yourself for a savage battle. Before we start... Could you heal me, please? Hephasto was an extremely challenging opponent.','','What have you done, mortals?! You let great evil and terror enter your realm. We have to hurry if we want to avoid unimaginable tragedy!','I\'m afraid of Black Witch a bit...','',260003,250023,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Heal Jonas to full health','Truth discovered','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY + 2 AND `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_queststarter` VALUES(@ENTRY + 2, @QUEST_ENTRY);
+
+DELETE FROM `creature_questender` WHERE `id` = @ENTRY + 6 AND `quest` = @QUEST_ENTRY;
+INSERT INTO `creature_questender` VALUES(@ENTRY + 6, @QUEST_ENTRY);
+
+SET @QUEST_ENTRY := @QUEST_ENTRY + 1;
+DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;  
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,@QUEST_ENTRY + 1,0,1000000,0,0,0,0,0,0,0,0,0,0,72,2,0,0,0,0,49426,2592,0,0,2,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Visit in Hell','Get Message from Tyrael','Have you helped him? I regret I didn\'t arrive in time... The Wanderer is not who he impersonates. He was looking for his Soulstone for years, compassing sequent realms and he finally found it. If he finishes a ritual and fuse himself with Stone, he will become enemy we cannot defeat... We have to hurry up! I set forth immediately looking for gates to hell. Keep in touch, when I find it, I will contact you.', '', 'Good to see you heroes, let\'s face this demon!', 'We must hurry...','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Message from Tyrael','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+
+DELETE FROM `creature_queststarter` WHERE `id` = @ENTRY + 6 AND `quest` = @QUEST_ENTRY;
+INSERT INTO `creature_queststarter` VALUES(@ENTRY + 6, @QUEST_ENTRY);
 
 DELETE FROM `creature_questender` WHERE `id` = @ENTRY + 6 AND `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_questender` VALUES(@ENTRY + 6, @QUEST_ENTRY);
@@ -143,7 +153,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 DELETE FROM `creature_equip_template` WHERE `entry` = @ENTRY + 2;
 INSERT INTO `creature_equip_template` VALUES (@ENTRY + 2, 1, 5194, 0, 0, 0);
 
-UPDATE `quest_template` SET `Flags` = `Flags` | 2 WHERE `Id` BETWEEN 31000 AND 31005;
+UPDATE `quest_template` SET `Flags` = `Flags` | 2 WHERE `Id` BETWEEN 31000 AND 31006;
 
 SET @TEXT_ENTRY := 1110010;
 DELETE FROM `npc_text` WHERE `Id` BETWEEN @TEXT_ENTRY AND @TEXT_ENTRY + 2;
@@ -154,7 +164,7 @@ INSERT INTO `npc_text`(`ID`, `text0_0`) VALUES
 
 SET @QUEST_ENTRY := 30012;
 DELETE FROM `quest_template` WHERE `Id` = @QUEST_ENTRY;
-INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,31000,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Meeting in Hellforge','Meet The Wanderer in Hellforge','I made it, friend! I’ve found my enemies’ hideout! They’ll regret stealing my possession. Get ready for the battle hero, I will be waiting for you in Hellforge. You can get there through the portal under Wyrmrest Temple in Dragonblight.', '', 'Good to see you pal, shall we start?', 'Are you ready to join me?','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Meet The Wanderer in Hellforge','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
+INSERT INTO `quest_template` VALUES (@QUEST_ENTRY,2,80,80,0,4395,62,0,0,0,0,0,0,0,0,0,0,0,0,0,0,@QUEST_ENTRY - 1,0,0,31000,0,1000000,0,0,0,0,0,0,0,0,0,0,72,0,0,0,0,0,49426,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,'Meeting in Hellforge','Meet The Wanderer in Hellforge','I made it, friend! I\'ve found my enemies\' hideout! They\'ll regret stealing my possession. Get ready for the battle hero, I will be waiting for you in Hellforge. You can get there through the portal under Wyrmrest Temple in Dragonblight.', '', 'Good to see you pal, shall we start?', 'Are you ready to join me?','',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'Meet The Wanderer in Hellforge','','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,12340);
 
 DELETE FROM `creature_queststarter` WHERE `quest` = @QUEST_ENTRY;
 INSERT INTO `creature_queststarter` VALUES(200000, @QUEST_ENTRY);
