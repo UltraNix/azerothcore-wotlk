@@ -358,6 +358,10 @@ public:
             if (player && player->GetGroup() && player->GetGroup()->isLFGGroup())
                 if (GameObject* doors = instance->GetGameObject(GoLyceumGUID))
                     HandleGameObject(0, true, doors);
+
+            if (instance->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC && GetBossState(DATA_BOSS_THREE) && player)
+                player->NearTeleportTo(1264.21f, -251.44f, -78.21f, 2.18f);
+
         }
 
         bool SetBossState(uint32 type, EncounterState state) override
