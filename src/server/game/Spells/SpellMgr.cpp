@@ -8012,6 +8012,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 38222: // Mark of corruption
             spellInfo->StackAmount = 5;
             break;
+        case 75332: // Starfire
+            spellInfo->rangeIndex = RANGE_INDEX_300YD;
+            break;
         }
 
         //////////////////////////////////////////

@@ -901,7 +901,6 @@ struct boss_dwarf_boss_four_AI : public BossAI
                 {
                     CustomSpellValues val;
                     val.AddSpellMod(SPELLVALUE_BASE_POINT0, 500000);
-                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 50000);
                     me->CastCustomSpell(SPELL_BOSS_FOUR_VORTEX_ENEMY, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
                     me->RemoveAurasDueToSpell(SPELL_BOSS_FOUR_CLOUD_VISUAL);
                     instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_BOSS_FOUR_CLOUD_VISUAL);
