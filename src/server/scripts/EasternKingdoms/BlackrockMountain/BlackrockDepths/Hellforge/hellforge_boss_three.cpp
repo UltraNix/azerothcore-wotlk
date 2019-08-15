@@ -275,6 +275,12 @@ struct boss_hellforge_boss_three_AI : public BossAI
 
     void JustSummoned(Creature* summon) override
     {
+        if (summon->GetEntry() == NPC_BOSS_THREE_TORNADO && summons.size() >= 40)
+        {
+            summon->DespawnOrUnsummon();
+            return;
+        }
+
         summons.Summon(summon);
         if (me->IsInCombat())
         {
@@ -294,7 +300,7 @@ struct boss_hellforge_boss_three_AI : public BossAI
         _fightTimer = getMSTime();
         BossAI::EnterCombat(who);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->MonsterYell("HA! Got ya, let's play a game, shall we?", LANG_UNIVERSAL, nullptr);
+        me->MonsterYell("HA! Got ya, let's play a game, shall we? I'll ask a question and you have to answer, otherwise a tornado will spawn!", LANG_UNIVERSAL, nullptr);
         events.ScheduleEvent(EVENT_SIMON_SAYS, 5s);
         TeleportPlayersToStartingPositions();
         SpawnInitialTornados();

@@ -1024,7 +1024,7 @@ struct npc_hellforge_boss_two_add_AI : public ScriptedAI
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
     {
-        if (me->HealthBelowPctDamaged(_explodePercentage, damage) && !_exploded)
+        if (me->HealthBelowPctDamaged(20, damage) && !_exploded)
         {
             _exploded = true;
             HandleExplosion();
@@ -1036,29 +1036,26 @@ struct npc_hellforge_boss_two_add_AI : public ScriptedAI
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_LAVA_GOUT_EXPLOSION);
         if (spellInfo)
         {
-            std::for_each(_summons.begin(), _summons.end(), [&](uint64 guid)
+            std::list<Creature*> _temp;
+            me->GetCreatureListWithEntryInGrid(_temp, NPC_ADD_DELAYED_EXPLOSION, 250.f);
+
+            for (auto const& ref : _temp)
             {
-                if (Creature* explosive = ObjectAccessor::GetCreature(*me, guid))
+                std::list<Player*> _lPlayers;
+                float _range = 6.5f;
+                Trinity::AnyPlayerInObjectRangeCheck checker(ref, _range);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(ref, _lPlayers, checker);
+                ref->VisitNearbyWorldObject(_range, searcher);
+
+                std::for_each(_lPlayers.begin(), _lPlayers.end(), [&ref, &spellInfo, this](Player* player)
                 {
-                    if (explosive->GetEntry() == NPC_ADD_DELAYED_EXPLOSION)
-                    {
-                        std::list<Player*> _lPlayers;
-                        float _range = 6.5f;
-                        Trinity::AnyPlayerInObjectRangeCheck checker(explosive, _range);
-                        Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(explosive, _lPlayers, checker);
-                        explosive->VisitNearbyWorldObject(_range, searcher);
+                    Unit::DealDamage(ref, player, _explosionDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, spellInfo, true);
+                });
 
-                        std::for_each(_lPlayers.begin(), _lPlayers.end(), [&explosive, &spellInfo, this](Player* player)
-                        {
-                            Unit::DealDamage(explosive, player, _explosionDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, spellInfo, true);
-                        });
-                    }
-
-                    explosive->RemoveAllAuras();
-                    explosive->CastSpell(explosive, SPELL_LAVA_GOUT_EXPLOSION, true);
-                    explosive->DespawnOrUnsummon(2s);
-                }
-            });
+                ref->RemoveAllAuras();
+                ref->CastSpell(ref, SPELL_LAVA_GOUT_EXPLOSION, true);
+                ref->DespawnOrUnsummon(2s);
+            }
         }
 
     }
