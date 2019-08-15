@@ -43,7 +43,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (31, 60, 1.0, "Boss four first transition percentage"),
 (32, 20, 1.0, "Boss four second transition percentage"),
 (33, 30000, 1.0, "Boss four emp shockwave damage"),
-(34, 31000, 0.90, "Boss four starfire damage"),
+(34, 50000, 0.90, "Boss four starfire damage"),
 (35, 1, 0.95, "Boss four hammer throw health pct"),
 (36, 2, 1.0, "Boss four mind warp player count"),
 (37, 500000, 1.0, "Boss four frost nova damage"),

@@ -365,7 +365,6 @@ struct boss_hellforge_boss_three_AI : public BossAI
                     _currentRequiredEmote = iterator->first;
                     me->MonsterYell(iterator->second.c_str(), 0, nullptr);
                     _emoteMap.erase(iterator);
-                    std::cout << "size of emotemap po erase: " << _emoteMap.size() << std::endl;
                     events.ScheduleEvent(EVENT_SIMON_SLAYS, std::chrono::milliseconds(_slayTimer));
                     ++_round;
                     break;
