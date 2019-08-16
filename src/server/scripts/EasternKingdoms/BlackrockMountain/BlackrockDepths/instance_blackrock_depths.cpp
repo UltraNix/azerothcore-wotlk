@@ -331,16 +331,22 @@ public:
                 case GO_SPECTRAL_CHALICE: GoSpectralChaliceGUID = go->GetGUID(); break;
                     /*hellforge*/
                 case GO_HELLFORGE_GATE_1:
-                case GO_HELLFORGE_GATE_2:
                 {
                     if (_hellforgeGauntletState)
                         go->SetGoState(GO_STATE_ACTIVE);
                     break;
                 }
+                case GO_HELLFORGE_GATE_2:
+                {
+                    go->SetGoState(GO_STATE_READY);
+                    break;
+                }
                 case GO_HELLFORGE_GATE_8:
+                {
                     if (GetBossState(DATA_BOSS_ONE) == DONE)
                         HandleGameObject(0, true, go);
                     break;
+                }
                 default:
                     break;
             }
@@ -359,7 +365,7 @@ public:
                 if (GameObject* doors = instance->GetGameObject(GoLyceumGUID))
                     HandleGameObject(0, true, doors);
 
-            if (instance->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC && GetBossState(DATA_BOSS_THREE) == DONE && player)
+            if (instance->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC && GetBossState(DATA_BOSS_THREE) == DONE && player && player->IsGameMaster())
                 player->NearTeleportTo(1264.21f, -251.44f, -78.21f, 2.18f);
 
         }

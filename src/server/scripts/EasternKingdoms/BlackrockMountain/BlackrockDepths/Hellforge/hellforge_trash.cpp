@@ -91,8 +91,11 @@ struct npc_gauntlet_controller_hellforge_AI : public ScriptedAI
         _eventRunning = false;
         _gargoyleCount = 0;
         _deadGargoyleCount = 0;
-        if (GameObject* door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2))
-            door2->SetGoState(GO_STATE_ACTIVE);
+        if (_instance->GetBossState(DATA_BOSS_FOUR) == DONE)
+        {
+            if (GameObject * door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2))
+                door2->SetGoState(GO_STATE_ACTIVE);
+        }
     }
 
     void JustSummoned(Creature* creature) override

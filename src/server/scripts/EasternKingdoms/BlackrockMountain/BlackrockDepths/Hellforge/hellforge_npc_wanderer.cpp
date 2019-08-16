@@ -821,6 +821,8 @@ public:
                 if (_state == STATE_DWARF_KILLED && id == POINT_GAUNTLET_2)
                 {
                     me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    if (GameObject * door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2))
+                        door2->SetGoState(GO_STATE_ACTIVE);
                 }
             }
         }
@@ -1105,6 +1107,12 @@ public:
                 ChangeState(STATE_FREED, true);
             else
                 ChangeState(STATE_TRAPPED, true);
+
+            if (_state >= STATE_DWARF_KILLED)
+            {
+                if (GameObject * door2 = _instance->GetGameObject(DATA_GO_GAUNTLET_DOORS2))
+                    door2->SetGoState(GO_STATE_ACTIVE);
+            }
         }
 
     private:
