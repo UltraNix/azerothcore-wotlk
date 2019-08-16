@@ -742,6 +742,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
         events.ScheduleEvent(EVENT_BOSS_FOUR_CHECK_ALIVE_PLAYERS, 10s);
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
         me->AddUnitState(UNIT_STATE_UNATTACKABLE);
+        KillCheatingPlayers();
     }
 
     void UpdateAI(uint32 diff) override
@@ -1148,6 +1149,23 @@ struct boss_dwarf_boss_four_AI : public BossAI
     {
         Position pos = player->GetPosition();
         return (pos.GetPositionX() > 1073.69f && pos.GetPositionX() < 1199.39f && pos.GetPositionY() < -112.59f && pos.GetPositionY() > -225.46f);
+    }
+
+    void KillCheatingPlayers()
+    {
+        auto const& pl = instance->instance->GetPlayers();
+        for (auto itr = pl.begin(); itr != pl.end(); ++itr)
+        {
+            Player* player = itr->GetSource();
+
+            if (!player || !player->IsInWorld() || player->IsGameMaster())
+                continue;
+            if (player->GetPositionZ() > -66.f)
+            {
+                me->Kill(me, player);
+            }
+        }
+
     }
 
 private:
