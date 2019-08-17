@@ -365,7 +365,7 @@ public:
                 if (GameObject* doors = instance->GetGameObject(GoLyceumGUID))
                     HandleGameObject(0, true, doors);
 
-            if (instance->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC && GetBossState(DATA_BOSS_THREE) == DONE && player && player->IsGameMaster())
+            if (instance->GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC && GetBossState(DATA_BOSS_THREE) == DONE && player && !player->IsGameMaster())
                 player->NearTeleportTo(1264.21f, -251.44f, -78.21f, 2.18f);
 
         }
