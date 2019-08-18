@@ -563,21 +563,22 @@ void BossAI::_JustDied()
     }
 }
 
-void BossAI::_EnterCombat()
+bool BossAI::_EnterCombat()
 {
-    me->setActive(true);
-    DoZoneInCombat();
     if (instance)
     {
         // bosses do not respawn, check only on enter combat
         if (!instance->CheckRequiredBosses(_bossId))
         {
             HandleRequiredBossFail();
-            return;
+            return false;
         }
 
         instance->SetBossState(_bossId, IN_PROGRESS);
     }
+
+    me->setActive(true);
+    DoZoneInCombat();
 }
 
 void BossAI::HandleRequiredBossFail()

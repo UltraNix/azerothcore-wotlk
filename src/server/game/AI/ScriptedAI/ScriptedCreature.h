@@ -421,7 +421,7 @@ class BossAI : public ScriptedAI
     protected:
         void _DespawnAtEvade(uint32 delayToRespawn = 30, Creature* who = nullptr);
         void _Reset();
-        void _EnterCombat();
+        bool _EnterCombat();
         void _JustDied();
         void _JustReachedHome() { me->setActive(false); }
 
