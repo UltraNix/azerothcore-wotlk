@@ -530,7 +530,7 @@ struct boss_hellforge_five_AI : public BossAI
                 summon->DespawnOrUnsummon(3s);
             });
         }
-        if (attacker->GetEntry() == NPC_WANDENER)
+        if (attacker && attacker->GetEntry() == NPC_WANDENER)
             damage = me->GetMaxHealth();
     }
 
