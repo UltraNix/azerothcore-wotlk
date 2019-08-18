@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -314,8 +314,9 @@ bool SpellChatLink::ValidateName(char* buffer, const char* context)
             {
                 // found the prefix, remove it to perform spellname validation below
                 // -2 = strlen(": ")
-                uint32 spellNameLength = strlen(buffer) - skillLineNameLength - 2;
-                memmove(buffer, buffer + skillLineNameLength + 2, spellNameLength + 1);
+                int32 spellNameLength = strlen(buffer) - skillLineNameLength - 2;
+                if (spellNameLength > -1)
+                    memmove(buffer, buffer + skillLineNameLength + 2, spellNameLength + 1);
                 break;
             }
         }
