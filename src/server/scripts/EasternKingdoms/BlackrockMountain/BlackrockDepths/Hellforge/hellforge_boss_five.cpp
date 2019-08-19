@@ -350,14 +350,10 @@ struct boss_hellforge_five_AI : public BossAI
 
     void EnterCombat(Unit* who) override
     {
-        if (!instance->CheckRequiredBosses(DATA_BOSS_FIVE))
-        {
-            HandleRequiredBossFail();
+        if (!_EnterCombat())
             return;
-        }
 
         _fightTimer = getMSTime();
-        BossAI::EnterCombat(who);
         if (_introDoneOnce)
             events.ScheduleEvent(EVENT_FINISH_INTRO, 1s);
         else if (Unit* champion = instance->GetCreature(DATA_NPC_WANDERER_CHAMPION))
@@ -635,7 +631,9 @@ struct boss_hellforge_five_AI : public BossAI
                 {
                     scheduler.CancelGroup(GROUP_SWARMING_SHADOWS);
 
-                    for (auto && pos : _swarmingOrbsPositions)
+                    std::vector<Position> _orbsPosition = _swarmingOrbsPositions;
+                    Trinity::Containers::RandomResize(_orbsPosition, size_t(2));
+                    for (auto && pos : _orbsPosition)
                     {
                         if (Creature* swarmer = me->SummonCreature(NPC_BOSS_FIVE_SWARM_SPREADER, pos))
                         {
@@ -675,7 +673,7 @@ struct boss_hellforge_five_AI : public BossAI
                             sum->CastSpell(target, SPELL_BOSS_FIVE_SWARMING_SHADOW, true);
                         }
 
-                        func.Repeat(15s);
+                        func.Repeat(20s);
                     });
 
                     me->SetSpeedRate(MOVE_RUN, me->GetSpeedRate(MOVE_RUN) * 2.0f);

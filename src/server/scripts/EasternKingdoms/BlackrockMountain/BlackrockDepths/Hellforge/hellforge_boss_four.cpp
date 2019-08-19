@@ -729,14 +729,10 @@ struct boss_dwarf_boss_four_AI : public BossAI
 
     void EnterCombat(Unit* who) override
     {
-        if (!instance->CheckRequiredBosses(DATA_BOSS_FOUR))
-        {
-            HandleRequiredBossFail();
+        if (!_EnterCombat())
             return;
-        }
 
         _fightTimer = getMSTime();
-        BossAI::EnterCombat(who);
         me->MonsterYell("Jonas? I'll smash your head on my anvil, moron.", LANG_UNIVERSAL, nullptr);
         events.ScheduleEvent(EVENT_BOSS_FOUR_LIGHTNING, 5s);
         events.ScheduleEvent(EVENT_BOSS_FOUR_CHECK_ALIVE_PLAYERS, 10s);

@@ -356,11 +356,8 @@ struct boss_hellforge_boss_two_AI : public BossAI
 
     void EnterCombat(Unit* who) override
     {
-        if (!instance->CheckRequiredBosses(DATA_BOSS_TWO))
-        {
-            HandleRequiredBossFail();
+        if (!_EnterCombat())
             return;
-        }
 
         _fightTimer = getMSTime();
         BossAI::EnterCombat(who);
