@@ -294,8 +294,8 @@ enum DwarfEquipment
     DWARF_EQUIP_MAX
 };
 
-constexpr uint32 MAX_LIGHTNINGS_PER_ROUND{ 40 };
-constexpr uint32 MAX_LIGHTNING_ROUNDS{ 20 };
+constexpr uint32 MAX_LIGHTNINGS_PER_ROUND{ 25 };
+constexpr uint32 MAX_LIGHTNING_ROUNDS{ 15 };
 constexpr size_t MAX_CHAINED_PLAYERS_SIZE{ 2 };
 constexpr uint32 AMOUNT_OF_FROST_ORBS_TO_SPAWN{ 10 };
 Position const _blizzardTargetSpawnPos{ 1114.286f, -134.715f, -74.359f };
@@ -311,7 +311,7 @@ struct boss_dwarf_boss_four_AI : public BossAI
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_DISPEL, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_STEAL_BENEFICIAL_BUFF, true);
         //! base validator checks for unit state casting
-        //! but we want to keep casting our scheduler events even while casting, so clear it
+        //! but we want to keep executing our scheduler events even while casting, so clear it
         scheduler.ClearValidator();
     }
 
