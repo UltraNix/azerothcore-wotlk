@@ -33,9 +33,9 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 
 -- boss three
 (25, 3499000, 1.0, "Simon max health"),
-(26, 71000, 0.84, "Simon melee damage"),
-(27, 15, 1.0, "Simon petrified bark charges"),
-(28, 25000, 0.85, "Simon arctic winds"),
+(26, 65000, 0.84, "Simon melee damage"),
+(27, 10, 1.0, "Simon petrified bark charges"),
+(28, 15000, 0.85, "Simon arctic winds"),
 
 -- boss four
 (29, 25123500, 1.0, "Boss four max health"),
@@ -97,7 +97,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (71, 320000, 1.0, "risen madman max health"),
 (72, 30000, 0.66, "risen madman melee damage"),
 
-(73, 8000, 1.0, "Simon tornado damage"),
+(73, 5000, 1.0, "Simon tornado damage"),
 (74, 12000, 1.0, "Simon sand trap damage"),
 
 (75, 10, 1.0, "boss one add count first wave"),
@@ -106,7 +106,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (78, 7350000, 1, "Frost Worgen health"),
 (79, 1, 0.5, "Boss one add one buffet chance"),
 
-(80, 5000, 1.0, "Boss three slay time timer, in miliseconds"),
+(80, 7500, 1.0, "Boss three slay time timer, in miliseconds"),
 (81, 20000, 1.5, "Boss five worgen melee dmg"),
 
 (82, 50000, 1.0, "Boss five shadowbreath damage"),
