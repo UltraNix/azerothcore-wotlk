@@ -39,7 +39,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 
 -- boss four
 (29, 18123500, 1.0, "Boss four max health"),
-(30, 92000, 0.77, "Boss four melee damage"),
+(30, 115000, 0.77, "Boss four melee damage"),
 (31, 60, 1.0, "Boss four first transition percentage"),
 (32, 20, 1.0, "Boss four second transition percentage"),
 (33, 30000, 1.0, "Boss four emp shockwave damage"),
