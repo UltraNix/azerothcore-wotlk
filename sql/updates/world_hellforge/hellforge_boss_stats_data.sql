@@ -38,7 +38,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (28, 15000, 0.85, "Simon arctic winds"),
 
 -- boss four
-(29, 20123500, 1.0, "Boss four max health"),
+(29, 18123500, 1.0, "Boss four max health"),
 (30, 92000, 0.77, "Boss four melee damage"),
 (31, 60, 1.0, "Boss four first transition percentage"),
 (32, 20, 1.0, "Boss four second transition percentage"),
