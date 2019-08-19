@@ -50,7 +50,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (38, 3, 1.0, "Boss four reflect charges amount"),
 (39, 150, 1.0, "Boss four cleave weapon pct damage"),
 (40, 500000, 1.0, "Boss four arcane explosion damage"),
-(41, 30000, 1.0, "Boss four lightning nova damage"),
+(41, 20000, 1.0, "Boss four lightning nova damage"),
 (42, 6000, 0.83, "boss four blizzard damage"),
 (43, 300000, 1.0, "Boss four soul charge duration"),
 (44, 5000, 1.0, "Boss four cold slap damage"),
