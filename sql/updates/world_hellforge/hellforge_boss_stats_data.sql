@@ -38,7 +38,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (28, 15000, 0.85, "Simon arctic winds"),
 
 -- boss four
-(29, 25123500, 1.0, "Boss four max health"),
+(29, 20123500, 1.0, "Boss four max health"),
 (30, 92000, 0.77, "Boss four melee damage"),
 (31, 60, 1.0, "Boss four first transition percentage"),
 (32, 20, 1.0, "Boss four second transition percentage"),
@@ -54,7 +54,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (42, 6000, 0.83, "boss four blizzard damage"),
 (43, 300000, 1.0, "Boss four soul charge duration"),
 (44, 5000, 1.0, "Boss four cold slap damage"),
-(45, 18000, 0.83, "Boss four chain lightning"),
+(45, 12000, 0.83, "Boss four chain lightning"),
 (46, 10000, 1.0, "Boss four lightning nova 2"),
 (47, 100, 1.0, "Boss four lightning shield charges count"),
 
