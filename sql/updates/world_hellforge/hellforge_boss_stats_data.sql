@@ -110,4 +110,7 @@ INSERT INTO `hellforge_boss_stats` (`StatId`, `StatValue`, `StatVariance`, `Stat
 (81, 20000, 1.5, "Boss five worgen melee dmg"),
 
 (82, 50000, 1.0, "Boss five shadowbreath damage"),
-(83, 5000, 1.0, "Boss five flame damage");
+(83, 5000, 1.0, "Boss five flame damage"),
+(84, 5, 1.0, "boss five shadow word death heal ratio"),
+(85, 15, 1.0, "Boss four lightning rounds"),
+(86, 25, 1.0, "boss four lightnings per round");

@@ -108,7 +108,9 @@ enum BossFourStats
     BOSS_FOUR_STAT_ID_COLD_SLAP_DAMAGE      = 44,
     BOSS_FOUR_STAT_ID_CHAIN_LIGHTNING_DMG   = 45,
     BOSS_FOUR_STAT_ID_LIGHTNING_NOVA_DMG_2  = 46,
-    BOSS_FOUR_STAT_ID_LIGHTNING_SHIELD_CNT  = 47
+    BOSS_FOUR_STAT_ID_LIGHTNING_SHIELD_CNT  = 47,
+    BOSS_FOUR_STAT_ID_LIGHTNING_ROUNDS      = 85,
+    BOSS_FOUR_STAT_ID_LIGHTNING_PER_ROUND   = 86
 };
 
 constexpr uint32 PROBLEMATIC_SPOTS_POS_SIZE{ 23 };
@@ -294,8 +296,6 @@ enum DwarfEquipment
     DWARF_EQUIP_MAX
 };
 
-constexpr uint32 MAX_LIGHTNINGS_PER_ROUND{ 25 };
-constexpr uint32 MAX_LIGHTNING_ROUNDS{ 15 };
 constexpr size_t MAX_CHAINED_PLAYERS_SIZE{ 2 };
 constexpr uint32 AMOUNT_OF_FROST_ORBS_TO_SPAWN{ 10 };
 Position const _blizzardTargetSpawnPos{ 1114.286f, -134.715f, -74.359f };
@@ -348,8 +348,8 @@ struct boss_dwarf_boss_four_AI : public BossAI
             BOSS_FOUR_STAT_ID_STARFIRE_DAMAGE, BOSS_FOUR_STAT_ID_HAMMER_THROW_PCT, BOSS_FOUR_STAT_ID_MIND_WARP_COUNT,
             BOSS_FOUR_STAT_ID_FROST_NOVA_DAMAGE, BOSS_FOUR_STAT_ID_REFLECT_CHARGES_COUNT, BOSS_FOUR_STAT_ID_CLEAVE_DAMAGE,
             BOSS_FOUR_STAT_ID_ARCANE_EXPLOSION_DMG, BOSS_FOUR_STAT_ID_SOUL_CHARGE_DURATION, BOSS_FOUR_STAT_ID_COLD_SLAP_DAMAGE,
-            BOSS_FOUR_STAT_ID_CHAIN_LIGHTNING_DMG, BOSS_FOUR_STAT_ID_LIGHTNING_NOVA_DMG_2, BOSS_FOUR_STAT_ID_LIGHTNING_SHIELD_CNT });
-
+            BOSS_FOUR_STAT_ID_CHAIN_LIGHTNING_DMG, BOSS_FOUR_STAT_ID_LIGHTNING_NOVA_DMG_2, BOSS_FOUR_STAT_ID_LIGHTNING_SHIELD_CNT,
+            BOSS_FOUR_STAT_ID_LIGHTNING_ROUNDS, BOSS_FOUR_STAT_ID_LIGHTNING_PER_ROUND });
         for (auto const& ref : _stats)
         {
             switch (ref.first)
@@ -444,6 +444,12 @@ struct boss_dwarf_boss_four_AI : public BossAI
                     _lightningShieldChargesCount = ref.second.StatValue;
                     break;
                 }
+                case BOSS_FOUR_STAT_ID_LIGHTNING_ROUNDS:
+                    _lightningRounds = ref.second.StatValue;
+                    break;
+                case BOSS_FOUR_STAT_ID_LIGHTNING_PER_ROUND:
+                    _lightningPerRound = ref.second.StatValue;
+                    break;
                 default:
                     break;
             }
@@ -762,10 +768,10 @@ struct boss_dwarf_boss_four_AI : public BossAI
                     for (auto const& pos : _problematicSpawnPos)
                         me->SummonCreature(NPC_BOSS_FOUR_LIGHTNING_TARGET, pos);
 
-                    for (uint32 i = 0; i < MAX_LIGHTNINGS_PER_ROUND; ++i)
+                    for (uint32 i = 0; i < _lightningPerRound; ++i)
                         me->SummonCreature(NPC_BOSS_FOUR_LIGHTNING_TARGET, Trinity::Containers::SelectRandomContainerElement(_lightningSpawnPos));
 
-                    if (++_lightningRoundCounter >= MAX_LIGHTNING_ROUNDS)
+                    if (++_lightningRoundCounter >= _lightningRounds)
                     {
                         me->AttackStop();
                         me->GetMotionMaster()->MovePath(me->GetEntry() * 10, false);
@@ -1192,6 +1198,8 @@ private:
     uint32 _lightningShieldChargesCount;
     BossFourPhase _currentPhase;
     uint32 _fightTimer;
+    uint32 _lightningRounds;
+    uint32 _lightningPerRound;
 };
 
 struct npc_boss_four_lightning_target_AI : public ScriptedAI

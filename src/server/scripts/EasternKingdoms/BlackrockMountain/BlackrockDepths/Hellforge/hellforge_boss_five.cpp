@@ -129,7 +129,8 @@ enum BossFiveStatIDs
     BOSS_FIVE_ADD_WORGEN_HEALTH             = 78,
     BOSS_FIVE_ADD_WORGEN_MELEE_DMG          = 81,
     BOSS_FIVE_STAT_ID_SHADOW_BREATH         = 82,
-    BOSS_FIVE_STAT_ID_FLAMES                = 83
+    BOSS_FIVE_STAT_ID_FLAMES                = 83,
+    BOSS_FIVE_STAT_ID_SHADOW_WORD_HEAL_RAT  = 84
 };
 
 Position const _wandererPosition{ 1025.720f, -228.156f, -61.860f, 3.90f };
@@ -234,7 +235,7 @@ struct boss_hellforge_five_AI : public BossAI
     void LoadBossStats()
     {
         HellforgeStats _stats = sWorldCache.GetStatValues({ BOSS_FIVE_STAT_ID_HEALTH, BOSS_FIVE_STAT_ID_MELEE_DAMAGE, BOSS_FIVE_STAT_ID_SHADOW_WORD,
-            BOSS_FIVE_STAT_ID_SONIC_SCREECH, BOSS_FIVE_STAT_ID_SHADOW_BOLT, BOSS_FIVE_STAT_ID_SHADOW_BREATH });
+            BOSS_FIVE_STAT_ID_SONIC_SCREECH, BOSS_FIVE_STAT_ID_SHADOW_BOLT, BOSS_FIVE_STAT_ID_SHADOW_BREATH, BOSS_FIVE_STAT_ID_SHADOW_WORD_HEAL_RAT });
 
         for (auto const& ref : _stats)
         {
@@ -275,6 +276,13 @@ struct boss_hellforge_five_AI : public BossAI
                     _shadowbreathDamage = ref.second.StatValue;
                     break;
                 }
+                case BOSS_FIVE_STAT_ID_SHADOW_WORD_HEAL_RAT:
+                {
+                    _shadowWordHealRatio = ref.second.StatValue;
+                    break;
+                }
+                default:
+                    break;
             }
         }
     }
@@ -611,7 +619,7 @@ struct boss_hellforge_five_AI : public BossAI
                         val.AddSpellMod(SPELLVALUE_BASE_POINT1, 0);
                         me->CastCustomSpell(SPELL_BOSS_FIVE_SHADOW_WORD, val, target, TRIGGERED_FULL_MASK);
 
-                        auto _damageToHeal = std::min(me->GetMaxHealth(), uint32(_damageToDeal * 5));
+                        auto _damageToHeal = std::min(me->GetMaxHealth(), uint32(_damageToDeal * _shadowWordHealRatio));
                         val.AddSpellMod(SPELLVALUE_BASE_POINT0, _damageToHeal);
                         me->CastCustomSpell(SPELL_BOSS_FIVE_BLOODTHRIST, val, me, TRIGGERED_FULL_MASK);
 
@@ -841,6 +849,7 @@ private:
     uint32 _shadowBoltDamage;
     uint32 _fightTimer;
     uint32 _shadowbreathDamage;
+    uint32 _shadowWordHealRatio;
 };
 
 //struct npc_boss_five_flame_spreader_AI : public ScriptedAI
