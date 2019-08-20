@@ -579,6 +579,7 @@ bool BossAI::_EnterCombat()
 
     me->setActive(true);
     DoZoneInCombat();
+    return true;
 }
 
 void BossAI::HandleRequiredBossFail()
