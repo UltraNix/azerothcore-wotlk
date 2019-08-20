@@ -1570,7 +1570,7 @@ class spell_dk_death_grip : public SpellScriptLoader
                 if (caster->IsPlayer() && caster->IsInWorld())
                 {
                     float ground_z = caster->GetMap()->GetHeight(caster->GetPhaseMask(), caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), true);
-                    if ((ground_z > INVALID_HEIGHT && (ground_z + 4.0f) < caster->GetPositionZ()))
+                    if (!caster->IsInWater() && (ground_z > INVALID_HEIGHT && (ground_z + 4.0f) < caster->GetPositionZ()))
                         return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 }
 
