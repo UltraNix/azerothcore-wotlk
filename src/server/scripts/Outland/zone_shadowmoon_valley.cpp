@@ -831,57 +831,57 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         npc_earthmender_wildaAI* earthmender_wildaAI = new npc_earthmender_wildaAI(creature);
-        earthmender_wildaAI->AddWaypoint(0, -2648.3, 1355.91, 35.2048);
-        earthmender_wildaAI->AddWaypoint(1, -2648.3, 1355.91, 35.2048);
-        earthmender_wildaAI->AddWaypoint(2, -2668.9, 1347.68, 34.4454);
-        earthmender_wildaAI->AddWaypoint(3, -2687.85, 1338.78, 34.4454);
-        earthmender_wildaAI->AddWaypoint(4, -2704.67, 1330.64, 34.4454);
-        earthmender_wildaAI->AddWaypoint(5, -2726.72, 1319.96, 33.3934);
-        earthmender_wildaAI->AddWaypoint(6, -2745.86, 1311.33, 33.6216);
-        earthmender_wildaAI->AddWaypoint(7, -2761.46, 1297.27, 33.2179);
-        earthmender_wildaAI->AddWaypoint(8, -2753.54, 1277.31, 33.4097);
-        earthmender_wildaAI->AddWaypoint(9, -2737.02, 1253.25, 33.4268);
-        earthmender_wildaAI->AddWaypoint(10, -2723.61, 1237.14, 33.4294, 10000); // FREE ELEMENTALS
-        earthmender_wildaAI->AddWaypoint(11, -2733.69, 1251.44, 33.7245);
-        earthmender_wildaAI->AddWaypoint(12, -2753.47, 1278.85, 33.3997);
-        earthmender_wildaAI->AddWaypoint(13, -2762.9, 1293.56, 33.209);
-        earthmender_wildaAI->AddWaypoint(14, -2737.7, 1314.38, 33.4618);
-        earthmender_wildaAI->AddWaypoint(15, -2721.36, 1323.13, 33.847);
-        earthmender_wildaAI->AddWaypoint(16, -2708.74, 1307.83, 33.0673);
-        earthmender_wildaAI->AddWaypoint(17, -2697.79, 1291.25, 33.9619);
-        earthmender_wildaAI->AddWaypoint(18, -2677.01, 1283.67, 30.2953);
-        earthmender_wildaAI->AddWaypoint(19, -2661.24, 1279.51, 26.5944);
-        earthmender_wildaAI->AddWaypoint(20, -2644.76, 1264.76, 23.5552, 3000); // SAY PROGRESS
-        earthmender_wildaAI->AddWaypoint(21, -2630.88, 1250.65, 17.73);
-        earthmender_wildaAI->AddWaypoint(22, -2638.11, 1237.29, 13.4125);
-        earthmender_wildaAI->AddWaypoint(23, -2648.96, 1214.01, 7.92752);
-        earthmender_wildaAI->AddWaypoint(24, -2660.74, 1199.59, 5.47501);
-        earthmender_wildaAI->AddWaypoint(25, -2677.96, 1179.13, 4.84202);
-        earthmender_wildaAI->AddWaypoint(26, -2693.49, 1166.91, 5.37836);
-        earthmender_wildaAI->AddWaypoint(27, -2706.32, 1153.42, 4.42537);
-        earthmender_wildaAI->AddWaypoint(28, -2715.87, 1141.6, 1.452);
-        earthmender_wildaAI->AddWaypoint(29, -2735.48, 1138.9, 3.05414);
-        earthmender_wildaAI->AddWaypoint(30, -2753.81, 1146.88, 5.83016);
-        earthmender_wildaAI->AddWaypoint(31, -2771.29, 1162.3, 6.46434);
-        earthmender_wildaAI->AddWaypoint(32, -2782.89, 1173.76, 6.0197);
-        earthmender_wildaAI->AddWaypoint(33, -2795, 1189.45, 5.22805);
-        earthmender_wildaAI->AddWaypoint(34, -2803.13, 1200.84, 6.33987);
-        earthmender_wildaAI->AddWaypoint(35, -2813.41, 1216.36, 6.26596);
-        earthmender_wildaAI->AddWaypoint(36, -2826.56, 1231.18, 6.17901);
-        earthmender_wildaAI->AddWaypoint(37, -2839.15, 1243.21, 6.48784);
-        earthmender_wildaAI->AddWaypoint(38, -2850.29, 1253.52, 7.05257);
-        earthmender_wildaAI->AddWaypoint(39, -2852.3, 1266.18, 6.88055);
-        earthmender_wildaAI->AddWaypoint(40, -2845.29, 1276.82, 6.96451);
-        earthmender_wildaAI->AddWaypoint(41, -2843.1, 1283.38, 7.68115);
-        earthmender_wildaAI->AddWaypoint(42, -2843.73, 1291.55, 6.5211);
-        earthmender_wildaAI->AddWaypoint(43, -2856.87, 1296.37, 6.80744);
-        earthmender_wildaAI->AddWaypoint(44, -2874.1, 1303.6, 6.66064, 5000); // END
+        earthmender_wildaAI->AddWaypoint(0, -2648.3f, 1355.91f, 35.2048f);
+        earthmender_wildaAI->AddWaypoint(1, -2648.3f, 1355.91f, 35.2048f);
+        earthmender_wildaAI->AddWaypoint(2, -2668.9f, 1347.68f, 34.4454f);
+        earthmender_wildaAI->AddWaypoint(3, -2687.85f, 1338.78f, 34.4454f);
+        earthmender_wildaAI->AddWaypoint(4, -2704.67f, 1330.64f, 34.4454f);
+        earthmender_wildaAI->AddWaypoint(5, -2726.72f, 1319.96f, 33.3934f);
+        earthmender_wildaAI->AddWaypoint(6, -2745.86f, 1311.33f, 33.6216f);
+        earthmender_wildaAI->AddWaypoint(7, -2761.46f, 1297.27f, 33.2179f);
+        earthmender_wildaAI->AddWaypoint(8, -2753.54f, 1277.31f, 33.4097f);
+        earthmender_wildaAI->AddWaypoint(9, -2737.02f, 1253.25f, 33.4268f);
+        earthmender_wildaAI->AddWaypoint(10, -2723.61f, 1237.14f, 33.4294f, 10000); // FREE ELEMENTALS
+        earthmender_wildaAI->AddWaypoint(11, -2733.69f, 1251.44f, 33.7245f);
+        earthmender_wildaAI->AddWaypoint(12, -2753.47f, 1278.85f, 33.3997f);
+        earthmender_wildaAI->AddWaypoint(13, -2762.9f, 1293.56f, 33.209f);
+        earthmender_wildaAI->AddWaypoint(14, -2737.7f, 1314.38f, 33.4618f);
+        earthmender_wildaAI->AddWaypoint(15, -2721.36f, 1323.13f, 33.847f);
+        earthmender_wildaAI->AddWaypoint(16, -2708.74f, 1307.83f, 33.0673f);
+        earthmender_wildaAI->AddWaypoint(17, -2697.79f, 1291.25f, 33.9619f);
+        earthmender_wildaAI->AddWaypoint(18, -2677.01f, 1283.67f, 30.2953f);
+        earthmender_wildaAI->AddWaypoint(19, -2661.24f, 1279.51f, 26.5944f);
+        earthmender_wildaAI->AddWaypoint(20, -2644.76f, 1264.76f, 23.5552f, 3000); // SAY PROGRESS
+        earthmender_wildaAI->AddWaypoint(21, -2630.88f, 1250.65f, 17.73f);
+        earthmender_wildaAI->AddWaypoint(22, -2638.11f, 1237.29f, 13.4125f);
+        earthmender_wildaAI->AddWaypoint(23, -2648.96f, 1214.01f, 7.92752f);
+        earthmender_wildaAI->AddWaypoint(24, -2660.74f, 1199.59f, 5.47501f);
+        earthmender_wildaAI->AddWaypoint(25, -2677.96f, 1179.13f, 4.84202f);
+        earthmender_wildaAI->AddWaypoint(26, -2693.49f, 1166.91f, 5.37836f);
+        earthmender_wildaAI->AddWaypoint(27, -2706.32f, 1153.42f, 4.42537f);
+        earthmender_wildaAI->AddWaypoint(28, -2715.87f, 1141.6f, 1.452f);
+        earthmender_wildaAI->AddWaypoint(29, -2735.48f, 1138.9f, 3.05414f);
+        earthmender_wildaAI->AddWaypoint(30, -2753.81f, 1146.88f, 5.83016f);
+        earthmender_wildaAI->AddWaypoint(31, -2771.29f, 1162.3f, 6.46434f);
+        earthmender_wildaAI->AddWaypoint(32, -2782.89f, 1173.76f, 6.0197f);
+        earthmender_wildaAI->AddWaypoint(33, -2795.0f, 1189.45f, 5.22805f);
+        earthmender_wildaAI->AddWaypoint(34, -2803.13f, 1200.84f, 6.33987f);
+        earthmender_wildaAI->AddWaypoint(35, -2813.41f, 1216.36f, 6.26596f);
+        earthmender_wildaAI->AddWaypoint(36, -2826.56f, 1231.18f, 6.17901f);
+        earthmender_wildaAI->AddWaypoint(37, -2839.15f, 1243.21f, 6.48784f);
+        earthmender_wildaAI->AddWaypoint(38, -2850.29f, 1253.52f, 7.05257f);
+        earthmender_wildaAI->AddWaypoint(39, -2852.3f, 1266.18f, 6.88055f);
+        earthmender_wildaAI->AddWaypoint(40, -2845.29f, 1276.82f, 6.96451f);
+        earthmender_wildaAI->AddWaypoint(41, -2843.1f, 1283.38f, 7.68115f);
+        earthmender_wildaAI->AddWaypoint(42, -2843.73f, 1291.55f, 6.5211f);
+        earthmender_wildaAI->AddWaypoint(43, -2856.87f, 1296.37f, 6.80744f);
+        earthmender_wildaAI->AddWaypoint(44, -2874.1f, 1303.6f, 6.66064f, 5000); // END
 
         return new npc_earthmender_wildaAI(creature);
     }
     struct npc_earthmender_wildaAI : public npc_escortAI
     {
-        npc_earthmender_wildaAI(Creature* creature) : npc_escortAI(creature) 
+        npc_earthmender_wildaAI(Creature* creature) : npc_escortAI(creature)
         {
             me->SetDisableGravity(true);
             me->SetHover(true);
