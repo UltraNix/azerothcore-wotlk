@@ -441,7 +441,8 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
         pos.m_positionX += std::cos(angle) * step;
         pos.m_positionY += std::sin(angle) * step;
         pos.m_positionZ += 2.5f;
-        _owner->UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+        if (!_owner->GetMap()->IsInWater(pos.m_positionX, pos.m_positionY, pos.m_positionZ))
+            _owner->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
         if (!_owner->IsWithinLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ) || IsUnderTextures(_owner, pos))
             break;
 
