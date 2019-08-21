@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -113,7 +113,7 @@ public:
     {
         uint64 ownerGUID;
         EventMap events;
-        npc_pet_gen_soul_trader_beaconAI(Creature *c) : ScriptedAI(c) 
+        npc_pet_gen_soul_trader_beaconAI(Creature *c) : ScriptedAI(c)
         {
             events.Reset();
             events.ScheduleEvent(EVENT_INITIAL_TALK, 0);
@@ -175,7 +175,7 @@ enum eArgentPony
     SPELL_AURA_SHOP_S                = 67377,
     SPELL_AURA_BANK_S                = 67368,
     SPELL_AURA_TIRED_S                = 67401,
-    
+
     SPELL_AURA_BANK_G                = 68849,
     SPELL_AURA_POSTMAN_G            = 68850,
     SPELL_AURA_SHOP_G                = 68851,
@@ -225,7 +225,7 @@ public:
 
     struct npc_pet_gen_argent_pony_bridleAI : public ScriptedAI
     {
-        npc_pet_gen_argent_pony_bridleAI(Creature *c) : ScriptedAI(c) 
+        npc_pet_gen_argent_pony_bridleAI(Creature *c) : ScriptedAI(c)
         {
             _state = ARGENT_PONY_STATE_NONE;
             _init = false;
@@ -326,7 +326,7 @@ public:
         {
             if (param == 0)
                 return _state;
-            
+
             return _banners[param];
         }
 
@@ -342,7 +342,7 @@ public:
 
             _state = param;
         }
-        
+
         private:
             bool _init;
             uint8 _state;
@@ -372,7 +372,7 @@ public:
         for (uint8 i = RACE_HUMAN; i < MAX_RACES; ++i)
             if (creature->AI()->GetData(i) == uint32(true))
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, argentBanners[i].text, GOSSIP_SENDER_MAIN, argentBanners[i].spell);
-        
+
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         return true;
     }
@@ -447,7 +447,7 @@ public:
 
     struct npc_pet_gen_target_following_bombAI : public NullCreatureAI
     {
-        npc_pet_gen_target_following_bombAI(Creature *c) : NullCreatureAI(c) 
+        npc_pet_gen_target_following_bombAI(Creature *c) : NullCreatureAI(c)
         {
             checkTimer = 0;
             bombSpellId = 0;
@@ -502,7 +502,7 @@ public:
 
     struct npc_pet_gen_gnomish_flame_turretAI : public ScriptedAI
     {
-        npc_pet_gen_gnomish_flame_turretAI(Creature *c) : ScriptedAI(c) 
+        npc_pet_gen_gnomish_flame_turretAI(Creature *c) : ScriptedAI(c)
         {
             checkTimer = 0;
         }
@@ -542,64 +542,116 @@ public:
     }
 };
 
-class npc_pet_gen_valkyr_guardian : public CreatureScript
+enum Valkyr
 {
-public:
-    npc_pet_gen_valkyr_guardian() : CreatureScript("npc_pet_gen_valkyr_guardian") { }
+    EVENT_FIND_TARGET = 1
+};
 
-    struct npc_pet_gen_valkyr_guardianAI : public ScriptedAI
+struct npc_pet_gen_valkyr_guardianAI : public ScriptedAI
+{
+    npc_pet_gen_valkyr_guardianAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void IsSummonedBy(Unit* summoner) override
     {
-        npc_pet_gen_valkyr_guardianAI(Creature *c) : ScriptedAI(c)
-        {
-            me->SetReactState(REACT_DEFENSIVE);
-            me->SetDisableGravity(true);
-            me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
-            targetCheck = 0;
-        }
+        if (!summoner)
+            return;
 
-        uint32 targetCheck;
-
-        void InitializeAI()
-        {
-            if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
-                if (Unit* target = owner->GetSelectedUnit())
-                    if (!owner->IsFriendlyTo(target))
-                        AttackStart(target);
-        }
-
-        void OwnerAttacked(Unit* target)
-        {
-            if (!target || (me->GetVictim() && me->GetVictim()->IsAlive() && !me->GetVictim()->HasBreakableByDamageCrowdControlAura()))
-                return;
-
-            AttackStart(target);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-            {
-                targetCheck += diff;
-                if (targetCheck > 1000)
-                {
-                    targetCheck = 0;
-                    if (Unit* owner = me->GetCharmerOrOwner())
-                        if (Unit* ownerVictim = owner->GetVictim())
-                            if (!ownerVictim->HasBreakableByDamageCrowdControlAura())
-                                AttackStart(ownerVictim);
-                }
-                return;
-            }
-
-            if (me->isAttackReady() && !me->GetVictim()->HasBreakableByDamageCrowdControlAura())
-                DoSpellAttackIfReady(me->GetCreatureTemplate()->spells[0]);
-        }
-    };
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_pet_gen_valkyr_guardianAI (pCreature);
+        _targetGUID = 0;
+        _smiteSpellId = me->GetCreatureTemplate()->spells[0];
+        me->SetDefensive();
+        me->SetDisableGravity(true);
+        me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
+        _events.ScheduleEvent(EVENT_FIND_TARGET, 0.1s);
     }
+
+    Unit* FindTarget() const
+    {
+        Unit* newTarget = nullptr;
+        float max_range = 0.0f;
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_smiteSpellId))
+            max_range = spellInfo->RangeEntry->maxRangeHostile;
+
+        if (max_range > 0.0f)
+        {
+            auto IsViableTarget = [this, max_range](Unit* target, Unit* owner) -> bool
+            {
+                if (!target)
+                    return false;
+
+                if (!owner->IsInCombat() || !target->IsInCombat())
+                    return false;
+
+                if (!target->isTargetableForAttack(false, me))
+                    return false;
+
+                if (!target->IsValidAttackTarget(owner))
+                    return false;
+
+                if (!me->IsWithinDistInMap(target, max_range))
+                    return false;
+
+                if (target->IsFriendlyTo(owner))
+                    return false;
+
+                if (target->HasBreakableByDamageCrowdControlAura())
+                    return false;
+
+                return true;
+            };
+
+            if (Unit* owner = me->GetSummoner())
+            {
+                Unit* currentOwnerTarget = ObjectAccessor::GetUnit(*me, owner->GetTarget());
+                if (IsViableTarget(currentOwnerTarget, owner))
+                    newTarget = currentOwnerTarget;
+                else
+                {
+                    Unit* target = nullptr;
+                    Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck u_check(me, me, owner, max_range);
+                    Trinity::UnitLastSearcher<Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck> checker(me, target, u_check);
+                    me->VisitNearbyObject(max_range, checker);
+                    newTarget = target;
+                }
+            }
+        }
+
+        return newTarget;
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (_events.Empty())
+        {
+            _events.ScheduleEvent(EVENT_FIND_TARGET, 0s);
+            return;
+        }
+
+        _events.Update(diff);
+
+        switch (_events.ExecuteEvent())
+        {
+            case EVENT_FIND_TARGET:
+                if (Unit* target = FindTarget())
+                    if (target != ObjectAccessor::GetUnit(*me, me->GetTarget()))
+                        AttackStart(target);
+                _events.Repeat(1s);
+                break;
+            default:
+                break;
+        }
+
+        if (!UpdateVictim())
+            return;
+
+        if (Unit* target = ObjectAccessor::GetUnit(*me, me->GetTarget()))
+            if (me->isAttackReady() && !target->HasBreakableByDamageCrowdControlAura())
+                DoSpellAttackIfReady(_smiteSpellId);
+    }
+
+    private:
+        uint32 _smiteSpellId;
+        EventMap _events;
+        uint64 _targetGUID;
 };
 
 class spell_pet_gen_valkyr_guardian_smite : public SpellScriptLoader
@@ -980,7 +1032,7 @@ void AddSC_generic_pet_scripts()
     new npc_pet_gen_argent_pony_bridle();
     new npc_pet_gen_target_following_bomb();
     new npc_pet_gen_gnomish_flame_turret();
-    new npc_pet_gen_valkyr_guardian();
+    new CreatureAILoader<npc_pet_gen_valkyr_guardianAI>("npc_pet_gen_valkyr_guardian");
     new spell_pet_gen_valkyr_guardian_smite();
     new npc_pet_gen_imp_in_a_bottle();
     new npc_pet_gen_wind_rider_cub();
