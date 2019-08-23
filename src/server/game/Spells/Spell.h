@@ -205,6 +205,8 @@ struct SpellValue
     uint8     AuraStackAmount;
     bool      ForcedCritResult;
     bool      TargetPlayersOnly; // only for AoE casts
+    int32     AuraDuration;
+    float     SpellRange;
 };
 
 enum SpellState

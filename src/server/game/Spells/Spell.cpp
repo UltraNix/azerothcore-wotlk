@@ -554,6 +554,8 @@ SpellValue::SpellValue(SpellInfo const* proto)
     AuraStackAmount = 1;
     ForcedCritResult = false;
     TargetPlayersOnly = false;
+    AuraDuration = 0;
+    SpellRange = -1.f;
 }
 
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
@@ -3076,8 +3078,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         if (m_originalCaster)
         {
             bool refresh = false;
-            m_spellAura = Aura::TryRefreshStackOrCreate(aurSpellInfo, effectMask, unit,    m_originalCaster,
-                (aurSpellInfo == m_spellInfo)? &m_spellValue->EffectBasePoints[0] : &basePoints[0], m_CastItem, 0, &refresh, !(_triggeredCastFlags & TRIGGERED_NO_PERIODIC_RESET));
+            m_spellAura = Aura::TryRefreshStackOrCreate(aurSpellInfo, effectMask, unit, m_originalCaster,
+                (aurSpellInfo == m_spellInfo) ? &m_spellValue->EffectBasePoints[0] : &basePoints[0], m_CastItem, 0, &refresh, !(_triggeredCastFlags & TRIGGERED_NO_PERIODIC_RESET));
 
             // xinef: if aura was not refreshed, add proc ex
             if (!refresh)
@@ -3097,6 +3099,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 // Now Reduce spell duration using data received at spell hit
                 int32 duration = m_spellAura->GetMaxDuration();
                 int32 limitduration = GetDiminishingReturnsLimitDuration(m_diminishGroup, aurSpellInfo);
+                if (int32 _customDuration = m_spellValue->AuraDuration)
+                    duration = _customDuration;
 
                 // Xinef: if unit == caster - test versus original unit if available
                 float diminishMod = 1.0f;
@@ -3307,6 +3311,9 @@ bool Spell::UpdateChanneledTargetList()
     if (channelAuraMask)
     {
         range = m_spellInfo->GetMaxRange(m_spellInfo->IsPositive());
+        if (m_spellValue->SpellRange > 0.0f)
+            range = m_spellValue->SpellRange;
+
         if (range == 0)
             for(int i = EFFECT_0; i <= EFFECT_2; ++i)
                 if (channelAuraMask & (1<<i) && m_spellInfo->Effects[i].RadiusEntry)
@@ -3896,6 +3903,8 @@ void Spell::handle_immediate()
     if (m_spellInfo->IsChanneled())
     {
         int32 duration = m_spellInfo->GetDuration();
+        if (int32 _customDuration = m_spellValue->AuraDuration)
+            duration = _customDuration;
 
         if (duration > 0)
         {
@@ -6764,6 +6773,8 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     Unit* target = m_targets.GetUnitTarget();
     float max_range = m_caster->GetSpellMaxRangeForTarget(target, m_spellInfo);
+    if (m_spellValue->SpellRange > 0.f)
+        max_range = m_spellValue->SpellRange;
     float min_range = m_caster->GetSpellMinRangeForTarget(target, m_spellInfo);
 
     // xinef: hack for npc shooters
@@ -8107,6 +8118,12 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_TARGET_PLAYERS_ONLY:
             m_spellValue->TargetPlayersOnly = (bool)value;
+            break;
+        case SPELLVALUE_AURA_DURATION:
+            m_spellValue->AuraDuration = value;
+            break;
+        case SPELLVALUE_SPELL_RANGE:
+            m_spellValue->SpellRange = (float)value;
             break;
     }
 }
