@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -231,14 +231,6 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             player->SendTransferAborted(mapid, TRANSFER_ABORT_TOO_MANY_INSTANCES);
             return false;
         }
-    }
-
-    if (entry->MapID == 230 /* Blackrock Depths - Hellforge */ && targetDifficulty == DUNGEON_DIFFICULTY_HEROIC)
-    {
-        bool _canEnter = player->GetQuestStatus( 30012 /*QUEST_MEETING_IN_HELLFORGE*/) == QUEST_STATUS_COMPLETE ||
-            player->GetQuestStatus( 30012 /*QUEST_MEETING_IN_HELLFORGE*/) == QUEST_STATUS_REWARDED;
-        if (!_canEnter)
-            return false;
     }
 
     //Other requirements

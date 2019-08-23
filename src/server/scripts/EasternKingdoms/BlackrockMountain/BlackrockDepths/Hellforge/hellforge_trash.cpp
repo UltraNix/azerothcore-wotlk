@@ -2002,15 +2002,7 @@ struct npc_hellforge_teleporter : public ScriptedAI
         if (me->GetDistance(player) > 2.5f)
             return;
 
-        bool _canEnter = player->GetQuestStatus(QUEST_MEETING_IN_HELLFORGE) == QUEST_STATUS_COMPLETE ||
-            player->GetQuestStatus(QUEST_MEETING_IN_HELLFORGE) == QUEST_STATUS_REWARDED;
-
-        if (!_canEnter)
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("You must have active or completed \"Meeting in Hellforge\" quest.");
-            return;
-        }
-
+        bool _canEnter = false;
         Group* group = player->GetGroup();
         _canEnter = group && group->isRaidGroup();
 
