@@ -176,7 +176,7 @@ m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REAC
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_moveInLineOfSightDisabled(false), m_moveInLineOfSightStrictlyDisabled(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_originalEntry(0), m_homePosition(), _wasHitByPlayer(false), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE),
-m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_chainPullTimer(0)
+m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -199,6 +199,7 @@ m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_c
     _focusSpell = nullptr;
 
     _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
+    m_chainPullTimer.Reset(CREATURE_CHAIN_PULL_TIMER_CHECK);
 }
 
 Creature::~Creature()
@@ -675,13 +676,13 @@ void Creature::Update(uint32 diff)
                 m_regenTimer += CREATURE_REGEN_INTERVAL;
             }
 
-            if (!IsCharmedOwnedByPlayerOrPlayer() && IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) !m_AlreadyCallAssistance)
+            if (CanChainPull())
             {
-                m_chainPullTimer += diff;
-                if (m_chainPullTimer >= CREATURE_CHAIN_PULL_TIMER_CHECK)
+                m_chainPullTimer.Update(diff);
+                if (m_chainPullTimer.Passed())
                 {
                     CallForHelp(CHAIN_PULL_RANGE);
-                    m_chainPullTimer = 0;
+                    m_chainPullTimer.Reset(CREATURE_CHAIN_PULL_TIMER_CHECK);
                 }
             }
 
@@ -2746,12 +2747,16 @@ void Creature::SetCannotReachTarget(bool cannotReach)
     m_cannotReachTarget = cannotReach;
     m_cannotReachTimer = 0;
     if (sWorld->getBoolConfig(CONFIG_LOG_CREATURE_CANT_REACH) && cannotReach && IsInWorld() && GetMap()->IsDungeon() && !CanFly() && !IsFlying() && CanFreeMove() && !HasUnitState(UNIT_STATE_NOT_MOVE))
+    {
         if (Unit* victim = GetVictim())
+        {
             if (victim->IsPlayer() && --_creatureCantMoveThreshold == 0)
             {
                 _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
                 sWorld->SendGMText(LANG_REPORT_CREATURE_CANT_REACH, GetName().c_str(), victim->GetName().c_str());
             }
+        }
+    }
 }
 
 void Creature::SetPosition(float x, float y, float z, float o)

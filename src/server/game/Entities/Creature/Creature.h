@@ -78,19 +78,15 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING | CREATURE_FLAG_USE_WAYPOINT_MMAP| CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ)
 
 
-#define MAX_AGGRO_RESET_TIME 10 // in seconds
-
-#define MAX_KILL_CREDIT 2
-#define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
-#define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
-#define CREATURE_NOPATH_EVADE_TIME 6 * IN_MILLISECONDS
-#define CREATURE_CHAIN_PULL_TIMER_CHECK 1 * IN_MILLISECONDS
-
-#define CHAIN_PULL_RANGE 8.0f
-
-#define MAX_CREATURE_QUEST_ITEMS 6
-
-#define MAX_EQUIPMENT_ITEMS 3
+constexpr uint32 MAX_AGGRO_RESET_TIME{ 10 }; // in seconds
+constexpr uint32 MAX_KILL_CREDIT{ 2 };
+constexpr uint32 CREATURE_REGEN_INTERVAL{ 2 * IN_MILLISECONDS };
+constexpr uint32 PET_FOCUS_REGEN_INTERVAL{ 4 * IN_MILLISECONDS };
+constexpr uint32 CREATURE_NOPATH_EVADE_TIME{ 6 * IN_MILLISECONDS };
+constexpr uint32 CREATURE_CHAIN_PULL_TIMER_CHECK{ 1 * IN_MILLISECONDS };
+constexpr float CHAIN_PULL_RANGE{ 8.f };
+constexpr uint32 MAX_CREATURE_QUEST_ITEMS{ 6 };
+constexpr uint32 MAX_EQUIPMENT_ITEMS{ 3 };
 
 // from `creature_template` table
 struct CreatureTemplate
@@ -694,6 +690,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void SetPassive();
         void SetDefensive();
         void SetAggressive();
+        inline bool const IsPassive() const { return HasReactState(REACT_PASSIVE); }
+        inline bool const IsDefensive() const { return HasReactState(REACT_DEFENSIVE); }
+        inline bool const IsAggressive() const { return HasReactState(REACT_AGGRESSIVE); }
 
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 lootingGroupLowGUID;                         // used to find group which is looting corpse
@@ -718,6 +717,10 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         void SetCannotReachTarget(bool cannotReach);
         bool CanNotReachTarget() const { return m_cannotReachTarget; }
+        inline bool const CanChainPull() const
+        {
+            return IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) && !m_AlreadyCallAssistance;
+        }
 
         void SetPosition(float x, float y, float z, float o);
         void SetPosition(const Position &pos) { SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()); }
@@ -840,7 +843,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         uint32 m_cannotReachTimer;
         bool m_AI_locked;
 
-        uint32 m_chainPullTimer;
+        TimeTrackerSmall m_chainPullTimer;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
