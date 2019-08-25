@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -22,6 +22,7 @@
 
 #include "Opcodes.h"
 #include "WorldSession.h"
+#include <iomanip>
 
 /// Correspondence between opcodes and their names
 OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
@@ -1338,3 +1339,27 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x51D*/ { "SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT2",      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               , false },
     /*0x51E*/ { "SMSG_COMPRESSED_UNKNOWN_1310",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               , false },
 };
+
+template<typename T>
+inline std::string GetOpcodeNameForLoggingImpl(T id)
+{
+    uint16 opcode = uint16(id);
+    std::ostringstream ss;
+    ss << '[';
+
+    if (static_cast<uint16>(id) < NUM_MSG_TYPES)
+    {
+        OpcodeHandler handler = opcodeTable[id];
+        ss << handler.name;
+    }
+    else
+        ss << "INVALID OPCODE";
+
+    ss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << opcode << std::nouppercase << std::dec << " (" << opcode << ")]";
+    return ss.str();
+}
+
+std::string GetOpcodeNameForLogging(Opcodes opcode)
+{
+    return GetOpcodeNameForLoggingImpl(opcode);
+}

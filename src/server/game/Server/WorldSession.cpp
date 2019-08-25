@@ -281,7 +281,8 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         }
         else if (packet->GetOpcode() >= NUM_MSG_TYPES)
         {
-            sLog->outError("network.opcode Received non-existed opcode %s from %s", GetPlayerInfo().c_str());
+            KickPlayer();
+            sLog->outError("network.opcode Received non-existing opcode %s from %s", GetPlayerInfo().c_str(), GetOpcodeNameForLogging(Opcodes(packet->GetOpcode())).c_str());
         }
         else
         {

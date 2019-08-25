@@ -1391,5 +1391,9 @@ inline const char* LookupOpcodeName(uint16 id)
         return "Received unknown opcode, it's more than max!";
     return opcodeTable[id].name;
 }
+
+/// Lookup opcode name for human understandable logging
+std::string GetOpcodeNameForLogging(Opcodes opcode);
+
 #endif
 /// @}
