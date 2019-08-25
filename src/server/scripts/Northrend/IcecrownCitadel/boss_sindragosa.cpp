@@ -548,7 +548,7 @@ class boss_sindragosa : public CreatureScript
                             me->DisableRotate(true);
                             me->SetControlled(true, UNIT_STATE_ROOT);
                             me->SendMovementFlagUpdate();
-                            DoCastSelf(SPELL_TAIL_SMASH);
+                            DoCastAOE(SPELL_TAIL_SMASH);
                             events.DelayEventsToMax(1, 0);
                             events.ScheduleEvent(EVENT_UNROOT, 0);
                             events.ScheduleEvent(EVENT_TAIL_SMASH, urand(22000, 27000), EVENT_GROUP_LAND_PHASE);
@@ -1446,6 +1446,21 @@ class spell_sindragosa_soul_preservation : public SpellScriptLoader
         }
 };
 
+class spell_sindragosa_blistering_cold_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_sindragosa_blistering_cold_SpellScript);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_ICE_TOMB_DAMAGE));
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sindragosa_blistering_cold_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+    }
+};
+
 class achievement_all_you_can_eat : public AchievementCriteriaScript
 {
     public:
@@ -1459,7 +1474,8 @@ class achievement_all_you_can_eat : public AchievementCriteriaScript
         }
 };
 
-
+// Trash scripts
+//
 
 class npc_spinestalker : public CreatureScript
 {

@@ -3258,7 +3258,15 @@ void SpellMgr::LoadSpellCustomAttr()
             63293, // Mimiron - spinning damage
             68873, // Wailing Souls
             70324,
-            64619 // Ulduar, Mimiron, Emergency Fire Bot, Water Spray
+            64619, // Ulduar, Mimiron, Emergency Fire Bot, Water Spray
+            69649, // Sindragosa Frost Breath
+            71056,
+            71057,
+            71058,
+            73061,
+            73062,
+            73063,
+            73064
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
         });
@@ -7140,9 +7148,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 71077: // Tail Smash (Sindragosa)
             spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_CASTER_BACK;
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_DEST_AREA_ENEMY;
             spellInfo->EffectImplicitTargetA[1] = TARGET_DEST_CASTER_BACK;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_DEST_AREA_ENEMY;
             break;
         case 69846: // Frost Bomb
             spellInfo->speed = 0.0f;    // This spell's summon happens instantly

@@ -5159,6 +5159,13 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
         m_caster->GetPosition(x, y);
     }
 
+    // Tail Smash, Sindragosa
+    if (m_spellInfo->Id == 71077)
+    {
+        speedxy = 0.01f;
+        speedz = 0.01f;
+    }
+
     unitTarget->KnockbackFrom(x, y, speedxy, speedz);
 }
 
