@@ -127,7 +127,10 @@ class CreatureAI : public UnitAI
         virtual void JustRespawned() { Reset(); }
 
         // Called at waypoint reached or point movement finished
-        virtual void MovementInform(uint32 /*type*/, uint32 /*id*/) {}
+        virtual void MovementInform(uint32 /*type*/, uint32 /*id*/) { }
+
+        // Called when we're temp summon and summoner is a creature
+        virtual void SummonedMovementInform(uint32 /*type*/, uint32 /*pointId*/, Unit* /*who*/) { }
 
         void OnCharmed(bool apply);
 

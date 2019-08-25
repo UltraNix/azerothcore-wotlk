@@ -154,6 +154,10 @@ template <> void PointMovementGenerator<Creature>::MovementInform(Creature* unit
 {
     if (unit->AI())
         unit->AI()->MovementInform(POINT_MOTION_TYPE, id);
+
+    if (Creature* summoner = unit->GetSummoner())
+        if (summoner->IsAIEnabled)
+            summoner->AI()->SummonedMovementInform(POINT_MOTION_TYPE, id, unit);
 }
 
 template void PointMovementGenerator<Player>::DoInitialize(Player*);

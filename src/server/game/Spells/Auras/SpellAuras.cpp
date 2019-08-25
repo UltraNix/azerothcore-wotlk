@@ -1329,7 +1329,7 @@ void Aura::HandleAuraSpecificMods( AuraApplication const* aurApp, Unit* caster, 
                 switch ( GetId() )
                 {
                     case 32474: // Buffeting Winds of Susurrus
-                        if ( target->GetTypeId() == TYPEID_PLAYER )
+                        if ( target->GetTypeId() == TYPEID_PLAYER && target->GetMapId() != 249)
                             target->ToPlayer()->ActivateTaxiPathTo( 506, GetId() );
                         break;
                     case 33572: // Gronn Lord's Grasp, becomes stoned

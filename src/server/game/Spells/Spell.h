@@ -207,6 +207,7 @@ struct SpellValue
     bool      TargetPlayersOnly; // only for AoE casts
     int32     AuraDuration;
     float     SpellRange;
+    bool      ShareDamage; // damage is divided by player hit count
 };
 
 enum SpellState

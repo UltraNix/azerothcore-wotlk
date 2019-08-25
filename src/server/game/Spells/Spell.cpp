@@ -556,6 +556,7 @@ SpellValue::SpellValue(SpellInfo const* proto)
     TargetPlayersOnly = false;
     AuraDuration = 0;
     SpellRange = -1.f;
+    ShareDamage = false;
 }
 
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
@@ -8124,6 +8125,9 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_SPELL_RANGE:
             m_spellValue->SpellRange = (float)value;
+            break;
+        case SPELLVALUE_ENABLE_SHARE_DAMAGE:
+            m_spellValue->ShareDamage = (bool)value;
             break;
     }
 }

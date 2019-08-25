@@ -272,6 +272,7 @@ void AddSC_hellforge_boss_two();
 void AddSC_hellforge_boss_three();
 void AddSC_hellforge_boss_four();
 void AddSC_hellforge_boss_five();
+void AddSC_hellforge_boss_six();
 void AddSC_hellforge_npc_wanderer();
 
 //kalimdor
@@ -936,6 +937,7 @@ void AddEasternKingdomsScripts()
     AddSC_hellforge_boss_three();
     AddSC_hellforge_boss_four();
     AddSC_hellforge_boss_five();
+    AddSC_hellforge_boss_six();
     AddSC_hellforge_npc_wanderer();
 #endif
 }

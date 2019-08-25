@@ -4,16 +4,17 @@
 
 ObjectData const creatureData[] =
 {
-    { DATA_ONYXIA, NPC_ONYXIA },
-    { 0          ,          0 } // END
+    { NPC_ONYXIA,       DATA_ONYXIA  },
+    { NPC_BOSS_DIABLO,  DATA_DIABLO  },
+    { 0          ,          0        } // END
 };
 
 struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
 {
-    instance_onyxias_lair_InstanceMapScript(Map* map) : InstanceScript(map) 
+    instance_onyxias_lair_InstanceMapScript(Map* map) : InstanceScript(map)
     {
-        LoadObjectData(creatureData, nullptr);
         SetBossNumber(MAX_ENCOUNTER);
+        LoadObjectData(creatureData, nullptr);
     };
 
     bool SetBossState(uint32 type, EncounterState state) override
@@ -34,6 +35,7 @@ struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
 
     void OnCreatureCreate(Creature* creature) override
     {
+        InstanceScript::OnCreatureCreate(creature);
         switch (creature->GetEntry())
         {
             case NPC_ONYXIAN_WHELP:

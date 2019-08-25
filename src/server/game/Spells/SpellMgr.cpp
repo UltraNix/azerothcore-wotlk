@@ -3578,7 +3578,8 @@ void SpellMgr::LoadSpellCustomAttr()
             63059, // Pollinate
             62326, // Low blow
             62243, // Unstable sunbeam
-            69579  // arcing smash
+            69579, // arcing smash
+            34121, // flame buffet
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
@@ -7956,8 +7957,14 @@ void SpellMgr::LoadDbcDataCorrections()
         case 52656: // cosmetic self stun, freeze anim
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
             break;
+        case 49544: // Eye beam
+        case 59965:
         case 40639: // Arcane beam
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->rangeIndex = 6; // 100y
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
+        case 41277: // fiery comet
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         case 57465: // Holy bolt naxxramas
@@ -8024,6 +8031,18 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 75332: // Starfire
             spellInfo->rangeIndex = RANGE_INDEX_300YD;
+            break;
+        /* Diablo */
+        case 36837: // meteor
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_CAN_CAST_WHILE_CASTING;
+            break;
+        case 64668:
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
+            break;
+            //AURA_INTERRUPT_FLAG_LANDING
+        case 32474: // buffeting winds of susurrus
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_LANDING;
             break;
         }
 

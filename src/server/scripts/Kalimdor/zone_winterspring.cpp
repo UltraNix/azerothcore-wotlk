@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -563,7 +563,7 @@ public:
             }
         }
 
-        void SummonedMovementInform(Creature* summoned, uint32 type, uint32 pointId)
+        void _SummonedMovementInform(Creature* summoned, uint32 type, uint32 pointId)
         {
             if (type != POINT_MOTION_TYPE || summoned->GetEntry() != NPC_PRIESTESS_ELUNE || pointId != 1)
                 return;

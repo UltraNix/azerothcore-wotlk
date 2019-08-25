@@ -48,7 +48,7 @@ void WorldCache::LoadHellforgeBossValues()
     {
         Field* field = result->Fetch();
         uint32 statId = field[0].GetUInt32();
-        
+
         HellforgeStatValues val;
         val.StatValue = field[1].GetUInt32();
         val.StatVariance = field[2].GetFloat();

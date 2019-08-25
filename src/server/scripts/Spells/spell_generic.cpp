@@ -4039,6 +4039,9 @@ class spell_gen_count_pct_from_max_hp : public SpellScriptLoader
 
             void RecalculateDamage()
             {
+                if (GetCaster() && GetCaster()->GetMapId() == 249 /*onyxia's lair*/)
+                    return;
+
                 if (!_damagePct)
                     _damagePct = GetHitDamage();
 
