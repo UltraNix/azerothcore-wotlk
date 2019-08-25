@@ -260,7 +260,9 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         scheduler.Update(diff);
 
-        DoMeleeAttackIfReady();
+#pragma message(CompileMessage "to tylko do testow, przepisac")
+        if (me->GetVictim())
+            DoMeleeAttackIfReady();
 
         if (_intro)
             return;
@@ -539,15 +541,21 @@ struct npc_boss_six_diablo_AI : public BossAI
                 exploTrigger->AI()->SetData(DATA_EXPLOSION_TIMER, static_cast<uint32>(_timer.count() * f));
         }
 
-        me->DespawnOrUnsummon(_timer.count() + 200U);
+        //me->DespawnOrUnsummon(_timer.count() + 200U);
     }
 
     void HandleFireBeam()
     {
+        me->GetMotionMaster()->Clear();
+        me->GetMotionMaster()->MoveIdle();
+
         Position pos = me->GetPosition();
         float mapHeight = me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), true, 150.f);
 
         pos.m_positionZ += 2.5f;
+        me->NearTeleportTo(pos);
+        pos.m_positionZ = mapHeight;
+
         if (Creature* trigger = me->SummonCreature(NPC_BOSS_SIX_BEAM_TRIGGER, pos))
         {
             trigger->SetCanFly(true);
@@ -718,7 +726,7 @@ struct npc_boss_six_beam_trigger_explosion : public ScriptedAI
 
     void SetData(uint32 type, uint32 value) override
     {
-        if (type != 1)
+        if (type != DATA_EXPLOSION_TIMER)
             return;
 
         _scheduler.Schedule(std::chrono::milliseconds(value), [this](TaskContext func)
