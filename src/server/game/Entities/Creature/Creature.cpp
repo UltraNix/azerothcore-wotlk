@@ -176,7 +176,7 @@ m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REAC
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_moveInLineOfSightDisabled(false), m_moveInLineOfSightStrictlyDisabled(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_originalEntry(0), m_homePosition(), _wasHitByPlayer(false), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE),
-m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false)
+m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_chainPullTimer(0)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -196,7 +196,7 @@ m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false)
     ResetLootMode(); // restore default loot mode
     TriggerJustRespawned = false;
     m_isTempWorldObject = false;
-    _focusSpell = NULL;
+    _focusSpell = nullptr;
 
     _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
 }
@@ -673,6 +673,16 @@ void Creature::Update(uint32 diff)
                     Regenerate(POWER_MANA);
 
                 m_regenTimer += CREATURE_REGEN_INTERVAL;
+            }
+
+            if (!IsCharmedOwnedByPlayerOrPlayer() && IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) !m_AlreadyCallAssistance)
+            {
+                m_chainPullTimer += diff;
+                if (m_chainPullTimer >= CREATURE_CHAIN_PULL_TIMER_CHECK)
+                {
+                    CallForHelp(CHAIN_PULL_RANGE);
+                    m_chainPullTimer = 0;
+                }
             }
 
             if (CanNotReachTarget() && !IsInEvadeMode())
@@ -3037,7 +3047,7 @@ void Creature::ReleaseFocus(Spell const* focusSpell)
     if (focusSpell != _focusSpell)
         return;
 
-    _focusSpell = NULL;
+    _focusSpell = nullptr;
     if (Unit* victim = GetVictim())
         SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
     else

@@ -84,6 +84,9 @@ enum CreatureFlagsExtra
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 #define PET_FOCUS_REGEN_INTERVAL 4 * IN_MILLISECONDS
 #define CREATURE_NOPATH_EVADE_TIME 6 * IN_MILLISECONDS
+#define CREATURE_CHAIN_PULL_TIMER_CHECK 1 * IN_MILLISECONDS
+
+#define CHAIN_PULL_RANGE 8.0f
 
 #define MAX_CREATURE_QUEST_ITEMS 6
 
@@ -836,6 +839,8 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool m_cannotReachTarget;
         uint32 m_cannotReachTimer;
         bool m_AI_locked;
+
+        uint32 m_chainPullTimer;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
