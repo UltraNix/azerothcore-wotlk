@@ -96,6 +96,21 @@ public:
                 case GO_CACHE_OF_EREGOS_HERO:
                     EregosCacheGUID = pGo->GetGUID();
                     pGo->SetVisible(false);
+
+                    if (instance->IsHeroic())
+                    {
+                        auto& players = pGo->GetMap()->GetPlayers();
+                        for (auto && source : players)
+                        {
+                            Player* player = source.GetSource();
+                            if (!player)
+                                continue;
+                            if (Group* group = player->GetGroup())
+                                if (group->IsLfgRandomInstance())
+                                    pGo->SetLootMode(3);
+                            break;
+                        }
+                    }
                     break;
             }
         }
