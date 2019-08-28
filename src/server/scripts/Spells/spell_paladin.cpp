@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -137,6 +137,7 @@ class spell_pal_seal_of_command : public SpellScriptLoader
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
                     if (procSpell->SpellIconID == 3025) // Righteous Vengeance, should not proc SoC
                         return false;
+
                 return true;
             }
 
@@ -145,7 +146,7 @@ class spell_pal_seal_of_command : public SpellScriptLoader
                 PreventDefaultAction();
                 int32 targets = 3;
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
-                    if (procSpell->IsAffectingArea())
+                    if (procSpell->IsAffectingArea() || procSpell->GetSpellSpecific() == SPELL_SPECIFIC_JUDGEMENT)
                         targets = 1;
 
                 eventInfo.GetActor()->CastCustomSpell(aurEff->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, SPELLVALUE_MAX_TARGETS, targets, eventInfo.GetActionTarget(), false, NULL, aurEff);
@@ -303,7 +304,7 @@ class spell_pal_sacred_shield_base : public SpellScriptLoader
 
                     return;
                 }
-                
+
                 uint32 triggered_spell_id = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
                 if (eventInfo.GetActionTarget()->HasSpellCooldown(triggered_spell_id))
                     return;
@@ -1198,7 +1199,7 @@ class spell_pal_lay_on_hands : public SpellScriptLoader
 
             bool Load()
             {
-                _manaAmount = 0; 
+                _manaAmount = 0;
                 return true;
             }
 
