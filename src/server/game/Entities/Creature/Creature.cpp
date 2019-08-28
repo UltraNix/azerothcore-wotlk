@@ -199,7 +199,7 @@ m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false)
     _focusSpell = nullptr;
 
     _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
-    m_chainPullTimer.Reset(CREATURE_CHAIN_PULL_TIMER_CHECK);
+    m_chainPullTimer.Reset(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER));
 }
 
 Creature::~Creature()
@@ -681,8 +681,8 @@ void Creature::Update(uint32 diff)
                 m_chainPullTimer.Update(diff);
                 if (m_chainPullTimer.Passed())
                 {
-                    CallForHelp(CHAIN_PULL_RANGE);
-                    m_chainPullTimer.Reset(CREATURE_CHAIN_PULL_TIMER_CHECK);
+                    CallForHelp(sWorld->getFloatConfig(CONFIG_CHAIN_PULL_RANGE));
+                    m_chainPullTimer.Reset(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER));
                 }
             }
 

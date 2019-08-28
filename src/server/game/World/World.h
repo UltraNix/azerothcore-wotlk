@@ -201,6 +201,7 @@ enum WorldBoolConfigs
     CONFIG_EXTERNAL_MAIL,                     // Enables or disabled sending external mails
     CONFIG_ANTIWINTRADING_ENABLE,             // Notifies GMs about possible arena wintraders
     CONFIG_LOG_CREATURE_CANT_REACH,           // Notifies GMs when some creature can't reach player and stands still
+    CONFIG_CHAIN_PULL_ENABLED,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -228,6 +229,7 @@ enum WorldFloatConfigs
     CONFIG_DYNAMIC_RESPAWN_61_80,
     CONFIG_BONUS_HONOR_FOR_FACTION_RATE, // in order for this to work, you need to enable per side honor bonus in bool configs
     CONFIG_DUEL_DEBUFF_RESET,
+    CONFIG_CHAIN_PULL_RANGE,
     FLOAT_CONFIG_VALUE_COUNT
 };
 
@@ -419,6 +421,7 @@ enum WorldIntConfigs
     CONFIG_ANTIWINTRADING_MINDMG,
     CONFIG_ANTIWINTRADING_MINHEALING,
     CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD,
+    CONFIG_CHAIN_PULL_TIMER,
     INT_CONFIG_VALUE_COUNT
 };
 
