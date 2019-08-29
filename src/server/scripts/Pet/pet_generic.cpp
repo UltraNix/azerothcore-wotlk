@@ -542,11 +542,6 @@ public:
     }
 };
 
-enum Valkyr
-{
-    EVENT_FIND_TARGET = 1
-};
-
 struct npc_pet_gen_valkyr_guardianAI : public ScriptedAI
 {
     npc_pet_gen_valkyr_guardianAI(Creature* creature) : ScriptedAI(creature) { }
@@ -556,102 +551,34 @@ struct npc_pet_gen_valkyr_guardianAI : public ScriptedAI
         if (!summoner)
             return;
 
-        _targetGUID = 0;
         _smiteSpellId = me->GetCreatureTemplate()->spells[0];
         me->SetDefensive();
         me->SetDisableGravity(true);
         me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
-        _events.ScheduleEvent(EVENT_FIND_TARGET, 0.1s);
     }
 
-    Unit* FindTarget() const
+    void AttackStart(Unit* target) override
     {
-        Unit* newTarget = nullptr;
-        float max_range = 0.0f;
-        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_smiteSpellId))
-            max_range = spellInfo->RangeEntry->maxRangeHostile;
-
-        if (max_range > 0.0f)
-        {
-            auto IsViableTarget = [this, max_range](Unit* target, Unit* owner) -> bool
-            {
-                if (!target)
-                    return false;
-
-                if (!owner->IsInCombat() || !target->IsInCombat())
-                    return false;
-
-                if (!target->isTargetableForAttack(false, me))
-                    return false;
-
-                if (!target->IsValidAttackTarget(owner))
-                    return false;
-
-                if (!me->IsWithinDistInMap(target, max_range))
-                    return false;
-
-                if (target->IsFriendlyTo(owner))
-                    return false;
-
-                if (target->HasBreakableByDamageCrowdControlAura())
-                    return false;
-
-                return true;
-            };
-
-            if (Unit* owner = me->GetSummoner())
-            {
-                Unit* currentOwnerTarget = ObjectAccessor::GetUnit(*me, owner->GetTarget());
-                if (IsViableTarget(currentOwnerTarget, owner))
-                    newTarget = currentOwnerTarget;
-                else
-                {
-                    Unit* target = nullptr;
-                    Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck u_check(me, me, owner, max_range);
-                    Trinity::UnitLastSearcher<Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck> checker(me, target, u_check);
-                    me->VisitNearbyObject(max_range, checker);
-                    newTarget = target;
-                }
-            }
-        }
-
-        return newTarget;
+        if (Unit* owner = me->GetOwner())
+            if (target && !me->IsCasting() && target->GetGUID() == owner->GetTarget())
+                ScriptedAI::AttackStart(target);
     }
 
     void UpdateAI(uint32 diff) override
     {
-        if (_events.Empty())
-        {
-            _events.ScheduleEvent(EVENT_FIND_TARGET, 0s);
-            return;
-        }
-
-        _events.Update(diff);
-
-        switch (_events.ExecuteEvent())
-        {
-            case EVENT_FIND_TARGET:
-                if (Unit* target = FindTarget())
-                    if (target != ObjectAccessor::GetUnit(*me, me->GetTarget()))
-                        AttackStart(target);
-                _events.Repeat(1s);
-                break;
-            default:
-                break;
-        }
-
         if (!UpdateVictim())
             return;
 
-        if (Unit* target = ObjectAccessor::GetUnit(*me, me->GetTarget()))
-            if (me->isAttackReady() && !target->HasBreakableByDamageCrowdControlAura())
+        if (Unit* owner = me->GetOwner())
+            AttackStart(owner->GetVictim());
+
+        if (Unit* victim = me->GetVictim())
+            if (me->isAttackReady())
                 DoSpellAttackIfReady(_smiteSpellId);
     }
 
     private:
         uint32 _smiteSpellId;
-        EventMap _events;
-        uint64 _targetGUID;
 };
 
 class spell_pet_gen_valkyr_guardian_smite : public SpellScriptLoader
