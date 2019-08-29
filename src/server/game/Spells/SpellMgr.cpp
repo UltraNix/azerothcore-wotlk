@@ -5563,10 +5563,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 27812:
             spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_3_YARDS;
             break;
-            // Fungal Creep
-        case 29232:
-            spellInfo->MaxAffectedTargets = 25;
-            break;
 
         //////////////////////////////////////////
         ////////// Gundrak

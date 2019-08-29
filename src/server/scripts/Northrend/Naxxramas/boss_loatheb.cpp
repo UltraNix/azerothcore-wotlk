@@ -157,40 +157,7 @@ private:
     uint32 _fightTimer;
 };
 
-// 29232 - Fungal Creep
-class spell_loatheb_fungal_creep_SpellScript : public SpellScript
-{
-    PrepareSpellScript(spell_loatheb_fungal_creep_SpellScript);
-
-    void FilterTargets(std::list<WorldObject*>& targets)
-    {
-        targets.sort(Trinity::ObjectDistanceOrderPred(GetCaster()));
-        targets.resize(5);
-        _targets = targets;
-    }
-
-    // use the same target for second and third effect
-    void FilterTargetsSubsequent(std::list<WorldObject*>& targets)
-    {
-        if (_targets.empty())
-            return;
-
-        targets.clear();
-        targets = _targets;
-    }
-
-    void Register() override
-    {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_loatheb_fungal_creep_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_loatheb_fungal_creep_SpellScript::FilterTargetsSubsequent, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_loatheb_fungal_creep_SpellScript::FilterTargetsSubsequent, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
-    }
-
-    std::list<WorldObject*> _targets;
-};
-
 void AddSC_boss_loatheb()
 {
     new CreatureAILoader<boss_loathebAI>("boss_loatheb");
-    new SpellScriptLoaderEx<spell_loatheb_fungal_creep_SpellScript>("spell_loatheb_fungal_creep");
 }
