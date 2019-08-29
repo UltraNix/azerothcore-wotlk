@@ -557,6 +557,7 @@ SpellValue::SpellValue(SpellInfo const* proto)
     AuraDuration = 0;
     SpellRange = -1.f;
     ShareDamage = false;
+    CastTime = 0;
 }
 
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
@@ -3480,6 +3481,8 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
     m_casttime = (_triggeredCastFlags & TRIGGERED_CAST_DIRECTLY) ? 0 : m_spellInfo->CalcCastTime(m_caster, this);
+    if (uint32 _castTime = m_spellValue->CastTime)
+        m_casttime = _castTime;
 
     switch (m_spellInfo->Id)
     {
@@ -8128,6 +8131,9 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_ENABLE_SHARE_DAMAGE:
             m_spellValue->ShareDamage = (bool)value;
+            break;
+        case SPELLVALUE_MODIFY_CAST_TIME:
+            m_spellValue->CastTime = uint32(value);
             break;
     }
 }

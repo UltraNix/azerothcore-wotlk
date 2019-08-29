@@ -7959,6 +7959,9 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 49544: // Eye beam
         case 59965:
+            spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
         case 40639: // Arcane beam
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->rangeIndex = 6; // 100y
@@ -8040,9 +8043,11 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectImplicitTargetA[EFFECT_0] = TARGET_UNIT_TARGET_ANY;
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_UNIT_TARGET_ANY;
             break;
-            //AURA_INTERRUPT_FLAG_LANDING
         case 32474: // buffeting winds of susurrus
             spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_LANDING;
+            break;
+        case 54988: // Heart beam visual
+            spellInfo->Attributes &= ~SPELL_ATTR0_CANT_USED_IN_COMBAT;
             break;
         }
 
