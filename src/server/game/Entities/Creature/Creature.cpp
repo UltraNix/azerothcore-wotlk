@@ -3033,6 +3033,9 @@ void Creature::FocusTarget(Spell const* focusSpell, WorldObject const* target)
     // already focused
     if (_focusSpell)
         return;
+    // Prevent dead creatures from setting a focus target, so they won't turn
+    if (!IsAlive())
+        return;
 
     _focusSpell = focusSpell;
     SetUInt64Value(UNIT_FIELD_TARGET, this == target ? 0 : target->GetGUID());
