@@ -143,13 +143,16 @@ class spell_pal_seal_of_command : public SpellScriptLoader
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
+                Unit* target = eventInfo.GetActionTarget();
+                if (!target)
+                    return;
                 PreventDefaultAction();
                 int32 targets = 3;
                 if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
-                    if (procSpell->IsAffectingArea() || procSpell->GetSpellSpecific() == SPELL_SPECIFIC_JUDGEMENT)
+                    if (procSpell->IsAffectingArea() || (procSpell->GetSpellSpecific() == SPELL_SPECIFIC_JUDGEMENT && !target->HasAura(53695) && !target->HasAura(53696)))
                         targets = 1;
 
-                eventInfo.GetActor()->CastCustomSpell(aurEff->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, SPELLVALUE_MAX_TARGETS, targets, eventInfo.GetActionTarget(), false, NULL, aurEff);
+                eventInfo.GetActor()->CastCustomSpell(aurEff->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, SPELLVALUE_MAX_TARGETS, targets, target, false, nullptr, aurEff);
             }
 
             void Register()
