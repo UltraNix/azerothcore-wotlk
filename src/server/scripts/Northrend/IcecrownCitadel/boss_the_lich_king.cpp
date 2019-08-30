@@ -19,6 +19,7 @@ REWRITTEN FROM SCRATCH BY PUSSYWIZARD, IT OWNS NOW!
 #include "PassiveAI.h"
 #include "Group.h"
 #include "MoveSplineInit.h"
+#include "WorldCache.h"
 
 enum Texts
 {
@@ -2327,6 +2328,9 @@ class npc_raging_spirit : public CreatureScript
 
             void Reset()
             {
+                if (me->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
+                    LoadStats();
+
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_RAGING_SPIRIT_UNROOT, 3000);
                 _events.ScheduleEvent(EVENT_SOUL_SHRIEK, urand(12000, 15000));
@@ -2349,10 +2353,42 @@ class npc_raging_spirit : public CreatureScript
                 }
             }
 
+            void LoadStats()
+            {
+                HellforgeStats stats = sWorldCache.GetStatValues({ 985,986 });
+                for (auto const& ref : stats)
+                {
+                    switch (ref.first)
+                    {
+                        case 985: // Health
+                        {
+                            me->SetMaxHealth(ref.second.StatValue);
+                            break;
+                        }
+                        case 986: // Meele DMG
+                        {
+                            // Divide by 10 (dmg_multiplier in creature_template)
+                            uint32 minDamage = ref.second.StatValue * ref.second.StatVariance / 10.f;
+                            uint32 maxDamage = ref.second.StatValue / 10.f;
+                            me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                            me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                            me->UpdateDamagePhysical(BASE_ATTACK);
+                            break;
+                        }
+                    }
+                }
+            }
+
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 // player is the spellcaster so register summon manually
-                if (Creature* lichKing = ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                Creature* lichKing = nullptr;
+                if (me->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
+                    lichKing = me->FindNearestCreature(261008, 100.f);
+                else
+                    ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING));
+
+                if (lichKing)
                     lichKing->AI()->JustSummoned(me);
             }
 
@@ -2423,7 +2459,7 @@ class npc_raging_spirit : public CreatureScript
 
             bool CanAIAttack(Unit const* target) const
             {
-                return IsValidPlatformTarget(target) && !target->GetVehicle();
+                return ( (target && target->GetMapId() != 631) ||  IsValidPlatformTarget(target) ) && !target->GetVehicle();
             }
 
         private:
@@ -2433,7 +2469,7 @@ class npc_raging_spirit : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const
         {
-            return GetIcecrownCitadelAI<npc_raging_spiritAI>(creature);
+            return new npc_raging_spiritAI(creature);
         }
 };
 
@@ -2469,7 +2505,23 @@ class spell_the_lich_king_defile : public SpellScriptLoader
                 // HACK: target player should cast this spell on defile
                 // however with current aura handling auras cast by different units
                 // cannot stack on the same aura object increasing the stack count
-                GetCaster()->CastSpell(GetCaster(), SPELL_DEFILE_GROW, true);
+                if (GetCaster()->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
+                {
+                    if (Aura * aura = GetCaster()->GetAura(SPELL_DEFILE_GROW))
+                    {
+                        if (uint8 stackAmount = aura->GetStackAmount())
+                            aura->SetStackAmount(stackAmount - 1);
+                        else
+                        {
+                            if (GetCaster()->IsAIEnabled)
+                                GetCaster()->GetAI()->DoAction(1);
+                        }
+                    }
+                    else 
+                        GetCaster()->ToCreature()->DespawnOrUnsummon();
+                }
+                else
+                    GetCaster()->CastSpell(GetCaster(), SPELL_DEFILE_GROW, true);
             }
 
             void Register()

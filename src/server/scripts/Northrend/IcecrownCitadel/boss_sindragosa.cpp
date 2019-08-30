@@ -209,9 +209,10 @@ class IceTombSummonEvent : public BasicEvent
                 _owner->GetPosition(&pos);
                 _owner->m_positionZ -= 1.0f; // +2.0f in UpdateGroundPositionZ, prevent going over GO model of another ice block, because new would be spawned on top of the old one xd
                 _owner->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-                if (pos.GetPositionZ() < 203.0f)
+                if (_owner->GetMapId() != 249 /* Onyxia's Lair - Hellforge */ && pos.GetPositionZ() < 203.0f)
                     pos.m_positionZ = 203.0f;
-                if (TempSummon* summon = sindragosa->SummonCreature(NPC_ICE_TOMB, pos))
+                uint32 iceTombEntry = _owner->GetMapId() == 249 ? 261001 : NPC_ICE_TOMB;
+                if (TempSummon* summon = sindragosa->SummonCreature(iceTombEntry, pos))
                 {
                     summon->m_positionZ = summon->GetPositionZ()+5.0f;
                     summon->AI()->SetGUID(_owner->GetGUID(), DATA_TRAPPED_PLAYER);

@@ -7,6 +7,7 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "naxxramas.h"
 #include "SpellScript.h"
 #include "Player.h"
+#include "WorldCache.h"
 
 enum Yells
 {
@@ -656,7 +657,14 @@ class spell_kelthuzad_detonate_mana : public SpellScriptLoader
                 if (int32 mana = int32(target->GetMaxPower(POWER_MANA) / 10))
                 {
                     mana = target->ModifyPower(POWER_MANA, -mana);
-                    target->CastCustomSpell(SPELL_MANA_DETONATION_DAMAGE, SPELLVALUE_BASE_POINT0, -mana * 10, target, true, NULL, aurEff);
+                    if (target->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
+                    {
+                        HellforgeStatValues val;
+                        sWorldCache.GetStatValue(987, val);
+                        target->CastCustomSpell(SPELL_MANA_DETONATION_DAMAGE, SPELLVALUE_BASE_POINT0, val.StatValue, target, true, NULL, aurEff);
+                    }
+                    else
+                        target->CastCustomSpell(SPELL_MANA_DETONATION_DAMAGE, SPELLVALUE_BASE_POINT0, -mana * 10, target, true, NULL, aurEff);
                 }
             }
 

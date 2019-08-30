@@ -101,6 +101,11 @@ set(scripts_STAT_SRCS
   Kalimdor/OnyxiasLair/boss_six_diablo.cpp
   Kalimdor/OnyxiasLair/onyxias_lair.h
   Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp
+  Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_kelthuzad.cpp
+  Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_onyxia.cpp
+  Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_anubarak.cpp
+  Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_lichking.cpp
+  Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_yogg.cpp
   Kalimdor/RagefireChasm/instance_ragefire_chasm.cpp
   Kalimdor/DireMaul/instance_dire_maul.cpp
   Kalimdor/DireMaul/dire_maul.h

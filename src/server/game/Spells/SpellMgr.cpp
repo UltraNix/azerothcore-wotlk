@@ -6223,7 +6223,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64147: // crush
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_15_YARDS;
             break;
-
+        case 60835: // Shadow crash for Hellforge Diablo
+            spellInfo->AttributesEx6 |= (SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE);
+            break;
         // ALGALON
          // Cosmic Smash (Algalon the Observer)
         case 62293:
@@ -8029,6 +8031,7 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->StackAmount = 5;
             break;
         case 75332: // Starfire
+        case 69273: // Frostbolt volley;
             spellInfo->rangeIndex = RANGE_INDEX_300YD;
             break;
         /* Diablo */
@@ -8044,6 +8047,14 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 54988: // Heart beam visual
             spellInfo->Attributes &= ~SPELL_ATTR0_CANT_USED_IN_COMBAT;
+        case 67938: // Icy Touch 
+        case 66021:
+        case 67939:
+        case 67940:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
+        case 14032: // Shadow Word: Pain
+            spellInfo->Dispel = DISPEL_NONE;
             break;
         }
 

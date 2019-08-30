@@ -921,6 +921,7 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
                 return;
 
             int32 multiplier = 68;
+            int32 lifeLeeched = 0;
             if (auto caster = GetCaster())
             {
                 if (auto map = caster->GetMap())
@@ -934,14 +935,24 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
                     else if (!map->Is25ManRaid() && !map->IsHeroic()) // 10 n
                         multiplier = 68;
                 }
+                if (caster->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
+                {
+                    if (GetTarget() && GetTarget()->GetHealthPct() >= 10.f)
+                        lifeLeeched = GetTarget()->CountPctFromCurHealth(20.f);
+                    else
+                        lifeLeeched = 0;
+                }
+                else
+                {
+                    lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
+                    if (lifeLeeched < 250)
+                        lifeLeeched = 250;
+                }
             }
 
-            int32 lifeLeeched = GetTarget()->CountPctFromCurHealth(aurEff->GetAmount());
-            if (lifeLeeched < 250)
-                lifeLeeched = 250;
-
             // Damage
-            caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
+            if(lifeLeeched)
+                caster->CastCustomSpell(GetTarget(), SPELL_LEECHING_SWARM_DMG, &lifeLeeched, 0, 0, true);
 
             // Heal
             uint32 resist = 0;
@@ -949,7 +960,7 @@ class spell_gen_leeching_swarm_AuraScript : public AuraScript
             GetTarget()->CalcAbsorbResist(caster, GetTarget(), sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)->GetSchoolMask(), DIRECT_DAMAGE, lifeLeeched, &absorb, &resist, sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG));
             if (Unit* target = GetTarget())
             {
-                if (!target->IsImmunedToDamage(sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)))
+                if (target->GetMapId() != 249 /* Onyxia's Lair - Hellforge */ && !target->IsImmunedToDamage(sSpellMgr->GetSpellInfo(SPELL_LEECHING_SWARM_DMG)))
                 {
                     lifeLeeched -= resist;
                     int32 value = lifeLeeched * multiplier / 100.0f;

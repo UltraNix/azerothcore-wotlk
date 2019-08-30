@@ -273,6 +273,11 @@ void AddSC_hellforge_boss_three();
 void AddSC_hellforge_boss_four();
 void AddSC_hellforge_boss_five();
 void AddSC_hellforge_boss_six();
+void AddSC_hellforge_boss_diablo_kelthuzad();
+void AddSC_hellforge_boss_diablo_onyxia();
+void AddSC_hellforge_boss_diablo_anubarak();
+void AddSC_hellforge_boss_diablo_lichking();
+void AddSC_hellforge_boss_diablo_yogg();
 void AddSC_hellforge_npc_wanderer();
 
 //kalimdor
@@ -938,6 +943,11 @@ void AddEasternKingdomsScripts()
     AddSC_hellforge_boss_four();
     AddSC_hellforge_boss_five();
     AddSC_hellforge_boss_six();
+    AddSC_hellforge_boss_diablo_kelthuzad();
+    AddSC_hellforge_boss_diablo_onyxia();
+    AddSC_hellforge_boss_diablo_anubarak();
+    AddSC_hellforge_boss_diablo_lichking();
+    AddSC_hellforge_boss_diablo_yogg();
     AddSC_hellforge_npc_wanderer();
 #endif
 }
