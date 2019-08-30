@@ -541,26 +541,20 @@ public:
         {
             case EVENT_LK_COLDFLAME:
             {
-                uint32 dir1 = urand(0, 3);
-                uint32 dir2;
-                do 
-                {
-                    dir2 = urand(0, 3);
-                } while (dir1 == dir2);
+                std::array<uint32, 4> directions = { 0, 1, 2 ,3 };
+                Trinity::Containers::RandomShuffle(directions);
 
                 Position pos = me->GetPosition();
                 Creature* lichKing = me->GetSummoner();
-                if (Creature * coldflame = me->SummonCreature(NPC_LK_COLDFLAME_SUMMONER, pos))
+
+                for (uint32 i = 0; i < 2; ++i)
                 {
-                    if (lichKing)
-                        coldflame->AI()->SetGUID(lichKing->GetGUID());
-                    coldflame->AI()->SetData(1, dir1);
-                }
-                if (Creature * coldflame = me->SummonCreature(NPC_LK_COLDFLAME_SUMMONER, pos))
-                {
-                    if (lichKing)
-                        coldflame->AI()->SetGUID(lichKing->GetGUID());
-                    coldflame->AI()->SetData(1, dir2);
+                    if (Creature * coldflame = me->SummonCreature(NPC_LK_COLDFLAME_SUMMONER, pos))
+                    {
+                        if (lichKing)
+                            coldflame->AI()->SetGUID(lichKing->GetGUID());
+                        coldflame->AI()->SetData(1, directions[i]);
+                    }
                 }
                 
                 _events.RescheduleEvent(EVENT_LK_COLDFLAME, _coldFlameTimer);
@@ -579,8 +573,6 @@ public:
                     aura->SetMaxDuration(8000);
                     aura->RefreshDuration();
                 }
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(38663);
-                Aura::TryRefreshStackOrCreate(spellInfo, MAX_EFFECT_MASK, me, me);
                 _events.RescheduleEvent(EVENT_LK_BLADESTORM, _bladestormTimer);
                 break;
             }

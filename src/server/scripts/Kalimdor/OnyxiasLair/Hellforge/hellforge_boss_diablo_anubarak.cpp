@@ -180,7 +180,7 @@ public:
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*det*/, SpellSchoolMask) override
     {
-        if (!me->HasAura(SPELL_ANUB_LEECHING_SWARM) && me->HealthBelowPctDamaged(30, damage))
+        if (me->HealthBelowPctDamaged(30, damage) && !me->HasAura(SPELL_ANUB_LEECHING_SWARM))
         {
             _events.CancelEvent(EVENT_ANUB_SUBMERGE);
             DoCastSelf(SPELL_ANUB_LEECHING_SWARM);
@@ -207,6 +207,9 @@ public:
                 auto threatList = me->getThreatManager().getThreatList();
                 for (auto ref : threatList)
                 {
+                    if (!ref->isOnline())
+                        continue;
+
                     Unit* source = ObjectAccessor::GetUnit(*me, ref->getUnitGuid());
                     if (!source)
                         continue;
@@ -286,17 +289,11 @@ public:
             }
             case EVENT_ANUB_IMPALE:
             {
-                std::vector<uint64> selectedGuids;
-                for(uint32 i = 0; i < _impaleCount; ++i)
+                std::list<Unit*> targets;
+                SelectTargetList(targets, _impaleCount, SELECT_TARGET_RANDOM);
+                for (auto& target : targets)
                 {
-                    if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* unit) 
-                    {
-                        return unit && std::find(selectedGuids.begin(), selectedGuids.end(), unit->GetGUID()) == selectedGuids.end() && unit->GetEntry() != NPC_PERMAFROST_TRIGGER;
-                    }))
-                    {
-                        me->SummonCreature(NPC_ANUB_IMPALE_TARGET, target->GetPosition());
-                        selectedGuids.push_back(target->GetGUID());
-                    }
+                    me->SummonCreature(NPC_ANUB_IMPALE_TARGET, target->GetPosition());
                 }
                 _events.RescheduleEvent(EVENT_ANUB_IMPALE, _impaleTimer);
                 break;
@@ -382,25 +379,13 @@ struct boss_hellforge_diablo_anubarak_permafrostAI : public ScriptedAI
             func.Repeat(std::chrono::milliseconds(_frostPulseTimer));
         });
 
-        _scheduler.Schedule(5s, [this](TaskContext func)
-        {
-            if (!_anubGuid)
-                me->DespawnOrUnsummon();
-            if (Creature * anub = ObjectAccessor::GetCreature(*me, _anubGuid))
-            {
-                if (!anub->IsInCombat())
-                    me->DespawnOrUnsummon();
-            }
-            else
-                me->DespawnOrUnsummon();
-        });
-
         me->DespawnOrUnsummon(std::chrono::milliseconds(_despawnTime));
     }
 
     void SetGUID(uint64 guid, int32 /*type*/)
     {
-        _anubGuid = guid;
+        if (Creature * anub = ObjectAccessor::GetCreature(*me, guid))
+            anub->AI()->JustSummoned(me);
     }
 
     void AttackStart(Unit* /*who*/) override { }

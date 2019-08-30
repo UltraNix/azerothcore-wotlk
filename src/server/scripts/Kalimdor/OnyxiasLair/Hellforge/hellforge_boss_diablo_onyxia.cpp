@@ -181,7 +181,7 @@ public:
         _eggs.clear();
     }
 
-    void EnterCombat(Unit* /*victim*/)
+    void EnterCombat(Unit* /*victim*/) override
     {
         DoZoneInCombat();
         _events.ScheduleEvent(EVENT_ONYXIA_FLAMEBREATH, _flameBreathTimerFirst);
@@ -442,7 +442,6 @@ struct npc_hellforge_diablo_onyxian_drakeAI : ScriptedAI
             }
             case EVENT_DRAKE_SHADOW_FISSURE:
             {
-                auto threatList = me->getThreatManager().getThreatList();
                 Unit* target1 = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.f, true);
                 Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* unit) { return unit->GetGUID() != target1->GetGUID(); });
 

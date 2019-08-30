@@ -117,7 +117,7 @@ public:
         DoZoneInCombat();
         me->SummonCreature(NPC_SHADOWCRASH_CASTER, _shadowCrashCasterPosition);
 
-        std::random_shuffle(_crusherTentaclePositions.begin(), _crusherTentaclePositions.end());
+        Trinity::Containers::RandomShuffle(_crusherTentaclePositions);
 
         me->SummonCreature(NPC_CRUSHER_TENTACLE, _crusherTentaclePositions[0]);
         me->SummonCreature(NPC_CRUSHER_TENTACLE, _crusherTentaclePositions[1]);
@@ -312,7 +312,7 @@ struct boss_hellforge_diablo_yogg_constrictor_tentacleAI : public ScriptedAI
                         player->Kill(me, player);
                         Position pos = me->GetPosition();
                         pos.RelocateOffset({ 0.f, 0.f, 10.f });
-                        me->MovePositionToFirstCollision(pos, 100.f, frand(0, 2 * M_PI));
+                        me->MovePositionToFirstCollision(pos, 100.f, Position::RandomOrientation());
                         player->GetMotionMaster()->MoveJump(pos, 40.f, 20.f);
                         me->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                         ScheduleGrabPlayer(false);

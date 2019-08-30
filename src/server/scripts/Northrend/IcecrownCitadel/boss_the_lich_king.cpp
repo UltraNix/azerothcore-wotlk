@@ -2518,7 +2518,10 @@ class spell_the_lich_king_defile : public SpellScriptLoader
                         }
                     }
                     else 
-                        GetCaster()->ToCreature()->DespawnOrUnsummon();
+                    {
+                        if (Creature* creature = GetCaster()->ToCreature())
+                            creature->DespawnOrUnsummon();
+                    }
                 }
                 else
                     GetCaster()->CastSpell(GetCaster(), SPELL_DEFILE_GROW, true);

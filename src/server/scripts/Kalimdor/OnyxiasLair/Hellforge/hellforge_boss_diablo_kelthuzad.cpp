@@ -161,16 +161,14 @@ public:
 
     void EnterEvadeMode() override
     {
-        _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_DUMMY);
-        _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_UNTARGETABLE);
-        _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ICE_TOMB_DAMAGE);
-        _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ASPHYXIATION);
+        for (auto const& spellId : { SPELL_ICE_TOMB_DUMMY, SPELL_ICE_TOMB_UNTARGETABLE, SPELL_ICE_TOMB_DAMAGE, SPELL_ASPHYXIATION })
+            _instance->DoRemoveAurasDueToSpellOnPlayers(spellId);
         _summons.DespawnAll();
 
         ScriptedAI::EnterEvadeMode();
     }
 
-    void EnterCombat(Unit* /*victim*/) 
+    void EnterCombat(Unit* /*victim*/) override
     {
         DoZoneInCombat();
 
@@ -225,6 +223,8 @@ public:
                 val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 200);
                 for (auto ref : threatList)
                 {
+                    if (!ref->isOnline())
+                        continue;
                     Unit* target = ref->getTarget();
                     if (!target)
                         continue;
@@ -270,22 +270,21 @@ public:
 
                 if (!unitList.empty())
                 {
-                    std::vector<Unit*>::iterator itr = unitList.begin();
-                    advance(itr, urand(0, unitList.size() - 1));
-                    me->CastSpell(*itr, SPELL_KEL_DETONATE_MANA, false);
+                    Unit* target = Trinity::Containers::SelectRandomContainerElement(unitList);
+                    if (target)
+                        me->CastSpell(target, SPELL_KEL_DETONATE_MANA, false);
                 }
                 _events.RescheduleEvent(EVENT_KEL_DETONATE_MANA, _detonateManaTimer);
                 break;
             }
             case EVENT_KEL_SHADOW_FISSURE:
             {
-                std::vector<uint64> selectedTargets;
-                for (uint32 i = 0; i < _fissureCount; ++i)
-                    if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* unit) {return !unit->HasAura(SPELL_ICE_TOMB_UNTARGETABLE) && std::find(selectedTargets.begin(), selectedTargets.end(), unit->GetGUID()) == selectedTargets.end(); }))
-                    {
-                        me->CastSpell(target, SPELL_KEL_SHADOW_FISSURE);
-                        selectedTargets.push_back(target->GetGUID());
-                    }
+                std::list<Unit*> targets;
+                SelectTargetList(targets, _fissureCount, SELECT_TARGET_RANDOM, 0.F, true, -SPELL_ICE_TOMB_UNTARGETABLE);
+                for (auto& target : targets)
+                {
+                    me->CastSpell(target, SPELL_KEL_SHADOW_FISSURE);
+                }
                 _events.RescheduleEvent(EVENT_KEL_SHADOW_FISSURE, _shadowFissureTimer);
                 break;
             }
@@ -334,7 +333,7 @@ struct boss_hellforge_diablo_kelthuzad_minionAI : public ScriptedAI
 {
     boss_hellforge_diablo_kelthuzad_minionAI(Creature* c) : ScriptedAI(c) {}
 
-    void Reset()
+    void Reset() override
     {
         _scheduler.CancelAll();
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
@@ -374,7 +373,7 @@ struct boss_hellforge_diablo_kelthuzad_minionAI : public ScriptedAI
         }
     }
 
-    void EnterCombat(Unit* who)
+    void EnterCombat(Unit* who) override
     {
         DoZoneInCombat();
         _scheduler.Schedule(std::chrono::milliseconds(_bloodTapTimer), [&](TaskContext func)
@@ -384,7 +383,7 @@ struct boss_hellforge_diablo_kelthuzad_minionAI : public ScriptedAI
         });
     }
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 diff) override
     {
         if (!UpdateVictim())
             return;
@@ -392,7 +391,7 @@ struct boss_hellforge_diablo_kelthuzad_minionAI : public ScriptedAI
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
         
-        _scheduler.Update();
+        _scheduler.Update(diff);
 
         DoMeleeAttackIfReady();
     }
@@ -410,9 +409,6 @@ struct npc_ice_tombAI : public NullCreatureAI
         _trappedPlayerGUID = 0;
         _existenceCheckTimer = 1000;
     }
-
-    uint64 _trappedPlayerGUID;
-    uint32 _existenceCheckTimer;
 
     void EnterEvadeMode() override { }
 
@@ -445,7 +441,7 @@ struct npc_ice_tombAI : public NullCreatureAI
         }
     }
 
-    void SetGUID(uint64 guid, int32 /*type*/)
+    void SetGUID(uint64 guid, int32 /*type*/) override
     {
         _trappedPlayerGUID = guid;
         _scheduler.Schedule(std::chrono::milliseconds(_asphyxiationTimer), [&](TaskContext /*func*/)
@@ -455,13 +451,13 @@ struct npc_ice_tombAI : public NullCreatureAI
         });
     }
 
-    void DamageTaken(Unit*, uint32& dmg, DamageEffectType, SpellSchoolMask)
+    void DamageTaken(Unit*, uint32& dmg, DamageEffectType, SpellSchoolMask) override
     {
         if (dmg >= me->GetHealth())
             me->m_positionZ = me->GetPositionZ() - 5.0f;
     }
 
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* /*killer*/) override
     {
         me->RemoveAllGameObjects();
 
@@ -475,7 +471,7 @@ struct npc_ice_tombAI : public NullCreatureAI
         }
     }
 
-    void UpdateAI(uint32 diff)
+    void UpdateAI(uint32 diff) override
     {
         if (!_trappedPlayerGUID)
             return;
@@ -501,6 +497,8 @@ struct npc_ice_tombAI : public NullCreatureAI
 private:
     TaskScheduler _scheduler;
     uint32 _asphyxiationTimer;
+    uint64 _trappedPlayerGUID;
+    uint32 _existenceCheckTimer;
 };
 
 struct boss_hellforge_diablo_kelthuzad_fissureAI : public NullCreatureAI
