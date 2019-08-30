@@ -1,7 +1,6 @@
 SET @ENTRY:= 250200;
-SET @GO_ENTRY:= 400800;
 
-DELETE FROM `creature_template` WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 21;
+DELETE FROM `creature_template` WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 23;
 INSERT INTO `creature_template` VALUES
 (@ENTRY, 0, 0, 0, 0, 0, 10992, 0, 0, 0, 'Diablo', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "npc_boss_six_diablo", 12340),
 (@ENTRY + 1, 0, 0, 0, 0, 0, 30039, 0, 0, 0, 'Diablo nether portal', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "", 12340),
@@ -27,7 +26,9 @@ INSERT INTO `creature_template` VALUES
 (@ENTRY + 18, 0, 0, 0, 0, 0, 17890, 0, 0, 0, 'Ashes of alar copy', '', '', 0, 80, 80, 1, 35, 0, 1, 1.14286, 1, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 140, 1, 0, 0, '', 12340),
 (@ENTRY + 19, 0, 0, 0, 0, 0, 19135, 0, 0, 0, 'Onyx netherwing drake copy', '', '', 0, 80, 80, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 0, 'npc_boss_diablo_shadow_drake', 12340),
 (@ENTRY + 20, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo napalam shell trigger', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340),
-(@ENTRY + 21, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo meteor caster', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340);
+(@ENTRY + 21, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo meteor caster', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340),
+(@ENTRY + 22, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Fire elemental spawn in portal trigger', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340),
+(@ENTRY + 23, 0, 0, 0, 0, 0, 22506, 0, 0, 0, 'Shadow Crystal', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 617297919, '', 12340);
 
 UPDATE `creature_template` SET `npcflag` = `npcflag` | 16777216, `VehicleId` = 25, `InhabitType` = 7 WHERE `entry` = @ENTRY + 18;
 UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` IN (@ENTRY + 16, @ENTRY + 17);
@@ -50,7 +51,7 @@ DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID + 0, 250200, 249, 8, 1, 0, 0, -10.9161, -213.238, -87.7776, 3.137, 300, 0, 0, 13945, 4258, 0, 0, 0, 0);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 68147, 64529);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 68147, 64529, 61585);
 INSERT INTO `spell_script_names` VALUES
 (67105, "spell_boss_diablo_nether_portal"),
 (36837, "spell_boss_six_diablo_meteor"),
@@ -60,11 +61,8 @@ INSERT INTO `spell_script_names` VALUES
 (65979, "spell_boss_diablo_flametongue_weapon"),
 (43501, "spell_diablo_siphon_soul"),
 (68147, "spell_boss_diablo_hellfire_effect"),
-(64529, "spell_boss_diablo_plasma_blast");
-
-DELETE FROM `gameobject_template` WHERE `entry` BETWEEN @GO_ENTRY + 0 AND @GO_ENTRY + 10;
-INSERT INTO `gameobject_template` VALUES
-(@GO_ENTRY + 0, 10, 7021, 'CLICK ME', '', '', '', 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_click_me_diablo', 0);
+(64529, "spell_boss_diablo_plasma_blast"),
+(61585, "spell_lightning_marker_visual");
 
 -- pozmieniac GUIDy potem
 DELETE FROM `creature` WHERE `id` = 250200;

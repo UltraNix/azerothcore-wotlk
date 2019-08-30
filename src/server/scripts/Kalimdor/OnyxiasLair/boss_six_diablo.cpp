@@ -31,6 +31,10 @@ enum DiabloSpells
     SPELL_DIABLO_CONVERSION_BEAM            = 69856,
     SPELL_DIABLO_EXPLOSION                  = 52146,
     SPELL_DIABLO_BLUE_EXPLOSION             = 70509,
+    SPELL_DIABLO_PORTAL_STATE_VISUAL        = 46907,
+    SPELL_DIABLO_DEVOURING_FLAME            = 63236,
+    SPELL_DIABLO_LIGHTNING_MARKER_VISUAL    = 61585,
+    SPELL_DIABLO_THUNDERSHOCK               = 56926
 };
 
 enum DiabloCreatures
@@ -52,12 +56,9 @@ enum DiabloCreatures
     NPC_BOSS_SIX_ASHES_OF_ALAR              = 250218,
     NPC_BOSS_SIX_SHADOW_DRAKE               = 250219,
     NPC_BOSS_SIX_NAPALAM_SHELL_TRIGGER      = 250220,
-    NPC_BOSS_SIX_METEOR_CASTER_TRIGGER      = 250221
-};
-
-enum DiabloGameobjects
-{
-    GAMEOBJECT_DIABLO_JUMPER                = 400800
+    NPC_BOSS_SIX_METEOR_CASTER_TRIGGER      = 250221,
+    NPC_BOSS_SIX_PORTAL_TRIGGER_VISUAL      = 250222,
+    NPC_BOSS_SIX_SHADOW_CRYSTAL             = 250223
 };
 
 enum DiabloMisc
@@ -149,7 +150,7 @@ Position const increasedDamageTriggerPositions[INCREASED_DAMAGE_TRIGGER_POSITION
     { -71.761f, -213.107f, -83.74525f }
 };
 
-static const std::vector<Position> shadowDrakePositions =
+static const std::vector<Position> const shadowDrakePositions =
 {
     { -64.555f, -184.492f, -58.58546f, 5.430f },
     { -78.472f, -198.727f, -57.88005f, 5.654f },
@@ -173,9 +174,52 @@ Position const ashesOfAlarSpawnPositions[ASHES_OF_ALAR_POSITION_SIZE] =
     { -31.943f, -171.163f, -86.83335f, 4.758f }
 };
 
+constexpr uint32 FIRE_ELEMENTAL_SPAWN_POSITION_SIZE{ 4 };
+Position const fireelementalsSpawnPositions[FIRE_ELEMENTAL_SPAWN_POSITION_SIZE] =
+{
+    { -73.179f, -231.372f, -83.96888f, 0.160f },
+    { -69.563f, -197.305f, -84.27898f, 6.247f },
+    { 19.7060f, -189.098f, -85.21370f, 3.239f },
+    { 25.9200f, -229.868f, -84.14931f, 3.141f }
+};
+
+static const std::vector<Position> const meteorSpawnPositions =
+{
+    { -3.7960f, -239.020f, -87.30614f, 1.292f },
+    { -3.2450f, -229.691f, -86.86133f, 1.512f },
+    { -2.6790f, -216.861f, -86.39458f, 1.559f },
+    { -2.6160f, -207.516f, -86.30782f, 1.571f },
+    { -3.1250f, -198.811f, -86.97971f, 1.810f },
+    { -7.2210f, -188.621f, -87.55802f, 2.541f },
+    { -17.114f, -185.088f, -88.04424f, 4.650f },
+    { -14.690f, -195.835f, -88.02670f, 4.673f },
+    { -16.267f, -207.947f, -88.48183f, 4.583f },
+    { -17.334f, -221.896f, -88.60110f, 4.677f },
+    { -19.046f, -234.590f, -88.46857f, 4.591f },
+    { -20.401f, -245.602f, -88.36201f, 4.591f },
+    { -59.238f, -241.401f, -85.22026f, 2.494f },
+    { -71.205f, -228.914f, -83.89588f, 2.011f },
+    { -72.345f, -204.387f, -83.71380f, 1.292f },
+    { -57.967f, -193.932f, -85.24558f, 6.220f },
+    { -55.565f, -210.649f, -85.34544f, 4.673f },
+    { -59.705f, -221.177f, -84.90156f, 5.353f },
+    { -43.628f, -225.143f, -86.17281f, 6.017f },
+    { -45.339f, -204.437f, -86.15733f, 0.146f },
+    { 6.08100f, -216.623f, -86.07436f, 5.585f },
+    { 6.14300f, -232.239f, -86.36105f, 4.474f },
+    { 4.44800f, -243.770f, -86.45892f, 4.552f },
+    { 7.88500f, -201.638f, -86.18610f, 1.587f },
+    { 6.12300f, -185.470f, -86.33523f, 1.917f },
+    { -51.400f, -217.346f, -85.81856f, 4.631f },
+    { -20.778f, -175.197f, -87.85326f, 3.931f },
+    { -46.091f, -186.474f, -86.44711f, 3.621f },
+    { -53.845f, -188.988f, -85.63702f, 3.432f }
+};
+
 Position const _dummyFacingPosition{ -54.503f, -212.654f, -85.46500f, 6.268f };
 Position const _centerOfFightingArea{ -28.712f, -213.297f, -89.08712f, 6.233f };
 Position const _shadowRealmExitPosition{ -43.299423f, -216.492767f, -86.663925f, -0.012966f };
+constexpr uint32 AMOUNT_OF_DRAKES_REQUIRED{ 4 };
 
 // ID - 54111 Summon Target Visual spell pod aure od dmg buff
 // ID - 46907 Boss Fel Portal State fajny portal visual
@@ -198,9 +242,19 @@ struct npc_boss_six_diablo_AI : public BossAI
     npc_boss_six_diablo_AI(Creature* creature) : BossAI(creature, DATA_DIABLO)
     {
         _myShadowDrakePositions = shadowDrakePositions;
-        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.f);
+        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 6.5f);
         scheduler.ClearValidator();
         me->SetCanMissSpells(false);
+    }
+
+    bool CanEventExecute()
+    {
+        if (Spell* spell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+            if (SpellInfo const* spellInfo = spell->GetSpellInfo())
+                if (spellInfo->Id == 64487)
+                    return false;
+
+        return true;
     }
 
     void JustSummoned(Creature* summon) override
@@ -224,8 +278,13 @@ struct npc_boss_six_diablo_AI : public BossAI
 
             for (auto const& entry : { NPC_BOSS_SIX_INCREASED_DAMAGE_TRIGGER, NPC_BOSS_SIX_HEART_BEAM_TRIGGER, NPC_BOSS_SIX_FIERY_COMET_TRIGGER })
                 summons.DespawnEntry(entry);
+            SchedulePhaseOneAbilities();
+            scheduler.Schedule(10s, [this](TaskContext /*func*/)
+            {
+                SpawnFirebeamTriggers();
+            });
         }
-        else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_DRAKE && ++_drakesDead >= 2/*config*/)
+        else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_DRAKE && ++_drakesDead >= AMOUNT_OF_DRAKES_REQUIRED)
         {
             for (auto const& guid : summons)
             {
@@ -243,6 +302,19 @@ struct npc_boss_six_diablo_AI : public BossAI
                 }
             }
         }
+        else if (summon->GetEntry() == NPC_BOSS_SIX_OMOR_COPY)
+        {
+            if (!me->FindNearestCreature(NPC_BOSS_SIX_OMOR_COPY, 300.f))
+            {
+                me->AttackStop();
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetAggressive();
+                DoZoneInCombat(me, 200.f);
+                SchedulePhaseOneAbilities();
+            }
+        }
+        else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_CRYSTAL)
+            DrawPentagram();
     }
 
     void OnMeleeAttack(VictimState state, WeaponAttackType attType, Unit* victim) override
@@ -281,12 +353,16 @@ struct npc_boss_six_diablo_AI : public BossAI
         _intermission = false;
         me->SetVisible(true);
         me->SetAggressive();
-        if (Creature* trigger = me->SummonCreature(NPC_BOSS_SIX_METEOR_CASTER_TRIGGER, me->GetPosition()))
+        if (Creature* trigger = me->SummonCreature(NPC_BOSS_SIX_METEOR_CASTER_TRIGGER, me->GetHomePosition()))
         {
             trigger->SetSelectable(false);
             trigger->SetPassive();
             _meteorTriggerGUID = trigger->GetGUID();
         }
+
+        _knockbackOrShadowstep = false;
+        _napalmShellCount = 1;
+        _readjustNapalmShells = false;
     }
 
     uint64 GetGUID(int32 /*data*/) const override
@@ -305,16 +381,21 @@ struct npc_boss_six_diablo_AI : public BossAI
         if (me->HealthBelowPctDamaged(20, damage) && !_elementalPhase)
         {
             _elementalPhase = true;
-            HandleFireElementals();
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_1, true);
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_2, true);
             return;
         }
 
+        if (me->HealthBelowPctDamaged(30, damage) && !_readjustNapalmShells)
+        {
+            _readjustNapalmShells = true;
+            _napalmShellCount = 3;
+        }
+
         if (me->HealthBelowPctDamaged(50, damage) && !_intermission)
         {
             _intermission = true;
-            me->MonsterYell("Super add piootrka sie zrespi teraz", LANG_UNIVERSAL, nullptr);
+            me->MonsterYell("Super add piootrka sie zrespi teraz, beda addy to dorobie jego stanie na srodku i cast co napisales na githubie", LANG_UNIVERSAL, nullptr);
             SchedulePhaseTwoAbilities();
             return;
         }
@@ -333,15 +414,6 @@ struct npc_boss_six_diablo_AI : public BossAI
                 HandleTriggerCharge(target, who);
             }
         }
-    }
-
-    void MovementInform(uint32 type, uint32 pointId) override
-    {
-        if (type != POINT_MOTION_TYPE)
-            return;
-
-        if (pointId == POINT_ID_DIABLO_FIREBEAMS)
-            SpawnFirebeamTriggers();
     }
 
     void HandleShadowstep()
@@ -386,7 +458,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         scheduler.Schedule(1s, [this](TaskContext func)
         {
-            for (uint32 i = 0; i < 10; ++i)
+            for (uint32 i = 0; i < _napalmShellCount; ++i)
             {
                 Position spawnPosition = Trinity::Containers::SelectRandomContainerElement(_diabloRandomSpawnPositions);
                 spawnPosition.m_positionZ += 15.f;
@@ -395,21 +467,16 @@ struct npc_boss_six_diablo_AI : public BossAI
                 {
                     trigger->SetSelectable(false);
                     trigger->SetImmuneToPC(true);
-                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 300.f, true);
+                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
+                    {
+                        return object->ToPlayer() && !object->GetVehicleBase();
+                    });
                     if (target)
                         trigger->CastSpell(target, SPELL_DIABLO_NAPALM_SHELL, true, NullItemRef, (AuraEffect*)nullptr, me->GetGUID());
                     trigger->DespawnOrUnsummon(6s);
                 };
             }
-
-            func.Repeat(6s);
         });
-    }
-
-    void SetData(uint32 type, uint32 value) override
-    {
-        if (type == DATA_JUMPER_CLICKED && value == DATA_JUMPER_CLICKED)
-            DrawPentagram();
     }
 
     void AttackStart(Unit* who) override
@@ -429,6 +496,16 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void EnterEvadeMode() override
     {
+        auto& players = me->GetMap()->GetPlayers();
+        for (auto && source : players)
+        {
+            if (Player* player = source.GetSource())
+            {
+                if (!player->IsGameMaster() && player->IsAlive())
+                    Unit::Kill(me, player);
+            }
+        }
+
         CleanupShadowRealm();
         BossAI::EnterEvadeMode();
     }
@@ -439,7 +516,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
 
         scheduler.Update(diff);
-        if (me->IsVisible())
+        if (!me->IsPassive())
             DoMeleeAttackIfReady();
     }
 
@@ -447,13 +524,22 @@ struct npc_boss_six_diablo_AI : public BossAI
     void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
     {
         if (caster && caster->GetEntry() == NPC_BOSS_SIX_ASHES_OF_ALAR && spellInfo->Id == 21667)
+        {
             if (me->IsCasting())
+            {
+                me->SetAggressive();
+                me->AttackStop();
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveIdle();
+                DoZoneInCombat(me, 250.f);
                 me->CastStop();
+            }
+        }
     }
 
     void SchedulePhaseOneAbilities()
     {
-        scheduler.Schedule(45s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext /*func*/)
+        scheduler.Schedule(70s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext /*func*/)
         {
             BeginShadowRealm();
             //! re-scheduled when previous add dies
@@ -478,20 +564,29 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         scheduler.Schedule(6s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
         {
-            HandleKnockbackPlayer();
-            func.Repeat(17s);
+            if (CanEventExecute())
+            {
+                if (_knockbackOrShadowstep)
+                    HandleKnockbackPlayer();
+                else
+                    HandleShadowstep();
+
+                _knockbackOrShadowstep = !_knockbackOrShadowstep;
+            }
+
+            func.Repeat(12s);
         });
 
-        scheduler.Schedule(15s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
-        {
-            HandleShadowstep();
-            func.Repeat(18s);
-        });
 
         scheduler.Schedule(5s, [this](TaskContext func)
         {
-            HandleNapalmShells();
-            func.Repeat(5s);
+            auto repeatTime = 8s;
+            if (!CanEventExecute())
+                repeatTime = 10s;
+            else
+                HandleNapalmShells();
+
+            func.Repeat(repeatTime);
         });
 
         scheduler.Schedule(20s, [this](TaskContext func)
@@ -502,29 +597,25 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         scheduler.Schedule(45s, [this](TaskContext func)
         {
-            HandlePlasmaRay();
+            auto repeatTimer = 45s;
+            if (!CanEventExecute())
+                repeatTimer = 5s;
+            else
+                HandlePlasmaRay();
+
             func.Repeat(45s);
         });
 
-        scheduler.Schedule(25s, [this](TaskContext func)
+        scheduler.Schedule(6s, [this](TaskContext func)
         {
             HandlePheonixPhase();
-            func.Repeat(25s);
+            func.Repeat(90s);
         });
     }
 
     //! Spawn wave of adds when fight begins
     void SpawnInitialAdds()
     {
-        scheduler.Schedule(20s, [this](TaskContext func)
-        {
-            me->AttackStop();
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            me->SetAggressive();
-            DoZoneInCombat(me, 200.f);
-            SchedulePhaseOneAbilities();
-        });
-
         scheduler.Schedule(5s, [this](TaskContext func)
         {
             for (auto pos : netherPortalSpawnPosition)
@@ -635,13 +726,13 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS);
+            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->GetVehicleBase();
         });
+
         if (!target)
             return;
 
-        target->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), 0.1f, 45.f);
-        target->CastSpell(target, SPELL_DIABLO_BUFFETTING_WINDS, true);
+        me->AddAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL, target);
     }
 
     /** Shadow realm handling **/
@@ -656,7 +747,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         me->AddAura(SPELL_DIABLO_REALM_OF_SHADOWS, target);
         _shadowRealmTargetGUID = target->GetGUID();
 
-        SpawnShadowrealmJumpers();
+        SpawnShadowrealm();
         SpawnPentagramTriggers();
 
         scheduler.Schedule(30s, GROUP_DIABLO_CANCELABLE, [this](TaskContext func)
@@ -682,28 +773,21 @@ struct npc_boss_six_diablo_AI : public BossAI
         _pentagramTriggerGUIDs.clear();
         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DIABLO_SELF_STUN);
         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_DIABLO_REALM_OF_SHADOWS);
-        DespawnPreviousJumpers();
+        summons.DespawnEntry(NPC_BOSS_SIX_SHADOW_CRYSTAL);
     }
 
-    void DespawnPreviousJumpers()
+    void SpawnShadowrealm()
     {
-        for (auto && ref : _jumperGUIDs)
+        for (uint32 i = 0; i < PENTAGON_TRIGGER_POSITION_SIZE; ++i)
         {
-            if (GameObject* go = ObjectAccessor::GetGameObject(*me, ref))
-                go->Delete();
-        }
+            Position _spawnPos = pentagonSpawnPositions[i];
+            _spawnPos.m_positionZ = me->GetMap()->GetHeight(_spawnPos.GetPositionX(), _spawnPos.GetPositionY(), _spawnPos.GetPositionZ(), true, 100.f);
 
-        _jumperGUIDs.clear();
-    }
-
-    void SpawnShadowrealmJumpers()
-    {
-        for (uint32 i = 0; i < 5; ++i)
-        {
-            if (GameObject* go = me->SummonGameObject(GAMEOBJECT_DIABLO_JUMPER, Trinity::Containers::SelectRandomContainerElement(_diabloRandomSpawnPositions), 0.f, 0.f, 0.f, 0.f, 0, false))
+            if (Creature* shadowCrystal = me->SummonCreature(NPC_BOSS_SIX_SHADOW_CRYSTAL, _spawnPos))
             {
-                go->SetPhaseMask(32, true);
-                _jumperGUIDs.push_back(go->GetGUID());
+                shadowCrystal->SetPassive();
+                shadowCrystal->SetCanFly(true);
+                shadowCrystal->SetPhaseMask(32, true);
             }
         }
     }
@@ -870,26 +954,33 @@ struct npc_boss_six_diablo_AI : public BossAI
         }
     }
 
-    void HandleFireBeam()
-    {
-        me->GetMotionMaster()->Clear();
-        me->GetMotionMaster()->MoveIdle();
-        me->SetPassive();
-        me->GetMotionMaster()->MovePoint(POINT_ID_DIABLO_FIREBEAMS, _shadowRealmExitPosition);
-    }
-
     void HandleFireElementals()
     {
-        for (uint32 i = 0; i < 5; ++i)
+        for (auto const& pos : fireelementalsSpawnPositions)
         {
-            Position pos = Trinity::Containers::SelectRandomContainerElement(_diabloRandomSpawnPositions);
-            me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos);
+            if (Creature* portal = me->SummonCreature(NPC_BOSS_SIX_PORTAL_TRIGGER_VISUAL, pos))
+            {
+                portal->SetImmuneToAll(true);
+                portal->SetPassive();
+                portal->SetSelectable(false);
+                portal->CastSpell(portal, SPELL_DIABLO_PORTAL_STATE_VISUAL, true);
+                portal->DespawnOrUnsummon(5s);
+            }
         }
+
+        scheduler.Schedule(3s, [this](TaskContext)
+        {
+            for (auto const& pos : fireelementalsSpawnPositions)
+                me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos);
+        });
     }
 
     void HandlePlasmaRay()
     {
-        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, 300.f, true))
+        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
+        {
+            return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+        }))
         {
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
@@ -900,18 +991,30 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void HandlePheonixPhase()
     {
-        CustomSpellValues val;
-        me->MonsterYell("Testowy spell, testowy cast time", LANG_UNIVERSAL, nullptr);
-        val.AddSpellMod(SPELLVALUE_MODIFY_CAST_TIME, 60000);
-        me->CastCustomSpell(64487, val, (Unit*)nullptr);
-        _drakesDead = 0;
+        _drakesDead = 0; // config
         me->AttackStop();
         me->SetPassive();
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
         for (auto const& entry : { NPC_BOSS_SIX_ASHES_OF_ALAR, NPC_BOSS_SIX_SHADOW_DRAKE })
             summons.DespawnEntry(entry);
-        me->MonsterYell("ILE TYCH MOBOW TU MA BYC?", LANG_UNIVERSAL, nullptr);
+
+        scheduler.Schedule(35s, [this](TaskContext)
+        {
+            CustomSpellValues val;
+            val.AddSpellMod(SPELLVALUE_MODIFY_CAST_TIME, 15000);
+            me->CastCustomSpell(64487, val, (Unit*)nullptr);
+        });
+
+        scheduler.Schedule(51s, [this](TaskContext)
+        {
+            me->SetAggressive();
+            me->AttackStop();
+            me->GetMotionMaster()->Clear();
+            me->GetMotionMaster()->MoveIdle();
+            DoZoneInCombat(me, 250.f);
+        });
+
         for (auto i = 0; i < 2; ++i)
         {
             if (Creature* phoenix = me->GetMap()->SummonCreature(NPC_BOSS_SIX_ASHES_OF_ALAR, ashesOfAlarSpawnPositions[i]))
@@ -926,7 +1029,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             }
         }
 
-        for (uint32 i = 0; i < 2; ++i)
+        for (uint32 i = 0; i < AMOUNT_OF_DRAKES_REQUIRED; ++i)
         {
             if (Creature* drake = me->SummonCreature(NPC_BOSS_SIX_SHADOW_DRAKE, _myShadowDrakePositions[i]))
             {
@@ -941,13 +1044,15 @@ private:
     bool _shadowRealmSucceeded;
     uint32 _pentagramIndex;
     std::vector<uint64> _pentagramTriggerGUIDs;
-    std::vector<uint64> _jumperGUIDs;
     uint64 _shadowRealmTargetGUID;
     bool _elementalPhase;
     bool _intermission;
     std::vector<Position> _myShadowDrakePositions;
     uint32 _drakesDead;
     uint64 _meteorTriggerGUID;
+    bool _knockbackOrShadowstep;
+    uint32 _napalmShellCount;
+    bool _readjustNapalmShells;
 };
 
 enum DemonSpells
@@ -1102,6 +1207,7 @@ struct npc_boss_diablo_playerclone : public ScriptedAI
     npc_boss_diablo_playerclone(Creature* creature) : ScriptedAI(creature)
     {
         _instance = me->GetInstanceScript();
+        _myMeteorSpawnPositions = meteorSpawnPositions;
     }
 
     void Reset() override { }
@@ -1121,7 +1227,10 @@ struct npc_boss_diablo_playerclone : public ScriptedAI
 
                 if (player && diablo)
                 {
-                    if (Creature* trigger = player->SummonCreature(NPC_BOSS_SIX_FIERY_COMET_TRIGGER, Trinity::Containers::SelectRandomContainerElement(_diabloRandomSpawnPositions)))
+                    Trinity::Containers::RandomShuffle(_myMeteorSpawnPositions);
+                    Position pos = _myMeteorSpawnPositions.front();
+
+                    if (Creature* trigger = player->SummonCreature(NPC_BOSS_SIX_FIERY_COMET_TRIGGER, pos))
                     {
                         diablo->AI()->JustSummoned(trigger);
                         trigger->SetCanFly(true);
@@ -1142,32 +1251,7 @@ struct npc_boss_diablo_playerclone : public ScriptedAI
 private:
     InstanceScript* _instance;
     TaskScheduler _scheduler;
-};
-
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
-struct go_click_me_diablo : public GameObjectAI
-{
-    go_click_me_diablo(GameObject* go) : GameObjectAI(go)
-    {
-        _instance = go->GetInstanceScript();
-        _clicked = false;
-    }
-
-    bool GossipHello(Player* player, bool /*reportUse*/) override
-    {
-#pragma message(CompileMessage "tu ma sie spawnic clicker nad tym GO, ktory gracz musi clicknac")
-        if (_clicked)
-            return false;
-
-        _clicked = true;
-        //player->KnockbackFrom(go->GetPositionX(), go->GetPositionY(), 0.1f, 25.f);
-        if (Creature* diablo = _instance->GetCreature(DATA_DIABLO))
-            diablo->AI()->SetData(DATA_JUMPER_CLICKED, DATA_JUMPER_CLICKED);
-        return false;
-    }
-private:
-    InstanceScript* _instance;
-    bool _clicked;
+    std::vector<Position> _myMeteorSpawnPositions;
 };
 
 class spell_boss_diablo_nether_portal_AuraScript : public AuraScript
@@ -1632,24 +1716,26 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
         me->GetMotionMaster()->MoveTargetedHome(); // call any motionmaster so they do not fall to the ground instantly
         ScriptedAI::IsSummonedBy(summoner);
         DoZoneInCombat(me, 250.f);
+        ScheduleAttacks();
     }
 
-    void EnterCombat(Unit* who) override
+    void ScheduleAttacks()
     {
         _scheduler.Schedule(2s, [this](TaskContext func)
         {
-            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, 250.f, true);
+            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
+            {
+                return object->IsPlayer() && !object->GetVehicleBase();
+            });
+
             if (target)
             {
-                Creature* vehicleBase = target->GetVehicleCreatureBase();
-                std::cout << "vehicleBase to : " << (vehicleBase ? "pointer" : "null pointer") << std::endl;
-                //46161
                 CustomSpellValues val;
                 val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 300.f);
-                me->CastCustomSpell(46161, val, vehicleBase ? vehicleBase : target);
+                me->CastCustomSpell(SPELL_DIABLO_DEVOURING_FLAME, val, target);
             }
 
-            func.Repeat(3s);
+            func.Repeat(5s);
         });
     }
 
@@ -1743,6 +1829,66 @@ class spell_boss_diablo_plasma_blast : public AuraScript
     }
 };
 
+class spell_lightning_marker_visual : public AuraScript
+{
+    PrepareAuraScript(spell_lightning_marker_visual);
+
+    void OnEffectRemoved(AuraEffect const* aurEff, AuraEffectHandleModes mode)
+    {
+        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        {
+            Unit* target = GetTarget();
+            InstanceScript* instance = target->GetInstanceScript();
+            Creature* diablo = nullptr;
+            if (instance)
+                diablo = instance->GetCreature(DATA_DIABLO);
+
+            if (diablo)
+            {
+                CustomSpellValues val;
+                val.AddSpellMod(SPELLVALUE_BASE_POINT0, 15000 /*config*/);
+                val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 400.f);
+                diablo->CastCustomSpell(SPELL_DIABLO_THUNDERSHOCK, val, target, TRIGGERED_FULL_MASK);
+            }
+
+            target->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), 0.1f, 45.f);
+            target->CastSpell(target, SPELL_DIABLO_BUFFETTING_WINDS, true);
+
+            std::list<Player*> targets;
+            Trinity::AnyPlayerInObjectRangeCheck check(target, 10.f, true);
+            Trinity::PlayerListSearcherWithSharedVision<Trinity::AnyPlayerInObjectRangeCheck> searcher(target, targets, check);
+            target->VisitNearbyWorldObject(10.f, searcher);
+            targets.remove_if([&target](Player* _ref)
+            {
+                return _ref->GetGUID() == target->GetGUID();
+            });
+
+            for (auto && player : targets)
+            {
+                if (player->IsGameMaster() || player->isDead())
+                    continue;
+
+                if (player->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS))
+                    continue;
+
+                if (player->GetVehicleBase())
+                    continue;
+
+                if (player->HasAura(SPELL_DIABLO_BUFFETTING_WINDS))
+                    continue;
+
+
+                player->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), 0.1f, 45.f);
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectRemove += AuraEffectRemoveFn(spell_lightning_marker_visual::OnEffectRemoved, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void AddSC_hellforge_boss_six()
 {
     new CreatureAILoader<npc_boss_six_diablo_AI>("npc_boss_six_diablo");
@@ -1756,7 +1902,6 @@ void AddSC_hellforge_boss_six()
     new CreatureAILoader<npc_boss_diablo_fire_elementals>("npc_boss_diablo_fire_elementals");
     new CreatureAILoader<npc_boss_player_flame_sphere>("npc_boss_player_flame_sphere");
     new CreatureAILoader<npc_boss_diablo_shadow_drake>("npc_boss_diablo_shadow_drake");
-    new GameObjectAILoader<go_click_me_diablo>("go_click_me_diablo");
 
     new AuraScriptLoaderEx<spell_boss_diablo_nether_portal_AuraScript>("spell_boss_diablo_nether_portal");
     new SpellScriptLoaderEx<spell_boss_six_diablo_meteor>("spell_boss_six_diablo_meteor");
@@ -1767,4 +1912,5 @@ void AddSC_hellforge_boss_six()
     new AuraScriptLoaderEx<spell_diablo_siphon_soul>("spell_diablo_siphon_soul");
     new AuraScriptLoaderEx<spell_boss_diablo_hellfire_effect>("spell_boss_diablo_hellfire_effect");
     new AuraScriptLoaderEx<spell_boss_diablo_plasma_blast>("spell_boss_diablo_plasma_blast");
+    new AuraScriptLoaderEx<spell_lightning_marker_visual>("spell_lightning_marker_visual");
 }
