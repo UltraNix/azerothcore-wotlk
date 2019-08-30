@@ -150,7 +150,7 @@ Position const increasedDamageTriggerPositions[INCREASED_DAMAGE_TRIGGER_POSITION
     { -71.761f, -213.107f, -83.74525f }
 };
 
-static const std::vector<Position> const shadowDrakePositions =
+static const std::vector<Position> shadowDrakePositions =
 {
     { -64.555f, -184.492f, -58.58546f, 5.430f },
     { -78.472f, -198.727f, -57.88005f, 5.654f },
@@ -183,7 +183,7 @@ Position const fireelementalsSpawnPositions[FIRE_ELEMENTAL_SPAWN_POSITION_SIZE] 
     { 25.9200f, -229.868f, -84.14931f, 3.141f }
 };
 
-static const std::vector<Position> const meteorSpawnPositions =
+static const std::vector<Position> meteorSpawnPositions =
 {
     { -3.7960f, -239.020f, -87.30614f, 1.292f },
     { -3.2450f, -229.691f, -86.86133f, 1.512f },
