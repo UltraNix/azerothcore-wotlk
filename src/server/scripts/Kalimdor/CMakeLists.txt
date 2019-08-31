@@ -106,6 +106,7 @@ set(scripts_STAT_SRCS
   Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_anubarak.cpp
   Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_lichking.cpp
   Kalimdor/OnyxiasLair/Hellforge/hellforge_boss_diablo_yogg.cpp
+  Kalimdor/OnyxiasLair/Hellforge/hellforge_npc_diablo_wanderer.cpp
   Kalimdor/RagefireChasm/instance_ragefire_chasm.cpp
   Kalimdor/DireMaul/instance_dire_maul.cpp
   Kalimdor/DireMaul/dire_maul.h
