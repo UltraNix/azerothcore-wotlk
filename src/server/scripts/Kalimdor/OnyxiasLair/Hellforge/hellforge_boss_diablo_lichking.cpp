@@ -49,6 +49,8 @@ enum DiabloLichKingData
     SPELL_VALKYR_CARRY              = 74445,
     SPELL_EJECT_ALL_PASSENGERS      = 68576,
 
+    ACTION_PLAYER_KILLED            = 1,
+
     STAT_LK_HEALTH                  = 971,
     STAT_LK_MEELE_DMG               = 972,
     STAT_LK_INFEST_TIMER            = 973,
@@ -173,6 +175,7 @@ public:
 
     void EnterCombat(Unit* /*victim*/)
     {
+        me->MonsterYell("How is this possible? I've been summoned? You will regret it...", LANG_UNIVERSAL, me);
         DoZoneInCombat();
         _events.ScheduleEvent(EVENT_LK_DEFILE, _defileTimerFirst);
         _events.ScheduleEvent(EVENT_LK_INFEST, _infestTimerFirst);
@@ -189,7 +192,23 @@ public:
 
     void JustDied(Unit* /*killer*/) override
     {
+        me->MonsterYell("I... I failed you father...", LANG_UNIVERSAL, me);
         _summons.DespawnAll();
+    }
+
+    void DoAction(int32 action) override
+    {
+        if (action == ACTION_PLAYER_KILLED)
+        {
+            if(!urand(0,3))
+                me->MonsterYell(urand(0,1) ? "The end has come!" : "Begone!", LANG_UNIVERSAL, me);
+        }
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            DoAction(ACTION_PLAYER_KILLED);
     }
 
     void UpdateAI(uint32 diff) override
@@ -208,6 +227,7 @@ public:
             {
                 if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.f, true, -SPELL_VALKYR_TARGET_SEARCH))
                 {
+                    me->MonsterYell("Are you ready for reversed one?", LANG_UNIVERSAL, me);
                     Position pos = target->GetPosition();
                     pos.RelocateOffset({ 0.f, 0.f, 1.f });
                     if (Creature * defile = me->SummonCreature(NPC_LK_DEFILE, pos))
@@ -242,6 +262,7 @@ public:
             }
             case EVENT_LK_SPAWN_VALKYR:
             {
+                me->MonsterYell("Val'kyr, your master calls! Take them to Diablo!", LANG_UNIVERSAL, me);
                 me->SummonCreature(NPC_LK_VALKYR_SHADOWGUARD, _valkyrSpawnPosition);
                 _events.RescheduleEvent(EVENT_LK_SPAWN_VALKYR, _spawnValkyrTimer);
                 break;
@@ -511,6 +532,15 @@ public:
         _summons.Summon(summon);
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+        {
+            if(Creature* lichking = me->GetSummoner())
+                lichking->GetAI()->DoAction(ACTION_PLAYER_KILLED);
+        }
+    }
+
     void IsSummonedBy(Unit* /*summoner*/)
     {
         if (Unit * target = me->SelectNearestPlayer(100.f))
@@ -668,6 +698,7 @@ struct boss_hellforge_diablo_lk_coldflameAI : public ScriptedAI
         {
             lichKing->AI()->JustSummoned(me);
         }
+        _lichKingGUID = guid;
     }
 
     void UpdateAI(uint32 diff)
@@ -675,8 +706,18 @@ struct boss_hellforge_diablo_lk_coldflameAI : public ScriptedAI
         _scheduler.Update(diff);
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+        {
+            if (Creature * lichking = ObjectAccessor::GetCreature(*me, _lichKingGUID))
+                lichking->GetAI()->DoAction(ACTION_PLAYER_KILLED);
+        }
+    }
+
 private:
     TaskScheduler _scheduler;
+    uint64 _lichKingGUID;
 };
 
 struct boss_hellforge_diablo_lk_defileAI : ScriptedAI

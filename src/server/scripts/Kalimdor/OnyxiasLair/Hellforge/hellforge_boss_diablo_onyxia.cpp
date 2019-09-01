@@ -34,6 +34,8 @@ enum DiabloOnyxiaData
 
     GO_ONYXIA_EGG                       = 177807,
 
+    ACTION_PLAYER_KILLED                = 1,
+
     STAT_ONYXIA_HEALTH                  = 938,
     STAT_ONYXIA_MEELE_DMG               = 939,
     STAT_ONYXIA_FLAMEBREATH_TIMER       = 940,
@@ -183,6 +185,7 @@ public:
 
     void EnterCombat(Unit* /*victim*/) override
     {
+        me->MonsterYell("Who dares to summon me!", LANG_UNIVERSAL, me);
         DoZoneInCombat();
         _events.ScheduleEvent(EVENT_ONYXIA_FLAMEBREATH, _flameBreathTimerFirst);
         _events.ScheduleEvent(EVENT_ONYXIA_TAILSWEEP, _tailSweepTimer);
@@ -205,6 +208,13 @@ public:
         }
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        DoAction(ACTION_PLAYER_KILLED);
+    }
+
     void JustSummoned(Creature* creature) override
     {
         _summons.Summon(creature);
@@ -212,7 +222,19 @@ public:
 
     void JustDied(Unit* /*killer*/) override
     {
+        me->MonsterYell("This cannot be... not again...", LANG_UNIVERSAL, me);
         _summons.DespawnAll();
+    }
+    
+    void DoAction(int32 action) override
+    {
+        if (action == ACTION_PLAYER_KILLED)
+        {
+            if (!urand(0, 3))
+            {
+                me->MonsterYell(urand(0, 1) ? "Learn your place, mortal!" : "Worthless wretch! Your friends will join you soon enough!", LANG_UNIVERSAL, me);
+            }
+        }
     }
 
     void UpdateAI(uint32 diff) override
@@ -229,6 +251,7 @@ public:
         {
             case EVENT_ONYXIA_FLAMEBREATH: 
             {
+                me->MonsterYell("Burn, you rats! Burn!", LANG_UNIVERSAL, me);
                 if (Unit * victim = me->GetVictim())
                     me->CastCustomSpell(SPELL_ONYXIA_FLAMEBREATH, SPELLVALUE_BASE_POINT0, _flameBreathDMG, victim);
                 _events.RescheduleEvent(EVENT_ONYXIA_FLAMEBREATH, _flameBreathTimer);
@@ -266,6 +289,8 @@ public:
                     _events.PopEvent();
                     break;
                 }
+
+                me->MonsterYell("Rise!", LANG_UNIVERSAL, me);
 
                 uint64 eggGuid = Trinity::Containers::SelectRandomContainerElement(_eggs);
                 GameObject* egg = ObjectAccessor::GetGameObject(*me, eggGuid);
@@ -391,6 +416,14 @@ struct npc_hellforge_diablo_onyxian_drakeAI : ScriptedAI
                 
             }
         }
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Unit * onyxia = me->GetSummoner())
+            onyxia->GetAI()->DoAction(ACTION_PLAYER_KILLED);
     }
 
     void EnterCombat(Unit* /*victim*/) override

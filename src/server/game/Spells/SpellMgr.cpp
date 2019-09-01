@@ -6215,7 +6215,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64147: // crush
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_15_YARDS;
             break;
-        case 60835: // Shadow crash for Hellforge Diablo
+        case 60849: // Shadow crash for Hellforge Diablo
             spellInfo->AttributesEx6 |= (SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE);
             break;
         // ALGALON

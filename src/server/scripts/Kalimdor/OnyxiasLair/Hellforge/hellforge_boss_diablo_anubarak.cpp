@@ -53,10 +53,11 @@ enum DiabloAnubarakData
 struct boss_hellforge_diablo_anubarakAI : public ScriptedAI
 {
 public:
-    boss_hellforge_diablo_anubarakAI(Creature* creature) : ScriptedAI(creature), _summons(creature), _instance(me->GetInstanceScript()){ }
+    boss_hellforge_diablo_anubarakAI(Creature* creature) : ScriptedAI(creature), _summons(creature), _instance(me->GetInstanceScript()), _leechingSwarmCasted(false) { }
 
     void Reset() override
     {
+        _leechingSwarmCasted = false;
         _events.Reset();
         DoCastSelf(SPELL_SHADOW_FORM);
         me->SetSelectable(true);
@@ -160,6 +161,7 @@ public:
         DoZoneInCombat();
         ScheduleCombatEvents(true);
         _events.ScheduleEvent(EVENT_ANUB_SUBMERGE, _submergeTimer);
+        me->MonsterYell("I remember you... die!", LANG_UNIVERSAL, me);
     }
 
     void ScheduleCombatEvents(bool first = false)
@@ -180,10 +182,12 @@ public:
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*det*/, SpellSchoolMask) override
     {
-        if (me->HealthBelowPctDamaged(30, damage) && !me->HasAura(SPELL_ANUB_LEECHING_SWARM))
+        if (me->HealthBelowPctDamaged(30, damage) && !_leechingSwarmCasted)
         {
+            _leechingSwarmCasted = true;
             _events.CancelEvent(EVENT_ANUB_SUBMERGE);
             DoCastSelf(SPELL_ANUB_LEECHING_SWARM);
+            me->MonsterYell("The pestilence upon you!", LANG_UNIVERSAL, me);
         }
     }
 
@@ -270,6 +274,7 @@ public:
             }
             case EVENT_ANUB_SUBMERGE:
             {
+                me->MonsterYell("Auum na-l ak-k-k-k, isshhh. Devour...", LANG_UNIVERSAL, me);
                 me->SetSelectable(false);
                 DoCastSelf(SPELL_ANUB_SUBMERGE);
                 _events.Reset();
@@ -279,6 +284,7 @@ public:
             }
             case EVENT_ANUB_EMERGE:
             {
+                me->MonsterYell("Feast on your flesh!", LANG_UNIVERSAL, me);
                 me->RemoveAura(SPELL_ANUB_SUBMERGE);
                 DoCastSelf(SPELL_ANUB_EMERGE);
                 me->SetSelectable(true);
@@ -302,10 +308,26 @@ public:
         DoMeleeAttackIfReady();
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (!urand(0, 3))
+        {
+            me->MonsterYell("One more soul to my collection.", LANG_UNIVERSAL, me);
+        }
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        me->MonsterYell("Never thought... I would be free of him...", LANG_UNIVERSAL, me);
+    }
+
 private:
     EventMap _events;
     SummonList _summons;
     InstanceScript* _instance;
+    bool _leechingSwarmCasted;
 
     uint32 _freezingSlashTimer;
     uint32 _freezingSlashTimerFirst;

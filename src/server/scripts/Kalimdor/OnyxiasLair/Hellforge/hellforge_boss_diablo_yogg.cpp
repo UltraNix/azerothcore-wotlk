@@ -6,9 +6,9 @@ enum DiabloYoggData
     SPELL_SHADOW_FORM                   = 37802,
 
     SPELL_YOGG_LUNGE                    = 64123,
-    SPELL_YOGG_SQUEEZE                  = 64125,
+    SPELL_YOGG_SQUEEZE                  = 64126,
     SPELL_YOGG_SHADOWCRASH              = 60833,
-    SPELL_YOGG_SHADOWCRASH_DMG          = 60835,
+    SPELL_YOGG_SHADOWCRASH_DMG          = 60849,
     SPELL_YOGG_VOID_ZONE_VISUAL         = 69422,
     SPELL_YOGG_SHADOW_NOVA              = 62714,
     SPELL_YOGG_DARK_VOLLEY              = 63038,
@@ -32,6 +32,7 @@ enum DiabloYoggData
     NPC_YOGG_BRAIN_CELL                 = 261019,
 
     ACTION_SECOND_PHASE                 = 1,
+    ACTION_PLAYER_DIED                  = 2,
 
     // CRUSHER TENTACLE
     SPELL_CRUSH                         = 64146,
@@ -121,6 +122,8 @@ public:
 
         me->SummonCreature(NPC_CRUSHER_TENTACLE, _crusherTentaclePositions[0]);
         me->SummonCreature(NPC_CRUSHER_TENTACLE, _crusherTentaclePositions[1]);
+
+        me->MonsterYell("HAHAHAHAHAHA! I AM BACK!", LANG_UNIVERSAL, me);
     }
 
     void LoadStats()
@@ -165,18 +168,45 @@ public:
 
     void DoAction(int32 action) override
     {
-        if (action == ACTION_SECOND_PHASE)
+        switch(action)
         {
-            _summons.Broadcast([&](Unit* summon) { if (summon->GetEntry() == NPC_CRUSHER_TENTACLE) summon->CastSpell(summon, SPELL_DIMINISH_POWER); });
-            _events.CancelEvent(EVENT_YOGG_CORRUPTOR_TENTACLE);
-            _events.CancelEvent(EVENT_YOGG_CONSTRICTOR_TENTACLE);
-            me->SummonCreature(NPC_YOGG_BRAIN, _brainSpawnPosition);
+            case ACTION_SECOND_PHASE:
+            {
+                _summons.Broadcast([&](Unit* summon) { if (summon->GetEntry() == NPC_CRUSHER_TENTACLE) summon->CastSpell(summon, SPELL_DIMINISH_POWER); });
+                _events.CancelEvent(EVENT_YOGG_CORRUPTOR_TENTACLE);
+                _events.CancelEvent(EVENT_YOGG_CONSTRICTOR_TENTACLE);
+                _scheduler.Schedule(1s, [&](TaskContext func)
+                {
+                    switch (func.GetRepeatCounter())
+                    {
+                        case 0:
+                        {
+                            me->MonsterYell("We are the lucid dream.", LANG_UNIVERSAL, me);
+                            func.Repeat(2s);
+                            break;
+                        }
+                        case 1:
+                        {
+                            me->SummonCreature(NPC_YOGG_BRAIN, _brainSpawnPosition);
+                            break;
+                        }
+                    }
+                });
+                break;
+            }
+            case ACTION_PLAYER_DIED:
+            {
+                if (!urand(0,3))
+                    me->MonsterYell("Hoohehehahahaha... AHAHAHAHAHAHA!", LANG_UNIVERSAL, me);
+            }
+            
         }
     }
 
     void UpdateAI(uint32 diff) override
     {
         _events.Update(diff);
+        _scheduler.Update(diff);
         switch (_events.GetEvent())
         {
             case EVENT_YOGG_CONSTRICTOR_TENTACLE:
@@ -222,6 +252,7 @@ public:
 
 private:
     EventMap _events;
+    TaskScheduler _scheduler;
     SummonList _summons;
     InstanceScript* _instance;
 
@@ -272,6 +303,14 @@ struct boss_hellforge_diablo_yogg_constrictor_tentacleAI : public ScriptedAI
                 }
             }
         }
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Unit * yogg = me->GetSummoner())
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
     }
 
     void ScheduleGrabPlayer(bool first = true)
@@ -408,6 +447,14 @@ public:
             }
         }
     }
+    
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Unit * yogg = me->GetSummoner())
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
+    }
 
     void ScheduleEvents()
     {
@@ -422,7 +469,9 @@ public:
             if (++_shadowCrashCount >= _shadowCrashMaxCount)
             {
                 if (Unit * unit = me->GetSummoner())
+                {
                     unit->GetAI()->DoAction(ACTION_SECOND_PHASE);
+                }
             }
             else
                 func.Repeat(std::chrono::milliseconds(_shadowCrashTimer));
@@ -461,6 +510,7 @@ public:
         {
             if (Creature * creature = me->SummonCreature(NPC_YOGG_CHILDREN, me->GetPosition()))
             {
+                creature->AI()->SetGUID(_yoggGUID);
                 if (Player * victim = creature->SelectNearestPlayer(100.f))
                     creature->Attack(victim, false);
                 if (Creature * yogg = ObjectAccessor::GetCreature(*me, _yoggGUID))
@@ -470,9 +520,19 @@ public:
         }
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Creature * yogg = ObjectAccessor::GetCreature(*me, _yoggGUID))
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
+    }
+
     void SetGUID(uint64 guid, int32 /*id*/ = 0) override
     {
         _yoggGUID = guid;
+        if (Creature * yogg = ObjectAccessor::GetCreature(*me, guid))
+            yogg->AI()->JustSummoned(me);
     }
 private:
     uint64 _yoggGUID;
@@ -532,11 +592,29 @@ struct boss_hellforge_diablo_yogg_childrenAI : ScriptedAI
         }
     }
 
+    void SetGUID(uint64 guid, int32 /*type*/) override 
+    {
+        _yoggGUID = guid;
+        if (Creature * yogg = ObjectAccessor::GetCreature(*me, guid))
+        {
+            yogg->AI()->JustSummoned(me);
+            yogg->MonsterYell("Suffocate upon your own hate!", LANG_UNIVERSAL, me);
+        }
+    }
+
     void JustDied(Unit* killer) override
     {
         DoCastAOE(SPELL_YOGG_SHADOW_NOVA, true);
         if (Creature * tentacle = me->FindNearestCreature(NPC_CRUSHER_TENTACLE, 10.f))
             me->DealDamage(me, tentacle, tentacle->GetMaxHealth() * 0.21f);
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Creature * yogg = ObjectAccessor::GetCreature(*me, _yoggGUID))
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
     }
 
     void UpdateAI(uint32 diff) override
@@ -551,6 +629,7 @@ struct boss_hellforge_diablo_yogg_childrenAI : ScriptedAI
 
 private:
     TaskScheduler _scheduler;
+    uint64 _yoggGUID;
 
     uint32 _volleyTimer;
     uint32 _volleyTimerFirst;
@@ -601,6 +680,14 @@ struct boss_hellforge_diablo_yogg_crusher_tentacleAI : public ScriptedAI
                 }
             }
         }
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Unit * yogg = me->GetSummoner())
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -686,6 +773,14 @@ struct boss_hellforge_diablo_yogg_corruptor_tentacleAI : public ScriptedAI
         }
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Unit * yogg = me->GetSummoner())
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
+    }
+
     Unit* SelectCorruptionTarget()
     {
         Player* target = NULL;
@@ -729,7 +824,7 @@ private:
 
 struct boss_hellforge_diablo_yogg_brainAI : public ScriptedAI
 {
-    boss_hellforge_diablo_yogg_brainAI(Creature* creature) : ScriptedAI(creature) { }
+    boss_hellforge_diablo_yogg_brainAI(Creature* creature) : ScriptedAI(creature), _did50pctYell(false) { }
 
     void Reset() override
     {
@@ -738,6 +833,15 @@ struct boss_hellforge_diablo_yogg_brainAI : public ScriptedAI
         ScheduleEvents();
         SetCombatMovement(false);
         DoZoneInCombat();
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
+    {
+        if (!_did50pctYell && me->HealthBelowPctDamaged(50, damage))
+        {
+            _did50pctYell = true;
+            me->MonsterYell("Only death is eternal!", LANG_UNIVERSAL, me);
+        }
     }
 
     void LoadStats()
@@ -798,7 +902,10 @@ struct boss_hellforge_diablo_yogg_brainAI : public ScriptedAI
                     {
                         spark->Attack(target, false);
                         if (Creature * yogg = me->GetSummoner())
+                        {
                             yogg->AI()->JustSummoned(spark);
+                            spark->AI()->SetGUID(yogg->GetGUID());
+                        }
                     }
                 }
             }
@@ -832,6 +939,7 @@ struct boss_hellforge_diablo_yogg_brainAI : public ScriptedAI
 
     void JustDied(Unit* killer)
     {
+        me->MonsterYell("Uulwi ifis halahs gag erh\'ongg w\'ssh.", LANG_UNIVERSAL, me);
         if (Unit * summoner = me->GetSummoner())
             Unit::Kill(killer, summoner);
     }
@@ -840,6 +948,7 @@ private:
     uint32 _summonCellTimer;
     uint32 _summonCellCount;
     uint32 _wipeTimer;
+    bool _did50pctYell;
 };
 
 struct boss_hellforge_diablo_yogg_brain_cellAI : public ScriptedAI
@@ -854,6 +963,11 @@ struct boss_hellforge_diablo_yogg_brain_cellAI : public ScriptedAI
         me->SetInhabitType(INHABIT_ANYWHERE);
         me->SetCanFly(true);
         me->SetDisableGravity(true);
+    }
+
+    void SetGUID(uint64 guid, int32 /*id*/ = 0) override
+    {
+        _yoggGUID = guid;
     }
 
     void LoadStats()
@@ -900,6 +1014,14 @@ struct boss_hellforge_diablo_yogg_brain_cellAI : public ScriptedAI
             DoCastAOE(SPELL_YOGG_ARCANE_EXPLOSION);
             func.Repeat(std::chrono::milliseconds(_explosionTimer));
         });
+    }
+
+    void KilledUnit(Unit* victim) override
+    {
+        if (!victim->IsPlayer())
+            return;
+        if (Creature * yogg = ObjectAccessor::GetCreature(*me, _yoggGUID))
+            yogg->GetAI()->DoAction(ACTION_PLAYER_DIED);
     }
 
     void EnterEvadeMode() override { }
@@ -961,6 +1083,8 @@ struct boss_hellforge_diablo_yogg_brain_cellAI : public ScriptedAI
 
 private:
     TaskScheduler _scheduler;
+    uint64 _yoggGUID;
+
     uint32 _explosionTimer;
     uint32 _bubbleDmg;
 };

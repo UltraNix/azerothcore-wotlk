@@ -18,11 +18,15 @@ public:
 
     void Reset() override
     {
-        if (InstanceScript * instance = me->GetInstanceScript())
+        // Diablo may be not created here, so delay changing his phase a bit
+        _scheduler.Schedule(100ms, [&](TaskContext /*func*/)
         {
-            if (Creature * diablo = instance->GetCreature(1))
-                diablo->SetPhaseMask(2, true);
-        }
+            if (InstanceScript * instance = me->GetInstanceScript())
+            {
+                if (Creature * diablo = instance->GetCreature(1))
+                    diablo->SetPhaseMask(2, true);
+            }
+        });
         _summons.DespawnAll();
         _eventStarted = false;
         DoCastSelf(SPELL_BLOOD_ORB_VISUAL);
@@ -49,6 +53,25 @@ public:
         if (Creature * soulstone = ObjectAccessor::GetCreature(*me, _soulstoneGUID))
             if (soulstone->IsAIEnabled)
                 soulstone->GetAI()->DoAction(1);
+
+        _scheduler.Schedule(1s, [&](TaskContext func)
+        {
+            switch (func.GetRepeatCounter())
+            {
+                case 0:
+                {
+                    me->MonsterYell("Ahh... you again. I must thank you for receiving my soul stone. Now, I can become... myself...", LANG_UNIVERSAL, me);
+                    func.Repeat(5s);
+                    break;
+                }
+                case 1:
+                {
+                    me->MonsterYell("Now, cover before my true form!", LANG_UNIVERSAL, me);
+                    break;
+                }
+            }
+        });
+
         _eventStarted = true;
     }
     
@@ -84,6 +107,7 @@ public:
                 }
                 soulstone->DespawnOrUnsummon();
             }
+
             _scheduler.Schedule(800ms, [&](TaskContext /*func*/)
             {
                 if (InstanceScript * instance = me->GetInstanceScript())
@@ -92,12 +116,14 @@ public:
                     {
                         diablo->SetPhaseMask(1, true);
                         diablo->SetUInt32Value(UNIT_NPC_EMOTESTATE, 434);
+                        diablo->AI()->DoAction(1);
                     }
                     me->SetPhaseMask(2, true);
                     me->DespawnOrUnsummon(3s);
                     me->SetRespawnTime(7 * DAY);
                 }
             });
+
             _scheduler.Schedule(1800ms, [&](TaskContext /*func*/)
             {
                 if (InstanceScript * instance = me->GetInstanceScript())

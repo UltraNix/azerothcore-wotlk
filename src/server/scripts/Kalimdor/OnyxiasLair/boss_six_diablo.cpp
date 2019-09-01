@@ -611,8 +611,9 @@ struct npc_boss_six_diablo_AI : public BossAI
     //! Spawn wave of adds when fight begins
     void SpawnInitialAdds()
     {
-        scheduler.Schedule(5s, [this](TaskContext func)
+        scheduler.Schedule(6s, [this](TaskContext func)
         {
+            me->MonsterYell("Welcome to hell, where all belongs to me! Minions, erase them!", LANG_UNIVERSAL, me);
             for (auto pos : netherPortalSpawnPosition)
             {
                 if (Creature* portal = me->SummonCreature(NPC_BOSS_SIX_PORTAL_TRIGGER, pos))
@@ -1055,6 +1056,42 @@ struct npc_boss_six_diablo_AI : public BossAI
                 drake->SetDisableGravity(true);
                 drake->SetCanMissSpells(false);
             }
+        }
+    }
+
+    void DoAction(int32 action) override
+    {
+        if (action == 1)
+        {
+            me->MonsterYell("I am complete!", LANG_UNIVERSAL, me);
+            
+            if (Player * victim = me->SelectNearestPlayer(200.f))
+                me->Attack(victim, false);
+
+            scheduler.Schedule(3s, [&](TaskContext func)
+            {
+                switch(func.GetRepeatCounter())
+                {
+                    case 0:
+                    {
+                        auto& players = instance->instance->GetPlayers();
+                        for (auto i = players.begin(); i != players.end(); ++i)
+                        {
+                            Player* player = i->GetSource();
+                            if (!player || player->IsGameMaster())
+                                continue;
+                            player->Yell("Fuuuuuuuuuuuuckkkkk!!!", LANG_UNIVERSAL);
+                        }
+                        func.Repeat(1s);
+                        break;
+                    }
+                    case 1:
+                    {
+                        me->MonsterYell("I'm the end of your world.", LANG_UNIVERSAL, me);
+                        break;
+                    }
+                }
+            });
         }
     }
 

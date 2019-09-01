@@ -18,8 +18,8 @@ enum DiabloKelthuzadData
     SPELL_KEL_FROSTBOLT_VOLLEY      = 69273,
     SPELL_KEL_DETONATE_MANA         = 27819,
     SPELL_KEL_SHADOW_FISSURE        = 27810,
-    SPELL_KEL_SHADOW_WORD_PAIN      = 15654,
-    SPELL_KEL_FROST_FEVER           = 67767,
+    SPELL_KEL_SHADOW_WORD_PAIN      = 72319,
+    SPELL_KEL_FROST_FEVER           = 67934,
     SPELL_KEL_BLOOD_TAP             = 28470,
 
     SPELL_ICE_TOMB_UNTARGETABLE     = 69700,
@@ -172,6 +172,8 @@ public:
     {
         DoZoneInCombat();
 
+        me->MonsterYell("What sorcery is this?!", LANG_UNIVERSAL, me);
+
         _events.ScheduleEvent(EVENT_KEL_ICY_TOUCH, _icyTouchTimerFirst);
         _events.ScheduleEvent(EVENT_KEL_FROST_TOMB, _frostTombTimerFirst);
         _events.ScheduleEvent(EVENT_KEL_DETONATE_MANA, _detonateManaTimerFirst);
@@ -188,6 +190,7 @@ public:
     {
         if (me->HealthBelowPctDamaged(80, damage) && !_addSummoned)
         {
+            me->MonsterYell("Destroy them minion, your master commands it!", LANG_UNIVERSAL, me);
             if (Creature * creature = me->SummonCreature(NPC_GUARDIAN_OF_ICECROWN, -40.71f, -212.53f, -86.66f, 0.f))
             {
                 creature->CastSpell(creature, SPELL_SHADOW_FORM);
@@ -200,6 +203,7 @@ public:
 
     void JustDied(Unit* /*killer*/) override
     {
+        me->MonsterYell("Free... at last...", LANG_UNIVERSAL, me);
         _summons.DespawnAll();
     }
 
@@ -236,6 +240,7 @@ public:
             }
             case EVENT_KEL_FROST_TOMB:
             {
+                me->MonsterYell("Can you feel the cold hand of death upon your heart?", LANG_UNIVERSAL, me);
                 for (uint32 i = 0; i < _frostTombCount; ++i)
                 {
                     if (Unit * target = SelectTarget(SELECT_TARGET_RANDOM, 0, [&](Unit* unit) { return !unit->HasAura(SPELL_ICE_TOMB_UNTARGETABLE) && unit != me->GetVictim(); }))
@@ -248,6 +253,7 @@ public:
             }
             case EVENT_KEL_VOLLEY:
             {
+                me->MonsterYell("Endless winter!", LANG_UNIVERSAL, me);
                 CustomSpellValues val;
                 val.AddSpellMod(SPELLVALUE_BASE_POINT0, _frostVolleyDamage);
                 val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 100000);
@@ -290,6 +296,7 @@ public:
             }
             case EVENT_KEL_SHADOW_WORD_PAIN:
             {
+                me->MonsterYell("Suffer.", LANG_UNIVERSAL, me);
                 if (Unit* target = me->SelectVictim())
                     me->CastCustomSpell(SPELL_KEL_SHADOW_WORD_PAIN, SPELLVALUE_BASE_POINT0, _shadowWordPainDamage, target);
                 _events.RescheduleEvent(EVENT_KEL_SHADOW_WORD_PAIN, _shadowWordPainTimer);
