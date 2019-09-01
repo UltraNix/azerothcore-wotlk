@@ -220,22 +220,7 @@ static const std::vector<Position> meteorSpawnPositions =
 Position const _dummyFacingPosition{ -54.503f, -212.654f, -85.46500f, 6.268f };
 Position const _centerOfFightingArea{ -28.712f, -213.297f, -89.08712f, 6.233f };
 Position const _shadowRealmExitPosition{ -43.299423f, -216.492767f, -86.663925f, -0.012966f };
-constexpr uint32 AMOUNT_OF_DRAKES_REQUIRED{ 4 };
-
-// ID - 54111 Summon Target Visual spell pod aure od dmg buff
-// ID - 46907 Boss Fel Portal State fajny portal visual
-
-// 18036 fajny infernal visual
-// ID - 40736 Death Blast
-
-// + explosion at 5stacks ID - 27676 Exploding Heart
-// ID - 72313 Twilight Bloodbolt Visual + ball of flames sphere
-
-//ID - 66186 Napalm - z nieba, co X Sekund
-//! teleport za gracza i podniesienie
-//! death ray, custom dbc spell, ktory triggeruje jakis cone spell podczas trwania casta eyebeam z kologarna ? lub plasma blast
-// SPELL_PLASMA_BLAST_25                            = 64529,
-
+constexpr uint32 AMOUNT_OF_DRAKES_REQUIRED{ 2 };
 
 #pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
 struct npc_boss_six_diablo_AI : public BossAI
@@ -243,8 +228,8 @@ struct npc_boss_six_diablo_AI : public BossAI
     npc_boss_six_diablo_AI(Creature* creature) : BossAI(creature, DATA_DIABLO)
     {
         _myShadowDrakePositions = shadowDrakePositions;
-        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 6.5f);
-        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 6.5f);
+        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 3.5f);
+        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 3.5f);
         scheduler.ClearValidator();
         me->SetCanMissSpells(false);
     }
@@ -321,12 +306,18 @@ struct npc_boss_six_diablo_AI : public BossAI
             DrawPentagram();
     }
 
-    void OnMeleeAttack(VictimState state, WeaponAttackType attType, Unit* victim) override
+    void OnMeleeAttack(VictimState state, WeaponAttackType attType, Unit* victim, uint32 procAttacker) override
     {
         if (!victim)
             return;
 
         if (!victim->ToPlayer())
+            return;
+
+        std::cout << "procAttacker to: " << procAttacker << std::endl;
+
+        //! Proc for melee attacks only, not melee spells and so on and so forth
+        if (procAttacker != PROC_FLAG_DONE_MELEE_AUTO_ATTACK)
             return;
 
         if (attType == BASE_ATTACK)
@@ -388,6 +379,18 @@ struct npc_boss_six_diablo_AI : public BossAI
             _elementalPhase = true;
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_1, true);
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_2, true);
+
+            scheduler.Schedule(5s, [this](TaskContext func)
+            {
+                auto repeatTime = 8s;
+                if (!CanEventExecute())
+                    repeatTime = 10s;
+                else
+                    HandleNapalmShells();
+
+                func.Repeat(repeatTime);
+            });
+
             return;
         }
 
@@ -425,7 +428,8 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE);
+            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE)
+                && !object->GetVehicleBase();
         }))
         {
             me->AttackStop();
@@ -580,18 +584,6 @@ struct npc_boss_six_diablo_AI : public BossAI
             }
 
             func.Repeat(12s);
-        });
-
-
-        scheduler.Schedule(5s, [this](TaskContext func)
-        {
-            auto repeatTime = 8s;
-            if (!CanEventExecute())
-                repeatTime = 10s;
-            else
-                HandleNapalmShells();
-
-            func.Repeat(repeatTime);
         });
 
         scheduler.Schedule(20s, [this](TaskContext func)
@@ -750,10 +742,19 @@ struct npc_boss_six_diablo_AI : public BossAI
         _pentagramIndex = 0;
         Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->IsPlayer() && !object->HasAura(SPELL_DIABLO_MC_INSANE) && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+            return object->IsPlayer() &&
+                !object->HasAura(SPELL_DIABLO_MC_INSANE) &&
+                !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) &&
+                !object->HasAura(SPELL_DIABLO_CONVERSION_BEAM) &&
+                !object->HasAura(SPELL_DIABLO_CONVERSION_BEAM);
         });
+
         if (!target)
+        {
+            me->MonsterYell("brak targetu dla shadow realm, evaduje", LANG_UNIVERSAL, nullptr);
+            EnterEvadeMode();
             return;
+        }
 
         me->AddAura(SPELL_DIABLO_REALM_OF_SHADOWS, target);
         _shadowRealmTargetGUID = target->GetGUID();
@@ -972,6 +973,9 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void HandleFireElementals()
     {
+        std::vector<Position> elementalPositions(fireelementalsSpawnPositions, fireelementalsSpawnPositions + FIRE_ELEMENTAL_SPAWN_POSITION_SIZE);
+        Trinity::Containers::RandomResize(elementalPositions, size_t(2));
+
         for (auto const& pos : fireelementalsSpawnPositions)
         {
             if (Creature* portal = me->SummonCreature(NPC_BOSS_SIX_PORTAL_TRIGGER_VISUAL, pos))
@@ -1047,7 +1051,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         for (uint32 i = 0; i < AMOUNT_OF_DRAKES_REQUIRED; ++i)
         {
-            if (Creature* drake = me->SummonCreature(NPC_BOSS_SIX_SHADOW_DRAKE, _myShadowDrakePositions[i]))
+            if (Creature* drake = me->SummonCreature(NPC_BOSS_SIX_SHADOW_DRAKE, _myShadowDrakePositions[i], TEMPSUMMON_CORPSE_DESPAWN))
             {
                 drake->SetCanFly(true);
                 drake->SetDisableGravity(true);
