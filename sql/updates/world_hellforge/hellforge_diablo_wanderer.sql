@@ -8,4 +8,4 @@ SET @CGUID := 600003;
 
 DELETE FROM `creature` WHERE `guid` = @CGUID;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(@CGUID + 0, @ENTRY, 249, 8, 1, 0, 0, -10.9161, -213.238, -87.7776, 3.137, 300, 0, 0, 13945, 4258, 0, 0, 0, 0);
+(@CGUID + 0, @ENTRY, 249, 8, 1, 0, 0, -10.9161, -213.238, -87.7776, 3.137, 604800, 0, 0, 13945, 4258, 0, 0, 0, 0);
