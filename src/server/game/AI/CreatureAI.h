@@ -148,7 +148,7 @@ class CreatureAI : public UnitAI
         // Called when owner attacks something
         virtual void OwnerAttacked(Unit* /*target*/) {}
 
-        virtual void OnMeleeAttack(VictimState /*state*/, WeaponAttackType /*attType*/, Unit* /*victim*/) { }
+        virtual void OnMeleeAttack(VictimState /*state*/, WeaponAttackType /*attType*/, Unit* /*victim*/, uint32 /*procAttacker*/) { }
 
         /// == Triggered Actions Requested ==================
 

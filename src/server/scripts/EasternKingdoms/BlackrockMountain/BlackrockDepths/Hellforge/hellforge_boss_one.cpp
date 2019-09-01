@@ -530,7 +530,7 @@ struct npc_little_worm_boss_one_AI : public ScriptedAI
             _events.ScheduleEvent(EVENT_L_WORM_ENTER_COMBAT, value);
     }
 
-    void OnMeleeAttack(VictimState state, WeaponAttackType /*attackType*/, Unit* victim) override
+    void OnMeleeAttack(VictimState state, WeaponAttackType /*attackType*/, Unit* victim, uint32 /*procAttacker*/) override
     {
         if (victim && state == VICTIMSTATE_HIT && rand_norm() >= _buffetChance)
         {

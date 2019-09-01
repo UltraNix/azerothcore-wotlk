@@ -828,12 +828,32 @@ struct boss_hellforge_five_AI : public BossAI
 
     void JustDied(Unit* killer) override
     {
+        BossAI::JustDied(killer);
         me->MonsterYell("Lord of Terror...", LANG_UNIVERSAL, me);
         if (Unit * wanderer = instance->GetCreature(DATA_NPC_WANDERER))
             if (wanderer->IsAIEnabled)
                 wanderer->GetAI()->DoAction(ACTION_VAMPIRE_KILLED);
-        CheckCreatureRecord(killer, HELLFORGE_CREATURE_RECORD_MIN_VALUE + 4, RAID_DIFFICULTY_10MAN_NORMAL, "", 1, _fightTimer);
-        BossAI::JustDied(killer);
+
+        Player* player = nullptr;
+        auto const& players = me->GetMap()->GetPlayers();
+        if (players.isEmpty())
+            return;
+
+        for (auto itr = players.begin(); itr != players.end(); ++itr)
+        {
+            Player* _player = itr->GetSource();
+
+            if (!_player)
+                continue;
+
+            if (_player->IsGameMaster())
+                continue;
+
+            player = _player;
+            break;
+        }
+
+        CheckCreatureRecord(player, HELLFORGE_CREATURE_RECORD_MIN_VALUE + 4, RAID_DIFFICULTY_10MAN_NORMAL, "", 1, _fightTimer);
     }
 private:
     bool _introDoneOnce;
@@ -955,7 +975,7 @@ struct npc_boss_five_frosty_worgen_AI : public ScriptedAI
         ScriptedAI::JustDied(killer);
     }
 
-    void OnMeleeAttack(VictimState state, WeaponAttackType attackType, Unit* victim) override
+    void OnMeleeAttack(VictimState state, WeaponAttackType attackType, Unit* victim, uint32 /*procAttacker*/) override
     {
         if (attackType != BASE_ATTACK)
             return;

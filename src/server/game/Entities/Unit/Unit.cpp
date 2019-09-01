@@ -1479,7 +1479,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
     if (Creature* creature = ToCreature())
         if (creature->IsAIEnabled)
-            creature->AI()->OnMeleeAttack(static_cast<VictimState>(damageInfo->TargetState), damageInfo->attackType, victim);
+            creature->AI()->OnMeleeAttack(static_cast<VictimState>(damageInfo->TargetState), damageInfo->attackType, victim, damageInfo->procAttacker);
 
     if (damageInfo->TargetState == VICTIMSTATE_PARRY && victim->IsParryHasteAllowed())
     {
