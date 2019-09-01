@@ -3259,14 +3259,6 @@ void SpellMgr::LoadSpellCustomAttr()
             68873, // Wailing Souls
             70324,
             64619, // Ulduar, Mimiron, Emergency Fire Bot, Water Spray
-            69649, // Sindragosa Frost Breath
-            71056,
-            71057,
-            71058,
-            73061,
-            73062,
-            73063,
-            73064
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_LINE;
         });
