@@ -28,7 +28,7 @@ INSERT INTO `creature_template` VALUES
 (@ENTRY + 20, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo napalam shell trigger', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340),
 (@ENTRY + 21, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo meteor caster', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340),
 (@ENTRY + 22, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Fire elemental spawn in portal trigger', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 128, '', 12340),
-(@ENTRY + 23, 0, 0, 0, 0, 0, 22506, 0, 0, 0, 'Shadow Crystal', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 617297919, '', 12340);
+(@ENTRY + 23, 0, 0, 0, 0, 0, 22506, 0, 0, 0, 'Shadow Crystal', '', '', 0, 83, 83, 1, 16, 0, 1, 1.14286, 2, 0, 0, 0, 0, 0, 1, 2000, 2000, 1, 0, 2048, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'NullCreatureAI', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 212, 1, 0, 0, '', 12340);
 
 UPDATE `creature_template` SET `npcflag` = `npcflag` | 16777216, `VehicleId` = 25, `InhabitType` = 7 WHERE `entry` = @ENTRY + 18;
 UPDATE `creature_template` SET `InhabitType` = 7 WHERE `entry` IN (@ENTRY + 16, @ENTRY + 17);
@@ -40,6 +40,7 @@ UPDATE `creature_template` SET `AIName` = "NullCreatureAI" WHERE `entry` = @ENTR
 UPDATE `creature_template` SET `AIName` = "NullCreatureAI" WHERE `entry` = @ENTRY + 7;
 UPDATE `creature_template` SET `type_flags` = `type_flags` = 1048576 WHERE `entry` >= @ENTRY AND flags_extra & 128;
 UPDATE `creature_template` SET `spell1` = 56091, `spell2` = 56092, `unit_class` = 4 WHERE `entry` = @ENTRY + 18;
+UPDATE `creature_template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 23;
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @ENTRY + 18;
 INSERT INTO `npc_spellclick_spells` VALUES
