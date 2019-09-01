@@ -34,7 +34,8 @@ enum DiabloSpells
     SPELL_DIABLO_PORTAL_STATE_VISUAL        = 46907,
     SPELL_DIABLO_DEVOURING_FLAME            = 63236,
     SPELL_DIABLO_LIGHTNING_MARKER_VISUAL    = 61585,
-    SPELL_DIABLO_THUNDERSHOCK               = 56926
+    SPELL_DIABLO_THUNDERSHOCK               = 56926,
+    SPELL_DIABLO_RUNIC_LIGHTNING            = 62445
 };
 
 enum DiabloCreatures
@@ -243,6 +244,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         _myShadowDrakePositions = shadowDrakePositions;
         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 6.5f);
+        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 6.5f);
         scheduler.ClearValidator();
         me->SetCanMissSpells(false);
     }
@@ -272,6 +274,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         {
             me->SetAggressive();
             me->AttackStop();
+            me->SetSelectable(true);
             me->SetVisible(true);
             DoZoneInCombat(me, 250.f);
             CleanupShadowRealm();
@@ -308,6 +311,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             {
                 me->AttackStop();
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetSelectable(true);
                 me->SetAggressive();
                 DoZoneInCombat(me, 200.f);
                 SchedulePhaseOneAbilities();
@@ -347,6 +351,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.f);
         BossAI::Reset();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        me->SetSelectable(false);
         _pentagramIndex = 0;
         _shadowRealmTargetGUID = 0;
         _elementalPhase = false;
@@ -420,7 +425,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE);
         }))
         {
             me->AttackStop();
@@ -469,7 +474,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                     trigger->SetImmuneToPC(true);
                     Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
                     {
-                        return object->ToPlayer() && !object->GetVehicleBase();
+                        return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_MC_INSANE);
                     });
                     if (target)
                         trigger->CastSpell(target, SPELL_DIABLO_NAPALM_SHELL, true, NullItemRef, (AuraEffect*)nullptr, me->GetGUID());
@@ -516,7 +521,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
 
         scheduler.Update(diff);
-        if (!me->IsPassive())
+        if (me->IsSelectable())
             DoMeleeAttackIfReady();
     }
 
@@ -726,12 +731,15 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->GetVehicleBase();
+            return object->ToPlayer() && !object->HasAura(SPELL_DIABLO_REALM_OF_SHADOWS) && !object->HasAura(SPELL_DIABLO_MC_INSANE) && !object->GetVehicleBase();
         });
 
         if (!target)
             return;
 
+        CustomSpellValues val;
+        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 0);
+        me->CastCustomSpell(SPELL_DIABLO_RUNIC_LIGHTNING, val, target, TRIGGERED_FULL_MASK);
         me->AddAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL, target);
     }
 
@@ -740,7 +748,10 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         CleanupShadowRealm();
         _pentagramIndex = 0;
-        Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, 200.f, true);
+        Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
+        {
+            return object->IsPlayer() && !object->HasAura(SPELL_DIABLO_MC_INSANE) && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+        });
         if (!target)
             return;
 
@@ -759,6 +770,10 @@ struct npc_boss_six_diablo_AI : public BossAI
                     SchedulePhaseOneAbilities();
                     CleanupShadowRealm();
                     DoCast(player, SPELL_DIABLO_MC_INSANE, true);
+                    scheduler.Schedule(10s, [this](TaskContext /*func*/)
+                    {
+                        SpawnFirebeamTriggers();
+                    });
                 }
             }
         });
@@ -862,6 +877,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         me->GetMotionMaster()->MoveIdle();
         me->SetPassive();
         me->SetVisible(false);
+        me->SetSelectable(false);
         scheduler.CancelGroup(GROUP_DIABLO_PHASE_ONE_CANCELABLE);
     }
     /** END OF SHADOW REALM HANDLING **/
@@ -979,7 +995,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+            return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE);
         }))
         {
             CustomSpellValues val;
@@ -1725,7 +1741,7 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
         {
             Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
             {
-                return object->IsPlayer() && !object->GetVehicleBase();
+                return object->IsPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_MC_INSANE);
             });
 
             if (target)
@@ -1878,7 +1894,8 @@ class spell_lightning_marker_visual : public AuraScript
                     continue;
 
 
-                player->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), 0.1f, 45.f);
+                player->KnockbackFrom(player->GetPositionX(), player->GetPositionY(), 0.1f, 45.f);
+                player->CastSpell(player, SPELL_DIABLO_BUFFETTING_WINDS, true);
             }
         }
     }
