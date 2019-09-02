@@ -2382,14 +2382,13 @@ class npc_raging_spirit : public CreatureScript
             void IsSummonedBy(Unit* /*summoner*/)
             {
                 // player is the spellcaster so register summon manually
-                Creature* lichKing = nullptr;
-                if (me->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
-                    lichKing = me->FindNearestCreature(261008, 100.f);
-                else
-                    ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING));
-
-                if (lichKing)
+                if (Creature* lichKing = me->GetMapId() == 249 /* Onyxias lair - Hellforge */ ?
+                    me->FindNearestCreature(261008, 100.f) :
+                    ObjectAccessor::GetCreature(*me, _instance->GetData64(DATA_THE_LICH_KING)))
+                {
                     lichKing->AI()->JustSummoned(me);
+                }
+
             }
 
             void JustDied(Unit* /*killer*/)
@@ -2517,7 +2516,7 @@ class spell_the_lich_king_defile : public SpellScriptLoader
                                 GetCaster()->GetAI()->DoAction(1);
                         }
                     }
-                    else 
+                    else
                     {
                         if (Creature* creature = GetCaster()->ToCreature())
                             creature->DespawnOrUnsummon();
