@@ -7,14 +7,14 @@
 
 enum DiabloSpells
 {
-    SPELL_DIABLO_NETHER_PORTAL_VISUAL       = 66263, // We have to disable proc on this map
+    SPELL_DIABLO_NETHER_PORTAL_VISUAL       = 66263,
     SPELL_DIABLO_EYE_BEAM                   = 49544,
     SPELL_DIABLO_HEART_BEAM_VISUAL          = 54988,
     SPELL_DIABLO_REALM_OF_SHADOWS           = 52693,
     SPELL_DIABLO_RED_BEAM_DROPS             = 30944,
     SPELL_DIABLO_SMOKEY_MARKER              = 16714,
     SPELL_DIABLO_FLAME_BUFFET               = 34121,
-    SPELL_DIABLO_RUNE_DETONATION            = 62527, // used instead of base triggered spell in Armageddon spell
+    SPELL_DIABLO_RUNE_DETONATION            = 62527,
     SPELL_DIABLO_FLAMETONGUE_ATTACK         = 68111,
     SPELL_DIABLO_SHADOWFORM_1               = 55086,
     SPELL_DIABLO_SHADOWFORM_2               = 63359,
@@ -35,7 +35,19 @@ enum DiabloSpells
     SPELL_DIABLO_DEVOURING_FLAME            = 63236,
     SPELL_DIABLO_LIGHTNING_MARKER_VISUAL    = 61585,
     SPELL_DIABLO_THUNDERSHOCK               = 56926,
-    SPELL_DIABLO_RUNIC_LIGHTNING            = 62445
+    SPELL_DIABLO_RUNIC_LIGHTNING            = 62445,
+    SPELL_DIABLO_TRIGGER_EXPLOSION          = 35470,
+    SPELL_DIABLO_TRIGGER_FLAME_PATCH        = 69671,
+    SPELL_DIABLO_ELEMENTAL_ADD_EXPLODE      = 69669,
+    SPELL_DIABLO_VICINITY_CHECKER_TRIGGER   = 56543,
+    SPELL_DIABLO_MAGNETIC_FIELD             = 64668,
+    SPELL_DIABLO_EXPLODING_HEART            = 27676,
+    SPELL_DIABLO_ARMAGEDDON                 = 20478,
+    SPELL_DIABLO_INFERNAL_HELLFIRE          = 68147,
+    SPELL_DIABLO_SUMMON_VISUAL              = 54111,
+    SPELL_DIABLO_STATIC_OVERLOAD            = 59798,
+    SPELL_DIABLO_ASCEND                     = 64487,
+    SPELL_DIABLO_FIVE_FAT_FINGERS           = 27673
 };
 
 enum DiabloCreatures
@@ -49,6 +61,8 @@ enum DiabloCreatures
     NPC_BOSS_SIX_HEART_BEAM_TRIGGER         = 250206,
     NPC_BOSS_SIX_FIERY_COMET_TRIGGER        = 250207,
     NPC_BOSS_SIX_PENTAGON_TRIGGER_1         = 250208, // all the way to 250212
+    /* Pentagon triggers gap */
+
     NPC_BOSS_SIX_DIABOLIC_INFERNAL          = 250213,
     NPC_BOSS_SIX_INCREASED_DAMAGE_TRIGGER   = 250214,
     NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL    = 250215,
@@ -238,7 +252,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (Spell* spell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL))
             if (SpellInfo const* spellInfo = spell->GetSpellInfo())
-                if (spellInfo->Id == 64487)
+                if (spellInfo->Id == SPELL_DIABLO_ASCEND)
                     return false;
 
         return true;
@@ -289,6 +303,11 @@ struct npc_boss_six_diablo_AI : public BossAI
                         player->VehicleSpellInitialize();
                 }
             }
+
+            scheduler.Schedule(30s, [this](TaskContext)
+            {
+                HandlePheonixPhase();
+            });
         }
         else if (summon->GetEntry() == NPC_BOSS_SIX_OMOR_COPY)
         {
@@ -315,7 +334,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
 
         //! Proc for melee attacks only, not melee spells and so on and so forth
-        if (procAttacker != PROC_FLAG_DONE_MELEE_AUTO_ATTACK)
+        if (procAttacker & (PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS) != 0)
             return;
 
         if (attType == BASE_ATTACK)
@@ -323,7 +342,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             if (!roll_chance_i(50 /*config*/))
                 return;
 
-            DoCast(victim, 27673, true); // config
+            DoCast(victim, SPELL_DIABLO_FIVE_FAT_FINGERS, true); // config
         }
         else if (attType == OFF_ATTACK)
         {
@@ -604,7 +623,6 @@ struct npc_boss_six_diablo_AI : public BossAI
         scheduler.Schedule(6s, [this](TaskContext func)
         {
             HandlePheonixPhase();
-            func.Repeat(90s);
         });
     }
 
@@ -618,6 +636,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             {
                 if (Creature* portal = me->SummonCreature(NPC_BOSS_SIX_PORTAL_TRIGGER, pos))
                 {
+                    portal->SetSelectable(false);
                     portal->SetPassive();
                     portal->SetImmuneToAll(true);
                     portal->CastSpell(portal, SPELL_DIABLO_NETHER_PORTAL_VISUAL, TRIGGERED_DISALLOW_PROC_EVENTS);
@@ -744,7 +763,6 @@ struct npc_boss_six_diablo_AI : public BossAI
             return object->IsPlayer() &&
                 !object->HasAura(SPELL_DIABLO_MC_INSANE) &&
                 !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) &&
-                !object->HasAura(SPELL_DIABLO_CONVERSION_BEAM) &&
                 !object->HasAura(SPELL_DIABLO_CONVERSION_BEAM);
         });
 
@@ -887,9 +905,9 @@ struct npc_boss_six_diablo_AI : public BossAI
         if (!summoner || !caster)
             return;
 
-        Position pos = me->GetPosition();
+        Position pos = caster->GetPosition();
+        pos.m_positionZ = caster->GetMap()->GetHeight(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true, 150.f);
         pos.SetOrientation(summoner->GetAngle(me->GetPositionX(), me->GetPositionY()));
-        me->GetNearPosition(pos, 1.5f, pos.GetOrientation());
         Creature* trigger = caster->SummonCreature(NPC_BOSS_SIX_BEAM_TRIGGER, pos);
         if (!trigger)
             return;
@@ -931,9 +949,9 @@ struct npc_boss_six_diablo_AI : public BossAI
     void SpawnFirebeamTriggers()
     {
         Position _bossFireOrbPos = me->GetPosition();
-        _bossFireOrbPos.m_positionZ += 10.f;
+        _bossFireOrbPos.m_positionZ += 25.f;
 
-        if (Creature* selfOrb = me->SummonCreature(NPC_BOSS_SIX_BALL_OF_FLAMES_BOSS, _bossFireOrbPos))
+        if (Creature* selfOrb = me->SummonCreature(NPC_BOSS_SIX_BALL_OF_FLAMES_BOSS, _bossFireOrbPos, TEMPSUMMON_TIMED_DESPAWN, 60000))
         {
             selfOrb->SetSelectable(false);
             selfOrb->SetCanFly(true);
@@ -943,6 +961,10 @@ struct npc_boss_six_diablo_AI : public BossAI
         }
 
         _bossFireOrbPos.m_positionZ += 4.5f;
+
+        Unit* currentTarget = me->GetVictim();
+        if (!currentTarget)
+            return;
 
         auto& players = me->GetMap()->GetPlayers();
         for (auto && source : players)
@@ -954,6 +976,10 @@ struct npc_boss_six_diablo_AI : public BossAI
             if (player->isDead() || player->IsGameMaster())
                 continue;
 
+            // exclude tanks
+            if (currentTarget->GetGUID() == player->GetGUID())
+                continue;
+
             if (Creature* orb = me->SummonCreature(NPC_BOSS_SIX_BALL_OF_FLAMES_PLAYER, player->GetPosition()))
             {
                 orb->AI()->SetGUID(player->GetGUID());
@@ -962,7 +988,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                 orb->SetSelectable(false);
                 orb->SetPassive();
                 orb->CastSpell(orb, SPELL_DIABLO_BALL_OF_FLAMES_VISUAL, true);
-                orb->SetWalk(true);
+                orb->SetSpeedRate(MOVE_RUN, 0.9f/*config*/);
                 orb->SetCanFly(true);
                 orb->SetDisableGravity(true);
                 orb->GetMotionMaster()->MovePoint(POINT_ID_FLAME_ORB_PLAYER, _bossFireOrbPos);
@@ -975,7 +1001,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         std::vector<Position> elementalPositions(fireelementalsSpawnPositions, fireelementalsSpawnPositions + FIRE_ELEMENTAL_SPAWN_POSITION_SIZE);
         Trinity::Containers::RandomResize(elementalPositions, size_t(2));
 
-        for (auto const& pos : fireelementalsSpawnPositions)
+        for (auto const& pos : elementalPositions)
         {
             if (Creature* portal = me->SummonCreature(NPC_BOSS_SIX_PORTAL_TRIGGER_VISUAL, pos))
             {
@@ -998,7 +1024,8 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE);
+            return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE) &&
+                !object->HasAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL);
         }))
         {
             CustomSpellValues val;
@@ -1022,7 +1049,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         {
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_MODIFY_CAST_TIME, 15000);
-            me->CastCustomSpell(64487, val, (Unit*)nullptr);
+            me->CastCustomSpell(SPELL_DIABLO_ASCEND, val, (Unit*)nullptr);
         });
 
         scheduler.Schedule(51s, [this](TaskContext)
@@ -1064,7 +1091,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         if (action == 1)
         {
             me->MonsterYell("I am complete!", LANG_UNIVERSAL, me);
-            
+
             if (Player * victim = me->SelectNearestPlayer(200.f))
                 me->Attack(victim, false);
 
@@ -1230,6 +1257,7 @@ struct npc_boss_six_beam_trigger_explosion : public ScriptedAI
     npc_boss_six_beam_trigger_explosion(Creature* creature) : ScriptedAI(creature)
     {
         _scheduler.CancelAll();
+        me->DespawnOrUnsummon(25s);
     }
 
     void MoveInLineOfSight(Unit* who) override { }
@@ -1247,8 +1275,22 @@ struct npc_boss_six_beam_trigger_explosion : public ScriptedAI
 
         _scheduler.Schedule(std::chrono::milliseconds(value), [this](TaskContext func)
         {
-            DoCastSelf(35470, true);
-            DoCastSelf(69671, true);
+            if (InstanceScript* instance = me->GetInstanceScript())
+            {
+                Creature* diablo = instance->GetCreature(DATA_DIABLO);
+                if (diablo)
+                {
+                    CustomSpellValues val;
+                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, 25000);
+                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 5000);
+                    me->CastCustomSpell(SPELL_DIABLO_TRIGGER_EXPLOSION, val, (Unit*) nullptr, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, diablo->GetGUID());
+
+                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, 3);
+                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 5000);
+                    me->CastCustomSpell(SPELL_DIABLO_TRIGGER_FLAME_PATCH, val, (Unit*) nullptr, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, diablo->GetGUID());
+                    me->DespawnOrUnsummon(20s); //config
+                }
+            }
         });
     }
 
@@ -1372,7 +1414,6 @@ struct npc_boss_diablo_comet_trigger : public ScriptedAI
 
     void SetData(uint32 type, uint32 value) override
     {
-#pragma message(CompileMessage "zmienic magic numbers")
         if (type == 52 && value)
             _didSpawnInfernal = true;
         //! if we didnt hit anything, spawn infernal
@@ -1462,7 +1503,7 @@ struct npc_boss_six_diabolic_infernal : public NullCreatureAI
                 //! change radius of trigger spell
                 CustomSpellValues val;
                 val.AddSpellMod(SPELLVALUE_BASE_POINT1, 0);
-                me->CastCustomSpell(68147, val, (Unit*)nullptr, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
+                me->CastCustomSpell(SPELL_DIABLO_INFERNAL_HELLFIRE, val, (Unit*)nullptr, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
             }
 
             func.Repeat(4s);
@@ -1489,7 +1530,7 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
 
     void Reset() override
     {
-        DoCastSelf(54111);
+        DoCastSelf(SPELL_DIABLO_SUMMON_VISUAL);
         _scheduler.CancelAll();
         me->SetSelectable(false);
         _scheduler.Schedule(2s, [this](TaskContext func)
@@ -1497,9 +1538,8 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
             _playerNearby = false;
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
-            me->CastCustomSpell(56543, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
+            me->CastCustomSpell(SPELL_DIABLO_VICINITY_CHECKER_TRIGGER, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
 
-#pragma message(CompileMessage "Ten szajs sie nie refreshuje poprawnie jezeli zmienimy castera - retest")
             val.AddSpellMod(SPELLVALUE_AURA_DURATION, 35000);
             val.AddSpellMod(SPELLVALUE_BASE_POINT0, 5000); // config
             val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 1); // 1/1000 = 0.0001 | base radius of 50,000 * 0.0001 equals 5 yards radius
@@ -1516,7 +1556,7 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
                             CustomSpellValues val;
                             val.AddSpellMod(SPELLVALUE_AURA_DURATION, 30000);
                             val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 100.f);
-                            me->CastCustomSpell(64668, val, clone, TRIGGERED_FULL_MASK);
+                            me->CastCustomSpell(SPELL_DIABLO_MAGNETIC_FIELD, val, clone, TRIGGERED_FULL_MASK);
                         }
                     }
                 }
@@ -1530,7 +1570,7 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
 
     void SpellHitTarget(Unit* who, SpellInfo const* spellInfo) override
     {
-        if (spellInfo->Id == 56543 && who && who->IsPlayer())
+        if (spellInfo->Id == SPELL_DIABLO_VICINITY_CHECKER_TRIGGER && who && who->IsPlayer())
             _playerNearby = true;
     }
 
@@ -1564,16 +1604,19 @@ class spell_five_finger_death_punch : public SpellScript
 
         if (aura->GetStackAmount() >= 5)
         {
-#pragma message(CompileMessage "wyjebac magiczne liczby z calego pliku")
-            GetHitUnit()->CastSpell(GetHitUnit(), 27676, true);
+            GetHitUnit()->CastSpell(GetHitUnit(), SPELL_DIABLO_EXPLODING_HEART, true);
             GetHitUnit()->RemoveAurasDueToSpell(GetSpellInfo()->Id);
-            if (GetHitUnit()->GetMapId() == 249/*onyxias lair*/)
+            if (GetHitUnit()->GetMapId() == DIABLO_MAP_ID)
             {
-                GetHitUnit()->CastSpell(GetHitUnit(), 20478, true);
                 if (InstanceScript* instance = GetHitUnit()->GetInstanceScript())
                 {
                     if (Creature* diablo = instance->GetCreature(DATA_DIABLO))
+                    {
                         diablo->getThreatManager().modifyThreatPercent(GetHitUnit(), -100);
+                        CustomSpellValues val;
+                        val.AddSpellMod(SPELLVALUE_AURA_DURATION, 3500);
+                        GetHitUnit()->CastCustomSpell(SPELL_DIABLO_ARMAGEDDON, val, GetHitUnit(), TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, diablo->GetGUID());
+                    }
                 }
             }
         }
@@ -1616,11 +1659,10 @@ class spell_buffeting_winds_diablo : public AuraScript
     {
         if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT && GetTarget() && GetTarget()->GetMapId() == 249)
         {
-            //59798
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_ENABLE_SHARE_DAMAGE, 1);
             val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
-            GetTarget()->CastCustomSpell(59798, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
+            GetTarget()->CastCustomSpell(SPELL_DIABLO_STATIC_OVERLOAD, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
         }
     }
 
@@ -1636,6 +1678,7 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
 
     void Reset() override
     {
+        _exploded = false;
         me->SetSpeedRate(MOVE_RUN, 0.3f);
         me->SetSpeedRate(MOVE_WALK, 0.3f);
         me->SetWalk(true);
@@ -1649,23 +1692,43 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
 
         _scheduler.Schedule(5s, [this](TaskContext func)
         {
-            bool _repeat = true;
             if (Unit* target = me->GetSummoner())
             {
                 if (target->GetDistance2d(me) <= 0.5f)
+                    TriggerExplosion();
+                else
                 {
-                    me->MonsterYell("DOSZEDLEM DO BOSSA, DESPAWN. Nie ma dmg, znalezc spell, ile ma bic", LANG_UNIVERSAL, nullptr);
-                    JustDied(target);
-                    me->DespawnOrUnsummon(1s);
-                    _repeat = false;
+                    me->DealDamage(me, me, me->GetMaxHealth() * 0.1);
+                    func.Repeat(2s);
                 }
             }
+        });
+    }
 
-            if (_repeat)
-            {
-                me->DealDamage(me, me, me->GetMaxHealth() * 0.1);
-                func.Repeat(2s);
-            }
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
+    {
+        if (damage >= me->GetHealth())
+        {
+            damage = 0;
+            if (!_exploded)
+                TriggerExplosion();
+        }
+    }
+
+    void TriggerExplosion()
+    {
+        _exploded = true;
+        me->SetSelectable(false);
+        me->GetMotionMaster()->Clear();
+        me->GetMotionMaster()->MoveIdle();
+        _scheduler.CancelAll();
+        CustomSpellValues val;
+        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
+        val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 100000);
+        me->CastCustomSpell(SPELL_DIABLO_ELEMENTAL_ADD_EXPLODE, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
+        _scheduler.Schedule(1s, [this](TaskContext)
+        {
+            Unit::Kill(me, me);
         });
     }
 
@@ -1677,6 +1740,7 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
     }
 private:
     TaskScheduler _scheduler;
+    bool _exploded;
 };
 
 struct npc_boss_player_flame_sphere : public ScriptedAI
