@@ -209,6 +209,7 @@ struct SpellValue
     float     SpellRange;
     bool      ShareDamage; // damage is divided by player hit count
     uint32    CastTime;
+    float     ConeAngle;
 };
 
 enum SpellState

@@ -558,6 +558,7 @@ SpellValue::SpellValue(SpellInfo const* proto)
     SpellRange = -1.f;
     ShareDamage = false;
     CastTime = 0;
+    ConeAngle = float(M_PI / 2.0f);
 }
 
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
@@ -1184,7 +1185,7 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
     SpellTargetObjectTypes objectType = targetType.GetObjectType();
     SpellTargetCheckTypes selectionType = targetType.GetCheckType();
     ConditionList* condList = m_spellInfo->Effects[effIndex].ImplicitTargetConditions;
-    float coneAngle = M_PI/2;
+    float coneAngle = m_spellValue->ConeAngle;
     float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue->RadiusMod;
 
     if (uint32 containerTypeMask = GetSearcherTypeMask(objectType, condList))
@@ -8134,6 +8135,9 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
             break;
         case SPELLVALUE_MODIFY_CAST_TIME:
             m_spellValue->CastTime = uint32(value);
+            break;
+        case SPELLVALUE_CONE_ANGLE:
+            m_spellValue->ConeAngle = float(value);
             break;
     }
 }
