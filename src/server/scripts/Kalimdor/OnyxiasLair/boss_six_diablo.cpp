@@ -149,6 +149,11 @@ enum DiabloStatIds
     STAT_DIABLO_OFFHAND_PROC_DAMAGE                             = 235
 };
 
+enum DiabloGameobjects
+{
+    GO_DIABLO_CHEST                         = 405001
+};
+
 constexpr uint32 NETHER_PORTAL_SPAWN_POSITION_SIZE{ 2 };
 Position const netherPortalSpawnPosition[NETHER_PORTAL_SPAWN_POSITION_SIZE] =
 {
@@ -318,6 +323,11 @@ struct npc_boss_six_diablo_AI : public BossAI
             summons.Summon(summon);
         else
             BossAI::JustSummoned(summon);
+    }
+
+    void JustDied(Unit* /*killer*/)
+    {
+        me->SummonGameObject(GO_DIABLO_CHEST, { 2.37f, -220.39f, -86.1f, 3.08f }, 0.0f, 0.0f, -0.99f, -0.03f, 0);
     }
 
     void SummonedCreatureDies(Creature* summon, Unit* killer) override
