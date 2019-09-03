@@ -41,6 +41,7 @@ UPDATE `creature_template` SET `AIName` = "NullCreatureAI" WHERE `entry` = @ENTR
 UPDATE `creature_template` SET `type_flags` = `type_flags` = 1048576 WHERE `entry` >= @ENTRY AND flags_extra & 128;
 UPDATE `creature_template` SET `spell1` = 56091, `spell2` = 56092, `unit_class` = 4 WHERE `entry` = @ENTRY + 18;
 UPDATE `creature_template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 23;
+UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask` &~ 64 WHERE `entry` = @ENTRY + 6;
 UPDATE `creature_template` SET `type` = 3, `flags_extra` = `flags_extra` | 1 WHERE `entry` = @ENTRY + 0;
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @ENTRY + 18;

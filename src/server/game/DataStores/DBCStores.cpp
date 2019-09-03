@@ -390,7 +390,8 @@ void LoadDBCStores(const std::string& dataPath)
                     if (!_onyxiaHack)
                     {
                         _onyxiaHack = true;
-                        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 3)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 2)] = MapDifficulty(entry->resetTime, 10, false);
+                        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 3)] = MapDifficulty(entry->resetTime, 10, false);
                     }
                     break;
                 }
@@ -398,10 +399,6 @@ void LoadDBCStores(const std::string& dataPath)
                     sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
                     break;
             }
-            if (entry->MapId == 44) // old sm hack
-                sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(604800, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
-            else
-                sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
         }
     }
     //! clear, no longer used

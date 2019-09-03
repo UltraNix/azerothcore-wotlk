@@ -249,8 +249,7 @@ Position const ashesOfAlarSpawnPositions[ASHES_OF_ALAR_POSITION_SIZE] =
     { -31.943f, -171.163f, -86.83335f, 4.758f }
 };
 
-constexpr uint32 FIRE_ELEMENTAL_SPAWN_POSITION_SIZE{ 4 };
-Position const fireelementalsSpawnPositions[FIRE_ELEMENTAL_SPAWN_POSITION_SIZE] =
+static const std::vector<Position> fireelementalsSpawnPositions =
 {
     { -73.179f, -231.372f, -83.96888f, 0.160f },
     { -69.563f, -197.305f, -84.27898f, 6.247f },
@@ -390,6 +389,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         else if (summon->GetEntry() == _currentIntermissionBoss)
         {
             summons.DespawnEntry(_currentIntermissionBoss);
+            me->SetSelectable(true);
             SchedulePhaseTwoAbilities();
             me->SetAggressive();
             DoZoneInCombat(me, 200.f);
@@ -752,6 +752,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         if (pointId == POINT_ID_MIDDLE_INTERMISSION)
         {
+            me->SetFacingTo(_diabloIntermissionPosition.GetOrientation());
             scheduler.Schedule(1s, [this](TaskContext func)
             {
                 CustomSpellValues val;
@@ -1357,7 +1358,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void HandleFireElementals()
     {
-        std::vector<Position> elementalPositions(fireelementalsSpawnPositions, fireelementalsSpawnPositions + FIRE_ELEMENTAL_SPAWN_POSITION_SIZE);
+        std::vector<Position> elementalPositions = fireelementalsSpawnPositions;
         Trinity::Containers::RandomResize(elementalPositions, size_t(2));
 
         for (auto const& pos : elementalPositions)
@@ -1372,11 +1373,8 @@ struct npc_boss_six_diablo_AI : public BossAI
             }
         }
 
-        scheduler.Schedule(2s, [this, &elementalPositions](TaskContext)
-        {
-            for (auto const& pos : elementalPositions)
-                me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos);
-        });
+        for (auto const pos : elementalPositions)
+            me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos);
     }
 
     void HandlePlasmaRay()
@@ -1400,10 +1398,6 @@ struct npc_boss_six_diablo_AI : public BossAI
     void HandlePheonixPhase()
     {
         _drakesDead = 0;
-        me->AttackStop();
-        me->SetPassive();
-        me->GetMotionMaster()->Clear();
-        me->GetMotionMaster()->MoveIdle();
         for (auto const& entry : { NPC_BOSS_SIX_ASHES_OF_ALAR, NPC_BOSS_SIX_SHADOW_DRAKE })
             summons.DespawnEntry(entry);
 
@@ -1412,16 +1406,6 @@ struct npc_boss_six_diablo_AI : public BossAI
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_MODIFY_CAST_TIME, _phoenixPhaseCastLength);
             me->CastCustomSpell(SPELL_DIABLO_ASCEND, val, (Unit*)nullptr);
-        });
-
-        auto _makeAggressiveTimer = Seconds((_phoenixPhaseCastTimer * 1000) + _phoenixPhaseCastLength);
-        scheduler.Schedule(Seconds(_makeAggressiveTimer), [this](TaskContext)
-        {
-            me->SetAggressive();
-            me->AttackStop();
-            me->GetMotionMaster()->Clear();
-            me->GetMotionMaster()->MoveIdle();
-            DoZoneInCombat(me, 250.f);
         });
 
         for (uint32 i = 0; i < _alarSpawnCount; ++i)
@@ -2001,7 +1985,7 @@ struct npc_boss_diablo_comet_trigger : public ScriptedAI
                 val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _meteorRadiusRatio);
                 val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, _meteorTargetPlayersOnly);
                 val.AddSpellMod(SPELLVALUE_ENABLE_SHARE_DAMAGE, _meteorShareDamage);
-                _caster->CastCustomSpell(SPELL_DIABLO_METEOR, val, (Unit*)nullptr, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, me->GetGUID());
+                _caster->CastCustomSpell(SPELL_DIABLO_METEOR, val, me, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, me->GetGUID());
             }
         }
     }
@@ -2324,6 +2308,23 @@ class spell_boss_diablo_armageddon_AuraScript : public AuraScript
 {
     PrepareAuraScript(spell_boss_diablo_armageddon_AuraScript);
 
+    void CalcPeriodic(AuraEffect const* aurEff, bool& isPeriodic, int32& amplitude)
+    {
+        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        {
+            InstanceScript* instance = GetTarget()->GetInstanceScript();
+            if (!instance)
+                return;
+
+            Creature* diablo = instance->GetCreature(DATA_DIABLO);
+            if (!diablo)
+                return;
+
+            isPeriodic = true;
+            amplitude = diablo->AI()->GetData(STAT_DIABLO_ARMAGEDDON_DURATION);
+        }
+    }
+
     void OnPeriodic(AuraEffect const* /*aurEff*/)
     {
         if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
@@ -2347,6 +2348,7 @@ class spell_boss_diablo_armageddon_AuraScript : public AuraScript
 
     void Register() override
     {
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_boss_diablo_armageddon_AuraScript::CalcPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         OnEffectPeriodic += AuraEffectPeriodicFn(spell_boss_diablo_armageddon_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
     }
 };
