@@ -768,7 +768,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             });
 
             if (_currentIntermissionBoss)
-                me->SummonCreature(_currentIntermissionBoss, { -27.719555f, -214.777084f, -87.560944f, 3194592f }, TEMPSUMMON_CORPSE_DESPAWN);
+                me->SummonCreature(_currentIntermissionBoss, { -27.719555f, -214.777084f, -87.560944f, 3.194592f }, TEMPSUMMON_CORPSE_DESPAWN);
             else
                 EnterEvadeMode();
         }
