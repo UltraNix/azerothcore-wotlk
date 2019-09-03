@@ -208,6 +208,11 @@ enum SpellCustomAttributes : uint32
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
 };
 
+enum SpellCustomAttributes1 : uint32
+{
+    SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD        = 0x00000001
+};
+
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
 
 class SpellImplicitTargetInfo
@@ -323,6 +328,7 @@ public:
     uint32 AttributesEx6;
     uint32 AttributesEx7;
     uint32 AttributesCu;
+    uint32 AttributesCu1;
     uint32 Stances;
     uint32 StancesNot;
     uint32 Targets;
@@ -412,6 +418,7 @@ public:
     inline bool HasAttribute(SpellAttr6 attribute) const { return AttributesEx6 & attribute; }
     inline bool HasAttribute(SpellAttr7 attribute) const { return AttributesEx7 & attribute; }
     inline bool HasAttribute(SpellCustomAttributes customAttribute) const { return AttributesCu & customAttribute; }
+    inline bool HasAttribute(SpellCustomAttributes1 customAttribute) const { return AttributesCu1 & customAttribute; }
 
     bool IsExplicitDiscovery() const;
     bool IsLootCrafting() const;

@@ -3077,6 +3077,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu &= ~(SPELL_ATTR0_CU_NEGATIVE);
         });
 
+        // Lacerate (Druid)
+        ApplySpellFix({ 33745, 48567, 48568 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD;
+        });
+
         ApplySpellFix
         ({
             54428, // Divine Plea

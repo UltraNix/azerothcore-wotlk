@@ -644,8 +644,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
         // or maybe there's a spell attribute somewhere
         bool resetPeriodicTimer = create || ((GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE) && (GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE_PERCENT));
 
-        // Lacerate shouldn't reset periodic timer
-        if (resetPeriodicTimer && !(m_spellInfo->SpellFamilyFlags[1] & 0x00000100 && m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID))
+        if (resetPeriodicTimer && !m_spellInfo->HasAttribute(SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD))
         {
             m_periodicTimer = 0;
             // Start periodic on next tick or at aura apply

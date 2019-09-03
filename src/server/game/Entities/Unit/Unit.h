@@ -340,6 +340,7 @@ class Vehicle;
 class TransportBase;
 class SpellCastTargets;
 enum SpellCustomAttributes : uint32;
+enum SpellCustomAttributes1 : uint32;
 
 typedef std::list<Unit*> UnitList;
 typedef std::vector<Unit*> UnitVec;
@@ -2019,6 +2020,7 @@ class Unit : public WorldObject
         bool HasVisibleAuraType(AuraType auraType) const;
         bool HasNegativeAuraWithAttribute(uint32 flag, uint64 guid = 0);
         bool HasAuraWithAttributeCu(SpellCustomAttributes attr);
+        bool HasAuraWithAttributeCu(SpellCustomAttributes1 attr);
         bool HasAuraWithMechanic(uint32 mechanicMask) const;
         bool CannotRegenerateManaFromSpell(SpellInfo const* spell, Powers powerType);
 

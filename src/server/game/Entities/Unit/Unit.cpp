@@ -5152,15 +5152,24 @@ bool Unit::HasNegativeAuraWithAttribute(uint32 flag, uint64 guid)
     return false;
 }
 
+template <typename SpellCustomAttribute>
+bool HasAuraWithAttributeCuImpl(std::multimap<uint32, AuraApplication*> const& aurAppMap, SpellCustomAttribute attr)
+{
+    for (auto&& pair : aurAppMap)
+        if (pair.second->GetBase()->GetSpellInfo()->HasAttribute(attr))
+            return true;
+
+    return false;
+}
+
 bool Unit::HasAuraWithAttributeCu(SpellCustomAttributes attr)
 {
-    for (AuraApplicationMap::const_iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
-    {
-        Aura const* aura = iter->second->GetBase();
-        if (aura->GetSpellInfo()->HasAttribute(attr))
-            return true;
-    }
-    return false;
+    return HasAuraWithAttributeCuImpl(m_appliedAuras, attr);
+}
+
+bool Unit::HasAuraWithAttributeCu(SpellCustomAttributes1 attr)
+{
+    return HasAuraWithAttributeCuImpl(m_appliedAuras, attr);
 }
 
 bool Unit::HasAuraWithMechanic(uint32 mechanicMask) const
