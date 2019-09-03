@@ -1409,6 +1409,7 @@ class Unit : public WorldObject
 
         virtual void Update(uint32 time);
 
+        bool CanUpdateSwingTimer() const;
         void setSwingAllowedWhileCasting( bool value ) { m_CanFinishSwingWhileCasting = value; }
         void setAttackTimer(WeaponAttackType type, int32 time) { m_attackTimer[type] = time; }
         void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);

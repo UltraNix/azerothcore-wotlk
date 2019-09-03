@@ -408,12 +408,15 @@ void Unit::Update(uint32 p_time)
     // not implemented before 3.0.2
     // xinef: if attack time > 0, reduce by diff
     // if on next update, attack time < 0 assume player didnt attack - set to 0
-    if (int32 base_attack = getAttackTimer(BASE_ATTACK))
-        setAttackTimer(BASE_ATTACK, base_attack > 0 ? base_attack - (int32)p_time : 0);
-    if (int32 ranged_attack = getAttackTimer(RANGED_ATTACK))
-        setAttackTimer(RANGED_ATTACK, ranged_attack > 0 ? ranged_attack - (int32)p_time : 0);
-    if (int32 off_attack = getAttackTimer(OFF_ATTACK))
-        setAttackTimer(OFF_ATTACK, off_attack > 0 ? off_attack - (int32)p_time : 0);
+    if (CanUpdateSwingTimer())
+    {
+        if (int32 base_attack = getAttackTimer(BASE_ATTACK))
+            setAttackTimer(BASE_ATTACK, base_attack > 0 ? base_attack - (int32)p_time : 0);
+        if (int32 ranged_attack = getAttackTimer(RANGED_ATTACK))
+            setAttackTimer(RANGED_ATTACK, ranged_attack > 0 ? ranged_attack - (int32)p_time : 0);
+        if (int32 off_attack = getAttackTimer(OFF_ATTACK))
+            setAttackTimer(OFF_ATTACK, off_attack > 0 ? off_attack - (int32)p_time : 0);
+    }
 
     // update abilities available only for fraction of time
     UpdateReactives(p_time);
@@ -427,6 +430,19 @@ void Unit::Update(uint32 p_time)
 
     UpdateSplineMovement(p_time);
     GetMotionMaster()->UpdateMotion(p_time);
+}
+
+bool Unit::CanUpdateSwingTimer() const
+{
+    if (!IsPlayer())
+        return true;
+
+    if (IsCasting())
+        for (Spell* spell : m_currentSpells)
+            if (spell && spell->GetSpellInfo())
+                return !spell->GetSpellInfo()->HasAttribute(SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS);
+
+    return true;
 }
 
 bool Unit::haveOffhandWeapon() const
