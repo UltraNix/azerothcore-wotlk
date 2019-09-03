@@ -189,7 +189,8 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 const SpellInfo* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-                if (!spellInfo)
+                // Maul exception, should also proc Omen of Clarity
+                if (!spellInfo || (spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) && spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2) && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID))
                     return true;
 
                 // xinef: no mana cost
