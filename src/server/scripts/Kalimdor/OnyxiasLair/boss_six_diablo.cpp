@@ -2119,7 +2119,7 @@ struct npc_boss_six_diabolic_infernal : public NullCreatureAI
     void LoadStats()
     {
         HellforgeStats _stats = sWorldCache.GetStatValues
-        ({ STAT_INFERNAL_HELLFIRE_TIMER });
+        ({ STAT_INFERNAL_HELLFIRE_TIMER, STAT_INFERNAL_HELLFIRE_DAMAGE, STAT_INFERNAL_HELLFIRE_RADIUS_RATIO, STAT_INFERNAL_HELLFIRE_REPEAT_TIMER });
 
         for (auto const& ref : _stats)
         {
