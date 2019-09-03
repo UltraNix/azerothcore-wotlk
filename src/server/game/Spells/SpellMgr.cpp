@@ -8054,6 +8054,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 14032: // Shadow Word: Pain
             spellInfo->Dispel = DISPEL_NONE;
             break;
+        case 23011: // Tears of the Wind Seeker
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+            break;
         }
 
         //////////////////////////////////////////

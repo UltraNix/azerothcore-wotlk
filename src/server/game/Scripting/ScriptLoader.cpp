@@ -258,6 +258,7 @@ void AddSC_undercity();
 void AddSC_western_plaguelands();
 void AddSC_westfall();
 void AddSC_wetlands();
+void AddSC_worldzone_searing_gorge();
 
 // Battle for the Undercity
 void AddSC_battle_for_undercity_alliance();
@@ -930,6 +931,7 @@ void AddEasternKingdomsScripts()
     AddSC_western_plaguelands();
     AddSC_westfall();
     AddSC_wetlands();
+    AddSC_worldzone_searing_gorge();
     // Battle for the Undercity
     AddSC_battle_for_undercity_alliance();
     AddSC_battle_for_undercity_horde();

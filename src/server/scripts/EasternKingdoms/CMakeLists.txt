@@ -187,6 +187,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BattleForUndercity/battle_for_undercity_horde.cpp
   EasternKingdoms/BattleForUndercity/battle_for_undercity.cpp
   EasternKingdoms/BattleForUndercity/worldzone_trisfal_glades.cpp
+  EasternKingdoms/worldzone_searing_gorge.cpp
   EasternKingdoms/BattleForUndercity/battle_for_undercity.h
 )
 
