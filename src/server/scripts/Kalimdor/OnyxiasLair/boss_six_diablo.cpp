@@ -4,6 +4,7 @@
 #include "SpellScript.h"
 #include "MoveSplineInit.h"
 #include "GameObjectAI.h"
+#include "WorldCache.h"
 
 enum DiabloSpells
 {
@@ -43,11 +44,17 @@ enum DiabloSpells
     SPELL_DIABLO_MAGNETIC_FIELD             = 64668,
     SPELL_DIABLO_EXPLODING_HEART            = 27676,
     SPELL_DIABLO_ARMAGEDDON                 = 20478,
-    SPELL_DIABLO_INFERNAL_HELLFIRE          = 68147,
+    SPELL_DIABLO_INFERNAL_HELLFIRE          = 65817,
     SPELL_DIABLO_SUMMON_VISUAL              = 54111,
     SPELL_DIABLO_STATIC_OVERLOAD            = 59798,
     SPELL_DIABLO_ASCEND                     = 64487,
-    SPELL_DIABLO_FIVE_FAT_FINGERS           = 27673
+    SPELL_DIABLO_FIVE_FAT_FINGERS           = 27673,
+    SPELL_DIABLO_WRATH_INTERRUPT            = 21667,
+    SPELL_DIABLO_PLASMA_RAY                 = 64529,
+    SPELL_DIABLO_COSMETIC_WHITE_SMOKE       = 43467,
+    SPELL_DIABLO_METEOR                     = 36837,
+    SPELL_DIABLO_RING_OF_FLAME              = 35831,
+    SPELL_DIABLO_REFLECT_DAMAGE_FIREBOLT    = 44577
 };
 
 enum DiabloCreatures
@@ -91,7 +98,55 @@ enum DiabloMisc
 enum DiabloPointIDs
 {
     POINT_ID_DIABLO_FIREBEAMS               = 1,
-    POINT_ID_FLAME_ORB_PLAYER
+    POINT_ID_FLAME_ORB_PLAYER,
+    POINT_ID_MIDDLE_INTERMISSION
+};
+
+enum DiabloStatIds
+{
+    STAT_DIABLO_NAPALAM_SHELL_PERCENTAGE                        = 150,
+    STAT_DIABLO_NAPALAM_SHELL_TIMER,
+    STAT_DIABLO_NAPALAM_SHELL_READJUST_HEALTH_PERCENTAGE,
+    STAT_DIABLO_NAPALAM_SHELL_COUNT,
+    STAT_DIABLO_NAPALAM_SHELL_READJUSTED_COUNT,
+    STAT_DIABLO_INTERMISSION_PERCENTAGE,
+    STAT_DIABLO_SHADOW_STEP_EXPLOSION_DAMAGE,
+    STAT_DIABLO_SHADOW_STEP_EXPLOSION_RADIUS_RATIO,
+    STAT_DIABLO_NAPALAM_SHELL_DAMAGE,
+    STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO,
+    STAT_DIABLO_SHADOW_REALM_TIMER,
+    STAT_DIABLO_P1_KNOCKBACK_TIMER,
+    STAT_DIABLO_P1_KNOCKBACK_REPEAT_TIMER,
+    STAT_DIABLO_P1_SHADOWSTEP_FIRST_TIMER,
+    STAT_DIABLO_P1_SHADOWSTEP_REPEAT_TIMER,
+    STAT_DIABLO_P2_SHADOWSTEP_OR_KNOCKBACK_FIRST_TIMER,
+    STAT_DIABLO_P2_SHADOWSTEP_OR_KNOCKBACK_REPEAT_TIMER,
+    STAT_DIABLO_FIRE_ELEMENTALS_FIRST_SPAWN_TIMER,
+    STAT_DIABLO_FIRE_ELEMENTALS_REPEAT_SPAWN_TIMER,
+    STAT_DIABLO_PLASMA_RAY_FIRST_TIMER,
+    STAT_DIABLO_PLASMA_RAY_REPEAT_TIMER,
+    STAT_DIABLO_PHEONIX_FIRST_TIMER,
+    STAT_DIABLO_PHEONIX_REPEATE_TIMER,
+    STAT_DIABLO_FIREBEAM_TIMER,                                 // executes after shadow realm, fail or not
+    STAT_DIABLO_PLAYER_SPHERES_MOVE_RATIO,                      // Ratio for SetSpeedRatio (move run)
+    STAT_DIABLO_PLASMA_RAY_DAMAGE,
+    STAT_DIABLO_PHEONIX_PHASE_CAST_TIMER,
+    STAT_DIABLO_PHEONIX_CAST_TIME,                              // in milliseconds, diablo wipe spell cast time (unless interrupted)
+    STAT_DIABLO_ASHES_OF_ALAR_COUNT,
+    STAT_DIABLO_SHADOW_DRAKE_COUNT,
+    STAT_DIABLO_SHADOW_REALM_FAIL_TIMER,
+    STAT_DIABLO_ARMAGEDDON_DURATION,
+    STAT_DIABLO_ARMAGEDDON_RADIUS_RATIO,
+    STAT_DIABLO_ARMAGEDDON_DAMAGE,
+    STAT_DIABLO_WINDS_DAMAGE,
+    STAT_DIABLO_SPIRIT_BURN_DAMAGE,
+    STAT_DIABLO_PLASMA_RAY_WIDTH,
+    STAT_DIABLO_THUNDERSHOCK_DAMAGE,
+
+    /** Misc **/
+    STAT_DIABLO_BUFFETING_WINDS_RADIUS                          = 233,
+    STAT_DIABLO_FIVE_FAT_FINGERS_PROC_CHANCE                    = 234,
+    STAT_DIABLO_OFFHAND_PROC_DAMAGE                             = 235
 };
 
 constexpr uint32 NETHER_PORTAL_SPAWN_POSITION_SIZE{ 2 };
@@ -234,9 +289,8 @@ static const std::vector<Position> meteorSpawnPositions =
 Position const _dummyFacingPosition{ -54.503f, -212.654f, -85.46500f, 6.268f };
 Position const _centerOfFightingArea{ -28.712f, -213.297f, -89.08712f, 6.233f };
 Position const _shadowRealmExitPosition{ -43.299423f, -216.492767f, -86.663925f, -0.012966f };
-constexpr uint32 AMOUNT_OF_DRAKES_REQUIRED{ 2 };
+Position const _diabloIntermissionPosition{ -26.659204f, -211.738190f, -89.347158f, 3.182097f };
 
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
 struct npc_boss_six_diablo_AI : public BossAI
 {
     npc_boss_six_diablo_AI(Creature* creature) : BossAI(creature, DATA_DIABLO)
@@ -281,12 +335,12 @@ struct npc_boss_six_diablo_AI : public BossAI
             for (auto const& entry : { NPC_BOSS_SIX_INCREASED_DAMAGE_TRIGGER, NPC_BOSS_SIX_HEART_BEAM_TRIGGER, NPC_BOSS_SIX_FIERY_COMET_TRIGGER })
                 summons.DespawnEntry(entry);
             SchedulePhaseOneAbilities();
-            scheduler.Schedule(10s, [this](TaskContext /*func*/)
+            scheduler.Schedule(Seconds(_fireBeamTimer), [this](TaskContext /*func*/)
             {
                 SpawnFirebeamTriggers();
             });
         }
-        else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_DRAKE && ++_drakesDead >= AMOUNT_OF_DRAKES_REQUIRED)
+        else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_DRAKE && ++_drakesDead >= _drakeSpawnCount)
         {
             for (auto const& guid : summons)
             {
@@ -294,7 +348,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                 if (phoenix && phoenix->GetEntry() == NPC_BOSS_SIX_ASHES_OF_ALAR)
                 {
                     Player* player = phoenix->GetCharmerOrOwnerPlayerOrPlayerItself();
-                    phoenix->m_spells[3] = 21667;//todo
+                    phoenix->m_spells[3] = SPELL_DIABLO_WRATH_INTERRUPT;
 
                     //! now, if player exists hence vehicle is occupied
                     //! let's send new list of spells to him
@@ -304,7 +358,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                 }
             }
 
-            scheduler.Schedule(30s, [this](TaskContext)
+            scheduler.Schedule(Seconds(_phoenixSecondTimer), [this](TaskContext)
             {
                 HandlePheonixPhase();
             });
@@ -323,6 +377,17 @@ struct npc_boss_six_diablo_AI : public BossAI
         }
         else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_CRYSTAL)
             DrawPentagram();
+        else if (summon->GetEntry() == _currentIntermissionBoss)
+        {
+            summons.DespawnEntry(_currentIntermissionBoss);
+            SchedulePhaseTwoAbilities();
+            me->SetAggressive();
+            DoZoneInCombat(me, 200.f);
+            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                AttackStart(target);
+            else
+                EnterEvadeMode();
+        }
     }
 
     void OnMeleeAttack(VictimState state, WeaponAttackType attType, Unit* victim, uint32 procAttacker) override
@@ -339,30 +404,31 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         if (attType == BASE_ATTACK)
         {
-            if (!roll_chance_i(50 /*config*/))
+            if (!roll_chance_i(_fiveFingersProcChance))
                 return;
 
-            DoCast(victim, SPELL_DIABLO_FIVE_FAT_FINGERS, true); // config
+            DoCast(victim, SPELL_DIABLO_FIVE_FAT_FINGERS, true);
         }
         else if (attType == OFF_ATTACK)
         {
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 25000); // config
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, _offhandProcDamage);
             me->CastCustomSpell(SPELL_DIABLO_FLAMETONGUE_ATTACK, val, victim, TRIGGERED_FULL_MASK);
         }
     }
 
     void Reset() override
     {
+        BossAI::Reset();
         Trinity::Containers::RandomShuffle(_myShadowDrakePositions);
         me->SetCanDualWield(true);
-        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.f);
-        BossAI::Reset();
+        me->SetFloatValue(UNIT_FIELD_COMBATREACH, 3.5f);
+        me->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 3.5f);
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         me->SetSelectable(false);
         _pentagramIndex = 0;
         _shadowRealmTargetGUID = 0;
-        _elementalPhase = false;
+        _napalmPhase = false;
         _intermission = false;
         me->SetVisible(true);
         me->SetAggressive();
@@ -376,6 +442,241 @@ struct npc_boss_six_diablo_AI : public BossAI
         _knockbackOrShadowstep = false;
         _napalmShellCount = 1;
         _readjustNapalmShells = false;
+        _currentIntermissionBoss = 0;
+        LoadStats();
+    }
+
+    void SpellHitTarget(Unit* who, SpellInfo const* spell) override
+    {
+        if (who && who->ToPlayer() && spell->Id == SPELL_DIABLO_VICINITY_CHECKER_TRIGGER)
+            Unit::Kill(me, who);
+    }
+
+    uint32 GetData(uint32 data) const override
+    {
+        switch (data)
+        {
+            case STAT_DIABLO_NAPALAM_SHELL_DAMAGE:
+                return _napalmShellDamage;
+            case STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO:
+                return _napalamShellRadiusRatio;
+            case STAT_DIABLO_ARMAGEDDON_DURATION:
+                return _armageddonDuration;
+            case STAT_DIABLO_ARMAGEDDON_RADIUS_RATIO:
+                return _armageddonRadiusRatio;
+            case STAT_DIABLO_ARMAGEDDON_DAMAGE:
+                return _armageddonDamage;
+            case STAT_DIABLO_WINDS_DAMAGE:
+                return _windsDamage;
+            case STAT_DIABLO_SPIRIT_BURN_DAMAGE:
+                return _spiritBurnDamage;
+            case STAT_DIABLO_PLASMA_RAY_DAMAGE:
+                return _plasmaRayDamage;
+            case STAT_DIABLO_THUNDERSHOCK_DAMAGE:
+                return _thundershockDamage;
+            default:
+                return 0U;
+        }
+
+        return 0U;
+    }
+
+    float GetFloatData(uint32 data) const override
+    {
+        if (data == STAT_DIABLO_PLASMA_RAY_WIDTH)
+            return _plasmaRayWidth;
+        else if (data == STAT_DIABLO_BUFFETING_WINDS_RADIUS)
+            return _buffetingWindsRadius;
+
+        return 0.f;
+    }
+
+    bool CanAIAttack(Unit const* target) const override
+    {
+        if (target && target->GetVehicleBase())
+            return false;
+
+        return BossAI::CanAIAttack(target);
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({
+           STAT_DIABLO_NAPALAM_SHELL_PERCENTAGE,
+           STAT_DIABLO_NAPALAM_SHELL_TIMER,
+           STAT_DIABLO_NAPALAM_SHELL_READJUST_HEALTH_PERCENTAGE,
+           STAT_DIABLO_NAPALAM_SHELL_COUNT,
+           STAT_DIABLO_NAPALAM_SHELL_READJUSTED_COUNT,
+           STAT_DIABLO_INTERMISSION_PERCENTAGE,
+           STAT_DIABLO_SHADOW_STEP_EXPLOSION_DAMAGE,
+           STAT_DIABLO_SHADOW_STEP_EXPLOSION_RADIUS_RATIO,
+           STAT_DIABLO_NAPALAM_SHELL_DAMAGE,
+           STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO,
+           STAT_DIABLO_SHADOW_REALM_TIMER,
+           STAT_DIABLO_P1_KNOCKBACK_TIMER,
+           STAT_DIABLO_P1_KNOCKBACK_REPEAT_TIMER,
+           STAT_DIABLO_P1_SHADOWSTEP_FIRST_TIMER,
+           STAT_DIABLO_P1_SHADOWSTEP_REPEAT_TIMER,
+           STAT_DIABLO_P2_SHADOWSTEP_OR_KNOCKBACK_FIRST_TIMER,
+           STAT_DIABLO_P2_SHADOWSTEP_OR_KNOCKBACK_REPEAT_TIMER,
+           STAT_DIABLO_FIRE_ELEMENTALS_FIRST_SPAWN_TIMER,
+           STAT_DIABLO_FIRE_ELEMENTALS_REPEAT_SPAWN_TIMER,
+           STAT_DIABLO_PLASMA_RAY_FIRST_TIMER,
+           STAT_DIABLO_PLASMA_RAY_REPEAT_TIMER,
+           STAT_DIABLO_PHEONIX_FIRST_TIMER,
+           STAT_DIABLO_PHEONIX_REPEATE_TIMER,
+           STAT_DIABLO_FIREBEAM_TIMER,
+           STAT_DIABLO_PLAYER_SPHERES_MOVE_RATIO,
+           STAT_DIABLO_PLASMA_RAY_DAMAGE,
+           STAT_DIABLO_PHEONIX_PHASE_CAST_TIMER,
+           STAT_DIABLO_PHEONIX_CAST_TIME,
+           STAT_DIABLO_ASHES_OF_ALAR_COUNT,
+           STAT_DIABLO_SHADOW_DRAKE_COUNT,
+           STAT_DIABLO_SHADOW_REALM_FAIL_TIMER,
+           STAT_DIABLO_ARMAGEDDON_DURATION,
+           STAT_DIABLO_ARMAGEDDON_RADIUS_RATIO,
+           STAT_DIABLO_ARMAGEDDON_DAMAGE,
+           STAT_DIABLO_WINDS_DAMAGE,
+           STAT_DIABLO_SPIRIT_BURN_DAMAGE,
+           STAT_DIABLO_PLASMA_RAY_WIDTH,
+           STAT_DIABLO_THUNDERSHOCK_DAMAGE,
+           STAT_DIABLO_BUFFETING_WINDS_RADIUS,
+           STAT_DIABLO_FIVE_FAT_FINGERS_PROC_CHANCE,
+           STAT_DIABLO_OFFHAND_PROC_DAMAGE
+        });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+               case STAT_DIABLO_NAPALAM_SHELL_PERCENTAGE:
+                   _napalamShellStartPercent = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_NAPALAM_SHELL_TIMER:
+                   _napalamShellRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_NAPALAM_SHELL_READJUST_HEALTH_PERCENTAGE:
+                   _napalamShellReadjustPercent = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_NAPALAM_SHELL_COUNT:
+                   _napalamShellNormalCount = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_NAPALAM_SHELL_READJUSTED_COUNT:
+                   _napalamShellReadjustedCount = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_INTERMISSION_PERCENTAGE:
+                   _intermissionPercentage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_SHADOW_STEP_EXPLOSION_DAMAGE:
+                   _shadowStepExplosionDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_SHADOW_STEP_EXPLOSION_RADIUS_RATIO:
+                   _shadowStepExplosionRadiusRatio = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_NAPALAM_SHELL_DAMAGE:
+                   _napalmShellDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO:
+                   _napalamShellRadiusRatio = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_SHADOW_REALM_TIMER:
+                   _shadowRealmFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_P1_KNOCKBACK_TIMER:
+                   _knockbackFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_P1_KNOCKBACK_REPEAT_TIMER:
+                   _knockbackRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_P1_SHADOWSTEP_FIRST_TIMER:
+                   _shadowStepFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_P1_SHADOWSTEP_REPEAT_TIMER:
+                   _shadowStepRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_P2_SHADOWSTEP_OR_KNOCKBACK_FIRST_TIMER:
+                   _knockOrStepFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_P2_SHADOWSTEP_OR_KNOCKBACK_REPEAT_TIMER:
+                   _knockOrStepRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_FIRE_ELEMENTALS_FIRST_SPAWN_TIMER:
+                   _fireElementalsFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_FIRE_ELEMENTALS_REPEAT_SPAWN_TIMER:
+                   _fireElementalsRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PLASMA_RAY_FIRST_TIMER:
+                   _plasmaRayFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PLASMA_RAY_REPEAT_TIMER:
+                   _plasmaRayRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PHEONIX_FIRST_TIMER:
+                   _pheonixFirstTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PHEONIX_REPEATE_TIMER:
+                   _phoenixSecondTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_FIREBEAM_TIMER:
+                   _fireBeamTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PLAYER_SPHERES_MOVE_RATIO:
+                   _ballOfFlamesRunRatio = ref.second.StatVariance;
+                   break;
+               case STAT_DIABLO_PLASMA_RAY_DAMAGE:
+                   _plasmaRayDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PHEONIX_PHASE_CAST_TIMER:
+                   _phoenixPhaseCastTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PHEONIX_CAST_TIME:
+                   _phoenixPhaseCastLength = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_ASHES_OF_ALAR_COUNT:
+                   _alarSpawnCount = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_SHADOW_DRAKE_COUNT:
+                   _drakeSpawnCount = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_SHADOW_REALM_FAIL_TIMER:
+                   _shadowRealmFailTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_ARMAGEDDON_DURATION:
+                   _armageddonDuration = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_ARMAGEDDON_RADIUS_RATIO:
+                   _armageddonRadiusRatio = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_ARMAGEDDON_DAMAGE:
+                   _armageddonDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_WINDS_DAMAGE:
+                   _windsDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_SPIRIT_BURN_DAMAGE:
+                   _spiritBurnDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_PLASMA_RAY_WIDTH:
+                   _plasmaRayWidth = ref.second.StatVariance;
+                   break;
+               case STAT_DIABLO_THUNDERSHOCK_DAMAGE:
+                   _thundershockDamage = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_BUFFETING_WINDS_RADIUS:
+                   _buffetingWindsRadius = ref.second.StatVariance;
+                   break;
+               case STAT_DIABLO_FIVE_FAT_FINGERS_PROC_CHANCE:
+                   _fiveFingersProcChance = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_OFFHAND_PROC_DAMAGE:
+                   _offhandProcDamage = ref.second.StatValue;
+                   break;
+               default:
+                   break;
+            }
+        }
     }
 
     uint64 GetGUID(int32 /*data*/) const override
@@ -388,41 +689,78 @@ struct npc_boss_six_diablo_AI : public BossAI
         if (attacker && attacker->ToCreature() && (attacker->GetEntry() == NPC_BOSS_SIX_ASHES_OF_ALAR || attacker->GetEntry() == NPC_BOSS_SIX_SHADOW_DRAKE))
         {
             damage = 0;
+            CustomSpellValues val;
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, attacker->GetMaxHealth() / 2);
+            me->CastCustomSpell(SPELL_DIABLO_REFLECT_DAMAGE_FIREBOLT, val, attacker, TRIGGERED_FULL_MASK);
             return;
         }
 
-        if (me->HealthBelowPctDamaged(20, damage) && !_elementalPhase)
+        if (me->HealthBelowPctDamaged(_napalamShellStartPercent, damage) && !_napalmPhase)
         {
-            _elementalPhase = true;
+            _napalmPhase = true;
+            _napalmShellCount = _napalamShellNormalCount;
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_1, true);
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_2, true);
 
             scheduler.Schedule(5s, [this](TaskContext func)
             {
-                auto repeatTime = 8s;
-                if (!CanEventExecute())
-                    repeatTime = 10s;
-                else
+                if (CanEventExecute())
                     HandleNapalmShells();
 
-                func.Repeat(repeatTime);
+                func.Repeat(Seconds(_napalamShellRepeatTimer));
             });
 
             return;
         }
 
-        if (me->HealthBelowPctDamaged(30, damage) && !_readjustNapalmShells)
+        if (me->HealthBelowPctDamaged(_napalamShellReadjustPercent, damage) && !_readjustNapalmShells)
         {
             _readjustNapalmShells = true;
-            _napalmShellCount = 3;
+            _napalmShellCount = _napalamShellReadjustedCount;
         }
 
-        if (me->HealthBelowPctDamaged(50, damage) && !_intermission)
+        if (me->HealthBelowPctDamaged(_intermissionPercentage, damage) && !_intermission)
         {
+            scheduler.CancelAll();
             _intermission = true;
-            me->MonsterYell("Super add piootrka sie zrespi teraz, beda addy to dorobie jego stanie na srodku i cast co napisales na githubie", LANG_UNIVERSAL, nullptr);
-            SchedulePhaseTwoAbilities();
+            me->SetSelectable(false);
+            me->SetPassive();
+            me->GetMotionMaster()->Clear();
+            me->GetMotionMaster()->MoveIdle();
+            me->AttackStop();
+            me->GetMotionMaster()->MovePoint(POINT_ID_MIDDLE_INTERMISSION, _diabloIntermissionPosition);
+
+            std::vector<uint32> _bossEntries = { 261000, 261003, 261005, 261008, 261011 };
+            _currentIntermissionBoss = Trinity::Containers::SelectRandomContainerElement(_bossEntries);
+        }
+    }
+
+    void MovementInform(uint32 type, uint32 pointId) override
+    {
+        if (type != POINT_MOTION_TYPE)
             return;
+
+        if (pointId == POINT_ID_MIDDLE_INTERMISSION)
+        {
+            scheduler.Schedule(1s, [this](TaskContext func)
+            {
+                CustomSpellValues val;
+                val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
+                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 16000);
+                DoCastAOE(SPELL_DIABLO_VICINITY_CHECKER_TRIGGER, true);
+                func.Repeat(1s);
+            });
+
+            scheduler.Schedule(1s, [this](TaskContext func)
+            {
+                DoCastSelf(SPELL_DIABLO_RING_OF_FLAME, true);
+                func.Repeat(20s);
+            });
+
+            if (_currentIntermissionBoss)
+                me->SummonCreature(_currentIntermissionBoss, { -27.719555f, -214.777084f, -87.560944f, 3194592f }, TEMPSUMMON_CORPSE_DESPAWN);
+            else
+                EnterEvadeMode();
         }
     }
 
@@ -465,8 +803,13 @@ struct npc_boss_six_diablo_AI : public BossAI
 
             scheduler.Schedule(4s, [this](TaskContext /*func*/)
             {
-                DoCastAOE(SPELL_DIABLO_EXPLOSION, true);
+                CustomSpellValues val;
+                val.AddSpellMod(SPELLVALUE_BASE_POINT0, _shadowStepExplosionDamage);
+                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _shadowStepExplosionRadiusRatio);
+                me->CastCustomSpell(SPELL_DIABLO_EXPLOSION, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
+
                 DoCastSelf(SPELL_DIABLO_BLUE_EXPLOSION, true);
+
                 me->SetAggressive();
                 me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MoveIdle();
@@ -482,27 +825,33 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void HandleNapalmShells()
     {
-        scheduler.Schedule(1s, [this](TaskContext func)
+        for (uint32 i = 0; i < _napalmShellCount; ++i)
         {
-            for (uint32 i = 0; i < _napalmShellCount; ++i)
-            {
-                Position spawnPosition = Trinity::Containers::SelectRandomContainerElement(_diabloRandomSpawnPositions);
-                spawnPosition.m_positionZ += 15.f;
+            Position spawnPosition = Trinity::Containers::SelectRandomContainerElement(_diabloRandomSpawnPositions);
+            spawnPosition.m_positionZ += 15.f;
 
-                if (Creature* trigger = me->SummonCreature(NPC_BOSS_SIX_NAPALAM_SHELL_TRIGGER, spawnPosition))
+            if (Creature* trigger = me->SummonCreature(NPC_BOSS_SIX_NAPALAM_SHELL_TRIGGER, spawnPosition))
+            {
+                trigger->SetSelectable(false);
+                trigger->SetImmuneToPC(true);
+                trigger->SetCanFly(true);
+                trigger->SetDisableGravity(true);
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
                 {
-                    trigger->SetSelectable(false);
-                    trigger->SetImmuneToPC(true);
-                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
-                    {
-                        return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_MC_INSANE);
-                    });
-                    if (target)
-                        trigger->CastSpell(target, SPELL_DIABLO_NAPALM_SHELL, true, NullItemRef, (AuraEffect*)nullptr, me->GetGUID());
-                    trigger->DespawnOrUnsummon(6s);
-                };
-            }
-        });
+                    return object->ToPlayer()
+                        && !object->GetVehicleBase()
+                        && !object->HasAura(SPELL_DIABLO_MC_INSANE)
+                        && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS)
+                        && !object->HasAura(SPELL_DIABLO_CONVERSION_BEAM);
+                });
+
+                if (target)
+                    //! damage handled via spellscript, this is triggered spell
+                    trigger->CastSpell(target, SPELL_DIABLO_NAPALM_SHELL, true, NullItemRef, (AuraEffect*)nullptr, me->GetGUID());
+
+                trigger->DespawnOrUnsummon(8s);
+            };
+        }
     }
 
     void AttackStart(Unit* who) override
@@ -515,7 +864,6 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void EnterCombat(Unit* who) override
     {
-        DoCastSelf(SPELL_DIABLO_FLAMETONGUE_WEAPON);
         BossAI::EnterCombat(who);
         SpawnInitialAdds();
     }
@@ -538,7 +886,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void UpdateAI(uint32 diff) override
     {
-        if (!UpdateVictim() && me->IsVisible())
+        if (!UpdateVictim() && (me->IsVisible() && !_intermission))
             return;
 
         scheduler.Update(diff);
@@ -546,10 +894,9 @@ struct npc_boss_six_diablo_AI : public BossAI
             DoMeleeAttackIfReady();
     }
 
-
     void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
     {
-        if (caster && caster->GetEntry() == NPC_BOSS_SIX_ASHES_OF_ALAR && spellInfo->Id == 21667)
+        if (caster && caster->GetEntry() == NPC_BOSS_SIX_ASHES_OF_ALAR && spellInfo->Id == SPELL_DIABLO_WRATH_INTERRUPT)
         {
             if (me->IsCasting())
             {
@@ -565,22 +912,22 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void SchedulePhaseOneAbilities()
     {
-        scheduler.Schedule(70s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext /*func*/)
+        scheduler.Schedule(Seconds(_shadowRealmFirstTimer), GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext /*func*/)
         {
             BeginShadowRealm();
             //! re-scheduled when previous add dies
         });
 
-        scheduler.Schedule(6s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_knockbackFirstTimer), GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
         {
             HandleKnockbackPlayer();
-            func.Repeat(17s);
+            func.Repeat(Seconds(_knockbackRepeatTimer));
         });
 
-        scheduler.Schedule(15s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_shadowStepFirstTimer), GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
         {
             HandleShadowstep();
-            func.Repeat(18s);
+            func.Repeat(Seconds(_shadowStepRepeatTimer));
         });
     }
 
@@ -588,7 +935,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         scheduler.CancelAll();
 
-        scheduler.Schedule(6s, GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_knockOrStepFirstTimer), GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
         {
             if (CanEventExecute())
             {
@@ -600,27 +947,27 @@ struct npc_boss_six_diablo_AI : public BossAI
                 _knockbackOrShadowstep = !_knockbackOrShadowstep;
             }
 
-            func.Repeat(12s);
+            func.Repeat(Seconds(_knockOrStepRepeatTimer));
         });
 
-        scheduler.Schedule(20s, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_fireElementalsFirstTimer), [this](TaskContext func)
         {
             HandleFireElementals();
-            func.Repeat(20s);
+            func.Repeat(Seconds(_fireElementalsRepeatTimer));
         });
 
-        scheduler.Schedule(45s, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_plasmaRayFirstTimer), [this](TaskContext func)
         {
-            auto repeatTimer = 45s;
+            auto _repeatTimer = Seconds(_plasmaRayRepeatTimer);
             if (!CanEventExecute())
-                repeatTimer = 5s;
+                _repeatTimer = 5s;
             else
                 HandlePlasmaRay();
 
-            func.Repeat(45s);
+            func.Repeat(_repeatTimer);
         });
 
-        scheduler.Schedule(6s, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_pheonixFirstTimer), [this](TaskContext func)
         {
             HandlePheonixPhase();
         });
@@ -779,7 +1126,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         SpawnShadowrealm();
         SpawnPentagramTriggers();
 
-        scheduler.Schedule(30s, GROUP_DIABLO_CANCELABLE, [this](TaskContext func)
+        scheduler.Schedule(Seconds(_shadowRealmFailTimer), GROUP_DIABLO_CANCELABLE, [this](TaskContext func)
         {
             if (!_shadowRealmSucceeded)
             {
@@ -788,7 +1135,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                     SchedulePhaseOneAbilities();
                     CleanupShadowRealm();
                     DoCast(player, SPELL_DIABLO_MC_INSANE, true);
-                    scheduler.Schedule(10s, [this](TaskContext /*func*/)
+                    scheduler.Schedule(Seconds(_fireBeamTimer), [this](TaskContext /*func*/)
                     {
                         SpawnFirebeamTriggers();
                     });
@@ -919,8 +1266,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         trigger->SetImmuneToPC(true);
 
         CustomSpellValues val;
-        val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 100.f);
-        caster->CastCustomSpell(SPELL_DIABLO_EYE_BEAM, val, trigger, TRIGGERED_FULL_MASK);
+        val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 300.f);
 
         Position initialPosition = trigger->GetPosition();
         Position chargePosition = summoner->GetPosition();
@@ -931,6 +1277,8 @@ struct npc_boss_six_diablo_AI : public BossAI
         init.MoveTo({ chargePosition.GetPositionX(), chargePosition.GetPositionY(), chargePosition.GetPositionZ() }, false, false);
         init.SetVelocity(42.f);
         std::chrono::milliseconds _timer(init.Launch());
+        val.AddSpellMod(SPELLVALUE_AURA_DURATION, _timer.count());
+        caster->CastCustomSpell(SPELL_DIABLO_EYE_BEAM, val, trigger, TRIGGERED_FULL_MASK);
 
         float const distance = trigger->GetDistance2d(summoner);
 
@@ -988,7 +1336,8 @@ struct npc_boss_six_diablo_AI : public BossAI
                 orb->SetSelectable(false);
                 orb->SetPassive();
                 orb->CastSpell(orb, SPELL_DIABLO_BALL_OF_FLAMES_VISUAL, true);
-                orb->SetSpeedRate(MOVE_RUN, 0.9f/*config*/);
+                orb->SetSpeedRate(MOVE_RUN, _ballOfFlamesRunRatio);
+                orb->SetSpeedRate(MOVE_WALK, _ballOfFlamesRunRatio);
                 orb->SetCanFly(true);
                 orb->SetDisableGravity(true);
                 orb->GetMotionMaster()->MovePoint(POINT_ID_FLAME_ORB_PLAYER, _bossFireOrbPos);
@@ -1013,9 +1362,9 @@ struct npc_boss_six_diablo_AI : public BossAI
             }
         }
 
-        scheduler.Schedule(3s, [this](TaskContext)
+        scheduler.Schedule(2s, [this, &elementalPositions](TaskContext)
         {
-            for (auto const& pos : fireelementalsSpawnPositions)
+            for (auto const& pos : elementalPositions)
                 me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos);
         });
     }
@@ -1024,20 +1373,23 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1U, [this](Unit* object)
         {
-            return object->ToPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS) && !object->HasAura(SPELL_DIABLO_MC_INSANE) &&
-                !object->HasAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL);
+            return object->ToPlayer()
+                && !object->GetVehicleBase()
+                && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS)
+                && !object->HasAura(SPELL_DIABLO_MC_INSANE)
+                && !object->HasAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL);
         }))
         {
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, _plasmaRayDamage);
             val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 300);
-            me->CastCustomSpell(64529, val, target, TRIGGERED_FULL_MASK);
+            me->CastCustomSpell(SPELL_DIABLO_PLASMA_RAY, val, target, TRIGGERED_FULL_MASK);
         }
     }
 
     void HandlePheonixPhase()
     {
-        _drakesDead = 0; // config
+        _drakesDead = 0;
         me->AttackStop();
         me->SetPassive();
         me->GetMotionMaster()->Clear();
@@ -1045,14 +1397,15 @@ struct npc_boss_six_diablo_AI : public BossAI
         for (auto const& entry : { NPC_BOSS_SIX_ASHES_OF_ALAR, NPC_BOSS_SIX_SHADOW_DRAKE })
             summons.DespawnEntry(entry);
 
-        scheduler.Schedule(35s, [this](TaskContext)
+        scheduler.Schedule(Seconds(_phoenixPhaseCastTimer), [this](TaskContext)
         {
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_MODIFY_CAST_TIME, 15000);
+            val.AddSpellMod(SPELLVALUE_MODIFY_CAST_TIME, _phoenixPhaseCastLength);
             me->CastCustomSpell(SPELL_DIABLO_ASCEND, val, (Unit*)nullptr);
         });
 
-        scheduler.Schedule(51s, [this](TaskContext)
+        auto _makeAggressiveTimer = Seconds((_phoenixPhaseCastTimer * 1000) + _phoenixPhaseCastLength);
+        scheduler.Schedule(Seconds(_makeAggressiveTimer), [this](TaskContext)
         {
             me->SetAggressive();
             me->AttackStop();
@@ -1061,7 +1414,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             DoZoneInCombat(me, 250.f);
         });
 
-        for (auto i = 0; i < 2; ++i)
+        for (uint32 i = 0; i < _alarSpawnCount; ++i)
         {
             if (Creature* phoenix = me->GetMap()->SummonCreature(NPC_BOSS_SIX_ASHES_OF_ALAR, ashesOfAlarSpawnPositions[i]))
             {
@@ -1075,7 +1428,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             }
         }
 
-        for (uint32 i = 0; i < AMOUNT_OF_DRAKES_REQUIRED; ++i)
+        for (uint32 i = 0; i < _drakeSpawnCount; ++i)
         {
             if (Creature* drake = me->SummonCreature(NPC_BOSS_SIX_SHADOW_DRAKE, _myShadowDrakePositions[i], TEMPSUMMON_CORPSE_DESPAWN))
             {
@@ -1097,18 +1450,20 @@ struct npc_boss_six_diablo_AI : public BossAI
 
             scheduler.Schedule(3s, [&](TaskContext func)
             {
-                switch(func.GetRepeatCounter())
+                switch (func.GetRepeatCounter())
                 {
                     case 0:
                     {
-                        auto& players = instance->instance->GetPlayers();
+                        auto players = instance->instance->GetPlayers();
                         for (auto i = players.begin(); i != players.end(); ++i)
                         {
                             Player* player = i->GetSource();
                             if (!player || player->IsGameMaster())
                                 continue;
+
                             player->Yell("Fuuuuuuuuuuuuckkkkk!!!", LANG_UNIVERSAL);
                         }
+
                         func.Repeat(1s);
                         break;
                     }
@@ -1117,6 +1472,8 @@ struct npc_boss_six_diablo_AI : public BossAI
                         me->MonsterYell("I'm the end of your world.", LANG_UNIVERSAL, me);
                         break;
                     }
+                    default:
+                        break;
                 }
             });
         }
@@ -1127,7 +1484,7 @@ private:
     uint32 _pentagramIndex;
     std::vector<uint64> _pentagramTriggerGUIDs;
     uint64 _shadowRealmTargetGUID;
-    bool _elementalPhase;
+    bool _napalmPhase;
     bool _intermission;
     std::vector<Position> _myShadowDrakePositions;
     uint32 _drakesDead;
@@ -1135,27 +1492,123 @@ private:
     bool _knockbackOrShadowstep;
     uint32 _napalmShellCount;
     bool _readjustNapalmShells;
+    uint32 _currentIntermissionBoss;
+
+    // Napalam Shell related
+    uint32 _napalamShellStartPercent; // 150
+    uint32 _napalamShellRepeatTimer;
+    uint32 _napalamShellReadjustPercent;
+    uint32 _napalamShellNormalCount;
+    uint32 _napalamShellReadjustedCount;
+    // Intermission related
+    uint32 _intermissionPercentage;
+    // shadowstep related
+    uint32 _shadowStepExplosionDamage;
+    uint32 _shadowStepExplosionRadiusRatio;
+    //! trzeba wyrzucic do spell skryptu
+    uint32 _napalmShellDamage;
+    uint32 _napalamShellRadiusRatio;
+    // phase one timers
+    uint32 _shadowRealmFirstTimer;
+    uint32 _knockbackFirstTimer;
+    uint32 _knockbackRepeatTimer;
+    uint32 _shadowStepFirstTimer;
+    uint32 _shadowStepRepeatTimer;
+    // phase two timers
+    uint32 _knockOrStepFirstTimer;
+    uint32 _knockOrStepRepeatTimer;
+    uint32 _fireElementalsFirstTimer;
+    uint32 _fireElementalsRepeatTimer;
+    uint32 _plasmaRayFirstTimer;
+    uint32 _plasmaRayRepeatTimer;
+    uint32 _pheonixFirstTimer;
+    uint32 _phoenixSecondTimer;
+    uint32 _fireBeamTimer;
+    uint32 _shadowRealmFailTimer;
+    float _ballOfFlamesRunRatio;
+    uint32 _plasmaRayDamage;
+    uint32 _phoenixPhaseCastTimer; // important, has to be in seconds
+    uint32 _phoenixPhaseCastLength; // in milliseconds
+    uint32 _alarSpawnCount;
+    uint32 _drakeSpawnCount;
+    uint32 _armageddonDuration;
+    uint32 _armageddonRadiusRatio;
+    uint32 _armageddonDamage;
+    uint32 _windsDamage;
+    uint32 _spiritBurnDamage;
+    float _plasmaRayWidth;
+    uint32 _thundershockDamage;
+    float _buffetingWindsRadius;
+    uint32 _fiveFingersProcChance;
+    uint32 _offhandProcDamage;
 };
 
 enum DemonSpells
 {
     SPELL_DEMON_REFLECT_SPELLS              = 35158,
-    SPELL_DEMON_SHADOW_NOVA                 = 51073, // radius_mod 8000 and damage of 5k config
+    SPELL_DEMON_SHADOW_NOVA                 = 51073,
     SPELL_DEMON_NETHER_POWER                = 67108
 };
 
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
+enum DemonStatId
+{
+    STAT_DEMON_SHADOW_NOVA_TIMER            = 200,
+    STAT_DEMON_SHADOW_NOVA_RADIUS_RATIO,
+    STAT_DEMON_SHADOW_NOVA_DAMAGE,
+    STAT_DEMON_SHADOW_NOVA_REPEAT_TIMER,
+    STAT_DEMON_DEMON_SWITCH_TIMER,
+    STAT_DEMON_NEARBY_DEMON_RADIUS,
+    STAT_DEMON_NEARBY_DEMON_CHECK_TIMER
+};
+
 struct npc_boss_six_flying_demon_AI : public ScriptedAI
 {
     npc_boss_six_flying_demon_AI(Creature* creature) : ScriptedAI(creature)
     {
         _reflectingDemonType = false;
+        LoadStats();
     }
 
     void Reset() override
     {
         _scheduler.CancelAll();
         ScriptedAI::Reset();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues({ STAT_DEMON_SHADOW_NOVA_TIMER, STAT_DEMON_SHADOW_NOVA_RADIUS_RATIO,
+            STAT_DEMON_SHADOW_NOVA_DAMAGE, STAT_DEMON_SHADOW_NOVA_REPEAT_TIMER, STAT_DEMON_DEMON_SWITCH_TIMER, STAT_DEMON_NEARBY_DEMON_RADIUS, STAT_DEMON_NEARBY_DEMON_CHECK_TIMER });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_DEMON_SHADOW_NOVA_TIMER:
+                    _shadowNovaTimer = ref.second.StatValue;
+                    break;
+                case STAT_DEMON_SHADOW_NOVA_RADIUS_RATIO:
+                    _shadowNovaRadiusRatio = ref.second.StatValue;
+                    break;
+                case STAT_DEMON_SHADOW_NOVA_DAMAGE:
+                    _shadowNovaDamage = ref.second.StatValue;
+                    break;
+                case STAT_DEMON_SHADOW_NOVA_REPEAT_TIMER:
+                    _shadowNovaRepeatTimer = ref.second.StatValue;
+                    break;
+                case STAT_DEMON_DEMON_SWITCH_TIMER:
+                    _demonSwitchTimer = ref.second.StatValue;
+                    break;
+                case STAT_DEMON_NEARBY_DEMON_RADIUS:
+                    _demonNearbyRadius = ref.second.StatVariance;
+                    break;
+                case STAT_DEMON_NEARBY_DEMON_CHECK_TIMER:
+                    _demonNearbyCheckTimer = ref.second.StatValue;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     void SetData(uint32 type, uint32 value)
@@ -1189,13 +1642,13 @@ struct npc_boss_six_flying_demon_AI : public ScriptedAI
         }
         else
         {
-            _scheduler.Schedule(5s, GROUP_DEMON_SWITCHABLE, [this](TaskContext func)
+            _scheduler.Schedule(Seconds(_shadowNovaTimer), GROUP_DEMON_SWITCHABLE, [this](TaskContext func)
             {
                 CustomSpellValues val;
-                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 8000); // config
-                val.AddSpellMod(SPELLVALUE_BASE_POINT0, 5000/*config*/);
+                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _shadowNovaRadiusRatio);
+                val.AddSpellMod(SPELLVALUE_BASE_POINT0, _shadowNovaDamage);
                 me->CastCustomSpell(SPELL_DEMON_SHADOW_NOVA, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
-                func.Repeat(1s);
+                func.Repeat(Seconds(_shadowNovaRepeatTimer));
             });
         }
     }
@@ -1203,33 +1656,34 @@ struct npc_boss_six_flying_demon_AI : public ScriptedAI
     void EnterCombat(Unit* who) override
     {
         ScriptedAI::EnterCombat(who);
-        _scheduler.Schedule(20s, [this](TaskContext func)
+        _scheduler.Schedule(Seconds(_demonSwitchTimer), [this](TaskContext func)
         {
             SetData(DATA_SWITCH_DEMON_TYPE, DATA_SWITCH_DEMON_TYPE);
-            func.Repeat(20s);
+            func.Repeat(Seconds(_demonSwitchTimer));
         });
 
-        _scheduler.Schedule(2s, [this](TaskContext func)
-        {
-            std::list<Creature*> _demons;
-            me->GetCreatureListWithEntryInGrid(_demons, me->GetEntry(), 20.f/*config*/);
-            _demons.remove_if([this](Creature* ref)
-            {
-                return ref->GetGUID() == me->GetGUID();
-            });
+        //! Nerfed those, they no longer stack that aura when they're nearby
+        //_scheduler.Schedule(Seconds(_demonNearbyCheckTimer), [this](TaskContext func)
+        //{
+        //    std::list<Creature*> _demons;
+        //    me->GetCreatureListWithEntryInGrid(_demons, me->GetEntry(), _demonNearbyRadius);
+        //    _demons.remove_if([this](Creature* ref)
+        //    {
+        //        return ref->GetGUID() == me->GetGUID();
+        //    });
 
-            if (!_demons.empty())
-            {
-                DoCastSelf(SPELL_DEMON_NETHER_POWER, true);
-                if (Aura* aura = me->GetAura(SPELL_DEMON_NETHER_POWER))
-                {
-                    aura->SetMaxDuration(-1);
-                    aura->RefreshDuration();
-                }
-            }
+        //    if (!_demons.empty())
+        //    {
+        //        DoCastSelf(SPELL_DEMON_NETHER_POWER, true);
+        //        if (Aura* aura = me->GetAura(SPELL_DEMON_NETHER_POWER))
+        //        {
+        //            aura->SetMaxDuration(-1);
+        //            aura->RefreshDuration();
+        //        }
+        //    }
 
-            func.Repeat(2s);
-        });
+        //    func.Repeat(Seconds(_demonNearbyCheckTimer));
+        //});
     }
 
     void UpdateAI(uint32 diff) override
@@ -1240,9 +1694,16 @@ struct npc_boss_six_flying_demon_AI : public ScriptedAI
 private:
     TaskScheduler _scheduler;
     bool _reflectingDemonType;
+
+    uint32 _shadowNovaTimer;
+    float _shadowNovaRadiusRatio;
+    float _shadowNovaDamage;
+    uint32 _shadowNovaRepeatTimer;
+    uint32 _demonSwitchTimer;
+    float _demonNearbyRadius;
+    uint32 _demonNearbyCheckTimer;
 };
 
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
 struct npc_boss_six_beam_trigger : public ScriptedAI
 {
     npc_boss_six_beam_trigger(Creature* creature) : ScriptedAI(creature) { }
@@ -1252,12 +1713,51 @@ struct npc_boss_six_beam_trigger : public ScriptedAI
     void EnterCombat(Unit* /*who*/) override { }
 };
 
+enum BeamStatIDs
+{
+    STAT_BEAM_FIREBEAM_EXPLOSION_DAMAGE         = 207,
+    STAT_BEAM_FIREBEAM_EXPLOSION_RADIUS_RATIO,
+    STAT_BEAM_FIREBEAM_FLAME_PATCH_PCT_DMG,
+    STAT_BEAM_FIREBEAM_FLAME_PATCH_RADIUS_RATIO,
+    STAT_BEAM_FIREBEAM_DESPAWN_TIMER
+};
+
 struct npc_boss_six_beam_trigger_explosion : public ScriptedAI
 {
     npc_boss_six_beam_trigger_explosion(Creature* creature) : ScriptedAI(creature)
     {
         _scheduler.CancelAll();
         me->DespawnOrUnsummon(25s);
+        LoadStats();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({ STAT_BEAM_FIREBEAM_EXPLOSION_DAMAGE, STAT_BEAM_FIREBEAM_EXPLOSION_RADIUS_RATIO, STAT_BEAM_FIREBEAM_FLAME_PATCH_PCT_DMG,
+            STAT_BEAM_FIREBEAM_FLAME_PATCH_RADIUS_RATIO, STAT_BEAM_FIREBEAM_DESPAWN_TIMER });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_BEAM_FIREBEAM_EXPLOSION_DAMAGE:
+                    _firebeamExplosionDamage = ref.second.StatValue;
+                    break;
+                case STAT_BEAM_FIREBEAM_EXPLOSION_RADIUS_RATIO:
+                    _firebeamExplosionRadiusRatio = ref.second.StatValue;
+                    break;
+                case STAT_BEAM_FIREBEAM_FLAME_PATCH_PCT_DMG:
+                    _firebeamFlamePatchPercentDamage = ref.second.StatValue;
+                    break;
+                case STAT_BEAM_FIREBEAM_FLAME_PATCH_RADIUS_RATIO:
+                    _firebeamFlamePatchRadiusRatio = ref.second.StatValue;
+                    break;
+                case STAT_BEAM_FIREBEAM_DESPAWN_TIMER:
+                    _firebeamDespawnTimer = ref.second.StatValue;
+                    break;
+            }
+        }
     }
 
     void MoveInLineOfSight(Unit* who) override { }
@@ -1281,14 +1781,17 @@ struct npc_boss_six_beam_trigger_explosion : public ScriptedAI
                 if (diablo)
                 {
                     CustomSpellValues val;
-                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, 25000);
-                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 5000);
+                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, _firebeamExplosionDamage);
+                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _firebeamExplosionRadiusRatio);
+                    val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
                     me->CastCustomSpell(SPELL_DIABLO_TRIGGER_EXPLOSION, val, (Unit*) nullptr, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, diablo->GetGUID());
 
-                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, 3);
-                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 5000);
+                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, _firebeamFlamePatchPercentDamage);
+                    val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _firebeamFlamePatchRadiusRatio);
+                    val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
                     me->CastCustomSpell(SPELL_DIABLO_TRIGGER_FLAME_PATCH, val, (Unit*) nullptr, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, diablo->GetGUID());
-                    me->DespawnOrUnsummon(20s); //config
+
+                    me->DespawnOrUnsummon(Seconds(_firebeamDespawnTimer));
                 }
             }
         });
@@ -1296,15 +1799,53 @@ struct npc_boss_six_beam_trigger_explosion : public ScriptedAI
 
 private:
     TaskScheduler _scheduler;
+
+    uint32 _firebeamExplosionDamage;
+    uint32 _firebeamExplosionRadiusRatio;
+    uint32 _firebeamFlamePatchPercentDamage;
+    uint32 _firebeamFlamePatchRadiusRatio;
+    uint32 _firebeamDespawnTimer;
 };
 
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
+enum PlayerCloneStatId
+{
+    STAT_PLAYERCLONE_COMET_COUNT            = 212,
+    STAT_PLAYERCLONE_COMET_TIMER,
+    STAT_PLAYERCLONE_COMET_REPEAT_TIMER,
+};
+
 struct npc_boss_diablo_playerclone : public ScriptedAI
 {
     npc_boss_diablo_playerclone(Creature* creature) : ScriptedAI(creature)
     {
         _instance = me->GetInstanceScript();
         _myMeteorSpawnPositions = meteorSpawnPositions;
+        LoadStats();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({ STAT_PLAYERCLONE_COMET_COUNT, STAT_PLAYERCLONE_COMET_TIMER, STAT_PLAYERCLONE_COMET_REPEAT_TIMER });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_PLAYERCLONE_COMET_COUNT:
+                    _playerCloneCometCount = ref.second.StatValue;
+                    break;
+                case STAT_PLAYERCLONE_COMET_TIMER:
+                    _playerCloneCometTimer = ref.second.StatValue;
+                    break;
+                case STAT_PLAYERCLONE_COMET_REPEAT_TIMER:
+                    _playerCloneCometRepeatTimer = ref.second.StatValue;
+                    break;
+                default:
+                    break;
+
+            }
+        }
     }
 
     void Reset() override { }
@@ -1315,9 +1856,9 @@ struct npc_boss_diablo_playerclone : public ScriptedAI
     {
         _scheduler.CancelAll();
         DoZoneInCombat(me, 200.f);
-        _scheduler.Schedule(4s, [this](TaskContext func)
+        _scheduler.Schedule(Seconds(_playerCloneCometTimer), [this](TaskContext func)
         {
-            for (uint32 i = 0; i < 3/*config*/; ++i)
+            for (uint32 i = 0; i < _playerCloneCometCount; ++i)
             {
                 Player* player = me->SelectNearestPlayer(150.f);
                 Creature* diablo = _instance->GetCreature(DATA_DIABLO);
@@ -1336,7 +1877,8 @@ struct npc_boss_diablo_playerclone : public ScriptedAI
                     }
                 }
             }
-            func.Repeat(14s); // config
+
+            func.Repeat(Seconds(_playerCloneCometRepeatTimer));
         });
     }
 
@@ -1349,6 +1891,10 @@ private:
     InstanceScript* _instance;
     TaskScheduler _scheduler;
     std::vector<Position> _myMeteorSpawnPositions;
+
+    uint32 _playerCloneCometTimer;
+    uint32 _playerCloneCometCount;
+    uint32 _playerCloneCometRepeatTimer;
 };
 
 class spell_boss_diablo_nether_portal_AuraScript : public AuraScript
@@ -1382,7 +1928,15 @@ class spell_boss_diablo_flametongue_weapon : public AuraScript
     }
 };
 
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
+enum CometStatId
+{
+    STAT_COMET_METEOR_HIT_TIMER         = 215,
+    STAT_COMET_METEOR_HIT_DAMAGE,
+    STAT_COMET_METEOR_RADIUS_RATIO,
+    STAT_COMET_HIT_PLAYERS_ONLY,
+    STAT_COMET_SPLIT_DAMAGE
+};
+
 struct npc_boss_diablo_comet_trigger : public ScriptedAI
 {
     npc_boss_diablo_comet_trigger(Creature* creature) : ScriptedAI(creature)
@@ -1390,23 +1944,67 @@ struct npc_boss_diablo_comet_trigger : public ScriptedAI
         _instance = me->GetInstanceScript();
         _didSpawnInfernal = false;
         me->SetCanMissSpells(false);
+        LoadStats();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({ STAT_COMET_METEOR_HIT_TIMER, STAT_COMET_METEOR_HIT_DAMAGE, STAT_COMET_METEOR_RADIUS_RATIO,
+            STAT_COMET_HIT_PLAYERS_ONLY, STAT_COMET_SPLIT_DAMAGE });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_COMET_METEOR_HIT_TIMER:
+                    _meteorHitTimer = ref.second.StatValue;
+                    break;
+                case STAT_COMET_METEOR_HIT_DAMAGE:
+                    _meteorHitDamage = ref.second.StatValue;
+                    break;
+                case STAT_COMET_METEOR_RADIUS_RATIO:
+                    _meteorRadiusRatio = ref.second.StatValue;
+                    break;
+                case STAT_COMET_HIT_PLAYERS_ONLY:
+                    _meteorTargetPlayersOnly = ref.second.StatValue;
+                    break;
+                case STAT_COMET_SPLIT_DAMAGE:
+                    _meteorShareDamage = ref.second.StatValue;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    void HandleMeteor()
+    {
+        Creature* diablo = _instance->GetCreature(DATA_DIABLO);
+        if (diablo)
+        {
+            Creature* _caster = ObjectAccessor::GetCreature(*me, diablo->AI()->GetGUID());
+            if (_caster)
+            {
+                CustomSpellValues val;
+                val.AddSpellMod(SPELLVALUE_BASE_POINT0, _meteorHitDamage);
+                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _meteorRadiusRatio);
+                val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, _meteorTargetPlayersOnly);
+                val.AddSpellMod(SPELLVALUE_ENABLE_SHARE_DAMAGE, _meteorShareDamage);
+                _caster->CastCustomSpell(SPELL_DIABLO_METEOR, val, (Unit*)nullptr, TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, me->GetGUID());
+            }
+        }
     }
 
     void Reset() override
     {
-        DoCastSelf(43467);
+        DoCastSelf(SPELL_DIABLO_COSMETIC_WHITE_SMOKE);
         me->SetSelectable(false);
         _scheduler.CancelAll();
 
-        _scheduler.Schedule(10s, [this](TaskContext /*func*/)
+        _scheduler.Schedule(Seconds(_meteorHitTimer), [this](TaskContext /*func*/)
         {
-            Creature* diablo = _instance->GetCreature(DATA_DIABLO);
-            if (diablo)
-            {
-                Creature* _caster = ObjectAccessor::GetCreature(*me, diablo->AI()->GetGUID());
-                if (_caster)
-                    _caster->CastSpell(me, 36837, true, NullItemRef, (AuraEffect*)nullptr, me->GetGUID());
-            }
+            HandleMeteor();
         });
 
         me->DespawnOrUnsummon(20s);
@@ -1451,6 +2049,12 @@ private:
     InstanceScript* _instance;
     TaskScheduler _scheduler;
     bool _didSpawnInfernal;
+
+    uint32 _meteorHitTimer;
+    uint32 _meteorHitDamage;
+    uint32 _meteorRadiusRatio;
+    uint32 _meteorTargetPlayersOnly;
+    uint32 _meteorShareDamage;
 };
 
 class spell_boss_six_diablo_meteor : public SpellScript
@@ -1482,31 +2086,64 @@ class spell_boss_six_diablo_meteor : public SpellScript
     }
 };
 
-#pragma message(CompileMessage "przerzucic wszystkie timery i wartosci do hellforge_boss_stats")
+enum InfernalStatId
+{
+    STAT_INFERNAL_HELLFIRE_TIMER            = 219,
+    STAT_INFERNAL_HELLFIRE_DAMAGE,
+    STAT_INFERNAL_HELLFIRE_RADIUS_RATIO,
+    STAT_INFERNAL_HELLFIRE_REPEAT_TIMER
+};
+
 struct npc_boss_six_diabolic_infernal : public NullCreatureAI
 {
-    npc_boss_six_diabolic_infernal(Creature* creature) : NullCreatureAI(creature) { }
+    npc_boss_six_diabolic_infernal(Creature* creature) : NullCreatureAI(creature)
+    {
+        LoadStats();
+    }
 
     void DamageTaken(Unit* /*att*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
     {
         damage = 0;
     }
 
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({ STAT_INFERNAL_HELLFIRE_TIMER });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_INFERNAL_HELLFIRE_TIMER:
+                    _infernalHellfireFirstTimer = ref.second.StatValue;
+                    break;
+                case STAT_INFERNAL_HELLFIRE_DAMAGE:
+                    _hellfireDamage = ref.second.StatValue;
+                    break;
+                case STAT_INFERNAL_HELLFIRE_RADIUS_RATIO:
+                    _hellfireRadiusRatio = ref.second.StatValue;
+                    break;
+                case STAT_INFERNAL_HELLFIRE_REPEAT_TIMER:
+                    _infernalHellfireRepeatTimer = ref.second.StatValue;
+                    break;
+            }
+        }
+    }
+
     void Reset() override
     {
         me->SetSelectable(false);
         _scheduler.CancelAll();
-        _scheduler.Schedule(2s, [this](TaskContext func)
-        {
-            if (!me->IsCasting())
-            {
-                //! change radius of trigger spell
-                CustomSpellValues val;
-                val.AddSpellMod(SPELLVALUE_BASE_POINT1, 0);
-                me->CastCustomSpell(SPELL_DIABLO_INFERNAL_HELLFIRE, val, (Unit*)nullptr, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
-            }
 
-            func.Repeat(4s);
+        _scheduler.Schedule(Seconds(_infernalHellfireFirstTimer), [this](TaskContext func)
+        {
+            CustomSpellValues val;
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, _hellfireDamage);
+            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _hellfireRadiusRatio);
+            me->CastCustomSpell(SPELL_DIABLO_INFERNAL_HELLFIRE, val, (Unit*)nullptr, TRIGGERED_IGNORE_POWER_AND_REAGENT_COST);
+
+            func.Repeat(Seconds(_infernalHellfireRepeatTimer));
         });
     }
 
@@ -1517,6 +2154,19 @@ struct npc_boss_six_diabolic_infernal : public NullCreatureAI
 
 private:
     TaskScheduler _scheduler;
+
+    uint32 _infernalHellfireFirstTimer;
+    uint32 _infernalHellfireRepeatTimer;
+    uint32 _hellfireDamage;
+    uint32 _hellfireRadiusRatio;
+};
+
+enum IncreasedDamageTriggerStats
+{
+    STAT_DAMAGE_TRIGGER_CHECK_TIMER                 = 223,
+    STAT_DAMAGE_TRIGGER_BUFFFET_DURATION,
+    STAT_DAMAGE_TRIGGET_FLAME_BUFFET_DMG,
+    STAT_DAMAGE_TRIGGER_FLAME_BUFFET_RADIUS_RATIO
 };
 
 struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
@@ -1526,6 +2176,32 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
         _scheduler.ClearValidator();
         _heartBeamTargetGUID = 0;
         me->SetCanMissSpells(false);
+        LoadStats();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({ STAT_DAMAGE_TRIGGER_CHECK_TIMER, STAT_DAMAGE_TRIGGER_BUFFFET_DURATION, STAT_DAMAGE_TRIGGET_FLAME_BUFFET_DMG, STAT_DAMAGE_TRIGGER_FLAME_BUFFET_RADIUS_RATIO });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_DAMAGE_TRIGGER_CHECK_TIMER:
+                    _increasedDamageTriggerCheckTimer = ref.second.StatValue;
+                    break;
+                case STAT_DAMAGE_TRIGGER_BUFFFET_DURATION:
+                    _flameBuffetAuraDuration = ref.second.StatValue;
+                    break;
+                case STAT_DAMAGE_TRIGGET_FLAME_BUFFET_DMG:
+                    _flameBuffetDamage = ref.second.StatValue;
+                    break;
+                case STAT_DAMAGE_TRIGGER_FLAME_BUFFET_RADIUS_RATIO:
+                    _flameBuffetRadiusRatio = ref.second.StatValue;
+                    break;
+            }
+        }
     }
 
     void Reset() override
@@ -1533,16 +2209,17 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
         DoCastSelf(SPELL_DIABLO_SUMMON_VISUAL);
         _scheduler.CancelAll();
         me->SetSelectable(false);
-        _scheduler.Schedule(2s, [this](TaskContext func)
+
+        _scheduler.Schedule(Seconds(_increasedDamageTriggerCheckTimer), [this](TaskContext func)
         {
             _playerNearby = false;
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
             me->CastCustomSpell(SPELL_DIABLO_VICINITY_CHECKER_TRIGGER, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
 
-            val.AddSpellMod(SPELLVALUE_AURA_DURATION, 35000);
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 5000); // config
-            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 1); // 1/1000 = 0.0001 | base radius of 50,000 * 0.0001 equals 5 yards radius
+            val.AddSpellMod(SPELLVALUE_AURA_DURATION, _flameBuffetAuraDuration);
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, _flameBuffetDamage);
+            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _flameBuffetRadiusRatio);
             me->CastCustomSpell(SPELL_DIABLO_FLAME_BUFFET, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
 
             _scheduler.Schedule(1s, [this](TaskContext /*func*/)
@@ -1555,7 +2232,7 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
                         {
                             CustomSpellValues val;
                             val.AddSpellMod(SPELLVALUE_AURA_DURATION, 30000);
-                            val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 100.f);
+                            val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 150.f);
                             me->CastCustomSpell(SPELL_DIABLO_MAGNETIC_FIELD, val, clone, TRIGGERED_FULL_MASK);
                         }
                     }
@@ -1564,7 +2241,7 @@ struct npc_boss_six_increased_damage_trigger : public NullCreatureAI
                     me->CastStop();
             });
 
-            func.Repeat(2s);
+            func.Repeat(Seconds(_increasedDamageTriggerCheckTimer));
         });
     }
 
@@ -1587,6 +2264,11 @@ private:
     TaskScheduler _scheduler;
     uint64 _heartBeamTargetGUID;
     bool _playerNearby;
+
+    uint32 _increasedDamageTriggerCheckTimer;
+    uint32 _flameBuffetDamage;
+    uint32 _flameBuffetRadiusRatio;
+    uint32 _flameBuffetAuraDuration;
 };
 
 class spell_five_finger_death_punch : public SpellScript
@@ -1614,7 +2296,7 @@ class spell_five_finger_death_punch : public SpellScript
                     {
                         diablo->getThreatManager().modifyThreatPercent(GetHitUnit(), -100);
                         CustomSpellValues val;
-                        val.AddSpellMod(SPELLVALUE_AURA_DURATION, 3500);
+                        val.AddSpellMod(SPELLVALUE_AURA_DURATION, diablo->AI()->GetData(STAT_DIABLO_ARMAGEDDON_DURATION));
                         GetHitUnit()->CastCustomSpell(SPELL_DIABLO_ARMAGEDDON, val, GetHitUnit(), TRIGGERED_FULL_MASK, NullItemRef, (const AuraEffect*)nullptr, diablo->GetGUID());
                     }
                 }
@@ -1634,12 +2316,20 @@ class spell_boss_diablo_armageddon_AuraScript : public AuraScript
 
     void OnPeriodic(AuraEffect const* /*aurEff*/)
     {
-        if (GetTarget() && GetTarget()->GetMapId() == 249)
+        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
         {
+            InstanceScript* instance = GetCaster()->GetInstanceScript();
+            if (!instance)
+                return;
+
+            Creature* diablo = instance->GetCreature(DATA_DIABLO);
+            if (!diablo)
+                return;
+
             PreventDefaultAction();
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 6666);
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 500000/*config*/);
+            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, diablo->AI()->GetData(STAT_DIABLO_ARMAGEDDON_RADIUS_RATIO));
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, diablo->AI()->GetData(STAT_DIABLO_ARMAGEDDON_DAMAGE));
             val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
             GetTarget()->CastCustomSpell(SPELL_DIABLO_RUNE_DETONATION, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
         }
@@ -1657,11 +2347,19 @@ class spell_buffeting_winds_diablo : public AuraScript
 
     void OnEffectRemoved(AuraEffect const* aurEff, AuraEffectHandleModes mode)
     {
-        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT && GetTarget() && GetTarget()->GetMapId() == 249)
+        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT && GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
         {
+            InstanceScript* instance = GetTarget()->GetInstanceScript();
+            if (!instance)
+                return;
+
+            Creature* diablo = instance->GetCreature(DATA_DIABLO);
+            if (!diablo)
+                return;
+
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_ENABLE_SHARE_DAMAGE, 1);
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, diablo->AI()->GetData(STAT_DIABLO_WINDS_DAMAGE));
             GetTarget()->CastCustomSpell(SPELL_DIABLO_STATIC_OVERLOAD, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
         }
     }
@@ -1672,16 +2370,56 @@ class spell_buffeting_winds_diablo : public AuraScript
     }
 };
 
+enum ElementalStats
+{
+    STAT_ELEMENTAL_DIABLO_DISTANCE          = 227,
+    STAT_ELEMENTAL_SELF_DAMAGE_RATIO,
+    STAT_ELEMENTAL_CHECK_TIMER,
+    STAT_ELEMENTAL_EXPLOSION_DAMAGE,
+    STAT_ELEMENTAL_EXPLOSION_RADIUS_RATIO
+};
+
 struct npc_boss_diablo_fire_elementals : public NullCreatureAI
 {
-    npc_boss_diablo_fire_elementals(Creature* creature) : NullCreatureAI(creature) { }
+    npc_boss_diablo_fire_elementals(Creature* creature) : NullCreatureAI(creature)
+    {
+        LoadStats();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStats _stats = sWorldCache.GetStatValues
+        ({ STAT_ELEMENTAL_DIABLO_DISTANCE, STAT_ELEMENTAL_SELF_DAMAGE_RATIO, STAT_ELEMENTAL_CHECK_TIMER,
+            STAT_ELEMENTAL_EXPLOSION_DAMAGE, STAT_ELEMENTAL_EXPLOSION_RADIUS_RATIO });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_ELEMENTAL_DIABLO_DISTANCE:
+                    _elementalDistanceToDiablo = ref.second.StatVariance;
+                    break;
+                case STAT_ELEMENTAL_SELF_DAMAGE_RATIO:
+                    _elementalSelfDamageRatio = ref.second.StatVariance;
+                    break;
+                case STAT_ELEMENTAL_CHECK_TIMER:
+                    _elementalCheckTimer = ref.second.StatValue;
+                    break;
+                case STAT_ELEMENTAL_EXPLOSION_DAMAGE:
+                    _elementalExplosionDamage = ref.second.StatValue;
+                    break;
+                case STAT_ELEMENTAL_EXPLOSION_RADIUS_RATIO:
+                    _elementalExplosionRadiusRatio = ref.second.StatValue;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 
     void Reset() override
     {
         _exploded = false;
-        me->SetSpeedRate(MOVE_RUN, 0.3f);
-        me->SetSpeedRate(MOVE_WALK, 0.3f);
-        me->SetWalk(true);
 
         _scheduler.CancelAll();
         if (Unit* target = me->GetSummoner())
@@ -1690,16 +2428,16 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
             me->GetMotionMaster()->MoveFollow(target, 0.2f, angle, MOTION_SLOT_CONTROLLED);
         }
 
-        _scheduler.Schedule(5s, [this](TaskContext func)
+        _scheduler.Schedule(1s, [this](TaskContext func)
         {
             if (Unit* target = me->GetSummoner())
             {
-                if (target->GetDistance2d(me) <= 0.5f)
+                if (target->GetDistance2d(me) <= _elementalDistanceToDiablo)
                     TriggerExplosion();
                 else
                 {
-                    me->DealDamage(me, me, me->GetMaxHealth() * 0.1);
-                    func.Repeat(2s);
+                    me->DealDamage(me, me, me->GetMaxHealth() * _elementalSelfDamageRatio);
+                    func.Repeat(Seconds(_elementalCheckTimer));
                 }
             }
         });
@@ -1723,8 +2461,9 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
         me->GetMotionMaster()->MoveIdle();
         _scheduler.CancelAll();
         CustomSpellValues val;
-        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
-        val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 100000);
+
+        val.AddSpellMod(SPELLVALUE_BASE_POINT0, _elementalExplosionDamage);
+        val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _elementalExplosionRadiusRatio);
         me->CastCustomSpell(SPELL_DIABLO_ELEMENTAL_ADD_EXPLODE, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
         _scheduler.Schedule(1s, [this](TaskContext)
         {
@@ -1741,6 +2480,12 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
 private:
     TaskScheduler _scheduler;
     bool _exploded;
+
+    float _elementalDistanceToDiablo;
+    float _elementalSelfDamageRatio;
+    uint32 _elementalCheckTimer;
+    uint32 _elementalExplosionDamage;
+    uint32 _elementalExplosionRadiusRatio;
 };
 
 struct npc_boss_player_flame_sphere : public ScriptedAI
@@ -1787,13 +2532,15 @@ struct npc_boss_player_flame_sphere : public ScriptedAI
         AttackStart(target);
         CustomSpellValues val;
         val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 200);
-        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 5000); // config
         me->CastCustomSpell(SPELL_DIABLO_SOUL_SIPHON, val, target, TRIGGERED_FULL_MASK);
     }
 
 private:
     bool _arrived;
     uint64 _targetGUID;
+
+    uint32 _flameSphereDamage;
+    uint32 _spiritBurnDamage;
 };
 
 class spell_diablo_siphon_soul : public AuraScript
@@ -1802,15 +2549,30 @@ class spell_diablo_siphon_soul : public AuraScript
 
     void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
     {
-        isPeriodic = true;
-        amplitude = 1500;
+        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        {
+            isPeriodic = true;
+            amplitude = 1500;
+        }
     }
 
     void HandlePeriodic(AuraEffect const* aurEff)
     {
         PreventDefaultAction();
         if (GetTarget() && GetCaster())
+        {
+            InstanceScript* instance = GetTarget()->GetInstanceScript();
+            if (!instance)
+                return;
+
+            Creature* diablo = instance->GetCreature(DATA_DIABLO);
+            if (!diablo)
+                return;
+
+            CustomSpellValues val;
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, diablo->AI()->GetData(STAT_DIABLO_SPIRIT_BURN_DAMAGE));
             GetCaster()->CastSpell(GetTarget(), SPELL_DIABLO_SPIRIT_BURN, true);
+        }
     }
 
     void Register() override
@@ -1820,6 +2582,7 @@ class spell_diablo_siphon_soul : public AuraScript
     }
 };
 
+constexpr uint32 STAT_SHADOW_DRAKE_FLAME_TIMER{ 232 };
 struct npc_boss_diablo_shadow_drake : public ScriptedAI
 {
     npc_boss_diablo_shadow_drake(Creature* creature) : ScriptedAI(creature) { }
@@ -1828,6 +2591,14 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
     {
         ScriptedAI::Reset();
         _scheduler.CancelAll();
+        LoadStats();
+    }
+
+    void LoadStats()
+    {
+        HellforgeStatValues val;
+        sWorldCache.GetStatValue(STAT_SHADOW_DRAKE_FLAME_TIMER, val);
+        _shadowDrakeDevouringFlameTimer = val.StatValue;
     }
 
     void IsSummonedBy(Unit* summoner) override
@@ -1838,13 +2609,23 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
         ScheduleAttacks();
     }
 
+    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
+    {
+        if (attacker && attacker->IsPlayer())
+            damage = 0;
+    }
+
     void ScheduleAttacks()
     {
         _scheduler.Schedule(2s, [this](TaskContext func)
         {
             Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
             {
-                return object->IsPlayer() && !object->GetVehicleBase() && !object->HasAura(SPELL_DIABLO_MC_INSANE);
+                return object->IsPlayer() && !object->GetVehicleBase()
+                    && !object->HasAura(SPELL_DIABLO_MC_INSANE)
+                    && !object->HasAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL)
+                    && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+
             });
 
             if (target)
@@ -1854,7 +2635,7 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
                 me->CastCustomSpell(SPELL_DIABLO_DEVOURING_FLAME, val, target);
             }
 
-            func.Repeat(5s);
+            func.Repeat(Seconds(_shadowDrakeDevouringFlameTimer));
         });
     }
 
@@ -1869,29 +2650,8 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
     }
 private:
     TaskScheduler _scheduler;
-};
 
-constexpr uint32 SPELL_DIABLO_INFERNAL_HELLFIRE_TRIGGERED{ 68144 };
-class spell_boss_diablo_hellfire_effect : public AuraScript
-{
-    PrepareAuraScript(spell_boss_diablo_hellfire_effect);
-
-    void OnPeriodic(AuraEffect const* /*aurEff*/)
-    {
-        if (GetCaster() && GetCaster()->GetMapId() == DIABLO_MAP_ID)
-        {
-            PreventDefaultAction();
-            CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
-            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, 5000);
-            GetCaster()->CastCustomSpell(SPELL_DIABLO_INFERNAL_HELLFIRE_TRIGGERED, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
-        }
-    }
-
-    void Register() override
-    {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_boss_diablo_hellfire_effect::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-    }
+    uint32 _shadowDrakeDevouringFlameTimer;
 };
 
 class spell_boss_diablo_plasma_blast : public AuraScript
@@ -1926,12 +2686,19 @@ class spell_boss_diablo_plasma_blast : public AuraScript
                 if (target == GetTarget())
                     continue;
 
-                if (GetCaster()->HasInLine(target, 1.f/*config*/))
+                InstanceScript* instance = target->GetInstanceScript();
+                if (!instance)
+                    continue;
+
+                Creature* diablo = instance->GetCreature(DATA_DIABLO);
+                if (!diablo)
+                    continue;
+
+                if (GetCaster()->HasInLine(target, diablo->AI()->GetFloatData(STAT_DIABLO_PLASMA_RAY_WIDTH)))
                 {
                     float resistance = float(target->GetResistance(SPELL_SCHOOL_MASK_FIRE));
-                    // copy paste of sindragosas script
                     float resistFactor = ((resistance * 2.0f) / (resistance + 510.f));
-                    uint32 damage = 10000 * (1.0f - resistFactor);
+                    uint32 damage = diablo->AI()->GetData(STAT_DIABLO_PLASMA_RAY_DAMAGE) * (1.0f - resistFactor);
                     SpellNonMeleeDamage damageInfo(GetCaster(), target, GetSpellInfo()->Id, SPELL_SCHOOL_MASK_FIRE);
                     damageInfo.damage = damage;
                     damageInfo.target = target;
@@ -1962,21 +2729,23 @@ class spell_lightning_marker_visual : public AuraScript
             if (instance)
                 diablo = instance->GetCreature(DATA_DIABLO);
 
-            if (diablo)
-            {
-                CustomSpellValues val;
-                val.AddSpellMod(SPELLVALUE_BASE_POINT0, 15000 /*config*/);
-                val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 400.f);
-                diablo->CastCustomSpell(SPELL_DIABLO_THUNDERSHOCK, val, target, TRIGGERED_FULL_MASK);
-            }
+            if (!diablo)
+                return;
+
+            CustomSpellValues val;
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, diablo->AI()->GetData(STAT_DIABLO_THUNDERSHOCK_DAMAGE));
+            val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 400.f);
+            diablo->CastCustomSpell(SPELL_DIABLO_THUNDERSHOCK, val, target, TRIGGERED_FULL_MASK);
 
             target->KnockbackFrom(target->GetPositionX(), target->GetPositionY(), 0.1f, 45.f);
             target->CastSpell(target, SPELL_DIABLO_BUFFETTING_WINDS, true);
 
+            float radius = diablo->AI()->GetFloatData(STAT_DIABLO_BUFFETING_WINDS_RADIUS);
             std::list<Player*> targets;
-            Trinity::AnyPlayerInObjectRangeCheck check(target, 10.f, true);
+            Trinity::AnyPlayerInObjectRangeCheck check(target, radius, true);
             Trinity::PlayerListSearcherWithSharedVision<Trinity::AnyPlayerInObjectRangeCheck> searcher(target, targets, check);
-            target->VisitNearbyWorldObject(10.f, searcher);
+            target->VisitNearbyWorldObject(radius, searcher);
+
             targets.remove_if([&target](Player* _ref)
             {
                 return _ref->GetGUID() == target->GetGUID();
@@ -2009,6 +2778,47 @@ class spell_lightning_marker_visual : public AuraScript
     }
 };
 
+class spell_boss_diablo_napalm_shell_damage : public SpellScript
+{
+    PrepareSpellScript(spell_boss_diablo_napalm_shell_damage);
+
+    void HandleCast(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(EFFECT_0);
+        if (!GetExplTargetUnit())
+            return;
+
+        if (GetCaster())
+            return;
+
+        uint32 triggered_spell_id = GetSpellInfo()->Effects[effIndex].TriggerSpell;
+
+        Position pos = GetExplTargetDest()->GetPosition();
+        if (GetCaster()->GetMapId() == DIABLO_MAP_ID)
+        {
+            InstanceScript* instance = GetCaster()->GetInstanceScript();
+            if (!instance)
+                return;
+
+            Creature* diablo = instance->GetCreature(DATA_DIABLO);
+            if (!diablo)
+                return;
+
+            CustomSpellValues val;
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_DAMAGE));
+            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO));
+            GetCaster()->CastCustomSpell(triggered_spell_id, val, GetExplTargetUnit(), TRIGGERED_FULL_MASK);
+        }
+        else
+            GetCaster()->CastSpell(GetExplTargetUnit(), triggered_spell_id, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_boss_diablo_napalm_shell_damage::HandleCast, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
+    }
+};
+
 void AddSC_hellforge_boss_six()
 {
     new CreatureAILoader<npc_boss_six_diablo_AI>("npc_boss_six_diablo");
@@ -2026,11 +2836,11 @@ void AddSC_hellforge_boss_six()
     new AuraScriptLoaderEx<spell_boss_diablo_nether_portal_AuraScript>("spell_boss_diablo_nether_portal");
     new SpellScriptLoaderEx<spell_boss_six_diablo_meteor>("spell_boss_six_diablo_meteor");
     new SpellScriptLoaderEx<spell_five_finger_death_punch>("spell_five_finger_death_punch");
+    new SpellScriptLoaderEx<spell_boss_diablo_napalm_shell_damage>("spell_boss_diablo_napalm_shell_damage");
     new AuraScriptLoaderEx<spell_boss_diablo_armageddon_AuraScript>("spell_boss_diablo_armageddon");
     new AuraScriptLoaderEx<spell_buffeting_winds_diablo>("spell_buffeting_winds_diablo");
     new AuraScriptLoaderEx<spell_boss_diablo_flametongue_weapon>("spell_boss_diablo_flametongue_weapon");
     new AuraScriptLoaderEx<spell_diablo_siphon_soul>("spell_diablo_siphon_soul");
-    new AuraScriptLoaderEx<spell_boss_diablo_hellfire_effect>("spell_boss_diablo_hellfire_effect");
     new AuraScriptLoaderEx<spell_boss_diablo_plasma_blast>("spell_boss_diablo_plasma_blast");
     new AuraScriptLoaderEx<spell_lightning_marker_visual>("spell_lightning_marker_visual");
 }

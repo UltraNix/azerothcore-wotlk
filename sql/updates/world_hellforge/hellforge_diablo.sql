@@ -7,7 +7,7 @@ INSERT INTO `creature_template` VALUES
 (@ENTRY + 2, 0, 0, 0, 0, 0, 19503, 0, 0, 0, 'Abyss Knight', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "", 12340),
 (@ENTRY + 3, 0, 0, 0, 0, 0, 18237, 0, 0, 0, 'Kazzak copy', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "", 12340),
 (@ENTRY + 4, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo beam target', '', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "npc_boss_six_beam_trigger", 12340),
-(@ENTRY + 5, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo', 'Beam target explosion trigger', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "npc_boss_six_beam_trigger_explosion", 12340),
+(@ENTRY + 5, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo', 'Beam target explosion trigger', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297855, 0, "npc_boss_six_beam_trigger_explosion", 12340),
 (@ENTRY + 6, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo', 'Heart beam target', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, "npc_boss_diablo_playerclone", 12340),
 (@ENTRY + 7, 0, 0, 0, 0, 0, 11686, 0, 0, 0, 'Diablo', 'fiery comet trigger', '', 0, 83, 83, 2, 14, 0, 1, 1.14286, 1, 0, 1000, 1000, 0, 1, 1, 2000, 2000, 2, 0, 34816, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 3, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 617297919, 0, "npc_boss_diablo_comet_trigger", 12340),
 
@@ -53,7 +53,7 @@ DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID + 0, 250200, 249, 8, 1, 0, 0, -10.9161, -213.238, -87.7776, 3.137, 300, 0, 0, 13945, 4258, 0, 0, 0, 0);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 68147, 64529, 61585);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 64529, 61585, 68832);
 INSERT INTO `spell_script_names` VALUES
 (67105, "spell_boss_diablo_nether_portal"),
 (36837, "spell_boss_six_diablo_meteor"),
@@ -62,9 +62,9 @@ INSERT INTO `spell_script_names` VALUES
 (32474, "spell_buffeting_winds_diablo"),
 (65979, "spell_boss_diablo_flametongue_weapon"),
 (43501, "spell_diablo_siphon_soul"),
-(68147, "spell_boss_diablo_hellfire_effect"),
 (64529, "spell_boss_diablo_plasma_blast"),
-(61585, "spell_lightning_marker_visual");
+(61585, "spell_lightning_marker_visual"),
+(68832, "spell_boss_diablo_napalm_shell_damage");
 
 -- pozmieniac GUIDy potem
 DELETE FROM `creature` WHERE `id` = 250200;

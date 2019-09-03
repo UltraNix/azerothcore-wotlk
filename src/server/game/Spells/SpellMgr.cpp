@@ -8057,6 +8057,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 23011: // Tears of the Wind Seeker
             spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
             break;
+        case 35831:
+            spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            break;
         }
 
         //////////////////////////////////////////
