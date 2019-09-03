@@ -334,7 +334,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
 
         //! Proc for melee attacks only, not melee spells and so on and so forth
-        if (procAttacker & (PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS) != 0)
+        if ((procAttacker & (PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS)) != 0)
             return;
 
         if (attType == BASE_ATTACK)
