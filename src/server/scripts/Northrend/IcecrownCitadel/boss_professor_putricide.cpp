@@ -617,10 +617,10 @@ class boss_professor_putricide : public CreatureScript
                             me->CastSpell(target, SPELL_UNBOUND_PLAGUE, false);
                             me->CastSpell(target, SPELL_UNBOUND_PLAGUE_SEARCHER, false);
                             auto time = GetUnboundPlagueTime(_phase);
-                            events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, time, EVENT_GROUP_ABILITIES);
+                            events.RescheduleEvent(EVENT_UNBOUND_PLAGUE, time, EVENT_GROUP_ABILITIES);
                         }
                         else
-                            events.ScheduleEvent(EVENT_UNBOUND_PLAGUE, 3500, EVENT_GROUP_ABILITIES);
+                            events.RescheduleEvent(EVENT_UNBOUND_PLAGUE, 3500, EVENT_GROUP_ABILITIES);
                         break;
                     case EVENT_MALLEABLE_GOO:
                         if (Is25ManRaid())
