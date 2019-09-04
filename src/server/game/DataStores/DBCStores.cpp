@@ -369,6 +369,8 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sMapDifficultyStore,          dbcPath, "MapDifficulty.dbc");
     // fill data
     bool _onyxiaHack = false;
+    //! if we're making a new custom difficulty for raid type instance
+    //! we need to mess around with SMSG_INSTANCE_DIFFICULTY as well, otherwise we will get client crashes
     for (uint32 i = 1; i < sMapDifficultyStore.GetNumRows(); ++i)
     {
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))

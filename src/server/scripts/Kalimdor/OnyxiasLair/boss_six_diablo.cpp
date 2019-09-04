@@ -54,7 +54,8 @@ enum DiabloSpells
     SPELL_DIABLO_COSMETIC_WHITE_SMOKE       = 43467,
     SPELL_DIABLO_METEOR                     = 36837,
     SPELL_DIABLO_RING_OF_FLAME              = 35831,
-    SPELL_DIABLO_REFLECT_DAMAGE_FIREBOLT    = 44577
+    SPELL_DIABLO_REFLECT_DAMAGE_FIREBOLT    = 44577,
+    SPELL_DIABLO_SHADOW_DRAKE_VOID_BLAST    = 46161
 };
 
 enum DiabloCreatures
@@ -144,9 +145,34 @@ enum DiabloStatIds
     STAT_DIABLO_THUNDERSHOCK_DAMAGE,
 
     /** Misc **/
+    // 232 is taken
     STAT_DIABLO_BUFFETING_WINDS_RADIUS                          = 233,
     STAT_DIABLO_FIVE_FAT_FINGERS_PROC_CHANCE                    = 234,
-    STAT_DIABLO_OFFHAND_PROC_DAMAGE                             = 235
+    STAT_DIABLO_OFFHAND_PROC_DAMAGE                             = 235,
+
+    /** Health **/
+    STAT_ABYSSAL_KNIGHT_HEALTH,
+    STAT_PITLORD_HEALTH,
+    STAT_DIABLO_HEALTH,
+    STAT_HEARTBEAM_HEALTH,
+    STAT_SHADOWCRYSTAL_HEALTH,
+    STAT_SHADOW_DRAKE_HEALTH,
+    STAT_PHOENIX_HEALTH,
+    STAT_WANDERING_ELEMENTAL_HEALTH,
+
+    /** Melee **/
+    STAT_ABYSSAL_MELEE_DAMAGE,
+    STAT_PIT_LORD_MELEE_DAMAGE,
+    STAT_DIABLO_MELEE_DAMAGE,
+
+    /** Additional spell stats **/
+    STAT_DIABLO_NAPALM_SHELL_PERIODIC,
+    STAT_DIABLO_CONVERSION_BEAM_DAMAGE,
+    // those two are used by shadow drake, do not use those IDs
+    // 249
+    // 250
+    // 251
+    STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE          = 252
 };
 
 enum DiabloGameobjects
@@ -553,7 +579,18 @@ struct npc_boss_six_diablo_AI : public BossAI
            STAT_DIABLO_THUNDERSHOCK_DAMAGE,
            STAT_DIABLO_BUFFETING_WINDS_RADIUS,
            STAT_DIABLO_FIVE_FAT_FINGERS_PROC_CHANCE,
-           STAT_DIABLO_OFFHAND_PROC_DAMAGE
+           STAT_DIABLO_OFFHAND_PROC_DAMAGE,
+           /** health **/
+           STAT_ABYSSAL_KNIGHT_HEALTH,
+           STAT_PITLORD_HEALTH,
+           STAT_DIABLO_HEALTH,
+           STAT_HEARTBEAM_HEALTH,
+           STAT_SHADOWCRYSTAL_HEALTH,
+           STAT_SHADOW_DRAKE_HEALTH,
+           STAT_PHOENIX_HEALTH,
+           STAT_WANDERING_ELEMENTAL_HEALTH,
+           STAT_DIABLO_CONVERSION_BEAM_DAMAGE,
+           STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE
         });
 
         for (auto const& ref : _stats)
@@ -683,6 +720,37 @@ struct npc_boss_six_diablo_AI : public BossAI
                case STAT_DIABLO_OFFHAND_PROC_DAMAGE:
                    _offhandProcDamage = ref.second.StatValue;
                    break;
+               case STAT_ABYSSAL_KNIGHT_HEALTH:
+                   _abyssalMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_PITLORD_HEALTH:
+                   _pitlordMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_HEALTH:
+                   me->SetMaxHealth(ref.second.StatValue);
+                   me->SetFullHealth();
+                   break;
+               case STAT_HEARTBEAM_HEALTH:
+                   _heartbeamMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_SHADOWCRYSTAL_HEALTH:
+                   _shadowcrystalMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_SHADOW_DRAKE_HEALTH:
+                   _shadowDrakeMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_PHOENIX_HEALTH:
+                   _phoenixMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_WANDERING_ELEMENTAL_HEALTH:
+                   _wanderingElementalMaxHealth = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_CONVERSION_BEAM_DAMAGE:
+                   _conversionBeamDamage = urand((ref.second.StatValue * ref.second.StatVariance), ref.second.StatValue);
+                   break;
+               case STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE:
+                   _runicLightningDamage = urand((ref.second.StatValue * ref.second.StatVariance), ref.second.StatValue);
+                   break;
                default:
                    break;
             }
@@ -808,7 +876,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             me->NearTeleportTo(teleportPos);
 
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, 50000);
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, _conversionBeamDamage);
             val.AddSpellMod(SPELLVALUE_AURA_DURATION, 3500);
             me->CastCustomSpell(SPELL_DIABLO_CONVERSION_BEAM, val, target, TRIGGERED_FULL_MASK);
 
@@ -998,6 +1066,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                     portal->SetPassive();
                     portal->SetImmuneToAll(true);
                     portal->CastSpell(portal, SPELL_DIABLO_NETHER_PORTAL_VISUAL, TRIGGERED_DISALLOW_PROC_EVENTS);
+                    portal->DespawnOrUnsummon(25s);
                 }
             }
 
@@ -1021,6 +1090,8 @@ struct npc_boss_six_diablo_AI : public BossAI
 
                     if (Creature* knight = me->SummonCreature(NPC_BOSS_SIX_ABYSS_KNIGHT, spawnPos))
                     {
+                        knight->SetMaxHealth(_abyssalMaxHealth);
+                        knight->SetFullHealth();
                         knight->SetPassive();
                         knight->SetImmuneToAll(true);
                         knight->SetWalk(true);
@@ -1049,6 +1120,8 @@ struct npc_boss_six_diablo_AI : public BossAI
 
                     if (Creature* knight = me->SummonCreature(NPC_BOSS_SIX_ABYSS_KNIGHT, spawnPos))
                     {
+                        knight->SetMaxHealth(_abyssalMaxHealth);
+                        knight->SetFullHealth();
                         knight->SetPassive();
                         knight->SetImmuneToAll(true);
                         knight->SetWalk(true);
@@ -1075,6 +1148,8 @@ struct npc_boss_six_diablo_AI : public BossAI
                         flyingDoom->SetCanFly(true);
                         flyingDoom->SetDisableGravity(true);
                         flyingDoom->GetMotionMaster()->MovePoint(100, flyingDoomMovePositions[_moveIndex]);
+                        flyingDoom->SetMaxHealth(_pitlordMaxHealth);
+                        flyingDoom->SetFullHealth();
                         ++_moveIndex;
                     }
                 }
@@ -1106,7 +1181,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
 
         CustomSpellValues val;
-        val.AddSpellMod(SPELLVALUE_BASE_POINT0, 0);
+        val.AddSpellMod(SPELLVALUE_BASE_POINT0, _runicLightningDamage);
         me->CastCustomSpell(SPELL_DIABLO_RUNIC_LIGHTNING, val, target, TRIGGERED_FULL_MASK);
         me->AddAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL, target);
     }
@@ -1126,7 +1201,6 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         if (!target)
         {
-            me->MonsterYell("brak targetu dla shadow realm, evaduje", LANG_UNIVERSAL, nullptr);
             EnterEvadeMode();
             return;
         }
@@ -1176,6 +1250,8 @@ struct npc_boss_six_diablo_AI : public BossAI
 
             if (Creature* shadowCrystal = me->SummonCreature(NPC_BOSS_SIX_SHADOW_CRYSTAL, _spawnPos))
             {
+                shadowCrystal->SetMaxHealth(_shadowcrystalMaxHealth);
+                shadowCrystal->SetFullHealth();
                 shadowCrystal->SetPassive();
                 shadowCrystal->SetCanFly(true);
                 shadowCrystal->SetPhaseMask(32, true);
@@ -1237,6 +1313,8 @@ struct npc_boss_six_diablo_AI : public BossAI
         player->AddAura(SPELL_DIABLO_HEART_BEAM_VISUAL, player);
         if (Creature* heartbeam = me->SummonCreature(NPC_BOSS_SIX_HEART_BEAM_TRIGGER, _shadowRealmExitPosition))
         {
+            heartbeam->SetMaxHealth(_heartbeamMaxHealth);
+            heartbeam->SetFullHealth();
             heartbeam->SetPassive();
             player->CastSpell(heartbeam, SPELL_DIABLO_RAGING_SPIRIT_VISUAL, true);
             heartbeam->CastSpell(heartbeam, SPELL_DIABLO_HEART_BEAM_VISUAL, true);
@@ -1374,7 +1452,13 @@ struct npc_boss_six_diablo_AI : public BossAI
         }
 
         for (auto const pos : elementalPositions)
-            me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos);
+        {
+            if (Creature* elemental = me->SummonCreature(NPC_BOSS_SIX_UNSTABLE_FIRE_ELEMENTAL, pos))
+            {
+                elemental->SetMaxHealth(_wanderingElementalMaxHealth);
+                elemental->SetFullHealth();
+            }
+        }
     }
 
     void HandlePlasmaRay()
@@ -1412,6 +1496,8 @@ struct npc_boss_six_diablo_AI : public BossAI
         {
             if (Creature* phoenix = me->GetMap()->SummonCreature(NPC_BOSS_SIX_ASHES_OF_ALAR, ashesOfAlarSpawnPositions[i]))
             {
+                phoenix->SetMaxHealth(_phoenixMaxHealth);
+                phoenix->SetFullHealth();
                 phoenix->setPowerType(POWER_ENERGY);
                 phoenix->SetMaxPower(POWER_ENERGY, 200);
                 phoenix->SetPower(POWER_ENERGY, phoenix->GetMaxPower(POWER_ENERGY));
@@ -1426,6 +1512,8 @@ struct npc_boss_six_diablo_AI : public BossAI
         {
             if (Creature* drake = me->SummonCreature(NPC_BOSS_SIX_SHADOW_DRAKE, _myShadowDrakePositions[i], TEMPSUMMON_CORPSE_DESPAWN))
             {
+                drake->SetMaxHealth(_shadowDrakeMaxHealth);
+                drake->SetFullHealth();
                 drake->SetCanFly(true);
                 drake->SetDisableGravity(true);
                 drake->SetCanMissSpells(false);
@@ -1535,6 +1623,17 @@ private:
     float _buffetingWindsRadius;
     uint32 _fiveFingersProcChance;
     uint32 _offhandProcDamage;
+
+    /** Health **/
+    uint32 _abyssalMaxHealth;
+    uint32 _pitlordMaxHealth;
+    uint32 _heartbeamMaxHealth;
+    uint32 _shadowcrystalMaxHealth;
+    uint32 _shadowDrakeMaxHealth;
+    uint32 _phoenixMaxHealth;
+    uint32 _wanderingElementalMaxHealth;
+    uint32 _conversionBeamDamage;
+    uint32 _runicLightningDamage;
 };
 
 enum DemonSpells
@@ -2550,9 +2649,6 @@ struct npc_boss_player_flame_sphere : public ScriptedAI
 private:
     bool _arrived;
     uint64 _targetGUID;
-
-    uint32 _flameSphereDamage;
-    uint32 _spiritBurnDamage;
 };
 
 class spell_diablo_siphon_soul : public AuraScript
@@ -2595,6 +2691,9 @@ class spell_diablo_siphon_soul : public AuraScript
 };
 
 constexpr uint32 STAT_SHADOW_DRAKE_FLAME_TIMER{ 232 };
+constexpr uint32 STAT_SHADOW_DRAKE_VOID_BLAST_TIMER{ 249 };
+constexpr uint32 STAT_SHADOW_DRAKE_DEVOURING_FLAME_DAMAGE{ 250 };
+constexpr uint32 STAT_SHADOW_DRAKE_VOID_BLAST_DAMAGE{ 251 };
 struct npc_boss_diablo_shadow_drake : public ScriptedAI
 {
     npc_boss_diablo_shadow_drake(Creature* creature) : ScriptedAI(creature) { }
@@ -2608,9 +2707,25 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
 
     void LoadStats()
     {
-        HellforgeStatValues val;
-        sWorldCache.GetStatValue(STAT_SHADOW_DRAKE_FLAME_TIMER, val);
-        _shadowDrakeDevouringFlameTimer = val.StatValue;
+        HellforgeStats _stats = sWorldCache.GetStatValues({ STAT_SHADOW_DRAKE_FLAME_TIMER, STAT_SHADOW_DRAKE_VOID_BLAST_TIMER, STAT_SHADOW_DRAKE_VOID_BLAST_DAMAGE });
+
+        for (auto const& ref : _stats)
+        {
+            switch (ref.first)
+            {
+                case STAT_SHADOW_DRAKE_FLAME_TIMER:
+                    _shadowDrakeDevouringFlameTimer = ref.second.StatValue;
+                    break;
+                case STAT_SHADOW_DRAKE_VOID_BLAST_TIMER:
+                    _voidBlastTimer = ref.second.StatValue;
+                    break;
+                case STAT_SHADOW_DRAKE_VOID_BLAST_DAMAGE:
+                    _voidblastDamage = urand((ref.second.StatValue * ref.second.StatVariance), ref.second.StatValue);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     void IsSummonedBy(Unit* summoner) override
@@ -2649,6 +2764,27 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
 
             func.Repeat(Seconds(_shadowDrakeDevouringFlameTimer));
         });
+
+        _scheduler.Schedule(Seconds(_voidBlastTimer), [this](TaskContext func)
+        {
+            Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
+            {
+                return object->IsPlayer() && !object->GetVehicleBase()
+                    && !object->HasAura(SPELL_DIABLO_MC_INSANE)
+                    && !object->HasAura(SPELL_DIABLO_LIGHTNING_MARKER_VISUAL)
+                    && !object->HasAura(SPELL_DIABLO_BUFFETTING_WINDS);
+
+            });
+
+            if (target)
+            {
+                CustomSpellValues val;
+                val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 500);
+                val.AddSpellMod(SPELLVALUE_BASE_POINT0, _voidblastDamage);
+                me->CastCustomSpell(SPELL_DIABLO_SHADOW_DRAKE_VOID_BLAST, val, target);
+                func.Repeat(Seconds(_voidBlastTimer));
+            }
+        });
     }
 
     void AttackStart(Unit* who) override
@@ -2664,6 +2800,8 @@ private:
     TaskScheduler _scheduler;
 
     uint32 _shadowDrakeDevouringFlameTimer;
+    uint32 _voidBlastTimer;
+    uint32 _voidblastDamage;
 };
 
 class spell_boss_diablo_plasma_blast : public AuraScript
@@ -2817,7 +2955,15 @@ class spell_boss_diablo_napalm_shell_damage : public SpellScript
                 return;
 
             CustomSpellValues val;
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_DAMAGE));
+            HellforgeStatValues stat;
+            sWorldCache.GetStatValue(STAT_DIABLO_NAPALAM_SHELL_DAMAGE, stat);
+            uint32 damage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+
+            sWorldCache.GetStatValue(STAT_DIABLO_NAPALM_SHELL_PERIODIC, stat);
+            uint32 periodicDamage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
+            val.AddSpellMod(SPELLVALUE_BASE_POINT1, periodicDamage);
             val.AddSpellMod(SPELLVALUE_RADIUS_MOD, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO));
             GetCaster()->CastCustomSpell(triggered_spell_id, val, GetExplTargetUnit(), TRIGGERED_FULL_MASK);
         }
@@ -2828,6 +2974,60 @@ class spell_boss_diablo_napalm_shell_damage : public SpellScript
     void Register() override
     {
         OnEffectHit += SpellEffectFn(spell_boss_diablo_napalm_shell_damage::HandleCast, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
+    }
+};
+
+constexpr uint32 SPELL_DEVOURING_FLAME_TRIGGERED{ 64733 };
+class spell_devouring_flame_diablo_hellforge : public AuraScript
+{
+    PrepareAuraScript(spell_devouring_flame_diablo_hellforge);
+
+    void OnPeriodic(AuraEffect const* /*aurEff*/)
+    {
+        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        {
+            InstanceScript* instance = GetCaster()->GetInstanceScript();
+            if (!instance)
+                return;
+
+            Creature* diablo = instance->GetCreature(DATA_DIABLO);
+            if (!diablo)
+                return;
+
+            PreventDefaultAction();
+
+            HellforgeStatValues stat;
+            sWorldCache.GetStatValue(STAT_SHADOW_DRAKE_DEVOURING_FLAME_DAMAGE, stat);
+            CustomSpellValues val;
+
+            val.AddSpellMod(SPELLVALUE_BASE_POINT0, stat.StatValue);
+            val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
+            GetTarget()->CastCustomSpell(SPELL_DEVOURING_FLAME_TRIGGERED, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_devouring_flame_diablo_hellforge::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
+
+class spell_diablo_conversion_beam : public AuraScript
+{
+    PrepareAuraScript(spell_diablo_conversion_beam);
+
+    void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
+    {
+        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        {
+            isPeriodic = true;
+            amplitude = 500;
+        }
+    }
+
+    void Register() override
+    {
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_diablo_conversion_beam::CalcPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
     }
 };
 
@@ -2855,4 +3055,6 @@ void AddSC_hellforge_boss_six()
     new AuraScriptLoaderEx<spell_diablo_siphon_soul>("spell_diablo_siphon_soul");
     new AuraScriptLoaderEx<spell_boss_diablo_plasma_blast>("spell_boss_diablo_plasma_blast");
     new AuraScriptLoaderEx<spell_lightning_marker_visual>("spell_lightning_marker_visual");
+    new AuraScriptLoaderEx<spell_devouring_flame_diablo_hellforge>("spell_devouring_flame_diablo_hellforge");
+    new AuraScriptLoaderEx<spell_diablo_conversion_beam>("spell_diablo_conversion_beam");
 }

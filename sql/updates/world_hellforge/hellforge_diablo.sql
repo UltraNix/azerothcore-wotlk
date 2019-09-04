@@ -54,7 +54,7 @@ DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID + 0, 250200, 249, 8, 1, 0, 0, -10.9161, -213.238, -87.7776, 3.137, 300, 0, 0, 13945, 4258, 0, 0, 0, 0);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 64529, 61585, 68832);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 64529, 61585, 68832, 64734, 69856);
 INSERT INTO `spell_script_names` VALUES
 (67105, "spell_boss_diablo_nether_portal"),
 (36837, "spell_boss_six_diablo_meteor"),
@@ -65,7 +65,9 @@ INSERT INTO `spell_script_names` VALUES
 (43501, "spell_diablo_siphon_soul"),
 (64529, "spell_boss_diablo_plasma_blast"),
 (61585, "spell_lightning_marker_visual"),
-(68832, "spell_boss_diablo_napalm_shell_damage");
+(68832, "spell_boss_diablo_napalm_shell_damage"),
+(64734, "spell_devouring_flame_diablo_hellforge"),
+(69856, "spell_diablo_conversion_beam");
 
 -- pozmieniac GUIDy potem
 DELETE FROM `creature` WHERE `id` = 250200;
