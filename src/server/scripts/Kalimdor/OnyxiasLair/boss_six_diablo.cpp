@@ -355,8 +355,10 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void JustDied(Unit* /*killer*/)
     {
-        me->SummonGameObject(GO_DIABLO_CHEST, { 2.37f, -220.39f, -86.1f, 3.08f }, 0.0f, 0.0f, -0.99f, -0.03f, 0);
-        summons.DespawnAll();
+        if (Player* pl = me->SelectNearestPlayer(100.0f))
+        {
+            pl->SummonGameObject(GO_DIABLO_CHEST, { 2.37f, -220.39f, -86.1f, 3.08f }, 0.0f, 0.0f, -0.99f, -0.03f, 0);
+        }
     }
 
     void SummonedCreatureDies(Creature* summon, Unit* killer) override
