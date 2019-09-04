@@ -3083,6 +3083,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD;
         });
 
+        // Flight Form (Druid)
+        ApplySpellFix({ 33948, 40121 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_MAINTAIN_MOMENTUM_ON_AURA_REMOVE;
+        });
+
         ApplySpellFix
         ({
             54428, // Divine Plea

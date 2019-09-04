@@ -210,7 +210,8 @@ enum SpellCustomAttributes : uint32
 
 enum SpellCustomAttributes1 : uint32
 {
-    SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD        = 0x00000001
+    SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD           = 0x00000001,
+    SPELL_ATTR1_CU_MAINTAIN_MOMENTUM_ON_AURA_REMOVE = 0x00000002
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);

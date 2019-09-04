@@ -3227,7 +3227,15 @@ void AuraEffect::HandleAuraModIncreaseFlightSpeed(AuraApplication const* aurApp,
 
     Unit* target = aurApp->GetTarget();
 
-    if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK)
+    auto ShouldChangeSpeed = [&]() -> bool
+    {
+        if (!apply)
+            return !GetSpellInfo()->HasAttribute(SPELL_ATTR1_CU_MAINTAIN_MOMENTUM_ON_AURA_REMOVE);
+
+        return true;
+    };
+
+    if (mode & AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK && ShouldChangeSpeed())
         target->UpdateSpeed(MOVE_FLIGHT);
 
     //! Update ability to fly
