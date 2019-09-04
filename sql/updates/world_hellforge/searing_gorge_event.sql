@@ -31,7 +31,7 @@ INSERT INTO `gameobject` VALUES
 (@GGUID + 1,180250,0,1,1,-6556.93,-1271.33,134.023,5.71618,-0,-0,-0.279719,0.960082,300,0,1,0);
 
 DELETE FROM `world_zone_scripts` WHERE `zone_entry` = 51;
-INSERT INTO `world_zone_scripts` VALUES (51, 'worldzone_searing_gorge`');
+INSERT INTO `world_zone_scripts` VALUES (51, 'worldzone_searing_gorge');
 
 DELETE FROM `creature_equip_template` WHERE `entry` = 300002;
 INSERT INTO `creature_equip_template` VALUES (300002, 1, 49778, 0, 0, 1);
