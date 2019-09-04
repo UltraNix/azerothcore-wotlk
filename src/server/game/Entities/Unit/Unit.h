@@ -926,27 +926,31 @@ public:
 
 class HealInfo
 {
-private:
-    Unit* const m_healer;
-    Unit* const m_target;
-    uint32 m_heal;
-    uint32 m_absorb;
-    SpellInfo const* const m_spellInfo;
-    SpellSchoolMask const m_schoolMask;
-public:
-    explicit HealInfo(Unit* _healer, Unit* _target, uint32 _heal, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask)
-        : m_healer(_healer), m_target(_target), m_heal(_heal), m_spellInfo(_spellInfo), m_schoolMask(_schoolMask)
-    {
-        m_absorb = 0;
-    }
-    void AbsorbHeal(uint32 amount)
-    {
-        amount = std::min(amount, GetHeal());
-        m_absorb += amount;
-        m_heal -= amount;
-    }
+    private:
+        Unit* const _healer;
+        Unit* const _target;
+        uint32 _heal;
+        uint32 _absorb;
+        SpellInfo const* const _spellInfo;
+        SpellSchoolMask const _schoolMask;
 
-    uint32 GetHeal() const { return m_heal; };
+    public:
+        explicit HealInfo(Unit* healer, Unit* target, uint32 heal, SpellInfo const* spellInfo, SpellSchoolMask schoolMask)
+            : _healer(healer), _target(target), _heal(heal), _absorb(0), _spellInfo(spellInfo), _schoolMask(schoolMask) { }
+
+        void AbsorbHeal(uint32 amount)
+        {
+            amount = std::min(amount, GetHeal());
+            _absorb += amount;
+            _heal -= amount;
+        }
+
+        Unit* GetHealer() const { return _healer; }
+        Unit* GetTarget() const { return _target; }
+        uint32 GetHeal() const { return _heal; }
+        uint32 GetAbsorb() const { return _absorb; }
+        SpellInfo const* GetSpellInfo() const { return _spellInfo; };
+        SpellSchoolMask GetSchoolMask() const { return _schoolMask; };
 };
 
 class ProcEventInfo
@@ -973,8 +977,8 @@ public:
     uint32 GetSpellTypeMask() const { return _spellTypeMask; }
     uint32 GetSpellPhaseMask() const { return _spellPhaseMask; }
     uint32 GetHitMask() const { return _hitMask; }
-    SpellInfo const* GetSpellInfo() const { return NULL; }
-    SpellSchoolMask GetSchoolMask() const { return SPELL_SCHOOL_MASK_NONE; }
+    SpellInfo const* GetSpellInfo() const;
+    SpellSchoolMask GetSchoolMask() const;
     DamageInfo* GetDamageInfo() const { return _damageInfo; }
     HealInfo* GetHealInfo() const { return _healInfo; }
     SpellInfo const* GetTriggerAuraSpell() const { return _triggeredByAuraSpell; }

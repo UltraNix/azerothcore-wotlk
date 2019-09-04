@@ -84,42 +84,18 @@ enum PaladinSpells
     SPELL_PALADIN_AURA_MASTERY_IMMUNE            = 64364,
 
     SPELL_GENERIC_ARENA_DAMPENING                = 74410,
-    SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411
+    SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411,
+
+    SPELL_PALADIN_BEACON_OF_LIGHT                = 53563,
+    SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_1         = 53652,
+    SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_2         = 53653,
+    SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_3         = 53654,
+    SPELL_PALADIN_HOLY_LIGHT                     = 635
 };
 
 enum PaladinSpellIcons
 {
     PALADIN_ICON_ID_RETRIBUTION_AURA             = 555
-};
-
-// Ours
-class spell_pal_lights_beacon: public SpellScriptLoader
-{
-public:
-    spell_pal_lights_beacon() : SpellScriptLoader("spell_pal_lights_beacon") { }
-
-    class spell_pal_lights_beacon_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_lights_beacon_AuraScript);
-
-        bool CheckProc(ProcEventInfo& eventInfo)
-        {
-            if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
-                if (procSpell->Id == 54968)
-                    return false;
-            return true;
-        }
-
-        void Register()
-        {
-                DoCheckProc += AuraCheckProcFn(spell_pal_lights_beacon_AuraScript::CheckProc);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_pal_lights_beacon_AuraScript();
-    }
 };
 
 // Ours
@@ -1374,6 +1350,62 @@ class spell_pal_seal_of_righteousness : public SpellScriptLoader
         }
 };
 
+// 53651 - Light's Beacon - Beacon of Light
+class spell_pal_light_s_beacon_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_pal_light_s_beacon_AuraScript);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo(
+            {
+                SPELL_PALADIN_BEACON_OF_LIGHT,
+                SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_1,
+                SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_2,
+                SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_3,
+                SPELL_PALADIN_HOLY_LIGHT
+            });
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        if (GetTarget()->HasAura(SPELL_PALADIN_BEACON_OF_LIGHT, eventInfo.GetActor()->GetGUID()))
+            return false;
+        return true;
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+
+        SpellInfo const* procSpell = eventInfo.GetSpellInfo();
+        if (!procSpell)
+            return;
+
+        HealInfo* healInfo = eventInfo.GetHealInfo();
+        if (!healInfo || !healInfo->GetHeal())
+            return;
+
+        uint32 healSpellId = procSpell->IsRankOf(sSpellMgr->GetSpellInfo(SPELL_PALADIN_HOLY_LIGHT)) ? SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_1 : SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_3;
+        uint32 heal = CalculatePct(healInfo->GetHeal(), aurEff->GetAmount());
+
+        Unit* beaconTarget = GetCaster();
+        if (!beaconTarget || !beaconTarget->HasAura(SPELL_PALADIN_BEACON_OF_LIGHT, eventInfo.GetActor()->GetGUID()))
+            return;
+
+        /// @todo: caster must be the healed unit to perform distance checks correctly
+        ///        but that will break animation on clientside
+        ///        caster in spell packets must be the healing unit
+        eventInfo.GetActor()->CastCustomSpell(healSpellId, SPELLVALUE_BASE_POINT0, heal, beaconTarget, true);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_pal_light_s_beacon_AuraScript::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_pal_light_s_beacon_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     // Ours
@@ -1381,7 +1413,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_divine_intervention();
     new spell_pal_seal_of_light();
     new spell_pal_sacred_shield_base();
-    new spell_pal_lights_beacon();
+    new AuraScriptLoaderEx<spell_pal_light_s_beacon_AuraScript>("spell_pal_light_s_beacon");
 
     // Theirs
     new spell_pal_ardent_defender();
