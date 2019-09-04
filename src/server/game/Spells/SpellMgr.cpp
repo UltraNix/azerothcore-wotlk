@@ -8045,6 +8045,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 54988: // Heart beam visual
             spellInfo->Attributes &= ~SPELL_ATTR0_CANT_USED_IN_COMBAT;
+            break;
         case 67938: // Icy Touch
         case 66021:
         case 67939:
