@@ -895,9 +895,6 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
     float z = data->posZ;
     float ang = data->orientation;
 
-    if (entry >= 192028 && entry <= 192033)
-        printf("asdasd \n");
-
     uint32 animprogress = data->animprogress;
     GOState go_state = data->go_state;
     uint32 artKit = data->artKit;
