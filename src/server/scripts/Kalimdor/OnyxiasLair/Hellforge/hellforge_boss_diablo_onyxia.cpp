@@ -79,10 +79,22 @@ public:
 
     void Reset() override
     {
+        me->MonsterYell("Who dares to summon me!", LANG_UNIVERSAL, me);
         _events.Reset();
         DoCastSelf(SPELL_SHADOW_FORM);
         LoadStats();
         me->SetCanMissSpells(false);
+
+        me->SetCanFly(true);
+        me->SetDisableGravity(true);
+        me->SetHover(true);
+        me->SendMovementFlagUpdate();
+        me->SetPassive();
+        me->SetImmuneToPC(true);
+
+        Position pos = me->GetPosition();     
+
+        me->GetMotionMaster()->MovePoint(1, pos.GetPositionX() - 80.f, pos.GetPositionY(), -79.31f, false);
     }
 
     void LoadStats()
@@ -175,25 +187,47 @@ public:
         }
     }
 
+    void MovementInform(uint32 type, uint32 point)
+    {
+        if (type == POINT_MOTION_TYPE && point == 1)
+        {
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
+            me->SetHover(false);
+            me->SendMovementFlagUpdate();
+            me->SetAggressive();
+            me->SetImmuneToPC(false);
+            if (Player * victim = me->SelectNearestPlayer(200.f))
+                me->Attack(victim, false);
+            ScheduleEvents();
+        }
+    }
+
     void EnterEvadeMode() override
     {
         me->RemoveAllGameObjects();
         _summons.DespawnAll();
         ScriptedAI::EnterEvadeMode();
         _eggs.clear();
+
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->EnterEvadeMode();
     }
 
     void EnterCombat(Unit* /*victim*/) override
     {
-        me->MonsterYell("Who dares to summon me!", LANG_UNIVERSAL, me);
         DoZoneInCombat();
+        SpawnEggs();
+    }
+
+    void ScheduleEvents()
+    {
         _events.ScheduleEvent(EVENT_ONYXIA_FLAMEBREATH, _flameBreathTimerFirst);
         _events.ScheduleEvent(EVENT_ONYXIA_TAILSWEEP, _tailSweepTimer);
         _events.ScheduleEvent(EVENT_ONYXIA_CLEAVE, _cleaveTimer);
         _events.ScheduleEvent(EVENT_ONYXIA_FIREBALL_VOLLEY, _volleyTimerFirst);
         _events.ScheduleEvent(EVENT_ONYXIA_SPAWN_DRAKE, _spawnDrakeTimer);
         _events.ScheduleEvent(EVENT_ONYXIA_FEAR, _fearTimer);
-        SpawnEggs();
     }
 
     void SpawnEggs()
@@ -218,6 +252,8 @@ public:
     void JustSummoned(Creature* creature) override
     {
         _summons.Summon(creature);
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->JustSummoned(creature);
     }
 
     void JustDied(Unit* /*killer*/) override

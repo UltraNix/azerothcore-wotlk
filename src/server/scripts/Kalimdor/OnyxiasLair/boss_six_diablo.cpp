@@ -55,7 +55,8 @@ enum DiabloSpells
     SPELL_DIABLO_METEOR                     = 36837,
     SPELL_DIABLO_RING_OF_FLAME              = 35831,
     SPELL_DIABLO_REFLECT_DAMAGE_FIREBOLT    = 44577,
-    SPELL_DIABLO_SHADOW_DRAKE_VOID_BLAST    = 46161
+    SPELL_DIABLO_SHADOW_DRAKE_VOID_BLAST    = 46161,
+    SPELL_DIABLO_IMPALE_VISUAL              = 53455
 };
 
 enum DiabloCreatures
@@ -81,7 +82,9 @@ enum DiabloCreatures
     NPC_BOSS_SIX_NAPALAM_SHELL_TRIGGER      = 250220,
     NPC_BOSS_SIX_METEOR_CASTER_TRIGGER      = 250221,
     NPC_BOSS_SIX_PORTAL_TRIGGER_VISUAL      = 250222,
-    NPC_BOSS_SIX_SHADOW_CRYSTAL             = 250223
+    NPC_BOSS_SIX_SHADOW_CRYSTAL             = 250223,
+
+    NPC_WORLD_TRIGGER                       = 22515
 };
 
 enum DiabloMisc
@@ -353,6 +356,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     void JustDied(Unit* /*killer*/)
     {
         me->SummonGameObject(GO_DIABLO_CHEST, { 2.37f, -220.39f, -86.1f, 3.08f }, 0.0f, 0.0f, -0.99f, -0.03f, 0);
+        summons.DespawnAll();
     }
 
     void SummonedCreatureDies(Creature* summon, Unit* killer) override
@@ -837,7 +841,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             });
 
             if (_currentIntermissionBoss)
-                me->SummonCreature(_currentIntermissionBoss, { -27.719555f, -214.777084f, -87.560944f, 3.194592f }, TEMPSUMMON_CORPSE_DESPAWN);
+                SummonIntermissionCreature();
             else
                 EnterEvadeMode();
         }
@@ -1559,6 +1563,49 @@ struct npc_boss_six_diablo_AI : public BossAI
                 }
             });
         }
+    }
+
+    void SummonIntermissionCreature()
+    {
+        if (!_currentIntermissionBoss)
+            return;
+
+        // Don't summon portal on Yogg-Saron spawn
+        if (_currentIntermissionBoss != 261011) 
+        {
+            if (Creature * trigger = me->SummonCreature(NPC_WORLD_TRIGGER, GetIntermissionSpawnPosition(), TEMPSUMMON_TIMED_DESPAWN, 10000))
+            {
+                trigger->SetCanFly(true);
+                trigger->SetDisableGravity(true);
+
+                trigger->SetObjectScale(_currentIntermissionBoss != 261005 ? 10.f : 3.f);
+                trigger->CastSpell(me, _currentIntermissionBoss != 261005 ? SPELL_DIABLO_NETHER_PORTAL_VISUAL : SPELL_DIABLO_IMPALE_VISUAL);
+            }
+        }
+        scheduler.Schedule(3s, [&](TaskContext /*func*/)
+        {
+            Position pos = GetIntermissionSpawnPosition();
+            if (_currentIntermissionBoss == 261003)
+                pos.RelocateOffset({ -20.f, 0.f, 20.f });
+            me->SummonCreature(_currentIntermissionBoss, pos, TEMPSUMMON_CORPSE_DESPAWN);
+        });
+    }
+
+    Position GetIntermissionSpawnPosition()
+    {
+        switch (_currentIntermissionBoss)
+        {
+            case 261000: // Kel'thuzad
+                return { 24.69f, -209.50f, -84.88f, 3.25f };
+            case 261011: // Yogg-Saron
+                return me->GetPosition();
+            case 261005: // Anub'arak
+            case 261008: // Lich King
+                return { -59.64f, -214.89f, -84.87f, 0.04f };
+            case 261003: // Onyxia
+                return { 30.18f, -214.84f, -58.39f, 3.18f };
+        }
+        return me->GetPosition();
     }
 
 private:

@@ -8051,7 +8051,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 67940:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
-        case 14032: // Shadow Word: Pain
+        case 57778: // Shadow Word: Pain
             spellInfo->Dispel = DISPEL_NONE;
             break;
         case 23011: // Tears of the Wind Seeker

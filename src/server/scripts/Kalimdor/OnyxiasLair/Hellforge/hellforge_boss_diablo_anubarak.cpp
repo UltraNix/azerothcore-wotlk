@@ -60,9 +60,20 @@ public:
         _leechingSwarmCasted = false;
         _events.Reset();
         DoCastSelf(SPELL_SHADOW_FORM);
-        me->SetSelectable(true);
         LoadStats();
+
+        me->SetSelectable(false);
         me->SetCanMissSpells(false);
+        me->AddAura(SPELL_ANUB_SUBMERGE, me);
+        _scheduler.Schedule(2s, [&](TaskContext /*func*/)
+        {
+            me->RemoveAura(SPELL_ANUB_SUBMERGE);
+            DoCastSelf(SPELL_ANUB_EMERGE);
+            me->SetSelectable(true);
+            ScheduleCombatEvents(true);
+        });
+        if (Player * victim = me->SelectNearestPlayer(200.f))
+            me->Attack(victim, false);
     }
 
     void LoadStats()
@@ -149,6 +160,9 @@ public:
         _summons.DespawnAll();
         _instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_ANUB_PENETRATING_COLD);
         ScriptedAI::EnterEvadeMode();
+
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->EnterEvadeMode();
     }
 
     void JustSummoned(Creature* creature) override
@@ -159,7 +173,6 @@ public:
     void EnterCombat(Unit* /*victim*/)
     {
         DoZoneInCombat();
-        ScheduleCombatEvents(true);
         _events.ScheduleEvent(EVENT_ANUB_SUBMERGE, _submergeTimer);
         me->MonsterYell("I remember you... die!", LANG_UNIVERSAL, me);
     }
@@ -197,6 +210,7 @@ public:
             return;
 
         _events.Update(diff);
+        _scheduler.Update(diff);
 
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
@@ -325,6 +339,7 @@ public:
 
 private:
     EventMap _events;
+    TaskScheduler _scheduler;
     SummonList _summons;
     InstanceScript* _instance;
     bool _leechingSwarmCasted;

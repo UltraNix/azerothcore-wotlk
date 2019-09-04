@@ -29,7 +29,6 @@ public:
         });
         _summons.DespawnAll();
         _eventStarted = false;
-        DoCastSelf(SPELL_BLOOD_ORB_VISUAL);
         DoCastSelf(SPELL_WELL_OF_SOULS_VISUAL);
         me->SetImmuneToNPC(false);
         me->SetImmuneToPC(true);

@@ -69,8 +69,8 @@ enum DiabloLichKingData
     STAT_LK_FM_CLEAVE_TIMER         = 984
 };
 
-Position _diabloPosition { -0.41f, -209.65f, -82.17f, 3.37f };
-Position _valkyrSpawnPosition { -32.92f, -213.45f, -67.20f, 6.12f };
+Position const DiabloPosition { -26.65f, -211.73f, -83.34f, 3.18f };
+Position const ValkyrSpawnPosition { -32.92f, -213.45f, -67.20f, 6.12f };
 
 struct npc_hellforge_diablo_lichkingAI : public ScriptedAI
 {
@@ -85,6 +85,13 @@ public:
         me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, ITEM_LK_FROSTMOURNE);
         _secondPhase = false;
         me->SetCanMissSpells(false);
+
+        me->SetPassive();
+        Position pos;
+        me->GetNearPosition(pos, 10.f, 0.f);
+        me->SetWalk(true);
+        me->GetMotionMaster()->MovePoint(1, pos);
+        me->SetImmuneToPC(true);
     }
 
     void LoadStats()
@@ -153,10 +160,25 @@ public:
 
     }
 
+    void MovementInform(uint32 type, uint32 point) override
+    {
+        if (type == POINT_MOTION_TYPE && point == 1)
+        {
+            me->SetAggressive();
+            me->SetWalk(false);
+            me->SetImmuneToPC(false);
+            if (Player * victim = me->SelectNearestPlayer(200.f))
+                me->Attack(victim, false);
+        }
+    }
+
     void EnterEvadeMode() override
     {
         _summons.DespawnAll();
         ScriptedAI::EnterEvadeMode();
+
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->EnterEvadeMode();
     }
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override 
@@ -188,6 +210,11 @@ public:
     void JustSummoned(Creature* creature) override
     {
         _summons.Summon(creature);
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->JustSummoned(creature);
+
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->JustSummoned(creature);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -263,7 +290,7 @@ public:
             case EVENT_LK_SPAWN_VALKYR:
             {
                 me->MonsterYell("Val'kyr, your master calls! Take them to Diablo!", LANG_UNIVERSAL, me);
-                me->SummonCreature(NPC_LK_VALKYR_SHADOWGUARD, _valkyrSpawnPosition);
+                me->SummonCreature(NPC_LK_VALKYR_SHADOWGUARD, ValkyrSpawnPosition);
                 _events.RescheduleEvent(EVENT_LK_SPAWN_VALKYR, _spawnValkyrTimer);
                 break;
             }
@@ -369,7 +396,7 @@ struct npc_hellforge_diablo_valkyr_shadowguardAI : public ScriptedAI
                         target->SendMeleeAttackStop();
 
                         me->CastSpell(target, SPELL_VALKYR_CARRY, false);
-                        _destPoint.Relocate(_diabloPosition);
+                        _destPoint.Relocate(DiabloPosition);
                         _events.Reset();
                         _events.ScheduleEvent(EVENT_MOVE_TO_DROP_POS, 1000);
                     }
@@ -737,7 +764,7 @@ struct boss_hellforge_diablo_lk_defileAI : ScriptedAI
         {
             if (Aura * defile = me->GetAura(SPELL_LK_DEFILE_GROWTH_AURA))
             {
-                defile->SetStackAmount(defile->GetStackAmount() + 1);
+                defile->SetStackAmount(std::min(defile->GetStackAmount() + 1, 255));
             }   
             func.Repeat(3s);
         });

@@ -164,6 +164,8 @@ public:
     void JustSummoned(Creature* creature) override
     {
         _summons.Summon(creature);
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->JustSummoned(creature);
     }
 
     void DoAction(int32 action) override
@@ -464,7 +466,10 @@ public:
             {
                 me->CastCustomSpell(SPELL_YOGG_SHADOWCRASH, SPELLVALUE_SPELL_RANGE, 200, target, TRIGGERED_FULL_MASK);
                 if (Creature * crashTarget = me->SummonCreature(NPC_SHADOWCRASH_TARGET, target->GetPosition()))
-                    crashTarget->AI()->SetGUID(me->GetSummoner()->GetGUID());
+                {
+                    if (Creature * yogg = me->GetSummoner())
+                        crashTarget->AI()->SetGUID(yogg->GetGUID());
+                }
             }
             if (++_shadowCrashCount >= _shadowCrashMaxCount)
             {

@@ -18,7 +18,7 @@ enum DiabloKelthuzadData
     SPELL_KEL_FROSTBOLT_VOLLEY      = 69273,
     SPELL_KEL_DETONATE_MANA         = 27819,
     SPELL_KEL_SHADOW_FISSURE        = 27810,
-    SPELL_KEL_SHADOW_WORD_PAIN      = 72319,
+    SPELL_KEL_SHADOW_WORD_PAIN      = 57778,
     SPELL_KEL_FROST_FEVER           = 67934,
     SPELL_KEL_BLOOD_TAP             = 28470,
 
@@ -67,6 +67,13 @@ public:
         _addSummoned = false;
         LoadStats();
         me->SetCanMissSpells(false);
+        
+        me->SetPassive();
+        Position pos;
+        me->GetNearPosition(pos, 10.f, 0.f);
+        me->SetWalk(true);
+        me->GetMotionMaster()->MovePoint(1, pos);
+        me->SetImmuneToPC(true);
     }
 
     void LoadStats()
@@ -159,6 +166,18 @@ public:
         }
     }
 
+    void MovementInform(uint32 type, uint32 point) override
+    {
+        if (type == POINT_MOTION_TYPE && point == 1)
+        {
+            me->SetAggressive();
+            me->SetWalk(false);
+            me->SetImmuneToPC(false);
+            if (Player * victim = me->SelectNearestPlayer(200.f))
+                me->Attack(victim, false);
+        }
+    }
+
     void EnterEvadeMode() override
     {
         for (auto const& spellId : { SPELL_ICE_TOMB_DUMMY, SPELL_ICE_TOMB_UNTARGETABLE, SPELL_ICE_TOMB_DAMAGE, SPELL_ASPHYXIATION })
@@ -166,6 +185,9 @@ public:
         _summons.DespawnAll();
 
         ScriptedAI::EnterEvadeMode();
+
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->EnterEvadeMode();
     }
 
     void EnterCombat(Unit* /*victim*/) override
@@ -184,6 +206,8 @@ public:
     void JustSummoned(Creature* creature) override
     {
         _summons.Summon(creature);
+        if (Creature * diablo = me->GetSummoner())
+            diablo->AI()->JustSummoned(creature);
     }
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
