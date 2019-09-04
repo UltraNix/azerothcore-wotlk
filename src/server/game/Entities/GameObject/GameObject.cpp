@@ -283,14 +283,18 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     // set name for logs usage, doesn't affect anything ingame
     SetName(goinfo->name);
 
+    // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
+    SetGoType(GameobjectTypes(goinfo->type));
+
+    // GoState must be initialized before creating/updating model
+    // GameObjectModel::initialize takes gamebject go state to define its model phasemask, used in dynamictree calculations
+    SetGoState(go_state);
+    SetGoArtKit(artKit);
+
     SetDisplayId(goinfo->displayId);
 
     if (!m_model)
         m_model = GameObjectModel::Create(*this);
-    // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
-    SetGoType(GameobjectTypes(goinfo->type));
-    SetGoState(go_state);
-    SetGoArtKit(artKit);
 
     switch (goinfo->type)
     {
@@ -890,6 +894,9 @@ bool GameObject::LoadGameObjectFromDB(uint32 guid, Map* map, bool addToMap)
     float y = data->posY;
     float z = data->posZ;
     float ang = data->orientation;
+
+    if (entry >= 192028 && entry <= 192033)
+        printf("asdasd \n");
 
     uint32 animprogress = data->animprogress;
     GOState go_state = data->go_state;

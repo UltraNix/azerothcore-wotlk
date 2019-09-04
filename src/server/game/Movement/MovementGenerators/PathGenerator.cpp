@@ -1114,7 +1114,7 @@ void PathGenerator::UpdateAllowedPositionZ( G3D::Vector3 & pos )
 
         if ( m_context->CanSourceSwim() )
         {
-            maxAllowedZ = map->GetWaterOrGroundLevel( pos.x, pos.y, pos.z, &minAllowedZ, !m_context->CanSourceWaterWalk() );
+            maxAllowedZ = map->GetWaterOrGroundLevel( m_context->GetPhaseMask(), pos.x, pos.y, pos.z, &minAllowedZ, !m_context->CanSourceWaterWalk() );
         }
         else
         {

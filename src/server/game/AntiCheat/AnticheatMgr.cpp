@@ -96,7 +96,7 @@ void AnticheatMgr::TeleportPlaneHackDetection(Player* player, MovementInfo movem
 
     float x, y, z;
     player->GetPosition(x, y, z);
-    float ground_Z = player->GetMap()->GetHeight(x, y, z);
+    float ground_Z = player->GetMap()->GetHeight(player->GetPhaseMask(), x, y, z);
     float z_diff = fabs(ground_Z - z);
 
     // we are not really walking there

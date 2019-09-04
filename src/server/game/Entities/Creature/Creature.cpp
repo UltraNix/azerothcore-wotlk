@@ -1444,7 +1444,7 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap, bool gri
     // xinef: fix shitness from db
     if ((addToMap || gridLoad) && !data->overwrittenZ)
     {
-        float tz = map->GetHeight(data->posX, data->posY, data->posZ+1.0f, true);
+        float tz = map->GetHeight(data->phaseMask, data->posX, data->posY, data->posZ+1.0f, true);
         if (tz >= data->posZ && tz - data->posZ <= 1.0f)
             const_cast<CreatureData*>(data)->posZ = tz+0.1f;
 
