@@ -517,6 +517,10 @@ void Vehicle::RelocatePassengers()
             passenger->m_movementInfo.transport.pos.GetPosition(px, py, pz, po);
             CalculatePassengerPosition(px, py, pz, &po);
 
+            // If seat allows turning by itself, do not change orientation
+            if (itr->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING)
+                po = passenger->GetOrientation();
+
             //passenger->UpdatePosition(px, py, pz, po);
             seatRelocation.emplace_back(passenger, Position(px, py, pz, po));
         }

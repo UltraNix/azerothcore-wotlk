@@ -37,6 +37,7 @@
 #include "Chat.h"
 #include "BattlegroundMgr.h"
 #include "Language.h"
+#include "Vehicle.h"
 
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
@@ -343,7 +344,16 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
     {
         // T_POS ON VEHICLES!
         if (mover->GetVehicle())
+        {
+            float oldTransportOrientation = movementInfo.transport.pos.GetOrientation();
+
             movementInfo.transport.pos = mover->m_movementInfo.transport.pos;
+
+            if (Vehicle* vehicle = mover->GetVehicle())
+                if (VehicleSeatEntry const* seat = vehicle->GetSeatForPassenger(mover))
+                    if (seat->m_flags & VEHICLE_SEAT_FLAG_ALLOW_TURNING)
+                        movementInfo.transport.pos.SetOrientation(oldTransportOrientation);
+        }
 
         // transports size limited
         // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
