@@ -6228,9 +6228,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64147: // crush
             spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_15_YARDS;
             break;
-        case 60849: // Shadow crash for Hellforge Diablo
-            spellInfo->AttributesEx6 |= (SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE);
-            break;
         // ALGALON
          // Cosmic Smash (Algalon the Observer)
         case 62293:
@@ -8067,6 +8064,9 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         case 35831:
             spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            break;
+        case 60835: // Shadow crash for Hellforge Diablo
+            spellInfo->AttributesEx6 |= (SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE);
             break;
         }
 

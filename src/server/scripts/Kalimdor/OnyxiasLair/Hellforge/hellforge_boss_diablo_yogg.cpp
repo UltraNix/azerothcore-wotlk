@@ -507,6 +507,7 @@ public:
         me->setFaction(250);
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         DoCastSelf(SPELL_YOGG_VOID_ZONE_VISUAL);
+        me->SetSelectable(true);
     }
 
     void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override

@@ -484,6 +484,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         _napalmShellCount = 1;
         _readjustNapalmShells = false;
         _currentIntermissionBoss = 0;
+        _firstPull = false;
         LoadStats();
     }
 
@@ -1060,7 +1061,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     //! Spawn wave of adds when fight begins
     void SpawnInitialAdds()
     {
-        scheduler.Schedule(6s, [this](TaskContext func)
+        scheduler.Schedule(_firstPull ? 12s : 3s, [this](TaskContext func)
         {
             me->MonsterYell("Welcome to hell, where all belongs to me! Minions, erase them!", LANG_UNIVERSAL, me);
             for (auto pos : netherPortalSpawnPosition)
@@ -1530,6 +1531,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     {
         if (action == 1)
         {
+            _firstPull = true;
             me->MonsterYell("I am complete!", LANG_UNIVERSAL, me);
 
             if (Player * victim = me->SelectNearestPlayer(200.f))
@@ -1541,7 +1543,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                 {
                     case 0:
                     {
-                        auto players = instance->instance->GetPlayers();
+                        auto &players = instance->instance->GetPlayers();
                         for (auto i = players.begin(); i != players.end(); ++i)
                         {
                             Player* player = i->GetSource();
@@ -1551,7 +1553,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                             player->Yell("Fuuuuuuuuuuuuckkkkk!!!", LANG_UNIVERSAL);
                         }
 
-                        func.Repeat(1s);
+                        func.Repeat(4s);
                         break;
                     }
                     case 1:
@@ -1623,6 +1625,7 @@ private:
     uint32 _napalmShellCount;
     bool _readjustNapalmShells;
     uint32 _currentIntermissionBoss;
+    bool _firstPull;
 
     // Napalam Shell related
     uint32 _napalamShellStartPercent; // 150

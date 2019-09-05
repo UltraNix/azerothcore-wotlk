@@ -466,7 +466,7 @@ struct npc_ice_tombAI : public NullCreatureAI
                 case STAT_KEL_FROST_TOMB_ASPHYXIATION_TIMER:
                 {
                     _asphyxiationTimer = ref.second.StatValue;
-                    return;
+                    break;
                 }
             }
         }

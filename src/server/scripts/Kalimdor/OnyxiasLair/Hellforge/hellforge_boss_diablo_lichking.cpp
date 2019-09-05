@@ -421,12 +421,8 @@ struct npc_hellforge_diablo_valkyr_shadowguardAI : public ScriptedAI
                 }
                 dropped = true;
                 _events.Reset();
-                Player* p = NULL;
-                if (Vehicle * v = me->GetVehicleKit())
-                    if (Unit * passenger = v->GetPassenger(0))
-                        p = passenger->ToPlayer();
                 me->CastSpell((Unit*)NULL, SPELL_EJECT_ALL_PASSENGERS, false);
-                me->MonsterSay("Tu powinien byc diablo i zabic gracza", LANG_UNIVERSAL, 0);
+                me->MonsterSay("Order completed my king.", LANG_UNIVERSAL, 0);
                 me->DespawnOrUnsummon(1000);
                 break;
             }
@@ -717,6 +713,8 @@ struct boss_hellforge_diablo_lk_coldflameAI : public ScriptedAI
             func.Repeat(3s);
         });
         me->DespawnOrUnsummon(20s);
+        me->SetControlled(true, UNIT_STATE_ROOT);
+        me->SetPassive();
     }
 
     void SetGUID(uint64 guid, int32 /* = 0*/)

@@ -501,7 +501,6 @@ class spell_anubarak_penetraing_cold_AuraScript : public AuraScript
         if (!GetCaster() || !GetCaster()->IsInCombat() || !GetTarget() || GetTarget()->GetMapId() != 249 /* Onyxia's Lair - Hellforge */)
             return;
         Position pos = GetTarget()->GetPosition();
-        //pos.RelocateOffset({ 0.f, 0.f, 1.f });
         if (Creature * trigger = GetCaster()->SummonCreature(NPC_PERMAFROST_TRIGGER, pos))
             trigger->AI()->SetGUID(GetCaster()->GetGUID());
     }

@@ -1,4 +1,5 @@
 #include "ScriptMgr.h"
+#include "Group.h"
 
 constexpr uint32 PORTAL_DEFENDERS_COUNT = 8;
 
@@ -78,6 +79,11 @@ enum Spells
     SPELL_EARTH_QUAKE       = 33919,
     SPELL_THUNDER           = 23011,
     SPELL_FIRE_NOVA         = 23462,
+};
+
+enum Misc
+{
+    DIABLO_MAP_ID = 249
 };
 
 class worldzone_searing_gorge : public WorldMapZoneScript
@@ -265,12 +271,69 @@ struct npc_hellforge_portal_event_AI : public ScriptedAI
         visualsThunderTriggered = 0;
     }
 
+    void Reset()
+    {
+        _scheduler.CancelAll();
+        _canUsePortal = true;
+    }
+
     void MoveInLineOfSight(Unit* who) override
     {
-        if (!who || !who->IsPlayer() || who->ToPlayer()->IsGameMaster() || eventStarted)
+        if (!who || !who->IsPlayer() || who->ToPlayer()->IsGameMaster())
             return;
-        events.ScheduleEvent(EVENT_START_EVENT, 5s);
-        eventStarted = true;
+        if (!eventStarted)
+        {
+            events.ScheduleEvent(EVENT_START_EVENT, 5s);
+            eventStarted = true;
+        }
+        else
+            TeleportToDiablo(who);
+    }
+
+    void TeleportToDiablo(Unit* who)
+    {
+        if (!_canUsePortal)
+            return;
+
+        _canUsePortal = false;
+        _scheduler.Schedule(1s, [this](TaskContext /*func*/)
+        {
+            _canUsePortal = true;
+        });
+
+        Player* player = who->ToPlayer();
+        if (!player)
+            return;
+
+        if (me->GetDistance(player) > 2.5f)
+            return;
+
+        bool _canEnter = false;
+        Group* group = player->GetGroup();
+        _canEnter = group && group->isRaidGroup();
+
+        if (!_canEnter)
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("You must be in a raid group to enter this instance.");
+            return;
+        }
+
+        if (player->GetDifficulty(true) != RAID_DIFFICULTY_25MAN_HEROIC)
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("Wrong difficulty setting, please set 25 man heroic in order to enter Hellforge.");
+            return;
+        }
+
+        if (!player->IsBeingTeleported())
+        {
+            if (player->GetMapId() != DIABLO_MAP_ID)
+            {
+                if (!sMapMgr->CanPlayerEnter(DIABLO_MAP_ID, player, false))
+                    return;
+
+                player->TeleportTo(DIABLO_MAP_ID, { -176.27f, -205.96f, -66.43f, 6.17f });
+            }
+        }
     }
 
     void DoAction(int32 param) override
@@ -287,6 +350,7 @@ struct npc_hellforge_portal_event_AI : public ScriptedAI
             return;
 
         events.Update(diff);
+        _scheduler.Update(diff);
         switch (events.GetEvent())
         {
         case EVENT_START_EVENT:
@@ -381,6 +445,9 @@ private:
     uint32 visualsFireTriggered;
     uint32 visualsThunderTriggered;
     EventMap events;
+    TaskScheduler _scheduler;
+
+    bool _canUsePortal;
 };
 
 struct npc_hellforge_portal_defender_AI : public ScriptedAI

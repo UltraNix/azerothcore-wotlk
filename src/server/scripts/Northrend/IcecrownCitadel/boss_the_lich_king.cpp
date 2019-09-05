@@ -2363,13 +2363,14 @@ class npc_raging_spirit : public CreatureScript
                         case 985: // Health
                         {
                             me->SetMaxHealth(ref.second.StatValue);
+                            me->SetFullHealth();
                             break;
                         }
                         case 986: // Meele DMG
                         {
-                            // Divide by 10 (dmg_multiplier in creature_template)
-                            uint32 minDamage = ref.second.StatValue * ref.second.StatVariance / 10.f;
-                            uint32 maxDamage = ref.second.StatValue / 10.f;
+                            float dmgMultiplier = me->GetCreatureTemplate()->dmg_multiplier;
+                            uint32 minDamage = ref.second.StatValue * ref.second.StatVariance / dmgMultiplier;
+                            uint32 maxDamage = ref.second.StatValue / dmgMultiplier;
                             me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
                             me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
                             me->UpdateDamagePhysical(BASE_ATTACK);
@@ -2506,6 +2507,9 @@ class spell_the_lich_king_defile : public SpellScriptLoader
                 // cannot stack on the same aura object increasing the stack count
                 if (GetCaster()->GetMapId() == 249 /* Onyxia's Lair - Hellforge */)
                 {
+                    HellforgeStatValues val;
+                    sWorldCache.GetStatValue(994, val); // Defile DMG
+                    SetHitDamage(int32(val.StatValue * GetCaster()->GetFloatValue(OBJECT_FIELD_SCALE_X)));
                     if (Aura * aura = GetCaster()->GetAura(SPELL_DEFILE_GROW))
                     {
                         if (uint8 stackAmount = aura->GetStackAmount())
