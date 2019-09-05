@@ -584,28 +584,37 @@ void BattlegroundSA::DefendersPortalTeleport(GameObject* portal, Player* plr)
     if (plr->GetTeamId() == Attackers)
         return;
 
-    uint32 portal_num = 0;
+    uint32 portal_num = 4; // Gold
+
     //get it via X
     switch( (uint32)portal->GetPositionX() )
     {
-    case 1394:
-        portal_num = 0;
-        break;
-    case 1065:
-        portal_num = 1;
-        break;
-    case 1468:
-        portal_num = 2;
-        break;
-    case 1255:
-        portal_num = 3;
-        break;
-    case 1216:
-        portal_num = 4;
-        break;
+        case 1394: // Green
+            if (GateStatus[BG_SA_GREEN_GATE] != BG_SA_GATE_DESTROYED)
+            {
+                portal_num = 0;
+                break;
+            }
+            // no break;
+        case 1216: // Purple
+            if (GateStatus[BG_SA_PURPLE_GATE] != BG_SA_GATE_DESTROYED)
+                portal_num = 1;
+            break;
+        case 1468: // Blue
+            if (GateStatus[BG_SA_BLUE_GATE] != BG_SA_GATE_DESTROYED)
+            {
+                portal_num = 2;
+                break;
+            }
+            // no break;
+        case 1255: // Red
+            if (GateStatus[BG_SA_RED_GATE] != BG_SA_GATE_DESTROYED)
+                portal_num = 3;
+            break;
+        
     }
 
-    plr->TeleportTo( plr->GetMapId(), SOTADefPortalDest[portal_num][0], SOTADefPortalDest[portal_num][1], SOTADefPortalDest[portal_num][2], SOTADefPortalDest[portal_num][3], TELE_TO_SPELL );
+    plr->TeleportTo( plr->GetMapId(), SOTADefPortalDest[portal_num], TELE_TO_SPELL );
 }
 
 void BattlegroundSA::EventPlayerDamagedGO(Player* /*player*/, GameObject* go, uint32 eventType)

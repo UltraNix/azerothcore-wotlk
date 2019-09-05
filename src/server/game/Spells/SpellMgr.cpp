@@ -8068,6 +8068,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 60835: // Shadow crash for Hellforge Diablo
             spellInfo->AttributesEx6 |= (SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE);
             break;
+        case 54643: // Teleport
+            spellInfo->Effect[EFFECT_1] = 0;
+            break;
         }
 
         //////////////////////////////////////////
