@@ -449,6 +449,8 @@ void BattlegroundEY::EventTeamLostPoint(TeamId teamId, uint32 point)
 
     _capturePointInfo[point]._ownerTeamId = TEAM_NEUTRAL;
 
+    RelocateDeadPlayers(BgCreatures[point]);
+
     UpdatePointsIcons(point);
     UpdatePointsCount();
     DelCreature(BG_EY_TRIGGER_FEL_REAVER + point);

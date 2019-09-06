@@ -54,7 +54,7 @@ enum BG_EY_WorldStates
 enum BG_EY_ProgressBarConsts
 {
     BG_EY_POINT_MAX_CAPTURERS_COUNT     = 5,
-    BG_EY_POINT_RADIUS                  = 50,
+    BG_EY_POINT_RADIUS                  = 60,
     BG_EY_PROGRESS_BAR_DONT_SHOW        = 0,
     BG_EY_PROGRESS_BAR_SHOW             = 1,
     BG_EY_PROGRESS_BAR_PERCENT_GREY     = 40,
