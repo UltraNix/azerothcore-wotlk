@@ -9,6 +9,9 @@ enum DiabloWandererData
     SPELL_WELL_OF_SOULS_VISUAL  = 68855,
     SPELL_HUGE_EXPLOSION        = 74550,
     SPELL_DRAIN_SOUL_VISUAL     = 60857,
+
+    TYRAEL_GOSSIP               = 1120000,
+    QUEST_VISIT_IN_HELL         = 31006
 };
 
 struct npc_hellforge_diablo_wandererAI : public ScriptedAI
@@ -170,8 +173,68 @@ struct npc_hellforge_diablo_wanderer_soulstoneAI : NullCreatureAI
 
 };
 
+struct npc_dalaran_tyrael : public CreatureScript
+{
+    npc_dalaran_tyrael() : CreatureScript("npc_dalaran_tyrael") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    { 
+        switch (player->GetQuestStatus(QUEST_VISIT_IN_HELL))
+        {
+            case QUEST_STATUS_NONE:
+            {
+                player->SEND_GOSSIP_MENU(TYRAEL_GOSSIP, creature->GetGUID());
+                break;
+            }
+            case QUEST_STATUS_INCOMPLETE:
+            {
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Tell me", GOSSIP_SENDER_MAIN, 1);
+                player->SEND_GOSSIP_MENU(TYRAEL_GOSSIP + 1, creature->GetGUID());
+                break;
+            }
+            case QUEST_STATUS_COMPLETE:
+            {
+                player->SEND_GOSSIP_MENU(TYRAEL_GOSSIP + 3, creature->GetGUID());
+                break;
+            }
+        }
+        return true; 
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)  override
+    { 
+        player->PlayerTalkClass->ClearMenus();
+        if (action != 1)
+            return true;
+
+        if (player->GetQuestStatus(QUEST_VISIT_IN_HELL) == QUEST_STATUS_INCOMPLETE)
+            player->AreaExploredOrEventHappens(QUEST_VISIT_IN_HELL);
+
+        player->SEND_GOSSIP_MENU(TYRAEL_GOSSIP + 2, creature->GetGUID());
+
+        return true;
+    }
+
+    struct npc_dalaran_tyraelAI : public ScriptedAI
+    {
+        npc_dalaran_tyraelAI(Creature* creature) : ScriptedAI(creature) {}
+
+        bool CanBeSeen(Player const* player)
+        {
+            return player->IsGameMaster() || player->GetQuestStatus(QUEST_VISIT_IN_HELL) != QUEST_STATUS_REWARDED;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_dalaran_tyraelAI(creature);
+    }
+
+};
+
 void AddSC_hellforge_boss_diablo_wanderer()
 {
     new CreatureAILoader<npc_hellforge_diablo_wandererAI>("npc_hellforge_diablo_wanderer");
     new CreatureAILoader<npc_hellforge_diablo_wanderer_soulstoneAI>("npc_hellforge_diablo_wanderer_soulstone");
+    new npc_dalaran_tyrael();
 }

@@ -53,6 +53,7 @@ enum Events
     EVENT_VISUAL_THUNDER    = 8,
     EVENT_VISUAL            = 9,
     EVENT_NEXT_VISUAL_FIRE  = 10,
+    EVENT_RESET_EVENT       = 11,
 };
 
 enum WorldzoneData
@@ -189,57 +190,86 @@ public:
         {
             switch (eventId)
             {
-            case EVENT_START_EVENT:
-                if (Unit * unit = sObjectAccessor->FindUnit(leaderGUID))
+                case EVENT_START_EVENT:
                 {
-                    if (unit->IsAIEnabled)
-                        unit->GetAI()->DoAction(1);
+                    if (Unit * unit = sObjectAccessor->FindUnit(leaderGUID))
+                    {
+                        if (unit->IsAIEnabled)
+                            unit->GetAI()->DoAction(1);
+                    }
+                    break;
                 }
-                break;
-            case EVENT_START_EVENT2:
-                for (auto& attacker : attackersGuids)
+                case EVENT_START_EVENT2:
                 {
-                    if (Unit * unit = sObjectAccessor->FindUnit(attacker))
-                        unit->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY_UNARMED);
+                    for (auto& attacker : attackersGuids)
+                    {
+                        if (Unit * unit = sObjectAccessor->FindUnit(attacker))
+                            unit->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY_UNARMED);
+                    }
+                    break;
                 }
-                break;
-            case EVENT_START_EVENT3:
-                for (auto& attacker : attackersGuids)
+                case EVENT_START_EVENT3:
                 {
-                    if (Unit * unit = sObjectAccessor->FindUnit(attacker))
-                        if (Creature * creature = unit->ToCreature())
-                        {
-                            creature->SetReactState(REACT_AGGRESSIVE);
-                            if (Unit * victim = creature->FindNearestCreature(NPC_DEFENDER, 50.f))
+                    for (auto& attacker : attackersGuids)
+                    {
+                        if (Unit * unit = sObjectAccessor->FindUnit(attacker))
+                            if (Creature * creature = unit->ToCreature())
                             {
-                                creature->CombatStart(victim);
-                                creature->getThreatManager().addThreat(victim, 1000.f);
+                                unit->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                                creature->SetReactState(REACT_AGGRESSIVE);
+                                if (Unit * victim = creature->FindNearestCreature(NPC_DEFENDER, 50.f))
+                                {
+                                    creature->CombatStart(victim);
+                                    creature->getThreatManager().addThreat(victim, 1000.f);
+                                }
                             }
-                        }
-                }
+                    }
 
-                for (auto& defender : defendersGuids)
-                {
-                    if (Unit * unit = sObjectAccessor->FindUnit(defender))
-                        if (Creature * creature = unit->ToCreature())
-                        {
-                            creature->SetReactState(REACT_AGGRESSIVE);
-                            if (Unit * victim = creature->FindNearestCreature(NPC_ATTACKER, 50.f))
+                    for (auto& defender : defendersGuids)
+                    {
+                        if (Unit * unit = sObjectAccessor->FindUnit(defender))
+                            if (Creature * creature = unit->ToCreature())
                             {
-                                creature->CombatStart(victim);
-                                creature->getThreatManager().addThreat(victim, 1000.f);
+                                creature->SetReactState(REACT_AGGRESSIVE);
+                                if (Unit * victim = creature->FindNearestCreature(NPC_ATTACKER, 50.f))
+                                {
+                                    creature->CombatStart(victim);
+                                    creature->getThreatManager().addThreat(victim, 1000.f);
+                                }
                             }
-                        }
+                    }
+                    eventStarted = true;
+                    break;
                 }
-                eventStarted = true;
-                break;
-            case EVENT_REVIVE_ATTACKER:
-                if (!deadAttackers.empty())
-                    deadAttackers.pop_back();
-                break;
-            case EVENT_NEXT_VISUAL_FIRE:
-                visualFireIndex = (visualFireIndex + 1) % VISUAL_FIRE_TRIGGERS_COUNT;
-                break;
+                case EVENT_REVIVE_ATTACKER:
+                {
+                    if (!deadAttackers.empty())
+                        deadAttackers.pop_back();
+                    break;
+                }
+                case EVENT_NEXT_VISUAL_FIRE:
+                {
+                    visualFireIndex = (visualFireIndex + 1) % VISUAL_FIRE_TRIGGERS_COUNT;
+                    break;
+                }
+                case EVENT_RESET_EVENT:
+                {
+                    eventStarted = false;
+                    visualFireIndex = 0;
+                    defendersGuids.clear();
+                    visualFireTriggers.clear();
+                    for (auto& attacker : attackersGuids)
+                    {
+                        if (Unit * unit = sObjectAccessor->FindUnit(attacker))
+                            if (Creature * creature = unit->ToCreature())
+                            {
+                                creature->SetPassive();
+                                if(creature->IsAlive())
+                                    creature->GetMotionMaster()->MoveTargetedHome();
+                            }
+                    }
+                    break;
+                }
             }
         }
 
@@ -264,17 +294,27 @@ public:
 struct npc_hellforge_portal_event_AI : public ScriptedAI
 {
 
-    npc_hellforge_portal_event_AI(Creature* creature) : ScriptedAI(creature)
+    npc_hellforge_portal_event_AI(Creature* creature) : ScriptedAI(creature), _summons(creature) { }
+
+    void Reset()
     {
+        if (eventStarted)
+        {
+            if (ZoneScript * zoneScript = me->GetZoneScript())
+                zoneScript->ProcessEvent(nullptr, EVENT_RESET_EVENT);
+        }
+        _summons.DespawnAll();
+        _scheduler.CancelAll();
+        events.Reset();
+        _canUsePortal = false;
         eventStarted = false;
         visualsFireTriggered = 0;
         visualsThunderTriggered = 0;
     }
 
-    void Reset()
+    void JustSummoned(Creature* summon) override
     {
-        _scheduler.CancelAll();
-        _canUsePortal = true;
+        _summons.Summon(summon);
     }
 
     void MoveInLineOfSight(Unit* who) override
@@ -285,6 +325,10 @@ struct npc_hellforge_portal_event_AI : public ScriptedAI
         {
             events.ScheduleEvent(EVENT_START_EVENT, 5s);
             eventStarted = true;
+            _scheduler.Schedule(10s, [&](TaskContext /*func*/)
+            {
+                _canUsePortal = true;
+            });
         }
         else
             TeleportToDiablo(who);
@@ -353,66 +397,93 @@ struct npc_hellforge_portal_event_AI : public ScriptedAI
         _scheduler.Update(diff);
         switch (events.GetEvent())
         {
-        case EVENT_START_EVENT:
-            StartEvent();
-            events.PopEvent();
-            break;
-        case EVENT_NEW_DEFENDER:
-            SummonDefender(0);
-            events.PopEvent();
-            break;
-        case EVENT_EARTH_QUAKE:
-            me->CastCustomSpell(SPELL_EARTH_QUAKE, SPELLVALUE_BASE_POINT1, 0, nullptr, TRIGGERED_FULL_MASK);
-            events.RescheduleEvent(EVENT_EARTH_QUAKE, 30s, 60s);
-            break;
-        case EVENT_VISUAL_FIRE:
-        {
-            uint32 count = !visualsFireTriggered ? 3 : 2;
-            for (uint32 i = 0; i < count; ++i)
+            case EVENT_START_EVENT:
+            {
+                StartEvent();
+                events.PopEvent();
+                break;
+            }
+            case EVENT_NEW_DEFENDER:
+            {
+                SummonDefender(0);
+                events.PopEvent();
+                break;
+            }
+            case EVENT_EARTH_QUAKE:
+            {
+                me->CastCustomSpell(SPELL_EARTH_QUAKE, SPELLVALUE_BASE_POINT1, 0, nullptr, TRIGGERED_FULL_MASK);
+                events.RescheduleEvent(EVENT_EARTH_QUAKE, 30s, 60s);
+                break;
+            }
+            case EVENT_VISUAL_FIRE:
+            {
+                uint32 count = !visualsFireTriggered ? 3 : 2;
+                for (uint32 i = 0; i < count; ++i)
+                {
+                    if (ZoneScript * zoneScript = me->GetZoneScript())
+                    {
+                        if (Unit * unit = sObjectAccessor->FindUnit(zoneScript->GetData64(NPC_VISUAL_FIRE_TRIGGER)))
+                        {
+                            me->CastCustomSpell(SPELL_FIRE_VISUAL, SPELLVALUE_BASE_POINT0, 0, unit, TRIGGERED_FULL_MASK);
+
+                            CustomSpellValues vals;
+                            vals.AddSpellMod(SPELLVALUE_RADIUS_MOD, 800);
+                            vals.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
+                            unit->CastCustomSpell(SPELL_FIRE_NOVA, vals, unit, TRIGGERED_FULL_MASK);
+                        }
+                        zoneScript->ProcessEvent(nullptr, EVENT_NEXT_VISUAL_FIRE);
+                    }
+                }
+                if (visualsFireTriggered >= (VISUAL_FIRE_TRIGGERS_COUNT / 2) - 1)
+                {
+                    events.RescheduleEvent(EVENT_VISUAL_FIRE, 10s, 20s);
+                    visualsFireTriggered = 0;
+                }
+                else
+                {
+                    events.RescheduleEvent(EVENT_VISUAL_FIRE, 250ms);
+                    ++visualsFireTriggered;
+                }
+                break;
+            }
+            case EVENT_VISUAL_THUNDER:
             {
                 if (ZoneScript * zoneScript = me->GetZoneScript())
                 {
-                    if (Unit * unit = sObjectAccessor->FindUnit(zoneScript->GetData64(NPC_VISUAL_FIRE_TRIGGER)))
+                    if (Unit * unit = sObjectAccessor->FindUnit(zoneScript->GetData64(NPC_VISUAL_THUNDER_TRIGGER)))
                     {
-                        me->CastCustomSpell(SPELL_FIRE_VISUAL, SPELLVALUE_BASE_POINT0, 0, unit, TRIGGERED_FULL_MASK);
-
-                        CustomSpellValues vals;
-                        vals.AddSpellMod(SPELLVALUE_RADIUS_MOD, 800);
-                        vals.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
-                        unit->CastCustomSpell(SPELL_FIRE_NOVA, vals, unit, TRIGGERED_FULL_MASK);
+                        unit->CastCustomSpell(SPELL_THUNDER, SPELLVALUE_BASE_POINT0, 0);
                     }
-                    zoneScript->ProcessEvent(nullptr, EVENT_NEXT_VISUAL_FIRE);
                 }
+                events.RescheduleEvent(EVENT_VISUAL_THUNDER, 30s, 60s);
+                break;
             }
-            if (visualsFireTriggered >= (VISUAL_FIRE_TRIGGERS_COUNT / 2) - 1)
+            case EVENT_RESET_EVENT:
             {
-                events.RescheduleEvent(EVENT_VISUAL_FIRE, 10s, 20s);
-                visualsFireTriggered = 0;
-            }
-            else
-            {
-                events.RescheduleEvent(EVENT_VISUAL_FIRE, 250ms);
-                ++visualsFireTriggered;
-            }
-            break;
-        }
-        case EVENT_VISUAL_THUNDER:
-            if (ZoneScript * zoneScript = me->GetZoneScript())
-            {
-                if (Unit * unit = sObjectAccessor->FindUnit(zoneScript->GetData64(NPC_VISUAL_THUNDER_TRIGGER)))
+                std::list<Player*> _players;
+                float _range = 65.f;
+                Trinity::AnyPlayerInObjectRangeCheck checker(me, _range);
+                Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, _players, checker);
+                me->VisitNearbyWorldObject(_range, searcher);
+
+                _players.remove_if([](Player* obj)
                 {
-                    unit->CastCustomSpell(SPELL_THUNDER, SPELLVALUE_BASE_POINT0, 0);
-                }
+                    return obj->IsGameMaster();
+                });
+
+                if (_players.empty())
+                    Reset();
+
+                events.RescheduleEvent(EVENT_RESET_EVENT, 2min);
+                break;
             }
-            events.RescheduleEvent(EVENT_VISUAL_THUNDER, 30s, 60s);
-            break;
         }
     }
 
     void StartEvent()
     {
         for (uint32 i = 0; i < PORTAL_DEFENDERS_COUNT; ++i)
-            SummonDefender(i);
+            SummonDefender(i, true);
 
         for (uint32 i = 0; i < VISUAL_FIRE_TRIGGERS_COUNT; ++i)
             me->SummonCreature(NPC_VISUAL_FIRE_TRIGGER, VisualFireTriggersPosition[i]);
@@ -427,12 +498,15 @@ struct npc_hellforge_portal_event_AI : public ScriptedAI
         events.ScheduleEvent(EVENT_VISUAL_FIRE, 3s);
         events.ScheduleEvent(EVENT_VISUAL_THUNDER, 4s);
         events.ScheduleEvent(EVENT_EARTH_QUAKE, 30s, 60s);
+        events.ScheduleEvent(EVENT_RESET_EVENT, 2min);
     }
 
-    void SummonDefender(uint32 positionId)
+    void SummonDefender(uint32 positionId, bool first = false)
     {
         if (Creature * creature = me->SummonCreature(NPC_DEFENDER, me->GetPosition()))
         {
+            if (first)
+                creature->SetPassive();
             Position pos = PortalDefendersPosition[positionId];
             creature->MonsterMoveWithSpeed(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 3);
             creature->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_READY_UNARMED);
@@ -446,6 +520,7 @@ private:
     uint32 visualsThunderTriggered;
     EventMap events;
     TaskScheduler _scheduler;
+    SummonList _summons;
 
     bool _canUsePortal;
 };
@@ -548,7 +623,11 @@ struct npc_hellforge_portal_attacker_leader_AI : public ScriptedAI
                 if (Unit * unit = sObjectAccessor->FindUnit(zonescript->GetData64(DATA_DEAD_ATTACKER)))
                 {
                     if (unit->IsCreature())
+                    {
                         unit->ToCreature()->Respawn();
+                        if (!zonescript->GetData(DATA_EVENT_STARTED))
+                            unit->ToCreature()->SetPassive();
+                    }
                     me->MonsterSay("This death cannot be in vain! Push harder!", LANG_UNIVERSAL, nullptr);
                     me->CastSpell(unit, SPELL_REVIVE_VISUAL);
                     zonescript->ProcessEvent(nullptr, EVENT_REVIVE_ATTACKER);

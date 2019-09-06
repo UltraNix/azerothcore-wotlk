@@ -288,6 +288,8 @@ public:
             }
             case EVENT_ANUB_SUBMERGE:
             {
+                me->RemoveAurasDueToSpell(SPELL_ANUB_SELF_ROOT);
+                me->DisableRotate(false);
                 me->MonsterYell("Auum na-l ak-k-k-k, isshhh. Devour...", LANG_UNIVERSAL, me);
                 me->SetSelectable(false);
                 DoCastSelf(SPELL_ANUB_SUBMERGE);

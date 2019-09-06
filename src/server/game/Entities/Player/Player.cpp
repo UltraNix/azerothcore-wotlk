@@ -5775,6 +5775,15 @@ void Player::RepopAtGraveyard()
         return;
     }
 
+    if (GetMapId() == 249 && GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC) // Diablo
+    {
+        m_deathTimer = 0;
+        ResurrectPlayer(1.0f);
+        SpawnCorpseBones();
+        TeleportTo(0, { -6450.60f, -1113.51f, 308.02f, 2.50f });
+        return;
+    }
+
     if (GetMapId() == 530 && GetZoneId() == 3522 && GetAreaId() == 3785)
     {
         TeleportTo(530, 2296.352295f, 7023.231445f, 364.117401f, 2.836073f);
