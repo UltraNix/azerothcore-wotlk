@@ -918,7 +918,6 @@ struct npc_boss_six_diablo_AI : public BossAI
             if (Creature* trigger = me->SummonCreature(NPC_BOSS_SIX_NAPALAM_SHELL_TRIGGER, spawnPosition))
             {
                 trigger->SetSelectable(false);
-                trigger->SetImmuneToPC(true);
                 trigger->SetCanFly(true);
                 trigger->SetDisableGravity(true);
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0U, [this](Unit* object)
@@ -931,10 +930,13 @@ struct npc_boss_six_diablo_AI : public BossAI
                 });
 
                 if (target)
+                {
                     //! damage handled via spellscript, this is triggered spell
-                    trigger->CastSpell(target, SPELL_DIABLO_NAPALM_SHELL, true, NullItemRef, (AuraEffect*)nullptr, me->GetGUID());
+                    trigger->CastSpell(target, SPELL_DIABLO_NAPALM_SHELL, true);
+                    trigger->AI()->SetGUID(target->GetGUID());
+                }
 
-                trigger->DespawnOrUnsummon(8s);
+                trigger->DespawnOrUnsummon(20s);
             };
         }
     }
@@ -1574,7 +1576,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
 
         // Don't summon portal on Yogg-Saron spawn
-        if (_currentIntermissionBoss != 261011) 
+        if (_currentIntermissionBoss != 261011)
         {
             if (Creature * trigger = me->SummonCreature(NPC_WORLD_TRIGGER, GetIntermissionSpawnPosition(), TEMPSUMMON_TIMED_DESPAWN, 10000))
             {
@@ -2460,9 +2462,9 @@ class spell_boss_diablo_armageddon_AuraScript : public AuraScript
 
     void CalcPeriodic(AuraEffect const* aurEff, bool& isPeriodic, int32& amplitude)
     {
-        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        if (GetCaster() && GetCaster()->GetMapId() == DIABLO_MAP_ID)
         {
-            InstanceScript* instance = GetTarget()->GetInstanceScript();
+            InstanceScript* instance = GetCaster()->GetInstanceScript();
             if (!instance)
                 return;
 
@@ -2471,7 +2473,7 @@ class spell_boss_diablo_armageddon_AuraScript : public AuraScript
                 return;
 
             isPeriodic = true;
-            amplitude = diablo->AI()->GetData(STAT_DIABLO_ARMAGEDDON_DURATION);
+            amplitude = diablo->AI()->GetData(STAT_DIABLO_ARMAGEDDON_DURATION) - 500;
         }
     }
 
@@ -2546,6 +2548,7 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
     npc_boss_diablo_fire_elementals(Creature* creature) : NullCreatureAI(creature)
     {
         LoadStats();
+        me->SetCanMissSpells(false);
     }
 
     void LoadStats()
@@ -2626,6 +2629,7 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
 
         val.AddSpellMod(SPELLVALUE_BASE_POINT0, _elementalExplosionDamage);
         val.AddSpellMod(SPELLVALUE_RADIUS_MOD, _elementalExplosionRadiusRatio);
+        val.AddSpellMod(SPELLVALUE_TARGET_PLAYERS_ONLY, 1);
         me->CastCustomSpell(SPELL_DIABLO_ELEMENTAL_ADD_EXPLODE, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
         _scheduler.Schedule(1s, [this](TaskContext)
         {
@@ -2708,7 +2712,7 @@ class spell_diablo_siphon_soul : public AuraScript
 
     void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
     {
-        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        if (GetCaster() && GetCaster()->GetMapId() == DIABLO_MAP_ID)
         {
             isPeriodic = true;
             amplitude = 1500;
@@ -2754,6 +2758,7 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
         ScriptedAI::Reset();
         _scheduler.CancelAll();
         LoadStats();
+        _scheduler.ClearValidator();
     }
 
     void LoadStats()
@@ -2806,14 +2811,18 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
 
             });
 
-            if (target)
+            bool const IsCasting = me->IsCasting();
+            if (target && !IsCasting)
             {
                 CustomSpellValues val;
                 val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 300.f);
                 me->CastCustomSpell(SPELL_DIABLO_DEVOURING_FLAME, val, target);
             }
 
-            func.Repeat(Seconds(_shadowDrakeDevouringFlameTimer));
+            if (IsCasting)
+                func.Repeat(1s);
+            else
+                func.Repeat(Seconds(_shadowDrakeDevouringFlameTimer));
         });
 
         _scheduler.Schedule(Seconds(_voidBlastTimer), [this](TaskContext func)
@@ -2827,14 +2836,19 @@ struct npc_boss_diablo_shadow_drake : public ScriptedAI
 
             });
 
-            if (target)
+            bool const IsCasting = me->IsCasting();
+            if (target && !IsCasting)
             {
                 CustomSpellValues val;
                 val.AddSpellMod(SPELLVALUE_SPELL_RANGE, 500);
                 val.AddSpellMod(SPELLVALUE_BASE_POINT0, _voidblastDamage);
                 me->CastCustomSpell(SPELL_DIABLO_SHADOW_DRAKE_VOID_BLAST, val, target);
-                func.Repeat(Seconds(_voidBlastTimer));
             }
+
+            if (IsCasting)
+                func.Repeat(Seconds(_voidBlastTimer));
+            else
+                func.Repeat(Seconds(_voidBlastTimer));
         });
     }
 
@@ -2966,7 +2980,6 @@ class spell_lightning_marker_visual : public AuraScript
                 if (player->HasAura(SPELL_DIABLO_BUFFETTING_WINDS))
                     continue;
 
-
                 player->KnockbackFrom(player->GetPositionX(), player->GetPositionY(), 0.1f, 45.f);
                 player->CastSpell(player, SPELL_DIABLO_BUFFETTING_WINDS, true);
             }
@@ -2985,47 +2998,66 @@ class spell_boss_diablo_napalm_shell_damage : public SpellScript
 
     void HandleCast(SpellEffIndex effIndex)
     {
-        PreventHitDefaultEffect(EFFECT_0);
-        if (!GetExplTargetUnit())
-            return;
-
-        if (GetCaster())
-            return;
-
-        uint32 triggered_spell_id = GetSpellInfo()->Effects[effIndex].TriggerSpell;
-
-        Position pos = GetExplTargetDest()->GetPosition();
-        if (GetCaster()->GetMapId() == DIABLO_MAP_ID)
+        if (GetCaster() && GetCaster()->IsCreature() && GetCaster()->GetMapId() == DIABLO_MAP_ID)
         {
-            InstanceScript* instance = GetCaster()->GetInstanceScript();
-            if (!instance)
-                return;
+            PreventHitDefaultEffect(EFFECT_0);
+            uint32 triggered_spell_id = GetSpellInfo()->Effects[effIndex].TriggerSpell;
 
-            Creature* diablo = instance->GetCreature(DATA_DIABLO);
-            if (!diablo)
-                return;
+            if (GetCaster()->GetMapId() == DIABLO_MAP_ID)
+            {
+                InstanceScript* instance = GetCaster()->GetInstanceScript();
+                if (!instance)
+                    return;
 
-            CustomSpellValues val;
-            HellforgeStatValues stat;
-            sWorldCache.GetStatValue(STAT_DIABLO_NAPALAM_SHELL_DAMAGE, stat);
-            uint32 damage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+                Creature* diablo = instance->GetCreature(DATA_DIABLO);
+                if (!diablo)
+                    return;
 
-            sWorldCache.GetStatValue(STAT_DIABLO_NAPALM_SHELL_PERIODIC, stat);
-            uint32 periodicDamage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+                CustomSpellValues val;
+                HellforgeStatValues stat;
+                sWorldCache.GetStatValue(STAT_DIABLO_NAPALAM_SHELL_DAMAGE, stat);
+                uint32 damage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
 
-            val.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
-            val.AddSpellMod(SPELLVALUE_BASE_POINT1, periodicDamage);
-            val.AddSpellMod(SPELLVALUE_RADIUS_MOD, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO));
-            GetCaster()->CastCustomSpell(triggered_spell_id, val, GetExplTargetUnit(), TRIGGERED_FULL_MASK);
+                sWorldCache.GetStatValue(STAT_DIABLO_NAPALM_SHELL_PERIODIC, stat);
+                uint32 periodicDamage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+
+                val.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
+                val.AddSpellMod(SPELLVALUE_BASE_POINT1, periodicDamage);
+                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO));
+                Unit* target = ObjectAccessor::GetUnit(*GetCaster(), GetCaster()->ToCreature()->AI()->GetGUID());
+                if (target)
+                    GetCaster()->CastCustomSpell(triggered_spell_id, val, target, TRIGGERED_FULL_MASK);
+            }
         }
-        else
-            GetCaster()->CastSpell(GetExplTargetUnit(), triggered_spell_id, true);
     }
 
     void Register() override
     {
         OnEffectHit += SpellEffectFn(spell_boss_diablo_napalm_shell_damage::HandleCast, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
     }
+};
+
+struct npc_diablo_napalm_shell_trigger : public NullCreatureAI
+{
+    npc_diablo_napalm_shell_trigger(Creature* creature) : NullCreatureAI(creature) { }
+
+    void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        damage = 0;
+    }
+
+    void UpdateAI(uint32 /*diff*/) override { }
+    void SetGUID(uint64 guid, int32 /*=data*/) override
+    {
+        _cachedTargetGUID = guid;
+    }
+
+    uint64 GetGUID(int32 /*=data*/) const override
+    {
+        return _cachedTargetGUID;
+    }
+private:
+    uint64 _cachedTargetGUID;
 };
 
 constexpr uint32 SPELL_DEVOURING_FLAME_TRIGGERED{ 64733 };
@@ -3069,7 +3101,7 @@ class spell_diablo_conversion_beam : public AuraScript
 
     void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
     {
-        if (GetTarget() && GetTarget()->GetMapId() == DIABLO_MAP_ID)
+        if (GetCaster() && GetCaster()->GetMapId() == DIABLO_MAP_ID)
         {
             isPeriodic = true;
             amplitude = 500;
@@ -3095,6 +3127,7 @@ void AddSC_hellforge_boss_six()
     new CreatureAILoader<npc_boss_diablo_fire_elementals>("npc_boss_diablo_fire_elementals");
     new CreatureAILoader<npc_boss_player_flame_sphere>("npc_boss_player_flame_sphere");
     new CreatureAILoader<npc_boss_diablo_shadow_drake>("npc_boss_diablo_shadow_drake");
+    new CreatureAILoader<npc_diablo_napalm_shell_trigger>("npc_diablo_napalm_shell_trigger");
 
     new AuraScriptLoaderEx<spell_boss_diablo_nether_portal_AuraScript>("spell_boss_diablo_nether_portal");
     new SpellScriptLoaderEx<spell_boss_six_diablo_meteor>("spell_boss_six_diablo_meteor");

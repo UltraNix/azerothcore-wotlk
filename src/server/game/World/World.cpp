@@ -1869,7 +1869,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr->ReturnOrDeleteOldMails(false);
 
     sLog->outString("Loading Autobroadcasts...");
-    LoadAutobroadcasts();
+    //LoadAutobroadcasts();
 
     sLog->outString("Loading Ip2nation...");
     LoadIp2nation();

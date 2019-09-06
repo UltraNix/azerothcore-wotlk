@@ -25,7 +25,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 (171, 6, 1.0, "Pheonix first timer"),
 (172, 30, 1.0, "Pheonix second timer, after first one finishes cleanly"),
 (173, 10, 1.0, "Firebeam timer after successul or not shadow realm"),
-(174, 1, 0.9, "How fast the ball of flames are traveling, uses move run as default"),
+(174, 1, 0.7, "How fast the ball of flames are traveling, uses move run as default"),
 (175, 50000, 1.0, "Plasma ray damage"),
 (176, 35, 1.0, "Timer, in seconds, when diablo starts casting his wipe spell that has to be interrupted"),
 (177, 15000, 1.0, "Diablo wipe spell cast time, in milliseconds"),
@@ -83,7 +83,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 (227, 1, 0.5, "Distance to diable that triggers explosion"),
 (228, 1, 0.1, "elementals self-damage every X seconds, this value controls how much of MaxHealth they deal to self"),
 (229, 2, 1.0, "elemental check timer"),
-(230, 20000, 1.0, "Elemental explosion damage"),
+(230, 3000, 1.0, "Elemental explosion damage"),
 (231, 100000, 1.0, "Elemental explosion radius ratio"),
 
 /** Shadow drake **/

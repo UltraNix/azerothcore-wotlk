@@ -8071,6 +8071,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 54643: // Teleport
             spellInfo->Effect[EFFECT_1] = 0;
             break;
+        case 20478: // Armageddon
+            spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_PACIFY_SILENCE;
+            break;
         }
 
         //////////////////////////////////////////
