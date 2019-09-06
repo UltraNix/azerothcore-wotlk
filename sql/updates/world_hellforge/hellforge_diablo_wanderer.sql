@@ -24,10 +24,13 @@ UPDATE `creature_questender` SET `id` = 300003 WHERE `quest` = 31006;
 UPDATE `quest_template` SET `NextQuestIdChain` = 0 WHERE `Id` = 31006;
 
 SET @GO_GUID := 281000;
-DELETE FROM `gameobject` WHERE `guid` IN (@GO_GUID, @GO_GUID + 1);
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @GO_GUID AND @GO_GUID + 4; 
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
 (@GO_GUID,400601, 249, 8, 1, -163.07, -163.25, -59.01, 4.27, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0),
-(@GO_GUID + 1, 195682, 249, 8, 1, -188.86, -199.30, -68.10, 6.0, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0);
+(@GO_GUID + 1, 195682, 249, 8, 1, -188.86, -199.30, -68.10, 6.0, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0),
+(@GO_GUID + 2, 400601, 249, 8, 1, -42.724068, -159.866440, -92.218880, 6.0, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0),
+(@GO_GUID + 3, 400601, 249, 8, 1, -39.813084, -268.012543, -91.765244, 6.0, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0),
+(@GO_GUID + 4, 203006, 249, 8, 1, -93.77, -214.24, -82.44, 3.11, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0);
 
 DELETE FROM `access_requirement` WHERE `mapId` = 249 AND `difficulty` = 3;
 INSERT INTO `access_requirement` VALUES 

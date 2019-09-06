@@ -5780,7 +5780,7 @@ void Player::RepopAtGraveyard()
         m_deathTimer = 0;
         ResurrectPlayer(1.0f);
         SpawnCorpseBones();
-        TeleportTo(0, { -6450.60f, -1113.51f, 308.02f, 2.50f });
+        TeleportTo(0, { -6509.70f, -1296.36f, 137.18f, 2.63f });
         return;
     }
 

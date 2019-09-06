@@ -421,6 +421,7 @@ public:
         me->SetImmuneToNPC(false);
         me->SetCanMissSpells(false);
         me->CastCustomSpell(SPELL_YOGG_BERSERK, SPELLVALUE_BASE_POINT0, _increaseDMG);
+        me->SetControlled(true, UNIT_STATE_ROOT);
     }
 
     void LoadStats()
@@ -487,6 +488,13 @@ public:
     {
         _scheduler.Update(diff);
     }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*mask*/) override
+    {
+        damage = 0;
+    }
+
+    void EnterCombat(Unit* victim) override { }
 private:
     TaskScheduler _scheduler;
     uint32 _shadowCrashCount;

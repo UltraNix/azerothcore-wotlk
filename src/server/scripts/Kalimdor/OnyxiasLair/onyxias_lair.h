@@ -20,7 +20,10 @@ enum OLCreatures
 enum OLGameObjects
 {
     GO_WHELP_SPAWNER                = 176510,
-    GO_WHELP_EGG                    = 176511
+    GO_WHELP_EGG                    = 176511,
+
+    //! diablo related
+    GO_FLAME_WALL                   = 203006,
 };
 
 enum OLMiscData

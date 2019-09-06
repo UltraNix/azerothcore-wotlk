@@ -1583,7 +1583,11 @@ struct npc_boss_six_diablo_AI : public BossAI
                 trigger->SetCanFly(true);
                 trigger->SetDisableGravity(true);
 
-                trigger->SetObjectScale(_currentIntermissionBoss != 261005 ? 10.f : 3.f);
+                float scale = 10.f;
+                if (_currentIntermissionBoss == 261005 || _currentIntermissionBoss == 261008)
+                    scale = 3.f;
+
+                trigger->SetObjectScale(scale);
                 trigger->CastSpell(me, _currentIntermissionBoss != 261005 ? SPELL_DIABLO_NETHER_PORTAL_VISUAL : SPELL_DIABLO_IMPALE_VISUAL);
             }
         }

@@ -9,13 +9,20 @@ ObjectData const creatureData[] =
     { 0          ,          0        } // END
 };
 
+DoorData const doorData[] =
+{
+     { GO_FLAME_WALL, DATA_DIABLO, DOOR_TYPE_ROOM, BOUNDARY_NONE }
+};
+
 struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
 {
     instance_onyxias_lair_InstanceMapScript(Map* map) : InstanceScript(map)
     {
         SetBossNumber(MAX_ENCOUNTER);
         LoadObjectData(creatureData, nullptr);
+        LoadDoorData(doorData);
     };
+
 
     bool SetBossState(uint32 type, EncounterState state) override
     {
@@ -50,11 +57,18 @@ struct instance_onyxias_lair_InstanceMapScript : public InstanceScript
         switch (go->GetEntry())
         {
             case GO_WHELP_SPAWNER:
+            {
                 go->CastSpell((Unit*)nullptr, 17646);
                 if (Creature* onyxia = GetCreature(DATA_ONYXIA))
                     if (onyxia->IsAIEnabled)
                         onyxia->AI()->DoAction(-1);
                 break;
+            }
+            case GO_FLAME_WALL:
+            {
+                AddDoor(go, true);
+                break;
+            }
         }
     }
 
