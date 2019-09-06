@@ -28,3 +28,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (@GO_GUID, @GO_GUID + 1);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
 (@GO_GUID,400601, 249, 8, 1, -163.07, -163.25, -59.01, 4.27, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0),
 (@GO_GUID + 1, 195682, 249, 8, 1, -188.86, -199.30, -68.10, 6.0, -0, -0, -0.924628, -0.38087, 300, 0, 1, 0);
+
+DELETE FROM `access_requirement` WHERE `mapId` = 249 AND `difficulty` = 3;
+INSERT INTO `access_requirement` VALUES 
+(249, 3, 80, 0, 0, 0, 0, 31006, 31006, 0, 'You must complete the quest "Visit in Hell" before entering the Hellforge.', 'Onyxia\'s Lair - Hellforge');
