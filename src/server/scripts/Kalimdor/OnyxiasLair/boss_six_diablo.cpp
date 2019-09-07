@@ -178,11 +178,6 @@ enum DiabloStatIds
     STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE          = 252
 };
 
-enum DiabloGameobjects
-{
-    GO_DIABLO_CHEST                         = 405001
-};
-
 constexpr uint32 NETHER_PORTAL_SPAWN_POSITION_SIZE{ 2 };
 Position const netherPortalSpawnPosition[NETHER_PORTAL_SPAWN_POSITION_SIZE] =
 {
@@ -353,11 +348,26 @@ struct npc_boss_six_diablo_AI : public BossAI
             BossAI::JustSummoned(summon);
     }
 
-    void JustDied(Unit* /*killer*/)
+    void JustDied(Unit* killer) override
     {
-        if (Player* pl = me->SelectNearestPlayer(100.0f))
-            pl->SummonGameObject(GO_DIABLO_CHEST, { 2.37f, -220.39f, -86.1f, 3.08f }, 0.0f, 0.0f, -0.99f, -0.03f, 0);
-        summons.DespawnAll();
+        me->MonsterYell("Damn you mortals... one day I will come back... one day you will feel despair...", LANG_UNIVERSAL, nullptr);
+        BossAI::JustDied(killer);
+    }
+
+    void KilledUnit(Unit* unit) override
+    {
+        if (unit->IsPlayer() && !_unitKilledYell)
+        {
+            _unitKilledYell = true;
+            scheduler.Schedule(5s, [this](TaskContext func)
+            {
+                _unitKilledYell = false;
+            });
+
+            std::string _talk = urand(0, 1) ? "Pathetic." : "Another one down!";
+            me->MonsterYell(_talk.c_str(), LANG_UNIVERSAL, nullptr);
+        }
+        BossAI::KilledUnit(unit);
     }
 
     void SummonedCreatureDies(Creature* summon, Unit* killer) override
@@ -371,6 +381,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             me->SetVisible(true);
             DoZoneInCombat(me, 250.f);
             CleanupShadowRealm();
+            me->MonsterYell("Still alive?", LANG_UNIVERSAL, nullptr);
 
             for (auto const& entry : { NPC_BOSS_SIX_INCREASED_DAMAGE_TRIGGER, NPC_BOSS_SIX_HEART_BEAM_TRIGGER, NPC_BOSS_SIX_FIERY_COMET_TRIGGER })
                 summons.DespawnEntry(entry);
@@ -485,6 +496,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         _readjustNapalmShells = false;
         _currentIntermissionBoss = 0;
         _firstPull = false;
+        _unitKilledYell = false;
         LoadStats();
     }
 
@@ -781,6 +793,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         if (me->HealthBelowPctDamaged(_napalamShellStartPercent, damage) && !_napalmPhase)
         {
+            me->MonsterYell("I am inevitable.", LANG_UNIVERSAL, nullptr);
             _napalmPhase = true;
             _napalmShellCount = _napalamShellNormalCount;
             DoCastSelf(SPELL_DIABLO_SHADOWFORM_1, true);
@@ -799,6 +812,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
         if (me->HealthBelowPctDamaged(_napalamShellReadjustPercent, damage) && !_readjustNapalmShells)
         {
+            me->MonsterYell("BURN TO ASHES!", LANG_UNIVERSAL, nullptr);
             _readjustNapalmShells = true;
             _napalmShellCount = _napalamShellReadjustedCount;
         }
@@ -807,6 +821,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         {
             scheduler.CancelAll();
             _intermission = true;
+            _unitKilledYell = false;
             me->SetSelectable(false);
             me->SetPassive();
             me->GetMotionMaster()->Clear();
@@ -936,7 +951,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                     trigger->AI()->SetGUID(target->GetGUID());
                 }
 
-                trigger->DespawnOrUnsummon(20s);
+                trigger->DespawnOrUnsummon(30s);
             };
         }
     }
@@ -1021,6 +1036,7 @@ struct npc_boss_six_diablo_AI : public BossAI
     void SchedulePhaseTwoAbilities()
     {
         scheduler.CancelAll();
+        _unitKilledYell = false;
 
         scheduler.Schedule(Seconds(_knockOrStepFirstTimer), GROUP_DIABLO_PHASE_ONE_CANCELABLE, [this](TaskContext func)
         {
@@ -1188,6 +1204,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         if (!target)
             return;
 
+        me->MonsterYell("Taste my lightning!", LANG_UNIVERSAL, nullptr);
         CustomSpellValues val;
         val.AddSpellMod(SPELLVALUE_BASE_POINT0, _runicLightningDamage);
         me->CastCustomSpell(SPELL_DIABLO_RUNIC_LIGHTNING, val, target, TRIGGERED_FULL_MASK);
@@ -1213,6 +1230,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             return;
         }
 
+        me->MonsterYell("Be gone to the realm of the shadows pest!", LANG_UNIVERSAL, nullptr);
         me->AddAura(SPELL_DIABLO_REALM_OF_SHADOWS, target);
         _shadowRealmTargetGUID = target->GetGUID();
 
@@ -1315,6 +1333,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         if (!player)
             return;
 
+        me->MonsterYell("ENOUGH!", LANG_UNIVERSAL, nullptr);
         player->RemoveAurasDueToSpell(SPELL_DIABLO_REALM_OF_SHADOWS);
         player->NearTeleportTo(_shadowRealmExitPosition);
         player->AddAura(SPELL_DIABLO_SELF_STUN, player);
@@ -1489,6 +1508,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void HandlePheonixPhase()
     {
+        me->MonsterYell("Death from above!", LANG_UNIVERSAL, nullptr);
         _drakesDead = 0;
         for (auto const& entry : { NPC_BOSS_SIX_ASHES_OF_ALAR, NPC_BOSS_SIX_SHADOW_DRAKE })
             summons.DespawnEntry(entry);
@@ -1632,6 +1652,7 @@ private:
     bool _readjustNapalmShells;
     uint32 _currentIntermissionBoss;
     bool _firstPull;
+    bool _unitKilledYell;
 
     // Napalam Shell related
     uint32 _napalamShellStartPercent; // 150
@@ -2589,7 +2610,7 @@ struct npc_boss_diablo_fire_elementals : public NullCreatureAI
     void Reset() override
     {
         _exploded = false;
-
+        me->SetWalk(true);
         _scheduler.CancelAll();
         if (Unit* target = me->GetSummoner())
         {
@@ -2996,48 +3017,52 @@ class spell_lightning_marker_visual : public AuraScript
     }
 };
 
-class spell_boss_diablo_napalm_shell_damage : public SpellScript
+class spell_napalm_shell_triggered_damage : public SpellScript
 {
-    PrepareSpellScript(spell_boss_diablo_napalm_shell_damage);
+    PrepareSpellScript(spell_napalm_shell_triggered_damage);
 
-    void HandleCast(SpellEffIndex effIndex)
+    void HandleHit(SpellEffIndex /*eff*/)
     {
-        if (GetCaster() && GetCaster()->IsCreature() && GetCaster()->GetMapId() == DIABLO_MAP_ID)
-        {
-            PreventHitDefaultEffect(EFFECT_0);
-            uint32 triggered_spell_id = GetSpellInfo()->Effects[effIndex].TriggerSpell;
-
-            if (GetCaster()->GetMapId() == DIABLO_MAP_ID)
-            {
-                InstanceScript* instance = GetCaster()->GetInstanceScript();
-                if (!instance)
-                    return;
-
-                Creature* diablo = instance->GetCreature(DATA_DIABLO);
-                if (!diablo)
-                    return;
-
-                CustomSpellValues val;
-                HellforgeStatValues stat;
-                sWorldCache.GetStatValue(STAT_DIABLO_NAPALAM_SHELL_DAMAGE, stat);
-                uint32 damage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
-
-                sWorldCache.GetStatValue(STAT_DIABLO_NAPALM_SHELL_PERIODIC, stat);
-                uint32 periodicDamage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
-
-                val.AddSpellMod(SPELLVALUE_BASE_POINT0, damage);
-                val.AddSpellMod(SPELLVALUE_BASE_POINT1, periodicDamage);
-                val.AddSpellMod(SPELLVALUE_RADIUS_MOD, diablo->AI()->GetData(STAT_DIABLO_NAPALAM_SHELL_RADIUS_RATIO));
-                Unit* target = ObjectAccessor::GetUnit(*GetCaster(), GetCaster()->ToCreature()->AI()->GetGUID());
-                if (target)
-                    GetCaster()->CastCustomSpell(triggered_spell_id, val, target, TRIGGERED_FULL_MASK);
-            }
-        }
+        HellforgeStatValues stat;
+        sWorldCache.GetStatValue(STAT_DIABLO_NAPALAM_SHELL_DAMAGE, stat);
+        uint32 damage = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+        SetEffectValue(damage);
     }
 
     void Register() override
     {
-        OnEffectHit += SpellEffectFn(spell_boss_diablo_napalm_shell_damage::HandleCast, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
+        OnEffectLaunchTarget += SpellEffectFn(spell_napalm_shell_triggered_damage::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
+class spell_napalm_shell_triggered_damage_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_napalm_shell_triggered_damage_AuraScript);
+
+    void CalculateDamageAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+    {
+        if (!GetCaster())
+            return;
+
+        if (GetCaster()->GetMapId() != DIABLO_MAP_ID)
+            return;
+
+        InstanceScript* instance = GetCaster()->GetInstanceScript();
+        if (!instance)
+            return;
+
+        Creature* diablo = instance->GetCreature(DATA_DIABLO);
+        if (!diablo)
+            return;
+
+        HellforgeStatValues stat;
+        sWorldCache.GetStatValue(STAT_DIABLO_NAPALM_SHELL_PERIODIC, stat);
+        amount = urand((stat.StatValue * stat.StatVariance), stat.StatValue);
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_napalm_shell_triggered_damage_AuraScript::CalculateDamageAmount, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
     }
 };
 
@@ -3118,6 +3143,51 @@ class spell_diablo_conversion_beam : public AuraScript
     }
 };
 
+class spell_heart_beam_visual : public AuraScript
+{
+    PrepareAuraScript(spell_heart_beam_visual);
+
+    void OnEffectRemoved(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (!GetTarget())
+            return;
+
+        GetTarget()->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, false);
+    }
+
+    void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (!GetTarget())
+            return;
+
+        GetTarget()->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove += AuraEffectRemoveFn(spell_heart_beam_visual::OnEffectRemoved, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        OnEffectApply += AuraEffectApplyFn(spell_heart_beam_visual::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class spell_diablo_fire_elemental_explosion : public SpellScript
+{
+    PrepareSpellScript(spell_diablo_fire_elemental_explosion);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* object)
+        {
+            return object && object->ToPlayer() && !object->ToPlayer()->GetVehicleBase();
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_diablo_fire_elemental_explosion::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
+
 void AddSC_hellforge_boss_six()
 {
     new CreatureAILoader<npc_boss_six_diablo_AI>("npc_boss_six_diablo");
@@ -3136,7 +3206,7 @@ void AddSC_hellforge_boss_six()
     new AuraScriptLoaderEx<spell_boss_diablo_nether_portal_AuraScript>("spell_boss_diablo_nether_portal");
     new SpellScriptLoaderEx<spell_boss_six_diablo_meteor>("spell_boss_six_diablo_meteor");
     new SpellScriptLoaderEx<spell_five_finger_death_punch>("spell_five_finger_death_punch");
-    new SpellScriptLoaderEx<spell_boss_diablo_napalm_shell_damage>("spell_boss_diablo_napalm_shell_damage");
+    new SpellScriptLoaderEx<spell_diablo_fire_elemental_explosion>("spell_diablo_fire_elemental_explosion");
     new AuraScriptLoaderEx<spell_boss_diablo_armageddon_AuraScript>("spell_boss_diablo_armageddon");
     new AuraScriptLoaderEx<spell_buffeting_winds_diablo>("spell_buffeting_winds_diablo");
     new AuraScriptLoaderEx<spell_boss_diablo_flametongue_weapon>("spell_boss_diablo_flametongue_weapon");
@@ -3145,4 +3215,6 @@ void AddSC_hellforge_boss_six()
     new AuraScriptLoaderEx<spell_lightning_marker_visual>("spell_lightning_marker_visual");
     new AuraScriptLoaderEx<spell_devouring_flame_diablo_hellforge>("spell_devouring_flame_diablo_hellforge");
     new AuraScriptLoaderEx<spell_diablo_conversion_beam>("spell_diablo_conversion_beam");
+    new AuraScriptLoaderEx<spell_heart_beam_visual>("spell_heart_beam_visual");
+    new SpellAuraScriptLoaderEx<spell_napalm_shell_triggered_damage, spell_napalm_shell_triggered_damage_AuraScript>("spell_napalm_shell_triggered_damage");
 }

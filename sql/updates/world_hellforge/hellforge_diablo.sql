@@ -43,6 +43,7 @@ UPDATE `creature_template` SET `spell1` = 56091, `spell2` = 56092, `unit_class` 
 UPDATE `creature_template` SET `mechanic_immune_mask` = 650854271 WHERE `entry` BETWEEN @ENTRY + 0 AND @ENTRY + 23;
 UPDATE `creature_template` SET `mechanic_immune_mask` = `mechanic_immune_mask` &~ 64 WHERE `entry` = @ENTRY + 6;
 UPDATE `creature_template` SET `type` = 3, `flags_extra` = `flags_extra` | 1 WHERE `entry` = @ENTRY + 0;
+UPDATE `creature_template` SET `flags_extra` = `flags_extra` | 2097152 WHERE entry BETWEEN @ENTRY + 0 AND @ENTRY + 23;
 
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` = @ENTRY + 18;
 INSERT INTO `npc_spellclick_spells` VALUES
@@ -54,7 +55,7 @@ DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID + 0 AND @CGUID + 1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (@CGUID + 0, 250200, 249, 8, 1, 0, 0, -10.9161, -213.238, -87.7776, 3.137, 300, 0, 0, 13945, 4258, 0, 0, 0, 0);
 
-DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 64529, 61585, 68832, 64734, 69856);
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (67105, 36837, 27673, 20478, 32474, 65979, 43501, 64529, 61585, 64734, 69856, 54988, 67444, 69669);
 INSERT INTO `spell_script_names` VALUES
 (67105, "spell_boss_diablo_nether_portal"),
 (36837, "spell_boss_six_diablo_meteor"),
@@ -65,9 +66,12 @@ INSERT INTO `spell_script_names` VALUES
 (43501, "spell_diablo_siphon_soul"),
 (64529, "spell_boss_diablo_plasma_blast"),
 (61585, "spell_lightning_marker_visual"),
-(68832, "spell_boss_diablo_napalm_shell_damage"),
+-- (68832, "spell_boss_diablo_napalm_shell_damage"),
 (64734, "spell_devouring_flame_diablo_hellforge"),
-(69856, "spell_diablo_conversion_beam");
+(69856, "spell_diablo_conversion_beam"),
+(54988, "spell_heart_beam_visual"),
+(67444, "spell_napalm_shell_triggered_damage"),
+(69669, "spell_diablo_fire_elemental_explosion");
 
 -- pozmieniac GUIDy potem
 DELETE FROM `creature` WHERE `id` = 250200;

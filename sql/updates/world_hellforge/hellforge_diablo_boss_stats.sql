@@ -110,7 +110,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 
 /** Additional spell damages **/
 (247, 10000, 0.7, "napalm shell dot damage"),
-(248, 10000, 0.83, "conversion beam damage"),
+(248, 7000, 0.83, "conversion beam damage"),
 (249, 2, 1.0, "shadow drake void blast timer"),
 (250, 12000, 1.0, "Shadow drake devouring flame damage"),
 (251, 9000, 0.88, "Shadow drake void blast damage"),
