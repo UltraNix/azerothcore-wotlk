@@ -35,3 +35,5 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 DELETE FROM `access_requirement` WHERE `mapId` = 249 AND `difficulty` = 3;
 INSERT INTO `access_requirement` VALUES 
 (249, 3, 80, 0, 0, 0, 0, 31006, 31006, 0, 'You must complete the quest "Visit in Hell" before entering the Hellforge.', 'Onyxia\'s Lair - Hellforge');
+
+UPDATE `quest_template` SET `PrevQuestId` = 0 WHERE `Id` = 31000;
