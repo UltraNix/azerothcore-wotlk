@@ -43,7 +43,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 /** demons **/
 (200, 5, 1, "Demon shadow nova timer"),
 (201, 8000, 1.0, "Demon shadow nova radius ratio"),
-(202, 20000, 1.0, "Demon shadow nova damage"),
+(202, 3400, 1.0, "Demon shadow nova damage"),
 (203, 2, 1.0, "Demon shadow nova repeat timer"),
 (204, 20, 1.0, "Demon switch timer (reflect and shadow nova types)"),
 (205, 10, 1.0, "nearby demon radius, in yards"),

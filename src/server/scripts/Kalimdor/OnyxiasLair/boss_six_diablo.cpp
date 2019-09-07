@@ -1136,14 +1136,6 @@ struct npc_boss_six_diablo_AI : public BossAI
 
                     if (Creature* knight = me->SummonCreature(NPC_BOSS_SIX_ABYSS_KNIGHT, spawnPos))
                     {
-                        HellforgeStatValues stat;
-                        sWorldCache.GetStatValue(STAT_ABYSSAL_MELEE_DAMAGE, stat);
-                        uint32 minDamage = stat.StatValue;
-                        uint32 maxDamage = stat.StatValue * stat.StatVariance;
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-                        knight->UpdateDamagePhysical(BASE_ATTACK);
-
                         knight->SetMaxHealth(_abyssalMaxHealth);
                         knight->SetFullHealth();
                         knight->SetPassive();
@@ -1174,14 +1166,6 @@ struct npc_boss_six_diablo_AI : public BossAI
 
                     if (Creature* knight = me->SummonCreature(NPC_BOSS_SIX_ABYSS_KNIGHT, spawnPos))
                     {
-                        HellforgeStatValues stat;
-                        sWorldCache.GetStatValue(STAT_ABYSSAL_MELEE_DAMAGE, stat);
-                        uint32 minDamage = stat.StatValue;
-                        uint32 maxDamage = stat.StatValue * stat.StatVariance;
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-                        knight->UpdateDamagePhysical(BASE_ATTACK);
-
                         knight->SetMaxHealth(_abyssalMaxHealth);
                         knight->SetFullHealth();
                         knight->SetPassive();
@@ -1204,14 +1188,6 @@ struct npc_boss_six_diablo_AI : public BossAI
                     realPosition.m_positionZ += 4.5f;
                     if (Creature* flyingDoom = me->SummonCreature(NPC_BOSS_SIX_OMOR_COPY, realPosition))
                     {
-                        HellforgeStatValues stat;
-                        sWorldCache.GetStatValue(STAT_PIT_LORD_MELEE_DAMAGE, stat);
-                        uint32 minDamage = stat.StatValue;
-                        uint32 maxDamage = stat.StatValue * stat.StatVariance;
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
-                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
-                        flyingDoom->UpdateDamagePhysical(BASE_ATTACK);
-
                         flyingDoom->AI()->SetData(DATA_SET_DEMON_TYPE, ++_demonType);
                         flyingDoom->SetPassive();
                         flyingDoom->SetImmuneToAll(true);
@@ -1799,7 +1775,8 @@ struct npc_boss_six_flying_demon_AI : public ScriptedAI
     void LoadStats()
     {
         HellforgeStats _stats = sWorldCache.GetStatValues({ STAT_DEMON_SHADOW_NOVA_TIMER, STAT_DEMON_SHADOW_NOVA_RADIUS_RATIO,
-            STAT_DEMON_SHADOW_NOVA_DAMAGE, STAT_DEMON_SHADOW_NOVA_REPEAT_TIMER, STAT_DEMON_DEMON_SWITCH_TIMER, STAT_DEMON_NEARBY_DEMON_RADIUS, STAT_DEMON_NEARBY_DEMON_CHECK_TIMER });
+            STAT_DEMON_SHADOW_NOVA_DAMAGE, STAT_DEMON_SHADOW_NOVA_REPEAT_TIMER, STAT_DEMON_DEMON_SWITCH_TIMER, STAT_DEMON_NEARBY_DEMON_RADIUS,
+            STAT_DEMON_NEARBY_DEMON_CHECK_TIMER, STAT_PIT_LORD_MELEE_DAMAGE });
 
         for (auto const& ref : _stats)
         {
@@ -1826,6 +1803,15 @@ struct npc_boss_six_flying_demon_AI : public ScriptedAI
                 case STAT_DEMON_NEARBY_DEMON_CHECK_TIMER:
                     _demonNearbyCheckTimer = ref.second.StatValue;
                     break;
+                case STAT_PIT_LORD_MELEE_DAMAGE:
+                {
+                    uint32 minDamage = ref.second.StatValue;
+                    uint32 maxDamage = ref.second.StatValue * ref.second.StatVariance;
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                    me->UpdateDamagePhysical(BASE_ATTACK);
+                    break;
+                }
                 default:
                     break;
             }
@@ -3238,6 +3224,29 @@ class spell_diablo_fire_elemental_explosion : public SpellScript
     }
 };
 
+struct npc_abyssal_knight_diablo : public ScriptedAI
+{
+    npc_abyssal_knight_diablo(Creature* creature) : ScriptedAI(creature) { }
+
+    void LoadStats()
+    {
+        HellforgeStatValues stat;
+        sWorldCache.GetStatValue(STAT_ABYSSAL_MELEE_DAMAGE, stat);
+        uint32 minDamage = stat.StatValue;
+        uint32 maxDamage = stat.StatValue * stat.StatVariance;
+        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+        me->UpdateDamagePhysical(BASE_ATTACK);
+    }
+
+    void Reset() override
+    {
+        LoadStats();
+        ScriptedAI::Reset();
+    }
+
+};
+
 void AddSC_hellforge_boss_six()
 {
     new CreatureAILoader<npc_boss_six_diablo_AI>("npc_boss_six_diablo");
@@ -3252,6 +3261,7 @@ void AddSC_hellforge_boss_six()
     new CreatureAILoader<npc_boss_player_flame_sphere>("npc_boss_player_flame_sphere");
     new CreatureAILoader<npc_boss_diablo_shadow_drake>("npc_boss_diablo_shadow_drake");
     new CreatureAILoader<npc_diablo_napalm_shell_trigger>("npc_diablo_napalm_shell_trigger");
+    new CreatureAILoader<npc_abyssal_knight_diablo>("npc_abyssal_knight_diablo");
 
     new AuraScriptLoaderEx<spell_boss_diablo_nether_portal_AuraScript>("spell_boss_diablo_nether_portal");
     new SpellScriptLoaderEx<spell_boss_six_diablo_meteor>("spell_boss_six_diablo_meteor");
