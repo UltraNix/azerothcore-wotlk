@@ -325,7 +325,6 @@ class BattlegroundEY : public Battleground
         void AddPlayer(Player* player);
         void StartingEventCloseDoors();
         void StartingEventOpenDoors();
-        bool HandlePlayerUnderMap(Player* player);
 
         /* BG Flags */
         uint64 GetFlagPickerGUID(TeamId /*teamId*/ = TEAM_NEUTRAL) const    { return _flagKeeperGUID; }
