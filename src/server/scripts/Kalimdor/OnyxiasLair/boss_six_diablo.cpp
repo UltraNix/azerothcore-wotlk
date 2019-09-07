@@ -175,7 +175,8 @@ enum DiabloStatIds
     // 249
     // 250
     // 251
-    STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE          = 252
+    STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE          = 252,
+    STAT_DIABLO_FIRE_ELEMENTAL_MOVE_SPEED       = 253
 };
 
 constexpr uint32 NETHER_PORTAL_SPAWN_POSITION_SIZE{ 2 };
@@ -613,7 +614,8 @@ struct npc_boss_six_diablo_AI : public BossAI
            STAT_WANDERING_ELEMENTAL_HEALTH,
            STAT_DIABLO_CONVERSION_BEAM_DAMAGE,
            STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE,
-           STAT_DIABLO_MELEE_DAMAGE
+           STAT_DIABLO_MELEE_DAMAGE,
+           STAT_DIABLO_FIRE_ELEMENTAL_MOVE_SPEED
         });
 
         for (auto const& ref : _stats)
@@ -676,6 +678,9 @@ struct npc_boss_six_diablo_AI : public BossAI
                    break;
                case STAT_DIABLO_FIRE_ELEMENTALS_REPEAT_SPAWN_TIMER:
                    _fireElementalsRepeatTimer = ref.second.StatValue;
+                   break;
+               case STAT_DIABLO_FIRE_ELEMENTAL_MOVE_SPEED:
+                   _fireElementalSpeedRate = ref.second.StatVariance;
                    break;
                case STAT_DIABLO_PLASMA_RAY_FIRST_TIMER:
                    _plasmaRayFirstTimer = ref.second.StatValue;
@@ -1525,6 +1530,8 @@ struct npc_boss_six_diablo_AI : public BossAI
             {
                 elemental->SetMaxHealth(_wanderingElementalMaxHealth);
                 elemental->SetFullHealth();
+                elemental->SetSpeedRate(MOVE_RUN, _fireElementalSpeedRate);
+                elemental->SetSpeedRate(MOVE_WALK, _fireElementalSpeedRate);
             }
         }
     }
@@ -1754,6 +1761,7 @@ private:
     uint32 _wanderingElementalMaxHealth;
     uint32 _conversionBeamDamage;
     uint32 _runicLightningDamage;
+    float _fireElementalSpeedRate;
 };
 
 enum DemonSpells
