@@ -177,7 +177,7 @@ public:
                 _summons.Broadcast([&](Unit* summon) { if (summon->GetEntry() == NPC_CRUSHER_TENTACLE) summon->CastSpell(summon, SPELL_DIMINISH_POWER); });
                 _events.CancelEvent(EVENT_YOGG_CORRUPTOR_TENTACLE);
                 _events.CancelEvent(EVENT_YOGG_CONSTRICTOR_TENTACLE);
-                _scheduler.Schedule(1s, [&](TaskContext func)
+                _scheduler.Schedule(20s, [&](TaskContext func)
                 {
                     switch (func.GetRepeatCounter())
                     {
