@@ -1404,7 +1404,7 @@ class Unit : public WorldObject
 
         DiminishingLevels GetDiminishing(DiminishingGroup  group);
         void IncrDiminishing(DiminishingGroup group);
-        float ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration);
+        float ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration, Unit const* caster, DiminishingLevels Level, int32 limitduration) const;
         void ApplyDiminishingAura(DiminishingGroup  group, bool apply);
         void ClearDiminishings() { m_Diminishing.clear(); }
 
@@ -2275,7 +2275,7 @@ class Unit : public WorldObject
         float ApplyEffectModifiers(SpellInfo const* spellProto, uint8 effect_index, float value) const;
         int32 CalculateSpellDamage(Unit const* target, SpellInfo const* spellProto, uint8 effect_index, int32 const* basePoints = NULL) const;
         int32 CalcSpellDuration(SpellInfo const* spellProto);
-        int32 ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask);
+        int32 ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask) const;
         void  ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell * spell=NULL);
         float CalculateLevelPenalty(SpellInfo const* spellProto) const;
 

@@ -13909,7 +13909,7 @@ int32 Unit::CalcSpellDuration(SpellInfo const* spellProto)
     return duration;
 }
 
-int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask)
+int32 Unit::ModSpellDuration(SpellInfo const* spellProto, Unit const* target, int32 duration, bool positive, uint32 effectMask) const
 {
     // don't mod permanent auras duration
     if (duration < 0)
@@ -14072,7 +14072,7 @@ void Unit::IncrDiminishing(DiminishingGroup group)
     m_Diminishing.push_back(DiminishingReturn(group, World::GetGameTimeMS(), DIMINISHING_LEVEL_2));
 }
 
-float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit* caster, DiminishingLevels Level, int32 limitduration)
+float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit const* caster, DiminishingLevels Level, int32 limitduration) const
 {
     // xinef: dont apply diminish to self casts
     if (duration == -1 || group == DIMINISHING_NONE)
