@@ -612,7 +612,8 @@ struct npc_boss_six_diablo_AI : public BossAI
            STAT_PHOENIX_HEALTH,
            STAT_WANDERING_ELEMENTAL_HEALTH,
            STAT_DIABLO_CONVERSION_BEAM_DAMAGE,
-           STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE
+           STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE,
+           STAT_DIABLO_MELEE_DAMAGE
         });
 
         for (auto const& ref : _stats)
@@ -773,6 +774,18 @@ struct npc_boss_six_diablo_AI : public BossAI
                case STAT_DIABLO_RUNIC_LIGHTNING_DAMAGE:
                    _runicLightningDamage = urand((ref.second.StatValue * ref.second.StatVariance), ref.second.StatValue);
                    break;
+               case STAT_DIABLO_MELEE_DAMAGE:
+               {
+                   uint32 minDamage = ref.second.StatValue;
+                   uint32 maxDamage = ref.second.StatValue * ref.second.StatVariance;
+                   me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                   me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                   me->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, minDamage);
+                   me->SetBaseWeaponDamage(OFF_ATTACK, MAXDAMAGE, maxDamage);
+                   me->UpdateDamagePhysical(BASE_ATTACK);
+                   me->UpdateDamagePhysical(OFF_ATTACK);
+                   break;
+               }
                default:
                    break;
             }
@@ -1118,6 +1131,14 @@ struct npc_boss_six_diablo_AI : public BossAI
 
                     if (Creature* knight = me->SummonCreature(NPC_BOSS_SIX_ABYSS_KNIGHT, spawnPos))
                     {
+                        HellforgeStatValues stat;
+                        sWorldCache.GetStatValue(STAT_ABYSSAL_MELEE_DAMAGE, stat);
+                        uint32 minDamage = stat.StatValue;
+                        uint32 maxDamage = stat.StatValue * stat.StatVariance;
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                        knight->UpdateDamagePhysical(BASE_ATTACK);
+
                         knight->SetMaxHealth(_abyssalMaxHealth);
                         knight->SetFullHealth();
                         knight->SetPassive();
@@ -1148,6 +1169,14 @@ struct npc_boss_six_diablo_AI : public BossAI
 
                     if (Creature* knight = me->SummonCreature(NPC_BOSS_SIX_ABYSS_KNIGHT, spawnPos))
                     {
+                        HellforgeStatValues stat;
+                        sWorldCache.GetStatValue(STAT_ABYSSAL_MELEE_DAMAGE, stat);
+                        uint32 minDamage = stat.StatValue;
+                        uint32 maxDamage = stat.StatValue * stat.StatVariance;
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                        knight->UpdateDamagePhysical(BASE_ATTACK);
+
                         knight->SetMaxHealth(_abyssalMaxHealth);
                         knight->SetFullHealth();
                         knight->SetPassive();
@@ -1170,6 +1199,14 @@ struct npc_boss_six_diablo_AI : public BossAI
                     realPosition.m_positionZ += 4.5f;
                     if (Creature* flyingDoom = me->SummonCreature(NPC_BOSS_SIX_OMOR_COPY, realPosition))
                     {
+                        HellforgeStatValues stat;
+                        sWorldCache.GetStatValue(STAT_PIT_LORD_MELEE_DAMAGE, stat);
+                        uint32 minDamage = stat.StatValue;
+                        uint32 maxDamage = stat.StatValue * stat.StatVariance;
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
+                        me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
+                        flyingDoom->UpdateDamagePhysical(BASE_ATTACK);
+
                         flyingDoom->AI()->SetData(DATA_SET_DEMON_TYPE, ++_demonType);
                         flyingDoom->SetPassive();
                         flyingDoom->SetImmuneToAll(true);
@@ -3183,7 +3220,7 @@ class spell_diablo_fire_elemental_explosion : public SpellScript
     {
         targets.remove_if([](WorldObject* object)
         {
-            return object && object->ToPlayer() && !object->ToPlayer()->GetVehicleBase();
+            return object && object->IsPlayer() && object->ToPlayer()->GetVehicleBase();
         });
     }
 
