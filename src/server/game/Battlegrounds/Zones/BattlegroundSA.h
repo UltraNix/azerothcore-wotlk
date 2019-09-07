@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -420,15 +420,12 @@ struct BG_SA_RoundScore
     uint32 time;
 };
 
-Position const SOTADefPortalDest[5] = 
-{
-    { 1388.94f, 103.067f, 34.49f, 5.4571f },    // Green
-    { 1193.857f, 69.9f, 58.046f, 5.7245f },     // Purple
-
-    { 1441.0411f, -240.974f, 35.264f, 0.949f }, // Blue
-    { 1228.342f, -235.234f, 60.03f, 0.4584f },  // Red
-
-    { 1043.69f, -87.95f, 87.12f, 0.003f }       // Gold    
+const float SOTADefPortalDest[5][4] = {
+    { 1388.94f, 103.067f, 34.49f, 5.4571f },
+    { 1043.69f, -87.95f, 87.12f, 0.003f },
+    { 1441.0411f, -240.974f, 35.264f, 0.949f },
+    { 1228.342f, -235.234f, 60.03f, 0.4584f },
+    { 1193.857f, 69.9f, 58.046f, 5.7245f },
 };
 
 /// Class for manage Strand of Ancient battleground
@@ -466,7 +463,7 @@ class BattlegroundSA : public Battleground
         void EventPlayerClickedOnFlag(Player* Source, GameObject* gameObject);
         /// Called when a player use a gamobject (relic)
         void EventPlayerUsedGO(Player* Source, GameObject* object);
-       
+
         /// Return worldstate id, according to door id
         uint32 GetWorldStateFromGateID(uint32 id)
         {

@@ -8068,9 +8068,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 60835: // Shadow crash for Hellforge Diablo
             spellInfo->AttributesEx6 |= (SPELL_ATTR6_CAN_TARGET_UNTARGETABLE | SPELL_ATTR6_CAN_TARGET_INVISIBLE);
             break;
-        case 54643: // Teleport
-            spellInfo->Effect[EFFECT_1] = 0;
-            break;
         case 20478: // Armageddon
             spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_PACIFY_SILENCE;
             break;
