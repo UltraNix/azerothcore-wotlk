@@ -350,6 +350,7 @@ struct npc_boss_six_diablo_AI : public BossAI
 
     void JustDied(Unit* killer) override
     {
+        CheckCreatureRecord(killer, 110000 + 5, RAID_DIFFICULTY_10MAN_NORMAL, "", 1, _fightTimer);
         me->MonsterYell("Damn you mortals... one day I will come back... one day you will feel despair...", LANG_UNIVERSAL, nullptr);
         BossAI::JustDied(killer);
     }
@@ -381,6 +382,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             me->SetVisible(true);
             DoZoneInCombat(me, 250.f);
             CleanupShadowRealm();
+            _fightTimer = getMSTime();
             me->MonsterYell("Still alive?", LANG_UNIVERSAL, nullptr);
 
             for (auto const& entry : { NPC_BOSS_SIX_INCREASED_DAMAGE_TRIGGER, NPC_BOSS_SIX_HEART_BEAM_TRIGGER, NPC_BOSS_SIX_FIERY_COMET_TRIGGER })
@@ -497,6 +499,7 @@ struct npc_boss_six_diablo_AI : public BossAI
         _currentIntermissionBoss = 0;
         _firstPull = false;
         _unitKilledYell = false;
+        _fightTimer = 0;
         LoadStats();
     }
 
@@ -1653,6 +1656,7 @@ private:
     uint32 _currentIntermissionBoss;
     bool _firstPull;
     bool _unitKilledYell;
+    uint32 _fightTimer;
 
     // Napalam Shell related
     uint32 _napalamShellStartPercent; // 150
