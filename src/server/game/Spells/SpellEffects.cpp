@@ -3952,15 +3952,23 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 54640:
                 {
                     if (Player* player = unitTarget->ToPlayer())
+                    {
                         if (player->GetBattleground() && player->GetBattleground()->GetBgTypeID() == BATTLEGROUND_SA)
                         {
                             if (GameObject* dportal = player->FindNearestGameObject(192819, 10.0f))
                             {
+                                player->AddAura(m_spellInfo->Effects[effIndex].CalcValue(), player);
+
                                 BattlegroundSA* bg = ((BattlegroundSA*)player->GetBattleground());
                                 bg->DefendersPortalTeleport(dportal, player);
+
+                                return;
                             }
                         }
-                    return;
+
+                        player->CastSpell(player, m_spellInfo->Effects[effIndex].CalcValue(), true);
+                    }
+                    break;
                 }
                 /*// Mug Transformation
                 case 41931:
