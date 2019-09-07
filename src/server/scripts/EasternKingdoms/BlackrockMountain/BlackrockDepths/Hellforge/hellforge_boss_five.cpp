@@ -949,8 +949,8 @@ struct npc_boss_five_frosty_worgen_AI : public ScriptedAI
                 }
                 case BOSS_FIVE_ADD_WORGEN_MELEE_DMG:
                 {
-                    uint32 minDamage = ref.second.StatValue;
-                    uint32 maxDamage = ref.second.StatValue * ref.second.StatVariance;
+                    uint32 minDamage = ref.second.StatValue* ref.second.StatVariance;;
+                    uint32 maxDamage = ref.second.StatValue;
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
                     me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
                     me->UpdateDamagePhysical(BASE_ATTACK);

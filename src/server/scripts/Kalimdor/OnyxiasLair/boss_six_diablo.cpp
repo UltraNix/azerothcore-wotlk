@@ -781,8 +781,8 @@ struct npc_boss_six_diablo_AI : public BossAI
                    break;
                case STAT_DIABLO_MELEE_DAMAGE:
                {
-                   uint32 minDamage = ref.second.StatValue;
-                   uint32 maxDamage = ref.second.StatValue * ref.second.StatVariance;
+                   uint32 minDamage = ref.second.StatValue * ref.second.StatVariance;
+                   uint32 maxDamage = ref.second.StatValue;
                    me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
                    me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
                    me->SetBaseWeaponDamage(OFF_ATTACK, MINDAMAGE, minDamage);
@@ -1805,8 +1805,8 @@ struct npc_boss_six_flying_demon_AI : public ScriptedAI
                     break;
                 case STAT_PIT_LORD_MELEE_DAMAGE:
                 {
-                    uint32 minDamage = ref.second.StatValue;
-                    uint32 maxDamage = ref.second.StatValue * ref.second.StatVariance;
+                    uint32 maxDamage = ref.second.StatValue;
+                    uint32 minDamage = ref.second.StatValue * ref.second.StatVariance;
                     me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
                     me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
                     me->UpdateDamagePhysical(BASE_ATTACK);
@@ -3232,8 +3232,8 @@ struct npc_abyssal_knight_diablo : public ScriptedAI
     {
         HellforgeStatValues stat;
         sWorldCache.GetStatValue(STAT_ABYSSAL_MELEE_DAMAGE, stat);
-        uint32 minDamage = stat.StatValue;
-        uint32 maxDamage = stat.StatValue * stat.StatVariance;
+        uint32 maxDamage = stat.StatValue;
+        uint32 minDamage = stat.StatValue * stat.StatVariance;
         me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, minDamage);
         me->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, maxDamage);
         me->UpdateDamagePhysical(BASE_ATTACK);

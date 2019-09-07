@@ -106,7 +106,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 /** Melee **/
 (244, 14000, 0.64, "Abyssal knight melee damage"),
 (245, 45000, 0.555, "Pit lord melee damage"),
-(246, 69000, 0.65, "Diablo melee damage"),
+(246, 100000, 0.65, "Diablo melee damage"),
 
 /** Additional spell damages **/
 (247, 10000, 0.7, "napalm shell dot damage"),
