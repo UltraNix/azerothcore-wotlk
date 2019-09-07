@@ -27,7 +27,7 @@ INSERT INTO `hellforge_boss_stats` VALUES
 (173, 10, 1.0, "Firebeam timer after successul or not shadow realm"),
 (174, 1, 0.9, "How fast the ball of flames are traveling, uses move run as default"),
 (175, 50000, 1.0, "Plasma ray damage"),
-(176, 35, 1.0, "Timer, in seconds, when diablo starts casting his wipe spell that has to be interrupted"),
+(176, 65, 1.0, "Timer, in seconds, when diablo starts casting his wipe spell that has to be interrupted"),
 (177, 15000, 1.0, "Diablo wipe spell cast time, in milliseconds"),
 (178, 2, 1.0, "How many ashes of alar is supposed to spawn"),
 (179, 2, 1.0, "How many shadow drakes is supposed to spanw"),

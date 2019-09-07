@@ -1736,7 +1736,7 @@ private:
     uint32 _shadowRealmFailTimer;
     float _ballOfFlamesRunRatio;
     uint32 _plasmaRayDamage;
-    uint32 _phoenixPhaseCastTimer; // important, has to be in seconds
+    uint32 _phoenixPhaseCastTimer;
     uint32 _phoenixPhaseCastLength; // in milliseconds
     uint32 _alarSpawnCount;
     uint32 _drakeSpawnCount;
