@@ -382,7 +382,7 @@ struct npc_boss_six_diablo_AI : public BossAI
             me->SetVisible(true);
             DoZoneInCombat(me, 250.f);
             CleanupShadowRealm();
-            _fightTimer = getMSTime();
+
             me->MonsterYell("Still alive?", LANG_UNIVERSAL, nullptr);
 
             for (auto const& entry : { NPC_BOSS_SIX_INCREASED_DAMAGE_TRIGGER, NPC_BOSS_SIX_HEART_BEAM_TRIGGER, NPC_BOSS_SIX_FIERY_COMET_TRIGGER })
@@ -426,6 +426,7 @@ struct npc_boss_six_diablo_AI : public BossAI
                 me->SetAggressive();
                 DoZoneInCombat(me, 200.f);
                 SchedulePhaseOneAbilities();
+                _fightTimer = getMSTime();
             }
         }
         else if (summon->GetEntry() == NPC_BOSS_SIX_SHADOW_CRYSTAL)
