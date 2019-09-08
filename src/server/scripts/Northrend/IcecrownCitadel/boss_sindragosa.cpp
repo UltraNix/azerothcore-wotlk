@@ -135,6 +135,9 @@ enum FrostwingData
     DATA_WHELP_MARKER           = 2,
     DATA_LINKED_GAMEOBJECT      = 3,
     DATA_TRAPPED_PLAYER         = 4,
+
+    DATA_TRIGGER_ASPHYXIATION_AIR_PHASE,
+    DATA_TRIGGER_ASPHYXIATION_LAST_PHASE
 };
 
 enum MovementPoints
@@ -466,7 +469,7 @@ class boss_sindragosa : public CreatureScript
                             AttackStart(target);
                         // trigger Asphyxiation
                         std::function<bool(uint64)> _function = [](uint64 guid) { return GUID_ENPART(guid) == NPC_ICE_TOMB; };
-                        summons.DoAction(1, _function);
+                        summons.DoAction(DATA_TRIGGER_ASPHYXIATION_AIR_PHASE, _function);
                         break;
                     }
                     default:
@@ -504,6 +507,8 @@ class boss_sindragosa : public CreatureScript
                 summons.Summon(summon);
                 if (summon->GetEntry() == NPC_FROST_BOMB)
                     summon->m_Events.AddEvent(new FrostBombExplosion(summon, me->GetGUID()), summon->m_Events.CalculateTime(5500));
+                else if (summon->GetEntry() == NPC_ICE_TOMB && _isThirdPhase)
+                    summon->AI()->DoAction(DATA_TRIGGER_ASPHYXIATION_LAST_PHASE);
             }
 
             void SummonedCreatureDespawn(Creature* summon)
@@ -726,10 +731,12 @@ class npc_ice_tomb : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
                 _trappedPlayerGUID = 0;
                 _existenceCheckTimer = 1000;
+                _asphyxiationTimer = 0;
             }
 
             uint64 _trappedPlayerGUID;
             uint32 _existenceCheckTimer;
+            uint32 _asphyxiationTimer;
 
             void SetGUID(uint64 guid, int32 type)
             {
@@ -739,9 +746,18 @@ class npc_ice_tomb : public CreatureScript
 
             void DoAction(int32 actionId) override
             {
-                if (actionId == 1)
-                    if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
-                        player->CastSpell(player, SPELL_ASPHYXIATION, true);
+                switch (actionId)
+                {
+                    case DATA_TRIGGER_ASPHYXIATION_AIR_PHASE:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
+                            player->CastSpell(player, SPELL_ASPHYXIATION, true);
+                        break;
+                    case DATA_TRIGGER_ASPHYXIATION_LAST_PHASE:
+                        _asphyxiationTimer = 22500;
+                        break;
+                    default:
+                        break;
+                }
             }
 
             void DamageTaken(Unit*, uint32 &dmg, DamageEffectType, SpellSchoolMask)
@@ -783,6 +799,17 @@ class npc_ice_tomb : public CreatureScript
                 }
                 else
                     _existenceCheckTimer -= diff;
+
+                if (_asphyxiationTimer)
+                {
+                    if (_asphyxiationTimer <= diff)
+                    {
+                        _asphyxiationTimer = 0;
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _trappedPlayerGUID))
+                            player->CastSpell(player, SPELL_ASPHYXIATION, true);
+                    }
+                    else
+                        _asphyxiationTimer -= diff;
             }
         };
 
