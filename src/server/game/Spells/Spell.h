@@ -486,6 +486,8 @@ class Spell
         uint32 m_glyphIndex;
         uint32 m_preCastSpell;
         SpellCastTargets m_targets;
+
+        SpellCastResult m_castError;
         SpellCustomErrors m_customError;
 
         UsedSpellMods m_appliedMods;
