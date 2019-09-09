@@ -1412,7 +1412,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD] = sConfigMgr->GetIntDefault("CreatureCantReachLogThreshold.Amount", 5);
 
     // Chain Pull
-    m_bool_configs[CONFIG_CHAIN_PULL_TIMER] = sConfigMgr->GetBoolDefault("CreatureChainPull.Enable", true);
+    m_bool_configs[CONFIG_CHAIN_PULL_ENABLED] = sConfigMgr->GetBoolDefault("CreatureChainPull.Enable", true);
     m_int_configs[CONFIG_CHAIN_PULL_TIMER] = sConfigMgr->GetIntDefault("CreatureChainPullTimer.Amount", 3000);
     m_float_configs[CONFIG_CHAIN_PULL_RANGE] = sConfigMgr->GetFloatDefault("CreatureChainPullRange.Amount", 8.0f);
 

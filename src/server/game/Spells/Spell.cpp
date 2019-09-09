@@ -567,6 +567,7 @@ m_caster((info->HasAttribute(SPELL_ATTR6_CAST_BY_CHARMER) && caster->GetCharmerO
 , m_spellValue(new SpellValue(m_spellInfo))
 {
     m_customError = SPELL_CUSTOM_ERROR_NONE;
+    m_castError = SPELL_CAST_OK;
     m_skipCheck = skipCheck;
     m_selfContainer = NULL;
     m_referencedFromCurrentSpell = false;
@@ -4267,7 +4268,20 @@ void Spell::finish(bool ok)
 
             // Xinef: Reset cooldown event in case of fail cast
             if (m_spellInfo->IsCooldownStartedOnEvent())
-                m_caster->ToPlayer()->SendCooldownEvent(m_spellInfo, 0, 0, false);
+            {
+                switch (m_castError)
+                {
+                    case SPELL_FAILED_FIZZLE:
+                        break;
+                    case SPELL_FAILED_NOT_READY:
+                        if (m_caster->ToPlayer()->HasSpellCooldown(m_spellInfo->Id))
+                            break;
+                        // no break;
+                    default:
+                        m_caster->ToPlayer()->SendCooldownEvent(m_spellInfo, 0, 0, false);
+                        break;
+                }
+            }
         }
         return;
     }
@@ -4462,8 +4476,13 @@ void Spell::SendCastResult(SpellCastResult result)
     if (m_caster->ToPlayer()->GetSession()->PlayerLoading())  // don't send cast results at loading time
         return;
 
+    m_castError = result;
+
     // Xinef: override every possible result, except for gm fail result... breaks many things and goes unnoticed because of this and makes me rage when i find this out
     if ((_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) && result != SPELL_FAILED_BM_OR_INVISGOD)
+        result = SPELL_FAILED_DONT_REPORT;
+
+    if (result == SPELL_FAILED_FIZZLE && m_spellInfo->IsCooldownStartedOnEvent())
         result = SPELL_FAILED_DONT_REPORT;
 
     SendCastResult(m_caster->ToPlayer(), m_spellInfo, m_cast_count, result, m_customError);
@@ -5391,7 +5410,12 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // Check global cooldown
     if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
-        return SPELL_FAILED_NOT_READY;
+    {
+        if (m_spellInfo->IsCooldownStartedOnEvent())
+            return SPELL_FAILED_FIZZLE;
+        else
+            return SPELL_FAILED_NOT_READY;
+    }
 
     // only triggered spells can be processed an ended battleground
     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)

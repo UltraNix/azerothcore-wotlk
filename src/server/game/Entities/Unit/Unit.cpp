@@ -956,7 +956,8 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         if (victim->GetTypeId() != TYPEID_PLAYER)
         {
             // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
-            if (damagetype != DOT && damage > 0 && !IS_PLAYER_GUID(victim->GetOwnerGUID()) && (!spellProto || !spellProto->HasAura(SPELL_AURA_DAMAGE_SHIELD)))
+            // Damage Shield warrior talent exception, suprisingly it isn't SPELL_AURA_DAMAGE_SHIELD and may cause mobs to follow player forever
+            if (damagetype != DOT && damage > 0 && !IS_PLAYER_GUID(victim->GetOwnerGUID()) && (!spellProto || (!spellProto->HasAura(SPELL_AURA_DAMAGE_SHIELD) && spellProto->Id != 59653)))
                 victim->ToCreature()->SetLastDamagedTime(sWorld->GetGameTime()+MAX_AGGRO_RESET_TIME);
 
             if (attacker)
