@@ -17067,6 +17067,9 @@ void Unit::SetStunned(bool apply)
 {
     if (apply)
     {
+        if (IsCreature() && IsAlive() && GetVictim())
+            SetFacingToObject(GetVictim());
+
         SetTarget(0);
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
@@ -17076,9 +17079,6 @@ void Unit::SetStunned(bool apply)
             SetStandState(UNIT_STAND_STATE_STAND);
 
         SetRooted( true );
-
-        if (IsAlive() && GetVictim())
-            SetFacingToObject(GetVictim());
     }
     else
     {
