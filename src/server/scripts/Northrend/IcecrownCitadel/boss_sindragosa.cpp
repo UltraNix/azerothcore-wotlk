@@ -810,6 +810,7 @@ class npc_ice_tomb : public CreatureScript
                     }
                     else
                         _asphyxiationTimer -= diff;
+                }
             }
         };
 
