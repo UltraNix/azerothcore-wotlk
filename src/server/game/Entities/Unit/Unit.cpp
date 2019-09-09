@@ -19129,7 +19129,7 @@ void Unit::PetSpellFail(const SpellInfo* spellInfo, Unit* target, uint32 result)
         if ((result == SPELL_FAILED_LINE_OF_SIGHT || result == SPELL_FAILED_OUT_OF_RANGE) || !ToCreature()->HasReactState(REACT_PASSIVE))
             if (Unit *owner = GetOwner())
             {
-                if (spellInfo->IsPositive() && IsFriendlyTo(target))
+                if ((spellInfo->IsPositive() || spellInfo->HasEffect(SPELL_EFFECT_DISPEL)) && IsFriendlyTo(target))
                 {
                     AttackStop();
                     charmInfo->SetIsAtStay(false);
