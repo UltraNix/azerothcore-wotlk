@@ -434,11 +434,12 @@ void Unit::Update(uint32 p_time)
     {
         if (int32 base_attack = getAttackTimer(BASE_ATTACK))
             setAttackTimer(BASE_ATTACK, base_attack > 0 ? base_attack - (int32)p_time : 0);
-        if (int32 ranged_attack = getAttackTimer(RANGED_ATTACK))
-            setAttackTimer(RANGED_ATTACK, ranged_attack > 0 ? ranged_attack - (int32)p_time : 0);
         if (int32 off_attack = getAttackTimer(OFF_ATTACK))
             setAttackTimer(OFF_ATTACK, off_attack > 0 ? off_attack - (int32)p_time : 0);
     }
+
+    if (int32 ranged_attack = getAttackTimer(RANGED_ATTACK))
+        setAttackTimer(RANGED_ATTACK, ranged_attack > 0 ? ranged_attack - (int32)p_time : 0);
 
     // update abilities available only for fraction of time
     UpdateReactives(p_time);
