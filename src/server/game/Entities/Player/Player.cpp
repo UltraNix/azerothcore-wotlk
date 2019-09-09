@@ -27310,6 +27310,10 @@ void Player::ActivateSpec(uint8 spec)
         else
             ++iter;
     }
+
+    // Call Stabled Pet: Switching between primary and secondary talent builds resets the cooldown
+    if (getClass() == CLASS_HUNTER)
+        RemoveSpellCooldown(62757, true);
 }
 
 void Player::GetTalentTreePoints(uint8 (&specPoints)[3]) const
