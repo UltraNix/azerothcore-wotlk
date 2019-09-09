@@ -203,11 +203,11 @@ void PetAI::UpdateAI(uint32 diff)
         return;
 
     // Autocast (casted only in combat or persistent spells in any state)
-    if (!me->HasUnitState(UNIT_STATE_CASTING))
+    if (!me->IsCasting())
     {
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER && me->GetCharmInfo()->GetForcedSpell() && me->GetCharmInfo()->GetForcedTarget())
+        if (owner && owner->IsPlayer() && me->GetCharmInfo()->GetForcedSpell() && me->GetCharmInfo()->GetForcedTarget())
         {
-            owner->ToPlayer()->GetSession()->HandlePetActionHelper(me, me->GetGUID(), abs(me->GetCharmInfo()->GetForcedSpell()), ACT_ENABLED, me->GetCharmInfo()->GetForcedTarget());
+            owner->ToPlayer()->GetSession()->HandlePetActionHelper(me, me->GetGUID(), std::abs(me->GetCharmInfo()->GetForcedSpell()), ACT_ENABLED, me->GetCharmInfo()->GetForcedTarget());
 
             // xinef: if spell was casted properly and we are in passive mode, handle return
             if (!me->GetCharmInfo()->GetForcedSpell() && me->HasReactState(REACT_PASSIVE))
@@ -227,8 +227,8 @@ void PetAI::UpdateAI(uint32 diff)
         if (me->IsPet() && me->ToPet()->IsPetGhoul() && me->GetPower(POWER_ENERGY) < 75)
             return;
 
-        typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
-        TargetSpellList targetSpellStore;
+        typedef std::vector<std::pair<Unit*, Spell*>> TargetSpellVector;
+        TargetSpellVector targetSpellStore;
 
         for (uint8 i = 0; i < me->GetPetAutoSpellSize(); ++i)
         {
@@ -249,15 +249,12 @@ void PetAI::UpdateAI(uint32 diff)
 
             if (spellInfo->IsPositive())
             {
-                if (spellInfo->CanBeUsedInCombat())
-                {
-                    // Check if we're in combat or commanded to attack
-                    // Blood Pact exception
-                    if (!me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack() && !(spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo->SpellFamilyFlags[0] & 0x00800000 && spellInfo->HasAttribute(SPELL_ATTR7_CONSOLIDATED_RAID_BUFF)))
-                        continue;
-                }
+                // Check if we're in combat or commanded to attack
+                // AoE Self Cast spells exception, allow to cast them anyway because they give benefitial buffs to player regardless of combat (Furious Howl, Blood Pact)
+                if (spellInfo->CanBeUsedInCombat() && !spellInfo->IsSelfCast() && !me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack())
+                    continue;
 
-                Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
+                Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE);
                 spell->LoadScripts(); // xinef: load for CanAutoCast (calling CheckPetCast)
                 bool spellUsed = false;
 
@@ -269,19 +266,26 @@ void PetAI::UpdateAI(uint32 diff)
 
                 if (target)
                 {
-                    if (CanAttack(target) && spell->CanAutoCast(target))
+                    if (CanAttack(target, spellInfo) && spell->CanAutoCast(target))
                     {
-                        targetSpellStore.push_back(std::make_pair(target, spell));
+                        targetSpellStore.emplace_back(target, spell);
                         spellUsed = true;
                     }
+                }
+
+                if (spellInfo->HasEffect(SPELL_EFFECT_JUMP_DEST))
+                {
+                    if (!spellUsed)
+                        delete spell;
+                    continue; // Pets must only jump to target
                 }
 
                 // No enemy, check friendly
                 if (!spellUsed)
                 {
-                    for (std::set<uint64>::const_iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
+                    for (uint64 guid : m_AllySet)
                     {
-                        Unit* ally = ObjectAccessor::GetUnit(*me, *tar);
+                        Unit* ally = ObjectAccessor::GetUnit(*me, guid);
 
                         //only buff targets that are in combat, unless the spell can only be cast while out of combat
                         if (!ally)
@@ -289,7 +293,7 @@ void PetAI::UpdateAI(uint32 diff)
 
                         if (spell->CanAutoCast(ally))
                         {
-                            targetSpellStore.push_back(std::make_pair(ally, spell));
+                            targetSpellStore.emplace_back(ally, spell);
                             spellUsed = true;
                             break;
                         }
@@ -299,12 +303,13 @@ void PetAI::UpdateAI(uint32 diff)
                 // No valid targets at all
                 if (!spellUsed)
                     delete spell;
+
             }
             else if (me->GetVictim() && CanAttack(me->GetVictim(), spellInfo) && spellInfo->CanBeUsedInCombat())
             {
-                Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
+                Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE);
                 if (spell->CanAutoCast(me->GetVictim()))
-                    targetSpellStore.push_back(std::make_pair(me->GetVictim(), spell));
+                    targetSpellStore.emplace_back(me->GetVictim(), spell);
                 else
                     delete spell;
             }
@@ -313,12 +318,13 @@ void PetAI::UpdateAI(uint32 diff)
         //found units to cast on to
         if (!targetSpellStore.empty())
         {
-            uint32 index = urand(0, targetSpellStore.size() - 1);
+            TargetSpellVector::iterator it = targetSpellStore.begin();
+            std::advance(it, urand(0, targetSpellStore.size() - 1));
 
-            Spell* spell  = targetSpellStore[index].second;
-            Unit*  target = targetSpellStore[index].first;
+            Spell* spell = (*it).second;
+            Unit*  target = (*it).first;
 
-            targetSpellStore.erase(targetSpellStore.begin() + index);
+            targetSpellStore.erase(it);
 
             SpellCastTargets targets;
             targets.SetUnitTarget(target);
@@ -326,21 +332,18 @@ void PetAI::UpdateAI(uint32 diff)
             if (!me->HasInArc(M_PI, target))
             {
                 me->SetInFront(target);
-                if (target && target->GetTypeId() == TYPEID_PLAYER)
-                    me->SendUpdateToPlayer(target->ToPlayer());
-
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    me->SendUpdateToPlayer(owner->ToPlayer());
+                for (Unit* unit : { target, owner })
+                    if (unit && unit->IsPlayer())
+                        me->SendUpdateToPlayer(unit->ToPlayer());
             }
 
             me->AddSpellCooldown(spell->m_spellInfo->Id, 0, 0);
-
             spell->prepare(&targets);
         }
 
         // deleted cached Spell objects
-        for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
-            delete itr->second;
+        for (auto pair : targetSpellStore)
+            delete pair.second;
     }
 }
 
