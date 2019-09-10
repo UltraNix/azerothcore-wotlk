@@ -8071,6 +8071,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 20478: // Armageddon
             spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_PACIFY_SILENCE;
             break;
+        case 54409: // Mana Sapphire
+            spellInfo->SpellFamilyName = SPELLFAMILY_MAGE;
+            break;
         }
 
         //////////////////////////////////////////
