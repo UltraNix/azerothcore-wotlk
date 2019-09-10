@@ -25480,7 +25480,7 @@ void Player::RemoveRunesByAuraEffect(AuraEffect const* aura)
         if (m_runes->runes[i].ConvertAura == aura)
         {
             ConvertRune(i, GetBaseRune(i));
-            SetRuneConvertAura(i, NULL);
+            SetRuneConvertAura(i, nullptr);
         }
     }
 }
@@ -25491,16 +25491,18 @@ void Player::RestoreBaseRune(uint8 index)
     // If rune was converted by a non-pasive aura that still active we should keep it converted
     if (aura && !aura->GetSpellInfo()->HasAttribute(SPELL_ATTR0_PASSIVE))
         return;
+
     ConvertRune(index, GetBaseRune(index));
-    SetRuneConvertAura(index, NULL);
+    SetRuneConvertAura(index, nullptr);
+
     // Don't drop passive talents providing rune convertion
     if (!aura || aura->GetAuraType() != SPELL_AURA_CONVERT_RUNE)
         return;
+
     for (uint8 i = 0; i < MAX_RUNES; ++i)
-    {
         if (aura == m_runes->runes[i].ConvertAura)
             return;
-    }
+
     aura->GetBase()->Remove();
 }
 
@@ -25559,7 +25561,7 @@ void Player::InitRunes()
         SetCurrentRune(i, runeSlotTypes[i]);                           // init current types
         SetRuneCooldown(i, 0);                                         // reset cooldowns
         SetGracePeriod(i, 0);                                          // xinef: reset grace period
-        SetRuneConvertAura(i, NULL);
+        SetRuneConvertAura(i, nullptr);
         m_runes->SetRuneState(i);
     }
 
