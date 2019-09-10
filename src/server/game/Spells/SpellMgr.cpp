@@ -7025,6 +7025,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 71274: // Ymirjar Frostbinder, Frozen Orb
             spellInfo->EffectImplicitTargetA[0] = 6;
             break;
+        case 72272:
+        case 72273: // Vile Gas
+            spellInfo->AttributesEx3 |= (SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_ONLY_TARGET_PLAYERS);
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            break;
         case 71089:
         case 71090: // Bubbling Pus
         case 69195:
@@ -7035,8 +7040,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 71218:
         case 73019:
         case 73020:
-        case 72272:
-        case 72273: // Vile Gas
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
         case 69248:
         case 69244:
