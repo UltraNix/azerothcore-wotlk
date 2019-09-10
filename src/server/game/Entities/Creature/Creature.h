@@ -717,8 +717,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool CanNotReachTarget() const { return m_cannotReachTarget; }
         inline bool const CanChainPull() const
         {
-            return sWorld->getBoolConfig(CONFIG_CHAIN_PULL_ENABLED) && IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) && !m_AlreadyCallAssistance;
+            return sWorld->getBoolConfig(CONFIG_CHAIN_PULL_ENABLED) && IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) && !m_isChainPullDisabled;
         }
+        void SetChainPullDisabled(bool val) { m_isChainPullDisabled = val; }
 
         void SetPosition(float x, float y, float z, float o);
         void SetPosition(const Position &pos) { SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()); }
@@ -842,6 +843,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool m_AI_locked;
 
         TimeTrackerSmall m_chainPullTimer;
+        bool m_isChainPullDisabled;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
