@@ -2199,9 +2199,13 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
         for (std::list<WorldObject*>::iterator itr = tempTargets.begin(); itr != tempTargets.end();)
         {
             std::list<WorldObject*>::iterator checkItr = itr++;
-            if (!m_caster->HasInArc(static_cast<float>(M_PI), *checkItr))
-                tempTargets.erase(checkItr);
-            else if (allowedArc > 0.0f && !m_caster->HasInArc(allowedArc, *checkItr, (*checkItr)->GetObjectSize()))
+            if (allowedArc > 0.0f)
+            {
+                // Exception for Seal of Command
+                if (!m_spellInfo->Id != 20424 && !m_caster->HasInArc(allowedArc, *checkItr, (*checkItr)->GetObjectSize()))
+                    tempTargets.erase(checkItr);
+            }
+            else if (!m_caster->HasInArc(static_cast<float>(M_PI), *checkItr))
                 tempTargets.erase(checkItr);
         }
     }
