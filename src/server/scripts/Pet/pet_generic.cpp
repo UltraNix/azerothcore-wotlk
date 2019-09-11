@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -113,7 +113,7 @@ public:
     {
         uint64 ownerGUID;
         EventMap events;
-        npc_pet_gen_soul_trader_beaconAI(Creature *c) : ScriptedAI(c) 
+        npc_pet_gen_soul_trader_beaconAI(Creature *c) : ScriptedAI(c)
         {
             events.Reset();
             events.ScheduleEvent(EVENT_INITIAL_TALK, 0);
@@ -175,7 +175,7 @@ enum eArgentPony
     SPELL_AURA_SHOP_S                = 67377,
     SPELL_AURA_BANK_S                = 67368,
     SPELL_AURA_TIRED_S                = 67401,
-    
+
     SPELL_AURA_BANK_G                = 68849,
     SPELL_AURA_POSTMAN_G            = 68850,
     SPELL_AURA_SHOP_G                = 68851,
@@ -225,7 +225,7 @@ public:
 
     struct npc_pet_gen_argent_pony_bridleAI : public ScriptedAI
     {
-        npc_pet_gen_argent_pony_bridleAI(Creature *c) : ScriptedAI(c) 
+        npc_pet_gen_argent_pony_bridleAI(Creature *c) : ScriptedAI(c)
         {
             _state = ARGENT_PONY_STATE_NONE;
             _init = false;
@@ -326,7 +326,7 @@ public:
         {
             if (param == 0)
                 return _state;
-            
+
             return _banners[param];
         }
 
@@ -342,7 +342,7 @@ public:
 
             _state = param;
         }
-        
+
         private:
             bool _init;
             uint8 _state;
@@ -372,7 +372,7 @@ public:
         for (uint8 i = RACE_HUMAN; i < MAX_RACES; ++i)
             if (creature->AI()->GetData(i) == uint32(true))
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, argentBanners[i].text, GOSSIP_SENDER_MAIN, argentBanners[i].spell);
-        
+
         player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         return true;
     }
@@ -447,7 +447,7 @@ public:
 
     struct npc_pet_gen_target_following_bombAI : public NullCreatureAI
     {
-        npc_pet_gen_target_following_bombAI(Creature *c) : NullCreatureAI(c) 
+        npc_pet_gen_target_following_bombAI(Creature *c) : NullCreatureAI(c)
         {
             checkTimer = 0;
             bombSpellId = 0;
@@ -502,7 +502,7 @@ public:
 
     struct npc_pet_gen_gnomish_flame_turretAI : public ScriptedAI
     {
-        npc_pet_gen_gnomish_flame_turretAI(Creature *c) : ScriptedAI(c) 
+        npc_pet_gen_gnomish_flame_turretAI(Creature *c) : ScriptedAI(c)
         {
             checkTimer = 0;
         }
@@ -539,66 +539,6 @@ public:
     CreatureAI* GetAI(Creature* creature) const
     {
         return new npc_pet_gen_gnomish_flame_turretAI (creature);
-    }
-};
-
-class npc_pet_gen_valkyr_guardian : public CreatureScript
-{
-public:
-    npc_pet_gen_valkyr_guardian() : CreatureScript("npc_pet_gen_valkyr_guardian") { }
-
-    struct npc_pet_gen_valkyr_guardianAI : public ScriptedAI
-    {
-        npc_pet_gen_valkyr_guardianAI(Creature *c) : ScriptedAI(c)
-        {
-            me->SetReactState(REACT_DEFENSIVE);
-            me->SetDisableGravity(true);
-            me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
-            targetCheck = 0;
-        }
-
-        uint32 targetCheck;
-
-        void InitializeAI()
-        {
-            if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
-                if (Unit* target = owner->GetSelectedUnit())
-                    if (!owner->IsFriendlyTo(target))
-                        AttackStart(target);
-        }
-
-        void OwnerAttacked(Unit* target)
-        {
-            if (!target || (me->GetVictim() && me->GetVictim()->IsAlive() && !me->GetVictim()->HasBreakableByDamageCrowdControlAura()))
-                return;
-
-            AttackStart(target);
-        }
-
-        void UpdateAI(uint32 diff)
-        {
-            if (!UpdateVictim())
-            {
-                targetCheck += diff;
-                if (targetCheck > 1000)
-                {
-                    targetCheck = 0;
-                    if (Unit* owner = me->GetCharmerOrOwner())
-                        if (Unit* ownerVictim = owner->GetVictim())
-                            if (!ownerVictim->HasBreakableByDamageCrowdControlAura())
-                                AttackStart(ownerVictim);
-                }
-                return;
-            }
-
-            if (me->isAttackReady() && !me->GetVictim()->HasBreakableByDamageCrowdControlAura())
-                DoSpellAttackIfReady(me->GetCreatureTemplate()->spells[0]);
-        }
-    };
-
-    CreatureAI* GetAI(Creature* pCreature) const
-    {
-        return new npc_pet_gen_valkyr_guardianAI (pCreature);
     }
 };
 
@@ -973,6 +913,97 @@ public:
     }
 };
 
+enum GuardianPetEntries
+{
+    NPC_NIBELUNG_VALKYR_N = 38391,
+    NPC_NIBELUNG_VALKYR_H = 38392
+};
+
+struct npc_guardian_petAI : public ScriptedAI
+{
+    npc_guardian_petAI(Creature* creature) : ScriptedAI(creature) { }
+
+    bool IsValidTarget(Unit const* unit, Player const* owner) const
+    {
+        return me->CanCreatureAttack(unit, true) && unit->IsInCombatWith(owner);
+    }
+
+    void InitializeSummonProperties()
+    {
+        switch (me->GetEntry())
+        {
+            case NPC_NIBELUNG_VALKYR_N:
+            case NPC_NIBELUNG_VALKYR_H:
+                me->SetDisableGravity(true);
+                me->AddUnitState(UNIT_STATE_NO_ENVIRONMENT_UPD);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void IsSummonedBy(Unit* /*summoner*/) override
+    {
+        InitializeSummonProperties();
+        if (Unit* target = GetValidTargetForGuardian())
+            AttackStart(target);
+        _changeTargetTimer.Reset(1000);
+    }
+
+    Unit* GetValidTargetForGuardian() const
+    {
+        Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!owner)
+            return nullptr;
+
+        // If current target of owner is attackable then stop here
+        if (Unit* unit = owner->GetSelectedUnit())
+            if (IsValidTarget(unit, owner))
+                return unit;
+
+        // Otherwise just check attackable targets in range in combat with owner and pick closest one
+        Unit* unit = nullptr;
+        Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck u_check(me, me, owner, 25.0f);
+        Trinity::UnitLastSearcher<Trinity::NearestUnfriendlyInCombatWithOwnerNoTotemUnitInObjectRangeCheck> checker(me, unit, u_check);
+        me->VisitNearbyObject(25.0f, checker);
+        return unit;
+    }
+
+    bool CanAIAttack(Unit const* target) const override
+    {
+        Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!owner)
+            return true;
+
+        return target->IsInCombatWith(owner);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (me->GetVictim() || UpdateVictim())
+        {
+            _changeTargetTimer.Update(diff);
+            if (_changeTargetTimer.Passed())
+            {
+                // If we don't have target or player has other target find appropriate one
+                Unit* newTarget = GetValidTargetForGuardian();
+                if (newTarget && (!me->GetVictim() || me->GetVictim() != newTarget))
+                    AttackStart(newTarget);
+
+                _changeTargetTimer.Reset(1000);
+            }
+
+            if (uint32 spellId = me->m_spells[0])
+                DoSpellAttackIfReady(spellId);
+            else
+                DoMeleeAttackIfReady();
+        }
+    }
+
+    private:
+        TimeTrackerSmall _changeTargetTimer;
+};
+
 void AddSC_generic_pet_scripts()
 {
     new npc_pet_gen_mojo();
@@ -980,11 +1011,11 @@ void AddSC_generic_pet_scripts()
     new npc_pet_gen_argent_pony_bridle();
     new npc_pet_gen_target_following_bomb();
     new npc_pet_gen_gnomish_flame_turret();
-    new npc_pet_gen_valkyr_guardian();
     new spell_pet_gen_valkyr_guardian_smite();
     new npc_pet_gen_imp_in_a_bottle();
     new npc_pet_gen_wind_rider_cub();
     new npc_pet_gen_plump_turkey();
     new npc_pet_gen_toxic_wasteling();
     new npc_pet_gen_fetch_ball();
+    new CreatureAILoader<npc_guardian_petAI>("npc_guardian_pet");
 }

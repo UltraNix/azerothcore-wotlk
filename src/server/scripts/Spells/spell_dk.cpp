@@ -2661,6 +2661,27 @@ class spell_ebon_gargoyle_strike_hack_requested_SpellScript : public SpellScript
     }
 };
 
+// 49027, 49542, 49543 - Bloodworms
+class spell_bloodworms_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_bloodworms_AuraScript);
+
+    bool CheckProc(ProcEventInfo& /*eventInfo*/)
+    {
+        // Sanity check, don't allow to spawn too much
+        if (Unit* caster = GetCaster())
+            if (!caster->m_Controlled.empty())
+                return std::count_if(std::begin(caster->m_Controlled), std::end(caster->m_Controlled), [](Unit* controlled) { return controlled->GetEntry() == NPC_BLOODWORM; }) < 15;
+
+        return false;
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_bloodworms_AuraScript::CheckProc);
+    }
+};
+
 void AddSC_deathknight_spell_scripts()
 {
     // Ours
@@ -2684,6 +2705,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_scent_of_blood_trigger();
     new spell_dk_pet_scaling();
     new SpellScriptLoaderEx<spell_ebon_gargoyle_strike_hack_requested_SpellScript>("spell_ebon_gargoyle_strike_hack_requested");
+    new AuraScriptLoaderEx<spell_bloodworms_AuraScript>("spell_bloodworms");
 
     // Theirs
     new spell_dk_anti_magic_shell_raid();
