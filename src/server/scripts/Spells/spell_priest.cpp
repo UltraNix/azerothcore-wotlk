@@ -1012,11 +1012,31 @@ class spell_pri_inner_fire_AuraScript : public AuraScript
     }
 };
 
+// 14751 - Inner Focus
+class spell_pri_inner_focus_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_pri_inner_focus_AuraScript);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+            return spellInfo->ManaCost > 0;
+
+        return false;
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_pri_inner_focus_AuraScript::CheckProc);
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     // Ours
     new spell_pri_shadowfiend_scaling();
     new AuraScriptLoaderEx<spell_pri_inner_fire_AuraScript>("spell_pri_inner_fire");
+    new AuraScriptLoaderEx<spell_pri_inner_focus_AuraScript>("spell_pri_inner_focus");
 
     // Theirs
     new spell_pri_circle_of_healing();
