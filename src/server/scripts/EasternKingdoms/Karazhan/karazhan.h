@@ -56,7 +56,12 @@ enum DataTypes
     DATA_STRAWMAN,
     DATA_TINHEAD,
     DATA_ROAR,
-    DATA_GO_BLACKENED_URN
+    DATA_GO_BLACKENED_URN,
+
+    DATA_CHESS_DAMAGE,
+    DATA_CHESS_EVENT,
+    DATA_CHESS_EVENT_TEAM,
+    DATA_CHESS_STATUS,
 };
 
 enum InstanceOperaEvents
@@ -89,7 +94,8 @@ enum KarazhanNPCs
     NPC_ATTUMEN_UNMOUNTED               = 15550,
     NPC_ATTUMEN_MOUNTED                 = 16152,
     NPC_MIDNIGHT                        = 16151,
-    NPC_NIGHTBANE                       = 17225
+    NPC_NIGHTBANE                       = 17225,
+    NPC_CHESS_STATUS                    = 22520,
 };
 
 enum KarazhanGOs

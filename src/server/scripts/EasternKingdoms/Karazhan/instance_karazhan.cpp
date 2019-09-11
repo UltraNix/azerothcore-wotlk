@@ -42,6 +42,7 @@ ObjectData const creatureData[] =
     { NPC_STRAWMAN          , DATA_STRAWMAN },
     { NPC_TINHEAD           , DATA_TINHEAD },
     { NPC_ROAR              , DATA_ROAR },
+    { NPC_CHESS_STATUS      , DATA_CHESS_STATUS},
     { 0                     , 0 } // END
 };
 
@@ -83,6 +84,11 @@ struct instance_karazhan_InstanceMapScript : public InstanceScript
     {
         SetHeaders(DataHeader);
         SetBossNumber(MAX_ENCOUNTER);
+        
+    }
+
+    void Initialize() override
+    {
         LoadObjectData(creatureData, gameObjectData);
         LoadDoorData(doorData);
 
@@ -91,6 +97,10 @@ struct instance_karazhan_InstanceMapScript : public InstanceScript
         _selectedRare = RAND(NPC_SHADIKITH_THE_GLIDER, NPC_HYAKISS_THE_LURKER, NPC_ROKAD_THE_RAVAGER);
         _operaEvent = RAND(OPERA_EVENT_RED_RIDING_HOOD, OPERA_EVENT_WIZARD_OF_OZ, OPERA_EVENT_ROMULO_AND_JULIANNE);
         _servantQuarterBossAggroed = false;
+
+        _chessEventTeam = 0;
+        _chessDamage = 0;
+        _chessEvent = 0;
     }
 
     void SetData(uint32 field, uint32 data) override
@@ -106,6 +116,15 @@ struct instance_karazhan_InstanceMapScript : public InstanceScript
                         if (Creature* creature = instance->GetCreature(guid))
                             if (creature->IsAIEnabled && creature->GetEntry() == GetData(DATA_SELECTED_RARE))
                                 creature->AI()->DoAction(0);
+                break;
+            case DATA_CHESS_EVENT_TEAM:
+                _chessEventTeam = data;
+                break;
+            case DATA_CHESS_DAMAGE:
+                _chessDamage = data;
+                break;
+            case DATA_CHESS_EVENT:
+                _chessEvent = data;
                 break;
             default:
                 break;
@@ -206,6 +225,12 @@ struct instance_karazhan_InstanceMapScript : public InstanceScript
                 return _operaEvent;
             case DATA_SERVANT_QUARTERS_AGGRO:
                 return static_cast<uint32>(_servantQuarterBossAggroed);
+            case DATA_CHESS_EVENT_TEAM:
+                return _chessEventTeam;
+            case DATA_CHESS_DAMAGE:
+                return _chessDamage;
+            case DATA_CHESS_EVENT:
+                return _chessEvent;
         }
 
         return 0;
@@ -230,6 +255,10 @@ struct instance_karazhan_InstanceMapScript : public InstanceScript
         uint32 _operaEvent;
         bool _servantQuarterBossAggroed;
         std::array<uint64, 3> _servantQuarterGUIDs;
+
+        uint32 _chessEventTeam;
+        uint32 _chessDamage;
+        uint32 _chessEvent;
 };
 
 void AddSC_instance_karazhan()

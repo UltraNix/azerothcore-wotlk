@@ -17305,7 +17305,9 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
     if (playerCharmer)
     {
         playerCharmer->StopCastingCharm();
-        playerCharmer->StopCastingBindSight();
+        
+        if (aurApp && aurApp->GetBase()->GetId() != 30019) // Karazhan Chess Event - Control Piece
+            playerCharmer->StopCastingBindSight();
     }
 
     // Charmed stop charming
@@ -17337,6 +17339,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
     {
         if (ToCreature()->CanChangeAI())
             ToCreature()->AI()->OnCharmed(true);
+
         GetMotionMaster()->MoveIdle();
 
         // Xinef: If creature can fly, add normal player flying flag (fixes speed)

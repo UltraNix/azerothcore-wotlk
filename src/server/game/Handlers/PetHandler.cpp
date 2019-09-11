@@ -501,6 +501,9 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
     switch (flag)
     {
         case ACT_COMMAND:                                   //0x07
+            // Possessed or shared vision pets are only able to attack
+            if ((pet->isPossessed() || pet->HasAuraType(SPELL_AURA_BIND_SIGHT)) && spellid != COMMAND_ATTACK && spellid != COMMAND_ABANDON)
+                return;
             switch (spellid)
             {
                 case COMMAND_STAY:                          //flat=1792  //STAY
@@ -621,7 +624,7 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                     break;
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
-                    if (pet->GetEntry() == 250011)
+                    if (pet->GetEntry() == 250011 || pet->HasAura(30019) /* Karazhan Chess event - Control piece */)
                         return;
 
                     if (pet->GetCharmerGUID() == GetPlayer()->GetGUID())
@@ -1216,8 +1219,10 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     // Xinef: Send default target, fixes return on NeedExplicitUnitTarget
     Unit* target = targets.GetUnitTarget();
     if (!target && spell->m_spellInfo->NeedsExplicitUnitTarget())
+    {
         target = _player->GetSelectedUnit();
-
+    }
+    
     SpellCastResult result = spell->CheckPetCast(target);
 
     if (result == SPELL_CAST_OK)

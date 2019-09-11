@@ -5358,7 +5358,50 @@ void SpellMgr::LoadDbcDataCorrections()
         case 37098: // Rain of Bones
             spellInfo->EffectImplicitTargetA[EFFECT_1] = TARGET_DEST_DEST;
             break;
-
+        case 37454: // Chess event: Bite
+        case 37453: // Chess event: Smash
+        case 37413: // Chess event: Vicious Strike
+        case 37406: // Chess event: Heroic Blow
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;    // effect radius from 8 to 5 yd
+            break;
+        case 37502: // Chess event: Howl
+        case 37498: // Chess event: Stomp
+            spellInfo->EffectRadiusIndex[0] = 29;    // effect radius from 8 to 6 yd
+            break;
+        case 37461: // Chess event: Shadow Spear
+            spellInfo->EffectRadiusIndex[0] = 18;   // effect radius from 18 to 15 yd
+            break;
+        case 37474: // Chess event: Cleave
+        case 37476: // Chess event: Sweep
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CONE_ENTRY;
+            break;
+        case 37146: // Move
+        case 30012: // Move
+        case 37144: // Move
+        case 37148: // Move
+        case 37151: // Move
+        case 37152: // Move
+        case 37153: // Move
+        case 30284: // Change Facing
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->MaxAffectedTargets = 1;
+            spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_2_YARDS;
+            break;
+        case 32745: // Chess: Disabled Square Transform
+        case 32261: // Karazhan - Chess: Create Move Marker
+        case 39383: // Karazhan Fury of Medivh
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_UNTARGETABLE;
+            break;
+        case 32247: // Karazhan - Chess NPC Action : Melee Attack : DAMAGE(Footman)
+            spellInfo->rangeIndex = 34;
+            break;
+        case 39331: // Karazhan - Chess: Game In Session
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            spellInfo->DurationIndex = 21;  // infinity
+            spellInfo->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA_FRIEND;
+            spellInfo->EffectRadiusIndex[0] = 27;   // effect radius from 65 to 50 yd
+            break;
         // Sunwell Plateu
         // Activate Sunblade Protecto
         case 46475:

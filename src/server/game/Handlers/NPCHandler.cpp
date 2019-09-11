@@ -380,7 +380,8 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recvData)
         return;
 
     // xinef: do not allow to open gossip when npc is in combat
-    if (unit->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_GOSSIP && unit->IsInCombat()) // should work on all flags?
+    // Piootrek: allow to open gossip when npc is in combat in Karazhan (needed for chess event encounter)
+    if (unit->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_GOSSIP && unit->IsInCombat() && unit->GetMapId() != 532) // should work on all flags?
         return;
 
     // set faction visible if needed
