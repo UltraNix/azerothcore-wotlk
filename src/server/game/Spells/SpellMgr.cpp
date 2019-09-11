@@ -737,10 +737,11 @@ SpellProcEventEntry const* SpellMgr::GetSpellProcEvent(uint32 spellId) const
     return NULL;
 }
 
-bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellInfo const* procSpell, uint32 procFlags, uint32 procExtra, bool active) const
+bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, SpellProcEventEntry const* spellProcEvent, uint32 EventProcFlag, SpellInfo const* procSpell, uint32 procFlags, uint32 procExtra, uint32 procPhase, bool active) const
 {
     // No extra req need
     uint32 procEvent_procEx = PROC_EX_NONE;
+    uint32 procEvent_procPhase = PROC_SPELL_PHASE_HIT;
 
     if (spellProcEvent && spellProcEvent->procEx & PROC_EX_NO_OVERHEAL)
         return procExtra & PROC_EX_NO_OVERHEAL;
@@ -800,6 +801,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, Spell
     {
         // Store extra req
         procEvent_procEx = spellProcEvent->procEx;
+        procEvent_procPhase = spellProcEvent->procPhase;
 
         // For melee triggers
         if (procSpell == NULL)
@@ -831,7 +833,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, Spell
         }
     }
 
-    if(spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK)
+    if (spellProto->AttributesCu & SPELL_ATTR0_CU_IGNORE_FAMILY_PROC_CHECK)
         hasFamilyMask = true;
 
     if (procExtra & (PROC_EX_INTERNAL_REQ_FAMILY))
@@ -839,6 +841,9 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellInfo const* spellProto, Spell
         if (!hasFamilyMask)
             return false;
     }
+
+    if (!(procEvent_procPhase & procPhase))
+        return false;
 
     // Check for extra req (if none) and hit/crit
     if (procEvent_procEx == PROC_EX_NONE)
@@ -1725,8 +1730,8 @@ void SpellMgr::LoadSpellProcEvents()
 
     mSpellProcEventMap.clear();                             // need for reload case
 
-    //                                                0      1           2                3                 4                 5                 6          7       8        9             10
-    QueryResult result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
+    //                                                0      1           2                3                 4                 5                 6          7       8         9        10            11
+    QueryResult result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, procFlags, procEx, procPhase, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
     if (!result)
     {
         sLog->outString(">> Loaded 0 spell proc event conditions. DB table `spell_proc_event` is empty.");
@@ -1776,9 +1781,14 @@ void SpellMgr::LoadSpellProcEvents()
         spellProcEvent.spellFamilyMask[2] = fields[5].GetUInt32();
         spellProcEvent.procFlags          = fields[6].GetUInt32();
         spellProcEvent.procEx             = fields[7].GetUInt32();
-        spellProcEvent.ppmRate            = fields[8].GetFloat();
-        spellProcEvent.customChance       = fields[9].GetFloat();
-        spellProcEvent.cooldown           = fields[10].GetUInt32();
+        spellProcEvent.procPhase          = fields[8].GetUInt32();
+        spellProcEvent.ppmRate            = fields[9].GetFloat();
+        spellProcEvent.customChance       = fields[10].GetFloat();
+        spellProcEvent.cooldown           = fields[11].GetUInt32();
+
+        // PROC_PHASE_NONE is by default PROC_PHASE_HIT
+        if (spellProcEvent.procPhase == PROC_SPELL_PHASE_NONE)
+            spellProcEvent.procPhase = PROC_SPELL_PHASE_HIT;
 
         while (spellInfo)
         {
