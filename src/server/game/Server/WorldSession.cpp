@@ -923,8 +923,9 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo* mi)
     // pussywizard: remade this condition
     bool canFly = GetPlayer()->m_mover->HasAuraType(SPELL_AURA_FLY) || GetPlayer()->m_mover->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) ||
                   GetPlayer()->m_mover->GetTypeId() == TYPEID_UNIT && GetPlayer()->m_mover->ToCreature()->CanFly() || GetSecurity() > SEC_PLAYER;
-    REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY) && !canFly,
-        MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY);
+
+    if (mi->HasMovementFlag(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY) && !canFly)
+        GetPlayer()->m_mover->SetCanFly(false);
 
     // pussywizard: added condition for disable gravity
     REMOVE_VIOLATING_FLAGS(mi->HasMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY) && (GetPlayer()->m_mover->GetTypeId() == TYPEID_PLAYER || !canFly),
