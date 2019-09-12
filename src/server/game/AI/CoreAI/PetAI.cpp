@@ -251,7 +251,7 @@ void PetAI::UpdateAI(uint32 diff)
             {
                 // Check if we're in combat or commanded to attack
                 // AoE Self Cast spells exception, allow to cast them anyway because they give benefitial buffs to player regardless of combat (Furious Howl, Blood Pact)
-                if (spellInfo->CanBeUsedInCombat() && spellInfo->GetDuration() != -1 && !me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack())
+                if (spellInfo->CanBeUsedInCombat() && spellInfo->GetDuration() != -1 && !me->IsPetInCombat())
                     continue;
 
                 Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE);
