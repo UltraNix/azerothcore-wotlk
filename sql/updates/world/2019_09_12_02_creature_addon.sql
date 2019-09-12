@@ -1,0 +1,1 @@
+DELETE FROM `creature_addon` WHERE `guid` IN (129722, 129726, 130009, 130014);
