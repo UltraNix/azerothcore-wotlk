@@ -40,7 +40,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
     protected:
         TargetedMovementGeneratorMedium(Unit* target, float offset, float angle) :
             TargetedMovementGeneratorBase(target), lastPathingFailMSTime(0),
-            i_recheckDistance(0), i_recheckDistanceForced(2500), i_offset(offset), i_angle(angle),
+            i_recheckDistance(0), i_recheckDistanceForced(2500), i_recheckBackout(0), i_offset(offset), i_angle(angle),
             i_recalculateTravel(false), i_targetReached(false)
         {
         }
@@ -52,7 +52,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
         void unitSpeedChanged() { i_recalculateTravel = true; }
 
     protected:
-        void _setTargetLocation(T* owner, bool initial);
+        void _setTargetLocation(T* owner, bool initial, bool InBounds = false);
         bool _handleAsyncPathRequest( T* owner );
 
         std::pair<Movement::AsyncPathResult, bool > m_pathRequest;
@@ -62,6 +62,7 @@ class TargetedMovementGeneratorMedium : public MovementGeneratorMedium< T, D >, 
 
         TimeTrackerSmall i_recheckDistance;
         TimeTrackerSmall i_recheckDistanceForced;
+        TimeTrackerSmall i_recheckBackout;
         float i_offset;
         float i_angle;
         bool i_recalculateTravel : 1;

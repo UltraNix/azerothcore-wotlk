@@ -33,10 +33,31 @@
 
 #include <cmath>
 
-template<class T, typename D>
-void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool initial)
+static bool ValidateBackout(Unit* owner, Unit* target)
 {
-    if (!i_target.isValid() || !i_target->IsInWorld() || !owner->IsInMap(i_target.getTarget()))
+    //! Big units should ignore backout
+    if (owner->GetCombatReach() * 0.25f > target->GetCombatReach())
+        return false;
+
+    //! Too much Z difference
+    if (Creature* creature = owner->ToCreature())
+        if (!creature->CanFly() && (creature->GetDistanceZ(target) > CREATURE_Z_ATTACK_RANGE + creature->m_CombatDistance))
+            return false;
+
+    return true;
+}
+
+static bool IsInBounds(Unit* owner, Unit* target, float penetrationPct = 0.5f)
+{
+    float radius = (owner->GetCombatReach() + target->GetCombatReach()) * penetrationPct;
+    float distance = (G3D::Vector3(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()) - G3D::Vector3(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ())).squaredLength();
+    return distance < radius * radius;
+}
+
+template<class T, typename D>
+void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool initial, bool InBounds)
+{
+    if (!i_target.isValid() || !i_target->IsInWorld() || !owner->IsInMap(GetTarget()))
         return;
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
@@ -70,7 +91,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     if (!i_offset)
     {
         float allowedRange = MELEE_RANGE;
-        if ((!initial || (owner->movespline->Finalized() && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinMeleeRange(owner) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
+        if ((!initial || (owner->movespline->Finalized() && GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && !InBounds && i_target->IsWithinMeleeRange(owner) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
         {
             if (owner->GetTypeId() == TYPEID_UNIT)
                 owner->ToCreature()->SetCannotReachTarget(false);
@@ -108,7 +129,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
             size = owner->GetObjectSize();
         }
 
-        if ((!initial || (owner->movespline->Finalized() && this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinDistInMap(owner, dist) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
+        if ((!initial || (owner->movespline->Finalized() && GetMovementGeneratorType() == CHASE_MOTION_TYPE)) && i_target->IsWithinDistInMap(owner, dist) && i_target->IsWithinLOS(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ()))
         {
             if (owner->GetTypeId() == TYPEID_UNIT)
                 owner->ToCreature()->SetCannotReachTarget(false);
@@ -155,7 +176,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
                                 Movement::MoveSplineInit init( owner );
                                 init.MoveTo(x,y,z);
                                 if (i_angle == 0.f)
-                                    init.SetFacing(i_target.getTarget());
+                                    init.SetFacing(GetTarget());
 
                                 init.SetWalk(((D*)this)->EnableWalking());
                                 init.Launch();
@@ -164,7 +185,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
                             if (pillar->GetGoState() == GO_STATE_ACTIVE || pillar->GetGoState() == GO_STATE_READY && pillar->ToTransport()->GetPathProgress() > 0)
                             {
                                 Position pos;
-                                owner->GetFirstCollisionPositionForTotem(pos, owner->GetExactDist2d(i_target.getTarget()), owner->GetAngle(i_target.getTarget())-owner->GetOrientation(), false);
+                                owner->GetFirstCollisionPositionForTotem(pos, owner->GetExactDist2d(GetTarget()), owner->GetAngle(GetTarget()) - owner->GetOrientation(), false);
                                 x = pos.GetPositionX();
                                 y = pos.GetPositionY();
                                 z = 28.28f;
@@ -190,7 +211,7 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     // Using the same condition for facing target as the one that is used for SetInFront on movement end
     // - applies to ChaseMovementGenerator mostly
     if (i_angle == 0.f)
-        init.SetFacing(i_target.getTarget());
+        init.SetFacing(GetTarget());
 
     if (owner->GetTypeId() == TYPEID_UNIT)
         owner->ToCreature()->SetCannotReachTarget(false);
@@ -255,7 +276,7 @@ bool TargetedMovementGeneratorMedium<T, D>::_handleAsyncPathRequest( T* owner )
             init.MovebyPath( points );
             if ( i_angle == 0.f )
             {
-                init.SetFacing( i_target.getTarget() );
+                init.SetFacing( GetTarget() );
             }
 
             init.SetWalk( ( ( D* )this )->EnableWalking() );
@@ -354,16 +375,28 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
 
         float dist = (dest - G3D::Vector3(i_target->GetPositionX(),i_target->GetPositionY(),i_target->GetPositionZ())).squaredLength();
         float targetMoveDistSq = i_target->GetExactDistSq(&lastTargetXYZ);
-        if (dist >= allowed_dist_sq || (!i_offset && targetMoveDistSq >= 1.5f*1.5f))
+
+        bool isInBounds = false;
+        if (i_targetReached && ValidateBackout(owner, *i_target))
+        {
+            if (i_recheckBackout.Update(time_diff))
+                if (IsInBounds(owner, *i_target))
+                {
+                    i_recheckBackout.Reset(1000);
+                    isInBounds = true;
+                }
+        }
+
+        if (dist >= allowed_dist_sq || (!i_offset && (targetMoveDistSq >= 1.5f*1.5f || isInBounds)))
             if (targetMoveDistSq >= 0.1f*0.1f || owner->GetExactDistSq(&lastOwnerXYZ) >= 0.1f*0.1f)
-                _setTargetLocation(owner, false);
+                _setTargetLocation(owner, false, isInBounds);
     }
 
     if (owner->movespline->Finalized())
     {
         static_cast<D*>(this)->MovementInform(owner);
-        if (i_angle == 0.f && !owner->HasInArc(0.01f, i_target.getTarget()))
-            owner->SetInFront(i_target.getTarget());
+        if (i_angle == 0.f && !owner->HasInArc(0.01f, GetTarget()))
+            owner->SetInFront(GetTarget());
 
         if (!i_targetReached)
         {
@@ -383,8 +416,8 @@ bool TargetedMovementGeneratorMedium<T,D>::DoUpdate(T* owner, uint32 time_diff)
 template<class T>
 void ChaseMovementGenerator<T>::_reachTarget(T* owner)
 {
-    if (owner->IsWithinMeleeRange(this->i_target.getTarget()))
-        owner->Attack(this->i_target.getTarget(),true);
+    if (owner->IsWithinMeleeRange(GetTarget()))
+        owner->Attack(GetTarget(), true);
 }
 
 template<>
@@ -424,14 +457,14 @@ void ChaseMovementGenerator<Creature>::MovementInform(Creature* unit)
 {
     // Pass back the GUIDLow of the target. If it is pet's owner then PetAI will handle
     if (unit->AI())
-        unit->AI()->MovementInform(CHASE_MOTION_TYPE, i_target.getTarget()->GetGUIDLow());
+        unit->AI()->MovementInform(CHASE_MOTION_TYPE, GetTarget()->GetGUIDLow());
 }
 
 //-----------------------------------------------//
 template bool TargetedMovementGeneratorMedium<Player, ChaseMovementGenerator<Player> >::_handleAsyncPathRequest( Player* );
 template bool TargetedMovementGeneratorMedium<Creature, ChaseMovementGenerator<Creature> >::_handleAsyncPathRequest( Creature* );
-template void TargetedMovementGeneratorMedium<Player,ChaseMovementGenerator<Player> >::_setTargetLocation(Player*, bool initial);
-template void TargetedMovementGeneratorMedium<Creature,ChaseMovementGenerator<Creature> >::_setTargetLocation(Creature*, bool initial);
+template void TargetedMovementGeneratorMedium<Player,ChaseMovementGenerator<Player> >::_setTargetLocation(Player*, bool, bool);
+template void TargetedMovementGeneratorMedium<Creature,ChaseMovementGenerator<Creature> >::_setTargetLocation(Creature*, bool, bool);
 template bool TargetedMovementGeneratorMedium<Player,ChaseMovementGenerator<Player> >::DoUpdate(Player*, uint32);
 template bool TargetedMovementGeneratorMedium<Creature,ChaseMovementGenerator<Creature> >::DoUpdate(Creature*, uint32);
 
