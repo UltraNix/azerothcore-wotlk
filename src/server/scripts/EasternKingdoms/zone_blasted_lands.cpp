@@ -81,7 +81,30 @@ class spell_razelikh_teleport_group : public SpellScriptLoader
         }
 };
 
+enum StoneOfBindin
+{
+    NPC_SERVANT = 7668,
+    SPELL_SHATTER_SHACKLE = 10805
+};
+
+class go_stone_of_binding : public GameObjectScript
+{
+public:
+    go_stone_of_binding() : GameObjectScript("go_stone_of_binding") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        go->SetRespawnTime(60);
+        go->SetLootState(GO_JUST_DEACTIVATED);
+
+        if (Creature* cr = go->FindNearestCreature(NPC_SERVANT, 10.0f))
+            go->CastSpell(cr, SPELL_SHATTER_SHACKLE);
+        return false;
+    }
+};
+
 void AddSC_blasted_lands()
 {
     new spell_razelikh_teleport_group();
+    new go_stone_of_binding();
 }
