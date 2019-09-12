@@ -5876,8 +5876,7 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
             if (m_spellInfo->Id == 45529)
                 if (player->GetBaseRune(j) != RuneType(m_spellInfo->Effects[effIndex].MiscValueB))
                     continue;
-
-            player->SetRuneCooldown(j, 0, m_spellInfo->Id == 45529);
+            player->SetRuneCooldown(j, 0);
             player->SetGracePeriod(j, player->IsInCombat()); // xinef: reset grace period
             --count;
         }
@@ -5889,13 +5888,12 @@ void Spell::EffectActivateRune(SpellEffIndex effIndex)
         for (uint32 l = 0; l < MAX_RUNES && count > 0; ++l)
         {
             // Check if both runes are on cd as that is the only time when this needs to come into effect
-            if ((player->GetRuneCooldown(l) && player->GetCurrentRune(l) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)) && (player->GetRuneCooldown(l + 1) && player->GetCurrentRune(l + 1) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)))
+            if ((player->GetRuneCooldown(l) && player->GetCurrentRune(l) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)) && (player->GetRuneCooldown(l+1) && player->GetCurrentRune(l+1) == RuneType(m_spellInfo->Effects[effIndex].MiscValueB)))
             {
                 // Should always update the rune with the lowest cd
                 if (player->GetRuneCooldown(l) >= player->GetRuneCooldown(l+1))
                     l++;
-
-                player->SetRuneCooldown(l, 0, true);
+                player->SetRuneCooldown(l, 0);
                 player->SetGracePeriod(l, player->IsInCombat()); // xinef: reset grace period
                 --count;
             }

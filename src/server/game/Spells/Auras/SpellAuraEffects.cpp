@@ -5519,8 +5519,7 @@ void AuraEffect::HandleAuraConvertRune(AuraApplication const* aurApp, uint8 mode
         {
             if (GetMiscValue() != player->GetCurrentRune(i))
                 continue;
-
-            if (!player->GetRuneCooldown(i) && player->IsReadyToConvert(i))
+            if (!player->GetRuneCooldown(i))
             {
                 player->AddRuneByAuraEffect(i, RuneType(GetMiscValueB()), this);
                 --runes;
