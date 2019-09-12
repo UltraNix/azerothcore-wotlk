@@ -741,7 +741,7 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
             if (attacker->IsAIEnabled)
                 attacker->GetAI()->DamageDealt(victim, damage, damagetype);
 
-            if (attacker->IsPlayer() || attacker->IsVehicle() && attacker->IsControlledByPlayer())
+            if (attacker->IsPlayer() || (attacker->IsVehicle() && attacker->IsControlledByPlayer()))
                 if (victim->IsCreature())
                     victim->ToCreature()->SetWasHitByPlayer(true);
         }
@@ -4755,9 +4755,10 @@ void Unit::RemoveArenaAuras()
     {
         AuraApplication const* aurApp = iter->second;
         Aura const* aura = aurApp->GetBase();
-        if (!aura->GetSpellInfo()->HasAttribute(SPELL_ATTR4_UNK21) // don't remove stances, shadowform, pally/hunter auras
-            && !aura->IsPassive()                               // don't remove passive auras
-            && !aura->IsArea()                                    // don't remove area auras, eg pet talents affecting owner
+        if (!aura->GetSpellInfo()->HasAttribute(SPELL_ATTR4_UNK21)  // don't remove stances, shadowform, pally/hunter auras
+            && !aura->IsPassive()                                   // don't remove passive auras
+            && !aura->IsArea()                                      // don't remove area auras, eg pet talents affecting owner
+            && !IsPetAura(aura)                                     // don't remove pet auras casted by owner
             && (aurApp->IsPositive() || IsPet() || !aura->GetSpellInfo()->HasAttribute(SPELL_ATTR3_DEATH_PERSISTENT))) // not negative death persistent auras
         {
             RemoveAura(iter);
