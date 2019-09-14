@@ -716,6 +716,7 @@ void npc_chesspieceAI::UpdateAI(const uint32 diff)
         if (!medivh)
             return;
 
+
         if (Unit * uVictim = pInstance->instance->GetCreature(((boss_MedivhAI*)medivh->AI())->GetMeleeTarget(me->GetGUID())))
             me->CastSpell(uVictim, SPELL_MELEE_DAMAGE, true);
     }

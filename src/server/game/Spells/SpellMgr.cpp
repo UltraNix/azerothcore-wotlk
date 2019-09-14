@@ -5329,7 +5329,13 @@ void SpellMgr::LoadDbcDataCorrections()
         case 30632:
             spellInfo->EffectImplicitTargetB[0] = TARGET_DEST_DYNOBJ_ALLY;
             break;
-
+        // Sethekk Halls - Anzu
+        // Protection of the Hawk
+        case 40237:
+        // Speed of the Falcon
+        case 40241:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            break;
         //////////////
         // Karazhan //
         //////////////
