@@ -965,7 +965,14 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return eventInfo.GetActionTarget() && eventInfo.GetActionTarget()->IsAlive() && GetOwner()->GetGUID() == eventInfo.GetActionTarget()->GetGUID();
+                if (eventInfo.GetTypeMask() & PROC_FLAG_KILLED)
+                {
+                    SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+                    if (!spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_PRIEST || !(spellInfo->SpellFamilyFlags[0] & 0x00002000))
+                        return false;
+                }
+
+                return eventInfo.GetActionTarget() && GetOwner()->GetGUID() == eventInfo.GetActionTarget()->GetGUID();
             }
 
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)

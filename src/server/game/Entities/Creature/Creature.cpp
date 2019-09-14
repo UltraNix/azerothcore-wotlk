@@ -1091,7 +1091,7 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
         {
             m_lootRecipientGroup = group->GetLowGUID();
 
-            if (isWorldBoss() || IsDungeonBoss() && group)
+            if (isWorldBoss() || (IsDungeonBoss() && group))
             {
                 Map* map = GetMap();
                 if (map && map->IsDungeon())
