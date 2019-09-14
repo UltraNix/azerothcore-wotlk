@@ -8374,7 +8374,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             case SPELLFAMILY_WARLOCK:
             {
                 // Drain Soul
-                if (auraSpellInfo->SpellFamilyFlags[0] & 0x4000)
+                if (auraSpellInfo->SpellFamilyFlags[0] & 0x4000 && victim->HasAura(auraSpellInfo->Id, GetGUID()))
                 {
                     // Improved Drain Soul
                     Unit::AuraEffectList const& mAddFlatModifier = GetAuraEffectsByType(SPELL_AURA_DUMMY);
