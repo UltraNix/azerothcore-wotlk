@@ -597,7 +597,7 @@ void Channel::SetMode(Player const* player, std::string const& p2n, bool mod, bo
         return;
     }
 
-    if (!playersStore[guid].IsModerator() && !AccountMgr::IsGMAccount(sec))
+    if (!sec)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -668,7 +668,7 @@ void Channel::SetOwner(Player const* player, std::string const& newname)
     }
 
     bool isGoodConstantModerator = _channelRights.moderators.find(player->GetSession()->GetAccountId()) != _channelRights.moderators.end();
-    if (!AccountMgr::IsGMAccount(sec) && guid != _ownerGUID && !isGoodConstantModerator)
+    if (!AccountMgr::IsGMAccount(sec) && !isGoodConstantModerator)
     {
         WorldPacket data;
         MakeNotOwner(&data);
@@ -751,7 +751,7 @@ void Channel::Announce(Player const* player)
         return;
     }
 
-    if (!playersStore[guid].IsModerator() && !AccountMgr::IsGMAccount(sec))
+    if (!sec)
     {
         WorldPacket data;
         MakeNotModerator(&data);
