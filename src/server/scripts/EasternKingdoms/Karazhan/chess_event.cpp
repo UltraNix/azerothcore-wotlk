@@ -125,7 +125,7 @@ void move_triggerAI::MakeMove()
     unitToMove = 0;
 }
 
-void move_triggerAI::RemoveFromMove(uint64 const& piece)
+void move_triggerAI::RemoveFromMove(uint64 piece)
 {
     if (unitToMove == piece)
     {
@@ -878,7 +878,7 @@ boss_MedivhAI::boss_MedivhAI(Creature *c) : ScriptedAI(c)
     }
 }
 
-int boss_MedivhAI::GetMoveRange(uint64 const& piece)
+int boss_MedivhAI::GetMoveRange(uint64 piece)
 {
     return (GetMoveRange(pInstance->instance->GetCreature(piece)));
 }
@@ -915,7 +915,7 @@ int boss_MedivhAI::GetMoveRange(Unit * piece)
     return 0;
 }
 
-bool boss_MedivhAI::Enemy(uint64 const& piece1, uint64 const& piece2)
+bool boss_MedivhAI::Enemy(uint64 piece1, uint64 piece2)
 {
     Creature * tmp1, * tmp2;
 
@@ -931,7 +931,7 @@ bool boss_MedivhAI::Enemy(uint64 const& piece1, uint64 const& piece2)
     return tmp1->getFaction() != tmp2->getFaction();
 }
 
-int boss_MedivhAI::GetCountOfEnemyInMelee(uint64 const& piece, bool strafe)
+int boss_MedivhAI::GetCountOfEnemyInMelee(uint64 piece, bool strafe)
 {
     int tmpCount = 0, tmpI = -1, tmpJ = -1, tmpOffsetI, tmpOffsetJ;
 
@@ -968,7 +968,7 @@ int boss_MedivhAI::GetCountOfEnemyInMelee(uint64 const& piece, bool strafe)
     return tmpCount;
 }
 
-int boss_MedivhAI::GetCountOfPiecesInRange(uint64 const& trigger, int range, bool friendly)
+int boss_MedivhAI::GetCountOfPiecesInRange(uint64 trigger, int range, bool friendly)
 {
     int count = 0;
 
@@ -1079,7 +1079,7 @@ int boss_MedivhAI::GetCountOfPiecesInRange(uint64 const& trigger, int range, boo
     return count;
 }
 
-int boss_MedivhAI::GetLifePriority(uint64 const& piece)
+int boss_MedivhAI::GetLifePriority(uint64 piece)
 {
     Unit * uPiece = pInstance->instance->GetCreature(piece);
 
@@ -1123,7 +1123,7 @@ int boss_MedivhAI::GetLifePriority(uint64 const& piece)
     return tmpPriority;
 }
 
-int boss_MedivhAI::GetAttackPriority(uint64 const& piece)
+int boss_MedivhAI::GetAttackPriority(uint64 piece)
 {
     Unit * uPiece = pInstance->instance->GetCreature(piece);
 
@@ -1167,7 +1167,7 @@ int boss_MedivhAI::GetAttackPriority(uint64 const& piece)
     return tmpPriority;
 }
 
-bool boss_MedivhAI::IsEmptySquareInRange(uint64 const& piece, int range)
+bool boss_MedivhAI::IsEmptySquareInRange(uint64 piece, int range)
 {
     if (!piece || !range)
         return false;
@@ -1325,7 +1325,7 @@ bool boss_MedivhAI::IsHealingSpell(uint32 spell)
     return false;
 }
 
-bool boss_MedivhAI::Heal(uint32 spell, uint64 const& guid)
+bool boss_MedivhAI::Heal(uint32 spell, uint64 guid)
 {
     if (!IsHealingSpell(spell))
         return true;
@@ -1338,7 +1338,7 @@ bool boss_MedivhAI::Heal(uint32 spell, uint64 const& guid)
     return tmpC->GetHealth() != tmpC->GetMaxHealth();
 }
 
-uint64 const& boss_MedivhAI::GetSpellTarget(uint64 const& caster, uint32 spell)
+uint64 boss_MedivhAI::GetSpellTarget(uint64 caster, uint32 spell)
 {
     int tmpI = -1, tmpJ = -1, i, tmpOffsetI, tmpOffsetJ;
 
@@ -1826,7 +1826,7 @@ uint64 const& boss_MedivhAI::GetSpellTarget(uint64 const& caster, uint32 spell)
     return 0;
 }
 
-uint64 const& boss_MedivhAI::GetMeleeTarget(uint64 const& piece)
+uint64 boss_MedivhAI::GetMeleeTarget(uint64 piece)
 {
     int tmpi, tmpj;    //temporary piece position
 
@@ -1927,12 +1927,12 @@ bool boss_MedivhAI::IsChessPiece(Unit * unit)
     return false;
 }
 
-bool boss_MedivhAI::IsKing(uint64 const& piece)
+bool boss_MedivhAI::IsKing(uint64 piece)
 {
     return IsKing(ObjectAccessor::GetCreature(*me, piece));
 }
 
-bool boss_MedivhAI::IsHealer(uint64 const& piece)
+bool boss_MedivhAI::IsHealer(uint64 piece)
 {
     return IsHealer(ObjectAccessor::GetCreature(*me, piece));
 }
@@ -1993,7 +1993,7 @@ bool boss_MedivhAI::IsMedivhsPiece(Unit * unit)
     return false;
 }
 
-bool boss_MedivhAI::IsMedivhsPiece(uint64 const& unit)
+bool boss_MedivhAI::IsMedivhsPiece(uint64 unit)
 {
     for (uint64 const& guid : medivhSidePieces)
         if (guid == unit)
@@ -2002,7 +2002,7 @@ bool boss_MedivhAI::IsMedivhsPiece(uint64 const& unit)
     return false;
 }
 
-bool boss_MedivhAI::IsInMoveList(uint64 const& unit, bool trigger)
+bool boss_MedivhAI::IsInMoveList(uint64 unit, bool trigger)
 {
     if (!trigger)
     {
@@ -2020,7 +2020,7 @@ bool boss_MedivhAI::IsInMoveList(uint64 const& unit, bool trigger)
     return false;
 }
 
-bool boss_MedivhAI::IsInMoveRange(uint64 const& from, uint64 const& to, int range)
+bool boss_MedivhAI::IsInMoveRange(uint64 from, uint64 to, int range)
 {
     if (!from || !to || !range)
         return false;
@@ -2240,7 +2240,7 @@ void boss_MedivhAI::SayChessPieceDied(Unit * piece)
     }
 }
 
-void boss_MedivhAI::RemoveChessPieceFromBoard(uint64 const& piece)
+void boss_MedivhAI::RemoveChessPieceFromBoard(uint64 piece)
 {
     RemoveChessPieceFromBoard(pInstance->instance->GetCreature(piece));
 }
@@ -2971,7 +2971,7 @@ void boss_MedivhAI::UpdateAI(const uint32 diff)
     }
 }
 
-void boss_MedivhAI::SetOrientation(uint64 const& piece, ChessOrientation ori)
+void boss_MedivhAI::SetOrientation(uint64 piece, ChessOrientation ori)
 {
     int tmpi = -1, tmpj = -1;    //temp piece location in array
 
@@ -3082,7 +3082,7 @@ void boss_MedivhAI::SetOrientation(uint64 const& piece, ChessOrientation ori)
     }
 }
 
-uint64 boss_MedivhAI::FindTriggerGUID(uint64 const& piece)
+uint64 boss_MedivhAI::FindTriggerGUID(uint64 piece)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -3096,7 +3096,7 @@ uint64 boss_MedivhAI::FindTriggerGUID(uint64 const& piece)
     return 0;
 }
 
-Creature * boss_MedivhAI::FindTrigger(uint64 const& piece)
+Creature * boss_MedivhAI::FindTrigger(uint64 piece)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -3110,7 +3110,7 @@ Creature * boss_MedivhAI::FindTrigger(uint64 const& piece)
     return NULL;
 }
 
-bool boss_MedivhAI::ChessSquareIsEmpty(uint64 const& trigger)
+bool boss_MedivhAI::ChessSquareIsEmpty(uint64 trigger)
 {
     if (IsInMoveList(trigger, true))
         return false;
@@ -3143,7 +3143,7 @@ bool boss_MedivhAI::ChessSquareIsEmpty(int i, int j)
     return true;
 }
 
-bool boss_MedivhAI::CanMoveTo(uint64 const& trigger, uint64 const& piece)
+bool boss_MedivhAI::CanMoveTo(uint64 trigger, uint64 piece)
 {
     if (!trigger || !piece)
         return false;
@@ -3154,7 +3154,7 @@ bool boss_MedivhAI::CanMoveTo(uint64 const& trigger, uint64 const& piece)
     return inRange && isEmpty;
 }
 
-void boss_MedivhAI::AddTriggerToMove(uint64 const& trigger, uint64 const& piece, bool player)
+void boss_MedivhAI::AddTriggerToMove(uint64 trigger, uint64 piece, bool player)
 {
     RemoveFromMoveList(piece);
     ChessTile tmp;
@@ -3170,7 +3170,7 @@ void boss_MedivhAI::AddTriggerToMove(uint64 const& trigger, uint64 const& piece,
         ChoosePieceToMove();
 }
 
-void boss_MedivhAI::RemoveFromMoveList(uint64 const& unit)
+void boss_MedivhAI::RemoveFromMoveList(uint64 unit)
 {
     for (std::list<ChessTile>::iterator itr = moveList.begin(); itr != moveList.end();)
     {
@@ -3187,7 +3187,7 @@ void boss_MedivhAI::RemoveFromMoveList(uint64 const& unit)
     }
 }
 
-void boss_MedivhAI::ChangePlaceInBoard(uint64 const& piece, uint64 const& destTrigger)
+void boss_MedivhAI::ChangePlaceInBoard(uint64 piece, uint64 destTrigger)
 {
     for (int i = 0; i < 8; ++i)
     {
@@ -3209,7 +3209,7 @@ void boss_MedivhAI::ChangePlaceInBoard(uint64 const& piece, uint64 const& destTr
 
 }
 
-void boss_MedivhAI::ChangePieceFacing(uint64 const& piece, uint64 const& destTrigger)
+void boss_MedivhAI::ChangePieceFacing(uint64 piece, uint64 destTrigger)
 {
     ChangePieceFacing(ObjectAccessor::GetCreature(*me, piece), ObjectAccessor::GetCreature(*me, destTrigger));
 }
@@ -3276,7 +3276,7 @@ uint32 boss_MedivhAI::GetMoveSpell(Creature * piece)
     return 0;
 }
 
-bool boss_MedivhAI::FindPlaceInBoard(uint64 const& unit, int & i, int & j)
+bool boss_MedivhAI::FindPlaceInBoard(uint64 unit, int & i, int & j)
 {
     for (int x = 0; x < 8; ++x)
     {
@@ -3321,7 +3321,7 @@ Calculate Priority:
     modify priority based on way were we want to move
 */
 
-int boss_MedivhAI::CalculatePriority(uint64 const& piece, uint64 const& trigger)
+int boss_MedivhAI::CalculatePriority(uint64 piece, uint64 trigger)
 {
     // set base priority for square
     int tmpPrior = START_PRIORITY;
@@ -3544,7 +3544,7 @@ void boss_MedivhAI::ChoosePieceToMove()
     int possibleMovePrioritySum = 0;
 
     // for each medivh piece
-    for (uint64 const& guid : medivhSidePieces)
+    for (uint64 guid : medivhSidePieces)
     {
         if (IsInMoveList(guid))
             continue;
@@ -3777,7 +3777,7 @@ void boss_MedivhAI::ChoosePieceToMove()
         tmpC->CastSpell(tmpT, GetMoveSpell(tmpC), false);
 }
 
-uint32 boss_MedivhAI::GetEntry(uint64 const& piece)
+uint32 boss_MedivhAI::GetEntry(uint64 piece)
 {
     Creature * tmp = ObjectAccessor::GetCreature(*me, piece);
     if (!tmp)
@@ -3829,7 +3829,7 @@ uint32 boss_MedivhAI::GetDeadEntryForPiece(uint32 entry)
     return 0;
 }
 
-void boss_MedivhAI::CheckChangeFacing(uint64 const& piece, int i, int j)
+void boss_MedivhAI::CheckChangeFacing(uint64 piece, int i, int j)
 {
     if (i == -1 || j == -1)
         if (!FindPlaceInBoard(piece, i, j))

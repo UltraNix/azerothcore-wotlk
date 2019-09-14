@@ -367,7 +367,7 @@ struct ChessPosition
         j = -1;
     }
 
-    ChessPosition(uint64 const& guid, int i, int j)
+    ChessPosition(uint64 guid, int i, int j)
     {
         this->guid = guid;
         this->i = i;
@@ -435,7 +435,7 @@ public:
     void SpellHit(Unit *caster,const SpellInfo *spell) override;
 
     void MakeMove();
-    void RemoveFromMove(uint64 const& piece);
+    void RemoveFromMove(uint64 piece);
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damageType*/, SpellSchoolMask /*damageSchoolMask*/) override;
 
     void UpdateAI(const uint32 diff) override;
@@ -561,26 +561,26 @@ public:
     //remove
 
     void SayChessPieceDied(Unit * piece);
-    void RemoveChessPieceFromBoard(uint64 const& piece);       //removes dead piece from chess board
+    void RemoveChessPieceFromBoard(uint64 piece);       //removes dead piece from chess board
     void RemoveChessPieceFromBoard(Creature * piece);   //and spawn them in position near board
 
     //check
 
     bool IsChessPiece(Unit * unit);
     bool IsMedivhsPiece(Unit * unit);
-    bool IsMedivhsPiece(uint64 const& unit);
-    bool IsEmptySquareInRange(uint64 const& piece, int range);
-    bool IsInMoveList(uint64 const& unit, bool trigger = false);
-    bool IsInMoveRange(uint64 const& from, uint64 const& to, int range);
-    bool IsKing(uint64 const& piece);
-    bool IsHealer(uint64 const& piece);
+    bool IsMedivhsPiece(uint64 unit);
+    bool IsEmptySquareInRange(uint64 piece, int range);
+    bool IsInMoveList(uint64 unit, bool trigger = false);
+    bool IsInMoveRange(uint64 from, uint64 to, int range);
+    bool IsKing(uint64 piece);
+    bool IsHealer(uint64 piece);
     bool IsKing(Creature * piece);
     bool IsHealer(Creature * piece);
 
     bool IsHealingSpell(uint32 spell);
-    bool Heal(uint32 spell, uint64 const& guid);   // if isn't healing spell or creature isn't in full hp
+    bool Heal(uint32 spell, uint64 guid);   // if isn't healing spell or creature isn't in full hp
 
-    void CheckChangeFacing(uint64 const& piece, int i = -1, int j = -1);
+    void CheckChangeFacing(uint64 piece, int i = -1, int j = -1);
 
     //event
 
@@ -600,42 +600,42 @@ public:
 
     //move
 
-    int CalculatePriority(uint64 const& piece, uint64 const& trigger);
+    int CalculatePriority(uint64 piece, uint64 trigger);
     void ChoosePieceToMove();
-    bool ChessSquareIsEmpty(uint64 const& trigger);
+    bool ChessSquareIsEmpty(uint64 trigger);
     bool ChessSquareIsEmpty(int i, int j);
-    bool CanMoveTo(uint64 const& trigger, uint64 const& piece);   //check if player can move to trigger - prevent cheating
-    void AddTriggerToMove(uint64 const& trigger, uint64 const& piece, bool player);
-    void RemoveFromMoveList(uint64 const& unit);
-    Creature * FindTrigger(uint64 const& piece);               //find trigger where piece actually should be
-    uint64 FindTriggerGUID(uint64 const& piece);
-    int GetMoveRange(uint64 const& piece);
+    bool CanMoveTo(uint64 trigger, uint64 piece);   //check if player can move to trigger - prevent cheating
+    void AddTriggerToMove(uint64 trigger, uint64 piece, bool player);
+    void RemoveFromMoveList(uint64 unit);
+    Creature * FindTrigger(uint64 piece);               //find trigger where piece actually should be
+    uint64 FindTriggerGUID(uint64 piece);
+    int GetMoveRange(uint64 piece);
     int GetMoveRange(Unit * piece);
     uint32 GetMoveSpell(Creature * piece);
-    bool FindPlaceInBoard(uint64 const& unit, int & i, int & j);
-    void ChangePlaceInBoard(uint64 const& piece, uint64 const& destTrigger);
-    void ChangePieceFacing(uint64 const& piece, uint64 const& destTrigger);
+    bool FindPlaceInBoard(uint64 unit, int & i, int & j);
+    void ChangePlaceInBoard(uint64 piece, uint64 destTrigger);
+    void ChangePieceFacing(uint64 piece, uint64 destTrigger);
     void ChangePieceFacing(Creature * piece, Creature * destTrigger);
 
     //priority
 
-    int GetCountOfEnemyInMelee(uint64 const& piece, bool strafe = false);
-    int GetCountOfPiecesInRange(uint64 const& trigger, int range, bool friendly);
-    int GetLifePriority(uint64 const& piece);
-    int GetAttackPriority(uint64 const& piece);
+    int GetCountOfEnemyInMelee(uint64 piece, bool strafe = false);
+    int GetCountOfPiecesInRange(uint64 trigger, int range, bool friendly);
+    int GetLifePriority(uint64 piece);
+    int GetAttackPriority(uint64 piece);
 
     //target
 
     int GetAbilityRange(uint32 spell);      // return custom ability range <-- needed for target selection
     bool IsPositive(uint32 spell);          // check if spell is positive <-- if true then select friendly target
-    uint64 const& GetSpellTarget(uint64 const& caster, uint32 spell);
-    uint64 const& GetMeleeTarget(uint64 const& piece);
+    uint64 GetSpellTarget(uint64 caster, uint32 spell);
+    uint64 GetMeleeTarget(uint64 piece);
 
     //other
 
-    void SetOrientation(uint64 const& piece, ChessOrientation ori = CHESS_ORI_CHOOSE);
-    bool Enemy(uint64 const& piece1, uint64 const& piece2);
-    uint32 GetEntry(uint64 const& piece);
+    void SetOrientation(uint64 piece, ChessOrientation ori = CHESS_ORI_CHOOSE);
+    bool Enemy(uint64 piece1, uint64 piece2);
+    uint32 GetEntry(uint64 piece);
     uint32 GetDeadEntryForPiece(Creature * piece);
     uint32 GetDeadEntryForPiece(uint32 entry);
 
