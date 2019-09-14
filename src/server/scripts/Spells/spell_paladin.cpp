@@ -297,7 +297,7 @@ class spell_pal_sacred_shield_base : public SpellScriptLoader
                         cooldown = aurEffect->GetAmount()*IN_MILLISECONDS;
 
                 eventInfo.GetActionTarget()->AddSpellCooldown(triggered_spell_id, 0, cooldown);
-                eventInfo.GetActionTarget()->CastCustomSpell(eventInfo.GetActionTarget(), triggered_spell_id, &basepoints, NULL, NULL, true, NULL, aurEff, eventInfo.GetActionTarget()->GetGUID());
+                eventInfo.GetActionTarget()->CastCustomSpell(eventInfo.GetActionTarget(), triggered_spell_id, &basepoints, NULL, NULL, true, NULL, aurEff, aurEff->GetCasterGUID());
             }
 
             void Register()
