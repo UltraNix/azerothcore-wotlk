@@ -3780,7 +3780,8 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 40.0f))
                     {
                         target->CastSpell(me->GetVictim(), SPELL_BLOOD_MIRROR_VISUAL, true);
-                        me->GetVictim()->CastSpell(target, SPELL_BLOOD_MIRROR_DUMMY, true);
+                        if (Unit * victim = me->GetVictim())
+                            victim->CastSpell(target, SPELL_BLOOD_MIRROR_DUMMY, true);
                         DoCast(target, SPELL_BLOOD_MIRROR_AURA);
                     }
                     _events.ScheduleEvent(EVENT_BLOOD_MIRROR, urand(31000, 33000));
