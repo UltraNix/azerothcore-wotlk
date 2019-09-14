@@ -578,7 +578,6 @@ void npc_chesspieceAI::DamageTaken(Unit* attacker, uint32& damage, DamageEffectT
         if (damage >= me->GetHealth())
             tmpPl->RemoveAurasDueToSpell(SPELL_POSSES_CHESSPIECE);
     me->SetPassive();
-    InGame = false;
 }
 
 void npc_chesspieceAI::UpdateAI(const uint32 diff)
