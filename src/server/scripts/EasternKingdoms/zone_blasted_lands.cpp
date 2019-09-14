@@ -83,8 +83,20 @@ class spell_razelikh_teleport_group : public SpellScriptLoader
 
 enum StoneOfBindin
 {
-    NPC_SERVANT = 7668,
-    SPELL_SHATTER_SHACKLE = 10805
+    NPC_RAZELIKH            = 7668,
+    NPC_GOL                 = 7669,
+    NPC_ALLISTARJ           = 7670,
+    NPC_SEVINE              = 7671,
+
+    SPELL_RAZELIKH          = 10805,
+    SPELL_GOL               = 10834,
+    SPELL_ALLISTARJ         = 10835,
+    SPELL_SEVINE            = 10836,
+
+    GO_RAZELIKH             = 141812,
+    GO_GOL                  = 141857,
+    GO_ALLISTARJ            = 141858,
+    GO_SEVINE               = 141859
 };
 
 class go_stone_of_binding : public GameObjectScript
@@ -97,10 +109,34 @@ public:
         go->SetRespawnTime(60);
         go->SetLootState(GO_JUST_DEACTIVATED);
 
-        if (Creature* cr = go->FindNearestCreature(NPC_SERVANT, 10.0f))
-            go->CastSpell(cr, SPELL_SHATTER_SHACKLE);
+        switch (go->GetEntry()) {
+            case GO_RAZELIKH:
+                servantEntry = NPC_RAZELIKH;
+                spellId = SPELL_RAZELIKH;
+                break;
+            case GO_GOL:
+                servantEntry = NPC_GOL;
+                spellId = SPELL_GOL;
+                break;
+            case GO_ALLISTARJ:
+                servantEntry = NPC_ALLISTARJ;
+                spellId = SPELL_ALLISTARJ;
+                break;
+            case GO_SEVINE:
+                servantEntry = NPC_SEVINE;
+                spellId = SPELL_SEVINE;
+                break;
+        }
+
+        if (servantEntry)
+            if (Creature* cr = go->FindNearestCreature(servantEntry, 10.0f))
+                go->CastSpell(cr, spellId);
         return false;
     }
+
+private:
+    uint32 servantEntry;
+    uint32 spellId;
 };
 
 void AddSC_blasted_lands()
