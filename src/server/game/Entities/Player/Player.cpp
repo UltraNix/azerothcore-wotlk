@@ -2561,7 +2561,9 @@ void Player::ProcessDelayedOperations()
         if (m_entryPointData.mountSpell)
         {
             // xinef: remove shapeshift auras
-            RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+            if (IsInDisallowedMountForm())
+                RemoveAurasByType(SPELL_AURA_MOD_SHAPESHIFT);
+
             AddAura(m_entryPointData.mountSpell, this);
             m_entryPointData.mountSpell = 0;
         }
