@@ -2670,8 +2670,7 @@ class spell_bloodworms_AuraScript : public AuraScript
     {
         // Sanity check, don't allow to spawn too much
         if (Unit* caster = GetCaster())
-            if (!caster->m_Controlled.empty())
-                return std::count_if(std::begin(caster->m_Controlled), std::end(caster->m_Controlled), [](Unit* controlled) { return controlled->GetEntry() == NPC_BLOODWORM; }) < 15;
+            return !caster->m_Controlled.empty() ? (std::count_if(std::begin(caster->m_Controlled), std::end(caster->m_Controlled), [](Unit* controlled) { return controlled->GetEntry() == NPC_BLOODWORM; }) < 15) : true;
 
         return false;
     }
