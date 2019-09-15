@@ -12808,6 +12808,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
     {
         creature->m_targetsNotAcceptable.clear();
         creature->UpdateEnvironmentIfNeeded(2);
+        creature->SetChainPullTimer(200);
 
         // Set home position at place of engaging combat for escorted creatures
         if ((IsAIEnabled && creature->AI()->IsEscorted()) ||
@@ -17306,7 +17307,7 @@ bool Unit::SetCharmedBy(Unit* charmer, CharmType type, AuraApplication const* au
     if (playerCharmer)
     {
         playerCharmer->StopCastingCharm();
-        
+
         if (aurApp && aurApp->GetBase()->GetId() != 30019) // Karazhan Chess Event - Control Piece
             playerCharmer->StopCastingBindSight();
     }

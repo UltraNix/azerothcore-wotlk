@@ -720,6 +720,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
             return sWorld->getBoolConfig(CONFIG_CHAIN_PULL_ENABLED) && IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) && !m_isChainPullDisabled;
         }
         void SetChainPullDisabled(bool val) { m_isChainPullDisabled = val; }
+        void SetChainPullTimer(uint32 val) { m_chainPullTimer.Reset(val); }
 
         void SetPosition(float x, float y, float z, float o);
         void SetPosition(const Position &pos) { SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()); }

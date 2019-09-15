@@ -682,7 +682,7 @@ void Creature::Update(uint32 diff)
                 if (m_chainPullTimer.Passed())
                 {
                     CallForHelp(sWorld->getFloatConfig(CONFIG_CHAIN_PULL_RANGE));
-                    m_chainPullTimer.Reset(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER));
+                    SetChainPullTimer(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER));
                 }
             }
 
