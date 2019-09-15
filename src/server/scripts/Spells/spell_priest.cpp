@@ -440,6 +440,11 @@ class spell_pri_item_greater_heal_refund : public SpellScriptLoader
         }
 };
 
+enum LighwellData
+{
+    NPC_LIGHTWELL   = 31896
+};
+
 // -7001 - Lightwell Renew
 class spell_pri_lightwell_renew : public SpellScriptLoader
 {
@@ -460,9 +465,30 @@ class spell_pri_lightwell_renew : public SpellScriptLoader
                 }
             }
 
+            void HandleRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    for (Unit* controlled : caster->m_Controlled)
+                        if (controlled->GetEntry() == NPC_LIGHTWELL)
+                        {
+                            Player* player = GetOwner()->ToPlayer();
+                            if (!player || !player->HaveAtClient(controlled))
+                                return;
+
+                            UpdateData udata;
+                            WorldPacket packet;
+                            controlled->BuildValuesUpdateBlockForPlayer(&udata, player);
+                            udata.BuildPacket(&packet);
+                            player->SendDirectMessage(&packet);
+                        }
+                }
+            }
+
             void Register()
             {
                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_lightwell_renew_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_HEAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_pri_lightwell_renew_AuraScript::HandleRemoveEffect, EFFECT_0, SPELL_AURA_PERIODIC_HEAL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
             }
         };
 
