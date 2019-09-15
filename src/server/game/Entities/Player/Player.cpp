@@ -23763,10 +23763,43 @@ void Player::ApplyEquipCooldown(ItemRef const& pItem)
             {
                 if (uint32 spellEnchId = pEnchant->spellid[i])
                 {
+                    if (pEnchant->type[i] == ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL)
+                    {
+                        uint32 cooldown = 0;
+                        if (SpellProcEntry const* procEntry = sSpellMgr->GetSpellProcEntry(spellEnchId))
+                            cooldown = procEntry->cooldown;
+
+                        if (!cooldown)
+                            cooldown = 30 * IN_MILLISECONDS;
+
+                        AddSpellCooldown(spellEnchId, uint32(-1), cooldown);
+
+                        continue;
+                    }
+
                     if (pEnchant->type[i] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
                         continue;
 
-                    AddSpellCooldown(spellEnchId, uint32(-1), 30 * IN_MILLISECONDS);
+                    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellEnchId);
+                    if (!spellInfo)
+                        continue;
+
+                    if (spellInfo->HasAttribute(SPELL_ATTR0_CANT_USED_IN_COMBAT))
+                        continue;
+
+                    if (spellInfo->RecoveryTime <= 3000 && spellInfo->CategoryRecoveryTime <= 3000)
+                        continue;
+
+                    SpellCooldowns::iterator itr = m_spellCooldowns.find(spellEnchId);
+                    if (itr != m_spellCooldowns.end() && itr->second.end > time(nullptr) + 30)
+                        continue;
+
+                    AddSpellCooldown(spellEnchId, pItem->GetEntry(), 30 * IN_MILLISECONDS, true, true);
+
+                    WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+                    data << pItem->GetGUID();
+                    data << uint32(spellEnchId);
+                    GetSession()->SendPacket(&data);
                 }
             }
         }
@@ -23786,8 +23819,16 @@ void Player::ApplyEquipCooldown(ItemRef const& pItem)
         // xinef: apply hidden cooldown for procs
         if (spellData.SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP)
         {
+            uint32 cooldown = 0;
+            if (SpellProcEntry const* procEntry = sSpellMgr->GetSpellProcEntry(spellData.SpellId))
+                cooldown = procEntry->cooldown;
+
+            if (!cooldown)
+                cooldown = 30 * IN_MILLISECONDS;
+
             // xinef: uint32(-1) special marker for proc cooldowns
-            AddSpellCooldown(spellData.SpellId, uint32(-1), 30*IN_MILLISECONDS);
+            AddSpellCooldown(spellData.SpellId, uint32(-1), cooldown);
+
             continue;
         }
 
