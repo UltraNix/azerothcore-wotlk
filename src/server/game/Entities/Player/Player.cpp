@@ -1741,6 +1741,8 @@ void Player::Update(uint32 p_time)
                         m_swingErrorMsg = 2;
                     }
                 }
+                else if (!IsWithinLOSInMap(victim)) // TODO: find error packet to send to client
+                    setAttackTimer(BASE_ATTACK, 100);
                 else
                 {
                     m_swingErrorMsg = 0;                    // reset swing error state
@@ -1758,9 +1760,7 @@ void Player::Update(uint32 p_time)
 
             if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
             {
-                if (!IsWithinMeleeRange(victim, MELEE_RANGE, true))
-                    setAttackTimer(OFF_ATTACK, 100);
-                else if (!HasInArc(victimRadianRange, victim))
+                if (!IsWithinMeleeRange(victim, MELEE_RANGE, true) || !HasInArc(victimRadianRange, victim) || !IsWithinLOSInMap(victim))
                     setAttackTimer(OFF_ATTACK, 100);
                 else
                 {
