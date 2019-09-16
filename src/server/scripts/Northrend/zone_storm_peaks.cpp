@@ -1116,19 +1116,12 @@ public:
         void Reset()
         {
             events.ScheduleEvent(EVENT_CHECK_AREA, 5000);
-            me->SetSpeedRate(MOVE_RUN, 2.0f);
         }
 
         void MovementInform(uint32 type, uint32 id)
         {
             if (type == ESCORT_MOTION_TYPE && me->movespline->Finalized())
                 events.ScheduleEvent(EVENT_REACHED_HOME, 2000);
-        }
-
-        void PassengerBoarded(Unit* /*who*/, int8 /*seatId*/, bool apply) override
-        {
-            me->SetSpeedRate(MOVE_RUN, 2.0f);
-            me->SetSpeedRate(MOVE_FLIGHT, 2.0f);
         }
 
         void UpdateAI(uint32 diff)
