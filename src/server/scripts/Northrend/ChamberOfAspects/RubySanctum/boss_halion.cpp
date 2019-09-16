@@ -225,7 +225,7 @@ class boss_halion : public CreatureScript
                         summon->CastSpell(summon, SPELL_BIRTH_NO_VISUAL, false);
                         break;
                     case NPC_METEOR_STRIKE_FLAME:
-                        if (Is25ManRaid() && IsHeroic() && roll_chance_i(90) && summons.GetEntryCount(NPC_LIVING_EMBER) < _livingEmberCount + 12)
+                        if (Is25ManRaid() && IsHeroic() && roll_chance_i(90) && summons.GetEntryCount(NPC_LIVING_EMBER) < _livingEmberCount + 18)
                             if (Creature* ember = me->SummonCreature(NPC_LIVING_EMBER, *summon, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000))
                                 ember->SetVisible(false);
                         // no break
