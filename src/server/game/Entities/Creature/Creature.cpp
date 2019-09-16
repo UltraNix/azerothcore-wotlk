@@ -2123,7 +2123,7 @@ void Creature::CallForHelp(float radius)
 
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
-    if (IsInEvadeMode())
+    if (HasUnitState(UNIT_STATE_SIGHTLESS))
         return false;
 
     // is it true?
