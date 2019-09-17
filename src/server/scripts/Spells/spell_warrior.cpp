@@ -30,9 +30,11 @@
 enum WarriorSpells
 {
     // Ours
-    SPELL_WARRIOR_INTERVENE_TRIGGER                    = 59667,
-    SPELL_WARRIOR_SPELL_REFLECTION                     = 23920,
-    SPELL_WARRIOR_IMPROVED_SPELL_REFLECTION_TRIGGER    = 59725,
+    SPELL_WARRIOR_INTERVENE_TRIGGER                     = 59667,
+    SPELL_WARRIOR_SPELL_REFLECTION                      = 23920,
+    SPELL_WARRIOR_IMPROVED_SPELL_REFLECTION_TRIGGER     = 59725,
+    SPELL_WARRIOR_BLADESTORM_PERIODIC_WHIRLWIND         = 50622,
+    SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK         = 12723,
 
     // Theirs
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
@@ -52,7 +54,6 @@ enum WarriorSpells
     SPELL_WARRIOR_RETALIATION_DAMAGE                = 22858,
     SPELL_WARRIOR_SLAM                              = 50783,
     SPELL_WARRIOR_SUNDER_ARMOR                      = 58567,
-    SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK     = 26654,
     SPELL_WARRIOR_TAUNT                             = 355,
     SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_1        = 46859,
     SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_2        = 46860,
@@ -786,55 +787,63 @@ class spell_warr_shattering_throw : public SpellScriptLoader
 };
 
 // 12328, 18765, 35429 - Sweeping Strikes
-class spell_warr_sweeping_strikes : public SpellScriptLoader
+class spell_warr_sweeping_strikes_AuraScript : public AuraScript
 {
-    public:
-        spell_warr_sweeping_strikes() : SpellScriptLoader("spell_warr_sweeping_strikes") { }
+    PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
 
-        class spell_warr_sweeping_strikes_AuraScript : public AuraScript
+    bool Validate(SpellInfo const* /*spellInfo*/)
+    {
+        return ValidateSpellInfo({ SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK });
+    }
+
+    bool Load() override
+    {
+        _procTarget = nullptr;
+        return true;
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        _procTarget = eventInfo.GetActor()->SelectNearbyNoTotemTarget(eventInfo.GetProcTarget());
+        return _procTarget;
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
         {
-            PrepareAuraScript(spell_warr_sweeping_strikes_AuraScript);
+            Unit* procTarget = eventInfo.GetProcTarget();
+            int32 procDamage = 0;
+            SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+            SpellSchoolMask schoolMask = eventInfo.GetDamageInfo()->GetSchoolMask();
+            WeaponAttackType attackType = eventInfo.GetDamageInfo()->GetAttackType();
+            uint32 damage = eventInfo.GetDamageInfo()->GetDamage();
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            int32 armorDiff = _procTarget->GetArmor() - procTarget->GetArmor();
+            if (armorDiff > 0)
             {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
-                    return false;
-                return true;
+                if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
+                    procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
+                else
+                    procDamage = damage;
             }
+            else
+                procDamage = damage;
 
-            bool Load()
-            {
-                _procTarget = NULL;
-                return true;
-            }
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                _procTarget = eventInfo.GetActor()->SelectNearbyNoTotemTarget(eventInfo.GetProcTarget());
-                return _procTarget && !eventInfo.GetDamageInfo()->GetSpellInfo();
-            }
-
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-                int32 damage = eventInfo.GetDamageInfo()->GetDamage();
-                GetTarget()->CastCustomSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, &damage, 0, 0, true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_warr_sweeping_strikes_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_warr_sweeping_strikes_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-
-        private:
-            Unit* _procTarget;
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warr_sweeping_strikes_AuraScript();
+            if (procDamage)
+                GetTarget()->CastCustomSpell(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, procDamage, _procTarget, true, nullptr, aurEff);
         }
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_warr_sweeping_strikes_AuraScript::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_warr_sweeping_strikes_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+
+    private:
+        Unit* _procTarget;
 };
 
 // 50720 - Vigilance
@@ -1041,46 +1050,35 @@ class spell_warr_retaliation : public SpellScriptLoader
 };
 
 // 34428 - Victory Rush
-class spell_warr_victory_rush : public SpellScriptLoader
+class spell_warr_victory_rush_SpellScript : public SpellScript
 {
-public:
-	spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
+	PrepareSpellScript(spell_warr_victory_rush_SpellScript);
 
-	class spell_warr_victory_rush_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_warr_victory_rush_SpellScript);
-
-        void HandleOnHit()
+    void HandleOnHit()
+    {
+        // probably can be handle much MUCH better
+        if (Player* player = GetCaster()->ToPlayer())
         {
-            //probably can be handle much MUCH better
-            if (Player* player = GetCaster()->ToPlayer())
+            if (Unit* target = GetHitUnit())
             {
-                if (Unit* target = GetHitUnit())
-                {
-                    uint8 targetLevel = target->getLevel() + 5;
+                uint8 targetLevel = target->getLevel() + 5;
 
-                    if (target->isDead() && !target->IsCritter() && targetLevel >= player->getLevel())
-                        player->AddAura(32216, player);
-                }
+                if (target->isDead() && !target->IsCritter() && targetLevel >= player->getLevel())
+                    player->AddAura(32216, player);
             }
         }
+    }
 
-        void HandleBeforeCast()
-        {
-            if (Player * player = GetCaster()->ToPlayer())
-                player->RemoveAura(32216);
-        }
+    void HandleBeforeCast()
+    {
+        if (Player* player = GetCaster()->ToPlayer())
+            player->RemoveAura(32216);
+    }
 
-        void Register()
-        {
-            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleOnHit);
-            BeforeCast += SpellCastFn(spell_warr_victory_rush_SpellScript::HandleBeforeCast);
-        }
-	};
-
-	SpellScript* GetSpellScript() const
+	void Register() override
 	{
-		return new spell_warr_victory_rush_SpellScript();
+		AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleOnHit);
+        BeforeCast += SpellCastFn(spell_warr_victory_rush_SpellScript::HandleBeforeCast);
 	}
 };
 
@@ -1091,7 +1089,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_intervene();
     new spell_warr_improved_spell_reflection();
     new spell_warr_improved_spell_reflection_trigger();
-    new spell_warr_victory_rush();
+    new SpellScriptLoaderEx<spell_warr_victory_rush_SpellScript>("spell_warr_victory_rush");
     new spell_warr_charge_stun();
 
     // Theirs
@@ -1110,7 +1108,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_retaliation();
     new spell_warr_shattering_throw();
     new spell_warr_slam();
-    new spell_warr_sweeping_strikes();
+    new AuraScriptLoaderEx<spell_warr_sweeping_strikes_AuraScript>("spell_warr_sweeping_strikes");
     new spell_warr_vigilance();
     new spell_warr_vigilance_trigger();
 }
