@@ -1059,7 +1059,7 @@ public:
                 {
                     uint8 targetLevel = target->getLevel() + 5;
 
-                    if (target->isDead() && !target->IsCritter() && !target->IsCritter() && targetLevel >= player->getLevel())
+                    if (target->isDead() && !target->IsCritter() && targetLevel >= player->getLevel())
                         player->AddAura(32216, player);
                 }
             }
