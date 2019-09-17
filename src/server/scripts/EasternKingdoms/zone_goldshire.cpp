@@ -23,50 +23,50 @@
 
 enum COG_Paths
 {
-    STORMWIND_PATH = 80500,
-    GOLDSHIRE_PATH = 80501,
-    WOODS_PATH = 80502,
-    HOUSE_PATH = 80503,
-    LISA_PATH = 80700
+    STORMWIND_PATH          = 80500,
+    GOLDSHIRE_PATH          = 80501,
+    WOODS_PATH              = 80502,
+    HOUSE_PATH              = 80503,
+    LISA_PATH               = 80700
 };
 
 enum COG_Waypoints
 {
-    STORMWIND_WAYPOINT = 57,
-    GOLDSHIRE_WAYPOINT = 32,
-    WOODS_WAYPOINT = 22,
-    HOUSE_WAYPOINT = 35,
-    LISA_WAYPOINT = 4
+    STORMWIND_WAYPOINT      = 57,
+    GOLDSHIRE_WAYPOINT      = 32,
+    WOODS_WAYPOINT          = 22,
+    HOUSE_WAYPOINT          = 35,
+    LISA_WAYPOINT           = 4
 };
 
 enum COG_Sounds
 {
-    BANSHEE_DEATH = 1171,
-    BANSHEEPREAGGRO = 1172,
-    CTHUN_YOU_WILL_DIE = 8585,
-    CTHUN_DEATH_IS_CLOSE = 8580,
-    HUMAN_FEMALE_EMOTE_CRY = 6916,
-    GHOSTDEATH = 3416
+    BANSHEE_DEATH           = 1171,
+    BANSHEEPREAGGRO         = 1172,
+    CTHUN_YOU_WILL_DIE      = 8585,
+    CTHUN_DEATH_IS_CLOSE    = 8580,
+    HUMAN_FEMALE_EMOTE_CRY  = 6916,
+    GHOSTDEATH              = 3416
 };
 
 enum COG_Creatures
 {
-    NPC_DANA = 804,
-    NPC_CAMERON = 805,
-    NPC_JOHN = 806,
-    NPC_LISA = 807,
-    NPC_AARON = 810,
-    NPC_JOSE = 811
+    NPC_DANA                = 804,
+    NPC_CAMERON             = 805,
+    NPC_JOHN                = 806,
+    NPC_LISA                = 807,
+    NPC_AARON               = 810,
+    NPC_JOSE                = 811
 };
 
 enum COG_Events
 {
-    EVENT_WP_START_GOLDSHIRE = 1,
-    EVENT_WP_START_WOODS = 2,
-    EVENT_WP_START_HOUSE = 3,
-    EVENT_WP_START_LISA = 4,
-    EVENT_PLAY_SOUNDS = 5,
-    EVENT_BEGIN_EVENT = 6
+    EVENT_WP_START_GOLDSHIRE    = 1,
+    EVENT_WP_START_WOODS        = 2,
+    EVENT_WP_START_HOUSE        = 3,
+    EVENT_WP_START_LISA         = 4,
+    EVENT_PLAY_SOUNDS           = 5,
+    EVENT_BEGIN_EVENT           = 6
 };
 
 enum COG_GameEvent
@@ -135,57 +135,55 @@ public:
             uint32 pathId = me->GetWaypointPath();
             switch (pathId)
             {
-            case STORMWIND_PATH:
-            {
-                if (waypointId == STORMWIND_WAYPOINT)
+                case STORMWIND_PATH:
                 {
-                    me->GetMotionMaster()->MoveRandom(10.f);
-                    _events.ScheduleEvent(EVENT_WP_START_GOLDSHIRE, 11min);
-                }
+                    if (waypointId == STORMWIND_WAYPOINT)
+                    {
+                        me->GetMotionMaster()->MoveRandom(10.f);
+                        _events.ScheduleEvent(EVENT_WP_START_GOLDSHIRE, 11min);
+                    }
 
-                break;
-            }
-            case GOLDSHIRE_PATH:
-            {
-                if (waypointId == GOLDSHIRE_WAYPOINT)
-                {
-                    me->GetMotionMaster()->MoveRandom(10.f);
-                    _events.ScheduleEvent(EVENT_WP_START_WOODS, 15min);
+                    break;
                 }
-                break;
-            }
-            case WOODS_PATH:
-            {
-                if (waypointId == WOODS_WAYPOINT)
+                case GOLDSHIRE_PATH:
                 {
-                    me->GetMotionMaster()->MoveRandom(10.f);
-                    _events.ScheduleEvent(EVENT_WP_START_HOUSE, 6min);
-                    _events.ScheduleEvent(EVENT_WP_START_LISA, 2s);
+                    if (waypointId == GOLDSHIRE_WAYPOINT)
+                    {
+                        me->GetMotionMaster()->MoveRandom(10.f);
+                        _events.ScheduleEvent(EVENT_WP_START_WOODS, 15min);
+                    }
+                    break;
                 }
+                case WOODS_PATH:
+                {
+                    if (waypointId == WOODS_WAYPOINT)
+                    {
+                        me->GetMotionMaster()->MoveRandom(10.f);
+                        _events.ScheduleEvent(EVENT_WP_START_HOUSE, 6min);
+                        _events.ScheduleEvent(EVENT_WP_START_LISA, 2s);
+                    }
 
-                break;
-            }
-            case HOUSE_PATH:
-            {
-                if (waypointId == HOUSE_WAYPOINT)
-                {
-                    // Move childeren at last point 
-                    MoveTheChildren();
-
-                    // After 30 seconds a random sound should play
-                    _events.ScheduleEvent(EVENT_PLAY_SOUNDS, 30s);
+                    break;
                 }
-                break;
-            }
+                case HOUSE_PATH:
+                {
+                    if (waypointId == HOUSE_WAYPOINT)
+                    {
+                        // Move childeren at last point 
+                        MoveTheChildren();
+
+                        // After 30 seconds a random sound should play
+                        _events.ScheduleEvent(EVENT_PLAY_SOUNDS, 30s);
+                    }
+                    break;
+                }
             }
         }
 
         void sOnGameEvent(bool start, uint16 eventId) override
         {
-            printf("Game event\n");
             if (start && eventId == GAME_EVENT_CHILDEREN_OF_GOLDSHIRE)
             {
-                printf("Event GOLDSHIRE start\n");
                 // Start event at 7 am
                 // Begin pathing
                 _events.ScheduleEvent(EVENT_BEGIN_EVENT, 2s);
