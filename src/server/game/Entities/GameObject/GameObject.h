@@ -714,6 +714,12 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Mov
             m_respawnTime = respawn > 0 ? time(nullptr) + respawn : 0;
             m_respawnDelayTime = respawn > 0 ? respawn : 0;
         }
+
+        void SetRespawnDelay(uint32 delay)
+        {
+            m_respawnDelayTime = delay;
+        }
+
         void Respawn();
         bool isSpawned() const
         {
