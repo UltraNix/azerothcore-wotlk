@@ -3483,7 +3483,8 @@ void SpellMgr::LoadSpellCustomAttr()
             48568, //LacerateRank3 - initial dmg ignore armor
             48567, //LacerateRank2 - initial dmg ignore armor
             33745, //LacerateRank1 - initial dmg ignore armor
-            10093  // Harsh Winds hellforge
+            10093, // Harsh Winds hellforge
+            12723  // Sweeping Strike damage
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
         });
@@ -4990,6 +4991,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 47471:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            break;
+        // Sweeping Strike damage
+        case 12723:
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
             break;
 
         /////////////////////////////////
