@@ -85,10 +85,26 @@ void Totem::InitStats(uint32 duration)
             m_type = TOTEM_ACTIVE;
 }
 
+class DelayedTotemInitCastSpell : public BasicEvent
+{
+    public:
+        explicit DelayedTotemInitCastSpell(Totem* me) : _me(me) {}
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/) override
+        {
+            _me->CastSpell(_me, _me->GetSpell(), true);
+            return true;
+        }
+
+    private:
+        Totem* _me;
+};
+
 void Totem::InitSummon()
 {
+    // Delay init cast by one world tick to emulate proper cast order from retail
     if (m_type == TOTEM_PASSIVE && GetSpell())
-        CastSpell(this, GetSpell(), true);
+        m_Events.AddEvent(new DelayedTotemInitCastSpell(this), m_Events.CalculateTime(1));
 
     // Some totems can have both instant effect and passive spell
     if(GetSpell(1))
