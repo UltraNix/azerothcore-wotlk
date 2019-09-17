@@ -2231,9 +2231,22 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
         return;                                             // ignore ranged case
 
     // melee attack spell casted at main hand attack only - no normal melee dmg dealt
-    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra && m_currentSpells[CURRENT_MELEE_SPELL]->CheckCast(true) == SPELL_CAST_OK)
-        m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-    else
+    bool result = attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra;
+    if (result)
+    {
+        Spell* spell = m_currentSpells[CURRENT_MELEE_SPELL];
+        SpellCastResult spellResult = spell->CheckCast(true);
+        if (spellResult == SPELL_CAST_OK)
+            spell->cast();
+        else
+        {
+            spell->SendCastResult(spellResult);
+            spell->cancel();
+            result = false;
+        }
+    }
+
+    if (!result)
     {
         // attack can be redirected to another target
         victim = GetMeleeHitRedirectTarget(victim);

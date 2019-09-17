@@ -3610,7 +3610,7 @@ void Spell::cancel(bool bySelf)
         case SPELL_STATE_DELAYED:
             SendInterrupted(0);
             // xinef: fixes bugged gcd reset in some cases
-            if (!autoRepeat)
+            if (!autoRepeat && !IsNextMeleeSwingSpell())
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
             break;
 
