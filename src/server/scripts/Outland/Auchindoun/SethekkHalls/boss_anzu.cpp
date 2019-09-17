@@ -356,7 +356,7 @@ struct npc_anzu_spiritAI : public ScriptedAI
 
     void SpellHit(Unit* caster, const SpellInfo* spell) override
     {
-        if (spell && spell->SpellFamilyName == SPELLFAMILY_DRUID && (spell->SpellFamilyFlags & flag96(0x1000000050, 0, 0)))
+        if (spell && spell->SpellFamilyName == SPELLFAMILY_DRUID && spell->SpellFamilyFlags == flag96(0x1000000050, 0x0, 0x0))
         {
             CustomSpellValues val;
             val.AddSpellMod(SPELLVALUE_AURA_DURATION, spell->GetDuration());
