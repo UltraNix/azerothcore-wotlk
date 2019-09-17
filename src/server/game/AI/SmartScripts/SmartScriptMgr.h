@@ -426,6 +426,11 @@ struct SmartEvent
             uint32 param3;
             uint32 param4;
         } raw;
+
+        struct
+        {
+            uint32 onRemove;
+        } charm;
     };
 };
 
