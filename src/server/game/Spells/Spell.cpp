@@ -8083,31 +8083,6 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier,
     float critChance = caster->SpellDoneCritChance(unit, m_spellInfo, m_spellSchoolMask, m_attackType, false);
     critChance = unit->SpellTakenCritChance(caster, m_spellInfo, m_spellSchoolMask, critChance, m_attackType, false);
     targetInfo.crit = roll_chance_f(std::max(0.0f, critChance));
-
-    // Sweeping strikes wtf shit ;d
-    if (m_caster->getClass() == CLASS_WARRIOR && ssEffect < MAX_SPELL_EFFECTS && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR &&
-        ((m_spellInfo->Id != 50622 && m_spellInfo->Id != 44949) || firstTarget))
-    {
-        if (Aura* aur = m_caster->GetAura(12328))
-        {
-            Unit* target = m_caster->SelectNearbyNoTotemTarget(unit);
-            if (!target || target == unit)
-                return; // finish
-
-            int32 mdmg = m_damage;
-            int32 basepoints = 0;
-            m_damage = 0;
-
-            HandleEffects(target, NULL, NULL, ssEffect, SPELL_EFFECT_HANDLE_LAUNCH_TARGET);
-
-            basepoints = (targetInfo.crit ? Unit::SpellCriticalDamageBonus(m_caster, m_spellInfo, m_damage, target) : m_damage);
-            m_damage = mdmg;
-            m_caster->CastCustomSpell(target, 26654, &basepoints, NULL, NULL, true);
-
-            if (m_spellInfo->Id != 44949)
-                aur->DropCharge();
-        }
-    }
 }
 
 SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& skillId, int32& reqSkillValue, int32& skillValue)
