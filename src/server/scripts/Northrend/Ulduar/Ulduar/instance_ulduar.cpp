@@ -927,23 +927,6 @@ public:
                 }
             }
 
-            // take care of herbs
-            if (type == TYPE_FREYA && data == DONE)
-            {
-                std::list<GameObject*> goList;
-                if (Creature* freya = instance->GetCreature(GetData64(TYPE_FREYA)))
-                {
-                    freya->GetGameObjectListWithEntryInGrid(goList, 191019 /*Adder's Tongue*/, 333.0f);
-                    freya->GetGameObjectListWithEntryInGrid(goList, 190176 /*Frost Lotus*/, 333.0f);
-                    freya->GetGameObjectListWithEntryInGrid(goList, 190171 /*Lichbloom*/, 333.0f);
-                    freya->GetGameObjectListWithEntryInGrid(goList, 190170 /*Talandra's Rose*/, 333.0f);
-                    freya->GetGameObjectListWithEntryInGrid(goList, 189973 /*Goldclover*/, 333.0f);
-
-                    for (std::list<GameObject*>::const_iterator itr = goList.begin(); itr != goList.end(); ++itr)
-                        (*itr)->SetRespawnTime(7*DAY);
-                }
-            }
-
             if (data == DONE || type == TYPE_LEVIATHAN || type == TYPE_WATCHERS)
                 SaveToDB();
 
