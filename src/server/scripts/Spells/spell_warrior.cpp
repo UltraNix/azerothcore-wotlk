@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -386,7 +386,7 @@ class spell_warr_charge_stun : public SpellScriptLoader
                 float destx = target->GetPositionX() + target->GetObjectSize() * cos(angle);
                 float desty = target->GetPositionY() + target->GetObjectSize() * sin(angle);
                 float destz = target->GetPositionZ();
-                 
+
                 m_pathFinder->CalculatePath(destx, desty, destz + 0.15f, false);
 
                 caster->GetMotionMaster()->Clear(false);
@@ -1065,10 +1065,17 @@ public:
             }
         }
 
-		void Register()
-		{
-			AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleOnHit);
-		}
+        void HandleBeforeCast()
+        {
+            if (Player * player = GetCaster()->ToPlayer())
+                player->RemoveAura(32216);
+        }
+
+        void Register()
+        {
+            AfterHit += SpellHitFn(spell_warr_victory_rush_SpellScript::HandleOnHit);
+            BeforeCast += SpellCastFn(spell_warr_victory_rush_SpellScript::HandleBeforeCast);
+        }
 	};
 
 	SpellScript* GetSpellScript() const
