@@ -191,6 +191,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BattleForUndercity/worldzone_trisfal_glades.cpp
   EasternKingdoms/worldzone_searing_gorge.cpp
   EasternKingdoms/BattleForUndercity/battle_for_undercity.h
+  EasternKingdoms/zone_goldshire.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")
