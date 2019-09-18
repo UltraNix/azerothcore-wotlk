@@ -272,48 +272,33 @@ class spell_warr_last_stand : public SpellScriptLoader
 };
 
 // -12162 - Deep Wounds
-class spell_warr_deep_wounds : public SpellScriptLoader
+class spell_warr_deep_wounds_SpellScript : public SpellScript
 {
-    public:
-        spell_warr_deep_wounds() : SpellScriptLoader("spell_warr_deep_wounds") { }
+    PrepareSpellScript(spell_warr_deep_wounds_SpellScript);
 
-        class spell_warr_deep_wounds_SpellScript : public SpellScript
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_WARRIOR_DEEP_WOUNDS_RANK_1, SPELL_WARRIOR_DEEP_WOUNDS_RANK_2, SPELL_WARRIOR_DEEP_WOUNDS_RANK_3 });
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        int32 damage = std::max(GetEffectValue(), 0);
+        Unit* caster = GetCaster();
+        if (Unit* target = GetHitUnit())
         {
-            PrepareSpellScript(spell_warr_deep_wounds_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_1) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_2) || !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DEEP_WOUNDS_RANK_3))
-                    return false;
-                return true;
-            }
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                int32 damage = std::max(GetEffectValue(), 0);
-                Unit* caster = GetCaster();
-                if (Unit* target = GetHitUnit())
-                {
-                    // include target dependant auras
-                    damage = target->MeleeDamageBonusTaken(caster, damage, BASE_ATTACK, GetSpellInfo());
-                    // apply percent damage mods
-                    ApplyPct(damage, 16.0f * GetSpellInfo()->GetRank() / 6.0f);
-                    target->CastDelayedSpellWithPeriodicAmount(caster, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, SPELL_AURA_PERIODIC_DAMAGE, damage, EFFECT_0);
-
-                    //caster->CastCustomSpell(target, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, &damage, NULL, NULL, true);
-                }
-            }
-
-            void Register()
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_warr_deep_wounds_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_warr_deep_wounds_SpellScript();
+            // include target dependant auras
+            damage = target->MeleeDamageBonusTaken(caster, damage, BASE_ATTACK, GetSpellInfo());
+            // apply percent damage mods
+            ApplyPct(damage, 16.0f * GetSpellInfo()->GetRank() / 6.0f);
+            target->CastDelayedSpellWithPeriodicAmount(caster, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, SPELL_AURA_PERIODIC_DAMAGE, damage, EFFECT_0);
         }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_warr_deep_wounds_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
 };
 
 // -100 - Charge
@@ -804,6 +789,9 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == 22858) // Retaliation exception, shouldn't proc Sweeping Strikes
+            return false;
+
         _procTarget = eventInfo.GetActor()->SelectNearbyNoTotemTarget(eventInfo.GetProcTarget());
         return _procTarget;
     }
@@ -1098,7 +1086,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_charge();
     new spell_warr_concussion_blow();
     new spell_warr_damage_shield();
-    new spell_warr_deep_wounds();
+    new SpellScriptLoaderEx<spell_warr_deep_wounds_SpellScript>("spell_warr_deep_wounds");
     new spell_warr_execute();
     new spell_warr_glyph_of_sunder_armor();
     new spell_warr_intimidating_shout();
