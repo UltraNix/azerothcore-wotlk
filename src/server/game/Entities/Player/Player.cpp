@@ -12377,13 +12377,30 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16 &dest, ItemRef const& pI
 
             uint32 type = pProto->InventoryType;
 
+            bool ShouldSendDisarmError = [this, eslot]()
+            {
+                switch (eslot)
+                {
+                    case EQUIPMENT_SLOT_MAINHAND:
+                        return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED);
+                    case EQUIPMENT_SLOT_OFFHAND:
+                        return HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DISARM_OFFHAND);
+                    case EQUIPMENT_SLOT_RANGED:
+                        return HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_DISARM_RANGED);
+                    default:
+                        return false;
+                }
+            }();
+
+            if (ShouldSendDisarmError)
+                return EQUIP_ERR_NOT_WHILE_DISARMED;
+
             if (eslot == EQUIPMENT_SLOT_OFFHAND)
             {
                 // Do not allow polearm to be equipped in the offhand (rare case for the only 1h polearm 41750)
                 // xinef: same for fishing poles
                 if (type == INVTYPE_WEAPON && (pProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || pProto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE))
                     return EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT;
-
                 else if (type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND)
                 {
                     if (!CanDualWield())
