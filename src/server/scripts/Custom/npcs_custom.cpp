@@ -1578,7 +1578,6 @@ public:
             player->PrepareQuestMenu(creature->GetGUID());
 
         player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Who are you?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        //player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "***DEBUG*** Start event", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 100);
         player->SEND_GOSSIP_MENU(WANDERER_GOSSIP_HELLO, creature->GetGUID());
         return true;
     }
@@ -1614,13 +1613,7 @@ public:
         void Reset() override
         {
             events.Reset();
-            events.ScheduleEvent(WANDERER_EVENT_CHECKHOUR, 1s);
             events.ScheduleEvent(WANDERER_EVENT_SAY, 1min, 5min);
-        }
-
-        void DoAction(int32 /*param*/) override
-        {
-            StartEvent();
         }
 
         void UpdateAI(uint32 diff) override
@@ -1628,35 +1621,11 @@ public:
             events.Update(diff);
             switch (events.GetEvent())
             {
-            case WANDERER_EVENT_CHECKHOUR:
-            {
-                time_t now = time(nullptr);
-                tm* aTm = localtime(&now);
-
-                // Event should start at 10, 15, 20;
-                if (aTm->tm_min == 0 && aTm->tm_hour >= 10 && aTm->tm_hour <= 20 && aTm->tm_hour % 5 == 0)
-                    StartEvent();
-
-                events.RescheduleEvent(WANDERER_EVENT_CHECKHOUR, 1min);
-                break;
-            }
-            case WANDERER_EVENT_SAY:
-                Talk(urand(0, 3));
-                events.RescheduleEvent(WANDERER_EVENT_SAY, 1min, 5min);
-                break;
-            }
-        }
-
-        void StartEvent()
-        {
-            Talk(urand(4, 7));
-            for (uint8 i = 0; i < 5; ++i)
-            {
-                uint32 id = urand(0, WANDERER_DALARAN_NPC_COUNT - 1);
-                if (Unit* npc = sObjectAccessor->FindUnit(MAKE_NEW_GUID(wandererDalaranNPCs[id].guid, wandererDalaranNPCs[id].entry, HIGHGUID_UNIT)))
+                case WANDERER_EVENT_SAY:
                 {
-                    if (npc->IsAIEnabled)
-                        npc->GetAI()->DoAction(100);
+                    Talk(urand(0, 3));
+                    events.RescheduleEvent(WANDERER_EVENT_SAY, 1min, 5min);
+                    break;
                 }
             }
         }
