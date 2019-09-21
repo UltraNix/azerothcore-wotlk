@@ -2881,7 +2881,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (caster->GetTypeId() == TYPEID_PLAYER && (unitTarget->GetTypeId() == TYPEID_PLAYER || unitTarget->IsPet()))
         {
             if (!caster->IsInCombat() && m_caster->IsFriendlyTo(unitTarget) && unitTarget->IsInCombat()
-                && m_spellInfo->IsPositive() && !m_spellInfo->HasAttribute(SPELL_ATTR1_NO_THREAT) &&
+                && m_spellInfo->IsPositive() && !IsTriggered() && !m_spellInfo->HasAttribute(SPELL_ATTR1_NO_THREAT) &&
                 !m_spellInfo->HasAttribute(SPELL_ATTR3_NO_INITIAL_AGGRO))
             {
                 caster->SetInCombatState(true);
