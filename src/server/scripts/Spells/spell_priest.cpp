@@ -995,9 +995,13 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
                     return false;
                     
                 if (eventInfo.GetTypeMask() & PROC_FLAG_KILLED)
+                {
                     if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
                         if (spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && (spellInfo->SpellFamilyFlags[0] & 0x00002000))
                             return true;
+
+                    return false;
+                }
 
                 return eventInfo.GetActionTarget()->IsAlive();
             }
