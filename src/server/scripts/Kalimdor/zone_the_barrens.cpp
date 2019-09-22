@@ -662,6 +662,31 @@ public:
 
 };
 
+class npc_possible_but_not_probable_creature : public CreatureScript
+{
+public:
+    npc_possible_but_not_probable_creature() : CreatureScript("npc_possible_but_not_probable_creature") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_possible_but_not_probable_creatureAI(creature);
+    }
+
+    struct npc_possible_but_not_probable_creatureAI : public ScriptedAI
+    {
+        npc_possible_but_not_probable_creatureAI(Creature* creature) : ScriptedAI(creature) {}
+
+        void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask)
+        {
+            if (Player* pl = who->ToPlayer()) {
+                if (pl->getClass() == CLASS_ROGUE) {
+                    damage *= 1.4f;
+                }
+            }
+        }
+    };
+};
+
 void AddSC_the_barrens()
 {
     new npc_beaten_corpse();
@@ -669,4 +694,5 @@ void AddSC_the_barrens()
     new npc_taskmaster_fizzule();
     new npc_twiggy_flathead();
     new npc_wizzlecrank_shredder();
+    new npc_possible_but_not_probable_creature();
 }
