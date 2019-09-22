@@ -4918,6 +4918,11 @@ void SpellMgr::LoadDbcDataCorrections()
         /////////////////////////////////
         ///// WARRIOR
         /////////////////////////////////
+        // Sweeping Strikes
+        case 26654:
+            spellInfo->Effect[EFFECT_0] = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
+            spellInfo->EffectBasePoints[EFFECT_0] = 100;
+            break;
         // Bladestorm
         case 46924:
             spellInfo->AttributesEx2 |= SPELL_ATTR2_NOT_RESET_AUTO_ACTIONS;

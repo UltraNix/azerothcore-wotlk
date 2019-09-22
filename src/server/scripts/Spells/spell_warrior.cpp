@@ -34,7 +34,8 @@ enum WarriorSpells
     SPELL_WARRIOR_SPELL_REFLECTION                      = 23920,
     SPELL_WARRIOR_IMPROVED_SPELL_REFLECTION_TRIGGER     = 59725,
     SPELL_WARRIOR_BLADESTORM_PERIODIC_WHIRLWIND         = 50622,
-    SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK         = 12723,
+    SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1       = 12723,
+    SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2       = 26654,
 
     // Theirs
     SPELL_WARRIOR_BLOODTHIRST                       = 23885,
@@ -778,7 +779,7 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
 
     bool Validate(SpellInfo const* /*spellInfo*/)
     {
-        return ValidateSpellInfo({ SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK });
+        return ValidateSpellInfo({ SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2 });
     }
 
     bool Load() override
@@ -789,7 +790,7 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == 22858) // Retaliation exception, shouldn't proc Sweeping Strikes
+        if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->SpellFamilyFlags[0] & (0x80000000 | 0x00000020)) // Retaliation and Rend exception, shouldn't proc Sweeping Strikes
             return false;
 
         _procTarget = eventInfo.GetActor()->SelectNearbyNoTotemTarget(eventInfo.GetProcTarget());
@@ -801,26 +802,30 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
         PreventDefaultAction();
         if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
         {
-            Unit* procTarget = eventInfo.GetProcTarget();
-            int32 procDamage = 0;
-            SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-            SpellSchoolMask schoolMask = eventInfo.GetDamageInfo()->GetSchoolMask();
-            WeaponAttackType attackType = eventInfo.GetDamageInfo()->GetAttackType();
-            uint32 damage = eventInfo.GetDamageInfo()->GetDamage();
-
-            int32 armorDiff = _procTarget->GetArmor() - procTarget->GetArmor();
-            if (armorDiff > 0)
+            SpellInfo const* spellInfo = damageInfo->GetSpellInfo();
+            if (spellInfo && spellInfo->Id == SPELL_WARRIOR_EXECUTE && !_procTarget->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
+                GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2, true, nullptr, aurEff);
+            else
             {
-                if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
-                    procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
+                int32 procDamage = 0;
+                uint32 damage = damageInfo->GetDamage();
+                Unit* primaryTarget = eventInfo.GetProcTarget();
+                SpellSchoolMask schoolMask = damageInfo->GetSchoolMask();
+                WeaponAttackType attackType = damageInfo->GetAttackType();
+                int32 armorDiff = _procTarget->GetArmor() - primaryTarget->GetArmor();
+                if (armorDiff > 0)
+                {
+                    if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
+                        procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
+                    else
+                        procDamage = damage;
+                }
                 else
                     procDamage = damage;
-            }
-            else
-                procDamage = damage;
 
-            if (procDamage)
-                GetTarget()->CastCustomSpell(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, procDamage, _procTarget, true, nullptr, aurEff);
+                if (procDamage)
+                    GetTarget()->CastCustomSpell(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1, SPELLVALUE_BASE_POINT0, procDamage, _procTarget, true, nullptr, aurEff);
+            }
         }
     }
 
