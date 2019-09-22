@@ -4331,21 +4331,80 @@ class spell_gen_mount : public SpellScriptLoader
             spell_gen_mount_SpellScript(uint32 mount0, uint32 mount60, uint32 mount100, uint32 mount150, uint32 mount280, uint32 mount310) : SpellScript(),
                 _mount0(mount0), _mount60(mount60), _mount100(mount100), _mount150(mount150), _mount280(mount280), _mount310(mount310) { }
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/) override
             {
-                if (_mount0 && !sSpellMgr->GetSpellInfo(_mount0))
-                    return false;
-                if (_mount60 && !sSpellMgr->GetSpellInfo(_mount60))
-                    return false;
-                if (_mount100 && !sSpellMgr->GetSpellInfo(_mount100))
-                    return false;
-                if (_mount150 && !sSpellMgr->GetSpellInfo(_mount150))
-                    return false;
-                if (_mount280 && !sSpellMgr->GetSpellInfo(_mount280))
-                    return false;
-                if (_mount310 && !sSpellMgr->GetSpellInfo(_mount310))
-                    return false;
+                for (uint32 mountId : { _mount0, _mount60, _mount100, _mount150, _mount280, _mount310 })
+                    if (mountId && !sSpellMgr->GetSpellInfo(mountId))
+                        return false;
+
                 return true;
+            }
+
+            bool Load() override
+            {
+                _mount = 0;
+                return true;
+            }
+
+            SpellCastResult CheckCast()
+            {
+                Unit* unit = GetCaster();
+                if (!unit || !unit->IsPlayer())
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+                Player* target = unit->ToPlayer();
+                // Triggered spell id dependent on riding skill and zone
+                bool canFly = false;
+                uint32 map = GetVirtualMapForMapAndZone(target->GetMapId(), target->GetZoneId());
+                if (map == 530 || (map == 571 && target->HasSpell(SPELL_COLD_WEATHER_FLYING)))
+                    canFly = true;
+
+                AreaTableEntry const* area = sAreaTableStore.LookupEntry(target->GetAreaId());
+                // Xinef: add battlefield check
+                Battlefield* Bf = sBattlefieldMgr->GetBattlefieldToZoneId(target->GetZoneId());
+                if (!area || (canFly && ((area->flags & AREA_FLAG_NO_FLY_ZONE) || (Bf && !Bf->CanFlyIn()))))
+                    canFly = false;
+
+                uint32 mount = 0;
+                switch (target->GetBaseSkillValue(SKILL_RIDING))
+                {
+                    case 0:
+                        mount = _mount0;
+                        break;
+                    case 75:
+                        mount = _mount60;
+                        break;
+                    case 150:
+                        mount = _mount100;
+                        break;
+                    case 225:
+                        if (canFly)
+                            mount = _mount150;
+                        else
+                            mount = _mount100;
+                        break;
+                    case 300:
+                        if (canFly)
+                        {
+                            if (_mount310 && target->Has310Flyer(false))
+                                mount = _mount310;
+                            else
+                                mount = _mount280;
+                        }
+                        else
+                            mount = _mount100;
+                        break;
+                    default:
+                        break;
+                }
+
+
+                if (SpellInfo const* mountInfo = sSpellMgr->GetSpellInfo(_mount))
+                    if (target->IsInWater() && (mountInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || mountInfo->HasAura(SPELL_AURA_FLY)))
+                        return SPELL_FAILED_ONLY_ABOVEWATER;
+
+                _mount = mount;
+                return _mount ? SPELL_CAST_OK : SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
             }
 
             void HandleMount(SpellEffIndex effIndex)
@@ -4360,55 +4419,10 @@ class spell_gen_mount : public SpellScriptLoader
                     // Prevent stacking of mounts and client crashes upon dismounting
                     target->RemoveAurasByType(SPELL_AURA_MOUNTED, 0, GetHitAura());
 
-                    // Triggered spell id dependent on riding skill and zone
-                    bool canFly = false;
-                    uint32 map = GetVirtualMapForMapAndZone(target->GetMapId(), target->GetZoneId());
-                    if (map == 530 || (map == 571 && target->HasSpell(SPELL_COLD_WEATHER_FLYING)))
-                        canFly = true;
-
-                    AreaTableEntry const* area = sAreaTableStore.LookupEntry(target->GetAreaId());
-                    // Xinef: add battlefield check
-                    Battlefield* Bf = sBattlefieldMgr->GetBattlefieldToZoneId(target->GetZoneId());
-                    if (!area || (canFly && ((area->flags & AREA_FLAG_NO_FLY_ZONE) || (Bf && !Bf->CanFlyIn()))))
-                        canFly = false;
-
-                    uint32 mount = 0;
-                    switch (target->GetBaseSkillValue(SKILL_RIDING))
-                    {
-                        case 0:
-                            mount = _mount0;
-                            break;
-                        case 75:
-                            mount = _mount60;
-                            break;
-                        case 150:
-                            mount = _mount100;
-                            break;
-                        case 225:
-                            if (canFly)
-                                mount = _mount150;
-                            else
-                                mount = _mount100;
-                            break;
-                        case 300:
-                            if (canFly)
-                            {
-                                if (_mount310 && target->Has310Flyer(false))
-                                    mount = _mount310;
-                                else
-                                    mount = _mount280;
-                            }
-                            else
-                                mount = _mount100;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    if (mount)
+                    if (_mount)
                     {
                         PreventHitAura();
-                        target->CastSpell(target, mount, true);
+                        target->CastSpell(target, _mount, true);
                     }
 
                     if (petNumber)
@@ -4416,8 +4430,9 @@ class spell_gen_mount : public SpellScriptLoader
                 }
             }
 
-            void Register()
+            void Register() override
             {
+                 OnCheckCast += SpellCheckCastFn(spell_gen_mount_SpellScript::CheckCast);
                  OnEffectHitTarget += SpellEffectFn(spell_gen_mount_SpellScript::HandleMount, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
             }
 
@@ -4428,6 +4443,7 @@ class spell_gen_mount : public SpellScriptLoader
             uint32 _mount150;
             uint32 _mount280;
             uint32 _mount310;
+            uint32 _mount;
         };
 
         SpellScript* GetSpellScript() const

@@ -6499,8 +6499,9 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_MOUNTED:
             {
-                // Xinef: disallow casting in water for mounts not increasing water movement speed
-                if (m_caster->IsInWater() && (m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)))
+                // Only disallow using flight mounts in water
+                // "Wrath of the Lich King Patch 3.1.0 (2009-04-14): All Ground Mounts may now swim without dismounting the rider. Flying Mounts still may NOT, and will dismount the rider upon entering water."
+                if (m_caster->IsInWater() && (m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || m_spellInfo->HasAura(SPELL_AURA_FLY)))
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
