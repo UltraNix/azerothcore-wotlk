@@ -678,8 +678,10 @@ public:
 
         void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask)
         {
-            if (Player* pl = who->ToPlayer()) {
-                if (pl->getClass() == CLASS_ROGUE) {
+            if (Player* pl = who->ToPlayer())
+            {
+                if (pl->getClass() == CLASS_ROGUE)
+                {
                     damage *= 1.4f;
                 }
             }
