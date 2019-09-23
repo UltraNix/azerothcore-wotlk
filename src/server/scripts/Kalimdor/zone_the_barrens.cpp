@@ -689,6 +689,53 @@ public:
     };
 };
 
+enum Bragok
+{
+    NPC_GRYPHON = 9526,
+    NPC_WYVERN = 9297,
+    SAY_0 = 0
+};
+class npc_bragok : public CreatureScript
+{
+public:
+    npc_bragok() : CreatureScript("npc_bragok") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_bragokAI(creature);
+    }
+
+    struct npc_bragokAI : public ScriptedAI
+    {
+        npc_bragokAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
+
+        void EnterCombat(Unit* who)
+        {
+            if (Player* pl = who->ToPlayer())
+            {
+                uint32 creatureEntry = NPC_GRYPHON;
+                if (pl->GetTeamId() == TEAM_ALLIANCE)
+                    creatureEntry = NPC_WYVERN;
+                if (Creature* cr = me->SummonCreature(creatureEntry, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 30000))
+                    cr->AI()->AttackStart(who);
+            }
+        }
+
+        void Reset()
+        {
+            summons.DespawnAll();
+        }
+
+        void JustSummoned(Creature* creature)
+        {
+            summons.Summon(creature);
+        }
+
+    private:
+        SummonList summons;
+    };
+};
+
 void AddSC_the_barrens()
 {
     new npc_beaten_corpse();
@@ -697,4 +744,5 @@ void AddSC_the_barrens()
     new npc_twiggy_flathead();
     new npc_wizzlecrank_shredder();
     new npc_possible_but_not_probable_creature();
+    new npc_bragok();
 }
