@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -662,78 +662,58 @@ public:
 
 };
 
-class npc_possible_but_not_probable_creature : public CreatureScript
+struct npc_possible_but_not_probable_creature : public ScriptedAI
 {
-public:
-    npc_possible_but_not_probable_creature() : CreatureScript("npc_possible_but_not_probable_creature") { }
+    npc_possible_but_not_probable_creature(Creature* creature) : ScriptedAI(creature) { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
-        return new npc_possible_but_not_probable_creatureAI(creature);
-    }
-
-    struct npc_possible_but_not_probable_creatureAI : public ScriptedAI
-    {
-        npc_possible_but_not_probable_creatureAI(Creature* creature) : ScriptedAI(creature) {}
-
-        void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask)
+        if (Player* pl = who->ToPlayer())
         {
-            if (Player* pl = who->ToPlayer())
-            {
-                if (pl->getClass() == CLASS_ROGUE)
-                {
-                    damage *= 1.4f;
-                }
-            }
+            if (pl->getClass() == CLASS_ROGUE)
+                damage *= 1.4f;
         }
-    };
+    }
 };
 
 enum Bragok
 {
-    NPC_GRYPHON = 9526,
-    NPC_WYVERN = 9297,
-    SAY_0 = 0
+    NPC_GRYPHON     = 9526,
+    NPC_WYVERN      = 9297,
+    SAY_BRAGOK_0    = 0
 };
-class npc_bragok : public CreatureScript
+
+struct npc_bragok : public ScriptedAI
 {
-public:
-    npc_bragok() : CreatureScript("npc_bragok") { }
+    npc_bragok(Creature* creature) : ScriptedAI(creature), summons(me) { }
 
-    CreatureAI* GetAI(Creature* creature) const
+    void EnterCombat(Unit* who) override
     {
-        return new npc_bragokAI(creature);
-    }
-
-    struct npc_bragokAI : public ScriptedAI
-    {
-        npc_bragokAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
-
-        void EnterCombat(Unit* who)
+        if (Player* pl = who->ToPlayer())
         {
-            if (Player* pl = who->ToPlayer())
+            uint32 creatureEntry = pl->GetTeamId() == TEAM_ALLIANCE ? NPC_WYVERN : NPC_GRYPHON;
+            if (Creature* spawn = me->SummonCreature(creatureEntry, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 30000))
             {
-                uint32 creatureEntry = NPC_GRYPHON;
-                if (pl->GetTeamId() == TEAM_ALLIANCE)
-                    creatureEntry = NPC_WYVERN;
-                if (Creature* cr = me->SummonCreature(creatureEntry, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 30000))
-                    cr->AI()->AttackStart(who);
+                if (spawn->IsAIEnabled)
+                    spawn->AI()->AttackStart(who);
             }
         }
+    }
 
-        void Reset()
-        {
-            summons.DespawnAll();
-        }
+    void Reset() override
+    {
+        summons.DespawnAll();
+        ScriptedAI::Reset();
+    }
 
-        void JustSummoned(Creature* creature)
-        {
-            summons.Summon(creature);
-        }
+    void JustSummoned(Creature* creature) override
+    {
+        summons.Summon(creature);
+        ScriptedAI::JustSummoned(creature);
+    }
 
-    private:
-        SummonList summons;
-    };
+private:
+    SummonList summons;
 };
 
 void AddSC_the_barrens()
@@ -743,6 +723,6 @@ void AddSC_the_barrens()
     new npc_taskmaster_fizzule();
     new npc_twiggy_flathead();
     new npc_wizzlecrank_shredder();
-    new npc_possible_but_not_probable_creature();
-    new npc_bragok();
+    new CreatureAILoader<npc_possible_but_not_probable_creature>("npc_possible_but_not_probable_creature");
+    new CreatureAILoader<npc_bragok>("npc_bragok");
 }
