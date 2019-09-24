@@ -812,16 +812,19 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
                 Unit* primaryTarget = eventInfo.GetProcTarget();
                 SpellSchoolMask schoolMask = damageInfo->GetSchoolMask();
                 WeaponAttackType attackType = damageInfo->GetAttackType();
-                int32 armorDiff = _procTarget->GetArmor() - primaryTarget->GetArmor();
-                if (armorDiff > 0)
+                if (primaryTarget)
                 {
-                    if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
-                        procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
+                    int32 armorDiff = _procTarget->GetArmor() - primaryTarget->GetArmor();
+                    if (armorDiff > 0)
+                    {
+                        if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
+                            procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
+                        else
+                            procDamage = damage;
+                    }
                     else
                         procDamage = damage;
                 }
-                else
-                    procDamage = damage;
 
                 if (procDamage)
                     GetTarget()->CastCustomSpell(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1, SPELLVALUE_BASE_POINT0, procDamage, _procTarget, true, nullptr, aurEff);
