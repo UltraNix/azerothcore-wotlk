@@ -886,6 +886,26 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
+bool WorldObject::IsUnderTextures(Position const& pos)
+{
+    if (!Trinity::IsValidMapCoord(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
+        return false;
+
+    Map* map = GetMap();
+    float ground = GetMap()->GetHeight(GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), MAX_HEIGHT, true);
+    float floor = GetMap()->GetHeight(GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true);
+    float proper_z = fabs(ground - pos.GetPositionZ()) <= fabs(floor - pos.GetPositionZ()) ? ground : floor;
+    if (G3D::fuzzyEq(pos.GetPositionZ(), proper_z))
+        return false;
+
+    return pos.GetPositionZ() < proper_z;
+}
+
+bool WorldObject::IsUnderTextures()
+{
+    return IsUnderTextures(*this);
+}
+
 bool Position::HasInLine(WorldObject const* target, float width) const
 {
     if (!HasInArc(M_PI, target))

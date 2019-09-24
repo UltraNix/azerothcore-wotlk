@@ -1001,6 +1001,9 @@ class WorldObject : public Object, public WorldLocation
         virtual float GetStationaryZ() const { return GetPositionZ(); }
         virtual float GetStationaryO() const { return GetOrientation(); }
 
+        bool IsUnderTextures(Position const& pos);
+        bool IsUnderTextures();
+
     protected:
         std::string m_name;
         bool m_isActive;

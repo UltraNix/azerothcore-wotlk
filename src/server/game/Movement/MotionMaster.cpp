@@ -419,18 +419,6 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
     float dist = 2 * moveTimeHalf * speedXY;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
 
-    auto IsUnderTextures = [](WorldObject* src, Position const& pos)
-    {
-        Map* map = src->GetMap();
-        float ground = map->GetHeight(src->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), MAX_HEIGHT, true);
-        float floor = map->GetHeight(src->GetPhaseMask(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), true);
-        float proper_z = fabs(ground - pos.GetPositionZ()) <= fabs(floor - pos.GetPositionZ()) ? ground : floor;
-        if (G3D::fuzzyEq(pos.GetPositionZ(), proper_z))
-            return false;
-
-        return pos.GetPositionZ() < proper_z;
-    };
-
     constexpr int KNOCKBACK_STEP_AMOUNT = 10;
     float angle = _owner->GetAngle(srcX, srcY) + M_PI;
     Position pos = *_owner;
@@ -443,7 +431,7 @@ void MotionMaster::MoveKnockbackFrom(float srcX, float srcY, float speedXY, floa
         pos.m_positionZ += 2.5f;
         if (!_owner->GetMap()->IsInWater(pos.m_positionX, pos.m_positionY, pos.m_positionZ))
             _owner->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-        if (!_owner->IsWithinLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ) || IsUnderTextures(_owner, pos))
+        if (!_owner->IsWithinLOS(pos.m_positionX, pos.m_positionY, pos.m_positionZ) || _owner->IsUnderTextures(pos))
             break;
 
         lastGoodPosition = pos;

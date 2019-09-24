@@ -1373,189 +1373,58 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
         }
         case TARGET_DEST_CASTER_FRONT_LEAP:
         {
-            float distance = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
-            Map* map = m_caster->GetMap();
-            uint32 mapid = m_caster->GetMapId();
-            uint32 phasemask = m_caster->GetPhaseMask();
-            float destx, desty, destz, ground, startx, starty, startz, starto;
+            Unit* target = GetCaster();
+            if (!target)
+                break;
 
-            Position pos;
-            Position lastpos;
-            m_caster->GetPosition(startx, starty, startz, starto);
-            pos.Relocate(startx, starty, startz, starto);
-            destx = pos.GetPositionX() + distance * cos(pos.GetOrientation());
-            desty = pos.GetPositionY() + distance * sin(pos.GetOrientation());
+            float const distance = GetSpellInfo()->Effects[EFFECT_0].CalcRadius();
+            Position destination = target->GetPosition();
 
-            ground = map->GetHeight(phasemask, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+            constexpr uint32 BLINK_RESOLVE_STEPS = 12;
+            constexpr float BLINK_MAX_HEIGHT_PER_STEP = 2.0f;
 
-            if (!m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FALLING) || (pos.GetPositionZ() - ground < distance))
+            Position checkPos = destination;
+            checkPos.m_positionX += std::cos(target->GetOrientation()) * distance;
+            checkPos.m_positionY += std::sin(target->GetOrientation()) * distance;
+            if (!target->GetMap()->IsInWater(checkPos.m_positionX, checkPos.m_positionY, checkPos.m_positionZ))
+                target->UpdateGroundPositionZ(checkPos.m_positionX, checkPos.m_positionY, checkPos.m_positionZ);
+
+            if ((target->IsFalling() || target->IsFlying()) && fabs(target->GetPositionZ() - checkPos.m_positionZ) > (distance * BLINK_MAX_HEIGHT_PER_STEP))
+                break;
+
+            if (!target->IsWithinLOS(checkPos.GetPositionX(), checkPos.GetPositionY(), checkPos.GetPositionZ()) || target->IsUnderTextures(checkPos))
             {
-                float tstX, tstY, tstZ, prevX, prevY, prevZ;
-                float tstZ1, tstZ2, tstZ3, destz1, destz2, destz3, srange, srange1, srange2, srange3;
-                float maxtravelDistZ = 2.65f;
-                float overdistance = 0.0f;
-                float totalpath = 0.0f;
-                float beforewaterz = 0.0f;
-                bool inwater = false;
-                bool wcol = false;
-                const float  step = 2.0f;
-                const uint8 numChecks = ceil(fabs(distance / step));
-                const float DELTA_X = (destx - pos.GetPositionX()) / numChecks;
-                const float DELTA_Y = (desty - pos.GetPositionY()) / numChecks;
-                int j = 1;
-                for (; j < (numChecks + 1); j++)
+                Position currentPos = *target;
+                Position lastGoodPosition = *target;
+                float step = distance / BLINK_RESOLVE_STEPS;
+                for (uint32 idx = 0; idx < BLINK_RESOLVE_STEPS; ++idx)
                 {
-                    prevX = pos.GetPositionX() + (float(j - 1)*DELTA_X);
-                    prevY = pos.GetPositionY() + (float(j - 1)*DELTA_Y);
-                    tstX = pos.GetPositionX() + (float(j)*DELTA_X);
-                    tstY = pos.GetPositionY() + (float(j)*DELTA_Y);
+                    currentPos.m_positionX += std::cos(target->GetOrientation()) * step;
+                    currentPos.m_positionY += std::sin(target->GetOrientation()) * step;
+                    if (!target->GetMap()->IsInWater(currentPos.m_positionX, currentPos.m_positionY, currentPos.m_positionZ))
+                        target->UpdateGroundPositionZ(currentPos.m_positionX, currentPos.m_positionY, currentPos.m_positionZ);
 
-                    if (j < 2)
+                    if (!target->IsWithinLOS(currentPos.GetPositionX(), currentPos.GetPositionY(), currentPos.GetPositionZ()) || target->IsUnderTextures(currentPos))
                     {
-                        prevZ = pos.GetPositionZ();
-                    }
-                    else
-                    {
-                        prevZ = tstZ;
-                    }
-
-                    tstZ = map->GetHeight(phasemask, tstX, tstY, prevZ + maxtravelDistZ, true);
-                    ground = tstZ;
-
-                    if (!map->IsInWater(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
-                    {
-                        if (map->IsInWater(tstX, tstY, tstZ))
+                        if (idx)
                         {
-                            if (!(beforewaterz != 0.0f))
-                                beforewaterz = prevZ;
-                            tstZ = beforewaterz;
-                            srange = sqrt((tstY - prevY)*(tstY - prevY) + (tstX - prevX)*(tstX - prevX));
+                            lastGoodPosition.m_positionX -= std::cos(target->GetOrientation()) * 0.2f;
+                            lastGoodPosition.m_positionY -= std::sin(target->GetOrientation()) * 0.2f;
+                            if (!target->GetMap()->IsInWater(lastGoodPosition.m_positionX, lastGoodPosition.m_positionY, lastGoodPosition.m_positionZ))
+                                target->UpdateGroundPositionZ(lastGoodPosition.m_positionX, lastGoodPosition.m_positionY, lastGoodPosition.m_positionZ);
                         }
-                    }
-                    else if (map->IsInWater(tstX, tstY, tstZ))
-                    {
-                        prevZ = pos.GetPositionZ();
-                        tstZ = pos.GetPositionZ();
-                        srange = sqrt((tstY - prevY)*(tstY - prevY) + (tstX - prevX)*(tstX - prevX));
-
-                        inwater = true;
-                        if (inwater && (fabs(tstZ - ground) < 2.0f))
-                        {
-                            wcol = true;
-                        }
-                    }
-
-                    if ((!map->IsInWater(tstX, tstY, tstZ) && tstZ != beforewaterz) || wcol)  // second safety check z for blink way if on the ground
-                    {
-                        if (inwater && !map->IsInWater(tstX, tstY, tstZ))
-                            inwater = false;
-
-                        // highest available point
-                        tstZ1 = map->GetHeight(phasemask, tstX, tstY, prevZ + maxtravelDistZ, true, 25.0f);
-                        // upper or floor
-                        tstZ2 = map->GetHeight(phasemask, tstX, tstY, prevZ, true, 25.0f);
-                        //lower than floor
-                        tstZ3 = map->GetHeight(phasemask, tstX, tstY, prevZ - maxtravelDistZ / 2, true, 25.0f);
-
-                        //distance of rays, will select the shortest in 3D
-                        srange1 = sqrt((tstY - prevY)*(tstY - prevY) + (tstX - prevX)*(tstX - prevX) + (tstZ1 - prevZ)*(tstZ1 - prevZ));
-                        srange2 = sqrt((tstY - prevY)*(tstY - prevY) + (tstX - prevX)*(tstX - prevX) + (tstZ2 - prevZ)*(tstZ2 - prevZ));
-                        srange3 = sqrt((tstY - prevY)*(tstY - prevY) + (tstX - prevX)*(tstX - prevX) + (tstZ3 - prevZ)*(tstZ3 - prevZ));
-
-                        if (srange1 < srange2)
-                        {
-                            tstZ = tstZ1;
-                            srange = srange1;
-                        }
-                        else if (srange3 < srange2)
-                        {
-                            tstZ = tstZ3;
-                            srange = srange3;
-                        }
-                        else
-                        {
-                            tstZ = tstZ2;
-                            srange = srange2;
-                        }
-                    }
-
-                    destx = tstX;
-                    desty = tstY;
-                    destz = tstZ;
-
-                    totalpath += srange;
-
-                    if (totalpath > distance)
-                        overdistance = totalpath - distance;
-
-                    bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, prevX, prevY, prevZ + 0.5f, tstX, tstY, tstZ + 0.5f, tstX, tstY, tstZ, -0.5f);
-                    // check dynamic collision
-                    bool dcol = m_caster->GetMap()->getObjectHitPos(phasemask, prevX, prevY, prevZ + 0.5f, tstX, tstY, tstZ + 0.5f, tstX, tstY, tstZ, -0.5f);
-
-                    // collision occured
-                    if (col || dcol || (overdistance > 0.0f && !map->IsInWater(tstX, tstY, ground)) || (fabs(prevZ - tstZ) > maxtravelDistZ && (tstZ > prevZ)))
-                    {
-                        if ((overdistance > 0.0f) && (overdistance < step))
-                        {
-                            destx = prevX + overdistance * cos(pos.GetOrientation());
-                            desty = prevY + overdistance * sin(pos.GetOrientation());
-                        }
-                        else
-                        {
-                            // move back a bit
-                            destx = tstX - (0.6 * cos(pos.GetOrientation()));
-                            desty = tstY - (0.6 * sin(pos.GetOrientation()));
-                        }
-
-                        // highest available point
-                        destz1 = map->GetHeight(phasemask, destx, desty, prevZ + maxtravelDistZ, true, 25.0f);
-                        // upper or floor
-                        destz2 = map->GetHeight(phasemask, destx, desty, prevZ, true, 25.0f);
-                        //lower than floor
-                        destz3 = map->GetHeight(phasemask, destx, desty, prevZ - maxtravelDistZ / 2, true, 25.0f);
-
-                        //distance of rays, will select the shortest in 3D
-                        srange1 = sqrt((desty - prevY)*(desty - prevY) + (destx - prevX)*(destx - prevX) + (destz1 - prevZ)*(destz1 - prevZ));
-                        srange2 = sqrt((desty - prevY)*(desty - prevY) + (destx - prevX)*(destx - prevX) + (destz2 - prevZ)*(destz2 - prevZ));
-                        srange3 = sqrt((desty - prevY)*(desty - prevY) + (destx - prevX)*(destx - prevX) + (destz3 - prevZ)*(destz3 - prevZ));
-
-                        if (srange1 < srange2)
-                            destz = destz1;
-                        else if (srange3 < srange2)
-                            destz = destz3;
-                        else
-                            destz = destz2;
-
-                        if (inwater && destz < prevZ && !wcol)
-                            destz = prevZ;
 
                         break;
                     }
-                    // we have correct destz now
+
+                    lastGoodPosition = currentPos;
                 }
 
-                lastpos.Relocate(destx, desty, destz + 0.5f, pos.GetOrientation());
-                dest = SpellDestination(lastpos);
-            }
-            else
-            {
-                float z = pos.GetPositionZ();
-                bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, pos.GetPositionX(), pos.GetPositionY(), z + 0.5f, destx, desty, z + 0.5f, destx, desty, z, -0.5f);
-                // check dynamic collision
-                bool dcol = m_caster->GetMap()->getObjectHitPos(phasemask, pos.GetPositionX(), pos.GetPositionY(), z + 0.5f, destx, desty, z + 0.5f, destx, desty, z, -0.5f);
-
-                // collision occured
-                if (col || dcol)
-                {
-                    // move back a bit
-                    destx = destx - (0.6 * cos(pos.GetOrientation()));
-                    desty = desty - (0.6 * sin(pos.GetOrientation()));
-                }
-
-                lastpos.Relocate(destx, desty, z, pos.GetOrientation());
-                dest = SpellDestination(lastpos);
+                checkPos = lastGoodPosition;
             }
 
+            destination = checkPos;
+            dest = SpellDestination(destination);
             break;
         }
         default:
@@ -6114,10 +5983,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (m_caster->GetTransport())
                         break;
 
-                    m_pathFinder = new PathGenerator( new PathGeneratorContext( m_caster ), true );
+                    m_pathFinder = new PathGenerator(new PathGeneratorContext(m_caster), true);
                     m_pathFinder->CalculatePath(destx, desty, destz + 0.15f, false);
                     G3D::Vector3 endPos = m_pathFinder->GetEndPosition(); // also check distance between target and the point calculated by mmaps
-                    if ((m_pathFinder->GetPathType() & PATHFIND_NOPATH) || target->GetExactDistSq(endPos.x, endPos.y, endPos.z) > maxdist*maxdist || m_pathFinder->GetPathLength() > (40.0f + (m_caster->HasAura(58097) ? 5.0f : 0.0f)))
+
+                    if ((!m_caster->IsFalling() && (m_pathFinder->GetPathType() & PATHFIND_NOPATH)) || target->GetExactDistSq(endPos.x, endPos.y, endPos.z) > maxdist*maxdist || m_pathFinder->GetPathLength() > (40.0f + (m_caster->HasAura(58097) ? 5.0f : 0.0f)))
                         return SPELL_FAILED_NOPATH;
                     else if (m_pathFinder->GetPathType() & (PATHFIND_SHORT | PATHFIND_INCOMPLETE))
                     {
