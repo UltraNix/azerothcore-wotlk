@@ -2213,7 +2213,7 @@ void Unit::CalcHealAbsorb(Unit const* victim, const SpellInfo* healSpell, uint32
     healAmount = RemainingHeal;
 }
 
-void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool extra)
+void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool extra, bool meleeSwingOnly)
 {
     if (HasUnitState(UNIT_STATE_LOST_CONTROL) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         return;
@@ -2230,19 +2230,23 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
     if (attType != BASE_ATTACK && attType != OFF_ATTACK)
         return;                                             // ignore ranged case
 
-    // melee attack spell casted at main hand attack only - no normal melee dmg dealt
-    bool result = attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra;
-    if (result)
+    bool result = false;
+    if (!meleeSwingOnly)
     {
-        Spell* spell = m_currentSpells[CURRENT_MELEE_SPELL];
-        SpellCastResult spellResult = spell->CheckCast(true);
-        if (spellResult == SPELL_CAST_OK)
-            spell->cast();
-        else
+        // melee attack spell casted at main hand attack only - no normal melee dmg dealt
+        result = attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL] && !extra;
+        if (result)
         {
-            spell->SendCastResult(spellResult);
-            spell->cancel();
-            result = false;
+            Spell* spell = m_currentSpells[CURRENT_MELEE_SPELL];
+            SpellCastResult spellResult = spell->CheckCast(true);
+            if (spellResult == SPELL_CAST_OK)
+                spell->cast();
+            else
+            {
+                spell->SendCastResult(spellResult);
+                spell->cancel();
+                result = false;
+            }
         }
     }
 
@@ -8863,7 +8867,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 plr->AddSpellCooldown(16459, 0, cooldown);
 
                 if (plr->IsWithinMeleeRange(victim, MELEE_RANGE, true))
-                    plr->AttackerStateUpdate(victim);
+                    plr->AttackerStateUpdate(victim, BASE_ATTACK, false, true);
                 return true;
             }
         }
