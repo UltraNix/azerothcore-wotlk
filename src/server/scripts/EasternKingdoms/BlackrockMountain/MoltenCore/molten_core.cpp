@@ -264,6 +264,7 @@ struct npc_firelordAI : public ScriptedAI
     {
         CreatureAI::EnterEvadeMode();
         summons.DespawnAll();
+        _events.Reset();
     }
 
     void EnterCombat(Unit* victim) override
@@ -309,8 +310,8 @@ private:
 
 struct npc_majordomo_summonerAI : public ScriptedAI
 {
-    npc_majordomo_summonerAI(Creature* creature) : ScriptedAI(creature) 
-    { 
+    npc_majordomo_summonerAI(Creature* creature) : ScriptedAI(creature)
+    {
         instance = creature->GetInstanceScript();
         summoned = false;
     }
