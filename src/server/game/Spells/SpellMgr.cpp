@@ -4942,6 +4942,7 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
         // Strange shared cooldown
         case 20230: // Retaliation
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
         case 871: // Shield Wall
         case 1719: // Recklessness
             spellInfo->AttributesEx6 |= SPELL_ATTR6_IGNORE_CATEGORY_COOLDOWN_MODS;
