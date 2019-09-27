@@ -1574,7 +1574,8 @@ class spell_item_defibrillate : public SpellScriptLoader
 
 enum DesperateDefense
 {
-    SPELL_DESPERATE_RAGE    = 33898
+    SPELL_DESPERATE_RAGE      = 33898,
+    SPELL_DESPERATE_RAGE_ROOT = 33897
 };
 
 // 33896 - Desperate Defense
@@ -1599,10 +1600,15 @@ class spell_item_desperate_defense : public SpellScriptLoader
                 PreventDefaultAction();
                 GetTarget()->CastSpell(GetTarget(), SPELL_DESPERATE_RAGE, true, NULL, aurEff);
             }
+            void ExtraRemoveEffect(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                GetCaster()->RemoveAura(SPELL_DESPERATE_RAGE_ROOT);
+            }
 
             void Register()
             {
                 OnEffectProc += AuraEffectProcFn(spell_item_desperate_defense_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_PROC_TRIGGER_SPELL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_item_desperate_defense_AuraScript::ExtraRemoveEffect, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
             }
         };
 
