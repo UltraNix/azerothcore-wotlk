@@ -799,6 +799,9 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
+        if (!GetTarget() || !_procTarget)
+            return;
+
         PreventDefaultAction();
         if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
         {
