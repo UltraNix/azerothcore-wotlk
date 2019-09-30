@@ -3622,6 +3622,16 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_ENABLE_AURA_RESIST;
         });
 
+        ApplySpellFix
+        ({
+            469,
+            45517,
+            47439,
+            47440, // Commanding Shout
+            }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_CHANGE_CURRENT_HP_VALUE;
+        });
+
         /* ApplySpellFix({ 41105, 70768 }, [](SpellInfo* spellInfo) {
         spellInfo->AttributesCu |= SPELL_ATTR0_CU_CANT_BE_SAVED;
         });*/
