@@ -3596,6 +3596,7 @@ void SpellMgr::LoadSpellCustomAttr()
             62243, // Unstable sunbeam
             69579, // arcing smash
             34121, // flame buffet
+            71127  // Mortal Wound (stinky and precious in ICC)
         }, [](SpellInfo* spellInfo) {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
         });
