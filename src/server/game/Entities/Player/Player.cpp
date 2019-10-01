@@ -2880,7 +2880,7 @@ void Player::RegenerateHealth()
             ApplyPct(addvalue, GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT));
 
         if (!IsStandState())
-            addvalue *= 1.5f;
+            addvalue *= 4.0f/3.0f;
     }
 
     // always regeneration bonus (including combat)
