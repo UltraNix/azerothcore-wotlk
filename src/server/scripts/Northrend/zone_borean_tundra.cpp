@@ -1387,8 +1387,8 @@ class spell_blow_cenarion_horn : public SpellScriptLoader
                             {
                                 for (uint8 i = 0; i < 10; ++i)
                                 {
-                                    if (Creature* stampedCreature = caster->SummonCreature(RAND(NPC_STAMPED_MAMMOTH, NPC_STAMPED_CARRIBOU, NPC_STAMPED_RHINO, TEMPSUMMON_TIMED_DESPAWN, 30000),
-                                        StartStamped.GetPositionX() + urand(0.0f, 7.0f), StartStamped.GetPositionY() + urand(0.0f, 7.0f), StartStamped.GetPositionZ(), StartStamped.GetOrientation()))
+                                    if (Creature* stampedCreature = caster->SummonCreature(RAND(NPC_STAMPED_MAMMOTH, NPC_STAMPED_CARRIBOU, NPC_STAMPED_RHINO),
+                                        StartStamped.GetPositionX() + urand(0.0f, 7.0f), StartStamped.GetPositionY() + urand(0.0f, 7.0f), StartStamped.GetPositionZ(), StartStamped.GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 30000))
                                     {
                                         stampedCreature->SetOrientation(stampedCreature->GetAngle(caster));
                                         stampedCreature->SendMovementFlagUpdate();
