@@ -3633,6 +3633,17 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_CHANGE_CURRENT_HP_VALUE;
         });
 
+        ApplySpellFix
+        ({
+            20253,
+            20614,
+            20615,
+            25273,
+            25274, // Intercept
+            }, [](SpellInfo* spellInfo) {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_ALLOW_CRIT_ON_NORMAL_MAGIC;
+        });
+
         /* ApplySpellFix({ 41105, 70768 }, [](SpellInfo* spellInfo) {
         spellInfo->AttributesCu |= SPELL_ATTR0_CU_CANT_BE_SAVED;
         });*/
