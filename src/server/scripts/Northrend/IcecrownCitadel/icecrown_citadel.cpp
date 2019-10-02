@@ -3173,6 +3173,7 @@ public:
             currPipeWP = VENGEFUL_WP_COUNT;
             forward = true;
             needMove = false;
+            jumped = false;
             Position homePos = me->GetHomePosition();
             if (homePos.GetPositionZ() > 365.0f)
             {
@@ -3184,6 +3185,7 @@ public:
         uint8 currPipeWP;
         bool forward;
         bool needMove;
+        bool jumped;
         EventMap events;
 
         void Reset()
@@ -3221,7 +3223,7 @@ public:
         {
             ScriptedAI::AttackStart(who);
 
-            if (currPipeWP != VENGEFUL_WP_COUNT)
+            if (currPipeWP != VENGEFUL_WP_COUNT && !jumped)
             {
                 Position pos;
                 who->GetPosition(&pos);
@@ -3229,7 +3231,8 @@ public:
                 float dist = 3.0f;
                 pos.m_positionX += cos(angle)*dist;
                 pos.m_positionY += sin(angle)*dist;
-                me->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 10.0f, 6.0f, 0);
+                me->GetMotionMaster()->MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), 20.0f, 10.0f, 0);
+                jumped = true;
             }
         }
 
@@ -3260,7 +3263,7 @@ public:
                 }
                 me->SetHomePosition(VengefulWP[currPipeWP].GetPositionX(), VengefulWP[currPipeWP].GetPositionY(), VengefulWP[currPipeWP].GetPositionZ(), me->GetOrientation());
                 if (forward && currPipeWP == 3 || !forward && currPipeWP == 2)
-                    me->GetMotionMaster()->MoveJump(VengefulWP[currPipeWP].GetPositionX(), VengefulWP[currPipeWP].GetPositionY(), VengefulWP[currPipeWP].GetPositionZ(), 10.0f, 6.0f, 1);
+                    me->GetMotionMaster()->MoveJump(VengefulWP[currPipeWP].GetPositionX(), VengefulWP[currPipeWP].GetPositionY(), VengefulWP[currPipeWP].GetPositionZ(), 15.0f, 10.0f, 1);
                 else
                     me->GetMotionMaster()->MovePoint(1, VengefulWP[currPipeWP].GetPositionX(), VengefulWP[currPipeWP].GetPositionY(), VengefulWP[currPipeWP].GetPositionZ());
             }
