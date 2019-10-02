@@ -3628,15 +3628,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
         }
     }
 
-    int32 weaponDamage = 0;
-    // Dancing Rune Weapon
-    if (m_caster->GetEntry() == 27893)
-    {
-        if (Unit* owner = m_caster->GetOwner())
-            weaponDamage = owner->CalculateDamage(m_attackType, normalized, true);
-    }
-    else
-        weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
+    int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
     // Whirlwind
     if (m_caster->GetEntry() == 33846)

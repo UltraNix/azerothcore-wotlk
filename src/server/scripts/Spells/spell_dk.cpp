@@ -753,129 +753,144 @@ class spell_dk_blood_caked_blade : public SpellScriptLoader
         }
 };
 
-class spell_dk_dancing_rune_weapon : public SpellScriptLoader
+// 49028 - Dancing Rune Weapon
+class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
 {
-    public:
-        spell_dk_dancing_rune_weapon() : SpellScriptLoader("spell_dk_dancing_rune_weapon") { }
+    PrepareAuraScript(spell_dk_dancing_rune_weapon_AuraScript);
 
-        class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dk_dancing_rune_weapon_AuraScript);
+    bool Load() override
+    {
+        _runeWeaponGUID = 0;
+        return true;
+    }
 
-            bool CheckProc(ProcEventInfo& eventInfo)
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        if (!eventInfo.GetActor() || !eventInfo.GetActionTarget() || !eventInfo.GetActionTarget()->IsAlive() || !eventInfo.GetActor()->IsPlayer())
+            return false;
+
+        SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+        if (!spellInfo)
+            return true;
+
+        // Death Coil exception, Check if spell is from spellbook
+        if (spellInfo->Id != SPELL_DK_DEATH_COIL_DAMAGE && !eventInfo.GetActor()->ToPlayer()->HasActiveSpell(spellInfo->Id))
+            return false;
+
+        // Can't cast raise dead/ally, death grip, dark command, death pact, death and decay, anti-magic shell
+        if (spellInfo->SpellFamilyFlags.HasFlag(0x20A1220, 0x10000000, 0x0))
+            return false;
+
+        // AoE can be cast only once
+        if (spellInfo->IsTargetingArea() && eventInfo.GetActor() != eventInfo.GetActionTarget())
+            return false;
+
+        // No spells with summoning
+        if (spellInfo->HasEffect(SPELL_EFFECT_SUMMON))
+            return false;
+
+        // No Positive Spells
+        if (spellInfo->IsPositive())
+            return false;
+
+        return true;
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* target = eventInfo.GetActionTarget();
+        Unit* player = eventInfo.GetActor();
+        Unit* dancingRuneWeapon = ObjectAccessor::GetUnit(*target, _runeWeaponGUID);
+        if (!dancingRuneWeapon || !player)
+            return;
+
+        dancingRuneWeapon->SetOrientation(dancingRuneWeapon->GetAngle(target));
+        if (SpellInfo const* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
+            dancingRuneWeapon->CastSpell(target, procSpell->Id, true, nullptr, aurEff, dancingRuneWeapon->GetGUID());
+    }
+
+    void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* owner = GetCaster();
+        if (!owner)
+             return;
+        for (auto&& controlled : owner->m_Controlled)
+            if (controlled->GetEntry() == GetSpellInfo()->Effects[EFFECT_0].MiscValue)
             {
-                if (!eventInfo.GetActor() || !eventInfo.GetActionTarget() || !eventInfo.GetActionTarget()->IsAlive() || eventInfo.GetActor()->GetTypeId() != TYPEID_PLAYER)
-                    return false;
-
-                const SpellInfo* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-                if (!spellInfo)
-                    return true;
-
-                // Death Coil exception, Check if spell is from spellbook
-                if (spellInfo->Id != SPELL_DK_DEATH_COIL_DAMAGE && !eventInfo.GetActor()->ToPlayer()->HasActiveSpell(spellInfo->Id))
-                    return false;
-
-                // Can't cast raise dead/ally, death grip, dark command, death pact, death and decay, anti-magic shell
-                if (spellInfo->SpellFamilyFlags.HasFlag(0x20A1220, 0x10000000, 0x0))
-                    return false;
-
-                // AoE can be cast only once
-                if (spellInfo->IsTargetingArea() && eventInfo.GetActor() != eventInfo.GetActionTarget())
-                    return false;
-
-                // No spells with summoning
-                if (spellInfo->HasEffect(SPELL_EFFECT_SUMMON))
-                    return false;
-
-                // No Positive Spells
-                if (spellInfo->IsPositive())
-                    return false;
-
-                return true;
+                _runeWeaponGUID = controlled->GetGUID();
+                // Inform rune weapon about proper target, needed in script
+                if (Unit* ownerVictim = ObjectAccessor::GetUnit(*owner, owner->GetTarget()))
+                    if (UnitAI* runeWeaponAI = controlled->GetAI())
+                        runeWeaponAI->SetGUID(ownerVictim->GetGUID());
+                break;
             }
+    }
 
-            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_dk_dancing_rune_weapon_AuraScript::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_dk_dancing_rune_weapon_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
+        OnEffectApply += AuraEffectApplyFn(spell_dk_dancing_rune_weapon_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
 
-                Unit* player = eventInfo.GetActor();
-                Unit* target = eventInfo.GetActionTarget();
-                Unit* dancingRuneWeapon = NULL;
-                for (Unit::ControlSet::const_iterator itr = player->m_Controlled.begin(); itr != player->m_Controlled.end(); ++itr)
-                    if ((*itr)->GetEntry() == GetSpellInfo()->Effects[EFFECT_0].MiscValue)
-                    {
-                        dancingRuneWeapon = *itr;
-                        break;
-                    }
-
-                if (!dancingRuneWeapon)
-                    return;
-
-                dancingRuneWeapon->SetOrientation(dancingRuneWeapon->GetAngle(target));
-                if (const SpellInfo* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
-                {
-                    // xinef: ugly hack
-                    if (!procSpell->IsAffectingArea())
-                        GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
-                    dancingRuneWeapon->CastSpell(target, procSpell->Id, true, NULL, aurEff, dancingRuneWeapon->GetGUID());
-                    GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 0.01f);
-                }
-                else
-                {
-                    target = player->GetMeleeHitRedirectTarget(target);
-                    CalcDamageInfo damageInfo;
-                    player->CalculateMeleeDamage(target, 0, &damageInfo, eventInfo.GetDamageInfo()->GetAttackType());
-                    Unit::DealDamageMods(target, damageInfo.damage, &damageInfo.absorb);
-                    damageInfo.attacker = dancingRuneWeapon;
-                    damageInfo.damage /= 2.0f;
-                    dancingRuneWeapon->SendAttackStateUpdate(&damageInfo);
-                    dancingRuneWeapon->DealMeleeDamage(&damageInfo, true);
-                }
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_dk_dancing_rune_weapon_AuraScript::CheckProc);
-                OnEffectProc += AuraEffectProcFn(spell_dk_dancing_rune_weapon_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dk_dancing_rune_weapon_AuraScript();
-        }
+    uint64 _runeWeaponGUID;
 };
 
-class spell_dk_dancing_rune_weapon_visual : public SpellScriptLoader
+// 53160 - Dancing Rune Weapon Visual
+class spell_dk_dancing_rune_weapon_visual_AuraScript : public AuraScript
 {
-    public:
-        spell_dk_dancing_rune_weapon_visual() : SpellScriptLoader("spell_dk_dancing_rune_weapon_visual") { }
+    PrepareAuraScript(spell_dk_dancing_rune_weapon_visual_AuraScript);
 
-        class spell_dk_dancing_rune_weapon_visual_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_dk_dancing_rune_weapon_visual_AuraScript);
-
-            void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        PreventDefaultAction();
+        if (Unit* target = GetUnitOwner())
+            if (Player* owner = target->GetCharmerOrOwnerPlayerOrPlayerItself())
             {
-                PreventDefaultAction();
-                if (Unit* owner = GetUnitOwner()->ToTempSummon()->GetSummoner())
-                {
-                    GetUnitOwner()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID));
-                    GetUnitOwner()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID+1, owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_17_ENTRYID));
-                    GetUnitOwner()->SetFloatValue(UNIT_FIELD_COMBATREACH, 0.01f);
-                }
+                target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID));
+                target->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_17_ENTRYID));
+                target->SetFloatValue(UNIT_FIELD_COMBATREACH, owner->GetFloatValue(UNIT_FIELD_COMBATREACH));
             }
+    }
 
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_dk_dancing_rune_weapon_visual_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
+    void Register() override
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_dk_dancing_rune_weapon_visual_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
 
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dk_dancing_rune_weapon_visual_AuraScript();
-        }
+// 51906 - Death Knight Rune Weapon Scaling 02
+class spell_dk_rune_weapon_scaling_02_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_dk_rune_weapon_scaling_02_AuraScript);
+
+    bool Load() override
+    {
+        return !(!GetUnitOwner() || !GetUnitOwner()->GetOwner() || !GetUnitOwner()->GetOwner()->IsPlayer());
+    }
+
+    void CalculateDamageDoneAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+    {
+        canBeRecalculated = false;
+        if (Unit* pet = GetUnitOwner())
+            if (Unit* owner = pet->GetOwner())
+                amount += owner->CalculateDamage(BASE_ATTACK, false, true);
+    }
+
+    void CalculateAmountMeleeHaste(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+    {
+        canBeRecalculated = false;
+        if (Player* owner = GetUnitOwner()->GetOwner()->ToPlayer())
+            if (owner->m_modAttackSpeedPct[BASE_ATTACK] < 1.0f) // inherit haste only
+                amount = std::min<int32>(100, int32(((1.0f / owner->m_modAttackSpeedPct[BASE_ATTACK]) - 1.0f) * 100.0f));
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_rune_weapon_scaling_02_AuraScript::CalculateDamageDoneAmount, EFFECT_0, SPELL_AURA_MOD_DAMAGE_DONE);
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dk_rune_weapon_scaling_02_AuraScript::CalculateAmountMeleeHaste, EFFECT_1, SPELL_AURA_MELEE_SLOW);
+    }
 };
 
 class spell_dk_scent_of_blood_trigger : public SpellScriptLoader
@@ -2699,8 +2714,9 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_bone_shield();
     new spell_dk_hungering_cold();
     new spell_dk_blood_caked_blade();
-    new spell_dk_dancing_rune_weapon();
-    new spell_dk_dancing_rune_weapon_visual();
+    new AuraScriptLoaderEx<spell_dk_dancing_rune_weapon_AuraScript>("spell_dk_dancing_rune_weapon");
+    new AuraScriptLoaderEx<spell_dk_dancing_rune_weapon_visual_AuraScript>("spell_dk_dancing_rune_weapon_visual");
+    new AuraScriptLoaderEx<spell_dk_rune_weapon_scaling_02_AuraScript>("spell_dk_rune_weapon_scaling_02");
     new spell_dk_scent_of_blood_trigger();
     new spell_dk_pet_scaling();
     new SpellScriptLoaderEx<spell_ebon_gargoyle_strike_hack_requested_SpellScript>("spell_ebon_gargoyle_strike_hack_requested");

@@ -10582,12 +10582,6 @@ float Unit::SpellPctDamageModsDone(Unit* victim, SpellInfo const* spellProto, Da
             if (Unit* owner = GetOwner())
                 return owner->SpellPctDamageModsDone(victim, spellProto, damagetype);
         }
-        // Dancing Rune Weapon...
-        else if (GetEntry() == 27893)
-        {
-            if (Unit* owner = GetOwner())
-                return owner->SpellPctDamageModsDone(victim, spellProto, damagetype);
-        }
     }
 
     // Done total percent damage auras
@@ -10897,21 +10891,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     if (spellProto->HasAttribute(SPELL_ATTR3_NO_DONE_BONUS) || spellProto->HasAttribute(SPELL_ATTR0_CU_NO_POSITIVE_TAKEN_BONUS))
         return pdamage;
 
-    // For totems get damage bonus from owner
-    if (GetTypeId() == TYPEID_UNIT)
-    {
-        if (IsTotem())
+    // For totems or DRW get damage bonus from owner
+    if (IsCreature() && (IsTotem() || GetEntry() == 27893))
+        if (Unit* owner = GetOwner())
         {
-            if (Unit* owner = GetOwner())
-                return owner->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, TotalMod, stack);
+            uint32 damage = owner->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, TotalMod, stack);
+            return IsTotem() ? damage : damage / 2;
         }
-        // Dancing Rune Weapon...
-        else if (GetEntry() == 27893)
-        {
-            if (Unit* owner = GetOwner())
-                return owner->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, TotalMod, stack) / 2;
-        }
-    }
 
     // Done total percent damage auras
     float ApCoeffMod = 1.0f;
@@ -12162,16 +12148,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 {
     if (!victim || pdamage == 0)
         return 0;
-
-    if (GetTypeId() == TYPEID_UNIT)
-    {
-        // Dancing Rune Weapon...
-        if (GetEntry() == 27893)
-        {
-            if (Unit* owner = GetOwner())
-                return owner->MeleeDamageBonusDone(victim, pdamage, attType, spellProto) / 2;
-        }
-    }
 
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
 

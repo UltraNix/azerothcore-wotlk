@@ -2636,14 +2636,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, m_spellSchoolMask);
 
         // Add bonuses and fill damageInfo struct
-        // Dancing Rune Weapon...
-        if (m_caster->GetEntry() == 27893)
-        {
-            if (Unit* owner = m_caster->GetOwner())
-                owner->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType,  target->crit);
-        }
-        else
-            caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType,  target->crit);
+        caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType,  target->crit);
 
         // xinef: override miss info after absorb / block calculations
         if (missInfo == SPELL_MISS_NONE && damageInfo.damage == 0)
@@ -7941,9 +7934,9 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier,
         }
     }
 
-    // xinef: totem's inherit owner crit chance and dancing rune weapon
+    // xinef: totem's inherit owner crit chance
     Unit* caster = m_caster;
-    if (m_caster->IsTotem() || m_caster->GetEntry() == 27893)
+    if (m_caster->IsTotem())
     {
         if (Unit* owner = m_caster->GetOwner())
             caster = owner;

@@ -380,29 +380,87 @@ class npc_pet_dk_army_of_the_dead : public CreatureScript
         }
 };
 
-class npc_pet_dk_dancing_rune_weapon : public CreatureScript
+enum DancingRuneWeapon
 {
-    public:
-        npc_pet_dk_dancing_rune_weapon() : CreatureScript("npc_pet_dk_dancing_rune_weapon") { }
+    SPELL_DK_DRW_COPY_VISUAL     = 53160, // Copies weapon visual from owner
+    SPELL_DK_DANCING_RUNE_WEAPON = 49028, // EFFECT_2 is aura applied on current DK target when summoning DRW, Rune Weapon should attack this target
+    SPELL_DK_DRW_SCALING         = 51906, // Reduces damage by 50%
+};
 
-        struct npc_pet_dk_dancing_rune_weaponAI : public NullCreatureAI
+struct npc_pet_dk_dancing_rune_weaponAI : public ScriptedAI
+{
+    npc_pet_dk_dancing_rune_weaponAI(Creature* creature) : ScriptedAI(creature)
+    {
+        // Needed to load proper weapon model
+        EnterEvadeMode();
+    }
+
+    void SelectNextTarget()
+    {
+        Unit* owner = me->GetOwner();
+        if (owner && owner->IsPlayer() && (!me->GetVictim() || !me->IsValidAttackTarget(me->GetVictim()) || !owner->CanSeeOrDetect(me->GetVictim())))
         {
-            npc_pet_dk_dancing_rune_weaponAI(Creature* creature) : NullCreatureAI(creature) { }
-
-            void InitializeAI() override
+            Unit* selection = owner->ToPlayer()->GetSelectedUnit();
+            if (selection && selection != me->GetVictim() && me->IsValidAttackTarget(selection))
             {
-                // Xinef: Hit / Expertise scaling
-                me->AddAura(61017, me);
-                if (Unit* owner = me->GetOwner())
-                    me->GetMotionMaster()->MoveFollow(owner, 0.01f, me->GetFollowAngle(), MOTION_SLOT_CONTROLLED);
-                NullCreatureAI::InitializeAI();
+                me->GetMotionMaster()->Clear(false);
+                SetGazeOn(selection);
             }
-        };
-
-        CreatureAI* GetAI(Creature* creature) const override
-        {
-            return new npc_pet_dk_dancing_rune_weaponAI (creature);
+            else if (!me->GetVictim() || !owner->CanSeeOrDetect(me->GetVictim()))
+            {
+                me->CombatStop(true);
+                me->GetMotionMaster()->Clear(false);
+                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, 0.0f);
+            }
         }
+    }
+
+    void IsSummonedBy(Unit* summoner) override
+    {
+        if (!summoner)
+            return;
+
+        _changeTargetTimer.Reset(1000);
+        _targetGUID = 0;
+        me->SetDefensive();
+        DoCastSelf(SPELL_DK_DRW_SCALING, true);
+        DoCastSelf(SPELL_DK_DRW_COPY_VISUAL, true);
+    }
+
+    // Called from spell_dk_dancing_rune_weapon_AuraScript::HandleEffectApply
+    void SetGUID(uint64 guid, int32 /*id*/) override
+    {
+        _targetGUID = guid;
+        if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
+            SetGazeOn(target);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictimWithGaze())
+        {
+            SelectNextTarget();
+            return;
+        }
+
+        if (Unit* target = ObjectAccessor::GetUnit(*me, _targetGUID))
+            if (!target || !target->IsInWorld() || !target->IsAlive())
+            {
+                _changeTargetTimer.Update(diff);
+                if (_changeTargetTimer.Passed())
+                {
+                    SelectNextTarget();
+                    _changeTargetTimer.Reset(1000);
+                    return;
+                }
+            }
+
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        uint64 _targetGUID;
+        TimeTrackerSmall _changeTargetTimer;
 };
 
 void AddSC_deathknight_pet_scripts()
@@ -410,5 +468,5 @@ void AddSC_deathknight_pet_scripts()
     new npc_pet_dk_ebon_gargoyle();
     new npc_pet_dk_ghoul();
     new npc_pet_dk_army_of_the_dead();
-    new npc_pet_dk_dancing_rune_weapon();
+    new CreatureAILoader<npc_pet_dk_dancing_rune_weaponAI>("npc_pet_dk_dancing_rune_weapon");
 }
