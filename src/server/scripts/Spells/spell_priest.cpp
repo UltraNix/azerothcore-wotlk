@@ -312,61 +312,87 @@ class spell_pri_glyph_of_prayer_of_healing : public SpellScriptLoader
         }
 };
 
-// 47788 - Guardian Spirit
-class spell_pri_guardian_spirit : public SpellScriptLoader
+enum GuardianSpirit
 {
-    public:
-        spell_pri_guardian_spirit() : SpellScriptLoader("spell_pri_guardian_spirit") { }
+    SPELL_WEAKENED_SOUL         = 6788,
+    SPELL_WEAKENED_SPIRIT       = 72232,
 
-        class spell_pri_guardian_spirit_AuraScript : public AuraScript
+    NPC_VALITHRIA_DREAMWALKER   = 36789
+};
+
+// 47788 - Guardian Spirit
+class spell_pri_guardian_spirit_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_pri_guardian_spirit_SpellScript);
+
+    SpellCastResult CheckCast()
+    {
+        if (Unit* target = GetExplTargetUnit())
+            if (target->HasAura(SPELL_WEAKENED_SOUL) || (target->GetEntry() == NPC_VALITHRIA_DREAMWALKER && target->HasAura(SPELL_WEAKENED_SPIRIT)))
+                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+        return SPELL_CAST_OK;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_pri_guardian_spirit_SpellScript::CheckCast);
+    }
+};
+class spell_pri_guardian_spirit_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_pri_guardian_spirit_AuraScript);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL });
+    }
+
+    bool Load() override
+    {
+        _healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+        return true;
+    }
+
+    void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+    {
+        // Set absorbtion amount to unlimited
+        amount = -1;
+    }
+
+    void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
+    {
+        Unit* target = GetTarget();
+        if (dmgInfo.GetDamage() < target->GetHealth())
+            return;
+
+        int32 healAmount = int32(target->CountPctFromMaxHealth(_healPct));
+        // remove the aura now, we don't want 40% healing bonus
+        Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+        target->CastCustomSpell(target, SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL, &healAmount, NULL, NULL, true);
+        absorbAmount = dmgInfo.GetDamage();
+    }
+
+    void HandleApplyEffect(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        if (Unit* caster = GetCaster())
         {
-            PrepareAuraScript(spell_pri_guardian_spirit_AuraScript);
-
-            uint32 healPct;
-
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL))
-                    return false;
-                return true;
-            }
-
-            bool Load()
-            {
-                healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
-                return true;
-            }
-
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-            {
-                // Set absorbtion amount to unlimited
-                amount = -1;
-            }
-
-            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                Unit* target = GetTarget();
-                if (dmgInfo.GetDamage() < target->GetHealth())
-                    return;
-
-                int32 healAmount = int32(target->CountPctFromMaxHealth(healPct));
-                // remove the aura now, we don't want 40% healing bonus
-                Remove(AURA_REMOVE_BY_ENEMY_SPELL);
-                target->CastCustomSpell(target, SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL, &healAmount, NULL, NULL, true);
-                absorbAmount = dmgInfo.GetDamage();
-            }
-
-            void Register()
-            {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_guardian_spirit_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_guardian_spirit_AuraScript::Absorb, EFFECT_1);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_pri_guardian_spirit_AuraScript();
+            Unit* target = GetTarget();
+            if (target->GetEntry() == NPC_VALITHRIA_DREAMWALKER)
+                target->CastSpell(target, SPELL_WEAKENED_SPIRIT, true, NullItemRef, aurEff, caster->GetGUID());
+            else
+                caster->CastSpell(target, SPELL_WEAKENED_SOUL, true, NullItemRef, aurEff);
         }
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_guardian_spirit_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_SCHOOL_ABSORB);
+        OnEffectApply += AuraEffectApplyFn(spell_pri_guardian_spirit_AuraScript::HandleApplyEffect, EFFECT_0, SPELL_AURA_MOD_HEALING_PCT, AURA_EFFECT_HANDLE_REAL);
+        OnEffectAbsorb += AuraEffectAbsorbFn(spell_pri_guardian_spirit_AuraScript::Absorb, EFFECT_1);
+    }
+
+    uint32 _healPct;
 };
 
 // 64904 - Hymn of Hope
@@ -618,11 +644,12 @@ class spell_pri_pain_and_suffering_proc : public SpellScriptLoader
             {
                 // Refresh Shadow Word: Pain on target
                 if (Unit* unitTarget = GetHitUnit())
-                    if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetCaster()->GetGUID()))
-                    {
-                        aur->GetBase()->RefreshTimersWithMods();
-                        aur->ChangeAmount(aur->CalculateAmount(aur->GetCaster()), false);
-                    }
+                    if (unitTarget->GetGUID() != GetCaster()->GetGUID()) // don't refresh when we have SW:P on ourselves, can happen when target reflects it
+                        if (AuraEffect* aur = unitTarget->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, 0x8000, 0, 0, GetCaster()->GetGUID()))
+                        {
+                            aur->GetBase()->RefreshTimersWithMods();
+                            aur->ChangeAmount(aur->CalculateAmount(aur->GetCaster()), false);
+                        }
             }
 
             void Register()
@@ -1084,7 +1111,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_divine_aegis();
     new spell_pri_divine_hymn();
     new spell_pri_glyph_of_prayer_of_healing();
-    new spell_pri_guardian_spirit();
+    new SpellAuraScriptLoaderEx<spell_pri_guardian_spirit_SpellScript, spell_pri_guardian_spirit_AuraScript>("spell_pri_guardian_spirit");
     new spell_pri_hymn_of_hope();
     new spell_pri_item_greater_heal_refund();
     new spell_pri_lightwell_renew();
