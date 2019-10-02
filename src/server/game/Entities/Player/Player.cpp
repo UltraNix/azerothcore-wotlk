@@ -14288,9 +14288,6 @@ void Player::SwapItem(uint16 src, uint16 dst)
     else if (IsEquipmentPos(src))
         EquipItem(eDest2, pDstItem, true);
 
-    // Xinef: Call this here after all needed items are equipped
-    RemoveItemDependentAurasAndCasts((Item*)NULL);
-
     // if player is moving bags and is looting an item inside this bag
     // release the loot
     if (GetLootGUID())
