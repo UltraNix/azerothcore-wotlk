@@ -1472,6 +1472,22 @@ class spell_sha_shamanistic_focus_AuraScript : public AuraScript
         }
 };
 
+// -16257 - Flurry
+class spell_sha_flurry_AuraScript : public AuraScript
+{
+    PrepareAuraScript(spell_sha_flurry_AuraScript);
+
+    void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        SetCharges(CalcMaxCharges());
+    }
+
+    void Register() override
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_sha_flurry_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAPPLY);
+    }
+};
+
 void AddSC_shaman_spell_scripts()
 {
     // ours
@@ -1484,6 +1500,7 @@ void AddSC_shaman_spell_scripts()
     new spell_shaman_t8_elemental_4p_bonus();
     new AuraScriptLoaderEx<spell_sha_elemental_devastation_AuraScript>("spell_sha_elemental_devastation");
     new AuraScriptLoaderEx<spell_sha_shamanistic_focus_AuraScript>("spell_sha_shamanistic_focus");
+    new AuraScriptLoaderEx<spell_sha_flurry_AuraScript>("spell_sha_flurry");
 
     // theirs
     new spell_sha_ancestral_awakening_proc();
