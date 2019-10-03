@@ -753,6 +753,18 @@ class spell_dk_blood_caked_blade : public SpellScriptLoader
         }
 };
 
+enum DancingRuneWeapon
+{
+    SPELL_DK_BLOOD_STRIKE       = 45902,
+    SPELL_DK_ICY_TOUCH          = 45477,
+    SPELL_DK_PLAGUE_STRIKE      = 45462,
+    SPELL_DK_HEART_STRIKE       = 55050,
+    SPELL_DK_DEATH_STRIKE       = 49998,
+    SPELL_DK_DEATH_COIL_R1      = 47541,
+    SPELL_DK_BLOOD_BOIL         = 48721,
+    SPELL_DK_RUNE_STRIKE        = 56815
+};
+
 // 49028 - Dancing Rune Weapon
 class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
 {
@@ -766,34 +778,12 @@ class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        if (!eventInfo.GetActor() || !eventInfo.GetActionTarget() || !eventInfo.GetActionTarget()->IsAlive() || !eventInfo.GetActor()->IsPlayer())
-            return false;
+        if (SpellInfo const* procSpell = eventInfo.GetSpellInfo())
+            for (uint32 spellId : { SPELL_DK_BLOOD_STRIKE, SPELL_DK_ICY_TOUCH, SPELL_DK_PLAGUE_STRIKE, SPELL_DK_HEART_STRIKE, SPELL_DK_DEATH_STRIKE, SPELL_DK_DEATH_COIL_R1, SPELL_DK_BLOOD_BOIL, SPELL_DK_RUNE_STRIKE})
+                if (procSpell->IsRankOf(sSpellMgr->GetSpellInfo(spellId)))
+                    return true;
 
-        SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-        if (!spellInfo)
-            return true;
-
-        // Death Coil exception, Check if spell is from spellbook
-        if (spellInfo->Id != SPELL_DK_DEATH_COIL_DAMAGE && !eventInfo.GetActor()->ToPlayer()->HasActiveSpell(spellInfo->Id))
-            return false;
-
-        // Can't cast raise dead/ally, death grip, dark command, death pact, death and decay, anti-magic shell
-        if (spellInfo->SpellFamilyFlags.HasFlag(0x20A1220, 0x10000000, 0x0))
-            return false;
-
-        // AoE can be cast only once
-        if (spellInfo->IsTargetingArea() && eventInfo.GetActor() != eventInfo.GetActionTarget())
-            return false;
-
-        // No spells with summoning
-        if (spellInfo->HasEffect(SPELL_EFFECT_SUMMON))
-            return false;
-
-        // No Positive Spells
-        if (spellInfo->IsPositive())
-            return false;
-
-        return true;
+        return false;
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)

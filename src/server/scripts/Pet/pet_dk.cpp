@@ -405,6 +405,7 @@ struct npc_pet_dk_dancing_rune_weaponAI : public ScriptedAI
             {
                 me->GetMotionMaster()->Clear(false);
                 SetGazeOn(selection);
+                _targetGUID = selection->GetGUID();
             }
             else if (!me->GetVictim() || !owner->CanSeeOrDetect(me->GetVictim()))
             {
@@ -423,6 +424,8 @@ struct npc_pet_dk_dancing_rune_weaponAI : public ScriptedAI
         _changeTargetTimer.Reset(1000);
         _targetGUID = 0;
         me->SetDefensive();
+        DoCastSelf(SPELL_WARLOCK_PET_SCALING_05, true);
+        DoCastSelf(SPELL_DK_PET_SCALING_03, true);
         DoCastSelf(SPELL_DK_DRW_SCALING, true);
         DoCastSelf(SPELL_DK_DRW_COPY_VISUAL, true);
     }
