@@ -72,6 +72,8 @@ find_path(MYSQL_INCLUDE_DIR
     /usr/local/include
     /usr/local/include/mysql
     /usr/local/mysql/include
+    "C:/Program Files/MariaDB 10.4/include/mysql"
+    "C:/Program Files/MariaDB 10.3/include/mysql"
     "C:/Program Files/MariaDB 10.2/include/mysql"
     "C:/Program Files/MariaDB 10.1/include/mysql"
     "C:/Program Files/MySQL/MySQL Server 5.7/include"
@@ -80,7 +82,19 @@ find_path(MYSQL_INCLUDE_DIR
     "C:/Program Files/MySQL/MySQL Server 5.1/include"
     "C:/Program Files/MySQL/MySQL Server 5.0/include"
     "C:/Program Files/MySQL/include"
+    "c:/Program Files (x86)/MariaDB 10.4/include/mysql"
+    "c:/Program Files (x86)/MariaDB 10.3/include/mysql"
+    "c:/Program Files (x86)/MariaDB 10.2/include/mysql"
+    "c:/Program Files (x86)/MariaDB 10.1/include/mysql"
+    "c:/Program Files (x86)/MySQL/MySQL Server 5.7/include"
+    "c:/Program Files (x86)/MySQL/MySQL Server 5.6/include"
+    "c:/Program Files (x86)/MySQL/MySQL Server 5.5/include"
+    "c:/Program Files (x86)/MySQL/MySQL Server 5.1/include"
+    "c:/Program Files (x86)/MySQL/MySQL Server 5.0/include"
+    "c:/Program Files (x86)/MySQL/include"
     "C:/MySQL/include"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.4;Location]/include/mysql"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.3;Location]/include/mysql"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.2;Location]/include/mysql"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.1;Location]/include/mysql"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.7;Location]/include"
@@ -96,6 +110,8 @@ find_path(MYSQL_INCLUDE_DIR
     "$ENV{ProgramFiles}/MySQL/*/include"
     "$ENV{SystemDrive}/MySQL/*/include"
     "c:/msys/local/include"
+    "$ENV{MYSQL_ROOT}/include"
+    "$ENV{MARIADB_ROOT}/include/mysql"
   DOC
     "Specify the directory containing mysql.h."
 )
@@ -104,7 +120,7 @@ if( UNIX )
   foreach(LIB ${MYSQL_ADD_LIBRARIES})
     find_library( MYSQL_LIBRARY 
       NAMES
-        mysql libmysql ${LIB}
+        mysql libmysql libmariadb ${LIB}
       PATHS
         ${MYSQL_ADD_LIBRARIES_PATH}
         /usr/lib
@@ -120,9 +136,11 @@ endif( UNIX )
 if( WIN32 )
   find_library( MYSQL_LIBRARY 
     NAMES
-      libmysql
+      libmysql libmariadb
     PATHS
       ${MYSQL_ADD_LIBRARIES_PATH}
+      "C:/Program Files/MariaDB 10.4/lib"
+      "C:/Program Files/MariaDB 10.3/lib"
       "C:/Program Files/MariaDB 10.2/lib"
       "C:/Program Files/MariaDB 10.1/lib"
       "C:/Program Files/MySQL/MySQL Server 5.7/lib/opt"
@@ -131,7 +149,19 @@ if( WIN32 )
       "C:/Program Files/MySQL/MySQL Server 5.1/lib/opt"
       "C:/Program Files/MySQL/MySQL Server 5.0/lib/opt"
       "C:/Program Files/MySQL/lib"
+      "c:/Program Files (x86)/MariaDB 10.4/lib"
+      "c:/Program Files (x86)/MariaDB 10.3/lib"
+      "c:/Program Files (x86)/MariaDB 10.2/lib"
+      "c:/Program Files (x86)/MariaDB 10.1/lib"
+      "c:/Program Files (x86)/MySQL/MySQL Server 5.7/lib/opt"
+      "c:/Program Files (x86)/MySQL/MySQL Server 5.6/lib/opt"
+      "c:/Program Files (x86)/MySQL/MySQL Server 5.5/lib/opt"
+      "c:/Program Files (x86)/MySQL/MySQL Server 5.1/lib/opt"
+      "c:/Program Files (x86)/MySQL/MySQL Server 5.0/lib/opt"
+      "c:/Program Files (x86)/MySQL/lib"
       "C:/MySQL/lib/debug"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.4;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.3;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.2;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Monty Program AB\\MariaDB 10.1;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.7;Location]/lib"
@@ -144,6 +174,8 @@ if( WIN32 )
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.1;Location]/lib/opt"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.0;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MySQL AB\\MySQL Server 5.0;Location]/lib/opt"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Monty Program AB\\MariaDB 10.4;Location]/lib"
+      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Monty Program AB\\MariaDB 10.3;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Monty Program AB\\MariaDB 10.2;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Monty Program AB\\MariaDB 10.1;Location]/lib"
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\MySQL AB\\MySQL Server 5.7;Location]/lib"
@@ -159,6 +191,8 @@ if( WIN32 )
       "$ENV{ProgramFiles}/MySQL/*/lib/opt"
       "$ENV{SystemDrive}/MySQL/*/lib/opt"
       "c:/msys/local/include"
+      "$ENV{MYSQL_ROOT}/lib"
+      "$ENV{MARIADB_ROOT}/lib"
     DOC "Specify the location of the mysql library here."
   )
 endif( WIN32 )
