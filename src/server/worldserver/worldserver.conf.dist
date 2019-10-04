@@ -786,6 +786,14 @@ RaFLogFile = "RaF.log"
 
 RaFLogFileLogTimestamp = 0
 
+#    WebCommandsLogFile
+#        Log file for commands executed from web client/sql database
+#        Default: "web_commands.log"
+#                 "" - Empty name for disable
+#
+
+WebCommandsLogFile = "web_commands.log"
+
 #
 #    LogColors
 #        Description: Colors for log messages (Format: "normal basic detail debug").

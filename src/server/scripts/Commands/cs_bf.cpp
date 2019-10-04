@@ -35,15 +35,15 @@ public:
     {
         static std::vector<ChatCommand> battlefieldcommandTable =
         {
-            { "start",          SEC_ADMINISTRATOR,  false, &HandleBattlefieldStart,            "" },
-            { "stop",           SEC_ADMINISTRATOR,  false, &HandleBattlefieldEnd,              "" },
-            { "switch",         SEC_ADMINISTRATOR,  false, &HandleBattlefieldSwitch,           "" },
-            { "timer",          SEC_ADMINISTRATOR,  false, &HandleBattlefieldTimer,            "" },
-            { "enable",         SEC_ADMINISTRATOR,  false, &HandleBattlefieldEnable,           "" }
+            { "start",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleBattlefieldStart,            "" },
+            { "stop",           SEC_ADMINISTRATOR,  CMD_INGAME, &HandleBattlefieldEnd,              "" },
+            { "switch",         SEC_ADMINISTRATOR,  CMD_INGAME, &HandleBattlefieldSwitch,           "" },
+            { "timer",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleBattlefieldTimer,            "" },
+            { "enable",         SEC_ADMINISTRATOR,  CMD_INGAME, &HandleBattlefieldEnable,           "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "bf",             SEC_ADMINISTRATOR,  false, NULL,            "", battlefieldcommandTable }
+            { "bf",             SEC_ADMINISTRATOR,  CMD_INGAME, NULL,            "", battlefieldcommandTable }
         };
         return commandTable;
     }

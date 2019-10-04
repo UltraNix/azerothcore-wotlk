@@ -20,16 +20,16 @@ public:
     {
         static std::vector<ChatCommand> spectatorCommandTable =
         {
-            { "version",        SEC_CONSOLE,        false, &HandleSpectatorVersionCommand,    "" },
-            { "reset",          SEC_CONSOLE,        false, &HandleSpectatorResetCommand,      "" },
-            { "spectate",       SEC_CONSOLE,        false, &ArenaSpectator::HandleSpectatorSpectateCommand, "" },
-            { "watch",          SEC_CONSOLE,        false, &ArenaSpectator::HandleSpectatorWatchCommand, "" },
-            { "leave",          SEC_CONSOLE,        false, &HandleSpectatorLeaveCommand,      "" },
-            { "",               SEC_CONSOLE,        false, &HandleSpectatorCommand,           "" }
+            { "version",        SEC_CONSOLE,        CMD_INGAME, &HandleSpectatorVersionCommand,    "" },
+            { "reset",          SEC_CONSOLE,        CMD_INGAME, &HandleSpectatorResetCommand,      "" },
+            { "spectate",       SEC_CONSOLE,        CMD_INGAME, &ArenaSpectator::HandleSpectatorSpectateCommand, "" },
+            { "watch",          SEC_CONSOLE,        CMD_INGAME, &ArenaSpectator::HandleSpectatorWatchCommand, "" },
+            { "leave",          SEC_CONSOLE,        CMD_INGAME, &HandleSpectatorLeaveCommand,      "" },
+            { "",               SEC_CONSOLE,        CMD_INGAME, &HandleSpectatorCommand,           "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "spect",          SEC_CONSOLE,        false, NULL,                              "", spectatorCommandTable }
+            { "spect",          SEC_CONSOLE,        CMD_INGAME, NULL,                              "", spectatorCommandTable }
         };
         return commandTable;
     }

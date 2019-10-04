@@ -32,7 +32,7 @@ extern LoginDatabaseWorkerPool LoginDatabase;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL), cheatLogFile(NULL), itemRestoreLogFile(NULL), rafLogFile(NULL),
+    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL), cheatLogFile(NULL), itemRestoreLogFile(NULL), rafLogFile(NULL), webCommandsLogFile(NULL),
     m_gmlog_per_account(false), m_enableLogDB(false), m_colored(false)
 {
     Initialize();
@@ -107,6 +107,10 @@ Log::~Log()
     if (rafLogFile != NULL)
         fclose(rafLogFile);
     rafLogFile = NULL;
+
+    if (webCommandsLogFile != NULL)
+        fclose(webCommandsLogFile);
+    webCommandsLogFile = NULL;
 }
 
 void Log::SetLogLevel(char *Level)
@@ -1271,6 +1275,24 @@ void Log::outRaF(const char * str, ...)
         vfprintf(rafLogFile, str, ap);
         fprintf(rafLogFile, "\n");
         fflush(rafLogFile);
+        va_end(ap);
+    }
+}
+
+void Log::outWebCommands(const char * str, ...)
+{
+    if (!str)
+        return;
+
+
+    if (webCommandsLogFile)
+    {
+        outTimestamp(webCommandsLogFile);
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(webCommandsLogFile, str, ap);
+        fprintf(webCommandsLogFile, "\n");
+        fflush(webCommandsLogFile);
         va_end(ap);
     }
 }

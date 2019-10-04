@@ -39,16 +39,16 @@ public:
     {
         static std::vector<ChatCommand> instanceCommandTable =
         {
-            { "listbinds",      SEC_ADMINISTRATOR,  false,  &HandleInstanceListBindsCommand,    "" },
-            { "unbind",         SEC_ADMINISTRATOR,  false,  &HandleInstanceUnbindCommand,       "" },
-            { "unbindme",       SEC_MODERATOR,      false,  &HandleInstanceUnbindMeCommand,     "" },
-            { "stats",          SEC_ADMINISTRATOR,  true,   &HandleInstanceStatsCommand,        "" },
-            { "savedata",       SEC_ADMINISTRATOR,  false,  &HandleInstanceSaveDataCommand,     "" }
+            { "listbinds",      SEC_ADMINISTRATOR,  CMD_INGAME,  &HandleInstanceListBindsCommand,    "" },
+            { "unbind",         SEC_ADMINISTRATOR,  CMD_INGAME,  &HandleInstanceUnbindCommand,       "" },
+            { "unbindme",       SEC_MODERATOR,      CMD_INGAME,  &HandleInstanceUnbindMeCommand,     "" },
+            { "stats",          SEC_ADMINISTRATOR,  CMD_CLI,   &HandleInstanceStatsCommand,        "" },
+            { "savedata",       SEC_ADMINISTRATOR,  CMD_INGAME,  &HandleInstanceSaveDataCommand,     "" }
         };
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "instance",       SEC_ADMINISTRATOR,  true,   NULL,                               "", instanceCommandTable }
+            { "instance",       SEC_ADMINISTRATOR,  CMD_CLI,   NULL,                               "", instanceCommandTable }
         };
 
         return commandTable;

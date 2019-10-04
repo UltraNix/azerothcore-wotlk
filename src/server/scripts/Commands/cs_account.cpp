@@ -37,8 +37,8 @@ public:
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "account",               SEC_PLAYER,         false, &HandleAccountCommand,             "" },
-            { "money",                 SEC_PLAYER,         false, &HandleAccountMoneyCommand,        "" }
+            { "account",               SEC_PLAYER,         CMD_INGAME, &HandleAccountCommand,             "" },
+            { "money",                 SEC_PLAYER,         CMD_INGAME, &HandleAccountMoneyCommand,        "" }
         };
         return commandTable;
     }

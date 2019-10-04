@@ -599,4 +599,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     // Trade Logs
     PrepareStatement(CHAR_INS_LOG_TRADE, "INSERT INTO log_trade (time, realm_id, sender_acc, sender_guid, sender_name, sender_ip, receiver_acc, receiver_guid, receiver_name, receiver_ip, item_guid, item_entry, item_count, topic) VALUES(CURRENT_TIMESTAMP(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_WEB_COMMANDS, "select Id, Command, Target, Source, Access from web_commands", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_WEB_COMMANDS, "delete from web_commands where Id = ?", CONNECTION_ASYNC);
+
 }

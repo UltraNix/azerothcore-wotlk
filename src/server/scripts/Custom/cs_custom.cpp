@@ -38,19 +38,19 @@ public:
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "service",            SEC_ADMINISTRATOR,      true,  &HandleServiceCommand,               "" },
-            { "blizzlike",          SEC_PLAYER,             false, HandleBlizzlikeCommand,              "" },
-            { "pvpinfo",            SEC_PLAYER,             false, HandlePvPInfoCommand,                "" },
-            { "dodge",              SEC_PLAYER,             false, HandleDodgeModeCommand,              "" },
-            { "hasblizzlike",       SEC_MODERATOR,          false, HandleHasBlizzlikeCommand,           "" },
-            { "goldban",            SEC_MODERATOR,          false, &HandleGoldBanCommand,               "" },
-            { "speedban",           SEC_MODERATOR,          false, &HandleSpeedBanCommand,              "" },
-            { "englishmute",        SEC_MODERATOR,          false, &HandleEnglishMuteCommand,           "" },
-            { "iccreset",           SEC_MODERATOR,          false, HandleICCResetCommand,               "" },
-            { "bonusxp",            SEC_ADMINISTRATOR,      true,  &HandleBonusXpCommand,               "" },
-            { "ninjains",           SEC_GAMEMASTER,         false, &HandleInsertNinjaCommand,           "" },
-            { "ninjalist",          SEC_PLAYER,             false, &HandleSelectNinjaCommand,           "" },
-            { "ninjadel",           SEC_GAMEMASTER,         false, &HandleDeleteNinjaCommand,           "" },
+            { "service",            SEC_ADMINISTRATOR,      CMD_CLI,  &HandleServiceCommand,               "" },
+            { "blizzlike",          SEC_PLAYER,             CMD_INGAME, HandleBlizzlikeCommand,              "" },
+            { "pvpinfo",            SEC_PLAYER,             CMD_INGAME, HandlePvPInfoCommand,                "" },
+            { "dodge",              SEC_PLAYER,             CMD_INGAME, HandleDodgeModeCommand,              "" },
+            { "hasblizzlike",       SEC_MODERATOR,          CMD_INGAME, HandleHasBlizzlikeCommand,           "" },
+            { "goldban",            SEC_MODERATOR,          CMD_INGAME, &HandleGoldBanCommand,               "" },
+            { "speedban",           SEC_MODERATOR,          CMD_INGAME, &HandleSpeedBanCommand,              "" },
+            { "englishmute",        SEC_MODERATOR,          CMD_INGAME, &HandleEnglishMuteCommand,           "" },
+            { "iccreset",           SEC_MODERATOR,          CMD_INGAME, HandleICCResetCommand,               "" },
+            { "bonusxp",            SEC_ADMINISTRATOR,      CMD_CLI,  &HandleBonusXpCommand,               "" },
+            { "ninjains",           SEC_GAMEMASTER,         CMD_INGAME, &HandleInsertNinjaCommand,           "" },
+            { "ninjalist",          SEC_PLAYER,             CMD_INGAME, &HandleSelectNinjaCommand,           "" },
+            { "ninjadel",           SEC_GAMEMASTER,         CMD_INGAME, &HandleDeleteNinjaCommand,           "" },
         };
         return commandTable;
     }
