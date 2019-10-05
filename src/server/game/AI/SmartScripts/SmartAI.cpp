@@ -520,7 +520,7 @@ void SmartAI::UpdateAI(uint32 diff)
     if (!UpdateVictim())
         return;
 
-    if (mCanAutoAttack)
+    if (mCanAutoAttack && !me->HasAuraWithMechanic(1 << MECHANIC_POLYMORPH))
         DoMeleeAttackIfReady();
 }
 
