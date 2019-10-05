@@ -40,16 +40,16 @@ public:
     {
         static std::vector<ChatCommand> gmCommandTable =
         {
-            { "chat",           SEC_GAMEMASTER,      CMD_INGAME, &HandleGMChatCommand,              "" },
-            { "fly",            SEC_ADMINISTRATOR,  CMD_INGAME, &HandleGMFlyCommand,               "" },
-            //{ "ingame",         SEC_PLAYER,         CMD_CLI,  &HandleGMListIngameCommand,        "" },
-            { "list",           SEC_ADMINISTRATOR,  CMD_CLI,  &HandleGMListFullCommand,          "" },
-            { "visible",        SEC_GAMEMASTER,      CMD_INGAME, &HandleGMVisibleCommand,           "" },
-            { "",               SEC_GAMEMASTER,      CMD_INGAME, &HandleGMCommand,                  "" }
+            { "chat",           SEC_GAMEMASTER,      false, &HandleGMChatCommand,              "" },
+            { "fly",            SEC_ADMINISTRATOR,  false, &HandleGMFlyCommand,               "" },
+            //{ "ingame",         SEC_PLAYER,         true,  &HandleGMListIngameCommand,        "" },
+            { "list",           SEC_ADMINISTRATOR,  true,  &HandleGMListFullCommand,          "" },
+            { "visible",        SEC_GAMEMASTER,      false, &HandleGMVisibleCommand,           "" },
+            { "",               SEC_GAMEMASTER,      false, &HandleGMCommand,                  "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "gm",             SEC_GAMEMASTER,      CMD_INGAME, NULL,                     "", gmCommandTable }
+            { "gm",             SEC_GAMEMASTER,      false, NULL,                     "", gmCommandTable }
         };
         return commandTable;
     }

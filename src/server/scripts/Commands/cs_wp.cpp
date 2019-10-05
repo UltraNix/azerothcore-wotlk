@@ -38,17 +38,17 @@ public:
     {
         static std::vector<ChatCommand> wpCommandTable =
         {
-            { "add",            SEC_GAMEMASTER,     CMD_INGAME, &HandleWpAddCommand,                "" },
-            { "event",          SEC_GAMEMASTER,     CMD_INGAME, &HandleWpEventCommand,              "" },
-            { "load",           SEC_GAMEMASTER,     CMD_INGAME, &HandleWpLoadCommand,               "" },
-            { "modify",         SEC_GAMEMASTER,     CMD_INGAME, &HandleWpModifyCommand,             "" },
-            { "unload",         SEC_GAMEMASTER,     CMD_INGAME, &HandleWpUnLoadCommand,             "" },
-            { "reload",         SEC_ADMINISTRATOR,  CMD_INGAME, &HandleWpReloadCommand,             "" },
-            { "show",           SEC_GAMEMASTER,     CMD_INGAME, &HandleWpShowCommand,               "" }
+            { "add",            SEC_GAMEMASTER,     false, &HandleWpAddCommand,                "" },
+            { "event",          SEC_GAMEMASTER,     false, &HandleWpEventCommand,              "" },
+            { "load",           SEC_GAMEMASTER,     false, &HandleWpLoadCommand,               "" },
+            { "modify",         SEC_GAMEMASTER,     false, &HandleWpModifyCommand,             "" },
+            { "unload",         SEC_GAMEMASTER,     false, &HandleWpUnLoadCommand,             "" },
+            { "reload",         SEC_ADMINISTRATOR,  false, &HandleWpReloadCommand,             "" },
+            { "show",           SEC_GAMEMASTER,     false, &HandleWpShowCommand,               "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "wp",             SEC_GAMEMASTER,     CMD_INGAME, NULL,                     "", wpCommandTable }
+            { "wp",             SEC_GAMEMASTER,     false, NULL,                     "", wpCommandTable }
         };
         return commandTable;
     }

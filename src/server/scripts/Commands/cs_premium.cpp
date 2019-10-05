@@ -34,12 +34,12 @@ public:
     {
         static std::vector<ChatCommand> premiumCommandTable =
         {
-            { "teleport",       SEC_PLAYER,         CMD_INGAME, &HandlePremiumTeleportCommand,     "" },
-            { "",               SEC_PLAYER,         CMD_INGAME, &HandlePremiumCommand,             "" }
+            { "teleport",       SEC_PLAYER,         false, &HandlePremiumTeleportCommand,     "" },
+            { "",               SEC_PLAYER,         false, &HandlePremiumCommand,             "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "premium",        SEC_PLAYER,         CMD_INGAME, nullptr,                           "", premiumCommandTable },
+            { "premium",        SEC_PLAYER,         false, nullptr,                           "", premiumCommandTable },
         };
         return commandTable;
     }

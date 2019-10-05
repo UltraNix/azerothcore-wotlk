@@ -2182,24 +2182,6 @@ void World::Update(uint32 diff)
         WhoListCacheMgr::Update();
 
         sObjectMgr->UpdateItemDestroyQueue();
-        
-        auto result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEB_COMMANDS));
-        if (result)
-        {
-            do
-            {
-                Field *fields = result->Fetch();
-                std::string command = fields[1].GetString();
-                uint32 target = fields[2].GetUInt32();
-                uint32 source = fields[3].GetUInt32();
-                uint32 access = fields[4].GetUInt32();
-                WebCommandHandler(source, target, access).CommandWrapper(command.c_str());
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WEB_COMMANDS);
-                stmt->setUInt32(0,fields[0].GetUInt32());
-                CharacterDatabase.Execute(stmt);
-            }
-            while (result->NextRow());
-        }
     }
 
     ///- Update the game time and check for shutdown time

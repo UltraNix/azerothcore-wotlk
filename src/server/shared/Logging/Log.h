@@ -147,7 +147,6 @@ class Log
         void outReleaseDebug(const char * str, ...)             ATTR_PRINTF(2, 3); // sitowsky
         void outChinaTown(const char * str, ...)                ATTR_PRINTF(2, 3); // sitowsky
         void outItemRestore(const char * str, ...)              ATTR_PRINTF(2, 3); // sitowsky
-        void outWebCommands(const char * str, ...)              ATTR_PRINTF(2, 3);
 
         void outCharDump(const char * str, uint32 account_id, uint32 guid, const char * name);
 
@@ -186,7 +185,6 @@ class Log
         FILE* cheatLogFile;
         FILE* itemRestoreLogFile;
         FILE* rafLogFile;
-        FILE* webCommandsLogFile;
 
         // cache values for after initilization use (like gm log per account case)
         std::string m_logsDir;

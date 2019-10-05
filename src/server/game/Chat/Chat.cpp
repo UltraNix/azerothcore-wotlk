@@ -1241,7 +1241,7 @@ const char *CliHandler::GetTrinityString(int32 entry) const
 bool CliHandler::isAvailable(ChatCommand const& cmd) const
 {
     // skip non-console commands in console case
-    return cmd.m_usage == CMD_CLI;
+    return cmd.AllowConsole;
 }
 
 void CliHandler::SendSysMessage(const char *str)
@@ -1317,40 +1317,4 @@ LocaleConstant CliHandler::GetSessionDbcLocale() const
 int CliHandler::GetSessionDbLocaleIndex() const
 {
     return sObjectMgr->GetDBCLocaleIndex();
-}
-
-// WEB COMMAND HANDLER
-const char *WebCommandHandler::GetHellgroundString(int32 entry) const
-{
-    return sObjectMgr->GetTrinityStringForDBCLocale(entry);
-}
-
-bool WebCommandHandler::isAvailable(ChatCommand const& cmd, bool) const
-{
-    return (cmd.m_usage == CMD_CLI || cmd.m_usage == CMD_WEB) && ((cmd.SecurityLevel & m_access) != 0);
-}
-
-void WebCommandHandler::SendSysMessage(const char *str)
-{
-    sLog->outWebCommands("%u %u: %s", m_ownerGuid, m_targetGuid, str);
-    m_reported = true;
-}
-
-const char *WebCommandHandler::GetName() const
-{
-    std::string name;
-    sObjectMgr->GetPlayerNameByGUID(m_ownerGuid, name);
-    return name.c_str();
-}
-
-bool WebCommandHandler::needReportToTarget(Player* /*chr*/) const
-{
-    return true;
-}
-
-void WebCommandHandler::CommandWrapper(const char* cmd)
-{
-    ParseCommands(cmd);
-    if (!m_reported)
-        ChatHandler::SendSysMessage(LANG_DONE);
 }

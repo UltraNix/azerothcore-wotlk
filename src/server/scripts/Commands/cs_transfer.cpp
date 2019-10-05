@@ -41,29 +41,29 @@ public:
     {
         static std::vector<ChatCommand> transferCharacterCommandTable =
         {
-                { "newid",       SEC_ADMINISTRATOR,  CMD_CLI,  &HandleTransferCharacterNewIdCommand,        "" }
+                { "newid",       SEC_ADMINISTRATOR,  true,  &HandleTransferCharacterNewIdCommand,        "" }
         };
 
         static std::vector<ChatCommand> transferItemCommandTable =
         {
-                { "newid",       SEC_ADMINISTRATOR,  CMD_CLI,  &HandleTransferItemNewIdCommand,        "" }
+                { "newid",       SEC_ADMINISTRATOR,  true,  &HandleTransferItemNewIdCommand,        "" }
         };
 
         static std::vector<ChatCommand> transferPetCommandTable =
         {
-                { "newid",       SEC_ADMINISTRATOR,  CMD_CLI,  &HandleTransferPetNewIdCommand,        "" }
+                { "newid",       SEC_ADMINISTRATOR,  true,  &HandleTransferPetNewIdCommand,        "" }
         };
 
         static std::vector<ChatCommand> transferCommandTable =
         {
-            { "character",      SEC_ADMINISTRATOR,     CMD_CLI,  NULL, "", transferCharacterCommandTable },
-            { "item",           SEC_ADMINISTRATOR,     CMD_CLI,  NULL, "", transferItemCommandTable },
-            { "pet",            SEC_ADMINISTRATOR,     CMD_CLI,  NULL, "", transferPetCommandTable }
+            { "character",      SEC_ADMINISTRATOR,     true,  NULL, "", transferCharacterCommandTable },
+            { "item",           SEC_ADMINISTRATOR,     true,  NULL, "", transferItemCommandTable },
+            { "pet",            SEC_ADMINISTRATOR,     true,  NULL, "", transferPetCommandTable }
         };
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "transfer",       SEC_ADMINISTRATOR,  CMD_CLI,  NULL,                                   "", transferCommandTable },
+            { "transfer",       SEC_ADMINISTRATOR,  true,  NULL,                                   "", transferCommandTable },
         };
 
         return commandTable;

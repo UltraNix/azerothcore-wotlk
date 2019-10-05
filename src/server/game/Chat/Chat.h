@@ -34,24 +34,17 @@ class WorldObject;
 
 struct GameTele;
 
-enum CommandUsage
-{
-    CMD_INGAME,
-    CMD_WEB,
-    CMD_CLI
-};
-
 class ChatCommand
 {
     typedef bool(*pHandler)(ChatHandler*, char const*);
 
     public:
-        ChatCommand(char const* name, uint32 securityLevel, CommandUsage usage, pHandler handler, std::string help, std::vector<ChatCommand> childCommands = std::vector<ChatCommand>())
-            : Name(name), SecurityLevel(securityLevel), m_usage(usage), Handler(handler), Help(std::move(help)), ChildCommands(std::move(childCommands)) { }
+        ChatCommand(char const* name, uint32 securityLevel, bool allowConsole, pHandler handler, std::string help, std::vector<ChatCommand> childCommands = std::vector<ChatCommand>())
+            : Name(name), SecurityLevel(securityLevel), AllowConsole(allowConsole), Handler(handler), Help(std::move(help)), ChildCommands(std::move(childCommands)) { }
 
         char const* Name;
         uint32 SecurityLevel;                   // function pointer required correct align (use uint32)
-        CommandUsage m_usage;
+        bool AllowConsole;
         pHandler Handler;
         std::string Help;
         std::vector<ChatCommand> ChildCommands;
@@ -169,23 +162,6 @@ class CliHandler : public ChatHandler
     private:
         void* m_callbackArg;
         Print* m_print;
-};
-
-class WebCommandHandler : public ChatHandler
-{
-    public:
-        explicit WebCommandHandler(uint32 ownerGuid, uint32 targetGuid, uint32 access) : m_ownerGuid(ownerGuid), m_targetGuid(targetGuid), m_access(access), m_reported(false) {}
-
-        // overwrite functions
-        const char *GetHellgroundString(int32 entry) const;
-        bool isAvailable(ChatCommand const& cmd, bool) const;
-        void SendSysMessage(const char *str);
-        char const* GetName() const;
-        bool needReportToTarget(Player* chr) const;
-        void CommandWrapper(const char* cmd);
-    private:
-        uint32 m_ownerGuid, m_targetGuid, m_access;
-        bool m_reported;
 };
 
 #endif

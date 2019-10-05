@@ -39,36 +39,36 @@ public:
     {
         static std::vector<ChatCommand> pdumpCommandTable =
         {
-            { "load",           SEC_ADMINISTRATOR,  CMD_CLI,  &HandlePDumpLoadCommand,                 "" },
-            { "write",          SEC_ADMINISTRATOR,  CMD_CLI,  &HandlePDumpWriteCommand,                "" }
+            { "load",           SEC_ADMINISTRATOR,  true,  &HandlePDumpLoadCommand,                 "" },
+            { "write",          SEC_ADMINISTRATOR,  true,  &HandlePDumpWriteCommand,                "" }
         };
 
         static std::vector<ChatCommand> characterDeletedCommandTable =
         {
-            { "delete",         SEC_CONSOLE,        CMD_CLI,  &HandleCharacterDeletedDeleteCommand,   "" },
-            { "list",           SEC_ADMINISTRATOR,  CMD_CLI,  &HandleCharacterDeletedListCommand,     "" },
-            { "restore",        SEC_ADMINISTRATOR,  CMD_CLI,  &HandleCharacterDeletedRestoreCommand,  "" },
-            { "old",            SEC_CONSOLE,        CMD_CLI,  &HandleCharacterDeletedOldCommand,      "" }
+            { "delete",         SEC_CONSOLE,        true,  &HandleCharacterDeletedDeleteCommand,   "" },
+            { "list",           SEC_ADMINISTRATOR,  true,  &HandleCharacterDeletedListCommand,     "" },
+            { "restore",        SEC_ADMINISTRATOR,  true,  &HandleCharacterDeletedRestoreCommand,  "" },
+            { "old",            SEC_CONSOLE,        true,  &HandleCharacterDeletedOldCommand,      "" }
         };
 
         static std::vector<ChatCommand> characterCommandTable =
         {
-            { "customize",      SEC_GAMEMASTER,     CMD_CLI,  &HandleCharacterCustomizeCommand,       "" },
-            { "changefaction",  SEC_GAMEMASTER,     CMD_CLI,  &HandleCharacterChangeFactionCommand,   "" },
-            { "changerace",     SEC_GAMEMASTER,     CMD_CLI,  &HandleCharacterChangeRaceCommand,      "" },
-            { "deleted",        SEC_GAMEMASTER,     CMD_CLI,  NULL,                                   "", characterDeletedCommandTable },
-            { "level",          SEC_ADMINISTRATOR,  CMD_CLI,  &HandleCharacterLevelCommand,           "" },
-            { "rename",         SEC_GAMEMASTER,     CMD_CLI,  &HandleCharacterRenameCommand,          "" },
-            { "reputation",     SEC_GAMEMASTER,     CMD_CLI,  &HandleCharacterReputationCommand,      "" },
-            { "titles",         SEC_GAMEMASTER,     CMD_CLI,  &HandleCharacterTitlesCommand,          "" },
-            { "getnewid",       SEC_ADMINISTRATOR,  CMD_CLI,  &HandleCharacterGetNewIdCommand,        "" }
+            { "customize",      SEC_GAMEMASTER,     true,  &HandleCharacterCustomizeCommand,       "" },
+            { "changefaction",  SEC_GAMEMASTER,     true,  &HandleCharacterChangeFactionCommand,   "" },
+            { "changerace",     SEC_GAMEMASTER,     true,  &HandleCharacterChangeRaceCommand,      "" },
+            { "deleted",        SEC_GAMEMASTER,     true,  NULL,                                   "", characterDeletedCommandTable },
+            { "level",          SEC_ADMINISTRATOR,  true,  &HandleCharacterLevelCommand,           "" },
+            { "rename",         SEC_GAMEMASTER,     true,  &HandleCharacterRenameCommand,          "" },
+            { "reputation",     SEC_GAMEMASTER,     true,  &HandleCharacterReputationCommand,      "" },
+            { "titles",         SEC_GAMEMASTER,     true,  &HandleCharacterTitlesCommand,          "" },
+            { "getnewid",       SEC_ADMINISTRATOR,  true,  &HandleCharacterGetNewIdCommand,        "" }
         };
 
         static std::vector<ChatCommand> commandTable =
         {
-            { "character",      SEC_GAMEMASTER,     CMD_CLI,  NULL,                                   "", characterCommandTable },
-            { "levelup",        SEC_ADMINISTRATOR,  CMD_INGAME, &HandleLevelUpCommand,                  "" },
-            { "pdump",          SEC_ADMINISTRATOR,  CMD_CLI,  NULL,                                   "", pdumpCommandTable }
+            { "character",      SEC_GAMEMASTER,     true,  NULL,                                   "", characterCommandTable },
+            { "levelup",        SEC_ADMINISTRATOR,  false, &HandleLevelUpCommand,                  "" },
+            { "pdump",          SEC_ADMINISTRATOR,  true,  NULL,                                   "", pdumpCommandTable }
         };
         return commandTable;
     }

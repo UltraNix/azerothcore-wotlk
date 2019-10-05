@@ -43,29 +43,29 @@ public:
     {
         static std::vector<ChatCommand> gobjectAddCommandTable =
         {
-            { "temp",           SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectAddTempCommand,   "" },
-            { "",               SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectAddCommand,       "" }
+            { "temp",           SEC_GAMEMASTER,     false, &HandleGameObjectAddTempCommand,   "" },
+            { "",               SEC_GAMEMASTER,     false, &HandleGameObjectAddCommand,       "" }
         };
         static std::vector<ChatCommand> gobjectSetCommandTable =
         {
-            { "phase",          SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectSetPhaseCommand,  "" },
-            { "state",          SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectSetStateCommand,  "" }
+            { "phase",          SEC_GAMEMASTER,     false, &HandleGameObjectSetPhaseCommand,  "" },
+            { "state",          SEC_GAMEMASTER,     false, &HandleGameObjectSetStateCommand,  "" }
         };
         static std::vector<ChatCommand> gobjectCommandTable =
         {
-            { "activate",       SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectActivateCommand,  "" },
-            { "delete",         SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectDeleteCommand,    "" },
-            { "info",           SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectInfoCommand,      "" },
-            { "move",           SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectMoveCommand,      "" },
-            { "near",           SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectNearCommand,      "" },
-            { "target",         SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectTargetCommand,    "" },
-            { "turn",           SEC_GAMEMASTER,     CMD_INGAME, &HandleGameObjectTurnCommand,      "" },
-            { "add",            SEC_GAMEMASTER,     CMD_INGAME, NULL,            "", gobjectAddCommandTable },
-            { "set",            SEC_GAMEMASTER,     CMD_INGAME, NULL,            "", gobjectSetCommandTable }
+            { "activate",       SEC_GAMEMASTER,     false, &HandleGameObjectActivateCommand,  "" },
+            { "delete",         SEC_GAMEMASTER,     false, &HandleGameObjectDeleteCommand,    "" },
+            { "info",           SEC_GAMEMASTER,     false, &HandleGameObjectInfoCommand,      "" },
+            { "move",           SEC_GAMEMASTER,     false, &HandleGameObjectMoveCommand,      "" },
+            { "near",           SEC_GAMEMASTER,     false, &HandleGameObjectNearCommand,      "" },
+            { "target",         SEC_GAMEMASTER,     false, &HandleGameObjectTargetCommand,    "" },
+            { "turn",           SEC_GAMEMASTER,     false, &HandleGameObjectTurnCommand,      "" },
+            { "add",            SEC_GAMEMASTER,     false, NULL,            "", gobjectAddCommandTable },
+            { "set",            SEC_GAMEMASTER,     false, NULL,            "", gobjectSetCommandTable }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "gobject",        SEC_GAMEMASTER,     CMD_INGAME, NULL,                "", gobjectCommandTable }
+            { "gobject",        SEC_GAMEMASTER,     false, NULL,                "", gobjectCommandTable }
         };
         return commandTable;
     }

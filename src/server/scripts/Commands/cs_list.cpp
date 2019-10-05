@@ -38,15 +38,15 @@ public:
     {
         static std::vector<ChatCommand> listCommandTable =
         {
-            { "creature",       SEC_ADMINISTRATOR,  CMD_CLI,  &HandleListCreatureCommand,          "" },
-            { "item",           SEC_ADMINISTRATOR,  CMD_CLI,  &HandleListItemCommand,              "" },
-            { "object",         SEC_ADMINISTRATOR,  CMD_CLI,  &HandleListObjectCommand,            "" },
-            { "auras",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleListAurasCommand,             "" },
-            { "premium",        SEC_MODERATOR,      CMD_CLI,  &HandleListPremiumCommand,           ""},
+            { "creature",       SEC_ADMINISTRATOR,  true,  &HandleListCreatureCommand,          "" },
+            { "item",           SEC_ADMINISTRATOR,  true,  &HandleListItemCommand,              "" },
+            { "object",         SEC_ADMINISTRATOR,  true,  &HandleListObjectCommand,            "" },
+            { "auras",          SEC_ADMINISTRATOR,  false, &HandleListAurasCommand,             "" },
+            { "premium",        SEC_MODERATOR,      true,  &HandleListPremiumCommand,           ""},
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "list",          SEC_ADMINISTRATOR,   CMD_CLI, NULL,                                 "", listCommandTable }
+            { "list",          SEC_ADMINISTRATOR,   true, NULL,                                 "", listCommandTable }
         };
         return commandTable;
     }
