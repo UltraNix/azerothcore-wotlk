@@ -353,7 +353,7 @@ class Item : public Object
         uint32 GetPaidExtendedCost() { return m_paidExtendedCost; }
 
         // Sitowsky: Item Restore
-        void ItemRestore(uint32 pGuidLow, uint32 pItemEntry, uint32 count, RestoreAction action);
+        void ItemRestore(uint32 pGuidLow, RestoreAction action);
 
         void UpdatePlayedTime(Player* owner);
         uint32 GetPlayedTime();
