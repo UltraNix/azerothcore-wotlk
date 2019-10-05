@@ -5008,11 +5008,12 @@ void SpellMgr::LoadDbcDataCorrections()
         // execute
         // This should never miss/dodge/parry (this is dummy spell)
         // execute itself might get dodged/parried (id 20647)
+        case 20662: // Rank 5 - fix Sudden Death proc
+            spellInfo->AttributesEx3 &= ~(SPELL_ATTR3_CANT_TRIGGER_PROC);
         case 5308:
         case 20658:
         case 20660:
         case 20661:
-        case 20662:
         case 25234:
         case 25236:
         case 47470:
