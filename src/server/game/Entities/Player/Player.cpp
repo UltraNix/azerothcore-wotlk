@@ -1943,6 +1943,8 @@ void Player::Update(uint32 p_time)
     // group update
     SendUpdateToOutOfRangeGroupMembers();
 
+    UpdateConsecutiveKills();
+
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
     //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
@@ -7484,6 +7486,8 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
             if (GetTeamId() == victim->GetTeamId() && !sWorld->IsFFAPvPRealm())
                 return false;
 
+            AddConsecutiveKill(victim_guid);
+
             uint8 k_level = getLevel();
             uint8 k_grey = Trinity::XP::GetGrayLevel(k_level);
             uint8 v_level = victim->getLevel();
@@ -7621,6 +7625,19 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
             if (uVictim)
                 GiveXP(0.0005 * GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
         }
+
+    if(sWorld->getBoolConfig(CONFIG_ANTI_HK_FARM_ENABLE) && uVictim && uVictim->IsPlayer())
+    {
+        Map* map = GetMap();
+        if (map && !map->IsBattlegroundOrArena())
+        {
+            uint32 killsCount = GetConsecutiveKillsCount(uVictim->GetGUID());
+            if (killsCount >= sWorld->getIntConfig(CONFIG_ANTI_HK_FARM_COUNT))
+            {
+                sWorld->SendGMText(LANG_ANTI_HK_FARM, GetName().c_str(), GetGUIDLow(), uVictim->GetName().c_str(), uVictim->GetGUIDLow(), killsCount);
+            }
+        }
+    }
 
     return true;
 }
@@ -23228,6 +23245,50 @@ bool Player::IsAlwaysDetectableFor(WorldObject const* seer) const
             return !(seerPlayer->duel && seerPlayer->duel->startTime != 0 && seerPlayer->duel->opponent == this);
 
     return false;
+}
+
+void Player::AddConsecutiveKill(uint64 victimGuid)
+{
+    if (!sWorld->getBoolConfig(CONFIG_ANTI_HK_FARM_ENABLE))
+        return;
+
+    ConsecutiveKillsMap::iterator itr = m_consecutiveKills.find(victimGuid);
+    if (itr == m_consecutiveKills.end())
+        return void(m_consecutiveKills.insert(std::make_pair(victimGuid, std::make_pair(1, sWorld->GetGameTimeMS()))));
+
+    ++itr->second.first;
+    itr->second.second = sWorld->GetGameTimeMS();
+}
+
+uint32 Player::GetConsecutiveKillsCount(uint64 victimGuid)
+{
+    auto itr = m_consecutiveKills.find(victimGuid);
+    if (itr != m_consecutiveKills.end())
+        return itr->second.first;
+
+    return 0;
+}
+
+void Player::UpdateConsecutiveKills()
+{
+    if (!sWorld->getBoolConfig(CONFIG_ANTI_HK_FARM_ENABLE))
+        return;
+
+    Map* map = GetMap();
+    if (map == nullptr || map->IsBattlegroundOrArena())
+        return;
+
+    uint32 currentTime = sWorld->GetGameTimeMS();
+    uint32 expireTime = sWorld->getIntConfig(CONFIG_ANTI_HK_FARM_EXPIRE);
+
+    for (ConsecutiveKillsMap::iterator itr = m_consecutiveKills.begin(); itr != m_consecutiveKills.end();)
+    {
+        uint32 diff = currentTime - itr->second.second;
+        if (diff > expireTime)
+            itr = m_consecutiveKills.erase(itr);
+        else
+            ++itr;
+    }
 }
 
 bool Player::IsVisibleGloballyFor(Player const* u) const

@@ -1416,6 +1416,11 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CHAIN_PULL_TIMER] = sConfigMgr->GetIntDefault("CreatureChainPullTimer.Amount", 3000);
     m_float_configs[CONFIG_CHAIN_PULL_RANGE] = sConfigMgr->GetFloatDefault("CreatureChainPullRange.Amount", 8.0f);
 
+    // Anti hk farm system
+    m_bool_configs[CONFIG_ANTI_HK_FARM_ENABLE] = sConfigMgr->GetBoolDefault("AntiHkFarm.Enable", false);
+    m_int_configs[CONFIG_ANTI_HK_FARM_COUNT] = sConfigMgr->GetIntDefault("AntiHkFarm.Count", 10);
+    m_int_configs[CONFIG_ANTI_HK_FARM_EXPIRE] = sConfigMgr->GetIntDefault("AntiHkFarm.Expire", 600000);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

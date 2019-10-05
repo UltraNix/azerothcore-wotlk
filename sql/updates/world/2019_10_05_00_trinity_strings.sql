@@ -1,0 +1,2 @@
+DELETE FROM `trinity_string` WHERE `entry` = 11036;
+INSERT INTO `trinity_string`(`entry`, `content_default`) VALUES(11036, 'Possible HK / Honor farming exploit (killer: %s (guid: %u), victim: %s (guid: %u) kills count: %u');
