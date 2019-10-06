@@ -1274,50 +1274,37 @@ class spell_warl_unstable_affliction : public SpellScriptLoader
 };
 
 // -603 - Curse of Doom
-class spell_warl_curse_of_doom : public SpellScriptLoader
+class spell_warl_curse_of_doom_AuraScript : public AuraScript
 {
-    public:
-        spell_warl_curse_of_doom() : SpellScriptLoader("spell_warl_curse_of_doom") { }
+    PrepareAuraScript(spell_warl_curse_of_doom_AuraScript);
 
-        class spell_warl_curse_of_doom_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_warl_curse_of_doom_AuraScript);
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT });
+    }
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT))
-                    return false;
-                return true;
-            }
+    bool Load() override
+    {
+        return GetCaster() && GetCaster()->IsPlayer();
+    }
 
-            bool Load()
-            {
-                return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER;
-            }
+    void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        if (!GetCaster())
+            return;
 
-            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-            {
-                if (!GetCaster())
-                    return;
+        AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
+        if (removeMode != AURA_REMOVE_BY_DEATH || !IsExpired())
+            return;
 
-                AuraRemoveMode removeMode = GetTargetApplication()->GetRemoveMode();
-                if (removeMode != AURA_REMOVE_BY_DEATH || !IsExpired())
-                    return;
+        if (GetCaster()->ToPlayer()->isHonorOrXPTarget(GetTarget()))
+            GetCaster()->CastSpell(GetTarget(), SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT, true, nullptr, aurEff);
+    }
 
-                if (GetCaster()->ToPlayer()->isHonorOrXPTarget(GetTarget()))
-                    GetCaster()->CastSpell(GetTarget(), SPELL_WARLOCK_CURSE_OF_DOOM_EFFECT, true, NULL, aurEff);
-            }
-
-            void Register()
-            {
-                 AfterEffectRemove += AuraEffectRemoveFn(spell_warl_curse_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_curse_of_doom_AuraScript();
-        }
+    void Register() override
+    {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_warl_curse_of_doom_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+    }
 };
 
 // -755 - Health Funnel
@@ -1498,7 +1485,7 @@ void AddSC_warlock_spell_scripts()
     // Theirs
     new spell_warl_banish();
     new spell_warl_create_healthstone();
-    new spell_warl_curse_of_doom();
+    new AuraScriptLoaderEx<spell_warl_curse_of_doom_AuraScript>("spell_warl_curse_of_doom");
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();
     new spell_warl_demonic_empowerment();

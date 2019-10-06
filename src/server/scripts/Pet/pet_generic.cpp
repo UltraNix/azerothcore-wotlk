@@ -1004,6 +1004,100 @@ struct npc_guardian_petAI : public ScriptedAI
         TimeTrackerSmall _changeTargetTimer;
 };
 
+enum Doomguard
+{
+    SPELL_RITUAL_OF_DOOM_SUMMON = 60478,
+
+    // Combat spells
+    SPELL_CRIPPLE               = 89,
+    SPELL_WAR_STOMP             = 19482,
+    SPELL_REND                  = 21949,
+    SPELL_RAIN_OF_FIRE          = 19474,
+
+    EVENT_CRIPPLE               = 1,
+    EVENT_WAR_STOMP,
+    EVENT_REND,
+    EVENT_RAIN_OF_FIRE
+};
+
+struct npc_warl_doomguardAI : public ScriptedAI
+{
+    npc_warl_doomguardAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void IsSummonedBy(Unit* summoner) override
+    {
+        // We don't need AI, pet is controlled by player in this case
+        if (me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == SPELL_RITUAL_OF_DOOM_SUMMON)
+            me->IsAIEnabled = false;
+        else if (summoner)
+            me->SetLevel(summoner->getLevel());
+    }
+
+    void EnterCombat(Unit* /*attacker*/) override
+    {
+        _events.ScheduleEvent(EVENT_CRIPPLE, 1s, 10s);
+        _events.ScheduleEvent(EVENT_WAR_STOMP, 2s, 5s);
+        _events.ScheduleEvent(EVENT_REND, 1s, 10s);
+        _events.ScheduleEvent(EVENT_RAIN_OF_FIRE, 8s, 15s);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        _events.Update(diff);
+
+        if (me->IsCasting())
+            return;
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_CRIPPLE:
+                    DoCastVictim(SPELL_CRIPPLE);
+                    _events.Repeat(20s, 30s);
+                    break;
+                case EVENT_WAR_STOMP:
+                    if (me->SelectNearestTarget(8.0f))
+                    {
+                        DoCastSelf(SPELL_WAR_STOMP);
+                        _events.Repeat(20s, 30s);
+                        break;
+                    }
+
+                    _events.Repeat(2s);
+                    break;
+                case EVENT_REND:
+                    DoCastVictim(SPELL_REND);
+                    _events.Repeat(15s, 20s);
+                    break;
+                case EVENT_RAIN_OF_FIRE:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f))
+                    {
+                        DoCast(target, SPELL_RAIN_OF_FIRE);
+                        _events.Repeat(20s, 25s);
+                        break;
+                    }
+
+                    _events.Repeat(2s);
+                    break;
+                default:
+                    break;
+            }
+
+            if (me->IsCasting())
+                return;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+    private:
+        EventMap _events;
+};
+
 void AddSC_generic_pet_scripts()
 {
     new npc_pet_gen_mojo();
@@ -1018,4 +1112,5 @@ void AddSC_generic_pet_scripts()
     new npc_pet_gen_toxic_wasteling();
     new npc_pet_gen_fetch_ball();
     new CreatureAILoader<npc_guardian_petAI>("npc_guardian_pet");
+    new CreatureAILoader<npc_warl_doomguardAI>("npc_warl_doomguard");
 }
