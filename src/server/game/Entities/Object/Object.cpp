@@ -886,7 +886,7 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
-bool WorldObject::IsUnderTextures(Position const& pos)
+bool WorldObject::IsUnderTextures(Position const& pos) const
 {
     if (!Trinity::IsValidMapCoord(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()))
         return false;
@@ -901,7 +901,7 @@ bool WorldObject::IsUnderTextures(Position const& pos)
     return pos.GetPositionZ() < proper_z;
 }
 
-bool WorldObject::IsUnderTextures()
+bool WorldObject::IsUnderTextures() const
 {
     return IsUnderTextures(*this);
 }
