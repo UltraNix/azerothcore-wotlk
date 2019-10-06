@@ -356,6 +356,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             bool receiverIsPlayer = AccountMgr::IsPlayerAccount(receiver ? receiver->GetSession()->GetSecurity() : SEC_PLAYER);
             if (!receiver || (senderIsPlayer && !receiverIsPlayer && !receiver->isAcceptWhispers() && !receiver->IsInWhisperWhiteList(sender->GetGUID())))
             {
+                if (GetPlayer()->tryWhisperToWebCommand(to, msg))
+                    return;
+
                 SendPlayerNotFoundNotice(to);
                 return;
             }

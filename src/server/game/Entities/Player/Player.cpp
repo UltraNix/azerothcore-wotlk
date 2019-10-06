@@ -28210,3 +28210,19 @@ void Player::SetDisabledTransmogVisibility(bool disable)
     CharacterDatabase.Execute(stmt);
 }
 
+bool Player::tryWhisperToWebCommand(std::string to, std::string msg)
+{
+    if (!sWorld->isGmWebCommandWhisperEnabled(to))
+        return false;
+
+    uint64 target = sWorld->GetGlobalPlayerGUID(to);
+    sLog->outWebCommands("%u %u receiving whisper from %s: %s", target, GetGUID(), GetName(),  msg);
+
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, Language(LANG_UNIVERSAL), target, target, msg, CHAT_TAG_AFK);
+    GetSession()->SendPacket(&data);
+
+    ChatHandler(GetSession()).PSendSysMessage(LANG_PLAYER_AFK, to.c_str(), "Gamemaster may be AFK or offline, if you receive no response please open a ticket.");
+    return true;
+}
+

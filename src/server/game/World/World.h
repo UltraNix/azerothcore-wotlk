@@ -784,6 +784,8 @@ class World
         bool SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = 0, TeamId teamId = TEAM_NEUTRAL);
         void SendZoneText(uint32 zone, const char *text, WorldSession* self = 0, TeamId teamId = TEAM_NEUTRAL);
         void SendServerMessage(ServerMessageType type, const char *text = "", Player* player = NULL, TeamId teamId = TEAM_NEUTRAL);
+        void setGmWebCommandWhisper(std::string nickname, bool on = true);
+        bool isGmWebCommandWhisperEnabled(std::string nickname) const;
 
         uint32 pvp_ranks[HKRANKMAX];
 
@@ -988,6 +990,7 @@ class World
         bool m_allowMovement;
         std::string m_motd;
         std::string m_dataPath;
+        std::map<std::string, time_t> m_gamemastersWebCommandWhisper;
 
         // for max speed access
         static float m_MaxVisibleDistanceOnContinents;

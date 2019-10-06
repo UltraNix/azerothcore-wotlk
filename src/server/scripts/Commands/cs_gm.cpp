@@ -49,7 +49,8 @@ public:
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "gm",             SEC_GAMEMASTER,      CMD_INGAME, NULL,                     "", gmCommandTable }
+            { "gm",             SEC_GAMEMASTER,      CMD_INGAME, NULL,                     "", gmCommandTable },
+            { "webwhisper",     SEC_GAMEMASTER,      CMD_WEB, &HandleWebwhisperCommand,          ""}
         };
         return commandTable;
     }
@@ -267,6 +268,45 @@ public:
         handler->SendSysMessage(LANG_USE_BOL);
         handler->SetSentErrorMessage(true);
         return false;
+    }
+
+    static bool HandleWebwhisperCommand(ChatHandler* handler, const char *args)
+    {
+        if (!*args)
+        {
+            if (sWorld->isGmWebCommandWhisperEnabled(handler->GetName()))
+            {
+                sWorld->setGmWebCommandWhisper(handler->GetName(), false);
+                handler->SendSysMessage(LANG_GM_CHAT_OFF);
+            }
+            else
+            {
+                sWorld->setGmWebCommandWhisper(handler->GetName(), true);
+                handler->SendSysMessage(LANG_GM_CHAT_ON);
+            }
+            return true;
+        }
+        Player* rPlayer = handler->getSelectedPlayer();
+        if (!rPlayer)
+        {
+            handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        std::string msg(args);
+
+        WorldPacket data(SMSG_MESSAGECHAT, 200);
+        data << (uint8)CHAT_MSG_WHISPER;
+        data << (uint32)LANG_UNIVERSAL;
+        data << handler->getOwnerGuid();
+        data << (uint32)LANG_UNIVERSAL;
+        data << handler->getOwnerGuid();
+        data << (uint32)(msg.length() + 1);
+        data << msg;
+        data << (uint8)0; // AFK mark
+        rPlayer->GetSession()->SendPacket(&data);
+
+        return true;
     }
 };
 

@@ -3588,3 +3588,20 @@ uint32 World::GetGlobalPlayerGUID(std::string const& name) const
         return itr->second;
     return 0;
 }
+void World::setGmWebCommandWhisper(std::string nickname, bool on)
+{
+    if (!on)
+    {
+         m_gamemastersWebCommandWhisper.erase(nickname);
+         return;
+    }
+
+    m_gamemastersWebCommandWhisper[nickname] = time(NULL) + 5 * MINUTE;
+}
+
+bool World::isGmWebCommandWhisperEnabled(std::string nickname) const
+{
+    if (m_gamemastersWebCommandWhisper.find(nickname) != m_gamemastersWebCommandWhisper.end())
+        return (time(NULL) < m_gamemastersWebCommandWhisper.at(nickname));
+    return false;
+}

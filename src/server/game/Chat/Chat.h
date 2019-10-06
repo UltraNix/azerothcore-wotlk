@@ -136,6 +136,8 @@ class ChatHandler
         static void SetLoadCommandTable(bool val) { load_command_table = val; }
 
         bool ShowHelpForCommand(std::vector<ChatCommand> const& table, const char* cmd);
+        virtual char const* GetName() const;
+        virtual uint32 getOwnerGuid() const;
     protected:
         explicit ChatHandler() : m_session(NULL), sentErrorMessage(false) {}      // for CLI subclass
         static bool SetDataForCommandInTable(std::vector<ChatCommand>& table, const char* text, uint32 permission, std::string const& help, std::string const& fullcommand);
@@ -178,11 +180,12 @@ class WebCommandHandler : public ChatHandler
 
         // overwrite functions
         const char *GetHellgroundString(int32 entry) const;
-        bool isAvailable(ChatCommand const& cmd, bool) const;
+        bool isAvailable(ChatCommand const& cmd) const;
         void SendSysMessage(const char *str);
         char const* GetName() const;
         bool needReportToTarget(Player* chr) const;
         void CommandWrapper(const char* cmd);
+        uint32 getOwnerGuid() const {return m_ownerGuid;};
     private:
         uint32 m_ownerGuid, m_targetGuid, m_access;
         bool m_reported;

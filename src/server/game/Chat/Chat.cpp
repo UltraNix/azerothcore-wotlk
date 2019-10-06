@@ -1319,13 +1319,23 @@ int CliHandler::GetSessionDbLocaleIndex() const
     return sObjectMgr->GetDBCLocaleIndex();
 }
 
+const char* ChatHandler::GetName() const
+{
+    m_session->GetPlayer()->GetName();
+}
+
+uint32 ChatHandler::getOwnerGuid() const
+{
+    m_session->GetPlayer()->GetGUIDLow();
+}
+
 // WEB COMMAND HANDLER
 const char *WebCommandHandler::GetHellgroundString(int32 entry) const
 {
     return sObjectMgr->GetTrinityStringForDBCLocale(entry);
 }
 
-bool WebCommandHandler::isAvailable(ChatCommand const& cmd, bool) const
+bool WebCommandHandler::isAvailable(ChatCommand const& cmd) const
 {
     return (cmd.m_usage == CMD_CLI || cmd.m_usage == CMD_WEB) && ((cmd.SecurityLevel & m_access) != 0);
 }
