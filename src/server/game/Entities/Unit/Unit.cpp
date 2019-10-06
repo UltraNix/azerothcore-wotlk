@@ -13412,7 +13412,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
             if (GetTypeId() == TYPEID_UNIT)
             {
                 Unit* pOwner = GetCharmerOrOwner();
-                if (pOwner && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID()) && !IsInCombat() && !pOwner->IsInCombat()
+                if (pOwner && (IsPet() || IsGuardian() || GetGUID() == pOwner->GetCritterGUID() || GetEntry() == 11859) && !IsInCombat() && !pOwner->IsInCombat()
                     && GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE) // Must check for owner or crash on "Tame Beast"
                 {
                     G3D::Vector3 destPosition;
