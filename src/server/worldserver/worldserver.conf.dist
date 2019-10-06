@@ -3929,3 +3929,30 @@ AntiWintrading.MinDMG = 3000
 #       Default:     3000
 
 AntiWintrading.MinHealing = 3000
+
+###################################################################################################
+
+#
+#   AntiHkFarm.Enable
+#      Description: Notifies GMs about possible Hk/Honor farmers
+#      Default:  0 - (Disabled)
+#                1 - (Enabled)
+#
+
+AntiHkFarm.Enable = 1
+
+#
+#   AntiHkFarm.Count
+#      Description: How many kills are required to notify Gms
+#      Default:  10
+#
+
+AntiHkFarm.Count = 10
+
+#
+#   AntiHkFarm.Expire
+#      Description: When previous kills should expire in MS
+#      Default:  600000 (10 minutes)
+#
+
+AntiHkFarm.Expire = 600000

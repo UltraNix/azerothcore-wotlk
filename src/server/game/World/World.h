@@ -202,6 +202,7 @@ enum WorldBoolConfigs
     CONFIG_ANTIWINTRADING_ENABLE,             // Notifies GMs about possible arena wintraders
     CONFIG_LOG_CREATURE_CANT_REACH,           // Notifies GMs when some creature can't reach player and stands still
     CONFIG_CHAIN_PULL_ENABLED,
+    CONFIG_ANTI_HK_FARM_ENABLE,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -422,6 +423,8 @@ enum WorldIntConfigs
     CONFIG_ANTIWINTRADING_MINHEALING,
     CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD,
     CONFIG_CHAIN_PULL_TIMER,
+    CONFIG_ANTI_HK_FARM_COUNT,
+    CONFIG_ANTI_HK_FARM_EXPIRE,
     INT_CONFIG_VALUE_COUNT
 };
 

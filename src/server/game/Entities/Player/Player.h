@@ -135,6 +135,7 @@ typedef std::unordered_map<uint32, PlayerSpell*> PlayerSpellMap;
 typedef std::list<SpellModifier*> SpellModList;
 
 typedef std::list<uint64> WhisperListContainer;
+typedef std::unordered_map<uint64, std::pair<uint32, uint32>> ConsecutiveKillsMap;
 
 struct SpellCooldown
 {
@@ -584,6 +585,8 @@ enum SkillUpdateState
     SKILL_NEW           = 2,
     SKILL_DELETED       = 3
 };
+
+constexpr uint32 SKILL_TOOLTIP_UPDATE_PER_LEVEL{ 5 };
 
 struct SkillStatusData
 {
@@ -2721,6 +2724,8 @@ class Player : public Unit, public GridObject<Player>
         void         ClearPetSlotData( uint32 id );
         PetSlotData* GetPetSlotData( PetSaveMode mode, bool allowEmpty = false );
 
+        static bool ShouldUpdateSkillValueForTooltip(uint32 skillId);
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -3013,6 +3018,10 @@ class Player : public Unit, public GridObject<Player>
 
         AchievementMgr* GetAchievementMgr() const { return m_achievementMgr; }
 
+        void AddConsecutiveKill(uint64 guid);
+        uint32 GetConsecutiveKillsCount(uint64 guid);
+        void UpdateConsecutiveKills();
+
     private:
         // internal common parts for CanStore/StoreItem functions
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, ItemRef const& pSrcItem) const;
@@ -3081,6 +3090,7 @@ class Player : public Unit, public GridObject<Player>
         uint32 m_realVisibleSlots[ PLAYER_VISIBLE_SLOTS_COUNT + 1];
 
         PetSlotData m_petSlots[ PET_SAVE_LAST_STABLE_SLOT + 2 ] = {};
+        ConsecutiveKillsMap m_consecutiveKills;
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);

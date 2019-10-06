@@ -1174,6 +1174,7 @@ enum TrinityStrings
     LANG_SEND_AUTOINVITE_PL                 = 11033,
     LANG_SEND_AUTOINVITE_EN                 = 11034,
     LANG_REPORT_CREATURE_CANT_REACH         = 11035,
+    LANG_ANTI_HK_FARM                       = 11036,
 
     //                                      = 10500,
     //                                      = 10501,

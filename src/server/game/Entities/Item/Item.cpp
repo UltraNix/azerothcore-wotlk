@@ -378,9 +378,6 @@ void Item::SaveToDB(SQLTransaction& trans)
             if (!isInTransaction)
                 CharacterDatabase.CommitTransaction(trans);
 
-            // Sitowsky: Item Restore
-            ItemRestore(GUID_LOPART(GetOwnerGUID()), GetEntry(), GetCount(), ITEM_RESTORE_ACTION_INSERT);
-
             sObjectMgr->RequestItemDestroy( this );
             return;
         }
@@ -1259,13 +1256,19 @@ void Item::SetSpellCharges(uint8 index, int32 value)
 }
 
 
-void Item::ItemRestore(uint32 pGuidLow, uint32 pItemEntry, uint32 count, RestoreAction action)
+void Item::ItemRestore(uint32 pGuidLow, RestoreAction action)
 {
     if (!sWorld->getBoolConfig(CONFIG_ITEM_RESTORE))
         return;
 
-    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(pItemEntry);
-    if (!proto || proto->Quality < ITEM_QUALITY_RARE || proto->Class == ITEM_CLASS_QUEST)
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(GetEntry());
+    if (!proto)
+        return;
+    if (proto->Quality < ITEM_QUALITY_RARE || proto->Class == ITEM_CLASS_QUEST)
+        return;
+    if (proto->Class == ITEM_CLASS_CONSUMABLE && proto->SubClass == ITEM_SUBCLASS_CONSUMABLE)
+        return;
+    if (proto->Class == ITEM_CLASS_MISC && proto->SubClass == ITEM_SUBCLASS_JUNK)
         return;
 
     switch (action)
@@ -1274,11 +1277,11 @@ void Item::ItemRestore(uint32 pGuidLow, uint32 pItemEntry, uint32 count, Restore
         {
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ITEM_RESTORE);
             stmt->setUInt32(0, pGuidLow);
-            stmt->setUInt32(1, pItemEntry);
-            stmt->setUInt32(2, count);
+            stmt->setUInt32(1, GetEntry());
+            stmt->setUInt32(2, GetCount());
             stmt->setUInt32(3, time(nullptr));
             CharacterDatabase.Execute(stmt);
-            sLog->outItemRestore("Player GUID: %u has deleted item entry: %u, item count: %u", pGuidLow, pItemEntry, count);
+            sLog->outItemRestore("Player GUID: %u has deleted item entry: %u, item count: %u", pGuidLow, GetEntry(), GetCount());
             break;
         }
         case ITEM_RESTORE_ACTION_SELECT: { /* TODO OR HANDLE BY SENDITEMS COMMAND ? */ } break;

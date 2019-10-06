@@ -302,6 +302,8 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket & recvData)
     }
     else
         _player->DestroyItem(bag, slot, true);
+
+    pItem->ItemRestore(_player->GetGUIDLow(), ITEM_RESTORE_ACTION_INSERT);
 }
 
 void ItemTemplate::InitializeQueryData()
