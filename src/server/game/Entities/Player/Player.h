@@ -586,6 +586,8 @@ enum SkillUpdateState
     SKILL_DELETED       = 3
 };
 
+constexpr uint32 SKILL_TOOLTIP_UPDATE_PER_LEVEL{ 5 };
+
 struct SkillStatusData
 {
     SkillStatusData(uint8 _pos, SkillUpdateState _uState) : pos(_pos), uState(_uState)
@@ -2720,6 +2722,8 @@ class Player : public Unit, public GridObject<Player>
 
         void         ClearPetSlotData( uint32 id );
         PetSlotData* GetPetSlotData( PetSaveMode mode, bool allowEmpty = false );
+
+        static bool ShouldUpdateSkillValueForTooltip(uint32 skillId);
 
     protected:
         // Gamemaster whisper whitelist

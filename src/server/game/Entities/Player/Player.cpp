@@ -6666,13 +6666,19 @@ void Player::UpdateSkillsForLevel()
         if (!pSkill)
             continue;
 
-        if (GetSkillRangeType(pSkill, false) != SKILL_RANGE_LEVEL)
+        bool shouldUpdateSkill = ShouldUpdateSkillValueForTooltip(pSkill->id);
+        if (GetSkillRangeType(pSkill, false) != SKILL_RANGE_LEVEL && !shouldUpdateSkill)
             continue;
 
         uint32 valueIndex = PLAYER_SKILL_VALUE_INDEX(itr->second.pos);
         uint32 data = GetUInt32Value(valueIndex);
         uint32 max = SKILL_MAX(data);
         uint32 val = SKILL_VALUE(data);
+        if (shouldUpdateSkill)
+        {
+            max = DEFAULT_MAX_LEVEL * SKILL_TOOLTIP_UPDATE_PER_LEVEL;
+            val = getLevel() * SKILL_TOOLTIP_UPDATE_PER_LEVEL;
+        }
 
         /// update only level dependent max skill values
         if (max != 1)
@@ -28002,6 +28008,18 @@ PetSlotData* Player::GetPetSlotData( PetSaveMode mode, bool allowEmpty )
         return nullptr;
 
     return data;
+}
+
+bool Player::ShouldUpdateSkillValueForTooltip(uint32 skillId)
+{
+    switch (skillId)
+    {
+        case 78:
+        case 125:
+            return true;
+        default:
+            return false;
+    }
 }
 
 void Player::ClearPetSlotData( uint32 id )
