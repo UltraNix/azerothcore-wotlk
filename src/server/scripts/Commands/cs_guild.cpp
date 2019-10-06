@@ -38,15 +38,15 @@ public:
     {
         static std::vector<ChatCommand> guildCommandTable =
         {
-            { "create",         SEC_GAMEMASTER,     true,  &HandleGuildCreateCommand,           "" },
-            { "delete",         SEC_GAMEMASTER,     true,  &HandleGuildDeleteCommand,           "" },
-            { "invite",         SEC_GAMEMASTER,     true,  &HandleGuildInviteCommand,           "" },
-            { "uninvite",       SEC_GAMEMASTER,     true,  &HandleGuildUninviteCommand,         "" },
-            { "rank",           SEC_GAMEMASTER,     true,  &HandleGuildRankCommand,             "" }
+            { "create",         SEC_GAMEMASTER,     CMD_CLI,  &HandleGuildCreateCommand,           "" },
+            { "delete",         SEC_GAMEMASTER,     CMD_CLI,  &HandleGuildDeleteCommand,           "" },
+            { "invite",         SEC_GAMEMASTER,     CMD_CLI,  &HandleGuildInviteCommand,           "" },
+            { "uninvite",       SEC_GAMEMASTER,     CMD_CLI,  &HandleGuildUninviteCommand,         "" },
+            { "rank",           SEC_GAMEMASTER,     CMD_CLI,  &HandleGuildRankCommand,             "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "guild",          SEC_ADMINISTRATOR,  true, NULL,                                 "", guildCommandTable }
+            { "guild",          SEC_ADMINISTRATOR,  CMD_CLI, NULL,                                 "", guildCommandTable }
         };
         return commandTable;
     }

@@ -39,36 +39,36 @@ public:
     {
         static std::vector<ChatCommand> unbanCommandTable =
         {
-            { "account",        SEC_ADMINISTRATOR,  true,  &HandleUnBanAccountCommand,          "" },
-            { "character",      SEC_ADMINISTRATOR,  true,  &HandleUnBanCharacterCommand,        "" },
-            { "playeraccount",  SEC_ADMINISTRATOR,  true,  &HandleUnBanAccountByCharCommand,    "" },
-            { "ip",             SEC_ADMINISTRATOR,  true,  &HandleUnBanIPCommand,               "" }
+            { "account",        SEC_ADMINISTRATOR,  CMD_CLI,  &HandleUnBanAccountCommand,          "" },
+            { "character",      SEC_ADMINISTRATOR,  CMD_CLI,  &HandleUnBanCharacterCommand,        "" },
+            { "playeraccount",  SEC_ADMINISTRATOR,  CMD_CLI,  &HandleUnBanAccountByCharCommand,    "" },
+            { "ip",             SEC_ADMINISTRATOR,  CMD_CLI,  &HandleUnBanIPCommand,               "" }
         };
         static std::vector<ChatCommand> banlistCommandTable =
         {
-            { "account",        SEC_ADMINISTRATOR,  true,  &HandleBanListAccountCommand,        "" },
-            { "character",      SEC_ADMINISTRATOR,  true,  &HandleBanListCharacterCommand,      "" },
-            { "ip",             SEC_ADMINISTRATOR,  true,  &HandleBanListIPCommand,             "" }
+            { "account",        SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanListAccountCommand,        "" },
+            { "character",      SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanListCharacterCommand,      "" },
+            { "ip",             SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanListIPCommand,             "" }
         };
         static std::vector<ChatCommand> baninfoCommandTable =
         {
-            { "account",        SEC_ADMINISTRATOR,  true,  &HandleBanInfoAccountCommand,        "" },
-            { "character",      SEC_ADMINISTRATOR,  true,  &HandleBanInfoCharacterCommand,      "" },
-            { "ip",             SEC_ADMINISTRATOR,  true,  &HandleBanInfoIPCommand,             "" }
+            { "account",        SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanInfoAccountCommand,        "" },
+            { "character",      SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanInfoCharacterCommand,      "" },
+            { "ip",             SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanInfoIPCommand,             "" }
         };
         static std::vector<ChatCommand> banCommandTable =
         {
-            { "account",        SEC_ADMINISTRATOR,  true,  &HandleBanAccountCommand,            "" },
-            { "character",      SEC_ADMINISTRATOR,  true,  &HandleBanCharacterCommand,          "" },
-            { "playeraccount",  SEC_ADMINISTRATOR,  true,  &HandleBanAccountByCharCommand,      "" },
-            { "ip",             SEC_ADMINISTRATOR,  true,  &HandleBanIPCommand,                 "" }
+            { "account",        SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanAccountCommand,            "" },
+            { "character",      SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanCharacterCommand,          "" },
+            { "playeraccount",  SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanAccountByCharCommand,      "" },
+            { "ip",             SEC_ADMINISTRATOR,  CMD_CLI,  &HandleBanIPCommand,                 "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
-            { "ban",            SEC_ADMINISTRATOR,  true,  NULL,                                "", banCommandTable },
-            { "baninfo",        SEC_ADMINISTRATOR,  true,  NULL,                                "", baninfoCommandTable },
-            { "banlist",        SEC_ADMINISTRATOR,  true,  NULL,                                "", banlistCommandTable },
-            { "unban",          SEC_ADMINISTRATOR,  true,  NULL,                                "", unbanCommandTable }
+            { "ban",            SEC_ADMINISTRATOR,  CMD_CLI,  NULL,                                "", banCommandTable },
+            { "baninfo",        SEC_ADMINISTRATOR,  CMD_CLI,  NULL,                                "", baninfoCommandTable },
+            { "banlist",        SEC_ADMINISTRATOR,  CMD_CLI,  NULL,                                "", banlistCommandTable },
+            { "unban",          SEC_ADMINISTRATOR,  CMD_CLI,  NULL,                                "", unbanCommandTable }
         };
         return commandTable;
     }

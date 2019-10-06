@@ -37,15 +37,15 @@ public:
     {
         static std::vector<ChatCommand> commandTable =
         {
-            { "nameannounce",   SEC_GAMEMASTER,      true,   &HandleNameAnnounceCommand,         "" },
-            { "gmnameannounce", SEC_GAMEMASTER,      true,   &HandleGMNameAnnounceCommand,       "" },
-            { "announce",       SEC_GAMEMASTER,      true,   &HandleAnnounceCommand,             "" },
-            { "gmannounce",     SEC_GAMEMASTER,      true,   &HandleGMAnnounceCommand,           "" },
-            { "notify",         SEC_GAMEMASTER,      true,   &HandleNotifyCommand,               "" },
-            { "gmnotify",       SEC_GAMEMASTER,      true,   &HandleGMNotifyCommand,             "" },
-            { "whispers",       SEC_GAMEMASTER,      false,  &HandleWhispersCommand,             "" },
-            { "annhorde",       SEC_ADMINISTRATOR,  false,   &HandleAnnHordeCommand,             "" },
-            { "annalliance",    SEC_ADMINISTRATOR,  false,   &HandleAnnAllianceCommand,          "" },
+            { "nameannounce",   SEC_GAMEMASTER,      CMD_CLI,   &HandleNameAnnounceCommand,         "" },
+            { "gmnameannounce", SEC_GAMEMASTER,      CMD_CLI,   &HandleGMNameAnnounceCommand,       "" },
+            { "announce",       SEC_GAMEMASTER,      CMD_CLI,   &HandleAnnounceCommand,             "" },
+            { "gmannounce",     SEC_GAMEMASTER,      CMD_CLI,   &HandleGMAnnounceCommand,           "" },
+            { "notify",         SEC_GAMEMASTER,      CMD_CLI,   &HandleNotifyCommand,               "" },
+            { "gmnotify",       SEC_GAMEMASTER,      CMD_CLI,   &HandleGMNotifyCommand,             "" },
+            { "whispers",       SEC_GAMEMASTER,      CMD_INGAME,  &HandleWhispersCommand,             "" },
+            { "annhorde",       SEC_ADMINISTRATOR,  CMD_INGAME,   &HandleAnnHordeCommand,             "" },
+            { "annalliance",    SEC_ADMINISTRATOR,  CMD_INGAME,   &HandleAnnAllianceCommand,          "" },
         };
         return commandTable;
     }

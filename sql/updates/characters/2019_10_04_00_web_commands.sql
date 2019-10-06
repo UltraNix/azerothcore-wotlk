@@ -1,0 +1,1 @@
+CREATE TABLE web_commands (Id INT NOT NULL AUTO_INCREMENT, Command VARCHAR(255), Target INT, Source INT, Access INT, PRIMARY KEY (Id));
