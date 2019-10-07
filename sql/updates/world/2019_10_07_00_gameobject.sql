@@ -1,0 +1,1 @@
+UPDATE `gameobject` SET `spawntimesecs` = 7200 WHERE `guid` IN (100161, 100162);
