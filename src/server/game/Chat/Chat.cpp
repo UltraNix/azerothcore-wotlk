@@ -1321,7 +1321,7 @@ int CliHandler::GetSessionDbLocaleIndex() const
 
 const char* ChatHandler::GetName() const
 {
-    return m_session->GetPlayer()->GetName();
+    return m_session->GetPlayer()->GetName().c_str();
 }
 
 uint32 ChatHandler::getOwnerGuid() const
