@@ -1369,8 +1369,14 @@ class spell_pal_light_s_beacon_AuraScript : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        // Judgement of Light exception
+        if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && eventInfo.GetSpellInfo()->SpellFamilyFlags == flag96(0x0, 0x1, 0x0))
+                return false;
+
         if (GetTarget()->HasAura(SPELL_PALADIN_BEACON_OF_LIGHT, eventInfo.GetActor()->GetGUID()))
             return false;
+
         return true;
     }
 
