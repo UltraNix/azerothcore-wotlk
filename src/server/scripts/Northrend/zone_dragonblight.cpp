@@ -1933,6 +1933,10 @@ struct npc_onslaught_warhorseAI : public ScriptedAI
         _playerMounted = false;
         _knightGUID = 0;
         me->ApplySpellImmune(0, IMMUNITY_ID, 48290, false);
+        if (!me->FindNearestCreature(NPC_ONSLAUGHT_KNIGHT, 2.0f, true))
+            if (Creature* summon = me->SummonCreature(NPC_ONSLAUGHT_KNIGHT, me->GetPosition()))
+                summon->EnterVehicle(me, 0);
+       
     }
 
     void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell) override
