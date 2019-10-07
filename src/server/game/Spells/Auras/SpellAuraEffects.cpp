@@ -1791,6 +1791,23 @@ void AuraEffect::HandlePhase(AuraApplication const* aurApp, uint8 mode, bool app
 /***   UNIT MODEL   ***/
 /**********************/
 
+class DelayedStanceRestoreEvent : public BasicEvent
+{
+    public:
+        DelayedStanceRestoreEvent(Unit& owner, uint32 spellId) : BasicEvent(), _owner(owner), _spellId(spellId) { }
+
+        bool Execute(uint64 /*eventTime*/, uint32 /*diff*/) override
+        {
+            _owner.CastSpell(&_owner, _spellId, true);
+            return true;
+        }
+
+    private:
+        Unit& _owner;
+        uint32 _spellId;
+};
+
+
 void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK))
@@ -2070,6 +2087,28 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             else
                 target->ToPlayer()->removeSpell(shapeInfo->stanceSpell[i], SPEC_MASK_ALL, true);
         }
+    }
+
+    if (apply && target->getClass() == CLASS_WARRIOR && form == FORM_BATTLESTANCE || form == FORM_DEFENSIVESTANCE || form == FORM_BERSERKERSTANCE)
+        CharacterDatabase.PQuery("UPDATE characters SET lastStance=%u WHERE guid=%u", GetId(), target->GetGUIDLow());
+
+    if (!apply && target->getClass() == CLASS_WARRIOR && !target->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+    {
+        QueryResult result = CharacterDatabase.PQuery("SELECT lastStance FROM characters WHERE guid = %u", target->GetGUIDLow());
+        if (!result)
+            return;
+
+        do
+        {
+            Field* fields = result->Fetch();
+            if (!fields)
+                break;
+
+            uint32 spellId = fields[0].GetUInt32();
+            // Delay stance restore by one world tick, otherwise UI doesn't show the stance properly
+            if (spellId)
+                target->m_Events.AddEvent(new DelayedStanceRestoreEvent(*target, spellId), target->m_Events.CalculateTime(1));
+        } while (result->NextRow());
     }
 }
 
