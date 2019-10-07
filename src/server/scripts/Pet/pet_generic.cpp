@@ -1033,6 +1033,11 @@ struct npc_warl_doomguardAI : public ScriptedAI
             me->SetLevel(summoner->getLevel());
     }
 
+    void Reset() override
+    {
+        _events.Reset();
+    }
+
     void EnterCombat(Unit* /*attacker*/) override
     {
         _events.ScheduleEvent(EVENT_CRIPPLE, 1s, 10s);
