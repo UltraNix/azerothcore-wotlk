@@ -1558,6 +1558,51 @@ struct npc_oil_stained_wolfAI : public ScriptedAI
         TaskScheduler _scheduler;
 };
 
+enum DenVermin
+{
+    SPELL_TRASH     = 3391
+};
+
+struct npc_den_verminAI : public ScriptedAI
+{
+    npc_den_verminAI(Creature* creature) : ScriptedAI(creature) { }
+
+    void EnterCombat(Unit* victim) override
+    {
+        _scheduler.Schedule(5s, [&](TaskContext func)
+        {
+            if (Unit* v = me->GetVictim())
+            {
+                if (me->IsWithinMeleeRange(v))
+                {
+                    DoCastSelf(SPELL_TRASH);
+                    func.Repeat(12s);
+                }
+                else
+                    func.Repeat(3s);
+            }
+        });
+    }
+
+    void EnterEvadeMode() override
+    {
+        _scheduler.CancelAll();
+        ScriptedAI::EnterEvadeMode();
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+        _scheduler.Update(diff);
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+
 
 void AddSC_borean_tundra()
 {
@@ -1583,4 +1628,5 @@ void AddSC_borean_tundra()
     new CreatureAILoader<npc_nedarAI>("npc_nedar");
     new CreatureAILoader<npc_lunchboxAI>("npc_lunchbox");
     new CreatureAILoader<npc_oil_stained_wolfAI>("npc_oil_stained_wolf");
+    new CreatureAILoader<npc_den_verminAI>("npc_den_vermin");
 }
