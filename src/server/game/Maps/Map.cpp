@@ -1972,13 +1972,13 @@ inline bool IsOutdoorWMO(uint32 mogpFlags, int32 /*adtId*/, int32 /*rootId*/, in
     return outdoor;
 }
 
-bool Map::IsOutdoors(float x, float y, float z) const
+bool Map::IsOutdoors(uint32 phaseMask, float x, float y, float z) const
 {
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
 
     // no wmo found? -> outside by default
-    if (!GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
+    if (!GetAreaInfo(phaseMask, x, y, z, mogpFlags, adtId, rootId, groupId))
         return true;
 
     AreaTableEntry const* atEntry = 0;
@@ -1991,18 +1991,46 @@ bool Map::IsOutdoors(float x, float y, float z) const
     return IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
 }
 
-bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, int32 &rootId, int32 &groupId) const
+bool Map::GetAreaInfo(uint32 phaseMask, float x, float y, float z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const
 {
     float vmap_z = z;
+    float dynamic_z = z;
+    float check_z = z;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
+    uint32 vflags;
+    int32 vadtId;
+    int32 vrootId;
+    int32 vgroupId;
+    uint32 dflags;
+    int32 dadtId;
+    int32 drootId;
+    int32 dgroupId;
+
+    bool hasVmapAreaInfo = vmgr->getAreaInfo(GetId(), x, y, vmap_z, vflags, vadtId, vrootId, vgroupId);
+    bool hasDynamicAreaInfo = phaseMask && _dynamicTree.getAreaInfo(x, y, dynamic_z, phaseMask, dflags, dadtId, drootId, dgroupId);
+    auto useVmap = [&]() { check_z = vmap_z; flags = vflags; adtId = vadtId; rootId = vrootId; groupId = vgroupId; };
+    auto useDyn = [&]() { check_z = dynamic_z; flags = dflags; adtId = dadtId; rootId = drootId; groupId = dgroupId; };
+
+    if (hasVmapAreaInfo)
+    {
+        if (hasDynamicAreaInfo && dynamic_z > vmap_z)
+            useDyn();
+        else
+            useVmap();
+    }
+    else if (hasDynamicAreaInfo)
+    {
+        useDyn();
+    }
+
+    if (hasVmapAreaInfo || hasDynamicAreaInfo)
     {
         // check if there's terrain between player height and object height
         if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
         {
-            float _mapheight = gmap->getHeight(x, y);
+            float mapHeight = gmap->getHeight(x, y);
             // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
-            if (z + 2.0f > _mapheight &&  _mapheight > vmap_z)
+            if (z + 2.0f > mapHeight  &&  mapHeight > vmap_z)
                 return false;
         }
         return true;
@@ -2010,7 +2038,7 @@ bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, in
     return false;
 }
 
-uint32 Map::GetAreaId(float x, float y, float z, bool *isOutdoors) const
+uint32 Map::GetAreaId(float x, float y, float z, bool* isOutdoors, uint32 phaseMask) const
 {
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
@@ -2018,7 +2046,7 @@ uint32 Map::GetAreaId(float x, float y, float z, bool *isOutdoors) const
     AreaTableEntry const* atEntry = 0;
     bool haveAreaInfo = false;
 
-    if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
+    if (GetAreaInfo(phaseMask, x, y, z, mogpFlags, adtId, rootId, groupId))
     {
         haveAreaInfo = true;
         wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
@@ -2049,11 +2077,6 @@ uint32 Map::GetAreaId(float x, float y, float z, bool *isOutdoors) const
     }
 
     return areaId;
-}
-
-uint32 Map::GetAreaId(float x, float y, float z) const
-{
-    return GetAreaId(x, y, z, nullptr);
 }
 
 uint32 Map::GetZoneId(float x, float y, float z) const

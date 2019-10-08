@@ -7131,7 +7131,7 @@ void Player::CheckAreaExploreAndOutdoor()
         return;
 
     bool isOutdoor = IsOutdoors();
-    uint32 areaId = GetBaseMap()->GetAreaId(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
+    uint32 areaId = GetBaseMap()->GetAreaId(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor, GetPhaseMask());
     AreaTableEntry const* areaEntry = sAreaTableStore.LookupEntry(areaId);
 
     if (sWorld->getBoolConfig(CONFIG_VMAP_INDOOR_CHECK) && !isOutdoor)

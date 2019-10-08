@@ -26,6 +26,7 @@
 #include "Timer.h"
 #include "GameObjectModel.h"
 #include "ModelInstance.h"
+#include "MapTree.h"
 
 #include <G3D/AABox.h>
 #include <G3D/Ray.h>
@@ -237,4 +238,38 @@ float DynamicMapTree::getHeight(float x, float y, float z, float maxSearchDist, 
         return v.z - maxSearchDist;
     else
         return -G3D::inf();
+}
+
+struct DynamicTreeAreaInfoCallback
+{
+    DynamicTreeAreaInfoCallback(uint32 phaseMask) : _phaseMask(phaseMask) {}
+
+    void operator()(G3D::Vector3 const& p, GameObjectModel const& obj)
+    {
+        obj.intersectPoint(p, _areaInfo, _phaseMask);
+    }
+
+    VMAP::AreaInfo const& GetAreaInfo() const { return _areaInfo; }
+
+private:
+    uint32 _phaseMask;
+    VMAP::AreaInfo _areaInfo;
+};
+
+bool DynamicMapTree::getAreaInfo(float x, float y, float& z, uint32 phaseMask, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const
+{
+    G3D::Vector3 v(x, y, z + 0.5f);
+    DynamicTreeAreaInfoCallback intersectionCallBack(phaseMask);
+    impl->intersectPoint(v, intersectionCallBack);
+    if (intersectionCallBack.GetAreaInfo().result)
+    {
+        flags = intersectionCallBack.GetAreaInfo().flags;
+        adtId = intersectionCallBack.GetAreaInfo().adtId;
+        rootId = intersectionCallBack.GetAreaInfo().rootId;
+        groupId = intersectionCallBack.GetAreaInfo().groupId;
+        z = intersectionCallBack.GetAreaInfo().ground_Z;
+        return true;
+    }
+
+    return false;
 }

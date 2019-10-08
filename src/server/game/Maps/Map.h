@@ -345,13 +345,12 @@ class Map : public GridRefManager<NGridType>
 
         ZLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data = 0) const;
 
-        uint32 GetAreaId(float x, float y, float z, bool *isOutdoors) const;
-        bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
-        uint32 GetAreaId(float x, float y, float z) const;
+        uint32 GetAreaId(float x, float y, float z, bool* isOutdoors = nullptr, uint32 phaseMask = 0) const;
+        bool GetAreaInfo(uint32 phaseMask, float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
         uint32 GetZoneId(float x, float y, float z) const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const;
 
-        bool IsOutdoors(float x, float y, float z) const;
+        bool IsOutdoors(uint32 phaseMask, float x, float y, float z) const;
 
         uint8 GetTerrainType(float x, float y) const;
         float GetWaterLevel(float x, float y) const;

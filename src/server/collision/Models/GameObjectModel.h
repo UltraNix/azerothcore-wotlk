@@ -29,6 +29,7 @@
 namespace VMAP
 {
     class WorldModel;
+    struct AreaInfo;
 }
 
 class GameObject;
@@ -65,6 +66,7 @@ public:
     bool isEnabled() const {return phasemask != 0;}
 
     bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+    void intersectPoint(G3D::Vector3 const& point, VMAP::AreaInfo& info, uint32 phaseMask) const;
 
     static GameObjectModel* Create(const GameObject& go);
 

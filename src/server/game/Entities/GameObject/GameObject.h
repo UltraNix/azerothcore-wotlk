@@ -872,6 +872,7 @@ class GameObject : public WorldObject, public GridObject<GameObject>, public Mov
 
         void UpdateModelPosition();
         void RemoveFromOwner();
+
     protected:
         bool AIM_Initialize();
         void UpdateModel();                                 // updates model in case displayId were changed

@@ -446,7 +446,7 @@ public:
 
         if (haveVMap)
         {
-            if (map->IsOutdoors(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ()))
+            if (map->IsOutdoors(object->GetPhaseMask(), object->GetPositionX(), object->GetPositionY(), object->GetPositionZ()))
                 handler->PSendSysMessage("You are outdoors");
             else
                 handler->PSendSysMessage("You are indoors");

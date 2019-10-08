@@ -19248,7 +19248,7 @@ bool Unit::IsOutdoors() const
     else
     {
         const_cast<Position*>(&m_last_outdoors_position)->Relocate(GetPositionX(), GetPositionY(), GetPositionZ());
-        *(const_cast<bool*>(&m_last_outdoors_status)) = GetMap()->IsOutdoors(GetPositionX(), GetPositionY(), GetPositionZ());
+        *(const_cast<bool*>(&m_last_outdoors_status)) = GetMap()->IsOutdoors(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ());
         return m_last_outdoors_status;
     }
 }
