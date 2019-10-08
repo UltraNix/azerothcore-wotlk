@@ -2089,7 +2089,7 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         }
     }
 
-    if (apply && target->getClass() == CLASS_WARRIOR && form == FORM_BATTLESTANCE || form == FORM_DEFENSIVESTANCE || form == FORM_BERSERKERSTANCE)
+    if (apply && target->getClass() == CLASS_WARRIOR && (form == FORM_BATTLESTANCE || form == FORM_DEFENSIVESTANCE || form == FORM_BERSERKERSTANCE))
         CharacterDatabase.PQuery("UPDATE characters SET lastStance=%u WHERE guid=%u", GetId(), target->GetGUIDLow());
 
     if (!apply && target->getClass() == CLASS_WARRIOR && !target->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
