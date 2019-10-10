@@ -790,8 +790,13 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->SpellFamilyFlags[0] & (0x80000000 | 0x00000020)) // Retaliation and Rend exception, shouldn't proc Sweeping Strikes
-            return false;
+        if (eventInfo.GetSpellInfo())
+        {
+            if (eventInfo.GetSpellInfo()->SpellFamilyFlags[0] & (0x80000000 | 0x00000020)) // Retaliation and Rend exception, shouldn't proc Sweeping Strikes
+                return false;
+            if (eventInfo.GetSpellInfo() && (eventInfo.GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000 || eventInfo.GetSpellInfo()->SpellFamilyFlags[1] & 0x00000004) && GetTarget() && GetTarget()->HasSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1))
+                return false;
+        }
 
         _procTarget = eventInfo.GetActor()->SelectNearbyNoTotemTarget(eventInfo.GetProcTarget());
         return _procTarget;
@@ -830,7 +835,13 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
                 }
 
                 if (procDamage)
+                {
                     GetTarget()->CastCustomSpell(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1, SPELLVALUE_BASE_POINT0, procDamage, _procTarget, true, nullptr, aurEff);
+
+                    // Limit Whirlwind/Cleave to hit one target applying 1s cooldown
+                    if (eventInfo.GetSpellInfo() && (eventInfo.GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000 || eventInfo.GetSpellInfo()->SpellFamilyFlags[1] & 0x00000004))
+                        GetTarget()->AddSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1, 0, 1000);
+                }
             }
         }
     }
