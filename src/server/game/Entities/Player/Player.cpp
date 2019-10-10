@@ -25104,7 +25104,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     m_last_underwaterstate_position.Relocate(m_positionX, m_positionY, m_positionZ);
 
     if (IsMounted())
-        z + 0.5f;
+        z += 0.5f;
 
     if (!IsPositionValid()) // pussywizard: crashfix if calculated grid coords would be out of range 0-64
         return;
