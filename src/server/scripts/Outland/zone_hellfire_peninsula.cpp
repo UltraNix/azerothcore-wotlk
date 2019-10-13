@@ -976,6 +976,24 @@ class spell_demonaic_visitation_AuraScript : public AuraScript
     }
 };
 
+class spell_hellfire_peninsula_raise_dead_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_hellfire_peninsula_raise_dead_SpellScript);
+
+    SpellCastResult CheckCast()
+    {
+        if (Unit * caster = GetCaster())
+            if (!caster->m_Controlled.empty())
+                return SPELL_FAILED_ALREADY_HAVE_CHARM;
+        return SPELL_CAST_OK;
+    }
+
+    void Register()
+    {
+        OnCheckCast += SpellCheckCastFn(spell_hellfire_peninsula_raise_dead_SpellScript::CheckCast);
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     // Ours
@@ -994,4 +1012,5 @@ void AddSC_hellfire_peninsula()
     new CreatureAILoader<npc_abyssal_shelfAI>("npc_abyssal_shelf");
     new CreatureAILoader<npc_demoniac_scryerAI>("npc_demoniac_scryer");
     new AuraScriptLoaderEx<spell_demonaic_visitation_AuraScript>("spell_demonaic_visitation");
+    new SpellScriptLoaderEx<spell_hellfire_peninsula_raise_dead_SpellScript>("spell_hellfire_peninsula_raise_dead");
 }
