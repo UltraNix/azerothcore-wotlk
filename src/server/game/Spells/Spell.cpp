@@ -4261,6 +4261,17 @@ void Spell::finish(bool ok)
     // Stop Attack for some spells
     if (m_spellInfo->HasAttribute(SPELL_ATTR0_STOP_ATTACK_TARGET))
         m_caster->AttackStop();
+
+    for (auto&& targetInfo : m_UniqueTargetInfo)
+    {
+        if (targetInfo.missCondition != SPELL_MISS_NONE)
+        {
+            // Execute/Slam - show miss/dodge/parry in combat log
+            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags[0] & (0x20000000 | 0x00200000)))
+                if (Unit * target = ObjectAccessor::GetUnit(*m_caster, targetInfo.targetGUID))
+                    m_caster->SendSpellMiss(target, m_spellInfo->Id, targetInfo.missCondition);
+        }
+    }
 }
 
 void Spell::WriteCastResultInfo(WorldPacket& data, Player* caster, SpellInfo const* spellInfo, uint8 castCount, SpellCastResult result, SpellCustomErrors customError)
