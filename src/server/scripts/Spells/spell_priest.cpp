@@ -1021,17 +1021,9 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
                 if (!eventInfo.GetActionTarget() || GetOwner()->GetGUID() != eventInfo.GetActionTarget()->GetGUID())
                     return false;
 
-                if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST && (eventInfo.GetSpellInfo()->SpellFamilyFlags[2] & 0x00000440))
-                    return false;
-
-                if (eventInfo.GetTypeMask() & PROC_FLAG_KILLED)
-                {
-                    if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
-                        if (spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && (spellInfo->SpellFamilyFlags[0] & 0x00002000))
-                            return true;
-
-                    return false;
-                }
+                if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+                    if (spellInfo->SpellFamilyName != SPELLFAMILY_PRIEST || (spellInfo->SpellFamilyFlags[0] & 0x00002000) == 0)
+                        return false;
 
                 return eventInfo.GetActionTarget()->IsAlive();
             }
