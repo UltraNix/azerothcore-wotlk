@@ -13375,6 +13375,8 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
                 if (pProto && pProto->ItemSet)
                     RemoveItemsSetItem(this, pProto);
 
+                _ApplyItemMods(pItem, slot, false);
+
                 // remove item dependent auras and casts (only weapon and armor slots)
                 if (slot < EQUIPMENT_SLOT_END)
                 {
@@ -13415,7 +13417,18 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
 
             m_items[slot] = NULL;
             SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), 0);
-            _ApplyItemMods(pItem, slot, false);
+
+            // Update Melee Crit Rating after unequiping weapon
+            switch (slot)
+            {
+                case EQUIPMENT_SLOT_MAINHAND:
+                case EQUIPMENT_SLOT_OFFHAND:
+                case EQUIPMENT_SLOT_RANGED:
+                    UpdateRating(CR_CRIT_MELEE);
+                default:
+                    break;
+            }
+
 
             if (slot < EQUIPMENT_SLOT_END)
                 SetVisibleItemSlot(slot, NULL);
