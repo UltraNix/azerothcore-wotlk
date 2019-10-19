@@ -1602,6 +1602,22 @@ private:
     TaskScheduler _scheduler;
 };
 
+class spell_borean_tundra_soul_blast_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_borean_tundra_soul_blast_SpellScript);
+
+    void CalcDamage()
+    {
+        if (Unit * target = GetHitUnit())
+            SetHitDamage(target->CountPctFromMaxHealth(20));
+    }
+
+    void Register()
+    {
+        OnHit += SpellHitFn(spell_borean_tundra_soul_blast_SpellScript::CalcDamage);
+    }
+};
+
 
 
 void AddSC_borean_tundra()
@@ -1629,4 +1645,5 @@ void AddSC_borean_tundra()
     new CreatureAILoader<npc_lunchboxAI>("npc_lunchbox");
     new CreatureAILoader<npc_oil_stained_wolfAI>("npc_oil_stained_wolf");
     new CreatureAILoader<npc_den_verminAI>("npc_den_vermin");
+    new SpellScriptLoaderEx<spell_borean_tundra_soul_blast_SpellScript>("spell_borean_tundra_soul_blast");
 }
