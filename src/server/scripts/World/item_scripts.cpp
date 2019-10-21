@@ -82,29 +82,6 @@ public:
 };
 
 /*#####
-# item_nether_wraith_beacon
-#####*/
-
-class item_nether_wraith_beacon : public ItemScript
-{
-public:
-    item_nether_wraith_beacon() : ItemScript("item_nether_wraith_beacon") { }
-
-    bool OnUse(Player* player, ItemRef const& /*item*/, SpellCastTargets const& /*targets*/)
-    {
-        if (player->GetQuestStatus(10832) == QUEST_STATUS_INCOMPLETE)
-        {
-            if (Creature* nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY()+20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
-                nether->AI()->AttackStart(player);
-
-            if (Creature* nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY()-20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 180000))
-                nether->AI()->AttackStart(player);
-        }
-        return false;
-    }
-};
-
-/*#####
 # item_gor_dreks_ointment
 #####*/
 
@@ -322,7 +299,6 @@ public:
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
-    new item_nether_wraith_beacon();
     new item_gor_dreks_ointment();
     new item_incendiary_explosives();
     new item_mysterious_egg();

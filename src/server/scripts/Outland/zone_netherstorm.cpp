@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -1035,6 +1035,34 @@ private:
     EventMap _events;
 };
 
+class spell_nether_wraith_beacon_SpellScript : public SpellScript
+{
+    PrepareSpellScript(spell_nether_wraith_beacon_SpellScript);
+
+    void HandleAfterCast()
+    {
+        if (Unit * caster = GetCaster())
+        {
+            if (Player * player = caster->ToPlayer())
+            {
+                if (player->GetQuestStatus(10832) == QUEST_STATUS_INCOMPLETE)
+                {
+                    if (Creature * nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY() + 20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                        nether->AI()->AttackStart(player);
+
+                    if (Creature * nether = player->SummonCreature(22408, player->GetPositionX(), player->GetPositionY() - 20, player->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000))
+                        nether->AI()->AttackStart(player);
+                }
+            }
+        }
+    }
+
+    void Register()
+    {
+        AfterCast += SpellCastFn(spell_nether_wraith_beacon_SpellScript::HandleAfterCast);
+    }
+};
+
 void AddSC_netherstorm()
 {
     // Ours
@@ -1048,4 +1076,5 @@ void AddSC_netherstorm()
     new npc_bessy();
     new npc_maxx_a_million_escort();
     new CreatureAILoader<npc_naberiusAI>("npc_naberius");
+    new SpellScriptLoaderEx<spell_nether_wraith_beacon_SpellScript>("spell_nether_wraith_beacon");
 }
