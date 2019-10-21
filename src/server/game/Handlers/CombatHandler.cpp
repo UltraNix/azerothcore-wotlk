@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -45,6 +45,13 @@ void WorldSession::HandleAttackSwingOpcode(WorldPacket& recvData)
     }
 
     if (!_player->IsValidAttackTarget(pEnemy))
+    {
+        // stop attack state at client
+        SendAttackStop(pEnemy);
+        return;
+    }
+
+    if (pEnemy->IsCreature() && pEnemy->ToCreature()->IsInEvadeMode())
     {
         // stop attack state at client
         SendAttackStop(pEnemy);
