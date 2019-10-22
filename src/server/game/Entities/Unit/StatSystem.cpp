@@ -1085,8 +1085,8 @@ void Creature::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, 
 
     if (!CanUseAttackType(attType)) // disarm case
     {
-        weaponMinDamage = 0.0f;
-        weaponMaxDamage = 0.0f;
+        weaponMinDamage *= 0.5f;
+        weaponMaxDamage *= 0.5f;
     }
 
     // pussywizard: subtract value from database till its fixed (the way it worked before creature_levelstats damage implementation)
