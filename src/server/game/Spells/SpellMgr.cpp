@@ -4091,6 +4091,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 12868: // Deep Wounds
             spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
             break;
+        case 12834: // Deep Wounds proc aura (Rank 1)
+        case 12849: // Deep Wounds proc aura (Rank 2)
+        case 12867: // Deep Wounds proc aura (Rank 3)
+            spellInfo->EquippedItemSubClassMask |= (1 << ITEM_SUBCLASS_WEAPON_THROWN);
+            break;
         case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
             spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_HITBYSPELL | AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
             break;
