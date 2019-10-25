@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -39,10 +39,8 @@ public:
         static std::vector<ChatCommand> commandTable =
         {
             { "service",            SEC_ADMINISTRATOR,      CMD_CLI,  &HandleServiceCommand,               "" },
-            { "blizzlike",          SEC_PLAYER,             CMD_INGAME, HandleBlizzlikeCommand,              "" },
             { "pvpinfo",            SEC_PLAYER,             CMD_INGAME, HandlePvPInfoCommand,                "" },
             { "dodge",              SEC_PLAYER,             CMD_INGAME, HandleDodgeModeCommand,              "" },
-            { "hasblizzlike",       SEC_MODERATOR,          CMD_INGAME, HandleHasBlizzlikeCommand,           "" },
             { "goldban",            SEC_MODERATOR,          CMD_INGAME, &HandleGoldBanCommand,               "" },
             { "speedban",           SEC_MODERATOR,          CMD_INGAME, &HandleSpeedBanCommand,              "" },
             { "englishmute",        SEC_MODERATOR,          CMD_INGAME, &HandleEnglishMuteCommand,           "" },
@@ -51,6 +49,7 @@ public:
             { "ninjains",           SEC_GAMEMASTER,         CMD_INGAME, &HandleInsertNinjaCommand,           "" },
             { "ninjalist",          SEC_PLAYER,             CMD_INGAME, &HandleSelectNinjaCommand,           "" },
             { "ninjadel",           SEC_GAMEMASTER,         CMD_INGAME, &HandleDeleteNinjaCommand,           "" },
+            { "xp",                 SEC_PLAYER,             CMD_INGAME, &HandleXpCommand,                    ""},
         };
         return commandTable;
     }
@@ -68,7 +67,7 @@ public:
         std::string accName = aname;
         std::string serviceName;    // To display on output command and log
 
-                                    // Premium Type 
+                                    // Premium Type
         char* typeStr = strtok(nullptr, " ");
         if (!typeStr || !atoi(typeStr) && typeStr != "0")
             return false;
@@ -245,29 +244,6 @@ public:
         return true;
     }
 
-    static bool HandleBlizzlikeCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-
-        if (!player)
-            return false;
-
-        if (!player->BlizzlikeMode())
-        {
-            player->SetBlizzlikeMode(true);
-            handler->PSendSysMessage(LANG_BLIZZLIKE_ON);
-            handler->SetSentErrorMessage(true);
-        }
-        else
-        {
-            player->SetBlizzlikeMode(false);
-            handler->PSendSysMessage(LANG_BLIZZLIKE_OFF);
-            handler->SetSentErrorMessage(true);
-        }
-
-        return true;
-    }
-
     static bool HandlePvPInfoCommand(ChatHandler* handler, char const* /*args*/)
     {
         Player* player = handler->GetSession()->GetPlayer();
@@ -317,25 +293,6 @@ public:
             handler->PSendSysMessage(LANG_DODGE_OFF);
             handler->SetSentErrorMessage(true);
         }
-
-        return true;
-    }
-
-    static bool HandleHasBlizzlikeCommand(ChatHandler* handler, char const* /*args*/)
-    {
-        Player *player = handler->getSelectedPlayer();
-
-        if (!player)
-        {
-            handler->SendSysMessage(LANG_NO_CHAR_SELECTED);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        if (player->BlizzlikeMode())
-            handler->PSendSysMessage(LANG_HAS_BLIZZLIKE_ON, player->GetName().c_str());
-        else
-            handler->PSendSysMessage(LANG_HAS_BLIZZLIKE_OFF, player->GetName().c_str());
 
         return true;
     }
@@ -707,6 +664,35 @@ public:
 
         return true;
     }
+
+    static bool HandleXpCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!player)
+            return false;
+
+        if (!*args)
+        {
+            handler->PSendSysMessage(LANG_XP_RATE_INFO, player->GetXpRate());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 newXpRate = atoi(strtok((char*)args, " "));
+        if (newXpRate < 1 || newXpRate > 5)
+        {
+            handler->PSendSysMessage(LANG_XP_RATE_INFO, player->GetXpRate());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        player->SetXpRate(newXpRate);
+        handler->PSendSysMessage(LANG_XP_RATE_CHANGED, newXpRate);
+
+        return true;
+    }
+
 };
 
 void AddSC_custom_commandscript()

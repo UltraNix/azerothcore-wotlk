@@ -2690,8 +2690,8 @@ class Player : public Unit, public GridObject<Player>
         bool NeedToSaveGlyphs() { return m_NeedToSaveGlyphs; }
         void SetNeedToSaveGlyphs(bool val) { m_NeedToSaveGlyphs = val; }
 
-        bool BlizzlikeMode() { return m_BlizzlikeMode; }
-        void SetBlizzlikeMode(bool val) { m_BlizzlikeMode = val; }
+        uint32 GetXpRate() const { return m_xpRate; }
+        void SetXpRate(uint32 val) { m_xpRate = val; }
 
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
@@ -2969,7 +2969,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint16 m_requiredFish;
 
-        bool m_BlizzlikeMode;
+        uint32 m_xpRate;
         bool m_NeedAutoInvite; // @autoinvite_feature
         bool m_PvPAnnounces;
         bool m_goldSeller;     // @ChinaTown

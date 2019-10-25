@@ -942,7 +942,7 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
 
     // Ours
     m_NeedToSaveGlyphs = false;
-    m_BlizzlikeMode = false;
+    m_xpRate = 5;
     m_NeedAutoInvite = false;
     m_PvPAnnounces = true;
     m_goldSeller = false;
@@ -3317,21 +3317,27 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
     bool eventBonus = sWorld->getBoolConfig(CONFIG_EVENT_BONUS_XP);
     int8 eventMultipler = int8(sWorld->getIntConfig(CONFIG_EVENT_BONUS_MULTIPLER)) - 1;
 
-    bool IsBlizzlike = BlizzlikeMode();
+    //bool IsBlizzlike = BlizzlikeMode();
 
-    // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
-    if (premiumBonusX4 && !IsBlizzlike)
-        bonus_xp = (bgExtra ? 1.5 : 3) * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (premiumBonus && !IsBlizzlike)
-        bonus_xp = (bgExtra ? 1.5 : 2) * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (eventBonus && !IsBlizzlike)
-        bonus_xp = (bgExtra ? 1.5 : eventMultipler) * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else if (recruitAFriend && !IsBlizzlike)
-        bonus_xp = (bgExtra ? 1.5 : 2) * xp;                          // RaF does NOT stack with rested experience
-    else if (getLevel() < 70 && !IsBlizzlike)
-        bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
-    else
-        bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
+    //// xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
+    //if (premiumBonusX4 && !IsBlizzlike)
+    //    bonus_xp = (bgExtra ? 1.5 : 3) * xp + (victim ? GetXPRestBonus(xp) : 0);
+    //else if (premiumBonus && !IsBlizzlike)
+    //    bonus_xp = (bgExtra ? 1.5 : 2) * xp + (victim ? GetXPRestBonus(xp) : 0);
+    //else if (eventBonus && !IsBlizzlike)
+    //    bonus_xp = (bgExtra ? 1.5 : eventMultipler) * xp + (victim ? GetXPRestBonus(xp) : 0);
+    //else if (recruitAFriend && !IsBlizzlike)
+    //    bonus_xp = (bgExtra ? 1.5 : 2) * xp;                          // RaF does NOT stack with rested experience
+    //else if (getLevel() < 70 && !IsBlizzlike)
+    //    bonus_xp = 1 * xp + (victim ? GetXPRestBonus(xp) : 0);
+    //else
+    //    bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
+
+    if (premiumBonusX4)
+        bonus_xp = (bgExtra ? 1.5 : 9) * xp;
+    else if (m_xpRate > 1)
+        bonus_xp = (bgExtra ? 1.5 : (m_xpRate - 1) ) * xp;
+    bonus_xp += victim ? GetXPRestBonus(xp) : 0;
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
 
@@ -18653,8 +18659,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     if (m_grantableLevels > 0)
         SetByteValue(PLAYER_FIELD_BYTES, 1, 0x01);
 
-    m_BlizzlikeMode  = fields[67].GetBool();
-    m_NeedAutoInvite = fields[68].GetBool();
+    m_NeedAutoInvite = fields[67].GetBool();
+    m_xpRate  = fields[68].GetUInt32();
     m_PvPAnnounces    = fields[69].GetBool();
 
     _LoadDeclinedNames(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES));
@@ -26988,8 +26994,8 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setString(index++, ss.str());
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
-        stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
+        stmt->setUInt32(index++, m_xpRate);
         stmt->setBool(index++, m_PvPAnnounces);
     }
     else
@@ -27118,8 +27124,8 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setString(index++, ss.str());
         stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_BYTES, 2));
         stmt->setUInt32(index++, m_grantableLevels);
-        stmt->setBool(index++, m_BlizzlikeMode);
         stmt->setBool(index++, m_NeedAutoInvite);
+        stmt->setUInt32(index++, m_xpRate);
         stmt->setBool(index++, m_PvPAnnounces);
 
         stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);

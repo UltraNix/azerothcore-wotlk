@@ -1175,6 +1175,8 @@ enum TrinityStrings
     LANG_SEND_AUTOINVITE_EN                 = 11034,
     LANG_REPORT_CREATURE_CANT_REACH         = 11035,
     LANG_ANTI_HK_FARM                       = 11036,
+    LANG_XP_RATE_INFO                       = 11037,
+    LANG_XP_RATE_CHANGED                    = 11038,
 
     //                                      = 10500,
     //                                      = 10501,
