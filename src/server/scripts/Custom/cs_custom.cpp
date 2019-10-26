@@ -674,7 +674,7 @@ public:
 
         if (!*args)
         {
-            handler->PSendSysMessage(LANG_XP_RATE_INFO, player->GetXpRate());
+            DisplayXpInfo(handler);
             handler->SetSentErrorMessage(true);
             return false;
         }
@@ -682,8 +682,7 @@ public:
         uint32 newXpRate = atoi(strtok((char*)args, " "));
         if (newXpRate < 1 || newXpRate > 5)
         {
-            handler->PSendSysMessage(LANG_XP_RATE_INFO, player->GetXpRate());
-            handler->SetSentErrorMessage(true);
+            DisplayXpInfo(handler);
             return false;
         }
 
@@ -691,6 +690,23 @@ public:
         handler->PSendSysMessage(LANG_XP_RATE_CHANGED, newXpRate);
 
         return true;
+    }
+
+    static void DisplayXpInfo(ChatHandler* handler)
+    {
+        if (handler->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4))
+        {
+            handler->PSendSysMessage(LANG_XP_RATE_INFO, 10);
+            char buff[20];
+            time_t now = handler->GetSession()->GetPremiumService(PREMIUM_EXP_BOOST_X4);
+            strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
+            ChatHandler(handler->GetSession()).PSendSysMessage(LANG_SEND_PREMIUM_ACTIVE, "Experience boost", buff);
+        }
+        else
+        {
+            handler->PSendSysMessage(LANG_XP_RATE_INFO, handler->GetSession()->GetPlayer()->GetXpRate());
+            handler->PSendSysMessage(LANG_XP_RATE_INFO_2);
+        }
     }
 
 };

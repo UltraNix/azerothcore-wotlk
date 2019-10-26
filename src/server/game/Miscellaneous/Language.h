@@ -1176,7 +1176,8 @@ enum TrinityStrings
     LANG_REPORT_CREATURE_CANT_REACH         = 11035,
     LANG_ANTI_HK_FARM                       = 11036,
     LANG_XP_RATE_INFO                       = 11037,
-    LANG_XP_RATE_CHANGED                    = 11038,
+    LANG_XP_RATE_INFO_2                     = 11038,
+    LANG_XP_RATE_CHANGED                    = 11039,
 
     //                                      = 10500,
     //                                      = 10501,
