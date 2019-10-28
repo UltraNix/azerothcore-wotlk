@@ -3077,6 +3077,10 @@ void SpellMgr::LoadSpellCustomAttr()
         if (spellInfo->SpellVisual[0] == 3879)
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_CONE_BACK;
 
+        //! Area targeting buffs should ignore Line of sight checks
+        if (spellInfo->HasAttribute(SPELL_ATTR7_CONSOLIDATED_RAID_BUFF) && spellInfo->IsTargetingArea())
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+
         ApplySpellFix({ 62283, 62438, 62861, 62930, 61186 }, [](SpellInfo* spellInfo)
         {
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_REMOVE_MECHANICS;
