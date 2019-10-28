@@ -2187,7 +2187,7 @@ void World::Update(uint32 diff)
         WhoListCacheMgr::Update();
 
         sObjectMgr->UpdateItemDestroyQueue();
-        
+
         auto result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_SEL_WEB_COMMANDS));
         if (result)
         {
