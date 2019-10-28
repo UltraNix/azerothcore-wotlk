@@ -2289,17 +2289,17 @@ class Unit : public WorldObject
         void StopMoving();
         void StopMovingOnCurrentPos();
 
-        void AddUnitMovementFlag(uint32 f) { m_movementInfo.flags |= f; }
-        void RemoveUnitMovementFlag(uint32 f) { m_movementInfo.flags &= ~f; }
-        bool HasUnitMovementFlag(uint32 f) const { return (m_movementInfo.flags & f) == f; }
-        uint32 GetUnitMovementFlags() const { return m_movementInfo.flags; }
-        void SetUnitMovementFlags(uint32 f) { m_movementInfo.flags = f; }
+        void AddUnitMovementFlag(uint32 /*f*/);
+        void RemoveUnitMovementFlag(uint32 /*f*/);
+        bool HasUnitMovementFlag(uint32 /*f*/) const;
+        uint32 GetUnitMovementFlags() const;
+        void SetUnitMovementFlags(uint32 /*f*/);
 
-        void AddExtraUnitMovementFlag(uint16 f) { m_movementInfo.flags2 |= f; }
-        void RemoveExtraUnitMovementFlag(uint16 f) { m_movementInfo.flags2 &= ~f; }
-        uint16 HasExtraUnitMovementFlag(uint16 f) const { return m_movementInfo.flags2 & f; }
-        uint16 GetExtraUnitMovementFlags() const { return m_movementInfo.flags2; }
-        void SetExtraUnitMovementFlags(uint16 f) { m_movementInfo.flags2 = f; }
+        void AddExtraUnitMovementFlag(uint16 /*f*/);
+        void RemoveExtraUnitMovementFlag(uint16 /*f*/);
+        uint16 HasExtraUnitMovementFlag(uint16 /*f*/) const;
+        uint16 GetExtraUnitMovementFlags() const;
+        void SetExtraUnitMovementFlags(uint16 /*f*/);
 
         void SetControlled(bool apply, UnitState state);
         void DisableRotate(bool apply);

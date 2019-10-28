@@ -13570,6 +13570,8 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
         data.Initialize(moveTypeToOpcode[mtype][2], 8 + 30 + 4);
         data.append(GetPackGUID());
         BuildMovementPacket(&data);
+        std::cout << "GetUnitMovementFlags() : " << GetUnitMovementFlags() << std::endl;
+        std::cout << "GetUnitExtraMovementFlags() : " << GetExtraUnitMovementFlags() << std::endl;
         data << float(GetSpeed(mtype));
         SendMessageToSet(&data, false);
     }
@@ -15795,6 +15797,56 @@ void Unit::StopMovingOnCurrentPos() // pussywizard
     init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ());
     init.SetFacing(GetOrientation());
     init.Launch();
+}
+
+void Unit::AddUnitMovementFlag(uint32 flag)
+{
+    m_movementInfo.flags |= flag;
+}
+
+void Unit::RemoveUnitMovementFlag(uint32 flag)
+{
+    m_movementInfo.flags &= ~flag;
+}
+
+bool Unit::HasUnitMovementFlag(uint32 flag) const
+{
+    return (m_movementInfo.flags & flag) == flag;
+}
+
+uint32 Unit::GetUnitMovementFlags() const
+{
+    return m_movementInfo.flags;
+}
+
+void Unit::SetUnitMovementFlags(uint32 flag)
+{
+    m_movementInfo.flags = flag;
+}
+
+void Unit::AddExtraUnitMovementFlag(uint16 flag)
+{
+    m_movementInfo.flags2 |= flag;
+}
+
+void Unit::RemoveExtraUnitMovementFlag(uint16 flag)
+{
+    m_movementInfo.flags2 &= ~flag;
+}
+
+uint16 Unit::HasExtraUnitMovementFlag(uint16 flag) const
+{
+    return m_movementInfo.flags2 & flag;
+}
+
+uint16 Unit::GetExtraUnitMovementFlags() const
+{
+    return m_movementInfo.flags2;
+}
+
+void Unit::SetExtraUnitMovementFlags(uint16 f)
+{
+    m_movementInfo.flags2 = f;
 }
 
 void Unit::SendMovementFlagUpdate(bool self /* = false */)
