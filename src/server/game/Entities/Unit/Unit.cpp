@@ -13570,8 +13570,6 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate)
         data.Initialize(moveTypeToOpcode[mtype][2], 8 + 30 + 4);
         data.append(GetPackGUID());
         BuildMovementPacket(&data);
-        std::cout << "GetUnitMovementFlags() : " << GetUnitMovementFlags() << std::endl;
-        std::cout << "GetUnitExtraMovementFlags() : " << GetExtraUnitMovementFlags() << std::endl;
         data << float(GetSpeed(mtype));
         SendMessageToSet(&data, false);
     }
