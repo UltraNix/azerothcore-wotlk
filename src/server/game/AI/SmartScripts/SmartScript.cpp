@@ -551,7 +551,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     // Xinef: flag usable only if caster has max dist set
                     if ((e.action.cast.flags & SMARTCAST_COMBAT_MOVE) && GetCasterMaxDist() > 0.0f && me->GetMaxPower(GetCasterPowerType()) > 0)
                     {
-                        // Xinef: check mana case only and operate movement accordingly, LoS and range is checked in targetet movement generator
+                        // Xinef: check mana case only and operate movement accordingly, LoS and range is checked in targeted movement generator
                         if (me->GetPowerPct(GetCasterPowerType()) < 15.0f || me->HasAuraType(SPELL_AURA_MOD_SILENCE) || me->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE) ||
                             me->IsSpellProhibited(spellInfo->GetSchoolMask()))
                         {
