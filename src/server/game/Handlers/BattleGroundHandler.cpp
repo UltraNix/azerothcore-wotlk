@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -370,7 +370,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
     if (!_player->InBattlegroundQueue())
         return;
 
-    // get BattlegroundQueue for received 
+    // get BattlegroundQueue for received
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenaType);
     BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
@@ -431,6 +431,12 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
                 {
                     _player->ResurrectPlayer(1.0f);
                     _player->SpawnCorpseBones();
+                }
+
+                if (_player->IsInCombat())
+                {
+                    _player->GetSession()->SendNotification("You can't do that while in combat.");
+                    return;
                 }
 
                 // remove player from all bg queues
