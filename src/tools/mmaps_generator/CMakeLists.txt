@@ -116,10 +116,6 @@ if( WIN32 )
     )
 endif()
 
-if(WITH_VS_FOLDERS)
-set_target_properties(mmap_extractor PROPERTIES FOLDER Tools)
-endif()
-
 include_directories(${mmap_gen_Includes})
 
 add_executable(mmaps_generator ${mmap_gen_sources})
@@ -135,6 +131,10 @@ target_link_libraries(mmaps_generator
   ${BZIP2_LIBRARIES}
   ${ZLIB_LIBRARIES}
 )
+
+if(WITH_VS_FOLDERS)
+set_target_properties(mmaps_generator PROPERTIES FOLDER Tools)
+endif()
 
 if( UNIX )
   install(TARGETS mmaps_generator DESTINATION bin)

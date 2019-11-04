@@ -41,7 +41,7 @@ target_link_libraries(mapextractor
 )
 
 if(WITH_VS_FOLDERS)
-set_target_properties(map_extractor PROPERTIES FOLDER Tools)
+set_target_properties(mapextractor PROPERTIES FOLDER Tools)
 endif()
 
 if( UNIX )
