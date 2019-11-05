@@ -748,6 +748,13 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
         accountId     = playerData->accountId;
         name          = playerData->name;
     }
+    else
+    {
+        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        data << uint8(CHAR_DELETE_FAILED);
+        SendPacket(&data);
+        return;
+    }
 
     // prevent deleting other players' characters using cheating tools
     if (accountId != GetAccountId())
