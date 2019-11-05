@@ -727,6 +727,22 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
         return;
     }
 
+    if (PlayerLoading())
+    {
+        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        data << uint8(CHAR_DELETE_FAILED);
+        SendPacket(&data);
+        return;
+    }
+
+    if (PlayerDeleting())
+    {
+        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        data << uint8(CHAR_DELETE_IN_PROGRESS);
+        SendPacket(&data);
+        return;
+    }
+
     if (GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid)))
     {
         accountId     = playerData->accountId;
@@ -750,7 +766,10 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recvData)
     }
 
     sCalendarMgr->RemoveAllPlayerEventsAndInvites(guid);
+
+    m_playerDeleting = true;
     Player::DeleteFromDB(guid, GetAccountId(), true, false);
+    m_playerDeleting = false;
 
     sWorld->DeleteGlobalPlayerData(GUID_LOPART(guid), name);
     WorldPacket data(SMSG_CHAR_DELETE, 1);
@@ -888,6 +907,15 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
     if (!pCurrChar->LoadFromDB(GUID_LOPART(playerGuid), holder))
     {
         SetPlayer(NULL);
+        KickPlayer();                                       // disconnect client, player no set to session and it will not deleted or saved at kick
+        delete pCurrChar;                                   // delete it manually
+        delete holder;                                      // delete all unprocessed queries
+        m_playerLoading = false;
+        return;
+    }
+
+    if (PlayerDeleting())
+    {
         KickPlayer();                                       // disconnect client, player no set to session and it will not deleted or saved at kick
         delete pCurrChar;                                   // delete it manually
         delete holder;                                      // delete all unprocessed queries

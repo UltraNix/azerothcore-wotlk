@@ -98,7 +98,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     time_t premium_services[MAX_PREMIUM_SERVICES]):
 m_muteTime(mute_time), m_timeOutTime(0), m_GUIDLow(0), _player(NULL), m_Socket(sock),
 _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
-m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerSave(false),
+m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerDeleting(false), m_playerSave(false),
 m_sessionDbcLocale(sWorld->GetDefaultDbcLocale()),
 m_sessionDbLocaleIndex(locale),
 m_latency(0), m_clientTimeDelay(0), m_TutorialsChanged(false), recruiterId(recruiter),

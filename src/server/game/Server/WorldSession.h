@@ -225,6 +225,7 @@ class WorldSession
 
         bool PlayerLoading() const { return m_playerLoading; }
         bool PlayerLogout() const { return m_playerLogout; }
+        bool PlayerDeleting() const { return m_playerDeleting; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
 
         void ReadAddonsInfo(WorldPacket& data);
@@ -1073,6 +1074,7 @@ class WorldSession
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
         bool m_playerLogout;                                // code processed in LogoutPlayer
+        bool m_playerDeleting;
         bool m_playerSave;
         LocaleConstant m_sessionDbcLocale;
         LocaleConstant m_sessionDbLocaleIndex;
