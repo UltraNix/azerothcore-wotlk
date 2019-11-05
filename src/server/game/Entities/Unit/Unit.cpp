@@ -8861,13 +8861,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (Player* plr = ToPlayer())
             {
-                if (!victim || plr->HasSpellCooldown(16459))
+                if (!victim)
                     return false;
 
-                plr->AddSpellCooldown(16459, 0, cooldown);
-
                 if (plr->IsWithinMeleeRange(victim, MELEE_RANGE, true))
-                    plr->AttackerStateUpdate(victim, BASE_ATTACK, false, true);
+                {
+                    plr->CastSpell(victim, 16459, true, 0, triggeredByAura);
+                    plr->AddSpellCooldown(16459, 0, cooldown);
+                }
                 return true;
             }
         }
