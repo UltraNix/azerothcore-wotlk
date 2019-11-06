@@ -5042,6 +5042,11 @@ void SpellMgr::LoadDbcDataCorrections()
         case 12723:
             spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
             break;
+        // Intercept
+        case 20253:
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
+            spellInfo->SpellFamilyName = SPELLFAMILY_WARRIOR;
+            break;
 
         /////////////////////////////////
         ///// PRIEST
