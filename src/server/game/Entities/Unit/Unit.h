@@ -1607,7 +1607,7 @@ class Unit : public WorldObject
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit* victim, WeaponAttackType attType = BASE_ATTACK, bool extra = false, bool meleeSwingOnly = false);
 
-        void CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
+        void CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK, bool forceCrit = false);
         void DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss);
         void HandleProcExtraAttackFor(Unit* victim);
 

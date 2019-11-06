@@ -1303,7 +1303,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss)
 }
 
 // TODO for melee need create structure as in
-void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType)
+void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType, bool forceCrit)
 {
     damageInfo->attacker         = this;
     damageInfo->target           = victim;
@@ -1371,6 +1371,9 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
         damageInfo->damage = damage;
 
     damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
+
+    if (damageInfo->hitOutCome == MELEE_HIT_NORMAL && forceCrit)
+        damageInfo->hitOutCome = MELEE_HIT_CRIT;
 
     switch (damageInfo->hitOutCome)
     {
@@ -2224,6 +2227,12 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
     if (!victim->IsAlive())
         return;
 
+    // Hits against sitting units shouls be always a crit
+    // Must be set here, because CombatStart() clears standState
+    bool forceCrit = false;
+    if (!victim->IsStandState())
+        forceCrit = true;
+
     CombatStart(victim);
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MELEE_ATTACK);
 
@@ -2256,7 +2265,7 @@ void Unit::AttackerStateUpdate (Unit* victim, WeaponAttackType attType, bool ext
         victim = GetMeleeHitRedirectTarget(victim);
 
         CalcDamageInfo damageInfo;
-        CalculateMeleeDamage(victim, 0, &damageInfo, attType);
+        CalculateMeleeDamage(victim, 0, &damageInfo, attType, forceCrit);
         // Send log damage message to client
         Unit::DealDamageMods(victim, damageInfo.damage, &damageInfo.absorb);
         SendAttackStateUpdate(&damageInfo);
