@@ -2315,7 +2315,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit* victim, WeaponAttackT
         return MELEE_HIT_EVADE;
 
     // always crit against a sitting target
-    if (victim->IsPlayer() && !victim->IsStandState())
+    if (!victim->IsStandState())
     {
         ;//sLog->outStaticDebug ("RollMeleeOutcomeAgainst: CRIT (sitting victim)");
         return MELEE_HIT_CRIT;
@@ -11214,7 +11214,7 @@ float Unit::SpellDoneCritChance(Unit const* victim, SpellInfo const* spellProto,
         return -100.0f;
 
     // Always crit sitting targets
-    if (victim && victim->IsPlayer() && IsPlayer() && !victim->IsStandState())
+    if (victim && IsPlayer() && !victim->IsStandState())
         return 100.0f;
 
     // not critting spell
