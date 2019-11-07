@@ -38,12 +38,15 @@
 #include "ServiceWin32.h"
 extern int m_ServiceStatus;
 #endif
+#include "Config.h"
 
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
     uint32 realCurrTime = 0;
     uint32 realPrevTime = getMSTime();
+
+    uint32 networkDelay = getMSTime() + sConfigMgr->GetIntDefault( "Network.DelayedStart", 0 );
 
     sScriptMgr->OnStartup();
 
@@ -72,6 +75,11 @@ void WorldRunnable::run()
             while (m_ServiceStatus == 2)
                 Sleep(1000);
         #endif
+
+        if ( networkDelay < realCurrTime )
+        {
+            World::m_isReady = true;
+        }
     }
 
 	sLog->SetLogDB(false);

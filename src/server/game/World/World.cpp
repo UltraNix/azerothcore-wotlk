@@ -94,6 +94,8 @@
 #include "WorldCache.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
+ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_isReady = false;
+
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 uint32 World::m_worldLoopCounter = 0;
 uint32 World::m_gameMSTime = 0;

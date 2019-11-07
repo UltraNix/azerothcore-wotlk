@@ -2887,6 +2887,12 @@ Network.OutUBuff = 65536
 Network.TcpNodelay = 1
 
 #
+#    Network.DelayedStart:
+#        Description: Delay network activation by N milliseconds
+
+Network.DelayedStart = 5000
+
+#
 ###################################################################################################
 
 ###################################################################################################

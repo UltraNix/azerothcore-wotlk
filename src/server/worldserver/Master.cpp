@@ -57,6 +57,9 @@ extern int m_ServiceStatus;
 #define PROCESS_HIGH_PRIORITY -15 // [-20, 19], default is 0
 #endif
 
+#include <thread>
+#include <chrono>
+
 /// Handle worldservers's termination signals
 class WorldServerSignalHandler : public Trinity::SignalHandler
 {
@@ -168,7 +171,8 @@ int Master::Run()
     //handle.register_handler(SIGSEGV, &signalSEGV);
 
     ///- Launch WorldRunnable thread
-    ACE_Based::Thread worldThread(new WorldRunnable);
+
+    ACE_Based::Thread worldThread( new WorldRunnable );
     worldThread.setPriority(ACE_Based::Highest);
 
     ACE_Based::Thread* cliThread = NULL;
@@ -257,6 +261,9 @@ int Master::Run()
     
 #endif
 #endif
+
+    while ( !World::IsReady() && !World::IsStopped() )
+        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 
     // Start soap serving thread
     ACE_Based::Thread* soapThread = NULL;

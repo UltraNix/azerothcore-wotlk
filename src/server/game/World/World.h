@@ -675,6 +675,7 @@ class World
 {
     public:
         static uint32 m_worldLoopCounter;
+        static ACE_Atomic_Op<ACE_Thread_Mutex, bool> m_isReady;
 
         World();
         ~World();
@@ -803,7 +804,9 @@ class World
         void ShutdownMsg(bool show = false, Player* player = NULL);
         static uint8 GetExitCode() { return m_ExitCode; }
         static void StopNow(uint8 exitcode) { m_stopEvent = true; m_ExitCode = exitcode; }
+
         static bool IsStopped() { return m_stopEvent.value(); }
+        static bool IsReady() { return m_isReady.value(); }
 
         void Update(uint32 diff);
 
