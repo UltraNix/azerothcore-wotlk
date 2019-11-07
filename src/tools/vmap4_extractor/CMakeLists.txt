@@ -27,7 +27,7 @@ include_directories(${include_Dirs})
 add_executable(vmap4extractor ${sources})
 
 if(WITH_VS_FOLDERS)
-set_target_properties(vmap_extractor PROPERTIES FOLDER Tools)
+set_target_properties(vmap4extractor PROPERTIES FOLDER Tools)
 endif()
 
 target_link_libraries(vmap4extractor
