@@ -265,9 +265,6 @@ int Master::Run()
     while ( !World::IsReady() && !World::IsStopped() )
         std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 
-    // set server online (allow connecting now)
-    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_OFFLINE, realmID);
-
     // Start soap serving thread
     ACE_Based::Thread* soapThread = NULL;
     if (sConfigMgr->GetBoolDefault("SOAP.Enabled", false))
@@ -309,6 +306,8 @@ int Master::Run()
         // go down and shutdown the server
     }
 
+    // set server online (allow connecting now)
+    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_OFFLINE, realmID);
     sLog->outString("%s (worldserver-daemon) ready...", _FULLVERSION);
 
     // when the main thread closes the singletons get unloaded
