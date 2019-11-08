@@ -150,7 +150,7 @@ int Master::Run()
         return 1;
 
     // set server offline (not connectable)
-    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = (flag & ~%u) | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, REALM_FLAG_INVALID, realmID);
+    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, realmID);
 
     ///- Initialize the World
     sWorld->SetInitialWorldSettings();
@@ -265,6 +265,9 @@ int Master::Run()
     while ( !World::IsReady() && !World::IsStopped() )
         std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 
+    // set server online (allow connecting now)
+    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_OFFLINE, realmID);
+
     // Start soap serving thread
     ACE_Based::Thread* soapThread = NULL;
     if (sConfigMgr->GetBoolDefault("SOAP.Enabled", false))
@@ -305,9 +308,6 @@ int Master::Run()
         World::StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
     }
-
-    // set server online (allow connecting now)
-    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, realmID);
 
     sLog->outString("%s (worldserver-daemon) ready...", _FULLVERSION);
 
