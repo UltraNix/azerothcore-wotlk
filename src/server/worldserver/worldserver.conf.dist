@@ -1604,6 +1604,7 @@ Warden.ClientResponseDelay = 600
 #    Warden.ClientCheckHoldOff
 #        Description: Time (in seconds) to wait before sending the next check request to the client.
 #                     A low number increases traffic and load on client and server side.
+#                     (THIS SHARES TIMER WITH WARDEN LUA!)
 #        Default:     30 - (30 Seconds)
 #                     0  - (Send check as soon as possible)
 
@@ -1629,7 +1630,9 @@ Warden.ClientCheckFailAction = 2
 
 Warden.BanDuration = 259200
 
+
 #
+
 ###################################################################################################
 
 ###################################################################################################
@@ -3937,13 +3940,13 @@ AntiWintrading.MinDMG = 3000
 AntiWintrading.MinHealing = 3000
 
 ###################################################################################################
-
+# Honorablekill farming detection
+#
 #
 #   AntiHkFarm.Enable
 #      Description: Notifies GMs about possible Hk/Honor farmers
 #      Default:  0 - (Disabled)
 #                1 - (Enabled)
-#
 
 AntiHkFarm.Enable = 1
 
@@ -3962,3 +3965,47 @@ AntiHkFarm.Count = 10
 #
 
 AntiHkFarm.Expire = 600000
+
+
+###################################################################################################
+# Webhook relay
+#
+#    WebhookRelay.Enable
+#        Description: Initializes system which relays data to specified webhooks
+#        Default: 0
+
+WebhookRelay.Enable = 0
+
+#    WebhookRelay.NumThreads
+#        Description: How many threads should webrelay use
+#        Default: 1
+
+WebhookRelay.NumThreads = 1
+
+###################################################################################################
+# Warden lua checks
+#
+#    WardenLua.Enable
+#        Default: Disabled (0)
+
+WardenLua.Enabled = 1
+
+#    WardenParser.NumThreads
+#        Description: Number of threads to parse warden strings that client returns to us
+#        Default: 1 
+
+WardenParser.NumThreads = 1
+
+#    WardenLuaGenerator.NumThreads
+#        Description: Number of threads used to generate formatted lua strings
+#        Default: 1    
+
+WardenLuaGenerator.NumThreads = 1
+
+#    WardenLua.RequestTimeout
+#        Description: Time (in minutes) for a check timeout.
+#        Default: 1 minutes
+
+WardenLua.CheckTimeout = 1
+
+# Timer for sending checks is in non-lua warden settings (Warden.ClientCheckHoldOff)

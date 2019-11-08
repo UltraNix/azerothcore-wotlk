@@ -28,8 +28,10 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   add_subdirectory(zlib)
 endif()
 
+add_subdirectory(fmt)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)
+add_subdirectory(cpr)
 
 if(SERVERS)
   add_subdirectory(gsoap)

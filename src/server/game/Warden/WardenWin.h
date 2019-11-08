@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -83,6 +83,8 @@ class WardenWin : public Warden
         void HandleHashResult(ByteBuffer &buff);
         void RequestData();
         void HandleData(ByteBuffer &buff);
+        bool ExecuteLuaCheck(WardenRequest /*request*/);
+        bool ExecuteMandatoryLuaChecks(std::string& /*senderFunctionName*/);
 
     private:
         uint32 _serverTicks;

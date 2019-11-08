@@ -528,3 +528,24 @@ std::string ByteArrayToHexStr(uint8 const* bytes, uint32 arrayLen, bool reverse 
 
     return ss.str();
 }
+
+std::string GenerateRandomIdentifier(size_t length, std::string const& charset)
+{
+    auto randomchar = [&charset]() -> char
+    {
+        return charset[urand(0, charset.size() - 1)];
+    };
+
+    std::string string(length, 0);
+    std::generate_n(string.begin(), length, randomchar);
+
+    return string;
+}
+
+std::string GenerateRandomIdentifier(size_t length, std::function<char(void)>& randomCharacter)
+{
+    std::string string(length, 0);
+    std::generate_n(string.begin(), length, randomCharacter);
+
+    return string;
+}

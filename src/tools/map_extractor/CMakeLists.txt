@@ -16,6 +16,7 @@ set(include_Dirs
     ${CMAKE_SOURCE_DIR}/dep/libmpq
     ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
     ${CMAKE_SOURCE_DIR}/dep/google
+    ${CMAKE_SOURCE_DIR}/dep/fmt
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/loadlib
 )

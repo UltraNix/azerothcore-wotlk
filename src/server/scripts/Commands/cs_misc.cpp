@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -47,7 +47,7 @@ class misc_commandscript : public CommandScript
 public:
     misc_commandscript() : CommandScript("misc_commandscript") { }
 
-    std::vector<ChatCommand> GetCommands() const 
+    std::vector<ChatCommand> GetCommands() const
     {
         static std::vector<ChatCommand> groupCommandTable =
         {
@@ -2989,7 +2989,7 @@ public:
                 return true;
             }
         }
- 
+
         handler->SendSysMessage(LANG_COMMAND_FREEZE_WRONG);
         return true;
     }
@@ -3463,7 +3463,7 @@ public:
 
     static bool HandleBuffCommand(ChatHandler* handler, char const* args)
     {
-        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM)) 
+        if (!sWorld->getBoolConfig(CONFIG_PTR_REALM))
             return false;
 
         Player* player = handler->GetSession()->GetPlayer();

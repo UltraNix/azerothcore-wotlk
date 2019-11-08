@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -125,6 +125,7 @@ enum LoginDatabaseStatements
     LOGIN_SEL_MUTE_HISTORY,
     LOGIN_SEL_VPN,
     LOGIN_SEL_LAST_IP_BY_ACCOUNT,
+    LOGIN_SEL_REALM_NAME,
 
     MAX_LOGINDATABASE_STATEMENTS
 };

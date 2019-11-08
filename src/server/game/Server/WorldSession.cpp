@@ -44,7 +44,10 @@
 #include "ScriptMgr.h"
 #include "Transport.h"
 #include "WardenWin.h"
-#include "WardenMac.h"
+//#include "WardenMac.h"
+#include "WorldRelay/WorldRelay.hpp"
+
+//#include "WorldCache.h"
 #include "SavingSystem.h"
 
 namespace {
@@ -106,7 +109,6 @@ isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
 
-    _warden = NULL;
     _offlineTime = 0;
     _kicked = false;
     _shouldSetOfflineInDB = true;
@@ -126,6 +128,277 @@ isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0
     }
 
     InitializeQueryCallbackParameters();
+    InitializeWarden();
+}
+
+void WorldSession::InitializeWarden()
+{
+    _warden = nullptr;
+
+    //** Sending lua code to the client **/
+    _sendLuaCode = false;
+    _wardenScheduler.CancelAll();
+    _wardenScheduler.ClearValidator();
+    _luaCheckIDs = sWorldCache.GetLuaCheckIDs();
+    _mandatoryLuaCheckIDs = sWorldCache.GetLuaCheckIDs(true);
+    _SendAddonMessageFunctionPrefix = GenerateRandomIdentifier(4, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    //! Shuffle so client A has different order of checks sent than client B
+    Trinity::Containers::RandomShuffle(_luaCheckIDs);
+    _luaResult.Invalidate();
+}
+
+void WorldSession::OnWardenInitialized()
+{
+    //! this iterates over sent lua requests and looks for timed out requests
+    //! when client answers with proper prefix, it will get cleared from this u_map
+    _wardenScheduler.Schedule(Seconds(sWorld->getIntConfig(CONFIG_WARDEN_LUA_CHECK_TIMEOUT)), WARDEN_SCHEDULER_GROUP_TIMEOUTS, [this](TaskContext func)
+    {
+        CheckLuaRequests();
+        func.Repeat();
+    });
+
+    _warden->RequestData();
+
+    /**
+        when warden fully initializes and sets module information within the client then this function is fired.
+        session initializes and sets _sendLuaCheck to false, first turn is non-lua warden.
+        Warden class prepares checks and fires them and awaits data. Now, that may take a while but we HAVE to wait.
+        If client doesnt answer then after config specified value session will be kicked, so nothing to worry here.
+        When client sends back warden data opcode with header 0x02, we will parse that data and after parsing is done, we will signal
+        that our turn has ended.
+        ( server warden -> initialization send to the client -> onInitialized ->
+          send cheat checks -> .. await data .. -> data received -> parse data -> inform session that our turn ended via OnWardenCycleFinished
+          and everything else will be handled by that function. This fires one, we need it this way so we know warden is fully initialized
+
+        and we switch _sendLuaCheck to true, we will execute our lua code on the client via warden.
+        Now, we prepare our lua promise and we have to wait till its done because its handled on different thread
+        so we use _wardenScheduler, which will update till _luaResult is valid and ready.
+        Now we have to lock data parsing when client sends back data with 0x02 packet, because that packet containts
+        garbage information, that we have no need for (because we return data via Addon channel).
+        We might send multiple lua codes in one cycle so we will get multiple 0x02 packets, we have to lock the parsing
+        till its non-lua warden turn.
+    **/
+}
+
+void WorldSession::OnWardenCycleFinished()
+{
+    auto sendTimer = std::chrono::seconds(sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_CHECK_HOLDOFF));
+    _wardenScheduler.Schedule(sendTimer, WARDEN_SCHEDULER_GROUP_SENDER, [this](TaskContext /*func*/)
+    {
+        //! Okay, cycle finished - set _sendLuaCheck to opposite
+        //! if its lua turn, we will ask for our code and wait till it's prepared
+        _sendLuaCode = GetPlayer() ? !_sendLuaCode : false;
+
+        if (!_sendLuaCode)
+            _warden->RequestData();
+        else
+        {
+            //! Ask Threaded lua generator for our lua promise
+            PrepareLuaCheck();
+            _wardenScheduler.Schedule(5s, WARDEN_SCHEDULER_GROUP_SENDER, [this](TaskContext func)
+            {
+                if (_luaResult.IsValid() && _luaResult.IsReady())
+                    SendLuaCheck();
+                else
+                    func.Repeat();
+            });
+        }
+    });
+}
+
+void WorldSession::InitWarden(BigNumber* k, std::string const& os)
+{
+    if (os == "Win")
+    {
+        _warden = new WardenWin();
+        _warden->Init(this, k);
+    }
+    else if (os == "OSX")
+    {
+        // Disabled as it is causing the client to crash
+        // _warden = new WardenMac();
+        // _warden->Init(this, k);
+    }
+}
+
+void WorldSession::PrepareLuaCheck()
+{
+    uint32 checkId = 0;
+
+    if (!_mandatoryLuaCheckIDs.empty())
+    {
+        checkId = _mandatoryLuaCheckIDs.back();
+        _mandatoryLuaCheckIDs.pop_back();
+    }
+    else
+    {
+        checkId = _luaCheckIDs.front();
+        RotateLuaCheckIDs();
+    }
+
+    RequestData data;
+    data._checkId = checkId;
+    data._playerName = GetPlayer() ? GetPlayer()->GetName() : "Player none";
+    if (GetPlayer())
+        data._playerPosition = GetPlayer()->GetPosition();
+    data._playerGUIDLow = m_GUIDLow;
+    data._addonMessageFunctionPrefix = _SendAddonMessageFunctionPrefix;
+
+    _luaResult = std::move(GetLuaGenerator().RequestLuaCode(data));
+}
+
+void WorldSession::SendLuaCheck()
+{
+    sLog->outStaticDebug("** Entering Send Lua Request (accId: %u CharacterGuid %u).", GetAccountId(), GetGuidLow());
+
+    if (!_warden)
+        return;
+
+    WardenRequest _request = _luaResult.GetPreparedWardenRequest();
+    OnWardenCycleFinished();
+
+    //! This has to be before sending actual lua checks.
+    //! Player might be loading/not in world while that check is sending and ExecuteMandatoryLuaChecks or ExecuteLuaCheck
+    //! and that will cause send to stop (ui has to be setup for checks to work)
+    switch (_request.GetType())
+    {
+        case WARDEN_LUA_ADDON_SENDER_CREATION:
+            _mandatoryLuaCodes.push_back(_request.GetLuaCode());
+            return;
+        case WARDEN_LUA_FRAME_CREATION:
+        {
+            _luaFramePrefix = _request.GetPrefix();
+            _luaFrameBody = _request.GetBody();
+            _mandatoryLuaCodes.push_back(_request.GetLuaCode());
+            return;
+        }
+        default:
+            break;
+    }
+
+    //! Frames or substitutes for functions
+    //! make sure to write proper if logic for the code, so it doesnt create new objects
+    //! when previous one is not null. We have to send those checks each cycle
+    //! some of normal lua checks depends on them.
+    //! ie. we create custom function for SendAddonMessage (random generated for each session)
+    //! because cheats can bypass our checks if they find SendAddonMessage in it
+    if (_mandatoryLuaCheckIDs.empty()) // if all mandatory checks were sent already at least once
+    {
+        for (auto && code : _mandatoryLuaCodes)
+        {
+            if (!_warden->ExecuteMandatoryLuaChecks(code))
+                return;
+        }
+    }
+
+    if (!_warden->ExecuteLuaCheck(_request))
+    {
+        _luaResult.Invalidate();
+        return;
+    }
+
+    if (_request.GetType() == WARDEN_LUA_TRAP)
+        _wardenClientTraps.insert(std::make_pair(_request.GetPrefix(), std::move(_request)));
+    else
+    {
+        //! This will add it to queue as normal pong request
+        //! if client sends response, it will contain correct prefix and body
+        //! and we know it's clean.
+        //! If client doesn't answer our check it means our custom FrameScript wasnt triggered
+        //! hence functions do not return errors - client is unlocked.
+        //! those checks have high chance for false-positive, because those errors can
+        //! be triggered by user input or his addons
+        if (_request.GetType() == WARDEN_LUA_PONG_2)
+        {
+            _request.SetPrefix(_luaFramePrefix);
+            _request.SetBody(_luaFrameBody);
+        }
+
+        _wardenRequests.insert(std::make_pair(_request.GetPrefix(), std::move(_request)));
+    }
+}
+
+//! We may have duplicates, but if we find one then we can erase all of them
+//! we dont have to handle each request individually
+//! the chance that NON-FRAME checks will be duplicated, is very very low
+//! so we can accept that
+WardenRequest* WorldSession::GetLuaRequest(std::string const& key)
+{
+    auto const itr = _wardenRequests.find(key);
+    return itr != _wardenRequests.end() ? &itr->second : nullptr;
+}
+
+WardenRequest* WorldSession::GetLuaTrapRequest(std::string const& key)
+{
+    auto const itr = _wardenClientTraps.find(key);
+    return itr != _wardenClientTraps.end() ? &itr->second : nullptr;
+}
+
+void WorldSession::ClearPongRequest(std::string const& key)
+{
+    sLog->outStaticDebug("Erasing warden lua request, request prefix key: %s", key.c_str());
+    _wardenRequests.erase(key);
+}
+
+void WorldSession::HandleCheckFailure(uint32 checkId, bool timeout)
+{
+    sLog->outStaticDebug("Entering HandleCheckFailure. CheckId (%u), AccountId (%u)", checkId, GetAccountId());
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WARDEN_CHECK_FAILURE);
+
+    //! 0 - accountId, 1 - CharacterGuid, 2 - CharacterName, 3 - FailedCheck, 4 - FailureDate
+    stmt->setUInt32(0, GetAccountId());
+    stmt->setUInt32(1, GetGuidLow());
+    stmt->setString(2, GetPlayer() ? GetPlayer()->GetName() : "");
+
+    std::string _checkFailure = "Failed check: " + std::to_string(checkId);
+    if (timeout)
+        _checkFailure.append(" due to timeout.");
+    stmt->setString(3, _checkFailure);
+    stmt->setUInt64(4, time(nullptr));
+    CharacterDatabase.Execute(stmt);
+}
+
+void WorldSession::CheckLuaRequests()
+{
+    std::vector<WardenRequestStore::key_type> eraser;
+    for (auto && it : _wardenRequests)
+    {
+        WardenTimeStamp end = WardenClock::now();
+        uint32 timeCount = std::chrono::duration_cast<Milliseconds>(end - it.second.GetTimeStamp()).count();
+
+        if (timeCount >= sWorld->getIntConfig(CONFIG_WARDEN_LUA_CHECK_TIMEOUT) * MINUTE * IN_MILLISECONDS)
+        {
+            HandleCheckFailure(it.second.GetCheckId(), true);
+
+            RelayData data;
+            data.accountId = GetAccountId();
+            data.playerGUID = GetGuidLow();
+            data.playerName = it.second.GetPlayerName();
+            Position pos = it.second.GetPosition();
+            data.playerPosition = pos;
+            data.checkId = it.second.GetCheckId();
+            data._cheatDescription = it.second.GetDescription();
+            data.falsePositiveChance = it.second.GetFalsePositiveChance();
+            data.message = " due to timeout.";
+
+            GetRelay().Add(std::make_pair(TYPE_LUA_CHECK_FAILURE, data));
+
+            eraser.emplace_back(it.second.GetPrefix());
+        }
+    }
+
+    for (auto&& iter : eraser)
+        ClearPongRequest(iter);
+}
+
+void WorldSession::UpdateWardenScheduler(uint32 diff)
+{
+    _wardenScheduler.Update(diff);
+}
+
+bool WorldSession::CanUpdateWarden() const
+{
+    return _warden && m_Socket && !m_Socket->IsClosed();
 }
 
 /// WorldSession destructor
@@ -140,17 +413,17 @@ WorldSession::~WorldSession()
     {
         m_Socket->CloseSocket();
         m_Socket->RemoveReference();
-        m_Socket = NULL;
+        m_Socket = nullptr;
     }
 
     if (_warden)
     {
         delete _warden;
-        _warden = NULL;
+        _warden = nullptr;
     }
 
     ///- empty incoming packet queue
-    WorldPacket* packet = NULL;
+    WorldPacket* packet = nullptr;
     while (_recvQueue.next(packet))
         delete packet;
 
@@ -160,7 +433,7 @@ WorldSession::~WorldSession()
 
 std::string const & WorldSession::GetPlayerName() const
 {
-    return _player != NULL ? _player->GetName() : DefaultPlayerName;
+    return _player != nullptr ? _player->GetName() : DefaultPlayerName;
 }
 
 std::string WorldSession::GetPlayerInfo() const
@@ -232,7 +505,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 
 void ReportMalformedPacket( WorldPacket* packet, const std::string& address, uint32 accountId )
 {
-    sLog->outError( "WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.", packet->GetOpcode(), address.c_str(), accountId );
+    sLog->outError("WorldSession::Update ByteBufferException occured while parsing a packet (opcode: %u) from client %s, accountid=%i. Skipped packet.", packet->GetOpcode(), address.c_str(), accountId);
     if ( sLog->IsOutDebug() )
     {
         sLog->outDebug( LOG_FILTER_NETWORKIO, "Dumping error causing packet:" );
@@ -254,8 +527,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     {
         if (GetPlayer() && GetPlayer()->IsInWorld())
         {
-            _mailSendTimer.Update(diff);
-            if (_mailSendTimer.Passed())
+            if (_mailSendTimer.Update(diff))
             {
                 SendExternalMails();
                 _mailSendTimer.Reset(sWorld->getIntConfig(CONFIG_EXTERNAL_MAIL_INTERVAL) * MINUTE * IN_MILLISECONDS);
@@ -401,7 +673,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         if (ShouldLogOut(currTime) && !m_playerLoading)
             LogoutPlayer(true);
 
-        if (m_Socket && !m_Socket->IsClosed() && _warden)
+        if (CanUpdateWarden())
             _warden->Update();
 
         if (m_Socket && m_Socket->IsClosed())
@@ -1130,6 +1402,11 @@ void WorldSession::SetPlayer(Player* player)
         m_GUIDLow = _player->GetGUIDLow();
 }
 
+void WorldSession::RotateLuaCheckIDs()
+{
+    std::rotate(_luaCheckIDs.begin(), _luaCheckIDs.begin() + 1, _luaCheckIDs.end());
+}
+
 void WorldSession::InitializeQueryCallbackParameters()
 {
     // Callback parameters that have pointers in them should be properly
@@ -1262,21 +1539,6 @@ void WorldSession::ProcessQueryCallbackLogin()
         _charLoginCallback.get(param);
         HandlePlayerLoginFromDB((LoginQueryHolder*)param);
         _charLoginCallback.cancel();
-    }
-}
-
-void WorldSession::InitWarden(BigNumber* k, std::string const& os)
-{
-    if (os == "Win")
-    {
-        _warden = new WardenWin();
-        _warden->Init(this, k);
-    }
-    else if (os == "OSX")
-    {
-        // Disabled as it is causing the client to crash
-        // _warden = new WardenMac();
-        // _warden->Init(this, k);
     }
 }
 

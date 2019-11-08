@@ -17,7 +17,7 @@ file(GLOB_RECURSE sources_AuctionHouse AuctionHouse/*.cpp AuctionHouse/*.h)
 file(GLOB_RECURSE sources_Battlefield Battlefield/*.cpp Battlefield/*.h)
 file(GLOB_RECURSE sources_Battlegrounds Battlegrounds/*.cpp Battlegrounds/*.h)
 file(GLOB_RECURSE sources_Calendar Calendar/*.cpp Calendar/*.h)
-file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h)
+file(GLOB_RECURSE sources_Chat Chat/*.cpp Chat/*.h Chat/*.hpp)
 file(GLOB_RECURSE sources_Combat Combat/*.cpp Combat/*.h)
 file(GLOB_RECURSE sources_Conditions Conditions/*.cpp Conditions/*.h)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
@@ -48,6 +48,8 @@ file(GLOB_RECURSE sources_Texts Texts/*.cpp Texts/*.h)
 file(GLOB_RECURSE sources_Tools Tools/*.cpp Tools/*.h)
 file(GLOB_RECURSE sources_Tickets Tickets/*.cpp Tickets/*.h)
 file(GLOB_RECURSE sources_Warden Warden/*.cpp Warden/*.h)
+file(GLOB_RECURSE sources_WardenParser WardenParser/*.cpp WardenParser/*.h WardenParser/*.hpp)
+file(GLOB_RECURSE sources_WorldRelay WorldRelay/*.cpp WorldRelay/*.hpp)
 file(GLOB_RECURSE sources_Weather Weather/*.cpp Weather/*.h)
 file(GLOB_RECURSE sources_World World/*.cpp World/*.h)
 file(GLOB_RECURSE sources_ArenaSpectator ArenaSpectator/*.cpp ArenaSpectator/*.h)
@@ -102,7 +104,9 @@ set(game_STAT_SRCS
   ${sources_Tools}
   ${sources_Tickets}
   ${sources_Warden}
+  ${sources_WardenParser}
   ${sources_Weather}
+  ${sources_WorldRelay}
   ${sources_World}
   ${sources_ArenaSpectator}
   ${sources_Misc}
@@ -114,9 +118,12 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Recast
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/dep/google
+  ${CMAKE_SOURCE_DIR}/dep/fmt
   ${CMAKE_SOURCE_DIR}/dep/SFMT
   ${CMAKE_SOURCE_DIR}/dep/zlib
   ${CMAKE_SOURCE_DIR}/dep/utf8cpp
+  ${CMAKE_SOURCE_DIR}/dep/JsonParser
+  ${CPR_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/src/server/collision
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
   ${CMAKE_SOURCE_DIR}/src/server/collision/Models
@@ -203,6 +210,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Tools
   ${CMAKE_CURRENT_SOURCE_DIR}/Tickets
   ${CMAKE_CURRENT_SOURCE_DIR}/Warden
+  ${CMAKE_CURRENT_SOURCE_DIR}/WardenParser
   ${CMAKE_CURRENT_SOURCE_DIR}/Warden/Modules
   ${CMAKE_CURRENT_SOURCE_DIR}/Weather
   ${CMAKE_CURRENT_SOURCE_DIR}/World
@@ -220,6 +228,8 @@ add_library(game STATIC
   ${game_STAT_SRCS}
   ${game_STAT_PCH_SRC}
 )
+
+target_link_libraries(game fmt)
 
 add_dependencies(game revision.h)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -105,4 +105,5 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_MUTE_HISTORY, "SELECT characterName, muteReason, muteBy, minutes, DATE_FORMAT(mute_date, '%Y-%m-%d | %T') FROM account_mute_history WHERE account_id = ? AND RealmID = ? ORDER BY mute_date DESC", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_VPN, "SELECT vpnIp FROM vpn_list WHERE vpnActive = 1", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_LAST_IP_BY_ACCOUNT, "SELECT last_ip FROM account where id = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_REALM_NAME, "SELECT name FROM realmlist WHERE `id` = ?", CONNECTION_SYNCH);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -110,6 +110,9 @@ enum WorldDatabaseStatements
     WORLD_INS_DISABLES,
     WORLD_DEL_DISABLES,
     WORLD_SEL_HELLFORGE_STAT,
+    WORLD_SEL_WARDEN_LUA_CHECKS,
+    WORLD_SEL_RELAY_ADDRESSES,
+    WORLD_SEL_JSON_STRINGS,
     MAX_WORLDDATABASE_STATEMENTS
 };
 

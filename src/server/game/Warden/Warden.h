@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -46,12 +46,14 @@ enum WardenOpcodes
 
 enum WardenCheckType
 {
+    //! This allows to send strings as well
     MEM_CHECK               = 0xF3, // 243: byte moduleNameIndex + uint Offset + byte Len (check to ensure memory isn't modified)
     PAGE_CHECK_A            = 0xB2, // 178: uint Seed + byte[20] SHA1 + uint Addr + byte Len (scans all pages for specified hash)
     PAGE_CHECK_B            = 0xBF, // 191: uint Seed + byte[20] SHA1 + uint Addr + byte Len (scans only pages starts with MZ+PE headers for specified hash)
     MPQ_CHECK               = 0x98, // 152: byte fileNameIndex (check to ensure MPQ file isn't modified)
-    LUA_STR_CHECK           = 0x8B, // 139: byte luaNameIndex (check to ensure LUA string isn't used)
+    LUA_STR_CHECK           = 0x8B, // 139: byte luaNameIndex (check to ensure -> GLOBAL <- LUA string isn't used)
     DRIVER_CHECK            = 0x71, // 113: uint Seed + byte[20] SHA1 + byte driverNameIndex (check to ensure driver isn't loaded)
+    //! Im pretty sure that wasnt used on 3.3.5a
     TIMING_CHECK            = 0x57, //  87: empty (check to ensure GetTickCount() isn't detoured)
     PROC_CHECK              = 0x7E, // 126: uint Seed + byte[20] SHA1 + byte moluleNameIndex + byte procNameIndex + uint Offset + byte Len (check to ensure proc isn't detoured)
     MODULE_CHECK            = 0xD9, // 217: uint Seed + byte[20] SHA1 (check to ensure module isn't injected)
@@ -116,6 +118,8 @@ class Warden
         virtual void HandleHashResult(ByteBuffer &buff) = 0;
         virtual void RequestData() = 0;
         virtual void HandleData(ByteBuffer &buff) = 0;
+        virtual bool ExecuteLuaCheck(WardenRequest /*request*/) { return false; }
+        virtual bool ExecuteMandatoryLuaChecks(std::string& /*senderFunctionName*/) { return false; }
 
         void SendModuleToClient();
         void RequestModule();
@@ -131,16 +135,18 @@ class Warden
 
     private:
         WorldSession* _session;
+        ClientWardenModule* _module;
+
+        ARC4 _inputCrypto;
+        ARC4 _outputCrypto;
+
         uint8 _inputKey[16];
         uint8 _outputKey[16];
         uint8 _seed[16];
-        ARC4 _inputCrypto;
-        ARC4 _outputCrypto;
-        uint32 _checkTimer;                          // Timer for sending check requests
         uint32 _clientResponseTimer;                 // Timer for client response delay
-        bool _dataSent;
         uint32 _previousTimestamp;
-        ClientWardenModule* _module;
+
+        bool _dataSent;
         bool _initialized;
 };
 

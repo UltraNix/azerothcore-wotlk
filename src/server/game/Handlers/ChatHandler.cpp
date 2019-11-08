@@ -42,6 +42,10 @@
 #include "AccountMgr.h"
 #include "ChinaTown.h"
 #include "utf8.h"
+#include "ThreadedWardenParser.hpp"
+
+#include <cctype>
+#include <algorithm>
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
 {
@@ -250,6 +254,26 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             recvData >> msg;
             ignoreChecks = true;
             break;
+    }
+
+    ///! our warden scans return data via addon channel
+    ///! and it uses chat_msg_whisper only
+    if (type == CHAT_MSG_WHISPER && lang == LANG_ADDON && !msg.empty())
+    {
+        WardenParserWin::Requestee who;
+        who.accountId = GetAccountId();
+        who.characterGUID = GetGuidLow();
+        WardenParserWin::GetWardenParser().AddMessage(who, msg);
+
+        bool const IsLuaCheckReceiver = to.size() == 3 && std::any_of(to.begin(), to.end(), [](const char letter)
+        {
+            return std::isdigit(letter);
+        });
+
+        //! if its invalid player name then client will display
+        //! (player doesnt exist), so return silently to avoid that
+        if (IsLuaCheckReceiver)
+            return;
     }
 
     // Strip invisible characters for non-addon messages

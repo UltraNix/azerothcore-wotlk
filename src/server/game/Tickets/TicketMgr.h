@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -95,7 +95,7 @@ public:
     uint32 GetId() const { return _id; }
     Player* GetPlayer() const { return ObjectAccessor::FindPlayerInOrOutOfWorld(_playerGuid); }
     std::string const& GetPlayerName() const { return _playerName; }
-    std::string const& GetMessage() const { return _message; }
+    std::string const& GetTicketMessage() const { return _message; }
     Player* GetAssignedPlayer() const { return ObjectAccessor::FindPlayerInOrOutOfWorld(_assignedTo); }
     uint64 GetAssignedToGUID() const { return _assignedTo; }
     std::string GetAssignedToName() const
@@ -120,7 +120,7 @@ public:
             _escalatedStatus = TICKET_ASSIGNED;
     }
     void SetClosedBy(int64 value) { _closedBy = value; }
-    void SetCompleted() { _completed = true; }
+    void SetCompleted(uint64 completedBy);
     void SetMessage(std::string const& message)
     {
         _message = message;

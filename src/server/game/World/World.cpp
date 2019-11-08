@@ -90,8 +90,12 @@
 #include "SavingSystem.h"
 #include "CustomEventMgr.h"
 #include "ThreadedPathGenerator.hpp"
+#include "ThreadedWardenParser.hpp"
+#include "ThreadedWardenGenerator.hpp"
 #include "FollowMovementGenerator.hpp"
 #include "WorldCache.h"
+#include "WorldRelay/WorldRelay.hpp"
+#include "fmt/format.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_isReady = false;
@@ -123,6 +127,10 @@ World::World()
     m_NextMonthlyQuestReset = 0;
     m_NextRandomBGReset = 0;
     m_NextGuildReset = 0;
+    m_sessions.clear();
+    m_offlineSessions.clear();
+    m_disconnects.clear();
+    m_QueuedPlayer.clear();
 
     m_defaultDbcLocale = LOCALE_enUS;
 
@@ -949,7 +957,6 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_MAX_ALLOWED_MMR_DROP] = sConfigMgr->GetIntDefault("MaxAllowedMMRDrop", 500); // pussywizard
     m_bool_configs[CONFIG_ENABLE_LOGIN_AFTER_DC] = sConfigMgr->GetBoolDefault("EnableLoginAfterDC", true); // pussywizard
     m_bool_configs[CONFIG_DONT_CACHE_RANDOM_MOVEMENT_PATHS] = sConfigMgr->GetBoolDefault("DontCacheRandomMovementPaths", true); // pussywizard
-    SetRealmName(sConfigMgr->GetStringDefault("RealmName", "X"));
     SetRevision(sConfigMgr->GetIntDefault("Revision", 0));
 
     m_int_configs[CONFIG_SKILL_CHANCE_ORANGE] = sConfigMgr->GetIntDefault("SkillChance.Orange", 100);
@@ -1423,6 +1430,15 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTI_HK_FARM_COUNT] = sConfigMgr->GetIntDefault("AntiHkFarm.Count", 10);
     m_int_configs[CONFIG_ANTI_HK_FARM_EXPIRE] = sConfigMgr->GetIntDefault("AntiHkFarm.Expire", 600000);
 
+    /* World Relay */
+    m_bool_configs[CONFIG_ENABLE_WEBHOOK_RELAY] = sConfigMgr->GetBoolDefault("WebhookRelay.Enable", false);
+    m_int_configs[CONFIG_WORLD_RELAY_NUMTHREADS] = sConfigMgr->GetIntDefault("WebhookRelay.NumThreads", 1);
+    // Warden Lua checks
+    m_int_configs[CONFIG_WARDEN_PARSER_NUMTHREADS] = sConfigMgr->GetIntDefault("WardenParser.NumThreads", 1);
+    m_bool_configs[CONFIG_ENABLE_WARDEN_LUA_CHECKS] = sConfigMgr->GetBoolDefault("WardenLua.Enabled", false);
+    m_int_configs[CONFIG_WARDEN_LUA_CHECK_TIMEOUT] = sConfigMgr->GetIntDefault("WardenLua.CheckTimeout", 1);
+    m_int_configs[CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS] = sConfigMgr->GetIntDefault("WardenLuaGenerator.NumThreads", 1);
+
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -1490,6 +1506,17 @@ void World::SetInitialWorldSettings()
     uint32 realm_zone = getIntConfig(CONFIG_REALM_ZONE);
 
     LoginDatabase.PExecute("UPDATE realmlist SET icon = %u, timezone = %u WHERE id = '%d'", server_type, realm_zone, realmID);      // One-time query
+
+    PreparedStatement* realmNameStmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALM_NAME);
+    realmNameStmt->setUInt32(0, realmID);
+    PreparedQueryResult realmNameResult = LoginDatabase.Query(realmNameStmt);
+    if (!realmNameResult)
+        ASSERT(false);
+    else
+    {
+        Field* fields = realmNameResult->Fetch();
+        SetRealmName(fields[0].GetString());
+    }
 
     ///- Remove the bones (they should not exist in DB though) and old corpses after a restart
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_OLD_CORPSES);
@@ -2043,6 +2070,29 @@ void World::SetInitialWorldSettings()
     sLog->outString("Load hellforge boss stats...");
     sWorldCache.LoadHellforgeBossValues();
 
+    if (m_bool_configs[CONFIG_ENABLE_WEBHOOK_RELAY])
+    {
+        GetRelay().LoadRelayAddresses();
+        GetRelay().LoadJsonStrings();
+        GetRelay().InitializeRelay(size_t(m_int_configs[CONFIG_WORLD_RELAY_NUMTHREADS]));
+    }
+
+    if (m_bool_configs[CONFIG_ENABLE_WARDEN_LUA_CHECKS])
+    {
+        sLog->outString("Load warden lua checks...");
+        sWorldCache.LoadWardenLuaChecks();
+
+        uint32 parserNumThreads = m_int_configs[CONFIG_WARDEN_PARSER_NUMTHREADS];
+        sLog->outString(">> Initializing warden parser, using %d threads.", parserNumThreads);
+        WardenParserWin::GetWardenParser().Initialize(parserNumThreads);
+
+        uint32 luaGeneratorNumThreads = m_int_configs[CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS];
+        sLog->outString(">> Initializaing warden lua generator, using %d threads.", luaGeneratorNumThreads);
+        GetLuaGenerator().Initialize(luaGeneratorNumThreads);
+
+        CleanupWardenDatabase();
+    }
+
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog->outString();
     sLog->outError("WORLD: World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
@@ -2083,8 +2133,6 @@ void World::DetectDBCLang()
     sLog->outString("Using %s DBC Locale as default. All available DBC locales: %s", localeNames[GetDefaultDbcLocale()], availableLocalsStr.empty() ? "<none>" : availableLocalsStr.c_str());
     sLog->outString();
 }
-
-
 
 void World::LoadAutobroadcasts()
 {
@@ -2807,6 +2855,55 @@ bool World::PatchNotes(ContentPatches patchSince, ContentPatches patchTo) const
     return getIntConfig(CONFIG_CURRENT_BUILD) >= uint32(patchSince) && getIntConfig(CONFIG_CURRENT_BUILD) <= uint32(patchTo);
 }
 
+void World::CleanupWardenDatabase()
+{
+    uint32 count = 0;
+    uint32 removedCount = 0;
+    time_t _curTime = time(nullptr);
+    uint64 twoMonths = uint64(_curTime - (2 * MONTH));
+    uint64 threeMonths = uint64(_curTime - (3 * MONTH));
+
+    //! get amount of rows that are 2 months old and younger than 3 months
+    PreparedStatement* expiring = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WARDEN_CHECKS_COUNT);
+    expiring->setUInt64(0, (uint64)twoMonths);
+    expiring->setUInt64(1, (uint64)threeMonths);
+
+    PreparedQueryResult result = CharacterDatabase.Query(expiring);
+    if (result)
+    {
+        Field* fields = result->Fetch();
+        count = fields[0].GetUInt64();
+    }
+
+    //! get amount of rows that are 3 months old
+    PreparedStatement* expired = CharacterDatabase.GetPreparedStatement(CHAR_SEL_WARDEN_CHECKS_OLD_COUNT);
+    expired->setUInt64(0, threeMonths);
+
+    result = CharacterDatabase.Query(expired);
+    if (result)
+    {
+        Field* fields = result->Fetch();
+        removedCount = fields[0].GetUInt64();
+    }
+
+    //! delete 3 months old+ rows
+    PreparedStatement* remove = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WARDEN_CHECKS_TOO_OLD);
+    remove->setUInt64(0, threeMonths);
+    CharacterDatabase.Execute(remove);
+
+    std::string _unformattedMessage = "Analysis of warden_lua_failure for realm: {} \\n"
+        "* Found {} rows older than 2 months and younger than 3 m onths.\\n"
+        "* Removed {} rows that were at least 3 months old.";
+
+    RelayData data;
+    data.message = fmt::format(_unformattedMessage,
+        sWorld->GetRealmName(),
+        count,
+        removedCount);
+
+    GetRelay().Add(std::make_pair(TYPE_LUA_FAILURES_INFORM, data));
+}
+
 /// Update the game time
 void World::_UpdateGameTime()
 {
@@ -2972,6 +3069,8 @@ void World::UpdateSessions(uint32 diff)
                 pSession->SetShouldSetOfflineInDB(false);
             delete pSession;
         }
+        else
+            pSession->UpdateWardenScheduler(diff);
     }
 
     // pussywizard:

@@ -23,6 +23,7 @@
 #include "Errors.h"
 
 #include <algorithm>
+#include <functional>
 #include <random>
 #include <string>
 #include <vector>
@@ -345,6 +346,8 @@ std::string GetAddressString(ACE_INET_Addr const& addr);
 uint32 CreatePIDFile(const std::string& filename);
 
 std::string ByteArrayToHexStr(uint8 const* bytes, uint32 length, bool reverse = false);
+std::string GenerateRandomIdentifier(size_t /*length*/, std::string const& /*charset*/);
+std::string GenerateRandomIdentifier(size_t /*length*/, std::function<char(void)>& /*randomCharacter*/);
 #endif
 
 //handler for operations on large flags

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -27,6 +27,7 @@
 #include "World.h"
 #include "Player.h"
 #include "Opcodes.h"
+#include "WorldRelay/WorldRelay.hpp"
 
 inline float GetAge(uint64 t) { return float(time(nullptr) - t) / DAY; }
 
@@ -207,6 +208,23 @@ void GmTicket::SetUnassigned()
     }
 }
 
+void GmTicket::SetCompleted(uint64 completedBy)
+{
+    _completed = true;
+
+    if (Player * closedBy = sObjectAccessor->FindPlayer(completedBy))
+    {
+        //! relay to webhooks
+        RelayData data;
+        data.playerName = GetPlayerName();
+        data.ticketClosedBy = closedBy->GetName();
+        data.ticketId = GetId();
+
+        RelayRequest request{ TYPE_TICKETS_CLOSED, data };
+        GetRelay().Add(request);
+    }
+}
+
 void GmTicket::SetPosition(uint32 mapId, float x, float y, float z)
 {
     _mapId = mapId;
@@ -339,6 +357,34 @@ void TicketMgr::AddTicket(GmTicket* ticket)
         ++_openTicketCount;
     SQLTransaction trans = SQLTransaction(NULL);
     ticket->SaveToDB(trans);
+
+    //! relay to webhooks
+    if (Player* player = ticket->GetPlayer())
+    {
+        RelayData data;
+        data.message = ticket->GetTicketMessage();
+        data.playerName = ticket->GetPlayerName();
+        data.ticketId = ticket->GetId();
+        data.playerClass = player->getClass();
+        data.playerRace = player->getRace();
+        data.playerLevel = player->getLevel();
+        data.playerArea = "Unknown";
+        data.playerZone = "Unknown";
+        data.playerGUID = player->GetGUIDLow();
+        data.accountId = player->GetSession()->GetAccountId();
+
+        AreaTableEntry const* area = sAreaTableStore.LookupEntry(player->GetAreaId());
+        if (area)
+        {
+            data.playerArea = area->area_name[0];
+            AreaTableEntry const* zone = sAreaTableStore.LookupEntry(area->zone);
+            if (zone)
+                data.playerZone = zone->area_name[0];
+        }
+
+        RelayRequest request{ TYPE_TICKETS_NEW, data };
+        GetRelay().Add(request);
+    }
 }
 
 void TicketMgr::CloseTicket(uint32 ticketId, int64 source)
@@ -350,6 +396,21 @@ void TicketMgr::CloseTicket(uint32 ticketId, int64 source)
         if (source)
             --_openTicketCount;
         ticket->SaveToDB(trans);
+
+        if (!ticket->IsCompleted())
+        {
+            if (Player* closedBy = sObjectAccessor->FindPlayer(source))
+            {
+                //! relay to webhooks
+                RelayData data;
+                data.playerName = ticket->GetPlayerName();
+                data.ticketClosedBy = closedBy->GetName();
+                data.ticketId = ticket->GetId();
+
+                RelayRequest request{ TYPE_TICKETS_CLOSED, data };
+                GetRelay().Add(request);
+            }
+        }
     }
 }
 

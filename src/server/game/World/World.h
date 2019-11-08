@@ -203,6 +203,9 @@ enum WorldBoolConfigs
     CONFIG_LOG_CREATURE_CANT_REACH,           // Notifies GMs when some creature can't reach player and stands still
     CONFIG_CHAIN_PULL_ENABLED,
     CONFIG_ANTI_HK_FARM_ENABLE,
+    CONFIG_ENABLE_WEBHOOK_RELAY,
+    CONFIG_ENABLE_WARDEN_LUA_CHECKS,
+    CONFIG_ENABLE_WARDEN_LUA_CLEANUP,         // Cleans up warden_lua_failures table on world start-up
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -425,6 +428,11 @@ enum WorldIntConfigs
     CONFIG_CHAIN_PULL_TIMER,
     CONFIG_ANTI_HK_FARM_COUNT,
     CONFIG_ANTI_HK_FARM_EXPIRE,
+    CONFIG_WARDEN_PARSER_NUMTHREADS,
+    CONFIG_WORLD_RELAY_NUMTHREADS,
+    CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS,
+    CONFIG_WARDEN_LUA_CHECK_TIMEOUT,
+    CONFIG_WARDEN_LUA_CHECK_SEND_TIMER,
     INT_CONFIG_VALUE_COUNT
 };
 
@@ -940,6 +948,7 @@ class World
         bool IsPhasedDuelsZone(uint32 zone) const { if (m_phasedDuelsZones.empty()) return true; return std::find(m_phasedDuelsZones.begin(), m_phasedDuelsZones.end(), zone) != m_phasedDuelsZones.end(); }
 
         bool PatchNotes(ContentPatches patchSince = PATCH_MIN, ContentPatches patchTo = PATCH_MAX) const; // Maczuga
+        void CleanupWardenDatabase();
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

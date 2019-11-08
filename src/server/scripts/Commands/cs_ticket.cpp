@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -234,7 +234,10 @@ public:
             ticket->SendResponse(player->GetSession());
 
         SQLTransaction trans = SQLTransaction(NULL);
-        ticket->SetCompleted();
+        if (Player * player = handler->GetSession()->GetPlayer())
+            ticket->SetCompleted(player->GetGUID());
+        else
+            ticket->SetCompleted(0);
         ticket->SaveToDB(trans);
 
         sTicketMgr->UpdateLastChange();
