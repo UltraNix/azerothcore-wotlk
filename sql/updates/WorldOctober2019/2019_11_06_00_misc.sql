@@ -7,8 +7,8 @@ UPDATE `smart_scripts` SET `event_param3` = 65000, `event_param4` = 70000 WHERE 
 UPDATE `creature_template` SET `speed_run` = 2 WHERE `entry` = 32178;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = 31139 AND `id` IN (2,3);
 INSERT INTO `smart_scripts` VALUES
-(31139, 0, 2, 0, 0, 0, 100, 0, 3000, 5000, 3000, 7000, 0, 11, 28405, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Pustulent Horror - IC - Cast Knock Back'),
-(31139, 0, 3, 0, 0, 0, 100, 0, 4000, 6000, 5000, 9000, 0, 11, 63546, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Pustulent Horror - IC - Cast Stomp');
+(31139, 0, 2, 0, 0, 0, 100, 0, 3000, 5000, 3000, 7000, 11, 28405, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Pustulent Horror - IC - Cast Knock Back'),
+(31139, 0, 3, 0, 0, 0, 100, 0, 4000, 6000, 5000, 9000, 11, 63546, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Pustulent Horror - IC - Cast Stomp');
 UPDATE `smart_scripts` SET `target_type` = 7 WHERE `entryorguid` = 31692 AND `id` = 4;
 UPDATE `smart_scripts` SET `link` = 7 WHERE `entryorguid` = 31692 AND `id` = 6;
 
