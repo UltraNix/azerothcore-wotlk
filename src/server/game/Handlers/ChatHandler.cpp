@@ -67,7 +67,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
     //sLog->outDebug("CHAT: packet received. type %u, lang %u", type, lang);
 
     // pussywizard: chatting on most chat types requires 2 hours played to prevent spam/abuse
-    if (AccountMgr::IsPlayerAccount(GetSecurity()))
+    //! Riztazz: but not for addon messages, it might break addons and our warden lua sender
+    if (AccountMgr::IsPlayerAccount(GetSecurity()) && lang != LANG_ADDON)
+    {
         switch (type)
         {
             case CHAT_MSG_ADDON:
@@ -91,6 +93,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                     return;
                 }
         }
+    }
 
     // Angrathar: Newbie gamemasters doesn't have permissions to speak on public channels.
     if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR) && AccountMgr::IsModeratorAccount(GetSecurity()))
@@ -112,11 +115,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
         case CHAT_MSG_TEXT_EMOTE:
         case CHAT_MSG_AFK:
         case CHAT_MSG_DND:
+        {
             if (sender->IsSpectator())
             {
                 recvData.rfinish();
                 return;
             }
+        }
     }
 
     // prevent talking at unknown language (cheating)
@@ -127,6 +132,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
         recvData.rfinish();
         return;
     }
+
     if (langDesc->skill_id != 0 && !sender->HasSkill(langDesc->skill_id))
     {
         // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
@@ -140,6 +146,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 break;
             }
         }
+
         if (!foundAura)
         {
             SendNotification(LANG_NOT_LEARNED_LANGUAGE);
