@@ -13680,6 +13680,10 @@ bool Unit::CanHaveThreatList() const
     if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(((Pet*)this)->GetOwnerGUID()))
         return false;
 
+    // evading creatures can not have threat list
+    if (ToCreature()->IsInEvadeMode())
+        return false;
+
     return true;
 }
 
