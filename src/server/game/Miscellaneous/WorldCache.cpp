@@ -116,6 +116,8 @@ void WorldCache::LoadWardenLuaChecks()
         check._checkType = _type;
         check._description = field[3].GetString();
         check._falsePositiveProbability = field[4].GetString();
+        if (!field[5].GetBool())
+            _disabledRelayCheckIDs.push_back(checkId);
 
         if (_type == WARDEN_LUA_FRAME_CREATION || _type == WARDEN_LUA_ADDON_SENDER_CREATION)
             _wardenLuaMandatoryCheckIDs.push_back(checkId);
@@ -142,3 +144,39 @@ std::vector<uint32> WorldCache::GetLuaCheckIDs(bool mandatory)
 
     return _wardenLuaCheckIDs;
 }
+
+bool WorldCache::CanRelayLuaResult(uint32 checkId)
+{
+    return std::find(_disabledRelayCheckIDs.begin(), _disabledRelayCheckIDs.end(), checkId) == _disabledRelayCheckIDs.end();
+}
+
+void WorldCache::ReloadLuaResultDisables()
+{
+    _disabledRelayCheckIDs.clear();
+    uint32 oldMSTime = getMSTime();
+
+    auto* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_WARDEN_LUA_CHECK_STATUS);
+    auto result = WorldDatabase.Query(stmt);
+
+    if (!result)
+    {
+        sLog->outString(">> Loaded 0 warden lua check statuses. Table is empty!");
+        sLog->outString();
+        return;
+    }
+
+    do
+    {
+        WardenLuaCheck check;
+        Field* field = result->Fetch();
+        uint32 checkId = field[0].GetUInt32();
+        bool ShouldRelay = field[1].GetBool();
+
+        if (!ShouldRelay)
+            _disabledRelayCheckIDs.push_back(checkId);
+    } while (result->NextRow());
+
+    sLog->outString(">> Loaded warden lua check statuses in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
+}
+

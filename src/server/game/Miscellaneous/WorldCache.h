@@ -53,6 +53,9 @@ public:
     void LoadWardenLuaChecks();
     WardenLuaCheck const* GetWardenCheckFor(uint32 const& /*id*/);
     std::vector<uint32> GetLuaCheckIDs(bool mandatory = false);
+    //! checks whether relaying information to webhooks for that checkId is enabled
+    bool CanRelayLuaResult(uint32 checkId);
+    void ReloadLuaResultDisables();
 private:
     WorldCache() { }
 
@@ -60,6 +63,7 @@ private:
     HellforgeStats _hellforgeStatValues;
 
     WardenLuaStore _wardenLuaChecksPool;
+    std::vector<uint32> _disabledRelayCheckIDs;
     std::vector<uint32> _wardenLuaCheckIDs;
     std::vector<uint32> _wardenLuaMandatoryCheckIDs;
 

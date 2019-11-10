@@ -103,17 +103,20 @@ namespace WardenParserWin
                             request->GetCheckId(), session->GetAccountId(), _body.c_str(), request->GetBody().c_str());
                 }
 
-                RelayData data;
-                data.accountId = session->GetAccountId();
-                data.playerGUID = request->GetGUIDLow();
-                data.playerName = request->GetPlayerName();
-                data.playerPosition = request->GetPosition();
-                data.checkId = request->GetCheckId();
-                data._cheatDescription = request->GetDescription();
-                data.falsePositiveChance = request->GetFalsePositiveChance();
+                if (sWorldCache.CanRelayLuaResult(request->GetCheckId()))
+                {
+                    RelayData data;
+                    data.accountId = session->GetAccountId();
+                    data.playerGUID = request->GetGUIDLow();
+                    data.playerName = request->GetPlayerName();
+                    data.playerPosition = request->GetPosition();
+                    data.checkId = request->GetCheckId();
+                    data._cheatDescription = request->GetDescription();
+                    data.falsePositiveChance = request->GetFalsePositiveChance();
 
-                session->HandleCheckFailure(request->GetCheckId(), false);
-                GetRelay().Add( std::make_pair((IsTrapMessage ? TYPE_LUA_TRAP_FAILURE : TYPE_LUA_CHECK_FAILURE), data) );
+                    session->HandleCheckFailure(request->GetCheckId(), false);
+                    GetRelay().Add(std::make_pair((IsTrapMessage ? TYPE_LUA_TRAP_FAILURE : TYPE_LUA_CHECK_FAILURE), data));
+                }
             }
 
             //! Erase request, client answered. We do not need to keep track of it anymore

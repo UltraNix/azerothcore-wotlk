@@ -152,7 +152,8 @@ public:
             { "waypoint_data",                SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadWpCommand,                         "" },
             { "vehicle_accessory",            SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadVehicleAccessoryCommand,           "" },
             { "vehicle_template_accessory",   SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadVehicleTemplateAccessoryCommand,   "" },
-            { "hellforge_boss_stats",         SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadHellforgeBossStatsCommand,        "" }
+            { "hellforge_boss_stats",         SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadHellforgeBossStatsCommand,         "" },
+            { "lua_result_relay_status",      SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadLuaResultRelayStatusCommand,       "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1125,8 +1126,15 @@ public:
     static bool HandleReloadHellforgeBossStatsCommand(ChatHandler* handler, const char* /*args*/)
     {
         sLog->outString("Reloading hellforge boss stats table...");
-        WorldCache::GetInstance().LoadHellforgeBossValues();
+        sWorldCache.LoadHellforgeBossValues();
         handler->SendGlobalGMSysMessage("Hellforge boss stats reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadLuaResultRelayStatusCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        sWorldCache.ReloadLuaResultDisables();
+        handler->SendGlobalGMSysMessage("Warden lua relay disables reloaded.");
         return true;
     }
 };

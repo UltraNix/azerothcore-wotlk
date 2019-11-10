@@ -126,7 +126,7 @@ public:
             { "unbindsight",        SEC_ADMINISTRATOR,      CMD_INGAME, HandleUnbindSightCommand,            "" },
             { "playall",            SEC_GAMEMASTER,         CMD_INGAME, HandlePlayAllCommand,                "" },
             { "skirmish",           SEC_ADMINISTRATOR,      CMD_INGAME, HandleSkirmishCommand,               "" },
-            { "mailbox",            SEC_ADMINISTRATOR,      CMD_INGAME, &HandleMailBoxCommand,               "" },      
+            { "mailbox",            SEC_ADMINISTRATOR,      CMD_INGAME, &HandleMailBoxCommand,               "" },
             { "unstuck",            SEC_PLAYER,             CMD_INGAME, HandleUnstuckCommand,                "" },
             { "eventgo",            SEC_PLAYER,             CMD_INGAME, &HandleEventGoCommand,               "" },
             { "hide",               SEC_PLAYER,             CMD_INGAME, HandleSthHideCommand,                "" },
@@ -136,7 +136,7 @@ public:
             { "mutehistory",        SEC_GAMEMASTER,         CMD_INGAME, &HandleMuteHistoryCommand,           "" },
             { "gmhelp",             SEC_MODERATOR,          CMD_INGAME, &HandleGmhelpCommand,                "" },
             { "blockinvite",        SEC_PLAYER,             CMD_INGAME, HandleBlockInviteCommand,            "" },
-            { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,              ""},
+            { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,                "" }
         };
         return commandTable;
     }

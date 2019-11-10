@@ -89,7 +89,8 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_SEL_DISABLES, "SELECT entry FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_DEL_DISABLES, "DELETE FROM disables WHERE entry = ? AND sourceType = ?", CONNECTION_ASYNC);
     PrepareStatement(WORLD_SEL_HELLFORGE_STAT, "SELECT StatId, StatValue, StatVariance FROM hellforge_boss_stats", CONNECTION_SYNCH);
-    PrepareStatement(WORLD_SEL_WARDEN_LUA_CHECKS, "SELECT CheckId, LuaCode, CheckType, Description, FalsePositiveChance FROM warden_lua_checks", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_WARDEN_LUA_CHECKS, "SELECT CheckId, LuaCode, CheckType, Description, FalsePositiveChance, ShouldRelay FROM warden_lua_checks", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_WARDEN_LUA_CHECK_STATUS, "SELECT CheckId, ShouldRelay FROM warden_lua_checks", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_RELAY_ADDRESSES, "SELECT RelayType, RelayAddress FROM world_relay_addresses", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_JSON_STRINGS, "SELECT RelayType, JsonString from world_relay_json_strings", CONNECTION_SYNCH);
 }
