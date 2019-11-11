@@ -13680,10 +13680,6 @@ bool Unit::CanHaveThreatList() const
     if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(((Pet*)this)->GetOwnerGUID()))
         return false;
 
-    // evading creatures can not have threat list
-    if (ToCreature()->IsInEvadeMode())
-        return false;
-
     return true;
 }
 
@@ -13703,6 +13699,10 @@ float Unit::ApplyTotalThreatModifier(float fThreat, SpellSchoolMask schoolMask)
 
 void Unit::AddThreat(Unit* victim, float fThreat, SpellSchoolMask schoolMask, SpellInfo const* threatSpell)
 {
+    // evading creatures can not have threat list
+    if (IsCreature() && ToCreature()->IsInEvadeMode())
+        return;
+
     // Only mobs can manage threat lists
     if (CanHaveThreatList())
         m_ThreatManager.addThreat(victim, fThreat, schoolMask, threatSpell);
