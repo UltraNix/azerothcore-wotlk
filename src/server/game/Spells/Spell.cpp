@@ -5248,6 +5248,9 @@ void Spell::HandleThreatSpells()
 
     for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
+        if (ihit->missCondition == SPELL_MISS_EVADE)
+            continue;
+
         float threatToAdd = threat;
         if (ihit->missCondition != SPELL_MISS_NONE)
             threatToAdd = 0.0f;
