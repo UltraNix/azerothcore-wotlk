@@ -1373,7 +1373,6 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_SPECIAL_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharSpecial.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS_ANNOUNCES] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Announces.Enable", false);
-    m_int_configs[CONFIG_CALENDAR_KEEP_DAYS] = sConfigMgr->GetIntDefault("Calendar.KeepDays", 0);
     m_bool_configs[CONFIG_CHINA_TOWN] = sConfigMgr->GetBoolDefault("ChinaTown.Enable", false);
     m_int_configs[CONFIG_CHINA_TOWN_TIMER] = sConfigMgr->GetIntDefault("ChinaTown.Spam.Timer", 10);
 
@@ -1935,13 +1934,17 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading SmartAI scripts...");
     sSmartScriptMgr->LoadSmartAIFromDB();
 
-    // Sitowsky
-    if (getIntConfig(CONFIG_CALENDAR_KEEP_DAYS) != 0)
+    sLog->outString("Deleting calendar data that is at least 1 month old...");
+
+    auto calendarDeleteCount = CharacterDatabase.PQuery("SELECT COUNT(id) FROM calendar_events WHERE eventtime < (UNIX_TIMESTAMP(NOW()) - %u)", CALENDAR_OLD_EVENTS_DELETION_TIME);
+    if (calendarDeleteCount)
     {
-        sLog->outString("Deleting calendar data older than %i days...", getIntConfig(CONFIG_CALENDAR_KEEP_DAYS));
-        CharacterDatabase.PQuery("DELETE FROM calendar_events WHERE eventtime < (UNIX_TIMESTAMP(NOW()) - %u)", uint32(getIntConfig(CONFIG_CALENDAR_KEEP_DAYS) * DAY));
-        CharacterDatabase.Query("DELETE FROM calendar_invites WHERE (event) NOT IN (SELECT id FROM calendar_events)");
+        Field* fields = calendarDeleteCount->Fetch();
+        if (auto count = fields[0].GetUInt32())
+            sLog->outString("About to delete %u month old events from calendar_events", count);
     }
+    CharacterDatabase.PQuery("DELETE FROM calendar_events WHERE eventtime < (UNIX_TIMESTAMP(NOW()) - %u)", CALENDAR_OLD_EVENTS_DELETION_TIME);
+    CharacterDatabase.Query("DELETE FROM calendar_invites WHERE (event) NOT IN (SELECT id FROM calendar_events)");
 
     sLog->outString("Loading Calendar data...");
     sCalendarMgr->LoadFromDB();

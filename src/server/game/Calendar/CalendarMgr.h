@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -122,9 +122,14 @@ enum CalendarError
     CALENDAR_ERROR_NO_MODERATOR                 = 40
 };
 
-#define CALENDAR_MAX_EVENTS         30
-#define CALENDAR_MAX_GUILD_EVENTS   100
-#define CALENDAR_MAX_INVITES        100
+enum CalendarLimits
+{
+    CALENDAR_MAX_EVENTS                         = 30,
+    CALENDAR_MAX_GUILD_EVENTS                   = 100,
+    CALENDAR_MAX_INVITES                        = 100,
+    CALENDAR_CREATE_EVENT_COOLDOWN              = 5,
+    CALENDAR_OLD_EVENTS_DELETION_TIME           = 1 * MONTH,
+};
 
 struct CalendarInvite
 {
@@ -244,8 +249,11 @@ struct CalendarEvent
         void SetTimeZoneTime(time_t timezoneTime) { _timezoneTime = timezoneTime; }
         time_t GetTimeZoneTime() const { return _timezoneTime; }
 
-        bool IsGuildEvent() const { return _flags & CALENDAR_FLAG_GUILD_EVENT; }
-        bool IsGuildAnnouncement() const { return _flags & CALENDAR_FLAG_WITHOUT_INVITES; }
+        bool IsGuildEvent() const { return (_flags & CALENDAR_FLAG_GUILD_EVENT) != 0; }
+        bool IsGuildAnnouncement() const { return (_flags & CALENDAR_FLAG_WITHOUT_INVITES) != 0; }
+
+        static bool IsGuildEvent(uint32 flags) { return (flags & CALENDAR_FLAG_GUILD_EVENT) != 0; }
+        static bool IsGuildAnnouncement(uint32 flags) { return (flags & CALENDAR_FLAG_WITHOUT_INVITES) != 0; }
 
         std::string BuildCalendarMailSubject(uint64 remover) const;
         std::string BuildCalendarMailBody() const;
@@ -287,7 +295,9 @@ class CalendarMgr
 
         CalendarEvent* GetEvent(uint64 eventId, CalendarEventStore::iterator* it = NULL);
         CalendarEventStore const& GetEvents() const { return _events; }
+        CalendarEventStore GetEventsCreatedBy(uint64, bool includeGuildEvents = false);
         CalendarEventStore GetPlayerEvents(uint64 guid);
+        CalendarEventStore GetGuildEvents(uint32 guildId);
 
         CalendarInvite* GetInvite(uint64 inviteId) const;
         CalendarEventInviteStore const& GetInvites() const { return _invites; }
@@ -308,6 +318,7 @@ class CalendarMgr
         void AddInvite(CalendarEvent* calendarEvent, CalendarInvite* invite);
         void AddInvite(CalendarEvent* calendarEvent, CalendarInvite* invite, SQLTransaction& trans);
         void RemoveInvite(uint64 inviteId, uint64 eventId, uint64 remover);
+
         void UpdateInvite(CalendarInvite* invite);
         void UpdateInvite(CalendarInvite* invite, SQLTransaction& trans);
 

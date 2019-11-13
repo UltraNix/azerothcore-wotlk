@@ -448,6 +448,10 @@ class WorldSession
         bool hasVPNconnection() const { return _vpnActive;  }
         void setVPNconnection(bool isVPNconnection) { _vpnActive = isVPNconnection; }
 
+        // Packets cooldown
+        time_t GetCalendarEventCreationCooldown() const { return _calendarEventCreationCooldown; }
+        void SetCalendarEventCreationCooldown(time_t cooldown) { _calendarEventCreationCooldown = cooldown; }
+
     public:                                                 // opcodes handlers
 
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -1166,6 +1170,9 @@ class WorldSession
         bool _kicked;
         bool _shouldSetOfflineInDB;
         bool _vpnActive;
+
+        // Packets cooldown
+        time_t _calendarEventCreationCooldown;
 };
 #endif
 /// @}

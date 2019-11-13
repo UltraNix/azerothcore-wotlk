@@ -416,7 +416,6 @@ enum WorldIntConfigs
     CONFIG_MOVEMENT_FOLLOWSTART_TIMER,
     CONFIG_MOVEMENT_FOLLOWPATH_LENGTH,
     CONFIG_HUNGER_GAMES_LIMIT,
-    CONFIG_CALENDAR_KEEP_DAYS,                  // Sitowsky: When value is specified the calendar will delete everything specified value days back. (For speedup core loading).
     CONFIG_CHINA_TOWN_TIMER,
     CONFIG_WINTERGRASP_REMINDER,
     CONFIG_ICC_STAGE,                           // Afgann: Sets amount of opened wings on heroic in ICC.

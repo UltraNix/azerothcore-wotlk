@@ -105,14 +105,10 @@ m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerDeletin
 m_sessionDbcLocale(sWorld->GetDefaultDbcLocale()),
 m_sessionDbLocaleIndex(locale),
 m_latency(0), m_clientTimeDelay(0), m_TutorialsChanged(false), recruiterId(recruiter),
-isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0), _lastAuctionListOwnerItemsMSTime(0), _skipQueue(skipQueue), AntiDOS(this)
+isRecruiter(isARecruiter), m_currentBankerGUID(0), _lastAuctionListItemsMSTime(0), _lastAuctionListOwnerItemsMSTime(0), _skipQueue(skipQueue), AntiDOS(this),
+_offlineTime(0), _kicked(false), _shouldSetOfflineInDB(true), _vpnActive(false), _calendarEventCreationCooldown(0)
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
-
-    _offlineTime = 0;
-    _kicked = false;
-    _shouldSetOfflineInDB = true;
-    _vpnActive = false;
 
     for (uint8 i = 0; i < MAX_PREMIUM_SERVICES; i++)
     {
