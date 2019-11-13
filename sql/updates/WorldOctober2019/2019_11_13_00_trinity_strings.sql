@@ -1,0 +1,2 @@
+DELETE FROM `trinity_string` WHERE `entry` = 11038;
+INSERT INTO `trinity_string`(`entry`, `content_default`) VALUES (11038, 'In order to change your current xp multiplier please use command .xp 1-%u');

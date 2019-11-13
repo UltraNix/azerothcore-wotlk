@@ -1438,6 +1438,10 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WARDEN_LUA_CHECK_TIMEOUT] = sConfigMgr->GetIntDefault("WardenLua.CheckTimeout", 1);
     m_int_configs[CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS] = sConfigMgr->GetIntDefault("WardenLuaGenerator.NumThreads", 1);
 
+    // Xp Rates
+    m_int_configs[CONFIG_MAX_RATE_XP_1_67] = sConfigMgr->GetIntDefault("Rate.Max.Xp.1.67", 5);
+    m_int_configs[CONFIG_MAX_RATE_XP_68] = sConfigMgr->GetIntDefault("Rate.Max.Xp.68", 5);
+    m_int_configs[CONFIG_MAX_RATE_BOOST_MULTIPLIER] = sConfigMgr->GetIntDefault("Rate.Max.Xp.Boost.Multiplier", 2);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

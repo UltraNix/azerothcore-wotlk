@@ -4009,3 +4009,24 @@ WardenLuaGenerator.NumThreads = 1
 WardenLua.CheckTimeout = 1
 
 # Timer for sending checks is in non-lua warden settings (Warden.ClientCheckHoldOff)
+
+###################################################################################################
+# Xp Rates
+
+#    Rate.Max.Xp.1.67
+#        Description: Max Xp Rate between 1-67 lvls
+#        Default: 5
+
+Rate.Max.Xp.1.67 = 5
+
+#    Rate.Max.Xp.68
+#        Description: Max Xp Rate between above 68 lvl
+#        Default: 5
+
+Rate.Max.Xp.68 = 5
+
+#    Rate.Max.Xp.Boost.Multiplier
+#        Description: Premium boost multiplier
+#        Default: 2
+
+Rate.Max.Xp.Boost.Multiplier = 2

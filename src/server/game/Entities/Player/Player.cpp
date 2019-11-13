@@ -3333,10 +3333,14 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
     //else
     //    bonus_xp = victim ? GetXPRestBonus(xp) : 0; // XP resting bonus
 
+    uint32 maxXpRate = GetMaxXpRate();
+    if (m_xpRate > maxXpRate)
+        m_xpRate = maxXpRate;
+
     if (premiumBonusX4)
-        bonus_xp = (bgExtra ? 1.5 : 9) * xp;
-    else if (m_xpRate > 1)
-        bonus_xp = (bgExtra ? 1.5 : (m_xpRate - 1) ) * xp;
+        bonus_xp = ((maxXpRate * sWorld->getIntConfig(CONFIG_MAX_RATE_BOOST_MULTIPLIER))-1) * xp;
+    else
+        bonus_xp = (m_xpRate - 1) * xp;
     bonus_xp += victim ? GetXPRestBonus(xp) : 0;
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
@@ -28047,6 +28051,16 @@ bool Player::ShouldUpdateSkillValueForTooltip(uint32 skillId)
         default:
             return false;
     }
+}
+
+uint32 Player::GetMaxXpRate() const
+{
+    uint32 maxRate = 1;
+    if (getLevel() <= 67)
+        maxRate = sWorld->getIntConfig(CONFIG_MAX_RATE_XP_1_67);
+    else
+        maxRate = sWorld->getIntConfig(CONFIG_MAX_RATE_XP_68);
+    return maxRate;
 }
 
 void Player::ClearPetSlotData( uint32 id )

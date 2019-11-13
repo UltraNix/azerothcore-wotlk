@@ -680,9 +680,10 @@ public:
         }
 
         uint32 newXpRate = atoi(strtok((char*)args, " "));
-        if (newXpRate < 1 || newXpRate > 5)
+        if (newXpRate < 1 || newXpRate > handler->GetSession()->GetPlayer()->GetMaxXpRate())
         {
             DisplayXpInfo(handler);
+            handler->SetSentErrorMessage(true);
             return false;
         }
 
@@ -694,9 +695,19 @@ public:
 
     static void DisplayXpInfo(ChatHandler* handler)
     {
+        Player* player = handler->GetSession()->GetPlayer();
+        uint32 currXpRate = player->GetXpRate();
+        uint32 maxXpRate = player->GetMaxXpRate();
+
+        if (currXpRate > maxXpRate)
+        {
+            player->SetXpRate(maxXpRate);
+            currXpRate = maxXpRate;
+        }
+
         if (handler->GetSession()->IsPremiumServiceActive(PREMIUM_EXP_BOOST_X4))
         {
-            handler->PSendSysMessage(LANG_XP_RATE_INFO, 10);
+            handler->PSendSysMessage(LANG_XP_RATE_INFO, maxXpRate * sWorld->getIntConfig(CONFIG_MAX_RATE_BOOST_MULTIPLIER));
             char buff[20];
             time_t now = handler->GetSession()->GetPremiumService(PREMIUM_EXP_BOOST_X4);
             strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&now));
@@ -705,7 +716,7 @@ public:
         else
         {
             handler->PSendSysMessage(LANG_XP_RATE_INFO, handler->GetSession()->GetPlayer()->GetXpRate());
-            handler->PSendSysMessage(LANG_XP_RATE_INFO_2);
+            handler->PSendSysMessage(LANG_XP_RATE_INFO_2, maxXpRate);
         }
     }
 

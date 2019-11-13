@@ -2692,6 +2692,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 GetXpRate() const { return m_xpRate; }
         void SetXpRate(uint32 val) { m_xpRate = val; }
+        uint32 GetMaxXpRate() const;
 
         // @autoinvite_feature
         bool AutoInviteDone() { return m_NeedAutoInvite; }
