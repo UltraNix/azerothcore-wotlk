@@ -202,7 +202,7 @@ void WorldCache::ReloadLuaResultDisables()
     sLog->outString();
 }
 
-void WorldCache::AddOrExtendToFishingList(uint64 guid)
+void WorldCache::AddOrUpdateFishingList(uint64 guid)
 {
     if (_isFisherListLocked)
         return;

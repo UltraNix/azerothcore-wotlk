@@ -77,7 +77,7 @@ public:
     void ReloadLuaResultDisables();
 
     /** Currently fishing listing **/
-    void AddOrExtendToFishingList(uint64 guid);
+    void AddOrUpdateFishingList(uint64 guid);
     void ListCurrentFishers(ChatHandler* /*hadnler*/);
 
     /** Generic **/
