@@ -1123,8 +1123,11 @@ public:
 
         //! We're allowing to enter sapphiron (10/25) without killing entire instance now
         //! if we want to disable it in the future for whatever reason, just delete those two lines
-        player->CastSpell(player, 72617, true);
-        return true;
+        if (!sWorld->PatchNotes(PATCH_30X, PATCH_31X))
+        {
+            player->CastSpell(player, 72617, true);
+            return true;
+        }
 
         uint8 bossCount = 0;
         for (uint8 i = 0; i < MAX_ENCOUNTERS - 2; ++i)

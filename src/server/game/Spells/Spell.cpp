@@ -4299,6 +4299,18 @@ void Spell::WriteCastResultInfo(WorldPacket& data, Player* caster, SpellInfo con
                 case 45373:                                 // Bloodberry Elixir
                     data << uint32(4075);
                     break;
+                case 56001:                                 // Moonshroud - Emerald Dragonshire w Dragonblight
+                    if (sWorld->PatchNotes(PATCH_30X, PATCH_330))
+                        data << uint32(4179);
+                    break;
+                case 56002:                                 //  Ebonweave - Obsidian Dragonshire w Dragonblight
+                    if (sWorld->PatchNotes(PATCH_30X, PATCH_330))
+                        data << uint32(4167);
+                    break;
+                case 56003:                                 // Spellweave - Azure Dragonshrine w Dragonblight
+                    if (sWorld->PatchNotes(PATCH_30X, PATCH_330))
+                        data << uint32(4183);
+                    break;
                 default:                                    // default case (don't must be)
                     data << uint32(0);
                     break;
@@ -5688,6 +5700,18 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             break;
         }
+        case 56001: // Moonshroud - Emerald Dragonshire w Dragonblight
+            if (m_caster->ToPlayer()->GetAreaId() != 4179 && m_caster->GetTypeId() == TYPEID_PLAYER && sWorld->PatchNotes(PATCH_30X, PATCH_330))
+                return SPELL_FAILED_REQUIRES_AREA;
+            break;
+        case 56002: // Ebonweave - Obsidian Dragonshire w Dragonblight
+            if (m_caster->ToPlayer()->GetAreaId() != 4167 && m_caster->GetTypeId() == TYPEID_PLAYER && sWorld->PatchNotes(PATCH_30X, PATCH_330))
+                return SPELL_FAILED_REQUIRES_AREA;
+            break;
+        case 56003: // Spellweave - Azure Dragonshrine w Dragonblight
+            if (m_caster->ToPlayer()->GetAreaId() != 4183 && m_caster->GetTypeId() == TYPEID_PLAYER && sWorld->PatchNotes(PATCH_30X, PATCH_330))
+                return SPELL_FAILED_REQUIRES_AREA;
+            break;
        default:
            break;
     }

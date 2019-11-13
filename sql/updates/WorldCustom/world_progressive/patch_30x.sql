@@ -9,8 +9,10 @@ SET @EmblemHighCURR := 40753; -- Emblem of Valor
 SET @EmblemLowCURR  := 40752; -- Emblem of Heroism
 
 -- Update loot tables
+DELETE FROM `creature_loot_template` WHERE `entry` IN (31535, 31520, 31534 ,30452, 30451, 30449);
+
 UPDATE `creature_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV;
-UPDATE `creature_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
+UPDATE `creature_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV AND entry != 28860;
 
 UPDATE `gameobject_loot_template` SET `item`=@EmblemHighCURR WHERE `item`=@EmblemHighPREV;
 UPDATE `gameobject_loot_template` SET `item`=@EmblemLowCURR WHERE `item`=@EmblemLowPREV;
@@ -154,66 +156,66 @@ DELETE FROM `creature_questender` WHERE `quest` IN (11335,11336,11337,11338,1133
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 19 AND `ConditionTypeOrReference` = 12 AND `SourceEntry` IN (11335,11336,11337,11338,11339,11340,11341,11342,13405,13407,14163,14164);
 -- Alliance
 -- Call to Arms: WSG - Event 19
-INSERT INTO `creature_queststarter` VALUES (15351, 11338);
-INSERT INTO `creature_questender`   VALUES (15351, 11338);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11338, 19);
-INSERT INTO `conditions` VALUES (19, 0, 11338, 0, 0, 12, 0, 19, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: WSG');
+REPLACE INTO `creature_queststarter` VALUES (15351, 11338);
+REPLACE INTO `creature_questender`   VALUES (15351, 11338);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11338, 19);
+REPLACE INTO `conditions` VALUES (19, 0, 11338, 0, 0, 12, 0, 19, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: WSG');
 -- Call to Arms: AB - Event 20
-INSERT INTO `creature_queststarter` VALUES (15351, 11335);
-INSERT INTO `creature_questender`   VALUES (15351, 11335);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11335, 20);
-INSERT INTO `conditions` VALUES (19, 0, 11335, 0, 0, 12, 0, 20, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AB');
+REPLACE INTO `creature_queststarter` VALUES (15351, 11335);
+REPLACE INTO `creature_questender`   VALUES (15351, 11335);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11335, 20);
+REPLACE INTO `conditions` VALUES (19, 0, 11335, 0, 0, 12, 0, 20, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AB');
 -- Call to Arms: AV - Event 18
-INSERT INTO `creature_queststarter` VALUES (15351, 11336);
-INSERT INTO `creature_questender`   VALUES (15351, 11336);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11336, 18);
-INSERT INTO `conditions` VALUES (19, 0, 11336, 0, 0, 12, 0, 18, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AV');
+REPLACE INTO `creature_queststarter` VALUES (15351, 11336);
+REPLACE INTO `creature_questender`   VALUES (15351, 11336);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11336, 18);
+REPLACE INTO `conditions` VALUES (19, 0, 11336, 0, 0, 12, 0, 18, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AV');
 -- Call to Arms: EotS - Event 21
-INSERT INTO `creature_queststarter` VALUES (15351, 11337);
-INSERT INTO `creature_questender`   VALUES (15351, 11337);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11337, 21);
-INSERT INTO `conditions` VALUES (19, 0, 11337, 0, 0, 12, 0, 21, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: EotS');
+REPLACE INTO `creature_queststarter` VALUES (15351, 11337);
+REPLACE INTO `creature_questender`   VALUES (15351, 11337);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11337, 21);
+REPLACE INTO `conditions` VALUES (19, 0, 11337, 0, 0, 12, 0, 21, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: EotS');
 -- Call to Arms: SotA - Event 53
-INSERT INTO `creature_queststarter` VALUES (15351, 13405);
-INSERT INTO `creature_questender`   VALUES (15351, 13405);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (13405, 53);
-INSERT INTO `conditions` VALUES (19, 0, 13405, 0, 0, 12, 0, 53, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: SotA');
+REPLACE INTO `creature_queststarter` VALUES (15351, 13405);
+REPLACE INTO `creature_questender`   VALUES (15351, 13405);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (13405, 53);
+REPLACE INTO `conditions` VALUES (19, 0, 13405, 0, 0, 12, 0, 53, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: SotA');
 -- Call to Arms: IoC - Event 54
-INSERT INTO `creature_queststarter` VALUES (15351, 14163);
-INSERT INTO `creature_questender`   VALUES (15351, 14163);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (14163, 54);
-INSERT INTO `conditions` VALUES (19, 0, 14163, 0, 0, 12, 0, 54, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: IoC');
+REPLACE INTO `creature_queststarter` VALUES (15351, 14163);
+REPLACE INTO `creature_questender`   VALUES (15351, 14163);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (14163, 54);
+REPLACE INTO `conditions` VALUES (19, 0, 14163, 0, 0, 12, 0, 54, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: IoC');
 -- Horde
 -- Call to Arms: WSG - Event 19
-INSERT INTO `creature_queststarter` VALUES (15350, 11342);
-INSERT INTO `creature_questender`   VALUES (15350, 11342);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11342, 19);
-INSERT INTO `conditions` VALUES (19, 0, 11342, 0, 0, 12, 0, 19, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: WSG');
+REPLACE INTO `creature_queststarter` VALUES (15350, 11342);
+REPLACE INTO `creature_questender`   VALUES (15350, 11342);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11342, 19);
+REPLACE INTO `conditions` VALUES (19, 0, 11342, 0, 0, 12, 0, 19, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: WSG');
 -- Call to Arms: AB - Event 20
-INSERT INTO `creature_queststarter` VALUES (15350, 11339);
-INSERT INTO `creature_questender`   VALUES (15350, 11339);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11339, 20);
-INSERT INTO `conditions` VALUES (19, 0, 11339, 0, 0, 12, 0, 20, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AB');
+REPLACE INTO `creature_queststarter` VALUES (15350, 11339);
+REPLACE INTO `creature_questender`   VALUES (15350, 11339);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11339, 20);
+REPLACE INTO `conditions` VALUES (19, 0, 11339, 0, 0, 12, 0, 20, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AB');
 -- Call to Arms: AV - Event 18
-INSERT INTO `creature_queststarter` VALUES (15350, 11340);
-INSERT INTO `creature_questender`   VALUES (15350, 11340);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11340, 18);
-INSERT INTO `conditions` VALUES (19, 0, 11340, 0, 0, 12, 0, 18, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AV');
+REPLACE INTO `creature_queststarter` VALUES (15350, 11340);
+REPLACE INTO `creature_questender`   VALUES (15350, 11340);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11340, 18);
+REPLACE INTO `conditions` VALUES (19, 0, 11340, 0, 0, 12, 0, 18, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: AV');
 -- Call to Arms: EotS - Event 21
-INSERT INTO `creature_queststarter` VALUES (15350, 11341);
-INSERT INTO `creature_questender`   VALUES (15350, 11341);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (11341, 21);
-INSERT INTO `conditions` VALUES (19, 0, 11341, 0, 0, 12, 0, 21, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: EotS');
+REPLACE INTO `creature_queststarter` VALUES (15350, 11341);
+REPLACE INTO `creature_questender`   VALUES (15350, 11341);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (11341, 21);
+REPLACE INTO `conditions` VALUES (19, 0, 11341, 0, 0, 12, 0, 21, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: EotS');
 -- Call to Arms: SotA - Event 53
-INSERT INTO `creature_queststarter` VALUES (15350, 13407);
-INSERT INTO `creature_questender`   VALUES (15350, 13407);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (13407, 53);
-INSERT INTO `conditions` VALUES (19, 0, 13407, 0, 0, 12, 0, 53, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: SotA');
+REPLACE INTO `creature_queststarter` VALUES (15350, 13407);
+REPLACE INTO `creature_questender`   VALUES (15350, 13407);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (13407, 53);
+REPLACE INTO `conditions` VALUES (19, 0, 13407, 0, 0, 12, 0, 53, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: SotA');
 -- Call to Arms: IoC - Event 54
-INSERT INTO `creature_queststarter` VALUES (15350, 14164);
-INSERT INTO `creature_questender`   VALUES (15350, 14164);
-INSERT INTO `game_event_seasonal_questrelation` VALUES (14164, 54);
-INSERT INTO `conditions` VALUES (19, 0, 14164, 0, 0, 12, 0, 54, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: IoC');
+REPLACE INTO `creature_queststarter` VALUES (15350, 14164);
+REPLACE INTO `creature_questender`   VALUES (15350, 14164);
+REPLACE INTO `game_event_seasonal_questrelation` VALUES (14164, 54);
+REPLACE INTO `conditions` VALUES (19, 0, 14164, 0, 0, 12, 0, 54, 0, 0, 0, 0, 0, '', 'Quest avialable only during Call to Arms: IoC');
 
 -- =============================================================================================
 
@@ -450,9 +452,6 @@ UPDATE `gameobject_loot_template` SET `item` = '40753' WHERE `gameobject_loot_te
 
 /* OS EMBLEMS */
 UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_template`.`entry` = 31311 AND `creature_loot_template`.`item` = 40752;
-UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_template`.`entry` = 31535 AND `creature_loot_template`.`item` = 40752;
-UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_template`.`entry` = 31520 AND `creature_loot_template`.`item` = 40752;
-UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_template`.`entry` = 31534 AND `creature_loot_template`.`item` = 40752;
 
 UPDATE `item_loot_template` SET `item` = '40753' WHERE `item_loot_template`.`entry` = 43346 AND `item_loot_template`.`item` = 40752;
 UPDATE `reference_loot_template` SET `item` = '40753' WHERE `reference_loot_template`.`entry` = 34349 AND `reference_loot_template`.`item` = 40752;
@@ -462,7 +461,7 @@ UPDATE `creature_loot_template` SET `item` = '40753' WHERE `creature_loot_templa
 
 /* EOE EMBLEMS */
 DELETE FROM `gameobject_loot_template` WHERE `item` IN(@EmblemHighPREV,@EmblemLowPREV,@EmblemHighCURR,@EmblemLowCURR) AND `entry` IN(26094, 26097);
-INSERT INTO `gameobject_loot_template` VALUES 
+REPLACE INTO `gameobject_loot_template` VALUES 
 (26094, @EmblemLowCURR, 100, 1, 0, 2, 2), -- EoH for 10man
 (26097, @EmblemHighCURR, 100, 1, 0, 2, 2); -- EoV for 25man
 
@@ -500,7 +499,7 @@ UPDATE `gameobject_loot_template` SET `item` = '40752' WHERE `gameobject_loot_te
 
 /* Piootrek additional changes */
 DELETE FROM disables WHERE sourceType = 2 AND entry IN(533, 615, 624);
-INSERT INTO disables(sourceType, entry, flags, comment) VALUES
+REPLACE INTO disables(sourceType, entry, flags, comment) VALUES
 (2, 533, 3, 'Disable raid Naxxramas'),
 (2, 615, 3, 'Disable raid The Obsidan Sanctum'),
 (2, 624, 3, 'Disable raid Vault of Archavon');
@@ -516,3 +515,37 @@ DELETE FROM creature WHERE id = 40160;
  
 -- delete transmute epic gems
 DELETE FROM npc_trainer WHERE spell IN (66659,66663,66662,66660,66658,66664);
+
+-- remove emblems for daily random heroic
+UPDATE `quest_template` SET `RewardItemID1` = 0, `RewardItemCount1` = 0 WHERE `Id` IN (24789, 24790);
+
+-- Proof of Demise quests should reward 2 emblems of valors
+UPDATE `quest_template` SET `RewardItemId1` = 40753 WHERE `Title` LIKE 'Proof of Demise:%';
+
+-- Timear Foresees quests should reward 2 emblems of valors
+UPDATE `quest_template` SET `RewardItemId1` = 40752 WHERE `Title` LIKE 'Timear Foresees%';
+
+-- Remove Stormjewels
+DELETE FROM `item_loot_template` WHERE `item` IN (45879, 45883, 45862, 45880, 45881, 45882, 45897);
+
+-- Remove Portable Hole
+DELETE FROM `npc_vendor` WHERE `item` = 51809;
+
+-- Delete quest Assault on the Santcum (Ruby Sanctum quest) from NPC
+DELETE FROM `creature_queststarter` WHERE `quest` = 26013;
+
+-- Dalaran Fountian
+UPDATE `gameobject` SET `state`='1' WHERE  `guid`=151164;
+DELETE FROM `gameobject` WHERE `guid` = 342;
+
+-- Titatnium Ore shouldn't be prospectable
+UPDATE `item_template` SET `Flags` = `Flags` & ~0x00040000 WHERE `entry` = 36910;
+
+-- Hide Jean Pierre Poulain
+UPDATE `creature` c SET `phaseMask` = 2 WHERE `guid` = 85236;
+
+-- Change Bragor Bloodfist into Varimathras
+-- UPDATE `creature` c SET `id` = 2425 WHERE `guid` = 31901;
+
+-- Change Kor'koon Overseers to Undercity Guardians
+-- UPDATE `creature` c SET `id` = 5624 WHERE `id` = 36213 AND `map` = 0;
