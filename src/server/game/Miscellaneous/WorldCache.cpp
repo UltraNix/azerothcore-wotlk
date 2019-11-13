@@ -1,13 +1,35 @@
 #include "WorldCache.h"
 #include "Config.h"
-
+#include "Player.h"
 #include "Containers.h"
+#include "Chat.h"
+#include "fmt/format.h"
+
+#include <chrono>
+#include <ctime>
 
 WorldCache& WorldCache::GetInstance()
 {
     static WorldCache instance;
 
     return instance;
+}
+
+WorldCache::WorldCache()
+{
+    _playersCurrentlyFishing.clear();
+    scheduler.ClearValidator();
+
+    scheduler.Schedule(2min, [this](TaskContext func)
+    {
+        UpdateFishingList();
+        func.Repeat(2min);
+    });
+}
+
+void WorldCache::OnWorldUpdate(uint32 diff)
+{
+    scheduler.Update(diff);
 }
 
 std::vector<uint32> & WorldCache::GetAurasToResetAfterDuel()
@@ -180,3 +202,77 @@ void WorldCache::ReloadLuaResultDisables()
     sLog->outString();
 }
 
+void WorldCache::AddOrExtendToFishingList(uint64 guid)
+{
+    if (_isFisherListLocked)
+        return;
+
+    auto result = _playersCurrentlyFishing.find(guid);
+    FishingPlayerEntry fishEntry;
+    if (result == _playersCurrentlyFishing.end())
+    {
+        fishEntry.firstCaughtFishTime = FishingClock::now();
+        fishEntry.lastCaughtFishTime = FishingClock::now();
+    }
+    else
+    {
+        //! we're already in the map, get fish caught so far. We will increment it by one at the end of the function
+        fishEntry.SetFishCaughtSoFar(result->second.GetTotalFishCaught());
+        fishEntry.firstCaughtFishTime = result->second.firstCaughtFishTime;
+        fishEntry.lastCaughtFishTime = FishingClock::now();
+    }
+
+    fishEntry.IncrementFishCaught();
+    _playersCurrentlyFishing[guid] = fishEntry;
+};
+
+void WorldCache::ListCurrentFishers(ChatHandler* handler)
+{
+    if (!handler)
+        return;
+
+    if (_isFisherListLocked)
+    {
+        handler->PSendSysMessage("Fisher list is currently being modified, try again in a few seconds.");
+        return;
+    }
+
+    handler->PSendSysMessage("=== Listing currently fishing players ===");
+    handler->PSendSysMessage("There is currently %zu fishers, listing players that caught at least %u fishes.", _playersCurrentlyFishing.size(), MIN_FISH_CAUGHT_REQUIRED);
+
+    for (auto const& i : _playersCurrentlyFishing)
+    {
+        auto fishCaught = i.second.GetTotalFishCaught();
+        if (fishCaught >= MIN_FISH_CAUGHT_REQUIRED)
+        {
+            Player* fisher = ObjectAccessor::FindPlayer(i.first);
+            if (fisher)
+            {
+                FishingTimeStamp now = FishingClock::now();
+                uint64 timeCount = std::chrono::duration_cast<Seconds>(now - i.second.firstCaughtFishTime).count();
+                std::string _timeString = secsToTimeString(timeCount);
+                std::string _fisherString = fmt::format("|cffC93400 {} |rhas been fishing for {} and has caught {} fishes so far.", fisher->GetName(), _timeString, fishCaught);
+                handler->PSendSysMessage(_fisherString.c_str());
+            }
+        }
+    }
+}
+
+void WorldCache::UpdateFishingList()
+{
+    _isFisherListLocked = true;
+
+    std::vector<uint64> eraser;
+    FishingTimeStamp now = FishingClock::now();
+    for (auto const& i : _playersCurrentlyFishing)
+    {
+        uint32 timeCount = std::chrono::duration_cast<Milliseconds>(now - i.second.lastCaughtFishTime).count();
+        if (timeCount >= 2 * MINUTE * IN_MILLISECONDS)
+            eraser.push_back(i.first);
+    }
+
+    for (auto && guid : eraser)
+        _playersCurrentlyFishing.erase(guid);
+
+    _isFisherListLocked = false;
+}

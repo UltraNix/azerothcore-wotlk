@@ -2410,6 +2410,7 @@ void World::Update(uint32 diff)
     ProcessCliCommands();
 
     sScriptMgr->OnWorldUpdate(diff);
+    sWorldCache.OnWorldUpdate(diff);
 
     SavingSystemMgr::Update(diff);
 }

@@ -9426,6 +9426,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             else if (loot_type == LOOT_FISHING_JUNK)
                 go->getFishLootJunk(loot, this);
 
+            if (loot_type == LOOT_FISHING || loot_type == LOOT_FISHING_JUNK)
+                sWorldCache.AddOrExtendToFishingList(GetGUID());
+
             if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CHEST && go->GetGOInfo()->chest.groupLootRules)
             {
                 if (Group* group = GetGroup())

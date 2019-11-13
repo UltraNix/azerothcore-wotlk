@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -38,11 +38,12 @@ public:
     {
         static std::vector<ChatCommand> listCommandTable =
         {
-            { "creature",       SEC_ADMINISTRATOR,  CMD_CLI,  &HandleListCreatureCommand,          "" },
-            { "item",           SEC_ADMINISTRATOR,  CMD_CLI,  &HandleListItemCommand,              "" },
-            { "object",         SEC_ADMINISTRATOR,  CMD_CLI,  &HandleListObjectCommand,            "" },
-            { "auras",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleListAurasCommand,             "" },
-            { "premium",        SEC_MODERATOR,      CMD_CLI,  &HandleListPremiumCommand,           ""},
+            { "creature",       SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListCreatureCommand, "" },
+            { "item",           SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListItemCommand,     "" },
+            { "object",         SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListObjectCommand,   "" },
+            { "auras",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleListAurasCommand,    "" },
+            { "premium",        SEC_MODERATOR,      CMD_CLI,    &HandleListPremiumCommand,  ""},
+            { "fishers",        SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListFishersCommand,  "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -57,7 +58,7 @@ public:
 
         if (!player)
             return false;
-        
+
         char buff[20];
 
         bool isActiveTeleport = player->GetSession()->IsPremiumServiceActive(PREMIUM_TELEPORT);
@@ -75,7 +76,7 @@ public:
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Teleport' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
-        else 
+        else
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Teleport' - is |cffff0000Disabled", buff);
 
         if (isActiveSickness)
@@ -85,7 +86,7 @@ public:
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Sickness' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
-        else 
+        else
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'No Sickness' - is |cffff0000Disabled");
 
         if (isActiveExpBoost)
@@ -96,7 +97,7 @@ public:
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
-        else 
+        else
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost' - is |cffff0000Disabled");
 
         if (isActiveBoostX4)
@@ -107,7 +108,7 @@ public:
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost X4' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
-        else 
+        else
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Exp Boost X4' - is |cffff0000Disabled");
 
         if (isActiveNoDurLoss)
@@ -128,7 +129,7 @@ public:
 
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Instant Flying' - is |cff00ff00Enabled|r and expire at: %s", buff);
         }
-        else 
+        else
             ChatHandler(handler->GetSession()).PSendSysMessage("- Premium 'Instant Flying' - is |cffff0000Disabled");
         return true;
     }
@@ -544,6 +545,12 @@ public:
                 handler->PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetAmount());
         }
 
+        return true;
+    }
+
+    static bool HandleListFishersCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        sWorldCache.ListCurrentFishers(handler);
         return true;
     }
 };

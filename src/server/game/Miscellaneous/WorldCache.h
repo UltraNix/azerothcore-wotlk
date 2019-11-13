@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Common.h"
+#include "TaskScheduler.h"
+
+class ChatHandler;
 
 enum WardenLuaCheckType : uint32
 {
@@ -33,6 +36,22 @@ struct HellforgeStatValues
 };
 using HellforgeStats = std::unordered_map<uint32, HellforgeStatValues>;
 
+constexpr uint32 MIN_FISH_CAUGHT_REQUIRED{ 20 };
+using FishingTimeStamp = std::chrono::time_point<std::chrono::steady_clock>;
+using FishingClock = std::chrono::steady_clock;
+struct FishingPlayerEntry
+{
+private:
+    uint32 fishCaughtSoFar = 0;
+public:
+    FishingTimeStamp firstCaughtFishTime;
+    FishingTimeStamp lastCaughtFishTime;
+    void IncrementFishCaught() { ++fishCaughtSoFar; }
+    uint32 GetTotalFishCaught() const { return fishCaughtSoFar; }
+    void SetFishCaughtSoFar(uint32 val) { fishCaughtSoFar = val; }
+};
+using PlayersFishingStore = std::unordered_map<uint64, FishingPlayerEntry>;
+
 class WorldCache
 {
 public:
@@ -56,16 +75,30 @@ public:
     //! checks whether relaying information to webhooks for that checkId is enabled
     bool CanRelayLuaResult(uint32 checkId);
     void ReloadLuaResultDisables();
-private:
-    WorldCache() { }
 
+    /** Currently fishing listing **/
+    void AddOrExtendToFishingList(uint64 guid);
+    void ListCurrentFishers(ChatHandler* /*hadnler*/);
+
+    /** Generic **/
+    void OnWorldUpdate(uint32 diff);
+private:
+    WorldCache();
+
+    //! Misc
     std::vector<uint32> _duelResetSpellIDs;
     HellforgeStats _hellforgeStatValues;
+    PlayersFishingStore _playersCurrentlyFishing;
+    void UpdateFishingList();
 
+    //! Warden lua
     WardenLuaStore _wardenLuaChecksPool;
     std::vector<uint32> _disabledRelayCheckIDs;
     std::vector<uint32> _wardenLuaCheckIDs;
     std::vector<uint32> _wardenLuaMandatoryCheckIDs;
+
+    TaskScheduler scheduler;
+    bool _isFisherListLocked;
 
 protected:
     WorldCache(WorldCache const&)               = delete;
