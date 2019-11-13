@@ -366,18 +366,21 @@ void WorldSession::CheckLuaRequests()
         {
             HandleCheckFailure(it.second.GetCheckId(), true);
 
-            RelayData data;
-            data.accountId = GetAccountId();
-            data.playerGUID = GetGuidLow();
-            data.playerName = it.second.GetPlayerName();
-            Position pos = it.second.GetPosition();
-            data.playerPosition = pos;
-            data.checkId = it.second.GetCheckId();
-            data._cheatDescription = it.second.GetDescription();
-            data.falsePositiveChance = it.second.GetFalsePositiveChance();
-            data.message = " due to timeout.";
+            if (sWorldCache.CanRelayLuaResult(it.second.GetCheckId()))
+            {
+                RelayData data;
+                data.accountId = GetAccountId();
+                data.playerGUID = GetGuidLow();
+                data.playerName = it.second.GetPlayerName();
+                Position pos = it.second.GetPosition();
+                data.playerPosition = pos;
+                data.checkId = it.second.GetCheckId();
+                data._cheatDescription = it.second.GetDescription();
+                data.falsePositiveChance = it.second.GetFalsePositiveChance();
+                data.message = " due to timeout.";
 
-            GetRelay().Add(std::make_pair(TYPE_LUA_CHECK_FAILURE, data));
+                GetRelay().Add(std::make_pair(TYPE_LUA_CHECK_FAILURE_TIMEOUT, data));
+            }
 
             eraser.emplace_back(it.second.GetPrefix());
         }

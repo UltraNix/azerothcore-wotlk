@@ -110,6 +110,7 @@ void WorldRelay::RelayMessage(RelayRequest& request)
         case TYPE_TICKETS_CLOSED:
             BuildRelayBodyTicketClosed(request);
             break;
+        case TYPE_LUA_CHECK_FAILURE_TIMEOUT:
         case TYPE_LUA_CHECK_FAILURE:
         case TYPE_LUA_TRAP_FAILURE:
             BuildRelayCheatDetected(request);

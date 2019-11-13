@@ -11,8 +11,8 @@ CREATE TABLE `warden_lua_checks`
 );
 
 INSERT INTO `warden_lua_checks` (`CheckId`, `LuaCode`, `CheckType`, `Description`, `FalsePositiveChance`, `ShouldRelay`, `CheckComment`) VALUES
-(1, 'if not _tainted then local f = CreateFrame(\'frame\') f:SetScript(\'OnEvent\',function(s, e)@addonSuccess end)f:RegisterEvent\'MACRO_ACTION_FORBIDDEN\' _tainted = true end;', 4, 'Addon sending frame', 'None', 1, 'Setup a frame that will send us addon messages'),
-(2, 'RunMacroText(\'/run TargetNearest()\')StaticPopup_Hide(\'MACRO_ACTION_FORBIDDEN\')', 3, 'Clean client will always trigger MACRO_ACTION_FORBIDDEN event, unlocked will not', 'High', 1, 'Unlocked lua check'),
+-- (1, 'if not _tainted then local f = CreateFrame(\'frame\') f:SetScript(\'OnEvent\',function(s, e)@addonSuccess end)f:RegisterEvent\'MACRO_ACTION_FORBIDDEN\' _tainted = true end;', 4, 'Addon sending frame', 'None', 1, 'Setup a frame that will send us addon messages'),
+-- (2, 'RunMacroText(\'/run TargetNearest()\')StaticPopup_Hide(\'MACRO_ACTION_FORBIDDEN\')', 3, 'Clean client will always trigger MACRO_ACTION_FORBIDDEN event, unlocked will not', 'High', 1, 'Unlocked lua check'),
 (3, 'if (issecure()) then @addonSuccess else @addonFailure end', 1, 'Unlocked lua check', 'High', 1, 'This should return something, otherwise its unlocked?'),
 (4, 'forceinsecure() if (issecure())then @addonFailure else @addonSuccess end', 1, 'Unlocked lua check', 'High', 1, 'This should always return insecure, there are cheats that set lua state multiple times a second'),
 (5, 'if(rcbn==nil and CastSpellByName~=nil)then rcbn=CastSpellByName CastSpellByName=function(a) if(strfind(debugstack(2),\'Secure\')==nil)then @addonSuccess end rcbn(a) CastSpellByName=rcbn rcbn=nil end end', 2, 'Client called protected function!', 'Low', 1, 'hooks a sendaddon message when CastSpellByName is called'),
