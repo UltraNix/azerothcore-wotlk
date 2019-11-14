@@ -135,6 +135,7 @@ void WorldRelay::BuildRelayBodyTicketNew(RelayRequest request)
     **/
     std::string ticketMsg = EscapeForJson(request.second.message);
     std::string jsonString = fmt::format(_unformattedString,
+        sWorld->GetRealmName(),
         request.second.playerName,
         request.second.playerName,
         "#E79C2F",
@@ -146,8 +147,8 @@ void WorldRelay::BuildRelayBodyTicketNew(RelayRequest request)
         request.second.playerZone,
         request.second.playerArea,
         ticketMsg,
-        request.second.ticketId,
         sWorld->GetRealmName(),
+        request.second.ticketId,
         request.second.playerName);
 
     json = json::parse(jsonString);
