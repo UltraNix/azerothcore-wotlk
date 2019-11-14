@@ -1442,6 +1442,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_MAX_RATE_XP_1_67] = sConfigMgr->GetIntDefault("Rate.Max.Xp.1.67", 5);
     m_int_configs[CONFIG_MAX_RATE_XP_68] = sConfigMgr->GetIntDefault("Rate.Max.Xp.68", 5);
     m_int_configs[CONFIG_MAX_RATE_BOOST_MULTIPLIER] = sConfigMgr->GetIntDefault("Rate.Max.Xp.Boost.Multiplier", 2);
+    m_bool_configs[CONFIG_BG_DF_XP_BOOST_ENABLE] = sConfigMgr->GetBoolDefault("BgDf.Xp.Boost.Enable", 0);
+    m_float_configs[CONFIG_BG_DF_XP_BOOST_VALUE] = sConfigMgr->GetFloatDefault("BgDf.Xp.Boost.Value", 0.25f);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

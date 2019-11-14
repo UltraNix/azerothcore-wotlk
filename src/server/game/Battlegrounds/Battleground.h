@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -389,7 +389,7 @@ class Battleground
         bool HasFreeSlots() const;
         uint32 GetFreeSlotsForTeam(TeamId teamId) const;
         uint32 GetMaxFreeSlots() const;
- 
+
         typedef std::set<Player*> SpectatorList;
         typedef std::map<uint64, uint64> ToBeTeleportedMap;
         void AddSpectator(Player* p) { m_Spectators.insert(p); }
@@ -570,7 +570,7 @@ class Battleground
         virtual uint64 GetFlagPickerGUID(TeamId /*teamId*/ = TEAM_NEUTRAL) const { return 0; }
         virtual void SetDroppedFlagGUID(uint64 /*guid*/, TeamId /*teamId*/ = TEAM_NEUTRAL) {}
         uint32 GetTeamScore(TeamId teamId) const;
-        
+
         virtual TeamId GetPrematureWinner();
 
         // because BattleGrounds with different types and same level range has different m_BracketId

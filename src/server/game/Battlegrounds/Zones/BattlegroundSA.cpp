@@ -744,7 +744,7 @@ void BattlegroundSA::DestroyGate(Player* player, GameObject* go)
                 for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
                 {
                     if (itr->second->GetTeamId() == Attackers)
-                        itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+                        itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
                 }
             }
 
@@ -916,7 +916,7 @@ void BattlegroundSA::CaptureGraveyard(BG_SA_Graveyards i, Player *Source)
         for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
         {
             if (itr->second->GetTeamId() == Source->GetTeamId())
-                itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+                itr->second->GiveXP(0.0025 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
         }
     }
 

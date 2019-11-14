@@ -3275,7 +3275,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 BonusXP, bool re
     GetSession()->SendPacket(&data);
 }
 
-void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
+void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool finishedBgOrDf)
 {
     if (xp < 1)
         return;
@@ -3341,6 +3341,10 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool bgExtra)
         bonus_xp = ((maxXpRate * sWorld->getIntConfig(CONFIG_MAX_RATE_BOOST_MULTIPLIER))-1) * xp;
     else
         bonus_xp = (m_xpRate - 1) * xp;
+
+    if (finishedBgOrDf && level >= 68 && sWorld->getBoolConfig(CONFIG_BG_DF_XP_BOOST_ENABLE))
+        bonus_xp += xp * sWorld->getFloatConfig(CONFIG_BG_DF_XP_BOOST_VALUE);
+
     bonus_xp += victim ? GetXPRestBonus(xp) : 0;
 
     SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, group_rate);
@@ -16264,7 +16268,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     int32 moneyRew = 0;
     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        GiveXP(XP, NULL);
+        GiveXP(XP, NULL, 1.f, quest->HasSpecialFlag(8));
     else
         moneyRew = int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
 

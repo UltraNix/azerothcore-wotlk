@@ -4030,3 +4030,15 @@ Rate.Max.Xp.68 = 5
 #        Default: 2
 
 Rate.Max.Xp.Boost.Multiplier = 2
+
+#    BgDf.Xp.Boost.Enable
+#        Description: Enables or disables additional exp for finishing df or bg above 67lvl
+#        Default: 0
+
+BgDf.Xp.Boost.Enable = 0
+
+#    BgDf.Xp.Boost.Value
+#        Description: Multiplier of additional exp for finishing df or bg above 67lvl
+#        Default: 0.25
+
+BgDf.Xp.Boost.Value = 0.25

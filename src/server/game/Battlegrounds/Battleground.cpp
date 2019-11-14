@@ -1090,7 +1090,7 @@ void Battleground::EndBattleground(TeamId winnerTeamId)
         }
 
         if (!isArena() && GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
-            player->GiveXP(0.03 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+            player->GiveXP(0.03 * player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
 
         // BG Reward
         if (sWorld->getBoolConfig(CONFIG_ARENA_REWARD_ENABLE) && isArena() && isRated() && bValidArena)
