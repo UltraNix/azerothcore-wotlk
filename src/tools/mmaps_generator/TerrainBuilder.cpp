@@ -885,8 +885,60 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void TerrainBuilder::loadOffMeshConnections(uint32 mapID, uint32 tileX, uint32 tileY, MeshData &meshData, const char* offMeshFilePath)
+void TerrainBuilder::loadOffMeshConnections(uint32 mapID, uint32 tileX, uint32 tileY, MeshData &meshData, const char* offMeshFilePath)
     {
+        auto AddConnection = [&]( const G3D::Vector3 & p0, const G3D::Vector3 & p1, float size )
+        {
+            meshData.offMeshConnections.append( p0[ 1 ] );
+            meshData.offMeshConnections.append( p0[ 2 ] );
+            meshData.offMeshConnections.append( p0[ 0 ] );
+
+            meshData.offMeshConnections.append( p1[ 1 ] );
+            meshData.offMeshConnections.append( p1[ 2 ] );
+            meshData.offMeshConnections.append( p1[ 0 ] );
+
+            meshData.offMeshConnectionDirs.append( 1 );          // 1 - both direction, 0 - one sided
+            meshData.offMeshConnectionRads.append( size );       // agent size equivalent
+            // can be used same way as polygon flags
+            meshData.offMeshConnectionsAreas.append( ( unsigned char )0xFF );
+            meshData.offMeshConnectionsFlags.append( ( unsigned short )0xFF );  // all movement masks can make this path
+        };
+
+        switch ( mapID )
+        {
+            //! Azjol-Nerub
+            case 601:
+            {
+                //! tileX == 63 - gx from gps, tileY == 63 - gy from gps
+                if ( (tileX == 31 && tileY == 30) || (tileX == 31 && tileY == 30) )
+                {
+                    {
+                        G3D::Vector3 start{ 497.294f, 689.490f, 771.94f };
+                        G3D::Vector3 end{ 503.361f, 690.615f, 774.25f };
+
+                        AddConnection( start, end, 1.0f );
+                    }
+
+                    {
+                        G3D::Vector3 start{ 505.29f, 683.109f, 774.49f };
+                        G3D::Vector3 end{ 497.33f, 682.077f, 772.34f };
+
+                        AddConnection( start, end, 1.0f );
+                    }
+
+                    {
+                        G3D::Vector3 start{ 496.85f, 674.107f, 772.104f };
+                        G3D::Vector3 end{ 504.97f, 675.144f, 774.309f };
+
+                        AddConnection( start, end, 1.0f );
+                    }
+                }
+                break;
+            }
+        }
+
+        //printf( " loadOffMeshConnections:: %d connections added!", meshData.offMeshConnections.size() / 3 );
+
         // no meshfile input given?
         if (offMeshFilePath == NULL)
             return;
@@ -903,7 +955,7 @@ namespace MMAP
         char* buf = new char[512];
         while(fgets(buf, 512, fp))
         {
-            float p0[3], p1[3];
+            G3D::Vector3 p0, p1;
             uint32 mid, tx, ty;
             float size;
             if (sscanf(buf, "%d %d,%d (%f %f %f) (%f %f %f) %f", &mid, &tx, &ty,
@@ -912,19 +964,7 @@ namespace MMAP
 
             if (mapID == mid && tileX == tx && tileY == ty)
             {
-                meshData.offMeshConnections.append(p0[1]);
-                meshData.offMeshConnections.append(p0[2]);
-                meshData.offMeshConnections.append(p0[0]);
-
-                meshData.offMeshConnections.append(p1[1]);
-                meshData.offMeshConnections.append(p1[2]);
-                meshData.offMeshConnections.append(p1[0]);
-
-                meshData.offMeshConnectionDirs.append(1);          // 1 - both direction, 0 - one sided
-                meshData.offMeshConnectionRads.append(size);       // agent size equivalent
-                // can be used same way as polygon flags
-                meshData.offMeshConnectionsAreas.append((unsigned char)0xFF);
-                meshData.offMeshConnectionsFlags.append((unsigned short)0xFF);  // all movement masks can make this path
+                AddConnection( p0, p1, size );
             }
 
         }
