@@ -153,7 +153,8 @@ public:
             { "vehicle_accessory",            SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadVehicleAccessoryCommand,           "" },
             { "vehicle_template_accessory",   SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadVehicleTemplateAccessoryCommand,   "" },
             { "hellforge_boss_stats",         SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadHellforgeBossStatsCommand,         "" },
-            { "lua_result_relay_status",      SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadLuaResultRelayStatusCommand,       "" }
+            { "lua_result_relay_status",      SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadLuaResultRelayStatusCommand,       "" },
+            { "security_level",               SEC_CONSOLE,       CMD_CLI,  &HandleReloadWorldSecurityLevel,                "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1135,6 +1136,13 @@ public:
     {
         sWorldCache.ReloadLuaResultDisables();
         handler->SendGlobalGMSysMessage("Warden lua relay disables reloaded.");
+        return true;
+    }
+
+    static bool HandleReloadWorldSecurityLevel(ChatHandler* handler, const char* /*args*/)
+    {
+        sWorld->LoadDBAllowedSecurityLevel();
+        handler->SendGlobalGMSysMessage("World security level reloaded.");
         return true;
     }
 };
