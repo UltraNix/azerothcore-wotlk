@@ -1044,16 +1044,16 @@ class World
         // used versions
         std::string m_DBVersion;
 
-        typedef std::map<uint8, std::string> AutobroadcastsMap;
+        typedef std::unordered_map<uint32, std::string> AutobroadcastsMap;
         AutobroadcastsMap m_Autobroadcasts;
 
-        typedef std::map<uint8, std::string> AutobroadcastsCountryMap;
+        typedef std::unordered_map<uint32, std::string> AutobroadcastsCountryMap;
         AutobroadcastsCountryMap m_AutobroadcastsCountry;
 
-        typedef std::map<uint8, std::string> AutobroadcastsExceptCountryMap;
+        typedef std::unordered_map<uint32, std::string> AutobroadcastsExceptCountryMap;
         AutobroadcastsExceptCountryMap m_AutobroadcastsExceptCountry;
 
-        typedef std::map<uint8, uint8> AutobroadcastsWeightMap;
+        typedef std::unordered_map<uint32, uint8> AutobroadcastsWeightMap;
         AutobroadcastsWeightMap m_AutobroadcastsWeights;
 
         void ProcessQueryCallbacks();

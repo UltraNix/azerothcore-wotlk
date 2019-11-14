@@ -1906,10 +1906,10 @@ void World::SetInitialWorldSettings()
     sObjectMgr->ReturnOrDeleteOldMails(false);
 
     sLog->outString("Loading Autobroadcasts...");
-    //LoadAutobroadcasts();
+    LoadAutobroadcasts();
 
     sLog->outString("Loading Ip2nation...");
-    LoadIp2nation();
+    //LoadIp2nation();
 
     ///- Load and initialize scripts
     sObjectMgr->LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
