@@ -1646,8 +1646,13 @@ void Spell::SelectImplicitChainTargets(SpellEffIndex effIndex, SpellImplicitTarg
         CallScriptObjectAreaTargetSelectHandlers(targets, effIndex, targetType);
 
         for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+        {
             if (Unit* unitTarget = (*itr)->ToUnit())
-                AddUnitTarget(unitTarget, effMask, false);
+            {
+                if (!unitTarget->IsCritter())
+                    AddUnitTarget(unitTarget, effMask, false);
+            }
+        }
     }
 }
 
@@ -5269,6 +5274,9 @@ void Spell::HandleThreatSpells()
 
         Unit* target = ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
         if (!target)
+            continue;
+
+        if (target->IsCritter())
             continue;
 
         bool IsFriendly = m_caster->IsFriendlyTo(target);
