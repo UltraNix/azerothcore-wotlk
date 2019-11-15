@@ -18198,13 +18198,19 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         bool fixed = false;
         if (uint32 destInstId = sInstanceSaveMgr->PlayerGetDestinationInstanceId(this, mapId, GetDifficulty(mapEntry->IsRaid())))
         {
-            instanceId = destInstId;
-            if (AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(mapId))
-            {
-                Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+            if (instanceId == destInstId)
                 fixed = true;
+            else
+            {
+                instanceId = destInstId;
+                if (AreaTrigger const* at = sObjectMgr->GetMapEntranceTrigger(mapId))
+                {
+                    Relocate(at->target_X, at->target_Y, at->target_Z, at->target_Orientation);
+                    fixed = true;
+                }
             }
         }
+
         if (!fixed)
         {
             RelocateToHomebind();
@@ -18340,14 +18346,19 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     Map* map = sMapMgr->CreateMap(mapId, this);
     if (!map)
     {
-        instanceId = 0;
         areaTrigger = sObjectMgr->GetGoBackTrigger(mapId);
+        check = true;
     }
-    else if ( map->IsDungeon() )
+    else if (map->IsDungeon())
     {
-        if ( !( ( InstanceMap* )map )->CanEnter( this ) || !CheckInstanceLoginValid( map ) ) // ... and can't enter map, then look for entry point.
+        if (!((InstanceMap*)map)->CanEnter(this) || !CheckInstanceLoginValid(map)) // ... and can't enter map, then look for entry point.
         {
-            areaTrigger = sObjectMgr->GetGoBackTrigger( mapId );
+            areaTrigger = sObjectMgr->GetGoBackTrigger(mapId);
+            check = true;
+        }
+        else if (!instanceId)
+        {
+            areaTrigger = sObjectMgr->GetMapEntranceTrigger(mapId);
             check = true;
         }
     }
@@ -21083,8 +21094,18 @@ void Player::ResetInstances(uint64 guid, uint8 method, bool isRaid)
                             //p->SendResetInstanceSuccess(instanceSave->GetMapId());
                             toUnbind.push_back(instanceSave);
                         }
-                        //else
-                        //    p->SendResetInstanceFailed(0, instanceSave->GetMapId());
+                        else if (p->FindMap() == map)
+                        {
+                            // Anakin: in this situation group leader should get instance id from this player (if doesn't have already one)
+                            if (Group* g = p->GetGroup())
+                                if (g->GetLeaderGUID() != p->GetGUID())
+                                    if (!sInstanceSaveMgr->PlayerGetBoundInstance(GUID_LOPART(g->GetLeaderGUID()), instanceSave->GetMapId(), instanceSave->GetDifficulty()))
+                                    {
+                                        sInstanceSaveMgr->PlayerCreateBoundInstancesMaps(GUID_LOPART(g->GetLeaderGUID()));
+                                        sInstanceSaveMgr->PlayerBindToInstance(GUID_LOPART(g->GetLeaderGUID()), instanceSave, false, ObjectAccessor::FindPlayerInOrOutOfWorld(g->GetLeaderGUID()));
+                                    }
+                            //    p->SendResetInstanceFailed(0, instanceSave->GetMapId());
+                        }
                     }
                     for (std::vector<InstanceSave*>::const_iterator itr = toUnbind.begin(); itr != toUnbind.end(); ++itr)
                         sInstanceSaveMgr->PlayerUnbindInstance(p->GetGUIDLow(), (*itr)->GetMapId(), (*itr)->GetDifficulty(), true, p);
