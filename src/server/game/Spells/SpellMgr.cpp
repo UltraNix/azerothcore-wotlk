@@ -3732,6 +3732,7 @@ void SpellMgr::LoadSpellCustomAttr()
             56002, // Moonshroud
             56003, // Spellweave
             55208, // Smelt Titansteel
+            60350, // Transmute Titanium
             }, [](SpellInfo* spellInfo) {
             if (sWorld->PatchNotes(PATCH_30X, PATCH_330))
             {

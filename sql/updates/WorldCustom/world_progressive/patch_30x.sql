@@ -517,7 +517,7 @@ DELETE FROM creature WHERE id = 40160;
 DELETE FROM npc_trainer WHERE spell IN (66659,66663,66662,66660,66658,66664);
 
 -- remove emblems for daily random heroic
-UPDATE `quest_template` SET `RewardItemID1` = 0, `RewardItemCount1` = 0 WHERE `Id` IN (24789, 24790);
+UPDATE `quest_template` SET `RewardItemID1` = 0, `RewardItemCount1` = 0 WHERE `Id` IN (24789, 24790, 24788);
 
 -- Proof of Demise quests should reward 2 emblems of valors
 UPDATE `quest_template` SET `RewardItemId1` = 40753 WHERE `Title` LIKE 'Proof of Demise:%';
@@ -549,3 +549,48 @@ UPDATE `creature` c SET `phaseMask` = 2 WHERE `guid` = 85236;
 
 -- Change Kor'koon Overseers to Undercity Guardians
 -- UPDATE `creature` c SET `id` = 5624 WHERE `id` = 36213 AND `map` = 0;
+
+-- Delete quest Cardinal Ruby
+DELETE FROM `creature_queststarter` WHERE `quest` = 14151;
+
+-- Phase out AT quest giver
+UPDATE `creature` SET `phasemask` = 2 WHERE `guid` = 71980;
+
+-- Blue gems for honor/emblems
+DELETE FROM `npc_vendor` WHERE `entry` IN (32172, 31580, 31582, 34043, 34081) AND `item` IN (36918, 36930, 36921, 36933, 36924, 36927);
+INSERT INTO `npc_vendor`(`entry`, `item`, `ExtendedCost`) VALUES
+(32172, 36918, 2706),
+(32172, 36930, 2484),
+(32172, 36921, 2706),
+(32172, 36933, 2484),
+(32172, 36924, 2706),
+(32172, 36927, 2484),
+
+(31580, 36918, 2706),
+(31580, 36930, 2484),
+(31580, 36921, 2706),
+(31580, 36933, 2484),
+(31580, 36924, 2706),
+(31580, 36927, 2484),
+
+(31582, 36918, 2706),
+(31582, 36930, 2484),
+(31582, 36921, 2706),
+(31582, 36933, 2484),
+(31582, 36924, 2706),
+(31582, 36927, 2484),
+
+(34043, 36918, 2588),
+(34043, 36930, 2588),
+(34043, 36921, 2588),
+(34043, 36933, 2588),
+(34043, 36924, 2588),
+(34043, 36927, 2588),
+
+(34081, 36918, 2588),
+(34081, 36930, 2588),
+(34081, 36921, 2588),
+(34081, 36933, 2588),
+(34081, 36924, 2588),
+(34081, 36927, 2588);
+
