@@ -1477,16 +1477,16 @@ bool Creature::LoadCreatureFromDB(uint32 guid, Map* map, bool addToMap, bool gri
            if (isWorldBoss() && map->IsRaid())
                 loot.FillLootFromDB(this, NULL, map->GetId(), map->GetDifficulty());
 
-        uint32 remainingSpawnTime = m_respawnTime - time(nullptr);
-        //! if remaining time is bigger than default respawn time
-        //! it means it includes corpse decay time
-        if (remainingSpawnTime > m_respawnDelay)
-        {
-            //! calculate remaining corpse time
-            uint32 corpseRemoveTime = remainingSpawnTime - m_respawnDelay;
-            m_corpseRemoveTime = corpseRemoveTime;
-            setDeathState(CORPSE);
-        }
+        //uint32 remainingSpawnTime = m_respawnTime - time(nullptr);
+        ////! if remaining time is bigger than default respawn time
+        ////! it means it includes corpse decay time
+        //if (remainingSpawnTime > m_respawnDelay)
+        //{
+        //    //! calculate remaining corpse time
+        //    uint32 corpseRemoveTime = remainingSpawnTime - m_respawnDelay;
+        //    m_corpseRemoveTime = corpseRemoveTime;
+        //    setDeathState(CORPSE);
+        //}
 
         if (CanFly())
         {
