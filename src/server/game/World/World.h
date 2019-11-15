@@ -179,7 +179,7 @@ enum WorldBoolConfigs
     CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE,     // Sitowsky: Enables or disables custom events features like commands for them.
     CONFIG_HUNGER_GAMES_ENABLE,               // Piootrek: Enables or disables Hunger Games event.
     CONFIG_BOOST_NAXXRAMAS,                   // Sitowsky: Enables or disables Boost version of Naxxramas.
-    CONFIG_LAUNCH_ANGRATHAR,                  // Riztazz:  Enables or disables Special experience gain calculations and decreased respawn times of creatures and gobjects.
+    CONFIG_DECREASED_SPAWN_RATES,             // Riztazz: When enabled, creatures will reduce their respawnTime by config specified value
     CONFIG_BOSS_RECORDS,                      // Riztazz:  Enables or disables boss records (saving them to db).
     CONFIG_BOSS_RECORDS_ANNOUNCES,            // Sitowsky: Enables or disables announcing boss records to the world if boss records are enabled.
     CONFIG_SPECIAL_ANGRATHAR,                 // Sitowsky: Enables or disables Special Angrathar core settings.
@@ -230,7 +230,8 @@ enum WorldFloatConfigs
     CONFIG_BOOST_PERCENTAGE_ONLINE,
     CONFIG_DYNAMIC_RESPAWN_1_4,
     CONFIG_DYNAMIC_RESPAWN_5_20,
-    CONFIG_DYNAMIC_RESPAWN_21_60,
+    CONFIG_DYNAMIC_RESPAWN_21_40,
+    CONFIG_DYNAMIC_RESPAWN_41_60,
     CONFIG_DYNAMIC_RESPAWN_61_80,
     CONFIG_BONUS_HONOR_FOR_FACTION_RATE, // in order for this to work, you need to enable per side honor bonus in bool configs
     CONFIG_DUEL_DEBUFF_RESET,

@@ -1369,7 +1369,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_HUNGER_GAMES_LIMIT] = sConfigMgr->GetIntDefault("HungerGames.Limit", 500);
     m_bool_configs[CONFIG_BOOST_NAXXRAMAS] = sConfigMgr->GetBoolDefault("Naxxramas.Boost", false);
 
-    m_bool_configs[CONFIG_LAUNCH_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharLaunch.Enable", false);
+    m_bool_configs[CONFIG_DECREASED_SPAWN_RATES] = sConfigMgr->GetBoolDefault("DecreasedSpawnRates.Enable", false);
     m_bool_configs[CONFIG_SPECIAL_ANGRATHAR] = sConfigMgr->GetBoolDefault("AngratharSpecial.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Enable", false);
     m_bool_configs[CONFIG_BOSS_RECORDS_ANNOUNCES] = sConfigMgr->GetBoolDefault("CreatureBossRecords.Announces.Enable", false);
@@ -1381,7 +1381,8 @@ void World::LoadConfigSettings(bool reload)
 
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_1_4] = sConfigMgr->GetFloatDefault("DynamicRespawn.1.4", 0.15f);
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_5_20] = sConfigMgr->GetFloatDefault("DynamicRespawn.5.20", 0.25f);
-    m_float_configs[CONFIG_DYNAMIC_RESPAWN_21_60] = sConfigMgr->GetFloatDefault("DynamicRespawn.21.60", 0.35f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_21_40] = sConfigMgr->GetFloatDefault("DynamicRespawn.21.40", 0.35f);
+    m_float_configs[CONFIG_DYNAMIC_RESPAWN_41_60] = sConfigMgr->GetFloatDefault("DynamicRespawn.41.60", 0.45f);
     m_float_configs[CONFIG_DYNAMIC_RESPAWN_61_80] = sConfigMgr->GetFloatDefault("DynamicRespawn.61.80", 0.65f);
 
     /* Increased honor gains per faction config values */

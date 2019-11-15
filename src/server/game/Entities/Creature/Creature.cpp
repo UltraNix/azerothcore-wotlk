@@ -176,11 +176,10 @@ m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REAC
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_moveInLineOfSightDisabled(false), m_moveInLineOfSightStrictlyDisabled(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_originalEntry(0), m_homePosition(), _wasHitByPlayer(false), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE),
-m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_isChainPullDisabled(false)
+m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_isChainPullDisabled(false), m_respawnRate(1.0f)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
-
     for (uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_spells[i] = 0;
 
@@ -1675,8 +1674,16 @@ void Creature::setDeathState(DeathState s, bool despawn)
 
     if (s == JUST_DIED)
     {
-        m_corpseRemoveTime = time(NULL) + m_corpseDelay;
-        m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
+        UpdateDecayTimers();
+        m_corpseRemoveTime = time(nullptr) + m_corpseDelay;
+        //! its quick enough, so we're not modyifing it
+        if (m_respawnDelay < 60U)
+            m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
+        else
+        {
+            uint32 _respawnDelay = std::max(60U, uint32(m_respawnDelay * m_respawnRate));
+            m_respawnTime = time(nullptr) + _respawnDelay + m_corpseDelay;
+        }
 
         // always save boss respawn time at death to prevent crash cheating
         if (GetMap()->IsDungeon() || isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)
@@ -2550,6 +2557,55 @@ time_t Creature::GetRespawnTimeEx() const
         return now;
 }
 
+void Creature::UpdateDecayTimers()
+{
+    CreatureTemplate const* cTemplate = GetCreatureTemplate();
+    if (cTemplate)
+    {
+        switch (cTemplate->rank)
+        {
+            case CREATURE_ELITE_RARE:
+                m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RARE);
+                break;
+            case CREATURE_ELITE_ELITE:
+                m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_ELITE);
+                break;
+            case CREATURE_ELITE_RAREELITE:
+                m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_RAREELITE);
+                break;
+            case CREATURE_ELITE_WORLDBOSS:
+                // Reduce corpse delay for bossess outside of instance
+                if (!GetInstanceId())
+                    m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_ELITE) * 2;
+                else
+                    m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+                break;
+            default:
+                m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_NORMAL);
+                break;
+        }
+
+        if (cTemplate->flags_extra & CREATURE_FLAG_EXTRA_DUNGEON_BOSS)
+        {
+            m_corpseDelay = sWorld->getIntConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+        }
+    }
+
+    if (m_respawnDelay >= 60 && sWorld->getBoolConfig(CONFIG_DECREASED_SPAWN_RATES) && !IsDungeonBoss() && !isWorldBoss() && !GetMap()->IsBattlegroundOrArena() && !GetMap()->Instanceable())
+    {
+        if (getLevel() <= 4)
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_1_4);
+        else if (getLevel() > 4 && getLevel() <= 20)
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_5_20);
+        else if (getLevel() > 20 && getLevel() <= 40)
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_21_40);
+        else if (getLevel() > 40 && getLevel() <= 60)
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_41_60);
+        else
+            m_respawnRate = sWorld->getFloatConfig(CONFIG_DYNAMIC_RESPAWN_61_80);
+    }
+}
+
 void Creature::GetRespawnPosition(float &x, float &y, float &z, float* ori, float* dist) const
 {
     if (m_DBTableGuid)
@@ -2590,22 +2646,20 @@ void Creature::GetRespawnPosition(float &x, float &y, float &z, float* ori, floa
         *dist = 0;
 }
 
-void Creature::AllLootRemovedFromCorpse()
+void Creature::AllLootRemovedFromCorpse(bool generatedZeroLoot)
 {
+    bool const InInstanceOrBoss = IsDungeonBoss() || isWorldBoss() || GetMap()->IsBattlegroundOrArena() || GetMap()->Instanceable();
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
         time_t now = time(nullptr);
-        if (m_corpseRemoveTime <= now)
+        //! Creature generated zero loot but it's same world tick, so this will return true and exit
+        if (m_corpseRemoveTime <= now && !generatedZeroLoot)
             return;
 
-        float decayRate;
-        CreatureTemplate const* cinfo = GetCreatureTemplate();
-
-        decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
+        float decayRate = InInstanceOrBoss ? 0.f : sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
         uint32 diff = uint32((m_corpseRemoveTime - now) * decayRate);
-
         m_respawnTime -= diff;
-
+        CreatureTemplate const* cinfo = GetCreatureTemplate();
         // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
         if (cinfo && cinfo->SkinLootId)
             m_corpseRemoveTime = time(nullptr);

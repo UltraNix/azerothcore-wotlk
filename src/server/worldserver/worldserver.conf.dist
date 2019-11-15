@@ -1859,7 +1859,7 @@ Corpse.Decay.WORLDBOSS = 3600
 #                     after they have been looted.
 #         Default:    0.5
 
-Rate.Corpse.Decay.Looted = 0.5
+Rate.Corpse.Decay.Looted = 0
 
 #
 #    Rate.Creature.Normal.Damage
@@ -3624,12 +3624,12 @@ MalygosAdditionalBoost.Enable = 0
 UlduarPreNerf.Enable = 0
 
 #
-#     AngratharLaunch.Enable
-#     Description: Enables or disables Special experience gain calculations and decreased respawn times of creatures and gobjects.
+#     DecreasedSpawnRates.Enable
+#     Description: Enables or disables reduced spawn rates for creatures & gameobjects by config specified value
 #     Default:     0 - (Disabled)
 #                  1 - (Enabled)
    
-AngratharLaunch.Enable = 0
+DecreasedSpawnRates.Enable = 0
 
 #
 #     AngratharSpecial.Enable
@@ -3752,12 +3752,19 @@ DynamicRespawn.1.4 = 0.15
 
 DynamicRespawn.5.20 = 0.25
 
-#	DynamicRespawn.21.60
+#	DynamicRespawn.21.40
 #		Description: Respawn rate for creatures between 21 and 60 level
 #		Default: 0.35
 #
 
-DynamicRespawn.21.60 = 0.35
+DynamicRespawn.21.40 = 0.35
+
+#	DynamicRespawn.41.60
+#		Description: Respawn rate for creatures between 41 and 60 level
+#		Default: 0.45
+#
+
+DynamicRespawn.41.60 = 0.45
 
 #	DynamicRespawn.61.80
 #		Description: Respawn rate for creatures between 61 and 80 level

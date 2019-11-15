@@ -16832,6 +16832,10 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
 
                 if (creature->GetLootMode())
                     loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
+
+                //! Reduce corpse time if we had no loot at all
+                if (loot->isLooted())
+                    creature->AllLootRemovedFromCorpse(true);
             }
             if (group)
             {

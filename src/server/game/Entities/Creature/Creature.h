@@ -621,7 +621,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void ResetPickPocketLootTime() { lootPickPocketRestoreTime = 0; }
 
         void SetLootRecipient (Unit* unit, bool withGroup = true);
-        void AllLootRemovedFromCorpse();
+        void AllLootRemovedFromCorpse(bool generatedZeroLoot = false);
 
         uint16 GetLootMode() const { return m_LootMode; }
         bool HasLootMode(uint16 lootMode) const { return m_LootMode & lootMode; }
@@ -673,6 +673,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         }
         void DespawnOrUnsummon(uint32 msTimeToDespawn = 0, uint32 forceRespawnTime = 0);
 
+        void UpdateDecayTimers();
         time_t const& GetRespawnTime() const { return m_respawnTime; }
         time_t GetRespawnTimeEx() const;
         void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(nullptr) + respawn : 0; }
@@ -887,6 +888,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
 
         uint32 _creatureCantMoveThreshold;
+        float m_respawnRate;
 };
 
 class AssistDelayEvent : public BasicEvent
