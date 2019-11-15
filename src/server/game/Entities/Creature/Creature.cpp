@@ -2676,6 +2676,8 @@ void Creature::AllLootRemovedFromCorpse(bool generatedZeroLoot)
             m_corpseRemoveTime = time(nullptr);
         else
             m_corpseRemoveTime -= diff;
+
+        SaveRespawnTime();
     }
 }
 
