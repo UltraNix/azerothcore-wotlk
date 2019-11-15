@@ -207,6 +207,7 @@ enum WorldBoolConfigs
     CONFIG_ENABLE_WARDEN_LUA_CHECKS,
     CONFIG_ENABLE_WARDEN_LUA_CLEANUP,         // Cleans up warden_lua_failures table on world start-up
     CONFIG_BG_DF_XP_BOOST_ENABLE,             // Enables or disables additional exp for finishing df or bg above 67lvl
+    CONFIG_DUEL_DEBUFF_RESET,
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -234,7 +235,6 @@ enum WorldFloatConfigs
     CONFIG_DYNAMIC_RESPAWN_41_60,
     CONFIG_DYNAMIC_RESPAWN_61_80,
     CONFIG_BONUS_HONOR_FOR_FACTION_RATE, // in order for this to work, you need to enable per side honor bonus in bool configs
-    CONFIG_DUEL_DEBUFF_RESET,
     CONFIG_CHAIN_PULL_RANGE,
     CONFIG_BG_DF_XP_BOOST_VALUE,
     FLOAT_CONFIG_VALUE_COUNT
