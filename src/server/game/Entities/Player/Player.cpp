@@ -9073,15 +9073,18 @@ void Player::CastItemUseSpell(ItemRef const& item, SpellCastTargets const& targe
             continue;
         }
 
-        if (HasSpellCooldown(spellInfo->Id))
-            continue;
-
         Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
         spell->m_CastItem = *item;
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
         spell->InitExplicitTargets(targets);
 
+        if (HasSpellCooldown(spellInfo->Id))
+        {
+            spell->SendCastResult(SPELL_FAILED_NOT_READY);
+            delete spell;
+            continue;
+        }
         // Xinef: dont allow to cast such spells, it may happen that spell possess 2 spells, one for players and one for items / gameobjects
         // Xinef: if first one is cast on player, it may be deleted thus resulting in crash because second spell has saved pointer to the item
         // Xinef: there is one problem with scripts which wont be loaded at the moment of call
@@ -9118,15 +9121,18 @@ void Player::CastItemUseSpell(ItemRef const& item, SpellCastTargets const& targe
                 continue;
             }
 
-            if (HasSpellCooldown(spellInfo->Id))
-                continue;
-
             Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
             spell->m_CastItem = *item;
             spell->m_cast_count = cast_count;               // set count of casts
             spell->m_glyphIndex = glyphIndex;               // glyph index
             spell->InitExplicitTargets(targets);
 
+            if (HasSpellCooldown(spellInfo->Id))
+            {
+                spell->SendCastResult(SPELL_FAILED_NOT_READY);
+                delete spell;
+                continue;
+            }
             // Xinef: dont allow to cast such spells, it may happen that spell possess 2 spells, one for players and one for items / gameobjects
             // Xinef: if first one is cast on player, it may be deleted thus resulting in crash because second spell has saved pointer to the item
             // Xinef: there is one problem with scripts which wont be loaded at the moment of call
