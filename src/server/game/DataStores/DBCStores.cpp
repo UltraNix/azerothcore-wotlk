@@ -380,23 +380,23 @@ void LoadDBCStores(const std::string& dataPath)
                 case 44: // old scarlet monastery
                     sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(604800, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
                     break;
-                case 230:
-                    // Blackrock depths - create base blizzlike map
-                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
-                    // Blackrock depths - create heroic mode for our custom instance - HellForge
-                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 1)] = MapDifficulty(604800, 10U, entry->areaTriggerText[0] != '\0');
-                    break;
-                case 249:
-                {
-                    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
-                    if (!_onyxiaHack)
-                    {
-                        _onyxiaHack = true;
-                        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 2)] = MapDifficulty(entry->resetTime, 10, false);
-                        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 3)] = MapDifficulty(entry->resetTime, 10, false);
-                    }
-                    break;
-                }
+                //case 230:
+                //    // Blackrock depths - create base blizzlike map
+                //    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                //    // Blackrock depths - create heroic mode for our custom instance - HellForge
+                //    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 1)] = MapDifficulty(604800, 10U, entry->areaTriggerText[0] != '\0');
+                //    break;
+                //case 249:
+                //{
+                //    sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
+                //    if (!_onyxiaHack)
+                //    {
+                //        _onyxiaHack = true;
+                //        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 2)] = MapDifficulty(entry->resetTime, 10, false);
+                //        sMapDifficultyMap[MAKE_PAIR32(entry->MapId, 3)] = MapDifficulty(entry->resetTime, 10, false);
+                //    }
+                //    break;
+                //}
                 default:
                     sMapDifficultyMap[MAKE_PAIR32(entry->MapId, entry->Difficulty)] = MapDifficulty(entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] != '\0');
                     break;
