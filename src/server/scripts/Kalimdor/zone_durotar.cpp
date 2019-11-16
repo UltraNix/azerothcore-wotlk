@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -94,7 +94,7 @@ public:
             if (RebuffTimer <= diff)
             {
                 DoCast(me, SPELL_BUFF_SLEEP);
-                RebuffTimer = 300000;                 //Rebuff agian in 5 minutes
+                RebuffTimer = 35000;                 //Rebuff agian in 5 minutes
             }
             else
                 RebuffTimer -= diff;
