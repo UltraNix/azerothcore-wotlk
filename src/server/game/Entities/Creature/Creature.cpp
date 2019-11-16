@@ -1688,11 +1688,11 @@ void Creature::setDeathState(DeathState s, bool despawn)
         UpdateDecayTimers();
         m_corpseRemoveTime = time(nullptr) + m_corpseDelay;
         //! its quick enough, so we're not modyifing it
-        if (m_respawnDelay < 60U)
+        if (m_respawnDelay < 45U)
             m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
         else
         {
-            uint32 _respawnDelay = std::max(60U, uint32(m_respawnDelay * m_respawnRate));
+            uint32 _respawnDelay = std::max(45U, uint32(m_respawnDelay * m_respawnRate));
             m_respawnTime = time(nullptr) + _respawnDelay + m_corpseDelay;
         }
 
