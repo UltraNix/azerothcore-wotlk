@@ -6109,6 +6109,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     lockId = go->GetGOInfo()->GetLockId();
                     if (!lockId)
                         return SPELL_FAILED_BAD_TARGETS;
+
+                    if (go->GetGoType() == GAMEOBJECT_TYPE_CHEST && go->GetGOInfo() && sWorld->getBoolConfig(CONFIG_CHECK_GAMEOBJECT_LEVEL_REQ))
+                    {
+                        if (m_caster->getLevel() < go->GetGOInfo()->chest.level)
+                            return SPELL_FAILED_LEVEL_REQUIREMENT;
+                    }
                 }
                 else if (ItemRef itm = m_targets.GetItemTarget())
                     lockId = itm->GetTemplate()->LockID;
