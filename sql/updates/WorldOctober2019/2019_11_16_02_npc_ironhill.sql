@@ -1,0 +1,4 @@
+DELETE FROM `creature` WHERE `guid` = 3253933;
+DELETE FROM `creature` WHERE `guid` = 15850;
+INSERT INTO `creature` VALUES
+(15850, 2304, 0, 1, 1, 3769, 1, -1312.829956, -1209.420044, 49.902805, 3.81878, 300, 0, 0, 1057, 0, 0, 0, 0, 0);
