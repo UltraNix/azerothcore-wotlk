@@ -3728,15 +3728,25 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
-            56001, // Ebonweave
-            56002, // Moonshroud
-            56003, // Spellweave
             55208, // Smelt Titansteel
             60350, // Transmute Titanium
             }, [](SpellInfo* spellInfo) {
             if (sWorld->PatchNotes(PATCH_30X, PATCH_330))
             {
                 spellInfo->RecoveryTime = 20 * HOUR * IN_MILLISECONDS;
+                spellInfo->_requireCooldownInfo = true;
+            }
+        });
+
+        ApplySpellFix
+        ({
+            56001, // Ebonweave
+            56002, // Moonshroud
+            56003, // Spellweave
+            }, [](SpellInfo* spellInfo) {
+            if (sWorld->PatchNotes(PATCH_30X, PATCH_330))
+            {
+                spellInfo->RecoveryTime = 92 * HOUR * IN_MILLISECONDS;
                 spellInfo->_requireCooldownInfo = true;
             }
         });
