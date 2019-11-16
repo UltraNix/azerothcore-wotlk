@@ -208,6 +208,7 @@ enum WorldBoolConfigs
     CONFIG_ENABLE_WARDEN_LUA_CLEANUP,         // Cleans up warden_lua_failures table on world start-up
     CONFIG_BG_DF_XP_BOOST_ENABLE,             // Enables or disables additional exp for finishing df or bg above 67lvl
     CONFIG_DUEL_DEBUFF_RESET,
+    CONFIG_CHECK_GAMEOBJECT_LEVEL_REQ,        // When enabled, a chest gameobject will check for level requirements if said go has restrictions
     BOOL_CONFIG_VALUE_COUNT
 };
 
