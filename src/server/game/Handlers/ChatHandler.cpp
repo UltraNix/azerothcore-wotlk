@@ -68,7 +68,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
 
     // pussywizard: chatting on most chat types requires 2 hours played to prevent spam/abuse
     //! Riztazz: but not for addon messages, it might break addons and our warden lua sender
-    if (AccountMgr::IsPlayerAccount(GetSecurity()) && lang != LANG_ADDON)
+    if (sWorld->getBoolConfig(CONFIG_ENABLE_SEND_CHAT_MESSAGE_REQ) && AccountMgr::IsPlayerAccount(GetSecurity()) && lang != LANG_ADDON)
     {
         switch (type)
         {

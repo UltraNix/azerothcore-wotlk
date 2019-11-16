@@ -1447,6 +1447,7 @@ void World::LoadConfigSettings(bool reload)
     m_float_configs[CONFIG_BG_DF_XP_BOOST_VALUE] = sConfigMgr->GetFloatDefault("BgDf.Xp.Boost.Value", 0.25f);
 
     m_bool_configs[CONFIG_CHECK_GAMEOBJECT_LEVEL_REQ] = sConfigMgr->GetBoolDefault("GameObject.CheckLevelRequirements.Enable", false);
+    m_bool_configs[CONFIG_ENABLE_SEND_CHAT_MESSAGE_REQ] = sConfigMgr->GetBoolDefault("CheckMessageRequiredTime.Enable", true);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
