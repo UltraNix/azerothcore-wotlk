@@ -8870,7 +8870,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (Player* plr = ToPlayer())
             {
-                if (!victim)
+                if (!victim || plr->HasSpellCooldown(16459))
                     return false;
 
                 if (plr->IsWithinMeleeRange(victim, MELEE_RANGE, true))
