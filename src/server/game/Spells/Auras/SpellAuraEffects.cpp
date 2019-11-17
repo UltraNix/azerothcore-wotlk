@@ -606,15 +606,8 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
 
     GetBase()->CallScriptEffectCalcPeriodicHandlers(this, m_isPeriodic, m_amplitude);
 
-    if (m_spellInfo->Id == 1515)
-        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell 1515 (Tame beast) called CalculatePeriodic, create(%d) load(%d)!", create, load);
-
     if (!m_isPeriodic)
-    {
-        if (m_spellInfo->Id == 1515)
-            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell 1515 (Tame beast) called CalculatePeriodic, !m_isPeriodic returns false, create(%d) load(%d)!", create, load);
         return;
-    }
 
     // Xinef: fix broken data in dbc
     if (m_amplitude <= 0)
@@ -635,8 +628,6 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             {
                 float _casterCastSpeed = caster->GetFloatValue(UNIT_MOD_CAST_SPEED);
                 m_amplitude = int32(m_amplitude * _casterCastSpeed);
-                if (m_spellInfo->Id == 1515)
-                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "m_amplitude for spellId: 1515 is (%u) and caster mod cast speed is: (%f)", m_amplitude, _casterCastSpeed);
             }
         }
     }
@@ -665,8 +656,6 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
                 if (!GetSpellInfo()->HasAttribute(SPELL_ATTR5_START_PERIODIC_AT_APPLY))
                 {
                     m_periodicTimer += m_amplitude;
-                    if (m_spellInfo->Id == 1515)
-                        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "m_periodicTimer for 1515 is: %u", m_periodicTimer);
                 }
                 else if (caster && caster->IsTotem()) // for totems only ;d
                 {
@@ -677,9 +666,6 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             }
         }
     }
-
-    if (m_spellInfo->Id == 1515)
-        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "leaving Calculate periodic for 1515: final amplitude is: %u and m_periodic is: %u", m_amplitude, m_periodicTimer);
 }
 
 void AuraEffect::CalculateSpellMod()
