@@ -180,6 +180,7 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
 
     bool longBan = false; // 14d = 1209600s
     if (checkFailed)
+    {
         switch (checkFailed)
         {
             case 47: banReason += " (FrameXML Signature Check)"; break;
@@ -215,7 +216,8 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
             case 790: banReason += " (HideToolz)"; longBan = true; break;
             case 791: banReason += " (Cheat Engine)"; longBan = true; break;
         }
-
+    }
+    else return "Undefined";
 
     // Force to ban cheaters with 3th party software jnjection
     if (longBan)
