@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -148,7 +148,7 @@ void Channel::CleanOldChannelsInDB()
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_OLD_CHANNELS_BANS);
         trans->Append(stmt);
-        
+
         CharacterDatabase.CommitTransaction(trans);
     }
 }
@@ -320,7 +320,7 @@ void Channel::KickOrBan(Player const* player, std::string const& badname, bool b
         return;
     }
 
-    if (!playersStore[good].IsModerator() && !AccountMgr::IsGMAccount(sec))
+    if (!playersStore[good].IsModerator() && !sec)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -328,7 +328,7 @@ void Channel::KickOrBan(Player const* player, std::string const& badname, bool b
         return;
     }
 
-    if (!isGoodConstantModerator && !AccountMgr::IsGMAccount(sec))
+    if (!isGoodConstantModerator && !sec)
     {
         ChatHandler(player->GetSession()).PSendSysMessage("Channel: Ban or Kick option is available only for Game Masters.");
         return;
@@ -829,6 +829,7 @@ void Channel::Say(uint64 guid, std::string const& what, uint32 lang)
         ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, Language(lang), guid, guid, what, 0, "", "", 0, false, _name);
 
     SendToAll(&data, pinfo.IsModerator() ? 0 : guid);
+
 }
 
 void Channel::EveryoneSayToSelf(const char *what)
