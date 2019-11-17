@@ -580,7 +580,7 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
     m_amplitude = m_spellInfo->Effects[m_effIndex].Amplitude;
 
     // prepare periodics
-     switch (GetAuraType())
+    switch (GetAuraType())
     {
         case SPELL_AURA_OBS_MOD_POWER:
             // 3 spells have no amplitude set
@@ -606,8 +606,15 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
 
     GetBase()->CallScriptEffectCalcPeriodicHandlers(this, m_isPeriodic, m_amplitude);
 
+    if (m_spellInfo->Id == 1515)
+        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell 1515 (Tame beast) called CalculatePeriodic, create(%d) load(%d)!", create, load);
+
     if (!m_isPeriodic)
+    {
+        if (m_spellInfo->Id == 1515)
+            sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell 1515 (Tame beast) called CalculatePeriodic, !m_isPeriodic returns false, create(%d) load(%d)!", create, load);
         return;
+    }
 
     // Xinef: fix broken data in dbc
     if (m_amplitude <= 0)
@@ -625,7 +632,12 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
         if (caster)
         {
             if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellInfo) || m_spellInfo->HasAttribute(SPELL_ATTR5_HASTE_AFFECT_DURATION))
-                m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+            {
+                float _casterCastSpeed = caster->GetFloatValue(UNIT_MOD_CAST_SPEED);
+                m_amplitude = int32(m_amplitude * _casterCastSpeed);
+                if (m_spellInfo->Id == 1515)
+                    sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "m_amplitude for spellId: 1515 is (%u) and caster mod cast speed is: (%f)", m_amplitude, _casterCastSpeed);
+            }
         }
     }
 
@@ -651,7 +663,11 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             if (m_amplitude)
             {
                 if (!GetSpellInfo()->HasAttribute(SPELL_ATTR5_START_PERIODIC_AT_APPLY))
+                {
                     m_periodicTimer += m_amplitude;
+                    if (m_spellInfo->Id == 1515)
+                        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "m_periodicTimer for 1515 is: %u", m_periodicTimer);
+                }
                 else if (caster && caster->IsTotem()) // for totems only ;d
                 {
                     m_periodicTimer = 100; // make it ALMOST instant
@@ -661,6 +677,9 @@ void AuraEffect::CalculatePeriodic(Unit* caster, bool create, bool load)
             }
         }
     }
+
+    if (m_spellInfo->Id == 1515)
+        sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "leaving Calculate periodic for 1515: final amplitude is: %u and m_periodic is: %u", m_amplitude, m_periodicTimer);
 }
 
 void AuraEffect::CalculateSpellMod()
