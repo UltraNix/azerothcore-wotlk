@@ -482,7 +482,7 @@ void Channel::UnBan(Player const* player, std::string const& badname)
         return;
     }
 
-    if (!playersStore[good].IsModerator() && !AccountMgr::IsGMAccount(sec))
+    if (!playersStore[good].IsModerator() && !sec)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -490,7 +490,7 @@ void Channel::UnBan(Player const* player, std::string const& badname)
         return;
     }
 
-    if (!isConstantModerator)
+    if (!isConstantModerator && !sec)
     {
         ChatHandler(player->GetSession()).PSendSysMessage("Channel: Unban option is available only for Game Masters.");
         return;
