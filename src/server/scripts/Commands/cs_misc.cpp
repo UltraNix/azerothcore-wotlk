@@ -3120,7 +3120,7 @@ public:
 
         if (groupTarget)
         {
-            handler->PSendSysMessage(LANG_GROUP_TYPE, (groupTarget->isRaidGroup() ? "raid" : "party"));
+            handler->PSendSysMessage(LANG_GROUP_TYPE, (groupTarget->isRaidGroup() ? "raid" : "party"), groupTarget->GetMembersCount());
             Group::MemberSlotList const& members = groupTarget->GetMemberSlots();
             for (Group::MemberSlotList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
             {
