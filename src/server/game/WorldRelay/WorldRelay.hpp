@@ -1,10 +1,11 @@
 #pragma once
 
-#include "cpr/cpr.h"
 #include "json.hpp"
 #include "Threading/SyncQueue.hpp"
 
 #include <vector>
+
+class HttpPosterSocket;
 
 enum WorldRelayType
 {
@@ -67,15 +68,14 @@ public:
     void                Add(RelayRequest /*request*/);
 
 private:
-    void                RelayMessage(RelayRequest& /*request*/);
+    void                RelayMessage(RelayRequest& /*request*/, HttpPosterSocket& soc);
 
     //! prepare json message for types
-    void                BuildRelayBodyTicketNew(RelayRequest /*request*/);
-    void                BuildRelayBodyTicketClosed(RelayRequest /*request*/);
-    void                BuildRelayCheatDetected(RelayRequest /*request*/);
-    void                BuildRelayWorldstartup(RelayRequest /*request*/);
+    void                BuildRelayBodyTicketNew(RelayRequest /*request*/, HttpPosterSocket& soc);
+    void                BuildRelayBodyTicketClosed(RelayRequest /*request*/, HttpPosterSocket& soc);
+    void                BuildRelayCheatDetected(RelayRequest /*request*/, HttpPosterSocket& soc);
+    void                BuildRelayWorldstartup(RelayRequest /*request*/, HttpPosterSocket& soc);
 
-    void                SendToHost(json /*jsonStructure*/, WorldRelayType /*type*/);
     std::string const   GetAddressForRelayType(WorldRelayType /*type*/) const;
 
     std::atomic_bool    m_shutdown;

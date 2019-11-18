@@ -1,3 +1,4 @@
+#include "WorldRelaySocket.hpp"
 #include "WorldRelay.hpp"
 #include "fmt/format.h"
 
@@ -78,10 +79,11 @@ void WorldRelay::InitializeRelay(size_t threadsCount)
     {
         m_pool.push_back(std::thread([this]
         {
+            HttpPosterSocket soc("priv.wherego.pl");
             while (!m_shutdown)
             {
                 auto request = m_queue.pop();
-                RelayMessage(request);
+                RelayMessage(request, soc);
             }
         }));
     }
@@ -97,7 +99,7 @@ void WorldRelay::Add(RelayRequest request)
     m_queue.push(std::move(request));
 }
 
-void WorldRelay::RelayMessage(RelayRequest& request)
+void WorldRelay::RelayMessage(RelayRequest& request, HttpPosterSocket& soc)
 {
     if (request.first >= WORLD_RELAY_MAX_TYPE)
         return;
@@ -105,23 +107,23 @@ void WorldRelay::RelayMessage(RelayRequest& request)
     switch (request.first)
     {
         case TYPE_TICKETS_NEW:
-            BuildRelayBodyTicketNew(request);
+            BuildRelayBodyTicketNew(request, soc);
             break;
         case TYPE_TICKETS_CLOSED:
-            BuildRelayBodyTicketClosed(request);
+            BuildRelayBodyTicketClosed(request, soc);
             break;
         case TYPE_LUA_CHECK_FAILURE_TIMEOUT:
         case TYPE_LUA_CHECK_FAILURE:
         case TYPE_LUA_TRAP_FAILURE:
-            BuildRelayCheatDetected(request);
+            BuildRelayCheatDetected(request, soc);
             break;
         case TYPE_LUA_FAILURES_INFORM:
-            BuildRelayWorldstartup(request);
+            BuildRelayWorldstartup(request, soc);
             break;
     }
 }
 
-void WorldRelay::BuildRelayBodyTicketNew(RelayRequest request)
+void WorldRelay::BuildRelayBodyTicketNew(RelayRequest request, HttpPosterSocket& soc)
 {
     auto result = m_jsonStore.find(request.first);
     if (result == m_jsonStore.end())
@@ -152,10 +154,10 @@ void WorldRelay::BuildRelayBodyTicketNew(RelayRequest request)
         request.second.playerName);
 
     json = json::parse(jsonString);
-    SendToHost(std::move(json), request.first);
+    soc.post(std::move(json.dump()), std::move(GetAddressForRelayType(request.first)));
 }
 
-void WorldRelay::BuildRelayBodyTicketClosed(RelayRequest request)
+void WorldRelay::BuildRelayBodyTicketClosed(RelayRequest request, HttpPosterSocket& soc)
 {
     auto result = m_jsonStore.find(request.first);
     if (result == m_jsonStore.end())
@@ -171,10 +173,10 @@ void WorldRelay::BuildRelayBodyTicketClosed(RelayRequest request)
         request.second.playerName);
     json = json::parse(jsonString);
 
-    SendToHost(std::move(json), request.first);
+    soc.post(std::move(json.dump()), std::move(GetAddressForRelayType(request.first)));
 }
 
-void WorldRelay::BuildRelayCheatDetected(RelayRequest request)
+void WorldRelay::BuildRelayCheatDetected(RelayRequest request, HttpPosterSocket& soc)
 {
     auto result = m_jsonStore.find(request.first);
     if (result == m_jsonStore.end())
@@ -211,10 +213,10 @@ void WorldRelay::BuildRelayCheatDetected(RelayRequest request)
         "Warden");
 
     json = json::parse(jsonString);
-    SendToHost(std::move(json), request.first);
+    soc.post(std::move(json.dump()), std::move(GetAddressForRelayType(request.first)));
 }
 
-void WorldRelay::BuildRelayWorldstartup(RelayRequest request)
+void WorldRelay::BuildRelayWorldstartup(RelayRequest request, HttpPosterSocket& soc)
 {
     auto result = m_jsonStore.find(request.first);
     if (result == m_jsonStore.end())
@@ -225,18 +227,7 @@ void WorldRelay::BuildRelayWorldstartup(RelayRequest request)
     std::string jsonString = fmt::format(_unformattedString, request.second.message, "World Informer");
 
     json = json::parse(jsonString);
-    SendToHost(std::move(json), request.first);
-}
-
-void WorldRelay::SendToHost(json json, WorldRelayType type)
-{
-    cpr::Response r = cpr::Post
-    (
-        cpr::VerifySsl{ false }, // ToDo: fix me
-        cpr::Url{ GetAddressForRelayType(type) },
-        cpr::Body{ json.dump() },
-        cpr::Header{ { "Content-Type", "application/json" } }
-    );
+    soc.post(std::move(json.dump()), std::move(GetAddressForRelayType(request.first)));
 }
 
 std::string const WorldRelay::GetAddressForRelayType(WorldRelayType type) const
