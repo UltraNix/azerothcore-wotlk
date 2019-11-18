@@ -2570,6 +2570,9 @@ time_t Creature::GetRespawnTimeEx() const
 
 void Creature::UpdateDecayTimers()
 {
+    // Don't update corpse delay if it's 0 (Creature despawned by script)
+    if (!m_corpseDelay)
+        return;
     CreatureTemplate const* cTemplate = GetCreatureTemplate();
     if (cTemplate)
     {
