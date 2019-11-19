@@ -1183,7 +1183,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
 {
     uint32 spellId = 0;
     uint32 spellId2 = 0;
-    //uint32 spellId3 = 0;
+    uint32 spellId3 = 0;
     uint32 HotWSpellId = 0;
 
     switch (GetMiscValue())
@@ -1223,6 +1223,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         case FORM_MOONKIN:
             spellId = 24905;
             spellId2 = 69366;
+            spellId3 = 24907; // Moonkin Aura
             break;
         case FORM_FLIGHT:
             spellId = 33948;
@@ -1273,6 +1274,13 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             if (player)
                 player->RemoveSpellCooldown(spellId2);
             target->CastSpell(target, spellId2, true, NULL, this, target->GetGUID());
+        }
+
+        if (spellId3)
+        {
+            if (player)
+                player->RemoveSpellCooldown(spellId3);
+            target->CastSpell(target, spellId3, true, NULL, this, target->GetGUID());
         }
 
         if (player)

@@ -5184,7 +5184,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 63058:
             spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE;
             break;
-
+        // Moonkin Form - Trigger spell moved to HandleShapeshiftBoosts due to powershifting bug
+        case 24858:
+            spellInfo->Effect[EFFECT_2] = 0;
+            break;
 
         /////////////////////////////////
         ///// MISC
