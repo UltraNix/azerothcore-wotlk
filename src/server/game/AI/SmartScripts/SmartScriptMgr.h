@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -471,7 +471,7 @@ enum SMART_ACTION
     SMART_ACTION_EVADE                              = 24,     // No Params
     SMART_ACTION_FLEE_FOR_ASSIST                    = 25,     // With Emote
     SMART_ACTION_CALL_GROUPEVENTHAPPENS             = 26,     // QuestID
-    SMART_ACTION_COMBAT_STOP                        = 27,     // 
+    SMART_ACTION_COMBAT_STOP                        = 27,     //
     SMART_ACTION_REMOVEAURASFROMSPELL               = 28,     // Spellid (0 removes all auras), charges (0 removes aura)
     SMART_ACTION_FOLLOW                             = 29,     // Distance (0 = default), Angle (0 = default), EndCreatureEntry, credit, creditType (0monsterkill, 1event)
     SMART_ACTION_RANDOM_PHASE                       = 30,     // PhaseId1, PhaseId2, PhaseId3...
@@ -589,7 +589,7 @@ enum SMART_ACTION
     SMART_ACTION_SET_HOVER                            = 141,    // 0/1
     SMART_ACTION_ADD_IMMUNITY                        = 142,    // type, id, value
     SMART_ACTION_REMOVE_IMMUNITY                    = 143,    // type, id, value
-    SMART_ACTION_FALL                                = 144,    // 
+    SMART_ACTION_FALL                                = 144,    //
     SMART_ACTION_SET_EVENT_FLAG_RESET                = 145,    // 0/1
     SMART_ACTION_REMOVE_ALL_GAMEOBJECTS                = 146,
     SMART_ACTION_STOP_MOTION                        = 147,      // stopMoving, movementExpired
@@ -803,6 +803,7 @@ struct SmartAction
         struct
         {
             uint32 delay;
+            uint32 forceRespawnTimer;
         } forceDespawn;
 
         struct
