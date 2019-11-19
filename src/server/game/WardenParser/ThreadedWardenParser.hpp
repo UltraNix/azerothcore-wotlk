@@ -32,6 +32,7 @@ namespace WardenParserWin
     protected:
         void ParseMessage(ParseRequest request);
         void SplitAddonMessage(std::string& /*_message*/, std::string& /*_prefix*/, std::string& /*_body*/, uint32 /*tabPosition*/, uint32 /*prefixSize*/);
+        bool ParseDebugStackMessage(std::string _message);
 
         std::atomic_bool    m_shutdown;
 

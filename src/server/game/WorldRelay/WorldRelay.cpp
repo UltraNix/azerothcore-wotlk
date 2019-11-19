@@ -135,7 +135,7 @@ void WorldRelay::BuildRelayBodyTicketNew(RelayRequest request, HttpPosterSocket&
     /** Argument order:
         name, name, color, level, race, class, guid, account name, zone name, area name, message, ticketId, playername
     **/
-    std::string ticketMsg = EscapeForJson(request.second.message);
+    std::string ticketMsg = escape_string(request.second.message);
     std::string jsonString = fmt::format(_unformattedString,
         sWorld->GetRealmName(),
         request.second.playerName,
@@ -186,13 +186,14 @@ void WorldRelay::BuildRelayCheatDetected(RelayRequest request, HttpPosterSocket&
     std::string _unformattedFailureMessage = "{} \\nRealmName: {} \\n WARDEN check failed for (Player name: {}) (Account Id: {}){} Possible cheater!"
         "\\nFalse positive chance: {} {} "
         "\\n ``` \\nData: \\nCheckId: {} \\nCheck description: {}"
-        "\\n \\nPlayer name: {} \\nPlayer GUID: {} \\nPosition when check was send: {}\\n``` \\n---";
+        "\\n \\nPlayer name: {} \\nPlayer GUID: {} \\nPosition when check was send: {}\\n\\n\\nAdditional message:\\n{}\\n``` \\n---";
 
     std::time_t time = std::time(nullptr);
     char readableTime[100];
     bool success = std::strftime(readableTime, sizeof(readableTime), "%A %c", std::localtime(&time));
 
     std::string _unformattedJsonString = result->second;
+    std::string _secondMessage = escape_string(request.second._additionalMessage);
 
     std::string failureMessage = fmt::format(_unformattedFailureMessage,
         success ? readableTime : "INVALID",
@@ -206,7 +207,8 @@ void WorldRelay::BuildRelayCheatDetected(RelayRequest request, HttpPosterSocket&
         request.second._cheatDescription,
         request.second.playerName,
         request.second.playerGUID,
-        request.second.playerPosition.ToString());
+        request.second.playerPosition.ToString(),
+        _secondMessage);
 
     std::string jsonString = fmt::format(_unformattedJsonString,
         failureMessage,
@@ -237,20 +239,6 @@ std::string const WorldRelay::GetAddressForRelayType(WorldRelayType type) const
         return search->second;
 
     return { };
-}
-
-std::string WorldRelay::EscapeForJson(std::string const& source)
-{
-    std::ostringstream o;
-    for (auto c = source.cbegin(); c != source.cend(); c++)
-    {
-        if (*c == '"' || *c == '\\' || ('\x00' <= *c && *c <= '\x1f'))
-            o << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int)*c;
-        else
-            o << *c;
-    }
-
-    return o.str();
 }
 
 WorldRelay & GetRelay()

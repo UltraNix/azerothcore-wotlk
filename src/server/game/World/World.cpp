@@ -146,6 +146,10 @@ World::World()
     memset(m_int_configs, 0, sizeof(m_int_configs));
     memset(m_bool_configs, 0, sizeof(m_bool_configs));
     memset(m_float_configs, 0, sizeof(m_float_configs));
+    m_Autobroadcasts.clear();
+    m_AutobroadcastsWeights.clear();
+    m_AutobroadcastsCountry.clear();
+    m_AutobroadcastsExceptCountry.clear();
 }
 
 /// World destructor
@@ -1438,6 +1442,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_ENABLE_WARDEN_LUA_CHECKS] = sConfigMgr->GetBoolDefault("WardenLua.Enabled", false);
     m_int_configs[CONFIG_WARDEN_LUA_CHECK_TIMEOUT] = sConfigMgr->GetIntDefault("WardenLua.CheckTimeout", 1);
     m_int_configs[CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS] = sConfigMgr->GetIntDefault("WardenLuaGenerator.NumThreads", 1);
+    m_bool_configs[CONFIG_WARDEN_RELAY_TIMEOUTS] = sConfigMgr->GetBoolDefault("Warden.Relay.RelayTimeouts", true);
 
     // Xp Rates
     m_int_configs[CONFIG_MAX_RATE_XP_1_67] = sConfigMgr->GetIntDefault("Rate.Max.Xp.1.67", 5);
@@ -2173,7 +2178,7 @@ void World::LoadAutobroadcasts()
     do
     {
         Field* fields = result->Fetch();
-        uint8 id = fields[0].GetUInt8();
+        uint32 id = fields[0].GetUInt32();
 
         m_Autobroadcasts[id] = fields[4].GetString();
         m_AutobroadcastsExceptCountry[id] = fields[3].GetString();

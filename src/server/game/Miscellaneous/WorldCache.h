@@ -15,6 +15,7 @@ enum WardenLuaCheckType : uint32
     //! send before everything else
     WARDEN_LUA_FRAME_CREATION,
     WARDEN_LUA_ADDON_SENDER_CREATION,
+    WARDEN_LUA_TRAP_DEBUGSTACK,
 
     MAX_WARDEN_LUA_TYPES
 };

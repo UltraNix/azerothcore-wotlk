@@ -56,40 +56,52 @@ namespace WardenParserWin
             std::string _prefix{ };
             std::string _body{ };
             bool IsTrapMessage = false;
+            bool IsDebugStackMessage = false;
 
-            switch (message.size())
+            //! addon message is sent as one string seperated by tab (/t)
+            //! seperate prefix from message body
+            SplitAddonMessage(message, _prefix, _body, position, 5);
+            switch (_prefix.size())
             {
-                case WARDEN_PING_PONG_MESSAGE_SIZE:
-                    SplitAddonMessage(message, _prefix, _body, position, WARDEN_PREFIX_SIZE);
+                //case WARDEN_PREFIX_SIZE:
+                //    break;
+                case WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE:
+                    IsDebugStackMessage = true;
                     break;
-                case WARDEN_TRAP_MESSAGE_SIZE:
-                    SplitAddonMessage(message, _prefix, _body, position, WARDEN_TRAP_PREFIX_SIZE);
+                case WARDEN_TRAP_PREFIX_SIZE:
                     IsTrapMessage = true;
                     break;
                 default:
-                    //! return alltogether, doesnt match our structures
-                    return;
+                    break;
             }
 
-            WardenRequest* request = IsTrapMessage ?
-                session->GetLuaTrapRequest(_prefix) : session->GetLuaRequest(_prefix);
+            WardenRequest* request = nullptr;
+            if (IsTrapMessage || IsDebugStackMessage)
+                request = session->GetLuaTrapRequest(_prefix);
+            else
+                request = session->GetLuaRequest(_prefix);
 
             if (!request)
             {
-                sLog->outStaticDebug("ThreadedWardenParser::ParseMessage: Lack of lua request for key %s", _prefix);
+                sLog->outDebug(LOG_FILTER_WARDEN, "ThreadedWardenParser::ParseMessage: Lack of lua request for key %s", _prefix);
                 return;
             }
 
             bool checkPassed = false;
-            if (!IsTrapMessage)
+            if (IsDebugStackMessage)
+            {
+                checkPassed = ParseDebugStackMessage(_body);
+            }
+            else if (IsTrapMessage)
+            {
+                if (_prefix == request->GetPrefix() && _body == request->GetBody())
+                    checkPassed = false;
+            }
+            else
             {
                 if (_prefix == request->GetPrefix())
                     checkPassed = _body == request->GetBody();
             }
-            //! Trap checks send only one addon message, only in case of cheating
-            //! if we hit it then client is cheating
-            else if (_prefix == request->GetPrefix() && _body == request->GetBody())
-                checkPassed = false;
 
             if (!checkPassed)
             {
@@ -103,6 +115,7 @@ namespace WardenParserWin
                             request->GetCheckId(), session->GetAccountId(), _body.c_str(), request->GetBody().c_str());
                 }
 
+                session->HandleCheckFailure(request->GetCheckId(), false);
                 if (sWorldCache.CanRelayLuaResult(request->GetCheckId()))
                 {
                     RelayData data;
@@ -113,14 +126,14 @@ namespace WardenParserWin
                     data.checkId = request->GetCheckId();
                     data._cheatDescription = request->GetDescription();
                     data.falsePositiveChance = request->GetFalsePositiveChance();
+                    data._additionalMessage = std::move(_body);
 
-                    session->HandleCheckFailure(request->GetCheckId(), false);
-                    GetRelay().Add(std::make_pair((IsTrapMessage ? TYPE_LUA_TRAP_FAILURE : TYPE_LUA_CHECK_FAILURE), data));
+                    GetRelay().Add(std::make_pair(((IsTrapMessage || IsDebugStackMessage) ? TYPE_LUA_TRAP_FAILURE : TYPE_LUA_CHECK_FAILURE), data));
                 }
             }
 
             //! Erase request, client answered. We do not need to keep track of it anymore
-            if (!IsTrapMessage)
+            if (!IsTrapMessage && !IsDebugStackMessage)
                 session->ClearPongRequest(_prefix);
         }
     }
@@ -132,8 +145,20 @@ namespace WardenParserWin
         //! Whats left is our prefix, size is based on entire message size
         //! because size of message is static, check WARDEN_PREFIX_SIZE in WorldSession.h
         //! and then we check if it matches with anything we've sent in the past
-        message.resize(prefixSize);
+        message.resize(tabPosition);
         prefix = message;
+    }
+
+    //! True means everything went okay, client didnt cheat
+    bool ThreadedWardenParser::ParseDebugStackMessage(std::string message)
+    {
+        if (message.empty())
+            return false;
+
+        bool const foundSecureString = message.find("Secure") != std::string::npos;
+        bool const foundEnterPressedString = message.find("OnEnterPressed") != std::string::npos;
+
+        return foundSecureString || foundEnterPressedString;
     }
 
     ThreadedWardenParser & GetWardenParser()

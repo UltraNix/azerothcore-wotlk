@@ -232,6 +232,8 @@ constexpr uint32 WARDEN_BODY_SIZE{ 5 };
 constexpr uint32 WARDEN_TRAP_PREFIX_SIZE{ 7 };
 constexpr uint32 WARDEN_TRAP_BODY_SIZE{ 7 };
 
+constexpr uint32 WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE{ 6 };
+
 //! addonmessage string is composed of prefix + /t + body
 constexpr uint32 WARDEN_PING_PONG_MESSAGE_SIZE{ WARDEN_PREFIX_SIZE + WARDEN_BODY_SIZE + 1 };
 constexpr uint32 WARDEN_TRAP_MESSAGE_SIZE{ WARDEN_TRAP_PREFIX_SIZE + WARDEN_TRAP_BODY_SIZE + 1 };

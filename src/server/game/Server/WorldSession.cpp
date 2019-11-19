@@ -183,10 +183,17 @@ void WorldSession::OnWardenCycleFinished()
     {
         //! Okay, cycle finished - set _sendLuaCheck to opposite
         //! if its lua turn, we will ask for our code and wait till it's prepared
+        bool const _IsLuaEnabled = sWorld->getIntConfig(CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS) != 0U && !_luaCheckIDs.empty();
         _sendLuaCode = GetPlayer() ? !_sendLuaCode : false;
 
+        if (!_IsLuaEnabled)
+            _sendLuaCode = false;
+
         if (!_sendLuaCode)
-            _warden->RequestData();
+        {
+            if (_warden)
+                _warden->RequestData();
+        }
         else
         {
             //! Ask Threaded lua generator for our lua promise
@@ -219,6 +226,7 @@ void WorldSession::InitWarden(BigNumber* k, std::string const& os)
 
 void WorldSession::PrepareLuaCheck()
 {
+    sLog->outDebug(DebugLogFilters::LOG_FILTER_WARDEN, "** Entering prepare lua check (AccId %u CharacterGuid %u)", GetAccountId(), GetGuidLow());
     uint32 checkId = 0;
 
     if (!_mandatoryLuaCheckIDs.empty())
@@ -245,7 +253,7 @@ void WorldSession::PrepareLuaCheck()
 
 void WorldSession::SendLuaCheck()
 {
-    sLog->outStaticDebug("** Entering Send Lua Request (accId: %u CharacterGuid %u).", GetAccountId(), GetGuidLow());
+    sLog->outDebug(DebugLogFilters::LOG_FILTER_WARDEN, "** Entering Send Lua Request (accId: %u CharacterGuid %u).", GetAccountId(), GetGuidLow());
 
     if (!_warden)
         return;
@@ -293,8 +301,13 @@ void WorldSession::SendLuaCheck()
         return;
     }
 
-    if (_request.GetType() == WARDEN_LUA_TRAP)
+    if (_request.GetType() == WARDEN_LUA_TRAP || _request.GetType() == WARDEN_LUA_TRAP_DEBUGSTACK)
+    {
+        //! All other prefixes are obslete when new one arrives
+        //! this is NOT correct approach but frosthold just released and i dont have time to fix it properly.
+        _wardenClientTraps.clear();
         _wardenClientTraps.insert(std::make_pair(_request.GetPrefix(), std::move(_request)));
+    }
     else
     {
         //! This will add it to queue as normal pong request
@@ -366,7 +379,7 @@ void WorldSession::CheckLuaRequests()
         {
             HandleCheckFailure(it.second.GetCheckId(), true);
 
-            if (sWorldCache.CanRelayLuaResult(it.second.GetCheckId()))
+            if (sWorld->getBoolConfig(CONFIG_WARDEN_RELAY_TIMEOUTS) && sWorldCache.CanRelayLuaResult(it.second.GetCheckId()))
             {
                 RelayData data;
                 data.accountId = GetAccountId();

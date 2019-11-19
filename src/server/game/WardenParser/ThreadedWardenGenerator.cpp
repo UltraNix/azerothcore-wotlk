@@ -62,6 +62,7 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     std::string addonSuccessMessage = "{}('{}','{}','WHISPER','{}')";
     std::string addonFailureMessage = "{}('{}','{}','WHISPER','{}')";
     std::string SendAddonMessageFunction = "if ({} == nil)then {}=SendAddonMessage end";
+    std::string addonSuccessDebugStackMessage = "{}('{}',debugstack(2),'WHISPER', '{}')";
 
     //! Generate a name that includes a number in it
     //! ChatHandler checks whether a name in addon msg has a digit, if so it will return silently
@@ -78,6 +79,10 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
         _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_PREFIX_SIZE, WardenUniqueIdentifierCharset);
         _successBody = GenerateRandomIdentifier(WARDEN_TRAP_BODY_SIZE, WardenUniqueIdentifierCharset);
         _failureBody = GenerateRandomIdentifier(WARDEN_TRAP_BODY_SIZE - 1, WardenUniqueIdentifierCharset);
+    }
+    else if (checkType == WARDEN_LUA_TRAP_DEBUGSTACK)
+    {
+        _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE, WardenUniqueIdentifierCharset);
     }
     else
     {
@@ -99,8 +104,13 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     std::string finalAddonSuccessMessage = fmt::format(addonFailureMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _successBody.c_str(), _messageReceiver.c_str());
     std::string finalAddonFailureMessage = fmt::format(addonFailureMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _failureBody.c_str(), _messageReceiver.c_str());
     std::string finalAddonMessageFunction = fmt::format(SendAddonMessageFunction.c_str(), request.first._addonMessageFunctionPrefix.c_str(), request.first._addonMessageFunctionPrefix.c_str());
+    std::string finalAddonSuccessDebugStackMessage = fmt::format(addonSuccessDebugStackMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _messageReceiver.c_str());
 
-    ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessMessage);
+    if (checkType != WARDEN_LUA_TRAP_DEBUGSTACK)
+        ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessMessage);
+    else
+        ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessDebugStackMessage);
+
     ReplaceAll(_luaCode, "@addonFailure", finalAddonFailureMessage);
     //! creates custom function that handles sending addon message to the server
     //! this has to be re-send each time, because it is lost when UI is reloaded
