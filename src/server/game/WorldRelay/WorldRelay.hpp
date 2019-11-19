@@ -4,6 +4,7 @@
 #include "Threading/SyncQueue.hpp"
 
 #include <vector>
+#include <thread>
 
 class HttpPosterSocket;
 
