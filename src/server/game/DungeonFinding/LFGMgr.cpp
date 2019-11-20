@@ -175,16 +175,20 @@ void LFGMgr::LoadLFGDungeons(bool reload /* = false */)
 
     LfgDungeonStore.clear();
 
-    // Initialize Dungeon map with data from database (DBC has been moved to DB)
-    for (auto && it : sLFGDungeonStore)
+    // Initialize Dungeon map with data from dbcs
+    for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
     {
-        switch (it.second.type)
+        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(i);
+        if (!dungeon)
+            continue;
+
+        switch (dungeon->type)
         {
             case LFG_TYPE_DUNGEON:
             case LFG_TYPE_HEROIC:
             case LFG_TYPE_RAID:
             case LFG_TYPE_RANDOM:
-                LfgDungeonStore[it.second.ID] = LFGDungeonData(&it.second);
+                LfgDungeonStore[dungeon->ID] = LFGDungeonData(dungeon);
                 break;
         }
     }
