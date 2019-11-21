@@ -3321,6 +3321,13 @@ void Unit::_UpdateAutoRepeatSpell()
     // castroutine
     if (isAttackReady(RANGED_ATTACK))
     {
+        // We need to update pointers before calling CheckCast !
+        if (!m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->UpdatePointers())
+        {
+            InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            return;
+        }
+
         // Check if able to cast
         if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckCast(true) != SPELL_CAST_OK)
         {

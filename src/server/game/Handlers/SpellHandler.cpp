@@ -441,6 +441,17 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
             spellInfo = actualSpellInfo;
     }
 
+    if (spellInfo->AttributesEx2 & SPELL_ATTR2_AUTOREPEAT_FLAG)
+    {
+        Spell* autoReapeatSpell = _player->m_currentSpells[CURRENT_AUTOREPEAT_SPELL];
+        if (autoReapeatSpell && autoReapeatSpell->GetSpellInfo()->Id == spellInfo->Id)
+        {
+            // update targets if changed
+            autoReapeatSpell->m_targets = targets;
+            return;
+        }
+    }
+
     Spell* spell = new Spell(mover, spellInfo, TRIGGERED_NONE, 0, false);
     spell->m_cast_count = castCount;                       // set count of casts
     spell->prepare(&targets);

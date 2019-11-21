@@ -484,6 +484,25 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket & recv_data)
 #endif
 
     _player->SetSelection(guid);
+
+    Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
+    if (!unit)
+        return;
+
+    // Update autoshot if need
+    if (Spell * autoReapeatSpell = _player->GetCurrentSpell(CURRENT_AUTOREPEAT_SPELL))
+    {
+        if (!unit || unit == _player)
+            return;
+
+        if (!unit->IsInWorld() || unit->GetMap() != _player->GetMap())
+            return;
+
+        if (!unit->isTargetableForAttack(autoReapeatSpell->GetSpellInfo()->Id) || _player->IsFriendlyTo(unit))
+            return;
+
+        autoReapeatSpell->m_targets.SetUnitTarget(unit);
+    }
 }
 
 void WorldSession::HandleStandStateChangeOpcode(WorldPacket & recv_data)
