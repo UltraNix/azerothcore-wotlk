@@ -754,7 +754,6 @@ public:
             float x, y, z;
             handler->GetSession()->GetPlayer()->GetClosePoint(x, y, z, target->GetObjectSize());
             target->TeleportTo(handler->GetSession()->GetPlayer()->GetMapId(), x, y, z, target->GetOrientation());
-            target->SetPhaseMask(handler->GetSession()->GetPlayer()->GetPhaseMask(), false);
         }
         else
         {
