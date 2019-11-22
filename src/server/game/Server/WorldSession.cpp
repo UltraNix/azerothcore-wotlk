@@ -1824,6 +1824,12 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
             break;
         }
 
+        case CMSG_GUILD_BANK_SWAP_ITEMS:
+        {
+            maxPacketCounterAllowed = 45;
+            break;
+        }
+            
         case CMSG_SET_ACTION_BUTTON:
         {
             maxPacketCounterAllowed = MAX_ACTION_BUTTONS;
