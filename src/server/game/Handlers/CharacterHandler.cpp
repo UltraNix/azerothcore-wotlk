@@ -2077,6 +2077,8 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
         return;
     }
 
+
+
     // pussywizard:
     if (ObjectAccessor::FindPlayerInOrOutOfWorld(guid) || sWorld->FindOfflineSessionForCharacterGUID(GUID_LOPART(guid)))
     {
@@ -2128,6 +2130,15 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
         {
             WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
             data << (uint8)CHAR_CREATE_CHARACTER_DELETE_MAIL;
+            SendPacket(&data);
+            return;
+        }
+
+        //  can't change to race in same faction
+        if (Player::TeamIdForRace(playerData->race) == Player::TeamIdForRace(race))
+        {
+            WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
+            data << (uint8)CHAR_CREATE_CHARACTER_SWAP_FACTION;
             SendPacket(&data);
             return;
         }
