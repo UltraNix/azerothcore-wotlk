@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -373,7 +373,17 @@ struct LFGDungeonData
         type(dbc->type), expansion(dbc->expansion), group(dbc->grouptype),
         minlevel(dbc->minlevel), maxlevel(dbc->maxlevel), difficulty(Difficulty(dbc->difficulty)),
         seasonal(dbc->flags & LFG_FLAG_SEASONAL), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
-        { }
+    {
+        if (!dbc->recminlevel)
+            minRdfLevel = dbc->minlevel;
+        else
+            minRdfLevel = dbc->recminlevel;
+
+        if (!dbc->recmaxlevel)
+            maxRdfLevel = dbc->maxlevel;
+        else
+            maxRdfLevel = dbc->recmaxlevel;
+    }
 
     uint32 id;
     std::string name;
@@ -383,6 +393,8 @@ struct LFGDungeonData
     uint8 group;
     uint8 minlevel;
     uint8 maxlevel;
+    uint8 minRdfLevel;
+    uint8 maxRdfLevel;
     Difficulty difficulty;
     bool seasonal;
     float x, y, z, o;
@@ -425,6 +437,7 @@ class LFGMgr
         void LoadRewards();
         /// Loads dungeons from dbc and adds teleport coords
         void LoadLFGDungeons(bool reload = false);
+        void LoadCustomLevelBrackets();
 
         // Multiple files
         /// Check if given guid applied for random dungeon
@@ -559,7 +572,7 @@ class LFGMgr
         void DecreaseKicksLeft(uint64 guid);
         void SetState(uint64 guid, LfgState state);
         void SetCanOverrideRBState(uint64 guid, bool val);
-        void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap);
+        void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, bool IsRandomDungeon);
         void _SaveToDB(uint64 guid);
         LFGDungeonData const* GetLFGDungeon(uint32 id);
 
@@ -605,4 +618,5 @@ class LFGMgr
 } // namespace lfg
 
 #define sLFGMgr ACE_Singleton<lfg::LFGMgr, ACE_Null_Mutex>::instance()
+
 #endif

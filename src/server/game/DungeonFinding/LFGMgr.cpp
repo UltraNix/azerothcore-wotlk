@@ -607,7 +607,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, const
         // xinef: dont check compatibile dungeons for already running group (bind problems)
         if (!isContinue)
         {
-            GetCompatibleDungeons(dungeons, players, joinData.lockmap);
+            GetCompatibleDungeons(dungeons, players, joinData.lockmap, rDungeonId != 0);
             if (dungeons.empty())
                 joinData.result = grp ? LFG_JOIN_PARTY_NOT_MEET_REQS : LFG_JOIN_NOT_MEET_REQS;
         }
@@ -1370,13 +1370,34 @@ void LFGMgr::UpdateRoleCheck(uint64 gguid, uint64 guid /* = 0 */, uint8 roles /*
    @param[in]     players Set of players to check their dungeon restrictions
    @param[out]    lockMap Map of players Lock status info of given dungeons (Empty if dungeons is not empty)
 */
-void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap)
+void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, bool IsRandomType)
 {
     lockMap.clear();
+    uint32 _highestLevelInGroup = 0;
+    uint32 _lowestLevelInGroup = 81;
+    uint64 _lowestPlayerGUID = 0;
+    uint64 _highestPlayerGUID = 0;
+
     for (LfgGuidSet::const_iterator it = players.begin(); it != players.end() && !dungeons.empty(); ++it)
     {
         uint64 guid = (*it);
         LfgLockMap const& cachedLockMap = GetLockedDungeons(guid);
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        uint32 _playerLevel = player ? player->getLevel() : 0;
+
+        if (_playerLevel > _highestLevelInGroup)
+        {
+            _highestLevelInGroup = _playerLevel;
+            _highestPlayerGUID = guid;
+        }
+
+        if (_playerLevel < _lowestLevelInGroup)
+        {
+            _lowestLevelInGroup = _playerLevel;
+            _lowestPlayerGUID = guid;
+        }
+
+        //! First we clear all instances that we know are locked out
         for (LfgLockMap::const_iterator it2 = cachedLockMap.begin(); it2 != cachedLockMap.end() && !dungeons.empty(); ++it2)
         {
             uint32 dungeonId = (it2->first & 0x00FFFFFF); // Compare dungeon ids
@@ -1388,6 +1409,51 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
             }
         }
     }
+    
+    //! LFGDungeon contains two types of level brackets, one decides since when player can enter instance
+    //! second one are brackets for random dungeon selection
+    if (IsRandomType && sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_NEW_BRACKET_SYSTEM))
+    {
+        for (uint32 dung : dungeons)
+        {
+            uint32 _lockReason = 0;
+
+            LFGDungeonData const* _instanceData = GetLFGDungeon(dung);
+            if (_instanceData)
+            {
+                uint64 offenderGUID = 0;
+                uint32 _randomDungeonMinLevel = _instanceData->minRdfLevel;
+                uint32 _randomDungeonMaxLevel = _instanceData->maxRdfLevel;
+                //! first we remove all instances that lowest level in group cannot join
+                if (_lowestLevelInGroup < _randomDungeonMinLevel)
+                {
+                    _lockReason = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
+                    offenderGUID = _lowestPlayerGUID;
+                }
+                else if (_lowestLevelInGroup > _randomDungeonMaxLevel)
+                {
+                    _lockReason = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
+                    offenderGUID = _highestPlayerGUID;
+                }
+
+                //! if current dungeon is available to lowest level player then we have to check
+                //! if its available for highest player as well
+                if (!_lockReason)
+                {
+                    if (_highestLevelInGroup > _randomDungeonMaxLevel)
+                        _lockReason = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
+                }
+
+                auto iterator = dungeons.find(dung);
+                if (_lockReason && iterator != dungeons.end())
+                {
+                    dungeons.erase(iterator);
+                    lockMap[offenderGUID][dung] = _lockReason;
+                }
+            }
+        }
+    }
+
     if (!dungeons.empty())
         lockMap.clear();
 }

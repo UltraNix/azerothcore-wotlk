@@ -211,6 +211,7 @@ enum WorldBoolConfigs
     CONFIG_CHECK_GAMEOBJECT_LEVEL_REQ,        // When enabled, a chest gameobject will check for level requirements if said go has restrictions
     CONFIG_ENABLE_SEND_CHAT_MESSAGE_REQ,      // When enabled, ChatHandler will check for played time before sending message
     CONFIG_WARDEN_RELAY_TIMEOUTS,
+    CONFIG_DUNGEON_FINDER_NEW_BRACKET_SYSTEM,
     BOOL_CONFIG_VALUE_COUNT
 };
 
