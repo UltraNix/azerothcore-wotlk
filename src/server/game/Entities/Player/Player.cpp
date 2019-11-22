@@ -5784,15 +5784,6 @@ void Player::RepopAtGraveyard()
         return;
     }
 
-    if (GetMapId() == 230 && GetDifficulty(false) == DUNGEON_DIFFICULTY_HEROIC) // hellforge
-    {
-        m_deathTimer = 0;
-        ResurrectPlayer(1.0f);
-        SpawnCorpseBones();
-        TeleportTo(571, { 3538.170f, 275.510f, 45.61191f, 1.578f });
-        return;
-    }
-
     if (GetMapId() == 249 && GetDifficulty(true) == RAID_DIFFICULTY_25MAN_HEROIC) // Diablo
     {
         m_deathTimer = 0;
