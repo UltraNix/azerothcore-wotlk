@@ -1178,6 +1178,7 @@ enum TrinityStrings
     LANG_XP_RATE_INFO                       = 11037,
     LANG_XP_RATE_INFO_2                     = 11038,
     LANG_XP_RATE_CHANGED                    = 11039,
+    LANG_RAID_INVITE_RESTRICTION            = 11040,
 
     //                                      = 10500,
     //                                      = 10501,

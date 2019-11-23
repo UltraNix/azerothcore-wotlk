@@ -33,6 +33,8 @@
 #include "SpellAuras.h"
 #include "Vehicle.h"
 #include "utf8.h"
+#include "Chat.h"
+#include "Language.h"
 
 class Aura;
 
@@ -140,6 +142,12 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     Group* group = invitingPlayer->GetGroup();
     if (group && group->isBGGroup())
         group = invitingPlayer->GetOriginalGroup();
+    if (group && group->isRaidGroup() && sWorld->getBoolConfig(CONFIG_RAID_INVITE_RESTRICTION_ENABLE) && invitingPlayer->getLevel() < sWorld->getIntConfig(CONFIG_RAID_INVITE_RESTRICTION_LEVEL))
+    {
+        ChatHandler(invitingPlayer->GetSession()).PSendSysMessage(LANG_RAID_INVITE_RESTRICTION, sWorld->getIntConfig(CONFIG_RAID_INVITE_RESTRICTION_LEVEL));
+        return;
+    }
+
     if (!group)
         group = invitingPlayer->GetGroupInvite();
 

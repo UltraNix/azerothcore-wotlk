@@ -4049,3 +4049,16 @@ BgDf.Xp.Boost.Enable = 0
 #        Default: 0.25
 
 BgDf.Xp.Boost.Value = 0.25
+
+#    Raid.InviteRestriction.Enable
+#        Description: Enables or disables invites to raids below specified level
+#        Default: 1 (Enabled)
+
+Raid.InviteRestriction.Enable = 1
+
+#    Raid.InviteRestriction.Level
+#        Description: Level below players can't invite to raids
+#        Default: 10
+
+Raid.InviteRestriction.Level = 10
+

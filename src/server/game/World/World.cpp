@@ -1454,6 +1454,9 @@ void World::LoadConfigSettings(bool reload)
 
     m_bool_configs[CONFIG_CHECK_GAMEOBJECT_LEVEL_REQ] = sConfigMgr->GetBoolDefault("GameObject.CheckLevelRequirements.Enable", false);
     m_bool_configs[CONFIG_ENABLE_SEND_CHAT_MESSAGE_REQ] = sConfigMgr->GetBoolDefault("CheckMessageRequiredTime.Enable", true);
+
+    m_bool_configs[CONFIG_RAID_INVITE_RESTRICTION_ENABLE] = sConfigMgr->GetBoolDefault("Raid.InviteRestriction.Enable", true);
+    m_int_configs[CONFIG_RAID_INVITE_RESTRICTION_LEVEL] = sConfigMgr->GetIntDefault("Raid.InviteRestriction.Level", 10);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
