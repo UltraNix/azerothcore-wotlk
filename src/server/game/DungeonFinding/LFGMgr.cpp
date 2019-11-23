@@ -1414,6 +1414,7 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
     //! second one are brackets for random dungeon selection
     if (IsRandomType && sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_NEW_BRACKET_SYSTEM))
     {
+        std::set<uint32> _instancesToRemove;
         for (uint32 dung : dungeons)
         {
             uint32 _lockReason = 0;
@@ -1447,10 +1448,17 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
                 auto iterator = dungeons.find(dung);
                 if (_lockReason && iterator != dungeons.end())
                 {
-                    dungeons.erase(iterator);
+                    _instancesToRemove.insert(dung);
                     lockMap[offenderGUID][dung] = _lockReason;
                 }
             }
+        }
+
+        for (auto const& dungId : _instancesToRemove)
+        {
+            auto itr = dungeons.find(dungId);
+            if (itr != dungeons.end())
+                dungeons.erase(itr);
         }
     }
 
