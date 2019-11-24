@@ -6532,7 +6532,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     int32 Roll = irand(1, 1000);
 
     bool extra_chance = false;
-    if (sWorld->getBoolConfig(CONFIG_EXTRA_CHANCE_EVENT))
+    if (sWorld->getBoolConfig(CONFIG_EXTRA_CHANCE_EVENT) && GetTeamId() == TEAM_ALLIANCE)
         switch (urand(0, 1))
         {
         case 0:
