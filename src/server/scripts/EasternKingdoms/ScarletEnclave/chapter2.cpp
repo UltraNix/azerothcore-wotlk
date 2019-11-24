@@ -1028,6 +1028,11 @@ public:
                     ExecuteSpeech_Timer -= diff;
             }
         }
+
+        void JustDied(Unit* /* killer */) override
+        {
+            me->DespawnOrUnsummon(30s);
+        }
     };
 };
 
