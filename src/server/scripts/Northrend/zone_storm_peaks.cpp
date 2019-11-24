@@ -1074,6 +1074,11 @@ public:
                 freed = true;
             }
         }
+
+        void JustDied(Unit* /* killer */) override
+        {
+            me->DespawnOrUnsummon(30s);
+        }
     };
 
     CreatureAI* GetAI(Creature* creature) const
