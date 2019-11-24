@@ -291,6 +291,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
             AH->expire_time = time(nullptr) + auctionTime;
             AH->deposit = deposit;
             AH->auctionHouseEntry = auctionHouseEntry;
+            AH->auctionBirthTime = time(nullptr);
 
             ;//sLog->outDetail("CMSG_AUCTION_SELL_ITEM: Player %s (guid %d) is selling item %s entry %u (guid %d) to auctioneer %u with count %u with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u", _player->GetName().c_str(), _player->GetGUIDLow(), item->GetTemplate()->Name1.c_str(), item->GetEntry(), item->GetGUIDLow(), AH->auctioneer, item->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
             AH->aitem = sAuctionMgr->AddAItem(item);
@@ -331,6 +332,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
             AH->expire_time = time(nullptr) + auctionTime;
             AH->deposit = deposit;
             AH->auctionHouseEntry = auctionHouseEntry;
+            AH->auctionBirthTime = time(nullptr);
 
             ;//sLog->outDetail("CMSG_AUCTION_SELL_ITEM: Player %s (guid %d) is selling item %s entry %u (guid %d) to auctioneer %u with count %u with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u", _player->GetName().c_str(), _player->GetGUIDLow(), newItem->GetTemplate()->Name1.c_str(), newItem->GetEntry(), newItem->GetGUIDLow(), AH->auctioneer, newItem->GetCount(), bid, buyout, auctionTime, AH->GetHouseId());
             AH->aitem = sAuctionMgr->AddAItem(newItem);
@@ -539,6 +541,13 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
         ItemRef pItem = aItem ? aItem->GetItem() : nullptr;
         if ( pItem )
         {
+            auto _timeSinceAuctionBirth = time(nullptr) - auction->auctionBirthTime;
+            if (_timeSinceAuctionBirth <= 5)
+            {
+                SendAuctionCommandResult(0, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
+                return;
+            }
+
             if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
             {
                 uint32 auctionCut = auction->GetAuctionCut();

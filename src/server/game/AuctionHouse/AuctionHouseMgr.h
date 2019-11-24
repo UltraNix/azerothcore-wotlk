@@ -87,6 +87,7 @@ struct AuctionEntry
     AuctionHouseEntry const* auctionHouseEntry;             // in AuctionHouse.dbc
     uint32 factionTemplateId;
     AuctionItem const* aitem = nullptr;
+    time_t auctionBirthTime;
     // helpers
     uint32 GetHouseId() const { return auctionHouseEntry->houseId; }
     uint32 GetHouseFaction() const { return auctionHouseEntry->faction; }

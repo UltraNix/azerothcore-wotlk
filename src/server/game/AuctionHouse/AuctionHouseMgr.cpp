@@ -328,6 +328,7 @@ void AuctionHouseMgr::LoadAuctions()
 
         //! item should be already loaded
         aItem->aitem = GetAItem( aItem->item_guidlow );
+        aItem->auctionBirthTime = time(nullptr);
         GetAuctionsMap(aItem->factionTemplateId)->AddAuction(aItem);
         count++;
     } while (result->NextRow());
