@@ -5338,7 +5338,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_triggeredByAuraSpell)
                     return SPELL_FAILED_DONT_REPORT;
                 else
-                    return SPELL_FAILED_NOT_READY;
+                    return (!m_spellInfo->HasAttribute(SPELL_ATTR0_DISABLED_WHILE_ACTIVE)) ? SPELL_FAILED_NOT_READY : SPELL_FAILED_DONT_REPORT;
             }
 
             // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
@@ -5362,7 +5362,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->IsCooldownStartedOnEvent())
             return SPELL_FAILED_FIZZLE;
         else
-            return SPELL_FAILED_NOT_READY;
+            return (!m_spellInfo->HasAttribute(SPELL_ATTR0_DISABLED_WHILE_ACTIVE)) ? SPELL_FAILED_NOT_READY : SPELL_FAILED_DONT_REPORT;
+
     }
 
     // only triggered spells can be processed an ended battleground
