@@ -165,7 +165,7 @@ bool Battlefield::Update(uint32 diff)
 {
     if (m_Timer <= diff)
     {
-        if (!IsEnabled() || (!IsWarTime() && sWorld->GetPlayerCount() > 4500)) // if WG is disabled or there is more than 3500 connections, switch automaticly
+        if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_AUTOSWITCH_ENABLE) && ( !IsEnabled() || (!IsWarTime() && sWorld->GetPlayerCount() > sWorld->getIntConfig(CONFIG_WINTERGRASP_AUTOSWITCH_COUNT) ) )) // if WG is disabled or there is more than 3500 connections, switch automaticly
         {
             m_isActive = true;
             EndBattle(false);

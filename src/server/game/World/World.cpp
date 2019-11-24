@@ -1457,6 +1457,9 @@ void World::LoadConfigSettings(bool reload)
 
     m_bool_configs[CONFIG_RAID_INVITE_RESTRICTION_ENABLE] = sConfigMgr->GetBoolDefault("Raid.InviteRestriction.Enable", true);
     m_int_configs[CONFIG_RAID_INVITE_RESTRICTION_LEVEL] = sConfigMgr->GetIntDefault("Raid.InviteRestriction.Level", 10);
+
+    m_bool_configs[CONFIG_WINTERGRASP_AUTOSWITCH_ENABLE] = sConfigMgr->GetBoolDefault("Wintergrasp.Autoswitch.Enable", false);
+    m_int_configs[CONFIG_WINTERGRASP_AUTOSWITCH_COUNT] = sConfigMgr->GetIntDefault("Wintergrasp.Autoswitch.Count", 4500);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

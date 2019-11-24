@@ -4062,3 +4062,15 @@ Raid.InviteRestriction.Enable = 1
 
 Raid.InviteRestriction.Level = 10
 
+#    Wintergrasp.Autoswitch.Enable
+#        Description: Enables or disables Wintergrasp autoswitch above specified online players
+#        Default: 0
+
+Wintergrasp.Autoswitch.Enable = 0
+
+#    Wintergrasp.Autoswitch.Count
+#        Description: Online players above which Wintergrasp is autoswitched
+#        Default: 4500
+
+Wintergrasp.Autoswitch.Count = 4500
+
