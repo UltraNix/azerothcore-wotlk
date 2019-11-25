@@ -75,13 +75,16 @@ namespace WardenParserWin
                     break;
             }
 
-            WardenRequest* request = nullptr;
+            WardenRequestStore _store;
+            _store.clear();
+            //! Get by copy, different contexts might modify or erase while we operate on it
             if (IsTrapMessage || IsDebugStackMessage)
-                request = session->GetLuaTrapRequest(_prefix);
+                _store = session->GetLuaTrapRequests();
             else
-                request = session->GetLuaRequest(_prefix);
+                _store = session->GetLuaRequests();
 
-            if (!request)
+            auto luaRequest = _store.find(_prefix);
+            if (luaRequest == _store.end())
             {
                 sLog->outDebug(LOG_FILTER_WARDEN, "ThreadedWardenParser::ParseMessage: Lack of lua request for key %s", _prefix);
                 return;
@@ -94,13 +97,13 @@ namespace WardenParserWin
             }
             else if (IsTrapMessage)
             {
-                if (_prefix == request->GetPrefix() && _body == request->GetBody())
+                if (_prefix == luaRequest->second.GetPrefix() && _body == luaRequest->second.GetBody())
                     checkPassed = false;
             }
             else
             {
-                if (_prefix == request->GetPrefix())
-                    checkPassed = _body == request->GetBody();
+                if (_prefix == luaRequest->second.GetPrefix())
+                    checkPassed = _body == luaRequest->second.GetBody();
             }
 
             if (!checkPassed)
@@ -108,24 +111,24 @@ namespace WardenParserWin
                 if (sLog->IsOutDebug())
                 {
                     if (IsTrapMessage)
-                        sLog->outStaticDebug("Client trap triggered, CheckId(%u), AccountId (%u), Received prefix (%s), Received body (%s)", request->GetCheckId(),
+                        sLog->outStaticDebug("Client trap triggered, CheckId(%u), AccountId (%u), Received prefix (%s), Received body (%s)", luaRequest->second.GetCheckId(),
                             session->GetAccountId(), _prefix.c_str(), _body.c_str());
                     else
                         sLog->outStaticDebug("CheckId(%u) failed for account(%u). Received body is (%s) but correct answer should be (%s)!",
-                            request->GetCheckId(), session->GetAccountId(), _body.c_str(), request->GetBody().c_str());
+                            luaRequest->second.GetCheckId(), session->GetAccountId(), _body.c_str(), luaRequest->second.GetBody().c_str());
                 }
 
-                session->HandleCheckFailure(request->GetCheckId(), false);
-                if (sWorldCache.CanRelayLuaResult(request->GetCheckId()))
+                session->HandleCheckFailure(luaRequest->second.GetCheckId(), false);
+                if (sWorldCache.CanRelayLuaResult(luaRequest->second.GetCheckId()))
                 {
                     RelayData data;
                     data.accountId = session->GetAccountId();
-                    data.playerGUID = request->GetGUIDLow();
-                    data.playerName = request->GetPlayerName();
-                    data.playerPosition = request->GetPosition();
-                    data.checkId = request->GetCheckId();
-                    data._cheatDescription = request->GetDescription();
-                    data.falsePositiveChance = request->GetFalsePositiveChance();
+                    data.playerGUID = luaRequest->second.GetGUIDLow();
+                    data.playerName = luaRequest->second.GetPlayerName();
+                    data.playerPosition = luaRequest->second.GetPosition();
+                    data.checkId = luaRequest->second.GetCheckId();
+                    data._cheatDescription = luaRequest->second.GetDescription();
+                    data.falsePositiveChance = luaRequest->second.GetFalsePositiveChance();
                     data._additionalMessage = std::move(_body);
 
                     GetRelay().Add(std::make_pair(((IsTrapMessage || IsDebugStackMessage) ? TYPE_LUA_TRAP_FAILURE : TYPE_LUA_CHECK_FAILURE), data));
@@ -134,7 +137,7 @@ namespace WardenParserWin
 
             //! Erase request, client answered. We do not need to keep track of it anymore
             if (!IsTrapMessage && !IsDebugStackMessage)
-                session->ClearPongRequest(_prefix);
+                session->ClearPongRequest(std::move(_prefix));
         }
     }
 

@@ -224,7 +224,7 @@ struct PacketCounter
     uint32 amountCounter;
 };
 
-using WardenRequestStore = std::unordered_multimap<std::string/*prefix*/, WardenRequest>;
+using WardenRequestStore = std::unordered_map<std::string/*prefix*/, WardenRequest>;
 
 constexpr uint32 WARDEN_PREFIX_SIZE{ 5 };
 constexpr uint32 WARDEN_BODY_SIZE{ 5 };
@@ -1120,6 +1120,8 @@ class WorldSession
         WardenRequestStore _wardenRequests;
         WardenRequestStore _wardenClientTraps;
 
+        bool _luaStoreLock;
+        std::vector<std::string> _checksToRemove;
         AsyncLuaCodeResult _luaResult;
         void PrepareLuaCheck();
         void RotateLuaCheckIDs();
@@ -1144,8 +1146,9 @@ class WorldSession
         void OnWardenCycleFinished();
         inline bool IsWardenLuaTurn() const { return _sendLuaCode; }
 
-        WardenRequest* GetLuaRequest(std::string const& key);
-        WardenRequest* GetLuaTrapRequest(std::string const& key);
+        WardenRequestStore GetLuaRequests();
+        WardenRequestStore GetLuaTrapRequests();
+        
         //! Session are updated from map and world contexts
         //! We want scheduler to be updated only once (from world context)
         void UpdateWardenScheduler(uint32 diff);

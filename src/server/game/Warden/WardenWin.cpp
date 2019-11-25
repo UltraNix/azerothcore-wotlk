@@ -374,7 +374,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     {
         buff.rpos(buff.wpos());
         sLog->outDebug(LOG_FILTER_WARDEN, "CHECKSUM FAIL");
-        Penalty();
+        _session->KickPlayer(true);
         return;
     }
 
@@ -386,7 +386,8 @@ void WardenWin::HandleData(ByteBuffer &buff)
         if (result == 0x00)
         {
             sLog->outDebug(LOG_FILTER_WARDEN, "TIMING CHECK FAIL result 0x00");
-            Penalty();
+            _session->KickPlayer(true);
+            //Penalty();
             return;
         }
 

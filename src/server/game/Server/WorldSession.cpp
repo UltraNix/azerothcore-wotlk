@@ -132,6 +132,7 @@ void WorldSession::InitializeWarden()
     _warden = nullptr;
 
     //** Sending lua code to the client **/
+    _luaStoreLock = false;
     _sendLuaCode = false;
     _wardenScheduler.CancelAll();
     _wardenScheduler.ClearValidator();
@@ -147,7 +148,7 @@ void WorldSession::OnWardenInitialized()
 {
     //! this iterates over sent lua requests and looks for timed out requests
     //! when client answers with proper prefix, it will get cleared from this u_map
-    _wardenScheduler.Schedule(Seconds(sWorld->getIntConfig(CONFIG_WARDEN_LUA_CHECK_TIMEOUT)), WARDEN_SCHEDULER_GROUP_TIMEOUTS, [this](TaskContext func)
+    _wardenScheduler.Schedule(Minutes(sWorld->getIntConfig(CONFIG_WARDEN_LUA_CHECK_TIMEOUT)), WARDEN_SCHEDULER_GROUP_TIMEOUTS, [this](TaskContext func)
     {
         CheckLuaRequests();
         func.Repeat();
@@ -306,7 +307,7 @@ void WorldSession::SendLuaCheck()
         //! All other prefixes are obslete when new one arrives
         //! this is NOT correct approach but frosthold just released and i dont have time to fix it properly.
         _wardenClientTraps.clear();
-        _wardenClientTraps.insert(std::make_pair(_request.GetPrefix(), std::move(_request)));
+        _wardenClientTraps[_request.GetPrefix()] = std::move(_request);
     }
     else
     {
@@ -322,30 +323,29 @@ void WorldSession::SendLuaCheck()
             _request.SetPrefix(_luaFramePrefix);
             _request.SetBody(_luaFrameBody);
         }
-
-        _wardenRequests.insert(std::make_pair(_request.GetPrefix(), std::move(_request)));
+        _wardenRequests[_request.GetPrefix()] = std::move(_request);
     }
 }
-
-//! We may have duplicates, but if we find one then we can erase all of them
-//! we dont have to handle each request individually
-//! the chance that NON-FRAME checks will be duplicated, is very very low
-//! so we can accept that
-WardenRequest* WorldSession::GetLuaRequest(std::string const& key)
+WardenRequestStore WorldSession::GetLuaRequests()
 {
-    auto const itr = _wardenRequests.find(key);
-    return itr != _wardenRequests.end() ? &itr->second : nullptr;
+    return _wardenRequests;
 }
 
-WardenRequest* WorldSession::GetLuaTrapRequest(std::string const& key)
+WardenRequestStore WorldSession::GetLuaTrapRequests()
 {
-    auto const itr = _wardenClientTraps.find(key);
-    return itr != _wardenClientTraps.end() ? &itr->second : nullptr;
+    return _wardenClientTraps;
 }
 
 void WorldSession::ClearPongRequest(std::string const& key)
 {
-    sLog->outStaticDebug("Erasing warden lua request, request prefix key: %s", key.c_str());
+    if (_luaStoreLock)
+    {
+        _checksToRemove.push_back(key);
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_WARDEN, "Trying to erase key %s while store is locked, will be deleted later", key);
+        return;
+    }
+
+    sLog->outDebug(DebugLogFilters::LOG_FILTER_WARDEN, "Erasing warden lua request, request prefix key: %s", key.c_str());
     _wardenRequests.erase(key);
 }
 
@@ -369,6 +369,7 @@ void WorldSession::HandleCheckFailure(uint32 checkId, bool timeout)
 
 void WorldSession::CheckLuaRequests()
 {
+    _luaStoreLock = true;
     std::vector<WardenRequestStore::key_type> eraser;
     for (auto && it : _wardenRequests)
     {
@@ -401,6 +402,15 @@ void WorldSession::CheckLuaRequests()
 
     for (auto&& iter : eraser)
         ClearPongRequest(iter);
+
+    _luaStoreLock = false;
+
+    //! clear everything that was supposed to be cleared while we iterated over the store
+    for (auto&& key : _checksToRemove)
+    {
+        ClearPongRequest(key);
+        std::cout << "usuwam key: " << key << std::endl;
+    }
 }
 
 void WorldSession::UpdateWardenScheduler(uint32 diff)
