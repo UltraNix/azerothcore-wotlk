@@ -400,17 +400,14 @@ void WorldSession::CheckLuaRequests()
         }
     }
 
-    for (auto&& iter : eraser)
-        ClearPongRequest(iter);
-
-    _luaStoreLock = false;
+    for (auto&& key : eraser)
+        _wardenRequests.erase(key);
 
     //! clear everything that was supposed to be cleared while we iterated over the store
     for (auto&& key : _checksToRemove)
-    {
-        ClearPongRequest(key);
-        std::cout << "usuwam key: " << key << std::endl;
-    }
+        _wardenRequests.erase(key);
+
+    _luaStoreLock = false;
 }
 
 void WorldSession::UpdateWardenScheduler(uint32 diff)

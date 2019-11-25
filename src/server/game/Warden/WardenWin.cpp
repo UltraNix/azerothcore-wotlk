@@ -387,7 +387,6 @@ void WardenWin::HandleData(ByteBuffer &buff)
         {
             sLog->outDebug(LOG_FILTER_WARDEN, "TIMING CHECK FAIL result 0x00");
             _session->KickPlayer(true);
-            //Penalty();
             return;
         }
 
