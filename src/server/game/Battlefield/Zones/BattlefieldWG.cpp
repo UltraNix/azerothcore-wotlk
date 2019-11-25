@@ -99,6 +99,15 @@ bool BattlefieldWG::SetupBattlefield()
     SetData(BATTLEFIELD_WG_DATA_WON_H, uint32(sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_ATTACKED_H)));
     SetData(BATTLEFIELD_WG_DATA_DEF_H, uint32(sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_DEFENDED_H)));
 
+    // World states cannot store negative values, so factionBalanceScale is stored in range 0 - 1400, convert it to -700 - 700
+    uint32 factionScaleWorldState = uint32(sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_FACTION_SCALE));
+    if (factionScaleWorldState > 700)
+        factionBalanceScale = std::max((int32)(0 - (factionScaleWorldState - 700)), -700);
+    else
+        factionBalanceScale = std::min((int32)factionScaleWorldState, 700);
+
+    lastSuccessfulDefenderTeam = (TeamId)sWorld->getWorldState(BATTLEFIELD_WG_WORLD_STATE_LAST_DEFENDER);
+
     for (uint8 i = 0; i < BATTLEFIELD_WG_GRAVEYARD_MAX; i++)
     {
         BfGraveyardWG* graveyard = new BfGraveyardWG(this);
@@ -292,21 +301,33 @@ void BattlefieldWG::OnBattleStart()
     SetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT, 0);
     SetData(BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT, 0);
 
-    // Upper workshops should be controlled by defenders, lower by attackers.
-    for (auto itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
+    if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_BALANCE_SYSTEM))
     {
-        if (!itr->second || !itr->second->GetCapturePointGo())
-            continue;
-        switch (itr->second->GetCapturePointGo()->GetEntry())
+        TeamId favoredFaction = factionBalanceScale < 0 ? TEAM_ALLIANCE : TEAM_HORDE;
+        uint32 absFactionBalanceScale = std::abs(factionBalanceScale);
+        if (absFactionBalanceScale >= 400)
+            ChangeCapturePointFaction(GO_WINTERGRASP_FACTORY_BANNER_NE, favoredFaction); // Sunken Temple
+        if (absFactionBalanceScale >= 500)
+            ChangeCapturePointFaction(GO_WINTERGRASP_FACTORY_BANNER_NW, favoredFaction); // Broken Temple
+    }
+    else
+    {
+        // Upper workshops should be controlled by defenders, lower by attackers.
+        for (auto itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
         {
-        case GO_WINTERGRASP_FACTORY_BANNER_NE:
-        case GO_WINTERGRASP_FACTORY_BANNER_NW:
-            itr->second->ForceChangeTeam(GetDefenderTeam());
-            break;
-        case GO_WINTERGRASP_FACTORY_BANNER_SE:
-        case GO_WINTERGRASP_FACTORY_BANNER_SW:
-            itr->second->ForceChangeTeam(GetAttackerTeam());
-            break;
+            if (!itr->second || !itr->second->GetCapturePointGo())
+                continue;
+            switch (itr->second->GetCapturePointGo()->GetEntry())
+            {
+            case GO_WINTERGRASP_FACTORY_BANNER_NE:
+            case GO_WINTERGRASP_FACTORY_BANNER_NW:
+                itr->second->ForceChangeTeam(GetDefenderTeam());
+                break;
+            case GO_WINTERGRASP_FACTORY_BANNER_SE:
+            case GO_WINTERGRASP_FACTORY_BANNER_SW:
+                itr->second->ForceChangeTeam(GetAttackerTeam());
+                break;
+            }
         }
     }
 
@@ -397,10 +418,31 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
 
     // successful defense
     if (endByTimer)
+    {
+        // Fortress defended at least twice in row - add 100 points to opposite faction
+        if (GetDefenderTeam() == lastSuccessfulDefenderTeam)
+        {
+            if (GetDefenderTeam() == TEAM_ALLIANCE)
+                factionBalanceScale = std::min(factionBalanceScale + 100, 700);
+            else
+                factionBalanceScale = std::max(factionBalanceScale - 100, -700);
+        }
+        lastSuccessfulDefenderTeam = GetDefenderTeam();
         UpdateData(GetDefenderTeam() == TEAM_HORDE ? BATTLEFIELD_WG_DATA_DEF_H : BATTLEFIELD_WG_DATA_DEF_A, 1);
+    }
     // successful attack (note that teams have already been swapped, so defender team is the one who won)
     else
+    {
+        // Attacker faction has over 400 favor points - add 100 points to opposite faction
+        if (factionBalanceScale * (factionBalanceScale < 0 ? -1 : 1) >= 400)
+        {
+            if (GetAttackerTeam() == TEAM_ALLIANCE)
+                factionBalanceScale = std::max(factionBalanceScale - 100, -700);
+            else
+                factionBalanceScale = std::min(factionBalanceScale + 100, 700);
+        }
         UpdateData(GetDefenderTeam() == TEAM_HORDE ? BATTLEFIELD_WG_DATA_WON_H : BATTLEFIELD_WG_DATA_WON_A, 1);
+    }
 
     // Remove turret
     for (GuidSet::const_iterator itr = CanonList.begin(); itr != CanonList.end(); ++itr)
@@ -551,6 +593,12 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
     {
         m_reminderStage[i] = false;
     }
+
+    uint32 factionBalanceScaleWorldState = factionBalanceScale;
+    if (factionBalanceScale < 0)
+        factionBalanceScaleWorldState = 700 + std::abs(factionBalanceScale);
+    sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_FACTION_SCALE, factionBalanceScaleWorldState);
+    sWorld->setWorldState(BATTLEFIELD_WG_WORLD_STATE_LAST_DEFENDER, lastSuccessfulDefenderTeam);
 }
 
 // *******************************************************
@@ -674,6 +722,7 @@ void BattlefieldWG::OnCreatureCreate(Creature* creature)
                         return;
                     }
                 }
+                AddUpdateTenacity(creature);
                 break;
             }
             case NPC_WINTERGRASP_SIEGE_ENGINE_TURRET_HORDE:
@@ -830,6 +879,8 @@ void BattlefieldWG::PromotePlayer(Player* killer)
     if (!m_isActive)
         return;
     // Updating rank of player
+    TeamId favoredFaction = factionBalanceScale < 0 ? TEAM_ALLIANCE : TEAM_HORDE;
+    uint32 absFactionBalanceScale = std::abs(factionBalanceScale);
     if (Aura* aur = killer->GetAura(SPELL_RECRUIT))
     {
         if (aur->GetStackAmount() >= 5)
@@ -839,7 +890,26 @@ void BattlefieldWG::PromotePlayer(Player* killer)
             SendWarningToPlayer(killer, BATTLEFIELD_WG_TEXT_FIRSTRANK);
         }
         else
-            killer->CastSpell(killer, SPELL_RECRUIT, true);
+        {
+            if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_BALANCE_SYSTEM) && killer->GetTeamId() == favoredFaction && absFactionBalanceScale >= 600)
+            {
+                killer->RemoveAura(SPELL_RECRUIT);
+                // Faction with above 700 points should get Lieutenant rank after 1 kill
+                if (absFactionBalanceScale >= 700)
+                {
+                    killer->CastSpell(killer, SPELL_LIEUTENANT, true);
+                    SendWarningToPlayer(killer, BATTLEFIELD_WG_TEXT_SECONDRANK);
+                }
+                // Faction with above 600 points should get Corporal rank after 1 kill
+                else
+                {
+                    killer->CastSpell(killer, SPELL_CORPORAL, true);
+                    SendWarningToPlayer(killer, BATTLEFIELD_WG_TEXT_FIRSTRANK);
+                }
+            }
+            else
+                killer->CastSpell(killer, SPELL_RECRUIT, true);
+        }
     }
     else if (Aura* aur = killer->GetAura(SPELL_CORPORAL))
     {
@@ -984,6 +1054,18 @@ void BattlefieldWG::SendReminder(uint8 minutes)
         else
             oss << "Take control over Vault of Archavon!|r";
         sWorld->SendServerMessage(SERVER_MSG_STRING, oss.str().c_str(), nullptr, TEAM_ALLIANCE);
+    }
+}
+
+void BattlefieldWG::ChangeCapturePointFaction(uint32 capturePoint, TeamId faction)
+{
+    for (auto itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetCapturePointGo())
+            continue;
+        if (itr->second->GetCapturePointGo()->GetEntry() != capturePoint)
+            continue;
+        itr->second->ForceChangeTeam(faction);
     }
 }
 
@@ -1159,9 +1241,9 @@ uint32 BattlefieldWG::GetHonorBuff(int32 stack) const
     return SPELL_GREATEST_HONOR;
 }
 
-void BattlefieldWG::AddUpdateTenacity(Player* player)
+void BattlefieldWG::AddUpdateTenacity(Unit* unit)
 {
-    m_updateTenacityList.insert(player->GetGUID());
+    m_updateTenacityList.insert(unit->GetGUID());
 }
 
 void BattlefieldWG::RemoveUpdateTenacity(Player* player)
@@ -1184,20 +1266,48 @@ void BattlefieldWG::UpdateTenacity()
         else if (alliancePlayers > hordePlayers)
             newStack = int32((1.0f - ((float)alliancePlayers / hordePlayers)) * 4.0f);  // negative, should cast on horde
     }
-
+    newStack = std::min(abs(newStack), 20);
     // Return if no change in stack and apply tenacity to new player
     if (newStack == m_tenacityStack)
     {
+        TeamId tenacityFaction = newStack > 0 ? TEAM_ALLIANCE : TEAM_HORDE;
         for (GuidSet::const_iterator itr = m_updateTenacityList.begin(); itr != m_updateTenacityList.end(); ++itr)
-            if (Player* newPlayer = ObjectAccessor::FindPlayer(*itr))
-                if ((newPlayer->GetTeamId() == TEAM_ALLIANCE && m_tenacityStack > 0) || (newPlayer->GetTeamId() == TEAM_HORDE && m_tenacityStack < 0))
+        {
+            if (Unit* newUnit = ObjectAccessor::FindUnit(*itr))
+            {
+                if (Player* newPlayer = newUnit->ToPlayer())
                 {
-                    newStack = std::min(abs(newStack), 20);
-                    uint32 buff_honor = GetHonorBuff(newStack);
-                    newPlayer->SetAuraStack(SPELL_TENACITY, newPlayer, newStack);
-                    if (buff_honor)
-                        newPlayer->CastSpell(newPlayer, buff_honor, true);
+                    if ((newPlayer->GetTeamId() == TEAM_ALLIANCE && m_tenacityStack > 0) || (newPlayer->GetTeamId() == TEAM_HORDE && m_tenacityStack < 0))
+                    {
+                        uint32 buff_honor = GetHonorBuff(newStack);
+                        newPlayer->SetAuraStack(SPELL_TENACITY, newPlayer, newStack);
+                        if (buff_honor)
+                            newPlayer->CastSpell(newPlayer, buff_honor, true);
+                    }
                 }
+                else if (m_vehicles[tenacityFaction].find(newUnit->GetGUID()) != m_vehicles[tenacityFaction].end())
+                {
+                    newUnit->SetAuraStack(SPELL_TENACITY_VEHICLE, newUnit, newStack);
+                    if (uint32 buff_honor = GetHonorBuff(newStack))
+                        newUnit->CastSpell(newUnit, buff_honor, true);
+
+                    // Add Tenacity to Wintergrasp Siege Turret
+                    if (newUnit->GetEntry() == NPC_WINTERGRASP_SIEGE_ENGINE_ALLIANCE || newUnit->GetEntry() == NPC_WINTERGRASP_SIEGE_ENGINE_HORDE)
+                    {
+                        if (Vehicle * vehicle = newUnit->GetVehicleKit())
+                        {
+                            if (Unit * turret = vehicle->GetPassenger(7))
+                            {
+                                if (Aura * aura = turret->AddAura(SPELL_TENACITY_VEHICLE, turret))
+                                {
+                                    aura->SetStackAmount(newStack);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return;
     }
 
@@ -1233,6 +1343,10 @@ void BattlefieldWG::UpdateTenacity()
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
                 player->SetAuraStack(SPELL_TENACITY, player, newStack);
+
+                for (uint32 spellId : {SPELL_GREAT_HONOR, SPELL_GREATER_HONOR, SPELL_GREATEST_HONOR })
+                    player->RemoveAurasDueToSpell(spellId);
+
                 if (buff_honor)
                     player->CastSpell(player, buff_honor, true);
             }
@@ -1241,8 +1355,26 @@ void BattlefieldWG::UpdateTenacity()
             if (Unit* unit = ObjectAccessor::FindUnit(*itr))
             {
                 unit->SetAuraStack(SPELL_TENACITY_VEHICLE, unit, newStack);
+
+                for (uint32 spellId : {SPELL_GREAT_HONOR, SPELL_GREATER_HONOR, SPELL_GREATEST_HONOR })
+                    unit->RemoveAurasDueToSpell(spellId);
+
                 if (buff_honor)
                     unit->CastSpell(unit, buff_honor, true);
+                if (unit->GetEntry() == NPC_WINTERGRASP_SIEGE_ENGINE_ALLIANCE || unit->GetEntry() == NPC_WINTERGRASP_SIEGE_ENGINE_HORDE)
+                {
+                    // Add Tenacity to Wintergrasp Siege Turret
+                    if (Vehicle * vehicle = unit->GetVehicleKit())
+                    {
+                        if (Unit * turret = vehicle->GetPassenger(7))
+                        {
+                            if (Aura * aura = turret->AddAura(SPELL_TENACITY_VEHICLE, turret))
+                            {
+                                aura->SetStackAmount(newStack);
+                            }
+                        }
+                    }
+                }
             }
     }
 }

@@ -32,6 +32,9 @@ EndScriptData */
 #include "GridNotifiersImpl.h"
 #include "GossipDef.h"
 #include "Language.h"
+#include "Battlefield.h"
+#include "BattlefieldWG.h"
+#include "BattlefieldMgr.h"
 
 #include <fstream>
 
@@ -93,7 +96,8 @@ public:
             { "ulduar",         SEC_MODERATOR,      CMD_INGAME, &HandleDebugUlduar,                 "" },
             { "moltencore",     SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugMoltenCore,            ""},
             { "majordomo",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugMajordomo,             ""},
-            { "hellforge",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugHellforge,               ""}
+            { "hellforge",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugHellforge,               ""},
+            { "wintergrasp",    SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWintergrasp,            ""}
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1598,6 +1602,24 @@ public:
 
         if (Unit * u = instance->GetCreature(7))
             player->TeleportTo(u->GetWorldLocation());
+        return true;
+    }
+
+    static bool HandleDebugWintergrasp(ChatHandler* handler, char const* /*args*/)
+    {
+        if (Battlefield * bf = sBattlefieldMgr->GetBattlefieldByBattleId(1))
+        {
+            if (BattlefieldWG * wg = dynamic_cast<BattlefieldWG*>(bf))
+            {
+                std::string defenderTeam = "Neutral";
+                if (wg->getLastSuccessfulDefenderTeam() == TEAM_HORDE)
+                    defenderTeam = "Horde";
+                else if (wg->getLastSuccessfulDefenderTeam() == TEAM_ALLIANCE)
+                    defenderTeam = "Alliance";
+                handler->PSendSysMessage("Faction Balance Scale: %d", wg->getFactionBalanceScale());
+                handler->PSendSysMessage("Last Successful Defender Team: %s", defenderTeam.c_str());
+            }
+        }
         return true;
     }
 

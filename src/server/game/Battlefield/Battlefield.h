@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -35,7 +35,7 @@ enum BattlefieldTypes
 
 enum BattlefieldIDs
 {
-    BATTLEFIELD_BATTLEID_WG                      = 1,       // Wintergrasp battle 
+    BATTLEFIELD_BATTLEID_WG                      = 1,       // Wintergrasp battle
 };
 
 enum BattlefieldObjectiveStates
@@ -336,7 +336,7 @@ class Battlefield : public ZoneScript
         //virtual void DoCompleteOrIncrementAchievement(uint32 /*achievement*/, Player* /*player*/, uint8 /*incrementNumber = 1*/) {};
 
         /// Send all worldstate data to all player in zone.
-        virtual void SendInitWorldStatesToAll() = 0;    
+        virtual void SendInitWorldStatesToAll() = 0;
         virtual void FillInitialWorldStates(WorldPacket& /*data*/) = 0;
 
         /// Return if we can use mount in battlefield

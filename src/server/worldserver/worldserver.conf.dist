@@ -2721,6 +2721,13 @@ Wintergrasp.NoBattleTimer = 150
 Wintergrasp.CrashRestartTimer = 10
 
 #
+#     Wintergrasp.BalanceSystem.Enable
+#         Description: Enables or disables balance system
+#         Default:     1 - enabled
+
+Wintergrasp.BalanceSystem.Enable = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################

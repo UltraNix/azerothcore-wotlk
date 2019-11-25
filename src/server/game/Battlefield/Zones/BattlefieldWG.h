@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -119,7 +119,9 @@ enum WintergraspWorldStates
     BATTLEFIELD_WG_WORLD_STATE_ATTACKED_H        = 4022,
     BATTLEFIELD_WG_WORLD_STATE_ATTACKED_A        = 4023,
     BATTLEFIELD_WG_WORLD_STATE_DEFENDED_H        = 4024,
-    BATTLEFIELD_WG_WORLD_STATE_DEFENDED_A        = 4025
+    BATTLEFIELD_WG_WORLD_STATE_DEFENDED_A        = 4025,
+    BATTLEFIELD_WG_WORLD_STATE_FACTION_SCALE     = 4026,
+    BATTLEFIELD_WG_WORLD_STATE_LAST_DEFENDER     = 4027
 };
 
 enum WintergraspAreaIds
@@ -393,7 +395,7 @@ class BattlefieldWG : public Battlefield
         void UpdatedDestroyedTowerCount(TeamId team, GameObject* go);
 
         //void DoCompleteOrIncrementAchievement(uint32 achievement, Player* player, uint8 incrementNumber = 1);
-        
+
         void RemoveAurasFromPlayer(Player* player);
 
         /**
@@ -428,7 +430,7 @@ class BattlefieldWG : public Battlefield
 
         uint32 GetHonorBuff(int32 stack) const;
         void UpdateTenacity();
-        void AddUpdateTenacity(Player* player);
+        void AddUpdateTenacity(Unit* player);
         void RemoveUpdateTenacity(Player* player);
         void ProcessEvent(WorldObject *obj, uint32 eventId);
 
@@ -439,8 +441,12 @@ class BattlefieldWG : public Battlefield
         uint32 GetAreaByGraveyardId(uint8 gId) const;
 
         uint32 GetData(uint32 data) const;
+
+        uint32 getFactionBalanceScale() const { return factionBalanceScale; }
+        TeamId getLastSuccessfulDefenderTeam() const { return lastSuccessfulDefenderTeam; }
     private:
         void SendReminder(uint8 minutes);
+        void ChangeCapturePointFaction(uint32 capturePoint, TeamId faction);
     protected:
         bool m_isRelicInteractible;
 
@@ -462,6 +468,11 @@ class BattlefieldWG : public Battlefield
 
         uint64 m_titansRelic;
         bool m_reminderStage[4];
+
+        // https://www.wowhead.com/news=145516/patch-3-3-3-upcoming-wintergrasp-balance-changes
+        // Negative vaules - Alliance, positive - Horde
+        int32 factionBalanceScale;
+        TeamId lastSuccessfulDefenderTeam;
 };
 
 const uint8 WG_MAX_OBJ = 32;
@@ -569,7 +580,7 @@ enum WintergraspGameObject
 
 const uint8 WG_CAPTURE_POINTS_COUNT = 4;
 const uint32 WintergraspCapturePointId[WG_CAPTURE_POINTS_COUNT] = { GO_WINTERGRASP_FACTORY_BANNER_NE, GO_WINTERGRASP_FACTORY_BANNER_NW, GO_WINTERGRASP_FACTORY_BANNER_SE, GO_WINTERGRASP_FACTORY_BANNER_SW };
-const Position WintergraspCapturePointPos[WG_CAPTURE_POINTS_COUNT] = 
+const Position WintergraspCapturePointPos[WG_CAPTURE_POINTS_COUNT] =
 {
     {4949.34f, 2432.59f, 320.177f, 1.38621f},   //NE
     {4948.52f, 3342.34f, 376.875f, 4.40057f},   //NW
