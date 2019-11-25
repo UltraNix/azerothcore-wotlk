@@ -1091,8 +1091,15 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
     if (!pItem)
         return;
 
+    InventoryResult msg = _player->CanUnequipItem(pItem->GetPos(), false);
+    if (msg != EQUIP_ERR_OK)
+    {
+        _player->SendEquipError(msg, pItem, nullptr);
+        return;
+    }
+
     ItemPosCountVec dest;
-    InventoryResult msg = _player->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
+    msg = _player->CanBankItem(NULL_BAG, NULL_SLOT, dest, pItem, false);
     if (msg != EQUIP_ERR_OK)
     {
         _player->SendEquipError(msg, pItem, NULL);
