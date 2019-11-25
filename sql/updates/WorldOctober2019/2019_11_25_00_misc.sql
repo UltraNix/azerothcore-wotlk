@@ -1,0 +1,24 @@
+-- DB/NPC: DK starting zone dialogues
+UPDATE `creature_text` SET `text` = "Impressive, death knight. Return to me in the world of the living for your reward." WHERE `entry` = 28788;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29032;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29061;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29065;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29067;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29068;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29070;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29074;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29072;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29073;
+UPDATE `creature_text` SET `text` = 'Think, $N. Think back. Try and remember the hills and valleys of Elwynn, where you were born. Remember the splendor of life, $Gbrother:sister;. You were a champion of the Alliance once! This isn\'t you.' WHERE `groupid` = 33 AND `entry` = 29071;
+UPDATE `creature_text` SET `text` = 'Argh...what...is...' WHERE `groupid` = 33 AND `entry` =  29173;
+UPDATE `creature_text` SET `text` = 'That\'s enough; we must move again. Mal\'Ganis awaits.' WHERE `groupid` = 33 AND `entry` = 26499;
+UPDATE `creature_text` SET `text` = 'Alas, the only way to defeat the Lich King is to destroy him at the place he was created.' WHERE `groupid` = 33 AND `entry` = 37225;
+UPDATE `creature_text` SET `text` = 'You have reached Rank 2: First Lieutenant' WHERE `groupid` = 33 AND `entry` = 15214;
+UPDATE `creature_text` SET `text` = 'Corruption found. External influence gaining control over watchers. Sigils compromised.' WHERE `groupid` = 33 AND `entry` = 33874;
+UPDATE `creature_text` SET `text` = 'The cunning, powerful eredar warlocks were once our noble kinsmen.' WHERE `groupid` = 33 AND `entry` = 18896;
+UPDATE `creature_text` SET `text` = 'Have you ever noticed that all those cute, orc kids look the same?' WHERE `groupid` = 33 AND `entry` = 19228;
+UPDATE `creature_text` SET `text` = 'The East Frostwolf Tower is under attack!  If left unchecked, the Horde will destroy it!' WHERE `groupid` = 33 AND `entry` = 14848;
+UPDATE `creature_text` SET `text` = '%s begins to unleash a toxic poison cloud!' WHERE `groupid` = 33 AND `entry` = 36476;
+UPDATE `creature_text` SET `text` = 'You stumble about in darkness. There is no light here. No mercy. Icecrown has claimed the souls of better heroes than you.' WHERE `groupid` = 33 AND `entry` = 37181;
+UPDATE `creature_text` SET `text` = 'You spoiled my grand enterance, rat.' WHERE `groupid` = 33 AND `entry` = 35451;
+UPDATE `creature_text` SET `text` = 'It\'s good to have you back, Varok, old friend. I\'m sorry about your boy.' WHERE `groupid` = 33 AND `entry` = 31650;
