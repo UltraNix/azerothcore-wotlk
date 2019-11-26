@@ -30,6 +30,7 @@
 #include "QueryResult.h"
 #include "QueryHolder.h"
 #include "AdhocStatement.h"
+#include <mysqld_error.h>
 
 #define MIN_MYSQL_SERVER_VERSION 50100u
 #define MIN_MYSQL_CLIENT_VERSION 50100u
@@ -401,7 +402,8 @@ class DatabaseWorkerPool
         void DirectCommitTransaction(SQLTransaction& transaction)
         {
             T* con = GetFreeConnection();
-            if (con->ExecuteTransaction(transaction))
+            int errorCode = con->ExecuteTransaction(transaction);
+            if (!errorCode)
             {
                 con->Unlock();      // OK, operation succesful
                 return;
@@ -409,12 +411,12 @@ class DatabaseWorkerPool
 
             //! Handle MySQL Errno 1213 without extending deadlock to the core itself
             //! TODO: More elegant way
-            if (con->GetLastError() == 1213)
+            if (con->GetLastError() == ER_LOCK_DEADLOCK)
             {
                 uint8 loopBreaker = 5;
                 for (uint8 i = 0; i < loopBreaker; ++i)
                 {
-                    if (con->ExecuteTransaction(transaction))
+                    if (!con->ExecuteTransaction(transaction))
                         break;
                 }
             }

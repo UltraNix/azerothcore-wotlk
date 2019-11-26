@@ -89,7 +89,7 @@ class MySQLConnection
         void BeginTransaction();
         void RollbackTransaction();
         void CommitTransaction();
-        bool ExecuteTransaction(SQLTransaction& transaction);
+        int ExecuteTransaction(SQLTransaction& transaction);
 
         operator bool () const { return m_Mysql != NULL; }
 
