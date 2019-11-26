@@ -240,6 +240,8 @@ class Battlefield : public ZoneScript
         void InvitePlayersInQueueToWar();
         /// Invite all players in zone to join battle on battle start
         void InvitePlayersInZoneToWar();
+        bool CanBeInvitedToWar(Player* player) const;
+        uint32 GetMaxPlayers() const;
 
         /// Called when a Unit is kill in battlefield zone
         virtual void HandleKill(Player* /*killer*/, Unit* /*killed*/) {};
@@ -362,12 +364,19 @@ class Battlefield : public ZoneScript
 
         void InitStalker(uint32 entry, float x, float y, float z, float o);
 
+        uint32 GetPlayersInWarCount(TeamId team) const { return m_PlayersInWar[team].size(); }
+        uint32 GetInvitedPlayersCount(TeamId team) const { return m_InvitedPlayers[team].size(); }
+        uint32 GetPlayersInQueueCount(TeamId team) const { return m_PlayersInQueue[team].size(); }
+        uint32 GetPlayersCount(TeamId team) const { return m_PlayersInWar[team].size() + m_InvitedPlayers[team].size() + m_PlayersInQueue[team].size(); };
+        uint32 GetMaxFactionDiff() const { return m_maxFactionDiff; }
+
     protected:
         uint64 StalkerGuid;
         uint32 m_Timer;                                         // Global timer for event
         bool m_IsEnabled;
         bool m_isActive;
         TeamId m_DefenderTeam;
+        uint32 m_newPlayersInviteTimer;
 
         // Map of the objectives belonging to this OutdoorPvP
         BfCapturePointMap m_capturePoints;
@@ -392,6 +401,7 @@ class Battlefield : public ZoneScript
         uint32 m_RestartAfterCrash;                             // Delay to restart Wintergrasp if the server crashed during a running battle.
         uint32 m_TimeForAcceptInvite;
         uint32 m_uiKickDontAcceptTimer;
+        uint32 m_maxFactionDiff;
         WorldLocation KickPosition;                             // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
 
         uint32 m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war

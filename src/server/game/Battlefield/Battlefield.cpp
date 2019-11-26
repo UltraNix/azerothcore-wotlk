@@ -39,6 +39,7 @@ Battlefield::Battlefield()
     m_IsEnabled = true;
     m_isActive = false;
     m_DefenderTeam = TEAM_NEUTRAL;
+    m_newPlayersInviteTimer = 10000;
 
     m_TypeId = 0;
     m_BattleId = 0;
@@ -83,41 +84,16 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
         // If full of players > invite player to join the war if his faction has less players than the other one
         if (IsWarTime())
         {
-            auto GetPlayerCountInWar = [&](TeamId team) -> int32 {return m_PlayersInWar[team].size(); };
             auto KickAndInviteToQueue = [&](Player* pl) -> void
             {
                 m_PlayersWillBeKick[pl->GetTeamId()][pl->GetGUID()] = time(nullptr) + (pl->IsGameMaster() ? 30 * MINUTE : 10);
                 InvitePlayerToQueue(pl);
             };
 
-            if (GetPlayerCountInWar(player->GetTeamId()) + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
+            if (CanBeInvitedToWar(player))
                 InvitePlayerToWar(player);
             else
-            {
-                bool blockHorde    = GetPlayerCountInWar(TEAM_HORDE) - GetPlayerCountInWar(TEAM_ALLIANCE) > 5;
-                bool blockAlliance = GetPlayerCountInWar(TEAM_ALLIANCE) - GetPlayerCountInWar(TEAM_HORDE) > 5;
-                bool blockBoth     = false;
-
-                // Horde limit
-                if (GetPlayerCountInWar(TEAM_HORDE) >= 150)
-                    blockHorde = true;
-                // Alliance limit
-                if (GetPlayerCountInWar(TEAM_ALLIANCE) >= 150)
-                    blockAlliance = true;
-                // General limit.
-                if (GetPlayerCountInWar(TEAM_HORDE) >= 150 && GetPlayerCountInWar(TEAM_ALLIANCE) >= 150)
-                    blockBoth = true;
-
-                if (!blockHorde && !blockAlliance)
-                    InvitePlayerToWar(player);
-                else
-                {
-                    if ((player->GetTeamId() == TEAM_ALLIANCE && blockHorde && !blockBoth) || (player->GetTeamId() == TEAM_HORDE && blockAlliance && !blockBoth))
-                        InvitePlayerToWar(player);
-                    else
-                        KickAndInviteToQueue(player);
-                }
-            }
+                KickAndInviteToQueue(player);
         }
         else
         {
@@ -225,6 +201,14 @@ bool Battlefield::Update(uint32 diff)
         for (BfCapturePointMap::iterator itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
             if (itr->second->Update(diff))
                 objective_changed = true;
+
+        if (m_newPlayersInviteTimer <= diff)
+        {
+            m_newPlayersInviteTimer = 10000;
+            InvitePlayersInQueueToWar();
+        }
+        else
+            m_newPlayersInviteTimer -= diff;
     }
 
 
@@ -263,19 +247,22 @@ void Battlefield::InvitePlayersInQueueToWar()
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
     {
         GuidSet copy(m_PlayersInQueue[team]);
+        uint32 playersInWar = m_PlayersInWar[team].size() + m_InvitedPlayers[team].size();
+        uint32 maxPlayersInWar = GetMaxPlayers();
         for (GuidSet::const_iterator itr = copy.begin(); itr != copy.end(); ++itr)
         {
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
-                if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
-                    InvitePlayerToWar(player);
-                else
+                if (playersInWar < maxPlayersInWar)
                 {
-                    //Full
+                    InvitePlayerToWar(player);
+                    m_PlayersInQueue[team].erase(*itr);
+                    ++playersInWar;
                 }
+                else
+                    KickPlayerFromBattlefield(*itr);
             }
         }
-        m_PlayersInQueue[team].clear();
     }
 }
 
@@ -299,6 +286,33 @@ void Battlefield::InvitePlayersInZoneToWar()
         }
 }
 
+bool Battlefield::CanBeInvitedToWar(Player* player) const
+{
+    TeamId team = player->GetTeamId();
+    uint32 playersInWar = m_PlayersInWar[team].size() + m_InvitedPlayers[team].size();
+    uint32 maxPlayersInWar = GetMaxPlayers();
+    return playersInWar < maxPlayersInWar;
+}
+
+uint32 Battlefield::GetMaxPlayers() const
+{
+    if (GetPlayersCount(TEAM_ALLIANCE) < m_MaxPlayer || GetPlayersCount(TEAM_HORDE) < m_MaxPlayer)
+        return m_MaxPlayer;
+    else
+    {
+        if (GetPlayersCount(TEAM_ALLIANCE) > GetPlayersCount(TEAM_HORDE))
+        {
+            uint32 diff = std::min((uint32)GetPlayersCount(TEAM_ALLIANCE) - GetPlayersCount(TEAM_HORDE), m_maxFactionDiff);
+            return GetPlayersCount(TEAM_HORDE) + diff;
+        }
+        else
+        {
+            uint32 diff = std::min((uint32)GetPlayersCount(TEAM_HORDE) - GetPlayersCount(TEAM_ALLIANCE), m_maxFactionDiff);
+            return GetPlayersCount(TEAM_ALLIANCE) + diff;
+        }
+    }
+}
+
 void Battlefield::InvitePlayerToWar(Player* player)
 {
     if (!player)
@@ -314,7 +328,7 @@ void Battlefield::InvitePlayerToWar(Player* player)
         return;
     }
 
-    // If the player does not match minimal level requirements for the battlefield, kick him
+    // If the player does not match minimal level requirements for the battlefield,  him
     if (player->getLevel() < m_MinLevel)
     {
         if (m_PlayersWillBeKick[player->GetTeamId()].count(player->GetGUID()) == 0)
