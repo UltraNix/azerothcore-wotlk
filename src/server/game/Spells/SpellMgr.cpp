@@ -3098,6 +3098,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD;
         });
 
+        // Sheath of light
+        ApplySpellFix({ 54203 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD;
+        });
+
         // Flight Form (Druid)
         ApplySpellFix({ 33948, 40121 }, [](SpellInfo* spellInfo)
         {
