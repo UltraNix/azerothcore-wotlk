@@ -81,9 +81,34 @@ class ByteBuffer
         }
 
         // copy constructor
-        ByteBuffer(const ByteBuffer &buf) : _rpos(buf._rpos), _wpos(buf._wpos),
+        ByteBuffer(const ByteBuffer &buf)
+            : _rpos(buf._rpos),
+            _wpos(buf._wpos),
             _storage(buf._storage)
         {
+        }
+
+        ByteBuffer( ByteBuffer && buf ) noexcept
+            : _rpos( buf._rpos )
+            , _wpos( buf._wpos )
+            , _storage( std::move( buf._storage ) )
+        {
+        }
+
+        ByteBuffer & operator=( ByteBuffer && buf ) noexcept
+        {
+            _rpos = ( buf._rpos );
+            _wpos = ( buf._wpos );
+            _storage = std::move( buf._storage );
+            return *this;
+        }
+
+        ByteBuffer & operator=( const ByteBuffer & buf )
+        {
+            _rpos = ( buf._rpos );
+            _wpos = ( buf._wpos );
+            _storage = buf._storage;
+            return *this;
         }
 
         void clear()

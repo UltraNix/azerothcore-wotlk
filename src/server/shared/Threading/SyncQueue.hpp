@@ -50,27 +50,31 @@ namespace Threading
             return item;
         }
 
+        template< typename ...Args >
+        void emplace( Args && ... args )
+        {
+            {
+                std::unique_lock<std::mutex> lock( m_mutex );
+                m_queue.emplace_back( std::forward< Args >( args )... );
+            }
+            m_condition.notify_one();
+        }
+
         void push( T&& item )
         {
-            std::unique_lock<std::mutex> lock( m_mutex );
-
-            m_queue.push_back( std::move( item ) );
-
-            //! unlock before notifying threads
-            lock.unlock();
-
+            {
+                std::unique_lock<std::mutex> lock( m_mutex );
+                m_queue.push_back( std::move( item ) );
+            }
             m_condition.notify_one();
         }
 
         void push( T const& item )
         {
-            std::unique_lock<std::mutex> lock( m_mutex );
-
-            m_queue.push_back( item );
-
-            //! unlock before notifying threads
-            lock.unlock();
-
+            {
+                std::unique_lock<std::mutex> lock( m_mutex );
+                m_queue.push_back( item );
+            }
             m_condition.notify_one();
         }
 

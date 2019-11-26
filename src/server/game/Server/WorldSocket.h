@@ -140,6 +140,8 @@ class WorldSocket : public WorldHandler
         /// Called by WorldSocketMgr/ReactorRunnable.
         int Update (void);
 
+        WorldSession* HandleAuthSession(WorldPacket& recvPacket);
+
     private:
         /// Helper functions for processing incoming data.
         int handle_input_header (void);
@@ -159,7 +161,6 @@ class WorldSocket : public WorldHandler
         int ProcessIncoming (WorldPacket* new_pct);
 
         /// Called by ProcessIncoming() on CMSG_AUTH_SESSION.
-        int HandleAuthSession (WorldPacket& recvPacket);
 
         /// Called by ProcessIncoming() on CMSG_PING.
         int HandlePing (WorldPacket& recvPacket);

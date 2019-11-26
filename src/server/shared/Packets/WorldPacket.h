@@ -35,6 +35,26 @@ class WorldPacket : public ByteBuffer
         {
         }
 
+        WorldPacket & operator=( const WorldPacket & buf ) noexcept
+        {
+            ByteBuffer::operator=( buf );
+            m_opcode = buf.m_opcode;
+            return *this;
+        }
+
+        WorldPacket( WorldPacket && buf ) noexcept
+            : ByteBuffer( std::move( buf ) )
+            , m_opcode( buf.m_opcode)
+        {
+        }
+
+        WorldPacket & operator=( WorldPacket && buf ) noexcept
+        {
+            ByteBuffer::operator=( std::move( buf ) );
+            m_opcode = buf.m_opcode;
+            return *this;
+        }
+
         void Initialize(uint16 opcode, size_t newres=200)
         {
             clear();

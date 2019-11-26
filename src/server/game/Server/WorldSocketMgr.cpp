@@ -45,6 +45,7 @@
 #include "WorldSocket.h"
 #include "WorldSocketAcceptor.h"
 #include "ScriptMgr.h"
+#include "ThreadedAuthHandler.hpp"
 
 /**
 * This is a helper class to WorldSocketMgr, that manages
@@ -103,6 +104,8 @@ int WorldSocketMgr::StartReactiveIO( std::vector<ACE_UINT16> & ports, const char
         m_Acceptors.emplace_back( std::move( context ) );
     }
 
+    GetAuthHandler().Initialize( num_threads );
+
     m_SocketThreads.resize( num_threads );
     for ( size_t i = 0; i < num_threads; ++i )
     {
@@ -127,9 +130,10 @@ WorldSocketMgr::StartNetwork ( std::vector<ACE_UINT16> & ports, const char* addr
     return 0;
 }
 
-void
-WorldSocketMgr::StopNetwork()
+void WorldSocketMgr::StopNetwork()
 {
+    GetAuthHandler().Shutdown();
+
     for ( auto && context : m_Acceptors )
     {
         context->Stop();
@@ -145,8 +149,7 @@ WorldSocketMgr::StopNetwork()
     sScriptMgr->OnNetworkStop();
 }
 
-void
-WorldSocketMgr::Wait()
+void WorldSocketMgr::Wait()
 {
     for ( auto && context : m_Acceptors )
     {
@@ -159,8 +162,7 @@ WorldSocketMgr::Wait()
     }
 }
 
-int
-WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
+int WorldSocketMgr::OnSocketOpen (WorldSocket* sock)
 {
     // set some options here
     if (m_SockOutKBuff >= 0)
@@ -226,7 +228,6 @@ void WorldSocketMgr::AcceptorContext::Wait()
     m_reactorThread->Wait();
 }
 
-
 ReactorRunnable::ReactorRunnable() :
     m_Reactor( 0 ),
     m_Connections( 0 ),
@@ -284,13 +285,15 @@ long ReactorRunnable::Connections()
 
 int ReactorRunnable::AddSocket( WorldSocket* sock )
 {
-    TRINITY_GUARD( ACE_Thread_Mutex, m_NewSockets_Lock );
-
-    ++m_Connections;
     sock->AddReference();
     sock->reactor( m_Reactor );
-    m_NewSockets.insert( sock );
 
+    {
+        TRINITY_GUARD( ACE_Thread_Mutex, m_NewSocketsMutex );
+        m_NewSockets.push_back( sock );
+    }
+
+    ++m_Connections;
     sScriptMgr->OnSocketOpen( sock );
 
     return 0;
@@ -301,71 +304,65 @@ ACE_VERSIONED_NAMESPACE_NAME::ACE_Reactor* ReactorRunnable::GetReactor()
     return m_Reactor;
 }
 
-void ReactorRunnable::AddNewSockets()
-{
-    TRINITY_GUARD( ACE_Thread_Mutex, m_NewSockets_Lock );
-
-    if ( m_NewSockets.empty() )
-        return;
-
-    for ( SocketSet::const_iterator i = m_NewSockets.begin(); i != m_NewSockets.end(); ++i )
-    {
-        WorldSocket* sock = ( *i );
-
-        if ( sock->IsClosed() )
-        {
-            sScriptMgr->OnSocketClose( sock, true );
-
-            sock->RemoveReference();
-            --m_Connections;
-        }
-        else
-            m_Sockets.insert( sock );
-    }
-
-    m_NewSockets.clear();
-}
-
 int ReactorRunnable::svc()
 {
-    ;//sLog->outStaticDebug ("Network Thread Starting");
-
-    ACE_ASSERT( m_Reactor );
-
-    SocketSet::iterator i, t;
-
     while ( !m_Reactor->reactor_event_loop_done() )
     {
         // dont be too smart to move this outside the loop
         // the run_reactor_event_loop will modify interval
         ACE_Time_Value interval( 0, 10000 );
-
         if ( m_Reactor->run_reactor_event_loop( interval ) == -1 )
             break;
 
-        AddNewSockets();
-
-        for ( i = m_Sockets.begin(); i != m_Sockets.end();)
+        const auto CleanupSocket = [&]( WorldSocket * socket, bool wasNew )
         {
-            if ( ( *i )->Update() == -1 )
+            sScriptMgr->OnSocketClose( socket, wasNew );
+            socket->RemoveReference();
+
+            --m_Connections;
+        };
+
+        //! Insert new sockets
+        {
+            constexpr size_t MAX_NEW_SOCKETS_PER_TICK = 100;
+            size_t acceptedSockets = 0;
+
+            TRINITY_GUARD( ACE_Thread_Mutex, m_NewSocketsMutex );
+            while ( !m_NewSockets.empty() )
             {
-                t = i;
-                ++i;
+                WorldSocket * socket = m_NewSockets.front();
+                m_NewSockets.pop_front();
 
-                ( *t )->CloseSocket();
+                if ( socket->IsClosed() )
+                {
+                    CleanupSocket( socket, true );
+                    continue;
+                }
 
-                sScriptMgr->OnSocketClose( ( *t ), false );
+                m_Sockets.push_back( socket );
 
-                ( *t )->RemoveReference();
-                --m_Connections;
-                m_Sockets.erase( t );
+                if ( ++acceptedSockets >= MAX_NEW_SOCKETS_PER_TICK )
+                    break;
             }
-            else
-                ++i;
         }
-    }
 
-    ;//sLog->outStaticDebug ("Network Thread exits");
+        for ( WorldSocket * socket : m_Sockets )
+        {
+            auto result = socket->Update();
+            if ( result != -1 )
+                continue;
+
+            socket->CloseSocket();
+            CleanupSocket( socket, false );
+        }
+
+        //! Cleanup sockets
+        auto it = std::remove_if( m_Sockets.begin(), m_Sockets.end(), []( WorldSocket * socket )
+        {
+            return socket->IsClosed();
+        } );
+        m_Sockets.erase( it, m_Sockets.end() );
+    }
 
     return 0;
 }

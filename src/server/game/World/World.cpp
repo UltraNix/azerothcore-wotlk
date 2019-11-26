@@ -96,6 +96,7 @@
 #include "WorldCache.h"
 #include "WorldRelay/WorldRelay.hpp"
 #include "fmt/format.h"
+#include "ThreadedAuthHandler.hpp"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_isReady = false;
@@ -175,8 +176,6 @@ World::~World()
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
-
-    //TODO free addSessQueue
 }
 
 /// Find a player in a specified zone
@@ -272,11 +271,6 @@ bool World::KickSession(uint32 id)
 }
 
 void World::AddSession(WorldSession* s)
-{
-    addSessQueue.add(s);
-}
-
-void World::AddSession_(WorldSession* s)
 {
     ASSERT (s);
 
@@ -669,7 +663,9 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_PORT_WORLD] = sConfigMgr->GetIntDefault("WorldServerPort", 8085);
 
     m_int_configs[CONFIG_SOCKET_TIMEOUTTIME] = sConfigMgr->GetIntDefault("SocketTimeOutTime", 900000);
-    m_int_configs[CONFIG_SESSION_ADD_DELAY] = sConfigMgr->GetIntDefault("SessionAddDelay", 10000);
+
+    m_int_configs[CONFIG_SESSION_ADD_DELAY] = sConfigMgr->GetIntDefault("Network.SessionAddDelay", 10 * IN_MILLISECONDS);
+    m_timers[ WUPDATE_COLLECTSESSIONS ].SetInterval( m_int_configs[ CONFIG_SESSION_ADD_DELAY ] );
 
     m_float_configs[CONFIG_GROUP_XP_DISTANCE] = sConfigMgr->GetFloatDefault("MaxGroupXPDistance", 74.0f);
     m_float_configs[CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE] = sConfigMgr->GetFloatDefault("MaxRecruitAFriendBonusDistance", 100.0f);
@@ -3052,10 +3048,12 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
 
 void World::UpdateSessions(uint32 diff)
 {
-    ///- Add new sessions
-    WorldSession* sess = NULL;
-    while (addSessQueue.next(sess))
-        AddSession_ (sess);
+    if ( m_timers[ WUPDATE_COLLECTSESSIONS ].Passed() )
+    {
+        m_timers[ WUPDATE_COLLECTSESSIONS ].Reset();
+
+        GetAuthHandler().CollectSessions( this );
+    }
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
@@ -3103,6 +3101,7 @@ void World::UpdateSessions(uint32 diff)
     // pussywizard:
     if (m_offlineSessions.empty())
         return;
+
     uint32 currTime = time(nullptr);
     for (SessionMap::iterator itr = m_offlineSessions.begin(), next; itr != m_offlineSessions.end(); itr = next)
     {

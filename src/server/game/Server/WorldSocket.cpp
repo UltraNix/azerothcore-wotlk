@@ -45,6 +45,7 @@
 #include "PacketLog.h"
 #include "ScriptMgr.h"
 #include "AccountMgr.h"
+#include "ThreadedAuthHandler.hpp"
 
 #if defined(__GNUC__)
 #pragma pack(1)
@@ -691,7 +692,10 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     sLog->outError("WorldSocket::ProcessIncoming: Player send CMSG_AUTH_SESSION again");
                     return -1;
                 }
-                return HandleAuthSession (*new_pct);
+
+                GetAuthHandler().QueueAuthRequest( this, std::move( *aptr ) );
+
+                return 0;
             case CMSG_KEEP_ALIVE:
                 return 0;
             default:
@@ -732,7 +736,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
     ACE_NOTREACHED (return 0);
 }
 
-int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
+WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
@@ -757,7 +761,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendPacket(packet);
 
         sLog->outError("WorldSocket::HandleAuthSession: World closed, denying client (%s).", GetRemoteAddress().c_str());
-        return -1;
+        return nullptr;
     }
 
     // Read the content of the packet
@@ -770,18 +774,10 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket >> unk4;
     recvPacket.read(digest, 20);
 
-    ;//sLog->outStaticDebug ("WorldSocket::HandleAuthSession: client %u, unk2 %u, account %s, unk3 %u, clientseed %u",
-    //            BuiltNumberClient,
-    //            unk2,
-    //            account.c_str(),
-    //            unk3,
-    //            clientSeed);
-
     // Get the account information from the realmd database
     //         0           1        2       3          4         5       6          7   8              9
     // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os, last_local_ip FROM account WHERE username = ?
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
-
     stmt->setString(0, account);
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
@@ -795,7 +791,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendPacket(packet);
 
         sLog->outError("WorldSocket::HandleAuthSession: Sent Auth Response (unknown account).");
-        return -1;
+        return nullptr;
     }
 
     Field* fields = result->Fetch();
@@ -815,7 +811,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             SendPacket(packet);
 
             sLog->outBasic ("WorldSocket::HandleAuthSession: Sent Auth Response (Account IP differs).");
-            return -1;
+            return nullptr;
         }
     }
 
@@ -857,7 +853,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendPacket(packet);
 
         sLog->outError("WorldSocket::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", GetRemoteAddress().c_str(), os.c_str());
-        return -1;
+        return nullptr;
     }
 
     // Checks gmlevel per Realm
@@ -892,7 +888,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendPacket(packet);
 
         sLog->outError("WorldSocket::HandleAuthSession: Sent Auth Response (Account banned).");
-        return -1;
+        return nullptr;
     }
 
     // Check premium services
@@ -925,9 +921,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         Packet << uint8 (AUTH_UNAVAILABLE);
 
         SendPacket(packet);
-
-        ;//sLog->outDetail("WorldSocket::HandleAuthSession: User tries to login but his security level is not enough");
-        return -1;
+        return nullptr;
     }
 
     // Check that Key and account name are the same on client and server
@@ -952,7 +946,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendPacket(packet);
 
         sLog->outError("WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", id, account.c_str(), address.c_str());
-        return -1;
+        return nullptr;
     }
 
     ;//sLog->outStaticDebug("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
@@ -980,7 +974,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     LoginDatabase.Execute(stmt);
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, skipQueue, premiumServices), -1);
+    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, skipQueue, premiumServices), nullptr);
 
     m_Crypt.Init(&k);
 
@@ -1025,13 +1019,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
         m_Session->InitWarden(&k, os);
 
-    // Sleep this Network thread for
-    uint32 sleepTime = sWorld->getIntConfig(CONFIG_SESSION_ADD_DELAY);
-    ACE_OS::sleep (ACE_Time_Value (0, sleepTime));
-
-    sWorld->AddSession (m_Session);
-
-    return 0;
+    return m_Session;
 }
 
 int WorldSocket::HandlePing (WorldPacket& recvPacket)

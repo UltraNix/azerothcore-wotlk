@@ -81,6 +81,7 @@ enum WorldTimers
     WUPDATE_MAILBOXQUEUE,
     WUPDATE_5_SECS,
     WUPDATE_INGAMESTATS,
+    WUPDATE_COLLECTSESSIONS,
     WUPDATE_COUNT
 };
 
@@ -705,9 +706,7 @@ class World
         WorldSession* FindSession(uint32 id) const;
         WorldSession* FindOfflineSession(uint32 id) const;
         WorldSession* FindOfflineSessionForCharacterGUID(uint32 guidLow) const;
-        void AddSession(WorldSession* s);
         void SendAutoBroadcast();
-        bool KickSession(uint32 id);
         /// Get the number of current active sessions
         void UpdateMaxSessionCounters() { m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount, uint32(m_QueuedPlayer.size())); };
         const SessionMap& GetAllSessions() const { return m_sessions; }
@@ -832,7 +831,11 @@ class World
 
         void Update(uint32 diff);
 
+        // sessions that are added async
+        void AddSession(WorldSession* s);
+        bool KickSession( uint32 id );
         void UpdateSessions(uint32 diff);
+
         /// Set a server rate (see #Rates)
         void setRate(Rates rate, float value) { rate_values[rate]=value; }
         /// Get a server rate (see #Rates)
@@ -1048,10 +1051,6 @@ class World
 
         //Player Queue
         Queue m_QueuedPlayer;
-
-        // sessions that are added async
-        void AddSession_(WorldSession* s);
-        ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
 
         // used versions
         std::string m_DBVersion;

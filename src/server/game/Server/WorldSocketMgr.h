@@ -56,23 +56,19 @@ public:
     ACE_Reactor* GetReactor();
 
 protected:
-
-    void AddNewSockets();
-
     virtual int svc();
 
 private:
     typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicInt;
-    typedef std::set<WorldSocket*> SocketSet;
+    typedef std::deque<WorldSocket*> SocketQueue;
 
-    ACE_Reactor* m_Reactor;
-    AtomicInt m_Connections;
-    int m_ThreadId;
+    ACE_Reactor*        m_Reactor;
+    AtomicInt           m_Connections;
+    int                 m_ThreadId;
 
-    SocketSet m_Sockets;
-
-    SocketSet m_NewSockets;
-    ACE_Thread_Mutex m_NewSockets_Lock;
+    SocketQueue         m_Sockets;
+    SocketQueue         m_NewSockets;
+    ACE_Thread_Mutex    m_NewSocketsMutex;
 };
 
 /// Manages all sockets connected to peers and network threads
@@ -82,27 +78,21 @@ public:
     friend class WorldSocket;
     friend class ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>;
 
-    /// Start network, listen at address:port .
-    int StartNetwork( std::vector<ACE_UINT16> & ports, const char* address);
-
-    /// Stops all network threads, It will wait for all running threads .
-    void StopNetwork();
-
-    /// Wait untill all network threads have "joined" .
-    void Wait();
+    int     StartNetwork( std::vector<ACE_UINT16> & ports, const char* address);
+    void    StopNetwork();
+    void    Wait();
 
 private:
-    int OnSocketOpen(WorldSocket* sock);
-
-    int StartReactiveIO( std::vector<ACE_UINT16> & ports, const char* address);
+    int     OnSocketOpen(WorldSocket* sock);
+    int     StartReactiveIO( std::vector<ACE_UINT16> & ports, const char* address);
 
 private:
     WorldSocketMgr();
     virtual ~WorldSocketMgr();
 
-    int m_SockOutKBuff;
-    int m_SockOutUBuff;
-    bool m_UseNoDelay;
+    int     m_SockOutKBuff;
+    int     m_SockOutUBuff;
+    bool    m_UseNoDelay;
 
     struct AcceptorContext
     {

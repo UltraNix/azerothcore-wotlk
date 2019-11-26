@@ -226,14 +226,6 @@ GridUnload = 1
 SocketTimeOutTime = 900000
 
 #
-#    SessionAddDelay
-#        Description: Time (in microseconds) that a network thread will sleep after authentication
-#                     protocol handling before adding a connection to the world session map.
-#        Default:     10000 - (10 milliseconds, 0.01 second)
-
-SessionAddDelay = 10000
-
-#
 #    GridCleanUpDelay
 #        Description: Time (in milliseconds) grid clean up delay.
 #        Default:     300000 - (5 minutes)
@@ -2901,6 +2893,14 @@ Network.TcpNodelay = 1
 #        Description: Delay network activation by N milliseconds
 
 Network.DelayedStart = 5000
+
+#
+#    Network.SessionAddDelay
+#        Description: Time (in milliseconds) that a network thread will sleep after authentication
+#                     protocol handling before adding a connection to the world session map.
+#        Default:     50 
+
+Network.SessionAddDelay = 50
 
 #
 ###################################################################################################

@@ -23,7 +23,10 @@ if(!(test-path -path $vcpkg_dir ))
 
 invoke-expression "$vcpkg_dir\vcpkg install boost openssl libmariadb --triplet x64-windows --featurepackages"
 
-remove-item CMakeCache.txt
+if( test-path -path CMakeCache.txt )
+{
+    remove-item CMakeCache.txt
+}
 
 $generator = "Visual Studio 15 Win64"
 $toolchain = "$vcpkg_dir/scripts/buildsystems/vcpkg.cmake"
