@@ -11230,8 +11230,9 @@ float Unit::SpellDoneCritChance(Unit const* victim, SpellInfo const* spellProto,
         return -100.0f;
 
     // Always crit sitting targets
-    if (victim && IsPlayer() && !victim->IsStandState())
+    if (victim && IsPlayer() && !victim->IsStandState() && !spellProto->IsHealingSpell())
         return 100.0f;
+
 
     // not critting spell
     if (spellProto->HasAttribute(SPELL_ATTR2_CANT_CRIT))

@@ -1441,6 +1441,17 @@ bool SpellInfo::IsAuraExclusiveBySpecificPerCasterWith(SpellInfo const* spellInf
     }
 }
 
+bool SpellInfo::IsHealingSpell() const
+{
+    std::list<SpellEffects> healingEffects = { SPELL_EFFECT_HEAL, SPELL_EFFECT_HEAL_MAX_HEALTH, SPELL_EFFECT_HEAL_PCT };
+    for (SpellEffects effect : healingEffects)
+    {
+        if (HasEffect(effect))
+            return true;
+    }
+    return false;
+}
+
 SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
 {
     // talents that learn spells can have stance requirements that need ignore
