@@ -1,0 +1,4 @@
+DELETE FROM `conditions` WHERE `SourceEntry`=32037 AND `SourceTypeOrReferenceId`=17;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(17, 0, 32037, 0, 0, 29, 0, 18185, 100, 0, 1, 0, 0, "", "Spell 'Place Feralfen Totem' cannot be cast if NPC 'Feralden Serpent Spirit' is nearby"),
+(17, 0, 32037, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, "", "Spell 'Place Feralfen Totem' cannot be cast if nearby NPC 'Feralden Serpent Spirit' is alive");
