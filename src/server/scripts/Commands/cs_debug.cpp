@@ -97,13 +97,12 @@ public:
             { "moltencore",     SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugMoltenCore,            ""},
             { "majordomo",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugMajordomo,             ""},
             { "hellforge",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugHellforge,               ""},
-            { "wintergrasp",    SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWintergrasp,            ""},
-            { "wgstats",        SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWgstats,                ""}
+            { "wintergrasp",    SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWintergrasp,            ""}
         };
         static std::vector<ChatCommand> commandTable =
         {
             { "debug",          SEC_GAMEMASTER,     CMD_CLI,  NULL,                  "", debugCommandTable },
-            { "wpgps",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleWPGPSCommand, "" }
+            { "wpgps",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleWPGPSCommand,    "" }
         };
         return commandTable;
     }
@@ -1621,25 +1620,6 @@ public:
                 handler->PSendSysMessage("Last Successful Defender Team: %s", defenderTeam.c_str());
             }
         }
-        return true;
-    }
-
-    static bool HandleDebugWgstats(ChatHandler* handler, char const* /*args*/)
-    {
-        Battlefield* wg = sBattlefieldMgr->GetBattlefieldByBattleId(1);
-        if (!wg)
-            return false;
-        for (uint32 i = 0; i < 2; ++i)
-        {
-            handler->PSendSysMessage("-----%s-----", i ? "Horde" : "Alliance");
-            handler->PSendSysMessage("Players in war: %u", wg->GetPlayersInWarCount((TeamId)i));
-            handler->PSendSysMessage("Players in queue: %u", wg->GetPlayersInQueueCount((TeamId)i));
-            handler->PSendSysMessage("Players invited to war: %u", wg->GetInvitedPlayersCount((TeamId)i));
-            handler->PSendSysMessage("Total: %u", wg->GetPlayersCount((TeamId)i));
-        }
-        handler->PSendSysMessage("--------------------");
-        handler->PSendSysMessage("Max players: %u", wg->GetMaxPlayers());
-        handler->PSendSysMessage("Max difference between factions: %u", wg->GetMaxFactionDiff());
         return true;
     }
 

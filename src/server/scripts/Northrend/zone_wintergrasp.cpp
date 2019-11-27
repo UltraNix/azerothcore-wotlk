@@ -314,12 +314,12 @@ class npc_wg_queue : public CreatureScript
             if (!wintergrasp)
                 return true;
 
-            if (wintergrasp->IsWarTime() && wintergrasp->CanBeInvitedToWar(player))
+            if (wintergrasp->IsWarTime())
                 wintergrasp->InvitePlayerToWar(player);
             else
             {
                 uint32 timer = wintergrasp->GetTimer() / 1000;
-                if (timer < 15 * MINUTE || wintergrasp->IsWarTime())
+                if (timer < 15 * MINUTE)
                     wintergrasp->InvitePlayerToQueue(player);
             }
             return true;

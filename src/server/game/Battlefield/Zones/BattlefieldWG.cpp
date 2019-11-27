@@ -55,7 +55,6 @@ bool BattlefieldWG::SetupBattlefield()
     m_BattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_BATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_WINTERGRASP_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
-    m_maxFactionDiff = sWorld->getIntConfig(CONFIG_WINTERGRASP_MAX_FACTION_DIFF);
 
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;
@@ -262,8 +261,6 @@ bool BattlefieldWG::Update(uint32 diff)
 
 void BattlefieldWG::OnBattleStart()
 {
-    m_MaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MAX);
-    m_maxFactionDiff = sWorld->getIntConfig(CONFIG_WINTERGRASP_MAX_FACTION_DIFF);
     // Spawn titan relic
     GameObject* go = SpawnGameObject(GO_WINTERGRASP_TITAN_S_RELIC, 5440.0f, 2840.8f, 430.43f, 0);
     if (go)
