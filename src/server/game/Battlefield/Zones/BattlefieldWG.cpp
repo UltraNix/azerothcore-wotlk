@@ -1266,9 +1266,9 @@ void BattlefieldWG::UpdateTenacity()
         else if (alliancePlayers > hordePlayers)
             newStack = int32((1.0f - ((float)alliancePlayers / hordePlayers)) * 4.0f);  // negative, should cast on horde
     }
-    newStack = std::min(abs(newStack), 20);
+    uint32 newStackAbs = std::min(abs(newStack), 20);
     // Return if no change in stack and apply tenacity to new player
-    if (newStack == m_tenacityStack)
+    if (newStack && newStack == m_tenacityStack)
     {
         TeamId tenacityFaction = newStack > 0 ? TEAM_ALLIANCE : TEAM_HORDE;
         for (GuidSet::const_iterator itr = m_updateTenacityList.begin(); itr != m_updateTenacityList.end(); ++itr)
@@ -1279,16 +1279,16 @@ void BattlefieldWG::UpdateTenacity()
                 {
                     if ((newPlayer->GetTeamId() == TEAM_ALLIANCE && m_tenacityStack > 0) || (newPlayer->GetTeamId() == TEAM_HORDE && m_tenacityStack < 0))
                     {
-                        uint32 buff_honor = GetHonorBuff(newStack);
-                        newPlayer->SetAuraStack(SPELL_TENACITY, newPlayer, newStack);
+                        uint32 buff_honor = GetHonorBuff(newStackAbs);
+                        newPlayer->SetAuraStack(SPELL_TENACITY, newPlayer, newStackAbs);
                         if (buff_honor)
                             newPlayer->CastSpell(newPlayer, buff_honor, true);
                     }
                 }
                 else if (m_vehicles[tenacityFaction].find(newUnit->GetGUID()) != m_vehicles[tenacityFaction].end())
                 {
-                    newUnit->SetAuraStack(SPELL_TENACITY_VEHICLE, newUnit, newStack);
-                    if (uint32 buff_honor = GetHonorBuff(newStack))
+                    newUnit->SetAuraStack(SPELL_TENACITY_VEHICLE, newUnit, newStackAbs);
+                    if (uint32 buff_honor = GetHonorBuff(newStackAbs))
                         newUnit->CastSpell(newUnit, buff_honor, true);
 
                     // Add Tenacity to Wintergrasp Siege Turret
@@ -1300,7 +1300,7 @@ void BattlefieldWG::UpdateTenacity()
                             {
                                 if (Aura * aura = turret->AddAura(SPELL_TENACITY_VEHICLE, turret))
                                 {
-                                    aura->SetStackAmount(newStack);
+                                    aura->SetStackAmount(newStackAbs);
                                 }
                             }
                         }
@@ -1336,13 +1336,12 @@ void BattlefieldWG::UpdateTenacity()
     if (newStack)
     {
         team = newStack > 0 ? TEAM_ALLIANCE : TEAM_HORDE;
-        newStack = std::min(abs(newStack), 20);
-        uint32 buff_honor = GetHonorBuff(newStack);
+        uint32 buff_honor = GetHonorBuff(newStackAbs);
 
         for (GuidSet::const_iterator itr = m_PlayersInWar[team].begin(); itr != m_PlayersInWar[team].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
-                player->SetAuraStack(SPELL_TENACITY, player, newStack);
+                player->SetAuraStack(SPELL_TENACITY, player, newStackAbs);
 
                 for (uint32 spellId : {SPELL_GREAT_HONOR, SPELL_GREATER_HONOR, SPELL_GREATEST_HONOR })
                     player->RemoveAurasDueToSpell(spellId);
@@ -1354,7 +1353,7 @@ void BattlefieldWG::UpdateTenacity()
         for (GuidSet::const_iterator itr = m_vehicles[team].begin(); itr != m_vehicles[team].end(); ++itr)
             if (Unit* unit = ObjectAccessor::FindUnit(*itr))
             {
-                unit->SetAuraStack(SPELL_TENACITY_VEHICLE, unit, newStack);
+                unit->SetAuraStack(SPELL_TENACITY_VEHICLE, unit, newStackAbs);
 
                 for (uint32 spellId : {SPELL_GREAT_HONOR, SPELL_GREATER_HONOR, SPELL_GREATEST_HONOR })
                     unit->RemoveAurasDueToSpell(spellId);
@@ -1370,7 +1369,7 @@ void BattlefieldWG::UpdateTenacity()
                         {
                             if (Aura * aura = turret->AddAura(SPELL_TENACITY_VEHICLE, turret))
                             {
-                                aura->SetStackAmount(newStack);
+                                aura->SetStackAmount(newStackAbs);
                             }
                         }
                     }
