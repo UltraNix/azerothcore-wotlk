@@ -4088,3 +4088,19 @@ Wintergrasp.Autoswitch.Enable = 0
 
 Wintergrasp.Autoswitch.Count = 4500
 
+#    Reputation.Boost.Percent
+#        Description: Percentage of reputation boost
+#        Default: 0 (0%)
+
+Reputation.Boost.Percent = 0
+
+#    Reputation.Boost.FactionMask
+#        Description: Factionmask of reputation boost
+#        Default: 0 - Disabled
+#                 1 - Alliance
+#                 2 - Horde
+#                 3 - Both
+
+Reputation.Boost.FactionMask = 0
+
+

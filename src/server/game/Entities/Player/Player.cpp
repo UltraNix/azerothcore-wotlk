@@ -7311,6 +7311,9 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
     if (source != REPUTATION_SOURCE_SPELL && GetsRecruitAFriendBonus(false))
         percent *= 1.0f + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS);
 
+    if (sWorld->getIntConfig(CONFIG_REPUTATION_BOOST_FACTION_MASK) & (GetTeamId() + 1))
+        percent += sWorld->getIntConfig(CONFIG_REPUTATION_BOOST_PERCENT);
+
     return CalculatePct(rep, percent);
 }
 

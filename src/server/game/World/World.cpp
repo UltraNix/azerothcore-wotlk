@@ -1458,6 +1458,9 @@ void World::LoadConfigSettings(bool reload)
 
     m_bool_configs[CONFIG_WINTERGRASP_AUTOSWITCH_ENABLE] = sConfigMgr->GetBoolDefault("Wintergrasp.Autoswitch.Enable", false);
     m_int_configs[CONFIG_WINTERGRASP_AUTOSWITCH_COUNT] = sConfigMgr->GetIntDefault("Wintergrasp.Autoswitch.Count", 4500);
+
+    m_int_configs[CONFIG_REPUTATION_BOOST_PERCENT] = sConfigMgr->GetIntDefault("Reputation.Boost.Percent", 0);
+    m_int_configs[CONFIG_REPUTATION_BOOST_FACTION_MASK] = sConfigMgr->GetIntDefault("Reputation.Boost.FactionMask", 0);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
