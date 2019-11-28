@@ -26,6 +26,7 @@
 #include "GameObject.h"
 #include "Battleground.h"
 #include "ObjectAccessor.h"
+#include "Chat.h"
 
 enum BattlefieldTypes
 {
@@ -240,6 +241,8 @@ class Battlefield : public ZoneScript
         void InvitePlayersInQueueToWar();
         /// Invite all players in zone to join battle on battle start
         void InvitePlayersInZoneToWar();
+        bool CanBeInvitedToWar(Player* player) const;
+        uint32 GetMaxPlayers() const;
 
         /// Called when a Unit is kill in battlefield zone
         virtual void HandleKill(Player* /*killer*/, Unit* /*killed*/) {};
@@ -261,7 +264,8 @@ class Battlefield : public ZoneScript
          * \brief Kick player from battlefield and teleport him to kick-point location
          * \param guid : guid of player who must be kick
          */
-        void KickPlayerFromBattlefield(uint64 guid);
+        void KickPlayerFromBattlefield(uint64 guid, bool sendExitMessage = true);
+        void KickAndInviteToQueue(Player* player);
 
         /// Called when player (player) enter in zone
         void HandlePlayerEnterZone(Player* player, uint32 zone);
@@ -362,18 +366,25 @@ class Battlefield : public ZoneScript
 
         void InitStalker(uint32 entry, float x, float y, float z, float o);
 
+        uint32 GetPlayersInWarCount(TeamId team) const { return m_PlayersInWar[team].size(); }
+        uint32 GetInvitedPlayersCount(TeamId team) const { return m_InvitedPlayers[team].size(); }
+        uint32 GetPlayersInQueueCount(TeamId team) const { return m_PlayersInQueue[team].size(); }
+        uint32 GetPlayersCount(TeamId team) const { return m_PlayersInWar[team].size() + m_InvitedPlayers[team].size() + m_PlayersInQueue[team].size(); };
+        uint32 GetMaxFactionDiff() const { return m_maxFactionDiff; }
+
     protected:
         uint64 StalkerGuid;
         uint32 m_Timer;                                         // Global timer for event
         bool m_IsEnabled;
         bool m_isActive;
         TeamId m_DefenderTeam;
+        uint32 m_newPlayersInviteTimer;
 
         // Map of the objectives belonging to this OutdoorPvP
         BfCapturePointMap m_capturePoints;
 
         // Players info maps
-        GuidSet m_players[BG_TEAMS_COUNT];                      // Players in zone
+        GuidSet m_playersInZone[BG_TEAMS_COUNT];                      // Players in zone
         GuidSet m_PlayersInQueue[BG_TEAMS_COUNT];               // Players in the queue
         GuidSet m_PlayersInWar[BG_TEAMS_COUNT];                 // Players in WG combat
         PlayerTimerMap m_InvitedPlayers[BG_TEAMS_COUNT];
@@ -392,6 +403,7 @@ class Battlefield : public ZoneScript
         uint32 m_RestartAfterCrash;                             // Delay to restart Wintergrasp if the server crashed during a running battle.
         uint32 m_TimeForAcceptInvite;
         uint32 m_uiKickDontAcceptTimer;
+        uint32 m_maxFactionDiff;
         WorldLocation KickPosition;                             // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
 
         uint32 m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war

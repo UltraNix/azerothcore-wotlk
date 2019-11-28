@@ -55,6 +55,7 @@ bool BattlefieldWG::SetupBattlefield()
     m_BattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_BATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_WINTERGRASP_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
+    m_maxFactionDiff = sWorld->getIntConfig(CONFIG_WINTERGRASP_MAX_FACTION_DIFF);
 
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;
@@ -337,7 +338,7 @@ void BattlefieldWG::OnBattleStart()
             (*itr)->UpdateGraveyardAndWorkshop();
 
     for (uint8 team = 0; team < 2; ++team)
-        for (GuidSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
+        for (GuidSet::const_iterator itr = m_playersInZone[team].begin(); itr != m_playersInZone[team].end(); ++itr)
         {
             // Kick player in orb room, TODO: offline player ?
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
@@ -390,7 +391,7 @@ void BattlefieldWG::UpdateCounterVehicle(bool init)
 void BattlefieldWG::UpdateVehicleCountWG()
 {
     for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
-        for (GuidSet::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+        for (GuidSet::iterator itr = m_playersInZone[i].begin(); itr != m_playersInZone[i].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
                 player->SendUpdateWorldState(BATTLEFIELD_WG_WORLD_STATE_VEHICLE_H,     GetData(BATTLEFIELD_WG_DATA_VEHICLE_H));
@@ -403,7 +404,7 @@ void BattlefieldWG::UpdateVehicleCountWG()
 void BattlefieldWG::CapturePointTaken(uint32 areaId)
 {
     for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
-        for (GuidSet::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+        for (GuidSet::iterator itr = m_playersInZone[i].begin(); itr != m_playersInZone[i].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
                 if (player->GetAreaId() == areaId)
                     player->UpdateAreaDependentAuras(areaId);
@@ -569,7 +570,7 @@ void BattlefieldWG::OnBattleEnd(bool endByTimer)
     {
         for (uint8 team = 0; team < 2; ++team)
         {
-            for (GuidSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
+            for (GuidSet::const_iterator itr = m_playersInZone[team].begin(); itr != m_playersInZone[team].end(); ++itr)
             {
                 if (Player* player = ObjectAccessor::FindPlayer(*itr))
                 {
@@ -1113,7 +1114,7 @@ void BattlefieldWG::SendInitWorldStatesTo(Player* player)
 void BattlefieldWG::SendInitWorldStatesToAll()
 {
     for (uint8 team = 0; team < 2; team++)
-        for (GuidSet::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
+        for (GuidSet::iterator itr = m_playersInZone[team].begin(); itr != m_playersInZone[team].end(); ++itr)
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
                 SendInitWorldStatesTo(player);
 }

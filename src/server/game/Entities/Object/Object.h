@@ -978,7 +978,7 @@ class WorldObject : public Object, public WorldLocation
 
         bool IsInWintergrasp() const
         {
-            return GetMapId() == 571 && GetPositionX() > 3733.33331f && GetPositionX() < 5866.66663f && GetPositionY() > 1599.99999f && GetPositionY() < 4799.99997f;
+            return GetZoneId() == 4197;
         }
 
         uint32  LastUsedScriptID;

@@ -429,7 +429,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recvData)
     //we can return mail now
     //so firstly delete the old one
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
+        
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_BY_ID);
     stmt->setUInt32(0, mailId);
     trans->Append(stmt);
