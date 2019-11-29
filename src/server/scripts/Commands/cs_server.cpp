@@ -104,7 +104,7 @@ public:
     {
         std::string realmName = sWorld->GetRealmName();
         uint32 playerCount = sWorld->GetPlayerCount();
-        uint32 activeSessionCount = sWorld->GetActiveSessionCount();
+        uint32 activeSessionCount = sWorld->GetActiveAndQueuedSessionCount();
         uint32 queuedSessionCount = sWorld->GetQueuedSessionCount();
         std::string uptime = secsToTimeString(sWorld->GetUptime()).append(".");
         uint32 updateTime = sWorld->GetUpdateTime();
@@ -125,7 +125,7 @@ public:
         if (sWorld->getBoolConfig(CONFIG_SPECIAL_ANGRATHAR))
         {
             sWorld->GetRevision() != 0 ? handler->PSendSysMessage(LANG_SERVER_HASH_WITH_REVISION, sWorld->GetRealmName().c_str(), sWorld->GetRevision(), _HASH) : handler->PSendSysMessage(LANG_SERVER_HASH, sWorld->GetRealmName().c_str(), _HASH);
-            queuedSessionCount != 0 ? handler->PSendSysMessage(LANG_CONNECTED_USERS_QUE, activeSessionCount, playerCount, queuedSessionCount) : handler->PSendSysMessage(LANG_CONNECTED_USERS, activeSessionCount, playerCount);
+            handler->PSendSysMessage(LANG_CONNECTED_USERS_QUE, activeSessionCount, playerCount, queuedSessionCount);
         }
 
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
