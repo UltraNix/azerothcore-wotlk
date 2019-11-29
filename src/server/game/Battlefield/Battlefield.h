@@ -80,6 +80,7 @@ class Battlefield;
 class BfGraveyard;
 
 typedef std::unordered_set<uint64> GuidSet;
+typedef std::deque<uint64> GuidQueue;
 typedef std::vector<BfGraveyard*> GraveyardVect;
 typedef std::map<uint64, time_t> PlayerTimerMap;
 
@@ -371,6 +372,9 @@ class Battlefield : public ZoneScript
         uint32 GetPlayersInQueueCount(TeamId team) const { return m_PlayersInQueue[team].size(); }
         uint32 GetPlayersCount(TeamId team) const { return m_PlayersInWar[team].size() + m_InvitedPlayers[team].size() + m_PlayersInQueue[team].size(); };
         uint32 GetMaxFactionDiff() const { return m_maxFactionDiff; }
+        bool IsPlayerInQueue(Player* player) const;
+        void RemovePlayerFromQueue(Player* player);
+
 
     protected:
         uint64 StalkerGuid;
@@ -384,8 +388,8 @@ class Battlefield : public ZoneScript
         BfCapturePointMap m_capturePoints;
 
         // Players info maps
-        GuidSet m_playersInZone[BG_TEAMS_COUNT];                      // Players in zone
-        GuidSet m_PlayersInQueue[BG_TEAMS_COUNT];               // Players in the queue
+        GuidSet m_playersInZone[BG_TEAMS_COUNT];                // Players in zone
+        GuidQueue m_PlayersInQueue[BG_TEAMS_COUNT];             // Players in the queue
         GuidSet m_PlayersInWar[BG_TEAMS_COUNT];                 // Players in WG combat
         PlayerTimerMap m_InvitedPlayers[BG_TEAMS_COUNT];
         PlayerTimerMap m_PlayersWillBeKick[BG_TEAMS_COUNT];

@@ -236,7 +236,7 @@ void Battlefield::InvitePlayerToQueue(Player* player)
 {
     if (!player || player->IsGameMaster())
         return;
-    if (m_PlayersInQueue[player->GetTeamId()].count(player->GetGUID()))
+    if (IsPlayerInQueue(player))
         return;
 
     if (m_PlayersInQueue[player->GetTeamId()].size() <= m_MinPlayer || m_PlayersInQueue[GetOtherTeam(player->GetTeamId())].size() >= m_MinPlayer)
@@ -247,23 +247,33 @@ void Battlefield::InvitePlayersInQueueToWar()
 {
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
     {
-        GuidSet copy(m_PlayersInQueue[team]);
-        uint32 maxPlayersInWar = GetMaxPlayers();
-        for (GuidSet::const_iterator itr = copy.begin(); itr != copy.end(); ++itr)
+        while (!m_PlayersInQueue[team].empty())
         {
-            if (Player* player = ObjectAccessor::FindPlayer(*itr))
+            uint64 guid = m_PlayersInQueue[team].front();
+            if (Player * player = ObjectAccessor::FindPlayer(guid))
             {
                 if (CanBeInvitedToWar(player))
                 {
                     InvitePlayerToWar(player);
-                    m_PlayersInQueue[team].erase(*itr);
+                    m_PlayersInQueue[team].pop_front();
                 }
+                // Battle is full don't check rest of players
                 else
-                    KickPlayerFromBattlefield(*itr, false);
+                    break;
             }
             // Player is offline - kick from queue
             else
-                m_PlayersInQueue[team].erase(*itr);
+                m_PlayersInQueue[team].pop_front();
+        }
+    }
+
+    // Kick players who left in queue (weren't invited due to full battle)
+    for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
+    {
+        for(uint64 guid : m_PlayersInQueue[team])
+        {
+            if (Player * player = ObjectAccessor::FindPlayer(guid))
+                KickPlayerFromBattlefield(guid, false);
         }
     }
 }
@@ -278,7 +288,7 @@ void Battlefield::InvitePlayersInZoneToWar()
                 if (player->IsInFlight())
                     continue;
 
-                if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()) || m_PlayersInQueue[player->GetTeamId()].count(player->GetGUID()))
+                if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()) || IsPlayerInQueue(player))
                     continue;
                 if (CanBeInvitedToWar(player))
                     InvitePlayerToWar(player);
@@ -321,7 +331,7 @@ void Battlefield::InvitePlayerToWar(Player* player)
 
     if (player->InBattleground())
     {
-        m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+        RemovePlayerFromQueue(player);
         return;
     }
 
@@ -350,6 +360,16 @@ void Battlefield::InitStalker(uint32 entry, float x, float y, float z, float o)
         sLog->outError("Battlefield::InitStalker: could not spawn Stalker (Creature entry %u), zone messeges will be un-available", entry);
 }
 
+void Battlefield::RemovePlayerFromQueue(Player* player)
+{
+    m_PlayersInQueue[player->GetTeamId()].erase(std::remove(m_PlayersInQueue[player->GetTeamId()].begin(), m_PlayersInQueue[player->GetTeamId()].end(), player->GetGUID()), m_PlayersInQueue[player->GetTeamId()].end());
+}
+
+bool Battlefield::IsPlayerInQueue(Player* player) const
+{
+    return std::find(m_PlayersInQueue[player->GetTeamId()].begin(), m_PlayersInQueue[player->GetTeamId()].end(), player->GetGUID()) != m_PlayersInQueue[player->GetTeamId()].end();
+}
+
 void Battlefield::KickAfkPlayers()
 {
     // xinef: optimization, dont lookup player twice
@@ -364,16 +384,16 @@ void Battlefield::KickPlayerFromBattlefield(uint64 guid, bool sendExitMessage)
 {
     if (Player* player = ObjectAccessor::FindPlayer(guid))
     {
-        if (!player->IsInWintergrasp())
-            return;
-        if (player->GetZoneId() == GetZoneId() && !player->IsGameMaster() /*&& !player->IsInFlight()*/)
-            player->TeleportTo(KickPosition);
-
         m_InvitedPlayers[player->GetTeamId()].erase(guid);
-
         if (sendExitMessage)
             player->GetSession()->SendBfLeaveMessage(m_BattleId, BF_LEAVE_REASON_EXITED);
-        else
+
+        if (!player->IsInWintergrasp())
+            return;
+        if (!player->IsGameMaster() /*&& !player->IsInFlight()*/)
+            player->TeleportTo(KickPosition);
+
+        if (!sendExitMessage)
             ChatHandler(player->GetSession()).PSendSysMessage("Wintergrasp battle is full, please join the queue. If you are already in queue, you will be invited to battle once slot for you is available.");
     }
 }
@@ -467,7 +487,7 @@ bool Battlefield::HasPlayer(Player* player) const
 void Battlefield::PlayerAcceptInviteToQueue(Player* player)
 {
     // Add player in queue
-    m_PlayersInQueue[player->GetTeamId()].insert(player->GetGUID());
+    m_PlayersInQueue[player->GetTeamId()].push_back(player->GetGUID());
     // Send notification
     player->GetSession()->SendBfQueueInviteResponse(m_BattleId, m_ZoneId);
 }
@@ -476,7 +496,7 @@ void Battlefield::PlayerAcceptInviteToQueue(Player* player)
 void Battlefield::AskToLeaveQueue(Player* player)
 {
     // Remove player from queue
-    m_PlayersInQueue[player->GetTeamId()].erase(player->GetGUID());
+    RemovePlayerFromQueue(player);
     player->GetSession()->SendBfLeaveMessage(m_BattleId, BF_LEAVE_REASON_EXITED);
 }
 
@@ -522,8 +542,8 @@ void Battlefield::BroadcastPacketToZone(WorldPacket& data) const
 void Battlefield::BroadcastPacketToQueue(WorldPacket& data) const
 {
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
-        for (GuidSet::const_iterator itr = m_PlayersInQueue[team].begin(); itr != m_PlayersInQueue[team].end(); ++itr)
-            if (Player* player = ObjectAccessor::FindPlayer(*itr))
+        for(uint64 guid : m_PlayersInQueue[team])
+            if (Player* player = ObjectAccessor::FindPlayer(guid))
                 player->GetSession()->SendPacket(&data);
 }
 
