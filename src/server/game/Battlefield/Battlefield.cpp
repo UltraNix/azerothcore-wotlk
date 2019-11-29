@@ -47,6 +47,7 @@ Battlefield::Battlefield()
     m_MapId = 0;
     m_MaxPlayer = 0;
     m_MinPlayer = 0;
+    m_AbsoluteMaxPlayer = 0;
     m_MinLevel = 0;
     m_BattleTime = 0;
     m_NoWarBattleTime = 0;
@@ -233,6 +234,8 @@ void Battlefield::InvitePlayersInZoneToQueue()
 
 void Battlefield::InvitePlayerToQueue(Player* player)
 {
+    if (!player || player->IsGameMaster())
+        return;
     if (m_PlayersInQueue[player->GetTeamId()].count(player->GetGUID()))
         return;
 
@@ -294,7 +297,9 @@ bool Battlefield::CanBeInvitedToWar(Player* player) const
 
 uint32 Battlefield::GetMaxPlayers() const
 {
-    if (GetPlayersCount(TEAM_ALLIANCE) < m_MaxPlayer && GetPlayersCount(TEAM_HORDE) < m_MaxPlayer)
+    if (GetPlayersCount(TEAM_ALLIANCE) >= m_AbsoluteMaxPlayer || GetPlayersCount(TEAM_HORDE) >= m_AbsoluteMaxPlayer)
+        return m_AbsoluteMaxPlayer;
+    else if (GetPlayersCount(TEAM_ALLIANCE) < m_MaxPlayer && GetPlayersCount(TEAM_HORDE) < m_MaxPlayer)
         return m_MaxPlayer;
     else
     {
@@ -307,7 +312,7 @@ uint32 Battlefield::GetMaxPlayers() const
 
 void Battlefield::InvitePlayerToWar(Player* player)
 {
-    if (!player)
+    if (!player || player->IsGameMaster())
         return;
 
     // TODO : needed ?
@@ -375,10 +380,9 @@ void Battlefield::KickPlayerFromBattlefield(uint64 guid, bool sendExitMessage)
 
 void Battlefield::KickAndInviteToQueue(Player* player)
 {
-    if (!player)
+    if (!player || player->IsGameMaster())
         return;
-    if (!player->IsGameMaster())
-        KickPlayerFromBattlefield(player->GetGUID(), false);
+    KickPlayerFromBattlefield(player->GetGUID(), false);
     InvitePlayerToQueue(player);
 }
 
@@ -388,6 +392,7 @@ void Battlefield::StartBattle()
         return;
     m_MaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_PLR_MAX);
     m_maxFactionDiff = sWorld->getIntConfig(CONFIG_WINTERGRASP_MAX_FACTION_DIFF);
+    m_AbsoluteMaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_ABSOLUTE_LIMIT);
 
     for (int team = 0; team < BG_TEAMS_COUNT; team++)
     {
@@ -428,9 +433,17 @@ void Battlefield::EndBattle(bool endByTimer)
     // Reset battlefield timer
     m_Timer = m_NoWarBattleTime;
     SendInitWorldStatesToAll();
-    m_PlayersInQueue->clear();
-    m_InvitedPlayers->clear();
-    m_PlayersWillBeKick->clear();
+    for (uint32 i = 0; i < 2; ++i)
+    {
+        for (uint32 guid : m_PlayersInQueue[i])
+        {
+            if (Player* player = ObjectAccessor::FindPlayer(guid))
+                player->GetSession()->SendBfLeaveMessage(m_BattleId, BF_LEAVE_REASON_CLOSE);
+        }
+        m_PlayersInQueue[i].clear();
+        m_InvitedPlayers[i].clear();
+        m_PlayersWillBeKick[i].clear();
+    }
 }
 
 void Battlefield::DoPlaySoundToAll(uint32 SoundID)

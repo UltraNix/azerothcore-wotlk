@@ -2720,11 +2720,18 @@ Wintergrasp.CrashRestartTimer = 10
 Wintergrasp.BalanceSystem.Enable = 1
 
 #
-#     Wintergrasp.Wintergrasp.Max.Faction.Diff
+#     Wintergrasp.Max.Faction.Diff
 #         Description: Max difference between factions above general limit
 #         Default:     5
 
 Wintergrasp.Max.Faction.Diff = 5
+
+#
+#     Wintergrasp.AbsoluteLimit
+#         Description: Above this limit players never will be invited to battle
+#         Default:     180
+
+Wintergrasp.AbsoluteLimit = 180
 
 #
 ###################################################################################################

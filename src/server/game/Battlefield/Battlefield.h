@@ -404,6 +404,7 @@ class Battlefield : public ZoneScript
         uint32 m_TimeForAcceptInvite;
         uint32 m_uiKickDontAcceptTimer;
         uint32 m_maxFactionDiff;
+        uint32 m_AbsoluteMaxPlayer;
         WorldLocation KickPosition;                             // Position where players are teleported if they switch to afk during the battle or if they don't accept invitation
 
         uint32 m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war

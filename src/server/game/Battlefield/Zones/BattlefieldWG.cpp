@@ -56,6 +56,7 @@ bool BattlefieldWG::SetupBattlefield()
     m_NoWarBattleTime = sWorld->getIntConfig(CONFIG_WINTERGRASP_NOBATTLETIME) * MINUTE * IN_MILLISECONDS;
     m_RestartAfterCrash = sWorld->getIntConfig(CONFIG_WINTERGRASP_RESTART_AFTER_CRASH) * MINUTE * IN_MILLISECONDS;
     m_maxFactionDiff = sWorld->getIntConfig(CONFIG_WINTERGRASP_MAX_FACTION_DIFF);
+    m_AbsoluteMaxPlayer = sWorld->getIntConfig(CONFIG_WINTERGRASP_ABSOLUTE_LIMIT);
 
     m_TimeForAcceptInvite = 20;
     m_StartGroupingTimer = 15 * MINUTE * IN_MILLISECONDS;
