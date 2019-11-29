@@ -299,7 +299,7 @@ uint32 Battlefield::GetMaxPlayers() const
 {
     if (GetPlayersCount(TEAM_ALLIANCE) >= m_AbsoluteMaxPlayer || GetPlayersCount(TEAM_HORDE) >= m_AbsoluteMaxPlayer)
         return m_AbsoluteMaxPlayer;
-    else if (GetPlayersCount(TEAM_ALLIANCE) < m_MaxPlayer && GetPlayersCount(TEAM_HORDE) < m_MaxPlayer)
+    else if (GetPlayersCount(TEAM_ALLIANCE) < m_MaxPlayer || GetPlayersCount(TEAM_HORDE) < m_MaxPlayer)
         return m_MaxPlayer;
     else
     {
