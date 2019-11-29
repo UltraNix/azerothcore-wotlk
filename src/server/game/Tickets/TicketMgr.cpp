@@ -321,7 +321,7 @@ void TicketMgr::LoadTickets()
             delete ticket;
             continue;
         }
-        if (!ticket->IsClosed())
+        if (!ticket->IsClosed() || !ticket->IsCompleted())
             ++_openTicketCount;
 
         // Update max ticket id if necessary

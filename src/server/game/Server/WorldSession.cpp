@@ -1836,7 +1836,7 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
             maxPacketCounterAllowed = 45;
             break;
         }
-            
+
         case CMSG_SET_ACTION_BUTTON:
         {
             maxPacketCounterAllowed = MAX_ACTION_BUTTONS;

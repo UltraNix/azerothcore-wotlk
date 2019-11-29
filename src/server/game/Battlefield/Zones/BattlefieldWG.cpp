@@ -303,6 +303,25 @@ void BattlefieldWG::OnBattleStart()
     SetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT, 0);
     SetData(BATTLEFIELD_WG_DATA_DAMAGED_TOWER_ATT, 0);
 
+
+    // Upper workshops should be controlled by defenders, lower by attackers.
+    for (auto itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
+    {
+        if (!itr->second || !itr->second->GetCapturePointGo())
+            continue;
+        switch (itr->second->GetCapturePointGo()->GetEntry())
+        {
+        case GO_WINTERGRASP_FACTORY_BANNER_NE:
+        case GO_WINTERGRASP_FACTORY_BANNER_NW:
+            itr->second->ForceChangeTeam(GetDefenderTeam());
+            break;
+        case GO_WINTERGRASP_FACTORY_BANNER_SE:
+        case GO_WINTERGRASP_FACTORY_BANNER_SW:
+            itr->second->ForceChangeTeam(GetAttackerTeam());
+            break;
+        }
+    }
+
     if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_BALANCE_SYSTEM))
     {
         TeamId favoredFaction = factionBalanceScale < 0 ? TEAM_ALLIANCE : TEAM_HORDE;
@@ -311,26 +330,6 @@ void BattlefieldWG::OnBattleStart()
             ChangeCapturePointFaction(GO_WINTERGRASP_FACTORY_BANNER_NE, favoredFaction); // Sunken Temple
         if (absFactionBalanceScale >= 500)
             ChangeCapturePointFaction(GO_WINTERGRASP_FACTORY_BANNER_NW, favoredFaction); // Broken Temple
-    }
-    else
-    {
-        // Upper workshops should be controlled by defenders, lower by attackers.
-        for (auto itr = m_capturePoints.begin(); itr != m_capturePoints.end(); ++itr)
-        {
-            if (!itr->second || !itr->second->GetCapturePointGo())
-                continue;
-            switch (itr->second->GetCapturePointGo()->GetEntry())
-            {
-            case GO_WINTERGRASP_FACTORY_BANNER_NE:
-            case GO_WINTERGRASP_FACTORY_BANNER_NW:
-                itr->second->ForceChangeTeam(GetDefenderTeam());
-                break;
-            case GO_WINTERGRASP_FACTORY_BANNER_SE:
-            case GO_WINTERGRASP_FACTORY_BANNER_SW:
-                itr->second->ForceChangeTeam(GetAttackerTeam());
-                break;
-            }
-        }
     }
 
     // Update graveyard (in no war time all graveyard is to deffender, in war time, depend of base)
