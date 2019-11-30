@@ -365,22 +365,25 @@ void WorldSession::HandleLuaResults(std::vector<WardenLuaResult> results)
         else
         {
             HandleCheckFailure(it.GetCheckId(), false);
-            RelayData relay;
-            relay.checkId = it.GetCheckId();
-            relay.falsePositiveChance = std::move(it.GetLuaFalsePositiveChance());
-            relay.accountId = GetAccountId();
-            relay.playerGUID = _player ? m_GUIDLow : 0;
-            relay.playerName = _player ? _player->GetName() : "Player session active but player went offline, use accountId instead";
-            relay.playerPosition = std::move(it.GetPosition());
-            relay._cheatDescription = std::move(it.GetLuaDescription());
-            relay._additionalMessage = std::move(it.GetAdditionalMessage());
-
-            if (it.IsTrapOrDebugCheck())
-                GetRelay().Add(std::make_pair(TYPE_LUA_TRAP_FAILURE, std::move(relay)));
-            else
+            if (sWorldCache.CanRelayLuaResult(it.GetCheckId()))
             {
-                ClearPongRequest(key);
-                GetRelay().Add(std::make_pair(TYPE_LUA_CHECK_FAILURE, std::move(relay)));
+                RelayData relay;
+                relay.checkId = it.GetCheckId();
+                relay.falsePositiveChance = std::move(it.GetLuaFalsePositiveChance());
+                relay.accountId = GetAccountId();
+                relay.playerGUID = _player ? m_GUIDLow : 0;
+                relay.playerName = _player ? _player->GetName() : "Player session active but player went offline, use accountId instead";
+                relay.playerPosition = std::move(it.GetPosition());
+                relay._cheatDescription = std::move(it.GetLuaDescription());
+                relay._additionalMessage = std::move(it.GetAdditionalMessage());
+
+                if (it.IsTrapOrDebugCheck())
+                    GetRelay().Add(std::make_pair(TYPE_LUA_TRAP_FAILURE, std::move(relay)));
+                else
+                {
+                    ClearPongRequest(key);
+                    GetRelay().Add(std::make_pair(TYPE_LUA_CHECK_FAILURE, std::move(relay)));
+                }
             }
         }
     }
