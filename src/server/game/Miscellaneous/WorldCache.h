@@ -1,34 +1,9 @@
 #pragma once
 
-#include "Common.h"
 #include "TaskScheduler.h"
+#include "WardenDefines.hpp"
 
 class ChatHandler;
-
-enum WardenLuaCheckType : uint32
-{
-    WARDEN_LUA_PONG                 = 1,
-    WARDEN_LUA_TRAP,
-    //! clean client will always answer
-    //! unlocked client will not answer
-    WARDEN_LUA_PONG_2,
-    //! send before everything else
-    WARDEN_LUA_FRAME_CREATION,
-    WARDEN_LUA_ADDON_SENDER_CREATION,
-    WARDEN_LUA_TRAP_DEBUGSTACK,
-
-    MAX_WARDEN_LUA_TYPES
-};
-
-struct WardenLuaCheck
-{
-    uint32 _checkId = 0;
-    std::string _luaCode = "";
-    WardenLuaCheckType _checkType = MAX_WARDEN_LUA_TYPES;
-    std::string _description = "";
-    std::string _falsePositiveProbability = "";
-};
-using WardenLuaStore = std::unordered_map<uint32 /*checkId*/, WardenLuaCheck /*struct*/>;
 
 struct HellforgeStatValues
 {

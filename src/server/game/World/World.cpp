@@ -1440,6 +1440,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WARDEN_LUA_CHECK_TIMEOUT] = sConfigMgr->GetIntDefault("WardenLua.CheckTimeout", 1);
     m_int_configs[CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS] = sConfigMgr->GetIntDefault("WardenLuaGenerator.NumThreads", 1);
     m_bool_configs[CONFIG_WARDEN_RELAY_TIMEOUTS] = sConfigMgr->GetBoolDefault("Warden.Relay.RelayTimeouts", true);
+    m_int_configs[CONFIG_WARDEN_LUA_COLLECT_RESULTS_TIMER] = sConfigMgr->GetIntDefault("Warden.CollectResults.Timer", 60000);
+    m_timers[WUPDATE_COLLECTWARDENESULTS].SetInterval(m_int_configs[CONFIG_WARDEN_LUA_COLLECT_RESULTS_TIMER]);
+
     m_bool_configs[CONFIG_DUNGEON_FINDER_NEW_BRACKET_SYSTEM] = sConfigMgr->GetBoolDefault("DungeonFinder.NewBracketSystem.Enable", false);
 
     // Xp Rates
@@ -2393,6 +2396,15 @@ void World::Update(uint32 diff)
         {
             m_timers[WUPDATE_AUTOBROADCAST].Reset();
             SendAutoBroadcast();
+        }
+    }
+
+    if (sWorld->getBoolConfig(CONFIG_ENABLE_WARDEN_LUA_CHECKS))
+    {
+        if (m_timers[WUPDATE_COLLECTWARDENESULTS].Passed())
+        {
+            m_timers[WUPDATE_COLLECTWARDENESULTS].Reset();
+            WardenParserWin::GetWardenParser().GrabAllReports(this);
         }
     }
 
@@ -3742,4 +3754,12 @@ bool World::isGmWebCommandWhisperEnabled(std::string nickname) const
     if (m_gamemastersWebCommandWhisper.find(nickname) != m_gamemastersWebCommandWhisper.end())
         return (time(NULL) < m_gamemastersWebCommandWhisper.at(nickname));
     return false;
+}
+
+void World::HandleLuaResult(std::pair<uint64, std::vector<WardenLuaResult>> result)
+{
+    if (Player* player = ObjectAccessor::FindPlayer(result.first))
+        if (player->GetSession())
+            player->GetSession()->HandleLuaResults(std::move(result.second));
+    //else discard data
 }

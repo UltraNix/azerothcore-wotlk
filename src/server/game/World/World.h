@@ -23,7 +23,9 @@
 #ifndef __WORLD_H
 #define __WORLD_H
 
-#include "Common.h"
+#include "WardenDefines.hpp"
+
+//#include "Common.h"
 #include "Timer.h"
 #include <ace/Singleton.h>
 #include <ace/Atomic_Op.h>
@@ -82,6 +84,7 @@ enum WorldTimers
     WUPDATE_5_SECS,
     WUPDATE_INGAMESTATS,
     WUPDATE_COLLECTSESSIONS,
+    WUPDATE_COLLECTWARDENESULTS,
     WUPDATE_COUNT
 };
 
@@ -449,6 +452,7 @@ enum WorldIntConfigs
     CONFIG_MAX_RATE_BOOST_MULTIPLIER,
     CONFIG_RAID_INVITE_RESTRICTION_LEVEL,
     CONFIG_WINTERGRASP_AUTOSWITCH_COUNT,
+    CONFIG_WARDEN_LUA_COLLECT_RESULTS_TIMER,
     CONFIG_REPUTATION_BOOST_PERCENT,
     CONFIG_REPUTATION_BOOST_FACTION_MASK,
     CONFIG_WINTERGRASP_ABSOLUTE_LIMIT,
@@ -970,6 +974,7 @@ class World
 
         bool PatchNotes(ContentPatches patchSince = PATCH_MIN, ContentPatches patchTo = PATCH_MAX) const; // Maczuga
         void CleanupWardenDatabase();
+        void HandleLuaResult(uint64 /*guid*/, std::vector<WardenLuaResult> /*store*/);
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

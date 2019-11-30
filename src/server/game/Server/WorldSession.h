@@ -23,7 +23,8 @@
 #ifndef __WORLDSESSION_H
 #define __WORLDSESSION_H
 
-#include "Common.h"
+//#include "Common.h" included by warden defines
+#include "WardenDefines.hpp"
 #include "SharedDefines.h"
 #include "AddonMgr.h"
 #include "DatabaseEnv.h"
@@ -36,7 +37,8 @@
 #include "AccountMgr.h"
 #include "Item.h"
 #include "TaskScheduler.h"
-#include "ThreadedWardenGenerator.hpp"
+
+#include <mutex>
 
 class Creature;
 class GameObject;
@@ -223,20 +225,6 @@ struct PacketCounter
     time_t lastReceiveTime;
     uint32 amountCounter;
 };
-
-using WardenRequestStore = std::unordered_map<std::string/*prefix*/, WardenRequest>;
-
-constexpr uint32 WARDEN_PREFIX_SIZE{ 5 };
-constexpr uint32 WARDEN_BODY_SIZE{ 5 };
-
-constexpr uint32 WARDEN_TRAP_PREFIX_SIZE{ 7 };
-constexpr uint32 WARDEN_TRAP_BODY_SIZE{ 7 };
-
-constexpr uint32 WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE{ 6 };
-
-//! addonmessage string is composed of prefix + /t + body
-constexpr uint32 WARDEN_PING_PONG_MESSAGE_SIZE{ WARDEN_PREFIX_SIZE + WARDEN_BODY_SIZE + 1 };
-constexpr uint32 WARDEN_TRAP_MESSAGE_SIZE{ WARDEN_TRAP_PREFIX_SIZE + WARDEN_TRAP_BODY_SIZE + 1 };
 
 /// Player session in the World
 class WorldSession
@@ -1093,7 +1081,11 @@ class WorldSession
 
         typedef std::list<AddonInfo> AddonsList;
 
-        // Warden
+        /*
+          **************
+          *  Warden    *
+          **************  
+        */
         Warden* _warden;                                    // Remains null if Warden system is not enabled by config
         void InitializeWarden();
         bool CanUpdateWarden() const;
@@ -1120,8 +1112,6 @@ class WorldSession
         WardenRequestStore _wardenRequests;
         WardenRequestStore _wardenClientTraps;
 
-        bool _luaStoreLock;
-        std::vector<std::string> _checksToRemove;
         AsyncLuaCodeResult _luaResult;
         void PrepareLuaCheck();
         void RotateLuaCheckIDs();
@@ -1130,6 +1120,8 @@ class WorldSession
         //! Timeout can mean a few things, client answered with different body then required - he is cheating
         //! cheats detour the check we send or modifies it - client doesnt answer - cheating
         void CheckLuaRequests();
+        void ClearPongRequest(std::string const& key);
+        void HandleCheckFailure(uint32 /*checkId*/, bool /*timeout*/);
 
         //! those are generated once per session and assigned only once-
         //! at warden launch, we generate frame that catches client events and sends addon message
@@ -1140,14 +1132,12 @@ class WorldSession
         //! that handles sending addon messages back to the server
         std::string _SendAddonMessageFunctionPrefix;
     public:
-        void ClearPongRequest(std::string const& key);
-        void HandleCheckFailure(uint32 /*checkId*/, bool /*timeout*/);
         void OnWardenInitialized();
         void OnWardenCycleFinished();
         inline bool IsWardenLuaTurn() const { return _sendLuaCode; }
+        void HandleLuaResults(std::vector<WardenLuaResult> /*results*/);
 
-        WardenRequestStore GetLuaRequests();
-        WardenRequestStore GetLuaTrapRequests();
+        WardenRequestStore GetLuaStore(bool trapStore);
         
         //! Session are updated from map and world contexts
         //! We want scheduler to be updated only once (from world context)

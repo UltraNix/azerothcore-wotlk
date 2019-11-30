@@ -43,6 +43,7 @@
 #include "ChinaTown.h"
 #include "utf8.h"
 #include "ThreadedWardenParser.hpp"
+#include "WardenDefines.hpp"
 
 #include <cctype>
 #include <algorithm>
@@ -267,9 +268,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
     ///! and it uses chat_msg_whisper only
     if (type == CHAT_MSG_WHISPER && lang == LANG_ADDON && !msg.empty())
     {
-        WardenParserWin::Requestee who;
-        who.accountId = GetAccountId();
-        who.characterGUID = GetGuidLow();
+        Requestee who;
+        who.CopyLuaRequestStore(GetLuaStore(false));
+        who.CopyLuaTrapRequestStore(GetLuaStore(true));
+        who.SetCharacterGUID(_player->GetGUID());
         WardenParserWin::GetWardenParser().AddMessage(who, msg);
 
         bool const IsLuaCheckReceiver = to.size() == 3 && std::any_of(to.begin(), to.end(), [](const char letter)

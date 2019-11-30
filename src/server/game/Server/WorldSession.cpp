@@ -46,6 +46,8 @@
 #include "WardenWin.h"
 //#include "WardenMac.h"
 #include "WorldRelay/WorldRelay.hpp"
+#include "ThreadedWardenGenerator.hpp"
+#include "ThreadedWardenParser.hpp"
 
 //#include "WorldCache.h"
 #include "SavingSystem.h"
@@ -132,7 +134,6 @@ void WorldSession::InitializeWarden()
     _warden = nullptr;
 
     //** Sending lua code to the client **/
-    _luaStoreLock = false;
     _sendLuaCode = false;
     _wardenScheduler.CancelAll();
     _wardenScheduler.ClearValidator();
@@ -146,14 +147,6 @@ void WorldSession::InitializeWarden()
 
 void WorldSession::OnWardenInitialized()
 {
-    //! this iterates over sent lua requests and looks for timed out requests
-    //! when client answers with proper prefix, it will get cleared from this u_map
-    _wardenScheduler.Schedule(Minutes(sWorld->getIntConfig(CONFIG_WARDEN_LUA_CHECK_TIMEOUT)), WARDEN_SCHEDULER_GROUP_TIMEOUTS, [this](TaskContext func)
-    {
-        CheckLuaRequests();
-        func.Repeat();
-    });
-
     _warden->RequestData();
 
     /**
@@ -326,25 +319,16 @@ void WorldSession::SendLuaCheck()
         _wardenRequests[_request.GetPrefix()] = std::move(_request);
     }
 }
-WardenRequestStore WorldSession::GetLuaRequests()
-{
-    return _wardenRequests;
-}
 
-WardenRequestStore WorldSession::GetLuaTrapRequests()
+WardenRequestStore WorldSession::GetLuaStore(bool trapStore)
 {
-    return _wardenClientTraps;
+    if (trapStore)
+        return _wardenClientTraps;
+    return _wardenRequests;
 }
 
 void WorldSession::ClearPongRequest(std::string const& key)
 {
-    if (_luaStoreLock)
-    {
-        _checksToRemove.push_back(key);
-        sLog->outDebug(DebugLogFilters::LOG_FILTER_WARDEN, "Trying to erase key %s while store is locked, will be deleted later", key);
-        return;
-    }
-
     sLog->outDebug(DebugLogFilters::LOG_FILTER_WARDEN, "Erasing warden lua request, request prefix key: %s", key.c_str());
     _wardenRequests.erase(key);
 }
@@ -367,9 +351,51 @@ void WorldSession::HandleCheckFailure(uint32 checkId, bool timeout)
     CharacterDatabase.Execute(stmt);
 }
 
+void WorldSession::HandleLuaResults(std::vector<WardenLuaResult> results)
+{
+    for (auto&& it : results)
+    {
+        std::string key = it.GetCheckPrefix();
+        if (it.CheckPassed())
+        {
+            if (!it.IsTrapOrDebugCheck())
+                ClearPongRequest(key);
+            continue;
+        }
+        else
+        {
+            HandleCheckFailure(it.GetCheckId(), false);
+            RelayData relay;
+            relay.checkId = it.GetCheckId();
+            relay.falsePositiveChance = std::move(it.GetLuaFalsePositiveChance());
+            relay.accountId = GetAccountId();
+            relay.playerGUID = _player ? m_GUIDLow : 0;
+            relay.playerName = _player ? _player->GetName() : "Player session active but player went offline, use accountId instead";
+            relay.playerPosition = std::move(it.GetPosition());
+            relay._cheatDescription = std::move(it.GetLuaDescription());
+            relay._additionalMessage = std::move(it.GetAdditionalMessage());
+
+            if (it.IsTrapOrDebugCheck())
+                GetRelay().Add(std::make_pair(TYPE_LUA_TRAP_FAILURE, std::move(relay)));
+            else
+            {
+                ClearPongRequest(key);
+                GetRelay().Add(std::make_pair(TYPE_LUA_CHECK_FAILURE, std::move(relay)));
+            }
+        }
+    }
+
+    CheckLuaRequests();
+}
+
 void WorldSession::CheckLuaRequests()
 {
-    _luaStoreLock = true;
+    if (!sWorld->getBoolConfig(CONFIG_ENABLE_WARDEN_LUA_CHECKS))
+        return;
+
+    if (!_player)
+        return;
+
     std::vector<WardenRequestStore::key_type> eraser;
     for (auto && it : _wardenRequests)
     {
@@ -402,12 +428,6 @@ void WorldSession::CheckLuaRequests()
 
     for (auto&& key : eraser)
         _wardenRequests.erase(key);
-
-    //! clear everything that was supposed to be cleared while we iterated over the store
-    for (auto&& key : _checksToRemove)
-        _wardenRequests.erase(key);
-
-    _luaStoreLock = false;
 }
 
 void WorldSession::UpdateWardenScheduler(uint32 diff)

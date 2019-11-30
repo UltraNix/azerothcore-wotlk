@@ -1,23 +1,10 @@
 #pragma once
 
-#include <chrono>
-#include <vector>
-#include <thread>
-
-#include "Threading/SyncQueue.hpp"
+#include "WardenDefines.hpp"
+#include <mutex>
 
 namespace WardenParserWin
 {
-    struct Requestee
-    {
-        uint32_t accountId;
-        uint64 characterGUID;
-    };
-
-    using ParseRequest = std::pair<Requestee, std::string >;
-    using ParseGeneratorPool = std::vector< std::thread >;
-    using ParseRequestQueue = Threading::SyncQueue< ParseRequest >;
-
     class ThreadedWardenParser
     {
     public:
@@ -28,6 +15,7 @@ namespace WardenParserWin
         void Shutdown();
 
         void AddMessage(Requestee /*who*/, std::string /*message*/);
+        void GrabAllReports(World* /*world*/);
 
     protected:
         void ParseMessage(ParseRequest request);
@@ -38,6 +26,9 @@ namespace WardenParserWin
 
         ParseRequestQueue    m_queue;
         ParseGeneratorPool   m_pool;
+    private:
+        std::unordered_map<uint64, std::vector<WardenLuaResult>> _parseResultStore;
+        std::mutex resultsLock;
     };
 
     ThreadedWardenParser& GetWardenParser();

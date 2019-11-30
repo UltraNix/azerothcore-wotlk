@@ -4038,6 +4038,12 @@ WardenLua.CheckTimeout = 1
 
 # Timer for sending checks is in non-lua warden settings (Warden.ClientCheckHoldOff)
 
+#    Warden.CollectResults.Timer
+#        Description: Timer (in milliseconds) determining how often world grabs lua results from parser thread
+#
+
+Warden.CollectResults.Timer = 120000
+
 ###################################################################################################
 # Xp Rates
 
