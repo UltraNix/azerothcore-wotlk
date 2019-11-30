@@ -3756,10 +3756,10 @@ bool World::isGmWebCommandWhisperEnabled(std::string nickname) const
     return false;
 }
 
-void World::HandleLuaResult(std::pair<uint64, std::vector<WardenLuaResult>> result)
+void World::HandleLuaResult(uint64 guid, std::vector<WardenLuaResult> store)
 {
-    if (Player* player = ObjectAccessor::FindPlayer(result.first))
+    if (Player* player = ObjectAccessor::FindPlayer(guid))
         if (player->GetSession())
-            player->GetSession()->HandleLuaResults(std::move(result.second));
+            player->GetSession()->HandleLuaResults(std::move(store));
     //else discard data
 }

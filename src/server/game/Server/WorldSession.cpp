@@ -355,7 +355,7 @@ void WorldSession::HandleLuaResults(std::vector<WardenLuaResult> results)
 {
     for (auto&& it : results)
     {
-        std::string key = it.GetCheckPrefix();
+        std::string const& key = it.GetCheckPrefix();
         if (it.CheckPassed())
         {
             if (!it.IsTrapOrDebugCheck())
