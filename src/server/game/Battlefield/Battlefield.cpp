@@ -390,7 +390,7 @@ void Battlefield::KickPlayerFromBattlefield(uint64 guid, bool sendExitMessage)
 
         if (!player->IsInWintergrasp())
             return;
-        if (!player->IsGameMaster() /*&& !player->IsInFlight()*/)
+        if (!player->IsGameMaster() && !player->IsInFlight() && player->IsAlive())
             player->TeleportTo(KickPosition);
 
         if (!sendExitMessage)
