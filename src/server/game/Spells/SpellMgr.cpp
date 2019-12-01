@@ -5077,6 +5077,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 20253:
             spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
             spellInfo->SpellFamilyName = SPELLFAMILY_WARRIOR;
+            spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             break;
 
         /////////////////////////////////
