@@ -597,16 +597,10 @@ class spell_item_essence_of_life : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-                if (!spellInfo)
+                if (!spellInfo || !spellInfo->HasEffect(SPELL_EFFECT_HEAL))
                     return false;
 
-                bool const isLifeTap = spellInfo->SpellFamilyName && ((spellInfo->SpellFamilyFlags[0] & 0x00040000) != 0);
-                if (isLifeTap)
-                    return true;
-                else if (spellInfo->HasEffect(SPELL_EFFECT_HEAL) || spellInfo->HasAura(SPELL_AURA_PERIODIC_HEAL))
-                    return spellInfo->ManaCost > 0 || spellInfo->ManaCostPercentage > 0 || (spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo->SpellIconID == 156);
-
-                return false;
+                return spellInfo->ManaCost > 0 || spellInfo->ManaCostPercentage > 0 || (spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo->SpellIconID == 156);
             }
 
             void Register()
