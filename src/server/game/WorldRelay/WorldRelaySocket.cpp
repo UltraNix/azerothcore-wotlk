@@ -10,6 +10,8 @@
 HttpPosterSocket::HttpPosterSocket(std::string address) : m_address(address)
 {
     m_header = " HTTP/1.1\r\nHost: " + address + "\r\nUser-Agent: curl/7.66.0\r\nAccept: */*\r\nContent-Type: application/json\r\nContent-Length: ";
+    SSL_library_init();
+
 }
 
 HttpPosterSocket::~HttpPosterSocket()
@@ -18,7 +20,6 @@ HttpPosterSocket::~HttpPosterSocket()
 
 bool HttpPosterSocket::connect()
 {
-    SSL_library_init();
     m_ctx = nullptr;
     m_web = nullptr;
     SSL* ssl;
