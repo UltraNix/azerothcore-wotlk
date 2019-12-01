@@ -94,7 +94,10 @@ void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
                 return;
 
             if (CanBeInvitedToWar(player))
+            {
                 InvitePlayerToWar(player);
+                RemovePlayerFromQueue(player);
+            }
             else
                 KickAndInviteToQueue(player);
         }
@@ -181,16 +184,31 @@ bool Battlefield::Update(uint32 diff)
         if (m_uiKickDontAcceptTimer <= diff)
         {
             time_t now = time(nullptr);
-            /*for (int team = 0; team < 2; team++)
-                for (PlayerTimerMap::iterator itr = m_InvitedPlayers[team].begin(); itr != m_InvitedPlayers[team].end(); ++itr)
+
+            for (int team = 0; team < 2; team++)
+                for (PlayerTimerMap::iterator itr = m_InvitedPlayers[team].begin(); itr != m_InvitedPlayers[team].end();)
+                {
                     if (itr->second <= now)
-                        KickPlayerFromBattlefield(itr->first);*/
+                    {
+                        m_PlayersWillBeKick[team][itr->first] = now + 1;
+                        itr = m_InvitedPlayers[team].erase(itr);
+                    }
+                    else
+                        ++itr;
+                }
 
             InvitePlayersInZoneToWar();
             for (int team = 0; team < 2; team++)
-                for (PlayerTimerMap::iterator itr = m_PlayersWillBeKick[team].begin(); itr != m_PlayersWillBeKick[team].end(); ++itr)
+                for (PlayerTimerMap::iterator itr = m_PlayersWillBeKick[team].begin(); itr != m_PlayersWillBeKick[team].end();)
+                {
                     if (itr->second <= now)
+                    {
                         KickPlayerFromBattlefield(itr->first);
+                        itr = m_PlayersWillBeKick[team].erase(itr);
+                    }
+                    else
+                        ++itr;
+                }
 
             m_uiKickDontAcceptTimer = 5000;
         }
@@ -384,7 +402,6 @@ void Battlefield::KickPlayerFromBattlefield(uint64 guid, bool sendExitMessage)
 {
     if (Player* player = ObjectAccessor::FindPlayer(guid))
     {
-        m_InvitedPlayers[player->GetTeamId()].erase(guid);
         if (sendExitMessage)
             player->GetSession()->SendBfLeaveMessage(m_BattleId, BF_LEAVE_REASON_EXITED);
 
@@ -511,6 +528,7 @@ void Battlefield::PlayerAcceptInviteToWar(Player* player)
         player->GetSession()->SendBfEntered(m_BattleId);
         m_PlayersInWar[player->GetTeamId()].insert(player->GetGUID());
         m_InvitedPlayers[player->GetTeamId()].erase(player->GetGUID());
+        m_PlayersWillBeKick[player->GetTeamId()].erase(player->GetGUID());
 
         if (player->isAFK())
             player->ToggleAFK();
