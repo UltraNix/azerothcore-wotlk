@@ -152,7 +152,7 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
             if (creatureName == "")
                 creatureName = me->GetName();
             Map* map = me->GetMap();
-            if (map && (map->IsRaid() || map->GetId() == 230))
+            if (map && map->IsRaid())
             {
                 switch (difficulty)
                 {
@@ -175,15 +175,59 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
                 if (minTimer && time < minTimer)
                     return;
 
-                // Disable creature records for previous content.
-                //                  Naxx                   OS                     EoE                   Ulduar
-                if (map->GetId() == 533 || map->GetId() == 615 || map->GetId() == 616 || map->GetId() == 603)
+                if (!CanAnnounceRecordForMap(map->GetId()))
+                    return;
+
+                auto allowedMaps = sWorld->getIntConfig(CONFIG_CREATURE_BOSS_RECORDS_MAP_MASK);
+                if ((allowedMaps & map->GetId()) == 0)
                     return;
 
                 sObjectMgr->UpdateCreatureRecordData(entry, time, player, creatureName);
             }
         }
     }
+}
+
+bool ScriptedAI::CanAnnounceRecordForMap(uint32 const mapId) const
+{
+    /*
+        Masks:
+        1 - Naxxramas
+        2 - Obsidian Sanctum
+        4 - Eye of Eternity
+        8 - Ulduar
+        16 - Onyxia
+        32 - Vault of Archavon
+        64 - Trial of the crusader
+        128 - Icecrown Citadel
+        256 - The ruby Sanctum
+    */
+    uint32 const allowedAnnounceMaps = CONFIG_CREATURE_BOSS_RECORDS_MAP_MASK;
+    switch (mapId)
+    {
+        case 533: // Naxxramas
+            return (allowedAnnounceMaps & 1) != 0;
+        case 615: // Obsidian Sanctum
+            return (allowedAnnounceMaps & 2) != 0;
+        case 616: // Eye of eternity
+            return (allowedAnnounceMaps & 4) != 0;
+        case 603: // Ulduar
+            return (allowedAnnounceMaps & 8) != 0;
+        case 249: // Onyxia's lair
+            return (allowedAnnounceMaps & 16) != 0;
+        case 624: // Vault of Archavon
+            return (allowedAnnounceMaps & 32) != 0;
+        case 649: // Trial of the Crusader
+            return (allowedAnnounceMaps & 64) != 0;
+        case 631: // Icecrown Citadel
+            return (allowedAnnounceMaps & 128) != 0;
+        case 724: // The Ruby Sanctum
+            return (allowedAnnounceMaps & 256) != 0;
+        default:
+            return false;
+    }
+
+    return false;
 }
 
 void ScriptedAI::AttackStartNoMove(Unit* who)

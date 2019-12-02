@@ -456,6 +456,7 @@ enum WorldIntConfigs
     CONFIG_REPUTATION_BOOST_PERCENT,
     CONFIG_REPUTATION_BOOST_FACTION_MASK,
     CONFIG_WINTERGRASP_ABSOLUTE_LIMIT,
+    CONFIG_CREATURE_BOSS_RECORDS_MAP_MASK,   // mask that controls which maps are allowed to announce boss records
     INT_CONFIG_VALUE_COUNT
 };
 

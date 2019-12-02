@@ -199,6 +199,7 @@ struct ScriptedAI : public CreatureAI
     // *************
 
     void CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty difficulty, std::string creatureName/* =""*/, uint32 minTimer/* = 0*/, uint32 _fightTimer/* = 0*/) const;
+    bool CanAnnounceRecordForMap(uint32 const mapId) const;
 
     void AttackStartNoMove(Unit* target);
 
