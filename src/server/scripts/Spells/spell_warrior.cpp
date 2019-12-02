@@ -815,23 +815,34 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
                 GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2, true, nullptr, aurEff);
             else
             {
-                int32 procDamage = 0;
                 uint32 damage = damageInfo->GetDamage();
+                int32 procDamage = damage;
                 Unit* primaryTarget = eventInfo.GetProcTarget();
                 SpellSchoolMask schoolMask = damageInfo->GetSchoolMask();
                 WeaponAttackType attackType = damageInfo->GetAttackType();
-                if (primaryTarget)
+                if (primaryTarget && GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
                 {
+                    //! if _procTarget has more armor than primary target
                     int32 armorDiff = _procTarget->GetArmor() - primaryTarget->GetArmor();
                     if (armorDiff > 0)
-                    {
-                        if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
-                            procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, armorDiff);
-                        else
-                            procDamage = damage;
-                    }
+                        procDamage = GetTarget()->CalcArmorReducedDamage(GetCaster(), _procTarget, damage, spellInfo, GetTarget()->getLevel(), attackType, (float)armorDiff);
                     else
-                        procDamage = damage;
+                    {
+                        auto armorDiff2 = std::abs(armorDiff);
+                        float levelModifier = GetCaster()->getLevel();
+                        if (levelModifier > 59)
+                            levelModifier = levelModifier + (4.5f * (levelModifier - 59));
+                        float tempValue = 0.1f * armorDiff2 / (8.5f * levelModifier + 40);
+                        tempValue = tempValue / (1.0f + tempValue);
+                        
+                        if (tempValue < 0.f)
+                            tempValue = 0.f;
+
+                        if (tempValue > 0.75f)
+                            tempValue = 0.75f;
+
+                        procDamage = procDamage / (1 - tempValue);
+                    }
                 }
 
                 if (procDamage)
