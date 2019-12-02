@@ -8285,7 +8285,7 @@ void SpellMgr::LoadDbcDataCorrections()
                     break;
                     // Frost Aura (Encounter: Sapphiron)
                 case 55799:
-                    spellInfo->EffectBasePoints[EFFECT_0] = 6000;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 7000;
                     break;
                 case 28531: // Frost Aura (sapphiron 10man)
                     spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
@@ -8327,6 +8327,10 @@ void SpellMgr::LoadDbcDataCorrections()
                 case 54891:
                     spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 8;
                     spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
+                    break;
+                    // Void Blast (Encounter: Kel'thuzad)
+                case 27812:
+                    spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
                     break;
             }
         }

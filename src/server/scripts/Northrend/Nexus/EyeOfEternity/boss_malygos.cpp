@@ -73,7 +73,10 @@ enum MalygosSpells
     SPELL_STATIC_FIELD_MAIN                 = 57430,
     SPELL_STATIC_FIELD_SUMMON               = 57431,
     SPELL_STATIC_FIELD_AURA                 = 57428,
-    SPELL_STATIC_FIELD_DAMAGE               = 57429
+    SPELL_STATIC_FIELD_DAMAGE               = 57429,
+
+    SPELL_HEALING_REDUCE                    = 68881,
+    SPELL_SPARK_DOT                         = 70106,
 };
 
 #define SPELL_ARCANE_BREATH                DUNGEON_MODE(SPELL_ARCANE_BREATH_N, SPELL_ARCANE_BREATH_H)
@@ -121,13 +124,14 @@ enum MalygosEvents
     EVENT_SPELL_ARCANE_PULSE,
     EVENT_SPELL_STATIC_FIELD,
     EVENT_SPELL_PH3_SURGE_OF_POWER,
+    EVENT_HEALING_REDUCE,
 
     // Trash:
     EVENT_TELEPORT_VISUAL,
     EVENT_SCION_OF_ETERNITY_ARCANE_BARRAGE,
     EVENT_NEXUS_LORD_ARCANE_SHOCK,
     EVENT_NEXUS_LORD_HASTE,
-    EVENT_DISK_MOVE_NEXT_POINT
+    EVENT_DISK_MOVE_NEXT_POINT,
 };
 
 #define MAX_NEXUS_LORDS                    DUNGEON_MODE(2, 4)
@@ -708,6 +712,8 @@ public:
 
                         events.PopEvent();
                         events.RescheduleEvent(EVENT_SAY_PHASE_3_INTRO, 3000, 1);
+                        if (sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST) && Is25ManRaid())
+                            events.ScheduleEvent(EVENT_HEALING_REDUCE, 5s);
                     }
                     break;
                 case EVENT_SAY_PHASE_3_INTRO:
@@ -733,7 +739,10 @@ public:
                     break;
                 case EVENT_SPELL_STATIC_FIELD:
                 {
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, false))
+                    uint32 count = sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST) && Is25ManRaid() ? 2 : 1;
+                    std::list<Unit*> targets;
+                    SelectTargetList(targets, count, SELECT_TARGET_RANDOM);
+                    for (Unit* target : targets)
                     {
                         me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_STATIC_FIELD_MAIN, true);
@@ -746,6 +755,31 @@ public:
                     me->CastSpell((Unit*)NULL, SPELL_PH3_SURGE_OF_POWER, false);
                     events.RepeatEvent(7000);
                     break;
+                case EVENT_HEALING_REDUCE:
+                {
+                    auto& playerList = me->GetMap()->GetPlayers();
+                    for (auto&& ref : playerList)
+                    {
+                        Player* player = ref.GetSource();
+                        if (!player)
+                            continue;
+
+                        if (player->IsGameMaster())
+                            continue;
+
+                        if (player->isDead())
+                            continue;
+
+                        if (Unit * vehicle = player->GetVehicleCreatureBase())
+                        {
+                            if (Aura * aura = me->AddAura(SPELL_HEALING_REDUCE, vehicle))
+                                aura->SetDuration(600000);
+
+                        }
+                    }
+                    events.PopEvent();
+                    break;
+                }
             }
 
             DoMeleeAttackIfReady();
@@ -759,6 +793,7 @@ public:
             {
                 pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_MALYGOS, 1);
                 pInstance->SetData(DATA_ENCOUNTER_STATUS, DONE);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HEALING_REDUCE);
             }
 
             if (Map* map = me->GetMap())
@@ -794,6 +829,10 @@ public:
         {
             me->GetMap()->SetZoneOverrideLight(AREA_EYE_OF_ETERNITY, LIGHT_GET_DEFAULT_FOR_MAP, 1*IN_MILLISECONDS);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            if (pInstance)
+            {
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_HEALING_REDUCE);
+            }
             ScriptedAI::EnterEvadeMode();
         }
 
@@ -957,6 +996,7 @@ public:
         InstanceScript* pInstance;
         uint16 CheckTimer;
         uint16 MoveTimer;
+        TaskScheduler scheduler;
 
         void DoAction(int32 param)
         {
@@ -990,12 +1030,34 @@ public:
                     me->RemoveAura(SPELL_POWER_SPARK_VISUAL);
                     me->CastSpell(me, SPELL_POWER_SPARK_GROUND_BUFF, true);
                     me->DespawnOrUnsummon(60s);
+                    if (sWorld->getBoolConfig(CONFIG_ADDITIONAL_MALYGOS_BOOST) && pInstance && pInstance->instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL)
+                    {
+                        scheduler.Schedule(2s, [&](TaskContext func)
+                        {
+                            std::list<Player*> targets;
+                            Trinity::AnyPlayerInObjectRangeCheck check(me, 8.f, true);
+                            Trinity::PlayerListSearcherWithSharedVision<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, targets, check);
+                            me->VisitNearbyWorldObject(3.5f, searcher);
+                            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_SPARK_DOT);
+                            for (auto const& player : targets)
+                            {
+                                if (player->IsGameMaster() || player->isDead())
+                                    continue;
+
+                                if (spellInfo)
+                                    if (Aura * aura = Aura::TryRefreshStackOrCreate(spellInfo, MAX_EFFECT_MASK, player, me))
+                                        aura->SetDuration(10000);
+                            }
+                            func.Repeat(2s);
+                        });
+                    }
                 }
             }
         }
 
         void UpdateAI(uint32 diff)
         {
+            scheduler.Update(diff);
             if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                 return;
 

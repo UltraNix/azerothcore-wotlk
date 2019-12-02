@@ -47,26 +47,26 @@ UPDATE `creature_template` SET `Health_mod` = @BASE_HEALTH_MOD + (@BASE_HEALTH_M
 SET @SOUL_WEAVER_25_BASE_HP_MODIFIER:= 12;
 SET @SOUL_WEAVER_25_ENTRY:= 30018;
 
-UPDATE `creature_template` SET `Health_mod` = (@SOUL_WEAVER_25_BASE_HP_MODIFIER * 2) WHERE `entry` = @SOUL_WEAVER_25_ENTRY;
+UPDATE `creature_template` SET `Health_mod` = (@SOUL_WEAVER_25_BASE_HP_MODIFIER * 3), `dmg_multiplier` = 39 WHERE `entry` = @SOUL_WEAVER_25_ENTRY;
 
 SET @UNSTOPPABLE_ABOM_25_BASE_HP_MODIFIER:= 16.5;
 SET @ABOM_25_ENTRY:= 30048;
 
-UPDATE `creature_template` SET `Health_mod` = (@UNSTOPPABLE_ABOM_25_BASE_HP_MODIFIER * 2) WHERE `entry` = @ABOM_25_ENTRY;
+UPDATE `creature_template` SET `Health_mod` = (@UNSTOPPABLE_ABOM_25_BASE_HP_MODIFIER * 3), `dmg_multiplier` = 69 WHERE `entry` = @ABOM_25_ENTRY;
 
 SET @SOLDIER_FROZEN_WASTE_BASE_HP_MODIFIER:= 0.349206;
 SET @SOLDIER_FROZEN_25_ENTRY:= 30015;
 
-UPDATE `creature_template` SET `Health_mod` = (@SOLDIER_FROZEN_WASTE_BASE_HP_MODIFIER * 2) WHERE `entry` = @SOLDIER_FROZEN_25_ENTRY;
+UPDATE `creature_template` SET `Health_mod` = (@SOLDIER_FROZEN_WASTE_BASE_HP_MODIFIER * 3), `dmg_multiplier` = 39 WHERE `entry` = @SOLDIER_FROZEN_25_ENTRY;
 
 UPDATE `smart_scripts` SET `event_param3` = '5000', `event_param4` = '5000' WHERE `smart_scripts`.`entryorguid` = 16505 AND `smart_scripts`.`source_type` =0 AND `smart_scripts`.`id` =0 AND `smart_scripts`.`link` =0;
 UPDATE `smart_scripts` SET `event_phase_mask` = '0', `action_param2` = '4' WHERE `smart_scripts`.`entryorguid` =16573 AND `smart_scripts`.`source_type` =0 AND `smart_scripts`.`id` =3 AND `smart_scripts`.`link` =0;
 
-UPDATE `creature_template` SET `dmg_multiplier` = '110', `Health_mod` = '1800' WHERE `creature_template`.`entry` =29991;
-UPDATE `creature_template` SET `Health_mod` = '2100' WHERE `creature_template`.`entry` =30061;
+UPDATE `creature_template` SET `dmg_multiplier` = '110', `Health_mod` = '2374' WHERE `creature_template`.`entry` =29991;
+UPDATE `creature_template` SET `Health_mod` = '2818' WHERE `creature_template`.`entry` =30061;
 
 UPDATE `creature_template` SET `dmg_multiplier` = '23' WHERE `creature_template`.`entry` =30048;
-UPDATE `creature_template` SET `dmg_multiplier` = '26' WHERE `creature_template`.`entry` =30057;
+UPDATE `creature_template` SET `dmg_multiplier` = '1', `mindmg` = 145000, `maxdmg` = 150000, `speed_walk` = 0.65, `speed_run` = 0.65  WHERE `creature_template`.`entry` =30057;
 
 /* NAXXRAMAS ORB */
 DELETE FROM `areatrigger_teleport` WHERE `areatrigger_teleport`.`id` = 4156;
@@ -84,7 +84,7 @@ SET @MALYGOS_25_ENTRY:= 31734;
 SET @MALYGOS_BASE_HP_MODIFIER_10:= 500;
 SET @MALYGOS_10_ENTRY:= 28859;
 
-UPDATE `creature_template` SET `Health_mod` = @MALYGOS_BASE_HP_MODIFIER + (@MALYGOS_BASE_HP_MODIFIER * 1.1) WHERE `entry` = @MALYGOS_25_ENTRY;
+UPDATE `creature_template` SET `Health_mod` = 2387 WHERE `entry` = @MALYGOS_25_ENTRY;
 UPDATE `creature_template` SET `Health_mod` = @MALYGOS_BASE_HP_MODIFIER_10 + (@MALYGOS_BASE_HP_MODIFIER_10 * 0.45) WHERE `entry` = @MALYGOS_10_ENTRY;
 
 SET @NEXUS_LORD_HP_BASE_MODIFIER:= 45;

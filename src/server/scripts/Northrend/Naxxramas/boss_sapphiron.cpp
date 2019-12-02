@@ -31,6 +31,7 @@ enum Spells
     SPELL_LIFE_DRAIN_25                = 55665,
     SPELL_BERSERK                      = 26662,
     SPELL_STOMP_BOOST                  = 45185,
+    SPELL_FROST_NOVA                   = 42917,
 
     // Ice block
     SPELL_ICEBOLT_CAST                 = 28526,
@@ -70,7 +71,8 @@ enum Events
     EVENT_LAND                         = 13,
     EVENT_GROUND                       = 14,
     EVENT_HUNDRED_CLUB                 = 15,
-    EVENT_STOMP_BOOST                  = 16
+    EVENT_STOMP_BOOST                  = 16,
+    EVENT_FROST_NOVA                   = 17,
 };
 
 class boss_sapphiron : public CreatureScript
@@ -154,7 +156,10 @@ public:
             me->SetDisableGravity(false);
 
             if (pInstance)
+            {
                 pInstance->SetData(EVENT_SAPPHIRON, NOT_STARTED);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_NOVA);
+            }
         }
 
         void EnterCombatSelfFunction()
@@ -193,7 +198,10 @@ public:
             events.ScheduleEvent(EVENT_SPELL_CLEAVE, 5000);
 
             if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && me->GetMap()->Is25ManRaid())
+            {
                 events.ScheduleEvent(EVENT_STOMP_BOOST, 8000);
+                events.ScheduleEvent(EVENT_FROST_NOVA, 15s);
+            }
 
             events.ScheduleEvent(EVENT_SPELL_TAIL_SWEEP, 10000);
             events.ScheduleEvent(EVENT_SPELL_LIFE_DRAIN, 17000);
@@ -209,7 +217,10 @@ public:
         {
             me->CastSpell(me, SPELL_SAPPHIRON_DIES, true);
             if (pInstance)
+            {
                 pInstance->SetData(EVENT_SAPPHIRON, DONE);
+                pInstance->DoRemoveAurasDueToSpellOnPlayers(SPELL_FROST_NOVA);
+            }
 
             if (Map* map = me->GetMap())
                 CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
@@ -317,7 +328,7 @@ public:
                     return;
                 case EVENT_SPELL_LIFE_DRAIN:
                     if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS))
-                        me->CastCustomSpell(RAID_MODE(SPELL_LIFE_DRAIN_10, SPELL_LIFE_DRAIN_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 10), me, false);
+                        me->CastCustomSpell(RAID_MODE(SPELL_LIFE_DRAIN_10, SPELL_LIFE_DRAIN_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 8), me, false);
                     else
                         me->CastCustomSpell(RAID_MODE(SPELL_LIFE_DRAIN_10, SPELL_LIFE_DRAIN_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5), me, false);
                     events.RepeatEvent(24000);
@@ -453,6 +464,18 @@ public:
                     }
                     events.RepeatEvent(5000);
                     return;
+                }
+                case EVENT_FROST_NOVA:
+                {
+                    std::list<Unit*> targets;
+                    SelectTargetList(targets, 5, SELECT_TARGET_RANDOM);
+                    for (auto& target : targets)
+                    {
+                        if (Aura * frostNova = me->AddAura(SPELL_FROST_NOVA, target))
+                            frostNova->SetDuration(300000);
+                    }
+                    events.RepeatEvent(15000);
+                    break;
                 }
             }
 

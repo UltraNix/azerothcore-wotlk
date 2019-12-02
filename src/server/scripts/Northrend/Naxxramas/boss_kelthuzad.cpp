@@ -72,6 +72,8 @@ enum Event
     EVENT_SPELL_CHAINS                      = 12,
     EVENT_SUMMON_GUARDIAN_OF_ICECROWN       = 13,
     EVENT_FLOOR_CHANGE                      = 14,
+    EVENT_HEALTH_CHECK_50                   = 15,
+    EVENT_HEALTH_CHECK_25                   = 16,
 
     // Minions
     EVENT_MINION_SPELL_FRENZY               = 100,
@@ -250,7 +252,7 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_SOLDIER, 3200);
             events.ScheduleEvent(EVENT_SUMMON_UNSTOPPABLE_ABOMINATION, 10000);
             events.ScheduleEvent(EVENT_SUMMON_SOUL_WEAVER, 24000);
-            events.ScheduleEvent(EVENT_START_SECOND_PHASE, 228000);
+            events.ScheduleEvent(EVENT_START_SECOND_PHASE, /*228000*/1);
 
             if (pInstance)
             {
@@ -353,10 +355,17 @@ public:
                     events.RepeatEvent(20000);
                     break;
                 case EVENT_SPELL_SHADOW_FISSURE:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                {
+                    uint32 count = sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid() ? 3 : 1;
+                    std::list<Unit*> targets;
+                    SelectTargetList(targets, count, SELECT_TARGET_RANDOM);
+                    for (auto& target : targets)
+                    {
                         me->CastSpell(target, SPELL_SHADOW_FISURE, false);
+                    }
                     events.RepeatEvent(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? RAID_MODE(25000, 15000) : 25000);
                     break;
+                }
                 case EVENT_SPELL_FROST_BLAST:
                     if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM, RAID_MODE(1,0), 0, true))
                         me->CastSpell(target, SPELL_FROST_BLAST, false);
@@ -418,7 +427,7 @@ public:
                     break;
                 }
                 case EVENT_SECOND_PHASE_HEALTH_CHECK:
-                    if (me->HealthBelowPct(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? 90 : 45))
+                    if (me->HealthBelowPct(sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? 75 : 45))
                     {
                         events.PopEvent();
                         Talk(SAY_REQUEST_AID);
@@ -434,9 +443,17 @@ public:
                     if (pInstance)
                         if (Creature* cr = ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_LICH_KING_BOSS)))
                             cr->AI()->Talk(SAY_ANSWER_REQUEST);
-
-                    for (uint8 i = 0 ; i < RAID_MODE(2,4); ++i)
-                        events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_OF_ICECROWN, 10000+(i*5000));
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
+                    {
+                        for (uint8 i = 0; i < 2; ++i)
+                            events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_OF_ICECROWN, 10000 + (i * 5000));
+                        events.ScheduleEvent(EVENT_HEALTH_CHECK_50, 1s);
+                    }
+                    else
+                    {
+                        for (uint8 i = 0 ; i < RAID_MODE(2,4); ++i)
+                            events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_OF_ICECROWN, 10000+(i*5000));
+                    }
                     events.PopEvent();
                     break;
                 case EVENT_SUMMON_GUARDIAN_OF_ICECROWN:
@@ -446,6 +463,29 @@ public:
 
                     events.PopEvent();
                     break;
+                case EVENT_HEALTH_CHECK_50:
+                {
+                    if (me->HealthBelowPct(50))
+                    {
+                        events.PopEvent();
+                        events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_OF_ICECROWN, 1s);
+                        events.ScheduleEvent(EVENT_HEALTH_CHECK_25, 1s);
+                        break;
+                    }
+                    events.RepeatEvent(1000);
+                    break;
+                }
+                case EVENT_HEALTH_CHECK_25:
+                {
+                    if (me->HealthBelowPct(25))
+                    {
+                        events.PopEvent();
+                        events.ScheduleEvent(EVENT_SUMMON_GUARDIAN_OF_ICECROWN, 1s);
+                        break;
+                    }
+                    events.RepeatEvent(1000);
+                    break;
+                }
             }
 
             EnterEvadeIfOutOfCombatArea();
