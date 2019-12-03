@@ -178,10 +178,6 @@ void ScriptedAI::CheckCreatureRecord(Unit* killer, uint32 entry, Difficulty diff
                 if (!CanAnnounceRecordForMap(map->GetId()))
                     return;
 
-                auto allowedMaps = sWorld->getIntConfig(CONFIG_CREATURE_BOSS_RECORDS_MAP_MASK);
-                if ((allowedMaps & map->GetId()) == 0)
-                    return;
-
                 sObjectMgr->UpdateCreatureRecordData(entry, time, player, creatureName);
             }
         }
