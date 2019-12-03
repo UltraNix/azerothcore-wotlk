@@ -10,6 +10,8 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "CellImpl.h"
 #include "PassiveAI.h"
 
+#include "Chat.h"
+
 const float HeiganPos[2] = {2796.0f, -3707.0f};
 const float HeiganEruptionSlope[3] =
 {
@@ -493,6 +495,10 @@ public:
             {
                 if (immortalAchievement && IsEncounterInProgress() && player->GetSession()->GetSecurity() == SEC_PLAYER)
                 {
+                    WorldPacket data;
+                    ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, player, player, "Immortal/Undying achievement has been failed, %s died.");
+                    player->SendMessageToSetInRange(&data, 200.f, false);
+
                     immortalAchievement = 0;
                     SaveToDB();
                 }
