@@ -7928,6 +7928,7 @@ void Player::UpdateArea(uint32 newArea)
     bool isInn = area->IsInn(GetTeamId());
     // @schody
     bool isEvent = (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) && area->ID == 616 /* Hyjal */ || area->ID == 2037 /* Quel'Thalas */) ? true : false;
+    bool IsNaxxramasSanctuaryEnabled = sWorld->getBoolConfig(CONFIG_NAXXRAMAS_MEETING_STONE_SANCTUARY) && area->ID == 4234 /* meeting stone naxxramas */;
 
     if (zone)
     {
@@ -7938,7 +7939,7 @@ void Player::UpdateArea(uint32 newArea)
     }
 
     // previously this was in UpdateZone (but after UpdateArea) so nothing will break
-    if (isSanctuary || isEvent)    // in sanctuary or in event
+    if (isSanctuary || isEvent || IsNaxxramasSanctuaryEnabled)    // in sanctuary or in event
     {
         SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SANCTUARY);
         pvpInfo.IsInNoPvPArea = true;
