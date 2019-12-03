@@ -2672,7 +2672,7 @@ public:
             }
         }
 
-        draft.SendMailTo(trans, MailReceiver(receiver, GUID_LOPART(receiverGuid)), sender);
+        draft.SendMailTo(trans, MailReceiver(receiver, GUID_LOPART(receiverGuid)), sender, MAIL_CHECK_MASK_RETURNED);
         CharacterDatabase.CommitTransaction(trans);
 
         std::string nameLink = handler->playerLink(receiverName);
