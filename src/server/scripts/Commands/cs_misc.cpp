@@ -136,7 +136,8 @@ public:
             { "mutehistory",        SEC_GAMEMASTER,         CMD_INGAME, &HandleMuteHistoryCommand,           "" },
             { "gmhelp",             SEC_MODERATOR,          CMD_INGAME, &HandleGmhelpCommand,                "" },
             { "blockinvite",        SEC_PLAYER,             CMD_INGAME, HandleBlockInviteCommand,            "" },
-            { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,                "" }
+            { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,                "" },
+            { "deserter",           SEC_MODERATOR,          CMD_INGAME, &HandleDeserterCommand,              "" }
         };
         return commandTable;
     }
@@ -3597,6 +3598,38 @@ public:
 
         return true;
     }
+
+    static bool HandleDeserterCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+            return false;
+
+        char* playerName;
+        char* deserterDurationStr;
+        handler->extractOptFirstArg((char*)args, &playerName, &deserterDurationStr);
+        if (!playerName)
+            return false;
+
+        Player* target;
+        uint64 target_guid;
+        std::string target_name;
+        if (!handler->extractPlayerTarget(playerName, &target, &target_guid, &target_name))
+            return false;
+
+        if (!target)
+            return false;
+
+        uint32 deserterDuration = TimeStringToSecs(deserterDurationStr) * 1000;
+        Aura* aura = target->AddAura(26013/*deserter debuff*/, target);
+        if (aura)
+        {
+            aura->SetMaxDuration(deserterDuration);
+            aura->RefreshDuration();
+        }
+
+        return true;
+    }
+
 };
 
 void AddSC_misc_commandscript()
