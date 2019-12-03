@@ -1,6 +1,6 @@
 /*
- * Copyright (C)
- * Copyright (C)
+ * Copyright (C) 
+ * Copyright (C) 
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -18,26 +18,11 @@
 
 #include "AddonMgr.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "Log.h"
 #include "Timer.h"
 
-#include <unordered_map>
-
-inline uint32_t fnv1a( const void* key, const uint32_t len )
-{
-    const char* data = ( char* )key;
-    uint32_t hash = 0x811c9dc5;
-    uint32_t prime = 0x1000193;
-
-    for (uint32_t i = 0u; i < len; ++i)
-    {
-        uint8_t value = data[ i ];
-        hash = hash ^ value;
-        hash *= prime;
-    }
-
-    return hash;
-}
+#include <openssl/md5.h>
 
 namespace AddonMgr
 {
@@ -47,9 +32,10 @@ namespace AddonMgr
 namespace
 {
     // List of saved addons (in DB).
-    typedef std::unordered_map< uint32_t, SavedAddon> SavedAddonsMap;
+    typedef std::list<SavedAddon> SavedAddonsList;
 
-    SavedAddonsMap m_knownAddons;
+    SavedAddonsList m_knownAddons;
+    BannedAddonList m_bannedAddons;
 }
 
 void LoadFromDB()
@@ -57,57 +43,84 @@ void LoadFromDB()
     uint32 oldMSTime = getMSTime();
 
     QueryResult result = CharacterDatabase.Query("SELECT name, crc FROM addons");
-    if (!result)
+    if (result)
     {
+        uint32 count = 0;
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            std::string name = fields[0].GetString();
+            uint32 crc = fields[1].GetUInt32();
+
+            m_knownAddons.push_back(SavedAddon(name, crc));
+
+            ++count;
+        } while (result->NextRow());
+
+        sLog->outString(">> Loaded %u known addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+    }
+    else
         sLog->outString(">> Loaded 0 known addons. DB table `addons` is empty!");
-        sLog->outString();
-        return;
-    }
 
-    uint32 count = 0;
-
-    do
+    oldMSTime = getMSTime();
+    result = CharacterDatabase.Query("SELECT id, name, version, UNIX_TIMESTAMP(timestamp) FROM banned_addons ORDER BY timestamp");
+    if (result)
     {
-        Field* fields = result->Fetch();
+        uint32 count = 0;
+        uint32 dbcMaxBannedAddon = sBannedAddOnsStore.GetNumRows();
 
-        std::string name = fields[0].GetString();
-        uint32 crc = fields[1].GetUInt32();
+        do
+        {
+            Field* fields = result->Fetch();
 
-        uint32_t hash = fnv1a(name.c_str(), name.size());
-        m_knownAddons.insert({ hash, SavedAddon(std::move(name), crc) });
+            BannedAddon addon;
+            addon.Id = fields[0].GetUInt32() + dbcMaxBannedAddon;
+            addon.Timestamp = uint32(fields[3].GetUInt64());
 
-        ++count;
+            std::string name = fields[1].GetString();
+            std::string version = fields[2].GetString();
+
+            MD5(reinterpret_cast<uint8 const*>(name.c_str()), name.length(), addon.NameMD5);
+            MD5(reinterpret_cast<uint8 const*>(version.c_str()), version.length(), addon.VersionMD5);
+
+            m_bannedAddons.push_back(addon);
+
+            ++count;
+        } while (result->NextRow());
+
+        sLog->outString(">> Loaded %u banned addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
-    while (result->NextRow());
-
-    sLog->outString(">> Loaded %u known addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-    sLog->outString();
 }
 
-void SaveAddon(AddonInfo const& addon)
+void SaveAddon(std::string const& name, uint32 publicKeyCrc)
 {
-    std::string name = addon.Name;
-
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ADDON);
 
     stmt->setString(0, name);
-    stmt->setUInt32(1, addon.CRC);
+    stmt->setUInt32(1, publicKeyCrc);
 
     CharacterDatabase.Execute(stmt);
 
-    uint32_t hash = fnv1a(name.c_str(), name.size());
-    m_knownAddons.insert({ hash, SavedAddon(std::move(name), addon.CRC) });
+    m_knownAddons.emplace_back(name, publicKeyCrc);
 }
 
 SavedAddon const* GetAddonInfo(const std::string& name)
 {
-    uint32_t hash = fnv1a(name.c_str(), name.size());
+    for (SavedAddonsList::const_iterator it = m_knownAddons.begin(); it != m_knownAddons.end(); ++it)
+    {
+        SavedAddon const& addon = (*it);
+        if (addon.Name == name)
+            return &addon;
+    }
 
-    auto it = m_knownAddons.find(hash);
-    if (it == m_knownAddons.end())
-        return nullptr;
+    return NULL;
+}
 
-    return &(it->second);
+BannedAddonList const* GetBannedAddons()
+{
+    return &m_bannedAddons;
 }
 
 } // Namespace

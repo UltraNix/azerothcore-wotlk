@@ -1079,8 +1079,6 @@ class WorldSession
         uint32 _accountId;
         uint8 m_expansion;
 
-        typedef std::list<AddonInfo> AddonsList;
-
         /*
           **************
           *  Warden    *
@@ -1156,7 +1154,27 @@ class WorldSession
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[MAX_ACCOUNT_TUTORIAL_VALUES];
         bool   m_TutorialsChanged;
-        AddonsList m_addonsList;
+        struct Addons
+        {
+            struct SecureAddonInfo
+            {
+                enum SecureAddonStatus : uint8
+                {
+                    BANNED          = 0,
+                    SECURE_VISIBLE  = 1,
+                    SECURE_HIDDEN   = 2
+                };
+
+                std::string Name;
+                SecureAddonStatus Status = BANNED;
+                bool HasKey = false;
+            };
+
+            static uint32 constexpr MaxSecureAddons = 25;
+
+            std::vector<SecureAddonInfo> SecureAddons;
+            uint32 LastBannedAddOnTimestamp = 0;
+        } _addons;
         uint32 recruiterId;
         bool isRecruiter;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
