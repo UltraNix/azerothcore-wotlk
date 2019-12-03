@@ -4116,8 +4116,8 @@ Reputation.Boost.Percent = 0
 
 Reputation.Boost.FactionMask = 0
 
-#    CreatureBossRecords.MapMask
-#        Description: Specifies which maps can announce boss records to the world
+#    CreatureBossRecords.AllowedMaps
+#        Description: Specifies which maps can announce boss records to the world. MapIds seperated with ;
 
-CreatureBossRecords.MapMask = 1
+CreatureBossRecords.AllowedMaps = "533;615;616"
 

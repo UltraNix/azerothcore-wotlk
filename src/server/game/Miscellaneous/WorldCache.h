@@ -58,6 +58,9 @@ public:
 
     /** Generic **/
     void OnWorldUpdate(uint32 diff);
+
+    void LoadBossRecordAllowedMaps();
+    bool CanAnnounceBossRecordForMap(uint32 mapId) const;
 private:
     WorldCache();
 
@@ -72,6 +75,7 @@ private:
     std::vector<uint32> _disabledRelayCheckIDs;
     std::vector<uint32> _wardenLuaCheckIDs;
     std::vector<uint32> _wardenLuaMandatoryCheckIDs;
+    std::set<uint32>    _bossRecordsAllowedMaps;
 
     TaskScheduler scheduler;
     bool _isFisherListLocked;

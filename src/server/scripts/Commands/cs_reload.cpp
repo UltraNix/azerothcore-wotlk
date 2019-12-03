@@ -154,7 +154,8 @@ public:
             { "vehicle_template_accessory",   SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadVehicleTemplateAccessoryCommand,   "" },
             { "hellforge_boss_stats",         SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadHellforgeBossStatsCommand,         "" },
             { "lua_result_relay_status",      SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadLuaResultRelayStatusCommand,       "" },
-            { "security_level",               SEC_CONSOLE,       CMD_CLI,  &HandleReloadWorldSecurityLevel,                "" }
+            { "security_level",               SEC_CONSOLE,       CMD_CLI,  &HandleReloadWorldSecurityLevel,                "" },
+            { "boss_records_allowed_maps",    SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadBossRecordsAllowedMapsCommand,     "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1145,6 +1146,14 @@ public:
         handler->SendGlobalGMSysMessage("World security level reloaded.");
         return true;
     }
+
+    static bool HandleReloadBossRecordsAllowedMapsCommand(ChatHandler* handler, const char* /*args*/)
+    {
+        sWorldCache.LoadBossRecordAllowedMaps();
+        handler->SendGlobalGMSysMessage("Allowed maps for boss records reloaded.");
+        return true;
+    }
+
 };
 
 void AddSC_reload_commandscript()

@@ -276,3 +276,26 @@ void WorldCache::UpdateFishingList()
 
     _isFisherListLocked = false;
 }
+
+void WorldCache::LoadBossRecordAllowedMaps()
+{
+    uint32 oldMSTime = getMSTime();
+    _bossRecordsAllowedMaps.clear();
+
+    std::string allowedMaps = sConfigMgr->GetStringDefault("CreatureBossRecords.AllowedMaps", "");
+    if (!allowedMaps.empty())
+    {
+        Tokenizer toks(allowedMaps, ';');
+        for (auto&& token : toks)
+            _bossRecordsAllowedMaps.insert(atoi(token));
+    }
+
+    sLog->outString(">> Loaded disallowed boss record maps in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
+}
+
+bool WorldCache::CanAnnounceBossRecordForMap(uint32 mapId) const
+{
+    auto result = _bossRecordsAllowedMaps.find(mapId);
+    return result != _bossRecordsAllowedMaps.end();
+}
