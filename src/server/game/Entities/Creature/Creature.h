@@ -483,7 +483,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool IsTrigger() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
         bool IsGuard() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
         bool CanWalk() const { return m_inhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return m_inhabitType || IS_PLAYER_GUID(GetOwnerGUID()); }
+        bool CanSwim() const { return m_inhabitType & INHABIT_WATER || IS_PLAYER_GUID(GetOwnerGUID()); }
         bool CanFly()  const { return m_inhabitType & INHABIT_AIR; }
 
         void SetReactState(ReactStates st) { m_reactState = st; }
