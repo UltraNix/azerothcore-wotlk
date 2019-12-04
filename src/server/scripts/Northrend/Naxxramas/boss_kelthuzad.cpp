@@ -347,7 +347,12 @@ public:
                         events.ScheduleEvent(EVENT_SPELL_CHAINS, sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) ? 90000 : 50000);
                     break;
                 case EVENT_SPELL_FROST_BOLT_SINGLE:
-                    me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_FROST_BOLT_SINGLE_10, SPELL_FROST_BOLT_SINGLE_25), false);
+                    if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
+                    {
+                        me->CastCustomSpell(SPELL_FROST_BOLT_SINGLE_25, SPELLVALUE_MODIFY_CAST_TIME, 1200, me->GetVictim());
+                    }
+                    else
+                        me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_FROST_BOLT_SINGLE_10, SPELL_FROST_BOLT_SINGLE_25), false);
                     events.RepeatEvent(urand(2000, 15000));
                     break;
                 case EVENT_SPELL_FROST_BOLT_MULTI:
