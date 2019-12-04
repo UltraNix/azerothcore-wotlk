@@ -91,21 +91,14 @@ int cli_hook_func()
 void utf8print(void* /*arg*/, const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
-    std::wstring wtemp_buf;
-    std::string temp_buf(str);
-
-    if(!Utf8toWStr(temp_buf, wtemp_buf, 6000))
+    wchar_t wtemp_buf[6000];
+    size_t wtemp_len = 6000-1;
+    if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
         return;
 
-    // Guarantee null termination
-    if (!temp_buf.empty())
-    {
-        wtemp_buf.push_back('\0');
-        temp_buf.resize(wtemp_buf.size());
-        CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_buf.size());
-    }
-
-    printf("%s", temp_buf.c_str());
+    char temp_buf[6000];
+    CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len+1);
+    printf(temp_buf);
 #else
 {
     printf("%s", str);

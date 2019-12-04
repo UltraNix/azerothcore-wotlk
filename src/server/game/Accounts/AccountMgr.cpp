@@ -148,21 +148,20 @@ uint32 GetCharactersCount(uint32 accountId)
 
 bool normalizeString(std::string& utf8String)
 {
-    std::wstring wstr_buf;
-    if (!Utf8toWStr(utf8String, wstr_buf))
-        return false;
+    wchar_t buffer[MAX_ACCOUNT_STR+1];
 
-    if (wstr_buf.size() > MAX_ACCOUNT_STR)
+    size_t maxLength = MAX_ACCOUNT_STR;
+    if (!Utf8toWStr(utf8String, buffer, maxLength))
         return false;
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
-    std::transform(wstr_buf.begin(), wstr_buf.end(), wstr_buf.begin(), wcharToUpperOnlyLatin);
+    std::transform(&buffer[0], buffer+maxLength, &buffer[0], wcharToUpperOnlyLatin);
 #ifdef _MSC_VER
 #pragma warning(default: 4996)
 #endif
 
-    return WStrToUtf8(wstr_buf, utf8String);
+    return WStrToUtf8(buffer, maxLength, utf8String);
 }
 
 std::string CalculateShaPassHash(std::string const& name, std::string const& password)
