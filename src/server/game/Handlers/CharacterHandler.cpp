@@ -352,7 +352,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
         return;
     }
     // prevent character creating with invalid name
-    if (!normalizePlayerName(name, "Handle char create opcode"))
+    if (!normalizePlayerName(name))
     {
         data << (uint8)CHAR_NAME_NO_NAME;
         SendPacket(&data);
@@ -1479,7 +1479,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
     }
 
     // prevent character rename to invalid name
-    if (!normalizePlayerName(newName, "HandleCharRenameOpcode"))
+    if (!normalizePlayerName(newName))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << uint8(CHAR_NAME_NO_NAME);
@@ -1647,7 +1647,7 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
             return;
         }
 
-        if (!normalizePlayerName(declinedname.name[i], "HandleSetPlayerDeclinedNames"))
+        if (!normalizePlayerName(declinedname.name[i]))
         {
             WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
             data << uint32(1);
@@ -1858,7 +1858,7 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
         return;
     }
     // prevent character rename to invalid name
-    if (!normalizePlayerName(newName, "HandleCharCustomize"))
+    if (!normalizePlayerName(newName))
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
         data << uint8(CHAR_NAME_NO_NAME);
@@ -2256,7 +2256,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
     }
 
     // prevent character rename to invalid name
-    if (!normalizePlayerName(newname, "HandleCharFactionOrRaceChange"))
+    if (!normalizePlayerName(newname))
     {
         WorldPacket data(SMSG_CHAR_FACTION_CHANGE, 1);
         data << uint8(CHAR_NAME_NO_NAME);

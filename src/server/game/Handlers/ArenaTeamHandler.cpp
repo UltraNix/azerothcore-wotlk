@@ -94,7 +94,7 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket & recvData)
             sLog->outError("Player %s tried to invite to arena team a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
             return;
         }
-        if (!normalizePlayerName(invitedName, "HandleArenaTeamInviteOpcode"))
+        if (!normalizePlayerName(invitedName))
             return;
 
         player = ObjectAccessor::FindPlayerByName(invitedName, false);
@@ -298,7 +298,7 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket & recvData)
         return;
     }
 
-    if (!normalizePlayerName(name, "Handle arena team remove opcode"))
+    if (!normalizePlayerName(name))
         return;
 
     // Check if team member exists
@@ -354,7 +354,7 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket & recvData)
         return;
     }
 
-    if (!normalizePlayerName(name, "HandleArenaTeamLeaderOpcode"))
+    if (!normalizePlayerName(name))
         return;
 
     // Check if team member exists

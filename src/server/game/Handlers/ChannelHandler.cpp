@@ -126,7 +126,7 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelSetOwner"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -161,7 +161,7 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelModerator"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -183,7 +183,7 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelUnmoderator"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -205,7 +205,7 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelMute"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -227,7 +227,7 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelUnmute"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -249,7 +249,7 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelInvite"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -271,7 +271,7 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
         return;
     }
 
-    if (!normalizePlayerName(targetName, "HandleChannelKick"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -287,7 +287,7 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_BAN %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName, "HandleChannelBan"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))
@@ -303,7 +303,7 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_CHATSYS, "CMSG_CHANNEL_UNBAN %s Channel: %s, Target: %s",
         GetPlayerInfo().c_str(), channelName.c_str(), targetName.c_str());
 
-    if (!normalizePlayerName(targetName, "HandleChannelUnban"))
+    if (!normalizePlayerName(targetName))
         return;
 
     if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetPlayer()->GetTeamId()))

@@ -424,7 +424,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         guid = sObjectMgr->_hiCharGuid;
 
     // normalize the name if specified and check if it exists
-    if (!normalizePlayerName(name, "PlayerDumpReader::LoadDump"))
+    if (!normalizePlayerName(name))
         name = "";
 
     if (ObjectMgr::CheckPlayerName(name, true) == CHAR_NAME_SUCCESS)

@@ -1047,7 +1047,7 @@ uint64 ChatHandler::extractGuidFromLink(char* text)
                 sLog->outError("ChatHandler::extractGuidFromLink invalid UTF8 sequence - blocked");
                 return 0;
             }
-            if (!normalizePlayerName(name, "extractGuidFromLink"))
+            if (!normalizePlayerName(name))
                 return 0;
 
             if (Player* player = ObjectAccessor::FindPlayerByName(name, false))
@@ -1095,7 +1095,7 @@ std::string ChatHandler::extractPlayerNameFromLink(char* text)
         sLog->outError("ChatHandler::extractPlayerNameFromLink invalid UTF8 sequence - blocked");
         return "";
     }
-    if (!normalizePlayerName(name, "extractPlayerNameFromLink"))
+    if (!normalizePlayerName(name))
         return "";
 
     return name;
@@ -1275,7 +1275,7 @@ bool ChatHandler::GetPlayerGroupAndGUIDByName(const char* cname, Player* &player
                 sLog->outError("ChatHandler::GetPlayerGroupAndGUIDByName invalid UTF8 sequence - blocked");
                 return false;
             }
-            if (!normalizePlayerName(name, "GetPlayerGroupAndGUIDByName"))
+            if (!normalizePlayerName(name))
             {
                 PSendSysMessage(LANG_PLAYER_NOT_FOUND);
                 SetSentErrorMessage(true);

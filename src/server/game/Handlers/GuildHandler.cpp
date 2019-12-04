@@ -63,7 +63,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (normalizePlayerName(invitedName, "HandleGuildInviteOpcode"))
+    if (normalizePlayerName(invitedName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleInviteMember(this, invitedName);
 }
@@ -81,7 +81,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (normalizePlayerName(playerName, "HandleGuildRemoveOpcode"))
+    if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleRemoveMember(this, playerName);
 }
@@ -134,7 +134,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (normalizePlayerName(playerName, "HandleGuildPromoteOpcode"))
+    if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleUpdateMemberRank(this, playerName, false);
 }
@@ -152,7 +152,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (normalizePlayerName(playerName, "HandleGuildDemoteOpcode"))
+    if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleUpdateMemberRank(this, playerName, true);
 }
@@ -186,7 +186,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (normalizePlayerName(name, "HandleGuildLeaderOPcode"))
+    if (normalizePlayerName(name))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleSetLeader(this, name);
 }
@@ -211,7 +211,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_SET_PUBLIC_NOTE [%s]: Target: %s, Note: %s",
         GetPlayerInfo().c_str(), playerName.c_str(), note.c_str());
 
-    if (normalizePlayerName(playerName, "HandleGuildSetPublicNoteOpcode"))
+    if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleSetMemberNote(this, playerName, note, true);
 }
@@ -225,7 +225,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     sLog->outDebug(LOG_FILTER_GUILD, "CMSG_GUILD_SET_OFFICER_NOTE [%s]: Target: %s, Note: %s",
          GetPlayerInfo().c_str(), playerName.c_str(), note.c_str());
 
-    if (normalizePlayerName(playerName, "HandleGuildSetOfficerNoteOpcode"))
+    if (normalizePlayerName(playerName))
         if (Guild* guild = GetPlayer()->GetGuild())
             guild->HandleSetMemberNote(this, playerName, note, false);
 }

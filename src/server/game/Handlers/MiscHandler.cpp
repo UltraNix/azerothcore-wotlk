@@ -539,7 +539,7 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (!normalizePlayerName(friendName, "HandleAddFriendOpcode"))
+    if (!normalizePlayerName(friendName))
         return;
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: %s asked to add friend : '%s'", GetPlayer()->GetName().c_str(), friendName.c_str());
@@ -619,7 +619,7 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (!normalizePlayerName(ignoreName, "HandleAddIgnoreOpcode"))
+    if (!normalizePlayerName(ignoreName))
         return;
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: %s asked to Ignore: '%s'",
@@ -1247,7 +1247,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (charname.empty() || !normalizePlayerName(charname, "HandleWhoisOpcode"))
+    if (charname.empty() || !normalizePlayerName(charname))
     {
         SendNotification(LANG_NEED_CHARACTER_NAME);
         return;

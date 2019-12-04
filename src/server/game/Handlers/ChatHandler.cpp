@@ -378,7 +378,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 return;
             }
 
-            if (!normalizePlayerName(to, "HandleMessagechatOpcode"))
+            if (!normalizePlayerName(to))
             {
                 SendPlayerNotFoundNotice(to);
                 break;

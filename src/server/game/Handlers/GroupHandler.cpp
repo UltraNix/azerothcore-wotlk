@@ -76,7 +76,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         sLog->outError("Player %s tried to add to group a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
         return;
     }
-    if (!normalizePlayerName(membername, "HandleGroupInviteOpcode"))
+    if (!normalizePlayerName(membername))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_BAD_PLAYER_NAME_S);
         return;
@@ -386,7 +386,7 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recvData)
     }
 
     // player not found
-    if (!normalizePlayerName(membername, "HandleGroupUninviteOpcode"))
+    if (!normalizePlayerName(membername))
         return;
 
     // can't uninvite yourself
