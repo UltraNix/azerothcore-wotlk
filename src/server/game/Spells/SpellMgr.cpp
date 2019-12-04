@@ -8312,7 +8312,7 @@ void SpellMgr::LoadDbcDataCorrections()
                     break;
                     // Frosbolt single (Encounter: Kel'thuzad)
                 case 55802:
-                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.35;
+                    spellInfo->EffectBasePoints[0] = 60000;
                     break;
                     // Frosbolt multi (Encounter: Kel'thuzad)
                 case 28479: // 10 Man

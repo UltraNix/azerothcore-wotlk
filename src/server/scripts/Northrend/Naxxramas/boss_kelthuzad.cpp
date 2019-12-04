@@ -252,7 +252,7 @@ public:
             events.ScheduleEvent(EVENT_SUMMON_SOLDIER, 3200);
             events.ScheduleEvent(EVENT_SUMMON_UNSTOPPABLE_ABOMINATION, 10000);
             events.ScheduleEvent(EVENT_SUMMON_SOUL_WEAVER, 24000);
-            events.ScheduleEvent(EVENT_START_SECOND_PHASE, /*228000*/1);
+            events.ScheduleEvent(EVENT_START_SECOND_PHASE, 228000);
 
             if (pInstance)
             {
