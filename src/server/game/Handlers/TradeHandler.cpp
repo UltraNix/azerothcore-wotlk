@@ -183,7 +183,7 @@ void WorldSession::moveItems(ItemRef myItems[], ItemRef hisItems[])
                 stmt->setUInt32(2, trader->GetGUIDLow());
                 stmt->setString(3, trader->GetName());
                 stmt->setString(4, trader->GetSession()->GetRemoteAddress());
-                stmt->setUInt32(5, trader->GetSession()->GetAccountId());
+                stmt->setUInt32(5, _player->GetSession()->GetAccountId());
                 stmt->setUInt32(6, _player->GetGUIDLow());
                 stmt->setString(7, _player->GetName());
                 stmt->setString(8, _player->GetSession()->GetRemoteAddress());
