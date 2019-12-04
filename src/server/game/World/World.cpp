@@ -1467,6 +1467,7 @@ void World::LoadConfigSettings(bool reload)
 
     m_int_configs[CONFIG_WINTERGRASP_ABSOLUTE_LIMIT] = sConfigMgr->GetIntDefault("Wintergrasp.AbsoluteLimit", 180);
     m_bool_configs[CONFIG_NAXXRAMAS_MEETING_STONE_SANCTUARY] = sConfigMgr->GetBoolDefault("NaxxramasSanctuary", 0);
+    m_bool_configs[CONFIG_SARTHARION_BOOST] = sConfigMgr->GetBoolDefault("NaxxramasBoost.Enable", 0);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
