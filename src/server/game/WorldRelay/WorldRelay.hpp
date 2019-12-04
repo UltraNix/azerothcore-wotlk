@@ -16,6 +16,7 @@ enum WorldRelayType
     TYPE_LUA_TRAP_FAILURE,
     TYPE_LUA_FAILURES_INFORM,
     TYPE_LUA_CHECK_FAILURE_TIMEOUT,
+    TYPE_WARDEN_CHECK_FAILURE,
 
     WORLD_RELAY_MAX_TYPE
 };
@@ -76,6 +77,7 @@ private:
     void                BuildRelayBodyTicketNew(RelayRequest /*request*/, HttpPosterSocket& soc);
     void                BuildRelayBodyTicketClosed(RelayRequest /*request*/, HttpPosterSocket& soc);
     void                BuildRelayCheatDetected(RelayRequest /*request*/, HttpPosterSocket& soc);
+    void                BuildRelayWardenCheatDetected(RelayRequest /*request*/, HttpPosterSocket& soc);
     void                BuildRelayWorldstartup(RelayRequest /*request*/, HttpPosterSocket& soc);
 
     std::string const   GetAddressForRelayType(WorldRelayType /*type*/) const;

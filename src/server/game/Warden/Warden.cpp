@@ -29,6 +29,7 @@
 #include "Util.h"
 #include "Warden.h"
 #include "AccountMgr.h"
+#include "WorldRelay/WorldRelay.hpp"
 
 Warden::Warden() : _session(NULL), _inputCrypto(16), _outputCrypto(16), _clientResponseTimer(0),
                    _dataSent(false), _previousTimestamp(0), _module(NULL), _initialized(false)
@@ -166,7 +167,7 @@ uint32 Warden::BuildChecksum(const uint8* data, uint32 length)
     return checkSum;
 }
 
-std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*= 0*/)
+std::string Warden::Penalty(WardenCheck* check /*= NULL*/, int16 checkFailed /*= 0*/)
 {
     WardenActions action;
 
@@ -174,6 +175,12 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
         action = check->Action;
     else
         action = WardenActions(sWorld->getIntConfig(CONFIG_WARDEN_CLIENT_FAIL_ACTION));
+
+    //! ToDo: workaround for lua warden sometimes getting to Warden::HandleWardenDataOpcode
+    //! if check 0 then return undefined and do nothing, if -1 (its penalty for wrong hash)
+    //! else client failed some kind of check
+    if (!checkFailed)
+        return "Undefined";
 
     std::string banReason    = "Anticheat violation";
     std::string longDuration = "1209600s";
@@ -217,11 +224,15 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/, uint16 checkFailed /*
             case 791: banReason += " (Cheat Engine)"; longBan = true; break;
         }
     }
-    else return "Undefined";
 
-    // Force to ban cheaters with 3th party software jnjection
+    // Force to ban cheaters with 3th party software injection
     if (longBan)
         action = WARDEN_ACTION_BAN;
+
+    RelayData data;
+    data.accountId = _session->GetAccountId();
+    data.checkId = checkFailed;
+    GetRelay().Add(std::make_pair(TYPE_WARDEN_CHECK_FAILURE, std::move(data)));
 
     switch (action)
     {

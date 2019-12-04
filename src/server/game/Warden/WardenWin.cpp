@@ -175,7 +175,7 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     if (memcmp(buff.contents() + 1, Module.ClientKeySeedHash, 20) != 0)
     {
         sLog->outDebug(LOG_FILTER_WARDEN, "Request hash reply: failed");
-        Penalty();
+        Penalty(nullptr, -1);
         return;
     }
 

@@ -117,6 +117,9 @@ void WorldRelay::RelayMessage(RelayRequest& request, HttpPosterSocket& soc)
         case TYPE_LUA_TRAP_FAILURE:
             BuildRelayCheatDetected(request, soc);
             break;
+        case TYPE_WARDEN_CHECK_FAILURE:
+            BuildRelayWardenCheatDetected(request, soc);
+            break;
         case TYPE_LUA_FAILURES_INFORM:
             BuildRelayWorldstartup(request, soc);
             break;
@@ -183,7 +186,7 @@ void WorldRelay::BuildRelayCheatDetected(RelayRequest request, HttpPosterSocket&
         return;
 
     json json;
-    std::string _unformattedFailureMessage = "{} \\nRealmName: {} \\n WARDEN check failed for (Player name: {}) (Account Id: {}){} Possible cheater!"
+    std::string _unformattedFailureMessage = "{} \\nRealmName: {} \\nWARDEN check failed for (Player name: {}) (Account Id: {}){} Possible cheater!"
         "\\nFalse positive chance: {} {} "
         "\\n ``` \\nData: \\nCheckId: {} \\nCheck description: {}"
         "\\n \\nPlayer name: {} \\nPlayer GUID: {} \\nPosition when check was send: {}\\n\\n\\nAdditional message:\\n{}\\n``` \\n---";
@@ -215,6 +218,27 @@ void WorldRelay::BuildRelayCheatDetected(RelayRequest request, HttpPosterSocket&
         "Warden");
 
     json = json::parse(jsonString);
+    soc.post(std::move(json.dump()), std::move(GetAddressForRelayType(request.first)));
+}
+
+void WorldRelay::BuildRelayWardenCheatDetected(RelayRequest request, HttpPosterSocket& soc)
+{
+    auto result = m_jsonStore.find(request.first);
+    if (result == m_jsonStore.end())
+        return;
+
+    //std::string unformattedString = result->second;
+    std::string message = "RealmName: {} \\nWARDEN check failed (Check id: {}) for (Account Id: {}). Possible cheater, kicking session - monitor this account!";
+    std::string textMessage = fmt::format(message,
+        sWorld->GetRealmName(),
+        request.second.checkId,
+        request.second.accountId);
+
+    std::string jsonString = fmt::format(result->second,
+        textMessage,
+        "Warden");
+
+    json json = json::parse(jsonString);
     soc.post(std::move(json.dump()), std::move(GetAddressForRelayType(request.first)));
 }
 
