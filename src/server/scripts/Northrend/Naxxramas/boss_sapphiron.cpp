@@ -468,7 +468,7 @@ public:
                 case EVENT_FROST_NOVA:
                 {
                     std::list<Unit*> targets;
-                    SelectTargetList(targets, 5, SELECT_TARGET_RANDOM);
+                    SelectTargetList(targets, 5, SELECT_TARGET_RANDOM, 0.f, true);
                     for (auto& target : targets)
                     {
                         if (Aura * frostNova = me->AddAura(SPELL_FROST_NOVA, target))
