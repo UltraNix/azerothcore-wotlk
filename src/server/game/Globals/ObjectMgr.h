@@ -616,7 +616,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial);
 #define MAX_CHARTER_NAME         24                         // max allowed by client name length
 #define MAX_CHANNEL_NAME         50                         // pussywizard
 
-bool normalizePlayerName(std::string& name, std::string calledFrom = "");
+bool normalizePlayerName(std::string& name);
 
 struct LanguageDesc
 {
