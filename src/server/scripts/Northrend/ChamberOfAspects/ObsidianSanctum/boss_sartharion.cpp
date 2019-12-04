@@ -535,7 +535,15 @@ void boss_sartharion::boss_sartharionAI::HandleSartharionAbilities()
             events.RepeatEvent(20000);
             break;
         case EVENT_SARTHARION_CAST_TAIL_LASH:
-            me->CastSpell(me, SPELL_SARTHARION_TAIL_LASH, false);
+            if (sWorld->getBoolConfig(CONFIG_SARTHARION_BOOST) && Is25ManRaid())
+            {
+                CustomSpellValues val;
+                val.AddSpellMod(SPELLVALUE_AURA_DURATION, 5000);
+                me->CastCustomSpell(SPELL_SARTHARION_TAIL_LASH, val, nullptr);
+            }
+            else
+                me->CastSpell(me, SPELL_SARTHARION_TAIL_LASH, false);
+
             events.RepeatEvent(18000);
             break;
         case EVENT_SARTHARION_LAVA_STRIKE:
@@ -1648,9 +1656,23 @@ public:
             });
         }
 
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetCaster())
+                return;
+
+            Creature* caster = GetCaster()->ToCreature();
+            if (!caster)
+                return;
+
+            if (sWorld->getBoolConfig(CONFIG_SARTHARION_BOOST) && caster->GetMap()->Is25ManRaid())
+                SetEffectValue(150000);
+        }
+
         void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_vesperon_shadow_fissure_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnEffectLaunchTarget += SpellEffectFn(spell_vesperon_shadow_fissure_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
