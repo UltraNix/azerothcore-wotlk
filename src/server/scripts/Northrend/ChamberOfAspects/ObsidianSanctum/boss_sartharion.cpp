@@ -424,7 +424,6 @@ public:
             if (Map* map = me->GetMap())
                 CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + uint32(dragonsCount == 3), Difficulty(map->GetDifficulty()), dragonsCount == 3 ? "Sartharion with 3 drakes alive" : "", 30000, _fightTimer);
 
-            RespawnDragons(true);
             SetDragons(true);
             summons.DespawnAll();
             Talk(SAY_SARTHARION_DEATH);
