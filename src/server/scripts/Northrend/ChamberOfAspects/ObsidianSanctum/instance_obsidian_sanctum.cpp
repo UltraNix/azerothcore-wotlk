@@ -188,6 +188,11 @@ public:
                 SaveToDB();
         }
 
+        bool IsEncounterInProgress() const override
+        {
+            return Encounters[BOSS_SARTHARION_EVENT] == IN_PROGRESS;
+        }
+
         std::string GetSaveData()
         {
             OUT_SAVE_INST_DATA;
