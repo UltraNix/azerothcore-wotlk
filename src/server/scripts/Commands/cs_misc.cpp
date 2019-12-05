@@ -1848,6 +1848,7 @@ public:
         uint32 mapId;
         uint32 areaId;
         uint32 phase            = 0;
+        uint32 xpRate           = 0;
 
         // pussywizard: guild info
         std::string guildName   = "";
@@ -1883,6 +1884,7 @@ public:
             mapId             = target->GetMapId();
             areaId            = target->GetAreaId();
             phase             = target->GetPhaseMask();
+            xpRate            = target->GetXpRate();
         }
         // get additional information from DB
         else
@@ -1907,6 +1909,7 @@ public:
             Class             = fields[5].GetUInt8();
             mapId             = fields[6].GetUInt16();
             areaId            = fields[7].GetUInt16();
+            xpRate            = fields[8].GetUInt32();
         }
 
         std::string userName    = handler->GetTrinityString(LANG_ERROR);
@@ -2105,6 +2108,7 @@ public:
             uint32 copp = (guildMoney % GOLD) % SILVER;
             handler->PSendSysMessage("Guild: %s, members: %u, gb money: %ug %us %uc, is guild leader: %s", guildName.c_str(), guildMemberCount, gold, silv, copp, guildIsLeader ? "yes" : "no");
         }
+        handler->PSendSysMessage("XpRate: %u", xpRate);
 
         return true;
     }
