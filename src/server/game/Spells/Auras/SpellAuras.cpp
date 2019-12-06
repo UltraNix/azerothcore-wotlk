@@ -1094,7 +1094,8 @@ bool Aura::CanBeSaved() const
         return false;
 
     // Xinef: Raise Ally control aura
-    if ( GetId() == 46619 )
+    // Piootrek: Gymer's Buddy aura
+    if ( GetId() == 46619 || GetId() == 55430)
         return false;
 
     // don't save auras removed by proc system
