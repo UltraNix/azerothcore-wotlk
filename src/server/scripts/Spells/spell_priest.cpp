@@ -328,7 +328,7 @@ class spell_pri_guardian_spirit_SpellScript : public SpellScript
     SpellCastResult CheckCast()
     {
         if (Unit* target = GetExplTargetUnit())
-            if (target->HasAura(SPELL_WEAKENED_SOUL) || (target->GetEntry() == NPC_VALITHRIA_DREAMWALKER && target->HasAura(SPELL_WEAKENED_SPIRIT)))
+            if (target->GetEntry() == NPC_VALITHRIA_DREAMWALKER && target->HasAura(SPELL_WEAKENED_SPIRIT))
                 return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
         return SPELL_CAST_OK;
@@ -380,8 +380,6 @@ class spell_pri_guardian_spirit_AuraScript : public AuraScript
             Unit* target = GetTarget();
             if (target->GetEntry() == NPC_VALITHRIA_DREAMWALKER)
                 target->CastSpell(target, SPELL_WEAKENED_SPIRIT, true, NullItemRef, aurEff, caster->GetGUID());
-            else
-                caster->CastSpell(target, SPELL_WEAKENED_SOUL, true, NullItemRef, aurEff);
         }
     }
 
