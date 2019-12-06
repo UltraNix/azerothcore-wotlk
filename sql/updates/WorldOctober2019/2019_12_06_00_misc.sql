@@ -1,0 +1,1 @@
+UPDATE item_template i SET i.RequiredDisenchantSkill = 0 WHERE i.entry IN (30570,30568);
