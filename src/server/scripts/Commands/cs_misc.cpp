@@ -2671,6 +2671,7 @@ public:
         {
             if (ItemRef item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
             {
+                item->SetBinding(true);
                 item->SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
                 draft.AddItem(item);
             }
