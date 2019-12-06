@@ -348,7 +348,7 @@ void WorldSession::HandleCheckFailure(uint32 checkId, std::string callStack, boo
 {
     sLog->outStaticDebug("Entering HandleCheckFailure. CheckId (%u), AccountId (%u)", checkId, GetAccountId());
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WARDEN_CHECK_FAILURE);
-
+    CharacterDatabase.EscapeString(callStack);
     //! 0 - accountId, 1 - CharacterGuid, 2 - CharacterName, 3 - FailedCheck, 4 - FailureDate
     stmt->setUInt32(0, GetAccountId());
     stmt->setUInt32(1, GetGuidLow());
