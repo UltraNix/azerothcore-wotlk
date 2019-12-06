@@ -1119,7 +1119,7 @@ class WorldSession
         //! cheats detour the check we send or modifies it - client doesnt answer - cheating
         void CheckLuaRequests();
         void ClearPongRequest(std::string const& key);
-        void HandleCheckFailure(uint32 /*checkId*/, bool /*timeout*/);
+        void HandleCheckFailure(uint32 /*checkId*/, std::string additionalMessage, bool /*timeout*/);
 
         //! those are generated once per session and assigned only once-
         //! at warden launch, we generate frame that catches client events and sends addon message
@@ -1129,6 +1129,9 @@ class WorldSession
         //! each client generates random name for a function
         //! that handles sending addon messages back to the server
         std::string _SendAddonMessageFunctionPrefix;
+        //! wrobot cheat detection, we move debugstack string to lua global table (very rare check)
+        //! and then we fetch that data with another check
+        std::string _GlobalTableIndex;
     public:
         void OnWardenInitialized();
         void OnWardenCycleFinished();

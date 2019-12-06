@@ -140,6 +140,7 @@ void WorldSession::InitializeWarden()
     _luaCheckIDs = sWorldCache.GetLuaCheckIDs();
     _mandatoryLuaCheckIDs = sWorldCache.GetLuaCheckIDs(true);
     _SendAddonMessageFunctionPrefix = GenerateRandomIdentifier(4, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    _GlobalTableIndex = GenerateRandomIdentifier(5, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
     //! Shuffle so client A has different order of checks sent than client B
     Trinity::Containers::RandomShuffle(_luaCheckIDs);
     _luaResult.Invalidate();
@@ -232,6 +233,11 @@ void WorldSession::PrepareLuaCheck()
     {
         checkId = _luaCheckIDs.front();
         RotateLuaCheckIDs();
+        if (sWorldCache.IsLuaCheckDisabled(checkId))
+        {
+            OnWardenCycleFinished();
+            return;
+        }
     }
 
     RequestData data;
@@ -241,6 +247,7 @@ void WorldSession::PrepareLuaCheck()
         data._playerPosition = GetPlayer()->GetPosition();
     data._playerGUIDLow = m_GUIDLow;
     data._addonMessageFunctionPrefix = _SendAddonMessageFunctionPrefix;
+    data._globalTablesAccessIndex = _GlobalTableIndex;
 
     _luaResult = std::move(GetLuaGenerator().RequestLuaCode(data));
 }
@@ -295,7 +302,10 @@ void WorldSession::SendLuaCheck()
         return;
     }
 
-    if (_request.GetType() == WARDEN_LUA_TRAP || _request.GetType() == WARDEN_LUA_TRAP_DEBUGSTACK)
+    if (_request.GetType() == WARDEN_LUA_TRAP_DEBUGSTACK)
+        return;
+
+    if (_request.GetType() == WARDEN_LUA_TRAP || _request.GetType() == WARDEN_LUA_RETRIEVE_DATA_FROM_GT)
     {
         //! All other prefixes are obslete when new one arrives
         //! this is NOT correct approach but frosthold just released and i dont have time to fix it properly.
@@ -333,7 +343,8 @@ void WorldSession::ClearPongRequest(std::string const& key)
     _wardenRequests.erase(key);
 }
 
-void WorldSession::HandleCheckFailure(uint32 checkId, bool timeout)
+//void HandleCheckFailure(uint32 /*checkId*/, std::string additionalMessage, bool /*timeout*/)
+void WorldSession::HandleCheckFailure(uint32 checkId, std::string callStack, bool timeout)
 {
     sLog->outStaticDebug("Entering HandleCheckFailure. CheckId (%u), AccountId (%u)", checkId, GetAccountId());
     PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_WARDEN_CHECK_FAILURE);
@@ -348,6 +359,7 @@ void WorldSession::HandleCheckFailure(uint32 checkId, bool timeout)
         _checkFailure.append(" due to timeout.");
     stmt->setString(3, _checkFailure);
     stmt->setUInt64(4, time(nullptr));
+    stmt->setString(5, callStack);
     CharacterDatabase.Execute(stmt);
 }
 
@@ -364,9 +376,9 @@ void WorldSession::HandleLuaResults(std::vector<WardenLuaResult> results)
         }
         else
         {
-            HandleCheckFailure(it.GetCheckId(), false);
             if (sWorldCache.CanRelayLuaResult(it.GetCheckId()))
             {
+                HandleCheckFailure(it.GetCheckId(), std::move(it.GetAdditionalMessage()), false);
                 RelayData relay;
                 relay.checkId = it.GetCheckId();
                 relay.falsePositiveChance = std::move(it.GetLuaFalsePositiveChance());
@@ -407,7 +419,7 @@ void WorldSession::CheckLuaRequests()
 
         if (timeCount >= sWorld->getIntConfig(CONFIG_WARDEN_LUA_CHECK_TIMEOUT) * MINUTE * IN_MILLISECONDS)
         {
-            HandleCheckFailure(it.second.GetCheckId(), true);
+            HandleCheckFailure(it.second.GetCheckId(), "", true);
 
             if (sWorld->getBoolConfig(CONFIG_WARDEN_RELAY_TIMEOUTS) && sWorldCache.CanRelayLuaResult(it.second.GetCheckId()))
             {

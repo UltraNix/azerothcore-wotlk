@@ -79,9 +79,7 @@ namespace WardenParserWin
 
         bool checkPassed = false;
         if (IsDebugStackMessage)
-        {
             checkPassed = ParseDebugStackMessage(_body);
-        }
         else if (IsTrapMessage)
         {
             if (_prefix == luaRequest->second.GetPrefix() && _body == luaRequest->second.GetBody())
@@ -142,6 +140,8 @@ namespace WardenParserWin
 
         bool const foundSecureString = message.find("Secure") != std::string::npos;
         bool const foundEnterPressedString = message.find("OnEnterPressed") != std::string::npos;
+        bool const foundEnchantrixAddon = message.find("Enchantrix") != std::string::npos;
+        bool const foundSpotterAddon = message.find("Spotter") != std::string::npos;
 
         return foundSecureString || foundEnterPressedString;
     }

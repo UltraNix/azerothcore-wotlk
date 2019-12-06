@@ -53,16 +53,17 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     std::string _successBody;
     std::string _failureBody;
     std::string _luaCode = check->_luaCode;
-    std::string _messageReceiver = "3rp";
+    std::string _messageReceiver = "";
 
     //! 1. name of a function that handles sending addon message
     //! 2. addon message prefix
     //! 3. addon message body
-    //! 4. target ToDo
+    //! 4. some checks insert data into _G (lua Global Tables)
     std::string addonSuccessMessage = "{}('{}','{}','WHISPER','{}')";
     std::string addonFailureMessage = "{}('{}','{}','WHISPER','{}')";
     std::string SendAddonMessageFunction = "if ({} == nil)then {}=SendAddonMessage end";
-    std::string addonSuccessDebugStackMessage = "{}('{}',debugstack(2),'WHISPER', '{}')";
+    std::string globalTablesString = "_G[\"{}\"]";
+    std::string SendGlobalTablesData = "{}('{}',{},'WHISPER','{}')";
 
     //! Generate a name that includes a number in it
     //! ChatHandler checks whether a name in addon msg has a digit, if so it will return silently
@@ -74,21 +75,23 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     _messageReceiver = GenerateRandomIdentifier(2, WardenAlphaCharset);
     _messageReceiver += GenerateRandomIdentifier(1, WardenNumericCharset);
 
-    if (checkType == WARDEN_LUA_TRAP)
+    switch (checkType)
     {
-        _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_PREFIX_SIZE, WardenUniqueIdentifierCharset);
-        _successBody = GenerateRandomIdentifier(WARDEN_TRAP_BODY_SIZE, WardenUniqueIdentifierCharset);
-        _failureBody = GenerateRandomIdentifier(WARDEN_TRAP_BODY_SIZE - 1, WardenUniqueIdentifierCharset);
-    }
-    else if (checkType == WARDEN_LUA_TRAP_DEBUGSTACK)
-    {
-        _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE, WardenUniqueIdentifierCharset);
-    }
-    else
-    {
-        _messagePrefix = GenerateRandomIdentifier(WARDEN_PREFIX_SIZE, WardenUniqueIdentifierCharset);
-        _successBody = GenerateRandomIdentifier(WARDEN_BODY_SIZE, WardenUniqueIdentifierCharset);
-        _failureBody = GenerateRandomIdentifier(WARDEN_BODY_SIZE - 1, WardenUniqueIdentifierCharset);
+        case WARDEN_LUA_RETRIEVE_DATA_FROM_GT:
+            _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE, WardenUniqueIdentifierCharset);
+            break;
+        case WARDEN_LUA_TRAP:
+            _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_PREFIX_SIZE, WardenUniqueIdentifierCharset);
+            _successBody = GenerateRandomIdentifier(WARDEN_TRAP_BODY_SIZE, WardenUniqueIdentifierCharset);
+            _failureBody = GenerateRandomIdentifier(WARDEN_TRAP_BODY_SIZE - 1, WardenUniqueIdentifierCharset);
+            break;
+        default:
+        {
+            _messagePrefix = GenerateRandomIdentifier(WARDEN_PREFIX_SIZE, WardenUniqueIdentifierCharset);
+            _successBody = GenerateRandomIdentifier(WARDEN_BODY_SIZE, WardenUniqueIdentifierCharset);
+            _failureBody = GenerateRandomIdentifier(WARDEN_BODY_SIZE - 1, WardenUniqueIdentifierCharset);
+            break;
+        }
     }
 
     //! generate different ending for _failureBody
@@ -103,15 +106,18 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
 
     std::string finalAddonSuccessMessage = fmt::format(addonFailureMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _successBody.c_str(), _messageReceiver.c_str());
     std::string finalAddonFailureMessage = fmt::format(addonFailureMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _failureBody.c_str(), _messageReceiver.c_str());
-    std::string finalAddonMessageFunction = fmt::format(SendAddonMessageFunction.c_str(), request.first._addonMessageFunctionPrefix.c_str(), request.first._addonMessageFunctionPrefix.c_str());
-    std::string finalAddonSuccessDebugStackMessage = fmt::format(addonSuccessDebugStackMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _messageReceiver.c_str());
+    std::string finalAddonMessageFunction = fmt::format(SendAddonMessageFunction, request.first._addonMessageFunctionPrefix.c_str(), request.first._addonMessageFunctionPrefix.c_str());
+    std::string globalTablesIndexAccess = fmt::format(globalTablesString, request.first._globalTablesAccessIndex);
+    std::string finalSendGlobalTablesData = fmt::format(SendGlobalTablesData, request.first._addonMessageFunctionPrefix, _messagePrefix, globalTablesIndexAccess, _messageReceiver);
 
-    if (checkType != WARDEN_LUA_TRAP_DEBUGSTACK)
-        ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessMessage);
-    else
-        ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessDebugStackMessage);
-
+    ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessMessage);
     ReplaceAll(_luaCode, "@addonFailure", finalAddonFailureMessage);
+    if (checkType == WARDEN_LUA_TRAP_DEBUGSTACK || checkType == WARDEN_LUA_RETRIEVE_DATA_FROM_GT)
+    {
+        ReplaceAll(_luaCode, "@GlobalTablesEntry", globalTablesIndexAccess);
+        ReplaceAll(_luaCode, "@AddonMsgGt", finalSendGlobalTablesData);
+    }
+
     //! creates custom function that handles sending addon message to the server
     //! this has to be re-send each time, because it is lost when UI is reloaded
     //! or player leaves and enter the world (instances and so on)

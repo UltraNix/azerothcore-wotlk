@@ -21,7 +21,12 @@ enum WardenLuaCheckType : uint32
     //! send before everything else
     WARDEN_LUA_FRAME_CREATION,
     WARDEN_LUA_ADDON_SENDER_CREATION,
+    //! WRobot specific check, this will hook into protected functions
+    //! and then move data to clients global table and we will extract that data later
+    //! with additional check
     WARDEN_LUA_TRAP_DEBUGSTACK,
+    //! this check grabs data that we store in global tables and then returns data to us
+    WARDEN_LUA_RETRIEVE_DATA_FROM_GT,
 
     MAX_WARDEN_LUA_TYPES
 };
@@ -100,6 +105,7 @@ struct RequestData
     uint32 _playerGUIDLow;
     Position _playerPosition;
     std::string _addonMessageFunctionPrefix;
+    std::string _globalTablesAccessIndex;
 };
 
 struct AsyncLuaCodeResult

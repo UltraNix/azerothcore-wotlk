@@ -49,8 +49,10 @@ public:
     WardenLuaCheck const* GetWardenCheckFor(uint32 const& /*id*/);
     std::vector<uint32> GetLuaCheckIDs(bool mandatory = false);
     //! checks whether relaying information to webhooks for that checkId is enabled
-    bool CanRelayLuaResult(uint32 checkId);
+    bool CanRelayLuaResult(uint32 checkId) const;
     void ReloadLuaResultDisables();
+    bool IsLuaCheckDisabled(uint32 checkId) const;
+    void ReloadDisabledLuaChecks();
 
     /** Currently fishing listing **/
     void AddOrUpdateFishingList(uint64 guid);
@@ -73,6 +75,7 @@ private:
     //! Warden lua
     WardenLuaStore _wardenLuaChecksPool;
     std::vector<uint32> _disabledRelayCheckIDs;
+    std::vector<uint32> _disabledLuaChecks;
     std::vector<uint32> _wardenLuaCheckIDs;
     std::vector<uint32> _wardenLuaMandatoryCheckIDs;
     std::set<uint32>    _bossRecordsAllowedMaps;

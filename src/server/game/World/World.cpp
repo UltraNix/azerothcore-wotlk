@@ -2106,6 +2106,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Load allowed maps for creature boss records...");
     sWorldCache.LoadBossRecordAllowedMaps();
 
+    sLog->outString("Loading disabled warden check ids...");
+    sWorldCache.ReloadDisabledLuaChecks();
+
     if (m_bool_configs[CONFIG_ENABLE_WEBHOOK_RELAY])
     {
         GetRelay().LoadRelayAddresses();
@@ -2938,7 +2941,7 @@ void World::CleanupWardenDatabase()
     CharacterDatabase.Execute(remove);
 
     std::string _unformattedMessage = "Analysis of warden_lua_failure for realm: {} \\n"
-        "* Found {} rows older than 2 months and younger than 3 m onths.\\n"
+        "* Found {} rows older than 2 months and younger than 3 months.\\n"
         "* Removed {} rows that were at least 3 months old.";
 
     RelayData data;

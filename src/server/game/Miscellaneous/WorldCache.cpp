@@ -167,9 +167,20 @@ std::vector<uint32> WorldCache::GetLuaCheckIDs(bool mandatory)
     return _wardenLuaCheckIDs;
 }
 
-bool WorldCache::CanRelayLuaResult(uint32 checkId)
+bool WorldCache::CanRelayLuaResult(uint32 checkId) const
 {
+    if (_disabledRelayCheckIDs.empty())
+        return true;
+
     return std::find(_disabledRelayCheckIDs.begin(), _disabledRelayCheckIDs.end(), checkId) == _disabledRelayCheckIDs.end();
+}
+
+bool WorldCache::IsLuaCheckDisabled(uint32 checkId) const
+{
+    if (_disabledLuaChecks.empty())
+        return false;
+
+    return std::find(_disabledLuaChecks.begin(), _disabledLuaChecks.end(), checkId) != _disabledLuaChecks.end();
 }
 
 void WorldCache::ReloadLuaResultDisables()
@@ -199,6 +210,23 @@ void WorldCache::ReloadLuaResultDisables()
     } while (result->NextRow());
 
     sLog->outString(">> Loaded warden lua check statuses in %u ms", GetMSTimeDiffToNow(oldMSTime));
+    sLog->outString();
+}
+
+void WorldCache::ReloadDisabledLuaChecks()
+{
+    _disabledLuaChecks.clear();
+    uint32 oldMSTime = getMSTime();
+
+    std::string disabledChecksString = sConfigMgr->GetStringDefault("WardenLua.DisabledChecks", "");
+    if (!disabledChecksString.empty())
+    {
+        Tokenizer toks(disabledChecksString, ';');
+        for (auto&& check : toks)
+            _disabledLuaChecks.push_back(atoi(check));
+    }
+
+    sLog->outString(">> Loaded disabled lua checks in %u ms", GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
 }
 

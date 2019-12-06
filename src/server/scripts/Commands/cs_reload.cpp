@@ -155,7 +155,8 @@ public:
             { "hellforge_boss_stats",         SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadHellforgeBossStatsCommand,         "" },
             { "lua_result_relay_status",      SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadLuaResultRelayStatusCommand,       "" },
             { "security_level",               SEC_CONSOLE,       CMD_CLI,  &HandleReloadWorldSecurityLevel,                "" },
-            { "boss_records_allowed_maps",    SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadBossRecordsAllowedMapsCommand,     "" }
+            { "boss_records_allowed_maps",    SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadBossRecordsAllowedMapsCommand,     "" },
+            { "piootrek",          SEC_ADMINISTRATOR, CMD_CLI,  &HandleReloadDisabledLuaChecks,                 "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1154,6 +1155,12 @@ public:
         return true;
     }
 
+    static bool HandleReloadDisabledLuaChecks(ChatHandler* handler, const char* /*args*/)
+    {
+        sWorldCache.ReloadDisabledLuaChecks();
+        handler->SendGlobalSysMessage("Piootrek has been reloaded.");
+        return true;
+    }
 };
 
 void AddSC_reload_commandscript()

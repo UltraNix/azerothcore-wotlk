@@ -607,5 +607,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_WARDEN_CHECKS_COUNT, "SELECT count(*) FROM warden_lua_failures WHERE FailureDate <= ? AND FailureDate >= ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_WARDEN_CHECKS_OLD_COUNT, "SELECT count(*) FROM warden_lua_failures WHERE FailureDate <= ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_WARDEN_CHECKS_TOO_OLD, "DELETE FROM warden_lua_failures WHERE FailureDate <= ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_WARDEN_CHECK_FAILURE, "INSERT INTO warden_lua_failures (AccountId, CharacterGuid, CharacterName, FailedCheck, FailureDate) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_WARDEN_CHECK_FAILURE, "INSERT INTO warden_lua_failures (AccountId, CharacterGuid, CharacterName, FailedCheck, FailureDate, CallStack) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }
