@@ -303,7 +303,7 @@ void Battlefield::InvitePlayersInZoneToWar()
         {
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
             {
-                if (player->IsInFlight())
+                if (player->IsInFlight() || player->IsGameMaster())
                     continue;
 
                 if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()) || IsPlayerInQueue(player))
