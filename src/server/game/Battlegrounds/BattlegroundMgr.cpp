@@ -1109,6 +1109,7 @@ void RandomBattlegroundSystem::Update(uint32 diff)
                 ## Commented out by riztazz, we're making BG selection random ##
 
             // order it like: big, small, big, small, small, small (stored backwards, actually)
+            */
 
             std::vector<BattlegroundTypeId> big, small;
             big.push_back(BATTLEGROUND_AV);
@@ -1127,10 +1128,10 @@ void RandomBattlegroundSystem::Update(uint32 diff)
             m_BgOrder.push_back(big.back()); big.pop_back();
             m_BgOrder.push_back(small.back()); small.pop_back();
             m_BgOrder.push_back(big.back()); big.pop_back();
-            */
-            m_BgOrder.clear(); // just making sure?
-            m_BgOrder = { BATTLEGROUND_AV, BATTLEGROUND_IC, BATTLEGROUND_WS, BATTLEGROUND_EY, BATTLEGROUND_AB, BATTLEGROUND_SA };
-            std::random_shuffle(m_BgOrder.begin(), m_BgOrder.end());
+
+            //m_BgOrder.clear(); // just making sure?
+            //m_BgOrder = { BATTLEGROUND_AV, BATTLEGROUND_IC, BATTLEGROUND_WS, BATTLEGROUND_EY, BATTLEGROUND_AB, BATTLEGROUND_SA };
+            //std::random_shuffle(m_BgOrder.begin(), m_BgOrder.end());
         }
 
         m_CurrentRandomBg = m_BgOrder.back();
