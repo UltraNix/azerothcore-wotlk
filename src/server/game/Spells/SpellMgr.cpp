@@ -8328,10 +8328,6 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 8;
                     spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_40_YARDS;
                     break;
-                    // Void Blast (Encounter: Kel'thuzad)
-                case 27812:
-                    spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS;
-                    break;
             }
         }
 
