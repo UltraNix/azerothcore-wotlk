@@ -68,7 +68,8 @@ public:
             { "items",              SEC_ADMINISTRATOR,      CMD_CLI,  &HandleSendItemsCommand,             "" },
             { "mail",               SEC_GAMEMASTER,         CMD_CLI,  &HandleSendMailCommand,              "" },
             { "message",            SEC_ADMINISTRATOR,      CMD_CLI,  &HandleSendMessageCommand,           "" },
-            { "money",              SEC_ADMINISTRATOR,      CMD_CLI,  &HandleSendMoneyCommand,             "" }
+            { "money",              SEC_ADMINISTRATOR,      CMD_CLI,  &HandleSendMoneyCommand,             "" },
+            { "soulbound",          SEC_ADMINISTRATOR,      CMD_CLI,  &HandleSendSoulboundCommand,          "" },
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -2578,6 +2579,16 @@ public:
     // Send items by mail
     static bool HandleSendItemsCommand(ChatHandler* handler, char const* args)
     {
+        return SendItemsHelper(handler, args, false);
+    }
+
+    static bool HandleSendSoulboundCommand(ChatHandler* handler, char const* args)
+    {
+        return SendItemsHelper(handler, args, true);
+    }
+
+    static bool SendItemsHelper(ChatHandler* handler, char const* args, bool soulbound)
+    {
         // format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
         Player* receiver;
         uint64 receiverGuid;
@@ -2603,7 +2614,7 @@ public:
 
         // msgSubject, msgText isn't NUL after prev. check
         std::string subject = msgSubject;
-        std::string text    = msgText;
+        std::string text = msgText;
 
         // extract items
         typedef std::pair<uint32, uint32> ItemPair;
@@ -2671,7 +2682,12 @@ public:
         {
             if (ItemRef item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
             {
-                item->SetBinding(true);
+                if (soulbound)
+                {
+                    item->SetUInt64Value(ITEM_FIELD_OWNER, receiverGuid);
+                    item->SetUInt64Value(ITEM_FIELD_CONTAINED, receiverGuid);
+                    item->SetBinding(true);
+                }
                 item->SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
                 draft.AddItem(item);
             }
@@ -2684,6 +2700,7 @@ public:
         handler->PSendSysMessage(LANG_MAIL_SENT, nameLink.c_str());
         return true;
     }
+
     /// Send money by mail
     static bool HandleSendMoneyCommand(ChatHandler* handler, char const* args)
     {
