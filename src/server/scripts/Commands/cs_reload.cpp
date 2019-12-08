@@ -1158,7 +1158,7 @@ public:
     static bool HandleReloadDisabledLuaChecks(ChatHandler* handler, const char* /*args*/)
     {
         sWorldCache.ReloadDisabledLuaChecks();
-        handler->SendGlobalSysMessage("Piootrek has been reloaded.");
+        handler->SendGlobalGMSysMessage("Piootrek has been reloaded.");
         return true;
     }
 };
