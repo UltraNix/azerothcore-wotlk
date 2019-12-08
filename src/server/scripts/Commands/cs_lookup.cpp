@@ -1327,8 +1327,7 @@ public:
 
         std::string account = strtok((char*)args, " ");
 
-        if (!AccountMgr::normalizeString
-        (account))
+        if (!AccountMgr::normalizeString(account))
             return false;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS);
@@ -1351,23 +1350,12 @@ public:
             handler->SetSentErrorMessage(true);
             return false;
         }
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_ID);
-        stmt->setInt32(0, accountId);
-        result = LoginDatabase.Query(stmt);
-        if (!result) 
-        {
-            handler->PSendSysMessage("No history found for this account.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-        handler->PSendSysMessage("IP history for account %s:", account.c_str());
-        do {
-            Field* fields = result->Fetch();
-            std::string ip = fields[0].GetString();
-            std::string date = fields[1].GetString();
-            handler->PSendSysMessage("|cff00ccff[%s] | |cffffff00%s", ip.c_str(), date.c_str());
+        handler->PSendSysMessage("Ip history for accountId %d", accountId);
+        auto accStore = sWorld->GetIpStoreFor(accountId);
 
-        } while (result->NextRow());
+        for (auto const& it : accStore)
+            handler->PSendSysMessage("|cff00ccff[%s] | |cffffff00%s", it.first.c_str(), TimeToTimestampStr(it.second).c_str());
+
         return true;
     }
 
@@ -1377,38 +1365,26 @@ public:
             return false;
 
         std::string ip = strtok((char*)args, " "); 
-    
-        PreparedStatement *stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_HISTORY_BY_IP);
-        stmt->setString(0, ip);
-        PreparedQueryResult result = LoginDatabase.Query(stmt);
-       
-        if (!result) 
-        {
-            handler->PSendSysMessage("No history found for this IP address.");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
         handler->PSendSysMessage("Account history for IP %s:", ip.c_str());
-        do 
+
+        auto ipStore = sWorld->GetAccountStoreFor(ip);
+        for (auto const& it : ipStore)
         {
-            Field *fields = result->Fetch();
-            uint32 accID = fields[0].GetUInt32();
-            std::string date = fields[1].GetString();
+            uint32 accountId = it.first;
+            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO);
+            stmt->setUInt32(0, accountId);
+            PreparedQueryResult result = LoginDatabase.Query(stmt);
+            if (!result)
+                continue;
 
-            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO);
-            stmt->setUInt32(0, accID);
-            PreparedQueryResult result1 = LoginDatabase.Query(stmt);
-            if (!result1) continue;
-
-            Field *fields1 = result1->Fetch();
+            Field* fields1 = result->Fetch();
             uint8 gmLevel = fields1[2].GetUInt8();
             if (gmLevel && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //prevents GM stalking
                 continue;
             std::string accName = fields1[0].GetString();
+            handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName, accountId, TimeToTimestampStr(it.second).c_str());
+        }
 
-            handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName.c_str(), accID, date.c_str());
-
-        } while (result->NextRow());
         return true;
     }
 

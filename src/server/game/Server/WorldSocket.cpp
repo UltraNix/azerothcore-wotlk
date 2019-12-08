@@ -982,17 +982,8 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_Session->LoadTutorialsData();
     m_Session->ReadAddonsInfo(recvPacket);
 
-    // Sitowsky: Account History
     if (sWorld->getBoolConfig(CONFIG_ACCOUNT_HISTORY))
-    {
-        LoginDatabase.EscapeString(lastLocalIp);
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_HISTORY);
-        stmt->setUInt32(0, id);
-        stmt->setString(1, hostname.c_str());
-        stmt->setString(2, address.c_str());
-        stmt->setString(3, lastLocalIp.c_str());
-        LoginDatabase.Execute(stmt);
-    }
+        sWorld->AddAccountHistory(id, std::move(address), time(nullptr));
 
     // Check VPN connection
     if (sWorld->getBoolConfig(CONFIG_LATENCY_RECORD))

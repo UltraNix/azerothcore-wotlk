@@ -936,6 +936,27 @@ class World
         void DeleteGlobalPlayerData(uint32 guid, std::string const& name);
         uint32 GetGlobalDataAccountId(uint32 guid);
 
+        void LoadAccountAndIpHistory();
+        void AddAccountHistory(uint32 accountId, std::string ipAddress, time_t date, bool atLoad = false);
+        void UpdateAccountHistory(uint32 accountId, std::string ipAddress, time_t date);
+        std::unordered_map<uint32 /*accountId*/,
+            //!                       IP     DATE
+            std::unordered_map<std::string, time_t>> _accountHistoryStore;
+
+        std::unordered_map<std::string /*ip*/,
+            //!              AccountId   DATE    
+            std::unordered_map<uint32, time_t>> _ipHistoryStore;
+
+        std::unordered_map<std::string, time_t> const& GetIpStoreFor(uint32 accId)
+        {
+            return _accountHistoryStore[accId];
+        }
+
+        std::unordered_map<uint32, time_t> const& GetAccountStoreFor(std::string const& ipAddress)
+        {
+            return _ipHistoryStore[ipAddress];
+        }
+
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
 

@@ -1589,6 +1589,9 @@ void World::SetInitialWorldSettings()
     sLog->outString("Load Global Player Data...(This will take a while to load!)");
     sWorld->LoadGlobalPlayerDataStore();
 
+    sLog->outString("Loading account and ip history...");
+    sWorld->LoadAccountAndIpHistory();
+
     // Must be called before `creature_respawn`/`gameobject_respawn` tables
     sLog->outString("Loading instances...");
     sInstanceSaveMgr->LoadInstances();
@@ -3771,3 +3774,41 @@ void World::HandleLuaResult(uint64 guid, std::vector<WardenLuaResult> store)
             player->GetSession()->HandleLuaResults(std::move(store));
     //else discard data
 }
+
+void World::LoadAccountAndIpHistory()
+{
+    sLog->outString(">> Loading account and ip history...");
+
+    auto result = LoginDatabase.Query("SELECT AccountId, IpAddress, LoginDate FROM account_history");
+    if (!result)
+        return;
+
+    do
+    {
+        Field* field = result->Fetch();
+        uint32 accountId = field[0].GetUInt32();
+        std::string ipAddress = field[1].GetString();
+        uint32 date = field[2].GetUInt32();
+        AddAccountHistory(accountId, ipAddress, date, true);
+    } while (result->NextRow());
+}
+
+void World::AddAccountHistory(uint32 accountId, std::string ipAddress, time_t date, bool atLoad)
+{
+    if (!atLoad)
+        UpdateAccountHistory(accountId, ipAddress, date);
+
+    _accountHistoryStore[accountId][ipAddress] = date;
+    _ipHistoryStore[ipAddress][accountId] = date;
+}
+
+void World::UpdateAccountHistory(uint32 accountId, std::string ipAddress, time_t date)
+{
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_HISTORY);
+    stmt->setUInt32(0, accountId);
+    stmt->setString(1, ipAddress);
+    stmt->setUInt32(2, date);
+
+    LoginDatabase.Execute(stmt);
+}
+
