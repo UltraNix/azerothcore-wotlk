@@ -137,7 +137,11 @@ namespace Trinity
             if (mob_level >= pl_level)
             {
                 uint8 nLevelDiff = mob_level - pl_level;
-                if (nLevelDiff > 4)
+
+                // Don't give exp if difference between creature and player is above 10 lvls
+                if (nLevelDiff >= 10)
+                    return 0;
+                else if(nLevelDiff > 4)
                     nLevelDiff = 4;
 
                 baseGain = ((pl_level * 5 + nBaseExp) * (20 + nLevelDiff) / 10 + 1) / 2;
