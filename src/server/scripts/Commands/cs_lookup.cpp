@@ -1382,7 +1382,7 @@ public:
             if (gmLevel && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //prevents GM stalking
                 continue;
             std::string accName = fields1[0].GetString();
-            handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName, accountId, TimeToTimestampStr(it.second).c_str());
+            handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName.c_str(), accountId, TimeToTimestampStr(it.second).c_str());
         }
 
         return true;

@@ -3793,7 +3793,7 @@ void World::LoadAccountAndIpHistory()
     } while (result->NextRow());
 }
 
-void World::AddAccountHistory(uint32 accountId, std::string ipAddress, time_t date, bool atLoad)
+void World::AddAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date, bool atLoad)
 {
     if (!atLoad)
         UpdateAccountHistory(accountId, ipAddress, date);
@@ -3802,7 +3802,7 @@ void World::AddAccountHistory(uint32 accountId, std::string ipAddress, time_t da
     _ipHistoryStore[ipAddress][accountId] = date;
 }
 
-void World::UpdateAccountHistory(uint32 accountId, std::string ipAddress, time_t date)
+void World::UpdateAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date)
 {
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_HISTORY);
     stmt->setUInt32(0, accountId);

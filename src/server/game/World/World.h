@@ -937,8 +937,8 @@ class World
         uint32 GetGlobalDataAccountId(uint32 guid);
 
         void LoadAccountAndIpHistory();
-        void AddAccountHistory(uint32 accountId, std::string ipAddress, time_t date, bool atLoad = false);
-        void UpdateAccountHistory(uint32 accountId, std::string ipAddress, time_t date);
+        void AddAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date, bool atLoad = false);
+        void UpdateAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date);
         std::unordered_map<uint32 /*accountId*/,
             //!                       IP     DATE
             std::unordered_map<std::string, time_t>> _accountHistoryStore;
