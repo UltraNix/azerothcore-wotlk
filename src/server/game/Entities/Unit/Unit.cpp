@@ -2681,8 +2681,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
         return SPELL_MISS_MISS;
 
     bool canDodge = true;
-    bool canParry = true;                                                                                                     // Rogue: Gouge
-    bool canBlock = ((spell->HasAttribute(SPELL_ATTR3_BLOCKABLE_SPELL) && !spell->HasAttribute(SPELL_ATTR0_CU_DIRECT_DAMAGE)) || spell->Id == 1776);
+    bool canParry = true;
+    bool canBlock = spell->HasAttribute(SPELL_ATTR3_BLOCKABLE_SPELL);
 
     if (!CanMissSpells())
         return SPELL_MISS_NONE;
