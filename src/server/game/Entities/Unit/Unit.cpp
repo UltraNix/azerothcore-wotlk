@@ -2684,6 +2684,9 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     bool canParry = true;
     bool canBlock = spell->HasAttribute(SPELL_ATTR3_BLOCKABLE_SPELL);
 
+    if (victim->IsPlayer() && IsCreature() && spell->HasAttribute(SPELL_ATTR0_CU_DIRECT_DAMAGE))
+        canBlock = false;
+
     if (!CanMissSpells())
         return SPELL_MISS_NONE;
 
