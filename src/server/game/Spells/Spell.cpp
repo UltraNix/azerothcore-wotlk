@@ -1368,6 +1368,16 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
                 return;
             }
 
+            // Don't allow to fish in Wintergrasp during battle
+            if (Battlefield * bf = sBattlefieldMgr->GetBattlefieldToZoneId(m_caster->GetZoneId()))
+            {
+                if (bf->IsWarTime())
+                {
+                    FailAndSendCastResult(SPELL_FAILED_NOT_IN_BATTLEGROUND);
+                    return;
+                }
+            }
+
             dest = SpellDestination(x, y, liquidLevel, m_caster->GetOrientation());
             break;
         }
