@@ -65,8 +65,9 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ = 0x01000000,       // creature does not need to take player damage for kill credit
     CREATURE_FLAG_EXTRA_DUNGEON_BOSS         = 0x10000000,   // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
     CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING   = 0x20000000,   // creature ignore pathfinding
-    CREATURE_FLAG_USE_WAYPOINT_MMAP          = 0x40000000    // forces creature to use MMAP & ForceDest in waypointMovementGenerator || TEMP - I dont want to enable movemaps and forceDest globally for now
+    CREATURE_FLAG_USE_WAYPOINT_MMAP          = 0x40000000,    // forces creature to use MMAP & ForceDest in waypointMovementGenerator || TEMP - I dont want to enable movemaps and forceDest globally for now
                                                             //                                                                         Last time i did that - stuff broke and we're releasing angrathar tomorrow
+    CREATURE_FLAG_EXTRA_NO_PICKPOCKET        = 0x80000000   // Piootrek: creature can't be pickpocketed
 };
 
 #define CREATURE_FLAG_EXTRA_DB_ALLOWED (CREATURE_FLAG_EXTRA_INSTANCE_BIND | CREATURE_FLAG_EXTRA_CIVILIAN | \
@@ -75,7 +76,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_TAUNT | CREATURE_FLAG_EXTRA_WORLDEVENT | CREATURE_FLAG_EXTRA_NO_CRIT | \
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
     CREATURE_FLAG_EXTRA_GUARD | CREATURE_FLAG_EXTRA_KNOCKBACK_IMMUNE | CREATURE_FLAG_EXTRA_AVOID_AOE | \
-    CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING | CREATURE_FLAG_USE_WAYPOINT_MMAP| CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ)
+    CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING | CREATURE_FLAG_USE_WAYPOINT_MMAP| CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ | CREATURE_FLAG_EXTRA_NO_PICKPOCKET)
 
 
 constexpr uint32 MAX_AGGRO_RESET_TIME{ 10 }; // in seconds
