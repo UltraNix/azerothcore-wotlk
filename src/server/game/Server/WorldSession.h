@@ -1131,7 +1131,8 @@ class WorldSession
         std::string _SendAddonMessageFunctionPrefix;
         //! wrobot cheat detection, we move debugstack string to lua global table (very rare check)
         //! and then we fetch that data with another check
-        std::string _GlobalTableIndex;
+        std::string _castSpellByNameGlobalTableIndex;
+        std::string _castSpellByIdGlobalTableIndex;
     public:
         void OnWardenInitialized();
         void OnWardenCycleFinished();

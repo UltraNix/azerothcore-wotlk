@@ -140,7 +140,8 @@ void WorldSession::InitializeWarden()
     _luaCheckIDs = sWorldCache.GetLuaCheckIDs();
     _mandatoryLuaCheckIDs = sWorldCache.GetLuaCheckIDs(true);
     _SendAddonMessageFunctionPrefix = GenerateRandomIdentifier(4, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-    _GlobalTableIndex = GenerateRandomIdentifier(5, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    _castSpellByNameGlobalTableIndex = GenerateRandomIdentifier(5, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    _castSpellByIdGlobalTableIndex = GenerateRandomIdentifier(5, "abcdefghijklmnaoqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
     //! Shuffle so client A has different order of checks sent than client B
     Trinity::Containers::RandomShuffle(_luaCheckIDs);
     _luaResult.Invalidate();
@@ -247,7 +248,12 @@ void WorldSession::PrepareLuaCheck()
         data._playerPosition = GetPlayer()->GetPosition();
     data._playerGUIDLow = m_GUIDLow;
     data._addonMessageFunctionPrefix = _SendAddonMessageFunctionPrefix;
-    data._globalTablesAccessIndex = _GlobalTableIndex;
+    //! Change this later, hardcoded for now
+    if (checkId == 16 || checkId == 17)
+        data._globalTablesAccessIndex = _castSpellByNameGlobalTableIndex;
+    else
+        data._globalTablesAccessIndex = _castSpellByIdGlobalTableIndex;
+
 
     _luaResult = std::move(GetLuaGenerator().RequestLuaCode(data));
 }
