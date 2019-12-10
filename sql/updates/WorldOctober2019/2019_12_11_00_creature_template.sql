@@ -1,0 +1,1 @@
+UPDATE creature_template SET `flags_extra` = `flags_extra` | 0x80000000 WHERE `entry` IN (29062, 29064, 29063, 29097, 29096, 29098);
