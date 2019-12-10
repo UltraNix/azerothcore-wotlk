@@ -1,0 +1,1 @@
+UPDATE `smart_scripts` SET `event_flags`='2' WHERE  `entryorguid`=16506 AND `source_type`=0 AND `id`=2 AND `link`=0;
