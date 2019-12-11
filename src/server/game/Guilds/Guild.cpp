@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
 #include "Opcodes.h"
+#include "fmt/format.h"
 
 #define MAX_GUILD_BANK_TAB_TEXT_LEN 500
 #define EMBLEM_PRICE 10 * GOLD
@@ -2360,6 +2361,9 @@ void Guild::SwapItemsWithInventory(Player* player, bool toChar, uint8 tabId, uin
 
     BankMoveItemData bankData(this, player, tabId, slotId);
     PlayerMoveItemData charData(this, player, playerBag, playerSlotId);
+
+    LogGuildBankAction(player, tabId, slotId, playerBag, playerSlotId);
+
     if (toChar)
         _MoveItems(&bankData, &charData, splitedAmount);
     else
@@ -2908,4 +2912,45 @@ void Guild::ResetTimes()
         itr->second->ResetValues();
 
     _BroadcastEvent(GE_BANK_TAB_AND_MONEY_UPDATED, 0);
+}
+
+void Guild::LogGuildBankAction(Player* player, uint8 tabId, uint8 slotId, uint8 playerBag, uint8 playerSlotId)
+{
+    if (ItemRef item = _GetItem(tabId, slotId))
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOG_TRADE);
+        stmt->setUInt32(0, realmID);
+        stmt->setUInt32(1, GetId()); // Guild ID
+        stmt->setUInt32(2, 0);
+        stmt->setString(3, fmt::format("Guild {}", GetName())); // Guild name
+        stmt->setString(4, "");
+        stmt->setUInt32(5, player->GetSession()->GetAccountId());
+        stmt->setUInt32(6, player->GetGUIDLow());
+        stmt->setString(7, player->GetName());
+        stmt->setString(8, player->GetSession()->GetRemoteAddress());
+        stmt->setUInt32(9, item->GetGUID());
+        stmt->setUInt32(10, item->GetEntry());
+        stmt->setUInt32(11, item->GetCount());
+        stmt->setString(12, "Guildbank withdraw");
+        CharacterDatabase.Execute(stmt);
+    }
+
+    if (ItemRef item = player->GetItemByPos(playerBag, playerSlotId))
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOG_TRADE);
+        stmt->setUInt32(0, realmID);
+        stmt->setUInt32(1, player->GetSession()->GetAccountId());
+        stmt->setUInt32(2, player->GetGUIDLow());
+        stmt->setString(3, player->GetName());
+        stmt->setString(4, player->GetSession()->GetRemoteAddress());
+        stmt->setUInt32(5, GetId()); // Guild ID
+        stmt->setUInt32(6, 0);
+        stmt->setString(7, fmt::format("Guild {}", GetName())); // Guild name
+        stmt->setString(8, "");
+        stmt->setUInt32(9, item->GetGUID());
+        stmt->setUInt32(10, item->GetEntry());
+        stmt->setUInt32(11, item->GetCount());
+        stmt->setString(12, "Guildbank deposit");
+        CharacterDatabase.Execute(stmt);
+    }
 }

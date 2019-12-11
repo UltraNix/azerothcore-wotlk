@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -763,6 +763,8 @@ public:
     void SetBankTabText(uint8 tabId, std::string const& text);
 
     void ResetTimes();
+
+    void LogGuildBankAction(Player* player, uint8 tabId, uint8 slotId, uint8 playerBag, uint8 playerSlotId);
 
 protected:
     uint32 m_id;
