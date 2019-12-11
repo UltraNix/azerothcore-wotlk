@@ -107,27 +107,11 @@ public:
         SummonList summons;
         SummonList summons2;
         uint8 BoatNum;
-        uint8 BoatOrder[4];
+        std::array<uint8, 4> BoatOrder = { 0, 1 , 2, 3 };
 
         void Reset()
         {
-            for (uint8 i = 0; i < 4; ++i)
-            {
-                bool good;
-                do
-                {
-                    good = true;
-                    BoatOrder[i] = urand(0,3);
-
-                    for (uint8 j = 0; j < i; ++j)
-                        if (BoatOrder[i] == BoatOrder[j])
-                        {
-                            good = false;
-                            break;
-                        }
-                }
-                while (!good);
-            }
+            Trinity::Containers::RandomShuffle(BoatOrder);
 
             events.Reset();
             summons.DespawnAll();
@@ -252,20 +236,21 @@ public:
                     // Spawn it!
                     if (Creature* king = me->SummonCreature(BoatStructure[BoatOrder[BoatNum-1]].npc, BoatStructure[BoatOrder[BoatNum-1]].SpawnX, BoatStructure[BoatOrder[BoatNum-1]].SpawnY, BoatStructure[BoatOrder[BoatNum-1]].SpawnZ, BoatStructure[BoatOrder[BoatNum-1]].SpawnO, TEMPSUMMON_CORPSE_DESPAWN, 0))
                     {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                         king->CastSpell(me, SPELL_CHANNEL_SPIRIT_TO_YMIRON, true);
                         summons.Summon(king);
                         king->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                         king->SetDisableGravity(true);
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
-                        me->GetMotionMaster()->MoveChase(me->GetVictim());
-                        switch(BoatOrder[BoatNum-1])
-                        {
-                            case 0: events.ScheduleEvent(EVENT_YMIRON_RANULF_ABILITY, 3000, 1); break;
-                            case 1: events.ScheduleEvent(EVENT_YMIRON_TORGYN_ABILITY, 3000, 1); break;
-                            case 2: events.ScheduleEvent(EVENT_YMIRON_BJORN_ABILITY, 3000, 1); break;
-                            case 3: events.ScheduleEvent(EVENT_YMIRON_HALDOR_ABILITY, 3000, 1); break;
-                        }
+                    }
+
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                    me->GetMotionMaster()->MoveChase(me->GetVictim());
+                    switch (BoatOrder[BoatNum - 1])
+                    {
+                        case 0: events.ScheduleEvent(EVENT_YMIRON_RANULF_ABILITY, 3000, 1); break;
+                        case 1: events.ScheduleEvent(EVENT_YMIRON_TORGYN_ABILITY, 3000, 1); break;
+                        case 2: events.ScheduleEvent(EVENT_YMIRON_BJORN_ABILITY, 3000, 1); break;
+                        case 3: events.ScheduleEvent(EVENT_YMIRON_HALDOR_ABILITY, 3000, 1); break;
                     }
 
                     events.PopEvent();
