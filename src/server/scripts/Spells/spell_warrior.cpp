@@ -515,8 +515,39 @@ class spell_warr_execute : public SpellScriptLoader
                         rageUsed += aurEff->GetAmount() * 10;
 
 
-                    int32 bp = GetEffectValue() + int32(rageUsed * spellInfo->Effects[effIndex].DamageMultiplier + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
-                    caster->CastCustomSpell(target, SPELL_WARRIOR_EXECUTE, &bp, NULL, NULL, true, NULL, NULL, GetOriginalCaster()->GetGUID());
+                    int32 biggestAmount = 0;
+                    Unit::AuraEffectList const& mModDamagePercentDone = caster->GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                    for (Unit::AuraEffectList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+                    {
+                        if (!spellInfo->ValidateAttribute6SpellDamageMods(caster, *i, false))
+                            continue;
+
+                        AuraApplication* aurApp = (*i)->GetBase()->GetApplicationOfTarget(caster->GetGUID());
+                        if (!aurApp)
+                            continue;
+
+                        if (!aurApp->IsActive((*i)->GetEffIndex()))
+                            continue;
+
+                        if ((*i)->GetMiscValue() & spellInfo->GetSchoolMask())
+                        {
+                            int32 amount = 0;
+                            if ((*i)->GetSpellInfo()->EquippedItemClass == -1)
+                                amount = (*i)->GetAmount();
+                            else if (!(*i)->GetSpellInfo()->HasAttribute(SPELL_ATTR5_SPECIAL_ITEM_CLASS_CHECK) && ((*i)->GetSpellInfo()->EquippedItemSubClassMask == 0))
+                                amount = (*i)->GetAmount();
+                            else if (caster->ToPlayer() && caster->ToPlayer()->HasItemFitToSpellRequirements((*i)->GetSpellInfo()))
+                                amount = (*i)->GetAmount();
+
+                            biggestAmount = std::max(biggestAmount, amount);
+                        }
+                    }
+
+                    float dmgMod = 1.f;
+                    AddPct(dmgMod, biggestAmount);
+                    int32 bpWithoutMods = GetEffectValue() + int32(rageUsed * spellInfo->Effects[effIndex].DamageMultiplier + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
+                    int32 finalBp = bpWithoutMods * dmgMod;
+                    caster->CastCustomSpell(target, SPELL_WARRIOR_EXECUTE, &finalBp, NULL, NULL, true, NULL, NULL, GetOriginalCaster()->GetGUID());
                 }
             }
 
