@@ -838,20 +838,24 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
         if (!GetTarget() || !_procTarget)
             return;
 
+        Unit* primaryTarget = eventInfo.GetProcTarget();
+        if (!primaryTarget)
+            return;
+
         PreventDefaultAction();
+
         if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
         {
             SpellInfo const* spellInfo = damageInfo->GetSpellInfo();
-            if (spellInfo && spellInfo->Id == SPELL_WARRIOR_EXECUTE && !_procTarget->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
+            if (spellInfo && spellInfo->Id == SPELL_WARRIOR_EXECUTE && primaryTarget->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT) && !_procTarget->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
                 GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2, true, nullptr, aurEff);
             else
             {
                 uint32 damage = damageInfo->GetDamage();
                 int32 procDamage = damage;
-                Unit* primaryTarget = eventInfo.GetProcTarget();
                 SpellSchoolMask schoolMask = damageInfo->GetSchoolMask();
                 WeaponAttackType attackType = damageInfo->GetAttackType();
-                if (primaryTarget && GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
+                if (GetTarget()->IsDamageReducedByArmor(schoolMask, spellInfo))
                 {
                     //! if _procTarget has more armor than primary target
                     int32 armorDiff = _procTarget->GetArmor() - primaryTarget->GetArmor();
