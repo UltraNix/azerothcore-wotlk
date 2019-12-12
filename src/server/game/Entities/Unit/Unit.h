@@ -1404,7 +1404,8 @@ class Unit : public WorldObject
 
         DiminishingLevels GetDiminishing(DiminishingGroup  group);
         void IncrDiminishing(DiminishingGroup group);
-        float ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration, Unit const* caster, DiminishingLevels Level, int32 limitduration) const;
+        void DecreaseDiminishingFor(DiminishingGroup group);
+        float ApplyDiminishingToDuration(DiminishingGroup  group, int32& duration, Unit const* caster, DiminishingLevels Level, int32 limitduration) const;
         void ApplyDiminishingAura(DiminishingGroup  group, bool apply);
         void ClearDiminishings() { m_Diminishing.clear(); }
 

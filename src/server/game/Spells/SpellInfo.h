@@ -485,6 +485,8 @@ public:
     SpellCastResult CheckTarget(Unit const* caster, WorldObject const* target, bool implicit = true) const;
     SpellCastResult CheckExplicitTarget(Unit const* caster, WorldObject const* target, ItemRef const& itemTarget = NULL) const;
     bool CheckTargetCreatureType(Unit const* target) const;
+    //! Gets called in AddUnitTarget, just before aura is applied to target
+    bool IsStrongerCCAuraActive(Unit const* caster, Unit const* target) const;
 
     // xinef: aura stacking
     bool IsStrongerAuraActive(Unit const* caster, Unit const* target) const;

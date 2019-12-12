@@ -1621,11 +1621,15 @@ bool SpellInfo::IsStrongerAuraActive(Unit const* caster, Unit const* target) con
     if (!target)
         return false;
 
+    // xinef: check spell group
+    uint32 groupId = sSpellMgr->GetSpellGroup(Id);
+    if (!groupId)
+        return false;
+
     SpellGroupSpecialFlags sFlag = sSpellMgr->GetSpellGroupSpecialFlags(Id);
     if (sFlag & SPELL_GROUP_SPECIAL_FLAG_SKIP_STRONGER_CHECK)
         return false;
 
-    bool IsCCAura = false;
     for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
     {
         // xinef: Skip Empty effects
@@ -1643,26 +1647,7 @@ bool SpellInfo::IsStrongerAuraActive(Unit const* caster, Unit const* target) con
         // xinef: exclude dummy auras
         if (Effects[i].ApplyAuraName == SPELL_AURA_DUMMY)
             return false;
-
-        switch (Effects[i].ApplyAuraName)
-        {
-            case SPELL_AURA_MOD_CONFUSE:
-            case SPELL_AURA_MOD_FEAR:
-            case SPELL_AURA_MOD_STUN:
-            case SPELL_AURA_MOD_ROOT:
-            case SPELL_AURA_TRANSFORM:
-                if ((ProcFlags && !HasAura(SPELL_AURA_PROC_TRIGGER_SPELL)) || (AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
-                    IsCCAura = true;
-                break;
-            default:
-                break;
-        }
     }
-
-    // xinef: check spell group
-    uint32 groupId = sSpellMgr->GetSpellGroup(Id);
-    if (!groupId && !IsCCAura)
-        return false;
 
     for (uint8 i = EFFECT_0; i < MAX_SPELL_EFFECTS; ++i)
     {
@@ -1673,77 +1658,60 @@ bool SpellInfo::IsStrongerAuraActive(Unit const* caster, Unit const* target) con
         Unit::AuraEffectList const& auraList = target->GetAuraEffectsByType((AuraType)Effects[i].ApplyAuraName);
         for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
         {
-            if (IsCCAura)
+            // xinef: aura is not groupped or in different group
+            uint32 auraGroup = (*iter)->GetAuraGroup();
+            if (!auraGroup || auraGroup != groupId)
+                continue;
+
+            // xinef: check priority before effect mask
+            if (sFlag >= SPELL_GROUP_SPECIAL_FLAG_PRIORITY1)
             {
-                if ((*iter)->GetSpellInfo()->GetFirstRankSpell() == GetFirstRankSpell())
-                {
-                    int32 duration = GetMaxDuration();
-                    DiminishingGroup diminishingGroup = GetDiminishingReturnsGroupForSpell(this, false);
-                    int32 limitduration = GetDiminishingReturnsLimitDuration(diminishingGroup, this);
-                    target->ApplyDiminishingToDuration(diminishingGroup, duration, caster, const_cast<Unit*>(target)->GetDiminishing(diminishingGroup), limitduration);
-                    duration = caster->ModSpellDuration(this, target, duration, false, MAX_EFFECT_MASK);
-
-                    if (!(*iter)->GetBase()->IsPassive() && duration < (*iter)->GetBase()->GetDuration())
-                        return true;
-                }
-            }
-            else
-            {
-                // xinef: aura is not groupped or in different group
-                uint32 auraGroup = (*iter)->GetAuraGroup();
-                if (!auraGroup || auraGroup != groupId)
-                    continue;
-
-                // xinef: check priority before effect mask
-                if (sFlag >= SPELL_GROUP_SPECIAL_FLAG_PRIORITY1)
-                {
-                    SpellGroupSpecialFlags sFlagCurr = sSpellMgr->GetSpellGroupSpecialFlags((*iter)->GetId());
-                    if (sFlagCurr >= SPELL_GROUP_SPECIAL_FLAG_PRIORITY1 && sFlagCurr < sFlag)
-                        return true;
-                }
-
-                // xinef: misc value mismatches
-                // xinef: commented, checked above
-                if (Effects[i].MiscValue != (*iter)->GetMiscValue())
-                    continue;
-
-                // xinef: should not happen, or effect is not active - stronger one is present
-                AuraApplication* aurApp = (*iter)->GetBase()->GetApplicationOfTarget(target->GetGUID());
-                if (!aurApp || !aurApp->IsActive((*iter)->GetEffIndex()))
-                    continue;
-
-                // xinef: assume that all spells are either positive or negative, otherwise they should not be in one group
-                // xinef: take custom values into account
-
-                int32 basePoints = Effects[i].BasePoints;
-                int32 duration = GetMaxDuration();
-
-                // xinef: should have the same id, can be different if spell is triggered
-                // xinef: have to fix spell mods for triggered spell, turn off current spellmodtakingspell for preparing and restore after
-                if (Player const* player = caster->GetSpellModOwner())
-                    if (player->m_spellModTakingSpell && player->m_spellModTakingSpell->m_spellInfo->Id == Id)
-                        basePoints = player->m_spellModTakingSpell->GetSpellValue()->EffectBasePoints[i];
-
-                int32 curValue = abs(Effects[i].CalcValue(caster, &basePoints));
-                int32 auraValue = (sFlag & SPELL_GROUP_SPECIAL_FLAG_BASE_AMOUNT_CHECK) ?
-                    abs((*iter)->GetSpellInfo()->Effects[(*iter)->GetEffIndex()].CalcValue((*iter)->GetCaster())) :
-                    abs((*iter)->GetAmount());
-                // xinef: for same spells, divide amount by stack amount
-                if (Id == (*iter)->GetId())
-                    auraValue /= (*iter)->GetBase()->GetStackAmount();
-
-                if (curValue < auraValue)
+                SpellGroupSpecialFlags sFlagCurr = sSpellMgr->GetSpellGroupSpecialFlags((*iter)->GetId());
+                if (sFlagCurr >= SPELL_GROUP_SPECIAL_FLAG_PRIORITY1 && sFlagCurr < sFlag)
                     return true;
+            }
 
-                // xinef: little hack, if current spell is the same as aura spell, asume it is not stronger
-                // xinef: if values are the same, duration mods should be taken into account but they are almost always passive
-                if (curValue == auraValue)
-                {
-                    if (Id == (*iter)->GetId())
-                        continue;
-                    if (!(*iter)->GetBase()->IsPassive() && duration < (*iter)->GetBase()->GetDuration())
-                        return true;
-                }
+            // xinef: misc value mismatches
+            // xinef: commented, checked above
+            if (Effects[i].MiscValue != (*iter)->GetMiscValue())
+                continue;
+
+            // xinef: should not happen, or effect is not active - stronger one is present
+            AuraApplication* aurApp = (*iter)->GetBase()->GetApplicationOfTarget(target->GetGUID());
+            if (!aurApp || !aurApp->IsActive((*iter)->GetEffIndex()))
+                continue;
+
+            // xinef: assume that all spells are either positive or negative, otherwise they should not be in one group
+            // xinef: take custom values into account
+
+            int32 basePoints = Effects[i].BasePoints;
+            int32 duration = GetMaxDuration();
+
+            // xinef: should have the same id, can be different if spell is triggered
+            // xinef: have to fix spell mods for triggered spell, turn off current spellmodtakingspell for preparing and restore after
+            if (Player const* player = caster->GetSpellModOwner())
+                if (player->m_spellModTakingSpell && player->m_spellModTakingSpell->m_spellInfo->Id == Id)
+                    basePoints = player->m_spellModTakingSpell->GetSpellValue()->EffectBasePoints[i];
+
+            int32 curValue = abs(Effects[i].CalcValue(caster, &basePoints));
+            int32 auraValue = (sFlag & SPELL_GROUP_SPECIAL_FLAG_BASE_AMOUNT_CHECK) ?
+                abs((*iter)->GetSpellInfo()->Effects[(*iter)->GetEffIndex()].CalcValue((*iter)->GetCaster())) :
+                abs((*iter)->GetAmount());
+            // xinef: for same spells, divide amount by stack amount
+            if (Id == (*iter)->GetId())
+                auraValue /= (*iter)->GetBase()->GetStackAmount();
+
+            if (curValue < auraValue)
+                return true;
+
+            // xinef: little hack, if current spell is the same as aura spell, asume it is not stronger
+            // xinef: if values are the same, duration mods should be taken into account but they are almost always passive
+            if (curValue == auraValue)
+            {
+                if (Id == (*iter)->GetId())
+                    continue;
+                if (!(*iter)->GetBase()->IsPassive() && duration < (*iter)->GetBase()->GetDuration())
+                    return true;
             }
         }
     }
@@ -2015,6 +1983,63 @@ bool SpellInfo::CheckTargetCreatureType(Unit const* target) const
     }
     uint32 creatureType = target->GetCreatureTypeMask();
     return !TargetCreatureType || !creatureType || (creatureType & TargetCreatureType);
+}
+
+bool SpellInfo::IsStrongerCCAuraActive(Unit const* caster, Unit const* target) const
+{
+    if (!target->IsPlayer())
+        return false;
+
+    bool IsCCAura = false;
+    uint32 ccAuraNameIndex = 0;
+
+    if ((ProcFlags && !HasAura(SPELL_AURA_PROC_TRIGGER_SPELL)) || (AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE))
+    {
+        for (uint32 eff = 0; eff < MAX_SPELL_EFFECTS; ++eff)
+        {
+            if (!Effects[eff].IsAura())
+                continue;
+
+            auto auraName = Effects[eff].ApplyAuraName;
+            switch (auraName)
+            {
+                case SPELL_AURA_MOD_CONFUSE:
+                case SPELL_AURA_MOD_FEAR:
+                case SPELL_AURA_MOD_STUN:
+                case SPELL_AURA_MOD_ROOT:
+                case SPELL_AURA_TRANSFORM:
+                    IsCCAura = true;
+                    ccAuraNameIndex = auraName;
+                    break;
+                default:
+                    break;
+            }
+
+            if (IsCCAura)
+                break;
+        }
+    }
+
+    if (IsCCAura)
+    {
+        int32 duration = GetMaxDuration();
+        DiminishingGroup diminishingGroup = GetDiminishingReturnsGroupForSpell(this, false);
+        int32 limitduration = GetDiminishingReturnsLimitDuration(diminishingGroup, this);
+        target->ApplyDiminishingToDuration(diminishingGroup, duration, caster, const_cast<Unit*>(target)->GetDiminishing(diminishingGroup), limitduration);
+        duration = caster->ModSpellDuration(this, target, duration, false, MAX_EFFECT_MASK);
+
+        Unit::AuraEffectList const& auraList = target->GetAuraEffectsByType((AuraType)ccAuraNameIndex);
+        for (Unit::AuraEffectList::const_iterator iter = auraList.begin(); iter != auraList.end(); ++iter)
+        {
+            if ((*iter)->GetSpellInfo()->GetFirstRankSpell() == GetFirstRankSpell())
+            {
+                if (!(*iter)->GetBase()->IsPassive() && duration < (*iter)->GetBase()->GetDuration())
+                    return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 SpellSchoolMask SpellInfo::GetSchoolMask() const

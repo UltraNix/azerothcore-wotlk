@@ -14107,6 +14107,20 @@ void Unit::IncrDiminishing(DiminishingGroup group)
     m_Diminishing.push_back(DiminishingReturn(group, World::GetGameTimeMS(), DIMINISHING_LEVEL_2));
 }
 
+void Unit::DecreaseDiminishingFor(DiminishingGroup group)
+{
+    for (Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
+    {
+        if (i->DRGroup != group)
+            continue;
+
+        if (!i->hitCount)
+            continue;
+
+        i->hitCount -= 1;
+    }
+}
+
 float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, Unit const* caster, DiminishingLevels Level, int32 limitduration) const
 {
     // xinef: dont apply diminish to self casts
