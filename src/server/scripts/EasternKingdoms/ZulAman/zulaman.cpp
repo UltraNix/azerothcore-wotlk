@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -426,6 +426,7 @@ class npc_harrison_jones : public CreatureScript
                                 me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, uint32(0));
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
                                 me->GetMotionMaster()->MovePath(HARRISON_MOVE_3, false);
+                                instance->SetData(DATA_GONGEVENT, DONE);
                                 _gongTimer = 1000;
                                 _gongEvent = 0;
                                 break;
