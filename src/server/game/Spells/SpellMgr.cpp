@@ -8736,6 +8736,13 @@ void SpellMgr::LoadDbcDataCorrections()
     entry = sWorldSafeLocsStore.LookupEntry(1365);
     const_cast<WorldSafeLocsEntry*>(entry)->z += 6.0f;
 
+    // Isle of Conquest right upper graveyard
+    entry = sWorldSafeLocsStore.LookupEntry(1484);
+    const_cast<WorldSafeLocsEntry*>(entry)->x =  1150.75f;
+    const_cast<WorldSafeLocsEntry*>(entry)->y = -1255.40f;
+    const_cast<WorldSafeLocsEntry*>(entry)->z =  16.59f;
+
+
     sLog->outString(">> Loading spell dbc data corrections  in %u ms", GetMSTimeDiffToNow(oldMSTime));
     sLog->outString();
 }
