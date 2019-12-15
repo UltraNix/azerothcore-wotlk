@@ -70,7 +70,7 @@ namespace WardenParserWin
                 break;
         }
 
-        WardenRequestStore& requestStore = WardenRequestStore();
+        WardenRequestStore requestStore;
         if (IsDebugStackMessage)
             requestStore = requestee.GetDebugstackRequestStore();
         else if (IsTrapMessage)
