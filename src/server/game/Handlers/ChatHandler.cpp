@@ -271,6 +271,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
         Requestee who;
         who.CopyLuaRequestStore(GetLuaStore(false));
         who.CopyLuaTrapRequestStore(GetLuaStore(true));
+        who.CopyLuaDebugstackStore(GetLuaDebugstackStore());
         who.SetCharacterGUID(_player->GetGUID());
         WardenParserWin::GetWardenParser().AddMessage(who, msg);
 

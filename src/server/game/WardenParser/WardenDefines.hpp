@@ -34,13 +34,14 @@ enum WardenLuaCheckType : uint32
 using WardenTimeStamp = std::chrono::time_point<std::chrono::steady_clock>;
 using WardenClock = std::chrono::steady_clock;
 
+constexpr uint32 WARDEN_PREFIX_DEBUGSTACK_SIZE{ 4 };
 constexpr uint32 WARDEN_PREFIX_SIZE{ 5 };
 constexpr uint32 WARDEN_BODY_SIZE{ 5 };
 
 constexpr uint32 WARDEN_TRAP_PREFIX_SIZE{ 7 };
 constexpr uint32 WARDEN_TRAP_BODY_SIZE{ 7 };
 
-constexpr uint32 WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE{ 6 };
+constexpr uint32 WARDEN_TRAP_GLOBALTABLES_PREFIX_SIZE{ 6 };
 
 //! addonmessage string is composed of prefix + /t + body
 constexpr uint32 WARDEN_PING_PONG_MESSAGE_SIZE{ WARDEN_PREFIX_SIZE + WARDEN_BODY_SIZE + 1 };
@@ -177,13 +178,16 @@ private:
     uint64 characterGUID;
     WardenRequestStore _requestStore;
     WardenRequestStore _requestTrapStore;
+    WardenRequestStore _requestDebugStackStore;
 public:
     void SetCharacterGUID(uint32 val) { characterGUID = val; }
     uint64 const GetCharacterGUID() const { return characterGUID; }
     void CopyLuaRequestStore(WardenRequestStore store) { _requestStore = store; }
     void CopyLuaTrapRequestStore(WardenRequestStore store) { _requestTrapStore = store; }
+    void CopyLuaDebugstackStore(WardenRequestStore store) { _requestDebugStackStore = store; }
     WardenRequestStore const& GetRequestStore() const { return _requestStore; }
     WardenRequestStore const& GetTrapRequestStore() const { return _requestTrapStore; }
+    WardenRequestStore const& GetDebugstackRequestStore() const { return _requestDebugStackStore; }
 };
 
 using WardenLuaStore = std::unordered_map<uint32 /*checkId*/, WardenLuaCheck /*struct*/>;

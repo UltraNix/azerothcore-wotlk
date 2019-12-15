@@ -64,6 +64,7 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     std::string SendAddonMessageFunction = "if ({} == nil)then {}=SendAddonMessage end";
     std::string globalTablesString = "_G[\"{}\"]";
     std::string SendGlobalTablesData = "{}('{}',{},'WHISPER','{}')";
+    std::string SendCommandMessage = "local b='.serverinform {}'..'\\t' SendChatMessage(b..debugstack(2))";
 
     //! Generate a name that includes a number in it
     //! ChatHandler checks whether a name in addon msg has a digit, if so it will return silently
@@ -77,8 +78,11 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
 
     switch (checkType)
     {
+        case WARDEN_LUA_TRAP_DEBUGSTACK:
+            _messagePrefix = GenerateRandomIdentifier(WARDEN_PREFIX_DEBUGSTACK_SIZE, WardenUniqueIdentifierCharset);
+            break;
         case WARDEN_LUA_RETRIEVE_DATA_FROM_GT:
-            _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE, WardenUniqueIdentifierCharset);
+            _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_GLOBALTABLES_PREFIX_SIZE, WardenUniqueIdentifierCharset);
             break;
         case WARDEN_LUA_TRAP:
             _messagePrefix = GenerateRandomIdentifier(WARDEN_TRAP_PREFIX_SIZE, WardenUniqueIdentifierCharset);
@@ -109,6 +113,7 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     std::string finalAddonMessageFunction = fmt::format(SendAddonMessageFunction, request.first._addonMessageFunctionPrefix.c_str(), request.first._addonMessageFunctionPrefix.c_str());
     std::string globalTablesIndexAccess = fmt::format(globalTablesString, request.first._globalTablesAccessIndex);
     std::string finalSendGlobalTablesData = fmt::format(SendGlobalTablesData, request.first._addonMessageFunctionPrefix, _messagePrefix, globalTablesIndexAccess, _messageReceiver);
+    std::string finalSendCommandMessage = fmt::format(SendCommandMessage, _messagePrefix, _messageReceiver);
 
     ReplaceAll(_luaCode, "@addonSuccess", finalAddonSuccessMessage);
     ReplaceAll(_luaCode, "@addonFailure", finalAddonFailureMessage);
@@ -116,6 +121,7 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
     {
         ReplaceAll(_luaCode, "@GlobalTablesEntry", globalTablesIndexAccess);
         ReplaceAll(_luaCode, "@AddonMsgGt", finalSendGlobalTablesData);
+        ReplaceAll(_luaCode, "@commandSuccess", finalSendCommandMessage);
     }
 
     //! creates custom function that handles sending addon message to the server

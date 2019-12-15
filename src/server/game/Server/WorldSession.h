@@ -1106,9 +1106,13 @@ class WorldSession
         std::vector<uint32> _mandatoryLuaCheckIDs;
         //! already generated once, we will keep reusing them
         std::vector<std::string> _mandatoryLuaCodes;
+
+        //! ToDo: Change this to one unordered_map with index by check type
+        //! each checkType has its own unordered_map of prefixes, each check has its own size of prefix
         //! contains checks that were sent to the client
         WardenRequestStore _wardenRequests;
         WardenRequestStore _wardenClientTraps;
+        WardenRequestStore _wardenDebugstackTraps;
 
         AsyncLuaCodeResult _luaResult;
         void PrepareLuaCheck();
@@ -1133,13 +1137,17 @@ class WorldSession
         //! and then we fetch that data with another check
         std::string _castSpellByNameGlobalTableIndex;
         std::string _castSpellByIdGlobalTableIndex;
+        time_t lastServerInformTimestamp;
     public:
+        time_t const& GetLastServerInformTimestamp() const;
+        void UpdateServerInformTimestamp();
         void OnWardenInitialized();
         void OnWardenCycleFinished();
         inline bool IsWardenLuaTurn() const { return _sendLuaCode; }
         void HandleLuaResults(std::vector<WardenLuaResult> /*results*/);
 
-        WardenRequestStore GetLuaStore(bool trapStore);
+        WardenRequestStore GetLuaStore(bool trapStore) const;
+        WardenRequestStore GetLuaDebugstackStore() const;
         
         //! Session are updated from map and world contexts
         //! We want scheduler to be updated only once (from world context)

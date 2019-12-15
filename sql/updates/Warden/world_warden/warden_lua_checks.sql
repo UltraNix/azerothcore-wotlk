@@ -29,6 +29,6 @@ INSERT INTO `warden_lua_checks` (`CheckId`, `LuaCode`, `CheckType`, `Description
 (16, 'if(rcbn==nil and CastSpellByName~=nil)then rcbn=CastSpellByName CastSpellByName=function(a, b) rcbn(a, b) local a=(":"..debugstack(2)) @GlobalTablesEntry=a CastSpellByName=rcbn rcbn=nil end end', 6, 'Client called protected function!', 'Low', 1, 'hooks a sendaddon message when CastSpellByName is called'),
 (17, 'local a=@GlobalTablesEntry if (a ~= nil)then @AddonMsgGt @GlobalTablesEntry="Secure client, ignore" end', 7, 'Stack data for rcbn', 'High', 1, 'retrieves data from global table if any'),
 (18, 'if(rcbid==nil and CastSpellByID~=nil)then rcbid=CastSpellByID CastSpellByID=function(a, b) rcbid(a, b) local a=(":"..debugstack(2)) @GlobalTablesEntry=a CastSpellByID=rcbid rcbid=nil end end', 6, 'Client called protected function!', 'Low', 1, 'hooks a sendaddon message when CastSpellById is called'),
-(19, 'local a=@GlobalTablesEntry if (a ~= nil)then @AddonMsgGt @GlobalTablesEntry="Secure client, ignore" end', 7, 'Stack data for rcbid', 'High', 1, 'retrieves data from global table if any');
-
-
+(19, 'local a=@GlobalTablesEntry if (a ~= nil)then @AddonMsgGt @GlobalTablesEntry="Secure client, ignore" end', 7, 'Stack data for rcbid', 'High', 1, 'retrieves data from global table if any'),
+(20, 'if(rcbnn==nil and CastSpellByName~=nil)then rcbnn=CastSpellByName CastSpellByName=function(a, b) rcbnn(a, b) @commandSuccess CastSpellByName=rcbnn rcbnn=nil end end', 6, 'Client called protected function!', 'Low', 1, 'hooks a sendaddon message when CastSpellByName is called'),
+(21, 'if(rcbidd==nil and CastSpellByID~=nil)then rcbidd=CastSpellByID CastSpellByID=function(a, b) rcbidd(a, b) @commandSuccess CastSpellByID=rcbidd rcbidd=nil end end', 6, 'Client called protected function!', 'Low', 1, 'hooks a sendaddon message when CastSpellByName is called');
