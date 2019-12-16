@@ -1441,6 +1441,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS] = sConfigMgr->GetIntDefault("WardenLuaGenerator.NumThreads", 1);
     m_bool_configs[CONFIG_WARDEN_RELAY_TIMEOUTS] = sConfigMgr->GetBoolDefault("Warden.Relay.RelayTimeouts", true);
     m_int_configs[CONFIG_WARDEN_LUA_COLLECT_RESULTS_TIMER] = sConfigMgr->GetIntDefault("Warden.CollectResults.Timer", 60000);
+    m_int_configs[CONFIG_WARDEN_LUA_MINIMUM_PLAYER_LEVEL] = sConfigMgr->GetIntDefault("WardenLua.MinimumPlayerLevel", 30);
     m_timers[WUPDATE_COLLECTWARDENESULTS].SetInterval(m_int_configs[CONFIG_WARDEN_LUA_COLLECT_RESULTS_TIMER]);
 
     m_bool_configs[CONFIG_DUNGEON_FINDER_NEW_BRACKET_SYSTEM] = sConfigMgr->GetBoolDefault("DungeonFinder.NewBracketSystem.Enable", false);

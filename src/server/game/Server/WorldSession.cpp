@@ -182,6 +182,12 @@ void WorldSession::OnWardenCycleFinished()
         bool const _IsLuaEnabled = sWorld->getIntConfig(CONFIG_WARDEN_LUA_GENERATOR_NUMTHREADS) != 0U && !_luaCheckIDs.empty();
         _sendLuaCode = GetPlayer() ? !_sendLuaCode : false;
 
+        if (_sendLuaCode && GetPlayer())
+        {
+            if (GetPlayer()->getLevel() < sWorld->getIntConfig(CONFIG_WARDEN_LUA_MINIMUM_PLAYER_LEVEL))
+                _sendLuaCode = false;
+        }
+
         if (!_IsLuaEnabled)
             _sendLuaCode = false;
 
