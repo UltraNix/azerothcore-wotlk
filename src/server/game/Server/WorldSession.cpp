@@ -145,17 +145,6 @@ void WorldSession::InitializeWarden()
     //! Shuffle so client A has different order of checks sent than client B
     Trinity::Containers::RandomShuffle(_luaCheckIDs);
     _luaResult.Invalidate();
-    lastServerInformTimestamp = time(nullptr);
-}
-
-time_t const& WorldSession::GetLastServerInformTimestamp() const
-{
-    return lastServerInformTimestamp;
-}
-
-void WorldSession::UpdateServerInformTimestamp()
-{
-    lastServerInformTimestamp = time(nullptr);
 }
 
 void WorldSession::OnWardenInitialized()
@@ -320,14 +309,9 @@ void WorldSession::SendLuaCheck()
     }
 
     if (_request.GetType() == WARDEN_LUA_TRAP_DEBUGSTACK)
-    {
-        //! Clear after 100th requests, we might lose one or two, we do not care
-        if (_wardenDebugstackTraps.size() >= 100)
-            _wardenDebugstackTraps.clear();
+        return;
 
-        _wardenDebugstackTraps[_request.GetPrefix()] = std::move(_request);
-    }
-    else if (_request.GetType() == WARDEN_LUA_TRAP || _request.GetType() == WARDEN_LUA_RETRIEVE_DATA_FROM_GT)
+    if (_request.GetType() == WARDEN_LUA_TRAP || _request.GetType() == WARDEN_LUA_RETRIEVE_DATA_FROM_GT)
     {
         //! All other prefixes are obslete when new one arrives
         //! this is NOT correct approach but frosthold just released and i dont have time to fix it properly.
@@ -352,16 +336,11 @@ void WorldSession::SendLuaCheck()
     }
 }
 
-WardenRequestStore WorldSession::GetLuaStore(bool trapStore) const
+WardenRequestStore WorldSession::GetLuaStore(bool trapStore)
 {
     if (trapStore)
         return _wardenClientTraps;
     return _wardenRequests;
-}
-
-WardenRequestStore WorldSession::GetLuaDebugstackStore() const
-{
-    return _wardenDebugstackTraps;
 }
 
 void WorldSession::ClearPongRequest(std::string const& key)

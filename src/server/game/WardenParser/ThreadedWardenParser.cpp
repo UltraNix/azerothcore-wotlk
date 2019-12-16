@@ -40,7 +40,7 @@ namespace WardenParserWin
         Requestee const& requestee = request.first;
         std::string& message = request.second;
 
-        auto position = message.find("\t");
+        uint32 position = message.find("\t");
         if (position == std::string::npos)
         {
             sLog->outStaticDebug("ThreadedWardenParser::HandlePingPongMessage %s failed to find vertical tab in addon message", message.c_str());
@@ -59,10 +59,9 @@ namespace WardenParserWin
         {
             //case WARDEN_PREFIX_SIZE:
             //    break;
-            case WARDEN_PREFIX_DEBUGSTACK_SIZE:
+            case WARDEN_TRAP_DEBUGSTACK_PREFIX_SIZE:
                 IsDebugStackMessage = true;
                 break;
-            case WARDEN_TRAP_GLOBALTABLES_PREFIX_SIZE:
             case WARDEN_TRAP_PREFIX_SIZE:
                 IsTrapMessage = true;
                 break;
@@ -70,14 +69,7 @@ namespace WardenParserWin
                 break;
         }
 
-        WardenRequestStore& requestStore = WardenRequestStore();
-        if (IsDebugStackMessage)
-            requestStore = requestee.GetDebugstackRequestStore();
-        else if (IsTrapMessage)
-            requestStore = requestee.GetTrapRequestStore();
-        else
-            requestStore = requestee.GetRequestStore();
-
+        WardenRequestStore const& requestStore = IsTrapMessage || IsDebugStackMessage ? requestee.GetTrapRequestStore() : requestee.GetRequestStore();
         auto luaRequest = requestStore.find(_prefix);
         if (luaRequest == requestStore.end())
         {
@@ -150,9 +142,6 @@ namespace WardenParserWin
         bool const foundEnterPressedString = message.find("OnEnterPressed") != std::string::npos;
         bool const foundEnchantrixAddon = message.find("Enchantrix") != std::string::npos;
         bool const foundSpotterAddon = message.find("Spotter") != std::string::npos;
-        bool const foundMultiSlotMessage = message.find("MultiCast") != std::string::npos;
-        if (foundEnchantrixAddon || foundSpotterAddon || foundMultiSlotMessage)
-            return true;
 
         return foundSecureString || foundEnterPressedString;
     }

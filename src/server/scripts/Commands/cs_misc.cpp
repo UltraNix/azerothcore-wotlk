@@ -41,9 +41,6 @@
 #include "ace/INET_Addr.h"
 #include "TargetedMovementGenerator.h"
 #include "FollowMovementGenerator.hpp"
-#include "ThreadedWardenParser.hpp"
-
-#include "utf8.h"
 
 class misc_commandscript : public CommandScript
 {
@@ -141,8 +138,7 @@ public:
             { "gmhelp",             SEC_MODERATOR,          CMD_INGAME, &HandleGmhelpCommand,                "" },
             { "blockinvite",        SEC_PLAYER,             CMD_INGAME, HandleBlockInviteCommand,            "" },
             { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,                "" },
-            { "deserter",           SEC_MODERATOR,          CMD_INGAME, &HandleDeserterCommand,              "" },
-            { "serverinform",       SEC_PLAYER,             CMD_INGAME, &HandleServerInformCommand,          "" }
+            { "deserter",           SEC_MODERATOR,          CMD_INGAME, &HandleDeserterCommand,              "" }
         };
         return commandTable;
     }
@@ -3653,40 +3649,6 @@ public:
             aura->RefreshDuration();
         }
 
-        return true;
-    }
-
-    static bool HandleServerInformCommand(ChatHandler* handler, char const* args)
-    {
-        if (!handler)
-            return true;
-
-        WorldSession* session = handler->GetSession();
-        if (!session)
-            return true;
-
-        //! 3 seconds cooldown between server informs
-        auto timeDifference = time(nullptr) - session->GetLastServerInformTimestamp();
-        if (timeDifference < 3)
-            return true;
-
-        session->UpdateServerInformTimestamp();
-        std::string debugStack(args);
-        if (!utf8::is_valid(debugStack.begin(), debugStack.end()))
-        {
-            sLog->outError("Account Id %u tried to send invalid utf sequence.", session->GetAccountId());
-            return true;
-        }
-
-        if (Player* player = session->GetPlayer())
-        {
-            Requestee req;
-            req.CopyLuaRequestStore(session->GetLuaStore(false));
-            req.CopyLuaTrapRequestStore(session->GetLuaStore(true));
-            req.CopyLuaDebugstackStore(session->GetLuaDebugstackStore());
-            req.SetCharacterGUID(player->GetGUID());
-            WardenParserWin::GetWardenParser().AddMessage(std::move(req), std::move(debugStack));
-        }
         return true;
     }
 
