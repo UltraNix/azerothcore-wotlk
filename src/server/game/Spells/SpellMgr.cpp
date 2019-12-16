@@ -4766,6 +4766,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 3600:  //Earthbind totem
         case 64695: //Storm, Earth and Fire talent
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
             break;
 
 
