@@ -4291,9 +4291,22 @@ void Spell::finish(bool ok)
         if (targetInfo.missCondition != SPELL_MISS_NONE)
         {
             // Execute/Slam - show miss/dodge/parry in combat log
-            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags[0] & (0x20000000 | 0x00200000)))
-                if (Unit * target = ObjectAccessor::GetUnit(*m_caster, targetInfo.targetGUID))
-                    m_caster->SendSpellMiss(target, m_spellInfo->Id, targetInfo.missCondition);
+            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellInfo->Attributes & SPELL_ATTR0_HIDE_IN_COMBAT_LOG) != 0)
+            {
+                uint32 triggeredSpell = 0;
+                // Slam
+                if (m_spellInfo->SpellFamilyFlags[0] & 0x00200000)
+                    triggeredSpell = 50783;
+                // Execute
+                else if (m_spellInfo->SpellFamilyFlags[0] & 0x20000000)
+                    triggeredSpell = 20647;
+
+                if (triggeredSpell)
+                {
+                    if (Unit * target = ObjectAccessor::GetUnit(*m_caster, targetInfo.targetGUID))
+                        m_caster->SendSpellMiss(target, triggeredSpell, targetInfo.missCondition);
+                }
+            }
         }
     }
 }

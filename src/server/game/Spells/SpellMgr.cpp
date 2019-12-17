@@ -5045,19 +5045,17 @@ void SpellMgr::LoadDbcDataCorrections()
         case 65941:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
-        // execute
-        // This should never miss/dodge/parry (this is dummy spell)
-        // execute itself might get dodged/parried (id 20647)
         case 20662: // Rank 5 - fix Sudden Death proc
             spellInfo->AttributesEx3 &= ~(SPELL_ATTR3_CANT_TRIGGER_PROC);
-        case 5308:
-        case 20658:
-        case 20660:
-        case 20661:
-        case 25234:
-        case 25236:
-        case 47470:
-        case 47471:
+            break;
+        // Execute/Slam
+        // This should never miss/dodge/parry (this is dummy spell)
+        // execute itself might get dodged/parried (id 20647)
+        case 50783:
+        case 20647:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            break;
         // Slam
         case 1464:
         case 8820:
@@ -5065,10 +5063,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 11605:
         case 25241:
         case 25242:
+        case 11608:
         case 47474:
         case 47475:
-            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
-            spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            spellInfo->Attributes &= ~SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             break;
         // Sweeping Strike damage
         case 12723:
