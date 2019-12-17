@@ -2022,9 +2022,11 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
             jumpRadius = 7.5f;
             break;
         case SPELL_DAMAGE_CLASS_MELEE:
-            // 5y for swipe, cleave and similar
-            jumpRadius = 8.0f;
+        {
+            // 10y for swipe, cleave and similar
+            jumpRadius = 10.0f;
             break;
+        }
         case SPELL_DAMAGE_CLASS_NONE:
         case SPELL_DAMAGE_CLASS_MAGIC:
             // 12.5y for chain heal spell since 3.2 patch
@@ -2041,24 +2043,38 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
         || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE
         || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC);
 
-    // Thorim
-    bool ThorimChain = (m_spellInfo->Id == 62131 || m_spellInfo->Id == 64390);
+    bool const IsCleave = m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE;
+    bool const IsThorimChain = (m_spellInfo->Id == 62131 || m_spellInfo->Id == 64390);
 
-    if (ThorimChain)
+    if (IsThorimChain)
         jumpRadius = 6.5f;
 
     // max dist which spell can reach
     float searchRadius = jumpRadius;
-    if (isBouncingFar && !isChainHeal && !ThorimChain)
+    if (isBouncingFar && !isChainHeal && !IsThorimChain)
         searchRadius *= chainTargets;
 
     // Xinef: the distance should be increased by caster size, it is neglected in latter calculations
     std::list<WorldObject*> tempTargets;
-    SearchAreaTargets(tempTargets, searchRadius, (target), m_caster, objectType, selectType, condList);
+
+    //! https://www.youtube.com/watch?v=u4qBKWWbRC4&feature=youtu.be&t=120
+    //! https://www.youtube.com/watch?v=s5KLetVQn38&feature=youtu.be&t=143
+    //! https://www.youtube.com/watch?v=8WnaIKa6weY&feature=youtu.be&t=1m59s
+    //! https://www.youtube.com/watch?v=oYhPEjWZDik&feature=youtu.be&t=50s especially this
+    //! those videos pretty much confirms that cleaves range is much bigger than 5y(base tc value)
+    //! and has to include targets combat reach.
+    //! But some bosses have huge combat reaches, so limit it to base value if it exceeds
+    if (IsCleave && target->IsCreature())
+    {
+        float const targetReach = std::min(10.f, target->GetObjectSize());
+        searchRadius += targetReach;
+    }
+
+    SearchAreaTargets(tempTargets, searchRadius, target, m_caster, objectType, selectType, condList);
     tempTargets.remove(target);
 
     // Thorim
-    if (ThorimChain)
+    if (IsThorimChain)
         if (target->GetTypeId() != TYPEID_PLAYER)
             tempTargets.remove(target);
 
@@ -2074,18 +2090,10 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     // for some spells allow only chain targets in front of caster (swipe for example)
     if (!isBouncingFar)
     {
-        float allowedArc = 0.0f;
-        if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
-            allowedArc = (M_PI*7.0f) / 18.0f; // 70 degrees
-        else if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
-            allowedArc = M_PI*0.5f; // 90 degrees
-
         for (std::list<WorldObject*>::iterator itr = tempTargets.begin(); itr != tempTargets.end();)
         {
             std::list<WorldObject*>::iterator checkItr = itr++;
             if (!m_caster->HasInArc(static_cast<float>(M_PI), *checkItr))
-                tempTargets.erase(checkItr);
-            else if (allowedArc > 0.0f && !m_caster->HasInArc(allowedArc, *checkItr, (*checkItr)->GetObjectSize()))
                 tempTargets.erase(checkItr);
         }
     }
@@ -5593,7 +5601,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if ((!m_caster->IsTotem() || !m_spellInfo->IsPositive()) && !m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_spellInfo->HasAttribute(SPELL_ATTR5_SKIP_CHECKCAST_LOS_CHECK) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
             }
-            else {
+            else
+            {
                 // Must be behind the target
                 if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
                     return SPELL_FAILED_NOT_BEHIND;
