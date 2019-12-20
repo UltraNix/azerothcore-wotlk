@@ -91,7 +91,10 @@ public:
             return true;
         }
         else
+        {
             handler->PSendSysMessage("Something went wrong, arena team with arena team id %u doesnt exist.", arenaSlot);
+            return true;
+        }
 
         return false;
     }
