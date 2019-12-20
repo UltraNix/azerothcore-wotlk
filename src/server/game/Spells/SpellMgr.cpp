@@ -8289,10 +8289,6 @@ void SpellMgr::LoadDbcDataCorrections()
                 case 28531: // Frost Aura (sapphiron 10man)
                     spellInfo->EffectBasePoints[EFFECT_0] = spellInfo->EffectBasePoints[EFFECT_0] * 2;
                     break;
-                    // Chill (Encounter: Sapphiron)
-                case 55699:
-                    spellInfo->EffectBasePoints[0] = spellInfo->EffectBasePoints[0] * 1.5;
-                    break;
                     // Chain Lightining (Encounter: Thaddius)
                 case 54531:
                     spellInfo->MaxAffectedTargets = 10;
