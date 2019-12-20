@@ -80,6 +80,7 @@ void AddSC_titles_commandscript();
 void AddSC_wp_commandscript();
 void AddSC_reset_commandscript();
 void AddSC_transfer_commandscript();
+void AddSC_arena_commandscript();
 
 
 #ifdef SCRIPTS
@@ -746,6 +747,7 @@ void AddCommandScripts()
     AddSC_wp_commandscript();
     AddSC_reset_commandscript();
     AddSC_transfer_commandscript();
+    AddSC_arena_commandscript();
     sAnticheatMgr->StartScripts();
 }
 

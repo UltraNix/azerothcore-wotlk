@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -472,6 +472,32 @@ void ArenaTeamMember::ModifyPersonalRating(Player* player, int32 mod, uint32 typ
     }
 }
 
+void ArenaTeam::ForcePersonalRatingChange(Player* player, uint32 val, uint32 type)
+{
+    for (MemberList::iterator itr = Members.begin(); itr != Members.end(); ++itr)
+    {
+        if (itr->Guid == player->GetGUID())
+        {
+            itr->ForceModifyPersonalRating(player, val, GetType());
+            itr->MatchMakerRating = val;
+            if (itr->MatchMakerRating > itr->MaxMMR)
+                itr->MaxMMR = val;
+        }
+    }
+}
+
+
+void ArenaTeamMember::ForceModifyPersonalRating(Player* player, uint32 val, uint32 type)
+{
+    PersonalRating = val;
+
+    if (player)
+    {
+        player->SetArenaTeamInfoField(ArenaTeam::GetSlotByType(type), ARENA_TEAM_PERSONAL_RATING, PersonalRating);
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING, PersonalRating, type);
+    }
+}
+
 void ArenaTeamMember::ModifyMatchmakerRating(int32 mod, uint32 /*slot*/)
 {
     if (mod < 0)
@@ -805,7 +831,7 @@ void ArenaTeam::MemberWon(Player* player, uint32 againstMatchmakerRating, int32 
                 mod = std::min(MatchmakerRatingChange, Stats.Rating - itr->MatchMakerRating);
                 itr->ModifyMatchmakerRating(mod, GetSlot());
             }*/
-            
+
             itr->ModifyMatchmakerRating(MatchmakerRatingChange, GetSlot());
 
             // update personal stats

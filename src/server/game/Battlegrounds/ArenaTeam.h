@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -99,6 +99,7 @@ struct ArenaTeamMember
     uint16 MatchMakerRating;
     uint16 MaxMMR;
 
+    void ForceModifyPersonalRating(Player* player, uint32 val, uint32 type);
     void ModifyPersonalRating(Player* player, int32 mod, uint32 type);
     void ModifyMatchmakerRating(int32 mod, uint32 slot);
 };
@@ -179,6 +180,7 @@ class ArenaTeam
         void   MemberWon(Player* player, uint32 againstMatchmakerRating, int32 MatchmakerRatingChange);
         int32  LostAgainst(uint32 Own_MMRating, uint32 Opponent_MMRating, int32& rating_change, const Map* bgMap);
         void   MemberLost(Player* player, uint32 againstMatchmakerRating, int32 MatchmakerRatingChange = -12);
+        void   ForcePersonalRatingChange(Player* player, uint32 val, uint32 arenaType);
 
         void UpdateArenaPointsHelper(std::map<uint32, uint32> & PlayerPoints);
 
