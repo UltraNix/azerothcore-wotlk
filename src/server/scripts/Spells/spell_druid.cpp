@@ -189,16 +189,31 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
             bool CheckProc(ProcEventInfo& eventInfo)
             {
                 const SpellInfo* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-                // Maul exception, should also proc Omen of Clarity
-                if (!spellInfo || (spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) && spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2) && spellInfo->SpellFamilyName == SPELLFAMILY_DRUID))
+                if (!spellInfo)
                     return true;
 
-                // xinef: no mana cost
-                if (spellInfo->ManaCost == 0 && spellInfo->ManaCostPercentage == 0)
-                    return false;
+                if (spellInfo)
+                {
+                    if (spellInfo->IsPassive())
+                        return false;
 
-                // xinef: SPELL_ATTR0_CU_NO_INITIAL_THREAT and SPELL_ATTR0_CU_DIRECT_DAMAGE contains spells capable of healing and damaging + some others, but this is taken care of above
-                return spellInfo->HasAttribute(SpellCustomAttributes(SPELL_ATTR0_CU_DIRECT_DAMAGE|SPELL_ATTR0_CU_NO_INITIAL_THREAT));
+                    //! Feral abilities do not trigger omen. We can assume only druids will be using this spell
+                    //! so, anything that requires combo points OR adds combo points falls under feral category
+                    //! exclude shapeshifts as well, it shouldnt proc OOC
+                    if (spellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || spellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS) || spellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT))
+                        return false;
+
+                    if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE && !(spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) || spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2)))
+                        return false;
+
+                    //! Feral mangle for both cat and bear
+                    if (spellInfo->SpellFamilyFlags[1] & 0x00000440)
+                        return false;
+
+
+                }
+
+                return true;
             }
 
             void Register()
