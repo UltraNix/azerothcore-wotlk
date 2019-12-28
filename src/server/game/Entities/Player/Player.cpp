@@ -25082,6 +25082,15 @@ PartyResult Player::CanUninviteFromGroup() const
     }
     else
     {
+        if (grp->isBFGroup())
+        {
+            if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
+            {
+                if (bf->IsWarTime())
+                    return ERR_INVITE_RESTRICTED;
+            }
+        }
+
         if (!grp->IsLeader(GetGUID()) && !grp->IsAssistant(GetGUID()))
             return ERR_NOT_LEADER;
 
