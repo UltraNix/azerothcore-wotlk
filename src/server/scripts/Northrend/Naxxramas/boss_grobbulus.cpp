@@ -83,9 +83,9 @@ public:
             events.ScheduleEvent(EVENT_SPELL_MUTATING_INJECTION, 20000);
             events.ScheduleEvent(EVENT_SPELL_SLIME_SPRAY, 10000);
             if (sWorld->getBoolConfig(CONFIG_BOOST_NAXXRAMAS) && Is25ManRaid())
-                events.ScheduleEvent(EVENT_SPELL_BERSERK, 7min);
+                events.ScheduleEvent(EVENT_SPELL_BERSERK, 8min);
             else
-                events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(12min, 8min));
+                events.ScheduleEvent(EVENT_SPELL_BERSERK, RAID_MODE(12min, 10min));
 
             if (pInstance)
             {
