@@ -7,6 +7,7 @@ REWRITTEN BY XINEF
 #include "dire_maul.h"
 #include "UnitAI.h"
 #include "GameObject.h"
+#include "Group.h"
 
 class instance_dire_maul : public InstanceMapScript
 {
@@ -56,6 +57,11 @@ class instance_dire_maul : public InstanceMapScript
                             fullLootMode >>= 1;
 
                         gameobject->SetLootMode(fullLootMode);
+                        break;
+                    }
+                    case GO_CRESCENT_DOOR:
+                    {
+                        _crescentDoorGuid = gameobject->GetGUID();
                         break;
                     }
                 }
@@ -111,6 +117,13 @@ class instance_dire_maul : public InstanceMapScript
                 return 0;
             }
 
+            void OnPlayerEnter(Player* player) override
+            {
+                if (Group* group = player->GetGroup())
+                    if (group->isLFGGroup())
+                        HandleGameObject(_crescentDoorGuid, true);
+            }
+
             std::string GetSaveData()
             {
                 std::ostringstream saveStream;
@@ -142,6 +155,7 @@ class instance_dire_maul : public InstanceMapScript
             uint32 _pylonsState;
             uint32 _northWingProgress;
             uint32 _northWingBosses;
+            uint64 _crescentDoorGuid;
 
             uint64 _immoltharGUID;
         };

@@ -19,7 +19,8 @@ enum DataTypes
 enum GoIds
 {
     GO_DIRE_MAUL_FORCE_FIELD        = 179503,
-    GO_GORDOK_TRIBUTE                = 179564
+    GO_GORDOK_TRIBUTE               = 179564,
+    GO_CRESCENT_DOOR                = 177221
 };
 
 enum NpcIds
