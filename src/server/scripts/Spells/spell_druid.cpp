@@ -210,7 +210,10 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
                     if (spellInfo->SpellFamilyFlags[1] & 0x00000440)
                         return false;
 
-
+                    //! We kinda lack evidence of what should proc and what shouldnt, its very weird for OOC
+                    //! exclude self casts without visual data ie. furor / cozy fire
+                    if (spellInfo->IsSelfCast() && !spellInfo->SpellVisual[0] && !spellInfo->SpellVisual[1])
+                        return false;
                 }
 
                 return true;
