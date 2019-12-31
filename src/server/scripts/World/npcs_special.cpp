@@ -2253,6 +2253,11 @@ public:
         }
         if (doSwitch)
         {
+            if (player->InBattlegroundQueue())
+            {
+                ChatHandler(player->GetSession()).PSendSysMessage("Can't do that while being in battleground queue.");
+                return true;
+            }
             if (!player->HasEnoughMoney(EXP_COST))
                 player->SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, 0, 0, 0);
             else if (noXPGain)

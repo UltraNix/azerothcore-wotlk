@@ -4121,3 +4121,9 @@ Reputation.Boost.FactionMask = 0
 
 CreatureBossRecords.AllowedMaps = "533;615;616"
 
+#    Battlegrounds.Separate.Twink.Queues 
+#       Description: When enabled twinks will be put to separate battleground queues
+#       Default: 0 (disabled)
+
+Battlegrounds.Separate.Twink.Queues = 0
+

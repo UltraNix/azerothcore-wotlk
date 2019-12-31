@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -43,6 +43,7 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  ArenaMatchmakerRating;                          // if rated match, inited to the rating of the team
     uint32  OpponentsTeamRating;                            // for rated arena matches
     uint32  OpponentsMatchmakerRating;                      // for rated arena matches
+    bool    IsTwink;
 
     // pussywizard: for internal use
     uint8 _bracketId;
@@ -81,7 +82,7 @@ class BattlegroundQueue
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo) const;
 
-        void SetBgTypeIdAndArenaType(BattlegroundTypeId b, uint8 a) { m_bgTypeId = b; m_arenaType = ArenaType(a); } // pussywizard
+        void SetBgTypeIdAndArenaType(BattlegroundTypeId b, uint8 a, bool isTwinkQueue) { m_bgTypeId = b; m_arenaType = ArenaType(a); m_isTwinkQueue = isTwinkQueue; } // pussywizard
         void AddEvent(BasicEvent* Event, uint64 e_time);
 
         typedef std::map<uint64, GroupQueueInfo*> QueuedPlayersMap;
@@ -124,6 +125,7 @@ class BattlegroundQueue
         ArenaType m_arenaType;
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastIndex[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
+        bool m_isTwinkQueue;
 
         // Event handler
         EventProcessor m_events;
@@ -136,8 +138,8 @@ class BattlegroundQueue
 class BGQueueInviteEvent : public BasicEvent
 {
     public:
-        BGQueueInviteEvent(uint64 pl_guid, uint32 BgInstanceGUID, BattlegroundTypeId BgTypeId, uint8 arenaType, uint32 removeTime) :
-          m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime)
+        BGQueueInviteEvent(uint64 pl_guid, uint32 BgInstanceGUID, BattlegroundTypeId BgTypeId, uint8 arenaType, uint32 removeTime, bool isTwinkQueue) :
+          m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_ArenaType(arenaType), m_RemoveTime(removeTime), m_isTwinkQueue(isTwinkQueue)
           { }
         virtual ~BGQueueInviteEvent() { }
 
@@ -149,6 +151,7 @@ class BGQueueInviteEvent : public BasicEvent
         BattlegroundTypeId m_BgTypeId;
         uint8  m_ArenaType;
         uint32 m_RemoveTime;
+        bool m_isTwinkQueue;
 };
 
 /*
