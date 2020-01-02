@@ -177,6 +177,25 @@ class spell_dru_feral_swiftness : public SpellScriptLoader
         }
 };
 
+static std::vector<uint32 /*spellEffect*/> _omenOfClarityValidEffects
+{
+    SPELL_EFFECT_HEAL,
+    SPELL_EFFECT_HEAL_MAX_HEALTH,
+    SPELL_EFFECT_HEAL_PCT,
+    SPELL_EFFECT_SCHOOL_DAMAGE
+};
+
+static std::vector<uint32 /*auraEffect*/> _omenOfClarityValidAuraEffects
+{
+    SPELL_AURA_PERIODIC_DAMAGE,
+    SPELL_AURA_PERIODIC_HEAL,
+    SPELL_AURA_PERIODIC_ENERGIZE,
+    SPELL_AURA_MOD_RESISTANCE, // mark and gift of the wild
+    SPELL_AURA_DAMAGE_SHIELD, // thorns
+    SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE
+};
+
+//! Has custom handling for its procs, this spell is very weird
 class spell_dru_omen_of_clarity : public SpellScriptLoader
 {
     public:
@@ -188,35 +207,107 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                const SpellInfo* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
-                if (!spellInfo)
+                bool isValidSpell = false;
+                SpellInfo const* baseSpellInfo = eventInfo.GetDamageInfo()->GetSpellInfo();
+                //! its an auto attack, those can proc
+                if (!baseSpellInfo)
                     return true;
 
-                if (spellInfo)
+                //! Anything that generates combo points is disabled
+                if (baseSpellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || baseSpellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS) || baseSpellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT))
+                    return false;
+
+                if (baseSpellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE && (baseSpellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) || baseSpellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2)))
+                    return true;
+
+                if (baseSpellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
                 {
-                    if (spellInfo->IsPassive())
-                        return false;
+                    //! Barkskin apparently proccs this one
+                    if (baseSpellInfo->HasAura(SPELL_AURA_REDUCE_PUSHBACK))
+                        return true;
 
-                    //! Feral abilities do not trigger omen. We can assume only druids will be using this spell
-                    //! so, anything that requires combo points OR adds combo points falls under feral category
-                    //! exclude shapeshifts as well, it shouldnt proc OOC
-                    if (spellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || spellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS) || spellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT))
-                        return false;
+                    //! Fearie fire
+                    if (baseSpellInfo->HasAura(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE))
+                        return true;
 
-                    if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE && !(spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) || spellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2)))
-                        return false;
+                    //! Barkskin
+                    if (baseSpellInfo->SpellFamilyFlags[0] & 0x00000200)
+                        return true;
 
-                    //! Feral mangle for both cat and bear
-                    if (spellInfo->SpellFamilyFlags[1] & 0x00000440)
-                        return false;
+                    //! Nature's grasp
+                    if (baseSpellInfo->SpellFamilyFlags[0] & 0x00100000 && baseSpellInfo->SpellFamilyFlags[2] & 0x00001000)
+                        return true;
 
-                    //! We kinda lack evidence of what should proc and what shouldnt, its very weird for OOC
-                    //! exclude self casts without visual data ie. furor / cozy fire
-                    if (spellInfo->IsSelfCast() && !spellInfo->SpellVisual[0] && !spellInfo->SpellVisual[1])
+                    //! Both feral mangles
+                    if (baseSpellInfo->SpellFamilyFlags[1] & 0x00000440)
                         return false;
                 }
 
-                return true;
+                //! At this point those auras do not count anymore
+                if (baseSpellInfo->ProcFlags)
+                    return false;
+
+                bool foundValidEffect = false;
+                auto ValidateSpellEffect = [](uint32 sEffect)
+                {
+                    return std::any_of(_omenOfClarityValidEffects.begin(), _omenOfClarityValidEffects.end(), [sEffect](uint32 eff)
+                    {
+                        return sEffect == eff;
+                    });
+                };
+
+                auto ValidateAuraEffect = [](uint32 aEffect)
+                {
+                    return std::any_of(_omenOfClarityValidAuraEffects.begin(), _omenOfClarityValidAuraEffects.end(), [aEffect](uint32 aEff)
+                    {
+                        return aEffect == aEff;
+                    });
+                };
+
+                for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                {
+                    auto effectInfo = baseSpellInfo->Effects[i];
+                    if (!effectInfo.IsEffect())
+                        continue;
+
+                    foundValidEffect = ValidateSpellEffect(effectInfo.Effect);
+                    //! if its aura then check again
+                    if (!foundValidEffect && effectInfo.Effect == SPELL_EFFECT_APPLY_AURA)
+                    {
+                        auto const auraName = effectInfo.ApplyAuraName;
+                        //! Validate aura effects if aura is not trigger aura
+                        //! if so then we want to check triggered spell instead
+                        if (auraName != SPELL_AURA_PROC_TRIGGER_SPELL &&
+                            auraName != SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE)
+                            foundValidEffect = ValidateAuraEffect(effectInfo.ApplyAuraName);
+
+                        //! if aura is still not valid but it has trigger spell
+                        if (!foundValidEffect && effectInfo.TriggerSpell)
+                        {
+                            SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(effectInfo.TriggerSpell);
+                            if (triggeredSpellInfo)
+                            {
+                                for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                                {
+                                    if (!triggeredSpellInfo->Effects[i].IsEffect())
+                                        continue;
+
+                                    bool const IsAuraApply = triggeredSpellInfo->Effects[i].Effect == SPELL_EFFECT_APPLY_AURA;
+                                    uint32 triggeredEffect = IsAuraApply ? triggeredSpellInfo->Effects[i].ApplyAuraName : triggeredSpellInfo->Effects[i].Effect;
+                                    foundValidEffect = IsAuraApply ? ValidateAuraEffect(triggeredEffect) : ValidateSpellEffect(triggeredEffect);
+
+                                    if (foundValidEffect)
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (foundValidEffect)
+                        break;
+                }
+
+                return foundValidEffect;
             }
 
             void Register()
