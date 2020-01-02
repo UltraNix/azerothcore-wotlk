@@ -15409,13 +15409,9 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                 active = true;
         }
 
-        //// xinef: fix spell procing from damaging / healing casts if spell has DoT / HoT effect only
-        //// only player spells are taken into account
-        //if (!active && !isVictim && !(procFlag & PROC_FLAG_DONE_PERIODIC) && procSpell && procSpell->SpellFamilyName && (procSpell->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || procSpell->HasAura(SPELL_AURA_PERIODIC_HEAL)))
-        //    active = true;
-        //! Riztazz: Changed this into all harmful spells that are not periodic, it didn't trigger auras when ie. proccing spell was faerie fire
-        if (!active && !isVictim && !(procFlag & PROC_FLAG_DONE_PERIODIC) && procSpell
-            && procSpell->SpellFamilyName && !procSpell->IsPositive() && procSpell->HasEffect(SPELL_EFFECT_APPLY_AURA))
+        // xinef: fix spell procing from damaging / healing casts if spell has DoT / HoT effect only
+        // only player spells are taken into account
+        if (!active && !isVictim && !(procFlag & PROC_FLAG_DONE_PERIODIC) && procSpell && procSpell->SpellFamilyName && (procSpell->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || procSpell->HasAura(SPELL_AURA_PERIODIC_HEAL)))
             active = true;
 
         if (!IsTriggeredAtSpellProcEvent(target, triggerData.aura, procSpell, procFlag, procExtra, procPhase, attType, isVictim, active, triggerData.spellProcEvent, eventInfo))
