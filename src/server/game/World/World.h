@@ -221,6 +221,7 @@ enum WorldBoolConfigs
     CONFIG_WINTERGRASP_AUTOSWITCH_ENABLE,
     CONFIG_NAXXRAMAS_MEETING_STONE_SANCTUARY,
     CONFIG_SARTHARION_BOOST,
+    CONFIG_BATTLEGROUNDS_SEPARATE_TWINK_QUEUES, // When enabled twinks will be put to separate battleground queues
     BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -945,7 +946,7 @@ class World
             std::unordered_map<std::string, time_t>> _accountHistoryStore;
 
         std::unordered_map<std::string /*ip*/,
-            //!              AccountId   DATE    
+            //!              AccountId   DATE
             std::unordered_map<uint32, time_t>> _ipHistoryStore;
 
         std::unordered_map<std::string, time_t> const& GetIpStoreFor(uint32 accId)

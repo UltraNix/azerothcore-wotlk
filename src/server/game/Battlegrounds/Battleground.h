@@ -371,6 +371,7 @@ class Battleground
         void SetLastResurrectTime(uint32 Time) { m_LastResurrectTime = Time; }
         void SetLevelRange(uint32 min, uint32 max) { m_LevelMin = min; m_LevelMax = max; }
         void SetRated(bool state)           { m_IsRated = state; }
+        void SetTwink(bool state)           { m_IsTwink = state; }
         void SetArenaType(uint8 type)       { m_ArenaType = type; }
         void SetArenaorBGType(bool _isArena) { m_IsArena = _isArena; }
         void SetWinner(TeamId winner)        { m_WinnerId = winner; }
@@ -403,6 +404,7 @@ class Battleground
         bool isArena() const        { return m_IsArena; }
         bool isBattleground() const { return !m_IsArena; }
         bool isRated() const        { return m_IsRated; }
+        bool isTwink() const        { return m_IsTwink;}
 
         typedef std::map<uint64, Player*> BattlegroundPlayerMap;
         BattlegroundPlayerMap const& GetPlayers() const { return m_Players; }
@@ -660,6 +662,7 @@ class Battleground
         TeamId  m_WinnerId;
         int32  m_StartDelayTime;
         bool   m_IsRated;                                   // is this battle rated?
+        bool   m_IsTwink;
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
         char const* m_Name;

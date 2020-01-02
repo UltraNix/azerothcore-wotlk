@@ -55,7 +55,13 @@ BattlegroundMgr::BattlegroundMgr() : m_ArenaTesting(false), m_Testing(false),
     m_lastClientVisibleInstanceId(0), m_NextAutoDistributionTime(0), m_NextPeriodicQueueUpdateTime(5*IN_MILLISECONDS), randomBgDifficultyEntry(999, 0, 80, 80, 0)
 {
     for (uint32 qtype = BATTLEGROUND_QUEUE_NONE; qtype < MAX_BATTLEGROUND_QUEUE_TYPES; ++qtype)
-        m_BattlegroundQueues[qtype].SetBgTypeIdAndArenaType(BGTemplateId(BattlegroundQueueTypeId(qtype)), BGArenaType(BattlegroundQueueTypeId(qtype)));
+    {
+        if(qtype <= BATTLEGROUND_QUEUE_5v5)
+            m_BattlegroundQueues[qtype].SetBgTypeIdAndArenaType(BGTemplateId(BattlegroundQueueTypeId(qtype)), BGArenaType(BattlegroundQueueTypeId(qtype)), false);
+        else
+            m_BattlegroundQueues[qtype].SetBgTypeIdAndArenaType(BGTemplateId(BattlegroundQueueTypeId(qtype - BATTLEGROUND_QUEUE_5v5)), BGArenaType(BattlegroundQueueTypeId(qtype)), true);
+
+    }
 }
 
 BattlegroundMgr::~BattlegroundMgr()
@@ -126,6 +132,13 @@ void BattlegroundMgr::Update(uint32 diff)
             for (uint32 qtype = BATTLEGROUND_QUEUE_AV; qtype <= BATTLEGROUND_QUEUE_5v5; ++qtype)
                 for (uint32 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
                     m_BattlegroundQueues[qtype].BattlegroundQueueUpdate(BattlegroundBracketId(bracket), action, false, 0);
+
+            // for twink battlegrounds
+            // in first loop try to fill already running battlegrounds, then in a second loop try to create new battlegrounds
+            for (uint8 action = 1; action <= 2; ++action)
+                for (uint32 qtype = BATTLEGROUND_QUEUE_AV_TWINK; qtype <= BATTLEGROUND_QUEUE_IC_TWINK; ++qtype)
+                    for (uint32 bracket = BG_BRACKET_ID_FIRST; bracket < MAX_BATTLEGROUND_BRACKETS; ++bracket)
+                        m_BattlegroundQueues[qtype].BattlegroundQueueUpdate(BattlegroundBracketId(bracket), action, false, 0);
 
         m_NextPeriodicQueueUpdateTime = 5*IN_MILLISECONDS;
     }
@@ -420,7 +433,7 @@ uint32 BattlegroundMgr::GetNextClientVisibleInstanceId()
 }
 
 // create a new battleground that will really be used to play
-Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, uint32 minLevel, uint32 maxLevel, uint8 arenaType, bool isRated)
+Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId, uint32 minLevel, uint32 maxLevel, uint8 arenaType, bool isRated, bool isTwink)
 {
     // pussywizard: random battleground is chosen before calling this function!
     ASSERT(bgTypeId != BATTLEGROUND_RB);
@@ -487,6 +500,7 @@ Battleground* BattlegroundMgr::CreateNewBattleground(BattlegroundTypeId bgTypeId
     bg->SetArenaType(arenaType);
     bg->SetBgTypeID(bgTypeId);
     bg->SetRated(isRated);
+    bg->SetTwink(isTwink);
 
     // Set up correct min/max player counts for scoreboards
     if (bg->isArena())
@@ -801,24 +815,26 @@ bool BattlegroundMgr::IsArenaType(BattlegroundTypeId bgTypeId)
             || bgTypeId == BATTLEGROUND_RL;
 }
 
-BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgTypeId, uint8 arenaType)
+BattlegroundQueueTypeId BattlegroundMgr::BGQueueTypeId(BattlegroundTypeId bgTypeId, uint8 arenaType, bool isTwink)
 {
+    if (!sWorld->getBoolConfig(CONFIG_BATTLEGROUNDS_SEPARATE_TWINK_QUEUES))
+        isTwink = false;
     switch (bgTypeId)
     {
         case BATTLEGROUND_AB:
-            return BATTLEGROUND_QUEUE_AB;
+            return (!isTwink) ? BATTLEGROUND_QUEUE_AB : BATTLEGROUND_QUEUE_AB_TWINK;
         case BATTLEGROUND_AV:
-            return BATTLEGROUND_QUEUE_AV;
+            return (!isTwink) ? BATTLEGROUND_QUEUE_AV : BATTLEGROUND_QUEUE_AV_TWINK;
         case BATTLEGROUND_EY:
-            return BATTLEGROUND_QUEUE_EY;
+            return (!isTwink) ? BATTLEGROUND_QUEUE_EY : BATTLEGROUND_QUEUE_EY_TWINK;
         case BATTLEGROUND_IC:
-            return BATTLEGROUND_QUEUE_IC;
+            return (!isTwink) ? BATTLEGROUND_QUEUE_IC : BATTLEGROUND_QUEUE_IC_TWINK;
         case BATTLEGROUND_RB:
             return BATTLEGROUND_QUEUE_RB;
         case BATTLEGROUND_SA:
-            return BATTLEGROUND_QUEUE_SA;
+            return (!isTwink) ? BATTLEGROUND_QUEUE_SA : BATTLEGROUND_QUEUE_SA_TWINK;
         case BATTLEGROUND_WS:
-            return BATTLEGROUND_QUEUE_WS;
+            return (!isTwink) ? BATTLEGROUND_QUEUE_WS : BATTLEGROUND_QUEUE_WS_TWINK;
         case BATTLEGROUND_AA:
         case BATTLEGROUND_BE:
         case BATTLEGROUND_DS:
@@ -1048,7 +1064,7 @@ void BattlegroundMgr::InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg, T
     // set invitation
     ginfo->IsInvitedToBGInstanceGUID = bg->GetInstanceID();
 
-    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(ginfo->BgTypeId, ginfo->ArenaType);
+    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(ginfo->BgTypeId, ginfo->ArenaType, ginfo->IsTwink);
     BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
 
     // set ArenaTeamId for rated matches
@@ -1073,7 +1089,7 @@ void BattlegroundMgr::InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg, T
         bg->IncreaseInvitedCount(ginfo->teamId);
 
         // create remind invite events
-        BGQueueInviteEvent* inviteEvent = new BGQueueInviteEvent(player->GetGUID(), ginfo->IsInvitedToBGInstanceGUID, ginfo->BgTypeId, ginfo->ArenaType, ginfo->RemoveInviteTime);
+        BGQueueInviteEvent* inviteEvent = new BGQueueInviteEvent(player->GetGUID(), ginfo->IsInvitedToBGInstanceGUID, ginfo->BgTypeId, ginfo->ArenaType, ginfo->RemoveInviteTime, ginfo->IsTwink);
         bgQueue.AddEvent(inviteEvent, INVITATION_REMIND_TIME);
         // create automatic remove events
         BGQueueRemoveEvent* removeEvent = new BGQueueRemoveEvent(player->GetGUID(), ginfo->IsInvitedToBGInstanceGUID, bgQueueTypeId, ginfo->RemoveInviteTime);

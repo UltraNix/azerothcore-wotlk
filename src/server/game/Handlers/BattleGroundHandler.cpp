@@ -95,8 +95,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
 
     // get queue typeid and random typeid to check if already queued for them
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
-    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, 0);
-    BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0);
+    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, 0, GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN));
+    BattlegroundQueueTypeId bgQueueTypeIdRandom = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_RB, 0, false);
 
     // safety check - bgQueueTypeId == BATTLEGROUND_QUEUE_NONE if tried to queue for arena using this function
     if (bgQueueTypeId == BATTLEGROUND_QUEUE_NONE)
@@ -183,7 +183,9 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
     // check if group can queue:
     else
     {
+
         Group* grp = _player->GetGroup();
+        bool isLeaderTwink = _player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN);
         // no group or not a leader
         if (!grp || grp->GetLeaderGUID() != _player->GetGUID())
             return;
@@ -193,8 +195,11 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
         for (uint32 i=0; i<PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
             leaderQueueTypeIds.insert((uint32)_player->GetBattlegroundQueueTypeId(i));
         for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
             if (Player* member = itr->GetSource())
+            {
                 for (uint32 i=0; i<PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
+                {
                     if (BattlegroundQueueTypeId mqtid = member->GetBattlegroundQueueTypeId(i))
                         if (leaderQueueTypeIds.count((uint32)mqtid) == 0)
                         {
@@ -211,6 +216,18 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket & recvData)
                             bgQueue.RemovePlayer(member->GetGUID(), false, i);
                             member->RemoveBattlegroundQueueId(mqtid);
                         }
+                }
+
+                if (err > 0)
+                {
+                    if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN) != isLeaderTwink)
+                    {
+                        err = ERR_BATTLEGROUND_NONE;
+                        ChatHandler(GetPlayer()->GetSession()).PSendSysMessage("One or more party members has %s exp gain.", isLeaderTwink ? "unlocked" : "locked");
+                    }
+                }
+            }
+        }
 
         if (_player->InBattlegroundQueueForBattlegroundQueueType(bgQueueTypeIdRandom)) // queued for random bg, so can't queue for anything else
             err = ERR_IN_RANDOM_BG;
@@ -372,7 +389,7 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket &recvData)
 
     // get BattlegroundQueue for received
     BattlegroundTypeId bgTypeId = BattlegroundTypeId(bgTypeId_);
-    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenaType);
+    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenaType, GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_NO_XP_GAIN));
     BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
 
     // get group info from queue
@@ -595,7 +612,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket & recvData)
     }
 
     BattlegroundTypeId bgTypeId = bgt->GetBgTypeID();
-    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenatype);
+    BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenatype, false);
 
     // expected bracket entry
     PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgt->GetMapId(), _player->getLevel());
