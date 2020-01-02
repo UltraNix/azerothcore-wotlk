@@ -35,7 +35,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
             std::unordered_map< uint64_t, size_t >  SpawnToIndex;
             std::vector<uint64>                     AllianceSpawns;
 
-            void Initialize() 
+            void Initialize()
             {
                 for (uint8 i = 0; i < MAX_BATTLING_AREAS; ++i)
                 {
@@ -63,7 +63,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                 AllianceSpawns.reserve( 200 );
             }
 
-            void OnCreatureCreate(Creature* creature) 
+            void OnCreatureCreate(Creature* creature)
             {
                 switch (creature->GetEntry())
                 {
@@ -94,7 +94,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                 }
             }
 
-            void OnUnitDeath(Unit* unit) 
+            void OnUnitDeath(Unit* unit)
             {
                 if (unit->GetTypeId() != TYPEID_UNIT)
                     return;
@@ -153,7 +153,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                     }
             }
 
-            void SetData(uint32 type, uint32 data) 
+            void SetData(uint32 type, uint32 data)
             {
                 switch (type)
                 {
@@ -234,7 +234,9 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                     case DATA_WAVES_TRIGGER:
                         return WaveTriggerGUID;
                     case DATA_GET_ENEMY:
-                        return Trinity::Containers::SelectRandomContainerElement(AllianceSpawns);
+                        if (!AllianceSpawns.empty())
+                            return Trinity::Containers::SelectRandomContainerElement(AllianceSpawns);
+                        // else return 0
                 }
 
                 return 0;
