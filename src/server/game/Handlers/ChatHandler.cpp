@@ -184,6 +184,28 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
     // LANG_ADDON should not be changed nor be affected by flood control
     else
     {
+        auto GetMessageLimitForType = [](uint32 type, Player* player) -> uint32
+        {
+            switch (type)
+            {
+#pragma message(CompileMessage "Move those values to config")
+                case CHAT_MSG_RAID:
+                case CHAT_MSG_RAID_LEADER:
+                case CHAT_MSG_RAID_WARNING:
+                    return 35;
+                case CHAT_MSG_GUILD:
+                case CHAT_MSG_OFFICER:
+                    return 150;
+                case CHAT_MSG_WHISPER:
+                    if (player->getLevel() >= 80)
+                        return 15;
+                default:
+                    return 0;
+            }
+
+            return 0;
+        };
+
         uint32 specialMessageLimit = 0;
         // send in universal language if player in .gmon mode (ignore spell effects)
         if (sender->IsGameMaster())
@@ -194,22 +216,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             {
                 case CHAT_MSG_PARTY:
                 case CHAT_MSG_PARTY_LEADER:
+                {
                     if (sWorld->getBoolConfig(CONFIG_CROSSFACTION_RDF))
                         if (sender->getLevel() >= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MINLVL) && sender->getLevel() <= sWorld->getIntConfig(CONFIG_CROSSFACTION_RDF_MAXLVL))
                             lang = LANG_UNIVERSAL;
                     break;
-                case CHAT_MSG_RAID:
-                case CHAT_MSG_RAID_LEADER:
-                case CHAT_MSG_RAID_WARNING:
-                    specialMessageLimit = 35;
-                    break;
-                case CHAT_MSG_GUILD:
-                case CHAT_MSG_OFFICER:
-                    specialMessageLimit = 15;
-                    break;
-                case CHAT_MSG_WHISPER:
-                    if (sender->getLevel() >= 80)
-                        specialMessageLimit = 15;
+                }
+                default:
                     break;
             }
 
@@ -220,7 +233,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
         }
 
         if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
-            sender->UpdateSpeakTime(specialMessageLimit);
+            sender->UpdateSpeakTime(GetMessageLimitForType(type, sender));
     }
 
     // pussywizard: optimization
