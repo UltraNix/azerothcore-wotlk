@@ -8,15 +8,16 @@ REWRITTEN BY XINEF
 #include "stratholme.h"
 #include "Player.h"
 #include "SpellAuras.h"
+#include "Group.h"
 
-const Position BlackGuardPos[10] = 
+const Position BlackGuardPos[10] =
 {
     {4032.73f+0.0f, -3378.26f+0.0f, 119.76f, 4.67f},
     {4032.73f+2.0f, -3378.26f+2.0f, 119.76f, 4.67f},
     {4032.73f+2.0f, -3378.26f-2.0f, 119.76f, 4.67f},
     {4032.73f-2.0f, -3378.26f+2.0f, 119.76f, 4.67f},
     {4032.73f-2.0f, -3378.26f-2.0f, 119.76f, 4.67f},
-    
+
     {4032.73f+0.0f, -3407.38f+0.0f, 115.56f, 0.0f},
     {4032.73f+2.0f, -3407.38f+2.0f, 115.56f, 0.0f},
     {4032.73f+2.0f, -3407.38f-2.0f, 115.56f, 0.0f},
@@ -54,6 +55,7 @@ class instance_stratholme : public InstanceMapScript
                 _gauntletGateGUID = 0;
                 _slaughterGateGUID = 0;
                 _baronRivendareGUID = 0;
+                _serviceEntranceGateGUID = 0;
 
                 events.Reset();
             }
@@ -63,6 +65,10 @@ class instance_stratholme : public InstanceMapScript
                 if (_baronRunTime > 0)
                     if (Aura* aura = player->AddAura(SPELL_BARON_ULTIMATUM, player))
                         aura->SetDuration(_baronRunTime*MINUTE*IN_MILLISECONDS);
+
+                if (Group* group = player->GetGroup())
+                    if (group->isLFGGroup())
+                        HandleGameObject(_serviceEntranceGateGUID, true);
             }
 
             void OnCreatureCreate(Creature* creature)
@@ -186,6 +192,9 @@ class instance_stratholme : public InstanceMapScript
                         if (_slaughterProgress >= 2)
                             go->SetGoState(GO_STATE_ACTIVE);
                         break;
+                    case GO_SERVICE_ENTRANCE_GATE:
+                        _serviceEntranceGateGUID = go->GetGUID();
+                        break;
                 }
             }
 
@@ -245,7 +254,7 @@ class instance_stratholme : public InstanceMapScript
                                 ziggurat->SetGoState(GO_STATE_ACTIVE);
 
                         CheckZiggurats();
-                        break;                        
+                        break;
                     }
                     case TYPE_ZIGGURAT3:
                     {
@@ -393,7 +402,7 @@ class instance_stratholme : public InstanceMapScript
                                         ProcessSlaughterEvent();
                                         return;
                                     }
-                            
+
                         events.ScheduleEvent(EVENT_FORCE_SLAUGHTER_EVENT, 3000);
                         break;
                     }
@@ -435,6 +444,7 @@ class instance_stratholme : public InstanceMapScript
             uint64 _slaughterGateGUID;
             uint64 _gauntletGateGUID;
             uint64 _baronRivendareGUID;
+            uint64 _serviceEntranceGateGUID;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const

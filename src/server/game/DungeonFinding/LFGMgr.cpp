@@ -1409,7 +1409,7 @@ void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& pl
             }
         }
     }
-    
+
     //! LFGDungeon contains two types of level brackets, one decides since when player can enter instance
     //! second one are brackets for random dungeon selection
     if (IsRandomType && sWorld->getBoolConfig(CONFIG_DUNGEON_FINDER_NEW_BRACKET_SYSTEM))

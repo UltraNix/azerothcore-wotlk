@@ -38,8 +38,9 @@ enum GameobjectIds
     GO_ZIGGURAT_DOORS5                  = 175796,  // baron
     GO_GAUNTLET_GATE                    = 175374,
     GO_SLAUGTHER_GATE                   = 175373,
-    GO_SLAUGHTER_GATE_SIDE                = 175358,
-    GO_EXIT_GATE                        = 176424
+    GO_SLAUGHTER_GATE_SIDE              = 175358,
+    GO_EXIT_GATE                        = 176424,
+    GO_SERVICE_ENTRANCE_GATE            = 175368,
 };
 
 enum MiscIds
