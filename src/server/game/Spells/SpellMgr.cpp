@@ -2921,7 +2921,8 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_MOD_STUN:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
 
-                    if ( spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC )
+                    //! Iceblock is self-stun with immunity, we dont want that to have fake delay as well
+                    if ( spellInfo->SpellFamilyName != SPELLFAMILY_GENERIC && spellInfo->Mechanic != MECHANIC_IMMUNE_SHIELD)
                         spellInfo->AttributesCu |= SPELL_ATTR0_CU_FAKE_DELAY;
 
                     break;
