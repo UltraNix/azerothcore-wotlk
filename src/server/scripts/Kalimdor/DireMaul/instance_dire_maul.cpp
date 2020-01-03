@@ -26,6 +26,7 @@ class instance_dire_maul : public InstanceMapScript
                 _northWingProgress = 0;
                 _northWingBosses = 0;
                 _immoltharGUID = 0;
+                _crescentDoorGuid = 0;
             }
 
             void OnCreatureCreate(Creature* creature)
