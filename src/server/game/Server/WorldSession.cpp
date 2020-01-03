@@ -1847,7 +1847,6 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case CMSG_OPT_OUT_OF_LOOT:
         case CMSG_BATTLEMASTER_JOIN_ARENA:
         case CMSG_LEAVE_BATTLEFIELD:
-        case CMSG_REPORT_PVP_AFK:
         case CMSG_DUEL_ACCEPTED:
         case CMSG_DUEL_CANCELLED:
         case CMSG_CALENDAR_GET_CALENDAR:
@@ -1893,6 +1892,12 @@ uint32 WorldSession::DosProtection::GetMaxPacketCounterAllowed(uint16 opcode) co
         case MSG_RAID_READY_CHECK:
         {
             maxPacketCounterAllowed = 3;
+            break;
+        }
+
+        case CMSG_REPORT_PVP_AFK:
+        {
+            maxPacketCounterAllowed = 10;
             break;
         }
 
