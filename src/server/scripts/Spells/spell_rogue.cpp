@@ -852,7 +852,6 @@ class spell_rog_vanish : public SpellScriptLoader
 
             void HandleAfterCast()
             {
-                PreventHitDamage();
                 GetCaster()->RemoveMovementImpairingAuras(true);
             }
 
