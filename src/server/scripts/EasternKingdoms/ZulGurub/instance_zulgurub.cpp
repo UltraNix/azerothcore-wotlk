@@ -36,6 +36,8 @@ DoorData const doorData[] =
     { 0,             0,           DOOR_TYPE_ROOM, BOUNDARY_NONE } // END
 };
 
+Position const RankaSpawnPosition{ -11735.989258f, -1797.229858f, -5.787302f, 1.004512f };
+
 class instance_zulgurub : public InstanceMapScript
 {
     public: instance_zulgurub(): InstanceMapScript(ZGScriptName, 309) { }
@@ -87,6 +89,15 @@ class instance_zulgurub : public InstanceMapScript
                     case NPC_ARLOKK:
                         _arlokkGUID = creature->GetGUID();
                         break;
+                }
+            }
+
+            void ProcessEvent(WorldObject* obj, uint32 eventId) override
+            {
+                if (eventId == GAHZ_RANKA_EVENT_ID)
+                {
+                    if (GetBossState(DATA_GAHZRANKA) == TO_BE_DECIDED)
+                        instance->SummonCreature(NPC_GAHZ_RANKA, RankaSpawnPosition, nullptr, 0U, nullptr, SPELL_GAHZ_RANKA_SUMMON);
                 }
             }
 

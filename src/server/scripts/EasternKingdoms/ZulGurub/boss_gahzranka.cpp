@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -41,17 +41,39 @@ enum Events
     EVENT_SLAM                      = 3
 };
 
+enum GahzMisc
+{
+    POINT_ID_GHAZ_END               = 3
+};
+
 class boss_gahzranka : public CreatureScript // gahzranka
 {
     public: boss_gahzranka() : CreatureScript("boss_gahzranka") { }
 
         struct boss_gahzrankaAI : public BossAI
         {
-            boss_gahzrankaAI(Creature* creature) : BossAI(creature, DATA_GAHZRANKA) { }
+            boss_gahzrankaAI(Creature* creature) : BossAI(creature, DATA_GAHZRANKA), _introFinished(false) { }
 
             void Reset()
             {
+                if (instance->GetBossState(DATA_GAHZRANKA) == DONE)
+                {
+                    me->DespawnOrUnsummon();
+                    return;
+                }
+
                 _Reset();
+                if (!_introFinished)
+                    me->GetMotionMaster()->MovePath(me->GetEntry() * 10, false);
+            }
+
+            void MovementInform(uint32 type, uint32 pointId) override
+            {
+                if (type != WAYPOINT_MOTION_TYPE)
+                    return;
+
+                if (pointId == POINT_ID_GHAZ_END)
+                    DoZoneInCombat(me, 100.f);
             }
 
             void JustDied(Unit* /*killer*/)
@@ -100,6 +122,8 @@ class boss_gahzranka : public CreatureScript // gahzranka
 
                 DoMeleeAttackIfReady();
             }
+        private:
+            bool _introFinished;
         };
 
         CreatureAI* GetAI(Creature* creature) const

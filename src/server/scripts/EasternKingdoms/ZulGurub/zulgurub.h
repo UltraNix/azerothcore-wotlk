@@ -60,7 +60,15 @@ enum CreatureIds
     NPC_EDGE_GRILEK         = 15082,
     NPC_EDGE_HAZZA          = 15083,
     NPC_EDGE_RENE           = 15084,
-    NPC_EDGE_WUSH           = 15085
+    NPC_EDGE_WUSH           = 15085,
+
+    NPC_GAHZ_RANKA          = 15114
+};
+
+enum ZgMisc
+{
+    GAHZ_RANKA_EVENT_ID     = 9104,
+    SPELL_GAHZ_RANKA_SUMMON = 24325
 };
 
 enum GameobjectIds
