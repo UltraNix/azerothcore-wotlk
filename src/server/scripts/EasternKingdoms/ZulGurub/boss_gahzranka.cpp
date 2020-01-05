@@ -132,7 +132,27 @@ class boss_gahzranka : public CreatureScript // gahzranka
         }
 };
 
+constexpr uint32 SPELL_PAGLE_POINT_SPLASH_AND_QUAKE{ 24593 };
+class spell_pagle_point_spawn_ghaz : public SpellScript
+{
+    PrepareSpellScript(spell_pagle_point_spawn_ghaz);
+
+    void HandleHit(SpellEffIndex /*effIndex*/)
+    {
+        //! This should spawn a barrel and after 2 seconds we should cast splash and quake
+        //! But i cannot find which barrel it is without sniffs
+        if (GetCaster())
+            GetCaster()->CastSpell(GetCaster(), SPELL_PAGLE_POINT_SPLASH_AND_QUAKE, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_pagle_point_spawn_ghaz::HandleHit, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_boss_gahzranka()
 {
+    new SpellScriptLoaderEx<spell_pagle_point_spawn_ghaz>("spell_pagle_point_spawn_ghaz");
     new boss_gahzranka();
 }

@@ -36,7 +36,7 @@ DoorData const doorData[] =
     { 0,             0,           DOOR_TYPE_ROOM, BOUNDARY_NONE } // END
 };
 
-Position const RankaSpawnPosition{ -11735.989258f, -1797.229858f, -5.787302f, 1.004512f };
+Position const RankaSpawnPosition{ -11676.006f, -1698.0500, 8.409842, 1.004512f };
 
 class instance_zulgurub : public InstanceMapScript
 {
@@ -59,6 +59,7 @@ class instance_zulgurub : public InstanceMapScript
                 _vilebranchSpeakerGUID = 0;
                 _arlokkGUID = 0;
                 _goGongOfBethekkGUID = 0;
+                _ghazRankaSpawned = false;
             }
 
             bool IsEncounterInProgress() const override
@@ -96,8 +97,18 @@ class instance_zulgurub : public InstanceMapScript
             {
                 if (eventId == GAHZ_RANKA_EVENT_ID)
                 {
-                    if (GetBossState(DATA_GAHZRANKA) == TO_BE_DECIDED)
-                        instance->SummonCreature(NPC_GAHZ_RANKA, RankaSpawnPosition, nullptr, 0U, nullptr, SPELL_GAHZ_RANKA_SUMMON);
+                    if (!_ghazRankaSpawned)
+                    {
+                        if (Creature* ghaz = instance->SummonCreature(NPC_GAHZ_RANKA, RankaSpawnPosition, nullptr, 0U, nullptr, SPELL_GAHZ_RANKA_SUMMON))
+                        {
+                            //! Bind all players instantly, proof: https://youtu.be/BNsf4SbHFo4?t=271
+                            Map* map = ghaz->GetMap();
+                            if (map)
+                                map->ToInstanceMap()->PermBindAllPlayers();
+                            _ghazRankaSpawned = true;
+                            SaveToDB();
+                        }
+                    }
                 }
             }
 
@@ -163,7 +174,7 @@ class instance_zulgurub : public InstanceMapScript
                 OUT_SAVE_INST_DATA;
 
                 std::ostringstream saveStream;
-                saveStream << "Z G " << GetBossSaveData();
+                saveStream << "Z G " << GetBossSaveData() << _ghazRankaSpawned;
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -194,6 +205,8 @@ class instance_zulgurub : public InstanceMapScript
                             tmpState = NOT_STARTED;
                         SetBossState(i, EncounterState(tmpState));
                     }
+
+                    loadStream >> _ghazRankaSpawned;
                 }
                 else
                     OUT_LOAD_INST_DATA_FAIL;
@@ -211,6 +224,7 @@ class instance_zulgurub : public InstanceMapScript
             uint64 _vilebranchSpeakerGUID;
             uint64 _arlokkGUID;
             uint64 _goGongOfBethekkGUID;
+            bool   _ghazRankaSpawned;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const
