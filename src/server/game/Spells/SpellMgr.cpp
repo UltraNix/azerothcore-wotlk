@@ -5079,6 +5079,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->SpellFamilyName = SPELLFAMILY_WARRIOR;
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             break;
+        // Retaliation damage
+        case 22858:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+            break;
 
         /////////////////////////////////
         ///// PRIEST
