@@ -524,7 +524,6 @@ public:
 
         void Reset()
         {
-            me->SetChainPullDisabled(true);
             me->SetNoCallAssistance(true);
             callHelp = true;
             events.Reset();

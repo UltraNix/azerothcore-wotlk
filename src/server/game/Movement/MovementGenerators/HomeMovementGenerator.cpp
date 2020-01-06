@@ -31,6 +31,7 @@ void HomeMovementGenerator<Creature>::DoInitialize(Creature* owner)
 void HomeMovementGenerator<Creature>::DoFinalize(Creature* owner)
 {
     owner->ClearUnitState(UNIT_STATE_EVADE);
+    owner->DisableChainPullFor(1000ms);
     if (arrived)
     {
         // Xinef: npc run by default

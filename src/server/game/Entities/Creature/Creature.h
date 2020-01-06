@@ -27,6 +27,7 @@
 #include "DatabaseEnv.h"
 #include "Cell.h"
 #include "Duration.h"
+#include "TaskScheduler.h"
 
 #include <list>
 
@@ -63,11 +64,10 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_AVOID_AOE            = 0x00400000,       // pussywizard: ignored by aoe attacks (for icc blood prince council npc - Dark Nucleus)
     CREATURE_FLAG_EXTRA_NO_DODGE             = 0x00800000,       // xinef: target cannot dodge
     CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ = 0x01000000,       // creature does not need to take player damage for kill credit
-    CREATURE_FLAG_EXTRA_DUNGEON_BOSS         = 0x10000000,   // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
-    CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING   = 0x20000000,   // creature ignore pathfinding
-    CREATURE_FLAG_USE_WAYPOINT_MMAP          = 0x40000000,    // forces creature to use MMAP & ForceDest in waypointMovementGenerator || TEMP - I dont want to enable movemaps and forceDest globally for now
-                                                            //                                                                         Last time i did that - stuff broke and we're releasing angrathar tomorrow
-    CREATURE_FLAG_EXTRA_NO_PICKPOCKET        = 0x80000000   // Piootrek: creature can't be pickpocketed
+    CREATURE_FLAG_EXTRA_DUNGEON_BOSS         = 0x10000000,       // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
+    CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING   = 0x20000000,       // creature ignore pathfinding
+    CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL   = 0x40000000,       // Creature wont use chain pull system at all
+    CREATURE_FLAG_EXTRA_NO_PICKPOCKET        = 0x80000000        // Piootrek: creature can't be pickpocketed
 };
 
 #define CREATURE_FLAG_EXTRA_DB_ALLOWED (CREATURE_FLAG_EXTRA_INSTANCE_BIND | CREATURE_FLAG_EXTRA_CIVILIAN | \
@@ -76,7 +76,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_TAUNT | CREATURE_FLAG_EXTRA_WORLDEVENT | CREATURE_FLAG_EXTRA_NO_CRIT | \
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
     CREATURE_FLAG_EXTRA_GUARD | CREATURE_FLAG_EXTRA_KNOCKBACK_IMMUNE | CREATURE_FLAG_EXTRA_AVOID_AOE | \
-    CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING | CREATURE_FLAG_USE_WAYPOINT_MMAP| CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ | CREATURE_FLAG_EXTRA_NO_PICKPOCKET)
+    CREATURE_FLAG_EXTRA_NO_DODGE | CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING | CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL | CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ | CREATURE_FLAG_EXTRA_NO_PICKPOCKET)
 
 
 constexpr uint32 MAX_AGGRO_RESET_TIME{ 10 }; // in seconds
@@ -638,7 +638,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         CreatureSpellCooldowns m_CreatureSpellCooldowns;
         uint32 m_ProhibitSchoolTime[7];
 
-        bool CanStartAttack(Unit const* u) const;
+        bool CanStartAttack(Unit const* u, bool dueToChainPull = false) const;
         float GetAttackDistance(Unit const* player) const;
         float GetAggroRange(Unit const* target) const;
 
@@ -717,12 +717,6 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         void SetCannotReachTarget(bool cannotReach);
         bool CanNotReachTarget() const { return m_cannotReachTarget; }
-        inline bool const CanChainPull() const
-        {
-            return sWorld->getBoolConfig(CONFIG_CHAIN_PULL_ENABLED) && IsInCombat() && !IsTrigger() && !IsInEvadeMode() && !HasUnitState(UNIT_STATE_LOST_CONTROL) && !m_isChainPullDisabled;
-        }
-        void SetChainPullDisabled(bool val) { m_isChainPullDisabled = val; }
-        void SetChainPullTimer(uint32 val) { m_chainPullTimer.Reset(val); }
 
         void SetPosition(float x, float y, float z, float o);
         void SetPosition(const Position &pos) { SetPosition(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()); }
@@ -808,6 +802,19 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         //! returns Creature that summoned us, otherwise nullptr
         Creature* GetSummoner() const;
 
+        inline bool HasExtraFlag(uint32 flag) const { return (GetCreatureTemplate()->flags_extra & flag) != 0; }
+
+        enum CreatureSchedulerGroups : uint32
+        {
+            SCHEDULER_GROUP_CHAIN_PULL = 0
+        };
+
+        //! Chain pulling
+        void ScheduleGroupChainPull();
+        void DoPullNearbyCreatures();
+        void DisableChainPullFor(std::chrono::milliseconds const /*ms*/);
+        bool CanBeChainPulled() const;
+
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = NULL);
         bool InitEntry(uint32 entry, const CreatureData* data=NULL);
@@ -845,9 +852,6 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         uint32 m_cannotReachTimer;
         bool m_AI_locked;
 
-        TimeTrackerSmall m_chainPullTimer;
-        bool m_isChainPullDisabled;
-
         SpellSchoolMask m_meleeDamageSchoolMask;
         uint32 m_originalEntry;
 
@@ -871,6 +875,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool IsInvisibleDueToDespawn() const;
         bool CanAlwaysSee(WorldObject const* obj) const;
 
+        bool m_chainPullEnabled;
     private:
         void ForcedDespawn(uint32 timeMSToDespawn = 0, uint32 forceRespawnTimer = 0);
 
@@ -890,6 +895,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
 
         uint32 _creatureCantMoveThreshold;
         float m_respawnRate;
+        //! Gets updated as long as creature is in world, current deathState DOESN'T matter
+        //! So write proper exit logic in your tasks or cancel task when required
+        TaskScheduler scheduler;
 };
 
 class AssistDelayEvent : public BasicEvent
@@ -916,6 +924,29 @@ class ForcedDespawnDelayEvent : public BasicEvent
     private:
         Creature& m_owner;
         uint32 m_respawnTimer;
+};
+
+class NearbyCreatureChainPullDo
+{
+public:
+    NearbyCreatureChainPullDo(Unit const* _me, Unit* _target, float _range) : caller(_me), attackTarget(_target), range(_range) { }
+    void operator()(Creature* creature);
+private:
+    Unit const* caller;
+    Unit* attackTarget;
+    float range;
+};
+
+class DelayedAttackStartEvent : public BasicEvent
+{
+public:
+    DelayedAttackStartEvent(uint64 const _targetGUID, Creature* owner) : attackTarget(_targetGUID), m_owner(owner) { }
+
+    bool Execute(uint64 eTime, uint32 pTime) override;
+
+private:
+    uint64 const attackTarget;
+    Creature* m_owner;
 };
 
 #endif

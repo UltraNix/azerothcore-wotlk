@@ -9715,7 +9715,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         AddThreat(victim, 0.0f);
 
         ToCreature()->SendAIReaction(AI_REACTION_HOSTILE);
-        ToCreature()->CallAssistance();
     }
 
     // delay offhand weapon attack to next attack time
@@ -12829,7 +12828,6 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
     {
         creature->m_targetsNotAcceptable.clear();
         creature->UpdateEnvironmentIfNeeded(2);
-        creature->SetChainPullTimer(200);
 
         // Set home position at place of engaging combat for escorted creatures
         if ((IsAIEnabled && creature->AI()->IsEscorted()) ||
@@ -12841,6 +12839,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, uint32 duration)
         {
             if (IsAIEnabled)
                 creature->AI()->EnterCombat(enemy);
+            creature->ScheduleGroupChainPull();
 
             if (creature->GetFormation())
                 creature->GetFormation()->MemberAttackStart(creature, enemy);

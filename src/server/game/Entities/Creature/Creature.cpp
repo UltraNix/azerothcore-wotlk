@@ -176,7 +176,7 @@ m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REAC
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_moveInLineOfSightDisabled(false), m_moveInLineOfSightStrictlyDisabled(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_originalEntry(0), m_homePosition(), _wasHitByPlayer(false), m_transportHomePosition(), m_creatureInfo(NULL), m_creatureData(NULL), m_waypointID(0), m_path_id(0), m_formation(NULL), _lastDamagedTime(0), m_inhabitType(INHABIT_ANYWHERE),
-m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_isChainPullDisabled(false), m_respawnRate(1.0f)
+m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_respawnRate(1.0f), m_chainPullEnabled(false)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -198,7 +198,7 @@ m_cannotReachTarget(false), m_cannotReachTimer(0), m_disableChangeAI(false), m_i
     _focusSpell = nullptr;
 
     _creatureCantMoveThreshold = sWorld->getIntConfig(CONFIG_LOG_CREATURE_CANT_REACH_THRESHOLD);
-    m_chainPullTimer.Reset(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER));
+    scheduler.ClearValidator();
 }
 
 Creature::~Creature()
@@ -562,6 +562,8 @@ void Creature::Update(uint32 diff)
             m_vehicleKit->Reset();
     }
 
+    scheduler.Update(diff);
+
     switch (m_deathState)
     {
         case JUST_RESPAWNED:
@@ -668,16 +670,6 @@ void Creature::Update(uint32 diff)
                     Regenerate(POWER_MANA);
 
                 m_regenTimer += CREATURE_REGEN_INTERVAL;
-            }
-
-            if (CanChainPull())
-            {
-                m_chainPullTimer.Update(diff);
-                if (m_chainPullTimer.Passed())
-                {
-                    CallForHelp(sWorld->getFloatConfig(CONFIG_CHAIN_PULL_RANGE));
-                    SetChainPullTimer(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER));
-                }
             }
 
             if (CanNotReachTarget() && !IsInEvadeMode())
@@ -995,6 +987,8 @@ bool Creature::Create(uint32 guidlow, Map* map, uint32 phaseMask, uint32 Entry, 
 
     if (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_IGNORE_PATHFINDING)
         AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+
+    m_chainPullEnabled = !HasExtraFlag(CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL);
 
     return true;
 }
@@ -1634,7 +1628,7 @@ bool Creature::CanAlwaysSee(WorldObject const* obj) const
     return false;
 }
 
-bool Creature::CanStartAttack(Unit const* who) const
+bool Creature::CanStartAttack(Unit const* who, bool dueToChainPull /*= false*/) const
 {
     if (IsCivilian())
         return false;
@@ -1666,7 +1660,7 @@ bool Creature::CanStartAttack(Unit const* who) const
             if (IsWithinDistInMap(victim, sWorld->getFloatConfig(CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS)))
                 assist = true;
 
-    if (!assist)
+    if (!assist && !dueToChainPull)
         if (IsNeutralToAll() || !IsWithinDistInMap(who, GetAggroRange(who) + m_CombatDistance)) // pussywizard: +m_combatDistance for turrets and similar
             return false;
 
@@ -3144,4 +3138,134 @@ Creature* Creature::GetSummoner() const
         return nullptr;
 
     return _uSummoner->ToCreature();
+}
+
+void Creature::ScheduleGroupChainPull()
+{
+    if (!sWorld->getBoolConfig(CONFIG_CHAIN_PULL_ENABLED))
+        return;
+
+    scheduler.CancelGroup(SCHEDULER_GROUP_CHAIN_PULL);
+    auto const scheduleTime = m_chainPullEnabled ? 500ms : 8000ms;
+    scheduler.Schedule(scheduleTime, [&](TaskContext func)
+    {
+        //! Do not repeat this task if anything fails
+        if (IsInCombat() && IsAlive() && !IsInEvadeMode() && !IsPet())
+        {
+            //! We can be in combat but lose victim or be temporarily charmed
+            //! schedule another chain pull, we might no longer be charmed/have victim again at that point
+            if (GetVictim() && !IsCharmed())
+                DoPullNearbyCreatures();
+
+            func.Repeat(std::chrono::milliseconds(sWorld->getIntConfig(CONFIG_CHAIN_PULL_TIMER)));
+        }
+    });
+}
+
+void Creature::DoPullNearbyCreatures()
+{
+    float const range = sWorld->getFloatConfig(CONFIG_CHAIN_PULL_RANGE);
+    NearbyCreatureChainPullDo puller(this, GetVictim(), range);
+    Trinity::CreatureWorker<NearbyCreatureChainPullDo> worker(this, puller);
+    VisitNearbyGridObject(range, worker);
+}
+
+void Creature::DisableChainPullFor(std::chrono::milliseconds const ms)
+{
+    m_chainPullEnabled = false;
+    scheduler.Schedule(ms, [&](TaskContext func)
+    {
+        if (!HasExtraFlag(CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL))
+            m_chainPullEnabled = true;
+    });
+}
+
+bool Creature::CanBeChainPulled() const
+{
+    if (HasExtraFlag(CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL))
+        return false;
+
+    if (isDead())
+        return false;
+
+    if (IsCivilian() || IsTrigger() || IsInEvadeMode() || HasUnitState(UNIT_STATE_LOST_CONTROL))
+        return false;
+
+    return true;
+}
+
+void NearbyCreatureChainPullDo::operator()(Creature* creature)
+{
+    if (creature == caller)
+        return;
+
+    if (!creature->CanAssistTo(caller, attackTarget, false))
+        return;
+
+    if (!creature->IsWithinDistInMap(caller, range))
+        return;
+
+    if (!creature->IsWithinLOSInMap(attackTarget))
+        return;
+
+    if (!creature->IsAIEnabled)
+        return;
+
+    if (!creature->CanBeChainPulled())
+        return;
+
+    //! already tracking/focusing/chasing something OR already pulled by chain pull
+    if (creature->GetUInt64Value(UNIT_FIELD_TARGET))
+        return;
+
+    auto _moveGen = IDLE_MOTION_TYPE;
+    if (auto mMaster = creature->GetMotionMaster())
+        _moveGen = mMaster->GetCurrentMovementGeneratorType();
+
+    //! if creature is idle then it faces target and then attacks after specified time
+    //! otherwise they attack instantly
+    switch (_moveGen)
+    {
+        case IDLE_MOTION_TYPE:
+        {
+            creature->DisableChainPullFor(8000ms);
+            creature->SetTarget(attackTarget->GetGUID());
+            creature->m_Events.AddEvent(new DelayedAttackStartEvent(attackTarget->GetGUID(), creature), creature->m_Events.CalculateTime(1500));
+            break;
+        }
+        case RANDOM_MOTION_TYPE:
+        case WAYPOINT_MOTION_TYPE:
+        case POINT_MOTION_TYPE:
+        {
+            creature->DisableChainPullFor(8000ms);
+            creature->AI()->AttackStart(attackTarget);
+            break;
+        }
+    }
+}
+
+bool DelayedAttackStartEvent::Execute(uint64 /*eTime*/, uint32 /*pTime*/)
+{
+    bool _canAttack = true;
+    bool const IsInCombat = m_owner->IsInCombat();
+    //! Inbetween call and execute something got us engaged
+    if (IsInCombat)
+        _canAttack = false;
+
+    Unit* target = ObjectAccessor::GetUnit(*m_owner, attackTarget);
+    if (!target)
+        _canAttack = false;
+
+    if (_canAttack && !m_owner->CanStartAttack(target, true))
+        _canAttack = false;
+
+    if (_canAttack)
+        m_owner->AI()->AttackStart(target);
+    else if (!IsInCombat)
+    {
+        m_owner->SetTarget(0);
+        m_owner->SetFacingTo(m_owner->GetHomePosition().GetOrientation());
+    } // else in combat, do nothing
+
+    return true;
 }
