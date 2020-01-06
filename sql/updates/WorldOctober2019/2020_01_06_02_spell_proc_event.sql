@@ -1,0 +1,1 @@
+UPDATE `spell_proc_event` SET `procFlags`=1258492 WHERE  `entry`=57351;
