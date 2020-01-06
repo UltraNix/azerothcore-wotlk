@@ -3196,6 +3196,16 @@ bool Creature::CanBeChainPulled() const
 
 void NearbyCreatureChainPullDo::operator()(Creature* creature)
 {
+    if (!creature->IsAIEnabled)
+        return;
+
+    //! already tracking/focusing/chasing something OR already pulled by chain pull
+    if (creature->GetUInt64Value(UNIT_FIELD_TARGET))
+        return;
+
+    if (!creature->CanBeChainPulled())
+        return;
+
     if (creature == caller)
         return;
 
@@ -3206,16 +3216,6 @@ void NearbyCreatureChainPullDo::operator()(Creature* creature)
         return;
 
     if (!creature->IsWithinLOSInMap(attackTarget))
-        return;
-
-    if (!creature->IsAIEnabled)
-        return;
-
-    if (!creature->CanBeChainPulled())
-        return;
-
-    //! already tracking/focusing/chasing something OR already pulled by chain pull
-    if (creature->GetUInt64Value(UNIT_FIELD_TARGET))
         return;
 
     auto _moveGen = IDLE_MOTION_TYPE;
