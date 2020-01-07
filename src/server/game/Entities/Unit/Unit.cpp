@@ -10386,7 +10386,7 @@ Unit* Unit::GetMeleeHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
         if (Unit* magnet = (*i)->GetBase()->GetCaster())
             if (_IsValidAttackTarget(magnet, spellInfo) && magnet->IsWithinLOSInMap(this)
                 && (!spellInfo || (spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK
-                && spellInfo->CheckTarget(this, magnet, false) == SPELL_CAST_OK)))
+                && spellInfo->CheckTarget(this, magnet, false, nullptr) == SPELL_CAST_OK)))
                 if (roll_chance_i((*i)->GetAmount()))
                 {
                     (*i)->GetBase()->DropCharge(AURA_REMOVE_BY_EXPIRE);
@@ -15675,8 +15675,13 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         // Remove charge (aura can be removed by triggers)
         // xinef: take into account attribute6 of proc spell
         if (prepare && useCharges && takeCharges)
+        {
             if (!procSpell || isVictim || !procSpell->HasAttribute(SPELL_ATTR6_DONT_CONSUME_CHARGES))
-                i->aura->DropCharge();
+            {
+                if (i->aura->GetSpellInfo() && !i->aura->GetSpellInfo()->HasAttribute(SPELL_ATTR1_CU_DONT_DROP_CHARGES_ON_PROC))
+                    i->aura->DropCharge();
+            }
+        }
 
         i->aura->CallScriptAfterProcHandlers(aurApp, eventInfo);
 

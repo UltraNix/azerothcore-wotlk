@@ -2254,7 +2254,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
             return;
         }
 
-        SpellCastResult res = m_spellInfo->CheckTarget(m_caster, target, implicit);
+        SpellCastResult res = m_spellInfo->CheckTarget(m_caster, target, implicit, m_spellValue);
         if (res != SPELL_CAST_OK)
             return;
     }
@@ -2650,7 +2650,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         unitTarget->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, m_spellInfo);
         m_healing = gain;
 
-        // Xinef: if heal acutally healed something, add no overheal flag
+        // Xinef: if heal actually healed something, add no overheal flag
         if (m_healing)
             procEx |= PROC_EX_NO_OVERHEAL;
 
@@ -5589,7 +5589,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if (Unit* target = m_targets.GetUnitTarget())
     {
-        SpellCastResult castResult = m_spellInfo->CheckTarget(m_caster, target, false);
+        SpellCastResult castResult = m_spellInfo->CheckTarget(m_caster, target, false, m_spellValue);
         if (castResult != SPELL_CAST_OK)
             return castResult;
 
@@ -8148,6 +8148,9 @@ void Spell::SetSpellValue(SpellValueMod mod, int32 value)
         case SPELLVALUE_CONE_ANGLE:
             m_spellValue->ConeAngle = float(value);
             break;
+        case SPELLVALUE_AURA_STATE:
+            m_spellValue->AuraState = AuraStateType(value);
+            break;
     }
 }
 
@@ -8608,7 +8611,7 @@ WorldObjectSpellTargetCheck::~WorldObjectSpellTargetCheck()
 
 bool WorldObjectSpellTargetCheck::operator()(WorldObject* target)
 {
-    if (_spellInfo->CheckTarget(_caster, target, true) != SPELL_CAST_OK)
+    if (_spellInfo->CheckTarget(_caster, target, true, nullptr) != SPELL_CAST_OK)
         return false;
     Unit* unitTarget = target->ToUnit();
     if (Corpse* corpseTarget = target->ToCorpse())

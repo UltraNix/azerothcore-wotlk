@@ -1780,7 +1780,7 @@ bool SpellInfo::ValidateAttribute6SpellDamageMods(const Unit* caster, const Aura
     return !isDot && auraEffect && (auraEffect->GetAmount() < 0 || (auraEffect->GetCasterGUID() == caster->GetGUID() && auraEffect->GetSpellInfo()->SpellFamilyName == SpellFamilyName)) && !auraEffect->GetBase()->GetCastItemGUID();
 }
 
-SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* target, bool implicit) const
+SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* target, bool implicit, SpellValue const* val) const
 {
     if (AttributesEx & SPELL_ATTR1_CANT_TARGET_SELF && caster == target)
         return SPELL_FAILED_BAD_TARGETS;
@@ -1912,7 +1912,10 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
     if (!caster->IsVehicle() && !(caster->GetCharmerOrOwner() == target))
     {
         if (TargetAuraState && !unitTarget->HasAuraState(AuraStateType(TargetAuraState), this, caster))
-            return SPELL_FAILED_TARGET_AURASTATE;
+        {
+            if (!val || (val->AuraState != AuraStateType(TargetAuraState)))
+                return SPELL_FAILED_TARGET_AURASTATE;
+        }
 
         if (TargetAuraStateNot && unitTarget->HasAuraState(AuraStateType(TargetAuraStateNot), this, caster))
             return SPELL_FAILED_TARGET_AURASTATE;

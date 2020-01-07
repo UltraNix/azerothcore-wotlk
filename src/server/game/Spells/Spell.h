@@ -210,6 +210,7 @@ struct SpellValue
     bool      ShareDamage; // damage is divided by player hit count
     uint32    CastTime;
     float     ConeAngle;
+    AuraStateType AuraState = AURA_STATE_NONE; //! Treat as if aura state is present even tho it isnt
 };
 
 enum SpellState

@@ -3758,6 +3758,11 @@ void SpellMgr::LoadSpellCustomAttr()
             }
         });
 
+        ApplySpellFix({ 52437 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_DROP_CHARGES_ON_PROC;
+        });
+
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
@@ -5046,9 +5051,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64380:
         case 65941:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
-            break;
-        case 20662: // Rank 5 - fix Sudden Death proc
-            spellInfo->AttributesEx3 &= ~(SPELL_ATTR3_CANT_TRIGGER_PROC);
             break;
         // Execute/Slam
         // This should never miss/dodge/parry (this is dummy spell)

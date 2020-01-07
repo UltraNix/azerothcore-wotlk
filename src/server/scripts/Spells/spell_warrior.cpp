@@ -38,44 +38,45 @@ enum WarriorSpells
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2       = 26654,
 
     // Theirs
-    SPELL_WARRIOR_BLOODTHIRST                       = 23885,
-    SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
-    SPELL_WARRIOR_CHARGE                            = 34846,
-    SPELL_WARRIOR_DAMAGE_SHIELD_DAMAGE              = 59653,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_1                = 12162,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_2                = 12850,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_3                = 12868,
-    SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC         = 12721,
-    SPELL_WARRIOR_EXECUTE                           = 20647,
-    SPELL_WARRIOR_GLYPH_OF_EXECUTION                = 58367,
-    SPELL_WARRIOR_GLYPH_OF_VIGILANCE                = 63326,
-    SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF        = 65156,
-    SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT      = 64976,
-    SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976,
-    SPELL_WARRIOR_RETALIATION_DAMAGE                = 22858,
-    SPELL_WARRIOR_SLAM                              = 50783,
-    SPELL_WARRIOR_SUNDER_ARMOR                      = 58567,
-    SPELL_WARRIOR_TAUNT                             = 355,
-    SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_1        = 46859,
-    SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_2        = 46860,
-    SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_1     = 64849,
-    SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2     = 64850,
-    SPELL_WARRIOR_VICTORY_RUSH                      = 34428,
-    SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
-    SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665
+    SPELL_WARRIOR_BLOODTHIRST                           = 23885,
+    SPELL_WARRIOR_BLOODTHIRST_DAMAGE                    = 23881,
+    SPELL_WARRIOR_CHARGE                                = 34846,
+    SPELL_WARRIOR_DAMAGE_SHIELD_DAMAGE                  = 59653,
+    SPELL_WARRIOR_DEEP_WOUNDS_RANK_1                    = 12162,
+    SPELL_WARRIOR_DEEP_WOUNDS_RANK_2                    = 12850,
+    SPELL_WARRIOR_DEEP_WOUNDS_RANK_3                    = 12868,
+    SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC             = 12721,
+    SPELL_WARRIOR_EXECUTE                               = 20647,
+    SPELL_WARRIOR_GLYPH_OF_EXECUTION                    = 58367,
+    SPELL_WARRIOR_GLYPH_OF_VIGILANCE                    = 63326,
+    SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF            = 65156,
+    SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_TALENT          = 64976,
+    SPELL_WARRIOR_LAST_STAND_TRIGGERED                  = 12976,
+    SPELL_WARRIOR_RETALIATION_DAMAGE                    = 22858,
+    SPELL_WARRIOR_SLAM                                  = 50783,
+    SPELL_WARRIOR_SUNDER_ARMOR                          = 58567,
+    SPELL_WARRIOR_TAUNT                                 = 355,
+    SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_1            = 46859,
+    SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_2            = 46860,
+    SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_1         = 64849,
+    SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2         = 64850,
+    SPELL_WARRIOR_VICTORY_RUSH                          = 34428,
+    SPELL_WARRIOR_VIGILANCE_PROC                        = 50725,
+    SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT             = 59665
 };
 
 enum WarriorSpellIcons
 {
-    WARRIOR_ICON_ID_SUDDEN_DEATH                    = 1989
+    WARRIOR_ICON_ID_SUDDEN_DEATH                        = 1989
 };
 
 enum MiscSpells
 {
-    SPELL_PALADIN_BLESSING_OF_SANCTUARY             = 20911,
-    SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
-    SPELL_PRIEST_RENEWED_HOPE                       = 63944,
-    SPELL_GEN_DAMAGE_REDUCTION_AURA                 = 68066,
+    SPELL_PALADIN_BLESSING_OF_SANCTUARY                 = 20911,
+    SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY         = 25899,
+    SPELL_PRIEST_RENEWED_HOPE                           = 63944,
+    SPELL_GEN_DAMAGE_REDUCTION_AURA                     = 68066,
+    SPELL_WARRIOR_SUDDEN_DEATH_IGNORE_AURA_STATE        = 52437
 };
 
 // Ours
@@ -547,7 +548,16 @@ class spell_warr_execute : public SpellScriptLoader
                     AddPct(dmgMod, biggestAmount);
                     int32 bpWithoutMods = GetEffectValue() + int32(rageUsed * spellInfo->Effects[effIndex].DamageMultiplier + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
                     int32 finalBp = bpWithoutMods * dmgMod;
-                    caster->CastCustomSpell(target, SPELL_WARRIOR_EXECUTE, &finalBp, NULL, NULL, true, NULL, NULL, GetOriginalCaster()->GetGUID());
+                    CustomSpellValues val;
+                    val.AddSpellMod(SPELLVALUE_BASE_POINT0, finalBp);
+
+                    if (caster->HasAura(SPELL_WARRIOR_SUDDEN_DEATH_IGNORE_AURA_STATE))
+                    {
+                        val.AddSpellMod(SPELLVALUE_AURA_STATE, AuraStateType(AURA_STATE_HEALTHLESS_20_PERCENT));
+                        caster->RemoveAurasDueToSpell(SPELL_WARRIOR_SUDDEN_DEATH_IGNORE_AURA_STATE);
+                    }
+
+                    caster->CastCustomSpell(SPELL_WARRIOR_EXECUTE, val, target, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_DISALLOW_PROC_EVENTS), NullItemRef, (const AuraEffect*)nullptr, GetOriginalCaster()->GetGUID());
                 }
             }
 
@@ -869,7 +879,7 @@ class spell_warr_sweeping_strikes_AuraScript : public AuraScript
                             levelModifier = levelModifier + (4.5f * (levelModifier - 59));
                         float tempValue = 0.1f * armorDiff2 / (8.5f * levelModifier + 40);
                         tempValue = tempValue / (1.0f + tempValue);
-                        
+
                         if (tempValue < 0.f)
                             tempValue = 0.f;
 

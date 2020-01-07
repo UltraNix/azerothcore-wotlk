@@ -214,6 +214,7 @@ enum SpellCustomAttributes1 : uint32
     SPELL_ATTR1_CU_MAINTAIN_MOMENTUM_ON_AURA_REMOVE = 0x00000002,
     SPELL_ATTR1_CU_DONT_CHANGE_CURRENT_HP_VALUE     = 0x00000004,
     SPELL_ATTR1_CU_ALLOW_CRIT_ON_NORMAL_MAGIC       = 0x00000008, // Allows spells with SPELL_SCHOOL_MASK_NORMAL SpellSchoolMask and SPELL_DAMAGE_CLASS_MAGIC DamageClass to crit
+    SPELL_ATTR1_CU_DONT_DROP_CHARGES_ON_PROC        = 0x00000010  // Disables charge drop on aura proc - allows us to keep aura active and remove said charge elsewhere
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
@@ -482,7 +483,7 @@ public:
 
     SpellCastResult CheckShapeshift(uint32 form) const;
     SpellCastResult CheckLocation(uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = NULL) const;
-    SpellCastResult CheckTarget(Unit const* caster, WorldObject const* target, bool implicit = true) const;
+    SpellCastResult CheckTarget(Unit const* caster, WorldObject const* target, bool implicit, SpellValue const* val) const;
     SpellCastResult CheckExplicitTarget(Unit const* caster, WorldObject const* target, ItemRef const& itemTarget = NULL) const;
     bool CheckTargetCreatureType(Unit const* target) const;
     //! Gets called in AddUnitTarget, just before aura is applied to target
