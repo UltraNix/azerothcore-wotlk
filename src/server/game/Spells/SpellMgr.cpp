@@ -5970,6 +5970,12 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
+        case 56272: // Malygos arcane breath
+        case 56279: // Malygos arcane breath
+        case 60072: // Malygos arcane breath
+        case 61079: // Malygos arcane breath
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_PLAYERS;
+            break;
 
         //////////////////////////////////////////
         ////////// ULDUAR
