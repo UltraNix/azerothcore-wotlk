@@ -36,6 +36,7 @@
 #include "Vehicle.h"
 #include "World.h"
 #include "WorldPacket.h"
+#include "Profiler.h"
 
 #include <cmath>
 
@@ -391,6 +392,8 @@ Corpse* ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid, bool insignia
 
 void ObjectAccessor::RemoveOldCorpses()
 {
+    PROFILE_SCOPE( "ObjectAccessor::RemoveOldCorpses" );
+
     time_t now = time(nullptr);
     Player2CorpsesMapType::iterator next;
     for (Player2CorpsesMapType::iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); itr = next)
@@ -491,6 +494,8 @@ void ObjectAccessor::Update(uint32 /*diff*/)
 
 void Map::BuildAndSendUpdateForObjects()
 { 
+    PROFILE_SCOPE( "Map::BuildAndSendUpdateForObjects" );
+
     UpdateDataMapType update_players;
     UpdatePlayerSet player_set;
 

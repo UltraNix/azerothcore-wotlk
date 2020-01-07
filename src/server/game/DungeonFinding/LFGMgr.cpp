@@ -35,6 +35,7 @@
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Transmogrification.h"
+#include "Profiler.h"
 
 namespace lfg
 {
@@ -265,6 +266,7 @@ void LFGMgr::LoadLFGDungeons(bool reload /* = false */)
 
 void LFGMgr::Update(uint32 tdiff, uint8 task)
 {
+    PROFILE_SCOPE( "LFGMgr::Update" );
     if (!isOptionEnabled(LFG_OPTION_ENABLE_DUNGEON_FINDER | LFG_OPTION_ENABLE_RAID_BROWSER))
         return;
 

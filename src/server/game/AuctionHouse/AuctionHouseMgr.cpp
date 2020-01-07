@@ -33,6 +33,7 @@
 #include <vector>
 #include "AvgDiffTracker.h"
 #include "AsyncAuctionListing.h"
+#include "Profiler.h"
 
 enum eAuctionHouse
 {
@@ -373,6 +374,8 @@ bool AuctionHouseMgr::RemoveAItem(AuctionEntry* entry, bool deleteFromDB)
 
 void AuctionHouseMgr::Update()
 {
+    PROFILE_SCOPE( "AuctionHouseMgr::Update" );
+
     mHordeAuctions.Update();
     mAllianceAuctions.Update();
     mNeutralAuctions.Update();

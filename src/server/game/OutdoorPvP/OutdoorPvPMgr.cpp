@@ -20,6 +20,7 @@
 #include "Player.h"
 #include "DisableMgr.h"
 #include "ScriptMgr.h"
+#include "Profiler.h"
 
 OutdoorPvPMgr::OutdoorPvPMgr()
 {
@@ -159,6 +160,8 @@ OutdoorPvP* OutdoorPvPMgr::GetOutdoorPvPToZoneId(uint32 zoneid)
 
 void OutdoorPvPMgr::Update(uint32 diff)
 {
+    PROFILE_SCOPE( "OutdoorPvPMgr::Update" );
+
     m_UpdateTimer += diff;
     if (m_UpdateTimer > OUTDOORPVP_OBJECTIVE_UPDATE_INTERVAL)
     {

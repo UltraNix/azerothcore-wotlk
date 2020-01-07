@@ -88,8 +88,9 @@ add_library(shared STATIC
   ${shared_STAT_PCH_SRC}
 )
 
-target_link_libraries(shared
+target_link_libraries(shared PUBLIC
   ${ACE_LIBRARY}
+  easy_profiler
 )
 
 # Generate precompiled header

@@ -20,6 +20,7 @@
 #include "Zones/BattlefieldWG.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Profiler.h"
 
 BattlefieldMgr::BattlefieldMgr()
 {
@@ -122,6 +123,8 @@ Battlefield *BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleid)
 
 void BattlefieldMgr::Update(uint32 diff)
 {
+    PROFILE_SCOPE( "BattlefieldMgr::Update" );
+
     m_UpdateTimer += diff;
     if (m_UpdateTimer > BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL)
     {

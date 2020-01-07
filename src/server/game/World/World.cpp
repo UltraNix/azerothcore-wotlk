@@ -97,6 +97,7 @@
 #include "WorldRelay/WorldRelay.hpp"
 #include "fmt/format.h"
 #include "ThreadedAuthHandler.hpp"
+#include "Profiler.h"
 
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_stopEvent = false;
 ACE_Atomic_Op<ACE_Thread_Mutex, bool> World::m_isReady = false;
@@ -2240,6 +2241,8 @@ void World::LoadIp2nation()
 /// Update the World !
 void World::Update(uint32 diff)
 {
+    PROFILE_SCOPE( "World::Update" );
+
     m_updateTime = diff;
 
     if (m_int_configs[CONFIG_INTERVAL_LOG_UPDATE])
@@ -3079,6 +3082,7 @@ void World::SendServerMessage(ServerMessageType type, const char *text, Player* 
 
 void World::UpdateSessions(uint32 diff)
 {
+    PROFILE_SCOPE( "World::UpdateSessions" );
     if ( m_timers[ WUPDATE_COLLECTSESSIONS ].Passed() )
     {
         m_timers[ WUPDATE_COLLECTSESSIONS ].Reset();

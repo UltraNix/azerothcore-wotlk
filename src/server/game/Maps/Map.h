@@ -517,6 +517,9 @@ class Map : public GridRefManager<NGridType>
         TransportsContainer const& GetAllTransports() const { return _transports; }
 
     private:
+        void UpdateTransports( uint32 t_diff );
+        void UpdateSessions( uint32 s_diff );
+
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
         void LoadMap(int gx, int gy, bool reload = false);

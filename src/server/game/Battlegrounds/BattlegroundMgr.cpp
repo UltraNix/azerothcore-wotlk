@@ -46,6 +46,7 @@
 #include "DisableMgr.h"
 #include "Opcodes.h"
 #include "BattlegroundQueue.h"
+#include "Profiler.h"
 
 /*********************************************************/
 /***            BATTLEGROUND MANAGER                   ***/
@@ -83,6 +84,8 @@ void BattlegroundMgr::DeleteAllBattlegrounds()
 // used to update running battlegrounds, and delete finished ones
 void BattlegroundMgr::Update(uint32 diff)
 {
+    PROFILE_SCOPE( "BattlegroundMgr::Update" );
+
     // update all battlegrounds and delete if needed
     for (BattlegroundContainer::iterator itr = m_Battlegrounds.begin(), itrDelete; itr != m_Battlegrounds.end(); )
     {

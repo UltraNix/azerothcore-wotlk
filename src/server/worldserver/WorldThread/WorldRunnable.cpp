@@ -39,6 +39,7 @@
 extern int m_ServiceStatus;
 #endif
 #include "Config.h"
+#include "Profiler.h"
 
 /// Heartbeat for the World
 void WorldRunnable::run()
@@ -53,6 +54,8 @@ void WorldRunnable::run()
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
     {
+        PROFILE_SCOPE( "WorldRunnable" );
+
         ++World::m_worldLoopCounter;
         realCurrTime = getMSTime();
 

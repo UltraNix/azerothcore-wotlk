@@ -40,6 +40,7 @@
 #include "Chat.h"
 #include "AvgDiffTracker.h"
 #include "AchievementMgr.h"
+#include "Profiler.h"
 
 MapManager::MapManager()
 {
@@ -239,6 +240,8 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
 
 void MapManager::Update(uint32 diff)
 {
+    PROFILE_SCOPE( "MapManager::Update" );
+
     for (uint8 i=0; i<4; ++i)
         i_timer[i].Update(diff);
 
