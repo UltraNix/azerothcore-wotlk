@@ -83,8 +83,16 @@ public:
                     _talonKingsCofferGUID = go->GetGUID();
                     break;
                 case GO_RAVENS_CLAW:
+                {
                     _ravenClawGUID = go->GetGUID();
+                    if (AnzuEncounter == DONE)
+                    {
+                        go->SetRespawnTime(DAY);
+                        go->SetLootState(GO_JUST_DEACTIVATED);
+                        go->SetPhaseMask(2, false);
+                    }
                     break;
+                }
                 case GO_MOONSTONE:
                     _moonstoneGUID = go->GetGUID();
                     break;

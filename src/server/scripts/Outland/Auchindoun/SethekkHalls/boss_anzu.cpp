@@ -294,6 +294,11 @@ struct boss_anzuAI : public BossAI
         }
     }
 
+    void JustDied(Unit* /*killer*/) override
+    {
+        instance->SetData(TYPE_ANZU_ENCOUNTER, DONE);
+    }
+
 private:
     std::array<bool, 2> _banishStages;
     bool _introDone;
