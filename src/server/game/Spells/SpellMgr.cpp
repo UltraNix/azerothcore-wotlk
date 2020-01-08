@@ -4069,7 +4069,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 57994: // Wind Shear - improper data for EFFECT_1 in 3.3.5 DBC, but is correct in 4.x
             spellInfo->Effect[EFFECT_1] = SPELL_EFFECT_MODIFY_THREAT_PERCENT;
             spellInfo->EffectBasePoints[EFFECT_1] = -6; // -5%
-            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             break;
         case 63675: // Improved Devouring Plague
             spellInfo->EffectBonusMultiplier[0] = 0;
