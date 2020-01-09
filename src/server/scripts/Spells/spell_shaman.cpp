@@ -1379,9 +1379,26 @@ class spell_sha_thunderstorm : public SpellScriptLoader
                     PreventHitDefaultEffect(effIndex);
             }
 
+            SpellCastResult CheckCast()
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    for (auto const& aura : caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN))
+                    {
+                        uint32 mechanicMask = aura->GetSpellInfo()->GetAllEffectsMechanicMask();
+                        if (mechanicMask && (mechanicMask & ( 1 << MECHANIC_SAPPED )))
+                        {
+                            return SPELL_FAILED_STUNNED;
+                        }
+                    }
+                }
+                return SPELL_CAST_OK;
+            }
+
             void Register()
             {
                 OnEffectHitTarget += SpellEffectFn(spell_sha_thunderstorm_SpellScript::HandleKnockBack, EFFECT_2, SPELL_EFFECT_KNOCK_BACK);
+                OnCheckCast += SpellCheckCastFn(spell_sha_thunderstorm_SpellScript::CheckCast);
             }
         };
 
