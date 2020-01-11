@@ -2125,6 +2125,7 @@ public:
                 if (CreatureTemplate const* cinfo = me->GetCreatureTemplate())
                     me->SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
             }
+            me->SetSpeedRate(MOVE_RUN, 1.14f);
         }
 
         void UpdateEscortAI(uint32 const diff) override
@@ -2179,6 +2180,7 @@ public:
             Player* player = GetPlayerForEscort();
             if (!player)
                 return;
+
             if (waypointId == 5)
             {
                 missleTimer[0] = urand(4000, 8000);
@@ -2197,6 +2199,7 @@ public:
                 break;
             case 5:
                 me->SetSpeedRate(MOVE_FLIGHT, 3.5f);
+                me->SetSpeedRate(MOVE_RUN, 3.5f);
                 break;
             case 43:
                 me->SetSpeedRate(MOVE_RUN, 1.0f);
