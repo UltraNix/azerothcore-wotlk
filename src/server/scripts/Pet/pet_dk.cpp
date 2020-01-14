@@ -358,26 +358,135 @@ class npc_pet_dk_ghoul : public CreatureScript
         }
 };
 
-class npc_pet_dk_army_of_the_dead : public CreatureScript
+enum ArmyOfTheDeadSpells
 {
-    public:
-        npc_pet_dk_army_of_the_dead() : CreatureScript("npc_pet_dk_army_of_the_dead") { }
+    SPELL_ARMY_OF_THE_DEAD_CLAW         = 47468,
+    SPELL_ARMY_OF_THE_DEAD_LEAP         = 47482,
+    NPC_DK_RISEN_GHOUL                  = 26125,
+    DATA_AOTD_CLAW_ENERGY_COST          = 40,
+    DATA_AOTD_LEAP_ENERGY_COST          = 10
+};
 
-        struct npc_pet_dk_army_of_the_deadAI : public CombatAI
+struct npc_pet_dk_army_of_the_dead : public ScriptedAI
+{
+    npc_pet_dk_army_of_the_dead(Creature* creature) : ScriptedAI(creature) { }
+
+    void InitializeAI() override
+    {
+        scheduler.CancelAll();
+        scheduler.SetValidator([this]
         {
-            npc_pet_dk_army_of_the_deadAI(Creature* creature) : CombatAI(creature) { }
+            Unit* owner = me->GetOwner();
+            return owner && owner->ToPlayer();
+        });
 
-            void InitializeAI()
+        ownerFollowAngle = rand_norm() * 2.f * M_PI;
+
+        scheduler.Schedule(1s, [&](TaskContext func)
+        {
+            HandleCheckTarget();
+            func.Repeat(2s);
+        });
+
+        scheduler.Schedule(1s, [&](TaskContext func)
+        {
+            //! Save a little bit of energy for leap
+            if (me->GetPower(POWER_ENERGY) >= DATA_AOTD_CLAW_ENERGY_COST + DATA_AOTD_LEAP_ENERGY_COST && me->GetVictim())
+                DoCastVictim(SPELL_ARMY_OF_THE_DEAD_CLAW, true);
+
+            func.Repeat(2s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        scheduler.Update(diff);
+
+        ScriptedAI::UpdateAI(diff);
+    }
+
+    void AttackStart(Unit* /*who*/) override { }
+    void AttackStartAotd(Unit* who)
+    {
+        if (who)
+        {
+            me->GetMotionMaster()->Clear(false);
+            ScriptedAI::AttackStart(who);
+
+            scheduler.Schedule(1ms, [&](TaskContext func)
             {
-                CombatAI::InitializeAI();
-                ((Minion*)me)->SetFollowAngle(rand_norm()*2*M_PI);
-            }
-        };
+                Unit* victim = me->GetVictim();
+                if (victim)
+                {
+                    float distanceToVictim = me->GetDistance(victim);
+                    //! Only repeat this task if we're still walking to victim
+                    if (distanceToVictim >= 6.f)
+                    {
+                        if (distanceToVictim <= DoGetSpellMaxRange(SPELL_ARMY_OF_THE_DEAD_LEAP) /*&& !me->HasSpellCooldown(SPELL_ARMY_OF_THE_DEAD_LEAP)*/)
+                        {
+                            DoCastVictim(SPELL_ARMY_OF_THE_DEAD_LEAP, true);
+                            //me->AddSpellCooldown(SPELL_ARMY_OF_THE_DEAD_LEAP, 0, 20000);
+                        }
 
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new npc_pet_dk_army_of_the_deadAI (creature);
+                        func.Repeat(100s);
+                    }
+                }
+            });
         }
+    }
+
+    void HandleCheckTarget()
+    {
+        Unit* owner = me->GetOwner();
+        if (!owner)
+            return;
+
+        if (!owner->IsPlayer())
+            return;
+
+        //! First we're trying to get victim off of ghoul
+        //! if ghoul is present and attacking then we want to attack the same target
+        //! otherwise try to get a victim off of unit player is currently attacking
+        //! if owner is not attacking but we were commanded to attack something previously
+        //! we keep attacking that target
+        Unit* victimToAttack = me->GetVictim();
+        Unit* ghoul = ObjectAccessor::GetUnit(*me, owner->GetPetGUID());
+
+        if (ghoul && ghoul->GetVictim())
+        {
+            Unit* currentGhoulVictim = ghoul->GetVictim();
+            if (victimToAttack != currentGhoulVictim)
+                victimToAttack = currentGhoulVictim;
+        }
+        else
+        {
+            Unit* playerSelectedVictim = owner->ToPlayer()->GetSelectedUnit();
+            if (playerSelectedVictim && playerSelectedVictim->IsInCombatWith(owner) && victimToAttack != playerSelectedVictim)
+                victimToAttack = playerSelectedVictim;
+            else
+                victimToAttack = nullptr;
+        }
+
+        //! Only switch targets if we're actually forced to switch targets
+        bool const IsDifferentVictim = victimToAttack != me->GetVictim();
+        //! No valid targets either off of ghoul nor player and we're not attacking anything either then fall back to following owner
+        bool const ShouldStopCombat = victimToAttack == nullptr;
+        //! Dont call moveFollow when we're already following
+        bool const IsFollowingMaster = me->GetMotionMaster() &&
+            me->GetMotionMaster()->GetCurrentMovementGeneratorType() == MovementGeneratorType::FOLLOW_MOTION_TYPE;
+
+        if (IsDifferentVictim && !ShouldStopCombat && me->IsValidAttackTarget(victimToAttack) && owner->CanSeeOrDetect(victimToAttack))
+            AttackStartAotd(victimToAttack);
+        else if (ShouldStopCombat && !IsFollowingMaster && !me->GetVictim())
+        {
+            me->CombatStop(true);
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, ownerFollowAngle);
+        }
+    }
+private:
+    TaskScheduler scheduler;
+    float ownerFollowAngle;
 };
 
 enum DancingRuneWeapon
@@ -470,6 +579,6 @@ void AddSC_deathknight_pet_scripts()
 {
     new npc_pet_dk_ebon_gargoyle();
     new npc_pet_dk_ghoul();
-    new npc_pet_dk_army_of_the_dead();
+    new CreatureAILoader<npc_pet_dk_army_of_the_dead>("npc_pet_dk_army_of_the_dead");
     new CreatureAILoader<npc_pet_dk_dancing_rune_weaponAI>("npc_pet_dk_dancing_rune_weapon");
 }

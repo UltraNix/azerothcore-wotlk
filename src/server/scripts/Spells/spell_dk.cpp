@@ -300,23 +300,20 @@ class spell_dk_aotd_taunt : public SpellScriptLoader
 
             void FilterTargets(std::list<WorldObject*>& targets)
             {
-                for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end();)
+                targets.remove_if([](WorldObject* object) -> bool
                 {
-                    // ignore bosses
-                    if (Creature* cr = (*itr)->ToCreature())
-                        if (cr->isWorldBoss())
-                        {
-                            targets.erase(itr++);
-                            continue;
-                        }
+                    Creature* creature = object->ToCreature();
+                    if (!creature)
+                        return true;
 
-                    ++itr;
-                }
+                    return creature->isWorldBoss() || creature->IsDungeonBoss();
+                });
             }
 
             void Register()
             {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_aotd_taunt_SpellScript::FilterTargets, EFFECT_ALL, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_aotd_taunt_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dk_aotd_taunt_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
             }
         };
 
