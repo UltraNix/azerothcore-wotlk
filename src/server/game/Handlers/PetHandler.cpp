@@ -1222,7 +1222,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     {
         target = _player->GetSelectedUnit();
     }
-    
+
     SpellCastResult result = spell->CheckPetCast(target);
 
     if (result == SPELL_CAST_OK)

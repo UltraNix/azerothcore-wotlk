@@ -497,9 +497,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
                 {
                     plrMover->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_IS_OUT_OF_BOUNDS);
                     plrMover->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
-                    // player can be alive if GM
-                    if (plrMover->IsAlive())
-                        plrMover->KillPlayer();
                 }
                 else if (plrMover->HasAura(8326) /* Ghost Mode */)
                     plrMover->RepopAtGraveyard();
