@@ -41,6 +41,8 @@ extern int m_ServiceStatus;
 #include "Config.h"
 #include "Profiler.h"
 
+#include "easy/profiler.h"
+
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
@@ -48,6 +50,12 @@ void WorldRunnable::run()
     uint32 realPrevTime = getMSTime();
 
     uint32 networkDelay = getMSTime() + sConfigMgr->GetIntDefault( "Network.DelayedStart", 0 );
+
+    if ( sConfigMgr->GetIntDefault( "Profiler.Enabled", 1 ) )
+    {
+        uint16_t port = sConfigMgr->GetIntDefault( "Profiler.Port", profiler::DEFAULT_PORT );
+        profiler::startListen( port );
+    }
 
     sScriptMgr->OnStartup();
 

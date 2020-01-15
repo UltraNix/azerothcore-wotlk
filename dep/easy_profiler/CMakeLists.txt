@@ -41,7 +41,7 @@ endif ()
 # EasyProfiler options:
 set(EASY_OPTION_IMPLICIT_THREAD_REGISTER_TEXT "Enable new threads registration when collecting context switch events")
 set(EASY_DEFAULT_PORT                  28077  CACHE STRING "Default listening port")
-set(EASY_OPTION_LISTEN                 ON     CACHE BOOL   "Enable automatic startListen on startup")
+set(EASY_OPTION_LISTEN                 OFF     CACHE BOOL   "Enable automatic startListen on startup")
 set(EASY_OPTION_PROFILE_SELF           OFF    CACHE BOOL   "Enable self profiling (measure time for internal storage expand)")
 set(EASY_OPTION_PROFILE_SELF_BLOCKS_ON OFF    CACHE BOOL   "Storage expand default status (profiler::ON or profiler::OFF)")
 set(EASY_OPTION_TRUNCATE_RUNTIME_NAMES OFF    CACHE BOOL   "Enable truncation of block dynamic names (set at run-time, not compile-time). Reduces performance. Turn ON only if you want to use dynamic block names of length >${EASY_MAX_SIZE_VALUE} symbols at runtime. It is better to use EASY_VALUE instead of such long names.")

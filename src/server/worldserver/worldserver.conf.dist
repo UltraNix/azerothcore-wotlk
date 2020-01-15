@@ -4127,3 +4127,14 @@ CreatureBossRecords.AllowedMaps = "533;615;616"
 
 Battlegrounds.Separate.Twink.Queues = 0
 
+#    Profiler.Enabled
+#       Description: When enabled `easy_profiler` will start listening on specific port
+#       Default: 1 (enabled)
+
+Profiler.Enabled = 1
+
+#    Profiler.Port
+#       Description: Port on which profiler will listen for incoming client connections
+#       Default: 28077
+
+Profiler.Port = 28077
