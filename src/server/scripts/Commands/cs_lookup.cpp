@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -890,7 +890,7 @@ public:
                     found = true;
             }
         }
-        
+
         if (!found)
             handler->SendSysMessage(LANG_COMMAND_NOSPELLFOUND);
 
@@ -1333,7 +1333,7 @@ public:
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ACCESS);
         stmt->setString(0, account);
         PreparedQueryResult result = LoginDatabase.Query(stmt);
-        
+
         if (!result)
         {
             handler->PSendSysMessage(LANG_NO_PLAYERS_FOUND);
@@ -1344,16 +1344,25 @@ public:
         Field* fields = result->Fetch();
         uint32 accountId = fields[0].GetUInt32();
         uint8 gmLvl = fields[1].GetUInt8();
+
         if (gmLvl && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //Prevents GM stalking
         {
             handler->PSendSysMessage("You can't view history for this account.");
             handler->SetSentErrorMessage(true);
             return false;
         }
+
         handler->PSendSysMessage("Ip history for accountId %d", accountId);
         auto accStore = sWorld->GetIpStoreFor(accountId);
 
-        for (auto const& it : accStore)
+        std::vector<std::pair<std::string, time_t>> sortedAccStore(accStore.begin(), accStore.end());
+        std::sort(sortedAccStore.begin(), sortedAccStore.end(),
+            [](const std::pair<std::string, time_t>& a, const std::pair<std::string, time_t>& b)
+        {
+            return a.second > b.second;
+        });
+
+        for (auto const& it : sortedAccStore)
             handler->PSendSysMessage("|cff00ccff[%s] | |cffffff00%s", it.first.c_str(), TimeToTimestampStr(it.second).c_str());
 
         return true;
@@ -1364,11 +1373,19 @@ public:
         if (!*args)
             return false;
 
-        std::string ip = strtok((char*)args, " "); 
+        std::string ip = strtok((char*)args, " ");
         handler->PSendSysMessage("Account history for IP %s:", ip.c_str());
 
         auto ipStore = sWorld->GetAccountStoreFor(ip);
-        for (auto const& it : ipStore)
+
+        std::vector<std::pair<uint32, time_t>> sortedIpStore(ipStore.begin(), ipStore.end());
+        std::sort(sortedIpStore.begin(), sortedIpStore.end(),
+            [](const std::pair<uint32, time_t>& a, const std::pair<uint32, time_t>& b)
+        {
+            return a.second > b.second;
+        });
+
+        for (auto const& it : sortedIpStore)
         {
             uint32 accountId = it.first;
             PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO);
@@ -1379,8 +1396,10 @@ public:
 
             Field* fields1 = result->Fetch();
             uint8 gmLevel = fields1[2].GetUInt8();
+
             if (gmLevel && handler->GetSession()->GetSecurity() < SEC_ADMINISTRATOR) //prevents GM stalking
                 continue;
+
             std::string accName = fields1[0].GetString();
             handler->PSendSysMessage("|cff00ccff[%s (ID: %d)] | |cffffff00%s", accName.c_str(), accountId, TimeToTimestampStr(it.second).c_str());
         }
