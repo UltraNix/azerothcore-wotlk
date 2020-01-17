@@ -6607,10 +6607,6 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         if (m_caster->GetCharmInfo() && m_caster->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(m_spellInfo))
             return SPELL_FAILED_NOT_READY;
 
-    // Don't allow to cast channeled spells while moving
-    if (m_spellInfo->IsChanneled() && m_caster->isMoving())
-        return SPELL_FAILED_MOVING;
-
     return CheckCast(true);
 }
 
