@@ -36,7 +36,7 @@ DoorData const doorData[] =
     { 0,             0,           DOOR_TYPE_ROOM, BOUNDARY_NONE } // END
 };
 
-Position const RankaSpawnPosition{ -11676.006f, -1698.0500, 8.409842, 1.004512f };
+Position const RankaSpawnPosition{ -11676.006f, -1698.0500f, 8.409842f, 1.004512f };
 
 class instance_zulgurub : public InstanceMapScript
 {
