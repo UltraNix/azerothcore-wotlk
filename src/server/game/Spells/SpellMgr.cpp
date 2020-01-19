@@ -7881,6 +7881,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 56940:
             spellInfo->Attributes |= SPELL_ATTR0_CASTABLE_WHILE_MOUNTED;
             break;
+        // The Dusk Blade - The Darkest Night
+        case 59043:
+            spellInfo->procChance = 10;
+            break;
 
         // ///////////////////////////////////////////
         // ////////////////EVENTS/////////////////////
