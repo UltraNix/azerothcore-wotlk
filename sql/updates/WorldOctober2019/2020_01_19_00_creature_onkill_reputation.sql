@@ -1,0 +1,1 @@
+DELETE FROM `creature_onkill_reputation` WHERE `creature_id` IN (31480, 31461, 31462);
