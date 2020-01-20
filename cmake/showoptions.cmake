@@ -99,6 +99,12 @@ if ( NOJEM )
   message(" *** DO NOT DISABLE IT UNLESS YOU KNOW WHAT YOU'RE DOING!")
 endif()
 
+if(BOOST_STATIC)
+  message(STATUS "Use Boost static libs : Yes")
+else()
+  message(STATUS "Use Boost static libs : No  (default)")
+endif()
+
 if (DISABLE_DRESSNPCS_CORESOUNDS)
   message("")
   message("DressNPCs sound workaround disabled. Live without sounds or use a client side patch.")

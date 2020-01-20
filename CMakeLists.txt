@@ -66,6 +66,46 @@ endif()
 include(CheckPlatform)
 include(GroupSources)
 
+# Be sure to search only static lib
+add_definitions(-DBOOST_ALL_NO_LIB)
+if(BOOST_STATIC)
+  set(Boost_USE_STATIC_LIBS ON)
+endif()
+#set(Boost_DEBUG ON)
+
+if(MSVC)
+  # Use at least verion 3.8.1 of FindBoost to fix some issues. Especialy in MSVC with fixed Toolset issues.
+  # This is a workaround while VisualStudio does not embed higher cmake version than 3.7.2
+  if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION} LESS 3.8.1)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/macros/FindBoost)
+    message(STATUS "FindBoost: included version 3.8.1 of FindBoost is used.")
+  endif()
+endif()
+
+# Find needed packages and if necessery abort if something important is missing
+# example of boost if specific components are required
+# ie. find_package(Boost COMPONENTS system filesystem container thread program_options iostreams regex date_time )
+find_package(Boost)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_libraries(${Boost_LIBRARIES})
+else()
+  message(STATUS "BOOST_ROOT = $ENV{BOOST_ROOT}")
+  message(STATUS "BOOST_LIBRARYDIR = $ENV{BOOST_LIBRARYDIR}")
+  if ("$ENV{BOOST_ROOT}" STREQUAL "")
+    message(WARNING "BOOST_ROOT is not set, please set it correctly to your boost folder.")
+  else()
+    if ("$ENV{BOOST_LIBRARYDIR}" STREQUAL "")
+        message(STATUS "Please put all ${DEP_ARCH} boost lib files in $ENV{BOOST_ROOT}\\lib\\${DEP_ARCH} folder")
+        message(STATUS "Or set BOOST_LIBRARYDIR to your boost lib folder.")
+    else()
+        message(STATUS "BOOST_LIBRARYDIR is set, please verify if correct libs files are in that folder.")
+    endif()
+  endif()
+  message(FATAL_ERROR "This project requires boost.  Please install from http://www.boost.org")
+endif()
+
 # basic packagesearching and setup (further support will be needed, this is a preliminary release!)
 set(OPENSSL_EXPECTED_VERSION 1.0.0)
 set(ACE_EXPECTED_VERSION 5.8.3)
