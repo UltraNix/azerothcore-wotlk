@@ -1,0 +1,2 @@
+-- DB/Loot: Tears of bitter Anguish - slightly increase drop chance https://github.com/SunwellTracker/issues/issues/2815
+UPDATE `creature_loot_template` SET `ChanceOrQuestChance` = 1 WHERE `entry` = 29570 AND `item` = 43573
