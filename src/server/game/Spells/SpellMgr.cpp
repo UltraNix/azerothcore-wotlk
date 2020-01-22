@@ -4289,6 +4289,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 53651:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         // Hand of Reckoning
         case 62124:
