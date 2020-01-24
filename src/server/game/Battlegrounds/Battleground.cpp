@@ -591,6 +591,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
                 else
                     sWorld->SendPvPWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), std::min(GetMinLevel(), (uint32)80), std::min(GetMaxLevel(), (uint32)80));
             }
+            _CheckSafePositions(diff);
         }
     }
 }
