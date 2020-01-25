@@ -1,6 +1,7 @@
 #include "WorldRelaySocket.hpp"
 #include "WorldRelay.hpp"
 #include "fmt/format.h"
+#include "Profiler.h"
 
 #include <iomanip>
 #include <ctime>
@@ -79,6 +80,8 @@ void WorldRelay::InitializeRelay(size_t threadsCount)
     {
         m_pool.push_back(std::thread([this]
         {
+            PROFILE_THREAD("WorldRelay");
+
             HttpPosterSocket soc("priv.wherego.pl");
             while (!m_shutdown)
             {

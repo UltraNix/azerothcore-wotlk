@@ -41,28 +41,30 @@ extern int m_ServiceStatus;
 #include "Config.h"
 #include "Profiler.h"
 
-#include "easy/profiler.h"
-
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
+    PROFILE_THREAD( "WorldRunnable" );
+
     uint32 realCurrTime = 0;
     uint32 realPrevTime = getMSTime();
 
     uint32 networkDelay = getMSTime() + sConfigMgr->GetIntDefault( "Network.DelayedStart", 0 );
 
-    if ( sConfigMgr->GetIntDefault( "Profiler.Enabled", 1 ) )
-    {
-        uint16_t port = sConfigMgr->GetIntDefault( "Profiler.Port", profiler::DEFAULT_PORT );
-        profiler::startListen( port );
-    }
+    //! Brofiler doesn't support port changing
+    //std::unique_ptr<Optick::Server> profiler;
+    //if ( sConfigMgr->GetIntDefault( "Profiler.Enabled", 1 ) )
+    //{
+    //    uint16_t port = sConfigMgr->GetIntDefault( "Profiler.Port", 28077 );
+    //    profiler = std::make_unique< Optick::Server >( port );
+    //}
 
     sScriptMgr->OnStartup();
 
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
     {
-        PROFILE_SCOPE( "WorldRunnable" );
+        PROFILE_FRAME( "WorldRunnable" );
 
         ++World::m_worldLoopCounter;
         realCurrTime = getMSTime();
@@ -75,6 +77,8 @@ void WorldRunnable::run()
         uint32 executionTimeDiff = getMSTimeDiff(realCurrTime, getMSTime());
         devDiffTracker.Update(executionTimeDiff);
         avgDiffTracker.Update(executionTimeDiff > WORLD_SLEEP_CONST ? executionTimeDiff : WORLD_SLEEP_CONST);
+
+        PROFILE_SCOPE( "Sleep" );
 
         if (executionTimeDiff < WORLD_SLEEP_CONST)
             ACE_Based::Thread::Sleep(WORLD_SLEEP_CONST-executionTimeDiff);
@@ -113,6 +117,8 @@ void WorldRunnable::run()
 
 void AuctionListingRunnable::run()
 {
+    PROFILE_THREAD( "AuctionListingRunnable" );
+
     sLog->outString("Starting up Auction House Listing thread...");
 	while (!World::IsStopped())
 	{
@@ -123,6 +129,8 @@ void AuctionListingRunnable::run()
 
 			if (AsyncAuctionListingMgr::GetTempList().size() || AsyncAuctionListingMgr::GetList().size())
 			{
+                PROFILE_SCOPE( "AuctionListingRunnable::UpdateListings" );
+
 				TRINITY_GUARD(ACE_Thread_Mutex, AsyncAuctionListingMgr::GetLock());
 
 				{

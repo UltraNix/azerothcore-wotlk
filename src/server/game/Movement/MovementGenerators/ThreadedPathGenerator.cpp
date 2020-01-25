@@ -1,6 +1,7 @@
 #include "ThreadedPathGenerator.hpp"
 
 #include "PathGenerator.h"
+#include "Profiler.h"
 
 namespace Movement
 {
@@ -18,6 +19,8 @@ namespace Movement
         {
             m_pool.push_back( std::thread( [this]
             {
+                PROFILE_THREAD( "ThreadedPathGenerator" );
+
                 while ( !m_shutdown )
                 {
                     auto request = m_queue.pop();
@@ -44,6 +47,8 @@ namespace Movement
 
     void ThreadedPathGenerator::PreparePath( PathRequest& request )
     {
+        PROFILE_SCOPE( "ThreadedPathGenerator::PreparePath" );
+
         AsyncPathGeneratorContext const& params = request.first;
 
         PathGenerator generator( &params );

@@ -31,7 +31,7 @@ endif()
 add_subdirectory(fmt)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)
-add_subdirectory(easy_profiler)
+add_subdirectory(optick)
 
 if(SERVERS)
   add_subdirectory(gsoap)

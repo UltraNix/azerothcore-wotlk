@@ -1,6 +1,7 @@
 #include "ThreadedAuthHandler.hpp"
 #include "WorldSocket.h"
 #include "WorldPacket.h"
+#include "Profiler.h"
 
 ThreadedAuthHandler::ThreadedAuthHandler()
     : m_shutdown( false )
@@ -16,6 +17,8 @@ void ThreadedAuthHandler::Initialize( size_t threadsCount )
     {
         m_pool.push_back( std::thread( [this]
         {
+            PROFILE_THREAD( "ThreadedAuthHandler" );
+
             while ( !m_shutdown )
             {
                 auto request = m_queue.pop();
@@ -57,6 +60,8 @@ void ThreadedAuthHandler::QueueAuthRequest( WorldSocket * socket, WorldPacket pa
 
 void ThreadedAuthHandler::HandleRequest( AuthRequest request )
 {
+    PROFILE_SCOPE( "ThreadedAuthHandler::HandleRequest" );
+
     WorldSocket * socket = request.socket;
     if ( !socket->IsClosed() )
     {
