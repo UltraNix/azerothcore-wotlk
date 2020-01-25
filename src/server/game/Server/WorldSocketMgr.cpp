@@ -46,7 +46,6 @@
 #include "WorldSocketAcceptor.h"
 #include "ScriptMgr.h"
 #include "ThreadedAuthHandler.hpp"
-#include "Profiler.h"
 
 /**
 * This is a helper class to WorldSocketMgr, that manages
@@ -307,8 +306,6 @@ ACE_VERSIONED_NAMESPACE_NAME::ACE_Reactor* ReactorRunnable::GetReactor()
 
 int ReactorRunnable::svc()
 {
-    PROFILE_THREAD( "ReactorRunnable" );
-
     while ( !m_Reactor->reactor_event_loop_done() )
     {
         // dont be too smart to move this outside the loop
@@ -327,8 +324,6 @@ int ReactorRunnable::svc()
 
         //! Insert new sockets
         {
-            PROFILE_SCOPE( "ReactorRunnable::NewSockets" );
-
             constexpr size_t MAX_NEW_SOCKETS_PER_TICK = 100;
             size_t acceptedSockets = 0;
 
@@ -351,26 +346,22 @@ int ReactorRunnable::svc()
             }
         }
 
+        for ( WorldSocket * socket : m_Sockets )
         {
-            PROFILE_SCOPE( "ReactorRunnable::UpdateSockets" );
+            auto result = socket->Update();
+            if ( result != -1 )
+                continue;
 
-            for ( WorldSocket * socket : m_Sockets )
-            {
-                auto result = socket->Update();
-                if ( result != -1 )
-                    continue;
-
-                socket->CloseSocket();
-                CleanupSocket( socket, false );
-            }
-
-            //! Cleanup sockets
-            auto it = std::remove_if( m_Sockets.begin(), m_Sockets.end(), []( WorldSocket * socket )
-            {
-                return socket->IsClosed();
-            } );
-            m_Sockets.erase( it, m_Sockets.end() );
+            socket->CloseSocket();
+            CleanupSocket( socket, false );
         }
+
+        //! Cleanup sockets
+        auto it = std::remove_if( m_Sockets.begin(), m_Sockets.end(), []( WorldSocket * socket )
+        {
+            return socket->IsClosed();
+        } );
+        m_Sockets.erase( it, m_Sockets.end() );
     }
 
     return 0;

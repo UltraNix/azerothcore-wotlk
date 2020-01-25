@@ -1,7 +1,6 @@
 #include "ThreadedWardenParser.hpp"
 
 #include "WorldSession.h"
-#include "Profiler.h"
 
 namespace WardenParserWin
 {
@@ -15,8 +14,6 @@ namespace WardenParserWin
         {
             m_pool.push_back(std::thread([this]
             {
-                PROFILE_THREAD("ThreadedWardenParser");
-
                 while (!m_shutdown)
                 {
                     auto request = m_queue.pop();
@@ -40,8 +37,6 @@ namespace WardenParserWin
 
     void ThreadedWardenParser::ParseMessage(ParseRequest request)
     {
-        PROFILE_SCOPE( "ThreadedWardenParser::ParseMessage" );
-
         Requestee const& requestee = request.first;
         std::string& message = request.second;
 

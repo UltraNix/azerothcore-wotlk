@@ -2,7 +2,7 @@
 #include <ace/Thread_Mutex.h>
 #include <ace/Log_Msg.h>
 #include "Threading.h"
-#include "Profiler.h"
+
 #include "DelayExecutor.h"
 
 DelayExecutor* DelayExecutor::instance()
@@ -42,8 +42,6 @@ int DelayExecutor::svc()
 {
     if (pre_svc_hook_)
         pre_svc_hook_->call();
-
-    PROFILE_THREAD( "DelayExecutor" );
 
     for (;;)
     {

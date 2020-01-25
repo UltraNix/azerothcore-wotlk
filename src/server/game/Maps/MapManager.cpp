@@ -248,8 +248,6 @@ void MapManager::Update(uint32 diff)
     // pussywizard: lfg compatibles update, schedule before maps so it is processed from the very beginning
     //if (mapUpdateStep == 0)
     {
-        PROFILE_SCOPE( "MapManager::UpdateLfg" );
-
         if (m_updater.activated())
             m_updater.schedule_lfg_update(diff);
         else
@@ -261,37 +259,24 @@ void MapManager::Update(uint32 diff)
         }
     }
 
+    MapMapType::iterator iter = i_maps.begin();
+    for (; iter != i_maps.end(); ++iter)
     {
-        PROFILE_SCOPE( "MapManager::UpdateMaps" );
-
-        MapMapType::iterator iter = i_maps.begin();
-        for (; iter != i_maps.end(); ++iter)
-        {
-            bool full = mapUpdateStep<3 && ((mapUpdateStep==0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep==1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep==2 && iter->second->IsDungeon()));
-            if (m_updater.activated())
-                m_updater.schedule_update(*iter->second, uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
-            else
-                iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
-        }
-    }
-
-    {
-        PROFILE_SCOPE( "MapManager::WaitForMaps" );
-
+        bool full = mapUpdateStep<3 && ((mapUpdateStep==0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep==1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep==2 && iter->second->IsDungeon()));
         if (m_updater.activated())
-            m_updater.wait();
+            m_updater.schedule_update(*iter->second, uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
+        else
+            iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
     }
 
-    {
-        PROFILE_SCOPE( "ObjectAccessor::ProcessDelayedCorpseActions" );
-        sObjectAccessor->ProcessDelayedCorpseActions();
-    }
+    if (m_updater.activated())
+        m_updater.wait();
+
+    sObjectAccessor->ProcessDelayedCorpseActions();
 
     if (mapUpdateStep<3)
     {
-        PROFILE_SCOPE( "MapManager::DelayedUpdate" );
-
-        for (auto iter = i_maps.begin(); iter != i_maps.end(); ++iter)
+        for (iter = i_maps.begin(); iter != i_maps.end(); ++iter)
         {
             bool full = ((mapUpdateStep==0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep==1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep==2 && iter->second->IsDungeon()));
             if (full)
@@ -302,10 +287,7 @@ void MapManager::Update(uint32 diff)
         ++mapUpdateStep;
     }
 
-    {
-        PROFILE_SCOPE( "ObjectAccessor::Update" );
-        sObjectAccessor->Update(0);
-    }
+    sObjectAccessor->Update(0);
 
     if (mapUpdateStep == 3 && i_timer[3].Passed())
     {

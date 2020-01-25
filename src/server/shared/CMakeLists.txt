@@ -90,7 +90,7 @@ add_library(shared STATIC
 
 target_link_libraries(shared PUBLIC
   ${ACE_LIBRARY}
-  optick
+  easy_profiler
 )
 
 # Generate precompiled header

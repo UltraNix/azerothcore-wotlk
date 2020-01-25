@@ -20,7 +20,6 @@
 #include "SQLOperation.h"
 #include "MySQLConnection.h"
 #include "MySQLThreading.h"
-#include "Profiler.h"
 
 DatabaseWorker::DatabaseWorker(ACE_Activation_Queue* new_queue, MySQLConnection* con) :
 m_queue(new_queue),
@@ -35,8 +34,6 @@ int DatabaseWorker::svc()
     if (!m_queue)
         return -1;
 
-    PROFILE_THREAD( "DatabaseWorker" );
-
     SQLOperation *request = NULL;
     while (1)
     {
@@ -44,7 +41,6 @@ int DatabaseWorker::svc()
         if (!request)
             break;
 
-        PROFILE_SCOPE( "DatabaseWorker::Work" );
         request->SetConnection(m_conn);
         request->call();
 

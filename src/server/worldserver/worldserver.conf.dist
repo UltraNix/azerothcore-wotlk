@@ -4131,12 +4131,10 @@ Battlegrounds.Separate.Twink.Queues = 0
 #       Description: When enabled `easy_profiler` will start listening on specific port
 #       Default: 1 (enabled)
 
-# OPTICK doesn't support custom port, options below do nothing
-
-# Profiler.Enabled = 1
+Profiler.Enabled = 1
 
 #    Profiler.Port
 #       Description: Port on which profiler will listen for incoming client connections
 #       Default: 28077
 
-# Profiler.Port = 28077
+Profiler.Port = 28077

@@ -1,9 +1,6 @@
 #pragma once
 
-#include "optick.h"
-#include "optick_server.h"
+#include "easy/profiler.h"
 
-#define PROFILE_SCOPE( ... ) OPTICK_EVENT( __VA_ARGS__ )
-#define PROFILE_THREAD( ... ) OPTICK_THREAD( __VA_ARGS__ )
-#define PROFILE_FRAME( ... ) OPTICK_FRAME( __VA_ARGS__ )
-
+#define PROFILE_SCOPE( name ) EASY_BLOCK( name )
+#define PROFILE_FUNCTION(...) EASY_FUNCTION( __VA_ARGS__ )
