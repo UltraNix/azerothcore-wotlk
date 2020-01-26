@@ -1,0 +1,2 @@
+-- DB/Quest: All Hail Roanauk - players will be able to speak with Roanauk when Overlord Agmar is not around https://github.com/SunwellTracker/issues/issues/2827
+DELETE FROM `conditions` WHERE `SourceGroup` = 9461 AND `ConditionTypeOrReference` = 29;
