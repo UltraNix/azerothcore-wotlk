@@ -19,6 +19,7 @@ inline float FastSqrt(float x)
 }
 
 class WorldObject;
+class ByteBuffer;
 
 struct Position
 {

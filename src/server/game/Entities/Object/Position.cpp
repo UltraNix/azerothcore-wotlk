@@ -1,5 +1,6 @@
 #include "Position.h"
 #include "Object.h"
+#include "ByteBuffer.h"
 
 #include <strstream>
 #include <cmath>
