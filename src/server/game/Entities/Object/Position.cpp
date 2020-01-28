@@ -1,6 +1,8 @@
 #include "Position.h"
+
 #include "Object.h"
 #include "ByteBuffer.h"
+#include "Util.h"
 
 #include <strstream>
 #include <cmath>
@@ -26,6 +28,11 @@ std::string Position::ToString() const
     std::stringstream sstr;
     sstr << "X: " << m_positionX << " Y: " << m_positionY << " Z: " << m_positionZ << " O: " << m_orientation;
     return sstr.str();
+}
+
+inline float Position::RandomOrientation()
+{
+    return frand( 0.0f, 2 * M_PI );
 }
 
 ByteBuffer& operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const& streamer)
