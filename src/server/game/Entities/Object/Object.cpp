@@ -2986,34 +2986,3 @@ uint64 WorldObject::GetTransGUID() const
         return GetTransport()->GetGUID();
     return 0;
 }
-
-bool Trinity::ObjectDistanceOrderPred::operator()(const WorldObject* pLeft, const WorldObject* pRight) const
-{
-    return m_ascending ? m_refObj->GetDistanceOrder(pLeft, pRight) : !m_refObj->GetDistanceOrder(pLeft, pRight);
-}
-
-bool Trinity::PositionDistanceOrderPred::operator()(const WorldObject* pLeft, const WorldObject* pRight) const
-{
-    return m_ascending ? PositionDistanceOrder(m_refPosition, pLeft, pRight) : !PositionDistanceOrder(m_refPosition, pLeft, pRight);
-}
-
-bool Trinity::PositionDistanceOrderPred::PositionDistanceOrder(Position const fromPosition, WorldObject const* obj, WorldObject const* obj2) const
-{
-    float dx1 = fromPosition.GetPositionX() - obj->GetPositionX();
-    float dy1 = fromPosition.GetPositionY() - obj->GetPositionY();
-    float distsq1 = dx1 * dx1 + dy1 * dy1;
-
-    /* 3D */
-    float dz1 = fromPosition.GetPositionZ() - obj->GetPositionZ();
-    distsq1 += dz1 * dz1;
-
-    float dx2 = fromPosition.GetPositionX() - obj2->GetPositionX();
-    float dy2 = fromPosition.GetPositionY() - obj2->GetPositionY();
-    float distsq2 = dx2 * dx2 + dy2 * dy2;
-
-    /* 3D */
-    float dz2 = fromPosition.GetPositionZ() - obj2->GetPositionZ();
-    distsq2 += dz2 * dz2;
-
-    return distsq1 < distsq2;
-}

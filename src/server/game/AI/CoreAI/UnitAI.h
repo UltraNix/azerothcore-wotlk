@@ -30,6 +30,35 @@ class Quest;
 class Unit;
 struct AISpellInfoType;
 
+namespace Trinity
+{
+    // Binary predicate to sort WorldObjects based on the distance to a reference WorldObject
+    class ObjectDistanceOrderPred
+    {
+        public:
+            ObjectDistanceOrderPred(const WorldObject* pRefObj, bool ascending = true) : m_refObj(pRefObj), m_ascending(ascending) { }
+
+            bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const;
+
+        private:
+            const WorldObject* m_refObj;
+            const bool m_ascending;
+    };
+
+    class PositionDistanceOrderPred
+    {
+    public:
+        PositionDistanceOrderPred(Position const pos, bool ascending = true) : m_refPosition(pos), m_ascending(ascending) { }
+
+        bool operator()(const WorldObject* pLeft, const WorldObject* pRight) const;
+        bool PositionDistanceOrder(Position const fromPosition, WorldObject const* obj, WorldObject const* obj2) const;
+
+    private:
+        Position const m_refPosition;
+        const bool m_ascending;
+    };
+}
+
 //Selection method used by SelectTarget
 enum SelectAggroTarget
 {
