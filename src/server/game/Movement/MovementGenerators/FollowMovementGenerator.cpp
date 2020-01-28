@@ -1,9 +1,11 @@
 #include "FollowMovementGenerator.hpp"
 
-#include "Unit.h"
-#include "MoveSplineInit.h"
 #include "CreatureAI.h"
+#include "MoveSplineInit.h"
 #include "Player.h"
+#include "Unit.h"
+#include "VehicleDefines.h"
+
 namespace Movement
 {
     uint32 FollowMovementGenerator::FOLLOW_UPDATE_TIMER = 300;
