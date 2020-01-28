@@ -671,6 +671,8 @@ public:
 
         Player* player = handler->GetSession()->GetPlayer();
 
+        handler->PSendSysMessage( "----- DATABASE -----" );
+
         PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_CREATURE_NEAREST);
         stmt->setFloat(0, player->GetPositionX());
         stmt->setFloat(1, player->GetPositionY());
@@ -703,6 +705,37 @@ public:
                 ++count;
             }
             while (result->NextRow());
+        }
+
+        handler->PSendSysMessage( "----- GRID -----" );
+
+        CellCoord pair(Trinity::ComputeCellCoord(player->GetPositionX(), player->GetPositionY()));
+        Cell cell(pair);
+        cell.SetNoCreate();
+
+        std::list< WorldObject * > objects;
+
+        Trinity::AllWorldObjectsInRange check(player, distance);
+        Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange> searcher(player, objects, check);
+
+        TypeContainerVisitor<Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange>, WorldTypeMapContainer> world_visitor(searcher);
+        cell.Visit(pair, world_visitor, *(player->GetMap()), *player, distance);
+
+        TypeContainerVisitor<Trinity::WorldObjectListSearcher<Trinity::AllWorldObjectsInRange>, GridTypeMapContainer> grid_visitor(searcher);
+        cell.Visit(pair, grid_visitor, *(player->GetMap()), *player, distance);
+
+        for ( WorldObject * object : objects )
+        {
+            if ( object->IsCreature() )
+            {
+                CreatureTemplate const* creatureTemplate = sObjectMgr->GetCreatureTemplate(object->GetEntry());
+                if (!creatureTemplate)
+                    continue;
+
+                ++count;
+
+                handler->PSendSysMessage(LANG_CREATURE_LIST_CHAT, object->GetGUIDLow(), object->GetGUIDLow(), creatureTemplate->Name.c_str(), object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), object->GetMapId());
+            }
         }
 
         handler->PSendSysMessage(LANG_COMMAND_NEAR_NPC_MESSAGE, distance, count);
