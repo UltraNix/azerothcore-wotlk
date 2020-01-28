@@ -1,4 +1,7 @@
 #include "MovementInfo.h"
+#include "Log.h"
+
+#include <ctime>
 
 void MovementInfo::OutDebug()
 {

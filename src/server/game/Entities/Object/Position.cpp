@@ -1,6 +1,8 @@
 #include "Position.h"
+#include "Object.h"
 
 #include <strstream>
+#include <cmath>
 
 bool Position::HasInLine(WorldObject const* target, float width) const
 {

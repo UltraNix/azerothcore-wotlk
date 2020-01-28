@@ -18,6 +18,8 @@ inline float FastSqrt(float x)
     return 1.0f / x;
 }
 
+class WorldObject;
+
 struct Position
 {
     Position(float x = 0, float y = 0, float z = 0, float o = 0)
