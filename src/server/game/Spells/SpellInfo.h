@@ -22,6 +22,7 @@
 #include "Util.h"
 #include "DBCStructure.h"
 #include "Object.h"
+#include "Item.h"
 
 class AuraEffect;
 class Unit;
@@ -37,6 +38,7 @@ struct SpellRangeEntry;
 struct SpellRadiusEntry;
 struct SpellEntry;
 struct SpellCastTimesEntry;
+struct SpellValue;
 struct Condition;
 
 enum SpellCastTargetFlags
@@ -484,7 +486,7 @@ public:
     SpellCastResult CheckShapeshift(uint32 form) const;
     SpellCastResult CheckLocation(uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = NULL) const;
     SpellCastResult CheckTarget(Unit const* caster, WorldObject const* target, bool implicit, SpellValue const* val) const;
-    SpellCastResult CheckExplicitTarget(Unit const* caster, WorldObject const* target, ItemRef const& itemTarget = NULL) const;
+    SpellCastResult CheckExplicitTarget(Unit const* caster, WorldObject const* target, ItemRef const& itemTarget = NullItemRef) const;
     bool CheckTargetCreatureType(Unit const* target) const;
     //! Gets called in AddUnitTarget, just before aura is applied to target
     bool IsStrongerCCAuraActive(Unit const* caster, Unit const* target) const;
