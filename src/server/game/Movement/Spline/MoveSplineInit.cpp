@@ -91,7 +91,7 @@ namespace Movement
         args.initialOrientation = real_position.orientation;
         move_spline.onTransport = transport;
 
-        uint32 moveFlags = unit->m_movementInfo.GetMovementFlags();
+        MovementFlags moveFlags = unit->m_movementInfo.GetMovementFlags();
         moveFlags |= (MOVEMENTFLAG_SPLINE_ENABLED|MOVEMENTFLAG_FORWARD);
 
         if (moveFlags & MOVEMENTFLAG_ROOT)
@@ -101,7 +101,7 @@ namespace Movement
         {
             // If spline is initialized with SetWalk method it only means we need to select
             // walk move speed for it but not add walk flag to unit
-            uint32 moveFlagsForSpeed = moveFlags;
+            MovementFlags moveFlagsForSpeed = moveFlags;
             if (args.flags.walkmode)
                 moveFlagsForSpeed |= MOVEMENTFLAG_WALKING;
             else

@@ -1323,12 +1323,12 @@ public:
 
             char* mask2 = strtok(NULL, " \n");
 
-            uint32 moveFlags = (uint32)atoi(mask1);
+            MovementFlags moveFlags = (MovementFlags)atoi(mask1);
             target->SetUnitMovementFlags(moveFlags);
 
             if (mask2)
             {
-                uint32 moveFlagsExtra = uint32(atoi(mask2));
+                MovementFlags2 moveFlagsExtra = (MovementFlags2)(atoi(mask2));
                 target->SetExtraUnitMovementFlags(moveFlagsExtra);
             }
 

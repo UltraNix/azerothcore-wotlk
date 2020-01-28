@@ -2556,7 +2556,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsUnit(*itr))
                 {
-                    (*itr)->ToUnit()->SetUnitMovementFlags(e.action.movementFlag.flag);
+                    (*itr)->ToUnit()->SetUnitMovementFlags(( MovementFlags )e.action.movementFlag.flag);
                     (*itr)->ToUnit()->SendMovementFlagUpdate();
                 }
 

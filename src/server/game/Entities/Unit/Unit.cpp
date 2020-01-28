@@ -15845,52 +15845,52 @@ void Unit::StopMovingOnCurrentPos() // pussywizard
     init.Launch();
 }
 
-void Unit::AddUnitMovementFlag(uint32 flag)
+void Unit::AddUnitMovementFlag(MovementFlags flag)
 {
     m_movementInfo.flags |= flag;
 }
 
-void Unit::RemoveUnitMovementFlag(uint32 flag)
+void Unit::RemoveUnitMovementFlag(MovementFlags flag)
 {
     m_movementInfo.flags &= ~flag;
 }
 
-bool Unit::HasUnitMovementFlag(uint32 flag) const
+bool Unit::HasUnitMovementFlag(MovementFlags flag) const
 {
     return (m_movementInfo.flags & flag) == flag;
 }
 
-uint32 Unit::GetUnitMovementFlags() const
+MovementFlags Unit::GetUnitMovementFlags() const
 {
     return m_movementInfo.flags;
 }
 
-void Unit::SetUnitMovementFlags(uint32 flag)
+void Unit::SetUnitMovementFlags(MovementFlags flag)
 {
     m_movementInfo.flags = flag;
 }
 
-void Unit::AddExtraUnitMovementFlag(uint16 flag)
+void Unit::AddExtraUnitMovementFlag(MovementFlags2 flag)
 {
     m_movementInfo.flags2 |= flag;
 }
 
-void Unit::RemoveExtraUnitMovementFlag(uint16 flag)
+void Unit::RemoveExtraUnitMovementFlag(MovementFlags2 flag)
 {
     m_movementInfo.flags2 &= ~flag;
 }
 
-uint16 Unit::HasExtraUnitMovementFlag(uint16 flag) const
+MovementFlags2 Unit::HasExtraUnitMovementFlag(MovementFlags2 flag) const
 {
     return m_movementInfo.flags2 & flag;
 }
 
-uint16 Unit::GetExtraUnitMovementFlags() const
+MovementFlags2 Unit::GetExtraUnitMovementFlags() const
 {
     return m_movementInfo.flags2;
 }
 
-void Unit::SetExtraUnitMovementFlags(uint16 f)
+void Unit::SetExtraUnitMovementFlags(MovementFlags2 f)
 {
     m_movementInfo.flags2 = f;
 }

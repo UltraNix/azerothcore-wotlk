@@ -207,6 +207,12 @@ class ByteBuffer
             return *this;
         }
 
+        template< typename T, typename = std::enable_if< std::is_enum< T >::value >::type >
+        ByteBuffer & operator<<( T value )
+        {
+            return ( *this << static_cast< std::underlying_type< T >::type >( value ) );
+        }
+
         ByteBuffer &operator>>(bool &value)
         {
             value = read<char>() > 0 ? true : false;
@@ -271,6 +277,12 @@ class ByteBuffer
                 //throw ByteBufferException();
 			}
             return *this;
+        }
+
+        template< typename T, typename = std::enable_if< std::is_enum< T >::value >::type >
+        ByteBuffer & operator>>( T & value )
+        {
+            return ( *this >> reinterpret_cast< std::underlying_type< T >::type & >( value ) );
         }
 
         ByteBuffer &operator>>(double &value)
