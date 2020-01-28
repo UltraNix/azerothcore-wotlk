@@ -3,9 +3,12 @@ Xinef
  */
 
 #include "PetitionMgr.h"
+
+#include "DatabaseEnv.h"
 #include "Timer.h"
 #include "QueryResult.h"
-#include "DatabaseEnv.h"
+
+#include <unordered_map>
 
 PetitionMgr::PetitionMgr()
 {
