@@ -34,6 +34,7 @@
 #include "AvgDiffTracker.h"
 #include "AsyncAuctionListing.h"
 #include "Profiler.h"
+#include "ItemPrototype.h"
 
 enum eAuctionHouse
 {

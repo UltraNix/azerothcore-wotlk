@@ -26,6 +26,7 @@
 #include "DBCStructure.h"
 #include "EventProcessor.h"
 #include "WorldPacket.h"
+#include "Item.h"
 
 #include <string>
 #include <array>
@@ -33,6 +34,7 @@
 
 class Item;
 class Player;
+struct ItemTemplate;
 
 #define MIN_AUCTION_TIME (12*HOUR)
 #define MAX_AUCTION_ITEMS 160
