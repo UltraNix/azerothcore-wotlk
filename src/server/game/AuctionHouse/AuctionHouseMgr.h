@@ -26,13 +26,13 @@
 #include "DBCStructure.h"
 #include "EventProcessor.h"
 #include "WorldPacket.h"
-#include "Item.h"
 
 #include <string>
 #include <array>
 #include <vector>
 
 class Item;
+class ItemRef;
 class Player;
 struct ItemTemplate;
 

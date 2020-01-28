@@ -78,6 +78,8 @@ enum MailShowFlags
     MAIL_SHOW_RETURN  = 0x0010,
 };
 
+class ItemRef;
+
 class MailSender
 {
     public:                                                 // Constructors

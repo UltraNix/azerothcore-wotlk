@@ -29,6 +29,8 @@
 #include "Item.h"
 #include "AccountMgr.h"
 #include "Chat.h"
+#include "Item.h"
+
 #include "utf8.h"
 
 bool WorldSession::CanOpenMailBox(uint64 guid)

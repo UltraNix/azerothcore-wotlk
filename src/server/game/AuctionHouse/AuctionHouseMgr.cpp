@@ -30,11 +30,12 @@
 #include "Item.h"
 #include "Language.h"
 #include "Logging/Log.h"
-#include <vector>
 #include "AvgDiffTracker.h"
 #include "AsyncAuctionListing.h"
 #include "Profiler.h"
 #include "ItemPrototype.h"
+
+#include <vector>
 
 enum eAuctionHouse
 {
