@@ -8,8 +8,6 @@ Xinef
 #include "Timer.h"
 #include "QueryResult.h"
 
-#include <unordered_map>
-
 PetitionMgr::PetitionMgr()
 {
     m_petitionIds = 0u;

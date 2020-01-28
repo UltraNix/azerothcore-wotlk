@@ -8,7 +8,7 @@ Xinef
 #include "LinkedList.h"
 
 #include <ace/Singleton.h>
-#include <map>
+#include <unordered_map>
 #include <atomic>
 #include <set>
 #include <vector>
