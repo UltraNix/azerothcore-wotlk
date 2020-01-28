@@ -29,6 +29,7 @@
 #include <float.h>
 #include <limits>
 #include <stdlib.h>
+#include <algorithm>
 
 #ifdef _MSC_VER
     // Visual Studio is missing inttypes.h

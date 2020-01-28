@@ -151,10 +151,7 @@ struct Position
     bool HasInLine(WorldObject const* target, float width) const;
     std::string ToString() const;
 
-    static float RandomOrientation()
-    {
-        return frand(0.0f, 2 * M_PI);
-    }
+    static float RandomOrientation();
 
     // modulos a radian orientation to the range of 0..2PI
     static float NormalizeOrientation(float o)

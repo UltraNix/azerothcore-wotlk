@@ -404,7 +404,7 @@ void EasyEventTracer::setProcessPrivileges()
         if (!success)
             EASY_WARNING("Some context switch events could not get process name.\n");
 #else
-        setPrivilege(hToken, SE_DEBUG_NAME);
+        //setPrivilege(hToken, SE_DEBUG_NAME);
 #endif
             
         CloseHandle(hToken);
@@ -516,7 +516,7 @@ EventTracingEnableStatus EasyEventTracer::enable(bool _force)
 #ifdef __MINGW32__
     m_trace.LoggerName = KERNEL_LOGGER;
 #else
-    m_trace.LoggerName = KERNEL_LOGGER_NAME;
+    m_trace.LoggerName = (char*)KERNEL_LOGGER_NAME;
 #endif
     m_trace.ProcessTraceMode = PROCESS_TRACE_MODE_REAL_TIME | PROCESS_TRACE_MODE_EVENT_RECORD | PROCESS_TRACE_MODE_RAW_TIMESTAMP;
     m_trace.EventRecordCallback = easyProcessTraceEvent;

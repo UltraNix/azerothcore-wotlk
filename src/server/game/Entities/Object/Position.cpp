@@ -30,7 +30,7 @@ std::string Position::ToString() const
     return sstr.str();
 }
 
-inline float Position::RandomOrientation()
+float Position::RandomOrientation()
 {
     return frand( 0.0f, 2 * M_PI );
 }

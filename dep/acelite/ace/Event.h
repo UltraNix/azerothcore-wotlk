@@ -79,7 +79,7 @@ public:
   /// of day.
   void set_time_policy (TIME_POLICY const & time_policy)
   {
-	this->time_policy_ = rhs;
+	this->time_policy_ = time_policy;
   }
 
   /// Declare the dynamic allocation hooks

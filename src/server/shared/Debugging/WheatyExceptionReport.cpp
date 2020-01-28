@@ -527,7 +527,7 @@ PEXCEPTION_POINTERS pExceptionInfo)
 //======================================================================
 LPTSTR WheatyExceptionReport::GetExceptionString(DWORD dwCode)
 {
-    #define EXCEPTION(x) case EXCEPTION_##x: return _T(#x);
+    #define EXCEPTION(x) case EXCEPTION_##x: return (char*)_T(#x);
 
     switch (dwCode)
     {
@@ -868,8 +868,8 @@ DWORD dwTypeIndex,
 unsigned nestingLevel,
 DWORD_PTR offset,
 bool & bHandled,
-char* Name,
-char* suffix)
+const char* Name,
+const char* suffix)
 {
     bHandled = false;
 
