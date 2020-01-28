@@ -19,6 +19,7 @@
 #define TRINITY_CONTAINERS_H
 
 #include "Define.h"
+#include "Utilities/Util.h"
 
 #include <list>
 #include <sparsehash/dense_hash_map>
