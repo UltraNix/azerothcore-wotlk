@@ -9,7 +9,7 @@ int WorldSocketAcceptor::handle_timeout(const ACE_Time_Value& /*current_time*/, 
     return reactor()->register_handler(this, ACE_Event_Handler::ACCEPT_MASK);
 }
 
-int WorldSocketAcceptor::handle_timeout(void)
+int WorldSocketAcceptor::handle_accept_error(void)
 {
 #if defined(ENFILE) && defined(EMFILE)
     if (errno == ENFILE || errno == EMFILE)
