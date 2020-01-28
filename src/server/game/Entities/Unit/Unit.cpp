@@ -9695,7 +9695,9 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     m_attacking->_addAttacker(this);
 
     // Set our target
-    SetTarget(victim->GetGUID());
+    // Don't set target when unit is feared, it causes clientside orientation issues (occurs when creature is pulled with fear)
+    if (!HasUnitState(UNIT_STATE_FLEEING))
+        SetTarget(victim->GetGUID());
 
     if (meleeAttack)
         AddUnitState(UNIT_STATE_MELEE_ATTACKING);
