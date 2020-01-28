@@ -6,6 +6,7 @@ Xinef
 
 #include "DatabaseEnv.h"
 #include "Timer.h"
+#include "ObjectDefines.h"
 #include "QueryResult.h"
 
 PetitionMgr::PetitionMgr()
