@@ -105,7 +105,7 @@ Position const WaveTriggerSpawnPos[12] =
 
 #define GOSSIP_TELEPORT     "Teleport me!"
 
-uint32 AllianceWorldStates[] = 
+uint32 AllianceWorldStates[] =
 {
     WORLDSTATE_UNDERCITY_CONTROLLED_A,
     WORLDSTATE_MANHUNT_TIMER_STATE,
@@ -117,9 +117,11 @@ uint32 AllianceWorldStates[] =
     WORLDSTATE_SECURED_APOTHECARIUM
 };
 
+constexpr uint32 FAILED_EXPERIMENT_LIMIT = 30;
+
 struct npc_varian_battle_undercityAI : public npc_escortAI
 {
-    npc_varian_battle_undercityAI(Creature* creature) : npc_escortAI(creature), _summons(me) 
+    npc_varian_battle_undercityAI(Creature* creature) : npc_escortAI(creature), _summons(me)
     {
         zoneScript = me->GetZoneScript();
         map = me->GetMap();
@@ -242,7 +244,7 @@ struct npc_varian_battle_undercityAI : public npc_escortAI
                 SetEscortPaused(true);
                 JumpToNextStep(1000);
                 break;
-            case 8: 
+            case 8:
                 SummonTrigger(1);
                 break;
             case 10:
@@ -358,7 +360,7 @@ struct npc_varian_battle_undercityAI : public npc_escortAI
         if (!players.isEmpty())
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 if (Player* player = itr->GetSource())
-                    if ((player->GetZoneId() == ZONE_TRISFAL_GLADES || player->GetZoneId() == ZONE_UNDERCITY) 
+                    if ((player->GetZoneId() == ZONE_TRISFAL_GLADES || player->GetZoneId() == ZONE_UNDERCITY)
                         && player->GetPhaseMask() == phaseMask)
                         player->SendUpdateWorldState(uiStateId, uiStateData);
 
@@ -419,7 +421,7 @@ struct npc_varian_battle_undercityAI : public npc_escortAI
         }
     }
 
-    void SetData(uint32 /*type*/, uint32 data) override 
+    void SetData(uint32 /*type*/, uint32 data) override
     {
         switch (data)
         {
@@ -1003,6 +1005,11 @@ struct npc_putress_battle_undercityAI : public ScriptedAI
 
     void StartSpawningAdds()
     {
+        SpawnTimer = 5 * IN_MILLISECONDS;
+
+        if (_summons.GetEntryCount(NPC_FAILED_EXPERIMENT) >= FAILED_EXPERIMENT_LIMIT)
+            return;
+
         for (uint8 i = 0; i < 4; ++i)
             for (uint8 j = 0; j < urand(1, 5); ++j)
                 if (Creature* Experiment = me->SummonCreature(NPC_FAILED_EXPERIMENT, FailedExperimentSpawnPos[i], TEMPSUMMON_CORPSE_DESPAWN))
@@ -1012,8 +1019,6 @@ struct npc_putress_battle_undercityAI : public ScriptedAI
                             Experiment->AddThreat(target, 10000.0f);
                             Experiment->AI()->AttackStart(target);
                         }
-
-        SpawnTimer = 5 * IN_MILLISECONDS;
     }
 
     void JumpToNextStep(uint32 Timer)
@@ -1022,7 +1027,7 @@ struct npc_putress_battle_undercityAI : public ScriptedAI
         ++Phase;
     }
 
-    void UpdateAI(uint32 diff) 
+    void UpdateAI(uint32 diff)
     {
         if (!Encountered)
             return;
