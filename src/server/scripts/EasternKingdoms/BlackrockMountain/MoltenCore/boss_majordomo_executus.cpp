@@ -5,6 +5,7 @@
 #include "molten_core.h"
 #include "Player.h"
 #include "CreatureTextMgr.h"
+#include "SpellScript.h"
 
 enum Texts
 {

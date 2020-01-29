@@ -1,6 +1,9 @@
 #include "hellforge.hpp"
 
 #include "MoveSplineInit.h"
+#include "SpellAuras.h"
+#include "Player.h"
+#include "GridNotifiers.h"
 
 enum BossFiveEvents
 {

@@ -35,6 +35,7 @@ EndScriptData */
 #include "Battlefield.h"
 #include "BattlefieldWG.h"
 #include "BattlefieldMgr.h"
+#include "InstanceScript.h"
 
 #include <fstream>
 

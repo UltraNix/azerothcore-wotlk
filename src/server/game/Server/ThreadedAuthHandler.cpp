@@ -1,6 +1,9 @@
 #include "ThreadedAuthHandler.hpp"
+
 #include "WorldSocket.h"
 #include "WorldPacket.h"
+#include "World.h"
+#include "Log.h"
 
 ThreadedAuthHandler::ThreadedAuthHandler()
     : m_shutdown( false )

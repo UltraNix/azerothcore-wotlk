@@ -1,5 +1,9 @@
 #include "WorldRelaySocket.hpp"
 #include "WorldRelay.hpp"
+#include "Log.h"
+#include "World.h"
+#include "DatabaseEnv.h"
+
 #include "fmt/format.h"
 
 #include <iomanip>

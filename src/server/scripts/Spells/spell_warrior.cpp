@@ -26,6 +26,7 @@
 #include "SpellAuraEffects.h"
 #include "Player.h"
 #include "SpellInfo.h"
+#include "UnitAI.h"
 
 enum WarriorSpells
 {

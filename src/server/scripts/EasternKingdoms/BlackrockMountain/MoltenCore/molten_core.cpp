@@ -1,6 +1,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "molten_core.h"
+#include "SpellScript.h"
 
 enum CoreHound
 {

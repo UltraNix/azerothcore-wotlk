@@ -7,6 +7,7 @@
 #include "karazhan.h"
 #include "SpellScript.h"
 #include "Spell.h"
+#include "Player.h"
 
 enum AranYells
 {

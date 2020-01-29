@@ -5,6 +5,8 @@
 #include "ScriptMgr.h"
 #include "karazhan.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "Player.h"
 
 enum CuratorSays
 {

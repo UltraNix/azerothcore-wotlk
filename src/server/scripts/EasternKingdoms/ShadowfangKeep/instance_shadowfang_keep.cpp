@@ -22,6 +22,8 @@
 #include "TemporarySummon.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "Player.h"
+#include "SpellScript.h"
 
 ObjectData const creatureData[] =
 {

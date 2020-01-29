@@ -21,6 +21,7 @@
 #include "blackwing_lair.h"
 #include "ScriptedGossip.h"
 #include "Player.h"
+#include "SpellScript.h"
 
 enum Says
 {

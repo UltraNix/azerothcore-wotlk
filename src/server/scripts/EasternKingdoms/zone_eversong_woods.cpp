@@ -26,6 +26,11 @@ EndScriptData */
 /* ContentData
 EndContentData */
 
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "Player.h"
+
 enum mirveda {
     QUEST_UNEXPECTED_RESULTS    = 8488,
     QUEST_CORRUPTED_SOIL        = 8487,

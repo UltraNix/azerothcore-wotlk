@@ -18,6 +18,7 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "BattlefieldMgr.h"
+#include "Player.h"
 
 // @kruulevent
 class spell_cust_shadow_crash_SpellScript : public SpellScript

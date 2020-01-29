@@ -1,6 +1,10 @@
 #include "hellforge.hpp"
+
 #include "Group.h"
 #include "MoveSplineInit.h"
+#include "Player.h"
+#include "SpellAuras.h"
+#include "ScriptedGossip.h"
 
 enum HellforgeWandererData
 {

@@ -37,6 +37,7 @@ EndContentData */
 #include "WorldSession.h"
 #include "PassiveAI.h"
 #include "SpellInfo.h"
+#include "SpellScript.h"
 
 // Ours
 

@@ -3,6 +3,7 @@
 #include "ScriptedCreature.h"
 #include "blackwing_lair.h"
 #include "Player.h"
+#include "SpellScript.h"
 
 enum Events
 {

@@ -2,6 +2,7 @@
 #include "ScriptedCreature.h"
 #include "zulgurub.h"
 #include "Spell.h"
+#include "SpellScript.h"
 
 enum ThekalSays
 {

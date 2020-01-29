@@ -17,6 +17,12 @@
 
 #include "ScriptedEscortAI.h"
 #include "shadowfang_keep.h"
+#include "InstanceScript.h"
+#include "SpellScript.h"
+#include "Player.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "SpellAuraEffects.h"
 
 enum ShadowfangPrisoner
 {

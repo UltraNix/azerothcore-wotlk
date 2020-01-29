@@ -1,6 +1,7 @@
 #include "ThreadedWardenParser.hpp"
 
 #include "WorldSession.h"
+#include "World.h"
 
 namespace WardenParserWin
 {

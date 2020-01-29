@@ -5,6 +5,9 @@
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
 #include "karazhan.h"
+#include "CreatureAI.h"
+#include "CreatureAIImpl.h"
+
 #include <array>
 
 #define MAX_ENCOUNTER      12

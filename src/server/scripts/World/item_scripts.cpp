@@ -34,6 +34,7 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Spell.h"
 #include "Player.h"
+#include "Chat.h"
 
 /*#####
 # item_only_for_flight

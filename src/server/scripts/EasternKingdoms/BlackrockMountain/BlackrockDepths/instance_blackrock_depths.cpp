@@ -22,6 +22,7 @@
 #include "blackrock_depths.h"
 #include "Group.h"
 #include "Hellforge/hellforge.hpp"
+#include "Player.h"
 
 #define TIMER_TOMBOFTHESEVEN    15000
 #define MAX_ENCOUNTER           6

@@ -4,6 +4,7 @@
 #include "Chat.h"
 #include "World.h"
 #include "ArenaTeamMgr.h"
+#include "Player.h"
 
 class arena_commandscript : public CommandScript
 {

@@ -2,6 +2,7 @@
 #include "ScriptedCreature.h"
 #include "deadmines.h"
 #include "GameObjectAI.h"
+#include "SpellInfo.h"
 
 enum SmiteSays
 {

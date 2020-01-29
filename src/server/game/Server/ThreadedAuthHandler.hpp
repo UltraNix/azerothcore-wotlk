@@ -9,6 +9,7 @@
 #include <atomic>
 
 class WorldSocket;
+class WorldSession;
 class World;
 
 struct AuthRequest

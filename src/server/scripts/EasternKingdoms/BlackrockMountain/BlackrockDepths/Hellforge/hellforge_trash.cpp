@@ -1,6 +1,9 @@
 #include "hellforge.hpp"
 
+#include "Player.h"
 #include "Group.h"
+#include "GridNotifiers.h"
+#include "Chat.h"
 
 Position const _gargoyleSpawnPos{ 1104.572f, -252.234f, -48.04752f, 2.191f };
 Position const _entranceSpawnPosition{ 1075.500f, -175.851f, -65.245f, 4.069f };

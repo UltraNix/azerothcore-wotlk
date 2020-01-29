@@ -16,6 +16,8 @@
  */
 
 #include "shadowfang_keep.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
 
 enum NandosSpells
 {

@@ -3,6 +3,9 @@
 
 #include "Common.h"
 
+#include <openssl/ssl.h>
+#include <string>
+
 class HttpPosterSocket
 {
 public:

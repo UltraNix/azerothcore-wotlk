@@ -2,9 +2,12 @@
 
 #include "json.hpp"
 #include "Threading/SyncQueue.hpp"
+#include "Position.h"
 
 #include <vector>
 #include <thread>
+#include <atomic>
+#include <string>
 
 class HttpPosterSocket;
 

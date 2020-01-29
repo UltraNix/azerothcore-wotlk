@@ -16,6 +16,9 @@
  */
 
 #include "shadowfang_keep.h"
+#include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "InstanceScript.h"
 
 enum FenrusSpells
 {

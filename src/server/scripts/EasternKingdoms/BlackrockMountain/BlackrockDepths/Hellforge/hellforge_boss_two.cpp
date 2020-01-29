@@ -3,6 +3,9 @@
 #include "MoveSplineInit.h"
 #include "G3D/Vector3.h"
 #include "GameObjectAI.h"
+#include "Player.h"
+#include "GridNotifiers.h"
+#include "SpellAuraEffects.h"
 
 #include <algorithm>
 #include <array>

@@ -40,6 +40,7 @@ EndScriptData */
 #include "WardenCheckMgr.h"
 #include "WaypointManager.h"
 #include "WorldCache.h"
+#include "GameEventMgr.h"
 
 class reload_commandscript : public CommandScript
 {

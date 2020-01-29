@@ -33,6 +33,7 @@ EndScriptData */
 #include "Player.h"
 #include "Pet.h"
 #include "FollowMovementGenerator.hpp"
+#include "GridNotifiers.h"
 
 struct NpcFlagText
 {

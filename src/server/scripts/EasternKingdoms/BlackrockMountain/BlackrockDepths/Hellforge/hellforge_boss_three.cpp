@@ -1,5 +1,10 @@
 #include "hellforge.hpp"
 
+#include "Position.h"
+#include "Player.h"
+
+#include <array>
+
 constexpr uint32 PLAYER_POSITIONS_SIZE{ 10 };
 const std::array<Position const, PLAYER_POSITIONS_SIZE> _playerPositions
 {

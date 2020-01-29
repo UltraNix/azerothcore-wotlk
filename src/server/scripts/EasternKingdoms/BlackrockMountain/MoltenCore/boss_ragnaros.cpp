@@ -1,6 +1,7 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "molten_core.h"
+#include "Player.h"
 
 enum Texts
 {

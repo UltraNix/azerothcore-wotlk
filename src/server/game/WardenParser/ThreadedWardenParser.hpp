@@ -1,7 +1,13 @@
 #pragma once
 
 #include "WardenDefines.hpp"
+
 #include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+class World;
 
 namespace WardenParserWin
 {

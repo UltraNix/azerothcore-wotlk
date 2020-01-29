@@ -4,6 +4,7 @@
 #include "TransportMgr.h"
 #include "Transport.h"
 #include "Log.h"
+#include "Player.h"
 
 enum ZeppelinTransport
 {

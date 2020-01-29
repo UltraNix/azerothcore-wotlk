@@ -27,6 +27,7 @@ EndScriptData */
 #include "InstanceScript.h"
 #include "zulgurub.h"
 #include "GameObjectAI.h"
+#include "GameEventMgr.h"
 
 #include <array>
 
