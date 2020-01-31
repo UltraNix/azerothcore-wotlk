@@ -673,7 +673,7 @@ class WorldSession
         void HandleAuctionSellItem(WorldPacket& recvData);
         void HandleAuctionRemoveItem(WorldPacket& recvData);
         void HandleAuctionListOwnerItems(WorldPacket& recvData);
-        void HandleAuctionListOwnerItemsEvent(WorldPacket & recvData);
+        void HandleAuctionListOwnerItemsEvent(uint64 guid, uint32 listfrom);
         void HandleAuctionPlaceBid(WorldPacket& recvData);
         void HandleAuctionListPendingSales(WorldPacket& recvData);
 

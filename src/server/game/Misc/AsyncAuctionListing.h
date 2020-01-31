@@ -8,16 +8,17 @@
 class AuctionListOwnerItemsDelayEvent : public BasicEvent
 {
     public:
-        AuctionListOwnerItemsDelayEvent(WorldPacket& d, uint64 guid, bool o) : data(d), playerguid(guid), owner(o) {}
+        AuctionListOwnerItemsDelayEvent(uint64 guid, uint32 listfrom, uint64 playerGuid, bool o) : m_guid(guid), m_listfrom( listfrom ), m_playerguid(playerGuid), m_owner(o) {}
         virtual ~AuctionListOwnerItemsDelayEvent() {}
 
         virtual bool Execute(uint64 e_time, uint32 p_time);
         virtual void Abort(uint64 e_time) {}
 
     private:
-        WorldPacket data;
-        uint64 playerguid;
-        bool owner;
+        uint64 m_guid;
+        uint32 m_listfrom;
+        uint64 m_playerguid;
+        bool   m_owner;
 };
 
 class AuctionListItemsDelayEvent
