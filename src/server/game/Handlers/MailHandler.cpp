@@ -431,7 +431,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recvData)
     //we can return mail now
     //so firstly delete the old one
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
-        
+
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_MAIL_BY_ID);
     stmt->setUInt32(0, mailId);
     trans->Append(stmt);
@@ -768,6 +768,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recvData)
         if (!mailTemplateEntry)
         {
             player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
+            delete *bodyItem;
             return;
         }
 
