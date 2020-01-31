@@ -291,6 +291,18 @@ void WorldSession::HandleCalendarAddEvent(WorldPacket& recvData)
 
     SetCalendarEventCreationCooldown(time(nullptr) + CALENDAR_CREATE_EVENT_COOLDOWN);
 
+    CalendarEventStore playerEvents = sCalendarMgr->GetPlayerEvents(guid);
+    uint32 count = 0;
+    for (CalendarEventStore::const_iterator itr = playerEvents.begin(); itr != playerEvents.end(); ++itr)
+    {
+        // 48 hour buffer to prevent someone from creating CALENDAR_MAX_INVITES events every second at current GetGameTime
+        if ((*itr)->GetEventTime() + time_t(172800L) < sWorld->GetGameTime())
+            continue;
+
+        if (++count >= CALENDAR_MAX_INVITES)
+            return;
+    }
+
     CalendarEvent* calendarEvent = new CalendarEvent(sCalendarMgr->GetFreeEventId(), guid, 0, CalendarEventType(type), dungeonId,
         time_t(eventPackedTime), flags, time_t(unkPackedTime), title, description);
 
