@@ -1,0 +1,2 @@
+UPDATE `smart_scripts` SET `event_type`='61' WHERE  `entryorguid` IN (176308, 176304) AND `source_type`=1 AND `id`=3 AND `link`=0;
+UPDATE `smart_scripts` SET `link`='3' WHERE  `entryorguid` IN (176308, 176304) AND `source_type`=1 AND `id`=2 AND `link`=0;
