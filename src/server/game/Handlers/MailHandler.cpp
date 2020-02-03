@@ -90,15 +90,15 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         recvData >> itemGUIDs[i];
     }
 
-    if (utf8::is_valid(subject.begin(), subject.end()))
+    if (!utf8::is_valid(subject.begin(), subject.end()))
     {
-        sLog->outError("Player %s tried to send mail with a subject that has invalid utf8 sequence, blocking.", GetPlayer()->GetName());
+        sLog->outError("Player %s tried to send mail with a subject that has invalid utf8 sequence, blocking.", GetPlayer()->GetName().c_str());
         return;
     }
 
-    if (utf8::is_valid(body.begin(), body.end()))
+    if (!utf8::is_valid(body.begin(), body.end()))
     {
-        sLog->outError("Player %s tried to send mail with a body that has invalid utf8 sequence, blocking.", GetPlayer()->GetName());
+        sLog->outError("Player %s tried to send mail with a body that has invalid utf8 sequence, blocking.", GetPlayer()->GetName().c_str());
         return;
     }
 
