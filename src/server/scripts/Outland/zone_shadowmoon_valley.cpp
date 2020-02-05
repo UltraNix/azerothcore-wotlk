@@ -1323,20 +1323,19 @@ public:
         {
             if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
             {
-                Player* player = killer->ToPlayer();
-                if (!player)
-                    if (Unit* owner = killer->GetOwner())
-                        player = owner->ToPlayer();
-
+                Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (player)
                 {
-                    LordIllidan->AI()->Talk(11, player);
+                    if (LordIllidan->IsAIEnabled)
+                        LordIllidan->AI()->Talk(11, player);
                     player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
                 }
 
                 if (Creature* Auralion = me->FindNearestCreature(22073, 50))
-                    Auralion->AI()->Talk(1);
-                LordIllidan->AI()->EnterEvadeMode();
+                    if (Auralion->IsAIEnabled)
+                        Auralion->AI()->Talk(1);
+                if (LordIllidan->IsAIEnabled)
+                    LordIllidan->AI()->EnterEvadeMode();
             }
         }
     };
