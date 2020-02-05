@@ -1323,27 +1323,21 @@ public:
         {
             if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
             {
-                LordIllidan->AI()->Talk(11);
+                Player* player = killer->ToPlayer();
+                if (!player)
+                    if (Unit* owner = killer->GetOwner())
+                        player = owner->ToPlayer();
+
+                if (player)
+                {
+                    LordIllidan->AI()->Talk(11, player);
+                    player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
+                }
+
                 if (Creature* Auralion = me->FindNearestCreature(22073, 50))
                     Auralion->AI()->Talk(1);
-            }
-            switch (killer->GetTypeId())
-            {
-                case TYPEID_UNIT:
-                    if (Unit* owner = killer->GetOwner())
-                        if (Player* player = owner->ToPlayer())
-                            player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
-                    break;
-                case TYPEID_PLAYER:
-                    if (Player* player = killer->ToPlayer())
-                        player->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, me);
-                    break;
-                default:
-                    break;
-            }
-
-            if (Creature* LordIllidan = (ObjectAccessor::GetCreature(*me, LordIllidanGUID)))
                 LordIllidan->AI()->EnterEvadeMode();
+            }
         }
     };
 };

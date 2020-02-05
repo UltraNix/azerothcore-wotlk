@@ -1,0 +1,2 @@
+-- DB/Quest: Battle of the Crimson Watch - correct text to include players name https://github.com/SunwellTracker/issues/issues/2865
+UPDATE `creature_text` SET `text` = "So you have defeated the Crimson Sigil. You now seek to challenge my rule? Not even Arthas could defeat me, yet you dare to even harbor such thoughts? Then I say to you, come! Come $N! The Black Temple awaits..." WHERE `groupid` = 11 AND `entry` = 22083;
