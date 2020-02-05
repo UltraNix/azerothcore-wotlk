@@ -314,7 +314,11 @@ void World::AddSession(WorldSession* s)
         }
     }
 
-    m_sessions[s->GetAccountId()] = s;
+    auto accountId = s->GetAccountId();
+    m_sessions[accountId] = s;
+
+    if ( getBoolConfig( CONFIG_ACCOUNT_HISTORY ) )
+        AddAccountHistory( accountId, s->GetRemoteAddress(), time( nullptr ) );
 
     uint32 Sessions = GetActiveAndQueuedSessionCount();
     uint32 pLimit = GetPlayerAmountLimit();
