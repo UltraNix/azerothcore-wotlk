@@ -5063,6 +5063,17 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             break;
+        // Execute (base spells)
+        case 5308:
+        case 20658:
+        case 20660:
+        case 20661:
+        case 25234:
+        case 25236:
+        case 47470:
+        case 47471:
+            spellInfo->AttributesEx6 |= SPELL_ATTR6_LIMIT_PCT_DAMAGE_MODS;
+            break;
         // Slam
         case 1464:
         case 8820:
