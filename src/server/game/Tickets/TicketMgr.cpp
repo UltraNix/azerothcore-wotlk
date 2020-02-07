@@ -223,6 +223,12 @@ void GmTicket::SetCompleted(uint64 completedBy)
         RelayRequest request{ TYPE_TICKETS_CLOSED, data };
         GetRelay().Add(request);
     }
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GM_TICKET_COMPLETE);
+    stmt->setBool(0, completedBy ? true : false);
+    stmt->setString(1, _response);
+    stmt->setUInt32(2, _id);
+    CharacterDatabase.Execute(stmt);
 }
 
 void GmTicket::SetPosition(uint32 mapId, float x, float y, float z)

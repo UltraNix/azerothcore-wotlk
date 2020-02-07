@@ -233,12 +233,10 @@ public:
         if (Player* player = ticket->GetPlayer())
             ticket->SendResponse(player->GetSession());
 
-        SQLTransaction trans = SQLTransaction(NULL);
         if (Player * player = handler->GetSession()->GetPlayer())
             ticket->SetCompleted(player->GetGUID());
         else
             ticket->SetCompleted(0);
-        ticket->SaveToDB(trans);
 
         sTicketMgr->UpdateLastChange();
         return true;
