@@ -483,11 +483,9 @@ public:
             return true;
         }
 
-        SQLTransaction trans = SQLTransaction(NULL);
         ticket->AppendResponse(response);
         if (newLine)
             ticket->AppendResponse("\n");
-        ticket->SaveToDB(trans);
 
         return true;
     }
