@@ -7886,6 +7886,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 59043:
             spellInfo->procChance = 10;
             break;
+        // Living Ice Crystals
+        case 60526:
+            spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MAGIC;
+            break;
 
         // ///////////////////////////////////////////
         // ////////////////EVENTS/////////////////////
