@@ -1,0 +1,1 @@
+UPDATE `script_waypoint` SET `location_z`='100' WHERE  `entry`=23348 AND `pointid`=11;
