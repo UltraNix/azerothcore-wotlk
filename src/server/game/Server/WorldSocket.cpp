@@ -999,6 +999,9 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_Session->LoadTutorialsData();
         m_Session->ReadAddonsInfo( recvPacket );
 
+        if ( sWorld->getBoolConfig( CONFIG_ACCOUNT_HISTORY ) )
+            sWorld->AddAccountHistory( id, std::move( address ), time( nullptr ) );
+
         // Check VPN connection
         if ( sWorld->getBoolConfig( CONFIG_LATENCY_RECORD ) )
         {
