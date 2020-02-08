@@ -981,52 +981,42 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     LoginDatabase.Execute(stmt);
 
-    //! We are on other thread, we need to double check
+    // NOTE ATM the socket is single-threaded, have this in mind ...
+    ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, skipQueue, premiumServices), nullptr);
+
+    m_Crypt.Init(&k);
+
+    m_Session->LoadGlobalAccountData();
+    m_Session->LoadTutorialsData();
+    m_Session->ReadAddonsInfo(recvPacket);
+
+    if (sWorld->getBoolConfig(CONFIG_ACCOUNT_HISTORY))
+        sWorld->AddAccountHistory(id, std::move(address), time(nullptr));
+
+    // Check VPN connection
+    if (sWorld->getBoolConfig(CONFIG_LATENCY_RECORD))
     {
-        ACE_GUARD_RETURN( LockType, CloseGuard, m_OutBufferLock, nullptr );
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_VPN);
 
-        if ( IsClosed() )
-            return nullptr;
-
-        ACE_GUARD_RETURN( LockType, SessionGuard, m_SessionLock, nullptr );
-
-        // NOTE ATM the socket is single-threaded, have this in mind ...
-        ACE_NEW_RETURN( m_Session, WorldSession( id, this, AccountTypes( security ), expansion, mutetime, locale, recruiter, isRecruiter, skipQueue, premiumServices ), nullptr );
-
-        m_Crypt.Init( &k );
-
-        m_Session->LoadGlobalAccountData();
-        m_Session->LoadTutorialsData();
-        m_Session->ReadAddonsInfo( recvPacket );
-
-        if ( sWorld->getBoolConfig( CONFIG_ACCOUNT_HISTORY ) )
-            sWorld->AddAccountHistory( id, std::move( address ), time( nullptr ) );
-
-        // Check VPN connection
-        if ( sWorld->getBoolConfig( CONFIG_LATENCY_RECORD ) )
+        if (PreparedQueryResult vpnList = LoginDatabase.Query(stmt))
         {
-            stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_VPN );
-
-            if ( PreparedQueryResult vpnList = LoginDatabase.Query( stmt ) )
+            do
             {
-                do
-                {
-                    Field * fields = vpnList->Fetch();
-                    std::string vpnIP = fields[ 0 ].GetString();
+                Field* fields = vpnList->Fetch();
+                std::string vpnIP = fields[0].GetString();
 
-                    if ( vpnIP != GetRemoteAddress() )
-                        continue;
+                if (vpnIP != GetRemoteAddress())
+                    continue;
 
-                    m_Session->setVPNconnection( true );
+                m_Session->setVPNconnection(true);
 
-                } while ( vpnList->NextRow() );
-            }
+            } while (vpnList->NextRow());
         }
-
-        // Initialize Warden system only if it is enabled by config
-        if ( sWorld->getBoolConfig( CONFIG_WARDEN_ENABLED ) )
-            m_Session->InitWarden( &k, os );
     }
+
+    // Initialize Warden system only if it is enabled by config
+    if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
+        m_Session->InitWarden(&k, os);
 
     return m_Session;
 }
