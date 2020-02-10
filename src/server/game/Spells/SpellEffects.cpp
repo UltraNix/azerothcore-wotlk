@@ -2200,7 +2200,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
             return;
         else if (goInfo->type == GAMEOBJECT_TYPE_CHEST)
         {
-            if (m_caster->GetMap() && m_caster->GetMap()->IsDungeon() && m_caster->GetMap()->GetPlayersCountExceptGMs() < 2)
+            if (m_caster->GetMap()->IsDungeon() && m_caster->GetMap()->GetPlayersCountExceptGMs() < 2)
                 sWorld->SendGMText(LANG_DUNGEON_CHEST_CHEATER, m_caster->GetName().c_str());
         }
         lockId = goInfo->GetLockId();
