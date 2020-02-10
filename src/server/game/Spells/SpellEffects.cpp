@@ -2198,6 +2198,11 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
         // these objects must have been spawned by outdoorpvp!
         else if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && sOutdoorPvPMgr->HandleOpenGo(player, gameObjTarget->GetGUID()))
             return;
+        else if (goInfo->type == GAMEOBJECT_TYPE_CHEST)
+        {
+            if (m_caster->GetMap() && m_caster->GetMap()->IsDungeon() && m_caster->GetMap()->GetPlayersCountExceptGMs() < 2)
+                sWorld->SendGMText(LANG_DUNGEON_CHEST_CHEATER, m_caster->GetName().c_str());
+        }
         lockId = goInfo->GetLockId();
         guid = gameObjTarget->GetGUID();
     }
