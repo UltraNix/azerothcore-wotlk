@@ -195,7 +195,6 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
 
 void WardenWin::RequestData()
 {
-    return;
     sLog->outDebug(LOG_FILTER_WARDEN, "Warden::RequestData");
 
     // If all checks were done, fill the todo list again
