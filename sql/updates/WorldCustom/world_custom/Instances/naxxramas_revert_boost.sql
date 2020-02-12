@@ -28,7 +28,7 @@ UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 10, `mindmg
 UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 3, `mindmg` = 464, `maxdmg` = 604, `speed_walk` = 1 WHERE `entry` = 29989; -- Spectral Horse (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 6, `mindmg` = 464, `maxdmg` = 604, `speed_walk` = 1 WHERE `entry` = 29990; -- Spectral Death Knight (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 70, `health_mod` = 935, `mindmg` = 509, `maxdmg` = 683, `speed_walk` = 1 WHERE `entry` = 29991; -- Sapphiron (1)
-UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 0, `mindmg` = 422, `maxdmg` = 586, `speed_walk` = 0 WHERE `entry` = 30015; -- Soldier of the Frozen Wastes (1)
+UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 0.3492, `mindmg` = 422, `maxdmg` = 586, `speed_walk` = 0 WHERE `entry` = 30015; -- Soldier of the Frozen Wastes (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 12, `mindmg` = 422, `maxdmg` = 586, `speed_walk` = 0 WHERE `entry` = 30018; -- Soul Weaver (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 16, `mindmg` = 422, `maxdmg` = 586, `speed_walk` = 0 WHERE `entry` = 30048; -- Unstoppable Abomination (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 13, `health_mod` = 500, `mindmg` = 422, `maxdmg` = 586, `speed_walk` = 1 WHERE `entry` = 30057; -- Guardian of Icecrown (1)
