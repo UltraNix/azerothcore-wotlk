@@ -18772,7 +18772,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     for (uint32 type = CLIENT_ACTION_TYPE_PARTY_INVITE; type < CLIENT_ACTION_TYPE_MAX; ++type)
     {
-        auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CLIENT_ACTION_COUNTER_DATA);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CLIENT_ACTION_COUNTER_DATA);
         //SELECT ActionType, ActionCount, LastActionTimestamp FROM client_action_count WHERE AccountId = ?
         stmt->setUInt32(0, GetSession()->GetAccountId());
         stmt->setUInt32(1, type);
@@ -28443,10 +28443,7 @@ bool Player::tryWhisperToWebCommand(std::string to, std::string msg)
 void Player::OnClientAction(ClientActionType type)
 {
     if (!sWorld->getIntConfig(CONFIG_CLIENT_ACTION_SYSTEM))
-    {
-        std::cout << "system wylaczony" << std::endl;
         return;
-    }
 
     if (type >= CLIENT_ACTION_TYPE_MAX)
         return;
