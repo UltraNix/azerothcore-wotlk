@@ -45,3 +45,7 @@ UPDATE `creature_template` SET `dmg_multiplier` = 50, `health_mod` = 1400, `mind
 UPDATE `creature_template` SET `dmg_multiplier` = 35, `health_mod` = 45, `mindmg` = 417, `maxdmg` = 582, `speed_walk` = 1 WHERE `entry` = 31750; -- Nexus Lord (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 1, `health_mod` = 30, `mindmg` = 0, `maxdmg` = 0, `speed_walk` = 1 WHERE `entry` = 31751; -- Scion of Eternity (1)
 UPDATE `creature_template` SET `dmg_multiplier` = 1, `health_mod` = 3, `mindmg` = 0, `maxdmg` = 0, `speed_walk` = 1 WHERE `entry` = 32187; -- Power Spark (1)
+UPDATE `creature_template` SET `dmg_multiplier` = 45, `health_mod` = 550, `mindmg` = 509, `maxdmg` = 683, `speed_walk` = 1 WHERE `entry` = 31311; -- Sartharion (1)
+UPDATE `creature_template` SET `dmg_multiplier` = 45, `health_mod` = 160, `mindmg` = 509, `maxdmg` = 683, `speed_walk` = 1 WHERE `entry` = 31520; -- Shadron (1)
+UPDATE `creature_template` SET `dmg_multiplier` = 45, `health_mod` = 160, `mindmg` = 509, `maxdmg` = 683, `speed_walk` = 1 WHERE `entry` = 31534; -- Tenebron (1)
+UPDATE `creature_template` SET `dmg_multiplier` = 45, `health_mod` = 160, `mindmg` = 509, `maxdmg` = 683, `speed_walk` = 1 WHERE `entry` = 31535; -- Vesperon (1)
