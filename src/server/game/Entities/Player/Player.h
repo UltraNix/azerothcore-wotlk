@@ -33,6 +33,7 @@
 #include "WorldSession.h"
 #include "SpellAuras.h"
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -96,6 +97,26 @@ enum PlayerSpellState
     PLAYERSPELL_NEW       = 2,
     PLAYERSPELL_REMOVED   = 3,
     PLAYERSPELL_TEMPORARY = 4
+};
+
+enum ClientActionType
+{
+    CLIENT_ACTION_TYPE_PARTY_INVITE,
+    CLIENT_ACTION_TYPE_MAX
+};
+
+enum ClientActionPunishPolicy
+{
+    CLIENT_ACTION_POLICY_BAN            = 0x01,
+    CLIENT_ACTION_POLICY_KICK           = 0x02,
+    CLIENT_ACTION_POLICY_INFORM_GMS     = 0x04
+};
+
+struct ClientActionData
+{
+    uint32 counter = 0;
+    std::chrono::system_clock::time_point lastActionTime = std::chrono::system_clock::now();
+    uint32 operator ++();
 };
 
 struct PlayerSpell
@@ -2727,6 +2748,8 @@ class Player : public Unit, public GridObject<Player>
 
         static bool ShouldUpdateSkillValueForTooltip(uint32 skillId);
 
+        void OnClientAction(ClientActionType /*type*/);
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -3092,6 +3115,12 @@ class Player : public Unit, public GridObject<Player>
 
         PetSlotData m_petSlots[ PET_SAVE_LAST_STABLE_SLOT + 2 ] = {};
         ConsecutiveKillsMap m_consecutiveKills;
+
+        //! tracks how many times player did specific action that we track
+        std::unordered_map<ClientActionType /*type*/, ClientActionData> m_playerActionCounterStore;
+        bool m_playerActionCounterSaved;
+
+        TaskScheduler m_taskScheduler;
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);

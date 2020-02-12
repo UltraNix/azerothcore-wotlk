@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS `client_action_count`
+(
+	`AccountId` INT UNSIGNED NOT NULL DEFAULT 0 PRIMARY KEY,
+	`ActionType` INT NOT NULL DEFAULT 0,
+	`ActionCount` INT NOT NULL DEFAULT 0,
+	`LastActionTimestamp` INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

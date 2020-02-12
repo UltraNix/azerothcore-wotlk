@@ -139,6 +139,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         return;
     }
 
+    invitingPlayer->OnClientAction(CLIENT_ACTION_TYPE_PARTY_INVITE);
+
     Group* group = invitingPlayer->GetGroup();
     if (group && group->isBGGroup())
         group = invitingPlayer->GetOriginalGroup();

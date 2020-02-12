@@ -1471,6 +1471,11 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_NAXXRAMAS_MEETING_STONE_SANCTUARY] = sConfigMgr->GetBoolDefault("NaxxramasSanctuary", 0);
     m_bool_configs[CONFIG_SARTHARION_BOOST] = sConfigMgr->GetBoolDefault("SartharionBoost.Enable", 0);
     m_bool_configs[CONFIG_BATTLEGROUNDS_SEPARATE_TWINK_QUEUES] = sConfigMgr->GetBoolDefault("Battlegrounds.Separate.Twink.Queues", false);
+    m_int_configs[CONFIG_CLIENT_ACTION_PUNISH_POLICY] = sConfigMgr->GetIntDefault("ClientActionOffense.Policy", 4);
+    m_int_configs[CONFIG_CLIENT_ACTION_INVITE_MAX_AMOUNT] = sConfigMgr->GetIntDefault("ClientAction.Invites.MaximumAmount", 150);
+    //! time is in minutes
+    m_int_configs[CONFIG_CLIENT_ACTION_INVITE_RESET_TIME] = sConfigMgr->GetIntDefault("ClientAction.Invites.ResetTime", 5);
+    m_int_configs[CONFIG_CLIENT_ACTION_SYSTEM] = sConfigMgr->GetIntDefault("ClientAction.Enable", 0);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
@@ -2137,6 +2142,8 @@ void World::SetInitialWorldSettings()
 
         CleanupWardenDatabase();
     }
+
+    CharacterDatabase.Execute("DELETE FROM client_action_count");
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
     sLog->outString();

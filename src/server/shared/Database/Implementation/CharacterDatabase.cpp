@@ -609,4 +609,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_WARDEN_CHECKS_OLD_COUNT, "SELECT count(*) FROM warden_lua_failures WHERE FailureDate <= ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_WARDEN_CHECKS_TOO_OLD, "DELETE FROM warden_lua_failures WHERE FailureDate <= ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_WARDEN_CHECK_FAILURE, "INSERT INTO warden_lua_failures (AccountId, CharacterGuid, CharacterName, FailedCheck, FailureDate, CallStack) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+
+    // Client action counter tracking
+    PrepareStatement(CHAR_REP_CLIENT_ACTION_COUNTER_DATA, "REPLACE INTO client_action_count (AccountId, ActionType, ActionCount, LastActionTimestamp) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_CLIENT_ACTION_COUNTER_DATA, "SELECT ActionCount, LastActionTimestamp FROM client_action_count WHERE AccountId = ? AND ActionType = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_CLIENT_ACTION_COUNTER_DATA, "DELETE FROM client_action_count WHERE AccountId = ?", CONNECTION_ASYNC);
 }

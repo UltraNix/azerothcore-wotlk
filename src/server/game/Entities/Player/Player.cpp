@@ -960,6 +960,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
         m_charmAISpells[i] = 0;
 
     m_applyResilience = true;
+    m_playerActionCounterStore.clear();
+    m_playerActionCounterSaved = false;
 }
 
 Player::~Player()
@@ -1622,6 +1624,7 @@ void Player::Update(uint32 p_time)
         m_nextMailDelivereTime = 0;
     }
 
+    m_taskScheduler.Update(p_time);
     //used to implement delayed far teleports
     SetMustDelayTeleport(true);
     Unit::Update(p_time);
@@ -2656,6 +2659,44 @@ void Player::RemoveFromWorld()
     ///- It will crash when updating the ObjectAccessor
     ///- The player should only be removed when logging out
     Unit::RemoveFromWorld();
+
+    m_taskScheduler.CancelAll();
+    if (!m_playerActionCounterSaved)
+    {
+        m_playerActionCounterSaved = true;
+        for (uint32 type = CLIENT_ACTION_TYPE_PARTY_INVITE; type < CLIENT_ACTION_TYPE_MAX; ++type)
+        {
+            if (m_playerActionCounterStore.find(static_cast<ClientActionType>(type)) != m_playerActionCounterStore.end())
+            {
+                //! save data to database if timer didnt pass yet
+                ClientActionData const& data = m_playerActionCounterStore[static_cast<ClientActionType>(type)];
+                auto now = std::chrono::system_clock::now();
+                std::chrono::duration<double> difference = now - data.lastActionTime;
+
+                //! ToDo: in case of additional actions being tracked, we will need a different timer
+                //! for each type, right now we statically use action invite timer
+                uint32 resetTime = sWorld->getIntConfig(CONFIG_CLIENT_ACTION_INVITE_RESET_TIME) * MINUTE;
+                //! If last action was performed less than our specified timer
+                //! then we save that value to database, in case offender relogs on different character
+                PreparedStatement* stmt = nullptr;
+                if (difference.count() < resetTime)
+                {
+                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CLIENT_ACTION_COUNTER_DATA);
+                    stmt->setUInt32(0, GetSession()->GetAccountId());
+                    stmt->setUInt32(1, type);
+                    stmt->setUInt32(2, data.counter);
+                    stmt->setUInt64(3, time(nullptr));
+                }
+                else
+                {
+                    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CLIENT_ACTION_COUNTER_DATA);
+                    stmt->setUInt32(0, GetSession()->GetAccountId());
+                }
+
+                CharacterDatabase.Execute(stmt);
+            }
+        }
+    }
 
     for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
     {
@@ -18714,7 +18755,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         SetFlag(UNIT_FIELD_AURASTATE, 1<<(AURA_STATE_HEALTH_ABOVE_75_PERCENT-1));
 
     // unapply aura stats if dont meet requirements
-     AuraApplicationMap const& Auras = GetAppliedAuras();
+    AuraApplicationMap const& Auras = GetAppliedAuras();
     for (AuraApplicationMap::const_iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
     {
         // we assume that all auras are applied now, aurastate was modfied MANUALY preventing any apply/unapply state switching
@@ -18728,6 +18769,26 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         if (!HasAuraState((AuraStateType)m_spellInfo->CasterAuraState))
             aura->HandleAllEffects(itr->second, AURA_EFFECT_HANDLE_REAL, false);
     }
+
+    for (uint32 type = CLIENT_ACTION_TYPE_PARTY_INVITE; type < CLIENT_ACTION_TYPE_MAX; ++type)
+    {
+        auto stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CLIENT_ACTION_COUNTER_DATA);
+        //SELECT ActionType, ActionCount, LastActionTimestamp FROM client_action_count WHERE AccountId = ?
+        stmt->setUInt32(0, GetSession()->GetAccountId());
+        stmt->setUInt32(1, type);
+        auto result = CharacterDatabase.Query(stmt);
+        if (result)
+        {
+            do
+            {
+                Field* field = result->Fetch();
+                uint32 actionCount = field[0].GetUInt32();
+                time_t lastActionTime = field[1].GetUInt32();
+                m_playerActionCounterStore[static_cast<ClientActionType>(type)] = { actionCount, std::chrono::system_clock::from_time_t(lastActionTime) };
+            } while (result->NextRow());
+        }
+    }
+
     return true;
 }
 
@@ -28379,3 +28440,57 @@ bool Player::tryWhisperToWebCommand(std::string to, std::string msg)
     return true;
 }
 
+void Player::OnClientAction(ClientActionType type)
+{
+    if (!sWorld->getIntConfig(CONFIG_CLIENT_ACTION_SYSTEM))
+    {
+        std::cout << "system wylaczony" << std::endl;
+        return;
+    }
+
+    if (type >= CLIENT_ACTION_TYPE_MAX)
+        return;
+
+    switch (type)
+    {
+        case CLIENT_ACTION_TYPE_PARTY_INVITE:
+        {
+            auto now = std::chrono::system_clock::now();
+            if (m_playerActionCounterStore.find(type) == m_playerActionCounterStore.end())
+            {
+                m_playerActionCounterStore[type] = { 1, now };
+                m_taskScheduler.Schedule(Minutes(sWorld->getIntConfig(CONFIG_CLIENT_ACTION_INVITE_RESET_TIME)), [&](TaskContext func)
+                {
+                    m_playerActionCounterStore.clear();
+                    func.Repeat();
+                });
+                return;
+            }
+
+            uint32 currentCount = ++m_playerActionCounterStore[type];
+            m_playerActionCounterStore[type] = { currentCount, now };
+            if (currentCount >= sWorld->getIntConfig(CONFIG_CLIENT_ACTION_INVITE_MAX_AMOUNT))
+            {
+                uint32 ClientActionPolicy = sWorld->getIntConfig(CONFIG_CLIENT_ACTION_PUNISH_POLICY);
+                if ((ClientActionPolicy & CLIENT_ACTION_POLICY_BAN) != 0)
+                {
+                    std::string accountName;
+                    AccountMgr::GetName(GetSession()->GetAccountId(), accountName);
+                    sWorld->BanAccount(BAN_ACCOUNT, accountName, -1, "Gold selling", "Frosthold");
+                }
+                else if ((ClientActionPolicy & CLIENT_ACTION_POLICY_KICK) != 0)
+                    GetSession()->KickPlayer(true);
+                else // inform gms
+                    sWorld->SendGMText(LANG_INVITE_SPAMM_GM_NOTICE, GetName(), currentCount);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+uint32 ClientActionData::operator++()
+{
+    return ++counter;
+}
