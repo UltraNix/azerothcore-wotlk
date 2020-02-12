@@ -2685,11 +2685,11 @@ void Player::RemoveFromWorld()
                     stmt->setUInt32(0, GetSession()->GetAccountId());
                     stmt->setUInt32(1, type);
                     stmt->setUInt32(2, data.counter);
-                    stmt->setUInt64(3, time(nullptr));
+                    stmt->setUInt64(3, std::chrono::system_clock::to_time_t(data.lastActionTime));
                 }
                 else
                 {
-                    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CLIENT_ACTION_COUNTER_DATA);
+                    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CLIENT_ACTION_COUNTER_DATA);
                     stmt->setUInt32(0, GetSession()->GetAccountId());
                 }
 
@@ -18784,7 +18784,12 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
                 Field* field = result->Fetch();
                 uint32 actionCount = field[0].GetUInt32();
                 time_t lastActionTime = field[1].GetUInt32();
-                m_playerActionCounterStore[static_cast<ClientActionType>(type)] = { actionCount, std::chrono::system_clock::from_time_t(lastActionTime) };
+                auto now = std::chrono::system_clock::now();
+                auto cLastActionTime = std::chrono::system_clock::from_time_t(lastActionTime);
+                std::chrono::duration<double> difference = now - cLastActionTime;
+
+                if (difference.count() < double(60 * MINUTE))
+                    m_playerActionCounterStore[static_cast<ClientActionType>(type)] = { actionCount, cLastActionTime };
             } while (result->NextRow());
         }
     }
