@@ -113,7 +113,7 @@ m_Seed(static_cast<uint32> (rand32())), isPacketLoggingEnabled(false)
     msg_queue()->high_water_mark(8*1024*1024);
     msg_queue()->low_water_mark(8*1024*1024);
 
-    packetLog = std::make_shared<PacketLog>();
+    packetLog = std::make_unique<PacketLog>();
 }
 
 WorldSocket::~WorldSocket (void)
@@ -170,8 +170,8 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
         return -1;
 
     // Dump outgoing packet.
-    if (packetLog.get()->CanLogPacket() && isPacketLoggingEnabled)
-        packetLog.get()->LogPacket(pct, SERVER_TO_CLIENT);
+    if (packetLog->CanLogPacket() && isPacketLoggingEnabled)
+        packetLog->LogPacket(pct, SERVER_TO_CLIENT);
 
 
     ServerPktHeader header(pct.size()+2, pct.GetOpcode());
@@ -682,8 +682,8 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
         return -1;
 
     // Dump received packet.
-    if (packetLog.get()->CanLogPacket() && isPacketLoggingEnabled)
-        packetLog.get()->LogPacket(*new_pct, CLIENT_TO_SERVER);
+    if (packetLog->CanLogPacket() && isPacketLoggingEnabled)
+        packetLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
 
     try
     {
@@ -899,7 +899,6 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
             Field* field = result->Fetch();
             uint32 atLoginFlags = field[0].GetUInt16();
-            std::cout << "at Login Flags to: " << atLoginFlags << std::endl;
             if ((atLoginFlags & AT_LOGIN_LOG_PACKETS) != 0)
             {
                 packetLog.get()->Initialize(account);

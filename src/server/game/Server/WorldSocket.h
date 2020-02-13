@@ -215,7 +215,7 @@ class WorldSocket : public WorldHandler
         uint32 m_Seed;
 
         bool isPacketLoggingEnabled;
-        std::shared_ptr<PacketLog> packetLog;
+        std::unique_ptr<PacketLog> packetLog;
 };
 
 #endif  /* _WORLDSOCKET_H */
