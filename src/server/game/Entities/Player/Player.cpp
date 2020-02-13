@@ -28483,7 +28483,7 @@ void Player::OnClientAction(ClientActionType type)
                 else if ((ClientActionPolicy & CLIENT_ACTION_POLICY_KICK) != 0)
                     GetSession()->KickPlayer(true);
                 else // inform gms
-                    sWorld->SendGMText(LANG_INVITE_SPAMM_GM_NOTICE, GetName(), currentCount);
+                    sWorld->SendGMText(LANG_INVITE_SPAMM_GM_NOTICE, GetName().c_str(), currentCount);
             }
             break;
         }
