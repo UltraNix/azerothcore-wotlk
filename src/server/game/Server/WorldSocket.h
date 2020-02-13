@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,6 +40,8 @@
 
 #include "Common.h"
 #include "AuthCrypt.h"
+
+#include "PacketLog.h"
 
 class ACE_Message_Block;
 class WorldPacket;
@@ -212,6 +214,8 @@ class WorldSocket : public WorldHandler
 
         uint32 m_Seed;
 
+        bool isPacketLoggingEnabled;
+        std::shared_ptr<PacketLog> packetLog;
 };
 
 #endif  /* _WORLDSOCKET_H */

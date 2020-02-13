@@ -47,6 +47,8 @@
 #include "AccountMgr.h"
 #include "ThreadedAuthHandler.hpp"
 
+#include <memory>
+
 #if defined(__GNUC__)
 #pragma pack(1)
 #else
@@ -104,12 +106,14 @@ WorldSocket::WorldSocket (void): WorldHandler(),
 m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
 m_RecvWPct(0), m_RecvPct(), m_Header(sizeof (ClientPktHeader)),
 m_OutBuffer(0), m_OutBufferSize(65536), m_OutActive(false),
-m_Seed(static_cast<uint32> (rand32()))
+m_Seed(static_cast<uint32> (rand32())), isPacketLoggingEnabled(false)
 {
     reference_counting_policy().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
     msg_queue()->high_water_mark(8*1024*1024);
     msg_queue()->low_water_mark(8*1024*1024);
+
+    packetLog = std::make_shared<PacketLog>();
 }
 
 WorldSocket::~WorldSocket (void)
@@ -166,8 +170,9 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
         return -1;
 
     // Dump outgoing packet.
-    if (sPacketLog->CanLogPacket())
-        sPacketLog->LogPacket(pct, SERVER_TO_CLIENT);
+    if (packetLog.get()->CanLogPacket() && isPacketLoggingEnabled)
+        packetLog.get()->LogPacket(pct, SERVER_TO_CLIENT);
+
 
     ServerPktHeader header(pct.size()+2, pct.GetOpcode());
     m_Crypt.EncryptSend ((uint8*)header.header, header.getHeaderLength());
@@ -677,8 +682,8 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
         return -1;
 
     // Dump received packet.
-    if (sPacketLog->CanLogPacket())
-        sPacketLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
+    if (packetLog.get()->CanLogPacket() && isPacketLoggingEnabled)
+        packetLog.get()->LogPacket(*new_pct, CLIENT_TO_SERVER);
 
     try
     {
@@ -879,6 +884,28 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         fields = result->Fetch();
         security = fields[0].GetUInt8();
         skipQueue = true;
+    }
+
+    //! Fetch ALL characters
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_AT_LOGIN_BY_ACC_ID);
+    stmt->setUInt32(0, id/*accountId*/);
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+    {
+        do
+        {
+            //! One character is marked, track everyone on that account
+            if (isPacketLoggingEnabled)
+                break;
+
+            Field* field = result->Fetch();
+            uint32 atLoginFlags = field[0].GetUInt16();
+            std::cout << "at Login Flags to: " << atLoginFlags << std::endl;
+            if ((atLoginFlags & AT_LOGIN_LOG_PACKETS) != 0)
+            {
+                packetLog.get()->Initialize(account);
+                isPacketLoggingEnabled = true;
+            }
+        } while (result->NextRow());
     }
 
     // Re-check account ban (same check as in realmd)

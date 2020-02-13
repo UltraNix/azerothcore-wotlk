@@ -614,4 +614,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_REP_CLIENT_ACTION_COUNTER_DATA, "REPLACE INTO client_action_count (AccountId, ActionType, ActionCount, LastActionTimestamp) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CLIENT_ACTION_COUNTER_DATA, "SELECT ActionCount, LastActionTimestamp FROM client_action_count WHERE AccountId = ? AND ActionType = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_CLIENT_ACTION_COUNTER_DATA, "DELETE FROM client_action_count WHERE AccountId = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_CHARACTER_AT_LOGIN_BY_ACC_ID, "SELECT at_login FROM characters WHERE account = ?", CONNECTION_SYNCH);
 }

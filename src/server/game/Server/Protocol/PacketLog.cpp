@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C) 2008-2020 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -16,39 +16,36 @@
  */
 
 #include "PacketLog.h"
-#include "Config.h"
 #include "ByteBuffer.h"
 #include "WorldPacket.h"
+#include "Config.h"
 
-PacketLog::PacketLog() : _file(NULL)
-{
-    Initialize();
-}
+PacketLog::PacketLog() : _file(nullptr) { }
 
 PacketLog::~PacketLog()
 {
     if (_file)
         fclose(_file);
 
-    _file = NULL;
+    _file = nullptr;
 }
 
-void PacketLog::Initialize()
+void PacketLog::Initialize(const std::string& account)
 {
-    std::string logsDir = sConfigMgr->GetStringDefault("LogsDir", "");
+    std::string logsDir = sConfigMgr->GetStringDefault("PacketSniffLogsDir", "");
 
     if (!logsDir.empty())
-        if ((logsDir.at(logsDir.length()-1) != '/') && (logsDir.at(logsDir.length()-1) != '\\'))
+        if ((logsDir.at(logsDir.length() - 1) != '/') && (logsDir.at(logsDir.length() - 1) != '\\'))
             logsDir.push_back('/');
 
     std::string logname = sConfigMgr->GetStringDefault("PacketLogFile", "");
     if (!logname.empty())
-        _file = fopen((logsDir + logname).c_str(), "wb");
+        _file = fopen((logsDir + account + "_" + std::to_string(time(nullptr)) + "_" + logname).c_str(), "wb");
 }
 
 void PacketLog::LogPacket(WorldPacket const& packet, Direction direction)
 {
-    ByteBuffer data(4+4+4+1+packet.size());
+    ByteBuffer data(4 + 4 + 4 + 1 + packet.size());
     data << int32(packet.GetOpcode());
     data << int32(packet.size());
     data << uint32(time(nullptr));
