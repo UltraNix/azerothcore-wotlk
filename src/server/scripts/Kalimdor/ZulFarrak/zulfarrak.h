@@ -12,6 +12,8 @@ enum ZulFarrakData
     ENTRY_GAHZRILLA     = 7273,
 
     GO_END_DOOR         = 146084,
+    GO_SHALLOW_GRAVE    = 128403,
+    GO_SHALLOW_GRAVE_2  = 128308,
 
     EVENT_PYRAMID       = 1,
     EVENT_GAHZRILLA,

@@ -356,6 +356,18 @@ public:
                 addsAtBase.erase(addsAtBase.begin());
             }
         }
+
+        bool CanReportChest(uint32 chestId) const override
+        {
+            switch (chestId)
+            {
+                case GO_SHALLOW_GRAVE:
+                case GO_SHALLOW_GRAVE_2:
+                    return false;
+                default:
+                    return true;
+            }
+        }
     };
 
 };
@@ -482,7 +494,7 @@ class npc_sergeant_bly : public CreatureScript
             InstanceScript* instance;
 
             uint32 postGossipStep;
-            uint32 Text_Timer;                               
+            uint32 Text_Timer;
             uint64 PlayerGUID;
 
             void Reset() override
@@ -525,7 +537,7 @@ class npc_sergeant_bly : public CreatureScript
 
                 if (!UpdateVictim())
                     return;
-                
+
                 _events.Update(diff);
 
                 while (uint32 eventId = _events.ExecuteEvent())
