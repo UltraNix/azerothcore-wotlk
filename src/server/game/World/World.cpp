@@ -1476,6 +1476,9 @@ void World::LoadConfigSettings(bool reload)
     //! time is in minutes
     m_int_configs[CONFIG_CLIENT_ACTION_INVITE_RESET_TIME] = sConfigMgr->GetIntDefault("ClientAction.Invites.ResetTime", 5);
     m_int_configs[CONFIG_CLIENT_ACTION_SYSTEM] = sConfigMgr->GetIntDefault("ClientAction.Enable", 0);
+    m_int_configs[CONFIG_LOG_NEW_ACCOUNTS] = sConfigMgr->GetIntDefault("AccountLogging.LogNewAccounts", 1);
+    m_int_configs[CONFIG_OLD_ACCOUNT_TIMESTAMP] = sConfigMgr->GetIntDefault("AccountLogging.OldAccountTimestamp", 1581675120);
+    m_int_configs[CONFIG_LOG_NEW_ACCOUNTS_HIGHEST_CHAR_LEVEL] = sConfigMgr->GetIntDefault("AccountLogging.HighestCharacterLevel", 20);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

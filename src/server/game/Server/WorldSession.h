@@ -85,6 +85,12 @@ enum AccountDataType
     PER_CHARACTER_CHAT_CACHE        = 7,                    // 0x80 p
 };
 
+enum AccountFlags
+{
+    ACCOUNT_FLAG_NONE               = 0x00,
+    ACCOUNT_FLAG_LOG_ALL_PACKETS    = 0x01
+};
+
 #define NUM_ACCOUNT_DATA_TYPES        8
 
 #define GLOBAL_CACHE_MASK           0x15
@@ -1082,7 +1088,7 @@ class WorldSession
         /*
           **************
           *  Warden    *
-          **************  
+          **************
         */
         Warden* _warden;                                    // Remains null if Warden system is not enabled by config
         void InitializeWarden();
@@ -1140,7 +1146,7 @@ class WorldSession
         void HandleLuaResults(std::vector<WardenLuaResult> /*results*/);
 
         WardenRequestStore GetLuaStore(bool trapStore);
-        
+
         //! Session are updated from map and world contexts
         //! We want scheduler to be updated only once (from world context)
         void UpdateWardenScheduler(uint32 diff);
