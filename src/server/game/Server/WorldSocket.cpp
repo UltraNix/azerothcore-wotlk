@@ -1053,12 +1053,12 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_VPN);
 
-        PreparedQueryResult result = LoginDatabase.Query(stmt);
-        if (result)
+        PreparedQueryResult vpnListResult = LoginDatabase.Query(stmt);
+        if (vpnListResult)
         {
             do
             {
-                Field* fields = result->Fetch();
+                Field* fields = vpnListResult->Fetch();
                 std::string vpnIP = fields[0].GetString();
 
                 if (vpnIP != GetRemoteAddress())
@@ -1066,7 +1066,7 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
                 m_Session->setVPNconnection(true);
 
-            } while (result->NextRow());
+            } while (vpnListResult->NextRow());
         }
     }
 
