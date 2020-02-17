@@ -22,6 +22,7 @@
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "AnticheatMgr.h"
+#include "AuctionHouseMgr.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "BattlefieldWG.h"
@@ -19183,11 +19184,17 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timeDiff)
 
 ItemRef Player::_LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff, Field* fields)
 {
-    ItemRef item = NULL;
+    ItemRef item = nullptr;
     uint32 itemGuid  = fields[13].GetUInt32();
     uint32 itemEntry = fields[14].GetUInt32();
     if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry))
     {
+        //! ToDo: mail, just for tests for now
+        if (AuctionItem const* auctionItem = sAuctionMgr->GetAItem(itemGuid))
+        {
+            sLog->outError("_LoadItem: Player (%s) has an item with guid (%u) and that item currently exists on AH.", GetName().c_str(), itemGuid);
+        }
+
         bool remove = false;
         item = NewItemOrBag(proto);
         if (item->LoadFromDB(itemGuid, GetGUID(), fields, itemEntry))
