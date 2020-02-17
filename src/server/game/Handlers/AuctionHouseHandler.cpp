@@ -542,7 +542,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
         if ( pItem )
         {
             auto _timeSinceAuctionBirth = time(nullptr) - auction->auctionBirthTime;
-            if (_timeSinceAuctionBirth <= 5)
+            if (_timeSinceAuctionBirth <= 30)
             {
                 SendAuctionCommandResult(0, AUCTION_CANCEL, ERR_AUCTION_DATABASE_ERROR);
                 return;
