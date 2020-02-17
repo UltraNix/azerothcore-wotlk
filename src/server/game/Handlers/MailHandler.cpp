@@ -489,10 +489,10 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
 {
     uint64 mailbox;
     uint32 mailId;
-    uint32 itemId;
+    uint32 itemGuidLow;
     recvData >> mailbox;
     recvData >> mailId;
-    recvData >> itemId;                                    // item guid low
+    recvData >> itemGuidLow;                                    // item guid low
 
     if (!CanOpenMailBox(mailbox))
         return;
@@ -509,11 +509,14 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
     // verify that the mail has the item to avoid cheaters taking COD items without paying
     bool foundItem = false;
     for (std::vector<MailItemInfo>::const_iterator itr = m->items.begin(); itr != m->items.end(); ++itr)
-        if (itr->item_guid == itemId)
+    {
+        if (itr->item_guid == itemGuidLow)
         {
             foundItem = true;
             break;
         }
+    }
+
     if (!foundItem)
     {
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
@@ -527,15 +530,22 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
         return;
     }
 
-    ItemRef it = player->GetMItem(itemId);
+    ItemRef it = player->GetMItem(itemGuidLow);
+
+    if (_player->GetItemByGuid(itemGuidLow))
+    {
+        sLog->outError("Player (%s)(GUID: %u) is taking an item with GUID (%u) but he already has an item with that GUID!", _player->GetName().c_str(), itemGuidLow);
+        // not yet, im trying to catch the duper
+        //return;
+    }
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, it, false);
     if (msg == EQUIP_ERR_OK)
     {
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
-        m->RemoveItem(itemId);
-        m->removedItems.push_back(itemId);
+        m->RemoveItem(itemGuidLow);
+        m->removedItems.push_back(itemGuidLow);
 
         if (m->COD > 0) // if there is COD, take COD money from player and send them to sender by mail
         {
@@ -581,7 +591,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recvData)
         player->_SaveMail(trans);
         CharacterDatabase.CommitTransaction(trans);
 
-        player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, count);
+        player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemGuidLow, count);
     }
     else
         player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, msg);
