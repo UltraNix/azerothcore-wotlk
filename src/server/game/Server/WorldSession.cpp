@@ -1360,7 +1360,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
                 addonInfo >> addon.Name >> addon.HasKey;
                 addonInfo >> publicKeyCrc >> urlCrc;
 
-                sLog->outDetail("AddOn: %s (CRC: 0x%x) - has key: 0x%x - URL CRC: 0x%x - accountID %d", addon.Name.c_str(), publicKeyCrc, addon.HasKey, urlCrc, GetAccountId());
+                sLog->outDebug(LOG_FILTER_NETWORKIO, "AddOn: %s (CRC: 0x%x) - has key: 0x%x - URL CRC: 0x%x - accountID %d", addon.Name.c_str(), publicKeyCrc, addon.HasKey, urlCrc, GetAccountId());
 
                 SavedAddon const* savedAddon = AddonMgr::GetAddonInfo(addon.Name);
                 if (savedAddon)
@@ -1370,7 +1370,7 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
                         if (addon.HasKey)
                         {
                             addon.Status = Addons::SecureAddonInfo::BANNED;
-                            sLog->outDetail("Addon: %s: modified (CRC: 0x%x) - accountID %d)", addon.Name.c_str(), savedAddon->CRC, GetAccountId());
+                            sLog->outDebug(LOG_FILTER_NETWORKIO, "Addon: %s: modified (CRC: 0x%x) - accountID %d)", addon.Name.c_str(), savedAddon->CRC, GetAccountId());
                         }
                         else
                             addon.Status = Addons::SecureAddonInfo::SECURE_HIDDEN;
@@ -1378,13 +1378,13 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
                     else
                     {
                         addon.Status = Addons::SecureAddonInfo::SECURE_HIDDEN;
-                        sLog->outDetail("Addon: %s: validated (CRC: 0x%x) - accountID %d", addon.Name.c_str(), savedAddon->CRC, GetAccountId());
+                        sLog->outDebug(LOG_FILTER_NETWORKIO, "Addon: %s: validated (CRC: 0x%x) - accountID %d", addon.Name.c_str(), savedAddon->CRC, GetAccountId());
                     }
                 }
                 else
                 {
                     addon.Status = Addons::SecureAddonInfo::BANNED;
-                    sLog->outDetail("Addon: %s: not registered as known secure addon - accountId %d", addon.Name.c_str(), GetAccountId());
+                    sLog->outDebug(LOG_FILTER_NETWORKIO, "Addon: %s: not registered as known secure addon - accountId %d", addon.Name.c_str(), GetAccountId());
                 }
             }
 
@@ -1392,15 +1392,15 @@ void WorldSession::ReadAddonsInfo(WorldPacket &data)
 
             uint32 lastBannedAddOnTimestamp;
             addonInfo >> lastBannedAddOnTimestamp;
-            sLog->outDetail("AddOn: Newest banned addon timestamp: %u", lastBannedAddOnTimestamp);
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "AddOn: Newest banned addon timestamp: %u", lastBannedAddOnTimestamp);
         }
         catch (ByteBufferException const& e)
         {
-            sLog->outDetail("AddOn: Addon packet read error! %s", e.what());
+            sLog->outDebug(LOG_FILTER_NETWORKIO, "AddOn: Addon packet read error! %s", e.what());
         }
     }
     else
-        sLog->outDetail("AddOn: Addon packet uncompress error!");
+        sLog->outDebug(LOG_FILTER_NETWORKIO, "AddOn: Addon packet uncompress error!");
 }
 
 void WorldSession::SendAddonsInfo()
