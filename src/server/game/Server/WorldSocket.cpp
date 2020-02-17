@@ -106,7 +106,7 @@ WorldSocket::WorldSocket (void): WorldHandler(),
 m_LastPingTime(ACE_Time_Value::zero), m_OverSpeedPings(0), m_Session(0),
 m_RecvWPct(0), m_RecvPct(), m_Header(sizeof (ClientPktHeader)),
 m_OutBuffer(0), m_OutBufferSize(65536), m_OutActive(false),
-m_Seed(static_cast<uint32> (rand32())), isPacketLoggingEnabled(false)
+m_Seed(static_cast<uint32> (rand32())), m_isPacketLoggingEnabled(false)
 {
     reference_counting_policy().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
 
@@ -170,7 +170,7 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
         return -1;
 
     // Dump outgoing packet.
-    if (packetLog->CanLogPacket() && isPacketLoggingEnabled)
+    if (packetLog->CanLogPacket() && m_isPacketLoggingEnabled)
         packetLog->LogPacket(pct, SERVER_TO_CLIENT);
 
 
@@ -682,7 +682,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
         return -1;
 
     // Dump received packet.
-    if (packetLog->CanLogPacket() && isPacketLoggingEnabled)
+    if (packetLog->CanLogPacket() && m_isPacketLoggingEnabled)
         packetLog->LogPacket(*new_pct, CLIENT_TO_SERVER);
 
     try
@@ -897,7 +897,7 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         if ((accountFlags & ACCOUNT_FLAG_LOG_ALL_PACKETS) != 0)
         {
             packetLog->Initialize(account);
-            isPacketLoggingEnabled = true;
+            m_isPacketLoggingEnabled = true;
             sLog->outDebug(LOG_FILTER_NETWORKIO, "Account (%u) marked with ACCOUNT_FLAG_LOG_ALL_PACKETS, enabling packet logging.", accountId);
         }
     }
@@ -905,7 +905,7 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     //! otherwise check if account has been created after specified date
     //! and if system is up and running then log those accounts as well
     bool const IsNewAccountLoggingEnabled = sWorld->getIntConfig(CONFIG_LOG_NEW_ACCOUNTS) != 0;
-    if (!isPacketLoggingEnabled && IsNewAccountLoggingEnabled)
+    if (!m_isPacketLoggingEnabled && IsNewAccountLoggingEnabled)
     {
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_JOIN_DATE);
         stmt->setUInt32(0, accountId);
@@ -931,7 +931,7 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                     if (!count)
                     {
                         packetLog->Initialize(account);
-                        isPacketLoggingEnabled = true;
+                        m_isPacketLoggingEnabled = true;
                         sLog->outDebug(LOG_FILTER_NETWORKIO, "Enabling packet logging for account (%u)!", accountId);
                     }
                 }

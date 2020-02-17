@@ -1150,6 +1150,8 @@ class WorldSession
         //! Session are updated from map and world contexts
         //! We want scheduler to be updated only once (from world context)
         void UpdateWardenScheduler(uint32 diff);
+
+        bool IsPacketLoggingEnabled() const;
    private:
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue

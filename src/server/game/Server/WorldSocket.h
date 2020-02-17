@@ -143,6 +143,7 @@ class WorldSocket : public WorldHandler
         int Update (void);
 
         WorldSession* HandleAuthSession(WorldPacket& recvPacket);
+        inline bool IsPacketLoggingEnabled() const { return m_isPacketLoggingEnabled; }
 
     private:
         /// Helper functions for processing incoming data.
@@ -214,7 +215,7 @@ class WorldSocket : public WorldHandler
 
         uint32 m_Seed;
 
-        bool isPacketLoggingEnabled;
+        bool m_isPacketLoggingEnabled;
         std::unique_ptr<PacketLog> packetLog;
 };
 
