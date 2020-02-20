@@ -673,8 +673,7 @@ namespace Trinity
                 if (go->GetGOInfo()->spellFocus.focusId != i_focusId)
                     return false;
 
-                float dist = (float)((go->GetGOInfo()->spellFocus.dist)/2);
-
+                float const dist = go->GetGOInfo()->spellFocus.dist;
                 return go->IsWithinDistInMap(i_unit, dist);
             }
         private:
