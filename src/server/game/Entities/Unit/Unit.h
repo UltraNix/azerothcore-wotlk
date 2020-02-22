@@ -351,7 +351,8 @@ typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
 enum SpellImmuneBlockType
 {
     SPELL_BLOCK_TYPE_ALL        = 0,
-    SPELL_BLOCK_TYPE_POSITIVE    = 1,
+    SPELL_BLOCK_TYPE_POSITIVE   = 1,
+    SPELL_BLOCK_TYPE_NEGATIVE   = 2,
 };
 
 struct SpellImmune
