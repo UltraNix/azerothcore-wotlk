@@ -353,7 +353,7 @@ public:
             }
         }
 
-        void Reset()
+        void Reset() override
         {
             _fightTimer = 0;
             me->SetReactState(REACT_DEFENSIVE);
@@ -382,7 +382,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit* pWho)
+        void EnterCombat(Unit* /*who*/) override
         {
             _fightTimer = getMSTime();
             me->SetReactState(REACT_AGGRESSIVE);
@@ -390,12 +390,12 @@ public:
             me->CastSpell(me, SPELL_BITING_COLD_BOSS_AURA, true);
             SmallIcicles(true);
             events.Reset();
-            events.RescheduleEvent(EVENT_FLASH_FREEZE, 60s);
-            events.RescheduleEvent(EVENT_FREEZE, 15s);
+            events.ScheduleEvent(EVENT_FLASH_FREEZE, 60s);
+            events.ScheduleEvent(EVENT_FREEZE, 15s);
             if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-                events.RescheduleEvent(EVENT_HARD_MODE_MISSED, 2min);
+                events.ScheduleEvent(EVENT_HARD_MODE_MISSED, 2min);
             else
-                events.RescheduleEvent(EVENT_HARD_MODE_MISSED, 3min);
+                events.ScheduleEvent(EVENT_HARD_MODE_MISSED, 3min);
             events.ScheduleEvent(EVENT_BERSERK, 8min);
 
             me->MonsterYell(TEXT_HODIR_AGGRO, LANG_UNIVERSAL, 0);
@@ -415,7 +415,7 @@ public:
                     door->SetGoState(GOState::GO_STATE_READY);
         }
 
-        void JustReachedHome() { me->setActive(false); }
+        void JustReachedHome() override { me->setActive(false); }
 
         void SmallIcicles(bool enable)
         {
@@ -425,7 +425,7 @@ public:
                 me->RemoveAura(SPELL_ICICLE_BOSS_AURA);
         }
 
-        void SpellHitTarget(Unit* target, const SpellInfo* spell)
+        void SpellHitTarget(Unit* target, const SpellInfo* spell) override
         {
             switch (spell->Id)
             {
@@ -445,7 +445,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
+        void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
         {
             if (damage >= me->GetHealth() || me->GetHealth() < 150000)
             {
@@ -586,7 +586,7 @@ public:
                         events.Repeat(60s);
                         events.ScheduleEvent(EVENT_SMALL_ICICLES_ENABLE, 12s);
                         events.ScheduleEvent(EVENT_FROZEN_BLOWS, 15s);
-                        events.ScheduleEvent(EVENT_FREEZE, 20s);
+                        events.RescheduleEvent(EVENT_FREEZE, 20s);
                         break;
                     }
                     case EVENT_SMALL_ICICLES_ENABLE:
