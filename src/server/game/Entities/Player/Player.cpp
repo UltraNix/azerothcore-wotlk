@@ -28485,7 +28485,7 @@ void Player::OnClientAction(ClientActionType type)
                 {
                     std::string accountName;
                     AccountMgr::GetName(GetSession()->GetAccountId(), accountName);
-                    sWorld->BanAccount(BAN_ACCOUNT, accountName, -1, "Gold selling", "Frosthold");
+                    sWorld->BanAccount(BAN_ACCOUNT, accountName, 94608000/* 3 years */, "Gold selling", "Frosthold");
                 }
                 else if ((ClientActionPolicy & CLIENT_ACTION_POLICY_KICK) != 0)
                     GetSession()->KickPlayer(true);
