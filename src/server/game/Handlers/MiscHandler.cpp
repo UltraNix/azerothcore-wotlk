@@ -1873,3 +1873,37 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recvPacket)
         HandleMovementOpcodes(recvPacket);
     }
 }
+
+void WorldSession::HandleCommentatorModeOpcode(WorldPacket& recv_data)
+{
+    sLog->outDebug(LOG_FILTER_NETWORKIO, "WORLD: Received opcode CMSG_COMMENTATOR_ENABLE");
+
+    uint32 action;
+    recv_data >> action;
+
+    Player* _player = GetPlayer();
+
+    // Allow commentator mode only for players in GM mode
+    if (!_player->IsGameMaster())
+        return;
+
+    // This opcode can be used in three ways:
+    // 0 - Request to turn commentator mode off
+    // 1 - Request to turn commentator mode on
+    // 2 - Request to toggle current commentator mode status
+    switch (action)
+    {
+    case 0:
+        _player->RemoveFlag(PLAYER_FLAGS, (PLAYER_FLAGS_COMMENTATOR | PLAYER_FLAGS_COMMENTATOR_UBER));
+        break;
+    case 1:
+        _player->SetFlag(PLAYER_FLAGS, (PLAYER_FLAGS_COMMENTATOR | PLAYER_FLAGS_COMMENTATOR_UBER));
+        break;
+    case 2:
+        _player->ToggleFlag(PLAYER_FLAGS, (PLAYER_FLAGS_COMMENTATOR | PLAYER_FLAGS_COMMENTATOR_UBER));
+        break;
+    default:
+        sLog->outError("WorldSession::HandleCommentatorModeOpcode: player %d sent an invalid commentator mode action", _player->GetGUIDLow());
+        return;
+    }
+}

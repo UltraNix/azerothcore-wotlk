@@ -430,10 +430,10 @@ enum PlayerFlags
     PLAYER_FLAGS_UNK16             = 0x00010000,               // pre-3.0.3 PLAYER_FLAGS_SANCTUARY flag for player entered sanctuary
     PLAYER_FLAGS_TAXI_BENCHMARK    = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
     PLAYER_FLAGS_PVP_TIMER         = 0x00040000,               // 3.0.2, pvp timer active (after you disable pvp manually)
-    PLAYER_FLAGS_UBER              = 0x00080000,
+    PLAYER_FLAGS_COMMENTATOR       = 0x00080000,
     PLAYER_FLAGS_UNK20             = 0x00100000,
     PLAYER_FLAGS_UNK21             = 0x00200000,
-    PLAYER_FLAGS_COMMENTATOR2      = 0x00400000,
+    PLAYER_FLAGS_COMMENTATOR_UBER  = 0x00400000,
     PLAYER_ALLOW_ONLY_ABILITY      = 0x00800000,                // used by bladestorm and killing spree, allowed only spells with SPELL_ATTR0_REQ_AMMO, SPELL_EFFECT_ATTACK, checked only for active player
     PLAYER_FLAGS_UNK24             = 0x01000000,                // disabled all melee ability on tab include autoattack
     PLAYER_FLAGS_NO_XP_GAIN        = 0x02000000,
