@@ -9011,7 +9011,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         {
             if (HasAura(70718))
                 CastSpell(this, 70721, true);
-            RemoveAurasDueToSpell(trigger_spell_id);
             break;
         }
         // Shamanistic Rage triggered spell
