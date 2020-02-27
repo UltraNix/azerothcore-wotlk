@@ -33,17 +33,19 @@
 enum DruidSpells
 {
     // Ours
-    SPELL_DRUID_GLYPH_OF_WILD_GROWTH        = 62970,
+    SPELL_DRUID_GLYPH_OF_WILD_GROWTH         = 62970,
     SPELL_DRUID_NURTURING_INSTINCT_R1        = 47179,
     SPELL_DRUID_NURTURING_INSTINCT_R2        = 47180,
-    SPELL_DRUID_FERAL_SWIFTNESS_R1            = 17002,
-    SPELL_DRUID_FERAL_SWIFTNESS_R2            = 24866,
+    SPELL_DRUID_FERAL_SWIFTNESS_R1           = 17002,
+    SPELL_DRUID_FERAL_SWIFTNESS_R2           = 24866,
     SPELL_DRUID_FERAL_SWIFTNESS_PASSIVE_1    = 24867,
     SPELL_DRUID_FERAL_SWIFTNESS_PASSIVE_2    = 24864,
-    SPELL_DRUID_BARKSKIN                    = 22812,
+    SPELL_DRUID_BARKSKIN                     = 22812,
     SPELL_DRUID_GLYPH_OF_BARKSKIN            = 63057,
     SPELL_DRUID_GLYPH_OF_BARKSKIN_TRIGGER    = 63058,
     SPELL_FEROCIOUS_BITE_DRUID               = 48577,
+    SPELL_LEADER_OF_THE_PACK_HEAL            = 34299,
+    SPELL_LEADER_OF_THE_PACK_MANA            = 68285,
 
 
     // Theirs
@@ -1586,6 +1588,47 @@ class spell_dru_berserk : public SpellScriptLoader
         }
 };
 
+// 24932 - Leader of the Pack
+class spell_dru_leader_of_the_pack_SpellScript : public AuraScript
+{
+    PrepareAuraScript(spell_dru_leader_of_the_pack_SpellScript);
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+
+        Unit* actor = eventInfo.GetActor();
+        if (!actor)
+            return;
+
+        int32 triggerAmount = aurEff->GetAmount();
+
+        if (triggerAmount <= 0)
+            return;
+
+        // Improved Leader of the Pack
+        // Check cooldown of heal spell cooldown
+        if (actor->GetTypeId() == TYPEID_PLAYER && !actor->ToPlayer()->HasSpellCooldown(SPELL_LEADER_OF_THE_PACK_HEAL))
+        {
+            if (aurEff->GetCasterGUID() == actor->GetGUID())
+            {
+                int32 basepoints1 = CalculatePct(actor->GetMaxPower(Powers(POWER_MANA)), triggerAmount * 2);
+                actor->CastCustomSpell(actor, SPELL_LEADER_OF_THE_PACK_MANA, &basepoints1, 0, 0, true, 0, aurEff);
+            }
+            int32 basepoints0 = int32(actor->CountPctFromMaxHealth(triggerAmount));
+            actor->CastCustomSpell(actor, SPELL_LEADER_OF_THE_PACK_HEAL, &basepoints0, 0, 0, true);
+            actor->ToPlayer()->AddSpellCooldown(SPELL_LEADER_OF_THE_PACK_HEAL, 0, eventInfo.GetProcCooldown());
+        }
+
+    }
+
+    void Register()
+    {
+        OnEffectProc += AuraEffectProcFn(spell_dru_leader_of_the_pack_SpellScript::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
+    }
+};
+
+
 void AddSC_druid_spell_scripts()
 {
     // Ours
@@ -1597,6 +1640,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_barkskin();
     new spell_dru_treant_scaling();
     new SpellScriptLoaderEx<spell_ferocious_bite_damage_hack_SpellScript>("spell_ferocious_bite_damage_hack");
+    new AuraScriptLoaderEx<spell_dru_leader_of_the_pack_SpellScript>("spell_dru_leader_of_the_pack");
 
     // Theirs
     new spell_dru_dash();
