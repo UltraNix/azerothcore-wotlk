@@ -1,0 +1,1 @@
+ALTER TABLE `log_encounter` ADD COLUMN `instanceId` INT UNSIGNED NOT NULL AFTER `playersInfo`;

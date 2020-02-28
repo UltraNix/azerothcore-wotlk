@@ -616,4 +616,5 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_CLIENT_ACTION_COUNTER_DATA, "DELETE FROM client_action_count WHERE AccountId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_AT_LOGIN_BY_ACC_ID, "SELECT at_login FROM characters WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_CHARACTER_COUNT_WITH_LEVEL, "SELECT count(*) from characters WHERE account = ? AND level >= ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_LOG_ENCOUNTER, "INSERT INTO log_encounter(time, map, difficulty, creditType, creditEntry, playersInfo, instanceId) VALUES(NOW(), ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }
