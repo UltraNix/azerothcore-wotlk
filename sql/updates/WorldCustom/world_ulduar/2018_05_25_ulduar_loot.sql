@@ -496,7 +496,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (33449, 45518, 0, 2, 1, 1, 1),
 (33449, 45519, 0, 2, 1, 1, 1),
 (33449, 45520, 0, 2, 1, 1, 1),
-(33449, @CONQUEST, 100, 1, 2, 2, 2),
+(33449, @CONQUEST, 100, 1, 2, 1, 1),
 (33449, @CONQUEST, 100, 2, 3, 1, 1);
 
 -- Yogg Saron
