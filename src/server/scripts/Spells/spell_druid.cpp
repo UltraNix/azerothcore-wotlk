@@ -46,6 +46,7 @@ enum DruidSpells
     SPELL_FEROCIOUS_BITE_DRUID               = 48577,
     SPELL_LEADER_OF_THE_PACK_HEAL            = 34299,
     SPELL_LEADER_OF_THE_PACK_MANA            = 68285,
+    SPELL_DRUID_T8_2P_FERAL_BONUS            = 64752,
 
 
     // Theirs
@@ -215,8 +216,11 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
                 if (!baseSpellInfo)
                     return true;
 
-                //! Anything that generates combo points is disabled
-                if (baseSpellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || baseSpellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS) || baseSpellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT))
+                bool isPeriodic =  eventInfo.GetTypeMask() & PROC_FLAG_DONE_PERIODIC;
+                bool isRipOrRake = baseSpellInfo->SpellFamilyFlags[0] & (0x00001000 | 0x00800000);
+
+                //! Anything that generates combo points is disabled, excluding Rake and Rip (periodic)
+                if (!(isRipOrRake && isPeriodic) && (baseSpellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || (baseSpellInfo->Id != 48574 && baseSpellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS)) || baseSpellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT)))
                     return false;
 
                 if (baseSpellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE && (baseSpellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) || baseSpellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2)))
@@ -243,6 +247,16 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
                     //! Both feral mangles
                     if (baseSpellInfo->SpellFamilyFlags[1] & 0x00000440)
                         return false;
+
+                    // Item - Druid T8 Feral 2P Bonus
+                    // Periodic Rake and Rip can proc OOC
+                    if (isPeriodic)
+                    {
+                        if (isRipOrRake && eventInfo.GetActor() && eventInfo.GetActor()->IsPlayer())
+                            return eventInfo.GetActor()->ToPlayer()->HasAura(SPELL_DRUID_T8_2P_FERAL_BONUS);
+                        else
+                            return false;
+                    }
                 }
 
                 //! At this point those auras do not count anymore
