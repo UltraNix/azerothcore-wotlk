@@ -3,7 +3,6 @@ SET @CONQUEST:= 45624;
 SET @VALOR:= 40753;
 SET @REFERENCE_EMBLEM_10:= 34380;
 SET @EMBLEM_TO_REPLACE:= 47241;
-
 -- reference loot template for emblems 25
 UPDATE `reference_loot_template` SET `item` = @CONQUEST WHERE `entry` = 34349;
 
@@ -72,7 +71,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (33724, 2, 10, 1, 0, -34154, 1),
 (33724, 45038, 8.5, 1, 0, 1, 1),
 (33724, 45087, 40, 1, 0, 1, 1),
-(33724, 45624, 100, 1, 0, 1, 2);
+(33724, 45624, 100, 1, 0, 1, 1);
 
 -- Ignis 10
 DELETE FROM `creature_loot_template` WHERE `entry` = 33118;
@@ -99,7 +98,7 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (33293, 45870, 0, 2, 1, 1, 1),
 (33293, 45871, 0, 2, 1, 1, 1),
 (33293, @VALOR, 100, 1, 2, 1, 1),
-(33293, @CONQUEST, 100, 2, 2, 1, 1);
+(33293, @CONQUEST, 100, 2, 3, 1, 1);
 
 -- xt-002 25
 DELETE FROM `creature_loot_template` WHERE `entry` = 33885;
@@ -461,6 +460,17 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, 
 (26967, 45816, -100, 1, 0, 1, 1),
 (26967, @CONQUEST, 100, 1, 0, 2, 2);
 
+-- 25 norm
+DELETE FROM `gameobject_loot_template` WHERE `entry` = 26963;
+INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES 
+(26963, 1, 100, 1, 0, -34370, 1),
+(26963, 2, 100, 1, 0, -12031, 2),
+(26963, 3, 10, 1, 0, -34154, 1),
+(26963, @CONQUEST, 100, 1, 0, 1, 1),
+(26963, 45038, 8.5, 1, 0, 1, 1),
+(26963, 45087, 10, 1, 0, 1, 1);
+
+
 -- General Vezax
 -- 10 man
 DELETE FROM `creature_loot_template` WHERE `entry` = 33271;
@@ -486,7 +496,8 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 (33449, 45518, 0, 2, 1, 1, 1),
 (33449, 45519, 0, 2, 1, 1, 1),
 (33449, 45520, 0, 2, 1, 1, 1),
-(33449, @CONQUEST, 100, 1, 2, 1, 1);
+(33449, @CONQUEST, 100, 1, 2, 2, 2),
+(33449, @CONQUEST, 100, 2, 3, 1, 1);
 
 -- Yogg Saron
 -- yogg 10
