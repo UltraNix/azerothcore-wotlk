@@ -68,7 +68,7 @@ DELETE FROM `conditions` WHERE  `sourceentry` = 62990;
 INSERT INTO `conditions` VALUES
 (13, 1, 62990, 0, 0, 31, 0, 3, 33308, 0, 0, 0, 0, '', 'Chop tree should target Crystalong Oak');
 
-SET @CGUID = 142300;
+SET @CGUID = 303315;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID AND @CGUID+25;
 INSERT INTO `creature` VALUES 
 (@CGUID, 33308, 571, 1, 1, 0, 0, 5717.31, 482.338, 162.46, 5.48766, 60, 0, 0, 1, 0, 0, 0, 0, 0),

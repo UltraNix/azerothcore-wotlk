@@ -1,3 +1,3 @@
 Frosthold GUIDy: -- Proszę updatować jak używacie
 
-Pierwszy nie uzywany GUID dla creature: 303315
+Pierwszy nie uzywany GUID dla creature: 303341
