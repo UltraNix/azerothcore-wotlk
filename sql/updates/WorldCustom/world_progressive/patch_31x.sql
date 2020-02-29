@@ -248,3 +248,18 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`,`Exten
 
 -- Remove Epic gems from vendor
 DELETE FROM npc_vendor WHERE entry IN (33680, 33637) AND item != 20815 AND item != 20824;
+
+-- Stormjewel
+DELETE FROM `item_loot_template` WHERE `entry` = 46007 AND `item` = 4;
+INSERT INTO `item_loot_template` VALUES (46007, 4, 1, 1, 0, -10019, 1);
+DELETE FROM `reference_loot_template` WHERE `entry` = 10019;
+INSERT INTO `reference_loot_template` VALUES
+(10019, 45862, 0, 1, 1, 1, 1),
+(10019, 45879, 0, 1, 1, 1, 1),
+(10019, 45880, 0, 1, 1, 1, 1),
+(10019, 45881, 0, 1, 1, 1, 1),
+(10019, 45882, 0, 1, 1, 1, 1),
+(10019, 45883, 0, 1, 1, 1, 1),
+(10019, 45987, 0, 1, 1, 1, 1);
+
+UPDATE `item_template` SET `Flags` = `Flags` | 524288 WHERE `entry` IN (45862, 45879,45880,45881,45882,45883,45987);
