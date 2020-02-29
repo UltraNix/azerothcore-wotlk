@@ -1,5 +1,5 @@
 -- Chip off ulduar block
-SET @OGUID = 269386;
+SET @OGUID = 300032;
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID AND @OGUID+11;
 INSERT INTO `gameobject` VALUES
 (@OGUID, 194461, 571, 1, 7, 7475.51, -1383.12, 930.56, 3.58, -0.5, 0, 0, 0, 60, 100, 1, 0),
