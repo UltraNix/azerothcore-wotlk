@@ -48,6 +48,7 @@ enum UlduarData
     DATA_MIMIRON_VX001                     = 302,
     DATA_MIMIRON_ACU                       = 303,
     DATA_MIMIRON_DB_TARGET                 = 304,
+    DATA_MIMIRON_DB_TARGET_STOP_MOVING     = 305,
 
     // Mimiron's Doors
     DATA_GO_MIMIRON_DOOR_1                 = 311,
@@ -96,7 +97,8 @@ enum UlduarData
     DATA_MIMIRON_HARDMODE                  = 724,
     DATA_HODIR_HARDMODE                    = 725,
     DATA_THORIM_HARDMODE                   = 726,
-    DATA_FREYA_HARDMODE                    = 727
+    DATA_FREYA_HARDMODE                    = 727,
+    DATA_XT_002_HARDMODE                   = 728
 };
 
 enum UlduarNPCs
@@ -194,7 +196,11 @@ enum UlduarNPCs
     NPC_TRASH_FIRE_ELEMENTAL               = 33838,
     NPC_TRASH_TWILIGHT_ADHERENT            = 33818,
     NPC_TRASH_TWILIGHT_FROST_MAGE          = 33819,
-    NPC_TRASH_FACELESS_HORROR              = 33772
+    NPC_TRASH_FACELESS_HORROR              = 33772,
+
+    // Misc
+    NPC_TRASH_FLAME_CANNON                 = 33264,
+    NPC_TWILIGHT_SHADOWBLADE               = 33824
 };
 
 enum UlduarGameObjects

@@ -330,6 +330,7 @@ struct boss_razorscaleAI : public BossAI
 
     void Initialize()
     {
+        me->SetSpeedRate(MOVE_RUN, 3.0f);
         _engineersCount = 3;
         _defendersCount = 0;
         _engineersSummonCount = 0;
@@ -344,6 +345,7 @@ struct boss_razorscaleAI : public BossAI
 
     void Reset() override
     {
+        scheduler.ClearValidator();
         _fightTimer = 0;
         if (instance->GetData(TYPE_RAZORSCALE) != DONE)
             instance->SetData(TYPE_RAZORSCALE, NOT_STARTED);
@@ -399,7 +401,7 @@ struct boss_razorscaleAI : public BossAI
         summons.DoAction(ACTION_START_FIGHT);
 
         if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-            events.ScheduleEvent(EVENT_BERSERK, 7min);
+            events.ScheduleEvent(EVENT_BERSERK, 8min);
         else
             events.ScheduleEvent(EVENT_BERSERK, 15min);
 
@@ -431,8 +433,8 @@ struct boss_razorscaleAI : public BossAI
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                 me->SetSpeedRate(MOVE_RUN, 3.0f);
                 me->SetSpeedRate(MOVE_FLIGHT, 15.0f);
-                me->StopMoving();
-                me->StopMovingOnCurrentPos();
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveIdle();
                 me->SetAggressive();
                 me->GetMotionMaster()->MovePoint(POINT_RAZORSCALE_FLIGHT, RazorFlightPosition);
                 break;
@@ -474,30 +476,33 @@ struct boss_razorscaleAI : public BossAI
                 break;
             case POINT_RAZORSCALE_FLIGHT:
                 me->UpdateSpeed(MOVE_RUN);
-                me->SetFacingTo(RazorFlightPosition.GetOrientation());
+                _SetFacingToAtPosition(RazorFlightPosition);
                 me->SetInCombatWithZone();
                 DoZoneInCombat();
                 break;
             case POINT_RAZORSCALE_GROUND:
                 me->SetDisableGravity(false);
                 me->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND | UNIT_BYTE1_FLAG_HOVER);
-                if (!_permaGround)
+                scheduler.Schedule(1s, [&](TaskContext /*func*/)
                 {
-                    DoCastSelf(SPELL_STUN_SELF, true);
-                    EntryCheckPredicate pred(NPC_EXPEDITION_TRAPPER);
-                    summons.DoAction(ACTION_SHACKLE_RAZORSCALE, pred);
-                    if (Creature* commander = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_EXPEDITION_COMMANDER)))
-                        commander->AI()->DoAction(ACTION_GROUND_PHASE);
-                    events.ScheduleEvent(EVENT_FLAME_BREATH, Seconds(30), 0, PHASE_GROUND);
-                }
-                me->SetFacingTo(RazorscaleLand.GetOrientation());
+                    if (!_permaGround)
+                    {
+                        DoCastSelf(SPELL_STUN_SELF, true);
+                        EntryCheckPredicate pred(NPC_EXPEDITION_TRAPPER);
+                        summons.DoAction(ACTION_SHACKLE_RAZORSCALE, pred);
+                        if (Creature* commander = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_EXPEDITION_COMMANDER)))
+                            commander->AI()->DoAction(ACTION_GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_FLAME_BREATH, Seconds(30), 0, PHASE_GROUND);
+                    }
+                    _SetFacingToAtPosition(RazorscaleGroundPosition);
+                });
                 break;
             case POINT_RAZORSCALE_TAKEOFF:
                 me->StopMovingOnCurrentPos();
                 events.ScheduleEvent(EVENT_MOVE_TO_SKY_AFTER_GROUND, 1s);
                 break;
             case POINT_RAZORSCALE_FLIGHT_2:
-                me->SetFacingTo(RazorFlightPositionPhase2.GetOrientation());
+                _SetFacingToAtPosition(RazorFlightPositionPhase2);
                 me->SetReactState(REACT_AGGRESSIVE);
                 DoZoneInCombat(me, 200.0f);
                 ScheduleAirPhaseEvents();
@@ -505,9 +510,12 @@ struct boss_razorscaleAI : public BossAI
                 me->UpdateSpeed(MOVE_RUN);
                 break;
             case POINT_RAZORSCALE_LAND:
-                me->SetFacingTo(RazorscaleLand.GetOrientation());
-                me->GetMotionMaster()->MoveLand(POINT_RAZORSCALE_GROUND, RazorscaleGroundPosition, me->GetSpeed(MOVE_FLIGHT));
-                me->UpdateSpeed(MOVE_RUN);
+                scheduler.Schedule(100ms, [&](TaskContext /*func*/)
+                {
+                    me->GetMotionMaster()->MoveLand(POINT_RAZORSCALE_GROUND, RazorscaleGroundPosition, me->GetSpeed(MOVE_FLIGHT));
+                    me->UpdateSpeed(MOVE_RUN);
+                });
+
                 break;
             default:
                 break;
@@ -644,6 +652,7 @@ struct boss_razorscaleAI : public BossAI
         if (!UpdateVictim())
             return;
 
+        scheduler.Update(diff);
         events.Update(diff);
 
         if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -695,7 +704,7 @@ struct boss_razorscaleAI : public BossAI
                     me->SetReactState(REACT_PASSIVE);
                     me->AttackStop();
                     me->RemoveAurasDueToSpell(SPELL_STUN_SELF);
-                    me->SetFacingTo(RazorscaleLand.GetOrientation());
+                    _SetFacingToAtPosition(RazorscaleGroundPosition);
                     Talk(EMOTE_BREATH, me);
                     DoCast(FLAME_BREATH);
                     events.ScheduleEvent(EVENT_WING_BUFFET, Seconds(2), 0, PHASE_GROUND);
@@ -730,7 +739,7 @@ struct boss_razorscaleAI : public BossAI
                     break;
                 }
                 case EVENT_FIREBOLT:
-                    me->SetFacingTo(1.586f);
+                    //me->SetFacingTo(1.586f);
                     DoCastSelf(SPELL_FIREBOLT);
                     break;
                 case EVENT_FUSE_ARMOR:
@@ -768,6 +777,14 @@ private:
     uint32 _flyCount;
     std::vector<uint64> engineerGUIDs;
     uint32 _fightTimer;
+
+    void _SetFacingToAtPosition(Position const pos)
+    {
+        Movement::MoveSplineInit init(me);
+        init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
+        init.SetFacing(pos);
+        init.Launch();
+    }
 };
 
 struct npc_expedition_commanderAI : public ScriptedAI
@@ -1395,27 +1412,26 @@ struct npc_darkrune_watcherAI : public ScriptedAI
             switch (eventId)
             {
                 case EVENT_START_COMBAT:
-                    if (InstanceScript* instance = me->GetInstanceScript())
-                    {
-                        if (Creature* razor = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_RAZORSCALE)))
-                        {
-                            if (razor->IsAIEnabled)
-                            {
-                                if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
-                                {
-                                    AttackStart(engineer);
-                                }
-                            }
-                        }
-                    }
-
+                {
                     if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetInCombatWithZone();
                     DoZoneInCombat(me, 200.0f);
+
+                    InstanceScript* instance = me->GetInstanceScript();
+                    Creature* razor = instance ? ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_RAZORSCALE)) : nullptr;
+
+                    if (instance && razor && razor->IsAIEnabled)
+                    {
+                        if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
+                        {
+                            me->AddThreat(engineer, 1000.f);
+                            engineer->AddThreat(me, 1000.f);
+                            AttackStart(engineer);
+                        }
+                    }
                     break;
+                }
                 case EVENT_LIGHTNING_BOLT:
                     DoCastVictim(LIGHTNING_BOLT);
                     _events.Repeat(Seconds(3));
@@ -1485,27 +1501,26 @@ struct npc_darkrune_guardianAI : public ScriptedAI
             switch (eventId)
             {
                 case EVENT_START_COMBAT:
-                    if (InstanceScript* instance = me->GetInstanceScript())
-                    {
-                        if (Creature* razor = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_RAZORSCALE)))
-                        {
-                            if (razor->IsAIEnabled)
-                            {
-                                if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
-                                {
-                                    AttackStart(engineer);
-                                }
-                            }
-                        }
-                    }
-
+                {
                     if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetInCombatWithZone();
                     DoZoneInCombat(me, 200.0f);
+
+                    InstanceScript* instance = me->GetInstanceScript();
+                    Creature* razor = instance ? ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_RAZORSCALE)) : nullptr;
+
+                    if (instance && razor && razor->IsAIEnabled)
+                    {
+                        if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
+                        {
+                            me->AddThreat(engineer, 1000.f);
+                            engineer->AddThreat(me, 1000.f);
+                            AttackStart(engineer);
+                        }
+                    }
                     break;
+                }
                 case EVENT_STORMSTRIKE:
                     DoCastVictim(SPELL_STORMSTRIKE);
                     _events.Repeat(Seconds(13), Seconds(25));
@@ -1562,26 +1577,26 @@ struct npc_darkrune_sentinelAI : public ScriptedAI
             switch (eventId)
             {
                 case EVENT_START_COMBAT:
-                    if (InstanceScript* instance = me->GetInstanceScript())
-                    {
-                        if (Creature* razor = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_RAZORSCALE)))
-                        {
-                            if (razor->IsAIEnabled)
-                            {
-                                if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
-                                {
-                                    AttackStart(engineer);
-                                }
-                            }
-                        }
-                    }
+                {
                     if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC))
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-
                     me->SetReactState(REACT_AGGRESSIVE);
-                    me->SetInCombatWithZone();
                     DoZoneInCombat(me, 200.0f);
+
+                    InstanceScript* instance = me->GetInstanceScript();
+                    Creature* razor = instance ? ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_RAZORSCALE)) : nullptr;
+
+                    if (instance && razor && razor->IsAIEnabled)
+                    {
+                        if (Creature* engineer = ObjectAccessor::GetCreature(*me, razor->AI()->GetData64(DATA_GET_RANDOM_ENGINEER)))
+                        {
+                            me->AddThreat(engineer, 1000.f);
+                            engineer->AddThreat(me, 1000.f);
+                            AttackStart(engineer);
+                        }
+                    }
                     break;
+                }
                 case EVENT_HEROIC_STRIKE:
                     DoCastVictim(SPELL_HEROIC_STRIKE);
                     _events.Repeat(Seconds(5), Seconds(9));

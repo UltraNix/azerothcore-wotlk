@@ -95,7 +95,7 @@ enum HodirNPCs
 
 enum HodirGOs
 {
-    GO_HODIR_SNOWDRIFT                      = 194173,
+    GO_HODIR_SNOWDRIFT                      = 194173
     // GO_HODIR_FROZEN_DOOR                 = 194441,
     // GO_HODIR_DOOR                        = 194634,
 };
@@ -206,17 +206,17 @@ private:
     Unit * _me;
 };
 
-#define SPELL_FROZEN_BLOWS                  RAID_MODE(SPELL_FROZEN_BLOWS_10, SPELL_FROZEN_BLOWS_25)
-#define SPELL_SHAMAN_STORM_CLOUD            RAID_MODE(SPELL_SHAMAN_STORM_CLOUD_10, SPELL_SHAMAN_STORM_CLOUD_25)
+//#define SPELL_FROZEN_BLOWS                  RAID_MODE(SPELL_FROZEN_BLOWS_10, SPELL_FROZEN_BLOWS_25)
+//#define SPELL_SHAMAN_STORM_CLOUD            RAID_MODE(SPELL_SHAMAN_STORM_CLOUD_10, SPELL_SHAMAN_STORM_CLOUD_25)
 
-#define TEXT_HODIR_AGGRO                    "You will suffer for this trespass!"
-#define TEXTEMOTE_HODIR_FROZEN_BLOWS        "Hodir roars furious."
-#define TEXT_HODIR_FLASH_FREEZE             "Winds of the north consume you!"
-#define TEXTEMOTE_HODIR_HARD_MODE_MISSED    "Hodir shatters the Rare Cache of Hodir!"
-#define TEXT_HODIR_SLAIN_1                  "Tragic. To come so far, only to fail."
-#define TEXT_HODIR_SLAIN_2                  "Welcome to the endless winter."
-#define TEXT_HODIR_BERSERK                  "Enough! This ends now!"
-#define TEXT_HODIR_DEFEATED                 "I... I am released from his grasp... at last."
+std::string const TEXT_HODIR_AGGRO                    = "You will suffer for this trespass!";
+std::string const TEXTEMOTE_HODIR_FROZEN_BLOWS        = "Hodir roars furious.";
+std::string const TEXT_HODIR_FLASH_FREEZE             = "Winds of the north consume you!";
+std::string const TEXTEMOTE_HODIR_HARD_MODE_MISSED    = "Hodir shatters the Rare Cache of Hodir!";
+std::string const TEXT_HODIR_SLAIN_1                  = "Tragic. To come so far, only to fail.";
+std::string const TEXT_HODIR_SLAIN_2                  = "Welcome to the endless winter.";
+std::string const TEXT_HODIR_BERSERK                  = "Enough! This ends now!";
+std::string const TEXT_HODIR_DEFEATED                 = "I... I am released from his grasp... at last.";
 
 enum HodirSounds
 {
@@ -355,6 +355,8 @@ public:
 
         void Reset() override
         {
+            task.CancelAll();
+            _ignoreMeleeAvoidance = false;
             _fightTimer = 0;
             me->SetReactState(REACT_DEFENSIVE);
             events.Reset();
@@ -382,8 +384,47 @@ public:
             }
         }
 
+        void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
+        {
+            if (!victim->IsPlayer())
+                return;
+
+            if (type > OFF_ATTACK)
+                return;
+
+            //! Dont do anything if victim is over avoidance cap
+            if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
+                return;
+
+            if (!_ignoreMeleeAvoidance)
+                return;
+
+            switch (outcome)
+            {
+                case MELEE_HIT_DODGE:
+                case MELEE_HIT_PARRY:
+                case MELEE_HIT_MISS:
+                {
+                    outcome = MELEE_HIT_NORMAL;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
         void EnterCombat(Unit* /*who*/) override
         {
+            task.Schedule(15s, [&](TaskContext func)
+            {
+                _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
+
+                if (_ignoreMeleeAvoidance)
+                    func.Repeat(6s);
+                else
+                    func.Repeat(15s);
+            });
+
             _fightTimer = getMSTime();
             me->SetReactState(REACT_AGGRESSIVE);
             me->setActive(true);
@@ -547,6 +588,7 @@ public:
                 return;
             }
 
+            task.Update(diff);
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -569,7 +611,7 @@ public:
                             normalChest->SetPhaseMask(2, true);
 
                         hardmode = false;
-                        me->MonsterTextEmote(TEXTEMOTE_HODIR_HARD_MODE_MISSED, 0);
+                        me->MonsterTextEmote(TEXTEMOTE_HODIR_HARD_MODE_MISSED.c_str(), 0);
                         break;
                     }
                     case EVENT_FLASH_FREEZE:
@@ -597,9 +639,9 @@ public:
                     case EVENT_FROZEN_BLOWS:
                     {
                         me->MonsterTextEmote("Hodir gains Frozen Blows!", 0, true);
-                        me->MonsterTextEmote(TEXTEMOTE_HODIR_FROZEN_BLOWS, 0);
+                        me->MonsterTextEmote(TEXTEMOTE_HODIR_FROZEN_BLOWS.c_str(), 0);
                         me->PlayDirectSound(SOUND_HODIR_FROZEN_BLOWS, 0);
-                        me->CastSpell(me, SPELL_FROZEN_BLOWS, true);
+                        me->CastSpell(me, RAID_MODE(SPELL_FROZEN_BLOWS_10, SPELL_FROZEN_BLOWS_25), true);
                         break;
                     }
                     case EVENT_FREEZE:
@@ -712,6 +754,8 @@ public:
         uint64 _normalChest;
         uint64 _hardmodeChest;
         uint32 _fightTimer;
+        TaskScheduler task;
+        bool _ignoreMeleeAvoidance;
     };
 };
 
@@ -1085,7 +1129,8 @@ public:
         void ScheduleAbilities()
         {
             events.ScheduleEvent(EVENT_SHAMAN_LAVA_BURST, 2600);
-            events.ScheduleEvent(EVENT_SHAMAN_STORM_CLOUD, 10000);
+            //! pre-nerf timers, first storm cloud cast takes much longer then next ones
+            events.ScheduleEvent(EVENT_SHAMAN_STORM_CLOUD, urand(20000, 25000));
         }
 
         void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
@@ -1099,8 +1144,8 @@ public:
 
         void SpellHitTarget(Unit* target, const SpellInfo* spell)
         {
-            if (target && spell->Id == SPELL_SHAMAN_STORM_CLOUD)
-                if (Aura* a = target->GetAura(SPELL_SHAMAN_STORM_CLOUD, me->GetGUID()))
+            if (target && spell->Id == RAID_MODE(SPELL_SHAMAN_STORM_CLOUD_10, SPELL_SHAMAN_STORM_CLOUD_25))
+                if (Aura* a = target->GetAura(RAID_MODE(SPELL_SHAMAN_STORM_CLOUD_10, SPELL_SHAMAN_STORM_CLOUD_25), me->GetGUID()))
                     a->SetStackAmount(spell->StackAmount);
         }
 
@@ -1136,8 +1181,8 @@ public:
                     events.RepeatEvent(2600);
                     break;
                 case EVENT_SHAMAN_STORM_CLOUD:
-                    if (Player* target = ScriptedAI::SelectTargetFromPlayerList(35.0f, SPELL_SHAMAN_STORM_CLOUD))
-                        me->CastSpell(target, SPELL_SHAMAN_STORM_CLOUD, false);
+                    if (Player* target = ScriptedAI::SelectTargetFromPlayerList(35.0f, RAID_MODE(SPELL_SHAMAN_STORM_CLOUD_10, SPELL_SHAMAN_STORM_CLOUD_25)))
+                        me->CastSpell(target, RAID_MODE(SPELL_SHAMAN_STORM_CLOUD_10, SPELL_SHAMAN_STORM_CLOUD_25), false);
                     events.RepeatEvent(30000);
                     break;
             }
@@ -1186,7 +1231,7 @@ public:
         void ScheduleAbilities()
         {
             events.ScheduleEvent(EVENT_MAGE_FIREBALL, 3100);
-            events.ScheduleEvent(EVENT_MAGE_TOASTY_FIRE, 6000);
+            events.ScheduleEvent(EVENT_MAGE_TOASTY_FIRE, 10000);
             events.ScheduleEvent(EVENT_MAGE_MELT_ICE, 1000);
         }
 

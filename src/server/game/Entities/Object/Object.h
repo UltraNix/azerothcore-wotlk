@@ -611,6 +611,7 @@ class WorldObject : public Object, public WorldLocation
         virtual uint8 getLevelForTarget(WorldObject const* /*target*/) const { return 1; }
 
         void MonsterSay(const char* text, uint32 language, WorldObject const* target);
+        void MonsterYell(std::string const& text, uint32 language, WorldObject const* target);
         void MonsterYell(const char* text, uint32 language, WorldObject const* target);
         void MonsterTextEmote(const char* text, WorldObject const* target, bool IsBossEmote = false);
         void MonsterWhisper(const char* text, Player const* target, bool IsBossWhisper = false);

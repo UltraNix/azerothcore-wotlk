@@ -10,6 +10,8 @@ REWRITTEN FROM SCRATCH BY XINEF, IT OWNS NOW!
 #include "SpellAuraEffects.h"
 #include "Player.h"
 
+#include <cmath>
+
 #define BASE_CAMP    200
 #define GROUNDS      201
 #define FORGE        202
@@ -182,50 +184,120 @@ public:
     }
 };
 
-class npc_ulduar_snow_mound : public CreatureScript
+enum SnowMound
 {
-public:
-    npc_ulduar_snow_mound() : CreatureScript("npc_ulduar_snow_mound") { }
+    NPC_WHITE_JORMUNGAR         = 34137,
+    NPC_SNOW_MOUND_4            = 34146,
+    NPC_SNOW_MOUND_6            = 34150,
+    NPC_SNOW_MOUND_8            = 34151,
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    SPELL_SNOW_MOUND_PARTICLE   = 64615
+};
+
+struct npc_ulduar_snow_mound : public ScriptedAI
+{
+    npc_ulduar_snow_mound(Creature* creature) : ScriptedAI(creature)
     {
-        return new npc_ulduar_snow_moundAI(pCreature);
+        DoCastSelf(SPELL_SNOW_MOUND_PARTICLE);
+        _spawnJormungars = true;
     }
 
-    struct npc_ulduar_snow_moundAI : public ScriptedAI
+    void AttackStart(Unit* /*who*/) override { }
+    void EnterCombat(Unit* /*who*/) override { }
+
+    void MoveInLineOfSight(Unit* who) override
     {
-        npc_ulduar_snow_moundAI(Creature* pCreature) : ScriptedAI(pCreature)
+        if (_spawnJormungars && who->IsPlayer() && !who->ToPlayer()->IsGameMaster() && who->IsWithinDistInMap(me, 5.f))
         {
-            activated = false;
-            me->CastSpell(me, 64615, true);
-        }
+            _spawnJormungars = false;
+            uint32 jormungarCount = 8;
 
-        bool activated;
+            if (me->GetEntry() == NPC_SNOW_MOUND_4)
+                jormungarCount = 4;
+            else if (me->GetEntry() == NPC_SNOW_MOUND_6)
+                jormungarCount = 6;
+            else if (me->GetEntry() == NPC_SNOW_MOUND_8)
+                jormungarCount = 8;
 
-        void MoveInLineOfSight(Unit* who)
-        {
-            if (!activated && who->GetTypeId() == TYPEID_PLAYER)
-                if (me->GetExactDist2d(who) <= 25.0f && me->GetMap()->isInLineOfSight(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+5.0f, who->GetPositionX(), who->GetPositionY(), who->GetPositionZ()+5.0f, 2))
+            float const angleStep = static_cast<float>(2 * M_PI) / jormungarCount;
+            float currentAngle = 0.f;
+            Position spawnAt = me->GetPosition();
+            for (uint32 i = 0; i < jormungarCount; ++i)
+            {
+                Creature* jormungar = me->SummonCreature(NPC_WHITE_JORMUNGAR, spawnAt);
+                if (jormungar)
                 {
-                    activated = true;
-                    me->RemoveAura(64615);
-                    if (GameObject* go = me->FindNearestGameObject(194907, 5.0f))
-                        go->Delete();
-                    uint8 count;
-                    if (me->GetEntry() == 34146) count = 4;
-                    else if (me->GetEntry() == 34150) count = 6;
-                    else count = 8;
-                    for (uint8 i=0; i<count; ++i)
-                    {
-                        float a = rand_norm()*2*M_PI; float d = rand_norm()*4.0f;
-                        if (Creature* c = me->SummonCreature(34137, me->GetPositionX()+cos(a)*d, me->GetPositionY()+sin(a)*d, me->GetPositionZ()+1.0f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 300000))
-                            c->AI()->AttackStart(who);
-                    }
+                    Position jumpPosition = spawnAt;
+                    jumpPosition.m_positionX = spawnAt.GetPositionX() + 3.5f * cosf(currentAngle);
+                    jumpPosition.m_positionY = spawnAt.GetPositionY() + 3.5f * sinf(currentAngle);
+                    jumpPosition.m_positionZ = jormungar->GetMap()->GetWaterOrGroundLevel(jormungar->GetPhaseMask(), jumpPosition.GetPositionX(), jumpPosition.GetPositionY(), jumpPosition.GetPositionZ());
+                    currentAngle += angleStep;
+                    jormungar->GetMotionMaster()->MoveJump(jumpPosition, 10.f, 10.f);
+                    jormungar->SetHomePosition(jumpPosition);
                 }
-        }
+            }
 
-        void UpdateAI(uint32 diff) {}
-    };
+            me->RemoveAurasDueToSpell(SPELL_SNOW_MOUND_PARTICLE);
+            if (GameObject* go = me->FindNearestGameObject(GO_SNOW_MOUND, 5.0f))
+                go->SetLootState(GO_JUST_DEACTIVATED);
+            me->DespawnOrUnsummon(1500ms);
+        }
+    }
+
+private:
+    bool _spawnJormungars;
+};
+
+enum WhiteJormungar
+{
+    SPELL_JORMUNGAR_ACIDIC_BITE    = 64638
+};
+
+struct npc_white_jormungar_ulduar : public ScriptedAI
+{
+    npc_white_jormungar_ulduar(Creature* creature) : ScriptedAI(creature)
+    {
+        me->SetImmuneToAll(true);
+        _jumped = false;
+    }
+
+    void Reset() override
+    {
+        task.CancelAll();
+        if (!_jumped)
+        {
+            _jumped = true;
+            task.Schedule(1500ms, [&](TaskContext /*func*/)
+            {
+                me->SetImmuneToAll(false);
+                DoZoneInCombat(me, 100.f);
+            });
+        }
+    }
+
+    void EnterCombat(Unit* who) override
+    {
+        ScriptedAI::EnterCombat(who);
+        task.Schedule(1s, [&](TaskContext func)
+        {
+            if (me->GetVictim())
+                DoCastVictim(SPELL_JORMUNGAR_ACIDIC_BITE);
+            func.Repeat(3s, 5s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        task.Update(diff);
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    TaskScheduler task;
+    bool _jumped;
 };
 
 enum storm_tempered_keeper
@@ -598,13 +670,174 @@ private:
     bool _exploded;
 };
 
+constexpr uint32 SPELL_UNQUENCHABLE_FLAMES_AOE{ 64706 };
+constexpr uint32 NPC_IGNIS_WATER_TRIGGER{ 22515 };
+class spell_unquenchable_flames : public AuraScript
+{
+    PrepareAuraScript(spell_unquenchable_flames);
+
+    void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        switch (GetTargetApplication()->GetRemoveMode())
+        {
+            case AURA_REMOVE_BY_ENEMY_SPELL:
+            case AURA_REMOVE_BY_EXPIRE:
+            case AURA_REMOVE_BY_DEATH:
+                break;
+            default:
+                return;
+        }
+
+        CustomSpellValues val;
+        val.AddSpellMod(SPELLVALUE_MAX_TARGETS, 1);
+        GetTarget()->CastCustomSpell(SPELL_UNQUENCHABLE_FLAMES_AOE, val, (Unit*)nullptr, TRIGGERED_FULL_MASK);
+    }
+
+    void HandlePeriodic(AuraEffect const* /*aurEff*/)
+    {
+        if (GetTarget() && GetTarget()->FindNearestCreature(NPC_IGNIS_WATER_TRIGGER, 18.0f, true))
+            Remove(AURA_REMOVE_BY_CANCEL);
+    }
+
+    void Register() override
+    {
+        OnEffectRemove += AuraEffectRemoveFn(spell_unquenchable_flames::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE_PERCENT, AURA_EFFECT_HANDLE_REAL);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_unquenchable_flames::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+    }
+};
+
+enum MechagnomeBattletank
+{
+    SPELL_MECHAGNOME_JUMPATTACK         = 64953,
+    SPELL_MECHAGNOME_FLAME_CANNON       = 64692
+};
+
+struct npc_mechagnome_battletank : public ScriptedAI
+{
+    npc_mechagnome_battletank(Creature* creature) : ScriptedAI(creature)
+    {
+        me->m_SightDistance = 150.f;
+    }
+
+    void Reset() override
+    {
+        ScriptedAI::Reset();
+        scheduler.CancelAll();
+        //me->GetMotionMaster()->MoveRandom(0.3f);
+    }
+
+    bool CanSeeAlways(WorldObject const* /*obj*/) override
+    {
+        return true;
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!me->IsInCombat() && who && !me->IsFriendlyTo(who) && me->GetDistance(who) < 150.f && me->CanCreatureAttack(who, true))
+        {
+            DoZoneInCombat(me, 300.f);
+            AttackStart(who);
+        }
+    }
+
+    void EnterCombat(Unit* who) override
+    {
+        ScriptedAI::EnterCombat(who);
+
+        scheduler.Schedule(1s, [&](TaskContext func)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.f, true))
+                DoCast(target, SPELL_MECHAGNOME_JUMPATTACK, true);
+
+            func.Repeat(10s, 15s);
+        }).Schedule
+        (3s, [&](TaskContext func)
+        {
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.f, true))
+                DoCast(target, SPELL_MECHAGNOME_FLAME_CANNON, true);
+
+            func.Repeat(3s, 6s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (!UpdateVictim())
+            return;
+
+        scheduler.Update(diff);
+        DoMeleeAttackIfReady();
+    }
+private:
+    TaskScheduler scheduler;
+};
+
+enum SuperHeatedEnum
+{
+    SPELL_SUPERHEATED_WINDS_PERIODIC = 64724,
+
+    POINT_MOVE_SUPERHEATED_WINDS     = 1
+};
+
+struct npc_superheated_winds : public ScriptedAI
+{
+    npc_superheated_winds(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        task.CancelAll();
+        task.Schedule(500ms, [&](TaskContext func)
+        {
+            DoCastSelf(SPELL_SUPERHEATED_WINDS_PERIODIC, true);
+        }).Schedule(1500ms, [&](TaskContext func)
+        {
+            me->GetMotionMaster()->MovePoint(POINT_MOVE_SUPERHEATED_WINDS, GetRandomMovePosition());
+        });
+    }
+
+    void MovementInform(uint32 type, uint32 pointId) override
+    {
+        if (type == POINT_MOTION_TYPE && pointId == POINT_MOVE_SUPERHEATED_WINDS)
+            task.Schedule(5s, [&](TaskContext func)
+        {
+            me->GetMotionMaster()->MovePoint(POINT_MOVE_SUPERHEATED_WINDS, GetRandomMovePosition());
+        });
+    }
+
+    Position const GetRandomMovePosition()
+    {
+        Creature* summoner = me->GetSummoner();
+        if (summoner && summoner->IsAIEnabled && summoner->IsInCombat())
+        {
+            Unit* target = summoner->AI()->SelectTarget(SELECT_TARGET_TOPAGGRO, 0U, 0.f, true);
+            if (target)
+                return me->GetNearPositionFromPos(target->GetPosition(), 2.5f);
+        }
+
+        return me->GetNearPositionFromPos(me->GetPosition(), 5.f);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        task.Update(diff);
+    }
+
+    void AttackStart(Unit* /*who*/) override { }
+    void MoveInLineOfSight(Unit* /*who*/) override { }
+
+private:
+    TaskScheduler task;
+};
+
 void AddSC_ulduar()
 {
+    RegisterCreatureAI(npc_superheated_winds);
+    RegisterCreatureAI(npc_ulduar_snow_mound);
+    RegisterCreatureAI(npc_white_jormungar_ulduar);
     new go_ulduar_teleporter();
     new npc_ulduar_keeper();
 
     new spell_ulduar_energy_sap();
-    new npc_ulduar_snow_mound();
     new npc_ulduar_storm_tempered_keeper();
     new npc_ulduar_arachnopod_destroyer();
     new spell_ulduar_arachnopod_damaged();
@@ -613,4 +846,6 @@ void AddSC_ulduar()
     new go_call_tram();
 
     new CreatureAILoader<npc_boomer_xp500_ulduar_AI>("npc_boomer_xp500_ulduar");
+    new AuraScriptLoaderEx<spell_unquenchable_flames>("spell_unquenchable_flames");
+    new CreatureAILoader<npc_mechagnome_battletank>("npc_mechagnome_battletank");
 }

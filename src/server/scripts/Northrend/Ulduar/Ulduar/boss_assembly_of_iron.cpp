@@ -245,7 +245,7 @@ public:
             me->setActive(true);
             me->SetInCombatWithZone();
             me->CastSpell(me, SPELL_HIGH_VOLTAGE, true);
-            events.ScheduleEvent(EVENT_ENRAGE, sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) ? 600000 : 900000);
+            events.ScheduleEvent(EVENT_ENRAGE, sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) ? 10min : 15min);
             UpdatePhase();
 
             if (!pInstance)
@@ -332,11 +332,20 @@ public:
 
         void KilledUnit(Unit* who)
         {
+            /*
+                https://wowwiki.fandom.com/wiki/Steelbreaker
+                Hotfix (2009-05-13): "If a pet dies from Overwhelming Power on Steelbreaker in Ulduar, Steelbreaker will gain an Electrical Charge. [1]"
+            */
+
+            bool _doHealOffOfPets = sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && who->IsPet() || who->IsHunterPet();
+            if (_phase == 3 && who->GetGUID() != _lastOverwhelmingPowerTargetGUID)
+            {
+                if (_doHealOffOfPets || who->IsPlayer())
+                    me->CastSpell(me, SPELL_ELECTRICAL_CHARGE, true);
+            }
+
             if (who->GetTypeId() != TYPEID_PLAYER)
                 return;
-
-            if (_phase == 3 && who->GetGUID() != _lastOverwhelmingPowerTargetGUID)
-                me->CastSpell(me, SPELL_ELECTRICAL_CHARGE, true);
 
             if (urand(0, 1))
             {
@@ -1044,7 +1053,7 @@ struct npc_overload_ball_assembly_AI : public ScriptedAI
         DoCastSelf(SPELL_OVERLOAD_GROW_VISUAL);
         me->DespawnOrUnsummon(6s);
     }
-    
+
     void MoveInLineOfSight(Unit* /*who*/) override { }
     void EnterCombat(Unit* /*who*/) override { }
     void AttackStart(Unit* /*who*/) override { }

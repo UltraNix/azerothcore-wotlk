@@ -3180,20 +3180,6 @@ void Creature::DisableChainPullFor(std::chrono::milliseconds const ms)
     });
 }
 
-bool Creature::CanBeChainPulled() const
-{
-    if (HasExtraFlag(CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL))
-        return false;
-
-    if (isDead())
-        return false;
-
-    if (IsCivilian() || IsTrigger() || IsInEvadeMode() || HasUnitState(UNIT_STATE_LOST_CONTROL))
-        return false;
-
-    return true;
-}
-
 void NearbyCreatureChainPullDo::operator()(Creature* creature)
 {
     if (!creature->IsAIEnabled)
@@ -3203,7 +3189,10 @@ void NearbyCreatureChainPullDo::operator()(Creature* creature)
     if (creature->GetUInt64Value(UNIT_FIELD_TARGET))
         return;
 
-    if (!creature->CanBeChainPulled())
+    if (!creature->IsAIEnabled)
+        return;
+
+    if (!creature->AI()->CanBeChainPulled())
         return;
 
     if (creature == caller)

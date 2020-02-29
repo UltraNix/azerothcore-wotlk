@@ -53,11 +53,6 @@ enum XT002Spells
     SPELL_SCRAPBOT_RIDE_VEHICLE             = 47020
 };
 
-#define SPELL_GRAVITY_BOMB         RAID_MODE(SPELL_GRAVITY_BOMB_10, SPELL_GRAVITY_BOMB_25)
-#define SPELL_SEARING_LIGHT        RAID_MODE(SPELL_SEARING_LIGHT_10, SPELL_SEARING_LIGHT_25)
-#define SPELL_HEARTBREAK           RAID_MODE(SPELL_HEARTBREAK_10, SPELL_HEARTBREAK_25)
-#define SPELL_SPARK_DAMAGE         RAID_MODE(SPELL_SPARK_DAMAGE_10, SPELL_SPARK_DAMAGE_25)
-
 enum XT002Events
 {
     EVENT_HEALTH_CHECK                      = 1,
@@ -70,7 +65,7 @@ enum XT002Events
     EVENT_REMOVE_EMOTE
 };
 
-enum NPCs
+enum XT002NPCs
 {
     NPC_VOID_ZONE                           = 34001,
     NPC_LIFE_SPARK                          = 34004,
@@ -78,10 +73,10 @@ enum NPCs
     NPC_XS013_SCRAPBOT                      = 33343,
     NPC_XM024_PUMMELLER                     = 33344,
     NPC_XE321_BOOMBOT                       = 33346,
-    NPC_PILE_TRIGGER                        = 33337,
+    NPC_PILE_TRIGGER                        = 33337
 };
 
-enum Sounds
+enum XT002Sounds
 {
     XT_SOUND_AGGRO                          = 15724,
     XT_SOUND_HEART_OPEN                     = 15725,
@@ -91,10 +86,10 @@ enum Sounds
     XT_SOUND_SLAY2                          = 15729,
     XT_SOUND_ENRAGE                         = 15730,
     XT_SOUND_DEATH                          = 15731,
-    XT_SOUND_SUMMON                         = 15732,
+    XT_SOUND_SUMMON                         = 15732
 };
 
-enum Misc
+enum XT002Misc
 {
     HEART_VEHICLE_SEAT                      = 0,
     HEART_VEHICLE_SEAT_EXPOSED              = 1,
@@ -115,7 +110,7 @@ Position const XTArenaCenterPos = { 816.491455f, -12.355629f, 409.803619f, 5.292
 
 struct boss_xt002AI : BossAI
 {
-    explicit boss_xt002AI(Creature* creature) : BossAI(creature, TYPE_XT002), _healthCheck(75), _hardMode(false), _nerfAchievement(true), _gravityAchievement(true)
+    boss_xt002AI(Creature* creature) : BossAI(creature, TYPE_XT002), _healthCheck(75), _hardMode(false), _nerfAchievement(true), _gravityAchievement(true)
     {
         //boundaryHandler.SetBoundary(new RectangleBoundary(755.0f, 940.0f, -125.0f, 95.0f));
     }
@@ -150,14 +145,12 @@ struct boss_xt002AI : BossAI
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_MUST_DECONSTRUCT_FASTER);
         if (instance->GetData(TYPE_XT002) != DONE)
             instance->SetData(TYPE_XT002, NOT_STARTED);
-        if (auto go = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_XT002_DOORS)))
+        if (GameObject* go = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_XT002_DOORS)))
             go->SetGoState(GO_STATE_ACTIVE);
     }
 
     //! ToDo: ten override nie jest raczej poprawny
     void MoveInLineOfSight(Unit*) override { }
-    void JustSummoned(Creature* cr) override { summons.Summon(cr); }
-    void SummonedCreatureDespawn(Creature* cr) override { summons.Despawn(cr); }
 
     void EnterEvadeMode() override
     {
@@ -172,7 +165,7 @@ struct boss_xt002AI : BossAI
 
     void AttachHeart() const
     {
-        if (auto heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : nullptr)
+        if (Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : nullptr)
             heart->SetHealth(heart->GetMaxHealth());
         else if (Creature* accessory = me->SummonCreature(NPC_XT002_HEART, *me, TEMPSUMMON_MANUAL_DESPAWN))
         {
@@ -250,9 +243,9 @@ struct boss_xt002AI : BossAI
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
 
         if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-            events.ScheduleEvent(EVENT_ENRAGE, 10min, 0, 0);
+            events.ScheduleEvent(EVENT_ENRAGE, RAID_MODE(7min, 10min), 0, 0);
         else
-            events.ScheduleEvent(EVENT_ENRAGE, 600000, 0, 0);
+            events.ScheduleEvent(EVENT_ENRAGE, 10min, 0, 0);
 
         RescheduleEvents(); // Other events are scheduled here
 
@@ -291,12 +284,14 @@ struct boss_xt002AI : BossAI
         if (Map* map = me->GetMap())
             CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + _hardMode, Difficulty(map->GetDifficulty() + _hardMode * 2), "", 15000, _fightTimer);
 
+        if (_hardMode)
+            instance->SetData(DATA_XT_002_HARDMODE, DATA_XT_002_HARDMODE);
         _JustDied();
         me->MonsterYell("You are bad... Toys... Very... Baaaaad!", LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(XT_SOUND_DEATH);
 
         instance->SetData(TYPE_XT002, DONE);
-        if (auto go = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_XT002_DOORS)))
+        if (GameObject* go = ObjectAccessor::GetGameObject(*me, instance->GetData64(GO_XT002_DOORS)))
             go->SetGoState(GO_STATE_ACTIVE);
     }
 
@@ -327,7 +322,7 @@ struct boss_xt002AI : BossAI
             me->SetHealth(me->GetMaxHealth());
             me->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND); // emerge
 
-            DoCastSelf(SPELL_HEARTBREAK, true);
+            DoCastSelf(RAID_MODE(SPELL_HEARTBREAK_10, SPELL_HEARTBREAK_25), true);
 
             me->MonsterTextEmote("XT-002 Deconstructor's heart is severed from his body.", nullptr, true);
             events.ScheduleEvent(EVENT_REMOVE_EMOTE, 4000);
@@ -338,7 +333,7 @@ struct boss_xt002AI : BossAI
         if (param > 0)
         {
             // avoid reducing health under 1
-            auto _final = std::min(param, int32(me->GetHealth() - 1));
+            int32 _final = std::min(param, int32(me->GetHealth() - 1));
 
             me->ModifyHealth(-_final);
             me->LowerPlayerDamageReq(_final);
@@ -362,14 +357,14 @@ struct boss_xt002AI : BossAI
 
         events.Update(diff);
 
-        auto _canContinueCasting = _canCastDuringTantrum && me->HasAura(SPELL_TYMPANIC_TANTARUM);
+        bool const _canContinueCasting = _canCastDuringTantrum && me->HasAura(SPELL_TYMPANIC_TANTARUM);
         /// allow to execute stuff while tantrum is up and mode is set to preNerf
         if (me->HasUnitState(UNIT_STATE_CASTING) && !_canContinueCasting)
             return;
 
-        while (auto eventId = events.ExecuteEvent())
+        while (uint32 eventId = events.ExecuteEvent())
         {
-            switch(eventId)
+            switch (eventId)
             {
                 case EVENT_HEALTH_CHECK:
                     if (_hardMode)
@@ -385,26 +380,26 @@ struct boss_xt002AI : BossAI
                         me->PlayDirectSound(XT_SOUND_HEART_OPEN);
 
                         events.CancelEventGroup(1);
-                        events.ScheduleEvent(EVENT_START_SECOND_PHASE, 5000);
+                        events.ScheduleEvent(EVENT_START_SECOND_PHASE, 5s);
                         return;
                     }
                     events.Repeat(1000);
                     break;
                 // Abilities events
                 case EVENT_GRAVITY_BOMB:
-                    me->CastCustomSpell(SPELL_GRAVITY_BOMB, SPELLVALUE_MAX_TARGETS, 1, me, true);
-                    events.ScheduleEvent(EVENT_SEARING_LIGHT, 10000, 1);
+                    me->CastCustomSpell(RAID_MODE(SPELL_GRAVITY_BOMB_10, SPELL_GRAVITY_BOMB_25), SPELLVALUE_MAX_TARGETS, 1, me, true);
+                    events.ScheduleEvent(EVENT_SEARING_LIGHT, 10s, 1);
                     break;
                 case EVENT_SEARING_LIGHT:
-                    me->CastCustomSpell(SPELL_SEARING_LIGHT, SPELLVALUE_MAX_TARGETS, 1, me, true);
-                    events.ScheduleEvent(EVENT_GRAVITY_BOMB, 10000, 1);
+                    me->CastCustomSpell(RAID_MODE(SPELL_SEARING_LIGHT_10, SPELL_SEARING_LIGHT_25), SPELLVALUE_MAX_TARGETS, 1, me, true);
+                    events.ScheduleEvent(EVENT_GRAVITY_BOMB, 10s, 1);
                     break;
                 case EVENT_TYMPANIC_TANTARUM:
                     me->MonsterTextEmote("XT-002 Deconstructor begins to cause the earth to quake.", nullptr, true);
                     me->MonsterYell("NO! NO! NO! NO! NO!", LANG_UNIVERSAL, nullptr);
                     me->PlayDirectSound(XT_SOUND_TANTARUM);
                     DoCastSelf(SPELL_TYMPANIC_TANTARUM, true);
-                    events.Repeat(60000);
+                    events.Repeat(60s);
                     return;
                 case EVENT_ENRAGE:
                     me->MonsterYell("I'm tired of these toys. I don't want to play anymore!", LANG_UNIVERSAL, nullptr);
@@ -413,16 +408,19 @@ struct boss_xt002AI : BossAI
                     break;
                     // Animation events
                 case EVENT_START_SECOND_PHASE:
+                {
                     me->MonsterTextEmote("XT-002 Deconstructor's heart is exposed and leaking energy.", nullptr, true);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    if (auto heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : nullptr)
-                        if (heart->IsAIEnabled)
-                            heart->GetAI()->DoAction(ACTION_AWAKEN_HEART);
+                    Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT) : nullptr;
+                    if (heart && heart->IsAIEnabled)
+                        heart->GetAI()->DoAction(ACTION_AWAKEN_HEART);
 
-                    events.ScheduleEvent(EVENT_RESTORE, 30000);
+                    events.ScheduleEvent(EVENT_RESTORE, 30s);
                     return;
-                    // Restore from heartbreak
+                }
+                // Restore from heartbreak
                 case EVENT_RESTORE:
+                {
                     if (_hardMode)
                         return;
 
@@ -431,12 +429,13 @@ struct boss_xt002AI : BossAI
 
                     me->SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND); // emerge
                                                                                         // Hide heart
-                    if (auto heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT_EXPOSED) : nullptr)
+                    if (Unit* heart = me->GetVehicleKit() ? me->GetVehicleKit()->GetPassenger(HEART_VEHICLE_SEAT_EXPOSED) : nullptr)
                         if (heart->IsAIEnabled)
                             heart->GetAI()->DoAction(ACTION_HIDE_HEART);
 
-                    events.ScheduleEvent(EVENT_REMOVE_EMOTE, 4000);
+                    events.ScheduleEvent(EVENT_REMOVE_EMOTE, 4s);
                     return;
+                }
                 case EVENT_REMOVE_EMOTE:
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     me->SetControlled(false, UNIT_STATE_STUNNED);
@@ -467,20 +466,27 @@ private:
 
 struct npc_xt002_heartAI : PassiveAI
 {
-    explicit npc_xt002_heartAI(Creature* creature) : PassiveAI(creature), summons(me), _damageDone(0), _timerSpawn(0), _spawnSelection(0), _pummelerCount(0)
+    npc_xt002_heartAI(Creature* creature) : PassiveAI(creature), summons(me), _damageDone(0), _timerSpawn(0), _spawnSelection(0), _pummelerCount(0)
     {
+        instance = me->GetInstanceScript();
         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+    }
+
+    void Reset() override
+    {
+        PassiveAI::Reset();
+        if (!instance)
+            me->DespawnOrUnsummon();
     }
 
     void MoveInLineOfSight(Unit*) override { }
     void AttackStart(Unit*) override { }
-    void JustSummoned(Creature* cr) override
+    void JustSummoned(Creature* summon) override
     {
-        summons.Summon(cr);
-        if (auto owner = me->GetVehicleBase())
-            if (owner->GetTypeId() == TYPEID_UNIT)
-                if (owner->IsAIEnabled)
-                    owner->ToCreature()->AI()->JustSummoned(cr);
+        summons.Summon(summon);
+        if (Unit* owner = me->GetVehicleBase())
+            if (owner->GetTypeId() == TYPEID_UNIT && owner->IsAIEnabled)
+                owner->ToCreature()->AI()->JustSummoned(summon);
     }
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask) override
@@ -490,10 +496,10 @@ struct npc_xt002_heartAI : PassiveAI
 
     void SummonPiles() const
     {
-        me->SummonCreature(NPC_PILE_TRIGGER, 893.290f, 66.820f, 409.81f, 4.2f);
-        me->SummonCreature(NPC_PILE_TRIGGER, 898.099f, -88.9115f, 409.887f, 2.23402f);
-        me->SummonCreature(NPC_PILE_TRIGGER, 793.096f, -95.158f,  409.887f, 0.855211f);
-        me->SummonCreature(NPC_PILE_TRIGGER, 794.600f, 59.660f, 409.82f, 5.34f);
+        me->SummonCreature(NPC_PILE_TRIGGER, { 893.290f, 66.820f, 409.81f, 4.2f });
+        me->SummonCreature(NPC_PILE_TRIGGER, { 898.099f, -88.9115f, 409.887f, 2.23402f });
+        me->SummonCreature(NPC_PILE_TRIGGER, { 793.096f, -95.158f,  409.887f, 0.855211f });
+        me->SummonCreature(NPC_PILE_TRIGGER, { 794.600f, 59.660f, 409.82f, 5.34f });
     }
 
     void DoAction(int32 param) override
@@ -512,19 +518,19 @@ struct npc_xt002_heartAI : PassiveAI
             if (!summons.HasEntry(NPC_PILE_TRIGGER))
                 SummonPiles();
 
-            if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
             {
-                me->SetOrientation(pXT002->GetOrientation() * M_PI / 180);
-                me->SetFacingTo(pXT002->GetOrientation() * M_PI / 180);
+                me->SetOrientation(xt->GetOrientation() * M_PI / 180.f);
+                me->SetFacingTo(xt->GetOrientation() * M_PI / 180.f);
             }
         }
         else if (param == ACTION_HIDE_HEART)
         {
-            if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
             {
-                if (pXT002->IsAIEnabled)
+                if (xt->IsAIEnabled)
                 {
-                    pXT002->AI()->DoAction(_damageDone);
+                    xt->AI()->DoAction(_damageDone);
                     _damageDone = 0;
                 }
             }
@@ -540,17 +546,19 @@ struct npc_xt002_heartAI : PassiveAI
         Unit* pile = nullptr;
         uint8 num = urand(1, 4);
 
-        auto x = me->GetPositionX();
-        auto y = me->GetPositionY();
+        float const x = me->GetPositionX();
+        float const y = me->GetPositionY();
 
         for (SummonList::const_iterator itr = summons.begin(); itr != summons.end(); ++itr)
-            if (auto summon = ObjectAccessor::GetCreature(*me, *itr))
+        {
+            if (Creature* summon = ObjectAccessor::GetCreature(*me, *itr))
                 if (summon->GetEntry() == NPC_PILE_TRIGGER && !summon->IsWithinDist2d(x, y, 85.0f))
                 {
                     pile = summon;
-                    if (--num == 0)
+                    if (!--num)
                         break;
                 }
+        }
 
         if (pile)
             DoCast(pile, SPELL_ENERGY_ORB, true);
@@ -596,10 +604,9 @@ struct npc_xt002_heartAI : PassiveAI
     void JustDied(Unit* /*victim*/) override
     {
         me->SetVisible(false);
-        if (me->GetInstanceScript())
-            if (auto XT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
-                if (XT002->IsAIEnabled)
-                    XT002->AI()->DoAction(ACTION_HEART_BROKEN);
+        if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
+            if (xt->IsAIEnabled)
+                xt->AI()->DoAction(ACTION_HEART_BROKEN);
     }
 
     void UpdateAI(uint32 diff) override
@@ -621,14 +628,24 @@ private:
     uint32 _timerSpawn;
     uint8 _spawnSelection;
     uint8 _pummelerCount;
+    InstanceScript* instance;
 };
 
 struct npc_xt002_scrapbotAI : PassiveAI
 {
-    explicit npc_xt002_scrapbotAI(Creature* creature) : PassiveAI(creature), _locked(true) { }
+    npc_xt002_scrapbotAI(Creature* creature) : PassiveAI(creature), _locked(true)
+    {
+        instance = me->GetInstanceScript();
+    }
 
     void Reset() override
     {
+        if (!instance)
+        {
+            me->DespawnOrUnsummon();
+            return;
+        }
+
         me->SetRegeneratingHealth(false);
         me->StopMoving();
         me->SetFloatValue(UNIT_FIELD_COMBATREACH, 6.0f);
@@ -637,25 +654,23 @@ struct npc_xt002_scrapbotAI : PassiveAI
         me->SetWalk(true);
         _rangeCheckTimer = 500;
 
-        if (me->GetInstanceScript())
-            if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
-            {
-                if (pXT002->GetPositionZ() > 411.0f) // he is on stairs... idiot cryness protection
-                    me->GetMotionMaster()->MovePoint(0, 884.028931f, -14.593809f, 409.786987f);
-                else
-                    _locked = false;
-            }
+        if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
+        {
+            if (xt->GetPositionZ() > 411.0f) // he is on stairs... idiot cryness protection
+                me->GetMotionMaster()->MovePoint(0, 884.028931f, -14.593809f, 409.786987f);
+            else
+                _locked = false;
+        }
     }
 
     void JustDied(Unit* killer) override
     {
         // Nerf Scrapbots achievement
         if (killer->GetEntry() == NPC_XE321_BOOMBOT)
-            if (me->GetInstanceScript())
-            {
-                me->GetInstanceScript()->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, 65037);
-                me->GetInstanceScript()->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65037);
-            }
+        {
+            instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET, 65037);
+            instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 65037);
+        }
     }
 
     void MovementInform(uint32 type, uint32 /*param*/) override
@@ -676,9 +691,9 @@ struct npc_xt002_scrapbotAI : PassiveAI
         {
             if (me->GetInstanceScript())
             {
-                if (Creature* pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+                if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
                 {
-                    me->GetMotionMaster()->MoveChase(pXT002);
+                    me->GetMotionMaster()->MoveChase(xt);
                     _locked = true;
                 }
             }
@@ -686,17 +701,17 @@ struct npc_xt002_scrapbotAI : PassiveAI
 
         if (_rangeCheckTimer <= diff)
         {
-            if (Creature* pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            if (Creature* xt = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
             {
-                if (me->IsWithinCombatRange(pXT002, 6.f))
+                if (me->IsWithinCombatRange(xt, 6.f))
                 {
                     _reached = true;
-                    if (pXT002->IsAlive())
+                    if (xt->IsAlive())
                     {
-                        if (pXT002->IsAIEnabled)
-                            pXT002->AI()->DoAction(DATA_XT002_NERF_ENGINEERING);
-                        pXT002->CastSpell(me, SPELL_SCRAP_REPAIR, true);
-                        me->CastSpell(pXT002, SPELL_SCRAPBOT_RIDE_VEHICLE, true);
+                        if (xt->IsAIEnabled)
+                            xt->AI()->DoAction(DATA_XT002_NERF_ENGINEERING);
+                        xt->CastSpell(me, SPELL_SCRAP_REPAIR, true);
+                        me->CastSpell(xt, SPELL_SCRAPBOT_RIDE_VEHICLE, true);
                     }
 
                     if (roll_chance_i(10))
@@ -704,6 +719,7 @@ struct npc_xt002_scrapbotAI : PassiveAI
 
                     me->DespawnOrUnsummon(1.5s);
                 }
+
                 me->GetMotionMaster()->Clear();
                 _locked = false;
                 _rangeCheckTimer = 500;
@@ -714,6 +730,7 @@ struct npc_xt002_scrapbotAI : PassiveAI
     }
 
 private:
+    InstanceScript* instance;
     bool _locked;
     bool _reached;
     uint32 _rangeCheckTimer;
@@ -728,13 +745,13 @@ enum Pummeler
 
 struct npc_xt002_pummellerAI : ScriptedAI
 {
-    explicit npc_xt002_pummellerAI(Creature* creature) : ScriptedAI(creature) { }
+    npc_xt002_pummellerAI(Creature* creature) : ScriptedAI(creature) { }
 
     void Reset() override
     {
-        _events.ScheduleEvent(EVENT_ARCING_SMASH, 8000);
-        _events.ScheduleEvent(EVENT_TRAMPLE, 11000);
-        _events.ScheduleEvent(EVENT_UPPERCUT, 14000);
+        _events.ScheduleEvent(EVENT_ARCING_SMASH, 8s);
+        _events.ScheduleEvent(EVENT_TRAMPLE, 11s);
+        _events.ScheduleEvent(EVENT_UPPERCUT, 14s);
 
         if (Unit *target = SelectTargetFromPlayerList(200.0f))
             AttackStart(target);
@@ -749,7 +766,7 @@ struct npc_xt002_pummellerAI : ScriptedAI
 
         _events.Update(diff);
 
-        while (auto eventId = _events.ExecuteEvent())
+        while (uint32 eventId = _events.ExecuteEvent())
         {
             switch(eventId)
             {
@@ -806,26 +823,32 @@ class BoomEvent : public BasicEvent
 
 struct npc_xt002_boombotAI : PassiveAI
 {
-    explicit npc_xt002_boombotAI(Creature* creature) : PassiveAI(creature), _locked(true), _boomed(false)
+    npc_xt002_boombotAI(Creature* creature) : PassiveAI(creature), _locked(true), _boomed(false)
     {
         me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+        instance = me->GetInstanceScript();
     }
 
     void Reset() override
     {
+        if (!instance)
+        {
+            me->DespawnOrUnsummon();
+            return;
+        }
+
         me->StopMoving();
         _locked = true;
         _boomed = false;
         me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
 
-        if (me->GetInstanceScript())
-            if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
-            {
-                if (pXT002->GetPositionZ() > 411.0f) // he is on stairs... idiot cryness protection
-                    me->GetMotionMaster()->MovePoint(0, 884.028931f, -14.593809f, 409.786987f);
-                else
-                    _locked = false;
-            }
+        if (Creature* pXT002 = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_XT002)))
+        {
+            if (pXT002->GetPositionZ() > 411.0f) // he is on stairs... idiot cryness protection
+                me->GetMotionMaster()->MovePoint(0, 884.028931f, -14.593809f, 409.786987f);
+            else
+                _locked = false;
+        }
     }
 
     void Explode()
@@ -871,16 +894,16 @@ struct npc_xt002_boombotAI : PassiveAI
     {
         if (!_locked)
         {
-            if (me->GetInstanceScript())
-                if (auto pXT002 = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
-                {
-                    me->GetMotionMaster()->MoveFollow(pXT002, 0.0f, 0.0f);
-                    _locked = true;
-                }
+            if (Creature* xt = ObjectAccessor::GetCreature(*me, me->GetInstanceScript()->GetData64(TYPE_XT002)))
+            {
+                me->GetMotionMaster()->MoveFollow(xt, 0.0f, 0.0f);
+                _locked = true;
+            }
         }
     }
 
 private:
+    InstanceScript* instance;
     bool _locked;
     bool _boomed;
 };
@@ -900,7 +923,7 @@ struct npc_xt002_life_sparkAI : ScriptedAI
         scheduler.CancelAll();
         _playerGUID = 0;
         DoCastSelf(SPELL_ARCANE_POWER_STATE, true);
-        DoCastSelf(SPELL_SPARK_DAMAGE, true);
+        DoCastSelf(RAID_MODE(SPELL_SPARK_DAMAGE_10, SPELL_SPARK_DAMAGE_25), true);
     }
 
     void SetGUID(uint64 guid, int32 data) override
@@ -969,26 +992,25 @@ class spell_xt002_gravity_bomb_aura_AuraScript : public AuraScript
 
     void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
-        if (auto player = GetOwner()->ToPlayer())
-            if (auto xt002 = GetCaster())
+        if (Player* player = GetOwner()->ToPlayer())
+            if (Unit* xt002 = GetCaster())
                 if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                    if (Creature* cr = xt002->SummonCreature(NPC_VOID_ZONE, player->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 180000))
-                        cr->CastSpell(cr, SPELL_VOID_ZONE_DAMAGE, true);
+                    if (Creature* voidZone = xt002->SummonCreature(NPC_VOID_ZONE, player->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 180000))
+                        voidZone->CastSpell(voidZone, SPELL_VOID_ZONE_DAMAGE, true);
     }
 
     void OnPeriodic(AuraEffect const* aurEff)
     {
-        auto xt002 = GetCaster();
-        if (!xt002)
+        Unit* xt = GetCaster();
+        if (!xt)
             return;
 
-        auto owner = GetOwner()->ToUnit();
+        Unit* owner = GetOwner()->ToUnit();
         if (!owner)
             return;
 
-        if (aurEff->GetAmount() >= int32(owner->GetHealth()))
-            if (xt002->IsAIEnabled)
-                xt002->GetAI()->DoAction(DATA_XT002_GRAVITY_ACHIEV);
+        if (aurEff->GetAmount() >= int32(owner->GetHealth()) && xt->IsAIEnabled)
+            xt->GetAI()->DoAction(DATA_XT002_GRAVITY_ACHIEV);
     }
 
     void Register() override
@@ -1004,7 +1026,7 @@ class spell_xt002_gravity_bomb_aura_SpellScript : public SpellScript
 
     void SelectTarget(std::list<WorldObject*>& targets)
     {
-        if (auto victim = GetCaster()->GetVictim())
+        if (Unit* victim = GetCaster()->GetVictim())
             targets.remove_if(Trinity::ObjectGUIDCheck(victim->GetGUID(), true));
     }
 
@@ -1020,13 +1042,12 @@ class spell_xt002_gravity_bomb_damage_SpellScript : public SpellScript
 
     void HandleScript(SpellEffIndex /*eff*/)
     {
-        auto caster = GetCaster();
-        if (!caster)
+        Unit* caster = GetCaster();
+        if (!caster || !caster->IsAIEnabled)
             return;
 
         if (GetHitDamage() >= int32(GetHitUnit()->GetHealth()))
-            if (caster->IsAIEnabled)
-                caster->GetAI()->DoAction(DATA_XT002_GRAVITY_ACHIEV);
+            caster->GetAI()->DoAction(DATA_XT002_GRAVITY_ACHIEV);
     }
 
     void Register() override
@@ -1041,11 +1062,11 @@ class spell_xt002_searing_light_spawn_life_spark_AuraScript : public AuraScript
 
     void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
-        if (auto player = GetOwner()->ToPlayer())
+        if (Player* player = GetOwner()->ToPlayer())
         {
-            if (auto xt002 = GetCaster())
-                if (xt002->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
-                    if (Creature* spark = xt002->SummonCreature(NPC_LIFE_SPARK, player->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 180000))
+            if (Unit* xt = GetCaster())
+                if (xt->HasAura(aurEff->GetAmount()))   // Heartbreak aura indicating hard mode
+                    if (Creature* spark = xt->SummonCreature(NPC_LIFE_SPARK, player->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 180000))
                         if (spark->IsAIEnabled)
                             spark->AI()->SetGUID(player->GetGUID(), DATA_SPARK_FOLLOW_TARGET);
         }
@@ -1063,7 +1084,7 @@ class spell_xt002_searing_light_spawn_life_spark_SpellScript : public SpellScrip
 
     void SelectTarget(std::list<WorldObject*>& targets)
     {
-        if (auto victim = GetCaster()->GetVictim())
+        if (Unit* victim = GetCaster()->GetVictim())
             targets.remove_if(Trinity::ObjectGUIDCheck(victim->GetGUID(), true));
     }
 
@@ -1080,11 +1101,13 @@ class achievement_xt002_nerf_engineering : public AchievementCriteriaScript
 
         bool OnCheck(Player* /*player*/, Unit* target) override
         {
-            if (target)
-                if (auto instance = target->GetInstanceScript())
-                    if (auto cr = ObjectAccessor::GetCreature(*target, instance->GetData64(TYPE_XT002)))
-                        if (cr->IsAIEnabled)
-                            return cr->AI()->GetData(DATA_XT002_NERF_ENGINEERING);
+            if (!target)
+                return false;
+
+            InstanceScript* instance = target->GetInstanceScript();
+            Creature* xt = ObjectAccessor::GetCreature(*target, instance->GetData64(TYPE_XT002));
+            if (instance && xt && xt->IsAIEnabled)
+                return xt->AI()->GetData(DATA_XT002_NERF_ENGINEERING);
 
             return false;
         }
@@ -1097,11 +1120,13 @@ class achievement_xt002_nerf_gravity_bombs : public AchievementCriteriaScript
 
         bool OnCheck(Player* /*player*/, Unit* target) override
         {
-            if (target)
-                if (auto instance = target->GetInstanceScript())
-                    if (auto cr = ObjectAccessor::GetCreature(*target, instance->GetData64(TYPE_XT002)))
-                        if (cr->IsAIEnabled)
-                            return cr->AI()->GetData(DATA_XT002_GRAVITY_ACHIEV);
+            if (!target)
+                return false;
+
+            InstanceScript* instance = target->GetInstanceScript();
+            Creature* xt = ObjectAccessor::GetCreature(*target, instance->GetData64(TYPE_XT002));
+            if (instance && xt && xt->IsAIEnabled)
+                return xt->AI()->GetData(DATA_XT002_GRAVITY_ACHIEV);
 
             return false;
         }

@@ -94,7 +94,7 @@ enum Misc
 
 struct boss_auriayaAI : BossAI
 {
-    explicit boss_auriayaAI(Creature* creature) : BossAI(creature, TYPE_AURIAYA), _feralDied(false), _nineLives(false) {}
+    boss_auriayaAI(Creature* creature) : BossAI(creature, TYPE_AURIAYA), _feralDied(false), _nineLives(false) {}
 
     void Reset() override
     {
@@ -136,9 +136,8 @@ struct boss_auriayaAI : BossAI
                 // 5th summon - defenderLives(4) 4 stack
                 // 6th summon - defenderLives(3) 3 stack
                 // 7th summon - defenderLives(2) 2 stack
-                // 8th summon - defenderLives(1) no stack aura
-                // 9th summon - defenderLives(0) lack of aura and after that
-                // if defender dies he is supposed to stay DEAD!
+                // 8th summon - defenderLives(1) single stack aura
+                // 9th summon - defenderLives(0) lack of aura, next kill is defenders death
                 if (defenderLives)
                 {
                     --defenderLives;
@@ -183,11 +182,15 @@ struct boss_auriayaAI : BossAI
 
     void EnterCombat(Unit* /*who*/) override
     {
-        //! if for some reason sentries did not respawn
-        //! evade right away
+        //! if for some reason sentries did not respawn evade right away
         std::list<Creature*> sentries;
         me->GetCreatureListWithEntryInGrid(sentries, NPC_SANCTUM_SENTRY, 100.f);
-        if (sentries.empty())
+        sentries.remove_if([&](Creature* object)
+        {
+            return !object->IsAlive();
+        });
+
+        if (sentries.size() < static_cast<size_t>(RAID_MODE(2, 4)))
         {
             EnterEvadeMode();
             return;
@@ -197,12 +200,12 @@ struct boss_auriayaAI : BossAI
         _EnterCombat();
         instance->SetData(TYPE_AURIAYA, IN_PROGRESS);
 
-        events.ScheduleEvent(EVENT_TERRIFYING_SCREECH, 35000);
-        events.ScheduleEvent(EVENT_SONIC_SCREECH, 45000);
-        events.ScheduleEvent(EVENT_GUARDIAN_SWARM, 70000);
-        events.ScheduleEvent(EVENT_SUMMON_FERAL_DEFENDER, 60000);
-        events.ScheduleEvent(EVENT_SENTINEL_BLAST, 36000);
-        events.ScheduleEvent(EVENT_ENRAGE, 600000);
+        events.ScheduleEvent(EVENT_TERRIFYING_SCREECH, 28s, 32s);
+        events.ScheduleEvent(EVENT_SONIC_SCREECH, 55s);
+        events.ScheduleEvent(EVENT_GUARDIAN_SWARM, 45s);
+        events.ScheduleEvent(EVENT_SUMMON_FERAL_DEFENDER, 40s, 55s);
+
+        events.ScheduleEvent(EVENT_ENRAGE, 10min);
 
         me->MonsterYell("Some things are better left alone!", LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(SOUND_AGGRO);
@@ -241,13 +244,13 @@ struct boss_auriayaAI : BossAI
 
     void ExecuteEvent(uint32 eventId) override
     {
-        switch(eventId)
+        switch (eventId)
         {
             case EVENT_SUMMON_FERAL_DEFENDER:
                 --defenderLives;
                 me->MonsterTextEmote("Auriaya begins to activate Feral Defender.", nullptr, true);
-                DoCastSelf(SPELL_ACTIVATE_FERAL_DEFENDER, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+                DoCastSelf(SPELL_ACTIVATE_FERAL_DEFENDER, true);
                 events.ScheduleEvent(EVENT_REMOVE_IMMUNE, 3000);
                 break;
             case EVENT_REMOVE_IMMUNE:
@@ -256,11 +259,18 @@ struct boss_auriayaAI : BossAI
             case EVENT_TERRIFYING_SCREECH:
                 me->MonsterTextEmote("Auriaya begins to cast Terrifying Screech.", nullptr, true);
                 DoCastSelf(SPELL_TERRIFYING_SCREECH);
-                events.Repeat(35000);
+                events.ScheduleEvent(EVENT_SENTINEL_BLAST, 2s);
+
+                if (events.GetTimeUntilEvent(EVENT_SONIC_SCREECH) <= 4000)
+                    events.RescheduleEvent(EVENT_SONIC_SCREECH, 4s);
+                events.Repeat(38s);
+                break;
+            case EVENT_SENTINEL_BLAST:
+                DoCastSelf(SPELL_SENTINEL_BLAST);
                 break;
             case EVENT_SONIC_SCREECH:
                 DoCastSelf(SPELL_SONIC_SCREECH);
-                events.Repeat(50000);
+                events.Repeat(30s);
                 break;
             case EVENT_GUARDIAN_SWARM:
                 DoCastVictim(SPELL_GUARDIAN_SWARM);
@@ -269,12 +279,7 @@ struct boss_auriayaAI : BossAI
                     swarmingTargetGUID = target->GetGUID();
                     DoCast(target, SPELL_GUARDIAN_SWARM);
                 }
-                events.Repeat(40s);
-                break;
-            case EVENT_SENTINEL_BLAST:
-                DoCastSelf(SPELL_SENTINEL_BLAST);
-                events.Repeat(35000);
-                events.DelayEvents(5000, 0);
+                events.Repeat(38s);
                 break;
             case EVENT_ENRAGE:
                 me->MonsterTextEmote("You waste my time!", nullptr);
@@ -442,7 +447,7 @@ struct npc_auriaya_feral_defenderAI : public ScriptedAI
         deathCount = 0;
         lastRushGUID = 0;
         events.Reset();
-        DoZoneInCombat();
+        DoZoneInCombat(me, 100.f);
         me->SetInhabitType(INHABIT_GROUND);
         events.ScheduleEvent(EVENT_FERAL_POUNCE, 20s);
         events.ScheduleEvent(EVENT_RUSH, 1s);
@@ -478,30 +483,29 @@ struct npc_auriaya_feral_defenderAI : public ScriptedAI
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
         if (damage >= me->GetHealth() && !canReallyDie)
-            damage = me->GetHealth() - 1;
-
-        if (damage >= me->GetHealth() - 1 && canTakeDamage && !canReallyDie)
         {
-            if (!instance)
-                return;
+            damage = 0;
 
-            me->StopMovingOnCurrentPos();
-            events.CancelEvent(EVENT_RESTORE_REACT);
-            events.CancelEvent(EVENT_FERAL_POUNCE);
-            events.CancelEvent(EVENT_RUSH);
-            events.CancelEvent(EVENT_TARGET);
+            if (canTakeDamage && instance)
+            {
+                events.CancelEvent(EVENT_RESTORE_REACT);
+                events.CancelEvent(EVENT_FERAL_POUNCE);
+                events.CancelEvent(EVENT_RUSH);
+                events.CancelEvent(EVENT_TARGET);
 
-            if (Creature* auriaya = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_AURIAYA)))
-                auriaya->AI()->SummonedCreatureDies(me, me);
+                if (Creature* auriaya = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_AURIAYA)))
+                    auriaya->AI()->SummonedCreatureDies(me, me);
 
-            RemoveAllAurasExceptSelfCasted();
-            canTakeDamage = false;
-            me->SetStandState(UNIT_STAND_STATE_DEAD);
-            me->SetReactState(REACT_PASSIVE);
-            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            me->AttackStop();
-            me->SetReactState(REACT_PASSIVE);
-            me->GetMotionMaster()->Clear();
+                RemoveAllAurasExceptSelfCasted();
+                canTakeDamage = false;
+                me->SetStandState(UNIT_STAND_STATE_DEAD);
+                me->SetReactState(REACT_PASSIVE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                me->AttackStop();
+                me->SetReactState(REACT_PASSIVE);
+                me->GetMotionMaster()->Clear();
+                me->GetMotionMaster()->MoveIdle();
+            }
         }
     }
 
@@ -571,8 +575,8 @@ struct npc_auriaya_feral_defenderAI : public ScriptedAI
                     events.Repeat(10s);
                     break;
                 case EVENT_REVIVE:
-                    canTakeDamage = true;
                     DoCast(SPELL_FERAL_FULL_HEAL);
+                    canTakeDamage = true;
                     me->SetInhabitType(INHABIT_GROUND);
                     me->SetDisableGravity(false);
                     me->SetStandState(UNIT_STAND_STATE_STAND);
@@ -808,6 +812,40 @@ class spell_feral_rush_SpellScript : public SpellScript
     }
 };
 
+class spell_summon_swarming_defender_auriaya : public SpellScript
+{
+    PrepareSpellScript(spell_summon_swarming_defender_auriaya);
+
+    void HandleSummon(SpellEffIndex /*effindex*/)
+    {
+        if (!GetCaster())
+            return;
+
+        InstanceScript* instance = GetCaster()->GetInstanceScript();
+        if (!instance)
+            return;
+
+        Creature* auriaya = ObjectAccessor::GetCreature(*GetCaster(), instance->GetData64(TYPE_AURIAYA));
+        if (!auriaya)
+            return;
+
+        Position currentPosition = { GetExplTargetDest()->m_positionX, GetExplTargetDest()->m_positionY, GetExplTargetDest()->m_positionZ };
+        if (auriaya->GetDistance(currentPosition) >= 12.5f)
+        {
+            WorldLocation location;
+            Position pos = auriaya->GetNearPositionFromPos(auriaya->GetPosition(), 10.f);
+            location.Relocate(pos);
+            SetExplTargetDest(location);
+            GetHitDest()->Relocate(pos);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_summon_swarming_defender_auriaya::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+    }
+};
+
 void AddSC_boss_auriaya()
 {
     new CreatureAILoader<boss_auriayaAI>("boss_auriaya");
@@ -817,6 +855,7 @@ void AddSC_boss_auriaya()
 
     new SpellScriptLoaderEx<spell_auriaya_sentinel_blast_SpellScript>("spell_auriaya_sentinel_blast");
     new SpellScriptLoaderEx<spell_feral_rush_SpellScript>("spell_feral_rush");
+    RegisterSpellScript(spell_summon_swarming_defender_auriaya);
 
     new achievement_auriaya_crazy_cat_lady();
     new achievement_auriaya_nine_lives();

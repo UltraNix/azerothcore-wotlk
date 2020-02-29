@@ -673,7 +673,7 @@ public:
             {
                 //who->ClearUnitState(UNIT_STATE_ONVEHICLE);
                 if (!_damageDone)
-                    _damageDone = RAID_MODE(100000, 480000);
+                    _damageDone = RAID_MODE(150000, 480000);
             }
         }
 

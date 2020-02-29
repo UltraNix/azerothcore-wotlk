@@ -485,13 +485,14 @@ void MotionMaster::MoveAlongSplineChain(uint32 pointId, uint16 dbChainId, bool w
     Creature* owner = _owner->ToCreature();
     if (!owner)
     {
-        //TC_LOG_ERROR("misc", "MotionMaster::MoveAlongSplineChain: non-creature %s tried to walk along DB spline chain. Ignoring.", _owner->GetGUID().ToString().c_str());
+        sLog->outError("MotionMaster::MoveAlongSplineChain: non-creature %u tried to walk along db spline chain. Ignoring.", _owner->GetGUID());
         return;
     }
+
     std::vector<SplineChainLink> const* chain = sScriptSystemMgr->GetSplineChain(owner, dbChainId);
     if (!chain)
     {
-        //TC_LOG_ERROR("misc", "MotionMaster::MoveAlongSplineChain: creature with entry %u tried to walk along non-existing spline chain with DB id %u.", owner->GetEntry(), dbChainId);
+        sLog->outError("MotionMaster::MoveAlongSplineChain: creature with entry %u tried to walk along non-existing spline chain with DB Id %u.", _owner->GetEntry(), dbChainId);
         return;
     }
     MoveAlongSplineChain(pointId, *chain, walk);

@@ -813,7 +813,6 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void ScheduleGroupChainPull();
         void DoPullNearbyCreatures();
         void DisableChainPullFor(std::chrono::milliseconds const /*ms*/);
-        bool CanBeChainPulled() const;
 
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = NULL);

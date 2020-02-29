@@ -44,6 +44,7 @@ enum LeviathanSpells
     SPELL_TOWER_OF_STORMS             = 65076,
     SPELL_TOWER_OF_FLAMES             = 65075,
     SPELL_TOWER_OF_FROST              = 65077,
+    SPELL_TOWER_OF_FROST_SLOW         = 65079,
     SPELL_TOWER_OF_LIFE               = 64482,
 
     SPELL_HODIRS_FURY                 = 62533,
@@ -565,8 +566,10 @@ void boss_flame_leviathan::boss_flame_leviathanAI::BindPlayers()
 
 void boss_flame_leviathan::boss_flame_leviathanAI::RadioSay(const char* text, uint32 soundId)
 {
-    if (Creature *r = me->SummonCreature(NPC_BRANN_RADIO, me->GetPositionX()-150, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 5000))
+    if (Creature *r = me->SummonCreature(NPC_BRANN_RADIO, me->GetPositionX()-150.f, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN, 5000))
     {
+        r->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, 0);
+        r->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, 0);
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, r, NULL, text);
         r->SendMessageToSetInRange(&data, 200, true);
@@ -595,6 +598,7 @@ void boss_flame_leviathan::boss_flame_leviathanAI::ActivateTowers()
                     break;
                 case EVENT_TOWER_OF_FROST_DESTROYED:
                     me->AddAura(SPELL_TOWER_OF_FROST, me);
+                    me->AddAura(SPELL_TOWER_OF_FROST_SLOW, me);
                     events.RescheduleEvent(EVENT_HODIRS_FURY, 20000);
                     break;
                 case EVENT_TOWER_OF_FLAMES_DESTROYED:
@@ -1354,7 +1358,7 @@ public:
         void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
         {
             damage = 0;
-            
+
         }
 
         void SpellHit(Unit* caster, const SpellInfo* spellInfo)
@@ -3165,7 +3169,7 @@ struct npc_flame_leviathan_vehicles_AI : public ScriptedAI
             else
                 me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
-        else if (who->GetEntry() == NPC_SALVAGED_SIEGE_ENGINE_TURRET)
+        else if (who->GetEntry() == NPC_SALVAGED_SIEGE_ENGINE_TURRET && !me->GetDBTableGUIDLow())
             who->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 private:

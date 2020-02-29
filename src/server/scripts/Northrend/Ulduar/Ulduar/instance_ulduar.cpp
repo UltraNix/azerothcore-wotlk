@@ -125,6 +125,7 @@ public:
         bool _thorimHardMode;
         bool _freyaHardMode;
         bool _hodirHardMode;
+        bool _xtHardMode;
 
         // Ulduar entrance event that starts stuff related to flame leviathan (machines and so on)
         bool _eventStarted;
@@ -230,6 +231,7 @@ public:
             _thorimHardMode = false;
             _freyaHardMode = false;
             _hodirHardMode = false;
+            _xtHardMode = false;
         }
 
         void FillInitialWorldStates(WorldPacket& packet)
@@ -305,6 +307,16 @@ public:
         {
             switch(creature->GetEntry())
             {
+                case NPC_TWILIGHT_SHADOWBLADE:
+                    creature->SetCanDualWield(true);
+                    creature->UpdateDamagePhysical(BASE_ATTACK);
+                    creature->UpdateDamagePhysical(OFF_ATTACK);
+                    break;
+                case NPC_TRASH_FLAME_CANNON:
+                    creature->setActive(true);
+                    creature->m_SightDistance = 200.f;
+                    creature->m_CombatDistance = 200.f;
+                    break;
                 case NPC_SANCTUM_SENTRY:
                     _sanctumSentryGUIDs.push_back(creature->GetGUID());
                     break;
@@ -725,7 +737,7 @@ public:
 
         void SetData(uint32 type, uint32 data)
         {
-            switch(type)
+            switch (type)
             {
                 case DATA_MIMIRON_HARDMODE:
                     _mimironHardMode = true;
@@ -743,6 +755,10 @@ public:
                     _freyaHardMode = true;
                     SaveToDB();
                     break;
+                case DATA_XT_002_HARDMODE:
+                    _xtHardMode = true;
+                    SaveToDB();
+                    break;
                 case TYPE_LEVIATHAN:
                     m_auiEncounter[type] = data;
                     if (data == DONE)
@@ -754,14 +770,20 @@ public:
 
                         Position pos(162.3139f, -298.5704f, 499.2952f);
                         instance->SummonCreature(NPC_BRANN_BRONZEBEARD_FL, pos);
-                        instance->SetVisibilityRange(200.0f);
+                        instance->SetVisibilityRange(300.0f);
                     }
 
                     if (data == SPECIAL)
                         instance->SetVisibilityRange(350.0f);
                     break;
-                case TYPE_IGNIS:
                 case TYPE_RAZORSCALE:
+                    if (data == IN_PROGRESS || data == SPECIAL)
+                        instance->SetVisibilityRange(400.f);
+                    else
+                        instance->SetVisibilityRange(300.f);
+                    m_auiEncounter[type] = data;
+                    break;
+                case TYPE_IGNIS:
                 case TYPE_XT002:
                 case TYPE_AURIAYA:
                 case TYPE_VEZAX:
@@ -1116,6 +1138,8 @@ public:
                     return static_cast<uint32>(_thorimHardMode);
                 case DATA_FREYA_HARDMODE:
                     return static_cast<uint32>(_freyaHardMode);
+                case DATA_XT_002_HARDMODE:
+                    return static_cast<uint32>(_xtHardMode);
                 case TYPE_LEVIATHAN:
                 case TYPE_IGNIS:
                 case TYPE_RAZORSCALE:
@@ -1234,7 +1258,7 @@ public:
                 << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << ' '
                 << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] << ' ' << m_conspeedatoryAttempt << ' '
                 << m_unbrokenAchievement << ' ' << m_algalonTimer << ' ' << C_of_Ulduar_MASK << ' ' << _eventStarted << ' ' << _teamInInstance << _mimironHardMode << ' '
-                << _thorimHardMode << ' ' << _freyaHardMode << ' ' << _hodirHardMode;
+                << _thorimHardMode << ' ' << _freyaHardMode << ' ' << _hodirHardMode << _xtHardMode;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
@@ -1289,6 +1313,7 @@ public:
                 loadStream >> _thorimHardMode;
                 loadStream >> _freyaHardMode;
                 loadStream >> _hodirHardMode;
+                loadStream >> _xtHardMode;
             }
 
             OUT_LOAD_INST_DATA_COMPLETE;

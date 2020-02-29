@@ -290,3 +290,23 @@ Creature* CreatureAI::DoSummonFlyer(uint32 entry, WorldObject* obj, float flight
     pos.m_positionZ += flightZ;
     return me->SummonCreature(entry, pos, summonType, despawnTime);
 }
+
+bool CreatureAI::CanBeChainPulled() const
+{
+    if (me->HasExtraFlag(CREATURE_FLAG_EXTRA_DISABLE_CHAIN_PULL))
+        return false;
+
+    if (me->isDead())
+        return false;
+
+    if (me->IsCivilian() || me->IsTrigger())
+        return false;
+
+    if (me->HasUnitState(UNIT_STATE_LOST_CONTROL) || me->IsPassive())
+        return false;
+
+    if (me->IsInEvadeMode())
+        return false;
+
+    return true;
+}

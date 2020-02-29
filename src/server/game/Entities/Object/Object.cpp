@@ -1816,6 +1816,11 @@ void WorldObject::MonsterSay(int32 textId, uint32 language, WorldObject const* t
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
 }
 
+void WorldObject::MonsterYell(std::string const& text, uint32 language, WorldObject const* target)
+{
+    MonsterYell(text.c_str(), language, target);
+}
+
 void WorldObject::MonsterYell(const char* text, uint32 language, WorldObject const* target)
 {
     CellCoord p = Trinity::ComputeCellCoord(GetPositionX(), GetPositionY());

@@ -476,6 +476,7 @@ class boss_algalon_the_observer : public CreatureScript
                 events.Reset();
                 events.SetPhase(PHASE_ROLE_PLAY);
 
+                Talk(SAY_ALGALON_START_TIMER);
                 if (!_firstPull)
                 {
                     events.ScheduleEvent(EVENT_START_COMBAT, 0);
@@ -484,8 +485,6 @@ class boss_algalon_the_observer : public CreatureScript
                 else
                 {
                     summons.DespawnEntry(NPC_AZEROTH);
-                    _firstPull = false;
-                    Talk(SAY_ALGALON_START_TIMER);
                     introDelay = 22000;
                     events.ScheduleEvent(EVENT_START_COMBAT, 14000);
                     m_pInstance->SetData(DATA_DESPAWN_ALGALON, 0);
@@ -642,7 +641,11 @@ class boss_algalon_the_observer : public CreatureScript
                         break;
                     case EVENT_START_COMBAT:
                         m_pInstance->SetData(TYPE_ALGALON, IN_PROGRESS);
-                        Talk(SAY_ALGALON_AGGRO);
+                        if (_firstPull)
+                        {
+                            Talk(SAY_ALGALON_AGGRO);
+                            _firstPull = false;
+                        }
                         events.PopEvent();
                         break;
                     case EVENT_REMOVE_UNNATTACKABLE:
@@ -973,24 +976,24 @@ class npc_living_constellation : public CreatureScript
             npc_living_constellationAI(Creature* creature) : ScriptedAI(creature)
             {
                 me->SetReactState(REACT_PASSIVE);
+                me->SetCanFly(true);
+                me->SetDisableGravity(true);
+                me->SetHover(true);
             }
 
-            EventMap events;
-            bool _isActive;
-
-            void Reset()
+            void Reset() override
             {
                 events.Reset();
                 events.ScheduleEvent(EVENT_ARCANE_BARRAGE, 2500);
                 _isActive = false;
             }
 
-            uint32 GetData(uint32 param) const
+            uint32 GetData(uint32 param) const override
             {
                 return _isActive;
             }
 
-            void DoAction(int32 action)
+            void DoAction(int32 action) override
             {
                 switch (action)
                 {
@@ -1014,7 +1017,7 @@ class npc_living_constellation : public CreatureScript
                 }
             }
 
-            void SpellHit(Unit* caster, SpellInfo const* spell)
+            void SpellHit(Unit* caster, SpellInfo const* spell) override
             {
                 if (spell->Id != SPELL_CONSTELLATION_PHASE_EFFECT || caster->GetTypeId() != TYPEID_UNIT)
                     return;
@@ -1029,7 +1032,7 @@ class npc_living_constellation : public CreatureScript
                     voidZone->DespawnOrUnsummon(1);
             }
 
-            void UpdateAI(uint32 diff)
+            void UpdateAI(uint32 diff) override
             {
                 if (!(events.GetPhaseMask() & PHASE_MASK_NO_UPDATE) && !UpdateVictim())
                     return;
@@ -1047,9 +1050,12 @@ class npc_living_constellation : public CreatureScript
                         break;
                 }
             }
+        private:
+            EventMap events;
+            bool _isActive;
         };
 
-        CreatureAI* GetAI(Creature* creature) const
+        CreatureAI* GetAI(Creature* creature) const override
         {
             return new npc_living_constellationAI(creature);
         }
@@ -1135,6 +1141,20 @@ class go_celestial_planetarium_access : public GameObjectScript
                 InstanceScript* instance = go->GetInstanceScript();
                 if (!instance)
                     return false;
+
+                if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF) && go && go->GetMap()->Is25ManRaid())
+                {
+                    bool const mimironHM = instance->GetData(DATA_MIMIRON_HARDMODE) != 0;
+                    bool const hodirHM = instance->GetData(DATA_HODIR_HARDMODE) != 0;
+                    bool const thorimHM = instance->GetData(DATA_THORIM_HARDMODE) != 0;
+                    bool const freyaHM = instance->GetData(DATA_FREYA_HARDMODE) != 0;
+                    bool const xtHM = instance->GetData(DATA_XT_002_HARDMODE) != 0;
+                    if (!mimironHM || !hodirHM || !thorimHM || !freyaHM || !xtHM)
+                    {
+                        player->MonsterTextEmote("You are not worthy to face Algalon the Observer!", nullptr, true);
+                        return false;
+                    }
+                }
 
                 _locked = true;
                 // Start Algalon event

@@ -102,6 +102,8 @@ struct boss_vezaxAI : public BossAI
 
     void Reset() override
     {
+        scheduler.ClearValidator();
+        _ignoreMeleeAvoidance = false;
         _animusDied = false;
         _fightTimer = 0;
         _vaporsCount = 0;
@@ -114,6 +116,35 @@ struct boss_vezaxAI : public BossAI
 
         if (instance)
             instance->SetData(TYPE_VEZAX, NOT_STARTED);
+    }
+
+    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
+    {
+        if (!victim->IsPlayer())
+            return;
+
+        if (type > OFF_ATTACK)
+            return;
+
+        //! Dont do anything if victim is over avoidance cap
+        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
+            return;
+
+        if (!_ignoreMeleeAvoidance)
+            return;
+
+        switch (outcome)
+        {
+            case MELEE_HIT_DODGE:
+            case MELEE_HIT_PARRY:
+            case MELEE_HIT_MISS:
+            {
+                outcome = MELEE_HIT_NORMAL;
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     void EnterEvadeMode() override
@@ -191,6 +222,7 @@ struct boss_vezaxAI : public BossAI
         if (!UpdateVictim())
             return;
 
+        scheduler.Update(diff);
         events.Update(diff);
 
         if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -293,7 +325,7 @@ struct boss_vezaxAI : public BossAI
                     else
                     {
                         for (auto itr = summons.begin(); itr != summons.end(); ++itr)
-                            if (auto sv = ObjectAccessor::GetCreature(*me, *itr))
+                            if (Creature* sv = ObjectAccessor::GetCreature(*me, *itr))
                             {
                                 sv->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                                 sv->GetMotionMaster()->MoveIdle();
@@ -310,7 +342,7 @@ struct boss_vezaxAI : public BossAI
                     if (summons.size())
                     {
                         me->MonsterTextEmote("The saronite vapors mass and swirl violently, merging into a monstrous form!", 0, true);
-                        if (auto sv = ObjectAccessor::GetCreature(*me, *(summons.begin())))
+                        if (Creature* sv = ObjectAccessor::GetCreature(*me, *(summons.begin())))
                             sv->CastSpell(sv, SPELL_SARONITE_ANIMUS_FORMATION_VISUAL, true);
 
                         events.ScheduleEvent(EVENT_SPELL_SUMMON_SARONITE_ANIMUS, 2000);
@@ -325,8 +357,18 @@ struct boss_vezaxAI : public BossAI
                         me->PlayDirectSound(SOUND_VEZAX_HARDMODE, nullptr);
 
                         DoCastSelf(SPELL_SARONITE_BARRIER);
-                        if (auto sv = ObjectAccessor::GetCreature(*me, *(summons.begin())))
+                        if (Creature* sv = ObjectAccessor::GetCreature(*me, *(summons.begin())))
                             sv->CastSpell(sv, SPELL_SUMMON_SARONITE_ANIMUS, true);
+
+                        scheduler.Schedule(15s, [&](TaskContext func)
+                        {
+                            _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
+
+                            if (_ignoreMeleeAvoidance)
+                                func.Repeat(6s);
+                            else
+                                func.Repeat(15s);
+                        });
 
                         events.ScheduleEvent(EVENT_DESPAWN_SARONITE_VAPORS, 2500);
                         break;
@@ -357,7 +399,7 @@ struct boss_vezaxAI : public BossAI
         me->MonsterYell(TEXT_VEZAX_DEATH, LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(SOUND_VEZAX_DEATH, nullptr);
 
-        if (auto door = me->FindNearestGameObject(GO_VEZAX_DOOR, 500.0f))
+        if (GameObject* door = me->FindNearestGameObject(GO_VEZAX_DOOR, 500.0f))
             if (door->GetGoState() != GO_STATE_ACTIVE)
             {
                 door->SetLootState(GO_READY);
@@ -404,6 +446,7 @@ private:
     bool _berserk;
     bool _shadowdodger;
     bool _animusDied;
+    bool _ignoreMeleeAvoidance;
 };
 
 struct npc_ulduar_saronite_vaporsAI : NullCreatureAI
@@ -420,7 +463,7 @@ struct npc_ulduar_saronite_vaporsAI : NullCreatureAI
 
         // killed saronite vapors, hard mode unavailable
         if (instance)
-            if (auto vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
+            if (Creature* vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
                 if (vezax->IsAIEnabled)
                     vezax->AI()->DoAction(1);
     }
@@ -436,20 +479,58 @@ enum Animus
 
 struct npc_ulduar_saronite_animusAI : ScriptedAI
 {
-    explicit npc_ulduar_saronite_animusAI(Creature* creature) : ScriptedAI(creature), timer(0)
+    npc_ulduar_saronite_animusAI(Creature* creature) : ScriptedAI(creature)
     {
         instance = me->GetInstanceScript();
         if (instance)
-            if (auto vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
+            if (Creature* vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
                 if (vezax->IsAIEnabled)
                     vezax->AI()->JustSummoned(me);
     }
 
+    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
+    {
+        if (!victim->IsPlayer())
+            return;
 
-    uint16 timer;
+        if (type > OFF_ATTACK)
+            return;
+
+        //! Dont do anything if victim is over avoidance cap
+        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
+            return;
+
+        if (!_ignoreMeleeAvoidance)
+            return;
+
+        switch (outcome)
+        {
+            case MELEE_HIT_DODGE:
+            case MELEE_HIT_PARRY:
+            case MELEE_HIT_MISS:
+            {
+                outcome = MELEE_HIT_NORMAL;
+                break;
+            }
+            default:
+                break;
+        }
+    }
 
     void Reset() override
     {
+        _ignoreMeleeAvoidance = false;
+        task.CancelAll();
+        task.Schedule(15s, [&](TaskContext func)
+        {
+            _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
+
+            if (_ignoreMeleeAvoidance)
+                func.Repeat(6s);
+            else
+                func.Repeat(15s);
+        });
+
         ScriptedAI::Reset();
         _events.Reset();
         _events.ScheduleEvent(EVENT_PROFOUND_DARKNESS, 2000);
@@ -462,7 +543,7 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
         me->DespawnOrUnsummon(3000);
 
         if (instance)
-            if (auto vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
+            if (Creature* vezax = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_VEZAX)))
                 if (vezax->IsAIEnabled)
                     vezax->AI()->DoAction(2);
     }
@@ -471,6 +552,7 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
     {
         UpdateVictim();
 
+        task.Update(diff);
         _events.Update(diff);
 
         if (_events.ExecuteEvent() == EVENT_PROFOUND_DARKNESS)
@@ -485,6 +567,8 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
 private:
     InstanceScript* instance;
     EventMap _events;
+    TaskScheduler task;
+    bool _ignoreMeleeAvoidance;
 };
 
 
@@ -590,7 +674,7 @@ class spell_aura_of_despair_AuraScript : public AuraScript
 
     void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        if (auto target = GetTarget())
+        if (Unit* target = GetTarget())
         {
             target->RemoveAurasDueToSpell(SPELL_AURA_OF_DESPAIR_2);
             target->RemoveAurasDueToSpell(SPELL_CORRUPTED_RAGE);
@@ -611,7 +695,7 @@ class spell_mark_of_the_faceless_periodic_AuraScript : public AuraScript
 
     void HandleEffectPeriodic(AuraEffect const * aurEff)
     {
-        if (auto caster = GetCaster())
+        if (Unit* caster = GetCaster())
             if (GetTarget()->GetMapId() == 603)
             {
                 int32 dmg = 5000;
@@ -646,7 +730,7 @@ class spell_saronite_vapors_dummy_AuraScript : public AuraScript
 
     void HandleAfterEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
-        if (auto caster = GetCaster())
+        if (Unit* caster = GetCaster())
         {
             int32 damage = 100 * pow(2.0f, static_cast<float>(GetStackAmount()));
             caster->CastCustomSpell(GetTarget(), SPELL_SARONITE_VAPORS_DMG, &damage, NULL, NULL, true);
@@ -665,11 +749,11 @@ class spell_saronite_vapors_damage_SpellScript : public SpellScript
 
     void HandleAfterHit()
     {
-        if (auto caster = GetCaster())
+        if (Unit* caster = GetCaster())
             if (GetHitDamage() > 2)
             {
                 int32 mana = GetHitDamage() / 2;
-                if (auto target = GetHitUnit())
+                if (Unit* target = GetHitUnit())
                     caster->CastCustomSpell(target, SPELL_SARONITE_VAPORS_ENERGIZE, &mana, nullptr, nullptr, true);
             }
     }
@@ -712,7 +796,7 @@ class go_ulduar_pure_saronite_deposit : public GameObjectScript
             if (plr->IsGameMaster())
                 return false;
 
-            if (auto pInstance = go->GetInstanceScript())
+            if (InstanceScript* pInstance = go->GetInstanceScript())
                 if (pInstance->GetData(TYPE_XT002) != DONE && pInstance->GetData(TYPE_MIMIRON) != DONE && pInstance->GetData(TYPE_THORIM) != DONE && pInstance->GetData(TYPE_FREYA) != DONE && pInstance->GetData(TYPE_HODIR) != DONE)
                 {
                     std::string accountName;
@@ -810,7 +894,7 @@ struct npc_faceless_horror_ulduar_AI : public ScriptedAI
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
 
-        while (auto eventId = events.ExecuteEvent())
+        while (uint32 eventId = events.ExecuteEvent())
         {
             switch (eventId)
             {

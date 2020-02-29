@@ -94,6 +94,9 @@ struct ClientPktHeader
 {
     uint16 size;
     uint32 cmd;
+
+    bool IsValidSize() const { return size >= 4 && size < 10240; }
+    bool IsValidOpcode() const { return cmd < NUM_MSG_TYPES; }
 };
 
 #if defined(__GNUC__)
@@ -492,7 +495,7 @@ int WorldSocket::handle_input_header (void)
     EndianConvertReverse(header.size);
     EndianConvert(header.cmd);
 
-    if ((header.size < 4) || (header.size > 10240) || (header.cmd  > 10240))
+    if (!header.IsValidOpcode() || !header.IsValidSize())
     {
         Player* _player = m_Session ? m_Session->GetPlayer() : NULL;
         //sLog->outError("WorldSocket::handle_input_header(): client (account: %u, char [GUID: %u, name: %s]) sent malformed packet (size: %d, cmd: %d)", m_Session ? m_Session->GetAccountId() : 0, _player ? _player->GetGUIDLow() : 0, _player ? _player->GetName().c_str() : "<none>", header.size, header.cmd);

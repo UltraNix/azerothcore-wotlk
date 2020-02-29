@@ -6009,6 +6009,7 @@ void SpellMgr::LoadDbcDataCorrections()
         case 61903:
         case 63493:
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            spellInfo->InterruptFlags = 0;
             break;
         case 64320: // rune of power
             spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
@@ -6099,19 +6100,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 62490:
             spellInfo->Effect[EFFECT_1] = 0;
             break;
-        // Flame Leviathan - towers (40 % to 50 %)
-        case 64482:
-        case 65075:
-        case 65076:
-            spellInfo->EffectBasePoints[EFFECT_2] = 50;
-            break;
-        case 65077:
-            spellInfo->EffectBasePoints[EFFECT_0] = 50;
-            break;
-        // Flame Jets
-        case 63472:
-            spellInfo->EffectBasePoints[EFFECT_1] = 2598;
-            break;
         case 63024: // Gravity Bomb
         case 65121: // Searing light
             spellInfo->AttributesEx |= (SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED);
@@ -6125,10 +6113,6 @@ void SpellMgr::LoadDbcDataCorrections()
         case 64234:
             spellInfo->AttributesEx |= (SPELL_ATTR1_CANT_BE_REDIRECTED | SPELL_ATTR1_CANT_BE_REFLECTED);
             spellInfo->EffectBasePoints[EFFECT_2] = spellInfo->EffectBasePoints[EFFECT_2] + 4999;
-            break;
-        // Heartbreak
-        case 64193:
-            spellInfo->EffectBasePoints[EFFECT_2] = 39;
             break;
         // Stone Grip
         case 64292:
@@ -6229,6 +6213,10 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->Attributes |= SPELL_ATTR0_ON_NEXT_SWING;
             break;
         case 63355: // Crunch armor
+            spellInfo->DurationIndex = 22; // lasts 45s
+            spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
+            break;
         case 64002: // Crunch armor
             spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
@@ -6274,8 +6262,13 @@ void SpellMgr::LoadDbcDataCorrections()
             break;
 
         // FREYA
-        case 64606: // Summon nature bomb
         case 64604: // nature bomb force cast
+            spellInfo->MaxAffectedTargets = 25;
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
+            spellInfo->AttributesEx3 |= (SPELL_ATTR3_IGNORE_HIT_RESULT | SPELL_ATTR3_ONLY_TARGET_PLAYERS);
+            spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+            break;
+        case 64606: // Summon nature bomb
             spellInfo->AttributesEx4 |= SPELL_ATTR4_IGNORE_RESISTANCES;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_IGNORE_HIT_RESULT;
             spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
@@ -6344,15 +6337,20 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             break;
         // Chain Lightning
+        case 62131:
         case 64390:
             spellInfo->MaxAffectedTargets = 25;
             break;
         // Unbalancing Strike
         case 62130:
+            spellInfo->Attributes &= ~SPELL_ATTR0_ON_NEXT_SWING;
             spellInfo->AttributesEx3 &= ~SPELL_ATTR3_IGNORE_HIT_RESULT;
             break;
 
         // YOGG-SARON
+        case 64161: // Empowered periodic
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_START_PERIODIC_AT_APPLY;
+            break;
         case 63895: // phase 3 transform yogg
             //! remove the transform because there is no reason for it due to how scripts are written
             spellInfo->Effect[EFFECT_0] = 0;
@@ -6434,6 +6432,12 @@ void SpellMgr::LoadDbcDataCorrections()
         // Ground Slam
         case 62625:
             spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            break;
+        case 62670: // Resilience of Nature
+        case 62650: // Fortitude of Frost
+        case 62671: // Speed of Invention
+        case 62702: // Fury of the Storm
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_CHANGE_MAP;
             break;
 
         //////////////////////////////////////////
@@ -8383,17 +8387,43 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
             spellInfo->AttributesEx6 |= SPELL_ATTR6_CAN_TARGET_INVISIBLE;
         }
+
         if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
         {
             switch (spellInfo->Id)
             {
+                case 64705: // Unquenchable flames
+                case 64706: // Unquenchable flames
+                    spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                    break;
+                case 64875: // Sapper Explosion
+                    spellInfo->EffectBasePoints[EFFECT_0] = 94240; // instead of 9424
+                    spellInfo->EffectDieSides[EFFECT_0] = 11510; // instead of 1151
+                    break;
+                // Heartbreak
+                case 64193: // Heartbreak
+                case 65737: // Heartbreak
+                    spellInfo->EffectBasePoints[EFFECT_1] = 150;
+                    spellInfo->EffectBasePoints[EFFECT_2] = 40;
+                    break;
+                // Flame Leviathan - towers (40 % to 50 %)
+                case 64482:
+                case 65075:
+                case 65076:
+                    spellInfo->EffectBasePoints[EFFECT_2] = 50;
+                    break;
+                case 65077: // Tower of Frost
+                    // gives +50% HP instead of +40% HP
+                    spellInfo->EffectBasePoints[EFFECT_0] = 49; // instead of 39
+                    break;
                 //! Thorim
                 case 62470: // defeaning thunder ally damage
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
                     break;
                 //! Mimiron
                 case 64566: // Flames
-                    spellInfo->EffectBasePoints[EFFECT_0] = 10000;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9424; // instead of 4712
+                    spellInfo->EffectDieSides[EFFECT_0] = 1150; // instead of 575
                     break;
                 case 64582: // Emergency mode
                     spellInfo->EffectBasePoints[EFFECT_0] = 30;
@@ -8406,22 +8436,45 @@ void SpellMgr::LoadDbcDataCorrections()
                 case 63009: // Proximity mine
                     spellInfo->EffectBasePoints[EFFECT_0] = 25000;
                     break;
+                case 62997: // Plasma Blast
+                    // does more damage in pre-nerf, 25m version
+                    spellInfo->EffectBasePoints[EFFECT_0] = 19999; // instead of 16999
+                    break;
+                case 64529: // Plasma Blast
+                    // does more damage in pre-nerf, 25m version
+                    spellInfo->EffectBasePoints[EFFECT_0] = 39999; // instead of 24999
+                    break;
                 //! Auriaya
                 case 64386: // Terrifying screech
                     spellInfo->DurationIndex = 28;
                     break;
                 case 64422: // Sonic screech 10
-                    spellInfo->EffectBasePoints[EFFECT_0] = 80000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 6000;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 74000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 12000;
                     break;
                 case 64688: // Sonic screech 25
-                    spellInfo->EffectBasePoints[EFFECT_0] = 250000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 18750;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 231250;
+                    spellInfo->EffectDieSides[EFFECT_0] = 37500;
+                    break;
+                case 64459: // Seeping feral essence
+                    spellInfo->EffectBasePoints[EFFECT_0] = 6499; // instead of 4499
                     break;
                 case 64675: // Seeping feral essence
                     spellInfo->EffectBasePoints[EFFECT_0] = 9000;
+                case 64666: // Savage Pounce
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9250; // instead of 2774
+                    spellInfo->EffectDieSides[EFFECT_0] = 1500; // instead of 451
+                    // DoT
+                    spellInfo->EffectBasePoints[EFFECT_1] = 4625; // instead of 2312
+                    spellInfo->EffectDieSides[EFFECT_1] = 750; // instead of 375
+                    spellInfo->rangeIndex = 54;
                     break;
                 case 64374: // Savage pounce
+                    spellInfo->EffectBasePoints[EFFECT_0] = 13875; // instead of 5549
+                    spellInfo->EffectDieSides[EFFECT_0] = 2250; // instead of 901
+                    // DoT
+                    spellInfo->EffectBasePoints[EFFECT_1] = 7400; // instead of 3699
+                    spellInfo->EffectDieSides[EFFECT_1] = 1200; // instead of 601
                     spellInfo->rangeIndex = 54;
                     break;
                 //! Kologarn
@@ -8442,10 +8495,12 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->EffectDieSides[EFFECT_0] = 137;
                     break;
                 case 63818: // Rumble
+                    spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
                     spellInfo->EffectBasePoints[EFFECT_0] = 5000;
                     spellInfo->EffectDieSides[EFFECT_0] = 375;
                     break;
                 case 63978: // Stone nova
+                    spellInfo->DmgClass = SPELL_DAMAGE_CLASS_MELEE;
                     spellInfo->EffectBasePoints[EFFECT_0] = 8000;
                     spellInfo->EffectDieSides[EFFECT_0] = 600;
                     break;
@@ -8460,8 +8515,8 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->EffectTriggerSpell[EFFECT_0] = 63480;
                     break;
                 case 61916: // Lightning whirl 10 man
-                    spellInfo->EffectBasePoints[EFFECT_0] = 5000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 287;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 5200;
+                    spellInfo->EffectDieSides[EFFECT_0] = 843;
                     break;
                 case 63482: // Lightning whirl 25 man
                     spellInfo->EffectBasePoints[EFFECT_0] = 7500;
@@ -8480,6 +8535,16 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->EffectBasePoints[EFFECT_1] = 25;
                     break;
                 //! Ignis
+                case 62373: // Ignis Construct's SPELL_MOLTEN
+                    spellInfo->AttributesEx5 |= SPELL_ATTR5_USABLE_WHILE_STUNNED;
+                    break;
+                case 62548: // Scorch channel 10m
+                case 63476: // Scorch channel 25m
+                    spellInfo->EffectAmplitude[EFFECT_1] = 800;
+                    break;
+                case 64473: // Strength of the creator https://blue.mmo-champion.com/topic/6752-recent-in-game-fixes-april-may-2009/
+                    spellInfo->EffectMiscValue[EFFECT_0] = 127;
+                    break;
                 case 62549: // Scorched Ground 10
                     spellInfo->EffectBasePoints[EFFECT_0] = 4000;
                     spellInfo->EffectDieSides[EFFECT_0] = 230;
@@ -8488,28 +8553,44 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->EffectBasePoints[EFFECT_0] = 6400;
                     spellInfo->EffectDieSides[EFFECT_0] = 368;
                     break;
-                case 63472: // flame jets 25
-                    spellInfo->EffectBasePoints[EFFECT_0] = 9500;
+                case 62681: // Flame jets silence
+                    spellInfo->DurationIndex = 31;
                     break;
                 case 65722: // Slag pot damage 10
                     spellInfo->EffectBasePoints[EFFECT_0] = 5000;
-                    spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
                     break;
                 case 65723: // Slag pot damage 25
                     spellInfo->EffectBasePoints[EFFECT_0] = 7500;
-                    spellInfo->AttributesEx4 &= ~SPELL_ATTR4_IGNORE_RESISTANCES;
+                    break;
+                case 62680: // Flame jets 10 damage
+                    spellInfo->EffectBasePoints[EFFECT_0] = 6500;
+                    spellInfo->EffectDieSides[EFFECT_0] = 800;
+                    spellInfo->EffectBasePoints[EFFECT_1] = 1150;
+                    break;
+                case 63472: // Flame jets 25 damage
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9750;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1190;
+                    spellInfo->EffectBasePoints[EFFECT_1] = 2300;
                     break;
                 case 62343: // Heat
                     spellInfo->EffectRadiusIndex[EFFECT_0] = EFFECT_RADIUS_13_YARDS;
+                    break;
+                case 62530: // Molten
+                    spellInfo->EffectBasePoints[EFFECT_0] = 4713;
+                    spellInfo->EffectDieSides[0] = 575;
+                    break;
+                case 62553: // Scorch 10m
+                    spellInfo->EffectBasePoints[EFFECT_0] = 3770;
+                    spellInfo->EffectDieSides[EFFECT_0] = 460;
+                    break;
+                case 63473: // Scorch 25m
+                    spellInfo->EffectBasePoints[EFFECT_0] = 6032;
+                    spellInfo->EffectDieSides[EFFECT_0] = 736;
                     break;
                 //! handled in spellscript
                 case 63477: // Slag pot
                 case 62717: // Slag pot
                     spellInfo->Effect[EFFECT_1] = 0;
-                    break;
-                    //! XT-002
-                case 64193: // Heartbreak
-                    spellInfo->EffectBasePoints[EFFECT_2] = 60;
                     break;
                 case 62776: // Tympanic tantarum
                     spellInfo->DurationIndex = 29;
@@ -8533,17 +8614,16 @@ void SpellMgr::LoadDbcDataCorrections()
                     spellInfo->EffectDieSides[EFFECT_2] = 1000;
                     break;
                 case 63025: // gravity bomb
-                    spellInfo->EffectBasePoints[EFFECT_0] = 18000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 900;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 17100;
+                    spellInfo->EffectDieSides[EFFECT_0] = 1800;
                     break;
                 case 64233: // gravity bomb
-                    spellInfo->EffectBasePoints[EFFECT_0] = 20000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 1000;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 19000;
+                    spellInfo->EffectDieSides[EFFECT_0] = 2100;
                     break;
                     //! Razorscale
                 case 62796: // Fireball 10
-                    spellInfo->EffectBasePoints[EFFECT_0] = 9000;
-                    spellInfo->EffectDieSides[EFFECT_0] = 1000;
+                    spellInfo->EffectBasePoints[EFFECT_0] = 9712;
                     break;
                 case 63815: // Fireball 25
                     spellInfo->EffectBasePoints[EFFECT_0] = 13000;

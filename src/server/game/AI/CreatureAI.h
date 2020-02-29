@@ -63,6 +63,15 @@ enum SCEquip
     EQUIP_UNEQUIP   = 0
 };
 
+struct VictimAvoidanceStats
+{
+    float missChance = 0.f;
+    float critChance = 0.f;
+    float dodgeChance = 0.f;
+    float blockChance = 0.f;
+    float parryChance = 0.f;
+};
+
 class CreatureAI : public UnitAI
 {
     protected:
@@ -149,6 +158,12 @@ class CreatureAI : public UnitAI
         virtual void OwnerAttacked(Unit* /*target*/) {}
 
         virtual void OnMeleeAttack(VictimState /*state*/, WeaponAttackType /*attType*/, Unit* /*victim*/, uint32 /*procAttacker*/) { }
+        virtual void OnMeleeAttackTaken(Unit* /*attacker*/) { }
+
+        //! Allows to modify creatures melee attack outcome
+        //! ie. RollMeleeOutcomeAgainst returned a miss but we dont want our creature to ever miss
+        //! we can modify that in here
+        virtual void OnMeleeOutcome(WeaponAttackType /*attackType*/, Unit const* /*attacker*/, MeleeHitOutcome& /*outcome*/, VictimAvoidanceStats /*stats*/) { }
 
         /// == Triggered Actions Requested ==================
 
@@ -180,6 +195,8 @@ class CreatureAI : public UnitAI
         virtual bool CanBeSeen(Player const* /*seer*/) { return true; }
 
         virtual float GetMeleeRadianRange() const { return 0.0f; }
+
+        virtual bool CanBeChainPulled() const;
 
     protected:
         virtual void MoveInLineOfSight(Unit* /*who*/);

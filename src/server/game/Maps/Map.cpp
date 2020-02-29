@@ -252,6 +252,9 @@ void Map::InitVisibilityDistance()
         case 632: // forge of souls
             m_VisibleDistance = 200.0f;
             break;
+        case 603: // Ulduar
+            m_VisibleDistance = 300.0f;
+            break;
     }
 }
 
