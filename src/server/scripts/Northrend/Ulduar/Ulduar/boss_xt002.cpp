@@ -243,7 +243,7 @@ struct boss_xt002AI : BossAI
         me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_NONE);
 
         if (sWorld->getBoolConfig(CONFIG_ULDUAR_PRE_NERF))
-            events.ScheduleEvent(EVENT_ENRAGE, RAID_MODE(7min, 10min), 0, 0);
+            events.ScheduleEvent(EVENT_ENRAGE, RAID_MODE(10min, 10min), 0, 0);
         else
             events.ScheduleEvent(EVENT_ENRAGE, 10min, 0, 0);
 
