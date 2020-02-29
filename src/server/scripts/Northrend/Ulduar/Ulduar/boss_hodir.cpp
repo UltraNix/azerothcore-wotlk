@@ -247,6 +247,8 @@ public:
             if (!me->IsAlive())
                 if (pInstance)
                     pInstance->SetData(TYPE_HODIR, DONE);
+
+            me->ApplySpellImmune(SPELL_PRIEST_GREAT_HEAL, IMMUNITY_ID, SPELL_PRIEST_GREAT_HEAL, true);
         }
 
         void DoAction(int32 action) override
