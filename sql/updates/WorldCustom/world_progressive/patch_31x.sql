@@ -236,8 +236,6 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (32296, 0, 46087, 0, 0, 2578),
 (32296, 0, 46088, 0, 0, 2578);
 
-UPDATE `npc_vendor` SET `item` = '42122' WHERE `npc_vendor`.`entry` = 34036 AND `npc_vendor`.`item` = 42123 AND `npc_vendor`.`ExtendedCost` = 2605;
-
 -- Runed Orbs
 DELETE FROM `npc_vendor` WHERE `npc_vendor`.`entry` = 33963 AND `npc_vendor`.`item` = 45087 AND `npc_vendor`.`ExtendedCost` = 2604;
 DELETE FROM `npc_vendor` WHERE `npc_vendor`.`entry` = 33964 AND `npc_vendor`.`item` = 45087 AND `npc_vendor`.`ExtendedCost` = 2604;
