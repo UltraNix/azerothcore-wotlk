@@ -108,9 +108,15 @@ struct npc_ulduar_iron_constructAI : public ScriptedAI
         {
             scheduler.Schedule(2s, [&](TaskContext /*func*/)
             {
-                me->RemoveAura(SPELL_FREEZE_IRON_CONSTRUCT);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                me->SetReactState(REACT_AGGRESSIVE);
+                if (Creature* ignis = ObjectAccessor::GetCreature(*me, instance->GetData64(TYPE_IGNIS)))
+                {
+                    if (ignis->IsAlive() && ignis->IsInCombat())
+                    {
+                        me->RemoveAura(SPELL_FREEZE_IRON_CONSTRUCT);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                    }
+                }
             });
 
             scheduler.Schedule(1s, [&](TaskContext func)
@@ -527,8 +533,8 @@ class spell_ignis_slag_pot_AuraScript : public AuraScript
     {
         if (Unit* target = GetTarget())
         {
-            target->ApplySpellImmune(GetId(), IMMUNITY_ID, SPELL_SCORCH_DAMAGE_2000, true);
-            target->ApplySpellImmune(GetId(), IMMUNITY_ID, SPELL_SCORCH_DAMAGE_3000, true);
+            target->ApplySpellImmune(SPELL_SCORCH_DAMAGE_2000, IMMUNITY_ID, SPELL_SCORCH_DAMAGE_2000, true);
+            target->ApplySpellImmune(SPELL_SCORCH_DAMAGE_3000, IMMUNITY_ID, SPELL_SCORCH_DAMAGE_3000, true);
         }
     }
 
@@ -536,8 +542,8 @@ class spell_ignis_slag_pot_AuraScript : public AuraScript
     {
         if (Unit* target = GetTarget())
         {
-            target->ApplySpellImmune(GetId(), IMMUNITY_ID, SPELL_SCORCH_DAMAGE_2000, false);
-            target->ApplySpellImmune(GetId(), IMMUNITY_ID, SPELL_SCORCH_DAMAGE_3000, false);
+            target->ApplySpellImmune(SPELL_SCORCH_DAMAGE_2000, IMMUNITY_ID, SPELL_SCORCH_DAMAGE_2000, false);
+            target->ApplySpellImmune(SPELL_SCORCH_DAMAGE_3000, IMMUNITY_ID, SPELL_SCORCH_DAMAGE_3000, false);
             if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
             {
                 if (target->IsAlive())

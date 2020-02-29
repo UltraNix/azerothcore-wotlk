@@ -500,7 +500,7 @@ struct boss_freya : public ScriptedAI
         {
             me->MonsterYell("Eonar, your servant requires aid!", LANG_UNIVERSAL, 0);
             me->PlayDirectSound(SOUND_CONSERVATOR);
-            me->SummonCreature(NPC_ANCIENT_CONSERVATOR, GenerateRandomPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7000);
+            me->SummonCreature(NPC_ANCIENT_CONSERVATOR, GenerateRandomPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000);
         }
         // Detonating Lashers
         else if (_waveNumber == 3)
@@ -514,7 +514,7 @@ struct boss_freya : public ScriptedAI
                 float y = me->GetPositionY() + sin(angle) * 15.0f;
                 float z = me->GetPositionZ();
 
-                if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7000))
+                if (Creature* lasher = me->SummonCreature(NPC_DETONATING_LASHER, x, y, z, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 15000))
                 {
                     lasher->UpdateAllowedPositionZ(x, y, z);
                     lasher->NearTeleportTo(x, y, z, 0.0f);
