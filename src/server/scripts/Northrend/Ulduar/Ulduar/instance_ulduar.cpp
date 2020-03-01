@@ -116,7 +116,7 @@ public:
         uint64 _hodirEntranceDoorGUID;
         uint64 _hodirFrozenDoorGUID;
         uint64 _hodirExitDoorGUID;
-        uint8 _teamInInstance;
+        uint32 _teamInInstance;
         uint32 _leftHorrorCounter;
         uint32 _rightHorrorCounter;
         uint64 _leftHorrorGUID;
@@ -1257,8 +1257,8 @@ public:
                 << m_auiEncounter[4] << ' ' << m_auiEncounter[5] << ' ' << m_auiEncounter[6] << ' ' << m_auiEncounter[7] << ' '
                 << m_auiEncounter[8] << ' ' << m_auiEncounter[9] << ' ' << m_auiEncounter[10] << ' ' << m_auiEncounter[11] << ' '
                 << m_auiEncounter[12] << ' ' << m_auiEncounter[13] << ' ' << m_auiEncounter[14] << ' ' << m_conspeedatoryAttempt << ' '
-                << m_unbrokenAchievement << ' ' << m_algalonTimer << ' ' << C_of_Ulduar_MASK << ' ' << _eventStarted << ' ' << _teamInInstance << _mimironHardMode << ' '
-                << _thorimHardMode << ' ' << _freyaHardMode << ' ' << _hodirHardMode << _xtHardMode;
+                << m_unbrokenAchievement << ' ' << m_algalonTimer << ' ' << C_of_Ulduar_MASK << ' ' << _eventStarted << ' ' << _teamInInstance << ' ' << _mimironHardMode << ' '
+                << _thorimHardMode << ' ' << _freyaHardMode << ' ' << _hodirHardMode << ' ' << _xtHardMode;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();
