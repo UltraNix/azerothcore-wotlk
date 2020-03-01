@@ -757,6 +757,10 @@ struct boss_yoggsaron_sara : public ScriptedAI
 
         uint32 timer = events.GetNextEventTime(EVENT_SARA_P2_OPEN_PORTALS);
         uint32 portalTime = (timer > events.GetTimer() ? timer - events.GetTimer() : 0);
+        //! When stun expires, a set of tentacles should spawn right away, we will reschedule those events there
+        events.CancelEvent(EVENT_SARA_P2_SUMMON_T1);
+        events.CancelEvent(EVENT_SARA_P2_SUMMON_T2);
+        events.CancelEvent(EVENT_SARA_P2_SUMMON_T3);
         events.DelayEvents(param + 100);
         events.RescheduleEvent(EVENT_SARA_P2_OPEN_PORTALS, portalTime, 0, EVENT_PHASE_TWO);
         events.ScheduleEvent(EVENT_SARA_P2_REMOVE_STUN, param, 0, EVENT_PHASE_TWO);
@@ -958,6 +962,9 @@ struct boss_yoggsaron_sara : public ScriptedAI
                 me->RemoveAura(SPELL_SHATTERED_ILLUSION);
                 events.PopEvent();
                 summons.DoAction(ACTION_REMOVE_STUN);
+                events.ScheduleEvent(EVENT_SARA_P2_SUMMON_T1, 1000ms, 0, EVENT_PHASE_TWO);
+                events.ScheduleEvent(EVENT_SARA_P2_SUMMON_T2, 1000ms, 0, EVENT_PHASE_TWO);
+                events.ScheduleEvent(EVENT_SARA_P2_SUMMON_T3, 1000ms, 0, EVENT_PHASE_TWO);
                 break;
             }
             case EVENT_SARA_P2_SPAWN_START_TENTACLES:
