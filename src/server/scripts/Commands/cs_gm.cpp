@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -40,12 +40,13 @@ public:
     {
         static std::vector<ChatCommand> gmCommandTable =
         {
-            { "chat",           SEC_GAMEMASTER,      CMD_INGAME, &HandleGMChatCommand,              "" },
+            { "chat",           SEC_GAMEMASTER,     CMD_INGAME, &HandleGMChatCommand,              "" },
             { "fly",            SEC_ADMINISTRATOR,  CMD_INGAME, &HandleGMFlyCommand,               "" },
-            //{ "ingame",         SEC_PLAYER,         CMD_CLI,  &HandleGMListIngameCommand,        "" },
-            { "list",           SEC_ADMINISTRATOR,  CMD_CLI,  &HandleGMListFullCommand,          "" },
-            { "visible",        SEC_GAMEMASTER,      CMD_INGAME, &HandleGMVisibleCommand,           "" },
-            { "",               SEC_GAMEMASTER,      CMD_INGAME, &HandleGMCommand,                  "" }
+          //{ "ingame",         SEC_PLAYER,         CMD_CLI,    &HandleGMListIngameCommand,        "" },
+            { "list",           SEC_ADMINISTRATOR,  CMD_CLI,    &HandleGMListFullCommand,          "" },
+            { "visible",        SEC_GAMEMASTER,     CMD_INGAME, &HandleGMVisibleCommand,           "" },
+            { "spymode",        SEC_GAMEMASTER,     CMD_INGAME, &HandleGMSpymodeCommand,           ""},
+            { "",               SEC_GAMEMASTER,     CMD_INGAME, &HandleGMCommand,                  "" }
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -231,6 +232,28 @@ public:
         handler->SendSysMessage(LANG_USE_BOL);
         handler->SetSentErrorMessage(true);
         return false;
+    }
+
+    static bool HandleGMSpymodeCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+
+        if (!*args || !player)
+            return false;
+
+        std::string param = (char*)args;
+
+        if (param == "on")
+        {
+            player->SetSpymode(true);
+            handler->PSendSysMessage("Spymode has been enabled");
+        }
+        else if (param == "off")
+        {
+            player->SetSpymode(false);
+            handler->PSendSysMessage("Spymode has been disabled");
+        }
+        return true;
     }
 
     //Enable\Disable GM Mode

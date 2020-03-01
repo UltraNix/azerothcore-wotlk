@@ -557,6 +557,7 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_IGNORE_TRANSMOG          = 0x100000,
     PLAYER_EXTRA_STH_HIDE                 = 0x200000,
     PLAYER_EXTRA_ACCEPT_CHANNEL_INV       = 0x400000,
+    PLAYER_EXTRA_SPYMODE                  = 0x800000,
 };
 
 // 2^n values
@@ -1259,6 +1260,8 @@ class Player : public Unit, public GridObject<Player>
         void SetTaxiCheater(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
+        bool HasSpymodeEnabled() const { return m_ExtraFlags & PLAYER_EXTRA_SPYMODE; }
+        void SetSpymode(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_SPYMODE; else m_ExtraFlags &= ~PLAYER_EXTRA_SPYMODE; }
         bool Has310Flyer(bool checkAllSpells, uint32 excludeSpellId = 0);
         void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }

@@ -1535,7 +1535,9 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
         if (m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM))
             return true;
     }
-    else
+    // Normal players can't see invisible GMs never
+    // GMs with lower rank can see other invisble GMs if he has disabled spymode
+    else if ( (IsPlayer() && ToPlayer()->GetSession()->GetSecurity() == SEC_PLAYER) || (obj->IsPlayer() && obj->ToPlayer()->HasSpymodeEnabled()) || !IsPlayer())
         return m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM) >= obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM);
 
     // Ghost players, Spirit Healers, and some other NPCs
