@@ -804,9 +804,9 @@ void boss_flame_leviathan::boss_flame_leviathanAI::JustDied(Unit* killer)
         if (Player* player = ObjectAccessor::GetPlayer(*me, leaderGUID))
         {
             if (_hardMode)
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry + 1, Difficulty(map->GetDifficulty() + 2), "", 15000, _fightTimer);
+                CheckCreatureRecord(player, me->GetCreatureTemplate()->Entry + 1, Difficulty(map->GetDifficulty() + 2), "", 15000, _fightTimer);
             else
-                CheckCreatureRecord(killer, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
+                CheckCreatureRecord(player, me->GetCreatureTemplate()->Entry, map->GetDifficulty(), "", 15000, _fightTimer);
         }
     }
 }
@@ -2283,6 +2283,7 @@ class go_ulduar_tower : public GameObjectScript
         {
             std::list<Creature*> _triggerList;
             go->GetCreatureListWithEntryInGrid(_triggerList, NPC_ULDUAR_GAUNTLET_GENERATOR, 30.f);
+            go->GetCreatureListWithEntryInGrid(_triggerList, NPC_TRASH_FLAME_CANNON, 30.f);
             for (auto& creature : _triggerList)
             {
                 if (creature && creature->IsAlive())

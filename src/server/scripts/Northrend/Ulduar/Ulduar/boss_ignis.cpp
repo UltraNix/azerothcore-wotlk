@@ -50,6 +50,30 @@ std::string const TEXT_BERSERK             = "Let it be finished!";
 std::string const TEXT_DEATH               = "I. Have. Failed.";
 std::string const TEXT_FLAME_JETS          = "Ignis The Furnace Master begins to cast Flame Jets!";
 
+static const std::vector<Position> _constructSpawnPositions =
+{
+    { 543.220f, 313.451f, 360.886f, 0.10472f  },
+    { 630.366f, 216.772f, 360.891f, 3.00197f  },
+    { 630.594f, 231.846f, 360.891f, 3.12414f  },
+    { 543.356f, 329.408f, 360.886f, 6.24828f  },
+    { 630.435f, 337.246f, 360.886f, 3.21141f  },
+    { 543.076f, 247.458f, 360.888f, 6.21337f  },
+    { 630.493f, 313.349f, 360.886f, 3.05433f  },
+    { 630.444f, 321.406f, 360.886f, 3.12414f  },
+    { 543.117f, 232.082f, 360.891f, 0.06981f  },
+    { 543.161f, 305.956f, 360.886f, 0.15708f  },
+    { 543.277f, 321.482f, 360.886f, 0.05236f  },
+    { 543.316f, 337.468f, 360.886f, 6.19592f  },
+    { 630.366f, 247.307f, 360.888f, 3.21141f  },
+    { 630.698f, 305.311f, 360.886f, 3.00197f  },
+    { 630.500f, 224.559f, 360.891f, 3.05433f  },
+    { 630.668f, 239.840f, 360.890f, 3.15905f  },
+    { 543.280f, 239.674f, 360.890f, 6.26573f  },
+    { 630.384f, 329.585f, 360.886f, 3.15905f  },
+    { 543.265f, 217.147f, 360.891f, 0.17453f  },
+    { 543.256f, 224.831f, 360.891f, 0.12217f  }
+};
+
 enum IgnisTheFuranceMasterSounds
 {
     SOUND_AGGRO                             = 15564,
@@ -223,31 +247,24 @@ struct boss_ignisAI : public BossAI
         me->RemoveAurasDueToSpell(SPELL_STRENGTH_OF_THE_CREATOR);
         instance->SetData(TYPE_IGNIS, NOT_STARTED);
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_STOKIN_THE_FURNACE_EVENT);
+
+        summons.DespawnEntry(NPC_IRON_CONSTRUCT);
+        for (auto const& position : _constructSpawnPositions)
+        {
+            if (Creature* construct = me->SummonCreature(NPC_IRON_CONSTRUCT, position))
+            {
+                if (construct->IsAIEnabled)
+                    construct->AI()->Reset();
+
+                construct->CastSpell(construct, SPELL_FREEZE_IRON_CONSTRUCT, true);
+            }
+        }
     }
 
     void EnterCombat(Unit* /*who*/) override
     {
         _EnterCombat();
         _fightTimer = getMSTime();
-
-        std::list<Creature*> list;
-        me->GetCreaturesWithEntryInRange(list, 300.0f, NPC_IRON_CONSTRUCT);
-
-        for (Creature* creature : list)
-        {
-            if (!creature->IsAlive())
-            {
-                creature->Respawn();
-                creature->UpdatePosition(creature->GetHomePosition(), true);
-                creature->StopMovingOnCurrentPos();
-            }
-
-            if (creature->IsAIEnabled)
-                creature->AI()->Reset();
-
-            if (!creature->HasAura(SPELL_FREEZE_IRON_CONSTRUCT))
-                creature->CastSpell(creature, SPELL_FREEZE_IRON_CONSTRUCT, true);
-        }
 
         _shattered = false;
         _lastShatterMSTime = 0;
@@ -454,6 +471,7 @@ struct boss_ignisAI : public BossAI
 
     void EnterEvadeMode() override
     {
+        summons.DespawnEntry(NPC_IRON_CONSTRUCT);
         me->SetControlled(false, UNIT_STATE_ROOT);
         me->DisableRotate(false);
         _DespawnAtEvade();
