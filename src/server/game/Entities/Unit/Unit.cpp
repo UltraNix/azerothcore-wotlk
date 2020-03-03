@@ -7396,13 +7396,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                     break;
                 }
-                // Glyph of Holy Light
-                case 54937:
-                {
-                    triggered_spell_id = 54968;
-                    basepoints0 = CalculatePct(int32(damage), triggerAmount);
-                    break;
-                }
                 // Item - Paladin T8 Holy 2P Bonus
                 case 64890:
                 {

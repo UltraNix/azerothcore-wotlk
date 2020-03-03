@@ -90,7 +90,9 @@ enum PaladinSpells
     SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_1         = 53652,
     SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_2         = 53653,
     SPELL_PALADIN_BEACON_OF_LIGHT_HEAL_3         = 53654,
-    SPELL_PALADIN_HOLY_LIGHT                     = 635
+    SPELL_PALADIN_HOLY_LIGHT                     = 635,
+
+    SPELL_PALADIN_GLYPH_OF_HOLY_LIGHT_TRIGGER    = 54968,
 };
 
 enum PaladinSpellIcons
@@ -783,40 +785,6 @@ class spell_pal_eye_for_an_eye : public SpellScriptLoader
         }
 };
 
-// 54968 - Glyph of Holy Light
-class spell_pal_glyph_of_holy_light : public SpellScriptLoader
-{
-    public:
-        spell_pal_glyph_of_holy_light() : SpellScriptLoader("spell_pal_glyph_of_holy_light") { }
-
-        class spell_pal_glyph_of_holy_light_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pal_glyph_of_holy_light_SpellScript);
-
-            void FilterTargets(std::list<WorldObject*>& targets)
-            {
-                uint32 const maxTargets = GetSpellInfo()->MaxAffectedTargets;
-
-                targets.remove(GetCaster());
-                if (targets.size() > maxTargets)
-                {
-                    targets.sort(Trinity::HealthPctOrderPred());
-                    targets.resize(maxTargets);
-                }
-            }
-
-            void Register()
-            {
-                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_glyph_of_holy_light_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_pal_glyph_of_holy_light_SpellScript();
-        }
-};
-
 // 63521 - Guarded by The Light
 class spell_pal_guarded_by_the_light : public SpellScriptLoader
 {
@@ -1412,6 +1380,54 @@ class spell_pal_light_s_beacon_AuraScript : public AuraScript
     }
 };
 
+// 54968 - Glyph of Holy Light
+class spell_pal_glyph_of_holy_light_trigger : public SpellScript
+{
+    PrepareSpellScript(spell_pal_glyph_of_holy_light_trigger);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        uint32 const maxTargets = GetSpellInfo()->MaxAffectedTargets;
+
+        // Remove caster only when he's not in range of target
+        if (Unit* target = GetExplTargetUnit())
+        {
+            float radius = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(GetCaster(), GetSpell());
+            if (!target->IsInRange(GetCaster(), 0.0f, radius))
+                targets.remove(GetCaster());
+        }
+
+        if (targets.size() > maxTargets)
+        {
+            targets.sort(Trinity::HealthPctOrderPred());
+            targets.resize(maxTargets);
+        }
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_glyph_of_holy_light_trigger::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+    }
+};
+
+// 54937 - Glyph of Holy Light
+class spell_pal_glyph_of_holy_light : public AuraScript
+{
+    PrepareAuraScript(spell_pal_glyph_of_holy_light);
+
+    void HandleProc(ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        if (uint32 amount = CalculatePct(eventInfo.GetHealInfo()->GetHeal(), 10))
+            GetTarget()->CastCustomSpell(SPELL_PALADIN_GLYPH_OF_HOLY_LIGHT_TRIGGER, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetHealInfo()->GetTarget(), TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        OnProc += AuraProcFn(spell_pal_glyph_of_holy_light::HandleProc);
+    }
+};
+
 void AddSC_paladin_spell_scripts()
 {
     // Ours
@@ -1444,4 +1460,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_lay_on_hands();
     new spell_pal_righteous_defense();
     new spell_pal_seal_of_righteousness();
+    RegisterSpellScript(spell_pal_glyph_of_holy_light_trigger);
+    RegisterAuraScript(spell_pal_glyph_of_holy_light);
 }
