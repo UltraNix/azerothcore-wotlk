@@ -235,7 +235,7 @@ INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, 
 DELETE FROM `gameobject_loot_template` WHERE `entry` = 26946;
 INSERT INTO `gameobject_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
 (26946, 1, 100, 1, 0, -34368, 1),
-(26946, 2, 100, 1, 0, -12029, 1),
+(26946, 2, 100, 1, 0, -12029, 2),
 (26946, 3, 10, 1, 0, -34154, 1),
 (26946, 45038, 8.5, 1, 0, 1, 1),
 (26946, 45087, 40, 1, 0, 1, 1),
