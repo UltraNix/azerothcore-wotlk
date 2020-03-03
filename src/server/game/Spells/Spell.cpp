@@ -1387,7 +1387,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             if (!target)
                 break;
 
-            float const distance = GetSpellInfo()->Effects[EFFECT_0].CalcRadius();
+            float const distance = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(target, this);
             Position destination = target->GetPosition();
 
             constexpr uint32 BLINK_RESOLVE_STEPS = 12;
