@@ -2145,6 +2145,10 @@ struct npc_ulduar_bot_summon_triggerAI : public NullCreatureAI
                 {
                     if (summonEntry != NPC_EMERGENCY_FIRE_BOT)
                         bot->SetInCombatWithZone();
+
+                    if (Creature* m = GetMimiron())
+                        if (m->AI()->GetData(1)) // hardmode
+                            bot->CastSpell(bot, SPELL_EMERGENCY_MODE, true);
                 }
             }
 
