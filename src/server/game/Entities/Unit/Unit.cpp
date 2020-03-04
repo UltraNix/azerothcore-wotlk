@@ -10949,7 +10949,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     }
 
     // Custom scripted damage
-    if (spellProto->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT)
+    if (spellProto->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT || (spellProto->Id == 60443 && getClass() == CLASS_DEATH_KNIGHT))
     {
         // Sigil of the Vengeful Heart
         if (spellProto->SpellFamilyFlags[0] & 0x2000)
@@ -10957,7 +10957,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 AddPct(DoneTotal, aurEff->GetAmount());
 
         // Impurity
-        if (AuraEffect *aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 1986, 0))
+        if (AuraEffect* aurEff = GetDummyAuraEffect(SPELLFAMILY_DEATHKNIGHT, 1986, 0))
             AddPct(ApCoeffMod, aurEff->GetAmount());
 
         // Blood Boil - bonus for diseased targets
