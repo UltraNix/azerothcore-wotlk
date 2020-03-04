@@ -1149,6 +1149,40 @@ class spell_warr_victory_rush_SpellScript : public SpellScript
 	}
 };
 
+// 29707, 30324, 47449, 47450 - Heroic Strike
+class spell_warr_heroic_strike : public SpellScript
+{
+    PrepareSpellScript(spell_warr_heroic_strike);
+
+    void RecalculateDamage()
+    {
+        uint32 damage = GetHitDamage();
+        // check dazed affect
+        bool found = false;
+        if (Unit* target = GetExplTargetUnit())
+        {
+            for (auto&& aurEff : target->GetAuraEffectsByType(SPELL_AURA_MOD_DECREASE_SPEED))
+            {
+                if (aurEff->GetSpellInfo()->SpellIconID == 15 && aurEff->GetSpellInfo()->Dispel == 0)
+                {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (found)
+            damage *= 1.35f;
+
+        SetHitDamage(damage);
+    }
+
+    void Register() override
+    {
+        OnHit += SpellHitFn(spell_warr_heroic_strike::RecalculateDamage);
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     // Ours
@@ -1158,6 +1192,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_improved_spell_reflection_trigger();
     new SpellScriptLoaderEx<spell_warr_victory_rush_SpellScript>("spell_warr_victory_rush");
     new spell_warr_charge_stun();
+    RegisterSpellScript(spell_warr_heroic_strike);
 
     // Theirs
     new spell_warr_bloodthirst();
