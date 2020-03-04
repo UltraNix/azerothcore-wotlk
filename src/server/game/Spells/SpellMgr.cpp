@@ -8402,8 +8402,11 @@ void SpellMgr::LoadDbcDataCorrections()
                     break;
                 // Heartbreak
                 case 64193: // Heartbreak
-                case 65737: // Heartbreak
                     spellInfo->EffectBasePoints[EFFECT_1] = 150;
+                    spellInfo->EffectBasePoints[EFFECT_2] = 40;
+                    break;
+                case 65737: // Heartbreak
+                    spellInfo->EffectBasePoints[EFFECT_1] = 50;
                     spellInfo->EffectBasePoints[EFFECT_2] = 40;
                     break;
                 // Flame Leviathan - towers (40 % to 50 %)
