@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -49,6 +49,12 @@ Bag::~Bag()
             }
             delete m_bagslot[i];
         }
+
+    if (Player* player = GetOwner())
+        if (player->GetItemByGuid(GetGUID()))
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is deleting, but player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) still have it in his inventory!",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), player, player->GetName().c_str(), player->GetGUID(),
+                player->GetGUIDLow(), player->GetSession()->GetAccountId());
 }
 
 void Bag::AddToWorld()

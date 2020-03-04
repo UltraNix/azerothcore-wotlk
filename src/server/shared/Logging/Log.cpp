@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -32,7 +32,8 @@ extern LoginDatabaseWorkerPool LoginDatabase;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL), releaseDebugLogFile(NULL), cheatLogFile(NULL), itemRestoreLogFile(NULL), rafLogFile(NULL), webCommandsLogFile(NULL),
+    dberLogfile(NULL), sqlLogFile(NULL), sqlDevLogFile(NULL), miscLogFile(NULL), banLogFile(NULL), premiumLogFile(NULL), lootLogFile(NULL), rewardsLogFile(NULL), chinaTownLogFile(NULL),
+    releaseDebugLogFile(NULL), cheatLogFile(NULL), itemRestoreLogFile(NULL), rafLogFile(NULL), webCommandsLogFile(NULL), bagCrashLogFile(NULL),
     m_gmlog_per_account(false), m_enableLogDB(false), m_colored(false)
 {
     Initialize();
@@ -79,7 +80,7 @@ Log::~Log()
     if (premiumLogFile != NULL)
         fclose(premiumLogFile);
     premiumLogFile = NULL;
-    
+
     if (lootLogFile != NULL)
         fclose(lootLogFile);
     lootLogFile = NULL;
@@ -87,11 +88,11 @@ Log::~Log()
     if (rewardsLogFile != NULL)
         fclose(rewardsLogFile);
     rewardsLogFile = NULL;
-    
+
     if (chinaTownLogFile != NULL)
         fclose(chinaTownLogFile);
     chinaTownLogFile = NULL;
-    
+
     if (releaseDebugLogFile != NULL)
         fclose(releaseDebugLogFile);
     releaseDebugLogFile = NULL;
@@ -111,6 +112,10 @@ Log::~Log()
     if (webCommandsLogFile != NULL)
         fclose(webCommandsLogFile);
     webCommandsLogFile = NULL;
+
+    if (bagCrashLogFile != NULL)
+        fclose(bagCrashLogFile);
+    bagCrashLogFile = NULL;
 }
 
 void Log::SetLogLevel(char *Level)
@@ -201,6 +206,7 @@ void Log::Initialize()
     releaseDebugLogFile = openLogFile("ReleaseDebugLogFile", "ReleaseDebugLogTimestamp", "a");
     cheatLogFile        = openLogFile("CheatLogFile", "CheatLogTimestamp", "a");
     rafLogFile          = openLogFile("RaFLogFile", "RaFLogTimestamp", "a");
+    bagCrashLogFile     = openLogFile("BagCrashLogFile", "BagCrashLogTimestamp", "a");
 
     // Main log file settings
     m_logLevel     = sConfigMgr->GetIntDefault("LogLevel", LOGL_NORMAL);
@@ -1293,6 +1299,33 @@ void Log::outWebCommands(const char * str, ...)
         vfprintf(webCommandsLogFile, str, ap);
         fprintf(webCommandsLogFile, "\n");
         fflush(webCommandsLogFile);
+        va_end(ap);
+    }
+}
+
+void Log::outBagCrash(const char * str, ...)
+{
+    if (!str)
+        return;
+
+    if (m_enableLogDB)
+    {
+        va_list ap2;
+        va_start(ap2, str);
+        char nnew_str[MAX_QUERY_LEN];
+        vsnprintf(nnew_str, MAX_QUERY_LEN, str, ap2);
+        outDB(LOG_TYPE_PERF, nnew_str);
+        va_end(ap2);
+    }
+
+    if (bagCrashLogFile)
+    {
+        outTimestamp(bagCrashLogFile);
+        va_list ap;
+        va_start(ap, str);
+        vfprintf(bagCrashLogFile, str, ap);
+        fprintf(bagCrashLogFile, "\n");
+        fflush(bagCrashLogFile);
         va_end(ap);
     }
 }

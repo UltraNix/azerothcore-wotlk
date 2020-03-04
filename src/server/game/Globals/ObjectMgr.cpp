@@ -9415,6 +9415,13 @@ bool ObjectMgr::IsGameObjectStaticTransport(uint32 entry)
 
 void ObjectMgr::RequestItemDestroy( Item * item )
 {
+    if (item->IsBag())
+        if (Player* player = item->GetOwner())
+            if (player->GetItemByGuid(item->GetGUID()))
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is requested to be destroyed for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and stil have it?: %d",
+                    item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), player, player->GetName().c_str(), player->GetGUID(),
+                    player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(item->GetGUID()) != nullptr);
+
     std::lock_guard < std::mutex > guard( _itemDestroyMutex );
     _itemsToDestroy.push_back( item );
 }

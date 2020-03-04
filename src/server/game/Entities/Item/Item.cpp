@@ -688,8 +688,25 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
         RemoveFromUpdateQueueOf(forplayer);
         forplayer->DeleteRefundReference(GetGUIDLow());
         sObjectMgr->RequestItemDestroy( this );
+        if (IsBag())
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) got state ITEM_NEW, but changed to ITEM_REMOVED for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
+                forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
         return;
     }
+
+    if (IsBag())
+    {
+        if (state == ITEM_REMOVED)
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) changed state to ITEM_REMOVED from old state %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), uState, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
+                forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
+        else if (uState == ITEM_REMOVED)
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) got state ITEM_REMOVED, but changed state to %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), state, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
+                forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
+    }
+
     if (state != ITEM_UNCHANGED)
     {
         // new items must stay in new state until saved

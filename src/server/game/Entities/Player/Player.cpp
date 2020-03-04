@@ -13171,6 +13171,11 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
             pItem->ClearSoulboundTradeable(this);
             RemoveTradeableItem(pItem);
             pItem->SetState(ITEM_REMOVED, this);
+
+            if (pItem->IsBag())
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) removed in fuction '_StoreItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), this, GetName().c_str(), GetGUID(),
+                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
         }
 
         AddEnchantmentDurations(pItem2);
@@ -13298,6 +13303,11 @@ ItemRef Player::EquipItem(uint16 pos, ItemRef const& pItem, bool update)
         RemoveTradeableItem(pItem);
         pItem->SetState(ITEM_REMOVED, this);
         pItem2->SetState(ITEM_CHANGED, this);
+
+        if (pItem->IsBag())
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) removed in fuction 'EquipItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), this, GetName().c_str(), GetGUID(),
+                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
         ApplyEquipCooldown(pItem2);
 
@@ -13642,6 +13652,11 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
         pItem->SetSlot(NULL_SLOT);
         pItem->SetState(ITEM_REMOVED, this);
+
+        if (pItem->IsBag())
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) removed in fuction 'DestroyItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), this, GetName().c_str(), GetGUID(),
+                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
     }
 }
 
@@ -19300,6 +19315,11 @@ ItemRef Player::_LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff,
         // Remove item from inventory if necessary
         if (remove)
         {
+            if (item->IsBag())
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) removed in fuction '_LoadItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), this, GetName().c_str(), GetGUID(),
+                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
+
             Item::DeleteFromInventoryDB(trans, itemGuid);
             item->FSetState(ITEM_REMOVED);
             item->SaveToDB(trans);                           // it also deletes item object!
@@ -20436,6 +20456,11 @@ void Player::_SaveInventory(SQLTransaction& trans)
                 RemoveTradeableItem(item); // pussywizard
                 RemoveEnchantmentDurationsReferences(item); // pussywizard
                 RemoveItemDurations(item); // pussywizard
+
+                if (item->IsBag())
+                    sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) removed in fuction '_SaveInventory' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                        item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), this, GetName().c_str(), GetGUID(),
+                        GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
 
                 // also THIS item should be somewhere else, cheat attempt
                 item->FSetState(ITEM_REMOVED); // we are IN updateQueue right now, can't use SetState which modifies the queue

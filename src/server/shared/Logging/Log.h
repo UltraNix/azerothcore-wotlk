@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 
- * Copyright (C) 
+ * Copyright (C)
+ * Copyright (C)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -148,6 +148,7 @@ class Log
         void outChinaTown(const char * str, ...)                ATTR_PRINTF(2, 3); // sitowsky
         void outItemRestore(const char * str, ...)              ATTR_PRINTF(2, 3); // sitowsky
         void outWebCommands(const char * str, ...)              ATTR_PRINTF(2, 3);
+        void outBagCrash(const char * str, ...)                 ATTR_PRINTF(2, 3);
 
         void outCharDump(const char * str, uint32 account_id, uint32 guid, const char * name);
 
@@ -187,6 +188,7 @@ class Log
         FILE* itemRestoreLogFile;
         FILE* rafLogFile;
         FILE* webCommandsLogFile;
+        FILE* bagCrashLogFile;
 
         // cache values for after initilization use (like gm log per account case)
         std::string m_logsDir;
