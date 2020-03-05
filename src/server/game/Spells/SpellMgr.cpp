@@ -4195,6 +4195,9 @@ void SpellMgr::LoadDbcDataCorrections()
         case 54647: // Spirit Burn
             spellInfo->procChance = 20;
             break;
+        case 48776: // Mount Speed
+            spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED;
+            break;
         /////////////////////////////////////////////
         /////////////////CLASS SPELLS////////////////
         /////////////////////////////////////////////
