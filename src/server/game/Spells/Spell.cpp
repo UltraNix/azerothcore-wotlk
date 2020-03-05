@@ -7939,7 +7939,7 @@ void Spell::HandleLaunchPhase()
             continue;
 
         // do not consume ammo anymore for Hunter's volley spell
-        if (IsTriggered() && m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->IsTargetingArea())
+        if (IsTriggered() && m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && (m_spellInfo->IsTargetingArea() || m_spellInfo->SpellFamilyFlags.IsEqual(0x0, 0x0, 0x00000200)))
             usesAmmo = false;
 
         if (usesAmmo)
