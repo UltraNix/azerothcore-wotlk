@@ -137,7 +137,8 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (32294, 0, 46085, 0, 0, 2578),
 (32294, 0, 46086, 0, 0, 2578),
 (32294, 0, 46087, 0, 0, 2578),
-(32294, 0, 46088, 0, 0, 2578);
+(32294, 0, 46088, 0, 0, 2578),
+(32294, 0, 44115, 0, 0, 2576);
 
 DELETE FROM `npc_vendor` WHERE `npc_vendor`.`entry` = 32296;
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
@@ -234,7 +235,8 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (32296, 0, 46085, 0, 0, 2578),
 (32296, 0, 46086, 0, 0, 2578),
 (32296, 0, 46087, 0, 0, 2578),
-(32296, 0, 46088, 0, 0, 2578);
+(32296, 0, 46088, 0, 0, 2578),
+(32296, 0, 44115, 0, 0, 2576);
 
 -- Runed Orbs
 DELETE FROM `npc_vendor` WHERE `npc_vendor`.`entry` = 33963 AND `npc_vendor`.`item` = 45087 AND `npc_vendor`.`ExtendedCost` = 2604;
