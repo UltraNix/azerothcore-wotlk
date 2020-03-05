@@ -5917,7 +5917,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     Unit* target = m_targets.GetUnitTarget();
                     Pet *pet = m_caster->ToPlayer()->GetPet();
-                    if (!target || !pet || pet->isDead() || target->isDead())
+                    if (!target || !pet || pet->isDead() || target->isDead() || pet->IsUnderCrowdControl())
                         return SPELL_FAILED_BAD_TARGETS;
 
                     if (!pet->IsWithinLOSInMap(target))
