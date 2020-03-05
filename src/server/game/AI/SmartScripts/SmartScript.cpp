@@ -3282,7 +3282,8 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
         case SMART_TARGET_CHARMER_OWNER_OR_PLAYER:
             if (scriptTrigger)
             {
-                if (Player* player = scriptTrigger->GetCharmerOrOwnerPlayerOrPlayerItself()) {
+                if (Player* player = scriptTrigger->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
                     l->push_back(player);
                 }
             }
