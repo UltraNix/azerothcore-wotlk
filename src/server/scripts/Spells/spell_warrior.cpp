@@ -1154,9 +1154,9 @@ class spell_warr_heroic_strike : public SpellScript
 {
     PrepareSpellScript(spell_warr_heroic_strike);
 
-    void RecalculateDamage()
+    void HandleHit(SpellEffIndex /*effIndex*/)
     {
-        uint32 damage = GetHitDamage();
+        uint32 damage = GetEffectValue();
         // check dazed affect
         bool found = false;
         if (Unit* target = GetExplTargetUnit())
@@ -1174,12 +1174,12 @@ class spell_warr_heroic_strike : public SpellScript
         if (found)
             damage *= 1.35f;
 
-        SetHitDamage(damage);
+        SetEffectValue(damage);
     }
 
     void Register() override
     {
-        OnHit += SpellHitFn(spell_warr_heroic_strike::RecalculateDamage);
+        OnEffectLaunchTarget += SpellEffectFn(spell_warr_heroic_strike::HandleHit, EFFECT_0, SPELL_EFFECT_WEAPON_DAMAGE);
     }
 };
 
