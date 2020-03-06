@@ -2222,6 +2222,9 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
         task.Schedule(4s, [&](TaskContext /*func*/)
         {
             _canAttack = true;
+            if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO))
+                AttackStart(target);
+
             DoZoneInCombat(me, 250.f);
         });
 
@@ -2241,8 +2244,10 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
-        task.Update(diff,
-            std::bind(&ScriptedAI::DoMeleeAttackIfReady, this));
+        task.Update(diff);
+
+        if (_canAttack)
+            DoMeleeAttackIfReady();
     }
 private:
     bool _zeroKeepers;
