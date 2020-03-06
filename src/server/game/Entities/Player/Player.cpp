@@ -13119,7 +13119,7 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
             if (item->IsBag())
                 sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is added to m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
                     item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
+                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
 
             m_items[slot] = *item;
             SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), item->GetGUID());
@@ -13416,7 +13416,7 @@ void Player::VisualizeItem(uint8 slot, ItemRef const& pItem)
     if (pItem->IsBag())
         sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is added to m_items container in fuction 'VisualizeItem' slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
             pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-            GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
+            GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
     m_items[slot] = *pItem;
     SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), pItem->GetGUID());
@@ -13503,7 +13503,7 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
             if (pItem->IsBag())
                 sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is removing from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
                     pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
+                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
             // Update Melee Crit Rating after unequiping weapon
             switch (slot)
@@ -13656,7 +13656,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             if (pItem->IsBag())
                 sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is destroying item from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
                     pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
+                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
         }
         else if (Bag* pBag = GetBagByPos(bag))
             pBag->RemoveItem(slot, update);
@@ -14504,7 +14504,7 @@ void Player::AddItemToBuyBackSlot(ItemRef const& pItem)
         if (pItem->IsBag())
             sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is added item from m_items container in fuction 'AddItemToBuyBackSlot' slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
                 pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
+                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
         m_items[slot] = *pItem;
         time_t base = time(nullptr);
@@ -14550,7 +14550,7 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
         if (pItem && pItem->IsBag())
             sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is removing item from m_items container in fuction 'RemoveItemToBuyBackSlot' slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
                 pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
+                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
         uint32 eslot = slot - BUYBACK_SLOT_START;
         SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + (eslot * 2), 0);
