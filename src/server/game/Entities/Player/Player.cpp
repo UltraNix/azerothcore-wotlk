@@ -13519,11 +13519,6 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
 
             if (slot < EQUIPMENT_SLOT_END)
                 SetVisibleItemSlot(slot, NULL);
-
-            if (pItem->IsBag())
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is destroying item from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
         }
         else if (Bag* pBag = GetBagByPos(bag))
             pBag->RemoveItem(slot, update);
@@ -13657,6 +13652,11 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             }
 
             m_items[slot] = NULL;
+
+            if (pItem->IsBag())
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is destroying item from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), slot, this, GetName().c_str(), GetGUID(),
+                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(GetGUID()) != nullptr);
         }
         else if (Bag* pBag = GetBagByPos(bag))
             pBag->RemoveItem(slot, update);
