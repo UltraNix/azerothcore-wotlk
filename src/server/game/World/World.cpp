@@ -2608,7 +2608,7 @@ void World::SendWorldTextToCountry(std::string const& country, std::string const
 }
 
 /// Send a System Message to all players (except pvp announcer option disabled)
-void World::SendPvPWorldText(int32 string_id, ...)
+void World::SendPvPWorldText(bool sendToGms, int32 string_id, ...)
 {
     va_list ap;
     va_start(ap, string_id);
@@ -2618,6 +2618,9 @@ void World::SendPvPWorldText(int32 string_id, ...)
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() || !itr->second->GetPlayer()->PvPAnnounces())
+            continue;
+
+        if (!sendToGms && itr->second->GetPlayer()->GetSession()->GetSecurity() > SEC_PLAYER)
             continue;
 
         wt_do(itr->second->GetPlayer());

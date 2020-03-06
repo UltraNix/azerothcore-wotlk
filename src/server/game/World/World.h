@@ -822,7 +822,7 @@ class World
 
         void SendWorldText(int32 string_id, ...);
         void SendWorldTextToCountry(std::string const& country, std::string const& exceptCountry, int32 string_id, ...);
-        void SendPvPWorldText(int32 string_id, ...);
+        void SendPvPWorldText(bool sendToGms, int32 string_id, ...);
         void SendGlobalText(const char* text, WorldSession* self);
         void SendGMText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket* packet, WorldSession* self = 0, TeamId teamId = TEAM_NEUTRAL);

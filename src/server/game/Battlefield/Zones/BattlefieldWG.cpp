@@ -360,7 +360,7 @@ void BattlefieldWG::OnBattleStart()
     m_tenacityUpdateTimer = 20000;
 
     if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
-        sWorld->SendPvPWorldText(BATTLEFIELD_WG_WORLD_START_MESSAGE);
+        sWorld->SendPvPWorldText(true, BATTLEFIELD_WG_WORLD_START_MESSAGE);
 }
 
 void BattlefieldWG::UpdateCounterVehicle(bool init)

@@ -218,10 +218,12 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
                 switch (m_arenaType)
                 {
                     case 3: // 3v3
-                        sWorld->SendPvPWorldText(LANG_ARENA_3V3_ANNOUNCE);
+                        sWorld->SendPvPWorldText(false, LANG_ARENA_3V3_ANNOUNCE);
+                        sWorld->SendGMText(LANG_ARENA_ANNOUNCE_GM, "3v3", leader->GetName().c_str());
                         break;
                     case 5: // 5v5
-                        sWorld->SendPvPWorldText(LANG_ARENA_5V5_ANNOUNCE);
+                        sWorld->SendPvPWorldText(false, LANG_ARENA_5V5_ANNOUNCE);
+                        sWorld->SendGMText(LANG_ARENA_ANNOUNCE_GM, "5v5", leader->GetName().c_str());
                         break;
                 }
             }

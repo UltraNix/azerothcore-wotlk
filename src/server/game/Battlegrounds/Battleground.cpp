@@ -587,9 +587,9 @@ inline void Battleground::_ProcessJoin(uint32 diff)
             if (sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
             {
                 if (GetMinLevel() == 80)
-                    sWorld->SendPvPWorldText(LANG_BG_STARTED_80_ANNOUNCE_WORLD, GetName());
+                    sWorld->SendPvPWorldText(true, LANG_BG_STARTED_80_ANNOUNCE_WORLD, GetName());
                 else
-                    sWorld->SendPvPWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), std::min(GetMinLevel(), (uint32)80), std::min(GetMaxLevel(), (uint32)80));
+                    sWorld->SendPvPWorldText(true, LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), std::min(GetMinLevel(), (uint32)80), std::min(GetMaxLevel(), (uint32)80));
             }
             _CheckSafePositions(diff);
         }
