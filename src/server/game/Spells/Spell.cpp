@@ -5614,6 +5614,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
                     if ((!m_caster->IsTotem() || !m_spellInfo->IsPositive()) && !m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !m_spellInfo->HasAttribute(SPELL_ATTR5_SKIP_CHECKCAST_LOS_CHECK) && !m_caster->IsWithinLOSInMap(target))
                         return SPELL_FAILED_LINE_OF_SIGHT;
+
+                if (m_caster->IsPlayer() && target->IsTotem() && IS_PLAYER_GUID(target->GetOwnerGUID()) && m_spellInfo->IsHealingSpell())
+                    return SPELL_FAILED_BAD_TARGETS;
             }
         }
     }
