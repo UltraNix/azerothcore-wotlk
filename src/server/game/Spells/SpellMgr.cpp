@@ -3636,16 +3636,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
-            469,
-            45517,
-            47439,
-            47440, // Commanding Shout
-            }, [](SpellInfo* spellInfo) {
-            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_CHANGE_CURRENT_HP_VALUE;
-        });
-
-        ApplySpellFix
-        ({
             20253,
             20614,
             20615,

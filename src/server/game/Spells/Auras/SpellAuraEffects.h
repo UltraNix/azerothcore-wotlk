@@ -250,6 +250,8 @@ class AuraEffect
         void HandleModPowerRegenPCT(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleModManaRegen(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleAuraModIncreaseHealthProportionally(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+        void HandleAuraModIncreaseHealth_2(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModIncreaseMaxHealth(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModIncreaseEnergy(AuraApplication const* aurApp, uint8 mode, bool apply) const;
         void HandleAuraModIncreaseEnergyPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;

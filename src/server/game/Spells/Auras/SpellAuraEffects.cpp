@@ -291,7 +291,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE implemented in AuraEffect::PeriodicTick
     &AuraEffect::HandleNoImmediateEffect,                         //228 SPELL_AURA_DETECT_STEALTH stealth detection
     &AuraEffect::HandleNoImmediateEffect,                         //229 SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE
-    &AuraEffect::HandleAuraModIncreaseHealth,                     //230 SPELL_AURA_MOD_INCREASE_HEALTH_2
+    &AuraEffect::HandleAuraModIncreaseHealthProportionally,       //230 SPELL_AURA_MOD_INCREASE_HEALTH_2
     &AuraEffect::HandleNoImmediateEffect,                         //231 SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE
     &AuraEffect::HandleNoImmediateEffect,                         //232 SPELL_AURA_MECHANIC_DURATION_MOD           implement in Unit::CalculateSpellDuration
     &AuraEffect::HandleUnused,                                    //233 set model id to the one of the creature with id GetMiscValue() - clientside
@@ -311,7 +311,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleAuraCloneCaster,                           //247 SPELL_AURA_CLONE_CASTER
     &AuraEffect::HandleNoImmediateEffect,                         //248 SPELL_AURA_MOD_COMBAT_RESULT_CHANCE         implemented in Unit::RollMeleeOutcomeAgainst
     &AuraEffect::HandleAuraConvertRune,                           //249 SPELL_AURA_CONVERT_RUNE
-    &AuraEffect::HandleAuraModIncreaseHealth,                     //250 SPELL_AURA_MOD_INCREASE_HEALTH_2
+    &AuraEffect::HandleAuraModIncreaseHealth_2,                     //250 SPELL_AURA_MOD_INCREASE_HEALTH_2
     &AuraEffect::HandleNoImmediateEffect,                         //251 SPELL_AURA_MOD_ENEMY_DODGE
     &AuraEffect::HandleModCombatSpeedPct,                         //252 SPELL_AURA_252 Is there any difference between this and SPELL_AURA_MELEE_SLOW ? maybe not stacking mod?
     &AuraEffect::HandleNoImmediateEffect,                         //253 SPELL_AURA_MOD_BLOCK_CRIT_CHANCE  implemented in Unit::isBlockCritical
@@ -4263,17 +4263,60 @@ void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
         return;
 
-    bool modHp = !GetSpellInfo()->HasAttribute(SPELL_ATTR1_CU_DONT_CHANGE_CURRENT_HP_VALUE);
     Unit* target = aurApp->GetTarget();
+    uint32 healthDifference = target->GetMaxHealth() - target->GetHealth();
 
-    int32 const amt = apply ? GetAmount() : -GetAmount();
-    if (modHp && amt < 0)
-        target->ModifyHealth(std::max<int32>(1 - target->GetHealth(), amt));
+    if (apply)
+    {
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->ModifyHealth(GetAmount());
+    }
+    else
+    {
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->SetHealth(target->GetMaxHealth() - std::min(target->GetMaxHealth() - 1, healthDifference));
+    }
+}
 
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+void AuraEffect::HandleAuraModIncreaseHealthProportionally(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
 
-    if (modHp && amt > 0)
-        target->ModifyHealth(amt);
+    Unit* target = aurApp->GetTarget();
+    float healthPct = target->GetHealthPct();
+    if (apply)
+    {
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->ModifyHealth(GetAmount());
+        target->SetHealth(target->GetMaxHealth() * (healthPct / 100.0f));
+    }
+    else
+    {
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->SetHealth(std::min(target->GetMaxHealth() - 1, static_cast<uint32>(target->GetMaxHealth() * (healthPct / 100.0f))));
+    }
+}
+
+void AuraEffect::HandleAuraModIncreaseHealth_2(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    float healthPct = target->GetHealthPct() / 100.0f;
+
+    if (apply)
+    {
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        target->ModifyHealth(GetAmount());
+    }
+    else
+    {
+        target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(GetAmount()), apply);
+        int32 healthToSet = target->GetMaxHealth() * healthPct;
+        target->SetHealth(std::max(1, healthToSet));
+    }
 }
 
 void AuraEffect::HandleAuraModIncreaseMaxHealth(AuraApplication const* aurApp, uint8 mode, bool apply) const
