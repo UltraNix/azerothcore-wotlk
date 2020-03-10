@@ -19,6 +19,9 @@
 #define _TRANSACTION_H
 
 #include "SQLOperation.h"
+#include "Optional.h"
+
+#include <future>
 
 //- Forward declare (don't include header to prevent circular includes)
 class PreparedStatement;
@@ -52,6 +55,9 @@ class Transaction
 };
 typedef Trinity::AutoPtr<Transaction, ACE_Thread_Mutex> SQLTransaction;
 
+using TransactionPromise = std::promise< bool >;
+using TransactionResult = std::future< bool >;
+
 /*! Low level class*/
 class TransactionTask : public SQLOperation
 {
@@ -59,13 +65,17 @@ class TransactionTask : public SQLOperation
     friend class DatabaseWorker;
 
     public:
-        TransactionTask(SQLTransaction trans) : m_trans(trans) { } ;
-        ~TransactionTask(){ };
+        TransactionTask( SQLTransaction trans, Optional<TransactionPromise> promise = {} )
+            : m_trans(trans)
+            , m_promise( std::move( promise ) ) 
+        { 
+        };
 
     protected:
-        bool Execute();
+        bool                Execute();
 
-        SQLTransaction m_trans;
+        Optional<TransactionPromise>    m_promise;
+        SQLTransaction                  m_trans;
 };
 
 #endif

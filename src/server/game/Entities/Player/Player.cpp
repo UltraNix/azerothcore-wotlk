@@ -13532,23 +13532,53 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
 }
 
 // Common operation need to remove item from inventory without delete in trade, auction, guild bank, mail....
-void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
+bool Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
     if (ItemRef it = GetItemByPos(bag, slot))
     {
         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
         RemoveItem(bag, slot, update);
         UpdateTitansGrip();
+
         it->SetNotRefundable(this, false);
         it->RemoveFromUpdateQueueOf(this);
+
         if (it->IsInWorld())
         {
             it->RemoveFromWorld();
             it->DestroyForPlayer(this);
         }
+
+        return true;
     }
+
+    return false;
 }
 
+bool Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update, SQLTransaction & transaction)
+{
+    if (ItemRef item = GetItemByPos(bag, slot))
+    {
+        ItemRemovedQuestCheck(item->GetEntry(), item->GetCount());
+        RemoveItem(bag, slot, update);
+        UpdateTitansGrip();
+
+        item->SetNotRefundable(this, false);
+        item->RemoveFromUpdateQueueOf(this);
+
+        if (item->IsInWorld())
+        {
+            item->RemoveFromWorld();
+            item->DestroyForPlayer(this);
+        }
+
+        item->DeleteFromInventoryDB( transaction );
+        item->SaveToDB( transaction );
+        return true;
+    }
+
+    return false;
+}
 // Common operation need to add item from inventory without delete in trade, guild bank, mail....
 void Player::MoveItemToInventory(ItemPosCountVec const& dest, ItemRef const& pItem, bool update, bool in_characterInventoryDB)
 {
@@ -13981,6 +14011,26 @@ void Player::DestroyItemCount(ItemRef const& pItem, uint32 &count, bool update)
             pItem->SendUpdateToPlayer(this);
         pItem->SetState(ITEM_CHANGED, this);
     }
+}
+
+bool Player::DestroyItemCount( ItemRef const & item, uint32 count, bool update, SQLTransaction & transaction )
+{
+    if ( item->GetCount() < count )
+        return false;
+
+    if ( item->GetCount() == count )
+        return MoveItemFromInventory( item->GetBagSlot(), item->GetSlot(), update, transaction );
+
+    item->SetCount(item->GetCount() - count);
+    item->SetState(ITEM_CHANGED, this);
+
+    ItemRemovedQuestCheck(item->GetEntry(), count);
+    if (IsInWorld() && update)
+        item->SendUpdateToPlayer(this);
+
+    item->SaveToDB(transaction);
+
+    return true;
 }
 
 void Player::SplitItem(uint16 src, uint16 dst, uint32 count)

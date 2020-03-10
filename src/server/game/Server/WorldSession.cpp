@@ -1505,6 +1505,7 @@ void WorldSession::ProcessQueryCallbacks()
     ProcessQueryCallbackPlayer();
     ProcessQueryCallbackPet();
     ProcessQueryCallbackLogin();
+    ProcessTransactionCallbacks();
 }
 
 void WorldSession::ProcessQueryCallbackPlayer()
@@ -1624,6 +1625,23 @@ void WorldSession::ProcessQueryCallbackLogin()
         HandlePlayerLoginFromDB((LoginQueryHolder*)param);
         _charLoginCallback.cancel();
     }
+}
+
+void WorldSession::ProcessTransactionCallbacks()
+{
+    for ( auto & it : _transactionCallbacks )
+    {
+        TransactionResult & result = it.first;
+        if ( result.wait_for( std::chrono::nanoseconds( 0 ) ) == std::future_status::ready )
+            it.second( result.get() );
+    }
+
+    auto it = std::remove_if( _transactionCallbacks.begin(), _transactionCallbacks.end(), []( auto & it )
+    {
+        return !it.first.valid();
+    } );
+
+    _transactionCallbacks.erase( it, _transactionCallbacks.end() );
 }
 
 bool WorldSession::IsPacketLoggingEnabled() const

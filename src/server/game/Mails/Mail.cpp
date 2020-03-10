@@ -84,7 +84,7 @@ MailReceiver::MailReceiver(Player* receiver, uint32 receiver_lowguid) : m_receiv
 
 MailDraft& MailDraft::AddItem(ItemRef const& item)
 {
-    m_items[item->GetGUIDLow()] = *item; 
+    m_items[item->GetGUIDLow()] = item;
     return *this;
 }
 
