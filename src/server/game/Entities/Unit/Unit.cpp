@@ -2934,7 +2934,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
     tmp += resist_chance;
 
     // Chance resist debuff
-    if (!spell->IsPositive() && !spell->HasAttribute(SPELL_ATTR4_IGNORE_RESISTANCES))
+    if (!spell->IsPositive() && !spell->HasAttribute(SPELL_ATTR4_IGNORE_RESISTANCES) && !(spell->HasAttribute(SPELL_ATTR1_CU_IGNORE_RESISTANCES_PVE) && victim->IsCreature()))
     {
         bool bNegativeAura = true;
 

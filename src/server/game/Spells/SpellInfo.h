@@ -215,7 +215,8 @@ enum SpellCustomAttributes1 : uint32
     SPELL_ATTR1_CU_DONT_RESET_TICK_PERIOD           = 0x00000001,
     SPELL_ATTR1_CU_MAINTAIN_MOMENTUM_ON_AURA_REMOVE = 0x00000002,
     SPELL_ATTR1_CU_ALLOW_CRIT_ON_NORMAL_MAGIC       = 0x00000008, // Allows spells with SPELL_SCHOOL_MASK_NORMAL SpellSchoolMask and SPELL_DAMAGE_CLASS_MAGIC DamageClass to crit
-    SPELL_ATTR1_CU_DONT_DROP_CHARGES_ON_PROC        = 0x00000010  // Disables charge drop on aura proc - allows us to keep aura active and remove said charge elsewhere
+    SPELL_ATTR1_CU_DONT_DROP_CHARGES_ON_PROC        = 0x00000010, // Disables charge drop on aura proc - allows us to keep aura active and remove said charge elsewhere
+    SPELL_ATTR1_CU_IGNORE_RESISTANCES_PVE           = 0x00000020, // Spells with this attribute can't be resisted by creatures
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);

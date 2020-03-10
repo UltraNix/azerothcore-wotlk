@@ -3753,6 +3753,14 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_DROP_CHARGES_ON_PROC;
         });
 
+        ApplySpellFix
+        ({
+            57994, // Wind Shear
+            }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_IGNORE_RESISTANCES_PVE;
+        });
+
         switch (spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
