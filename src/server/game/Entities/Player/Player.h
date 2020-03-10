@@ -1428,9 +1428,7 @@ class Player : public Unit, public GridObject<Player>
         }
         ItemRef BankItem(uint16 pos, ItemRef const& pItem, bool update);
         void RemoveItem(uint8 bag, uint8 slot, bool update, bool swap = false);
-        bool MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
-        bool MoveItemFromInventory(uint8 bag, uint8 slot, bool update, SQLTransaction & transaction);
-
+        void MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
                                                             // in trade, auction, guild bank, mail....
         void MoveItemToInventory(ItemPosCountVec const& dest, ItemRef const& pItem, bool update, bool in_characterInventoryDB = false);
                                                             // in trade, guild bank, mail....
@@ -1438,7 +1436,6 @@ class Player : public Unit, public GridObject<Player>
         void DestroyItem(uint8 bag, uint8 slot, bool update);
         void DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check = false);
         void DestroyItemCount( ItemRef const& item, uint32& count, bool update);
-        bool DestroyItemCount( ItemRef const& item, uint32 count, bool update, SQLTransaction & transaction);
         void DestroyConjuredItems(bool update);
         void DestroyZoneLimitedItem(bool update, uint32 new_zone);
         void SplitItem(uint16 src, uint16 dst, uint32 count);

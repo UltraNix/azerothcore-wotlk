@@ -75,32 +75,24 @@ void Transaction::Cleanup()
 
 bool TransactionTask::Execute()
 {
-    auto ExecuteTransaction = [this]
-    {
-        int errorCode = m_conn->ExecuteTransaction( m_trans );
-        if ( !errorCode )
-            return true;
+    int errorCode = m_conn->ExecuteTransaction(m_trans);
+    if (!errorCode)
+        return true;
 
-        if ( errorCode == ER_LOCK_DEADLOCK )
+    if (errorCode == ER_LOCK_DEADLOCK)
+    {
+        uint8 loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
+        for (uint8 i = 0; i < loopBreaker; ++i)
         {
-            uint8 loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
-            for ( uint8 i = 0; i < loopBreaker; ++i )
+            if (!m_conn->ExecuteTransaction(m_trans))
             {
-                if ( !m_conn->ExecuteTransaction( m_trans ) )
-                {
-                    return true;
-                }
+                return true;
             }
         }
+    }
 
-        // Clean up now.
-        m_trans->Cleanup();
-        return false;
-    };
+    // Clean up now.
+    m_trans->Cleanup();
 
-    bool result = ExecuteTransaction();
-    if ( m_promise )
-        m_promise->set_value( result );
-
-    return result;
+    return false;
 }

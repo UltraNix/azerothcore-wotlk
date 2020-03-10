@@ -998,7 +998,6 @@ class WorldSession
         void ProcessQueryCallbackPlayer();
         void ProcessQueryCallbackPet();
         void ProcessQueryCallbackLogin();
-        void ProcessTransactionCallbacks();
 
         PreparedQueryResultFuture _charEnumCallback;
         QueryCallback<PreparedQueryResult, std::string> _charRenameCallback;
@@ -1197,8 +1196,6 @@ class WorldSession
         bool _kicked;
         bool _shouldSetOfflineInDB;
         bool _vpnActive;
-
-        std::vector < std::pair< TransactionResult, std::function< void( bool ) > > > _transactionCallbacks;
 
         // Packets cooldown
         time_t _calendarEventCreationCooldown;

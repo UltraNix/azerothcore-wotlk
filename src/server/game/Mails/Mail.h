@@ -117,7 +117,7 @@ class MailReceiver
 
 class MailDraft
 {
-    typedef std::map<uint32, ItemRef> MailItemMap;
+    typedef std::map<uint32, Item*> MailItemMap;
 
     public:                                                 // Constructors
         explicit MailDraft(uint16 mailTemplateId, bool need_items = true)
