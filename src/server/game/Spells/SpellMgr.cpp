@@ -3113,7 +3113,6 @@ void SpellMgr::LoadSpellCustomAttr()
 
         ApplySpellFix
         ({
-            54428, // Divine Plea
             47755, // Rapture
             34075, // Aspect of the Viper
             31930, // Judgements of the Wise
