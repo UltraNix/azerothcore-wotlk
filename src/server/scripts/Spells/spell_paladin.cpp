@@ -1428,6 +1428,39 @@ class spell_pal_glyph_of_holy_light : public AuraScript
     }
 };
 
+// -1022 - Hand of Protection
+class spell_pal_hand_of_protection : public SpellScript
+{
+    PrepareSpellScript(spell_pal_hand_of_protection);
+
+    SpellCastResult CheckCast()
+    {
+        Unit* target = GetExplTargetUnit();
+        Unit* caster = GetCaster();
+        if (!target)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        // Player can't cast spell on other players when stunned/confused/silenced
+        if (target != caster)
+        {
+            if (caster->isStuned())
+                return SPELL_FAILED_STUNNED;
+            else if (caster->HasUnitState(UNIT_STATE_CONFUSED))
+                return SPELL_FAILED_CONFUSED;
+            else if (caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+                return SPELL_FAILED_SILENCED;
+        }
+
+        return SPELL_CAST_OK;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_pal_hand_of_protection::CheckCast);
+    }
+};
+
+
 void AddSC_paladin_spell_scripts()
 {
     // Ours
@@ -1436,6 +1469,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_seal_of_light();
     new spell_pal_sacred_shield_base();
     new AuraScriptLoaderEx<spell_pal_light_s_beacon_AuraScript>("spell_pal_light_s_beacon");
+    RegisterSpellScript(spell_pal_hand_of_protection);
 
     // Theirs
     new spell_pal_ardent_defender();

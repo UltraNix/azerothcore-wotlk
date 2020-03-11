@@ -5665,14 +5665,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     switch (m_spellInfo->Id)
     {
-         // Hand of Protection - Disable usage in stuns (only castable on yourself)
-         case 10278:
-			 if (m_targets.GetUnitTarget() != m_caster && m_caster->isStuned())
-				 return SPELL_FAILED_STUNNED;
-        // Shouldn't be able to cast while confused (only castable on yourself)
-             if (m_targets.GetUnitTarget() != m_caster && m_caster->HasUnitState(UNIT_STATE_CONFUSED))
-                 return SPELL_FAILED_CONFUSED;
-             break;
          //Disengage
          case 781:
              if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED))
