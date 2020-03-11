@@ -770,6 +770,7 @@ class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
     bool Load() override
     {
         _runeWeaponGUID = 0;
+        _bloodBoilProcTimer = 0;
         return true;
     }
 
@@ -778,7 +779,12 @@ class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
         if (SpellInfo const* procSpell = eventInfo.GetSpellInfo())
             for (uint32 spellId : { SPELL_DK_BLOOD_STRIKE, SPELL_DK_ICY_TOUCH, SPELL_DK_PLAGUE_STRIKE, SPELL_DK_HEART_STRIKE, SPELL_DK_DEATH_STRIKE, SPELL_DK_DEATH_COIL_R1, SPELL_DK_BLOOD_BOIL, SPELL_DK_RUNE_STRIKE})
                 if (procSpell->IsRankOf(sSpellMgr->GetSpellInfo(spellId)))
+                {
+                    if (spellId == SPELL_DK_BLOOD_BOIL)
+                        return _bloodBoilProcTimer <= World::GetGameTimeMS();
+
                     return true;
+                }
 
         return false;
     }
@@ -794,7 +800,11 @@ class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
 
         dancingRuneWeapon->SetOrientation(dancingRuneWeapon->GetAngle(target));
         if (SpellInfo const* procSpell = eventInfo.GetDamageInfo()->GetSpellInfo())
+        {
             dancingRuneWeapon->CastSpell(target, procSpell->Id, true, nullptr, aurEff, dancingRuneWeapon->GetGUID());
+            if (sSpellMgr->GetFirstSpellInChain(procSpell->Id) == SPELL_DK_BLOOD_BOIL)
+                _bloodBoilProcTimer = World::GetGameTimeMS() + 1000;
+        }
     }
 
     void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -821,6 +831,7 @@ class spell_dk_dancing_rune_weapon_AuraScript : public AuraScript
         OnEffectApply += AuraEffectApplyFn(spell_dk_dancing_rune_weapon_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 
+    uint32 _bloodBoilProcTimer;
     uint64 _runeWeaponGUID;
 };
 
