@@ -1103,6 +1103,17 @@ struct npc_warl_doomguardAI : public ScriptedAI
         EventMap _events;
 };
 
+struct npc_warl_eye_of_kilrogg : public ScriptedAI
+{
+    npc_warl_eye_of_kilrogg(Creature* creature) : ScriptedAI(creature) { }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (Player* owner = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+            owner->InterruptSpell(CURRENT_CHANNELED_SPELL);
+    }
+};
+
 void AddSC_generic_pet_scripts()
 {
     new npc_pet_gen_mojo();
@@ -1118,4 +1129,5 @@ void AddSC_generic_pet_scripts()
     new npc_pet_gen_fetch_ball();
     new CreatureAILoader<npc_guardian_petAI>("npc_guardian_pet");
     new CreatureAILoader<npc_warl_doomguardAI>("npc_warl_doomguard");
+    RegisterCreatureAI(npc_warl_eye_of_kilrogg);
 }
