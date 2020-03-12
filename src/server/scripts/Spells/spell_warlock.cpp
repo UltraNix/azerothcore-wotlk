@@ -1466,6 +1466,22 @@ public:
     }
 };
 
+class spell_warl_consume_shadows : public SpellScript
+{
+    PrepareSpellScript(spell_warl_consume_shadows);
+
+    void HandleStopMoving()
+    {
+        if (Unit* target = GetHitUnit())
+            target->StopMoving();
+    }
+
+    void Register() override
+    {
+        BeforeHit += SpellHitFn(spell_warl_consume_shadows::HandleStopMoving);
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     // Ours
@@ -1481,6 +1497,7 @@ void AddSC_warlock_spell_scripts()
     new spell_wrl_fire_bolt();
     new spell_warl_everlasting_affliction_aura();
     new SpellScriptLoaderEx<spell_chaos_bolt_damage_hack_SpellScript>("spell_chaos_bolt_damage_hack");
+    RegisterSpellScript(spell_warl_consume_shadows);
 
     // Theirs
     new spell_warl_banish();
