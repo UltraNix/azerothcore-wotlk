@@ -58,6 +58,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
                 _atAttackCommand = false;
                 _withGhoul       = false;
                 _targetGUID = 0;
+                _strikeTimer = 2000;
             }
 
             void MovementInform(uint32 type, uint32 point)
@@ -132,6 +133,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
 
             void Reset()
             {
+                _strikeTimer = 2000;
                 _selectionTimer = 0;
                 me->SetReactState(REACT_PASSIVE);
                 MySelectNextTarget();
@@ -251,6 +253,13 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
                         }
                 }
 
+                if (Spell* spell = me->GetCurrentSpell(CURRENT_GENERIC_SPELL))
+                {
+                    uint32 spellTimer = spell->GetCastTime();
+                    if (_strikeTimer != spellTimer + 500)
+                        _strikeTimer = spellTimer + 500;
+                }
+
                 if (_checkGhoulTimer <= diff)
                     GhoulAI();
                 else
@@ -282,8 +291,18 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
                         }
                     }
 
-                    if (_initialCastTimer >= 2000 && !me->HasUnitState(UNIT_STATE_CASTING|UNIT_STATE_LOST_CONTROL) && me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == NULL_MOTION_TYPE)
-                        me->CastSpell(me->GetVictim(), 51963, false);
+                    if (_initialCastTimer >= 2000 && !me->HasUnitState(UNIT_STATE_CASTING | UNIT_STATE_LOST_CONTROL) && me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == NULL_MOTION_TYPE)
+                    {
+                        DoMeleeAttackIfReady();
+
+                        if (_strikeTimer > diff)
+                            _strikeTimer -= diff;
+                        else
+                        {
+                            me->CastSpell(me->GetVictim(), 51963, false);
+                            _strikeTimer = 2000;
+                        }
+                    }
                 }
                 else
                 {
@@ -303,6 +322,7 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
             uint32 _selectionTimer;
             uint32 _initialCastTimer;
             uint32 _checkGhoulTimer;
+            uint32 _strikeTimer;
             bool _despawning;
             bool _initialSelection;
             bool _atStayCommand;

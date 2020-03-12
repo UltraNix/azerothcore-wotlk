@@ -986,7 +986,13 @@ class spell_dk_pet_scaling : public SpellScriptLoader
                 // xinef: scale haste with owners melee haste
                 if (Unit* owner = GetUnitOwner()->GetOwner())
                     if (owner->m_modAttackSpeedPct[BASE_ATTACK] < 1.0f) // inherit haste only
-                        amount = std::min<int32>(100, int32(((1.0f / owner->m_modAttackSpeedPct[BASE_ATTACK]) - 1.0f) * 100.0f));
+                    {
+                        // Ebon Gargoyle exception, should be able to go below 1s cast.
+                        if (GetUnitOwner()->GetEntry() == NPC_EBON_GARGOYLE)
+                            amount = int32(((1.0f / owner->m_modAttackSpeedPct[BASE_ATTACK]) - 1.0f) * 100.0f);
+                        else
+                            amount = std::min<int32>(100, int32(((1.0f / owner->m_modAttackSpeedPct[BASE_ATTACK]) - 1.0f) * 100.0f));
+                    }
             }
 
             void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
