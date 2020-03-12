@@ -101,7 +101,9 @@ void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
         return message[urand(0, message.size() - 1)];
     };
 
-    bool const _lastSignIsDigit = std::isdigit(_failureBody[_failureBody.size() - 1]);
+    bool _lastSignIsDigit = false;
+    if (_failureBody.size() > size_t(0))
+        _lastSignIsDigit = std::isdigit(_failureBody[_failureBody.size() - 1]);
     _failureBody += randomCharacter(_lastSignIsDigit ? WardenAlphaCharset : WardenNumericCharset);
 
     std::string finalAddonSuccessMessage = fmt::format(addonFailureMessage, request.first._addonMessageFunctionPrefix.c_str(), _messagePrefix.c_str(), _successBody.c_str(), _messageReceiver.c_str());
