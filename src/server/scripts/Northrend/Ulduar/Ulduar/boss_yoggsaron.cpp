@@ -2145,6 +2145,12 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
             aur->SetStackAmount(9);
     }
 
+    void Reset() override
+    {
+        me->SetInCombatWithZone();
+        ScriptedAI::Reset();
+    }
+
     void SetData(uint32 type, uint32 value) override
     {
         if (type == DATA_SET_ZERO_KEEPERS)
@@ -2247,7 +2253,12 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
         task.Update(diff);
 
         if (_canAttack)
+        {
+            if (!UpdateVictim())
+                return;
+
             DoMeleeAttackIfReady();
+        }
     }
 private:
     bool _zeroKeepers;
