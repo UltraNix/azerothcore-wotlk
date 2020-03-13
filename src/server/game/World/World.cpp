@@ -1479,6 +1479,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_LOG_NEW_ACCOUNTS] = sConfigMgr->GetIntDefault("AccountLogging.LogNewAccounts", 1);
     m_int_configs[CONFIG_OLD_ACCOUNT_TIMESTAMP] = sConfigMgr->GetIntDefault("AccountLogging.OldAccountTimestamp", 1581675120);
     m_int_configs[CONFIG_LOG_NEW_ACCOUNTS_HIGHEST_CHAR_LEVEL] = sConfigMgr->GetIntDefault("AccountLogging.HighestCharacterLevel", 20);
+    m_int_configs[CONFIG_ARENA_WORLD_ANNOUNCER_COOLDOWN] = sConfigMgr->GetIntDefault("Arena.World.Announcer.Cooldown", 30);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

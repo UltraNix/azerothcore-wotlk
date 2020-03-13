@@ -2851,10 +2851,17 @@ Arena.ArenaMatchmakerRatingModifier = 24
 #
 #    Arena.World.Announcer
 #        Description: Arena world queue announcement type.
-#        Default:     1 - (Disabled)
+#        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
 Arena.World.Announcer = 0
+
+#    Arena.World.Announcer.Cooldown
+#        Description: Arena world queue announcement cooldown per character (in seconds)
+#        Default:     30
+
+
+Arena.World.Announcer.Cooldown = 30
 
 #
 #    Arena.AutoFlush

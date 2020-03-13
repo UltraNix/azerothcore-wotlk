@@ -963,6 +963,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_applyResilience = true;
     m_playerActionCounterStore.clear();
     m_playerActionCounterSaved = false;
+
+    m_canSendArenaAnnounce = true;
 }
 
 Player::~Player()
@@ -28556,6 +28558,15 @@ void Player::OnClientAction(ClientActionType type)
         default:
             break;
     }
+}
+
+void Player::AddArenaAnnounceCooldown()
+{
+    m_canSendArenaAnnounce = false;
+    m_taskScheduler.Schedule(Seconds(sWorld->getIntConfig(CONFIG_ARENA_WORLD_ANNOUNCER_COOLDOWN)), [&](TaskContext func)
+    {
+        m_canSendArenaAnnounce = true;
+    });
 }
 
 uint32 ClientActionData::operator++()

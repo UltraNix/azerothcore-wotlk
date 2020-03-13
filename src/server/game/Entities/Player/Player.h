@@ -2753,6 +2753,9 @@ class Player : public Unit, public GridObject<Player>
 
         void OnClientAction(ClientActionType /*type*/);
 
+        bool CanSendArenaAnnounce() const { return m_canSendArenaAnnounce; }
+        void AddArenaAnnounceCooldown();
+
     protected:
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
@@ -3124,6 +3127,7 @@ class Player : public Unit, public GridObject<Player>
         bool m_playerActionCounterSaved;
 
         TaskScheduler m_taskScheduler;
+        bool m_canSendArenaAnnounce;
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);

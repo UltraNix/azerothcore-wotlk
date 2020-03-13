@@ -210,7 +210,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
                 ChatHandler(leader->GetSession()).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_STANDARD, bgName, q_min_level, q_max_level, qAlliance, (bgt->GetMinPlayersPerTeam() > qAlliance ? bgt->GetMinPlayersPerTeam() - qAlliance : 0), qHorde, (bgt->GetMinPlayersPerTeam() > qHorde ? bgt->GetMinPlayersPerTeam() - qHorde : 0));
         }
 
-    if (isRated && sWorld->getBoolConfig(CONFIG_ARENA_WORLD_ANNOUNCER))
+    if (isRated && sWorld->getBoolConfig(CONFIG_ARENA_WORLD_ANNOUNCER) && leader->CanSendArenaAnnounce())
         if (Battleground* bgt = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
         {
             if (bgt->isArena())
@@ -220,10 +220,12 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, PvPDiffi
                     case 3: // 3v3
                         sWorld->SendPvPWorldText(false, LANG_ARENA_3V3_ANNOUNCE);
                         sWorld->SendGMText(LANG_ARENA_ANNOUNCE_GM, "3v3", leader->GetName().c_str());
+                        leader->AddArenaAnnounceCooldown();
                         break;
                     case 5: // 5v5
                         sWorld->SendPvPWorldText(false, LANG_ARENA_5V5_ANNOUNCE);
                         sWorld->SendGMText(LANG_ARENA_ANNOUNCE_GM, "5v5", leader->GetName().c_str());
+                        leader->AddArenaAnnounceCooldown();
                         break;
                 }
             }
