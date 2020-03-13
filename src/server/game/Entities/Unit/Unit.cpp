@@ -956,9 +956,9 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
 
         if (victim->GetTypeId() != TYPEID_PLAYER)
         {
-            // Part of Evade mechanics. DoT's and Thorns / Retribution Aura do not contribute to this
+            // Part of Evade mechanics. Thorns / Retribution Aura do not contribute to this
             // Damage Shield warrior talent exception, suprisingly it isn't SPELL_AURA_DAMAGE_SHIELD and may cause mobs to follow player forever
-            if (damagetype != DOT && damage > 0 && !IS_PLAYER_GUID(victim->GetOwnerGUID()) && (!spellProto || (!spellProto->HasAura(SPELL_AURA_DAMAGE_SHIELD) && spellProto->Id != 59653)))
+            if (damage > 0 && !IS_PLAYER_GUID(victim->GetOwnerGUID()) && (!spellProto || (!spellProto->HasAura(SPELL_AURA_DAMAGE_SHIELD) && spellProto->Id != 59653)))
                 victim->ToCreature()->SetLastDamagedTime(sWorld->GetGameTime()+MAX_AGGRO_RESET_TIME);
 
             if (attacker)
@@ -14045,7 +14045,6 @@ void Unit::ModSpellCastTime(SpellInfo const* spellProto, int32 & castTime, Spell
     // called from caster
     if (Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CASTING_TIME, castTime, spell, bool(modOwner != this && !IsPet()));
-
     if (!spellProto->HasAttribute(SpellAttr0(SPELL_ATTR0_ABILITY|SPELL_ATTR0_TRADESPELL)) && (spellProto->SpellFamilyName || GetTypeId() != TYPEID_PLAYER))
     {
         if (CanInstantCast())
