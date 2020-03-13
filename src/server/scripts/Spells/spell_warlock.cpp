@@ -158,40 +158,29 @@ class spell_warl_shadowflame : public SpellScriptLoader
         }
 };
 
-class spell_warl_seduction : public SpellScriptLoader
+class spell_warl_seduction_aura : public AuraScript
 {
-    public:
-        spell_warl_seduction() : SpellScriptLoader("spell_warl_seduction") { }
+    PrepareAuraScript(spell_warl_seduction_aura);
 
-        class spell_warl_seduction_AuraScript : public AuraScript
+    void HandleAuraApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Unit* caster = GetCaster())
         {
-            PrepareAuraScript(spell_warl_seduction_AuraScript);
-
-            void HandleAuraApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (Unit* caster = GetCaster())
+            if (Unit* owner = caster->GetOwner())
+                if (owner->GetAuraEffectDummy(56250))
                 {
-                    if (Unit* owner = caster->GetOwner())
-                        if (owner->GetAuraEffectDummy(56250))
-                        {
-                            Unit* target = GetTarget();
-                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
-                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
-                            target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
-                        }
+                    Unit* target = GetTarget();
+                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+                    target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
                 }
-            }
-
-            void Register()
-            {
-                OnEffectApply += AuraEffectApplyFn(spell_warl_seduction_AuraScript::HandleAuraApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_warl_seduction_AuraScript();
         }
+    }
+
+    void Register() override
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_warl_seduction_aura::HandleAuraApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+    }
 };
 
 class spell_warl_improved_demonic_tactics : public SpellScriptLoader
@@ -271,6 +260,7 @@ class spell_warl_ritual_of_summoning : public SpellScriptLoader
                 if (GetCaster()->GetTypeId() == TYPEID_PLAYER)
                     if (GetCaster()->ToPlayer()->InBattleground())
                         return SPELL_FAILED_NOT_IN_BATTLEGROUND;
+
                 return SPELL_CAST_OK;
             }
 
@@ -1482,12 +1472,48 @@ class spell_warl_consume_shadows : public SpellScript
     }
 };
 
+class DelayedInterruptEvent : public BasicEvent
+{
+    public:
+        DelayedInterruptEvent(Unit* caster) : _caster(caster) { }
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/)
+        {
+            _caster->InterruptNonMeleeSpells(true);
+            return true;
+        }
+
+        private:
+            Unit* _caster;
+};
+
+// 6358 - Seduction
+class spell_warl_seduction : public SpellScript
+{
+    PrepareSpellScript(spell_warl_seduction);
+
+    void HandleCheckImmune()
+    {
+        // Hack, delay interrupt a little bit because it isn't cast yet
+        for (auto&& targetInfo : *GetSpell()->GetUniqueTargetInfo())
+            if (targetInfo.missCondition == SPELL_MISS_IMMUNE)
+            {
+                GetCaster()->m_Events.AddEvent(new DelayedInterruptEvent(GetCaster()), GetCaster()->m_Events.CalculateTime(50));
+                break;
+            }
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_warl_seduction::HandleCheckImmune);
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     // Ours
     new spell_warl_eye_of_kilrogg();
     new spell_warl_shadowflame();
-    new spell_warl_seduction();
     new spell_warl_improved_demonic_tactics();
     new spell_warl_ritual_of_summoning();
     new spell_warl_demonic_aegis();
@@ -1498,7 +1524,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_everlasting_affliction_aura();
     new SpellScriptLoaderEx<spell_chaos_bolt_damage_hack_SpellScript>("spell_chaos_bolt_damage_hack");
     RegisterSpellScript(spell_warl_consume_shadows);
-
+    RegisterSpellAndAuraScriptPair(spell_warl_seduction, spell_warl_seduction_aura);
     // Theirs
     new spell_warl_banish();
     new spell_warl_create_healthstone();
