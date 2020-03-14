@@ -10925,6 +10925,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
 
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner() ? GetOwner() : this;
+    float DoneAdvertisedBenefit = 0.f;
     AuraEffectList const& mOverrideClassScript= owner->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (AuraEffectList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
@@ -10942,7 +10943,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             case 6008: // Increased Lightning Damage
             case 8627: // Totem of Hex
             {
-                DoneTotal += float((*i)->GetAmount());
+                DoneAdvertisedBenefit += float((*i)->GetAmount());
                 break;
             }
         }
@@ -10970,7 +10971,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     }
 
     // Done fixed damage bonus auras
-    float DoneAdvertisedBenefit  = float(SpellBaseDamageBonusDone(spellProto->GetSchoolMask()));
+    DoneAdvertisedBenefit  += float(SpellBaseDamageBonusDone(spellProto->GetSchoolMask()));
 
     // Check for table values
     float coeff = 0;
