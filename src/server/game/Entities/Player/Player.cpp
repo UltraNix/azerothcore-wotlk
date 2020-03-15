@@ -28531,7 +28531,7 @@ void Player::OnClientAction(ClientActionType type)
                 m_playerActionCounterStore[type] = { 1, now };
                 m_taskScheduler.Schedule(Minutes(sWorld->getIntConfig(CONFIG_CLIENT_ACTION_INVITE_RESET_TIME)), [&](TaskContext func)
                 {
-                    m_playerActionCounterStore.clear();
+                    m_playerActionCounterStore.erase(CLIENT_ACTION_TYPE_PARTY_INVITE);
                     func.Repeat();
                 });
                 return;
@@ -28552,6 +28552,27 @@ void Player::OnClientAction(ClientActionType type)
                     GetSession()->KickPlayer(true);
                 else // inform gms
                     sWorld->SendGMText(LANG_INVITE_SPAMM_GM_NOTICE, GetName().c_str(), currentCount);
+            }
+            break;
+        }
+        case CLIENT_ACTION_TYPE_CHEST_CHEATER:
+        {
+            auto now = std::chrono::system_clock::now();
+            if (m_playerActionCounterStore.find(type) == m_playerActionCounterStore.end())
+            {
+                m_playerActionCounterStore[type] = { 1, now };
+                m_taskScheduler.Schedule(Minutes(sWorld->getIntConfig(CONFIG_CLIENT_ACTION_CHEST_CHEATER_RESET_TIME)), [&](TaskContext func)
+                {
+                    m_playerActionCounterStore.erase(CLIENT_ACTION_TYPE_CHEST_CHEATER);
+                });
+                return;
+            }
+
+            uint32 currentCount = ++m_playerActionCounterStore[type];
+            m_playerActionCounterStore[type] = { currentCount, now };
+            if (currentCount >= sWorld->getIntConfig(CONFIG_CLIENT_ACTION_CHEST_CHEATER_MAX_AMOUNT))
+            {
+                sWorld->SendGMText(LANG_DUNGEON_CHEST_CHEATER, GetName().c_str(), GetMap()->GetMapName(), currentCount);
             }
             break;
         }

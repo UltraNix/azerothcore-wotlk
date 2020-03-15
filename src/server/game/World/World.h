@@ -464,6 +464,8 @@ enum WorldIntConfigs
     //! Maximum amount of invites you can send in 30 minutes before an action is taken
     CONFIG_CLIENT_ACTION_INVITE_MAX_AMOUNT,
     CONFIG_CLIENT_ACTION_INVITE_RESET_TIME,
+    CONFIG_CLIENT_ACTION_CHEST_CHEATER_RESET_TIME,
+    CONFIG_CLIENT_ACTION_CHEST_CHEATER_MAX_AMOUNT,
     CONFIG_CLIENT_ACTION_SYSTEM,
     //! if enabled, all packets from accounts created past CONFIG_OLD_ACCOUNT_TIMESTAMP will be logged
     CONFIG_LOG_NEW_ACCOUNTS,

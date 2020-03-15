@@ -102,6 +102,7 @@ enum PlayerSpellState
 enum ClientActionType
 {
     CLIENT_ACTION_TYPE_PARTY_INVITE,
+    CLIENT_ACTION_TYPE_CHEST_CHEATER,
     CLIENT_ACTION_TYPE_MAX
 };
 

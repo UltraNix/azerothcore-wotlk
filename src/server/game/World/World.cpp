@@ -1475,6 +1475,8 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CLIENT_ACTION_INVITE_MAX_AMOUNT] = sConfigMgr->GetIntDefault("ClientAction.Invites.MaximumAmount", 150);
     //! time is in minutes
     m_int_configs[CONFIG_CLIENT_ACTION_INVITE_RESET_TIME] = sConfigMgr->GetIntDefault("ClientAction.Invites.ResetTime", 5);
+    m_int_configs[CONFIG_CLIENT_ACTION_CHEST_CHEATER_RESET_TIME] = sConfigMgr->GetIntDefault("ClientAction.ChestCheater.ResetTime", 5);
+    m_int_configs[CONFIG_CLIENT_ACTION_CHEST_CHEATER_MAX_AMOUNT] = sConfigMgr->GetIntDefault("ClientAction.ChestCheater.MaximumAmount", 5);
     m_int_configs[CONFIG_CLIENT_ACTION_SYSTEM] = sConfigMgr->GetIntDefault("ClientAction.Enable", 0);
     m_int_configs[CONFIG_LOG_NEW_ACCOUNTS] = sConfigMgr->GetIntDefault("AccountLogging.LogNewAccounts", 1);
     m_int_configs[CONFIG_OLD_ACCOUNT_TIMESTAMP] = sConfigMgr->GetIntDefault("AccountLogging.OldAccountTimestamp", 1581675120);

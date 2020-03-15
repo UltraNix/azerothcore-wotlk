@@ -2200,8 +2200,10 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
             return;
         else if (goInfo->type == GAMEOBJECT_TYPE_CHEST)
         {
-            if (m_caster->GetInstanceScript() && m_caster->GetInstanceScript()->CanReportChest(goInfo->entry) && m_caster->GetMap()->GetPlayersCountExceptGMs() < 2)
-                sWorld->SendGMText(LANG_DUNGEON_CHEST_CHEATER, m_caster->GetName().c_str());
+            if (m_caster->GetInstanceScript() && m_caster->GetInstanceScript()->CanReportChest(goInfo->entry) && m_caster->GetMap()->GetPlayersCountExceptGMs() < 2 && m_caster->IsPlayer())
+            {
+                m_caster->ToPlayer()->OnClientAction(CLIENT_ACTION_TYPE_CHEST_CHEATER);
+            }
         }
         lockId = goInfo->GetLockId();
         guid = gameObjTarget->GetGUID();
