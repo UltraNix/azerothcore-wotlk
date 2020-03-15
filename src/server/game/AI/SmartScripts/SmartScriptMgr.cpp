@@ -339,6 +339,7 @@ bool SmartAIMgr::IsTargetValid(SmartScriptHolder const& e)
         case SMART_TARGET_CLOSEST_FRIENDLY:
         case SMART_TARGET_STORED:
         case SMART_TARGET_FARTHEST:
+        case SMART_TARGET_CHARMER_OWNER_OR_PLAYER:
             break;
         default:
             sLog->outErrorDb("SmartAIMgr: Not handled target_type(%u), Entry %d SourceType %u Event %u Action %u, skipped.", e.GetTargetType(), e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());

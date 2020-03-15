@@ -1232,7 +1232,8 @@ enum SMARTAI_TARGETS
     // RESERVED                                    = 39,
     SMART_TARGET_FARTHEST                        = 40,
 
-    SMART_TARGET_END                            = 41
+    SMART_TARGET_END                            = 41,
+    SMART_TARGET_CHARMER_OWNER_OR_PLAYER        = 42
 };
 
 struct SmartTarget
