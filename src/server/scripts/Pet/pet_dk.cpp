@@ -293,14 +293,22 @@ class npc_pet_dk_ebon_gargoyle : public CreatureScript
 
                     if (_initialCastTimer >= 2000 && !me->HasUnitState(UNIT_STATE_CASTING | UNIT_STATE_LOST_CONTROL) && me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == NULL_MOTION_TYPE)
                     {
-                        DoMeleeAttackIfReady();
-
-                        if (_strikeTimer > diff)
-                            _strikeTimer -= diff;
-                        else
+                        if (Unit* victim = me->GetVictim())
                         {
-                            me->CastSpell(me->GetVictim(), 51963, false);
-                            _strikeTimer = 2000;
+                            if (me->IsWithinMeleeRange(victim))
+                            {
+                                DoMeleeAttackIfReady();
+
+                                if (_strikeTimer > diff)
+                                    _strikeTimer -= diff;
+                                else
+                                {
+                                    DoCast(victim, 51963);
+                                    _strikeTimer = 2000;
+                                }
+                            }
+                            else
+                                DoCast(victim, 51963);
                         }
                     }
                 }
