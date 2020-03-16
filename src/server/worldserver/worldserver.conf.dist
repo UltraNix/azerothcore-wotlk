@@ -4145,3 +4145,5 @@ Profiler.Enabled = 1
 #       Default: 28077
 
 Profiler.Port = 28077
+
+Debug.VerifyItemDestroy = 0

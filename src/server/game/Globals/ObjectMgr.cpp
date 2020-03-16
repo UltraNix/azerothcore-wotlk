@@ -51,6 +51,7 @@
 #include "World.h"
 
 #include <iomanip>
+#include "ace/Stack_Trace.h"
 
 ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
@@ -9412,6 +9413,12 @@ bool ObjectMgr::IsGameObjectStaticTransport(uint32 entry)
     return goinfo && goinfo->type == GAMEOBJECT_TYPE_TRANSPORT;
 }
 
+static bool d_debugItemDestroy = false;
+
+void ObjectMgr::SetDebugItemDestroyEnabled( bool enabled )
+{
+    d_debugItemDestroy = enabled;
+}
 
 void ObjectMgr::RequestItemDestroy( Item * item )
 {
@@ -9427,6 +9434,18 @@ void ObjectMgr::RequestItemDestroy( Item * item )
         {
             sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is requested to be destroyed",
                 item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag());
+        }
+    }
+
+    if ( d_debugItemDestroy )
+    {
+        if ( Player * player = item->GetOwner() )
+        {
+            if ( player->GetItemByPos( item->GetBagSlot(), item->GetSlot() ) == item )
+            {
+                ACE_Stack_Trace trace( 0, 3 );
+                sLog->outBagCrash( "Item is requested to be destroyed, but player still has it!\nTrace:\n", trace.c_str() );
+            }
         }
     }
 

@@ -610,6 +610,9 @@ void World::LoadConfigSettings(bool reload)
         rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
     }
     ///- Read other configuration items from the config file
+   
+    bool debugItemDestroy = sConfigMgr->GetBoolDefault("Debug.VerifyItemDestroy", false);
+    ObjectMgr::SetDebugItemDestroyEnabled( debugItemDestroy );
 
     m_bool_configs[CONFIG_DURABILITY_LOSS_IN_PVP] = sConfigMgr->GetBoolDefault("DurabilityLoss.InPvP", false);
 

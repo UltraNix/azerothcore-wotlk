@@ -687,6 +687,8 @@ class ObjectMgr
         void RequestItemDestroy( Item * item );
         void UpdateItemDestroyQueue();
 
+        static void SetDebugItemDestroyEnabled( bool enabled );
+
         CreatureTemplate const* GetCreatureTemplate(uint32 entry);
         CreatureTemplateContainer const* GetCreatureTemplates() const { return &_creatureTemplateStore; }
         CreatureModelInfo const* GetCreatureModelInfo(uint32 modelId);
