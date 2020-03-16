@@ -992,7 +992,7 @@ void Guild::BankMoveItemData::LogAction(MoveItemData* pFrom) const
     MoveItemData::LogAction(pFrom);
 }
 
-ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef & pItem, ItemPosCount& pos, bool clone) const
+ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, const ItemRef & pItem, ItemPosCount& pos, bool clone) const
 {
     uint8 slotId = uint8(pos.pos);
 
@@ -1008,8 +1008,6 @@ ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab
             pItem->DeleteFromDB(trans);
 
             sObjectMgr->RequestItemDestroy( *pItem );
-
-            pItem.Reset();
         }
         return pItemDest;
     }
