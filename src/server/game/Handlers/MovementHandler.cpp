@@ -340,6 +340,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recvData)
         return;
     }
 
+    if (!mover->movespline->Finalized())
+    {
+        recvData.rfinish();                     // prevent warnings spam
+        return;
+    }
+
     if (movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // T_POS ON VEHICLES!
