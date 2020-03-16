@@ -654,7 +654,7 @@ private:
         InventoryResult CanStore( ItemRef const& pItem, bool swap);
 
     private:
-        ItemRef _StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef const& pItem, ItemPosCount& pos, bool clone) const;
+        ItemRef _StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef & pItem, ItemPosCount& pos, bool clone) const;
         bool _ReserveSpace(uint8 slotId, ItemRef const& pItem, ItemRef const& pItemDest, uint32& count);
         void CanStoreItemInTab(ItemRef const& pItem, uint8 skipSlotId, bool merge, uint32& count);
     };

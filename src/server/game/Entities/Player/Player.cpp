@@ -12337,7 +12337,7 @@ InventoryResult Player::CanEquipNewItem(uint8 slot, uint16 &dest, uint32 item, b
     if (pItem)
     {
         InventoryResult result = CanEquipItem(slot, dest, pItem, swap);
-        sObjectMgr->RequestItemDestroy( *pItem );
+        delete *pItem;
         return result;
     }
 

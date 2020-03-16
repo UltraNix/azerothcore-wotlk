@@ -422,7 +422,7 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
         stmt->setUInt8 (2, slotId);
         CharacterDatabase.Execute(stmt);
 
-        sObjectMgr->RequestItemDestroy( *pItem );
+        delete *pItem;
         return false;
     }
 
@@ -442,7 +442,7 @@ void Guild::BankTab::Delete(SQLTransaction& trans, bool removeItemsFromDB)
                 pItem->DeleteFromDB(trans);
 
             sObjectMgr->RequestItemDestroy( *pItem );
-            pItem = NULL;
+            m_items[ slotId ] = nullptr;
         }
 }
 
@@ -992,9 +992,10 @@ void Guild::BankMoveItemData::LogAction(MoveItemData* pFrom) const
     MoveItemData::LogAction(pFrom);
 }
 
-ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef const& pItem, ItemPosCount& pos, bool clone) const
+ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef & pItem, ItemPosCount& pos, bool clone) const
 {
     uint8 slotId = uint8(pos.pos);
+
     uint32 count = pos.count;
     if (ItemRef pItemDest = pTab->GetItem(slotId))
     {
@@ -1007,6 +1008,8 @@ ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab
             pItem->DeleteFromDB(trans);
 
             sObjectMgr->RequestItemDestroy( *pItem );
+
+            pItem.Reset();
         }
         return pItemDest;
     }
