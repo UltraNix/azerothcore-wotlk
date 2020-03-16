@@ -5665,11 +5665,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     switch (m_spellInfo->Id)
     {
-         //Disengage
-         case 781:
-             if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ENABLED))
-                 return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-             break;
         // Rogue stealth
         case 1784:
             // stealth can't be casted while being polymorphed

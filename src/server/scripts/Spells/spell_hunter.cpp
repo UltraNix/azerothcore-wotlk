@@ -1107,34 +1107,26 @@ class spell_hun_misdirection_proc : public SpellScriptLoader
 };
 
 // 781 - Disengage
-class spell_hun_disengage : public SpellScriptLoader
+class spell_hun_disengage : public SpellScript
 {
-    public:
-        spell_hun_disengage() : SpellScriptLoader("spell_hun_disengage") { }
+    PrepareSpellScript(spell_hun_disengage);
 
-        class spell_hun_disengage_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_hun_disengage_SpellScript);
+    SpellCastResult CheckCast()
+    {
+        Unit* caster = GetCaster();
+        if (caster->IsPlayer() && !caster->IsInCombat())
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
-            SpellCastResult CheckCast()
-            {
-                Unit* caster = GetCaster();
-                if (caster->GetTypeId() == TYPEID_PLAYER && !caster->IsInCombat())
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+        if (caster->HasAuraWithMechanic(MECHANIC_GRIP))
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 
-                return SPELL_CAST_OK;
-            }
+        return SPELL_CAST_OK;
+    }
 
-            void Register()
-            {
-                OnCheckCast += SpellCheckCastFn(spell_hun_disengage_SpellScript::CheckCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_hun_disengage_SpellScript();
-        }
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_hun_disengage::CheckCast);
+    }
 };
 
 // 1515 - Tame Beast
@@ -1353,7 +1345,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_aspect_of_the_beast();
     new spell_hun_ascpect_of_the_viper();
     new spell_hun_chimera_shot();
-    new spell_hun_disengage();
+    RegisterSpellScript(spell_hun_disengage);
     new spell_hun_freezing_trap_aura();
     new spell_hun_improved_mend_pet();
     new spell_hun_invigoration();
