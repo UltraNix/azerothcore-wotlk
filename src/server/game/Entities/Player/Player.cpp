@@ -2658,11 +2658,6 @@ void Player::RemoveFromWorld()
         sBattlefieldMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }
 
-    ///- Do not add/remove the player from the object storage
-    ///- It will crash when updating the ObjectAccessor
-    ///- The player should only be removed when logging out
-    Unit::RemoveFromWorld();
-
     m_taskScheduler.CancelAll();
     if (!m_playerActionCounterSaved)
     {
@@ -2703,7 +2698,7 @@ void Player::RemoveFromWorld()
 
     for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
     {
-        if ( ItemRef item = m_items[ i ] )
+        if (ItemRef item = m_items[i])
         {
             if ((i >= INVENTORY_SLOT_BAG_START && i < INVENTORY_SLOT_BAG_END) || (i >= BANK_SLOT_BAG_START && i < BANK_SLOT_BAG_END))
                 sLog->outBagCrash("Bag %p Slot: %d is trying to remove from world for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d)",
@@ -2712,6 +2707,11 @@ void Player::RemoveFromWorld()
             item->RemoveFromWorld();
         }
     }
+
+    ///- Do not add/remove the player from the object storage
+    ///- It will crash when updating the ObjectAccessor
+    ///- The player should only be removed when logging out
+    Unit::RemoveFromWorld();
 
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
         iter->second->RemoveFromWorld();
@@ -28529,7 +28529,6 @@ void Player::OnClientAction(ClientActionType type)
                 m_taskScheduler.Schedule(Minutes(sWorld->getIntConfig(CONFIG_CLIENT_ACTION_INVITE_RESET_TIME)), [&](TaskContext func)
                 {
                     m_playerActionCounterStore.erase(CLIENT_ACTION_TYPE_PARTY_INVITE);
-                    func.Repeat();
                 });
                 return;
             }
