@@ -11835,37 +11835,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
         }
     }
 
-    for (AuraEffect* aurEff : caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
-    {
-        if (!aurEff->IsAffectedOnSpell(spellProto))
-            continue;
-
-        switch (aurEff->GetMiscValue())
-        {
-            case 8477: // 4P T7 Druid
-            {
-                float totalModAdded = 0.0f;
-                // Rejuvenation
-                if (GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x00000010, 0x0, 0x0, caster->GetGUID()))
-                    totalModAdded += 0.05f;
-                // Regrowth
-                if (GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x00000040, 0x0, 0x0, caster->GetGUID()))
-                    totalModAdded += 0.05f;
-                // Lifebloom
-                if (GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x0, 0x00000010, 0x0, caster->GetGUID()))
-                    totalModAdded += 0.05f;
-                // Wild Growth
-                if (GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x0, 0x04000000, 0x0, caster->GetGUID()))
-                    totalModAdded += 0.05f;
-
-                TakenTotalMod += totalModAdded;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
     if (damagetype == DOT)
     {
         // Healing over time taken percent
