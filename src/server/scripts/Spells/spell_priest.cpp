@@ -1029,7 +1029,9 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
             void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
             {
                 PreventDefaultAction();
-                eventInfo.GetActor()->CastSpell(eventInfo.GetActor(), 57669, true, NULL, aurEff);
+
+                if ( Unit* actor = eventInfo.GetActor() )
+                    actor->CastSpell(actor, 57669, true, NULL, aurEff);
             }
 
             void Register()
