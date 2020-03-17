@@ -530,9 +530,6 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint16 spellid
                 }
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
                 {
-                    if (charmInfo->GetCommandState() == COMMAND_FOLLOW)
-                        break;
-
                     pet->AttackStop();
                     pet->InterruptNonMeleeSpells(false);
                     pet->ClearInPetCombat();
