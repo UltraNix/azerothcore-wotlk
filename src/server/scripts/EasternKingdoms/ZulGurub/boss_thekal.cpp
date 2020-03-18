@@ -141,7 +141,7 @@ struct boss_thekal_baseAI : public BossAI
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damageEffectType*/, SpellSchoolMask /*mask*/) override
     {
-        if (damage > me->GetHealth() && !events.IsInPhase(PHASE_TWO))
+        if (damage >= me->GetHealth() && !events.IsInPhase(PHASE_TWO))
         {
             damage = me->GetHealth() - 1;
             if (!_died)
