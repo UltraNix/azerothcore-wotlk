@@ -4854,6 +4854,10 @@ void SpellMgr::LoadDbcDataCorrections()
         case 35693:
             spellInfo->EffectBasePoints[EFFECT_0] = 12;
             break;
+        // Soulshatter
+        case 29858:
+            spellInfo->speed = 0.0f;
+            break;
         /////////////////////////////////
         ///// MAGE
         /////////////////////////////////
