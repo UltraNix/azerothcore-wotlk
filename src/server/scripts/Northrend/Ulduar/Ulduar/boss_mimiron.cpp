@@ -986,7 +986,10 @@ struct boss_mimironAI : public ScriptedAI
                 Spell* s2 = VX001->GetCurrentSpell(CURRENT_GENERIC_SPELL);
                 Spell* s3 = ACU->GetCurrentSpell(CURRENT_GENERIC_SPELL);
                 if (s1 && s2 && s3 && s1->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s2->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s3->GetSpellInfo()->Id == SPELL_SELF_REPAIR)
+                {
+                    events.Reset();
                     events.ScheduleEvent(EVENT_FINISH, 0);
+                }
             }
             break;
             case 7:
