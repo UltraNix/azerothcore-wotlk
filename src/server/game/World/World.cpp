@@ -450,8 +450,7 @@ void World::LoadConfigSettings(bool reload)
     }
 
     ///- Read the player limit and the Message of the day from the config file
-    if (!reload)
-        SetPlayerAmountLimit(sConfigMgr->GetIntDefault("PlayerLimit", 100));
+    SetPlayerAmountLimit(sConfigMgr->GetIntDefault("PlayerLimit", 100));
     SetMotd(sConfigMgr->GetStringDefault("Motd", "Welcome to a Sunwell Core Server."));
 
     ///- Read ticket system setting from the config file
