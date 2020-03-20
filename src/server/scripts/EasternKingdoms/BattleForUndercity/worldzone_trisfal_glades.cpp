@@ -82,10 +82,14 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                     {
                         uint64_t guid = creature->GetGUID();
 
-                        size_t idx = AllianceSpawns.size();
-                        SpawnToIndex[ guid ] = idx;
+                        auto it = SpawnToIndex.find( guid );
+                        if ( it == SpawnToIndex.end() )
+                        {
+                            size_t idx = AllianceSpawns.size();
+                            SpawnToIndex.emplace( guid, idx );
 
-                        AllianceSpawns.push_back( creature->GetGUID() );
+                            AllianceSpawns.push_back( creature->GetGUID() );
+                        }
                         break;
                     }
                     case NPC_FLYING_MACHINE:
@@ -106,17 +110,21 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
                     {
                         uint64_t guid = unit->GetGUID();
 
-                        auto idx = SpawnToIndex[ guid ];
-                        SpawnToIndex.erase( guid );
-
-                        uint64 guidToSwap = AllianceSpawns.back();
-                        if ( guidToSwap != guid )
+                        auto it = SpawnToIndex.find( guid );
+                        if ( it != SpawnToIndex.end() )
                         {
-                            SpawnToIndex[ guidToSwap ] = idx;
-                            AllianceSpawns[ idx ] = guidToSwap;
-                        }
+                            auto idx = it->second;
+                            SpawnToIndex.erase( it );
 
-                        AllianceSpawns.pop_back();
+                            uint64 guidToSwap = AllianceSpawns.back();
+                            if ( guidToSwap != guid )
+                            {
+                                SpawnToIndex[ guidToSwap ] = idx;
+                                AllianceSpawns[ idx ] = guidToSwap;
+                            }
+
+                            AllianceSpawns.pop_back();
+                        }
                         break;
                     }
                 }
