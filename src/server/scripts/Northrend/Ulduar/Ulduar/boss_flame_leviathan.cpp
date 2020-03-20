@@ -244,6 +244,7 @@ public:
             if (m_pInstance)
                 m_pInstance->SetData(DATA_UNBROKEN_ACHIEVEMENT, 0);
             me->setActive(false);
+            me->SetFullHealth();
         }
 
         void JustSummoned(Creature* cr)
