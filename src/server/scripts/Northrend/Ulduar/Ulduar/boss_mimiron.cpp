@@ -98,7 +98,7 @@ enum GOs
     GO_DOOR_1                                        = 194776,
     GO_DOOR_2                                        = 194774,
     GO_DOOR_3                                        = 194775,
-    GO_BUTTON                                        = 194739,
+    GO_BUTTON                                        = 194739
     // pads: 194740-48
 };
 
@@ -283,6 +283,11 @@ enum ComputerTalks
     TALK_COMPUTER_ZERO           = 12
 };
 
+enum MimironData
+{
+    DATA_MIMIRON_FIGHT_DONE     = 1000
+};
+
 #define GetMimiron() ObjectAccessor::GetCreature(*me, pInstance->GetData64(TYPE_MIMIRON))
 #define GetLMK2() ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_LEVIATHAN_MKII))
 #define GetVX001() ObjectAccessor::GetCreature(*me, pInstance->GetData64(DATA_MIMIRON_VX001))
@@ -299,6 +304,7 @@ struct boss_mimironAI : public ScriptedAI
             if (pInstance)
                 pInstance->SetData(TYPE_MIMIRON, DONE);
         bIsEvading = false;
+        _mimironFightDone = false;
     }
 
     void Reset() override
@@ -436,7 +442,7 @@ struct boss_mimironAI : public ScriptedAI
         }
 
         Position p = me->GetHomePosition();
-        if (me->GetExactDist(&p) > 80.0f || !SelectTargetFromPlayerList(150.0f))
+        if (me->GetExactDist(&p) > 80.0f || (!_mimironFightDone && !SelectTargetFromPlayerList(150.0f)))
         {
             EnterEvadeMode();
             return;
@@ -869,6 +875,9 @@ struct boss_mimironAI : public ScriptedAI
         if (bIsEvading)
             return;
 
+        if (_mimironFightDone)
+            return;
+
         bIsEvading = true;
 
         if (Creature* c = GetLMK2())
@@ -987,6 +996,12 @@ struct boss_mimironAI : public ScriptedAI
                 Spell* s3 = ACU->GetCurrentSpell(CURRENT_GENERIC_SPELL);
                 if (s1 && s2 && s3 && s1->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s2->GetSpellInfo()->Id == SPELL_SELF_REPAIR && s3->GetSpellInfo()->Id == SPELL_SELF_REPAIR)
                 {
+                    //! Encounter done, inform tank so he doesnt evade in case players somehow die
+                    //! we do not have to inform body and head, they will despawn either way
+                    if (LMK2->AI())
+                        LMK2->AI()->SetData(DATA_MIMIRON_FIGHT_DONE, DONE);
+
+                    _mimironFightDone = true;
                     events.Reset();
                     events.ScheduleEvent(EVENT_FINISH, 0);
                 }
@@ -1035,6 +1050,7 @@ private:
     uint8 minutesTalkNum;
     uint32 outofCombatTimer;
     uint32 _fightTimer;
+    bool _mimironFightDone;
 };
 
 struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
@@ -1043,15 +1059,12 @@ struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
     {
         pInstance = me->GetInstanceScript();
         bIsEvading = false;
+        _mimironFightDone = false;
     }
-
-    InstanceScript* pInstance;
-    EventMap events;
-    bool bIsEvading;
-    uint8 Phase;
 
     void Reset()
     {
+        _mimironFightDone = false;
         Phase = 0;
         if (Unit* c = GetS3())
             c->ExitVehicle(); // this should never happen!
@@ -1102,9 +1115,10 @@ struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
                     events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 30000);
                     events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
                     break;
-
             }
         }
+        else if (id == DATA_MIMIRON_FIGHT_DONE && value == DONE)
+            _mimironFightDone = true;
     }
 
     void DamageTaken(Unit*, uint32 &damage, DamageEffectType, SpellSchoolMask)
@@ -1156,7 +1170,7 @@ struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
 
     void UpdateAI(uint32 diff)
     {
-        if (!UpdateVictim())
+        if (!_mimironFightDone && !UpdateVictim())
             return;
 
         events.Update(diff);
@@ -1298,7 +1312,7 @@ struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
         return nullptr;
     }
 
-    void SpellHit(Unit* caster, const SpellInfo *spell)
+    void SpellHit(Unit* caster, const SpellInfo* spell)
     {
         if (spell->Id == SPELL_SELF_REPAIR)
         {
@@ -1307,6 +1321,13 @@ struct npc_ulduar_leviathan_mkiiAI : public ScriptedAI
             me->SetReactState(REACT_AGGRESSIVE);
         }
     }
+
+    private:
+        InstanceScript* pInstance;
+        EventMap events;
+        bool bIsEvading;
+        uint8 Phase;
+        bool _mimironFightDone;
 };
 
 struct npc_ulduar_vx001AI : public ScriptedAI
