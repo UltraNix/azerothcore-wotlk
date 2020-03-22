@@ -979,6 +979,8 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             if (expires_at < time(nullptr)) continue;
 
             premiumServices[type] = time_t(fields[1].GetUInt32());
+            if (sWorld->getBoolConfig(CONFIG_BOOL_PREMIUM_SKIPQUEUE) && type == PREMIUM_EXP_BOOST_X4)
+                skipQueue = true;
         } while (premiumInfo->NextRow());
     }
 

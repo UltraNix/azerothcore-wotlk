@@ -222,6 +222,7 @@ enum WorldBoolConfigs
     CONFIG_NAXXRAMAS_MEETING_STONE_SANCTUARY,
     CONFIG_SARTHARION_BOOST,
     CONFIG_BATTLEGROUNDS_SEPARATE_TWINK_QUEUES, // When enabled twinks will be put to separate battleground queues
+    CONFIG_BOOL_PREMIUM_SKIPQUEUE,
     BOOL_CONFIG_VALUE_COUNT
 };
 

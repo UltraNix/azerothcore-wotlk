@@ -609,7 +609,7 @@ void World::LoadConfigSettings(bool reload)
         rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
     }
     ///- Read other configuration items from the config file
-   
+
     bool debugItemDestroy = sConfigMgr->GetBoolDefault("Debug.VerifyItemDestroy", false);
     ObjectMgr::SetDebugItemDestroyEnabled( debugItemDestroy );
 
@@ -1484,6 +1484,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_OLD_ACCOUNT_TIMESTAMP] = sConfigMgr->GetIntDefault("AccountLogging.OldAccountTimestamp", 1581675120);
     m_int_configs[CONFIG_LOG_NEW_ACCOUNTS_HIGHEST_CHAR_LEVEL] = sConfigMgr->GetIntDefault("AccountLogging.HighestCharacterLevel", 20);
     m_int_configs[CONFIG_ARENA_WORLD_ANNOUNCER_COOLDOWN] = sConfigMgr->GetIntDefault("Arena.World.Announcer.Cooldown", 30);
+    m_bool_configs[CONFIG_BOOL_PREMIUM_SKIPQUEUE] = sConfigMgr->GetBoolDefault("Premium.SkipQueue", false);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);

@@ -4147,3 +4147,11 @@ Profiler.Enabled = 1
 Profiler.Port = 28077
 
 Debug.VerifyItemDestroy = 0
+
+#	Premium.SkipQueue
+#		Description: Players with bought premium experience boost (serviceId 5) will skip queues
+#		Default: 0 - disabled
+#				 1 - enabled
+#
+
+Premium.SkipQueue = 0
