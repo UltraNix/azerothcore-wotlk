@@ -41,6 +41,7 @@ enum DeathKnightSpells
     SPELL_SHADOWMOURNE_SOUL_FRAGMENT            = 71905,
     SPELL_SHADOWMOURNE_CHAOS_BANE_BUFF          = 73422,
     SPELL_GARGOYLE_STRIKE                       = 51963,
+    QUEST_TAKING_BACK_ARCHERUS                  = 13165,
 
     // Theirs
     SPELL_DK_ANTI_MAGIC_SHELL_TALENT            = 51052,
@@ -1548,6 +1549,12 @@ class spell_dk_death_gate : public SpellScriptLoader
                 {
                     SetCustomCastResultMessage(SPELL_CUSTOM_ERROR_MUST_BE_DEATH_KNIGHT);
                     return SPELL_FAILED_CUSTOM_ERROR;
+                }
+
+                if (GetCaster()->IsPlayer())
+                {
+                    if (GetCaster()->ToPlayer()->GetQuestStatus(QUEST_TAKING_BACK_ARCHERUS) == QUEST_STATUS_NONE)
+                        return SPELL_FAILED_SPELL_UNAVAILABLE;
                 }
 
                 return SPELL_CAST_OK;
