@@ -170,6 +170,7 @@ struct boss_vezaxAI : public BossAI
         events.RescheduleEvent(EVENT_SPELL_MARK_OF_THE_FACELESS, 20000);
         events.RescheduleEvent(EVENT_SPELL_SUMMON_SARONITE_VAPORS, 30000);
         events.RescheduleEvent(EVENT_BERSERK, 600000);
+        scheduler.CancelAll();
 
         me->MonsterYell(TEXT_VEZAX_AGGRO, LANG_UNIVERSAL, nullptr);
         me->PlayDirectSound(SOUND_VEZAX_AGGRO, nullptr);
