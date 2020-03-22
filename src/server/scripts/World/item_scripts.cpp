@@ -297,6 +297,27 @@ public:
     }
 };
 
+enum BengalTiger
+{
+    SPELL_BENGAL_TIGER  = 10790,
+    ITEM_BENGAL_TIGER   = 8630
+};
+
+class item_bengal_tiger : public ItemScript
+{
+public:
+    item_bengal_tiger() : ItemScript("item_bengal_tiger") { }
+
+    bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const& targets)
+    {
+        if (player->HasSpell(SPELL_BENGAL_TIGER))
+            return false;
+        player->learnSpell(SPELL_BENGAL_TIGER);
+        player->DestroyItemCount(ITEM_BENGAL_TIGER, 1, true);
+        return true;
+    }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -308,4 +329,5 @@ void AddSC_item_scripts()
     new item_trident_of_nazjan();
     new item_captured_frog();
     new item_portable_guildbank();
+    new item_bengal_tiger();
 }
