@@ -829,11 +829,33 @@ private:
     TaskScheduler task;
 };
 
+enum RavagerThundererMisc
+{
+    SPELL_THUNDERER_LIGHTNING_BRAND     = 63610,
+    SPELL_RAVAGER_RAVAGE_ARMOR          = 63616,
+
+    NPC_DARK_RUNE_THUNDERER_TRASH       = 33754
+};
+
+struct npc_dark_rune_ravager_thunderer : public ScriptedAI
+{
+    npc_dark_rune_ravager_thunderer(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        uint32 spellId = me->GetEntry() == NPC_DARK_RUNE_THUNDERER_TRASH ?
+            SPELL_THUNDERER_LIGHTNING_BRAND : SPELL_RAVAGER_RAVAGE_ARMOR;
+        me->RemoveAurasDueToSpell(spellId);
+        DoCastSelf(spellId, true);
+    }
+};
+
 void AddSC_ulduar()
 {
     RegisterCreatureAI(npc_superheated_winds);
     RegisterCreatureAI(npc_ulduar_snow_mound);
     RegisterCreatureAI(npc_white_jormungar_ulduar);
+    RegisterCreatureAI(npc_dark_rune_ravager_thunderer);
     new go_ulduar_teleporter();
     new npc_ulduar_keeper();
 
