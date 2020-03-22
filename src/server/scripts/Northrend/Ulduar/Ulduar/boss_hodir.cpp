@@ -804,6 +804,7 @@ public:
     };
 };
 
+constexpr uint32 WARLOCKS_CURSE_OF_DOOM_HODIR_RANK_ONE{ 603 };
 class npc_ulduar_flash_freeze : public CreatureScript
 {
 public:
@@ -825,12 +826,33 @@ public:
         InstanceScript* pInstance;
         uint16 timer;
 
+        void BeginFight(Unit* attacker)
+        {
+            if (!pInstance || !attacker)
+                return;
+
+            if (pInstance->GetData(TYPE_HODIR) == NOT_STARTED)
+                if (Creature* hodir = ObjectAccessor::GetCreature(*me, pInstance->GetData64(TYPE_HODIR)))
+                    hodir->AI()->AttackStart(attacker);
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spellInfo) override
+        {
+            if (!caster || !spellInfo)
+                return;
+
+            //! Should we engage on all non-passive spells?
+            SpellInfo const* doomInfo = sSpellMgr->GetSpellInfo(WARLOCKS_CURSE_OF_DOOM_HODIR_RANK_ONE);
+            if (!doomInfo)
+                return;
+
+            if (spellInfo->IsRankOf(doomInfo))
+                BeginFight(caster);
+        }
+
         void DamageTaken(Unit* doneBy, uint32 &damage, DamageEffectType, SpellSchoolMask)
         {
-            if (pInstance && doneBy)
-                if (pInstance->GetData(TYPE_HODIR) == NOT_STARTED)
-                    if (Creature* hodir = ObjectAccessor::GetCreature(*me, pInstance->GetData64(TYPE_HODIR)))
-                        hodir->AI()->AttackStart(doneBy);
+            BeginFight(doneBy);
         }
 
         void UpdateAI(uint32 diff)
