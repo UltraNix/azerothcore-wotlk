@@ -160,11 +160,6 @@ class CreatureAI : public UnitAI
         virtual void OnMeleeAttack(VictimState /*state*/, WeaponAttackType /*attType*/, Unit* /*victim*/, uint32 /*procAttacker*/) { }
         virtual void OnMeleeAttackTaken(Unit* /*attacker*/) { }
 
-        //! Allows to modify creatures melee attack outcome
-        //! ie. RollMeleeOutcomeAgainst returned a miss but we dont want our creature to ever miss
-        //! we can modify that in here
-        virtual void OnMeleeOutcome(WeaponAttackType /*attackType*/, Unit const* /*attacker*/, MeleeHitOutcome& /*outcome*/, VictimAvoidanceStats /*stats*/) { }
-
         /// == Triggered Actions Requested ==================
 
         // Called when creature attack expected (if creature can and no have current victim)

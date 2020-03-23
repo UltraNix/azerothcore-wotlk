@@ -291,38 +291,8 @@ struct boss_freya : public ScriptedAI
 
     void MoveInLineOfSight(Unit*) override { }
 
-    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-    {
-        if (!victim->IsPlayer())
-            return;
-
-        if (type > OFF_ATTACK)
-            return;
-
-        //! Dont do anything if victim is over avoidance cap
-        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-            return;
-
-        if (!_ignoreMeleeAvoidance)
-            return;
-
-        switch (outcome)
-        {
-            case MELEE_HIT_DODGE:
-            case MELEE_HIT_PARRY:
-            case MELEE_HIT_MISS:
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
     void Reset() override
     {
-        _ignoreMeleeAvoidance = false;
         if (m_pInstance && m_pInstance->GetData(TYPE_FREYA) != DONE)
             m_pInstance->SetData(TYPE_FREYA, NOT_STARTED);
 
@@ -672,19 +642,6 @@ struct boss_freya : public ScriptedAI
             me->MonsterYell("The Conservatory must be protected!", LANG_UNIVERSAL, 0);
             me->PlayDirectSound(SOUND_AGGRO);
         }
-
-        if (_elderGUID[0] && _elderGUID[1] && _elderGUID[2])
-        {
-            task.Schedule(15s, [&](TaskContext func)
-            {
-                _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
-
-                if (_ignoreMeleeAvoidance)
-                    func.Repeat(6s);
-                else
-                    func.Repeat(15s);
-            });
-        }
     }
 
     void UpdateAI(uint32 diff) override
@@ -698,7 +655,6 @@ struct boss_freya : public ScriptedAI
             _hastenWave = true;
         }
 
-        task.Update(diff);
         events.Update(diff);
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
@@ -845,8 +801,6 @@ private:
 
     uint64 _elderGUID[3];
     uint32 _fightTimer;
-    TaskScheduler task;
-    bool _ignoreMeleeAvoidance;
 };
 
 class boss_freya_elder_stonebark : public CreatureScript

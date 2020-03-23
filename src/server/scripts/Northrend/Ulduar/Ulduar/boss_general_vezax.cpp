@@ -103,7 +103,6 @@ struct boss_vezaxAI : public BossAI
     void Reset() override
     {
         scheduler.ClearValidator();
-        _ignoreMeleeAvoidance = false;
         _animusDied = false;
         _fightTimer = 0;
         _vaporsCount = 0;
@@ -116,35 +115,6 @@ struct boss_vezaxAI : public BossAI
 
         if (instance)
             instance->SetData(TYPE_VEZAX, NOT_STARTED);
-    }
-
-    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-    {
-        if (!victim->IsPlayer())
-            return;
-
-        if (type > OFF_ATTACK)
-            return;
-
-        //! Dont do anything if victim is over avoidance cap
-        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-            return;
-
-        if (!_ignoreMeleeAvoidance)
-            return;
-
-        switch (outcome)
-        {
-            case MELEE_HIT_DODGE:
-            case MELEE_HIT_PARRY:
-            case MELEE_HIT_MISS:
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-            default:
-                break;
-        }
     }
 
     void EnterEvadeMode() override
@@ -361,16 +331,6 @@ struct boss_vezaxAI : public BossAI
                         if (Creature* sv = ObjectAccessor::GetCreature(*me, *(summons.begin())))
                             sv->CastSpell(sv, SPELL_SUMMON_SARONITE_ANIMUS, true);
 
-                        scheduler.Schedule(15s, [&](TaskContext func)
-                        {
-                            _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
-
-                            if (_ignoreMeleeAvoidance)
-                                func.Repeat(6s);
-                            else
-                                func.Repeat(15s);
-                        });
-
                         events.ScheduleEvent(EVENT_DESPAWN_SARONITE_VAPORS, 2500);
                         break;
                     }
@@ -447,7 +407,6 @@ private:
     bool _berserk;
     bool _shadowdodger;
     bool _animusDied;
-    bool _ignoreMeleeAvoidance;
 };
 
 struct npc_ulduar_saronite_vaporsAI : NullCreatureAI
@@ -489,49 +448,8 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
                     vezax->AI()->JustSummoned(me);
     }
 
-    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-    {
-        if (!victim->IsPlayer())
-            return;
-
-        if (type > OFF_ATTACK)
-            return;
-
-        //! Dont do anything if victim is over avoidance cap
-        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-            return;
-
-        if (!_ignoreMeleeAvoidance)
-            return;
-
-        switch (outcome)
-        {
-            case MELEE_HIT_DODGE:
-            case MELEE_HIT_PARRY:
-            case MELEE_HIT_MISS:
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
     void Reset() override
     {
-        _ignoreMeleeAvoidance = false;
-        task.CancelAll();
-        task.Schedule(15s, [&](TaskContext func)
-        {
-            _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
-
-            if (_ignoreMeleeAvoidance)
-                func.Repeat(6s);
-            else
-                func.Repeat(15s);
-        });
-
         ScriptedAI::Reset();
         _events.Reset();
         _events.ScheduleEvent(EVENT_PROFOUND_DARKNESS, 2000);
@@ -553,7 +471,6 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
     {
         UpdateVictim();
 
-        task.Update(diff);
         _events.Update(diff);
 
         if (_events.ExecuteEvent() == EVENT_PROFOUND_DARKNESS)
@@ -568,8 +485,6 @@ struct npc_ulduar_saronite_animusAI : ScriptedAI
 private:
     InstanceScript* instance;
     EventMap _events;
-    TaskScheduler task;
-    bool _ignoreMeleeAvoidance;
 };
 
 

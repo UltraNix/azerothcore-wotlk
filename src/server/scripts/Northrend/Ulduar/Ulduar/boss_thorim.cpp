@@ -531,42 +531,11 @@ struct boss_thorim : public ScriptedAI
         CreatureAI::EnterEvadeMode();
     }
 
-    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-    {
-        if (!victim->IsPlayer())
-            return;
-
-        if (type > OFF_ATTACK)
-            return;
-
-        //! Dont do anything if victim is over avoidance cap
-        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-            return;
-
-        if (!_ignoreMeleeAvoidance)
-            return;
-
-        switch (outcome)
-        {
-            case MELEE_HIT_DODGE:
-            case MELEE_HIT_PARRY:
-            case MELEE_HIT_MISS:
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
     void Reset() override
     {
         if (m_pInstance && !_encounterFinished)
             m_pInstance->SetData(TYPE_THORIM, NOT_STARTED);
 
-        _ignoreMeleeAvoidance = false;
-        task.CancelAll();
         _fightTimer = 0;
         events.Reset();
         me->SetReactState(REACT_AGGRESSIVE);
@@ -689,15 +658,6 @@ struct boss_thorim : public ScriptedAI
                 _hardMode = true;
                 EntryCheckPredicate pred(NPC_SIF);
                 summons.DoAction(ACTION_SIF_JOIN_FIGHT, pred);
-                task.Schedule(15s, [&](TaskContext func)
-                {
-                    _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
-
-                    if (_ignoreMeleeAvoidance)
-                        func.Repeat(6s);
-                    else
-                        func.Repeat(15s);
-                });
             }
 
             DoResetThreat();
@@ -840,7 +800,6 @@ struct boss_thorim : public ScriptedAI
         if (!_encounterFinished && !UpdateVictim())
             return;
 
-        task.Update(diff);
         events.Update(diff);
         if (me->HasUnitState(UNIT_STATE_CASTING))
             return;
@@ -1047,8 +1006,6 @@ private:
 
     bool _hitByLightning;
     uint32 _fightTimer;
-    bool _ignoreMeleeAvoidance;
-    TaskScheduler task;
 };
 
 class boss_thorim_sif : public CreatureScript

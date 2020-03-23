@@ -357,8 +357,6 @@ public:
 
         void Reset() override
         {
-            task.CancelAll();
-            _ignoreMeleeAvoidance = false;
             _fightTimer = 0;
             me->SetReactState(REACT_DEFENSIVE);
             events.Reset();
@@ -386,47 +384,8 @@ public:
             }
         }
 
-        void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-        {
-            if (!victim->IsPlayer())
-                return;
-
-            if (type > OFF_ATTACK)
-                return;
-
-            //! Dont do anything if victim is over avoidance cap
-            if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-                return;
-
-            if (!_ignoreMeleeAvoidance)
-                return;
-
-            switch (outcome)
-            {
-                case MELEE_HIT_DODGE:
-                case MELEE_HIT_PARRY:
-                case MELEE_HIT_MISS:
-                {
-                    outcome = MELEE_HIT_NORMAL;
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-
         void EnterCombat(Unit* /*who*/) override
         {
-            task.Schedule(15s, [&](TaskContext func)
-            {
-                _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
-
-                if (_ignoreMeleeAvoidance)
-                    func.Repeat(6s);
-                else
-                    func.Repeat(15s);
-            });
-
             _fightTimer = getMSTime();
             me->SetReactState(REACT_AGGRESSIVE);
             me->setActive(true);
@@ -590,7 +549,6 @@ public:
                 return;
             }
 
-            task.Update(diff);
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -756,8 +714,6 @@ public:
         uint64 _normalChest;
         uint64 _hardmodeChest;
         uint32 _fightTimer;
-        TaskScheduler task;
-        bool _ignoreMeleeAvoidance;
     };
 };
 

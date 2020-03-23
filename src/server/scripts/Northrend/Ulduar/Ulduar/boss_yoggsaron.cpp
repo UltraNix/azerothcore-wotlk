@@ -1125,52 +1125,12 @@ struct boss_yoggsaron_guardian_of_ys : public ScriptedAI
         _zeroKeepers = false;
     }
 
-    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-    {
-        if (!victim->IsPlayer())
-            return;
-
-        if (type > OFF_ATTACK)
-            return;
-
-        //! Dont do anything if victim is over avoidance cap
-        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-            return;
-
-        if (!_ignoreMeleeAvoidance)
-            return;
-
-        switch (outcome)
-        {
-            case MELEE_HIT_DODGE:
-            case MELEE_HIT_PARRY:
-            case MELEE_HIT_MISS:
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
     void Reset()
     {
-        _ignoreMeleeAvoidance = false;
-        task.CancelAll();
         events.Reset();
         events.ScheduleEvent(EVENT_GUARDIAN_DARK_VOLLEY, 8s);
         events.ScheduleEvent(EVENT_GUARDIAN_DOMINATE_MIND, 25s);
         me->SetInCombatWithZone();
-        task.Schedule(15s, [&](TaskContext func)
-        {
-            _ignoreMeleeAvoidance = !_ignoreMeleeAvoidance;
-
-            if (_ignoreMeleeAvoidance)
-                func.Repeat(6s);
-            else
-                func.Repeat(15s);
-        });
     }
 
     void SetData(uint32 type, uint32 value) override
@@ -1237,8 +1197,6 @@ struct boss_yoggsaron_guardian_of_ys : public ScriptedAI
 private:
     EventMap events;
     bool _zeroKeepers;
-    TaskScheduler task;
-    bool _ignoreMeleeAvoidance;
 };
 
 struct boss_yoggsaron : public ScriptedAI
@@ -2136,7 +2094,6 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
     {
         task.CancelAll();
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, false);
-        _ignoreMeleeAvoidance = false;
         _canAttack = false;
         _zeroKeepers = false;
         ScheduleTasks();
@@ -2163,35 +2120,6 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
             return;
 
         ScriptedAI::AttackStart(who);
-    }
-
-    void OnMeleeOutcome(WeaponAttackType type, Unit const* victim, MeleeHitOutcome& outcome, VictimAvoidanceStats stats) override
-    {
-        if (!victim->IsPlayer())
-            return;
-
-        if (type > OFF_ATTACK)
-            return;
-
-        //! Dont do anything if victim is over avoidance cap
-        if (stats.parryChance + stats.dodgeChance + stats.missChance > 100.f)
-            return;
-
-        if (!_ignoreMeleeAvoidance)
-            return;
-
-        switch (outcome)
-        {
-            case MELEE_HIT_DODGE:
-            case MELEE_HIT_PARRY:
-            case MELEE_HIT_MISS:
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-            default:
-                break;
-        }
     }
 
     void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellSchoolMask) override
@@ -2262,7 +2190,6 @@ struct boss_yoggsaron_immortal_guardian : public ScriptedAI
     }
 private:
     bool _zeroKeepers;
-    bool _ignoreMeleeAvoidance;
     bool _canAttack;
     uint32 realDisplayId;
     TaskScheduler task;

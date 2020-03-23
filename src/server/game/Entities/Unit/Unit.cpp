@@ -2325,11 +2325,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* victim, WeaponAttackTy
         GetGUIDLow(), victim->GetGUIDLow(), miss_chance, crit_chance, dodge_chance, parry_chance, block_chance);
 
     MeleeHitOutcome result = RollMeleeOutcomeAgainst(victim, attType, int32(crit_chance * 100), int32(miss_chance * 100), int32(dodge_chance * 100), int32(parry_chance * 100), int32(block_chance * 100));
-    if (Creature const* attacker = ToCreature())
-    {
-        if (attacker->IsAIEnabled)
-            attacker->AI()->OnMeleeOutcome(attType, victim, result, { miss_chance, crit_chance, dodge_chance, block_chance, parry_chance });
-    }
     return result;
 }
 
