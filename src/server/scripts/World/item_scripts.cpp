@@ -311,7 +311,7 @@ public:
     bool OnUse(Player* player, ItemRef const& item, SpellCastTargets const& targets)
     {
         if (player->HasSpell(SPELL_BENGAL_TIGER))
-            return false;
+            return true;
         player->learnSpell(SPELL_BENGAL_TIGER);
         player->DestroyItemCount(ITEM_BENGAL_TIGER, 1, true);
         return true;
