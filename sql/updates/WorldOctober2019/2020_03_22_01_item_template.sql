@@ -1,1 +1,1 @@
-UPDATE `item_template` SET `RequiredSkill`='0', `RequiredSkillRank`='0', ScriptName = 'item_bengal_tiger', spellid_1 = 0, spellcooldown_1 = -1, spellcategory_1 = 0, spellcategorycooldown_1 = 0 WHERE  `entry`=8630;
+UPDATE `item_template` SET `RequiredSkill`=762, `RequiredSkillRank`=150, ScriptName = 'item_bengal_tiger', spellid_1 = 0, spellcooldown_1 = -1, spellcategory_1 = 0, spellcategorycooldown_1 = 0 WHERE  `entry`=8630;
