@@ -150,6 +150,7 @@ Position const SummonPositions10[4] =
     { 2010.06f, -243.45f, 432.767f, 1.57f }, // Elementalist Avuun   &&  Spiritwalker Yona
 };
 
+Position const HodirRoomsCenterPosition{ 2000.573f, -233.511f, 432.686f, 1.594f };
 uint32 const Entry25Alliance[8] =
 {
     NPC_FIELD_MEDIC_PENNY,
@@ -528,6 +529,11 @@ public:
             }
         }
 
+        bool CheckEvadeIfOutOfCombatArea() const override
+        {
+            return me->GetDistance(HodirRoomsCenterPosition) >= 70.f;
+        }
+
         void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
@@ -543,18 +549,12 @@ public:
                 return;
             }
 
-            if (me->GetPositionX() < 1940.0f || me->GetPositionX() > 2070.0f || me->GetPositionY() < -300.0f || me->GetPositionY() > -155.0f)
-            {
-                EnterEvadeMode();
-                return;
-            }
-
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
-            while (auto eventId = events.ExecuteEvent())
+            while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
                 {
@@ -615,6 +615,7 @@ public:
             }
 
             DoMeleeAttackIfReady();
+            EnterEvadeIfOutOfCombatArea();
         }
 
         void KilledUnit(Unit* who)
