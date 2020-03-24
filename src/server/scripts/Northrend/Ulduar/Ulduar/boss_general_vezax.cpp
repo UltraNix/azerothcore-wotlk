@@ -96,6 +96,7 @@ enum VezaxEvents
 #define TEXT_VEZAX_DEATH                            "Oh, what horrors await...."
 #define TEXT_VEZAX_HARDMODE                         "Behold, now! Terror, absolute!"
 
+Position const VezaxSpawnPosition{ 1852.7800f, 81.385f, 342.460f, 1.658f };
 struct boss_vezaxAI : public BossAI
 {
     boss_vezaxAI(Creature* creature) : BossAI(creature, TYPE_VEZAX) { }
@@ -121,6 +122,11 @@ struct boss_vezaxAI : public BossAI
     {
         _DespawnAtEvade();
         instance->SetData(TYPE_VEZAX, FAIL);
+    }
+
+    bool CheckEvadeIfOutOfCombatArea() const override
+    {
+        return me->GetDistance(VezaxSpawnPosition) >= 125.f;
     }
 
     bool CanSeeAlways(WorldObject const* /*obj*/) override
@@ -347,6 +353,7 @@ struct boss_vezaxAI : public BossAI
         }
 
         DoMeleeAttackIfReady();
+        EnterEvadeIfOutOfCombatArea();
     }
 
     void JustDied(Unit* killer) override
