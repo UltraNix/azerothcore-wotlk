@@ -1485,6 +1485,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_LOG_NEW_ACCOUNTS_HIGHEST_CHAR_LEVEL] = sConfigMgr->GetIntDefault("AccountLogging.HighestCharacterLevel", 20);
     m_int_configs[CONFIG_ARENA_WORLD_ANNOUNCER_COOLDOWN] = sConfigMgr->GetIntDefault("Arena.World.Announcer.Cooldown", 30);
     m_bool_configs[CONFIG_BOOL_PREMIUM_SKIPQUEUE] = sConfigMgr->GetBoolDefault("Premium.SkipQueue", false);
+    m_bool_configs[CONFIG_CREATURE_FULL_HEALTH_AT_EVADE] = sConfigMgr->GetBoolDefault("Creature.Misc.FullHealthAtEvadeForBosses", false);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
