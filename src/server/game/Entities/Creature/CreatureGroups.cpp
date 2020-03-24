@@ -1,20 +1,4 @@
-/*
- * Copyright (C)
- * Copyright (C)
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+
 
 #include "Creature.h"
 #include "CreatureGroups.h"
@@ -237,7 +221,7 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z, bool run)
         if (member->HasUnitState(UNIT_STATE_NOT_MOVE))
             continue;
 
-        // Xinef: this should be automatized, if turn angle is greater than PI/2 (90°) we should swap formation angle
+        // Xinef: this should be automatized, if turn angle is greater than PI/2 (90ï¿½) we should swap formation angle
         if (M_PI - fabs(fabs(m_leader->GetOrientation() - pathAngle) - M_PI) > M_PI*0.50f)
         {
             // pussywizard: in both cases should be 2*M_PI - follow_angle
