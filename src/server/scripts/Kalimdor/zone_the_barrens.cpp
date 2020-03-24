@@ -668,6 +668,8 @@ struct npc_possible_but_not_probable_creature : public ScriptedAI
 
     void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask) override
     {
+        if (!who)
+            return;
         if (Player* pl = who->ToPlayer())
         {
             if (pl->getClass() == CLASS_ROGUE)
