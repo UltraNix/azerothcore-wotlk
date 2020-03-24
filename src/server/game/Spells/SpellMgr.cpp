@@ -4041,6 +4041,9 @@ void SpellMgr::LoadDbcDataCorrections()
             spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             break;
+        case 49016: // Hysteria
+            spellInfo->AttributesEx5 |= SPELL_ATTR5_SINGLE_TARGET_SPELL;
+            break;
         case 41013: // Parasitic Shadowfiend Passive
             spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // proc debuff, and summon infinite fiends
             break;
