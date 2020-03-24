@@ -50,7 +50,7 @@ static constexpr unsigned int Fnv( const char * data, unsigned int hash = DEFAUL
     return hash;
 }
 
-inline static constexpr unsigned int Fnv( const std::string & data, unsigned int hash = DEFAULT_FNV1A_SEED )
-{
-    return Fnv( data.c_str(), data.size(), hash );
-}
+//inline static constexpr unsigned int Fnv( const std::string & data, unsigned int hash = DEFAULT_FNV1A_SEED )
+//{
+//    return Fnv( data.c_str(), data.size(), hash );
+//}
