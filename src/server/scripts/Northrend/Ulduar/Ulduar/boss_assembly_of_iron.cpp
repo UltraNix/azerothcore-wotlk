@@ -209,6 +209,7 @@ public:
         {
             if (me->GetPositionX() > 1680.0f || me->GetPositionX() < 1490.0f || me->GetPositionY() > 180.0f || me->GetPositionY() < 64.0f)
             {
+                sLog->outError("Boss::Steelbreaker, IsInRoom failed, Position: %s | InstanceId: %u", me->GetPosition().ToString().c_str(), me->GetInstanceId());
                 EnterEvadeMode();
                 return false;
             }
@@ -473,6 +474,7 @@ public:
         {
             if (me->GetPositionX() > 1680.0f || me->GetPositionX() < 1490.0f || me->GetPositionY() > 180.0f || me->GetPositionY() < 64.0f)
             {
+                sLog->outError("Boss::RunemasterMolgeim, IsInRoom failed, Position: %s | InstanceId: %u", me->GetPosition().ToString().c_str(), me->GetInstanceId());
                 EnterEvadeMode();
                 return false;
             }
@@ -744,6 +746,7 @@ public:
         {
             if (me->GetPositionX() > 1680.0f || me->GetPositionX() < 1490.0f || me->GetPositionY() > 180.0f || me->GetPositionY() < 64.0f)
             {
+                sLog->outError("Boss::StormcallerBrundir, IsInRoom failed, Position: %s | InstanceId: %u", me->GetPosition().ToString().c_str(), me->GetInstanceId());
                 EnterEvadeMode();
                 return false;
             }
