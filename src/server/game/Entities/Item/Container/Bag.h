@@ -45,7 +45,7 @@ class Bag : public Item
     protected:
 
         // Bag Storage space
-        Item* m_bagslot[MAX_BAG_SIZE];
+        ItemRef m_bagslot[MAX_BAG_SIZE];
 };
 
 inline ItemRef NewItemOrBag(ItemTemplate const* proto)

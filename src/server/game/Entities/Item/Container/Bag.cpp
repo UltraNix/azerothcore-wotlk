@@ -15,14 +15,12 @@ Bag::Bag(): Item()
     m_objectTypeId = TYPEID_CONTAINER;
 
     m_valuesCount = CONTAINER_END;
-
-    memset(m_bagslot, 0, sizeof(Item*) * MAX_BAG_SIZE);
 }
 
 Bag::~Bag()
 {
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
-        if (Item* item = m_bagslot[i])
+        if (ItemRef item = m_bagslot[i])
         {
             if (item->IsInWorld())
             {
@@ -31,7 +29,9 @@ Bag::~Bag()
                     GetEntry(), (uint32)GetSlot(), (uint32)GetBagSlot(), (uint32)i);
                 item->RemoveFromWorld();
             }
-            delete m_bagslot[i];
+
+            m_bagslot[ i ] = nullptr;
+            delete *item;
         }
 
     if (Player* player = GetOwner())
@@ -112,8 +112,11 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
-        delete m_bagslot[i];
-        m_bagslot[i] = NULL;
+        if ( ItemRef item = m_bagslot[ i ] )
+        {
+            m_bagslot[ i ] = nullptr;
+            delete *item;
+        }
     }
 
     return true;
@@ -145,7 +148,7 @@ void Bag::RemoveItem(uint8 slot, bool /*update*/)
     if (m_bagslot[slot])
         m_bagslot[slot]->SetContainer(NULL);
 
-    m_bagslot[slot] = NULL;
+    m_bagslot[slot] = nullptr;
     SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), 0);
 }
 
@@ -215,7 +218,7 @@ uint32 Bag::GetItemCountWithLimitCategory(uint32 limitCategory, ItemRef const& s
             if (pItem != skipItem)
                 if (ItemTemplate const* pProto = pItem->GetTemplate())
                     if (pProto->ItemLimitCategory == limitCategory)
-                        count += m_bagslot[i]->GetCount();
+                        count += pItem->GetCount();
 
     return count;
 }
@@ -223,8 +226,8 @@ uint32 Bag::GetItemCountWithLimitCategory(uint32 limitCategory, ItemRef const& s
 uint8 Bag::GetSlotByItemGUID(uint64 guid) const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
-        if (m_bagslot[i] != 0)
-            if (m_bagslot[i]->GetGUID() == guid)
+        if (ItemRef item = m_bagslot[i])
+            if (item->GetGUID() == guid)
                 return i;
 
     return NULL_SLOT;

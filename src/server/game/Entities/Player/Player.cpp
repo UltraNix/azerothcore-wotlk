@@ -957,8 +957,14 @@ Player::~Player()
     //m_social = NULL;
 
     // Note: buy back item already deleted from DB when player was saved
-    for (uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i)
-        delete m_items[i];
+    for ( uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i )
+    {
+        if ( ItemRef item = m_items[ i ] )
+        {
+            m_items[ i ] = nullptr;
+            delete * item;
+        }
+    }
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         delete itr->second;
@@ -18202,8 +18208,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), 0);
         SetVisibleItemSlot(slot, NULL);
 
-        delete m_items[slot];
-        m_items[slot] = NULL;
+        if ( ItemRef item = m_items[slot] )
+            delete *item;
+
+        m_items[slot] = nullptr;
     }
 
     ;//sLog->outDebug(LOG_FILTER_PLAYER_LOADING, "Load Basic value of player %s is: ", m_name.c_str());
