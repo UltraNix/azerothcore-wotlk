@@ -101,6 +101,8 @@ void AuctionListingRunnable::run()
 	{
 		if (AsyncAuctionListingMgr::IsAuctionListingAllowed())
 		{
+            PROFILE_SCOPE( "AsyncAuctionListing" );
+
 			uint32 diff = AsyncAuctionListingMgr::GetDiff();
 			AsyncAuctionListingMgr::ResetDiff();
 

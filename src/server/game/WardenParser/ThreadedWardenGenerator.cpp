@@ -2,6 +2,7 @@
 #include "WorldCache.h"
 #include "WorldSession.h"
 #include "Util.h"
+#include "Profiler.h"
 
 #include <cctype> // for std::isdigit
 #include "fmt/format.h"
@@ -39,6 +40,8 @@ AsyncLuaCodeResult ThreadedWardenGenerator::RequestLuaCode(RequestData data)
 
 void ThreadedWardenGenerator::PrepareLuaCode(LuaRequest& request)
 {
+    PROFILE_SCOPE( "PrepareLuaCode" );
+
     WardenLuaCheck const* check = sWorldCache.GetWardenCheckFor(request.first._checkId);
 
     if (!check)

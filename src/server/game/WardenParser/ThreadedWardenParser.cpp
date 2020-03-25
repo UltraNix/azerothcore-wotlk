@@ -2,6 +2,7 @@
 
 #include "WorldSession.h"
 #include "World.h"
+#include "Profiler.h"
 
 namespace WardenParserWin
 {
@@ -38,6 +39,8 @@ namespace WardenParserWin
 
     void ThreadedWardenParser::ParseMessage(ParseRequest request)
     {
+        PROFILE_SCOPE( "ParseMessage" );
+
         Requestee const& requestee = request.first;
         std::string& message = request.second;
 

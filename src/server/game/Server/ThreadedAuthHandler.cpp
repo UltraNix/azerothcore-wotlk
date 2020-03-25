@@ -4,6 +4,7 @@
 #include "WorldPacket.h"
 #include "World.h"
 #include "Log.h"
+#include "Profiler.h"
 
 ThreadedAuthHandler::ThreadedAuthHandler()
     : m_shutdown( false )
@@ -60,6 +61,8 @@ void ThreadedAuthHandler::QueueAuthRequest( WorldSocket * socket, WorldPacket pa
 
 void ThreadedAuthHandler::HandleRequest( AuthRequest request )
 {
+    PROFILE_SCOPE( "HandleAuth" );
+
     WorldSocket * socket = request.socket;
     if ( !socket->IsClosed() )
     {
