@@ -253,13 +253,19 @@ void MapManager::Update(uint32 diff)
             iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
     }
 
-    if (m_updater.activated())
-        m_updater.wait();
+    {
+        PROFILE_SCOPE( "WaitForMaps" );
+
+        if ( m_updater.activated() )
+            m_updater.wait();
+    }
 
     sObjectAccessor->ProcessDelayedCorpseActions();
 
     if (mapUpdateStep<3)
     {
+        PROFILE_SCOPE( "DelayedUpdate" );
+
         for (iter = i_maps.begin(); iter != i_maps.end(); ++iter)
         {
             bool full = ((mapUpdateStep==0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep==1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep==2 && iter->second->IsDungeon()));

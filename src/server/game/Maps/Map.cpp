@@ -1,5 +1,4 @@
 
-
 #include "Map.h"
 #include "Battleground.h"
 #include "CellImpl.h"
@@ -637,6 +636,108 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::Obj
     }
 }
 
+void Map::UpdatePlayers( float dt, UpdatedCellAreas * cellAreas )
+{
+    PROFILE_SCOPE( "UpdatePlayers" );
+
+    if ( cellAreas )
+        cellAreas->reserve( cellAreas->size() + m_mapRefManager.getSize() );
+
+    for ( m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter )
+    {
+        Player * player = m_mapRefIter->GetSource();
+        if ( !player || !player->IsInWorld() )
+            continue;
+
+        player->Update( dt );
+
+        if ( cellAreas )
+        {
+            const float activationRange = player->GetGridActivationRange();
+            cellAreas->push_back( Cell::CalculateCellArea( player->GetPositionX(), player->GetPositionY(), activationRange ) );
+
+            if ( !player->IsInCombat() )
+                continue;
+
+            const float rangactivationRangeSq = activationRange * activationRange;
+
+            HostileReference * ref = player->getHostileRefManager().getFirst();
+            while ( ref != nullptr )
+            {
+                if ( Unit * unit = ref->GetSource()->GetOwner() )
+                    if ( Creature * cre = unit->ToCreature() )
+                        if ( cre->FindMap() == player->FindMap() && cre->GetExactDist2dSq( player ) > rangactivationRangeSq )
+                            cellAreas->push_back( Cell::CalculateCellArea( cre->GetPositionX(), cre->GetPositionY(), cre->GetGridActivationRange() ) );
+
+                ref = ref->next();
+            }
+        }
+    }
+}
+
+void Map::UpdateActiveObjects( float dt, UpdatedCellAreas & cellAreas )
+{
+    PROFILE_SCOPE( "UpdateActiveObjects" );
+
+    cellAreas.reserve( cellAreas.size() + m_activeNonPlayers.size() );
+
+    for ( m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end();)
+    {
+        WorldObject * obj = *m_activeNonPlayersIter++;
+        if ( !obj || !obj->IsInWorld() )
+            continue;
+
+        cellAreas.push_back( Cell::CalculateCellArea( obj->GetPositionX(), obj->GetPositionY(), obj->GetGridActivationRange() ) );
+    }
+}
+
+void Map::UpdateAndActivateCells( float dt, const UpdatedCellAreas & cellAreas )
+{
+    PROFILE_SCOPE( "UpdateAndActivateCells" );
+
+    std::vector< Cell > cells;
+    cells.reserve( cellAreas.size() * 25 );
+
+    {
+        PROFILE_SCOPE( "CollectAndMarkCells" );
+
+        resetMarkedCells();
+
+        for ( const CellArea & area : cellAreas )
+        {
+            for ( uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y )
+            {
+                for ( uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x )
+                {
+                    // marked cells are those that have been visited
+                    // don't visit the same cell twice
+                    uint32 cell_id = ( y * TOTAL_NUMBER_OF_CELLS_PER_MAP ) + x;
+                    if ( isCellMarked( cell_id ) )
+                        continue;
+
+                    markCell( cell_id );
+                    cells.emplace_back( CellCoord{ x, y } );
+                }
+            }
+        }
+    }
+
+    {
+        PROFILE_SCOPE( "UpdateCells" );
+
+        Trinity::ObjectUpdater updater( dt );
+
+        TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer > gridVisitor( updater );
+        TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> worldVisitor( updater );
+
+        for ( Cell cell : cells )
+        {
+            Visit( cell, gridVisitor );
+            Visit( cell, worldVisitor );
+        }
+    }
+}
+
 void Map::Update( const uint32 t_diff, const uint32 s_diff, bool thread )
 {
     PROFILE_SCOPE( "Map::Update" );
@@ -645,98 +746,31 @@ void Map::Update( const uint32 t_diff, const uint32 s_diff, bool thread )
     sLog->outDebug( LOG_FILTER_POOLSYS, "%u", mapId ); // pussywizard: for crashlogs
 
     if ( t_diff )
+    {
+        PROFILE_SCOPE( "UpdateDynamicTree" );
         _dynamicTree.update( t_diff );
+    }
 
     UpdateSessions( s_diff );
 
     if ( !t_diff )
     {
-        PROFILE_SCOPE( "Map::UpdatePlayers" );
-
-        for ( m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter )
-        {
-            Player * player = m_mapRefIter->GetSource();
-
-            if ( !player || !player->IsInWorld() )
-                continue;
-
-            // update players at tick
-            player->Update( s_diff );
-        }
-
+        UpdatePlayers( s_diff, nullptr );
         HandleDelayedVisibility();
         return;
     }
 
-    /// update active cells around players and active objects
-    resetMarkedCells();
+    UpdatedCellAreas cellAreas;
+    UpdatePlayers( s_diff, &cellAreas );
+    UpdateActiveObjects( t_diff, cellAreas );
 
-    Trinity::ObjectUpdater updater( t_diff );
-    // for creature
-    TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer  > grid_object_update( updater );
-    // for pets
-    TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer > world_object_update( updater );
-
-    // pussywizard: container for far creatures in combat with players
-    std::vector<Creature *> updateList; updateList.reserve( 10 );
-
-    {
-        PROFILE_SCOPE( "Map::VisitPlayers" );
-
-        // the player iterator is stored in the map object
-        // to make sure calls to Map::Remove don't invalidate it
-        for ( m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter )
-        {
-            Player * player = m_mapRefIter->GetSource();
-
-            if ( !player || !player->IsInWorld() )
-                continue;
-
-            // update players at tick
-            player->Update( s_diff );
-
-            VisitNearbyCellsOf( player, grid_object_update, world_object_update );
-
-            // handle updates for creatures in combat with player and are more than X yards away
-            if ( player->IsInCombat() )
-            {
-                updateList.clear();
-                float rangeSq = player->GetGridActivationRange() - 1.0f; rangeSq = rangeSq * rangeSq;
-                HostileReference * ref = player->getHostileRefManager().getFirst();
-                while ( ref )
-                {
-                    if ( Unit * unit = ref->GetSource()->GetOwner() )
-                        if ( Creature * cre = unit->ToCreature() )
-                            if ( cre->FindMap() == player->FindMap() && cre->GetExactDist2dSq( player ) > rangeSq )
-                                updateList.push_back( cre );
-                    ref = ref->next();
-                }
-                for ( std::vector<Creature *>::const_iterator itr = updateList.begin(); itr != updateList.end(); ++itr )
-                    VisitNearbyCellsOf( *itr, grid_object_update, world_object_update );
-            }
-        }
-    }
-
-    {
-        PROFILE_SCOPE( "Map::VisitActiveObjects" );
-
-        // non-player active objects, increasing iterator in the loop in case of object removal
-        for (m_activeNonPlayersIter = m_activeNonPlayers.begin(); m_activeNonPlayersIter != m_activeNonPlayers.end();)
-        {
-            WorldObject* obj = *m_activeNonPlayersIter;
-            ++m_activeNonPlayersIter;
-
-            if (!obj || !obj->IsInWorld())
-                continue;
-
-            VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
-        }
-    }
-
+    //! Should transports activate cells?
     UpdateTransports( t_diff );
 
+    UpdateAndActivateCells( t_diff, cellAreas );
+
     ///- Process necessary scripts
-    if (!m_scriptSchedule.empty())
+    if ( !m_scriptSchedule.empty() )
     {
         i_scriptLock = true;
         ScriptsProcess();
@@ -744,7 +778,7 @@ void Map::Update( const uint32 t_diff, const uint32 s_diff, bool thread )
     }
 
     {
-        PROFILE_SCOPE( "Map::MoveAllInMoveList" );
+        PROFILE_SCOPE( "MoveAllInMoveList" );
 
         MoveAllCreaturesInMoveList();
         MoveAllGameObjectsInMoveList();
@@ -753,16 +787,16 @@ void Map::Update( const uint32 t_diff, const uint32 s_diff, bool thread )
 
     HandleDelayedVisibility();
 
-    sScriptMgr->OnMapUpdate(this, t_diff);
+    sScriptMgr->OnMapUpdate( this, t_diff );
 
     BuildAndSendUpdateForObjects(); // pussywizard
 
-    sLog->outDebug(LOG_FILTER_POOLSYS, "%u", mapId); // pussywizard: for crashlogs
+    sLog->outDebug( LOG_FILTER_POOLSYS, "%u", mapId ); // pussywizard: for crashlogs
 }
 
 void Map::UpdateTransports( uint32 t_diff )
 {
-    PROFILE_SCOPE( "Map::UpdateTransports" );
+    PROFILE_SCOPE( "UpdateTransports" );
 
     for ( _transportsUpdateIter = _transports.begin(); _transportsUpdateIter != _transports.end();) // pussywizard: transports updated after VisitNearbyCellsOf, grids around are loaded, everything ok
     {
@@ -778,7 +812,7 @@ void Map::UpdateTransports( uint32 t_diff )
 
 void Map::UpdateSessions( uint32 s_diff )
 {
-    PROFILE_SCOPE( "Map::UpdateSessions" );
+    PROFILE_SCOPE( "UpdateSessions" );
 
     /// update worldsessions for existing players
     for ( m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter )

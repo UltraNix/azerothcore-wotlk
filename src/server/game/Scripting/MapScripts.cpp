@@ -13,6 +13,7 @@
 #include "Transport.h"
 #include "WaypointManager.h"
 #include "World.h"
+#include "Profiler.h"
 
 /// Put scripts in the execution queue
 void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, Object* target)
@@ -269,6 +270,7 @@ inline GameObject* Map::_FindGameObject(WorldObject* searchObject, uint32 guid) 
 /// Process queued scripts
 void Map::ScriptsProcess()
 { 
+    PROFILE_SCOPE( "ScriptsProcess" );
     if (m_scriptSchedule.empty())
         return;
 

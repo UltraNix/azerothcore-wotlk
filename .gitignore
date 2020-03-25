@@ -4,3 +4,4 @@
 *.LOCAL.*
 *.patch
 build*/
+/contrib/easy_profiler/easy_profiler_stream.cache

@@ -501,8 +501,14 @@ class Map : public GridRefManager<NGridType>
         TransportsContainer const& GetAllTransports() const { return _transports; }
 
     private:
-        void UpdateTransports( uint32 t_diff );
-        void UpdateSessions( uint32 s_diff );
+        using UpdatedCellAreas = std::vector< CellArea >;
+
+        void    UpdatePlayers( float dt, UpdatedCellAreas * activators );
+        void    UpdateActiveObjects( float dt, UpdatedCellAreas & activators );
+
+        void    UpdateTransports( uint32 t_diff );
+        void    UpdateAndActivateCells( float dt, const UpdatedCellAreas & activators );
+        void    UpdateSessions( uint32 s_diff );
 
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
