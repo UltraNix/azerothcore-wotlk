@@ -751,9 +751,12 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         {
             if (!spellProto->HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS))
             {
-                victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto->Id);
-                if (damagetype == SPELL_DIRECT_DAMAGE)
-                    victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto->Id);
+                if (damage)
+                {
+                    victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto->Id);
+                    if (damagetype == SPELL_DIRECT_DAMAGE)
+                        victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto->Id);
+                }
             }
 
             if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
@@ -763,7 +766,8 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         }
         else
         {
-            victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
+            if (damage)
+                victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
 
             if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
                 if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
@@ -2686,7 +2690,13 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
 
     // Some spells cannot be parry/dodge
     if (spell->HasAttribute(SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK))
+    {
+        // Intercept exception, shouldn't go through deterrence
+        if (spell->Id == 20253 && victim->HasAuraType(SPELL_AURA_DEFLECT_SPELLS))
+            return SPELL_MISS_DEFLECT;
+
         return SPELL_MISS_NONE;
+    }
 
     // Chance resist mechanic
     int32 resist_chance = victim->GetMechanicResistChance(spell) * 100;
