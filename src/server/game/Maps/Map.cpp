@@ -440,7 +440,8 @@ bool Map::EnsureGridLoaded(const Cell &cell)
 
         // Add resurrectable corpses to world object list in grid
         sObjectAccessor->AddCorpsesToGrid(GridCoord(cell.GridX(), cell.GridY()), grid->GetGridType(cell.CellX(), cell.CellY()), this);
-        Balance();
+        _dynamicTree.m_rebalance = true;
+
         return true;
     //}
     }
@@ -746,7 +747,7 @@ void Map::Update( const uint32 t_diff, const uint32 s_diff, bool thread )
     uint32 mapId = GetId(); // pussywizard: for crashlogs
     sLog->outDebug( LOG_FILTER_POOLSYS, "%u", mapId ); // pussywizard: for crashlogs
 
-    if ( t_diff )
+    if ( t_diff || _dynamicTree.m_rebalance )
     {
         PROFILE_SCOPE( "UpdateDynamicTree" );
         _dynamicTree.update( t_diff );
