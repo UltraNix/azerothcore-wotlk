@@ -38,16 +38,16 @@ class UpdateData
         void AddOutOfRangeGUID(uint64 guid);
         void AddUpdateBlock(const ByteBuffer &block);
         void AddUpdateBlock(const UpdateData &block);
-        bool BuildPacket(WorldPacket* packet);
+        bool BuildPacket(WorldPacket* packet) const;
         bool HasData() const { return m_blockCount > 0 || !m_outOfRangeGUIDs.empty(); }
         void Clear();
 
-    protected:
-        uint32 m_blockCount;
-        std::vector<uint64> m_outOfRangeGUIDs;
-        ByteBuffer m_data;
+    private:
+        void Compress(void* dst, uint32 *dst_size, void* src, int src_size) const;
 
-        void Compress(void* dst, uint32 *dst_size, void* src, int src_size);
+        uint32              m_blockCount;
+        std::vector<uint64> m_outOfRangeGUIDs;
+        ByteBuffer          m_data;
 };
 #endif
 

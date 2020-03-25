@@ -2928,7 +2928,7 @@ struct WorldObjectChangeAccumulator
         }
     }
 
-    void BuildPacket(Player* player)
+    void BuildPacket(Player* player) const
     {
         // Only send update once to a player
         if (i_playerSet.find(player->GetGUIDLow()) == i_playerSet.end() && player->HaveAtClient(&i_object))

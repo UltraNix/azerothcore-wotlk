@@ -671,7 +671,7 @@ class WorldObject : public Object, public WorldLocation
 
         void DestroyForNearbyPlayers();
         virtual void UpdateObjectVisibility(bool forced = true, bool fromUpdate = false);
-        void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet& player_set);
+        void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet& player_set) override;
         void GetCreaturesWithEntryInRange(std::list<Creature*> &creatureList, float radius, uint32 entry);
 
         //relocation and visibility system functions

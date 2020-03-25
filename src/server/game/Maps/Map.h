@@ -43,6 +43,7 @@ class BattlegroundMap;
 class Transport;
 class StaticTransport;
 class MotionTransport;
+class MapUpdater;
 namespace Trinity { struct ObjectUpdater; }
 
 struct ScriptAction
@@ -277,7 +278,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> void RemoveFromMap(T *, bool);
 
         void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
-        virtual void Update(const uint32, const uint32, bool thread = true);
+        virtual void Update(const uint32, const uint32, bool thread);
 
         float GetVisibilityRange() const { return m_VisibleDistance; }
         void SetVisibilityRange(float range) { m_VisibleDistance = range; }
@@ -317,7 +318,9 @@ class Map : public GridRefManager<NGridType>
         ACE_RW_Thread_Mutex& GetMMapLock() const { return *(const_cast<ACE_RW_Thread_Mutex*>(&MMapLock)); }
         // pussywizard:
         std::unordered_set<Object*> i_objectsToUpdate;
-        void BuildAndSendUpdateForObjects(); // definition in ObjectAccessor.cpp, below ObjectAccessor::Update, because it does the same for a map
+        void BuildAndSendUpdateForObjects();
+        void BuildAndSendUpdateForObjectsAsync( MapUpdater & updater );
+
         std::unordered_set<Unit*> i_objectsForDelayedVisibility;
         void HandleDelayedVisibility();
 
@@ -651,7 +654,7 @@ class InstanceMap : public Map
         bool AddPlayerToMap(Player*);
         void RemovePlayerFromMap(Player*, bool);
         void AfterPlayerUnlinkFromMap();
-        void Update(const uint32, const uint32, bool thread = true);
+        void Update(const uint32, const uint32, bool thread) override;
         void CreateInstanceScript(bool load, std::string data, uint32 completedEncounterMask);
         bool Reset(uint8 method, std::list<uint32>* globalSkipList = NULL);
         uint32 GetScriptId() { return i_script_id; }

@@ -7,6 +7,8 @@
 #include "DelayExecutor.h"
 #include "World.h"
 
+#include <functional>
+
 class Map;
 
 class MapUpdater
@@ -16,11 +18,9 @@ class MapUpdater
         MapUpdater();
         virtual ~MapUpdater();
 
-        friend class MapUpdateRequest;
-        friend class LFGUpdateRequest;
-
         int schedule_update(Map& map, ACE_UINT32 diff, ACE_UINT32 s_diff);
         int schedule_lfg_update(ACE_UINT32 diff);
+        int schedule_task( std::function< void() > task );
 
         int wait();
 
@@ -36,6 +36,10 @@ class MapUpdater
         ACE_Thread_Mutex m_mutex;
         ACE_Condition_Thread_Mutex m_condition;
         size_t pending_requests;
+
+        friend class MapUpdateRequest;
+        friend class LFGUpdateRequest;
+        friend class TaskRequest;
 
         void update_finished();
 };

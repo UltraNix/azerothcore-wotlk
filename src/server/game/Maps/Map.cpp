@@ -21,6 +21,7 @@
 #include "Chat.h"
 #include "BattlefieldMgr.h"
 #include "Profiler.h"
+#include "MapUpdater.h"
 
 union u_map_magic
 {
@@ -789,7 +790,10 @@ void Map::Update( const uint32 t_diff, const uint32 s_diff, bool thread )
 
     sScriptMgr->OnMapUpdate( this, t_diff );
 
-    BuildAndSendUpdateForObjects(); // pussywizard
+    if ( !thread )
+    {
+        BuildAndSendUpdateForObjects();
+    }
 
     sLog->outDebug( LOG_FILTER_POOLSYS, "%u", mapId ); // pussywizard: for crashlogs
 }
@@ -825,6 +829,89 @@ void Map::UpdateSessions( uint32 s_diff )
             MapSessionFilter updater( session );
             session->Update( s_diff, updater );
         }
+    }
+}
+
+void Map::BuildAndSendUpdateForObjects()
+{
+    PROFILE_SCOPE( "BuildAndSendUpdateForObjects" );
+
+    UpdateDataMapType update_players;
+    UpdatePlayerSet player_set;
+
+    {
+        PROFILE_SCOPE( "BuildUpdate" );
+
+        while ( !i_objectsToUpdate.empty() )
+        {
+            Object * obj = *i_objectsToUpdate.begin();
+            ASSERT( obj && obj->IsInWorld() );
+            i_objectsToUpdate.erase( i_objectsToUpdate.begin() );
+            obj->BuildUpdate( update_players, player_set );
+        }
+    }
+
+    {
+        PROFILE_SCOPE( "SendUpdate" );
+
+        WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
+        for ( UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter )
+        {
+            iter->second.BuildPacket( &packet );
+            iter->first->GetSession()->SendPacket( &packet );
+            packet.clear();                                     // clean the string
+        }
+    }
+}
+
+void Map::BuildAndSendUpdateForObjectsAsync( MapUpdater & updater )
+{
+    std::vector< Object * > objects( i_objectsToUpdate.begin(), i_objectsToUpdate.end() );
+    i_objectsToUpdate.clear();
+
+    const size_t UPDATE_BATCH_SIZE = 20;
+    const size_t UPDATE_BATCH_COUNT = ( objects.size() / UPDATE_BATCH_SIZE ) + 1;
+
+    for ( size_t batch = 0u; batch < UPDATE_BATCH_COUNT; ++batch )
+    {
+        const size_t startIndex = batch * UPDATE_BATCH_SIZE;
+        const size_t endIndex = std::min( startIndex + UPDATE_BATCH_COUNT, objects.size() );
+
+        std::vector< Object * > span( objects.data() + startIndex, objects.data() + endIndex );
+
+        //! MapManager::Update will wait for these to finish
+        updater.schedule_task( [span = std::move( span )]
+        {
+            PROFILE_SCOPE( "BuildAndSendUpdateForObjectsAsync" );
+
+            UpdatePlayerSet players;
+            UpdateDataMapType data;
+
+            {
+                PROFILE_SCOPE( "BuildUpdate" );
+
+                for ( Object * object : span )
+                {
+                    object->BuildUpdate( data, players );
+                }
+            }
+
+            {
+                PROFILE_SCOPE( "SendUpdate" );
+
+                WorldPacket packet;
+                for ( auto && it : data )
+                {
+                    packet.clear();
+
+                    UpdateData & update = it.second;
+                    update.BuildPacket( &packet );
+
+                    WorldSession * session = it.first->GetSession();
+                    session->SendPacket( &packet );
+                }
+            }
+        } );
     }
 }
 
@@ -2769,9 +2856,9 @@ bool InstanceMap::AddPlayerToMap(Player* player)
     return true;
 }
 
-void InstanceMap::Update(const uint32 t_diff, const uint32 s_diff, bool /*thread*/)
+void InstanceMap::Update(const uint32 t_diff, const uint32 s_diff, bool thread)
 {
-    Map::Update(t_diff, s_diff);
+    Map::Update(t_diff, s_diff, thread);
 
     if (t_diff)
         if (instance_script)

@@ -37,7 +37,7 @@ public:
 
     bool CreateMoTrans(uint32 guidlow, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress);
     void CleanupsBeforeDelete(bool finalCleanup = true);
-    void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet&);
+    void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet&) override;
 
     void Update(uint32 diff);
     void DelayedUpdate(uint32 diff);
@@ -99,7 +99,7 @@ public:
 
     virtual bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, G3D::Quat const& rotation, uint32 animprogress, GOState go_state, uint32 artKit = 0);
     void CleanupsBeforeDelete(bool finalCleanup = true);
-    void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet&);
+    void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet&) override;
 
     void Update(uint32 diff);
     void RelocateToProgress(uint32 progress);

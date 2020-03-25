@@ -54,7 +54,8 @@ class MapUpdateRequest : public ACE_Method_Request
 
         virtual int call()
         {
-            m_map.Update (m_diff, s_diff);
+            m_map.Update (m_diff, s_diff, true);
+            m_map.BuildAndSendUpdateForObjectsAsync( m_updater );
             m_updater.update_finished();
             return 0;
         }
@@ -79,6 +80,26 @@ class LFGUpdateRequest : public ACE_Method_Request
             m_updater.update_finished();
             return 0;
         }
+};
+
+class TaskRequest : public ACE_Method_Request
+{
+public:
+    TaskRequest( MapUpdater & updater, std::function< void() > task )
+        : m_task( std::move( task ) )
+        , m_updater( updater )
+    {
+    }
+
+    int call() override
+    {
+        m_task();
+        m_updater.update_finished();
+    }
+
+private:
+    MapUpdater &            m_updater;
+    std::function< void() > m_task;
 };
 
 MapUpdater::MapUpdater():
@@ -140,6 +161,22 @@ int MapUpdater::schedule_lfg_update(ACE_UINT32 diff)
     {
         ACE_DEBUG((LM_ERROR, ACE_TEXT("(%t) \n"), ACE_TEXT("Failed to schedule LFG Update")));
 
+        --pending_requests;
+        return -1;
+    }
+
+    return 0;
+}
+
+int MapUpdater::schedule_task( std::function< void() > task )
+{
+    TRINITY_GUARD( ACE_Thread_Mutex, m_mutex );
+
+    ++pending_requests;
+
+    if ( m_executor.execute( new TaskRequest(*this, std::move(task) ) ) == -1 )
+    {
+        ACE_DEBUG( ( LM_ERROR, ACE_TEXT( "(%t) \n" ), ACE_TEXT( "Failed to schedule Map Update" ) ) );
         --pending_requests;
         return -1;
     }
