@@ -32,6 +32,7 @@
 #include "ThreadedAuthHandler.hpp"
 
 #include <memory>
+#include "Profiler.h"
 
 #if defined(__GNUC__)
 #pragma pack(1)
@@ -777,10 +778,17 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // Get the account information from the realmd database
     //         0           1        2       3          4         5       6          7   8              9
     // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os, last_local_ip FROM account WHERE username = ?
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
-    stmt->setString(0, account);
+    PreparedStatement * stmt = nullptr;
+    PreparedQueryResult result;
 
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    {
+        PROFILE_SCOPE( "LOGIN_SEL_ACCOUNT_INFO_BY_NAME" );
+
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_ACCOUNT_INFO_BY_NAME );
+        stmt->setString( 0, account );
+
+        result = LoginDatabase.Query( stmt );
+    }
 
     // Stop if the account is not found
     if (!result)
@@ -827,6 +835,8 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
     if (mutetime < 0)
     {
+        PROFILE_SCOPE( "LOGIN_UPD_MUTE_TIME_LOGIN" );
+
         mutetime = time(nullptr) + llabs(mutetime);
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
@@ -857,11 +867,15 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     // Checks gmlevel per Realm
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
-    stmt->setUInt32(0, accountId);
-    stmt->setInt32(1, int32(realmID));
+    {
+        PROFILE_SCOPE( "LOGIN_GET_GMLEVEL_BY_REALMID" );
 
-    result = LoginDatabase.Query(stmt);
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_GET_GMLEVEL_BY_REALMID );
+        stmt->setUInt32( 0, accountId );
+        stmt->setInt32( 1, int32( realmID ) );
+
+        result = LoginDatabase.Query( stmt );
+    }
 
     if (!result)
         security = 0;
@@ -874,18 +888,22 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     /** Account packet logging **/
     //! Check if account is marked to be logged
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_FLAGS);
-    stmt->setUInt32(0, accountId);
-    PreparedQueryResult flagsResult = LoginDatabase.Query(stmt);
-    if (flagsResult)
     {
-        Field* field = flagsResult->Fetch();
-        uint32 accountFlags = field[0].GetUInt32();
-        if ((accountFlags & ACCOUNT_FLAG_LOG_ALL_PACKETS) != 0)
+        PROFILE_SCOPE( "LOGIN_SEL_ACCOUNT_FLAGS" );
+
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_ACCOUNT_FLAGS );
+        stmt->setUInt32( 0, accountId );
+        PreparedQueryResult flagsResult = LoginDatabase.Query( stmt );
+        if ( flagsResult )
         {
-            packetLog->Initialize(account);
-            m_isPacketLoggingEnabled = true;
-            sLog->outDebug(LOG_FILTER_NETWORKIO, "Account (%u) marked with ACCOUNT_FLAG_LOG_ALL_PACKETS, enabling packet logging.", accountId);
+            Field * field = flagsResult->Fetch();
+            uint32 accountFlags = field[ 0 ].GetUInt32();
+            if ( ( accountFlags & ACCOUNT_FLAG_LOG_ALL_PACKETS ) != 0 )
+            {
+                packetLog->Initialize( account );
+                m_isPacketLoggingEnabled = true;
+                sLog->outDebug( LOG_FILTER_NETWORKIO, "Account (%u) marked with ACCOUNT_FLAG_LOG_ALL_PACKETS, enabling packet logging.", accountId );
+            }
         }
     }
 
@@ -894,6 +912,8 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     bool const IsNewAccountLoggingEnabled = sWorld->getIntConfig(CONFIG_LOG_NEW_ACCOUNTS) != 0;
     if (!m_isPacketLoggingEnabled && IsNewAccountLoggingEnabled)
     {
+        PROFILE_SCOPE( "LOGIN_SEL_JOIN_DATE" );
+
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_JOIN_DATE);
         stmt->setUInt32(0, accountId);
         PreparedQueryResult joinDateResult = LoginDatabase.Query(stmt);
@@ -928,44 +948,53 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     /** End of account packet logging **/
 
     // Re-check account ban (same check as in realmd)
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_BANS);
-
-    stmt->setUInt32(0, accountId);
-    stmt->setString(1, GetRemoteAddress());
-
-    PreparedQueryResult banresult = LoginDatabase.Query(stmt);
-
-    if (banresult) // if account banned
     {
-        packet.Initialize (SMSG_AUTH_RESPONSE, 1);
-        packet << uint8 (AUTH_BANNED);
-        SendPacket(packet);
+        PROFILE_SCOPE( "LOGIN_SEL_BANS" );
 
-        sLog->outError("WorldSocket::HandleAuthSession: Sent Auth Response (Account banned).");
-        return nullptr;
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_BANS );
+
+        stmt->setUInt32( 0, accountId );
+        stmt->setString( 1, GetRemoteAddress() );
+
+        PreparedQueryResult banresult = LoginDatabase.Query( stmt );
+
+        if ( banresult ) // if account banned
+        {
+            packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
+            packet << uint8( AUTH_BANNED );
+            SendPacket( packet );
+
+            sLog->outError( "WorldSocket::HandleAuthSession: Sent Auth Response (Account banned)." );
+            return nullptr;
+        }
     }
 
     // Check premium services
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_PREMIUM_TIME);
-    stmt->setUInt32(0, accountId);
-    stmt->setUInt32(1, realmID);
+    time_t premiumServices[ MAX_PREMIUM_SERVICES ] = { 0 };
 
-    time_t premiumServices[MAX_PREMIUM_SERVICES] = { 0 };
-    if (PreparedQueryResult premiumInfo = LoginDatabase.Query(stmt))
     {
-        do
+        PROFILE_SCOPE( "LOGIN_SEL_PREMIUM_TIME" );
+
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_PREMIUM_TIME );
+        stmt->setUInt32( 0, accountId );
+        stmt->setUInt32( 1, realmID );
+
+        if ( PreparedQueryResult premiumInfo = LoginDatabase.Query( stmt ) )
         {
-            Field* fields = premiumInfo->Fetch();
-            uint8 type = fields[0].GetUInt8();
-            if (type < 0 || type >= MAX_PREMIUM_SERVICES) continue;
+            do
+            {
+                Field * fields = premiumInfo->Fetch();
+                uint8 type = fields[ 0 ].GetUInt8();
+                if ( type < 0 || type >= MAX_PREMIUM_SERVICES ) continue;
 
-            time_t expires_at = time_t(fields[1].GetUInt32());
-            if (expires_at < time(nullptr)) continue;
+                time_t expires_at = time_t( fields[ 1 ].GetUInt32() );
+                if ( expires_at < time( nullptr ) ) continue;
 
-            premiumServices[type] = time_t(fields[1].GetUInt32());
-            if (sWorld->getBoolConfig(CONFIG_BOOL_PREMIUM_SKIPQUEUE) && type == PREMIUM_EXP_BOOST_X4)
-                skipQueue = true;
-        } while (premiumInfo->NextRow());
+                premiumServices[ type ] = time_t( fields[ 1 ].GetUInt32() );
+                if ( sWorld->getBoolConfig( CONFIG_BOOL_PREMIUM_SKIPQUEUE ) && type == PREMIUM_EXP_BOOST_X4 )
+                    skipQueue = true;
+            } while ( premiumInfo->NextRow() );
+        }
     }
 
     // Check locked state for server
@@ -1007,39 +1036,62 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Client (%s) authenticated successfuly from %s", account.c_str(), address.c_str());
     // Check if this user is by any chance a recruiter
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_RECRUITER);
-    stmt->setUInt32(0, accountId);
+    {
+        PROFILE_SCOPE( "LOGIN_SEL_ACCOUNT_RECRUITER" );
 
-    result = LoginDatabase.Query(stmt);
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_ACCOUNT_RECRUITER );
+        stmt->setUInt32( 0, accountId );
+
+        result = LoginDatabase.Query( stmt );
+    }
 
     bool isRecruiter = false;
     if (result)
         isRecruiter = true;
 
     // Update the last_ip in the database
+    {
+        PROFILE_SCOPE( "LOGIN_UPD_LAST_IP" );
 
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LAST_IP);
+        stmt = LoginDatabase.GetPreparedStatement( LOGIN_UPD_LAST_IP );
 
-    stmt->setString(0, address);
-    stmt->setString(1, account);
+        stmt->setString( 0, address );
+        stmt->setString( 1, account );
 
-    LoginDatabase.Execute(stmt);
+        LoginDatabase.Execute( stmt );
+    }
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
     ACE_NEW_RETURN (m_Session, WorldSession (accountId, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, skipQueue, premiumServices), nullptr);
 
     m_Crypt.Init(&k);
 
-    m_Session->LoadGlobalAccountData();
-    m_Session->LoadTutorialsData();
-    m_Session->ReadAddonsInfo(recvPacket);
+    {
+        PROFILE_SCOPE( "LoadGlobalAccountData" );
+        m_Session->LoadGlobalAccountData();
+    }
+
+    {
+        PROFILE_SCOPE( "LoadTutorialsData" );
+        m_Session->LoadTutorialsData();
+    }
+
+    {
+        PROFILE_SCOPE( "ReadAddonsInfo" );
+        m_Session->ReadAddonsInfo( recvPacket );
+    }
 
     if (sWorld->getBoolConfig(CONFIG_ACCOUNT_HISTORY))
-        sWorld->AddAccountHistory(accountId, std::move(address), time(nullptr));
+    {
+        PROFILE_SCOPE( "AddAccountHistory" );
+        sWorld->AddAccountHistory( accountId, std::move( address ), time( nullptr ) );
+    }
 
     // Check VPN connection
     if (sWorld->getBoolConfig(CONFIG_LATENCY_RECORD))
     {
+        PROFILE_SCOPE( "LOGIN_SEL_VPN" );
+
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_VPN);
 
         PreparedQueryResult vpnListResult = LoginDatabase.Query(stmt);
@@ -1061,7 +1113,10 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Initialize Warden system only if it is enabled by config
     if (sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED))
-        m_Session->InitWarden(&k, os);
+    {
+        PROFILE_SCOPE( "InitWarden" );
+        m_Session->InitWarden( &k, os );
+    }
 
     return m_Session;
 }

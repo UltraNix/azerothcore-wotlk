@@ -42,6 +42,8 @@ void ThreadedAuthHandler::Shutdown()
 
 void ThreadedAuthHandler::CollectSessions( World* world )
 {
+    PROFILE_SCOPE( "CollectSessions" );
+
     std::unique_lock< std::mutex > lock( m_mutex );
     for ( WorldSession * session : m_sessions )
     {
