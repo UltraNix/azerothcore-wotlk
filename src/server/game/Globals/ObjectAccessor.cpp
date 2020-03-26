@@ -476,6 +476,37 @@ void ObjectAccessor::Update(uint32 /*diff*/)
     }
 }
 
+void Map::BuildAndSendUpdateForObjects()
+{
+
+    UpdateDataMapType update_players;
+    UpdatePlayerSet player_set;
+
+    {
+        PROFILE_SCOPE("BuildUpdate");
+
+        while (!i_objectsToUpdate.empty())
+        {
+            Object* obj = *i_objectsToUpdate.begin();
+            ASSERT(obj && obj->IsInWorld());
+            i_objectsToUpdate.erase(i_objectsToUpdate.begin());
+            obj->BuildUpdate(update_players, player_set);
+        }
+    }
+
+    {
+        PROFILE_SCOPE("SendUpdate");
+
+        WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
+        for (UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+        {
+            iter->second.BuildPacket(&packet);
+            iter->first->GetSession()->SendPacket(&packet);
+            packet.clear();                                     // clean the string
+        }
+    }
+}
+
 void ObjectAccessor::UnloadAll()
 {
     for (Player2CorpsesMapType::const_iterator itr = i_player2corpse.begin(); itr != i_player2corpse.end(); ++itr)

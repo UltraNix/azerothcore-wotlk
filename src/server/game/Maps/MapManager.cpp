@@ -250,7 +250,7 @@ void MapManager::Update(uint32 diff)
         if (m_updater.activated())
             m_updater.schedule_update(*iter->second, uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
         else
-            iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff, false);
+            iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
     }
 
     {

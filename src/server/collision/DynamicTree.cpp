@@ -113,6 +113,11 @@ bool DynamicMapTree::contains(const GameObjectModel& mdl) const
     return impl->contains(mdl);
 }
 
+void DynamicMapTree::balance()
+{
+    impl->balance();
+}
+
 int DynamicMapTree::size() const
 {
     return impl->size();
@@ -120,12 +125,6 @@ int DynamicMapTree::size() const
 
 void DynamicMapTree::update(uint32 t_diff)
 {
-    if ( m_rebalance )
-    {
-        impl->balance();
-        m_rebalance = false;
-    }
-
     impl->update(t_diff);
 }
 

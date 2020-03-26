@@ -43,7 +43,6 @@ class BattlegroundMap;
 class Transport;
 class StaticTransport;
 class MotionTransport;
-class MapUpdater;
 namespace Trinity { struct ObjectUpdater; }
 
 struct ScriptAction
@@ -278,7 +277,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> void RemoveFromMap(T *, bool);
 
         void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
-        virtual void Update(const uint32, const uint32, bool thread);
+        virtual void Update(const uint32, const uint32, bool thread = true);
 
         float GetVisibilityRange() const { return m_VisibleDistance; }
         void SetVisibilityRange(float range) { m_VisibleDistance = range; }
@@ -318,9 +317,7 @@ class Map : public GridRefManager<NGridType>
         ACE_RW_Thread_Mutex& GetMMapLock() const { return *(const_cast<ACE_RW_Thread_Mutex*>(&MMapLock)); }
         // pussywizard:
         std::unordered_set<Object*> i_objectsToUpdate;
-        void BuildAndSendUpdateForObjects();
-        void BuildAndSendUpdateForObjectsAsync( MapUpdater & updater );
-
+        void BuildAndSendUpdateForObjects(); // definition in ObjectAccessor.cpp, below ObjectAccessor::Update, because it does the same for a map
         std::unordered_set<Unit*> i_objectsForDelayedVisibility;
         void HandleDelayedVisibility();
 
@@ -445,6 +442,7 @@ class Map : public GridRefManager<NGridType>
         float GetWaterOrGroundLevel(uint32 phaseMask, float x, float y, float z, float* ground = NULL, bool swim = false, float maxSearchDist = 50.0f) const;
         float GetHeight(uint32 phasemask, float x, float y, float z, bool vmap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         bool isInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
+        void Balance() { _dynamicTree.balance(); }
         void RemoveGameObjectModel(const GameObjectModel& model) { _dynamicTree.remove(model); }
         void InsertGameObjectModel(const GameObjectModel& model) { _dynamicTree.insert(model); }
         bool ContainsGameObjectModel(const GameObjectModel& model) const { return _dynamicTree.contains(model);}
@@ -503,14 +501,8 @@ class Map : public GridRefManager<NGridType>
         TransportsContainer const& GetAllTransports() const { return _transports; }
 
     private:
-        using UpdatedCellAreas = std::vector< CellArea >;
-
-        void    UpdatePlayers( float dt, UpdatedCellAreas * activators );
-        void    UpdateActiveObjects( float dt, UpdatedCellAreas & activators );
-
-        void    UpdateTransports( uint32 t_diff );
-        void    UpdateAndActivateCells( float dt, const UpdatedCellAreas & activators );
-        void    UpdateSessions( uint32 s_diff );
+        void UpdateTransports( uint32 t_diff );
+        void UpdateSessions( uint32 s_diff );
 
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
@@ -653,7 +645,7 @@ class InstanceMap : public Map
         bool AddPlayerToMap(Player*);
         void RemovePlayerFromMap(Player*, bool);
         void AfterPlayerUnlinkFromMap();
-        void Update(const uint32, const uint32, bool thread) override;
+        void Update(const uint32, const uint32, bool thread = true);
         void CreateInstanceScript(bool load, std::string data, uint32 completedEncounterMask);
         bool Reset(uint8 method, std::list<uint32>* globalSkipList = NULL);
         uint32 GetScriptId() { return i_script_id; }

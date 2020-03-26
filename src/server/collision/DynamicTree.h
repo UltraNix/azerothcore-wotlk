@@ -16,9 +16,10 @@ struct DynTreeImpl;
 
 class DynamicMapTree
 {
-    DynTreeImpl *impl = nullptr;
+    DynTreeImpl *impl;
 
 public:
+
     DynamicMapTree();
     ~DynamicMapTree();
 
@@ -40,9 +41,8 @@ public:
     bool contains(const GameObjectModel&) const;
     int size() const;
 
+    void balance();
     void update(uint32 diff);
-
-    bool m_rebalance = false;
 };
 
 #endif // _DYNTREE_H
