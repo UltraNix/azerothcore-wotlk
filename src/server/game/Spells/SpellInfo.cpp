@@ -2615,6 +2615,21 @@ bool SpellInfo::IsHighRankOf(SpellInfo const* spellInfo) const
     return false;
 }
 
+bool SpellInfo::IsRidingSpell() const
+{
+    for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        if (Effects[i].IsEffect(SPELL_EFFECT_SKILL) && Effects[i].MiscValue == SKILL_RIDING)
+            return true;
+    }
+    return false;
+}
+
+bool SpellInfo::RequiresInstantSave() const
+{
+    return IsRidingSpell() || Id == 54197 /* Cold Weather Flying */;
+}
+
 uint32 SpellInfo::_GetExplicitTargetMask() const
 {
     bool srcSet = false;

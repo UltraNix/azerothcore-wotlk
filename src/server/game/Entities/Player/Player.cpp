@@ -4300,6 +4300,12 @@ void Player::learnSpell(uint32 spellId)
         if (itr2 != m_spells.end() && itr2->second->State != PLAYERSPELL_REMOVED && !itr2->second->IsInSpec(m_activeSpec))
             learnSpell(itr2->first);
     }
+
+    if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+    {
+        if (spellInfo->RequiresInstantSave())
+            SaveToDB(false, false);
+    }
 }
 
 void Player::removeSpell(uint32 spellId, uint8 removeSpecMask, bool onlyTemporary)
