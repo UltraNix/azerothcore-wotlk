@@ -807,6 +807,23 @@ bool Item::CanBeTraded(bool mail, bool trade) const
     return true;
 }
 
+bool Item::CanBeAuctioned() const
+{
+    if ( !CanBeTraded() )
+        return false;
+
+    if ( IsNotEmptyBag() )
+        return false;
+
+    if ( GetTemplate()->Flags & ITEM_PROTO_FLAG_CONJURED )
+        return false;
+
+    if ( GetUInt32Value( ITEM_FIELD_DURATION ) )
+        return false;
+
+    return true;
+}
+
 bool Item::HasEnchantRequiredSkill(const Player* player) const
 {
     // Check all enchants for required skill
