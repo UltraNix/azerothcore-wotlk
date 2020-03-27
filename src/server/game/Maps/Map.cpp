@@ -197,7 +197,7 @@ void Map::LoadMapAndVMap(int gx, int gy)
 
 Map::Map(uint32 id, uint32 InstanceId, uint8 SpawnMode, Map* _parent) :
 i_mapEntry(sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode), i_InstanceId(InstanceId),
-m_unloadTimer(0), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
+m_unloadTimer(0), m_VisibleDistance(VisibilityConstants::DEFAULT_VISIBILITY_DISTANCE),
 m_activeNonPlayersIter(m_activeNonPlayers.end()), _transportsUpdateIter(_transports.end()),
 _instanceResetPeriod(0), i_scriptLock(false), _defaultLight(GetDefaultMapLight(id))
 {
@@ -2965,7 +2965,7 @@ BattlegroundMap::~BattlegroundMap()
 void BattlegroundMap::InitVisibilityDistance()
 {
     //init visibility distance for BG/Arenas
-    m_VisibleDistance = World::GetMaxVisibleDistanceInBGArenas();
+    m_VisibleDistance = World::GetMaxVisibleDistanceInBattlegrounds();
 
     if (IsBattleArena()) // pussywizard: start with 30yd visibility range on arenas to ensure players can't get informations about the opponents in any way
         m_VisibleDistance = 30.0f;
@@ -3437,4 +3437,28 @@ GameObject* Map::SummonGameObject(uint32 entry, float x, float y, float z, float
 GameObject* Map::SummonGameObject(uint32 entry, const Position& pos, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime, bool checkTransport)
 {
     return SummonGameObject(entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), rotation0, rotation1, rotation2, rotation3, respawnTime, checkTransport);
+}
+
+void Map::UpdateVisibilityRange()
+{
+    m_VisibleDistance = sWorld->GetMaxVisibleDistanceOnContinents();
+}
+
+void InstanceMap::UpdateVisibilityRange()
+{
+    m_VisibleDistance = sWorld->GetMaxVisibleDistanceInInstances();
+}
+
+void BattlegroundMap::UpdateVisibilityRange()
+{
+    //BattlegroundStatus GetStatus()
+    if (IsBattleArena() && GetBG())
+    {
+        if (GetBG()->GetStatus() == STATUS_IN_PROGRESS)
+            m_VisibleDistance = sWorld->GetMaxVisibleDistanceInArenas();
+        else
+            m_VisibleDistance = 30.f;
+    }
+    else
+        m_VisibleDistance = sWorld->GetMaxVisibleDistanceInBattlegrounds();
 }

@@ -46,6 +46,7 @@ Battlefield::Battlefield()
     m_StartGrouping = false;
     StalkerGuid = 0;
     m_maxFactionDiff = 0;
+    sWorldCache.SetWintergraspBattleState(false);
 }
 
 Battlefield::~Battlefield()
@@ -430,6 +431,7 @@ void Battlefield::StartBattle()
     DoPlaySoundToAll(BF_START);
 
     OnBattleStart();
+    sWorldCache.SetWintergraspBattleState(true);
 }
 
 void Battlefield::EndBattle(bool endByTimer)
@@ -465,6 +467,8 @@ void Battlefield::EndBattle(bool endByTimer)
         m_InvitedPlayers[i].clear();
         m_PlayersWillBeKick[i].clear();
     }
+
+    sWorldCache.SetWintergraspBattleState(false);
 }
 
 void Battlefield::DoPlaySoundToAll(uint32 SoundID)

@@ -3,7 +3,7 @@
 #define TRINITY_MAP_INSTANCED_H
 
 #include "Map.h"
-#include "InstanceSaveMgr.h"
+//#include "InstanceSaveMgr.h"
 #include "DBCEnums.h"
 
 class MapInstanced : public Map

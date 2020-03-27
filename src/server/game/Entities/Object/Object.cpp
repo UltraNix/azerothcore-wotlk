@@ -1384,7 +1384,7 @@ bool Position::IsPositionValid() const
 float WorldObject::GetGridActivationRange() const
 {
     if (ToPlayer())
-        return IsInWintergrasp() ? VISIBILITY_DIST_WINTERGRASP : GetMap()->GetVisibilityRange();
+        return IsInWintergrasp() ? GetVisibilityRangeForWintergrasp() : GetMap()->GetVisibilityRange();
     else if (ToCreature())
         return ToCreature()->m_SightDistance;
     else if (GetTypeId() == TYPEID_GAMEOBJECT && ToGameObject()->IsTransport())
@@ -1396,11 +1396,12 @@ float WorldObject::GetGridActivationRange() const
 float WorldObject::GetVisibilityRange() const
 {
     if (isActiveObject() && !ToPlayer())
-        return MAX_VISIBILITY_DISTANCE;
+        return VisibilityConstants::MAX_VISIBILITY_DISTANCE;
     else if (GetTypeId() == TYPEID_GAMEOBJECT)
-        return IsInWintergrasp() ? VISIBILITY_DIST_WINTERGRASP+VISIBILITY_INC_FOR_GOBJECTS : GetMap()->GetVisibilityRange()+VISIBILITY_INC_FOR_GOBJECTS;
+        return IsInWintergrasp() ? GetVisibilityRangeForWintergrasp() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS :
+            GetMap()->GetVisibilityRange() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS;
     else
-        return IsInWintergrasp() ? VISIBILITY_DIST_WINTERGRASP : GetMap()->GetVisibilityRange();
+        return IsInWintergrasp() ? GetVisibilityRangeForWintergrasp() : GetMap()->GetVisibilityRange();
 }
 
 float WorldObject::GetSightRange(const WorldObject* target) const
@@ -1412,13 +1413,14 @@ float WorldObject::GetSightRange(const WorldObject* target) const
             if (target)
             {
                 if (target->isActiveObject() && !target->ToPlayer())
-                    return MAX_VISIBILITY_DISTANCE;
+                    return VisibilityConstants::MAX_VISIBILITY_DISTANCE;
                 else if (target->GetTypeId() == TYPEID_GAMEOBJECT)
-                    return IsInWintergrasp() && target->IsInWintergrasp() ? VISIBILITY_DIST_WINTERGRASP+VISIBILITY_INC_FOR_GOBJECTS : GetMap()->GetVisibilityRange()+VISIBILITY_INC_FOR_GOBJECTS;
+                    return IsInWintergrasp() && target->IsInWintergrasp() ? GetVisibilityRangeForWintergrasp() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS :
+                        GetMap()->GetVisibilityRange() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS;
 
-                return IsInWintergrasp() && target->IsInWintergrasp() ? VISIBILITY_DIST_WINTERGRASP : GetMap()->GetVisibilityRange();
+                return IsInWintergrasp() && target->IsInWintergrasp() ? GetVisibilityRangeForWintergrasp() : GetMap()->GetVisibilityRange();
             }
-            return IsInWintergrasp() ? VISIBILITY_DIST_WINTERGRASP : GetMap()->GetVisibilityRange();
+            return IsInWintergrasp() ? GetVisibilityRangeForWintergrasp() : GetMap()->GetVisibilityRange();
         }
         else if (ToCreature())
             return ToCreature()->m_SightDistance;
@@ -1893,7 +1895,7 @@ void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*
 {
     dist += GetObjectSize();
     if (includeMargin)
-        dist += VISIBILITY_COMPENSATION; // pussywizard: to ensure everyone receives all important packets
+        dist += VisibilityConstants::VISIBILITY_COMPENSATION; // pussywizard: to ensure everyone receives all important packets
     Trinity::MessageDistDeliverer notifier(this, data, dist, false, skipped_rcvr);
     VisitNearbyWorldObject(dist, notifier);
 }
@@ -2814,9 +2816,9 @@ void WorldObject::DestroyForNearbyPlayers()
         return;
 
     std::list<Player*> targets;
-    Trinity::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange()+VISIBILITY_COMPENSATION, false);
+    Trinity::AnyPlayerInObjectRangeCheck check(this, GetVisibilityRange()+ VisibilityConstants::VISIBILITY_COMPENSATION, false);
     Trinity::PlayerListSearcherWithSharedVision<Trinity::AnyPlayerInObjectRangeCheck> searcher(this, targets, check);
-    VisitNearbyWorldObject(GetVisibilityRange()+VISIBILITY_COMPENSATION, searcher);
+    VisitNearbyWorldObject(GetVisibilityRange()+ VisibilityConstants::VISIBILITY_COMPENSATION, searcher);
     for (std::list<Player*>::const_iterator iter = targets.begin(); iter != targets.end(); ++iter)
     {
         Player* player = (*iter);
@@ -2839,7 +2841,7 @@ void WorldObject::UpdateObjectVisibility(bool /*forced*/, bool /*fromUpdate*/)
 {
     //updates object's visibility for nearby players
     Trinity::VisibleChangesNotifier notifier(*this);
-    VisitNearbyWorldObject(GetVisibilityRange()+VISIBILITY_COMPENSATION, notifier);
+    VisitNearbyWorldObject(GetVisibilityRange()+ VisibilityConstants::VISIBILITY_COMPENSATION, notifier);
 }
 
 void WorldObject::AddToNotify(uint16 f)
@@ -2950,7 +2952,7 @@ void WorldObject::BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet& play
     TypeContainerVisitor<WorldObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     Map& map = *GetMap();
     //we must build packets for all visible players
-    cell.Visit(p, player_notifier, map, *this, GetVisibilityRange()+VISIBILITY_COMPENSATION);
+    cell.Visit(p, player_notifier, map, *this, GetVisibilityRange() + VisibilityConstants::VISIBILITY_COMPENSATION);
 
     ClearUpdateMask(false);
 }
@@ -2976,4 +2978,12 @@ uint64 WorldObject::GetTransGUID() const
     if (GetTransport())
         return GetTransport()->GetGUID();
     return 0;
+}
+
+float WorldObject::GetVisibilityRangeForWintergrasp() const
+{
+    if (sWorldCache.IsWintergraspBattleActive())
+        return VisibilityConstants::VISIBILITY_DIST_WINTERGRASP;
+
+    return VisibilityConstants::VISIBILITY_DIST_WINTERGRASP_BEFORE_FIGHT;
 }

@@ -7,9 +7,9 @@
 #include <ace/Singleton.h>
 #include <ace/Thread_Mutex.h>
 #include "Common.h"
-#include "Map.h"
 #include "Object.h"
 #include "MapUpdater.h"
+#include "MapInstanced.h"
 
 class Transport;
 class StaticTransport;
@@ -136,6 +136,9 @@ class MapManager
 
         MapUpdater * GetMapUpdater() { return &m_updater; }
 
+        template<typename Worker>
+        void DoForAllMaps(Worker&& worker);
+
     private:
         typedef std::unordered_map<uint32, Map*> MapMapType;
         typedef std::vector<bool> InstanceIds;
@@ -146,7 +149,7 @@ class MapManager
         MapManager(const MapManager &);
         MapManager& operator=(const MapManager &);
 
-        ACE_Thread_Mutex Lock;
+        std::mutex _lock;
         MapMapType i_maps;
         IntervalTimer i_timer[4]; // continents, bgs/arenas, instances, total from the beginning
         uint8 mapUpdateStep;
@@ -155,5 +158,25 @@ class MapManager
         uint32 _nextInstanceId;
         MapUpdater m_updater;
 };
+
+template<typename Worker>
+void MapManager::DoForAllMaps(Worker&& worker)
+{
+    std::lock_guard<std::mutex> lock(_lock);
+
+    for (auto& mapPair : i_maps)
+    {
+        Map* map = mapPair.second;
+        if (MapInstanced* mapInstanced = map->ToMapInstanced())
+        {
+            MapInstanced::InstancedMaps& instances = mapInstanced->GetInstancedMaps();
+            for (auto& instancePair : instances)
+                worker(instancePair.second);
+        }
+        else
+            worker(map);
+    }
+}
+
 #define sMapMgr ACE_Singleton<MapManager, ACE_Thread_Mutex>::instance()
 #endif

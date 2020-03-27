@@ -4893,7 +4893,7 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
     WorldPacket data(SMSG_CLEAR_TARGET, 8);
     data << uint64(m_caster->GetGUID());
 
-    float dist = m_caster->GetVisibilityRange()+VISIBILITY_COMPENSATION;
+    float dist = m_caster->GetVisibilityRange() + VisibilityConstants::VISIBILITY_COMPENSATION;
     Trinity::MessageDistDelivererToHostile notifier(m_caster, &data, dist);
     m_caster->VisitNearbyWorldObject(dist, notifier);
 

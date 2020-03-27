@@ -501,7 +501,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
         {
             // pussywizard: initial visibility range is 30yd, set it to a proper value now:
             if (BattlegroundMap* map = GetBgMap())
-                map->SetVisibilityRange(World::GetMaxVisibleDistanceInBGArenas());
+                map->UpdateVisibilityRange();
 
             for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
                 if (Player* player = itr->second)

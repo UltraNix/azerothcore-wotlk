@@ -26,6 +26,8 @@ WorldCache::WorldCache()
         UpdateFishingList();
         func.Repeat(2min);
     });
+
+    _isWintergraspWarActive = false;
 }
 
 void WorldCache::OnWorldUpdate(uint32 diff)
@@ -327,4 +329,14 @@ bool WorldCache::CanAnnounceBossRecordForMap(uint32 mapId) const
 {
     auto result = _bossRecordsAllowedMaps.find(mapId);
     return result != _bossRecordsAllowedMaps.end();
+}
+
+bool WorldCache::IsWintergraspBattleActive() const
+{
+    return _isWintergraspWarActive;
+}
+
+void WorldCache::SetWintergraspBattleState(bool state)
+{
+    _isWintergraspWarActive = state;
 }

@@ -279,6 +279,7 @@ class Map : public GridRefManager<NGridType>
         void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
         virtual void Update(const uint32, const uint32, bool thread = true);
 
+        virtual void UpdateVisibilityRange();
         float GetVisibilityRange() const { return m_VisibleDistance; }
         void SetVisibilityRange(float range) { m_VisibleDistance = range; }
         //function for setting up visibility distance for maps on per-type/per-Id basis
@@ -659,7 +660,7 @@ class InstanceMap : public Map
         uint32 GetMaxResetDelay() const;
 
         void SummonUnlootedCreatures();
-
+        void UpdateVisibilityRange() override;
         virtual void InitVisibilityDistance();
     private:
         bool m_resetAfterUnload;
@@ -682,6 +683,7 @@ class BattlegroundMap : public Map
         //void UnloadAll(bool pForce);
         void RemoveAllPlayers();
 
+        void UpdateVisibilityRange() override;
         virtual void InitVisibilityDistance();
         Battleground* GetBG() { return m_bg; }
         void SetBG(Battleground* bg) { m_bg = bg; }

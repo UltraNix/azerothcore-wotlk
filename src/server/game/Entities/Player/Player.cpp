@@ -7137,7 +7137,7 @@ void Player::SendMessageToSetInRange(WorldPacket* data, float dist, bool self, b
 
     dist += GetObjectSize();
     if (includeMargin)
-        dist += VISIBILITY_COMPENSATION; // pussywizard: to ensure everyone receives all important packets
+        dist += VisibilityConstants::VISIBILITY_COMPENSATION; // pussywizard: to ensure everyone receives all important packets
     Trinity::MessageDistDeliverer notifier(this, data, dist, false, skipped_rcvr);
     VisitNearbyWorldObject(dist, notifier);
 }
@@ -23659,11 +23659,11 @@ void Player::UpdateVisibilityForPlayer(bool mapChange)
         m_seer = this;
 
         sLog->outError( "UpdateVisibilityForPlayer after map change, but we are not seer!? Map: %d, Instance: %d, Position: %.3f, %.3f, %.3f", GetMapId(), GetInstanceId(), GetPositionX(), GetPositionY(), GetPositionZ() );
-        VisitNearbyObject( GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS, notifier );
+        VisitNearbyObject( GetSightRange() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS, notifier );
     }
     else
     {
-        m_seer->VisitNearbyObject( GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS, notifier );
+        m_seer->VisitNearbyObject( GetSightRange() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS, notifier );
     }
 
     notifier.SendToSelf();

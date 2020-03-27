@@ -63,6 +63,8 @@ public:
 
     void LoadBossRecordAllowedMaps();
     bool CanAnnounceBossRecordForMap(uint32 mapId) const;
+    bool IsWintergraspBattleActive() const;
+    void SetWintergraspBattleState(bool /*active*/);
 private:
     WorldCache();
 
@@ -82,6 +84,7 @@ private:
 
     TaskScheduler scheduler;
     bool _isFisherListLocked;
+    bool _isWintergraspWarActive;
 
 protected:
     WorldCache(WorldCache const&)               = delete;

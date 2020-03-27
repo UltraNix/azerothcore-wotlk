@@ -1321,7 +1321,7 @@ void GameObject::Use(Unit* user)
 
             // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
 
-            float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
+            float lowestDist = VisibilityConstants::DEFAULT_VISIBILITY_DISTANCE;
 
             uint32 nearest_slot = 0;
             float x_lowest = GetPositionX();
@@ -1932,7 +1932,7 @@ void GameObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*s
 {
     dist += GetObjectSize();
     if (includeMargin)
-        dist += VISIBILITY_COMPENSATION * 2.0f; // pussywizard: to ensure everyone receives all important packets
+        dist += VisibilityConstants::VISIBILITY_COMPENSATION * 2.0f; // pussywizard: to ensure everyone receives all important packets
     Trinity::MessageDistDeliverer notifier(this, data, dist, false, skipped_rcvr);
     VisitNearbyWorldObject(dist, notifier);
 }

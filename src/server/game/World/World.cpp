@@ -90,9 +90,10 @@ uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 uint32 World::m_worldLoopCounter = 0;
 uint32 World::m_gameMSTime = 0;
 
-float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
-float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
-float World::m_MaxVisibleDistanceInBGArenas   = DEFAULT_VISIBILITY_BGARENAS;
+float World::m_MaxVisibleDistanceOnContinents       = VisibilityConstants::DEFAULT_VISIBILITY_DISTANCE;
+float World::m_MaxVisibleDistanceInInstances        = VisibilityConstants::DEFAULT_VISIBILITY_INSTANCE;
+float World::m_MaxVisibleDistanceInBattlegrounds    = VisibilityConstants::DEFAULT_VISIBILITY_BATTLEGROUNDS;
+float World::m_MaxVisibleDistanceInArenas           = VisibilityConstants::DEFAULT_VISIBILITY_ARENAS;
 
 /// World constructor
 World::World()
@@ -1108,42 +1109,58 @@ void World::LoadConfigSettings(bool reload)
         m_int_configs[CONFIG_GUILD_BANK_EVENT_LOG_COUNT] = GUILD_BANKLOG_MAX_RECORDS;
 
     //visibility on continents
-    m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", DEFAULT_VISIBILITY_DISTANCE);
+    m_MaxVisibleDistanceOnContinents = sConfigMgr->GetFloatDefault("Visibility.Distance.Continents", VisibilityConstants::DEFAULT_VISIBILITY_DISTANCE);
     if (m_MaxVisibleDistanceOnContinents < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
     {
         sLog->outError("Visibility.Distance.Continents can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
         m_MaxVisibleDistanceOnContinents = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
     }
-    else if (m_MaxVisibleDistanceOnContinents > MAX_VISIBILITY_DISTANCE)
+    else if (m_MaxVisibleDistanceOnContinents > VisibilityConstants::MAX_VISIBILITY_DISTANCE)
     {
-        sLog->outError("Visibility.Distance.Continents can't be greater %f", MAX_VISIBILITY_DISTANCE);
-        m_MaxVisibleDistanceOnContinents = MAX_VISIBILITY_DISTANCE;
+        sLog->outError("Visibility.Distance.Continents can't be greater %f", VisibilityConstants::MAX_VISIBILITY_DISTANCE);
+        m_MaxVisibleDistanceOnContinents = VisibilityConstants::MAX_VISIBILITY_DISTANCE;
     }
 
     //visibility in instances
-    m_MaxVisibleDistanceInInstances = sConfigMgr->GetFloatDefault("Visibility.Distance.Instances", DEFAULT_VISIBILITY_INSTANCE);
+    m_MaxVisibleDistanceInInstances = sConfigMgr->GetFloatDefault("Visibility.Distance.Instances", VisibilityConstants::DEFAULT_VISIBILITY_INSTANCE);
     if (m_MaxVisibleDistanceInInstances < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
     {
         sLog->outError("Visibility.Distance.Instances can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
         m_MaxVisibleDistanceInInstances = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
     }
-    else if (m_MaxVisibleDistanceInInstances > MAX_VISIBILITY_DISTANCE)
+    else if (m_MaxVisibleDistanceInInstances > VisibilityConstants::MAX_VISIBILITY_DISTANCE)
     {
-        sLog->outError("Visibility.Distance.Instances can't be greater %f", MAX_VISIBILITY_DISTANCE);
-        m_MaxVisibleDistanceInInstances = MAX_VISIBILITY_DISTANCE;
+        sLog->outError("Visibility.Distance.Instances can't be greater %f", VisibilityConstants::MAX_VISIBILITY_DISTANCE);
+        m_MaxVisibleDistanceInInstances = VisibilityConstants::MAX_VISIBILITY_DISTANCE;
     }
 
-    //visibility in BG/Arenas
-    m_MaxVisibleDistanceInBGArenas = sConfigMgr->GetFloatDefault("Visibility.Distance.BGArenas", DEFAULT_VISIBILITY_BGARENAS);
-    if (m_MaxVisibleDistanceInBGArenas < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
+    //visibility in Battlegrounds
+    m_MaxVisibleDistanceInBattlegrounds = sConfigMgr->GetFloatDefault("Visibility.Distance.Battlegrounds", VisibilityConstants::DEFAULT_VISIBILITY_BATTLEGROUNDS);
+    if (m_MaxVisibleDistanceInBattlegrounds < 45*sWorld->getRate(RATE_CREATURE_AGGRO))
     {
         sLog->outError("Visibility.Distance.BGArenas can't be less max aggro radius %f", 45*sWorld->getRate(RATE_CREATURE_AGGRO));
-        m_MaxVisibleDistanceInBGArenas = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
+        m_MaxVisibleDistanceInBattlegrounds = 45*sWorld->getRate(RATE_CREATURE_AGGRO);
     }
-    else if (m_MaxVisibleDistanceInBGArenas > MAX_VISIBILITY_DISTANCE)
+    else if (m_MaxVisibleDistanceInBattlegrounds > VisibilityConstants::MAX_VISIBILITY_DISTANCE)
     {
-        sLog->outError("Visibility.Distance.BGArenas can't be greater %f", MAX_VISIBILITY_DISTANCE);
-        m_MaxVisibleDistanceInBGArenas = MAX_VISIBILITY_DISTANCE;
+        sLog->outError("Visibility.Distance.Battlegrounds can't be greater %f", VisibilityConstants::MAX_VISIBILITY_DISTANCE);
+        m_MaxVisibleDistanceInBattlegrounds = VisibilityConstants::MAX_VISIBILITY_DISTANCE;
+    }
+
+    // Visibility in arenas
+    m_MaxVisibleDistanceInArenas = sConfigMgr->GetFloatDefault("Visibility.Distance.Arenas", VisibilityConstants::DEFAULT_VISIBILITY_ARENAS);
+    if (m_MaxVisibleDistanceInArenas > VisibilityConstants::MAX_VISIBILITY_DISTANCE)
+    {
+        sLog->outError("Visibility.Distance.Arenas can't be greater %f", VisibilityConstants::MAX_VISIBILITY_DISTANCE);
+        m_MaxVisibleDistanceInArenas = VisibilityConstants::MAX_VISIBILITY_DISTANCE;
+    }
+
+    if (reload)
+    {
+        sMapMgr->DoForAllMaps([](Map* map)
+        {
+            map->UpdateVisibilityRange();
+        });
     }
 
     ///- Load the CharDelete related config options

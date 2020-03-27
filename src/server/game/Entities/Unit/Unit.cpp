@@ -19407,7 +19407,7 @@ void Unit::ExecuteDelayedUnitRelocationEvent()
                 }
 
                 Trinity::PlayerRelocationNotifier relocate(*player);
-                viewPoint->VisitNearbyObject(player->GetSightRange()+VISIBILITY_INC_FOR_GOBJECTS, relocate);
+                viewPoint->VisitNearbyObject(player->GetSightRange() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS, relocate);
                 relocate.SendToSelf();
             }
 
@@ -19438,7 +19438,7 @@ void Unit::ExecuteDelayedUnitRelocationEvent()
         }
 
         Trinity::PlayerRelocationNotifier relocate(*player);
-        viewPoint->VisitNearbyObject(player->GetSightRange()+VISIBILITY_INC_FOR_GOBJECTS, relocate);
+        viewPoint->VisitNearbyObject(player->GetSightRange() + VisibilityConstants::VISIBILITY_INC_FOR_GOBJECTS, relocate);
         relocate.SendToSelf();
 
         this->AddToNotify(NOTIFY_AI_RELOCATION);

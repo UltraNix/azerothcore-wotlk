@@ -909,7 +909,8 @@ class World
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
-        static float GetMaxVisibleDistanceInBGArenas()      { return m_MaxVisibleDistanceInBGArenas;   }
+        static float GetMaxVisibleDistanceInBattlegrounds() { return m_MaxVisibleDistanceInBattlegrounds; }
+        static float GetMaxVisibleDistanceInArenas()        { return m_MaxVisibleDistanceInArenas; }
 
         // our: needed for arena spectator subscriptions
         uint32 GetNextWhoListUpdateDelaySecs()
@@ -1059,7 +1060,8 @@ class World
         // for max speed access
         static float m_MaxVisibleDistanceOnContinents;
         static float m_MaxVisibleDistanceInInstances;
-        static float m_MaxVisibleDistanceInBGArenas;
+        static float m_MaxVisibleDistanceInBattlegrounds;
+        static float m_MaxVisibleDistanceInArenas;
 
         // our speed ups
         GlobalPlayerDataMap _globalPlayerDataStore; // xinef

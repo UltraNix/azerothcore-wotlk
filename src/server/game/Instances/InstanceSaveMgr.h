@@ -1,17 +1,17 @@
-
 #ifndef _INSTANCESAVEMGR_H
 #define _INSTANCESAVEMGR_H
 
 #include "Define.h"
-#include <ace/Singleton.h>
-#include <ace/Null_Mutex.h>
-#include <ace/Thread_Mutex.h>
-#include <list>
-#include <map>
 #include "DatabaseEnv.h"
 #include "DBCEnums.h"
 #include "ObjectDefines.h"
 
+#include <ace/Singleton.h>
+#include <ace/Null_Mutex.h>
+#include <ace/Thread_Mutex.h>
+
+#include <list>
+#include <map>
 #include <unordered_map>
 
 struct InstanceTemplate;
