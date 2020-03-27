@@ -3906,6 +3906,10 @@ public:
             if (spellInfo->HasAttribute(SPELL_ATTR3_DISABLE_PROC) || spellInfo->HasAttribute(SPELL_ATTR3_CANT_TRIGGER_PROC))
                 return false;
 
+            // Glyph of Holy Light exception, shouldn't proc
+            if (spellInfo->Id == 54968)
+                return false;
+
             //! if power type different than mana, it shouldnt proc
             if (spellInfo->PowerType != POWER_MANA)
                 return false;
