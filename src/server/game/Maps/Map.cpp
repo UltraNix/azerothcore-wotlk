@@ -851,6 +851,9 @@ void Map::RemoveFromMap(T *obj, bool remove)
     bool inWorld = obj->IsInWorld() && obj->GetTypeId() >= TYPEID_UNIT && obj->GetTypeId() <= TYPEID_GAMEOBJECT;
     obj->RemoveFromWorld();
 
+    if (Unit* unitObj = obj->ToUnit())
+        i_objectsForDelayedVisibility.erase(unitObj);
+
     if (obj->isActiveObject())
         RemoveFromActive(obj);
 
