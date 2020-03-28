@@ -305,7 +305,6 @@ public:
     {
         sLog->outString("Re-Loading config settings...");
         sWorld->LoadConfigSettings(true);
-        sMapMgr->InitializeVisibilityDistanceInfo();
         handler->SendGlobalGMSysMessage("World config settings reloaded.");
         return true;
     }
