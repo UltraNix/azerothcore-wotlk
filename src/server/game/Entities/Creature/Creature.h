@@ -798,6 +798,9 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         void DoPullNearbyCreatures();
         void DisableChainPullFor(std::chrono::milliseconds const /*ms*/);
 
+        bool ShouldBeHealedAtEvade() const { return m_shouldBeHealedAtEvade; }
+        void SetShouldBeHealedAtEvade(bool apply) { m_shouldBeHealedAtEvade = apply; }
+
     protected:
         bool CreateFromProto(uint32 guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = NULL);
         bool InitEntry(uint32 entry, const CreatureData* data=NULL);
@@ -859,6 +862,7 @@ class Creature : public Unit, public GridObject<Creature>, public MovableMapObje
         bool CanAlwaysSee(WorldObject const* obj) const;
 
         bool m_chainPullEnabled;
+        bool m_shouldBeHealedAtEvade;
     private:
         void ForcedDespawn(uint32 timeMSToDespawn = 0, uint32 forceRespawnTimer = 0);
 

@@ -17,7 +17,7 @@ enum Murmur
     SPELL_MAGNETIC_PULL                = 33689,
     SPELL_SONIC_SHOCK                = 38797,
     SPELL_THUNDERING_STORM            = 39365,
- 
+
     SPELL_SONIC_BOOM_CAST_N            = 33923,
     SPELL_SONIC_BOOM_CAST_H            = 38796,
     SPELL_SONIC_BOOM_EFFECT_N        = 38795,
@@ -50,6 +50,7 @@ public:
         {
             SetCombatMovement(false);
             instance = creature->GetInstanceScript();
+            me->SetShouldBeHealedAtEvade(false);
         }
 
         InstanceScript* instance;

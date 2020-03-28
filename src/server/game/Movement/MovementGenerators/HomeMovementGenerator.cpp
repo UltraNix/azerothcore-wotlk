@@ -22,7 +22,7 @@ void HomeMovementGenerator<Creature>::DoFinalize(Creature* owner)
         //owner->SetWalk(true);
         owner->LoadCreaturesAddon(true);
         owner->AI()->JustReachedHome();
-        if (sWorld->getBoolConfig(CONFIG_CREATURE_FULL_HEALTH_AT_EVADE) && (owner->isWorldBoss() || owner->IsDungeonBoss()))
+        if (sWorld->getBoolConfig(CONFIG_CREATURE_FULL_HEALTH_AT_EVADE) && (owner->isWorldBoss() || owner->IsDungeonBoss()) && owner->ShouldBeHealedAtEvade())
             owner->SetFullHealth();
     }
     owner->m_targetsNotAcceptable.clear();
