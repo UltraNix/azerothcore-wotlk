@@ -1,0 +1,1 @@
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 30160 AND `source_type` = 0 AND `id` = 2;
