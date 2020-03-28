@@ -1316,6 +1316,25 @@ public:
     }
 };
 
+// 19577 - Intimidation
+class spell_hun_intimidation : public AuraScript
+{
+    PrepareAuraScript(spell_hun_intimidation);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+            return !spellInfo->IsPositive();
+
+        return true;
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_hun_intimidation::CheckProc);
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     // Ours
@@ -1325,6 +1344,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_animal_handler();
     new spell_hun_generic_scaling();
     new spell_hun_volley();
+    RegisterAuraScript(spell_hun_intimidation);
 
     // Theirs
     new spell_hun_aspect_of_the_beast();
