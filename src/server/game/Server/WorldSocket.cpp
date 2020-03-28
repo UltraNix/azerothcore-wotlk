@@ -1035,20 +1035,6 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     sLog->outDebug(LOG_FILTER_NETWORKIO, "Client (%s) authenticated successfuly from %s", account.c_str(), address.c_str());
-    // Check if this user is by any chance a recruiter
-    {
-        PROFILE_SCOPE( "LOGIN_SEL_ACCOUNT_RECRUITER" );
-
-        stmt = LoginDatabase.GetPreparedStatement( LOGIN_SEL_ACCOUNT_RECRUITER );
-        stmt->setUInt32( 0, accountId );
-
-        result = LoginDatabase.Query( stmt );
-    }
-
-    bool isRecruiter = false;
-    if (result)
-        isRecruiter = true;
-
     // Update the last_ip in the database
     {
         PROFILE_SCOPE( "LOGIN_UPD_LAST_IP" );
@@ -1062,7 +1048,7 @@ WorldSession* WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    ACE_NEW_RETURN (m_Session, WorldSession (accountId, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, skipQueue, premiumServices), nullptr);
+    ACE_NEW_RETURN (m_Session, WorldSession (accountId, this, AccountTypes(security), expansion, mutetime, locale, recruiter, false, skipQueue, premiumServices), nullptr);
 
     m_Crypt.Init(&k);
 

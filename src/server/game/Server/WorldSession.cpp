@@ -111,6 +111,13 @@ _offlineTime(0), _kicked(false), _shouldSetOfflineInDB(true), _vpnActive(false),
 
     InitializeQueryCallbackParameters();
     InitializeWarden();
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_RECRUITER);
+    if (stmt)
+    {
+        stmt->setUInt32(0, _accountId);
+        _isRecruiterCallback = CharacterDatabase.AsyncQuery(stmt);
+    }
 }
 
 void WorldSession::InitializeWarden()
@@ -1523,6 +1530,15 @@ void WorldSession::ProcessQueryCallbackPlayer()
         HandleLoadActionsSwitchSpec(result);
         _loadActionsSwitchSpecCallback.cancel();
     }
+
+    if (_isRecruiterCallback.ready())
+    {
+        _isRecruiterCallback.get(result);
+        if (result)
+            isRecruiter = true;
+        _isRecruiterCallback.cancel();
+    }
+
 }
 
 void WorldSession::ProcessQueryCallbackPet()

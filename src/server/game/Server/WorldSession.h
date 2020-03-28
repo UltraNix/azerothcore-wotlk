@@ -988,11 +988,11 @@ class WorldSession
         QueryCallback<PreparedQueryResult, std::string> _charRenameCallback;
         QueryCallback<PreparedQueryResult, uint32> _stableSwapCallback;
         QueryCallback<PreparedQueryResult, CharacterCreateInfo*, true> _charCreateCallback;
-
         QueryResultHolderFuture _charLoginCallback;
 
         QueryResultHolderFuture _loadPetFromDBSecondCallback;
         QueryCallback_3<PreparedQueryResult, uint8, uint8, uint32> _openWrappedItemCallback;
+        PreparedQueryResultFuture _isRecruiterCallback;
 
     public:
         // xinef: those must be public, requires calls out of worldsession :(
