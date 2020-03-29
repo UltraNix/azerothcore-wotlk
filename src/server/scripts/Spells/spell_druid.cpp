@@ -213,6 +213,16 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
 
                 if (baseSpellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
                 {
+                    // Item - Druid T8 Feral 2P Bonus
+                    // Periodic Rake and Rip can proc OOC
+                    if (isPeriodic)
+                    {
+                        if (isRipOrRake && eventInfo.GetActor() && eventInfo.GetActor()->IsPlayer())
+                            return eventInfo.GetActor()->ToPlayer()->HasAura(SPELL_DRUID_T8_2P_FERAL_BONUS);
+                        else
+                            return false;
+                    }
+
                     //! Barkskin apparently proccs this one
                     if (baseSpellInfo->HasAura(SPELL_AURA_REDUCE_PUSHBACK))
                         return true;
@@ -232,16 +242,6 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
                     //! Both feral mangles
                     if (baseSpellInfo->SpellFamilyFlags[1] & 0x00000440)
                         return false;
-
-                    // Item - Druid T8 Feral 2P Bonus
-                    // Periodic Rake and Rip can proc OOC
-                    if (isPeriodic)
-                    {
-                        if (isRipOrRake && eventInfo.GetActor() && eventInfo.GetActor()->IsPlayer())
-                            return eventInfo.GetActor()->ToPlayer()->HasAura(SPELL_DRUID_T8_2P_FERAL_BONUS);
-                        else
-                            return false;
-                    }
                 }
 
                 //! At this point those auras do not count anymore
