@@ -721,8 +721,11 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
         delete movementPacket;
     }
 
-    if (m_Socket && !m_Socket->IsClosed())
-        ProcessQueryCallbacks();
+    if (updater.ProcessCallbacks())
+    {
+        if (m_Socket && !m_Socket->IsClosed())
+            ProcessQueryCallbacks();
+    }
 
     if (updater.ProcessLogout())
     {
