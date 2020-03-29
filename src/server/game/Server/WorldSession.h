@@ -148,7 +148,6 @@ public:
     explicit PacketFilter(WorldSession* pSession) : m_pSession(pSession) {}
     virtual ~PacketFilter() {}
 
-
     virtual bool Process(WorldPacket* /*packet*/) { return true; }
     virtual bool ProcessLogout() const { return true; }
     virtual bool ProcessCallbacks() const { return true; }
@@ -156,6 +155,7 @@ public:
 protected:
     WorldSession* const m_pSession;
 };
+
 //process only thread-safe packets in Map::Update()
 class MapSessionFilter : public PacketFilter
 {
@@ -163,10 +163,9 @@ public:
     explicit MapSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
     ~MapSessionFilter() {}
 
-    virtual bool Process(WorldPacket* packet);
-    //in Map::Update() we do not process player logout!
-    virtual bool ProcessLogout() const { return false; }
-    virtual bool ProcessCallbacks() const { return false; }
+    bool Process(WorldPacket* packet) override;
+    bool ProcessLogout() const override { return false; }
+    bool ProcessCallbacks() const override { return false; }
 };
 
 //class used to filer only thread-unsafe packets from queue
