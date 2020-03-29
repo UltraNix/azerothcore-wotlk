@@ -842,7 +842,9 @@ public:
 enum CenarionSparrowhawk
 {
     GO_RAVEN_STONE = 185541,
-    POINT_ID = 1
+    POINT_ID = 1,
+    EVENT_FIND_RAVEN_STONE = 1,
+    SAY_STONE_FOUND = 0
 };
 
 class npc_cenarion_sparrowhawk : public CreatureScript
@@ -860,14 +862,30 @@ public:
         npc_cenarion_sparrowhawkAI(Creature* creature) : ScriptedAI(creature)
         {
             Initialize();
+            me->DespawnOrUnsummon(180000);
         }
 
         void Initialize()
         {
+            if (Player* pl = me->SelectNearestPlayer(10.f))
+            {
+              me->GetMotionMaster()->MoveFollow(pl, 5.f, 0.f);
+              events.ScheduleEvent(EVENT_FIND_RAVEN_STONE, 10s);
+            }
+        }
+
+        void FindRavenStone()
+        {
             if (GameObject* go = me->FindNearestGameObject(GO_RAVEN_STONE, 40.f))
+            {
+                Talk(SAY_STONE_FOUND);
+                me->GetMotionMaster()->Clear();
                 me->GetMotionMaster()->MovePoint(POINT_ID, go->GetPosition());
+            }
             else
-                me->DespawnOrUnsummon(10s);
+            {
+                events.ScheduleEvent(EVENT_FIND_RAVEN_STONE, 10s);
+            }
         }
 
         void MovementInform(uint32 type, uint32 id)
@@ -880,6 +898,25 @@ public:
                 me->DespawnOrUnsummon(5s);
             }
         }
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim())
+            {
+                events.Update(diff);
+                switch (events.ExecuteEvent())
+                {
+                    case EVENT_FIND_RAVEN_STONE:
+                        FindRavenStone();
+                        break;
+                }
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        EventMap events;
     };
 };
 
