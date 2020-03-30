@@ -1359,9 +1359,9 @@ ItemRef::~ItemRef()
         {
             if (Player* player = m_item->GetOwner())
             {
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is being destroying for its itemref for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and stil have it?: %d",
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is being destroying for its itemref for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d)",
                     m_item, m_item->GetGUID(), m_item->GetGUIDLow(), m_item->GetEntry(), m_item->GetSlot(), m_item->GetBagSlot(), m_item->m_refCounter.load(), m_item->IsBag(), player, player->GetName().c_str(), player->GetGUID(),
-                    player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(m_item->GetGUID()) != nullptr);
+                    player->GetGUIDLow(), player->GetSession()->GetAccountId());
             }
             else
             {
