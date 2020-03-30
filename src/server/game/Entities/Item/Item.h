@@ -353,9 +353,6 @@ class Item : public Object
         void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet&) override;
 
         uint32 GetScriptId() const { return GetTemplate()->ScriptId; }
-
-        std::atomic_int m_refCounter;
-
     private:
         std::string m_text;
         uint8 m_slot;
@@ -368,6 +365,8 @@ class Item : public Object
         uint32 m_paidMoney;
         uint32 m_paidExtendedCost;
         AllowedLooterSet allowedGUIDs;
+
+        std::atomic_int m_refCounter;
 };
 
 class ItemRef

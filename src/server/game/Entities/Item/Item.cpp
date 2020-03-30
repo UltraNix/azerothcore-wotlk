@@ -244,14 +244,13 @@ Item::~Item()
     if ((GetSlot() >= INVENTORY_SLOT_BAG_START && GetSlot() < INVENTORY_SLOT_BAG_END) || (GetSlot() >= BANK_SLOT_BAG_START && GetSlot() < BANK_SLOT_BAG_END))
         if (Player* player = GetOwner())
         {
-            sLog->outBagCrash("Item %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is deleting for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter.load(), IsBag(), player, player->GetName().c_str(), player->GetGUID(),
+            sLog->outBagCrash("Item %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is deleting for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), player, player->GetName().c_str(), player->GetGUID(),
                 player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(GetGUID()) != nullptr);
         }
         else
         {
-            sLog->outBagCrash("Item %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is deleting",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter.load(), IsBag());
+            sLog->outBagCrash("Item %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is deleting", this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag());
         }
 }
 
@@ -689,8 +688,8 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
         forplayer->DeleteRefundReference(GetGUIDLow());
         sObjectMgr->RequestItemDestroy( this );
         if ((GetSlot() >= INVENTORY_SLOT_BAG_START && GetSlot() < INVENTORY_SLOT_BAG_END) || (GetSlot() >= BANK_SLOT_BAG_START && GetSlot() < BANK_SLOT_BAG_END))
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) got state ITEM_NEW, but changed to ITEM_REMOVED for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter.load(), IsBag(), forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) got state ITEM_NEW, but changed to ITEM_REMOVED for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
                 forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
         return;
     }
@@ -698,12 +697,12 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
     if ((GetSlot() >= INVENTORY_SLOT_BAG_START && GetSlot() < INVENTORY_SLOT_BAG_END) || (GetSlot() >= BANK_SLOT_BAG_START && GetSlot() < BANK_SLOT_BAG_END))
     {
         if (state == ITEM_REMOVED)
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) changed state to ITEM_REMOVED from old state %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter.load(), IsBag(), uState, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) changed state to ITEM_REMOVED from old state %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), uState, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
                 forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
         else if (uState == ITEM_REMOVED)
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) got state ITEM_REMOVED, but changed state to %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter.load(), IsBag(), state, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) got state ITEM_REMOVED, but changed state to %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), state, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
                 forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
     }
 
@@ -1353,24 +1352,6 @@ void ItemRef::Reset( Item * item /*= nullptr */ )
 
 ItemRef::~ItemRef()
 {
-    if (m_item)
-    {
-        if ((m_item->GetSlot() >= INVENTORY_SLOT_BAG_START && m_item->GetSlot() < INVENTORY_SLOT_BAG_END) || (m_item->GetSlot() >= BANK_SLOT_BAG_START && m_item->GetSlot() < BANK_SLOT_BAG_END))
-        {
-            if (Player* player = m_item->GetOwner())
-            {
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is being destroying for its itemref for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d)",
-                    m_item, m_item->GetGUID(), m_item->GetGUIDLow(), m_item->GetEntry(), m_item->GetSlot(), m_item->GetBagSlot(), m_item->m_refCounter.load(), m_item->IsBag(), player, player->GetName().c_str(), player->GetGUID(),
-                    player->GetGUIDLow(), player->GetSession()->GetAccountId());
-            }
-            else
-            {
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is being destroying for its itemref",
-                    m_item, m_item->GetGUID(), m_item->GetGUIDLow(), m_item->GetEntry(), m_item->GetSlot(), m_item->GetBagSlot(), m_item->m_refCounter.load(), m_item->IsBag());
-            }
-        }
-    }
-
     Reset();
 }
 

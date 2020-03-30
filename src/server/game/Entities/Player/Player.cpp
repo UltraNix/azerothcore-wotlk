@@ -13116,8 +13116,8 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
         if (!pBag)
         {
             if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is added to m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter.load(), item->IsBag(), slot, this, GetName().c_str(), GetGUID(),
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is added to m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), slot, this, GetName().c_str(), GetGUID(),
                     GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
 
             m_items[slot] = *item;
@@ -13180,8 +13180,8 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
             pItem->SetState(ITEM_REMOVED, this);
 
             if ((pItem->GetSlot() >= INVENTORY_SLOT_BAG_START && pItem->GetSlot() < INVENTORY_SLOT_BAG_END) || (pItem->GetSlot() >= BANK_SLOT_BAG_START && pItem->GetSlot() < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) removed in fuction '_StoreItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->m_refCounter.load(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction '_StoreItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
                     GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
         }
 
@@ -13312,8 +13312,8 @@ ItemRef Player::EquipItem(uint16 pos, ItemRef const& pItem, bool update)
         pItem2->SetState(ITEM_CHANGED, this);
 
         if ((pItem->GetSlot() >= INVENTORY_SLOT_BAG_START && pItem->GetSlot() < INVENTORY_SLOT_BAG_END) || (pItem->GetSlot() >= BANK_SLOT_BAG_START && pItem->GetSlot() < BANK_SLOT_BAG_END))
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) removed in fuction 'EquipItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->m_refCounter.load(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction 'EquipItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
                 GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
         ApplyEquipCooldown(pItem2);
@@ -13413,8 +13413,8 @@ void Player::VisualizeItem(uint8 slot, ItemRef const& pItem)
     ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: EquipItem slot = %u, item = %u", slot, pItem->GetEntry());
 
     if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is added to m_items container in fuction 'VisualizeItem' slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-            *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->m_refCounter.load(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
+        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is added to m_items container in fuction 'VisualizeItem' slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+            *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
             GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
     m_items[slot] = *pItem;
@@ -13500,8 +13500,8 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
             SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), 0);
 
             if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is removing from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->m_refCounter.load(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is removing from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
                     GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
             // Update Melee Crit Rating after unequiping weapon
@@ -13683,8 +13683,8 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             m_items[slot] = NULL;
 
             if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is destroying item from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->m_refCounter.load(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is destroying item from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
                     GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
         }
         else if (Bag* pBag = GetBagByPos(bag))
@@ -13701,8 +13701,8 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         }
 
         if ((pItem->GetSlot() >= INVENTORY_SLOT_BAG_START && pItem->GetSlot() < INVENTORY_SLOT_BAG_END) || (pItem->GetSlot() >= BANK_SLOT_BAG_START && pItem->GetSlot() < BANK_SLOT_BAG_END))
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) removed in fuction 'DestroyItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->m_refCounter.load(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
+            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction 'DestroyItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
                 GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
 
         //pItem->SetOwnerGUID(0);
@@ -19391,8 +19391,8 @@ ItemRef Player::_LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff,
         if (remove)
         {
             if ((item->GetSlot() >= INVENTORY_SLOT_BAG_START && item->GetSlot() < INVENTORY_SLOT_BAG_END) || (item->GetSlot() >= BANK_SLOT_BAG_START && item->GetSlot() < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) removed in fuction '_LoadItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter.load(), item->IsBag(), this, GetName().c_str(), GetGUID(),
+                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction '_LoadItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                    *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), this, GetName().c_str(), GetGUID(),
                     GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
 
             Item::DeleteFromInventoryDB(trans, itemGuid);
@@ -20533,8 +20533,8 @@ void Player::_SaveInventory(SQLTransaction& trans)
                 RemoveItemDurations(item); // pussywizard
 
                 if ((item->GetSlot() >= INVENTORY_SLOT_BAG_START && item->GetSlot() < INVENTORY_SLOT_BAG_END) || (item->GetSlot() >= BANK_SLOT_BAG_START && item->GetSlot() < BANK_SLOT_BAG_END))
-                    sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) removed in fuction '_SaveInventory' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                        *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter.load(), item->IsBag(), this, GetName().c_str(), GetGUID(),
+                    sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction '_SaveInventory' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+                        *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), this, GetName().c_str(), GetGUID(),
                         GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
 
                 // also THIS item should be somewhere else, cheat attempt
