@@ -116,7 +116,7 @@ _offlineTime(0), _kicked(false), _shouldSetOfflineInDB(true), _vpnActive(false),
     if (stmt)
     {
         stmt->setUInt32(0, _accountId);
-        _isRecruiterCallback = CharacterDatabase.AsyncQuery(stmt);
+        _isRecruiterCallback = LoginDatabase.AsyncQuery(stmt);
     }
 }
 
