@@ -4104,6 +4104,31 @@ public:
     }
 };
 
+enum MalisterFrostWand
+{
+    NPC_PROTO_DRAKE = 23689
+};
+
+// 40969 - Malister's Frost Wand
+class spell_malisters_frost_wand : public SpellScript
+{
+    PrepareSpellScript(spell_malisters_frost_wand);
+
+    SpellCastResult CheckCast()
+    {
+        if (Unit* target = GetExplTargetUnit())
+            if (target->GetEntry() == NPC_PROTO_DRAKE)
+                return SPELL_CAST_OK;
+
+        return SPELL_FAILED_BAD_TARGETS;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_malisters_frost_wand::CheckCast);
+    }
+};
+
 void AddSC_item_spell_scripts()
 {
     // Ours
@@ -4210,4 +4235,5 @@ void AddSC_item_spell_scripts()
     new spell_item_muisek_vessel();
     new spell_item_greatmothers_soulcatcher();
     new spell_item_tiki_hex_remover();
+    RegisterSpellScript(spell_malisters_frost_wand);
 }
