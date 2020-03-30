@@ -751,12 +751,9 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         {
             if (!spellProto->HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS))
             {
-                if (damage)
-                {
-                    victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto->Id);
-                    if (damagetype == SPELL_DIRECT_DAMAGE)
-                        victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, spellProto->Id);
-                }
+                victim->RemoveAurasDueToDamage(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, damage, spellProto->Id);
+                if (damagetype == SPELL_DIRECT_DAMAGE)
+                    victim->RemoveAurasDueToDamage(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE, damage, spellProto->Id);
             }
 
             if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
@@ -766,8 +763,7 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         }
         else
         {
-            if (damage)
-                victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, 0);
+            victim->RemoveAurasDueToDamage(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, damage, 0);
 
             if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE)
                 if (Spell* spell = victim->m_currentSpells[CURRENT_GENERIC_SPELL])
@@ -4638,6 +4634,45 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
         Aura* aura = (*iter)->GetBase();
         ++iter;
         if ((aura->GetSpellInfo()->AuraInterruptFlags & flag) && (!except || aura->GetId() != except))
+        {
+            uint32 removedAuras = m_removedAurasCount;
+            RemoveAura(aura);
+            if (m_removedAurasCount > removedAuras + 1)
+                iter = m_interruptableAuras.begin();
+        }
+    }
+
+    // interrupt channeled spell
+    if (Spell* spell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+        if (spell->getState() == SPELL_STATE_CASTING
+            && (spell->m_spellInfo->ChannelInterruptFlags & flag)
+            && spell->m_spellInfo->Id != except)
+            InterruptNonMeleeSpells(false, spell->m_spellInfo->Id);
+
+    UpdateInterruptMask();
+}
+
+void Unit::RemoveAurasDueToDamage(uint32 flag, uint32 damage, uint32 except)
+{
+    if (!(m_interruptMask & flag))
+        return;
+
+    // interrupt auras
+    for (AuraApplicationList::iterator iter = m_interruptableAuras.begin(); iter != m_interruptableAuras.end();)
+    {
+        Aura* aura = (*iter)->GetBase();
+        ++iter;
+
+        bool shouldBeRemoved = [aura, damage]() -> bool
+        {
+            bool attr = aura->GetSpellInfo()->HasAttribute(SPELL_ATTR1_CU_DONT_REMOVE_AURA_ON_ABSORB);
+            if (!attr && !damage)
+                return true;
+
+            return damage;
+        }();
+
+        if (shouldBeRemoved && (aura->GetSpellInfo()->AuraInterruptFlags & flag) && (!except || aura->GetId() != except))
         {
             uint32 removedAuras = m_removedAurasCount;
             RemoveAura(aura);

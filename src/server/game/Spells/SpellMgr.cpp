@@ -3095,6 +3095,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_MAINTAIN_MOMENTUM_ON_AURA_REMOVE;
         });
 
+        // Intimidating Shout
+        ApplySpellFix({ 20511 }, [](SpellInfo* spellInfo)
+        {
+            spellInfo->AttributesCu1 |= SPELL_ATTR1_CU_DONT_REMOVE_AURA_ON_ABSORB;
+        });
+
         ApplySpellFix
         ({
             47755, // Rapture
