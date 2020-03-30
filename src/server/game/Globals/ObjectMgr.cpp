@@ -9411,13 +9411,13 @@ void ObjectMgr::RequestItemDestroy( Item * item )
         if (Player* player = item->GetOwner())
         {
             sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is requested to be destroyed for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and stil have it?: %d",
-                item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter, item->IsBag(), player, player->GetName().c_str(), player->GetGUID(),
+                item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter.load(), item->IsBag(), player, player->GetName().c_str(), player->GetGUID(),
                 player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(item->GetGUID()) != nullptr);
         }
         else
         {
             sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d, IsBag: %d) is requested to be destroyed",
-                item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter, item->IsBag());
+                item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->m_refCounter.load(), item->IsBag());
         }
     }
 
