@@ -36,13 +36,14 @@ Bag::~Bag()
 
     if (Player* player = GetOwner())
     {
-        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is deleting for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-            this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), player, player->GetName().c_str(), player->GetGUID(),
+        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d) is deleting for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
+            this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter, player, player->GetName().c_str(), player->GetGUID(),
             player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(GetGUID()) != nullptr);
     }
     else
     {
-        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is deleting", this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot());
+        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, RefCounter: %d) is deleting",
+            this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), m_refCounter);
     }
 }
 
