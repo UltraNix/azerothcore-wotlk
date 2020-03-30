@@ -243,14 +243,52 @@ void MapManager::Update(uint32 diff)
         }
     }
 
-    MapMapType::iterator iter = i_maps.begin();
-    for (; iter != i_maps.end(); ++iter)
+    const bool updateMapsAsync = m_updater.activated();
+    if ( updateMapsAsync )
     {
-        bool full = mapUpdateStep<3 && ((mapUpdateStep==0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep==1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep==2 && iter->second->IsDungeon()));
-        if (m_updater.activated())
-            m_updater.schedule_update(*iter->second, uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
-        else
-            iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
+        PROFILE_SCOPE( "QueueUpdateMaps" );
+
+        std::vector< Map * > maps;
+        maps.reserve( 200 );
+
+        for ( auto & it : i_maps )
+        {
+            if ( MapInstanced * container = it.second->ToMapInstanced() )
+            {
+                container->CleanupInstances( diff, diff );
+
+                for ( auto & it2 : container->GetInstancedMaps() )
+                {
+                    maps.push_back( it2.second );
+                }
+            }
+            else
+            {
+                maps.push_back( it.second );
+            }
+        }
+
+        std::sort( maps.begin(), maps.end(), [](const Map * lhs, const Map * rhs )
+        {
+            return lhs->GetPlayersCount() > rhs->GetPlayersCount();
+        } );
+
+        for ( Map * map : maps )
+        {
+            //! TODO: refactor this crap! ( rewritten by xinef & pussy )
+            const bool full = mapUpdateStep < 3 && ( ( mapUpdateStep == 0 && !map->IsBattlegroundOrArena() && !map->IsDungeon() ) || ( mapUpdateStep == 1 && map->IsBattlegroundOrArena() ) || ( mapUpdateStep == 2 && map->IsDungeon() ) );
+            m_updater.schedule_update( *map, uint32( full ? i_timer[ mapUpdateStep ].GetCurrent() : 0 ), diff );
+        }
+    }
+    else
+    {
+        PROFILE_SCOPE( "UpdateMaps" );
+        for ( auto iter = i_maps.begin(); iter != i_maps.end(); ++iter )
+        {
+            //! TODO: refactor this crap! ( rewritten by xinef & pussy )
+            bool full = mapUpdateStep < 3 && ( ( mapUpdateStep == 0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon() ) || ( mapUpdateStep == 1 && iter->second->IsBattlegroundOrArena() ) || ( mapUpdateStep == 2 && iter->second->IsDungeon() ) );
+            iter->second->Update( uint32( full ? i_timer[ mapUpdateStep ].GetCurrent() : 0 ), diff, false );
+        }
     }
 
     {
@@ -266,7 +304,7 @@ void MapManager::Update(uint32 diff)
     {
         PROFILE_SCOPE( "DelayedUpdate" );
 
-        for (iter = i_maps.begin(); iter != i_maps.end(); ++iter)
+        for (auto iter = i_maps.begin(); iter != i_maps.end(); ++iter)
         {
             bool full = ((mapUpdateStep==0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep==1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep==2 && iter->second->IsDungeon()));
             if (full)

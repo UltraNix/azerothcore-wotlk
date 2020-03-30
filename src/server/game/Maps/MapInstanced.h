@@ -16,7 +16,9 @@ class MapInstanced : public Map
         ~MapInstanced() {}
 
         // functions overwrite Map versions
-        void Update(const uint32, const uint32, bool thread = true);
+        void Update( const uint32 t_diff, const uint32 s_diff, bool thread = true ) override;;
+
+        void CleanupInstances( uint32 t_diff, uint32 s_diff );
         void DelayedUpdate(const uint32 diff);
         //void RelocationNotify();
         void UnloadAll();
