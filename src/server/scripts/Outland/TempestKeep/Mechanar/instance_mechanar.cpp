@@ -43,6 +43,11 @@ class instance_mechanar : public InstanceMapScript
                     case GO_DOOR_NETHERMANCER:
                         AddDoor(gameObject, true);
                         break;
+                    case GO_CACHE_OF_LEGION:
+                        if (instance)
+                            if (instance->IsHeroic())
+                                gameObject->SetLootMode(3);
+                        break;
                     default:
                         break;
                 }

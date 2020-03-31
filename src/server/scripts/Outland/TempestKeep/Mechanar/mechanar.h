@@ -39,7 +39,8 @@ enum GameobjectIds
 {
     GO_DOOR_MOARG_1                     = 184632,
     GO_DOOR_MOARG_2                     = 184322,
-    GO_DOOR_NETHERMANCER                = 184449
+    GO_DOOR_NETHERMANCER                = 184449,
+    GO_CACHE_OF_LEGION                  = 184465
 };
 
 enum SpellIds
