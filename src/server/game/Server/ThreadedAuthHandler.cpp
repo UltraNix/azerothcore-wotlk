@@ -23,7 +23,14 @@ void ThreadedAuthHandler::Initialize( size_t threadsCount )
             while ( !m_shutdown )
             {
                 auto request = m_queue.pop();
+                try
+                {
                 HandleRequest( std::move( request ) );
+                }
+                catch (ByteBufferException &)
+                {
+                    sLog->outError("ThreadedAuthHandler::HandleRequest ByteBufferException occured while parsing auth request.");
+                }
             }
         } ) );
     }
