@@ -903,8 +903,6 @@ public:
 
         if (target)
         {
-            if ((target->GetMap()->IsBattlegroundOrArena() || target->GetMap()->Instanceable()) && (handler->GetSession()->GetSecurity() < SEC_GAMEMASTER))
-               return false;
             target->ResurrectPlayer(!AccountMgr::IsPlayerAccount(target->GetSession()->GetSecurity()) ? 1.0f : 0.5f);
             target->SpawnCorpseBones();
             target->SaveToDB(false, false);
