@@ -15,6 +15,7 @@ option(USE_SCRIPTPCH    "Use precompiled headers when compiling scripts"        
 option(USE_COREPCH      "Use precompiled headers when compiling servers"              1)
 option(WITH_WARNINGS    "Show all warnings during compile"                            0)
 option(WITH_COREDEBUG   "Include additional debug-code in core"                       0)
+option(ADDRESS_SANITIZER "Use Address Sanitizer (with GCC compiler only)"              0)
 option(WITHOUT_GIT      "Disable the GIT testing routines"                            0)
 OPTION(BOOST_STATIC		"Use Boost static libs"										  0)
 set(WITH_SOURCE_TREE    "hierarchical" CACHE STRING "Build the source tree for IDE's.")

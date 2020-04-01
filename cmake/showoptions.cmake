@@ -62,6 +62,12 @@ else()
   message("* Use coreside debug     : No  (default)")
 endif()
 
+if( ADDRESS_SANITIZER )
+  message("* Use Address Sanitizer  : Yes")
+else()
+  message("* Use Address Sanitizer  : No  (default)")
+endif()
+
 if( NOT WITH_SOURCE_TREE STREQUAL "no" )
   message("* Show source tree       : Yes (${WITH_SOURCE_TREE})")
 else()
