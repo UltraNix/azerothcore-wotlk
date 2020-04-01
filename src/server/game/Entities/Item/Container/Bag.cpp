@@ -20,29 +20,8 @@ Bag::Bag(): Item()
 Bag::~Bag()
 {
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
-        if (ItemRef item = m_bagslot[i])
-        {
-            if (item->IsInWorld())
-            {
-                sLog->outCrash("Item %u (slot %u, bag slot %u) in bag %u (slot %u, bag slot %u, m_bagslot %u) is to be deleted but is still in world.",
-                    item->GetEntry(), (uint32)item->GetSlot(), (uint32)item->GetBagSlot(),
-                    GetEntry(), (uint32)GetSlot(), (uint32)GetBagSlot(), (uint32)i);
-                item->RemoveFromWorld();
-            }
-
-            m_bagslot[ i ] = nullptr;
-            delete *item;
-        }
-
-    if (Player* player = GetOwner())
     {
-        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is deleting for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-            this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), player, player->GetName().c_str(), player->GetGUID(),
-            player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(GetGUID()) != nullptr);
-    }
-    else
-    {
-        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d) is deleting", this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot());
+        m_bagslot[ i ].Delete();
     }
 }
 
@@ -108,15 +87,12 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry
 
     ItemTemplate const* itemProto = GetTemplate(); // checked in Item::LoadFromDB
     SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
+
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
-        if ( ItemRef item = m_bagslot[ i ] )
-        {
-            m_bagslot[ i ] = nullptr;
-            delete *item;
-        }
+        m_bagslot[ i ].Delete();
     }
 
     return true;

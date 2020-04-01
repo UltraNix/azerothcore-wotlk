@@ -141,7 +141,12 @@ class AuctionItem
 public:
     AuctionItem( Item * item );
 
-    Item * GetItem() const
+    ItemRef & GetItem()
+    {
+        return m_item;
+    }
+
+    ItemRef const & GetItem() const
     {
         return m_item;
     }
@@ -156,7 +161,7 @@ public:
 protected:
     std::array< std::wstring, TOTAL_LOCALES >   m_localizedNames;
 
-    Item *                                      m_item;
+    ItemRef                                     m_item;
     ItemTemplate const*                         m_itemTemplate;
 };
 

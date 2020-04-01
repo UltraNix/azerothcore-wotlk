@@ -162,7 +162,7 @@ class SpellCastTargets
 
         // objects (can be used at spell creating and after Update at casting)
         WorldObject* m_objectTarget;
-        Item* m_itemTarget;
+        ItemRef m_itemTarget;
 
         // object GUID/etc, can be used always
         uint64 m_objectTargetGUID;
@@ -465,7 +465,7 @@ class Spell
         void HandleThreatSpells();
 
         SpellInfo const* const m_spellInfo;
-        Item* m_CastItem;
+        ItemRef m_CastItem;
         uint64 m_castItemGUID;
         uint8 m_cast_count;
         uint32 m_glyphIndex;
@@ -584,7 +584,7 @@ class Spell
 
         // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)
         Unit* unitTarget;
-        Item* itemTarget;
+        ItemRef itemTarget;
         GameObject* gameObjTarget;
         WorldLocation* destTarget;
         int32 damage;

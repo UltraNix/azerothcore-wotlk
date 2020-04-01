@@ -210,7 +210,6 @@ class Item : public Object
         ItemRef CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
-        ~Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
@@ -353,6 +352,12 @@ class Item : public Object
         void BuildUpdate(UpdateDataMapType& data_map, UpdatePlayerSet&) override;
 
         uint32 GetScriptId() const { return GetTemplate()->ScriptId; }
+
+    protected:
+        ~Item()
+        {
+        }
+
     private:
         std::string m_text;
         uint8 m_slot;
@@ -374,6 +379,7 @@ class ItemRef
 public:
     ItemRef( Item * item = nullptr );
     ItemRef( const ItemRef & rhs );
+
     ~ItemRef();
 
     void operator=( ItemRef const& rhs );
@@ -384,7 +390,10 @@ public:
     bool operator!=( ItemRef const& rhs ) const;
     bool operator!=( Item const* rhs ) const;
 
+    Item *  Release();
+
     void    Reset( Item * item = nullptr );
+    void    Delete();
 
     operator bool() const;
 

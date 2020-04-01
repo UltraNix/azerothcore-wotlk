@@ -764,7 +764,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recvData)
     ItemRef bodyItem = new Item;                              // This is not bag and then can be used new Item.
     if (!bodyItem->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), MAIL_BODY_ITEM_TEMPLATE, player))
     {
-        delete *bodyItem;
+        bodyItem.Delete();
         return;
     }
 
@@ -775,7 +775,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recvData)
         if (!mailTemplateEntry)
         {
             player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
-            delete *bodyItem;
+            bodyItem.Delete();
             return;
         }
 
@@ -803,7 +803,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recvData)
     else
     {
         player->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_EQUIP_ERROR, msg);
-        delete *bodyItem;
+        bodyItem.Delete();
     }
 }
 

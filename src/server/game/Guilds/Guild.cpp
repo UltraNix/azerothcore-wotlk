@@ -406,7 +406,7 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
         stmt->setUInt8 (2, slotId);
         CharacterDatabase.Execute(stmt);
 
-        delete *pItem;
+        pItem.Delete();
         return false;
     }
 
@@ -419,15 +419,16 @@ bool Guild::BankTab::LoadItemFromDB(Field* fields)
 void Guild::BankTab::Delete(SQLTransaction& trans, bool removeItemsFromDB)
 {
     for (uint8 slotId = 0; slotId < GUILD_BANK_MAX_SLOTS; ++slotId)
-        if (ItemRef pItem = m_items[slotId])
+    {
+        if ( ItemRef & pItem = m_items[ slotId ] )
         {
             pItem->RemoveFromWorld();
-            if (removeItemsFromDB)
-                pItem->DeleteFromDB(trans);
+            if ( removeItemsFromDB )
+                pItem->DeleteFromDB( trans );
 
-            sObjectMgr->RequestItemDestroy( *pItem );
-            m_items[ slotId ] = nullptr;
+            pItem.Delete();
         }
+    }
 }
 
 inline void Guild::BankTab::WritePacket(WorldPacket& data) const
@@ -831,27 +832,32 @@ inline void Guild::MoveItemData::CopySlots(SlotIds& ids) const
 // PlayerMoveItemData
 bool Guild::PlayerMoveItemData::InitItem()
 {
-    m_pItem = *m_pPlayer->GetItemByPos(m_container, m_slotId);
-    if (m_pItem)
+    ItemRef item = m_pPlayer->GetItemByPos(m_container, m_slotId);
+    if ( !item )
+        return false;
+
+    // Anti-WPE protection. Do not move non-empty bags to bank.
+    if (item->IsNotEmptyBag())
     {
-        // Anti-WPE protection. Do not move non-empty bags to bank.
-        if (m_pItem->IsNotEmptyBag())
-        {
-            m_pPlayer->SendEquipError(EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS, m_pItem);
-            m_pItem = NULL;
-        }
-        // Bound items cannot be put into bank.
-        else if (!m_pItem->CanBeTraded())
-        {
-            m_pPlayer->SendEquipError(EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, m_pItem);
-            m_pItem = NULL;
-        }
+        m_pPlayer->SendEquipError(EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS, item);
+        return false;
     }
-    return (m_pItem != NULL);
+
+    // Bound items cannot be put into bank.
+    if (!item->CanBeTraded())
+    {
+        m_pPlayer->SendEquipError(EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, item);
+        return false;
+    }
+
+    m_pItem = item;
+    return true;
 }
 
 void Guild::PlayerMoveItemData::RemoveItem(SQLTransaction& trans, MoveItemData* /*pOther*/, uint32 splitedAmount)
 {
+    ASSERT( m_pItem );
+
     if (splitedAmount)
     {
         m_pItem->SetCount(m_pItem->GetCount() - splitedAmount);
@@ -862,11 +868,11 @@ void Guild::PlayerMoveItemData::RemoveItem(SQLTransaction& trans, MoveItemData* 
     {
         m_pPlayer->MoveItemFromInventory(m_container, m_slotId, true);
         m_pItem->DeleteFromInventoryDB(trans);
-        m_pItem = NULL;
+        m_pItem.Reset();
     }
 }
 
-ItemRef Guild::PlayerMoveItemData::StoreItem(SQLTransaction& trans, ItemRef const& pItem)
+ItemRef Guild::PlayerMoveItemData::StoreItem(SQLTransaction& trans, ItemRef & pItem)
 {
     ASSERT(pItem);
     m_pPlayer->MoveItemToInventory(m_vec, pItem, true);
@@ -890,8 +896,8 @@ inline InventoryResult Guild::PlayerMoveItemData::CanStore(ItemRef const& pItem,
 // BankMoveItemData
 bool Guild::BankMoveItemData::InitItem()
 {
-    m_pItem = *m_pGuild->_GetItem(m_container, m_slotId);
-    return (m_pItem != NULL);
+    m_pItem = m_pGuild->_GetItem(m_container, m_slotId);
+    return m_pItem;
 }
 
 bool Guild::BankMoveItemData::HasStoreRights(MoveItemData* pOther) const
@@ -900,6 +906,7 @@ bool Guild::BankMoveItemData::HasStoreRights(MoveItemData* pOther) const
     // Do not check rights if item is being swapped within the same bank tab
     if (pOther->IsBank() && pOther->GetContainer() == m_container)
         return true;
+
     return m_pGuild->_MemberHasTabRights(m_pPlayer->GetGUID(), m_container, GUILD_BANK_RIGHT_DEPOSIT_ITEM);
 }
 
@@ -936,7 +943,7 @@ void Guild::BankMoveItemData::RemoveItem(SQLTransaction& trans, MoveItemData* pO
         m_pGuild->_UpdateMemberWithdrawSlots(trans, m_pPlayer->GetGUID(), m_container);
 }
 
-ItemRef Guild::BankMoveItemData::StoreItem(SQLTransaction& trans, ItemRef const& pItem)
+ItemRef Guild::BankMoveItemData::StoreItem(SQLTransaction& trans, ItemRef & pItem)
 {
     if (!pItem)
         return NULL;
@@ -976,7 +983,7 @@ void Guild::BankMoveItemData::LogAction(MoveItemData* pFrom) const
     MoveItemData::LogAction(pFrom);
 }
 
-ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, const ItemRef & pItem, ItemPosCount& pos, bool clone) const
+ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef & pItem, ItemPosCount& pos, bool clone) const
 {
     uint8 slotId = uint8(pos.pos);
 
@@ -991,7 +998,7 @@ ItemRef Guild::BankMoveItemData::_StoreItem(SQLTransaction& trans, BankTab* pTab
             pItem->RemoveFromWorld();
             pItem->DeleteFromDB(trans);
 
-            sObjectMgr->RequestItemDestroy( *pItem );
+            pItem.Delete();
         }
         return pItemDest;
     }

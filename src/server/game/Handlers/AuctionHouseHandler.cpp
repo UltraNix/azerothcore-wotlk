@@ -291,7 +291,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
                 return SendDatabaseError();
 
             if ( auctionItem != item )
-                sObjectMgr->RequestItemDestroy( *item );
+                item.Delete();
         }
         else
         {

@@ -233,25 +233,11 @@ Item::Item()
     m_lootGenerated = false;
     mb_in_trade = false;
     m_lastPlayedTimeUpdate = time(nullptr);
+    m_refCounter = 0;
 
     m_refundRecipient = 0;
     m_paidMoney = 0;
     m_paidExtendedCost = 0;
-}
-
-Item::~Item()
-{
-    if ((GetSlot() >= INVENTORY_SLOT_BAG_START && GetSlot() < INVENTORY_SLOT_BAG_END) || (GetSlot() >= BANK_SLOT_BAG_START && GetSlot() < BANK_SLOT_BAG_END))
-        if (Player* player = GetOwner())
-        {
-            sLog->outBagCrash("Item %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is deleting for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), player, player->GetName().c_str(), player->GetGUID(),
-                player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(GetGUID()) != nullptr);
-        }
-        else
-        {
-            sLog->outBagCrash("Item %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is deleting", this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag());
-        }
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
@@ -286,6 +272,7 @@ bool Item::IsNotEmptyBag() const
 {
     if (Bag const* bag = ToBag())
         return !bag->IsEmpty();
+
     return false;
 }
 
@@ -686,24 +673,10 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
         // pretend the item never existed
         RemoveFromUpdateQueueOf(forplayer);
         forplayer->DeleteRefundReference(GetGUIDLow());
-        sObjectMgr->RequestItemDestroy( this );
-        if ((GetSlot() >= INVENTORY_SLOT_BAG_START && GetSlot() < INVENTORY_SLOT_BAG_END) || (GetSlot() >= BANK_SLOT_BAG_START && GetSlot() < BANK_SLOT_BAG_END))
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) got state ITEM_NEW, but changed to ITEM_REMOVED for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
-                forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
-        return;
-    }
 
-    if ((GetSlot() >= INVENTORY_SLOT_BAG_START && GetSlot() < INVENTORY_SLOT_BAG_END) || (GetSlot() >= BANK_SLOT_BAG_START && GetSlot() < BANK_SLOT_BAG_END))
-    {
-        if (state == ITEM_REMOVED)
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) changed state to ITEM_REMOVED from old state %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), uState, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
-                forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
-        else if (uState == ITEM_REMOVED)
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) got state ITEM_REMOVED, but changed state to %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                this, GetGUID(), GetGUIDLow(), GetEntry(), GetSlot(), GetBagSlot(), IsBag(), state, forplayer, forplayer->GetName().c_str(), forplayer->GetGUID(),
-                forplayer->GetGUIDLow(), forplayer->GetSession()->GetAccountId(), forplayer->GetItemByGuid(GetGUID()) != nullptr);
+        sObjectMgr->RequestItemDestroy( this );
+
+        return;
     }
 
     if (state != ITEM_UNCHANGED)
@@ -1335,6 +1308,16 @@ ItemRef::ItemRef( Item * item /*= nullptr */ )
     Reset( item );
 }
 
+Item * ItemRef::Release()
+{
+    Item * item = m_item;
+    if ( item == nullptr )
+        return nullptr;
+
+    Reset();
+    return item;
+}
+
 void ItemRef::Reset( Item * item /*= nullptr */ )
 {
     if ( m_item != nullptr )
@@ -1348,6 +1331,15 @@ void ItemRef::Reset( Item * item /*= nullptr */ )
     {
         ++m_item->m_refCounter;
     }
+}
+
+void ItemRef::Delete()
+{
+    Item * item = Release();
+    if ( item == nullptr )
+        return;
+
+    sObjectMgr->RequestItemDestroy( item );
 }
 
 ItemRef::~ItemRef()

@@ -101,7 +101,7 @@ void MailDraft::deleteIncludedItems(SQLTransaction& trans, bool inDB /*= false*/
 {
     for (MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
     {
-        ItemRef item = mailItemIter->second;
+        ItemRef & item = mailItemIter->second;
 
         if (inDB)
         {
@@ -110,7 +110,7 @@ void MailDraft::deleteIncludedItems(SQLTransaction& trans, bool inDB /*= false*/
             trans->Append(stmt);
         }
 
-        sObjectMgr->RequestItemDestroy( *item );
+        item.Delete();
     }
 
     m_items.clear();

@@ -11,9 +11,7 @@
 class Bag : public Item
 {
     public:
-
         Bag();
-        ~Bag();
 
         void AddToWorld();
         void RemoveFromWorld();
@@ -43,12 +41,13 @@ class Bag : public Item
         void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const;
 
     protected:
+        ~Bag();
 
         // Bag Storage space
         ItemRef m_bagslot[MAX_BAG_SIZE];
 };
 
-inline ItemRef NewItemOrBag(ItemTemplate const* proto)
+inline Item* NewItemOrBag(ItemTemplate const* proto)
 {
     return (proto->InventoryType == INVTYPE_BAG) ? new Bag : new Item;
 }

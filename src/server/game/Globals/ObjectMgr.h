@@ -1405,7 +1405,7 @@ class ObjectMgr
             GO_TO_CREATURE,         // GO is dependant on creature
         };
 
-        std::mutex       _itemDestroyMutex;
+        std::recursive_mutex  _itemDestroyMutex;
         std::vector< Item * > _itemsToDestroy;
 
         std::set<uint32> _transportMaps; // Helper container storing map ids that are for transports only, loaded from gameobject_template

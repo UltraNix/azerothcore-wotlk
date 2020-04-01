@@ -279,15 +279,19 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket & recvData)
         return;
     }
 
+    pItem->ItemRestore( _player->GetGUIDLow(), ITEM_RESTORE_ACTION_INSERT );
+
     if (count)
     {
         uint32 i_count = count;
         _player->DestroyItemCount(pItem, i_count, true);
     }
     else
-        _player->DestroyItem(bag, slot, true);
+    {
+        pItem.Reset();
+        _player->DestroyItem( bag, slot, true );
+    }
 
-    pItem->ItemRestore(_player->GetGUIDLow(), ITEM_RESTORE_ACTION_INSERT);
 }
 
 void ItemTemplate::InitializeQueryData()

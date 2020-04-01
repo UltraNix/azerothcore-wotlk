@@ -271,9 +271,10 @@ void AuctionHouseMgr::LoadAuctionItems()
         ItemRef item = NewItemOrBag(proto);
         if (!item->LoadFromDB(item_guid, 0, fields, item_template))
         {
-            delete *item;
+            item.Delete();
             continue;
         }
+
         AddAItem(item);
 
         ++count;
@@ -346,11 +347,13 @@ bool AuctionHouseMgr::RemoveAItem(AuctionEntry* entry, bool deleteFromDB)
 
     if (deleteFromDB)
     {
-        auto item = it->second.GetItem();
 
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
+
+        Item * item = it->second.GetItem().Release();
         item->FSetState(ITEM_REMOVED);
         item->SaveToDB(trans);
+
         CharacterDatabase.CommitTransaction(trans);
     }
 
@@ -627,7 +630,7 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
         return false;
     }
 
-    Item* item = aitem->GetItem();
+    auto & item = aitem->GetItem();
 
     data << uint32(Id);
     data << uint32(item->GetEntry());

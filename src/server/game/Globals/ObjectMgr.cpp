@@ -9406,41 +9406,22 @@ void ObjectMgr::SetDebugItemDestroyEnabled( bool enabled )
 
 void ObjectMgr::RequestItemDestroy( Item * item )
 {
-    if ((item->GetSlot() >= INVENTORY_SLOT_BAG_START && item->GetSlot() < INVENTORY_SLOT_BAG_END) || (item->GetSlot() >= BANK_SLOT_BAG_START && item->GetSlot() < BANK_SLOT_BAG_END))
-    {
-        if (Player* player = item->GetOwner())
-        {
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is requested to be destroyed for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and stil have it?: %d",
-                item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), player, player->GetName().c_str(), player->GetGUID(),
-                player->GetGUIDLow(), player->GetSession()->GetAccountId(), player->GetItemByGuid(item->GetGUID()) != nullptr);
-        }
-        else
-        {
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is requested to be destroyed",
-                item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag());
-        }
-    }
-
     if ( d_debugItemDestroy )
     {
-        if ( Player * player = item->GetOwner() )
+        if ( item->m_refCounter > 0 )
         {
-            if ( player->GetItemByPos( item->GetBagSlot(), item->GetSlot() ) == item )
-            {
-                ACE_Stack_Trace trace( 0, 3 );
-                sLog->outBagCrash( "Item is requested to be destroyed, but player still has it!\nTrace:\n", trace.c_str() );
-            }
+            ACE_Stack_Trace trace( 1, 4 );
+            sLog->outBagCrash( "Item: [%p, %d], owner: [%p, %d], IsBag: %d, BagSlot: `%d`, Slot: `%d`, Pos: `%d`, ref count: `%d`!\n%s", this, item->GetGUIDLow(), item->GetOwner(), item->GetOwnerGUID(), item->IsBag(), item->GetBagSlot(), item->GetSlot(), item->GetPos(), item->m_refCounter.load(), trace.c_str() );
         }
     }
 
-    std::lock_guard < std::mutex > guard( _itemDestroyMutex );
+    std::lock_guard < std::recursive_mutex > guard( _itemDestroyMutex );
     _itemsToDestroy.push_back( item );
 }
 
-
 void ObjectMgr::UpdateItemDestroyQueue()
 {
-    std::lock_guard < std::mutex > guard( _itemDestroyMutex );
+    std::lock_guard < std::recursive_mutex > guard( _itemDestroyMutex );
     for ( auto idx = 0u; idx < _itemsToDestroy.size(); )
     {
         Item* item = _itemsToDestroy[ idx ];

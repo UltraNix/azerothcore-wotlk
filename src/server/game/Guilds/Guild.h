@@ -522,9 +522,11 @@ private:
     class BankTab
     {
     public:
-        BankTab(uint32 guildId, uint8 tabId) : m_guildId(guildId), m_tabId(tabId)
+        BankTab(uint32 guildId, uint8 tabId)
+            : m_guildId(guildId), m_tabId(tabId)
         {
-            memset(m_items, 0, GUILD_BANK_MAX_SLOTS * sizeof(Item*));
+            for ( ItemRef & item : m_items )
+                item.Reset();
         }
 
         void LoadFromDB(Field* fields);
@@ -543,14 +545,14 @@ private:
         void SetText(std::string const& text);
         void SendText(const Guild* guild, WorldSession* session) const;
 
-        inline ItemRef GetItem(uint8 slotId) const { return slotId < GUILD_BANK_MAX_SLOTS ?  m_items[slotId] : NULL; }
+        inline ItemRef const& GetItem(uint8 slotId) const { return slotId < GUILD_BANK_MAX_SLOTS ?  m_items[slotId] : NullItemRef; }
         bool SetItem(SQLTransaction& trans, uint8 slotId, ItemRef const& pItem);
 
     private:
         uint32 m_guildId;
         uint8 m_tabId;
 
-        Item* m_items[GUILD_BANK_MAX_SLOTS];
+        ItemRef     m_items[GUILD_BANK_MAX_SLOTS];
         std::string m_name;
         std::string m_icon;
         std::string m_text;
@@ -580,7 +582,7 @@ private:
         // Remove item from container (if splited update items fields)
         virtual void RemoveItem(SQLTransaction& trans, MoveItemData* pOther, uint32 splitedAmount = 0) = 0;
         // Saves item to container
-        virtual ItemRef StoreItem(SQLTransaction& trans, ItemRef const& pItem) = 0;
+        virtual ItemRef StoreItem(SQLTransaction& trans, ItemRef & pItem) = 0;
         // Log bank event
         virtual void LogBankEvent(SQLTransaction& trans, MoveItemData* pFrom, uint32 count) const = 0;
         // Log GM action
@@ -588,7 +590,7 @@ private:
         // Copy slots id from position vector
         void CopySlots(SlotIds& ids) const;
 
-        ItemRef GetItem(bool isCloned = false) const { return isCloned ? m_pClonedItem : m_pItem; }
+        ItemRef const& GetItem(bool isCloned = false) const { return isCloned ? m_pClonedItem : m_pItem; }
         uint8 GetContainer() const { return m_container; }
         uint8 GetSlotId() const { return m_slotId; }
 
@@ -599,8 +601,8 @@ private:
         Player* m_pPlayer;
         uint8 m_container;
         uint8 m_slotId;
-        Item* m_pItem;
-        Item* m_pClonedItem;
+        ItemRef m_pItem;
+        ItemRef m_pClonedItem;
         ItemPosCountVec m_vec;
     };
 
@@ -613,7 +615,7 @@ private:
         bool IsBank() const { return false; }
         bool InitItem();
         void RemoveItem(SQLTransaction& trans, MoveItemData* pOther, uint32 splitedAmount = 0);
-        ItemRef StoreItem(SQLTransaction& trans, ItemRef const& pItem);
+        ItemRef StoreItem(SQLTransaction& trans, ItemRef & pItem);
         void LogBankEvent(SQLTransaction& trans, MoveItemData* pFrom, uint32 count) const;
     protected:
         InventoryResult CanStore(ItemRef const& pItem, bool swap);
@@ -630,7 +632,7 @@ private:
         bool HasStoreRights(MoveItemData* pOther) const;
         bool HasWithdrawRights(MoveItemData* pOther) const;
         void RemoveItem(SQLTransaction& trans, MoveItemData* pOther, uint32 splitedAmount);
-        ItemRef StoreItem(SQLTransaction& trans, ItemRef const& pItem);
+        ItemRef StoreItem(SQLTransaction& trans, ItemRef & pItem);
         void LogBankEvent(SQLTransaction& trans, MoveItemData* pFrom, uint32 count) const;
         void LogAction(MoveItemData* pFrom) const;
 
@@ -638,7 +640,7 @@ private:
         InventoryResult CanStore( ItemRef const& pItem, bool swap);
 
     private:
-        ItemRef _StoreItem(SQLTransaction& trans, BankTab* pTab, const ItemRef & pItem, ItemPosCount& pos, bool clone) const;
+        ItemRef _StoreItem(SQLTransaction& trans, BankTab* pTab, ItemRef & pItem, ItemPosCount& pos, bool clone) const;
         bool _ReserveSpace(uint8 slotId, ItemRef const& pItem, ItemRef const& pItemDest, uint32& count);
         void CanStoreItemInTab(ItemRef const& pItem, uint8 skipSlotId, bool merge, uint32& count);
     };

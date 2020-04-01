@@ -368,13 +368,13 @@ struct EnchantDuration
     EnchantDuration(Item* _item, EnchantmentSlot _slot, uint32 _leftduration) : item(_item), slot(_slot),
         leftduration(_leftduration){ ASSERT(item); };
 
-    Item* item;
+    ItemRef item;
     EnchantmentSlot slot;
     uint32 leftduration;
 };
 
 typedef std::list<EnchantDuration> EnchantDurationList;
-typedef std::list<Item*> ItemDurationList;
+typedef std::list<ItemRef> ItemDurationList;
 
 enum PlayerMovementType
 {
@@ -1333,7 +1333,7 @@ class Player : public Unit, public GridObject<Player>
         ItemRef GetWeaponForAttack(WeaponAttackType attackType, bool useable = false) const;
         ItemRef GetShield(bool useable = false) const;
         static uint8 GetAttackBySlot(uint8 slot);        // MAX_ATTACK if not weapon slot
-        std::vector<Item*> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
+        std::vector<ItemRef> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
         static bool IsInventoryPos(uint16 pos) { return IsInventoryPos(pos >> 8, pos & 255); }
         static bool IsInventoryPos(uint8 bag, uint8 slot);
         static bool IsEquipmentPos(uint16 pos) { return IsEquipmentPos(pos >> 8, pos & 255); }
@@ -1380,9 +1380,9 @@ class Player : public Unit, public GridObject<Player>
         InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
         ItemRef StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId = 0);
         ItemRef StoreNewItem(ItemPosCountVec const& pos, uint32 item, bool update, int32 randomPropertyId, AllowedLooterSet &allowedLooters);
-        ItemRef StoreItem(ItemPosCountVec const& pos, ItemRef const& pItem, bool update);
+        ItemRef StoreItem(ItemPosCountVec const& pos, ItemRef & pItem, bool update);
         ItemRef EquipNewItem(uint16 pos, uint32 item, bool update);
-        ItemRef EquipItem(uint16 pos, ItemRef const& pItem, bool update);
+        ItemRef EquipItem(uint16 pos, ItemRef & pItem, bool update);
         void AutoUnequipOffhandIfNeed(bool force = false);
         bool StoreNewItemInBestSlots(uint32 item_id, uint32 item_count);
         void AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore const& store, bool broadcast = false);
@@ -1407,17 +1407,16 @@ class Player : public Unit, public GridObject<Player>
         void SetVisibleItemSlot(uint8 slot, ItemRef const& pItem);
         uint32 RealVisibleItemData( uint32 index ) const;
 
-        ItemRef BankItem(ItemPosCountVec const& dest, ItemRef const& pItem, bool update)
+        ItemRef BankItem(ItemPosCountVec const& dest, ItemRef & pItem, bool update)
         {
             return StoreItem(dest, pItem, update);
         }
-        ItemRef BankItem(uint16 pos, ItemRef const& pItem, bool update);
         void RemoveItem(uint8 bag, uint8 slot, bool update, bool swap = false);
         bool MoveItemFromInventory(uint8 bag, uint8 slot, bool update);
         bool MoveItemFromInventory(uint8 bag, uint8 slot, bool update, SQLTransaction & transaction);
 
                                                             // in trade, auction, guild bank, mail....
-        void MoveItemToInventory(ItemPosCountVec const& dest, ItemRef const& pItem, bool update, bool in_characterInventoryDB = false);
+        void MoveItemToInventory(ItemPosCountVec const& dest, ItemRef & pItem, bool update, bool in_characterInventoryDB = false);
                                                             // in trade, guild bank, mail....
         void RemoveItemDependentAurasAndCasts( ItemRef const& pItem);
         void DestroyItem(uint8 bag, uint8 slot, bool update);
@@ -1732,21 +1731,21 @@ class Player : public Unit, public GridObject<Player>
         uint8 unReadMails;
         time_t m_nextMailDelivereTime;
 
-        typedef std::unordered_map<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, ItemRef> ItemMap;
 
         ItemMap mMitems;                                    //template defined in objectmgr.cpp
 
-        ItemRef GetMItem(uint32 id)
+        ItemRef const& GetMItem(uint32 id)
         {
             ItemMap::const_iterator itr = mMitems.find(id);
-            return itr != mMitems.end() ? itr->second : NULL;
+            return itr != mMitems.end() ? itr->second : NullItemRef;
         }
 
         void AddMItem(ItemRef const& it)
         {
             ASSERT(it);
             //ASSERT deleted, because items can be added before loading
-            mMitems[it->GetGUIDLow()] = *it;
+            mMitems[it->GetGUIDLow()] = it;
         }
 
         bool RemoveMItem(uint32 id)
@@ -2891,7 +2890,7 @@ class Player : public Unit, public GridObject<Player>
         ItemRef m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
 
-        std::vector<Item*> m_itemUpdateQueue;
+        std::vector<ItemRef> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
 
         uint32 m_ExtraFlags;
@@ -3045,7 +3044,7 @@ class Player : public Unit, public GridObject<Player>
         InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, ItemRef const& pSrcItem) const;
         InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, ItemRef const& pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
         InventoryResult CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, ItemRef const& pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
-        ItemRef _StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool clone, bool update);
+        ItemRef _StoreItem(uint16 pos, ItemRef & pItem, uint32 count, bool clone, bool update);
         ItemRef _LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff, Field* fields);
 
         typedef std::set<uint32> RefundableItemsSet;

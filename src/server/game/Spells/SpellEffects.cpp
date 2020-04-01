@@ -2249,7 +2249,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
         }
     }
 
-    ExecuteLogEffectOpenLock(effIndex, gameObjTarget ? (Object*)gameObjTarget : (Object*)itemTarget);
+    ExecuteLogEffectOpenLock(effIndex, gameObjTarget ? (Object*)gameObjTarget : (Object*)*itemTarget);
 }
 
 void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
@@ -2354,7 +2354,7 @@ void Spell::EffectSummonChangeItem(SpellEffIndex effIndex)
         }
     }
 
-    sObjectMgr->RequestItemDestroy( *pNewItem );
+    pNewItem.Delete();
 }
 
 void Spell::EffectProficiency(SpellEffIndex /*effIndex*/)

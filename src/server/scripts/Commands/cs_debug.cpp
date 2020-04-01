@@ -556,7 +556,7 @@ public:
 
         if (listQueue)
         {
-            std::vector<Item*>& updateQueue = player->GetItemUpdateQueue();
+            std::vector<ItemRef>& updateQueue = player->GetItemUpdateQueue();
             for (size_t i = 0; i < updateQueue.size(); ++i)
             {
                 ItemRef item = updateQueue[i];
@@ -592,7 +592,7 @@ public:
         if (checkAll)
         {
             bool error = false;
-            std::vector<Item*>& updateQueue = player->GetItemUpdateQueue();
+            std::vector<ItemRef>& updateQueue = player->GetItemUpdateQueue();
             for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
             {
                 if (i >= BUYBACK_SLOT_START && i < BUYBACK_SLOT_END)
@@ -633,7 +633,7 @@ public:
                         continue;
                     }
 
-                    if (updateQueue[qp] == NULL)
+                    if (!updateQueue[qp])
                     {
                         handler->PSendSysMessage("The item with slot %d and guid %d has its queuepos (%d) pointing to NULL in the queue!", item->GetSlot(), item->GetGUIDLow(), qp);
                         error = true;
@@ -701,7 +701,7 @@ public:
                                 continue;
                             }
 
-                            if (updateQueue[qp] == NULL)
+                            if (!updateQueue[qp] )
                             {
                                 handler->PSendSysMessage("The item in bag %d at slot %d having guid %d has a queuepos (%d) that points to NULL in the queue!", bag->GetSlot(), item2->GetSlot(), item2->GetGUIDLow(), qp);
                                 error = true;

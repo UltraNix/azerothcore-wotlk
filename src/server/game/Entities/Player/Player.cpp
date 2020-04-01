@@ -730,7 +730,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
 
     clearResurrectRequestData();
 
-    memset(m_items, 0, sizeof(Item*)*PLAYER_SLOTS_COUNT);
+    for ( ItemRef & item : m_items )
+        item.Reset();
 
     m_social = NULL;
 
@@ -959,11 +960,7 @@ Player::~Player()
     // Note: buy back item already deleted from DB when player was saved
     for ( uint8 i = 0; i < PLAYER_SLOTS_COUNT; ++i )
     {
-        if ( ItemRef item = m_items[ i ] )
-        {
-            m_items[ i ] = nullptr;
-            delete * item;
-        }
+        m_items[ i ].Delete();
     }
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
@@ -977,7 +974,9 @@ Player::~Player()
         delete *itr;
 
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
-        delete iter->second;                                //if item is duplicated... then server may crash ... but that item should be deallocated
+        iter->second.Delete();
+
+    mMitems.clear();
 
     delete PlayerTalkClass;
 
@@ -2690,10 +2689,6 @@ void Player::RemoveFromWorld()
     {
         if (ItemRef item = m_items[i])
         {
-            if ((i >= INVENTORY_SLOT_BAG_START && i < INVENTORY_SLOT_BAG_END) || (i >= BANK_SLOT_BAG_START && i < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p Slot: %d is trying to remove from world for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d)",
-                    *item, i, this, GetName().c_str(), GetGUID(), GetGUIDLow(), GetSession()->GetAccountId());
-
             item->RemoveFromWorld();
         }
     }
@@ -5049,15 +5044,15 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                                     continue;
                                 }
 
-                                ItemRef pItem = NewItemOrBag(itemProto);
-                                if (!pItem->LoadFromDB(item_guidlow, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER), itemFields, item_template))
+                                Item* item = NewItemOrBag(itemProto);
+                                if (!item->LoadFromDB(item_guidlow, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER), itemFields, item_template))
                                 {
-                                    pItem->FSetState(ITEM_REMOVED);
-                                    pItem->SaveToDB(trans);              // it also deletes item object!
+                                    item->FSetState(ITEM_REMOVED);
+                                    item->SaveToDB(trans);              // it also deletes item object!
                                     continue;
                                 }
 
-                                draft.AddItem(pItem);
+                                draft.AddItem(item);
                             }
                             while (resultItems->NextRow());
                         }
@@ -12333,7 +12328,8 @@ InventoryResult Player::CanEquipNewItem(uint8 slot, uint16 &dest, uint32 item, b
     if (pItem)
     {
         InventoryResult result = CanEquipItem(slot, dest, pItem, swap);
-        delete *pItem;
+        pItem.Delete();
+
         return result;
     }
 
@@ -13049,7 +13045,7 @@ ItemRef Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool upda
     return pItem;
 }
 
-ItemRef Player::StoreItem(ItemPosCountVec const& dest, ItemRef const& pItem, bool update)
+ItemRef Player::StoreItem(ItemPosCountVec const& dest, ItemRef & pItem, bool update)
 {
     if (!pItem)
         return NULL;
@@ -13084,7 +13080,7 @@ ItemRef Player::StoreItem(ItemPosCountVec const& dest, ItemRef const& pItem, boo
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
-ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool clone, bool update)
+ItemRef Player::_StoreItem(uint16 pos, ItemRef & pItem, uint32 count, bool clone, bool update)
 {
     if (!pItem)
         return NULL;
@@ -13095,10 +13091,10 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
     ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: StoreItem bag = %u, slot = %u, item = %u, count = %u, guid = %u", bag, slot, pItem->GetEntry(), count, pItem->GetGUIDLow());
 
     ItemRef pItem2 = GetItemByPos(bag, slot);
-
-    ItemRef item = pItem;
     if (!pItem2)
     {
+        ItemRef item = pItem;
+
         if (clone)
             item = pItem->CloneItem(count, this);
         else
@@ -13115,12 +13111,7 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
         Bag* pBag = (bag == INVENTORY_SLOT_BAG_0) ? NULL : GetBagByPos(bag);
         if (!pBag)
         {
-            if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is added to m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
-
-            m_items[slot] = *item;
+            m_items[slot] = item;
             SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), item->GetGUID());
             item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
             item->SetUInt64Value(ITEM_FIELD_OWNER, GetGUID());
@@ -13177,12 +13168,9 @@ ItemRef Player::_StoreItem(uint16 pos, ItemRef const& pItem, uint32 count, bool 
             pItem->SetNotRefundable(this);
             pItem->ClearSoulboundTradeable(this);
             RemoveTradeableItem(pItem);
-            pItem->SetState(ITEM_REMOVED, this);
 
-            if ((pItem->GetSlot() >= INVENTORY_SLOT_BAG_START && pItem->GetSlot() < INVENTORY_SLOT_BAG_END) || (pItem->GetSlot() >= BANK_SLOT_BAG_START && pItem->GetSlot() < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction '_StoreItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
+            Item * temp = pItem.Release();
+            temp->SetState(ITEM_REMOVED, this);
         }
 
         AddEnchantmentDurations(pItem2);
@@ -13210,7 +13198,7 @@ ItemRef Player::EquipNewItem(uint16 pos, uint32 item, bool update)
     return NULL;
 }
 
-ItemRef Player::EquipItem(uint16 pos, ItemRef const& pItem, bool update)
+ItemRef Player::EquipItem(uint16 pos, ItemRef & pItem, bool update)
 {
     AddEnchantmentDurations(pItem);
     AddItemDurations(pItem);
@@ -13308,13 +13296,11 @@ ItemRef Player::EquipItem(uint16 pos, ItemRef const& pItem, bool update)
         pItem->SetNotRefundable(this);
         pItem->ClearSoulboundTradeable(this);
         RemoveTradeableItem(pItem);
-        pItem->SetState(ITEM_REMOVED, this);
+
         pItem2->SetState(ITEM_CHANGED, this);
 
-        if ((pItem->GetSlot() >= INVENTORY_SLOT_BAG_START && pItem->GetSlot() < INVENTORY_SLOT_BAG_END) || (pItem->GetSlot() >= BANK_SLOT_BAG_START && pItem->GetSlot() < BANK_SLOT_BAG_END))
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction 'EquipItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
-                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
+        Item * temp = pItem.Release();
+        temp->SetState( ITEM_REMOVED, this );
 
         ApplyEquipCooldown(pItem2);
 
@@ -13410,14 +13396,7 @@ void Player::VisualizeItem(uint8 slot, ItemRef const& pItem)
     if (pItem->GetTemplate()->Bonding == BIND_WHEN_EQUIPED || pItem->GetTemplate()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetTemplate()->Bonding == BIND_QUEST_ITEM)
         pItem->SetBinding(true);
 
-    ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: EquipItem slot = %u, item = %u", slot, pItem->GetEntry());
-
-    if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-        sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is added to m_items container in fuction 'VisualizeItem' slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-            *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
-            GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
-
-    m_items[slot] = *pItem;
+    m_items[slot] = pItem;
     SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), pItem->GetGUID());
     pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
     pItem->SetUInt64Value(ITEM_FIELD_OWNER, GetGUID());
@@ -13499,11 +13478,6 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update, bool swap)
             m_items[slot] = NULL;
             SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), 0);
 
-            if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is removing from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
-
             // Update Melee Crit Rating after unequiping weapon
             switch (slot)
             {
@@ -13579,7 +13553,7 @@ bool Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update, SQLTransa
     return false;
 }
 // Common operation need to add item from inventory without delete in trade, guild bank, mail....
-void Player::MoveItemToInventory(ItemPosCountVec const& dest, ItemRef const& pItem, bool update, bool in_characterInventoryDB)
+void Player::MoveItemToInventory(ItemPosCountVec const& dest, ItemRef & pItem, bool update, bool in_characterInventoryDB)
 {
     // update quest counters
     ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
@@ -13681,11 +13655,6 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             }
 
             m_items[slot] = NULL;
-
-            if ((slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END) || (slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) is destroying item from m_items container slot %d for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), slot, this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
         }
         else if (Bag* pBag = GetBagByPos(bag))
             pBag->RemoveItem(slot, update);
@@ -13700,15 +13669,12 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             pItem->DestroyForPlayer(this);
         }
 
-        if ((pItem->GetSlot() >= INVENTORY_SLOT_BAG_START && pItem->GetSlot() < INVENTORY_SLOT_BAG_END) || (pItem->GetSlot() >= BANK_SLOT_BAG_START && pItem->GetSlot() < BANK_SLOT_BAG_END))
-            sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction 'DestroyItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                *pItem, pItem->GetGUID(), pItem->GetGUIDLow(), pItem->GetEntry(), pItem->GetSlot(), pItem->GetBagSlot(), pItem->IsBag(), this, GetName().c_str(), GetGUID(),
-                GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(pItem->GetGUID()) != nullptr);
-
         //pItem->SetOwnerGUID(0);
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
         pItem->SetSlot(NULL_SLOT);
-        pItem->SetState(ITEM_REMOVED, this);
+
+        Item * temp = pItem.Release();
+        temp->SetState(ITEM_REMOVED, this);
     }
 }
 
@@ -14093,7 +14059,8 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         InventoryResult msg = CanStoreItem(dstbag, dstslot, dest, pNewItem, false);
         if (msg != EQUIP_ERR_OK)
         {
-            delete *pNewItem;
+            pNewItem.Delete();
+
             pSrcItem->SetCount(pSrcItem->GetCount() + count);
             SendEquipError(msg, pSrcItem, NULL);
             return;
@@ -14101,6 +14068,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
 
         if (IsInWorld())
             pSrcItem->SendUpdateToPlayer(this);
+
         pSrcItem->SetState(ITEM_CHANGED, this);
         StoreItem(dest, pNewItem, true);
     }
@@ -14113,7 +14081,8 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         InventoryResult msg = CanBankItem(dstbag, dstslot, dest, pNewItem, false);
         if (msg != EQUIP_ERR_OK)
         {
-            delete *pNewItem;
+            pNewItem.Delete();
+
             pSrcItem->SetCount(pSrcItem->GetCount() + count);
             SendEquipError(msg, pSrcItem, NULL);
             return;
@@ -14121,6 +14090,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
 
         if (IsInWorld())
             pSrcItem->SendUpdateToPlayer(this);
+
         pSrcItem->SetState(ITEM_CHANGED, this);
         BankItem(dest, pNewItem, true);
     }
@@ -14133,7 +14103,8 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         InventoryResult msg = CanEquipItem(dstslot, dest, pNewItem, false);
         if (msg != EQUIP_ERR_OK)
         {
-            delete *pNewItem;
+            pNewItem.Delete();
+
             pSrcItem->SetCount(pSrcItem->GetCount() + count);
             SendEquipError(msg, pSrcItem, NULL);
             return;
@@ -14141,7 +14112,9 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
 
         if (IsInWorld())
             pSrcItem->SendUpdateToPlayer(this);
+
         pSrcItem->SetState(ITEM_CHANGED, this);
+
         EquipItem(dest, pNewItem, true);
         AutoUnequipOffhandIfNeed();
     }
@@ -14581,15 +14554,15 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
     ;//sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: RemoveItemFromBuyBackSlot slot = %u", slot);
     if (slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END)
     {
-        ItemRef pItem = m_items[slot];
-        if (pItem)
+        if (Item* item = m_items[ slot ].Release())
         {
-            pItem->RemoveFromWorld();
-            if (del)
-                pItem->SetState(ITEM_REMOVED, this);
-        }
+            item->RemoveFromWorld();
 
-        m_items[slot] = NULL;
+            if (del)
+            {
+                item->SetState( ITEM_REMOVED, this );
+            }
+        }
 
         uint32 eslot = slot - BUYBACK_SLOT_START;
         SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + (eslot * 2), 0);
@@ -18264,10 +18237,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         SetUInt64Value(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2), 0);
         SetVisibleItemSlot(slot, NULL);
 
-        if ( ItemRef item = m_items[slot] )
-            delete *item;
-
-        m_items[slot] = nullptr;
+        m_items[ slot ].Delete();
     }
 
     ;//sLog->outDebug(LOG_FILTER_PLAYER_LOADING, "Load Basic value of player %s is: ", m_name.c_str());
@@ -19232,7 +19202,9 @@ void Player::_LoadInventory(PreparedQueryResult result, uint32 timeDiff)
                         sLog->outError("Player::_LoadInventory: player (GUID: %u, name: '%s') has item (GUID: %u, entry: %u) which doesnt have a valid bag (Bag GUID: %u, slot: %u). Possible cheat?",
                             GetGUIDLow(), GetName().c_str(), item->GetGUIDLow(), item->GetEntry(), bagGuid, slot);
                         item->DeleteFromInventoryDB(trans);
-                        delete *item;
+
+                        item.Delete();
+
                         continue;
                     }
 
@@ -19390,15 +19362,11 @@ ItemRef Player::_LoadItem(SQLTransaction& trans, uint32 zoneId, uint32 timeDiff,
         // Remove item from inventory if necessary
         if (remove)
         {
-            if ((item->GetSlot() >= INVENTORY_SLOT_BAG_START && item->GetSlot() < INVENTORY_SLOT_BAG_END) || (item->GetSlot() >= BANK_SLOT_BAG_START && item->GetSlot() < BANK_SLOT_BAG_END))
-                sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction '_LoadItem' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                    *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), this, GetName().c_str(), GetGUID(),
-                    GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
-
             Item::DeleteFromInventoryDB(trans, itemGuid);
-            item->FSetState(ITEM_REMOVED);
-            item->SaveToDB(trans);                           // it also deletes item object!
-            item = NULL;
+
+            auto temp = item.Release();
+            temp->FSetState(ITEM_REMOVED);
+            temp->SaveToDB(trans);                           // it also deletes item object!
         }
     }
     else
@@ -19446,8 +19414,7 @@ void Player::_LoadMailedItems(Mail* mail)
             continue;
         }
 
-        ItemRef item = NewItemOrBag(proto);
-
+        Item* item = NewItemOrBag(proto);
         if (!item->LoadFromDB(itemGuid, MAKE_NEW_GUID(fields[13].GetUInt32(), 0, HIGHGUID_PLAYER), fields, itemTemplate))
         {
             sLog->outError("Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u, deleted from mail", mail->messageID, itemGuid);
@@ -19456,10 +19423,9 @@ void Player::_LoadMailedItems(Mail* mail)
             stmt->setUInt32(0, itemGuid);
             CharacterDatabase.Execute(stmt);
 
+            SQLTransaction transaction;
             item->FSetState(ITEM_REMOVED);
-
-            SQLTransaction temp = SQLTransaction(NULL);
-            item->SaveToDB(temp);                               // it also deletes item object !
+            item->SaveToDB( transaction );
             continue;
         }
 
@@ -19545,8 +19511,7 @@ void Player::_LoadMailAsynch(PreparedQueryResult result)
                     continue;
                 }
 
-                ItemRef item = NewItemOrBag(proto);
-
+                Item* item = NewItemOrBag(proto);
                 if (!item->LoadFromDB(itemGuid, MAKE_NEW_GUID(fields[13].GetUInt32(), 0, HIGHGUID_PLAYER), fields, itemTemplate))
                 {
                     sLog->outError("Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u, deleted from mail", m->messageID, itemGuid);
@@ -19555,10 +19520,9 @@ void Player::_LoadMailAsynch(PreparedQueryResult result)
                     stmt->setUInt32(0, itemGuid);
                     CharacterDatabase.Execute(stmt);
 
+                    SQLTransaction transaction;
                     item->FSetState(ITEM_REMOVED);
-
-                    SQLTransaction temp = SQLTransaction(NULL);
-                    item->SaveToDB(temp);                               // it also deletes item object !
+                    item->SaveToDB(transaction);                               // it also deletes item object !
                     continue;
                 }
 
@@ -20505,7 +20469,7 @@ void Player::_SaveInventory(SQLTransaction& trans)
     uint32 lowGuid = GetGUIDLow();
     for (size_t i = 0; i < m_itemUpdateQueue.size(); ++i)
     {
-        ItemRef item = m_itemUpdateQueue[i];
+        ItemRef & item = m_itemUpdateQueue[i];
         if (!item)
             continue;
 
@@ -20531,15 +20495,11 @@ void Player::_SaveInventory(SQLTransaction& trans)
                 RemoveTradeableItem(item); // pussywizard
                 RemoveEnchantmentDurationsReferences(item); // pussywizard
                 RemoveItemDurations(item); // pussywizard
-
-                if ((item->GetSlot() >= INVENTORY_SLOT_BAG_START && item->GetSlot() < INVENTORY_SLOT_BAG_END) || (item->GetSlot() >= BANK_SLOT_BAG_START && item->GetSlot() < BANK_SLOT_BAG_END))
-                    sLog->outBagCrash("Bag %p (GUID: %d, LowGuid: %d, Entry: %d, Slot: %d, BagSlot: %d, IsBag: %d) removed in fuction '_SaveInventory' for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d) and have it?: %d",
-                        *item, item->GetGUID(), item->GetGUIDLow(), item->GetEntry(), item->GetSlot(), item->GetBagSlot(), item->IsBag(), this, GetName().c_str(), GetGUID(),
-                        GetGUIDLow(), GetSession()->GetAccountId(), GetItemByGuid(item->GetGUID()) != nullptr);
+                DeleteRefundReference( item->GetGUIDLow() );
 
                 // also THIS item should be somewhere else, cheat attempt
-                item->FSetState(ITEM_REMOVED); // we are IN updateQueue right now, can't use SetState which modifies the queue
-                DeleteRefundReference(item->GetGUIDLow());
+                Item * temp = item.Release();
+                temp->FSetState(ITEM_REMOVED); // we are IN updateQueue right now, can't use SetState which modifies the queue
                 // don't skip, let the switch delete it
                 continue;
             }
@@ -20556,24 +20516,33 @@ void Player::_SaveInventory(SQLTransaction& trans)
 
         switch (item->GetState())
         {
+            case ITEM_REMOVED:
+            {
+                stmt = CharacterDatabase.GetPreparedStatement( CHAR_DEL_CHAR_INVENTORY_BY_ITEM );
+                stmt->setUInt32( 0, item->GetGUIDLow() );
+                trans->Append( stmt );
+
+                Item * temp = item.Release();
+                temp->SaveToDB( trans );
+                break;
+            }
             case ITEM_NEW:
             case ITEM_CHANGED:
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_INVENTORY_ITEM);
-                stmt->setUInt32(0, lowGuid);
-                stmt->setUInt32(1, bag_guid);
-                stmt->setUInt8 (2, item->GetSlot());
-                stmt->setUInt32(3, item->GetGUIDLow());
-                trans->Append(stmt);
+            {
+                stmt = CharacterDatabase.GetPreparedStatement( CHAR_REP_INVENTORY_ITEM );
+                stmt->setUInt32( 0, lowGuid );
+                stmt->setUInt32( 1, bag_guid );
+                stmt->setUInt8( 2, item->GetSlot() );
+                stmt->setUInt32( 3, item->GetGUIDLow() );
+                trans->Append( stmt );
+            }
+            //! Falltrough
+            default:
+            {
+                item->SaveToDB( trans );
                 break;
-            case ITEM_REMOVED:
-                stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INVENTORY_BY_ITEM);
-                stmt->setUInt32(0, item->GetGUIDLow());
-                trans->Append(stmt);
-            case ITEM_UNCHANGED:
-                break;
+            }
         }
-
-        item->SaveToDB(trans);                                   // item have unchanged inventory record and can be save standalone
     }
     m_itemUpdateQueue.clear();
 }
@@ -27195,10 +27164,6 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         {
             if (ItemRef item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
-                if ((i >= INVENTORY_SLOT_BAG_START && i < INVENTORY_SLOT_BAG_END) || (i >= BANK_SLOT_BAG_START && i < BANK_SLOT_BAG_END))
-                    sLog->outBagCrash("Bag %p Slot: %d is trying to be saved in inventory for player %p (Name: %s, GUID: %d, LowGuid: %d, AccountId: %d)",
-                        *item, i, this, GetName().c_str(), GetGUID(), GetGUIDLow(), GetSession()->GetAccountId());
-
                 ss << item->GetEntry();
             }
             else
