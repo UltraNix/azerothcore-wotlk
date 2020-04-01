@@ -953,18 +953,10 @@ GameObject* Battlefield::SpawnGameObject(uint32 entry, float x, float y, float z
 // ******************* CapturePoint **********************
 // *******************************************************
 
-BfCapturePoint::BfCapturePoint(Battlefield* battlefield) : m_Bf(battlefield), m_capturePoint(NULL)
-{
-    m_team = TEAM_NEUTRAL;
-    m_value = 0;
-    m_minValue = 0.0f;
-    m_maxValue = 0.0f;
-    m_State = BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL;
-    m_OldState = BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL;
-    m_capturePointEntry = 0;
-    m_neutralValuePct = 0;
-    m_maxSpeed = 0;
-}
+BfCapturePoint::BfCapturePoint(Battlefield* battlefield) : m_Bf(battlefield),
+        m_capturePoint(0), m_team(TEAM_NEUTRAL), m_value(0), m_minValue(0.0f), m_maxValue(0.0f),
+        m_State(BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL), m_OldState(BF_CAPTUREPOINT_OBJECTIVESTATE_NEUTRAL),
+        m_capturePointEntry(0), m_neutralValuePct(0), m_maxSpeed(0) { }
 
 bool BfCapturePoint::HandlePlayerEnter(Player* player)
 {
