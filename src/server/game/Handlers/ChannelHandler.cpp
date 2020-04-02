@@ -106,7 +106,9 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to set channel owner to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to set channel owner to a player with an invalid UTF8 sequence - blocked", guidStr.c_str() );
         return;
     }
 
@@ -141,7 +143,9 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to set channel moderator to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to set channel moderator to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -163,7 +167,9 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to unset channel moderator to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to unset channel moderator to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -185,7 +191,9 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to set channel mute to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to set channel mute to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -207,7 +215,9 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to set channel unmute to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to set channel unmute to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -229,7 +239,9 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to invite to channel a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to invite to channel a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -251,7 +263,9 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(targetName.begin(), targetName.end()))
     {
-        sLog->outError("Player %s tried to set kick from channel a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to set kick from channel a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

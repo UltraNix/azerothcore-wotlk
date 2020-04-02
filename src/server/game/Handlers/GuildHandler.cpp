@@ -43,7 +43,9 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(invitedName.begin(), invitedName.end()))
     {
-        sLog->outError("Player %s tried to invite to guild a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to invite to guild a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -61,7 +63,9 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(playerName.begin(), playerName.end()))
     {
-        sLog->outError("Player %s tried to remove from guild a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to remove from guild a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -114,7 +118,9 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(playerName.begin(), playerName.end()))
     {
-        sLog->outError("Player %s tried to guild promote a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to guild promote a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -132,7 +138,9 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(playerName.begin(), playerName.end()))
     {
-        sLog->outError("Player %s tried to guild demote a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to guild demote a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -166,7 +174,9 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
     if (!utf8::is_valid(name.begin(), name.end()))
     {
-        sLog->outError("Player %s tried to pass guild leader to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to pass guild leader to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

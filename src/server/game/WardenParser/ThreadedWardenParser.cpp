@@ -84,7 +84,7 @@ namespace WardenParserWin
         auto luaRequest = requestStore.find(_prefix);
         if (luaRequest == requestStore.end())
         {
-            sLog->outDebug(LOG_FILTER_WARDEN, "ThreadedWardenParser::ParseMessage: Lack of lua request for key %s", _prefix);
+            sLog->outDebug(LOG_FILTER_WARDEN, "ThreadedWardenParser::ParseMessage: Lack of lua request for key %s", _prefix.c_str());
             return;
         }
 

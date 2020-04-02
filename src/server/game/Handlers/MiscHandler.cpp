@@ -519,7 +519,9 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
 
     if (!utf8::is_valid(friendName.begin(), friendName.end()))
     {
-        sLog->outError("Player %s tried to add to friends player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to add to friends player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -599,7 +601,8 @@ void WorldSession::HandleAddIgnoreOpcode(WorldPacket & recv_data)
 
     if (!utf8::is_valid(ignoreName.begin(), ignoreName.end()))
     {
-        sLog->outError("Player %s tried to add to ignore list player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+        sLog->outError("Player %s tried to add to ignore list player with an invalid UTF8 sequence - blocked",guidStr.c_str() );
         return;
     }
 
@@ -1227,7 +1230,9 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 
     if (!utf8::is_valid(charname.begin(), charname.end()))
     {
-        sLog->outError("Player %s tried to whois a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to whois a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

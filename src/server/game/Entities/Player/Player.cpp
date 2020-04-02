@@ -3893,7 +3893,7 @@ bool Player::addTalent(uint32 spellId, uint8 addSpecMask, uint8 oldTalentRank)
     // xinef: error case, trying to add already present talent with present mask
     else
     {
-        sLog->outError("Player (%u) tries to learn talent %u with covered specMask (curr: %u, add: %u)", GetGUIDLow(), spellId, itr->second->specMask, addSpecMask);
+        sLog->outError("Player (%u) tries to learn talent %u with covered specMask (curr: %u, add: %u)", GetGUIDLow(), spellId, ( uint8 )itr->second->specMask, (uint8)addSpecMask);
     }
 
     return false;
@@ -28513,7 +28513,7 @@ bool Player::tryWhisperToWebCommand(std::string to, std::string msg)
         return false;
 
     uint64 target = sWorld->GetGlobalPlayerGUID(to);
-    sLog->outWebCommands("%u %u receiving whisper from %s: %s", target, GetGUID(), GetName(),  msg);
+    sLog->outWebCommands("%u %u receiving whisper from %s: %s", target, GetGUID(), GetName().c_str(),  msg.c_str());
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, Language(LANG_UNIVERSAL), target, target, msg, CHAT_TAG_AFK);

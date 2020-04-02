@@ -75,7 +75,8 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket & recvData)
     {
         if (!utf8::is_valid(invitedName.begin(), invitedName.end()))
         {
-            sLog->outError("Player %s tried to invite to arena team a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+            std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+            sLog->outError("Player %s tried to invite to arena team a player with an invalid UTF8 sequence - blocked", guidStr.c_str() );
             return;
         }
         if (!normalizePlayerName(invitedName))
@@ -278,7 +279,8 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket & recvData)
 
     if (!utf8::is_valid(name.begin(), name.end()))
     {
-        sLog->outError("Player %s tried to add to remove from arena team a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+        sLog->outError("Player %s tried to add to remove from arena team a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -334,7 +336,9 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket & recvData)
 
     if (!utf8::is_valid(name.begin(), name.end()))
     {
-        sLog->outError("Player %s tried to pass arena team leader to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to pass arena team leader to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

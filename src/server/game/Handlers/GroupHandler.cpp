@@ -57,7 +57,9 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     // cheating
     if (!utf8::is_valid(membername.begin(), membername.end()))
     {
-        sLog->outError("Player %s tried to add to group a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to add to group a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
     if (!normalizePlayerName(membername))
@@ -367,7 +369,9 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket& recvData)
 
     if (!utf8::is_valid(membername.begin(), membername.end()))
     {
-        sLog->outError("Player %s tried to remove from group a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to remove from group a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

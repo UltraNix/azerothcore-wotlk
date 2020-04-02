@@ -1458,7 +1458,9 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recvData)
 
     if (!utf8::is_valid(newName.begin(), newName.end()))
     {
-        sLog->outError("Player %s tried to rename himself to name with invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to rename himself to name with invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 
@@ -1627,7 +1629,8 @@ void WorldSession::HandleSetPlayerDeclinedNames(WorldPacket& recvData)
 
         if (!utf8::is_valid(declinedname.name[i].begin(), declinedname.name[i].end()))
         {
-            sLog->outError("Player %s WorldSession::HandleSetPlayerDeclinedNames invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+            std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+            sLog->outError("Player %s WorldSession::HandleSetPlayerDeclinedNames invalid UTF8 sequence - blocked",guidStr.c_str() );
             return;
         }
 
@@ -1838,7 +1841,9 @@ void WorldSession::HandleCharCustomize(WorldPacket& recvData)
 
     if (!utf8::is_valid(newName.begin(), newName.end()))
     {
-        sLog->outError("Player %s tried to rename himself to name with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to rename himself to name with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
     // prevent character rename to invalid name
@@ -2235,7 +2240,9 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
     if (!utf8::is_valid(newname.begin(), newname.end()))
     {
-        sLog->outError("Player %s tried to rename himself to name with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to rename himself to name with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

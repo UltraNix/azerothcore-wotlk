@@ -119,7 +119,9 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
     uint64 rc = 0;
     if (!utf8::is_valid(receiver.begin(), receiver.end()))
     {
-        sLog->outError("Player %s tried to send mail to a player with an invalid UTF8 sequence - blocked", std::to_string(GetPlayer()->GetGUID()));
+        std::string guidStr = std::to_string( GetPlayer()->GetGUID() );
+
+        sLog->outError("Player %s tried to send mail to a player with an invalid UTF8 sequence - blocked", guidStr.c_str());
         return;
     }
 

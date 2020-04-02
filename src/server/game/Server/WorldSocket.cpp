@@ -685,7 +685,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 catch (ByteBufferPositionException const&)
                 {
                 }
-                sLog->outError("Client send malformed CMSG_PING (Ip: %s)", GetRemoteAddress());
+                sLog->outError("Client send malformed CMSG_PING (Ip: %s)", GetRemoteAddress().c_str());
                 return -1;
             case CMSG_AUTH_SESSION:
                 if (m_Session)

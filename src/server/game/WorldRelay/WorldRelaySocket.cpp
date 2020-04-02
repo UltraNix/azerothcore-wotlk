@@ -69,7 +69,7 @@ bool HttpPosterSocket::post(std::string data, std::string endpoint)
     std::string puts = fmt::format("POST {}{}{}\r\n\r\n{}\r\n", endpoint, m_header, data.length(), data);
     if (sLog->IsOutDebug())
     {
-        sLog->outDebug(DebugLogFilters::LOG_FILTER_NETWORKIO, "WorldRelaySocket::Post: message < %s >", puts);
+        sLog->outDebug(DebugLogFilters::LOG_FILTER_NETWORKIO, "WorldRelaySocket::Post: message < %s >", puts.c_str());
     }
 
     BIO_puts(m_web, puts.c_str());

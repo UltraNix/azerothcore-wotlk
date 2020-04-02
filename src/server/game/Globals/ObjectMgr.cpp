@@ -1419,7 +1419,7 @@ void ObjectMgr::UpdateCreatureRecordData(uint32 entry, uint32 time, Player* kill
         }
         else
         {
-            sLog->outString("Boss [%s] has been killed by [%s] without group or raid group. Possible cheater!", creatureName, killer->GetName().c_str());
+            sLog->outString("Boss [%s] has been killed by [%s] without group or raid group. Possible cheater!", creatureName.c_str(), killer->GetName().c_str());
             return;
         }
 
