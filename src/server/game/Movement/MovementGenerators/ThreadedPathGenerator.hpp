@@ -61,7 +61,7 @@ namespace Movement
     class ThreadedPathGenerator
     {
     public:
-        ThreadedPathGenerator();
+        ThreadedPathGenerator() = default;
 
         void                Initialize( size_t threadsCount );
         void                Shutdown();
@@ -70,9 +70,6 @@ namespace Movement
 
     protected:
         void                PreparePath( PathRequest& request );
-
-        std::atomic_bool    m_shutdown;
-        std::atomic_bool    m_initialized;
 
         PathRequestQueue    m_queue;
         PathGeneratorPool   m_pool;

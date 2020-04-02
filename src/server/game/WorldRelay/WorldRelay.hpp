@@ -64,7 +64,7 @@ using JsonStringStore = std::unordered_map<WorldRelayType, std::string>;
 class WorldRelay
 {
 public:
-    WorldRelay();
+    WorldRelay() = default;
 
     void                InitializeRelay(size_t threadsCount);
     void                LoadRelayAddresses();
@@ -84,9 +84,6 @@ private:
     void                BuildRelayWorldstartup(RelayRequest /*request*/, HttpPosterSocket& soc);
 
     std::string const   GetAddressForRelayType(WorldRelayType /*type*/) const;
-
-    std::atomic_bool    m_shutdown;
-    std::atomic_bool    m_initialized;
 
     RelayRequestQueue   m_queue;
     RelayGeneratorPool  m_pool;

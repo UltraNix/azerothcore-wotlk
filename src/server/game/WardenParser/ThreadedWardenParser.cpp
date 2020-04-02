@@ -6,22 +6,23 @@
 
 namespace WardenParserWin
 {
-    ThreadedWardenParser::ThreadedWardenParser() : m_shutdown(false) { }
-
     void ThreadedWardenParser::Initialize(size_t threadsCount)
     {
         m_pool.reserve(threadsCount);
 
         for (size_t idx = 0u; idx < threadsCount; ++idx)
         {
-            m_pool.push_back(std::thread([this]
+            m_pool.emplace_back([this]
             {
-                while (!m_shutdown)
+                while (!m_queue.is_closed())
                 {
                     auto request = m_queue.pop();
-                    ParseMessage(std::move(request));
+                    if (!request)
+                        continue;
+
+                    ParseMessage( std::move( *request ));
                 }
-            }));
+            });
         }
 
         sLog->outString(">> Warden parser initialized.");
@@ -29,7 +30,13 @@ namespace WardenParserWin
 
     void ThreadedWardenParser::Shutdown()
     {
-        m_shutdown = true;
+        m_queue.close();
+
+        for ( auto & thread : m_pool )
+        {
+            if ( thread.joinable() )
+                thread.join();
+        }
     }
 
     void ThreadedWardenParser::AddMessage(Requestee who, std::string message)

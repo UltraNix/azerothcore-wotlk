@@ -11,8 +11,6 @@
 
 using json = nlohmann::json;
 
-WorldRelay::WorldRelay() : m_shutdown(false) { }
-
 void WorldRelay::LoadRelayAddresses()
 {
     sLog->outString(">> Loading relay addresses...");
@@ -75,21 +73,30 @@ void WorldRelay::LoadJsonStrings()
     sLog->outString();
 }
 
+
+void WorldRelay::Shutdown()
+{
+    m_queue.close();
+}
+
 void WorldRelay::InitializeRelay(size_t threadsCount)
 {
     m_pool.reserve(threadsCount);
 
     for (size_t idx = 0u; idx < threadsCount; ++idx)
     {
-        m_pool.push_back(std::thread([this]
+        m_pool.emplace_back([this]
         {
             HttpPosterSocket soc("priv.wherego.pl");
-            while (!m_shutdown)
+            while (!m_queue.is_closed())
             {
                 auto request = m_queue.pop();
-                RelayMessage(request, soc);
+                if ( !request )
+                    continue;
+
+                RelayMessage( *request, soc);
             }
-        }));
+        });
     }
 
     sLog->outString(">> Relay initialized.");

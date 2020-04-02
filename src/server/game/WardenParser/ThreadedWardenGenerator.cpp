@@ -7,10 +7,6 @@
 #include <cctype> // for std::isdigit
 #include "fmt/format.h"
 
-ThreadedWardenGenerator::ThreadedWardenGenerator()
-    : m_shutdown(false)
-    , m_initialized(false) { }
-
 void ThreadedWardenGenerator::Initialize(size_t threadsCount)
 {
     m_pool.reserve(threadsCount);
@@ -19,12 +15,26 @@ void ThreadedWardenGenerator::Initialize(size_t threadsCount)
     {
         m_pool.push_back(std::thread([this]
         {
-            while (!m_shutdown)
+            while (!m_queue.is_closed())
             {
                 auto request = m_queue.pop();
-                PrepareLuaCode(request);
+                if ( !request )
+                    continue;
+
+                PrepareLuaCode(*request);
             }
         }));
+    }
+}
+
+void ThreadedWardenGenerator::Shutdown()
+{
+    m_queue.close();
+
+    for ( auto & thread : m_pool )
+    {
+        if ( thread.joinable() )
+            thread.join();
     }
 }
 

@@ -46,7 +46,7 @@ class ThreadedAuthHandler
 public:
     friend class World;
 
-    ThreadedAuthHandler();
+    ThreadedAuthHandler() = default;
 
     void                Initialize( size_t /*threadsCount*/ );
     void                Shutdown();
@@ -58,14 +58,13 @@ protected:
     void                CollectSessions( World * world );
     void                HandleRequest( AuthRequest request );
 
-    std::atomic_bool    m_shutdown;
     AuthRequestQueue    m_queue;
 
     std::mutex                      m_mutex;
     std::vector< WorldSession * >   m_sessions;
 
     using ThreadPool = std::vector< std::thread >;
-    ThreadPool          m_pool;
+    ThreadPool                      m_pool;
 };
 
 ThreadedAuthHandler &   GetAuthHandler();

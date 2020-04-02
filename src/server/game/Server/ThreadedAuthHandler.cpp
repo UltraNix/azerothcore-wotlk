@@ -6,33 +6,30 @@
 #include "Log.h"
 #include "Profiler.h"
 
-ThreadedAuthHandler::ThreadedAuthHandler()
-    : m_shutdown( false )
-{
-
-}
-
 void ThreadedAuthHandler::Initialize( size_t threadsCount )
 {
     m_pool.reserve( threadsCount );
 
     for ( size_t idx = 0u; idx < threadsCount; ++idx )
     {
-        m_pool.push_back( std::thread( [this]
+        m_pool.emplace_back( [this]
         {
-            while ( !m_shutdown )
+            while ( !m_queue.is_closed() )
             {
                 auto request = m_queue.pop();
+                if ( !request )
+                    continue;
+
                 try
                 {
-                HandleRequest( std::move( request ) );
+                    HandleRequest( std::move( *request ) );
                 }
                 catch (ByteBufferException &)
                 {
                     sLog->outError("ThreadedAuthHandler::HandleRequest ByteBufferException occured while parsing auth request.");
                 }
             }
-        } ) );
+        } );
     }
 
     sLog->outString( ">> Auth handler initialized." );
@@ -40,10 +37,12 @@ void ThreadedAuthHandler::Initialize( size_t threadsCount )
 
 void ThreadedAuthHandler::Shutdown()
 {
-    m_shutdown = true;
+    m_queue.close();
+
     for ( auto & thread : m_pool )
     {
-        thread.join();
+        if ( thread.joinable() )
+            thread.join();
     }
 }
 

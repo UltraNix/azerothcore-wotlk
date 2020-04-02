@@ -5,7 +5,7 @@
 class ThreadedWardenGenerator
 {
 public:
-    ThreadedWardenGenerator();
+    ThreadedWardenGenerator() = default;
 
     void                Initialize(size_t threadsCount);
     void                Shutdown();
@@ -14,9 +14,6 @@ public:
 
 protected:
     void                PrepareLuaCode(LuaRequest& request);
-
-    std::atomic_bool    m_shutdown;
-    std::atomic_bool    m_initialized;
 
     LuaRequestQueue    m_queue;
     LuaGeneratorPool   m_pool;

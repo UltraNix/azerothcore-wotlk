@@ -830,6 +830,7 @@ class World
         uint32 GetShutDownTimeLeft() const { return m_ShutdownTimer; }
         char const* GetShutdownReason() { return m_ShutdownReason.c_str(); }
 
+        void OnShutdown();
         void ShutdownServ(uint32 time, uint32 options, uint8 exitcode, char const* = "no reason");
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);

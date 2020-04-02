@@ -3012,6 +3012,14 @@ void World::_UpdateGameTime()
     }
 }
 
+void World::OnShutdown()
+{
+    WardenParserWin::GetWardenParser().Shutdown();
+    GetLuaGenerator().Shutdown();
+    GetRelay().Shutdown();
+    Movement::GetPathGenerator().Shutdown();
+}
+
 /// Shutdown the server
 void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode, char const* exitmsg)
 {
