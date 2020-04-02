@@ -4674,6 +4674,10 @@ void Unit::RemoveAurasDueToDamage(uint32 flag, uint32 damage, uint32 except)
 
         if (shouldBeRemoved && (aura->GetSpellInfo()->AuraInterruptFlags & flag) && (!except || aura->GetId() != except))
         {
+            // Don't remove stealth auras on fully absorbed damage
+            if (aura->HasEffectType(SPELL_AURA_MOD_STEALTH) && !damage)
+                continue;
+
             uint32 removedAuras = m_removedAurasCount;
             RemoveAura(aura);
             if (m_removedAurasCount > removedAuras + 1)
