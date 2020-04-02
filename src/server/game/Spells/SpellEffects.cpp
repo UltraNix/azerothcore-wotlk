@@ -4420,7 +4420,7 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
         return;
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!m_caster->IsPlayer())
         return;
 
     Player* target = m_caster->ToPlayer();
@@ -4444,12 +4444,7 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     ItemRef hearthStone = target->GetItemByEntry(6948);
     if (!hearthStone || target->HasSpellCooldown(8690))
     {
-        /* Blizzlike mode
-        float o = rand_norm()*2*M_PI;
-        Position pos = *target;
-        target->MovePositionToFirstCollision(pos, 5.0f, o);
-        target->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), target->GetOrientation()); */
-        target->TeleportTo(target->GetStartPosition(), TELE_TO_SPELL);
+        target->TeleportTo(target->m_homebindMapId, target->m_homebindX, target->m_homebindY, target->m_homebindZ, 0.0f, TELE_TO_SPELL);
         return;
     }
 
