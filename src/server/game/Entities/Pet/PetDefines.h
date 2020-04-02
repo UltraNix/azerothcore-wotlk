@@ -185,7 +185,8 @@ enum PetScalingSpells
 
 };
 
-#define PET_FOLLOW_DIST  1.0f
-#define PET_FOLLOW_ANGLE (M_PI/2)
+constexpr float PET_FOLLOW_DIST{ 1.0f };
+constexpr float PET_FOLLOW_ANGLE{ static_cast<float>(M_PI / 2.0f) };
+constexpr float COMPANION_FOLLOW_ANGLE{ static_cast<float>(M_PI) };
 
 #endif

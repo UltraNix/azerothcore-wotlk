@@ -2495,7 +2495,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     if (properties->Type != SUMMON_TYPE_JEEVES)
                     {
                         summon->GetMotionMaster()->Clear(false);
-                        summon->GetMotionMaster()->MoveFollow(m_originalCaster, PET_FOLLOW_DIST, summon->GetFollowAngle(), MOTION_SLOT_ACTIVE);
+                        summon->GetMotionMaster()->MoveFollow(m_originalCaster, PET_FOLLOW_DIST, COMPANION_FOLLOW_ANGLE, MOTION_SLOT_ACTIVE);
                     }
                     break;
                 }

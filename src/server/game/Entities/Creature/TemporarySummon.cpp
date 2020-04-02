@@ -282,6 +282,8 @@ Minion::Minion(SummonPropertiesEntry const* properties, uint64 owner, bool isWor
     ASSERT(m_owner);
     m_unitTypeMask |= UNIT_MASK_MINION;
     m_followAngle = PET_FOLLOW_ANGLE;
+    if (properties && properties->Type == SUMMON_TYPE_MINIPET)
+        m_followAngle = COMPANION_FOLLOW_ANGLE;
 }
 
 void Minion::InitStats(uint32 duration)
