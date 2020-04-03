@@ -396,7 +396,26 @@ public:
     };
 };
 
+// 42723 - Dark Smash
+// Spell has SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS, but EFFECT_1 and EFFECT_2 should take LoS into account anyway
+class spell_dark_smash : public SpellScript
+{
+    PrepareSpellScript(spell_dark_smash);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        Trinity::Containers::Erase_if(targets, [this](WorldObject* target) { return !target->IsWithinLOSInMap(GetCaster()); });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dark_smash::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dark_smash::FilterTargets, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
+
 void AddSC_boss_ingvar_the_plunderer()
 {
     new boss_ingvar_the_plunderer();
+    RegisterSpellScript(spell_dark_smash);
 }
