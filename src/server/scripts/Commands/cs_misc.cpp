@@ -2663,7 +2663,7 @@ public:
 
         for (ItemPairs::const_iterator itr = items.begin(); itr != items.end(); ++itr)
         {
-            if (ItemRef item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
+            if (Item* item = Item::CreateItem(itr->first, itr->second, handler->GetSession() ? handler->GetSession()->GetPlayer() : 0))
             {
                 if (soulbound)
                 {

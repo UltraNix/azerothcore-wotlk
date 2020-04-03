@@ -1421,8 +1421,8 @@ class Player : public Unit, public GridObject<Player>
         void RemoveItemDependentAurasAndCasts( ItemRef const& pItem);
         void DestroyItem(uint8 bag, uint8 slot, bool update);
         void DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check = false);
-        void DestroyItemCount( ItemRef const& item, uint32& count, bool update);
-        bool DestroyItemCount( ItemRef const& item, uint32 count, bool update, SQLTransaction & transaction);
+        void DestroyItemCount( ItemRef & item, uint32& count, bool update);
+        bool DestroyItemCount( ItemRef & item, uint32 count, bool update, SQLTransaction & transaction);
         void DestroyConjuredItems(bool update);
         void DestroyZoneLimitedItem(bool update, uint32 new_zone);
         void SplitItem(uint16 src, uint16 dst, uint32 count);

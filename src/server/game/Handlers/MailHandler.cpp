@@ -297,7 +297,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         {
             for (uint8 i = 0; i < items_count; ++i)
             {
-                ItemRef const& item = items[i];
+                ItemRef & item = items[i];
 
                 PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LOG_TRADE);
                 stmt->setUInt32(0, realmID);
@@ -324,7 +324,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
                 item->SetOwnerGUID(rc);
                 item->SaveToDB(trans);                  // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
-                draft.AddItem(item);
+                draft.AddItem(item.Release());
             }
 
             // if item send to character at another account, then apply item delivery delay
@@ -454,7 +454,9 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recvData)
             {
                 ItemRef item = player->GetMItem(itr2->item_guid);
                 if (item)
-                    draft.AddItem(item);
+                {
+                    draft.AddItem( item.Release() );
+                }
 
                 player->RemoveMItem(itr2->item_guid);
             }

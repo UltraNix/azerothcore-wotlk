@@ -65,7 +65,7 @@ MailReceiver::MailReceiver(Player* receiver, uint32 receiver_lowguid) : m_receiv
     ASSERT(!receiver || receiver->GetGUIDLow() == receiver_lowguid);
 }
 
-MailDraft& MailDraft::AddItem(ItemRef const& item)
+MailDraft& MailDraft::AddItem(Item* item)
 {
     m_items[item->GetGUIDLow()] = item;
     return *this;
@@ -91,7 +91,7 @@ void MailDraft::prepareItems(Player* receiver, SQLTransaction& trans)
             if (ItemRef item = Item::CreateItem(lootitem->itemid, lootitem->count, receiver))
             {
                 item->SaveToDB(trans);                           // save for prevent lost at next mail load, if send fail then item will deleted
-                AddItem(item);
+                AddItem(item.Release());
             }
         }
     }

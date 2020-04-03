@@ -116,7 +116,7 @@ class MailDraft
         std::string const& GetBody() const { return m_body; }
 
     public:                                                 // modifiers
-        MailDraft& AddItem(ItemRef const& item);
+        MailDraft& AddItem(Item* item);
         MailDraft& AddMoney(uint32 money) { m_money = money; return *this; }
         MailDraft& AddCOD(uint32 COD) { m_COD = COD; return *this; }
 

@@ -259,7 +259,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recvData)
         return auctionEntry;
     };
 
-    auto GetOrCreateAuctionedItem = [&]( SQLTransaction & transaction )
+    auto GetOrCreateAuctionedItem = [&]( SQLTransaction & transaction ) -> ItemRef
     {
         //! We are only auctioned item
         if ( items.size() == 1 && sourceItem->GetCount() == auctionedCount )
@@ -528,7 +528,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket & recvData)
 
     // item will deleted or added to received mail list
     MailDraft(auction->BuildAuctionMailSubject(AUCTION_CANCELED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
-        .AddItem(auction->aitem->GetItem())
+        .AddItem(const_cast< AuctionItem* >( auction->aitem )->GetItem().Release())
         .SendMailTo(trans, _player, auction, MAIL_CHECK_MASK_COPIED);
 
     //! Its needed here currently, because _SaveInventory internally updates item update queue

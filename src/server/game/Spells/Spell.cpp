@@ -4996,14 +4996,14 @@ void Spell::TakeCastItem()
 
     if (expendable && withoutCharges)
     {
+        // prevent crash at access to deleted m_targets.GetItemTarget
+        if ( m_targets.GetItemTarget() == m_CastItem )
+            m_targets.SetItemTarget( NULL );
+
         uint32 count = 1;
         m_caster->ToPlayer()->DestroyItemCount(m_CastItem, count, true);
 
-        // prevent crash at access to deleted m_targets.GetItemTarget
-        if (m_targets.GetItemTarget() == m_CastItem)
-            m_targets.SetItemTarget(NULL);
-
-        m_CastItem = NULL;
+        m_CastItem.Reset();
         m_castItemGUID = 0;
     }
 }

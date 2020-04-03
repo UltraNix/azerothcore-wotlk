@@ -206,8 +206,8 @@ class Item : public Object
     friend class ObjectMgr;
 
     public:
-        static ItemRef CreateItem(uint32 item, uint32 count, Player const* player = NULL);
-        ItemRef CloneItem(uint32 count, Player const* player = NULL) const;
+        static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL);
+        Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
 

@@ -805,7 +805,7 @@ bool Guild::MoveItemData::CanStore(ItemRef const& pItem, bool swap, bool sendErr
 bool Guild::MoveItemData::CloneItem(uint32 count)
 {
     ASSERT(m_pItem);
-    m_pClonedItem = *m_pItem->CloneItem(count);
+    m_pClonedItem = m_pItem->CloneItem(count);
     if (!m_pClonedItem)
     {
         m_pPlayer->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, m_pItem);

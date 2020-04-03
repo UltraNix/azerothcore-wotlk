@@ -13018,8 +13018,10 @@ ItemRef Player::StoreNewItem(ItemPosCountVec const& dest, uint32 item, bool upda
         ItemAddedQuestCheck(item, count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_RECEIVE_EPIC_ITEM, item, count);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM, item, count);
+
         if (randomPropertyId)
             pItem->SetItemRandomProperties(randomPropertyId);
+
         pItem = StoreItem(dest, pItem, update);
 
 
@@ -13050,10 +13052,10 @@ ItemRef Player::StoreItem(ItemPosCountVec const& dest, ItemRef & pItem, bool upd
     if (!pItem)
         return NULL;
 
-    ItemRef lastItem = pItem;
-    const ItemTemplate *proto = pItem->GetTemplate();
+    ItemRef lastItem;
 
-    for (ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end();)
+    const ItemTemplate * proto = pItem->GetTemplate();
+    for (auto itr = dest.begin(); itr != dest.end();)
     {
         uint16 pos = itr->pos;
         uint32 count = itr->count;
@@ -13071,10 +13073,12 @@ ItemRef Player::StoreItem(ItemPosCountVec const& dest, ItemRef & pItem, bool upd
 
     // cast after item storing - some checks in checkcast requires item to be present!!
     if (lastItem)
-        for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
-            if (proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE && proto->Spells[i].SpellId > 0) // On obtain trigger
-                if (!HasAura(proto->Spells[i].SpellId))
-                    CastSpell(this, proto->Spells[i].SpellId, true, lastItem);
+    {
+        for ( uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i )
+            if ( proto->Spells[ i ].SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE && proto->Spells[ i ].SpellId > 0 ) // On obtain trigger
+                if ( !HasAura( proto->Spells[ i ].SpellId ) )
+                    CastSpell( this, proto->Spells[ i ].SpellId, true, lastItem );
+    }
 
     return lastItem;
 }
@@ -13954,7 +13958,7 @@ ItemRef Player::GetItemByEntry(uint32 entry) const
     return NULL;
 }
 
-void Player::DestroyItemCount(ItemRef const& pItem, uint32 &count, bool update)
+void Player::DestroyItemCount(ItemRef & pItem, uint32 &count, bool update)
 {
     if (!pItem)
         return;
@@ -13965,7 +13969,8 @@ void Player::DestroyItemCount(ItemRef const& pItem, uint32 &count, bool update)
     {
         count -= pItem->GetCount();
 
-        DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), update);
+        Item * item = pItem.Release();
+        DestroyItem(item->GetBagSlot(), item->GetSlot(), update);
     }
     else
     {
@@ -13978,7 +13983,7 @@ void Player::DestroyItemCount(ItemRef const& pItem, uint32 &count, bool update)
     }
 }
 
-bool Player::DestroyItemCount( ItemRef const & item, uint32 count, bool update, SQLTransaction & transaction )
+bool Player::DestroyItemCount( ItemRef & item, uint32 count, bool update, SQLTransaction & transaction )
 {
     if ( item->GetCount() < count )
         return false;
@@ -16328,7 +16333,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
         for (std::vector<std::pair<uint32, uint32> >::const_iterator itr = problematicItems.begin(); itr != problematicItems.end(); ++itr)
         {
-            if (ItemRef item = Item::CreateItem(itr->first, itr->second))
+            if (Item* item = Item::CreateItem(itr->first, itr->second))
             {
                 item->SaveToDB(trans);
                 draft.AddItem(item);
@@ -24638,7 +24643,7 @@ void Player::AutoUnequipOffhandIfNeed(bool force /*= false*/)
         offItem->SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
         std::string subject = GetSession()->GetTrinityString(LANG_NOT_EQUIPPED_ITEM);
-        MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, MailSender(this, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_COPIED);
+        MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem.Release()).SendMailTo(trans, this, MailSender(this, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_COPIED);
 
         CharacterDatabase.CommitTransaction(trans);
     }

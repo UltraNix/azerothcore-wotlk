@@ -74,7 +74,7 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
 //does not clear ram
 void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& trans)
 {
-    const AuctionItem* pItem = GetAItem( auction->item_guidlow );
+    AuctionItem* pItem = GetAItem( auction->item_guidlow );
     if (!pItem || !pItem->GetItem())
         return;
 
@@ -104,7 +104,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction, SQLTransaction& 
         }
 
         MailDraft(auction->BuildAuctionMailSubject(AUCTION_WON), AuctionEntry::BuildAuctionMailBody(auction->owner, auction->bid, auction->buyout, 0, 0))
-            .AddItem(pItem->GetItem())
+            .AddItem(pItem->GetItem().Release())
             .SendMailTo(trans, MailReceiver(bidder, auction->bidder), auction, MAIL_CHECK_MASK_COPIED);
     }
     else
@@ -167,7 +167,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction, SQLTransa
 void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction, SQLTransaction& trans)
 {
     //return an item in auction to its owner by mail
-    const AuctionItem* pItem = GetAItem( auction->item_guidlow );
+    AuctionItem* pItem = GetAItem( auction->item_guidlow );
     if (!pItem || !pItem->GetItem())
         return;
 
@@ -182,7 +182,7 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction, SQLTransacti
             owner->GetSession()->SendAuctionOwnerNotification(auction);
 
         MailDraft(auction->BuildAuctionMailSubject(AUCTION_EXPIRED), AuctionEntry::BuildAuctionMailBody(0, 0, auction->buyout, auction->deposit, 0))
-            .AddItem(pItem->GetItem())
+            .AddItem(pItem->GetItem().Release())
             .SendMailTo(trans, MailReceiver(owner, auction->owner), auction, MAIL_CHECK_MASK_COPIED, 0);
     }
     else
@@ -345,9 +345,8 @@ bool AuctionHouseMgr::RemoveAItem(AuctionEntry* entry, bool deleteFromDB)
     if (it == mAitems.end())
         return false;
 
-    if (deleteFromDB)
+    if (deleteFromDB && it->second.GetItem())
     {
-
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
         Item * item = it->second.GetItem().Release();

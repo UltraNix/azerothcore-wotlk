@@ -4650,8 +4650,7 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     if (!player)
         return;
 
-    ItemRef foodItem = itemTarget;
-    if (!foodItem)
+    if (!itemTarget)
         return;
 
     Pet* pet = player->GetPet();
@@ -4661,14 +4660,14 @@ void Spell::EffectFeedPet(SpellEffIndex effIndex)
     if (!pet->IsAlive())
         return;
 
-    int32 benefit = pet->GetCurrentFoodBenefitLevel(foodItem->GetTemplate()->ItemLevel);
+    int32 benefit = pet->GetCurrentFoodBenefitLevel(itemTarget->GetTemplate()->ItemLevel);
     if (benefit <= 0)
         return;
 
-    ExecuteLogEffectDestroyItem(effIndex, foodItem->GetEntry());
+    ExecuteLogEffectDestroyItem(effIndex, itemTarget->GetEntry());
 
     uint32 count = 1;
-    player->DestroyItemCount(foodItem, count, true);
+    player->DestroyItemCount(itemTarget, count, true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
     m_caster->CastCustomSpell(pet, m_spellInfo->Effects[effIndex].TriggerSpell, &benefit, NULL, NULL, true);

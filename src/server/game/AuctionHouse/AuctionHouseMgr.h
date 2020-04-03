@@ -179,13 +179,22 @@ class AuctionHouseMgr
 
         AuctionHouseObject* GetAuctionsMap(uint32 factionTemplateId);
 
-        const AuctionItem* GetAItem(uint32 id)
+        const AuctionItem* GetAItem(uint32 id) const
         {
-            AuctionItemMap::const_iterator itr = mAitems.find(id);
+            auto itr = mAitems.find(id);
             if (itr != mAitems.end())
                 return &(itr->second);
 
-            return NULL;
+            return nullptr;
+        }
+
+        AuctionItem * GetAItem( uint32 id )
+        {
+            auto itr = mAitems.find( id );
+            if ( itr != mAitems.end() )
+                return &( itr->second );
+
+            return nullptr;
         }
 
         //auction messages

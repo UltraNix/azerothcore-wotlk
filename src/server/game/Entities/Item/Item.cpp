@@ -1056,10 +1056,10 @@ void Item::SendTimeUpdate(Player* owner)
     owner->GetSession()->SendPacket(&data);
 }
 
-ItemRef Item::CreateItem(uint32 item, uint32 count, Player const* player)
+Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
 {
     if (count < 1)
-        return NULL;                                        //don't create item at zero count
+        return nullptr;                                        //don't create item at zero count
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
     if (pProto)
@@ -1069,25 +1069,28 @@ ItemRef Item::CreateItem(uint32 item, uint32 count, Player const* player)
 
         ASSERT(count !=0 && "pProto->Stackable == 0 but checked at loading already");
 
-        ItemRef pItem = NewItemOrBag(pProto);
+        Item* pItem = NewItemOrBag(pProto);
         if (pItem->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_ITEM), item, player))
         {
             pItem->SetCount(count);
             return pItem;
         }
         else
-            delete *pItem;
+        {
+            delete pItem;
+        }
     }
     else
         ASSERT(false);
-    return NULL;
+
+    return nullptr;
 }
 
-ItemRef Item::CloneItem(uint32 count, Player const* player) const
+Item* Item::CloneItem(uint32 count, Player const* player) const
 {
-    ItemRef newItem = CreateItem(GetEntry(), count, player);
+    Item* newItem = CreateItem(GetEntry(), count, player);
     if (!newItem)
-        return NULL;
+        return nullptr;
 
     newItem->SetUInt32Value(ITEM_FIELD_CREATOR,      GetUInt32Value(ITEM_FIELD_CREATOR));
     newItem->SetUInt32Value(ITEM_FIELD_GIFTCREATOR,  GetUInt32Value(ITEM_FIELD_GIFTCREATOR));
@@ -1096,6 +1099,7 @@ ItemRef Item::CloneItem(uint32 count, Player const* player) const
     // player CAN be NULL in which case we must not update random properties because that accesses player's item update queue
     if (player)
         newItem->SetItemRandomProperties(GetItemRandomPropertyId());
+
     return newItem;
 }
 
