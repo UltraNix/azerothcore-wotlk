@@ -14204,7 +14204,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration, 
     // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
     if (group == DIMINISHING_TAUNT)
     {
-        if (GetTypeId() == TYPEID_UNIT && (ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))
+        if (IsCreature() && (ToCreature()->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))
         {
             DiminishingLevels diminish = Level;
             switch (diminish)

@@ -2920,15 +2920,16 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         uint32 flagsExtra = unit->GetTypeId() == TYPEID_UNIT ? unit->ToCreature()->GetCreatureTemplate()->flags_extra : 0;
 
         // Increase Diminishing on unit, current informations for actually casts will use values above
-        if ((type == DRTYPE_PLAYER
-                                                                                                           // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
-                                                                                                           // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
-                                                                                                           // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
-            && (unit->GetCharmerOrOwnerPlayerOrPlayerItself()
-            || flagsExtra & CREATURE_FLAG_EXTRA_ALL_DIMINISH
-            || (sWorld->PatchNotes(PATCH_330) && m_diminishGroup == DIMINISHING_TAUNT && (flagsExtra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))))
-            || type == DRTYPE_ALL)
-            unit->IncrDiminishing(m_diminishGroup);
+        // Patch 3.3.0 (08-Dec-2009): Taunt Diminishing Returns: We've revised the system for diminishing returns on Taunt so that creatures do not become immune to Taunt until after 5 Taunts have landed.
+        // The duration of the Taunt effect will be reduced by 35% instead of 50% for each taunt landed. In addition, most creatures in the world will not be affected by Taunt diminishing returns at all.
+        // Creatures will only have Taunt diminishing returns if they have been specifically flagged for that behavior based on the design of a given encounter.
+        if (m_caster->IsPlayer())
+            if ((type == DRTYPE_PLAYER
+                && (unit->GetCharmerOrOwnerPlayerOrPlayerItself()
+                || flagsExtra & CREATURE_FLAG_EXTRA_ALL_DIMINISH
+                || (m_diminishGroup == DIMINISHING_TAUNT && (flagsExtra & CREATURE_FLAG_EXTRA_TAUNT_DIMINISH))))
+                || type == DRTYPE_ALL)
+                    unit->IncrDiminishing(m_diminishGroup);
     }
 
     // Xinef: Stealth remove, added UGLY hack for mass dispel... cant find any other solution, ugly hack for Storm, Earth and Fire talent
