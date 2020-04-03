@@ -4444,7 +4444,9 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     ItemRef hearthStone = target->GetItemByEntry(6948);
     if (!hearthStone || target->HasSpellCooldown(8690))
     {
-        target->TeleportTo(target->m_homebindMapId, target->m_homebindX, target->m_homebindY, target->m_homebindZ, 0.0f, TELE_TO_SPELL);
+        Position pos;
+        target->GetFirstCollisionPosition(pos, 5.0f, Position::RandomOrientation());
+        target->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), target->GetOrientation());
         return;
     }
 
