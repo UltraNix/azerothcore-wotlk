@@ -28278,7 +28278,7 @@ void Player::_LoadPetSlotsData( PreparedQueryResult result )
         data->Type = PetType( fields[ 6 ].GetUInt8() );
         data->Id = uint32( fields[ 1 ].GetUInt32() );
         data->Entry = uint32( fields[ 2 ].GetUInt32() );
-        data->Level = uint32( fields[ 3 ].GetUInt16() );              // level
+        data->Level = uint32( fields[ 3 ].GetUInt8() );              // level
         data->Name = fields[ 4 ].GetString();                        // name
     } while ( result->NextRow() );
 }
