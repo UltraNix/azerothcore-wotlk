@@ -297,14 +297,6 @@ int ReactorRunnable::svc()
         if ( m_Reactor->run_reactor_event_loop( interval ) == -1 )
             break;
 
-        const auto CleanupSocket = [&]( WorldSocket * socket, bool wasNew )
-        {
-            sScriptMgr->OnSocketClose( socket, wasNew );
-            socket->RemoveReference();
-
-            --m_Connections;
-        };
-
         //! Insert new sockets
         {
             constexpr size_t MAX_NEW_SOCKETS_PER_TICK = 100;
@@ -318,7 +310,9 @@ int ReactorRunnable::svc()
 
                 if ( socket->IsClosed() )
                 {
-                    CleanupSocket( socket, true );
+                    sScriptMgr->OnSocketClose( socket, true );
+                    socket->RemoveReference();
+                    --m_Connections;
                     continue;
                 }
 
@@ -336,13 +330,20 @@ int ReactorRunnable::svc()
                 continue;
 
             socket->CloseSocket();
-            CleanupSocket( socket, false );
+            sScriptMgr->OnSocketClose( socket, false );
+            --m_Connections;
         }
 
         //! Cleanup sockets
         auto it = std::remove_if( m_Sockets.begin(), m_Sockets.end(), []( WorldSocket * socket )
         {
-            return socket->IsClosed();
+            if (socket->IsClosed())
+            {
+                socket->RemoveReference();
+                // RemoveReference deletes this socket
+                return true;
+            }
+            return false;
         } );
         m_Sockets.erase( it, m_Sockets.end() );
     }
