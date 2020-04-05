@@ -769,7 +769,12 @@ void InstanceSaveManager::CopyBinds(uint32 from, uint32 to, Player* toPlr)
 
 void InstanceSaveManager::UnbindAllFor(InstanceSave* save)
 {
-    InstanceSave::PlayerListType &pList = save->m_playerList;
-    while (!pList.empty())
-        PlayerUnbindInstance(*(pList.begin()), save->GetMapId(), save->GetDifficulty(), true, ObjectAccessor::GetObjectInOrOutOfWorld(MAKE_NEW_GUID(*(pList.begin()), 0, HIGHGUID_PLAYER), (Player*)NULL));
+    uint32 mapId = save->GetMapId();
+    Difficulty difficulty = save->GetDifficulty();
+
+    InstanceSave::PlayerListType players = save->m_playerList;
+    for ( uint32 guid : players  )
+    {
+        PlayerUnbindInstance( guid, mapId, difficulty, true, ObjectAccessor::GetObjectInOrOutOfWorld( MAKE_NEW_GUID( guid, 0, HIGHGUID_PLAYER ), ( Player * )nullptr ) );
+    }
 }
