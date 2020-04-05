@@ -2223,7 +2223,7 @@ void World::LoadAutobroadcasts()
     do
     {
         Field* fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
+        uint32 id = fields[0].GetUInt8();
 
         m_Autobroadcasts[id] = fields[4].GetString();
         m_AutobroadcastsExceptCountry[id] = fields[3].GetString();
