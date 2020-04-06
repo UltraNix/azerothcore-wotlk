@@ -18183,6 +18183,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         stmt->setUInt16(0, uint16(AT_LOGIN_RENAME));
         stmt->setUInt32(1, guid);
         CharacterDatabase.Execute(stmt);
+        sLog->outDetail("Player (GUID %u) kicked due to invalid name, flagged for rename", guid);
         return false;
     }
 
