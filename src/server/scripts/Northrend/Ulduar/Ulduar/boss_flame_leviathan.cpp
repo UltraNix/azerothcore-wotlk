@@ -1842,18 +1842,15 @@ public:
                             CreatureGroup* formation = goran->GetFormation();
                             if (formation)
                             {
-                                for (auto& creature : formation->GetMembers())
+                                while (formation->GetMembers().size() >1)
                                 {
-                                    if (!creature.first)
-                                        continue;
+                                    auto creature = formation->GetMembers().begin();
+                                    if (creature->first->GetGUID() == goran->GetGUID())
+                                        ++creature;
+                                    Creature* member = creature->first;
+                                    formation->RemoveMember(member);
 
-                                    if (creature.first->GetGUID() == goran->GetGUID())
-                                        continue;
-
-                                    if (creature.first->GetFormation())
-                                        formation->RemoveMember(creature.first);
-
-                                    Movement::MoveSplineInit init(creature.first);
+                                    Movement::MoveSplineInit init(member);
                                     if (moveMembersToTheLeft)
                                     {
                                         moveMembersToTheLeft = false;
