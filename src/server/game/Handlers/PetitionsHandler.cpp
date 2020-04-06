@@ -735,6 +735,9 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recvData)
     // Delete charter item
     _player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
 
+    // xinef: clear petition store (petition and signatures)
+    sPetitionMgr->RemovePetition(petition->petitionId);
+
     if (type == GUILD_CHARTER_TYPE)
     {
         // Create guild
@@ -795,9 +798,6 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recvData)
     trans->Append(stmt);
 
     CharacterDatabase.CommitTransaction(trans);
-
-    // xinef: clear petition store (petition and signatures)
-    sPetitionMgr->RemovePetition(petition->petitionId);
 
     // created
     sLog->outDebug(LOG_FILTER_NETWORKIO, "TURN IN PETITION GUID %u", GUID_LOPART(petitionGuid));
