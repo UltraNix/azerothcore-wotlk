@@ -657,7 +657,7 @@ struct npc_possible_but_not_probable_creature : public ScriptedAI
         if (Player* pl = who->ToPlayer())
         {
             if (pl->getClass() == CLASS_ROGUE)
-                damage *= 2.0f;
+                damage *= 3.0f;
         }
     }
 };
