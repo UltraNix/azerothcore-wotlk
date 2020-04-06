@@ -1,1 +1,1 @@
-UPDATE `item_template` SET `RequiredSkill`=762, `RequiredSkillRank`=150, ScriptName = 'item_bengal_tiger', spellid_1 = 10790, spellcooldown_1 = 330, spellcategory_1 = 3000, spellcategorycooldown_1 = 3000, Description ='Ride me!' WHERE  `entry`=8630; 
+UPDATE `item_template` SET `RequiredSkill`=762, `RequiredSkillRank`=150, ScriptName = 'item_bengal_tiger', spellid_1 = 10790, spellcooldown_1 = 330, spellcategory_1 = 3000, spellcategorycooldown_1 = 3000, Description ='Ride me!', `bonding` = 1 WHERE  `entry`=8630; 
