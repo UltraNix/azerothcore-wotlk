@@ -2608,6 +2608,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
     CallScriptOnHitHandlers();
 
+    if (unitTarget && unitTarget->IsPlayer() && m_spellInfo->HasAttribute(SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY))
+        for (SpellEffIndex eff : { EFFECT_0, EFFECT_1, EFFECT_2})
+            if (m_spellInfo->Effects[eff].Effect == SPELL_EFFECT_APPLY_AURA && m_spellInfo->Effects[eff].ApplyAuraName == SPELL_AURA_MECHANIC_IMMUNITY)
+                unitTarget->ToPlayer()->RemoveProhibitedSpells();
+
     // All calculated do it!
     // Do healing and triggers
     if (m_healing > 0)
