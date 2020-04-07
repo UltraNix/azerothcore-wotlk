@@ -12,10 +12,17 @@ class WorldSocket;
 class WorldSession;
 class World;
 
+enum ARstates {
+    STATE_BEGIN = 0,
+    STATE_ACCOUNT = 1,
+    STATE_VERIFY = 2
+};
+
 struct AuthRequest
 {
     AuthRequest( WorldSocket * s, WorldPacket && p )
         : socket( s )
+        , state( ARstates::STATE_BEGIN )
         , packet( std::move( p ) )
     {
     }
@@ -32,9 +39,15 @@ struct AuthRequest
     {
         socket = rhs.socket;
         packet = std::move( rhs.packet );
+        state  = rhs.state;
+        accountIdCallback = std::move( rhs.accountIdCallback );
+        verifyCallback = std::move( rhs.verifyCallback );
         return *this;
     }
 
+    ARstates state;
+    PreparedQueryResultFuture accountIdCallback;
+    QueryResultHolderFuture   verifyCallback; 
     WorldPacket     packet;
     WorldSocket *   socket;
 };

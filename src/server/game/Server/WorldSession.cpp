@@ -82,6 +82,49 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
     return (player->IsInWorld() == false);
 }
 
+enum ConnectionQueryIndex
+{
+    SESSION_CONNECTION_QUERY_ACCOUNT_DATA = 0,
+    SESSION_CONNECTION_QUERY_TUTORIALS    = 1,
+    SESSION_CONNECTION_QUERY_CHARLEVELS   = 2,
+
+    SESSION_CONNECTION_QUERY_MAX
+};
+
+class ConnectionQueryHolder : public SQLQueryHolder
+{
+    public:
+        bool m_checklevel;
+        std::string m_account;
+        ConnectionQueryHolder() {}
+        bool Initialize(bool checklevel, uint32 accountId, std::string account);
+};
+
+bool ConnectionQueryHolder::Initialize(bool checklevel, uint32 accountId, std::string account)
+{
+    SetSize(checklevel ? SESSION_CONNECTION_QUERY_MAX : SESSION_CONNECTION_QUERY_MAX -1);
+    m_checklevel = checklevel;
+    m_account = account;
+    bool res = true;
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ACCOUNT_DATA);
+    stmt->setUInt32(0, accountId);
+    res &= SetPreparedQuery(SESSION_CONNECTION_QUERY_ACCOUNT_DATA, stmt);
+    
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_TUTORIALS);
+    stmt->setUInt32(0, accountId);
+    res &= SetPreparedQuery(SESSION_CONNECTION_QUERY_TUTORIALS, stmt);
+
+    if (checklevel)
+    {
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_COUNT_WITH_LEVEL);
+        stmt->setUInt32(0, accountId);
+        stmt->setUInt32(1, sWorld->getIntConfig(CONFIG_LOG_NEW_ACCOUNTS_HIGHEST_CHAR_LEVEL));
+        res &= SetPreparedQuery(SESSION_CONNECTION_QUERY_CHARLEVELS, stmt);
+    }
+    return res;
+}
+
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue,
     time_t premium_services[MAX_PREMIUM_SERVICES]):
@@ -111,13 +154,6 @@ _offlineTime(0), _kicked(false), _shouldSetOfflineInDB(true), _vpnActive(false),
 
     InitializeQueryCallbackParameters();
     InitializeWarden();
-
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_RECRUITER);
-    if (stmt)
-    {
-        stmt->setUInt32(0, _accountId);
-        _isRecruiterCallback = LoginDatabase.AsyncQuery(stmt);
-    }
 }
 
 void WorldSession::InitializeWarden()
@@ -1029,13 +1065,6 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     }
 }
 
-void WorldSession::LoadGlobalAccountData()
-{
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ACCOUNT_DATA);
-    stmt->setUInt32(0, GetAccountId());
-    LoadAccountData(CharacterDatabase.Query(stmt), GLOBAL_CACHE_MASK);
-}
-
 void WorldSession::LoadAccountData(PreparedQueryResult result, uint32 mask)
 {
     for (uint32 i = 0; i < NUM_ACCOUNT_DATA_TYPES; ++i)
@@ -1109,13 +1138,11 @@ void WorldSession::SendAccountDataTimes(uint32 mask)
     SendPacket(&data);
 }
 
-void WorldSession::LoadTutorialsData()
+void WorldSession::LoadTutorialsData(PreparedQueryResult result)
 {
     memset(m_Tutorials, 0, sizeof(uint32) * MAX_ACCOUNT_TUTORIAL_VALUES);
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_TUTORIALS);
-    stmt->setUInt32(0, GetAccountId());
-    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+    if (result)
         for (uint8 i = 0; i < MAX_ACCOUNT_TUTORIAL_VALUES; ++i)
             m_Tutorials[i] = (*result)[i].GetUInt32();
 
@@ -1310,6 +1337,17 @@ void WorldSession::WriteMovementInfo(WorldPacket* data, MovementInfo* mi)
 
     if (mi->HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
         *data << mi->splineElevation;
+}
+
+void WorldSession::PrepareConnectionQueries(bool checklevel, std::string account)
+{
+    ConnectionQueryHolder* holder = new ConnectionQueryHolder;
+    if (!holder->Initialize(checklevel, GetAccountId(), account))
+    {
+        delete holder;
+        return;
+    }
+    _onConnectionCallback = CharacterDatabase.DelayQueryHolder((SQLQueryHolder*)holder);
 }
 
 void WorldSession::ReadAddonsInfo(WorldPacket &data)
@@ -1533,15 +1571,6 @@ void WorldSession::ProcessQueryCallbackPlayer()
         HandleLoadActionsSwitchSpec(result);
         _loadActionsSwitchSpecCallback.cancel();
     }
-
-    if (_isRecruiterCallback.ready())
-    {
-        _isRecruiterCallback.get(result);
-        if (result)
-            isRecruiter = true;
-        _isRecruiterCallback.cancel();
-    }
-
 }
 
 void WorldSession::ProcessQueryCallbackPet()
@@ -1627,6 +1656,30 @@ void WorldSession::ProcessQueryCallbackLogin()
         _charLoginCallback.get(param);
         HandlePlayerLoginFromDB((LoginQueryHolder*)param);
         _charLoginCallback.cancel();
+    }
+
+    if (_onConnectionCallback.ready())
+    {
+        SQLQueryHolder* param;
+        _onConnectionCallback.get(param);
+        LoadTutorialsData(param->GetPreparedResult(SESSION_CONNECTION_QUERY_TUTORIALS));
+        LoadAccountData(param->GetPreparedResult(SESSION_CONNECTION_QUERY_ACCOUNT_DATA), GLOBAL_CACHE_MASK);
+        if (((ConnectionQueryHolder*)param)->m_checklevel)
+        {
+            PreparedQueryResult characterAboveResult = param->GetPreparedResult(SESSION_CONNECTION_QUERY_CHARLEVELS);
+            if (characterAboveResult)
+            {
+                Field* field = characterAboveResult->Fetch();
+                uint32 count = field[0].GetUInt32();
+                //! he has 0 characters with higher level than specified, log his packets
+                if (!count)
+                {
+                    m_Socket->StartLoggingPackets(((ConnectionQueryHolder*)param)->m_account);
+                    sLog->outDebug(LOG_FILTER_NETWORKIO, "Enabling packet logging for account (%u) due to fresh account with low levels!", GetAccountId());
+                }
+            }
+        }
+        _onConnectionCallback.cancel();
     }
 }
 

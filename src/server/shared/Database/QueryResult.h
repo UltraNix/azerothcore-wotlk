@@ -47,6 +47,9 @@ class PreparedResultSet
     public:
         PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES* result, uint64 rowCount, uint32 fieldCount);
         ~PreparedResultSet();
+        // just dont, unless someone implements this properly
+        PreparedResultSet& operator=(const PreparedResultSet&) = delete;
+        PreparedResultSet(const PreparedResultSet&) = delete;
 
         bool NextRow();
         uint64 GetRowCount() const { return m_rowCount; }

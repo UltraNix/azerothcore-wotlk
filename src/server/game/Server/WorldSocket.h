@@ -26,10 +26,13 @@
 #include "AuthCrypt.h"
 
 #include "PacketLog.h"
+#include "PreparedStatement.h"
+#include "QueryHolder.h"
 
 class ACE_Message_Block;
 class WorldPacket;
 class WorldSession;
+class AuthQueryHolder;
 
 /// Handler that can communicate over stream sockets.
 typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> WorldHandler;
@@ -126,8 +129,11 @@ class WorldSocket : public WorldHandler
         /// Called by WorldSocketMgr/ReactorRunnable.
         int Update (void);
 
-        WorldSession* HandleAuthSession(WorldPacket& recvPacket);
+        bool HandleAuthHello(WorldPacket& recvPacket, PreparedQueryResultFuture& callback);
+        bool HandleAuthAccount(WorldPacket& recvPacket, PreparedQueryResult& result, QueryResultHolderFuture& callback);
+        WorldSession* HandleAuthSession(WorldPacket& recvPacket, AuthQueryHolder* result);
         inline bool IsPacketLoggingEnabled() const { return m_isPacketLoggingEnabled; }
+        void StartLoggingPackets(std::string account);
 
     private:
         /// Helper functions for processing incoming data.

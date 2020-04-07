@@ -20973,8 +20973,7 @@ void Player::_SaveLatency(SQLTransaction& trans)
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_LATENCY_RECORD);
     stmt->setUInt32(0, GetGUIDLow());
     stmt->setUInt32(1, GetSession()->GetLatency());
-    stmt->setUInt32(2, GetSession()->hasVPNconnection());
-    stmt->setUInt32(3, time(nullptr));
+    stmt->setUInt32(2, time(nullptr));
     trans->Append(stmt);
 }
 

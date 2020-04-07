@@ -72,7 +72,8 @@ enum AccountDataType
 enum AccountFlags
 {
     ACCOUNT_FLAG_NONE               = 0x00,
-    ACCOUNT_FLAG_LOG_ALL_PACKETS    = 0x01
+    ACCOUNT_FLAG_LOG_ALL_PACKETS    = 0x01,
+    ACCOUNT_FLAG_IS_A_RECRUITER     = 0x02
 };
 
 #define NUM_ACCOUNT_DATA_TYPES        8
@@ -231,6 +232,7 @@ class WorldSession
         bool PlayerDeleting() const { return m_playerDeleting; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
 
+        void PrepareConnectionQueries(bool checklevel, std::string account);
         void ReadAddonsInfo(WorldPacket& data);
         void SendAddonsInfo();
 
@@ -327,10 +329,9 @@ class WorldSession
         AccountData* GetAccountData(AccountDataType type) { return &m_accountData[type]; }
         void SetAccountData(AccountDataType type, time_t tm, std::string const& data);
         void SendAccountDataTimes(uint32 mask);
-        void LoadGlobalAccountData();
         void LoadAccountData(PreparedQueryResult result, uint32 mask);
 
-        void LoadTutorialsData();
+        void LoadTutorialsData(PreparedQueryResult result);
         void SendTutorialsData();
         void SaveTutorialsData(SQLTransaction& trans);
         uint32 GetTutorialInt(uint8 index) const { return m_Tutorials[index]; }
@@ -426,9 +427,6 @@ class WorldSession
         {
             return _premiumServices[serviceId] > time(nullptr);
         }
-
-        bool hasVPNconnection() const { return _vpnActive;  }
-        void setVPNconnection(bool isVPNconnection) { _vpnActive = isVPNconnection; }
 
         // Packets cooldown
         time_t GetCalendarEventCreationCooldown() const { return _calendarEventCreationCooldown; }
@@ -986,6 +984,7 @@ class WorldSession
         void ProcessQueryCallbackLogin();
         void ProcessTransactionCallbacks();
 
+        QueryResultHolderFuture _onConnectionCallback;
         PreparedQueryResultFuture _charEnumCallback;
         QueryCallback<PreparedQueryResult, std::string> _charRenameCallback;
         QueryCallback<PreparedQueryResult, uint32> _stableSwapCallback;
@@ -994,7 +993,6 @@ class WorldSession
 
         QueryResultHolderFuture _loadPetFromDBSecondCallback;
         QueryCallback_3<PreparedQueryResult, uint8, uint8, uint32> _openWrappedItemCallback;
-        PreparedQueryResultFuture _isRecruiterCallback;
 
     public:
         // xinef: those must be public, requires calls out of worldsession :(

@@ -72,17 +72,64 @@ void ThreadedAuthHandler::HandleRequest( AuthRequest request )
     PROFILE_SCOPE( "HandleAuth" );
 
     WorldSocket * socket = request.socket;
-    if ( !socket->IsClosed() )
+    if ( socket->IsClosed() )
     {
-        WorldSession* session = socket->HandleAuthSession( request.packet );
-        if ( session != nullptr )
+        socket->RemoveReference();
+        return;
+    }
+    switch(request.state)
+    {
+        case ARstates::STATE_BEGIN:
+            if (!socket->HandleAuthHello(request.packet, request.accountIdCallback))
+            {
+                socket->RemoveReference();
+            }
+            else
+            {
+                request.state = ARstates::STATE_ACCOUNT;
+                m_queue.push( std::move(request) );
+            }
+            break;
+        case ARstates::STATE_ACCOUNT:
         {
-            std::unique_lock< std::mutex > lock( m_mutex );
-            m_sessions.push_back( session );
+            if (!request.accountIdCallback.ready())
+            {
+                m_queue.push( std::move(request) );
+                return; // back into queue
+            }
+            PreparedQueryResult result;
+            request.accountIdCallback.get(result);
+            if (!socket->HandleAuthAccount(request.packet, result, request.verifyCallback))
+            {
+                socket->RemoveReference();
+            }
+            else
+            {
+                request.state = ARstates::STATE_VERIFY;
+                m_queue.push( std::move(request) );
+            }
+            break;
+        }
+        case ARstates::STATE_VERIFY:
+        {
+            if (!request.verifyCallback.ready())
+            {
+                m_queue.push( std::move(request) );
+                return; // back into queue
+            }
+            SQLQueryHolder* result;
+            request.verifyCallback.get(result);
+            WorldSession* session = socket->HandleAuthSession( request.packet, (AuthQueryHolder*)result);
+            delete result;
+            if ( session != nullptr )
+            {
+                std::unique_lock< std::mutex > lock( m_mutex );
+                m_sessions.push_back( session );
+            }
+            socket->RemoveReference();
+            break;
         }
     }
-
-    socket->RemoveReference();
 }
 
 ThreadedAuthHandler & GetAuthHandler()
