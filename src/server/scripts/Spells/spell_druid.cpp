@@ -202,10 +202,10 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
                     return true;
 
                 bool isPeriodic =  eventInfo.GetTypeMask() & PROC_FLAG_DONE_PERIODIC;
-                bool isRipOrRake = baseSpellInfo->SpellFamilyFlags[0] & (0x00001000 | 0x00800000);
+                bool isRipOrRakeOrLacerate = baseSpellInfo->SpellFamilyFlags[0] & (0x00001000 | 0x00800000) || baseSpellInfo->SpellFamilyFlags[1] & (0x00000100);
 
                 //! Anything that generates combo points is disabled, excluding Rake and Rip (periodic)
-                if (!(isRipOrRake && isPeriodic) && (baseSpellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || (baseSpellInfo->Id != 48574 && baseSpellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS)) || baseSpellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT)))
+                if (!(isRipOrRakeOrLacerate && isPeriodic) && (baseSpellInfo->HasAttribute(SPELL_ATTR1_REQ_COMBO_POINTS1) || (baseSpellInfo->Id != 48574 && baseSpellInfo->HasEffect(SPELL_EFFECT_ADD_COMBO_POINTS)) || baseSpellInfo->HasAura(SPELL_AURA_MOD_SHAPESHIFT)))
                     return false;
 
                 if (baseSpellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE && (baseSpellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING) || baseSpellInfo->HasAttribute(SPELL_ATTR0_ON_NEXT_SWING_2)))
@@ -217,7 +217,7 @@ class spell_dru_omen_of_clarity : public SpellScriptLoader
                     // Periodic Rake and Rip can proc OOC
                     if (isPeriodic)
                     {
-                        if (isRipOrRake && eventInfo.GetActor() && eventInfo.GetActor()->IsPlayer())
+                        if (isRipOrRakeOrLacerate && eventInfo.GetActor() && eventInfo.GetActor()->IsPlayer())
                             return eventInfo.GetActor()->ToPlayer()->HasAura(SPELL_DRUID_T8_2P_FERAL_BONUS);
                         else
                             return false;
