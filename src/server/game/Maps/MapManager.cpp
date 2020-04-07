@@ -244,6 +244,7 @@ void MapManager::Update(uint32 diff)
     }
 
     const bool updateMapsAsync = m_updater.activated();
+    bool const _alwaysUpdateInstanceable = sWorld->getBoolConfig(CONFIG_UPDATE_INSTANCE_BATTLEGROUNDS_EVERY_UPDATE);
     if ( updateMapsAsync )
     {
         PROFILE_SCOPE( "QueueUpdateMaps" );
@@ -276,8 +277,14 @@ void MapManager::Update(uint32 diff)
         for ( Map * map : maps )
         {
             //! TODO: refactor this crap! ( rewritten by xinef & pussy )
-            const bool full = mapUpdateStep < 3 && ( ( mapUpdateStep == 0 && !map->IsBattlegroundOrArena() && !map->IsDungeon() ) || ( mapUpdateStep == 1 && map->IsBattlegroundOrArena() ) || ( mapUpdateStep == 2 && map->IsDungeon() ) );
-            m_updater.schedule_update( *map, uint32( full ? i_timer[ mapUpdateStep ].GetCurrent() : 0 ), diff );
+            bool fullUpdate = mapUpdateStep < 3 && ((mapUpdateStep == 0 && !map->IsBattlegroundOrArena() && !map->IsDungeon()) || (mapUpdateStep == 1 && map->IsBattlegroundOrArena()) || (mapUpdateStep == 2 && map->IsDungeon()));
+            if (_alwaysUpdateInstanceable)
+            {
+                if (map->IsDungeonOrRaid() || map->IsBattlegroundOrArena())
+                    fullUpdate = true;
+            }
+
+            m_updater.schedule_update( *map, uint32( fullUpdate ? i_timer[ mapUpdateStep ].GetCurrent() : 0 ), diff );
         }
     }
     else
@@ -287,6 +294,11 @@ void MapManager::Update(uint32 diff)
         {
             //! TODO: refactor this crap! ( rewritten by xinef & pussy )
             bool full = mapUpdateStep < 3 && ( ( mapUpdateStep == 0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon() ) || ( mapUpdateStep == 1 && iter->second->IsBattlegroundOrArena() ) || ( mapUpdateStep == 2 && iter->second->IsDungeon() ) );
+            if (_alwaysUpdateInstanceable)
+            {
+                if (iter->second->IsDungeonOrRaid() || iter->second->IsBattlegroundOrArena())
+                    full = true;
+            }
             iter->second->Update( uint32( full ? i_timer[ mapUpdateStep ].GetCurrent() : 0 ), diff, false );
         }
     }

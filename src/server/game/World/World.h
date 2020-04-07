@@ -208,6 +208,7 @@ enum WorldBoolConfigs
     CONFIG_BATTLEGROUNDS_SEPARATE_TWINK_QUEUES, // When enabled twinks will be put to separate battleground queues
     CONFIG_BOOL_PREMIUM_SKIPQUEUE,
     CONFIG_CREATURE_FULL_HEALTH_AT_EVADE,       // When enabled, raid bosses and dungeon bosses will regenerate full health when they reach home position
+    CONFIG_UPDATE_INSTANCE_BATTLEGROUNDS_EVERY_UPDATE,
     BOOL_CONFIG_VALUE_COUNT
 };
 

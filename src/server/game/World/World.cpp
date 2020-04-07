@@ -1487,6 +1487,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ARENA_WORLD_ANNOUNCER_COOLDOWN] = sConfigMgr->GetIntDefault("Arena.World.Announcer.Cooldown", 30);
     m_bool_configs[CONFIG_BOOL_PREMIUM_SKIPQUEUE] = sConfigMgr->GetBoolDefault("Premium.SkipQueue", false);
     m_bool_configs[CONFIG_CREATURE_FULL_HEALTH_AT_EVADE] = sConfigMgr->GetBoolDefault("Creature.Misc.FullHealthAtEvadeForBosses", false);
+    m_bool_configs[CONFIG_UPDATE_INSTANCE_BATTLEGROUNDS_EVERY_UPDATE] = sConfigMgr->GetBoolDefault("MapUpdates.UpdateInstancesEachCycle", false);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
