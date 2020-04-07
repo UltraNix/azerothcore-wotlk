@@ -155,6 +155,8 @@ class Aura
 
         uint8 GetCasterLevel() const { return m_casterLevel; }
 
+        uint32 Priority;
+
         bool IsArea() const;
         bool IsPassive() const;
         bool IsDeathPersistent() const;

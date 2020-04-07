@@ -404,6 +404,21 @@ Aura::Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, ItemRe
     m_isUsingCharges = m_procCharges != 0;
     memset( m_effects, 0, sizeof( m_effects ) );
     m_procCooldown = m_applyTime;
+    // TODO: handle this system properly and take values from spell.dbc
+    Priority = [&]()
+    {
+        switch (m_spellInfo->Id)
+        {
+            // backdraft
+            case 54277:
+                return 50;
+            // backlash
+            case 34936:
+                return 100;
+            default:
+                return 0;
+        }
+    }();
     // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
 }
 
