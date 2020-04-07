@@ -824,7 +824,15 @@ class spell_gen_proc_from_direct_damage : public SpellScriptLoader
 
             bool CheckProc(ProcEventInfo& eventInfo)
             {
-                return !eventInfo.GetDamageInfo()->GetSpellInfo() || !eventInfo.GetDamageInfo()->GetSpellInfo()->IsTargetingArea();
+                if (SpellInfo const* spellInfo = eventInfo.GetDamageInfo()->GetSpellInfo())
+                {
+                    if (spellInfo->IsTargetingArea())
+                        return false;
+                    // Death and Decay
+                    if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->SpellFamilyFlags[2] & 0x00000008)
+                        return false;
+                }
+                return true;
             }
 
             void Register()
