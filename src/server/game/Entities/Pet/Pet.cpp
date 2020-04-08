@@ -255,7 +255,7 @@ void Pet::SavePetToDB(PetSaveMode mode, bool logout, bool playerSave /*= false*/
 
         if (!playerSave)
         {
-            sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Saving pet to database: Id: %u, Entry: %u, Slot: %u, Owner: [%s], Level: %u, Name: %s",
+            sLog->outDebug(DebugLogFilters::LOG_FILTER_PETS, "Saving pet to database: Id: %u, Entry: %u, Slot: %u, Owner: [%u], Level: %u, Name: %s",
                         m_charmInfo->GetPetNumber(), GetEntry(), uint32(mode), owner->GetGUIDLow(), getLevel(), m_name.c_str());
         }
 
