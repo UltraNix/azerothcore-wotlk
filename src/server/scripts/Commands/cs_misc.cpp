@@ -123,7 +123,7 @@ public:
             { "gmhelp",             SEC_MODERATOR,          CMD_INGAME, &HandleGmhelpCommand,                "" },
             { "blockinvite",        SEC_PLAYER,             CMD_INGAME, HandleBlockInviteCommand,            "" },
             { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,                "" },
-            { "deserter",           SEC_MODERATOR,          CMD_INGAME, &HandleDeserterCommand,              "" }
+            { "deserter",           SEC_MODERATOR,          CMD_INGAME, &HandleDeserterCommand,              "" },
         };
         return commandTable;
     }

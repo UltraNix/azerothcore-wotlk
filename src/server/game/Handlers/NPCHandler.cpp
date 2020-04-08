@@ -585,8 +585,8 @@ void WorldSession::SendStablePet(uint64 guid)
     data << uint8( 0 );
     data << uint8( GetPlayer()->m_stableSlots );
 
-    uint8 petsCount = 0;       
-    
+    uint8 petsCount = 0;
+
     PetSlotData* current = GetPlayer()->GetPetSlotData(PET_SAVE_AS_CURRENT);
     if ( current == nullptr || current->Type != HUNTER_PET )
     {
@@ -915,8 +915,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket & recvData)
                 return;
             }
 
-            Pet* pet = _player->GetPet();
-            if ( pet != nullptr )
+            if (Pet* pet = _player->GetPet())
             {
                 if ( !pet->IsAlive() )
                 {
@@ -931,7 +930,8 @@ void WorldSession::HandleStableSwapPet(WorldPacket & recvData)
             }
             else
             {
-                SwapHunterPetsInSlots( _player, PET_SAVE_NOT_IN_SLOT, slot );
+                SendStableResult(STABLE_ERR_STABLE);
+                return;
             }
 
             // summon unstabled pet

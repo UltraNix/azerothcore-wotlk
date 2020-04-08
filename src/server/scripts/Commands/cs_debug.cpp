@@ -84,7 +84,8 @@ public:
             { "majordomo",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugMajordomo,             ""},
             { "hellforge",      SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugHellforge,               ""},
             { "wintergrasp",    SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWintergrasp,            ""},
-            { "wgstats",        SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWgstats,                ""}
+            { "wgstats",        SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugWgstats,                ""},
+            { "pet",            SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugPet,                    ""},
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -1626,6 +1627,31 @@ public:
         handler->PSendSysMessage("--------------------");
         handler->PSendSysMessage("Max players: %u", wg->GetMaxPlayers());
         handler->PSendSysMessage("Max difference between factions: %u", wg->GetMaxFactionDiff());
+        return true;
+    }
+
+    static bool HandleDebugPet(ChatHandler* handler, char const* /*args*/)
+    {
+        if (Player* player = handler->GetSession()->GetPlayer())
+        {
+            uint32 count = 0;
+            for (PetSaveMode slot = PET_SAVE_FIRST_STABLE_SLOT; slot <= PET_SAVE_LAST_STABLE_SLOT; slot = PetSaveMode(slot + 1))
+            {
+                if (PetSlotData* petSlot = player->GetPetSlotData(slot))
+                {
+                    handler->PSendSysMessage("%u. %s (Id: %u) Slot: %u", ++count, petSlot->Name.c_str(), petSlot->Id, (uint32)slot);
+                }
+            }
+
+            for (PetSaveMode slot : {PET_SAVE_AS_DELETED, PET_SAVE_AS_CURRENT, PET_SAVE_NOT_IN_SLOT, PET_SAVE_SWAP_TEMP})
+            {
+                if (PetSlotData* petSlot = player->GetPetSlotData(slot))
+                {
+                    handler->PSendSysMessage("%u. %s (Id: %u) Slot: %u", ++count, petSlot->Name.c_str(), petSlot->Id, (uint32)slot);
+                }
+            }
+
+        }
         return true;
     }
 
