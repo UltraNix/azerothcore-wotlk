@@ -2643,7 +2643,6 @@ void Player::RemoveFromWorld()
         ClearComboPointHolders(); // pussywizard: crashfix
         if (uint64 lguid = GetLootGUID()) // pussywizard: crashfix
             m_session->DoLootRelease(lguid);
-        _prohibitedSpells.clear();
         sOutdoorPvPMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sBattlefieldMgr->HandlePlayerLeaveZone(this, m_zoneUpdateId);
     }
@@ -4489,7 +4488,6 @@ bool Player::Has310Flyer(bool checkAllSpells, uint32 excludeSpellId)
 void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
 {
     m_spellCooldowns.erase(spell_id);
-    _prohibitedSpells.erase(spell_id);
 
     if (update)
         SendClearCooldown(spell_id, this);
@@ -22537,7 +22535,6 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
         {
             cooldowns[unSpellId] = unTimeMs;
             AddSpellCooldown(unSpellId, 0, unTimeMs, true);
-            _prohibitedSpells.emplace(unSpellId);
         }
     }
 
@@ -22546,13 +22543,6 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs)
         BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, cooldowns);
         GetSession()->SendPacket(&data);
     }
-}
-
-void Player::RemoveProhibitedSpells()
-{
-    auto prohibitedSpellsCopy = _prohibitedSpells;
-    for (uint32 spellId : prohibitedSpellsCopy)
-        RemoveSpellCooldown(spellId, true);
 }
 
 void Player::InitDataForForm(bool reapplyMods)

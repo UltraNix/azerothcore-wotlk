@@ -1390,7 +1390,6 @@ class Player : public Unit, public GridObject<Player>
         void StoreLootItem(uint8 lootSlot, Loot* loot);
         void UpdateLootAchievements(LootItem *item, Loot* loot);
         void UpdateTitansGrip();
-        void RemoveProhibitedSpells();
 
         InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count, ItemRef const& pItem, uint32* no_space_count = NULL) const;
         InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, ItemRef const& pItem = NULL, bool swap = false, uint32* no_space_count = NULL) const;
@@ -3116,7 +3115,6 @@ class Player : public Unit, public GridObject<Player>
 
         TaskScheduler m_taskScheduler;
         bool m_canSendArenaAnnounce;
-        std::unordered_set<uint32> _prohibitedSpells;
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);
