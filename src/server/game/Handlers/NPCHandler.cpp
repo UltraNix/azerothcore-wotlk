@@ -713,35 +713,10 @@ void WorldSession::HandleStablePet(WorldPacket & recvData)
 
 static void SwapHunterPetsInSlots( Player* owner, uint8 slot1, uint8 slot2 )
 {
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-    //! Current pet is offline, we need to swap entries
-    // NOT_IN_SLOT -> DELETED
-    // SLOT -> NOT_IN_SLOT
-    // DELETED -> SLOT
-
     PetSlotData* slot1Data = owner->GetPetSlotData( PetSaveMode( slot1 ), true );
     PetSlotData* slot2Data = owner->GetPetSlotData( PetSaveMode( slot2 ), true );
 
     std::swap( *slot1Data, *slot2Data );
-
-    const std::vector< std::pair< uint8, uint8 > > swapOrder =
-    {
-        { slot1, PET_SAVE_SWAP_TEMP },
-        { slot2, slot1 },
-        { PET_SAVE_SWAP_TEMP, slot2 }
-    };
-
-    for ( auto && it : swapOrder )
-    {
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement( CHAR_UDP_CHAR_HUNTER_PET_SLOT_BY_SLOT );
-        stmt->setUInt8( 0, it.second );
-        stmt->setUInt32( 1, owner->GetGUIDLow() );
-        stmt->setUInt8( 2, it.first );
-        trans->Append( stmt );
-    }
-
-    CharacterDatabase.CommitTransaction( trans );
 }
 
 void WorldSession::HandleUnstablePet(WorldPacket & recvData)
