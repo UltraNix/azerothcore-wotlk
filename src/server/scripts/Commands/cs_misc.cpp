@@ -3653,7 +3653,6 @@ public:
         if (!handler->extractPlayerTarget(nullptr, &target, &targetGuid, &targetName))
             return false;
 
-        uint32 interruptAuraFlag = 0;
         switch (function)
         {
             case 1:
