@@ -68,9 +68,19 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
                      sameTransport || // nothing to comment, can't find path on transports so allow it
                      (i_target->GetTypeId() == TYPEID_PLAYER && i_target->ToPlayer()->IsGameMaster()); // for .npc follow
     bool forcePoint = ((!isPlayerPet || owner->GetMapId() == 618) && (forceDest || !useMMaps)) || sameTransport;
+    bool ShouldGoForBack = [&]()
+    {
+        if (isPlayerPet && i_target->GetVictim() != owner)
+            if (owner->GetEntry() != 416 && owner->GetEntry() != 510 && owner->GetEntry() != 37994) // can melee attack
+                return true;
+        return false;
+    }();
 
     lastOwnerXYZ.Relocate(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ());
     lastTargetXYZ.Relocate(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ());
+
+    float dist = 0.0f;
+    float size = 0.0f;
 
     if (!i_offset)
     {
@@ -93,9 +103,6 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
     }
     else
     {
-        float dist;
-        float size;
-
         // Pets need special handling.
         // We need to subtract GetObjectSize() because it gets added back further down the chain
         //  and that makes pets too far away. Subtracting it allows pets to properly
@@ -183,6 +190,17 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool ini
         {
             lastOwnerXYZ.Relocate(-5000.0f, -5000.0f, -5000.0f);
             return;
+        }
+
+        if (ShouldGoForBack)
+        {
+            bool inRange = i_target->GetClosePoint(x, y, z, size, dist, float(M_PI), owner, forcePoint);
+            if (!inRange && (forceDest || !useMMaps) && owner->HasUnitState(UNIT_STATE_FOLLOW) && fabs(i_target->GetPositionZ() - z) > 25.0f)
+            {
+                x = i_target->GetPositionX();
+                y = i_target->GetPositionY();
+                z = i_target->GetPositionZ();
+            }
         }
 
         AsyncPathGeneratorContext context( owner, { x, y, z }, forceDest );
