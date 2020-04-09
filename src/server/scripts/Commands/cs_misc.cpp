@@ -124,6 +124,7 @@ public:
             { "blockinvite",        SEC_PLAYER,             CMD_INGAME, HandleBlockInviteCommand,            "" },
             { "pvpstats",           SEC_GAMEMASTER,         CMD_CLI,  &HandlePvPstatsCommand,                "" },
             { "deserter",           SEC_MODERATOR,          CMD_INGAME, &HandleDeserterCommand,              "" },
+            { "interrupt",          SEC_MODERATOR,          CMD_INGAME, &HandleInterruptCommand,             "" }
         };
         return commandTable;
     }
@@ -3632,6 +3633,43 @@ public:
             aura->RefreshDuration();
         }
 
+        return true;
+    }
+
+    static bool HandleInterruptCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+        {
+            handler->PSendSysMessage("Available functions:\n1 - Interrupt drink/food\n2 - Interrupt cast \n3 - Dismount");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        uint32 function = atoi(strtok((char*)args, " "));
+
+        Player* target;
+        uint64 targetGuid;
+        std::string targetName;
+
+        if (!handler->extractPlayerTarget(nullptr, &target, &targetGuid, &targetName))
+            return false;
+
+        uint32 interruptAuraFlag = 0;
+        switch (function)
+        {
+            case 1:
+                target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);
+                break;
+            case 2:
+                target->InterruptNonMeleeSpells(false);
+                break;
+            case 3:
+                target->RemoveAurasByType(SPELL_AURA_MOUNTED);
+                break;
+            default:
+                handler->PSendSysMessage("Available functions:\n1 - Interrupt drink/food\n2 - Interrupt cast \n3 - Dismount");
+                handler->SetSentErrorMessage(true);
+                return false;
+        }
         return true;
     }
 
