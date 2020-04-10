@@ -64,68 +64,101 @@ void ThreadedAuthHandler::QueueAuthRequest( WorldSocket * socket, WorldPacket pa
     //! Make sure no one destroys our socket
     socket->AddReference();
 
-    m_queue.emplace( socket, std::move( packet ) );
+    m_queue.emplace( std::make_unique< AuthRequest >( socket, std::move( packet ) ) );
 }
 
-void ThreadedAuthHandler::HandleRequest( AuthRequest request )
+void ThreadedAuthHandler::QueueAuthRequest( std::unique_ptr< AuthRequest > && request )
+{
+    m_queue.push( std::move( request ) );
+}
+
+template<typename T>
+struct AuthQueryObserver : public ACE_Future_Observer< T >
+{
+    AuthQueryObserver( std::unique_ptr< AuthRequest > && request, ARstates nextState )
+        : m_request( std::move( request ) )
+    {
+        m_request->state = nextState;
+    }
+
+    std::unique_ptr< AuthRequest > m_request;
+
+    void update( const ACE_Future<T> & future ) override
+    {
+        GetAuthHandler().QueueAuthRequest( std::move( m_request ) );
+
+        delete this;
+    }
+};
+
+void ThreadedAuthHandler::HandleRequest( std::unique_ptr< AuthRequest > && request )
 {
     PROFILE_SCOPE( "HandleAuth" );
 
-    WorldSocket * socket = request.socket;
+    WorldSocket * socket = request->socket;
     if ( socket->IsClosed() )
     {
         socket->RemoveReference();
         return;
     }
-    switch(request.state)
+
+    switch(request->state)
     {
         case ARstates::STATE_BEGIN:
-            if (!socket->HandleAuthHello(request.packet, request.accountIdCallback))
+        {
+            if (socket->HandleAuthHello( request->packet, request->accountIdCallback ))
             {
-                socket->RemoveReference();
+                auto observer = new AuthQueryObserver<PreparedQueryResult>( std::move( request ), ARstates::STATE_ACCOUNT );
+                if (observer->m_request->accountIdCallback.attach( observer ) == -1)
+                {
+                    sLog->outError("ThreadedAuthHandler::HandleRequest unable to attach observer to accountIdCallback");
+                    socket->RemoveReference();
+
+                    delete observer;
+                }
             }
             else
             {
-                request.state = ARstates::STATE_ACCOUNT;
-                m_queue.push( std::move(request) );
+                socket->RemoveReference();
             }
             break;
+        }
         case ARstates::STATE_ACCOUNT:
         {
-            if (!request.accountIdCallback.ready())
-            {
-                m_queue.push( std::move(request) );
-                return; // back into queue
-            }
             PreparedQueryResult result;
-            request.accountIdCallback.get(result);
-            if (!socket->HandleAuthAccount(request.packet, result, request.verifyCallback))
+            request->accountIdCallback.get(result);
+
+            if (socket->HandleAuthAccount( request->packet, result, request->verifyCallback ))
             {
-                socket->RemoveReference();
+                auto observer = new AuthQueryObserver<SQLQueryHolder*>( std::move( request ), ARstates::STATE_VERIFY );
+                if (observer->m_request->verifyCallback.attach(observer) == -1)
+                {
+                    sLog->outError( "ThreadedAuthHandler::HandleRequest unable to attach observer to verifyCallback" );
+                    socket->RemoveReference();
+
+                    delete observer;
+                }
             }
             else
             {
-                request.state = ARstates::STATE_VERIFY;
-                m_queue.push( std::move(request) );
+                socket->RemoveReference();
             }
             break;
         }
         case ARstates::STATE_VERIFY:
         {
-            if (!request.verifyCallback.ready())
-            {
-                m_queue.push( std::move(request) );
-                return; // back into queue
-            }
             SQLQueryHolder* result;
-            request.verifyCallback.get(result);
-            WorldSession* session = socket->HandleAuthSession( request.packet, (AuthQueryHolder*)result);
+            request->verifyCallback.get(result);
+
+            WorldSession* session = socket->HandleAuthSession( request->packet, (AuthQueryHolder*)result);
             delete result;
+
             if ( session != nullptr )
             {
                 std::unique_lock< std::mutex > lock( m_mutex );
                 m_sessions.push_back( session );
             }
+
             socket->RemoveReference();
             break;
         }

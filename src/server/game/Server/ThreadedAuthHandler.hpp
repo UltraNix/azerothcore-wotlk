@@ -7,12 +7,14 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include <memory>
 
 class WorldSocket;
 class WorldSession;
 class World;
 
-enum ARstates {
+enum ARstates
+{
     STATE_BEGIN = 0,
     STATE_ACCOUNT = 1,
     STATE_VERIFY = 2
@@ -27,32 +29,14 @@ struct AuthRequest
     {
     }
 
-    AuthRequest( const AuthRequest & ) = delete;
-    AuthRequest & operator=( const AuthRequest & ) = delete;
-
-    AuthRequest( AuthRequest && rhs )
-    {
-        *this = std::move( rhs );
-    }
-
-    AuthRequest & operator=( AuthRequest && rhs )
-    {
-        socket = rhs.socket;
-        packet = std::move( rhs.packet );
-        state  = rhs.state;
-        accountIdCallback = std::move( rhs.accountIdCallback );
-        verifyCallback = std::move( rhs.verifyCallback );
-        return *this;
-    }
-
-    ARstates state;
-    PreparedQueryResultFuture accountIdCallback;
-    QueryResultHolderFuture   verifyCallback; 
-    WorldPacket     packet;
-    WorldSocket *   socket;
+    ARstates                   state;
+    PreparedQueryResultFuture  accountIdCallback;
+    QueryResultHolderFuture    verifyCallback; 
+    WorldPacket                packet;
+    WorldSocket *              socket;
 };
 
-using AuthRequestQueue = Threading::SyncQueue< AuthRequest >;
+using AuthRequestQueue = Threading::SyncQueue< std::unique_ptr< AuthRequest > >;
 
 class ThreadedAuthHandler
 {
@@ -65,13 +49,14 @@ public:
     void                Shutdown();
 
     void                QueueAuthRequest( WorldSocket * socket, WorldPacket packet );
+    void                QueueAuthRequest( std::unique_ptr< AuthRequest > && request );
 
 protected:
     //! Call only from world thread
     void                CollectSessions( World * world );
-    void                HandleRequest( AuthRequest request );
+    void                HandleRequest( std::unique_ptr< AuthRequest > && request );
 
-    AuthRequestQueue    m_queue;
+    AuthRequestQueue                m_queue;
 
     std::mutex                      m_mutex;
     std::vector< WorldSession * >   m_sessions;

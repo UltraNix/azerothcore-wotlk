@@ -819,6 +819,7 @@ bool WorldSocket::HandleAuthHello(WorldPacket& recvPacket, PreparedQueryResultFu
     stmt->setString(0, account);
 
     callback = LoginDatabase.AsyncQuery(stmt);
+
     sLog->outDebug(LOG_FILTER_PLAYER_AUTH, "WorldSocket::HandleAuthHello for account (%s) ", account.c_str());
     return true;
 }
