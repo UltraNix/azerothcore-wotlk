@@ -3818,6 +3818,7 @@ void World::HandleLuaResult(uint64 guid, std::vector<WardenLuaResult> store)
 
 void World::LoadAccountAndIpHistory()
 {
+    TRINITY_WRITE_GUARD(ACE_RW_Thread_Mutex, m_playerHistoryMutex);
     sLog->outString(">> Loading account and ip history...");
 
     auto result = LoginDatabase.Query("SELECT AccountId, IpAddress, LoginDate FROM account_history");
@@ -3830,21 +3831,19 @@ void World::LoadAccountAndIpHistory()
         uint32 accountId = field[0].GetUInt32();
         std::string ipAddress = field[1].GetString();
         uint32 date = field[2].GetUInt32();
-        AddAccountHistory(accountId, ipAddress, date, true);
+        _accountHistoryStore[accountId][ipAddress] = date;
+        _ipHistoryStore[ipAddress][accountId] = date;
     } while (result->NextRow());
 }
 
-void World::AddAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date, bool atLoad)
+void World::AddAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date)
 {
-    if (!atLoad)
-        UpdateAccountHistory(accountId, ipAddress, date);
+    {
+        TRINITY_WRITE_GUARD(ACE_RW_Thread_Mutex, m_playerHistoryMutex);
+        _accountHistoryStore[accountId][ipAddress] = date;
+        _ipHistoryStore[ipAddress][accountId] = date;
+    }
 
-    _accountHistoryStore[accountId][ipAddress] = date;
-    _ipHistoryStore[ipAddress][accountId] = date;
-}
-
-void World::UpdateAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date)
-{
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_HISTORY);
     stmt->setUInt32(0, accountId);
     stmt->setString(1, ipAddress);

@@ -940,23 +940,17 @@ class World
         uint32 GetGlobalDataAccountId(uint32 guid);
 
         void LoadAccountAndIpHistory();
-        void AddAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date, bool atLoad = false);
-        void UpdateAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date);
-        std::unordered_map<uint32 /*accountId*/,
-            //!                       IP     DATE
-            std::unordered_map<std::string, time_t>> _accountHistoryStore;
-
-        std::unordered_map<std::string /*ip*/,
-            //!              AccountId   DATE
-            std::unordered_map<uint32, time_t>> _ipHistoryStore;
+        void AddAccountHistory(uint32 accountId, std::string const& ipAddress, time_t date);
 
         std::unordered_map<std::string, time_t> const& GetIpStoreFor(uint32 accId)
         {
+            TRINITY_READ_GUARD(ACE_RW_Thread_Mutex, m_playerHistoryMutex);
             return _accountHistoryStore[accId];
         }
 
         std::unordered_map<uint32, time_t> const& GetAccountStoreFor(std::string const& ipAddress)
         {
+            TRINITY_READ_GUARD(ACE_RW_Thread_Mutex, m_playerHistoryMutex);
             return _ipHistoryStore[ipAddress];
         }
 
@@ -1087,7 +1081,15 @@ class World
 
         //Player Queue
         Queue m_QueuedPlayer;
+        // player history cache
+        std::unordered_map<uint32 /*accountId*/,
+            //!                       IP     DATE
+            std::unordered_map<std::string, time_t>> _accountHistoryStore;
 
+        std::unordered_map<std::string /*ip*/,
+            //!              AccountId   DATE
+            std::unordered_map<uint32, time_t>> _ipHistoryStore;
+        ACE_RW_Thread_Mutex m_playerHistoryMutex;
         // used versions
         std::string m_DBVersion;
 
