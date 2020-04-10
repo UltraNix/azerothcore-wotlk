@@ -1316,8 +1316,15 @@ void Battleground::AddPlayer(Player* player)
     }
     else
     {
-        if (GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+        // not started yet
+        if (GetStatus() == STATUS_WAIT_JOIN)
+        {
+            if (Pet* pet = player->GetPet())
+                if (pet->IsAlive() && pet->IsInWorld())
+                    pet->SetHealth(pet->GetMaxHealth());
+
             player->CastSpell(player, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
+        }
     }
 
     // Xinef: reset all map criterias on map enter
