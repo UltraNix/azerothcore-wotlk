@@ -841,9 +841,15 @@ bool BattlefieldWG::FindAndRemoveVehicleFromList(Unit* vehicle)
         {
             //m_vehicles[itr].erase(vehicle->GetGUID());
             if (itr == TEAM_HORDE)
-                UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_H,-1);
+            {
+                if (GetData(BATTLEFIELD_WG_DATA_VEHICLE_H) > 0)
+                    UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_H, -1);
+            }
             else
-                UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_A,-1);
+            {
+                if (GetData(BATTLEFIELD_WG_DATA_VEHICLE_A) > 0)
+                    UpdateData(BATTLEFIELD_WG_DATA_VEHICLE_A, -1);
+            }
             return true;
         }
     }
