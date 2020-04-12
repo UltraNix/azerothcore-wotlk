@@ -13727,23 +13727,24 @@ void Unit::setDeathState(DeathState s, bool despawn)
 bool Unit::CanHaveThreatList() const
 {
     // only creatures can have threat list
-    if (GetTypeId() != TYPEID_UNIT)
+    if (!IsCreature())
         return false;
 
+    Creature const* cWho = ToCreature();
     // only alive units can have threat list
     if (!IsAlive() || isDying())
         return false;
 
-    // totems can not have threat list
-    if (ToCreature()->IsTotem())
+    // pets, totems and triggers cannot have threat list
+    if (cWho->IsPet() || cWho->IsTotem() || cWho->IsTrigger())
         return false;
 
     // vehicles can not have threat list
-    if (ToCreature()->IsVehicle() && GetMap()->IsBattlegroundOrArena())
+    if (cWho->IsVehicle() && GetMap()->IsBattlegroundOrArena())
         return false;
 
     // summons can not have a threat list, unless they are controlled by a creature
-    if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(((Pet*)this)->GetOwnerGUID()))
+    if (HasUnitTypeMask(UNIT_MASK_MINION | UNIT_MASK_GUARDIAN | UNIT_MASK_CONTROLABLE_GUARDIAN) && IS_PLAYER_GUID(cWho->GetOwnerGUID()))
         return false;
 
     return true;
