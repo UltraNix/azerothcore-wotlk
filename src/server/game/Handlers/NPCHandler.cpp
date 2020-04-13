@@ -664,7 +664,7 @@ void WorldSession::HandleStablePet(WorldPacket & recvData)
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
     Pet* pet = _player->GetPet();
-    if (!pet || ( pet && (pet->getPetType() != HUNTER_PET || !pet->IsAlive() || pet->isBeingLoaded()) ))
+    if ( !pet || pet->getPetType() != HUNTER_PET || !pet->IsAlive() || pet->isBeingLoaded() )
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
