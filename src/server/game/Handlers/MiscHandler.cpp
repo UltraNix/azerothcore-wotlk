@@ -1784,8 +1784,14 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
     if (_player->IsInFlight())
         return;
 
-    if(Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
+    if (Battlefield* bf = sBattlefieldMgr->GetBattlefieldToZoneId(_player->GetZoneId()))
     {
+        if (_player->IsInCombat())
+        {
+            ChatHandler(_player->GetSession()).PSendSysMessage("You can't leave Wintergrasp when in combat!");
+            return;
+        }
+
         _player->TeleportTo(_player->m_homebindMapId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ, _player->GetOrientation());
         return;
     }
