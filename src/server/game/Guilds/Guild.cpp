@@ -301,52 +301,46 @@ void Guild::RankInfo::WritePacket(WorldPacket& data) const
     }
 }
 
-void Guild::RankInfo::SetName(std::string const& name)
+void Guild::RankInfo::SetNameRightsMoney(std::string const& name, uint32 rights, uint32 money)
 {
-    if (m_name == name)
-        return;
-
-    m_name = name;
-
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_NAME);
-    stmt->setString(0, m_name);
-    stmt->setUInt8 (1, m_rankId);
-    stmt->setUInt32(2, m_guildId);
-    CharacterDatabase.Execute(stmt);
-}
-
-void Guild::RankInfo::SetRights(uint32 rights)
-{
-    if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
+    if (m_rankId == GR_GUILDMASTER)  // Prevent loss of leader rights
+    {
         rights = GR_RIGHT_ALL;
-
-    if (m_rights == rights)
-        return;
-
-    m_rights = rights;
-
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_RIGHTS);
-    stmt->setUInt32(0, m_rights);
-    stmt->setUInt8 (1, m_rankId);
-    stmt->setUInt32(2, m_guildId);
-    CharacterDatabase.Execute(stmt);
-}
-
-void Guild::RankInfo::SetBankMoneyPerDay(uint32 money)
-{
-    if (m_rankId == GR_GUILDMASTER)                     // Prevent loss of leader rights
         money = uint32(GUILD_WITHDRAW_MONEY_UNLIMITED);
+    }
 
-    if (m_bankMoneyPerDay == money)
-        return;
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    if (m_name != name)
+    {
+        m_name = name;
 
-    m_bankMoneyPerDay = money;
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_NAME);
+        stmt->setString(0, m_name);
+        stmt->setUInt8 (1, m_rankId);
+        stmt->setUInt32(2, m_guildId);
+        trans->Append(stmt);
+    }
+    if (m_rights != rights)
+    {
+        m_rights = rights;
 
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_BANK_MONEY);
-    stmt->setUInt32(0, money);
-    stmt->setUInt8 (1, m_rankId);
-    stmt->setUInt32(2, m_guildId);
-    CharacterDatabase.Execute(stmt);
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_RIGHTS);
+        stmt->setUInt32(0, m_rights);
+        stmt->setUInt8 (1, m_rankId);
+        stmt->setUInt32(2, m_guildId);
+        trans->Append(stmt);
+    }
+    if (m_bankMoneyPerDay != money)
+    {
+        m_bankMoneyPerDay = money;
+
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_GUILD_RANK_BANK_MONEY);
+        stmt->setUInt32(0, money);
+        stmt->setUInt8 (1, m_rankId);
+        stmt->setUInt32(2, m_guildId);
+        trans->Append(stmt);
+    }
+    CharacterDatabase.CommitTransaction(trans);
 }
 
 void Guild::RankInfo::SetBankTabSlotsAndRights(GuildBankRightsAndSlots rightsAndSlots, bool saveToDB)
@@ -1443,9 +1437,8 @@ void Guild::HandleSetRankInfo(WorldSession* session, uint8 rankId, std::string c
     {
        ;//sLog->outDebug(LOG_FILTER_GUILD, "Changed RankName to '%s', rights to 0x%08X", name.c_str(), rights);
 
-        rankInfo->SetName(name);
-        rankInfo->SetRights(rights);
-        _SetRankBankMoneyPerDay(rankId, moneyPerDay);
+       // update name rights and money
+        rankInfo->SetNameRightsMoney(name, rights, moneyPerDay);
 
         for (GuildBankRightsAndSlotsVec::const_iterator itr = rightsAndSlots.begin(); itr != rightsAndSlots.end(); ++itr)
             _SetRankBankTabRightsAndSlots(rankId, *itr);
@@ -2093,7 +2086,10 @@ bool Guild::Validate()
     // Validate members' data
     for (Members::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
         if (itr->second->GetRankId() > _GetRanksSize())
+        {
+            sLog->outError("Guild %u member has wrong rank %u assigned, correcting",m_id, itr->second->GetRankId());
             itr->second->ChangeRank(_GetLowestRankId());
+        }
 
     // Repair the structure of the guild.
     // If the guildmaster doesn't exist or isn't member of the guild
@@ -2120,7 +2116,10 @@ bool Guild::Validate()
     if (!sConfigMgr->GetBoolDefault("Guild.AllowMultipleGuildMaster", 0))
         for (Members::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
             if (itr->second->GetRankId() == GR_GUILDMASTER && !itr->second->IsSamePlayer(m_leaderGuid))
+            {
+            sLog->outError("Guild %u has multiple guildmasters rank assigned, correcting",m_id);
                 itr->second->ChangeRank(GR_OFFICER);
+            }
 
     _UpdateAccountsNumber();
     return true;
@@ -2511,12 +2510,6 @@ void Guild::_SetLeaderGUID(Member* pLeader)
     stmt->setUInt32(0, GUID_LOPART(m_leaderGuid));
     stmt->setUInt32(1, m_id);
     CharacterDatabase.Execute(stmt);
-}
-
-void Guild::_SetRankBankMoneyPerDay(uint8 rankId, uint32 moneyPerDay)
-{
-    if (RankInfo* rankInfo = GetRankInfo(rankId))
-        rankInfo->SetBankMoneyPerDay(moneyPerDay);
 }
 
 void Guild::_SetRankBankTabRightsAndSlots(uint8 rankId, GuildBankRightsAndSlots rightsAndSlots, bool saveToDB)

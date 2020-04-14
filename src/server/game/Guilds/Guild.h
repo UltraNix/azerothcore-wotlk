@@ -487,14 +487,10 @@ private:
         uint8 GetId() const { return m_rankId; }
 
         std::string const& GetName() const { return m_name; }
-        void SetName(std::string const& name);
-
         uint32 GetRights() const { return m_rights; }
-        void SetRights(uint32 rights);
-
         int32 GetBankMoneyPerDay() const { return m_bankMoneyPerDay; }
+        void SetNameRightsMoney(std::string const& name, uint32 rights, uint32 money);
 
-        void SetBankMoneyPerDay(uint32 money);
 
         inline int8 GetBankTabRights(uint8 tabId) const
         {
@@ -812,7 +808,6 @@ private:
     bool _ModifyBankMoney(SQLTransaction& trans, uint64 amount, bool add);
     void _SetLeaderGUID(Member* pLeader);
 
-    void _SetRankBankMoneyPerDay(uint8 rankId, uint32 moneyPerDay);
     void _SetRankBankTabRightsAndSlots(uint8 rankId, GuildBankRightsAndSlots rightsAndSlots, bool saveToDB = true);
     int8 _GetRankBankTabRights(uint8 rankId, uint8 tabId) const;
     uint32 _GetRankRights(uint8 rankId) const;
