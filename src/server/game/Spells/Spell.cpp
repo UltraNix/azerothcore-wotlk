@@ -7962,21 +7962,20 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier,
             m_damage = 0;
             m_healing = 0;
 
-            HandleEffects(unit, NULL, NULL, i, SPELL_EFFECT_HANDLE_LAUNCH_TARGET);
+            HandleEffects(unit, nullptr, nullptr, i, SPELL_EFFECT_HANDLE_LAUNCH_TARGET);
 
             if (m_damage > 0)
             {
+                Unit* caster = m_originalCaster ? m_originalCaster : m_caster;
                 // Xinef: Area Auras, AoE Targetting spells AND Chain Target spells (cleave etc.)
                 if (m_spellInfo->Effects[i].IsAreaAuraEffect() || m_spellInfo->Effects[i].IsTargetingArea() || (m_spellInfo->Effects[i].ChainTarget > 1 && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MAGIC))
                 {
-                    m_damage = unit->CalculateAOEDamageReduction(m_damage, m_spellInfo->SchoolMask, m_caster);
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                    m_damage = unit->CalculateAOEDamageReduction(m_damage, m_spellInfo->SchoolMask, caster);
+                    if (caster->IsPlayer())
                     {
                         uint32 targetAmount = m_UniqueTargetInfo.size();
-                        // temp hack for pact of the darkfallen and mutated plague and razorscales flame breath
-                        if (targetAmount > 10 && m_spellInfo->Id != 71341 && m_spellInfo->Id != 72454 && m_spellInfo->Id != 72464 && m_spellInfo->Id != 72506 && m_spellInfo->Id != 72507
-                            && m_spellInfo->Id != 63317 && m_spellInfo->Id != 64021)
-                            m_damage = m_damage * 10/targetAmount;
+                        if (targetAmount > 10)
+                            m_damage = m_damage * 10 / targetAmount;
                     }
                 }
             }
