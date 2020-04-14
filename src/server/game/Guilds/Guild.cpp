@@ -275,7 +275,7 @@ void Guild::RankInfo::CreateMissingTabsIfNeeded(uint8 tabs, SQLTransaction& tran
             rightsAndSlots.SetGuildMasterValues();
 
         if (logOnCreate)
-            sLog->outError("Guild %u has broken Tab %u for rank %u. Created default tab.", m_guildId, i, m_rankId);
+            sLog->outError("Guild %u has broken Tab %u (%u) for rank %u. Created default tab.", m_guildId, i, rightsAndSlots.GetTabId(), m_rankId);
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GUILD_BANK_RIGHT);
         stmt->setUInt32(0, m_guildId);
@@ -2058,7 +2058,7 @@ bool Guild::Validate()
     uint8 ranks = _GetRanksSize();
     if (ranks < GUILD_RANKS_MIN_COUNT || ranks > GUILD_RANKS_MAX_COUNT)
     {
-        sLog->outError("Guild %u has invalid number of ranks, creating new...", m_id);
+        sLog->outError("Guild %u has invalid number of ranks %u, creating new...", m_id, ranks);
         broken_ranks = true;
     }
     else
@@ -2068,7 +2068,7 @@ bool Guild::Validate()
             RankInfo* rankInfo = GetRankInfo(rankId);
             if (rankInfo->GetId() != rankId)
             {
-                sLog->outError("Guild %u has broken rank id %u, creating default set of ranks...", m_id, rankId);
+                sLog->outError("Guild %u has broken rank id %u (%u), creating default set of ranks...", m_id, rankId, rankInfo->GetId());
                 broken_ranks = true;
             }
             else
@@ -2101,12 +2101,16 @@ bool Guild::Validate()
         // If no more members left, disband guild
         if (m_members.empty())
         {
+            sLog->outError("Guild %u is being disbanded because of missing leader and no members", m_id);
             Disband();
             return false;
         }
     }
     else if (!pLeader->IsRank(GR_GUILDMASTER))
+    {
+        sLog->outError("Guild %u leader has rank %u, restoring guildmaster rank", m_id, pLeader->GetRankId());
         _SetLeaderGUID(pLeader);
+    }
 
     // Check config if multiple guildmasters are allowed
     if (!sConfigMgr->GetBoolDefault("Guild.AllowMultipleGuildMaster", 0))
