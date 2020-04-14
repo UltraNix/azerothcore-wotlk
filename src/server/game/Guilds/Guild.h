@@ -802,9 +802,9 @@ private:
     // Tries to create new bank tab
     void _CreateNewBankTab();
     // Creates default guild ranks with names in given locale
-    void _CreateDefaultGuildRanks(LocaleConstant loc);
+    void _CreateDefaultGuildRanks(LocaleConstant loc, SQLTransaction& trans);
     // Creates new rank
-    bool _CreateRank(std::string const& name, uint32 rights);
+    bool _CreateRank(std::string const& name, uint32 rights, SQLTransaction& trans);
     // Update account number when member added/removed from guild
     void _UpdateAccountsNumber();
     bool _IsLeader(Player* player) const;
