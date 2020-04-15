@@ -94,7 +94,7 @@ struct instance_trial_of_the_champion_InstanceMapScript : public InstanceScript
             Map::PlayerList const &players = instance->GetPlayers();
             if( !players.isEmpty() )
                 if( Player* pPlayer = players.begin()->GetSource() )
-                    TeamIdInInstance = pPlayer->GetTeamId();
+                    TeamIdInInstance = pPlayer->GetTeam(CrossFactionTeam::Discard);
         }
 
         switch (creature->GetEntry())

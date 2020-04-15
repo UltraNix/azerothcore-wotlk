@@ -642,6 +642,8 @@ enum Language
     LANG_ZOMBIE         = 36,
     LANG_GNOMISH_BINARY = 37,
     LANG_GOBLIN_BINARY  = 38,
+
+    LANG_UNK_CROSSFACTION = LANG_DEMONIC,
     LANG_ADDON          = 0xFFFFFFFF                        // used by addons, in 2.4.0 not exist, replaced by messagetype?
 };
 
@@ -649,12 +651,12 @@ enum Language
 
 enum TeamId
 {
-    TEAM_ALLIANCE = 0,
-    TEAM_HORDE,
-    TEAM_NEUTRAL,
+    TEAM_ALLIANCE   = 0,
+    TEAM_HORDE      = 1,
+    TEAM_NEUTRAL    = 2,
 };
 
-enum Team
+enum TeamFaction
 {
     HORDE               = 67,
     ALLIANCE            = 469,

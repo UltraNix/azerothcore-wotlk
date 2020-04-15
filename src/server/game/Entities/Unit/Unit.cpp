@@ -9416,7 +9416,7 @@ void Unit::setPowerType(Powers new_powertype)
 
 FactionTemplateEntry const* Unit::GetFactionTemplateEntry() const
 {
-    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(getFaction());
+    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry( getFaction() );
     if (!entry)
     {
         static uint64 guid = 0;                             // prevent repeating spam same faction problem
@@ -9505,7 +9505,7 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
                         return *repRank;
                     if (!selfPlayerOwner->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
                     {
-                        if (FactionEntry const* targetFactionEntry = sFactionStore.LookupEntry(targetFactionTemplateEntry->faction))
+                        if (FactionEntry const* targetFactionEntry = sFactionStore.LookupEntry( targetFactionTemplateEntry->faction ))
                         {
                             if (targetFactionEntry->CanHaveReputation())
                             {
@@ -9525,8 +9525,9 @@ ReputationRank Unit::GetReactionTo(Unit const* target) const
             }
         }
     }
+
     // do checks dependant only on our faction
-    return GetFactionReactionTo(GetFactionTemplateEntry(), target);
+    return GetFactionReactionTo( GetFactionTemplateEntry(), target );
 }
 
 ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTemplateEntry, Unit const* target) const
@@ -9536,7 +9537,7 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
         return REP_NEUTRAL;
 
     FactionTemplateEntry const* targetFactionTemplateEntry = target->GetFactionTemplateEntry();
-    if (!targetFactionTemplateEntry)
+    if ( !targetFactionTemplateEntry )
         return REP_NEUTRAL;
 
     // xinef: check forced reputation for self also
@@ -9554,7 +9555,8 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
             return *repRank;
         if (!target->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_IGNORE_REPUTATION))
         {
-            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
+            uint32 factionId = factionTemplateEntry->faction;
+            if (FactionEntry const* factionEntry = sFactionStore.LookupEntry( factionId ) )
             {
                 if (factionEntry->CanHaveReputation())
                 {
@@ -13092,12 +13094,21 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
 
             if (FactionTemplateEntry const* factionTemplate = creature->GetFactionTemplateEntry())
             {
-                if (!(player->GetReputationMgr().GetForcedRankIfAny(factionTemplate)))
-                    if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction))
-                        if (FactionState const* repState = player->GetReputationMgr().GetState(factionEntry))
-                            if (!(repState->Flags & FACTION_FLAG_AT_WAR))
+                auto forcedRank = player->GetReputationMgr().GetForcedRankIfAny( factionTemplate );
+                if ( forcedRank == nullptr )
+                {
+                    if ( FactionEntry const* factionEntry = sFactionStore.LookupEntry( factionTemplate->faction ) )
+                        if ( FactionState const* repState = player->GetReputationMgr().GetState( factionEntry ) )
+                            if ( !( repState->Flags & FACTION_FLAG_AT_WAR ) )
                                 return false;
-
+                }
+                else if ( !player->IsPlayingNative() && player->ConvertFactionForReputationReward( factionTemplate->faction ) != factionTemplate->faction ) //! crossfaction BG, query our original faction
+                {
+                    if ( FactionEntry const* factionEntry = sFactionStore.LookupEntry( player->ConvertFactionForReputationReward( factionTemplate->faction ) ) )
+                        if ( FactionState const* repState = player->GetReputationMgr().GetState( factionEntry ) )
+                            if ( !( repState->Flags & FACTION_FLAG_AT_WAR ) )
+                                return false;
+                }
             }
         }
     }
@@ -17112,7 +17123,7 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         if (killer->GetTypeId() == TYPEID_UNIT)
             victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_CREATURE, killer->GetEntry());
         else if (victim != killer && killer->GetTypeId() == TYPEID_PLAYER)
-            victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER, 1, killer->ToPlayer()->GetTeamId());
+            victim->ToPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER, 1, killer->ToPlayer()->GetTeam());
     }
 
     // Hook for OnPVPKill Event
@@ -17731,7 +17742,7 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 void Unit::RestoreFaction()
 {
     if (GetTypeId() == TYPEID_PLAYER)
-        ToPlayer()->setFactionForRace(getRace());
+        ToPlayer()->setFactionForRace(ToPlayer()->getRace());
     else
     {
         if (HasUnitTypeMask(UNIT_MASK_MINION))
@@ -18484,6 +18495,21 @@ uint32 Unit::GetModelForTotem(PlayerTotemType totemType)
                     return 19075;
                 case SUMMON_TYPE_TOTEM_AIR:     // air
                     return 19071;
+            }
+            break;
+        }
+        default: // One standard for other races.
+        {
+            switch (totemType)
+            {
+            case SUMMON_TYPE_TOTEM_FIRE:    // fire
+                return 4589;
+            case SUMMON_TYPE_TOTEM_EARTH:   // earth
+                return 4588;
+            case SUMMON_TYPE_TOTEM_WATER:   // water
+                return 4587;
+            case SUMMON_TYPE_TOTEM_AIR:     // air
+                return 4590;
             }
             break;
         }

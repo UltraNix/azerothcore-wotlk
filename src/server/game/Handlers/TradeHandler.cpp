@@ -644,7 +644,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pOther->GetTeamId() !=_player->GetTeamId())
+    if (pOther->GetTeam(CrossFactionTeam::Discard) !=_player->GetTeam(CrossFactionTeam::Discard))
     {
         SendTradeStatus(TRADE_STATUS_WRONG_FACTION);
         return;

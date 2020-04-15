@@ -221,7 +221,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket & recv_data)
     if (level_max >= MAX_LEVEL)
         level_max = STRONG_MAX_LEVEL;
 
-    TeamId teamId = _player->GetTeamId();
+    TeamId teamId = _player->GetTeam(CrossFactionTeam::Discard);
     uint32 security = GetSecurity();
     uint32 gmLevelInWhoList  = sWorld->getIntConfig(CONFIG_GM_LEVEL_IN_WHO_LIST);
     uint32 displaycount = 0;
@@ -550,7 +550,7 @@ void WorldSession::HandleAddFriendOpcode(WorldPacket & recv_data)
         {
             if (friendGuid == GetPlayer()->GetGUID())
                 friendResult = FRIEND_SELF;
-            else if (GetPlayer()->GetTeamId() != teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
+            else if (GetPlayer()->GetTeam(CrossFactionTeam::Discard) != teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
                 friendResult = FRIEND_ENEMY;
             else if (GetPlayer()->GetSocial()->HasFriend(guidLow))
                 friendResult = FRIEND_ALREADY;
@@ -1389,6 +1389,20 @@ void WorldSession::HandleSetTitleOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleTimeSyncResp(WorldPacket & recv_data)
 {
+    if ( _player->m_crossfactionState == CrossFactionPlayerState::UpdatePlayerData )
+    {
+        if ( Battleground * battleground = _player->GetBattleground() )
+        {
+            _player->RequestDirtyDataForBgPlayers( battleground->GetPlayers() );
+        }
+        else
+        {
+            _player->RequestCleanDataForDirtyPlayers();
+        }
+    }
+
+    _player->m_crossfactionState = CrossFactionPlayerState::None;
+
     uint32 counter, clientTicks;
     recv_data >> counter >> clientTicks;
     //uint32 ourTicks = clientTicks + (World::GetGameTimeMS() - _player->m_timeSyncServer);

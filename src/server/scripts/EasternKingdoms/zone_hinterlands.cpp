@@ -68,7 +68,7 @@ public:
             if (quest->GetQuestId() == QUEST_RESQUE_OOX_09)
             {
                 me->SetStandState(UNIT_STAND_STATE_STAND);
-                me->setFaction(player->GetTeamId() == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
+                me->setFaction(player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
                 Talk(SAY_OOX_START, player);
                 npc_escortAI::Start(false, false, player->GetGUID(), quest);
                 vileGroupSummoned = false;

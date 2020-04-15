@@ -2606,7 +2606,7 @@ bool InstanceMap::CanEnter(Player* player, bool loginCheck)
 
     if (GetId() == 624)
         if (Battlefield* battlefield = sBattlefieldMgr->GetBattlefieldToZoneId(4197)) // wintergrasp
-            if (player->GetTeamId() != battlefield->GetDefenderTeam())
+            if (player->GetTeam() != battlefield->GetDefenderTeam())
             {
                 player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAP_NOT_ALLOWED);
                 return false;

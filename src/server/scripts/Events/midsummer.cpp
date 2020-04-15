@@ -125,7 +125,7 @@ class npc_midsummer_torch_target : public CreatureScript
                     me->CastSpell(me, 45724, true); // hit visual anim
                     if (++counter >= maxCount)
                     {
-                        caster->CastSpell(caster, (caster->ToPlayer()->GetTeamId() ? 46651 : 45719), true); // quest complete spell
+                        caster->CastSpell(caster, (caster->ToPlayer()->GetTeam(CrossFactionTeam::Discard) ? 46651 : 45719), true); // quest complete spell
                         me->DespawnOrUnsummon(1);
                         return;
                     }
@@ -402,13 +402,13 @@ class spell_midsummer_fling_torch : public SpellScriptLoader
                 {
                     aur->ModStackAmount(1);
                     uint8 count = 4;
-                    if (target->GetQuestStatus(target->GetTeamId() ? 11925 : 11924) == QUEST_STATUS_INCOMPLETE) // More Torch Catching quests
+                    if (target->GetQuestStatus(target->GetTeam(CrossFactionTeam::Discard) ? 11925 : 11924) == QUEST_STATUS_INCOMPLETE) // More Torch Catching quests
                         count = 10;
 
                     if (aur->GetStackAmount() >= count)
                     {
                         //target->CastSpell(target, 46711, true); // Set Flag: all torch returning quests are complete
-                        target->CastSpell(target, (target->GetTeamId() ? 46654 : 46081), true); // Quest completion
+                        target->CastSpell(target, (target->GetTeam(CrossFactionTeam::Discard) ? 46654 : 46081), true); // Quest completion
                         aur->SetDuration(1);
                         return;
                     }
@@ -486,7 +486,7 @@ class spell_midsummer_juggling_torch : public SpellScriptLoader
                 return;
 
             if (Player* target = GetHitPlayer())
-                if (!handled && target->GetQuestRewardStatus(target->GetTeamId() == TEAM_ALLIANCE ? 11657 : 11923))
+                if (!handled && target->GetQuestRewardStatus(target->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? 11657 : 11923))
                 {
                     handled = true;
                     caster->CastSpell(target, SPELL_GIVE_TORCH, true);

@@ -133,7 +133,7 @@ class worldzone_trisfal_glades : public WorldMapZoneScript
             void FillInitialWorldStates(WorldPacket& data, Player* player) override
             {
                 if (player)
-                    if (player->GetTeamId() == TEAM_ALLIANCE)
+                    if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
                     {
                         data << uint32(WORLDSTATE_UNDERCITY_CONTROLLED_A) << uint32(Preparing[TEAM_ALLIANCE]);
                         data << uint32(WORLDSTATE_MANHUNT_TIMER_STATE) << uint32(BattleTimerState[TEAM_ALLIANCE]);

@@ -27,7 +27,7 @@ class npc_steam_powered_auctioneer : public CreatureScript
 
             bool CanBeSeen(Player const* player)
             {
-                if (player->GetTeamId() == TEAM_ALLIANCE)
+                if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
                     return me->GetEntry() == 35594;
                 else
                     return me->GetEntry() == 35607;
@@ -51,7 +51,7 @@ class npc_mei_francis_mount : public CreatureScript
 
             bool CanBeSeen(Player const* player)
             {
-                if (player->GetTeamId() == TEAM_ALLIANCE)
+                if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
                     return me->GetEntry() == 32206 || me->GetEntry() == 32335 || me->GetEntry() == 31851;
                 else
                     return me->GetEntry() == 32207 || me->GetEntry() == 32336 || me->GetEntry() == 31852;
@@ -222,7 +222,7 @@ public:
         if (player->GetQuestStatus(QUEST_SUITABLE_DISGUISE_A) == QUEST_STATUS_INCOMPLETE ||
             player->GetQuestStatus(QUEST_SUITABLE_DISGUISE_H) == QUEST_STATUS_INCOMPLETE)
         {
-            if(player->GetTeamId() == TEAM_ALLIANCE)
+            if(player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
                 player->ADD_GOSSIP_ITEM(0, "Arcanist Tybalin said you might be able to lend me a certain tabard.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
             else
                 player->ADD_GOSSIP_ITEM(0, "Magister Hathorel said you might be able to lend me a certain tabard.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
@@ -590,7 +590,7 @@ public:
             switch (me->GetEntry())
             {
                 case NPC_SILVER_COVENANT_GUARDIAN_MAGE:
-                    if (player->GetTeamId() == TEAM_HORDE)              // Horde unit found in Alliance area
+                    if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)              // Horde unit found in Alliance area
                     {
                         if (GetClosestCreatureWithEntry(me, NPC_APPLEBOUGH_A, 32.0f))
                         {
@@ -602,7 +602,7 @@ public:
                     }
                     break;
                 case NPC_SUNREAVER_GUARDIAN_MAGE:
-                    if (player->GetTeamId() == TEAM_ALLIANCE)           // Alliance unit found in Horde area
+                    if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)           // Alliance unit found in Horde area
                     {
                         if (GetClosestCreatureWithEntry(me, NPC_SWEETBERRY_H, 32.0f))
                         {

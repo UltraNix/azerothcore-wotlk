@@ -14,8 +14,9 @@
 #include "Pet.h"
 #include "MapManager.h"
 
-void WorldSession::SendNameQueryOpcode(uint64 guid)
+void WorldSession::SendNameQueryOpcode(uint64 guid, bool real)
 {
+    Player* player = ObjectAccessor::FindPlayer(guid);
     GlobalPlayerData const* playerData = sWorld->GetGlobalPlayerData(GUID_LOPART(guid));
 
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8+1+1+1+1+1+10));
@@ -30,7 +31,7 @@ void WorldSession::SendNameQueryOpcode(uint64 guid)
     data << uint8(0);                               // name known
     data << playerData->name;                       // played name
     data << uint8(0);                               // realm name - only set for cross realm interaction (such as Battlegrounds)
-    data << uint8(playerData->race);
+    data << uint8(player ? player->getRace( !real ) : playerData->race);
     data << uint8(playerData->gender);
     data << uint8(playerData->playerClass);
 

@@ -145,7 +145,7 @@ struct instance_shadowfang_keep_InstanceMapScript : public InstanceScript
             for (auto const& ref : instance->GetPlayers())
                 if (Player* player = ref.GetSource())
                 {
-                    switch (player->GetTeamId())
+                    switch (player->GetTeam())
                     {
                         case TEAM_ALLIANCE:
                             ++alliancePlayers;
@@ -166,7 +166,7 @@ struct instance_shadowfang_keep_InstanceMapScript : public InstanceScript
 
         for (auto const& ref : instance->GetPlayers())
             if (Player* player = ref.GetSource())
-                return player->GetTeamId();
+                return player->GetTeam();
 
         return TEAM_NEUTRAL;
     }

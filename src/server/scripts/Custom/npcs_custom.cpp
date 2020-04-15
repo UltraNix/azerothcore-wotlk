@@ -35,6 +35,7 @@ EndScriptData
 #include "CustomEventMgr.h"
 #include "BattlegroundMgr.h"
 #include "ArenaTeamMgr.h"
+#include "Chat.h"
 
 /* ######
 ## npc_schody
@@ -406,7 +407,7 @@ public:
 
             handler.PSendSysMessage(message.c_str());
 
-            if (player->GetTeamId() == TEAM_HORDE)
+            if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
                 player->TeleportTo(0, 2439.0f, 45.0f, 500.0f, player->GetOrientation());
             else
                 player->TeleportTo(0, -9444.0f, 1258.0f, 500.0f, player->GetOrientation());
@@ -1089,7 +1090,7 @@ private:
                     stmt->setUInt32(1, DeathKnightQuests[i]);
                 else if (i == 46)
                 {
-                    if (player->GetTeamId() == TEAM_ALLIANCE)
+                    if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
                         stmt->setUInt32(1, 13188);
                     else
                         stmt->setUInt32(1, 13189);
@@ -1624,7 +1625,6 @@ public:
     }
 };
 
-
 class npc_wanderer_dalaranNPC : public CreatureScript
 {
 public:
@@ -1690,6 +1690,7 @@ class npc_wanderer_skeleton : public CreatureScript
 {
 public:
     npc_wanderer_skeleton() : CreatureScript("npc_wanderer_skeleton") {}
+
     struct npc_wanderer_skeletonAI : public ScriptedAI
     {
         npc_wanderer_skeletonAI(Creature* creature) : ScriptedAI(creature) {}
@@ -1738,6 +1739,48 @@ public:
     }
 };
 
+struct npc_crossfaction_battlemaster : public CreatureScript
+{
+    npc_crossfaction_battlemaster() : CreatureScript("npc_crossfaction_battlemaster") {}
+
+    void FillGossipMenu( Player * player, Creature* creature )
+    {
+        player->PlayerTalkClass->ClearMenus();
+
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if ( player->IsCrossfactionBgAllowed() )
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Disable cross faction play on battlegrounds.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        else
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Enable cross faction play on battlegrounds.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature)
+    {
+        FillGossipMenu( player, creature );
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        switch ( action )
+        {
+            case GOSSIP_ACTION_INFO_DEF + 1: player->SetCrossfactionBgAllowed( false ); break;
+            case GOSSIP_ACTION_INFO_DEF + 2: player->SetCrossfactionBgAllowed( true ); break;
+        }
+
+        ChatHandler( player->GetSession() ).PSendSysMessage( "Cross faction play is now: %s", player->IsCrossfactionBgAllowed() ? "ENABLED" : "DISABLED" );
+
+        FillGossipMenu( player, creature );
+        player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+
+        return true;
+    }
+};
+
 void AddSC_npcs_custom()
 {
     new npc_schody();
@@ -1754,4 +1797,5 @@ void AddSC_npcs_custom()
     new npc_wanderer();
     new npc_wanderer_dalaranNPC();
     new npc_wanderer_skeleton();
+    new npc_crossfaction_battlemaster();
 }

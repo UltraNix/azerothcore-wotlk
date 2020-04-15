@@ -355,7 +355,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             void OnPlayerEnter(Player* player)
             {
                 if (TeamIdInInstance == TEAM_NEUTRAL)
-                    TeamIdInInstance = player->GetTeamId();
+                    TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
 
                 // Buff should be applied only on heroic
                 /*if (instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
@@ -392,7 +392,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     Map::PlayerList const &players = instance->GetPlayers();
                     if (!players.isEmpty())
                         if (Player* player = players.begin()->GetSource())
-                            TeamIdInInstance = player->GetTeamId();
+                            TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
                 }
 
                 // apply ICC buff to pets/summons
@@ -693,7 +693,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     Map::PlayerList const &players = instance->GetPlayers();
                     if (!players.isEmpty())
                         if (Player* player = players.begin()->GetSource())
-                            TeamIdInInstance = player->GetTeamId();
+                            TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
                 }
 
                 uint32 entry = data->id;
@@ -738,7 +738,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     Map::PlayerList const &players = instance->GetPlayers();
                     if (!players.isEmpty())
                         if (Player* player = players.begin()->GetSource())
-                            TeamIdInInstance = player->GetTeamId();
+                            TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
                 }
 
                 switch (entry)
@@ -888,7 +888,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                     Map::PlayerList const &players = instance->GetPlayers();
                     if (!players.isEmpty())
                         if (Player* player = players.begin()->GetSource())
-                            TeamIdInInstance = player->GetTeamId();
+                            TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
                 }
 
                 switch (go->GetEntry())

@@ -294,17 +294,34 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
     for (CGBattlefieldInfo__m_numPlayerPositions)
         data << guid << posx << posy;
     */
+
     data << flagCarrierCount;
     if (allianceFlagCarrier)
     {
-        data << uint64(allianceFlagCarrier->GetGUID());
+        if ( !allianceFlagCarrier->IsPlayingNative() )
+        {
+            GetPlayer()->RequestDirtyDataForPlayer( allianceFlagCarrier->GetGUID() );
+
+            data << uint64( allianceFlagCarrier->GetGUID() + std::numeric_limits< uint32_t >::max() );
+        }
+        else
+            data << uint64( allianceFlagCarrier->GetGUID() );
+
         data << float(allianceFlagCarrier->GetPositionX());
         data << float(allianceFlagCarrier->GetPositionY());
     }
 
     if (hordeFlagCarrier)
     {
-        data << uint64(hordeFlagCarrier->GetGUID());
+        if ( !hordeFlagCarrier->IsPlayingNative() )
+        {
+            GetPlayer()->RequestDirtyDataForPlayer( hordeFlagCarrier->GetGUID() );
+
+            data << uint64( hordeFlagCarrier->GetGUID() + std::numeric_limits< uint32_t >::max() );
+        }
+        else
+            data << uint64( hordeFlagCarrier->GetGUID() );
+
         data << float(hordeFlagCarrier->GetPositionX());
         data << float(hordeFlagCarrier->GetPositionY());
     }
@@ -498,7 +515,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket & /*recvData*/)
     if (Battleground* bg = _player->GetBattleground())
         if (bg->GetPlayers().count(_player->GetGUID()))
         {
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player->GetCurrentBattlegroundQueueSlot(), STATUS_IN_PROGRESS, bg->GetEndTime(), bg->GetStartTime(), bg->GetArenaType(), _player->GetBgTeamId());
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, _player->GetCurrentBattlegroundQueueSlot(), STATUS_IN_PROGRESS, bg->GetEndTime(), bg->GetStartTime(), bg->GetArenaType(), _player->GetTeam());
             SendPacket(&data);
         }
 

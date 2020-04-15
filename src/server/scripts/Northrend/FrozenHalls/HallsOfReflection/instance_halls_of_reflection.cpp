@@ -216,7 +216,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
                     if (Player* player = itr->GetSource())
                         if (!player->IsGameMaster())
                         {
-                            _teamId = player->GetTeamId();
+                            _teamId = player->GetTeam(CrossFactionTeam::Discard);
                             break;
                         }
         }
@@ -449,7 +449,7 @@ struct instance_halls_of_reflection_InstanceMapScript : public InstanceScript
                     Map::PlayerList const& pl = instance->GetPlayers();
                     for (Map::PlayerList::const_iterator itr = pl.begin(); itr != pl.end(); ++itr)
                         if (Player* p = itr->GetSource())
-                            p->CastSpell(p, p->GetTeamId() == TEAM_ALLIANCE ? SPELL_HOR_START_QUEST_ALLY : SPELL_HOR_START_QUEST_HORDE, true);
+                            p->CastSpell(p, p->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? SPELL_HOR_START_QUEST_ALLY : SPELL_HOR_START_QUEST_HORDE, true);
                 }
             }
             break;

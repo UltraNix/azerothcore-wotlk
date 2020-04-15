@@ -140,7 +140,7 @@ public:
         }
         else
         {
-            switch (player->GetTeamId())
+            switch (player->GetTeam(CrossFactionTeam::Discard))
             {
                 case TEAM_ALLIANCE:
                     if (std::string("stormwind").compare(0, loc.length(), loc) == 0)

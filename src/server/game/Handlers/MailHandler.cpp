@@ -168,7 +168,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
 
     if (receive)
     {
-        rc_teamId = receive->GetTeamId();
+        rc_teamId = receive->GetTeam(CrossFactionTeam::Discard);
         mails_count = receive->GetMailSize();
     }
     else
@@ -208,7 +208,7 @@ void WorldSession::HandleSendMail(WorldPacket & recvData)
         : sObjectMgr->GetPlayerAccountIdByGUID(rc);
 
 
-    if (!sWorld->getBoolConfig(CONFIG_CROSSFACTION_MAIL) && !accountBound && player->GetTeamId() != rc_teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
+    if (!sWorld->getBoolConfig(CONFIG_CROSSFACTION_MAIL) && !accountBound && player->GetTeam(CrossFactionTeam::Discard) != rc_teamId && AccountMgr::IsPlayerAccount(GetSecurity()))
     {
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_NOT_YOUR_TEAM);
         return;

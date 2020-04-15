@@ -165,7 +165,7 @@ public:
 
         //Send additional ann to GM if he is from second faction
         Player *player = handler->GetSession()->GetPlayer();
-        if (player && player->GetTeamId() != teamId) {
+        if (player && player->GetTeam(CrossFactionTeam::Discard) != teamId) {
             sWorld->SendServerMessage(SERVER_MSG_STRING, buff, player);
         }
         return true;

@@ -87,7 +87,7 @@ namespace Trinity
         Player const* skipped_receiver;
         MessageDistDeliverer(WorldObject* src, WorldPacket* msg, float dist, bool own_team_only = false, Player const* skipped = NULL)
             : i_source(src), i_message(msg), i_phaseMask(src->GetPhaseMask()), i_distSq(dist * dist)
-            , teamId((own_team_only && src->GetTypeId() == TYPEID_PLAYER) ? src->ToPlayer()->GetTeamId() : TEAM_NEUTRAL)
+            , teamId((own_team_only && src->GetTypeId() == TYPEID_PLAYER) ? src->ToPlayer()->GetTeam() : TEAM_NEUTRAL)
             , skipped_receiver(skipped)
         {
         }
@@ -99,7 +99,7 @@ namespace Trinity
         void SendPacket(Player* player)
         {
             // never send packet to self
-            if (player == i_source || (teamId != TEAM_NEUTRAL && player->GetTeamId() != teamId) || skipped_receiver == player)
+            if (player == i_source || (teamId != TEAM_NEUTRAL && player->GetTeam() != teamId) || skipped_receiver == player)
                 return;
 
             if (!player->HaveAtClient(i_source))

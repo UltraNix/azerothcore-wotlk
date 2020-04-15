@@ -19,7 +19,7 @@ class achievement_resilient_victory : public AchievementCriteriaScript
         bool OnCheck(Player* source, Unit* /*target*/)
         {
             Battleground* bg = source->GetBattleground();
-            return bg && bg->GetBgTypeID() == BATTLEGROUND_AB && bg->ToBattlegroundAB()->IsTeamScores500Disadvantage(source->GetTeamId());
+            return bg && bg->GetBgTypeID() == BATTLEGROUND_AB && bg->ToBattlegroundAB()->IsTeamScores500Disadvantage(source->GetTeam());
         }
 };
 
@@ -31,7 +31,7 @@ class achievement_bg_control_all_nodes : public AchievementCriteriaScript
         bool OnCheck(Player* source, Unit* /*target*/)
         {
             Battleground* bg = source->GetBattleground();
-            return bg && bg->AllNodesConrolledByTeam(source->GetTeamId());
+            return bg && bg->AllNodesConrolledByTeam(source->GetTeam());
         }
 };
 
@@ -48,7 +48,7 @@ class achievement_save_the_day : public AchievementCriteriaScript
             if (Player const* player = target->ToPlayer())
             {
                 Battleground* bg = source->GetBattleground();
-                return bg && bg->GetBgTypeID() == BATTLEGROUND_WS && bg->ToBattlegroundWS()->GetFlagState(player->GetTeamId()) == BG_WS_FLAG_STATE_ON_BASE;
+                return bg && bg->GetBgTypeID() == BATTLEGROUND_WS && bg->ToBattlegroundWS()->GetFlagState(player->GetTeam()) == BG_WS_FLAG_STATE_ON_BASE;
             }
             return false;
         }
@@ -62,7 +62,7 @@ class achievement_bg_ic_resource_glut : public AchievementCriteriaScript
         bool OnCheck(Player* source, Unit* /*target*/)
         {
             Battleground* bg = source->GetBattleground();
-            return bg && bg->GetBgTypeID() == BATTLEGROUND_IC && bg->ToBattlegroundIC()->IsResourceGlutAllowed(source->GetTeamId());
+            return bg && bg->GetBgTypeID() == BATTLEGROUND_IC && bg->ToBattlegroundIC()->IsResourceGlutAllowed(source->GetTeam());
         }
 };
 
@@ -152,7 +152,7 @@ class achievement_everything_counts : public AchievementCriteriaScript
         bool OnCheck(Player* source, Unit* /*target*/)
         {
             Battleground* bg = source->GetBattleground();
-            return bg && bg->GetBgTypeID() == BATTLEGROUND_AV && bg->ToBattlegroundAV()->IsBothMinesControlledByTeam(source->GetTeamId());
+            return bg && bg->GetBgTypeID() == BATTLEGROUND_AV && bg->ToBattlegroundAV()->IsBothMinesControlledByTeam(source->GetTeam());
         }
 };
 
@@ -164,7 +164,7 @@ class achievement_bg_av_perfection : public AchievementCriteriaScript
         bool OnCheck(Player* source, Unit* /*target*/)
         {
             Battleground* bg = source->GetBattleground();
-            return bg && bg->GetBgTypeID() == BATTLEGROUND_AV && bg->ToBattlegroundAV()->IsAllTowersControlledAndCaptainAlive(source->GetTeamId());
+            return bg && bg->GetBgTypeID() == BATTLEGROUND_AV && bg->ToBattlegroundAV()->IsAllTowersControlledAndCaptainAlive(source->GetTeam());
         }
 };
 
@@ -223,7 +223,7 @@ class achievement_not_even_a_scratch : public AchievementCriteriaScript
                 return false;
 
             Battleground* battleground = source->GetBattleground();
-            return battleground && battleground->GetBgTypeID() == BATTLEGROUND_SA && battleground->ToBattlegroundSA()->notEvenAScratch(source->GetTeamId());
+            return battleground && battleground->GetBgTypeID() == BATTLEGROUND_SA && battleground->ToBattlegroundSA()->notEvenAScratch(source->GetTeam());
         }
 };
 

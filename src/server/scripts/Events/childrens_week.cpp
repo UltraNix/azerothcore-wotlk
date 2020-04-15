@@ -886,8 +886,8 @@ class at_bring_your_orphan_to : public AreaTriggerScript
                     orphanId = ORPHAN_HUMAN;
                     break;
                 case AT_DARK_PORTAL:
-                    questId = player->GetTeamId() == TEAM_ALLIANCE ? QUEST_DARK_PORTAL_A : QUEST_DARK_PORTAL_H;
-                    orphanId = player->GetTeamId() == TEAM_ALLIANCE ? ORPHAN_DRAENEI : ORPHAN_BLOOD_ELF;
+                    questId = player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? QUEST_DARK_PORTAL_A : QUEST_DARK_PORTAL_H;
+                    orphanId = player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? ORPHAN_DRAENEI : ORPHAN_BLOOD_ELF;
                     break;
             }
 
@@ -924,8 +924,8 @@ class npc_cw_area_trigger : public CreatureScript
                             switch (me->GetEntry())
                             {
                                 case NPC_CAVERNS_OF_TIME_CW_TRIGGER:
-                                    questId = player->GetTeamId() == TEAM_ALLIANCE ? QUEST_TIME_TO_VISIT_THE_CAVERNS_A : QUEST_TIME_TO_VISIT_THE_CAVERNS_H;
-                                    orphanId = player->GetTeamId() == TEAM_ALLIANCE ? ORPHAN_DRAENEI : ORPHAN_BLOOD_ELF;
+                                    questId = player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? QUEST_TIME_TO_VISIT_THE_CAVERNS_A : QUEST_TIME_TO_VISIT_THE_CAVERNS_H;
+                                    orphanId = player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? ORPHAN_DRAENEI : ORPHAN_BLOOD_ELF;
                                     break;
                                 case NPC_EXODAR_01_CW_TRIGGER:
                                     questId = QUEST_THE_SEAT_OF_THE_NARUU;

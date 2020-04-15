@@ -102,13 +102,13 @@ class AreaTrigger_at_legion_teleporter : public AreaTriggerScript
         {
             if (player->IsAlive() && !player->IsInCombat())
             {
-                if (player->GetTeamId() == TEAM_ALLIANCE && player->GetQuestRewardStatus(QUEST_GAINING_ACCESS_A))
+                if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE && player->GetQuestRewardStatus(QUEST_GAINING_ACCESS_A))
                 {
                     player->CastSpell(player, SPELL_TELE_A_TO, false);
                     return true;
                 }
 
-                if (player->GetTeamId() == TEAM_HORDE && player->GetQuestRewardStatus(QUEST_GAINING_ACCESS_H))
+                if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE && player->GetQuestRewardStatus(QUEST_GAINING_ACCESS_H))
                 {
                     player->CastSpell(player, SPELL_TELE_H_TO, false);
                     return true;

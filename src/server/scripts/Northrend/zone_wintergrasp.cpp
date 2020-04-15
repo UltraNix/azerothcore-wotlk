@@ -155,7 +155,7 @@ class npc_wg_demolisher_engineer : public CreatureScript
                         creature->CastSpell(player, SPELL_BUILD_DEMOLISHER_FORCE, true);
                         break;
                     case 2:
-                        creature->CastSpell(player, player->GetTeamId() == TEAM_ALLIANCE ? SPELL_BUILD_SIEGE_VEHICLE_FORCE_ALLIANCE : SPELL_BUILD_SIEGE_VEHICLE_FORCE_HORDE, true);
+                        creature->CastSpell(player, player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? SPELL_BUILD_SIEGE_VEHICLE_FORCE_ALLIANCE : SPELL_BUILD_SIEGE_VEHICLE_FORCE_HORDE, true);
                         break;
                 }
                 creature->CastSpell(creature, SPELL_ACTIVATE_CONTROL_ARMS, true);
@@ -198,7 +198,7 @@ class npc_wg_spirit_guide : public CreatureScript
 
             GraveyardVect graveyard = wintergrasp->GetGraveyardVector();
             for (uint8 i = 0; i < graveyard.size(); i++)
-                if (graveyard[i]->GetControlTeamId() == player->GetTeamId())
+                if (graveyard[i]->GetControlTeamId() == player->GetTeam(CrossFactionTeam::Discard))
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, sObjectMgr->GetTrinityStringForDBCLocale(((BfGraveyardWG*)graveyard[i])->GetTextId()), GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + i);
 
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
@@ -214,7 +214,7 @@ class npc_wg_spirit_guide : public CreatureScript
             {
                 GraveyardVect gy = wintergrasp->GetGraveyardVector();
                 for (uint8 i = 0; i < gy.size(); i++)
-                    if (action - GOSSIP_ACTION_INFO_DEF == i && gy[i]->GetControlTeamId() == player->GetTeamId())
+                    if (action - GOSSIP_ACTION_INFO_DEF == i && gy[i]->GetControlTeamId() == player->GetTeam(CrossFactionTeam::Discard))
                         if (WorldSafeLocsEntry const* safeLoc = sWorldSafeLocsStore.LookupEntry(gy[i]->GetGraveyardId()))
                             player->TeleportTo(safeLoc->map_id, safeLoc->x, safeLoc->y, safeLoc->z, 0);
             }
@@ -979,7 +979,7 @@ class spell_wintergrasp_portal : public SpellScriptLoader
                 PreventHitDefaultEffect(effIndex);
                 Player* target = GetHitPlayer();
                 Battlefield* wintergrasp = sBattlefieldMgr->GetBattlefieldByBattleId(BATTLEFIELD_BATTLEID_WG);
-                if (!wintergrasp || !target || target->getLevel() < 75 || (wintergrasp->GetDefenderTeam() != target->GetTeamId()))
+                if (!wintergrasp || !target || target->getLevel() < 75 || (wintergrasp->GetDefenderTeam() != target->GetTeam(CrossFactionTeam::Discard)))
                     return;
 
                 target->CastSpell(target, SPELL_TELEPORT_TO_FORTRESS, true);

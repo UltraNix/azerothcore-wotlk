@@ -281,7 +281,7 @@ void BattlefieldWG::OnBattleStart()
     {
         building->Refresh(true);
         building->UpdateTurretAttack(false);
-    }
+        }
 
     SetData(BATTLEFIELD_WG_DATA_INTACT_TOWER_ATT, WG_MAX_ATTACKTOWERS);
     SetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT, 0);
@@ -675,7 +675,7 @@ void BattlefieldWG::OnCreatureCreate(Creature* creature)
                 Player* creator = ObjectAccessor::FindPlayer(creature->ToTempSummon()->GetSummonerGUID());
                 if (!creator)
                     return;
-                TeamId team = creator->GetTeamId();
+                TeamId team = creator->GetTeam();
 
                 if (team == TEAM_HORDE)
                 {
@@ -803,7 +803,7 @@ void BattlefieldWG::HandleKill(Player* killer, Unit* victim)
         return;
 
     bool again = false;
-    TeamId killerTeam = killer->GetTeamId();
+    TeamId killerTeam = killer->GetTeam();
 
     // xinef: tower cannons also grant rank
     if (victim->GetTypeId() == TYPEID_PLAYER || IsKeepNpc(victim->GetEntry()) || victim->GetEntry() == NPC_WINTERGRASP_TOWER_CANNON)
@@ -882,7 +882,7 @@ void BattlefieldWG::PromotePlayer(Player* killer)
         }
         else
         {
-            if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_BALANCE_SYSTEM) && killer->GetTeamId() == favoredFaction && absFactionBalanceScale >= 600)
+            if (sWorld->getBoolConfig(CONFIG_WINTERGRASP_BALANCE_SYSTEM) && killer->GetTeam() == favoredFaction && absFactionBalanceScale >= 600)
             {
                 killer->RemoveAura(SPELL_RECRUIT);
                 // Faction with above 700 points should get Lieutenant rank after 1 kill
@@ -936,18 +936,18 @@ void BattlefieldWG::OnPlayerJoinWar(Player* player)
 
     if (!player->IsInWintergrasp())
     {
-        if (player->GetTeamId() == GetDefenderTeam())
+        if (player->GetTeam() == GetDefenderTeam())
             player->TeleportTo(571, 5345, 2842, 410, 3.14f);
         else
         {
-            if (player->GetTeamId() == TEAM_HORDE)
+            if (player->GetTeam() == TEAM_HORDE)
                 player->TeleportTo(571, 5025.857422f, 3674.628906f, 362.737122f, 4.135169f);
             else
                 player->TeleportTo(571, 5101.284f, 2186.564f, 373.549f, 3.812f);
         }
     }
 
-    if (player->GetTeamId() == GetAttackerTeam())
+    if (player->GetTeam() == GetAttackerTeam())
     {
         if (GetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT) < 3)
             player->SetAuraStack(SPELL_TOWER_CONTROL, player, 3 - GetData(BATTLEFIELD_WG_DATA_BROKEN_TOWER_ATT));
@@ -994,7 +994,7 @@ void BattlefieldWG::OnPlayerEnterZone(Player* player)
     SendInitWorldStatesTo(player);
 
     // xinef: Attacker, if hidden in relic room kick him out
-    if (player->GetTeamId() == GetAttackerTeam())
+    if (player->GetTeam() == GetAttackerTeam())
         if (player->GetPositionX() > 5400.0f && player->GetPositionX() < 5490.0f && player->GetPositionY() > 2803.0f && player->GetPositionY() < 2878.0f)
             KickPlayerFromBattlefield(player->GetGUID());
 }
@@ -1117,7 +1117,7 @@ void BattlefieldWG::BrokenWallOrTower(TeamId team)
         for (GuidSet::const_iterator itr = m_PlayersInWar[GetAttackerTeam()].begin(); itr != m_PlayersInWar[GetAttackerTeam()].end(); ++itr)
         {
             if (Player* player = ObjectAccessor::FindPlayer(*itr))
-                IncrementQuest(player, WGQuest[player->GetTeamId()][2], true);
+                IncrementQuest(player, WGQuest[player->GetTeam()][2], true);
         }
     }*/
 }
@@ -1268,7 +1268,7 @@ void BattlefieldWG::UpdateTenacity()
             {
                 if (Player* newPlayer = newUnit->ToPlayer())
                 {
-                    if ((newPlayer->GetTeamId() == TEAM_ALLIANCE && m_tenacityStack > 0) || (newPlayer->GetTeamId() == TEAM_HORDE && m_tenacityStack < 0))
+                    if ((newPlayer->GetTeam() == TEAM_ALLIANCE && m_tenacityStack > 0) || (newPlayer->GetTeam() == TEAM_HORDE && m_tenacityStack < 0))
                     {
                         uint32 buff_honor = GetHonorBuff(newStackAbs);
                         newPlayer->SetAuraStack(SPELL_TENACITY, newPlayer, newStackAbs);

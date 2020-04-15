@@ -85,6 +85,7 @@ class ReputationMgr
         int32 GetReputation(FactionEntry const* factionEntry) const;
         int32 GetBaseReputation(FactionEntry const* factionEntry) const;
 
+        ReputationRank GetRank(uint32 faction_id) const;
         ReputationRank GetRank(FactionEntry const* factionEntry) const;
         ReputationRank GetBaseRank(FactionEntry const* factionEntry) const;
         uint32 GetReputationRankStrIndex(FactionEntry const* factionEntry) const
@@ -92,11 +93,7 @@ class ReputationMgr
             return ReputationRankStrIndex[GetRank(factionEntry)];
         };
 
-        ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const
-        {
-            ForcedReactions::const_iterator forceItr = _forcedReactions.find(factionTemplateEntry->faction);
-            return forceItr != _forcedReactions.end() ? &forceItr->second : NULL;
-        }
+        ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const;
 
     public:                                                 // modifiers
         bool SetReputation(FactionEntry const* factionEntry, int32 standing)
@@ -107,6 +104,8 @@ class ReputationMgr
         {
             return SetReputation(factionEntry, standing, true, spillOverOnly);
         }
+
+        bool ModifyReputation( uint32 faction_id, int32 standing, bool spillOverOnly = false );
 
         void SetVisible(FactionTemplateEntry const* factionTemplateEntry);
         void SetVisible(FactionEntry const* factionEntry);

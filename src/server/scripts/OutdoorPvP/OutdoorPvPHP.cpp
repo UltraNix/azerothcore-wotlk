@@ -72,7 +72,7 @@ bool OutdoorPvPHP::SetupOutdoorPvP()
 void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, uint32 zone)
 {
     // add buffs
-    if (player->GetTeamId() == TEAM_ALLIANCE)
+    if (player->GetTeam() == TEAM_ALLIANCE)
     {
         if (m_AllianceTowersControlled >=3)
             player->CastSpell(player, AllianceBuff, true);
@@ -88,7 +88,7 @@ void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, uint32 zone)
 void OutdoorPvPHP::HandlePlayerLeaveZone(Player* player, uint32 zone)
 {
     // remove buffs
-    if (player->GetTeamId() == TEAM_ALLIANCE)
+    if (player->GetTeam() == TEAM_ALLIANCE)
     {
         player->RemoveAurasDueToSpell(AllianceBuff);
     }
@@ -319,9 +319,9 @@ void OutdoorPvPHP::HandleKillImpl(Player* player, Unit* killed)
     if (killed->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (player->GetTeamId() == TEAM_ALLIANCE && killed->ToPlayer()->GetTeamId() != TEAM_ALLIANCE && killed->getLevel() > Trinity::XP::GetGrayLevel(player->getLevel()))
+    if (player->GetTeam() == TEAM_ALLIANCE && killed->ToPlayer()->GetTeam() != TEAM_ALLIANCE && killed->getLevel() > Trinity::XP::GetGrayLevel(player->getLevel()))
         player->CastSpell(player, AlliancePlayerKillReward, true);
-    else if (player->GetTeamId() == TEAM_HORDE && killed->ToPlayer()->GetTeamId() != TEAM_HORDE && killed->getLevel() > Trinity::XP::GetGrayLevel(player->getLevel()))
+    else if (player->GetTeam() == TEAM_HORDE && killed->ToPlayer()->GetTeam() != TEAM_HORDE && killed->getLevel() > Trinity::XP::GetGrayLevel(player->getLevel()))
         player->CastSpell(player, HordePlayerKillReward, true);
 }
 

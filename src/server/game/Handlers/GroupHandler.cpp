@@ -100,7 +100,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     }
 
     // can't group with
-    if (!invitingPlayer->IsGameMaster() && invitingPlayer->GetTeamId() != invitedPlayer->GetTeamId())
+    if (!invitingPlayer->IsGameMaster() && invitingPlayer->GetTeam() != invitedPlayer->GetTeam())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_PLAYER_WRONG_FACTION);
         return;

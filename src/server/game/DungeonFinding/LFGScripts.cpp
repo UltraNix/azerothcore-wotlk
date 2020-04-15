@@ -70,7 +70,7 @@ void LFGPlayerScript::OnLogin(Player* player)
     }
 
     sLFGMgr->InitializeLockedDungeons(player);
-    sLFGMgr->SetTeam(player->GetGUID(), player->GetTeamId());
+    sLFGMgr->SetTeam(player->GetGUID(), player->GetTeam());
     // TODO - Restore LfgPlayerData and send proper status to player if it was in a group
 }
 

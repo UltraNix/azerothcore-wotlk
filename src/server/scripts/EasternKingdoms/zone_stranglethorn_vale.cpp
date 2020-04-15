@@ -85,7 +85,7 @@ public:
                 {
                     if (Player* player = me->GetVictim()->ToPlayer())
                     {
-                        if (player->GetTeamId() == TEAM_HORDE)
+                        if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
                         {
                             me->CombatStop();
                             me->DeleteThreatList();

@@ -154,7 +154,6 @@ enum WorldBoolConfigs
     CONFIG_PTR_REALM,                         // Sitowsky: New created players have level 80 and allow them speak without any played time.
     CONFIG_CROSSFACTION_RDF,                  // Afgann:   Allow or disallow leveling with RDF between two factions.
     CONFIG_CROSSFACTION_BG,                   // Sitowsky: Allow or disallow playing in BG between two factions.
-    CONFIG_CROSSFACTION_BG_TWINK_ONLY,        // Sitowsky: Allow or disallow playing in BG between two factions only with twinks.
     CONFIG_PREMIUM_TELEPORT_ENABLE,           // Sitowsky: Allow or disallow usage of specified premium service.
     CONFIG_PREMIUM_INSTANT_FLYING_ENABLE,     // Sitowsky: Allow or disallow usage of specified premium service.
     CONFIG_PHASED_DUELS_ENABLE,               // Piootrek: Enables or disables Phased Duels.
@@ -258,6 +257,8 @@ enum WorldIntConfigs
     CONFIG_STRICT_PET_NAMES,
     CONFIG_CROSSFACTION_RDF_MINLVL,
     CONFIG_CROSSFACTION_RDF_MAXLVL,
+    CONFIG_CROSSFACTION_BG_MINLVL,
+    CONFIG_CROSSFACTION_BG_MAXLVL,
     CONFIG_MIN_PLAYER_NAME,
     CONFIG_MIN_CHARTER_NAME,
     CONFIG_MIN_PET_NAME,
@@ -693,7 +694,7 @@ enum GlobalPlayerUpdateMask
     PLAYER_UPDATE_DATA_RACE             = 0x02,
     PLAYER_UPDATE_DATA_CLASS            = 0x04,
     PLAYER_UPDATE_DATA_GENDER           = 0x08,
-    PLAYER_UPDATE_DATA_NAME             = 0x10
+    PLAYER_UPDATE_DATA_NAME             = 0x10,
 };
 
 typedef std::map<uint32, GlobalPlayerData> GlobalPlayerDataMap;

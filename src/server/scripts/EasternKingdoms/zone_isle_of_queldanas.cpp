@@ -607,7 +607,7 @@ public:
                     break;
                 case 12:
                     if (Player* p = ObjectAccessor::GetPlayer(*me, playerGUID))
-                        Talk(p->GetTeamId() == TEAM_ALLIANCE ? 5 : 4, p);
+                        Talk(p->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? 5 : 4, p);
                     break;
                 case 13:
                     me->setActive(false);

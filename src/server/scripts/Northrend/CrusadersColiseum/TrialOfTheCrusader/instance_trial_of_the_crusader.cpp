@@ -1002,7 +1002,7 @@ public:
                             if( Player* plr = itr->GetSource() )
                                 if( !plr->IsGameMaster() )
                                 {
-                                    TeamIdInInstance = plr->GetTeamId();
+                                    TeamIdInInstance = plr->GetTeam(CrossFactionTeam::Discard);
                                     break;
                                 }
 
@@ -1249,7 +1249,7 @@ public:
                                 if( Player* plr = itr->GetSource() )
                                     if( !plr->IsGameMaster() )
                                     {
-                                        TeamIdInInstance = plr->GetTeamId();
+                                        TeamIdInInstance = plr->GetTeam(CrossFactionTeam::Discard);
                                         break;
                                     }
                         }

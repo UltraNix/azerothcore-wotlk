@@ -42,7 +42,7 @@ class instance_nexus : public InstanceMapScript
                 TeamId TeamIdInInstance = TEAM_NEUTRAL;
                 if (!players.isEmpty())
                     if (Player* pPlayer = players.begin()->GetSource())
-                        TeamIdInInstance = pPlayer->GetTeamId();
+                        TeamIdInInstance = pPlayer->GetTeam(CrossFactionTeam::Discard);
 
                 switch (creature->GetEntry())
                 {

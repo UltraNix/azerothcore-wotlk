@@ -525,24 +525,25 @@ enum MirrorTimerType
 #define DISABLED_MIRROR_TIMER   -1
 
 // 2^n values
-enum PlayerExtraFlags
+enum PlayerExtraFlags : uint32
 {
     // gm abilities
-    PLAYER_EXTRA_GM_ON                    = 0x0001,
-    PLAYER_EXTRA_ACCEPT_WHISPERS          = 0x0004,
-    PLAYER_EXTRA_TAXICHEAT                = 0x0008,
-    PLAYER_EXTRA_GM_INVISIBLE             = 0x0010,
-    PLAYER_EXTRA_GM_CHAT                  = 0x0020,         // Show GM badge in chat messages
-    PLAYER_EXTRA_HAS_310_FLYER            = 0x0040,         // Marks if player already has 310% speed flying mount
-    PLAYER_EXTRA_SPECTATOR_ON             = 0x0080,         // Marks if player is spectactor
-    PLAYER_EXTRA_PVP_DEATH                = 0x0100,         // store PvP death status until corpse creating.
-    PLAYER_EXTRA_SHOW_DK_PET              = 0x0400,         // Marks if player should see ghoul on login screen
-    PLAYER_EXTRA_DODGE_LOCATION           = 0x0800,         // Marks if player should hide own location at who list
+    PLAYER_EXTRA_GM_ON                    = 0x00000001,
+    PLAYER_EXTRA_ACCEPT_WHISPERS          = 0x00000004,
+    PLAYER_EXTRA_TAXICHEAT                = 0x00000008,
+    PLAYER_EXTRA_GM_INVISIBLE             = 0x00000010,
+    PLAYER_EXTRA_GM_CHAT                  = 0x00000020,         // Show GM badge in chat messages
+    PLAYER_EXTRA_HAS_310_FLYER            = 0x00000040,         // Marks if player already has 310% speed flying mount
+    PLAYER_EXTRA_SPECTATOR_ON             = 0x00000080,         // Marks if player is spectactor
+    PLAYER_EXTRA_PVP_DEATH                = 0x00000100,         // store PvP death status until corpse creating.
+    PLAYER_EXTRA_SHOW_DK_PET              = 0x00000400,         // Marks if player should see ghoul on login screen
+    PLAYER_EXTRA_DODGE_LOCATION           = 0x00000800,         // Marks if player should hide own location at who list
 
-    PLAYER_EXTRA_IGNORE_TRANSMOG          = 0x100000,
-    PLAYER_EXTRA_STH_HIDE                 = 0x200000,
-    PLAYER_EXTRA_ACCEPT_CHANNEL_INV       = 0x400000,
-    PLAYER_EXTRA_SPYMODE                  = 0x800000,
+    PLAYER_EXTRA_IGNORE_TRANSMOG          = 0x00100000,
+    PLAYER_EXTRA_STH_HIDE                 = 0x00200000,
+    PLAYER_EXTRA_ACCEPT_CHANNEL_INV       = 0x00400000,
+    PLAYER_EXTRA_SPYMODE                  = 0x00800000,
+    PLAYER_EXTRA_DISABLE_CFBG             = 0x01000000,
 };
 
 // 2^n values
@@ -1035,12 +1036,15 @@ struct PetSlotData
 // holder for Battleground data (pussywizard: not stored in db)
 struct BGData
 {
-    BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgTeamId(TEAM_NEUTRAL), bgQueueSlot(PLAYER_MAX_BATTLEGROUND_QUEUES), isInvited(false), bgIsRandom(false), bgAfkReportedCount(0), bgAfkReportedTimer(0) {}
+    BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgTeamId(TEAM_NEUTRAL), bgQueueSlot(PLAYER_MAX_BATTLEGROUND_QUEUES), isInvited(false), bgIsRandom(false), bgAfkReportedCount(0), bgAfkReportedTimer(0) , bgRace(0){}
 
     uint32 bgInstanceID;
     BattlegroundTypeId bgTypeID;
+
     TeamId bgTeamId;
+    uint8  bgRace;
     uint32 bgQueueSlot;
+
     bool isInvited;
     bool bgIsRandom;
 
@@ -1150,6 +1154,18 @@ private:
 const uint32 PLAYER_VISIBLE_SLOTS_START = PLAYER_VISIBLE_ITEM_1_ENTRYID;
 const uint32 PLAYER_VISIBLE_SLOTS_COUNT = ( EQUIPMENT_SLOT_END - EQUIPMENT_SLOT_START ) * 2u;
 
+enum CrossFactionPlayerState
+{
+    None                = 0,
+    UpdatePlayerData    = 1,
+};
+
+enum class CrossFactionTeam
+{
+    Discard,
+    Allow,
+};
+
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
@@ -1158,6 +1174,32 @@ class Player : public Unit, public GridObject<Player>
     public:
         explicit Player(WorldSession* session);
         ~Player();
+
+        bool IsPlayingNative() const { return GetTeam() == m_team; }
+
+        void SendChatMessage(const char *format, ...);
+        void FitPlayerInTeam(bool action, Battleground* pBattleGround = NULL);
+
+        CrossFactionPlayerState      m_crossfactionState;
+        std::unordered_set< uint64 > m_dirtyPlayers;
+
+        void RequestDirtyDataForPlayer( uint64 guid );
+
+        void RequestDirtyDataForBgPlayers( const Battleground::BattlegroundPlayerMap & players );
+        void RequestCleanDataForDirtyPlayers();
+
+        bool SendBattleGroundChat(uint32 msgtype, std::string const& message);
+
+        void MorphFit(bool value);
+
+        uint32 ConvertFactionForReputationReward( uint32 faction_id ) const;
+        Language ConvertLanguage( Language language ) const;
+
+        TeamId GetTeam( CrossFactionTeam type = CrossFactionTeam::Allow ) const { return ( type == CrossFactionTeam::Allow && GetBattlegroundId() != 0 ) ? m_bgData.bgTeamId : m_team; }
+
+        uint8  GetInitialRace() const { return m_race; }
+
+        BGData const* GetBgData() const { return &m_bgData; }
 
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
@@ -1228,7 +1270,7 @@ class Player : public Unit, public GridObject<Player>
         PlayerSocial *GetSocial() { return m_social; }
 
         PlayerTaxi m_taxi;
-        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel()); }
+        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(false), getClass(), getLevel()); }
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 1);
         bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 1);
         void CleanupAfterTaxiFlight();
@@ -1271,6 +1313,9 @@ class Player : public Unit, public GridObject<Player>
         }
         bool HasBlockChannelInvite() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_CHANNEL_INV; }
 
+        bool IsCrossfactionBgAllowed() const { return (m_ExtraFlags & PLAYER_EXTRA_DISABLE_CFBG) == 0; }
+        void SetCrossfactionBgAllowed(bool disable);
+
         // @Transmog
         bool HasDisabledTransmogVisibility()   const { return m_ExtraFlags & PLAYER_EXTRA_IGNORE_TRANSMOG; }
         void SetDisabledTransmogVisibility(bool disable);
@@ -1308,6 +1353,8 @@ class Player : public Unit, public GridObject<Player>
         void Yell(std::string const& text, const uint32 language);
         void TextEmote(std::string const& text);
         void Whisper(std::string const& text, const uint32 language, uint64 receiver);
+        // Constructs the player Chat data for the specific functions to use
+        void BuildPlayerChat(WorldPacket* data, uint8 msgtype, std::string const& text, uint32 language) const;
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
@@ -1777,8 +1824,6 @@ class Player : public Unit, public GridObject<Player>
         void learnQuestRewardedSpells();
         void learnQuestRewardedSpells(Quest const* quest);
         void learnSpellHighRank(uint32 spellid);
-        void SetReputation(uint32 factionentry, uint32 value);
-        uint32 GetReputation(uint32 factionentry) const;
         std::string const& GetGuildName();
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points);
@@ -2178,7 +2223,6 @@ class Player : public Unit, public GridObject<Player>
         void CheckAreaExploreAndOutdoor(void);
 
         static TeamId TeamIdForRace(uint8 race);
-        TeamId GetTeamId() const { return m_team; }
         void setFactionForRace(uint8 race);
 
         void InitDisplayIds();
@@ -2335,7 +2379,7 @@ class Player : public Unit, public GridObject<Player>
             return GetBattlegroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES;
         }
 
-        void SetBattlegroundId(uint32 id, BattlegroundTypeId bgTypeId, uint32 queueSlot, bool invited, bool isRandom, TeamId teamId);
+        void SetBattlegroundId(uint32 id, BattlegroundTypeId bgTypeId, uint32 queueSlot, bool invited, bool isRandom, TeamId teamId, bool loading = false );
 
         uint32 AddBattlegroundQueueId(BattlegroundQueueTypeId val)
         {
@@ -2365,8 +2409,6 @@ class Player : public Unit, public GridObject<Player>
                     return;
                 }
         }
-
-        TeamId GetBgTeamId() const { return m_bgData.bgTeamId != TEAM_NEUTRAL ? m_bgData.bgTeamId : GetTeamId(); }
 
         void LeaveBattleground(Battleground* bg = NULL);
         bool CanJoinToBattleground() const;
@@ -2874,7 +2916,9 @@ class Player : public Unit, public GridObject<Player>
         void outDebugValues() const;
         uint64 m_lootGuid;
 
+        uint8  m_race;
         TeamId m_team;
+
         uint32 m_nextSave;                   // pussywizard
         uint16 m_additionalSaveTimer;        // pussywizard
         uint8 m_additionalSaveMask;          // pussywizard

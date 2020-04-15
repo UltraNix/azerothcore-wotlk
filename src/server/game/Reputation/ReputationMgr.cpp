@@ -26,8 +26,7 @@ ReputationRank ReputationMgr::ReputationToRank(int32 standing)
 
 bool ReputationMgr::IsAtWar(uint32 faction_id) const
 {
-    FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
-
+    FactionEntry const* factionEntry = sFactionStore.LookupEntry( faction_id );
     if (!factionEntry)
     {
         sLog->outError("ReputationMgr::IsAtWar: Can't get AtWar flag of %s for unknown faction (faction id) #%u.", _player->GetName().c_str(), faction_id);
@@ -49,8 +48,7 @@ bool ReputationMgr::IsAtWar(FactionEntry const* factionEntry) const
 
 int32 ReputationMgr::GetReputation(uint32 faction_id) const
 {
-    FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
-
+    FactionEntry const* factionEntry = sFactionStore.LookupEntry( faction_id );
     if (!factionEntry)
     {
         sLog->outError("ReputationMgr::GetReputation: Can't get reputation of %s for unknown faction (faction id) #%u.", _player->GetName().c_str(), faction_id);
@@ -65,7 +63,7 @@ int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry) const
     if (!factionEntry)
         return 0;
 
-    uint32 raceMask = _player->getRaceMask();
+    uint32 raceMask = _player->getRaceMask(false);
     uint32 classMask = _player->getClassMask();
     for (int i=0; i < 4; i++)
     {
@@ -100,6 +98,13 @@ ReputationRank ReputationMgr::GetRank(FactionEntry const* factionEntry) const
     return ReputationToRank(reputation);
 }
 
+
+ReputationRank ReputationMgr::GetRank( uint32 faction_id ) const
+{
+    FactionEntry const* factionEntry = sFactionStore.LookupEntry( faction_id );
+    return GetRank( factionEntry );
+}
+
 ReputationRank ReputationMgr::GetBaseRank(FactionEntry const* factionEntry) const
 {
     int32 reputation = GetBaseReputation(factionEntry);
@@ -119,7 +124,7 @@ uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry) con
     if (!factionEntry)
         return 0;
 
-    uint32 raceMask = _player->getRaceMask();
+    uint32 raceMask = _player->getRaceMask(false);
     uint32 classMask = _player->getClassMask();
     for (int i=0; i < 4; i++)
     {
@@ -197,8 +202,8 @@ void ReputationMgr::SendInitialReputations()
         }
 
         // fill in encountered data
-        data << uint8  (itr->second.Flags);
-        data << uint32 (itr->second.Standing);
+        data << uint8( itr->second.Flags );
+        data << uint32( itr->second.Standing );
 
         itr->second.needSend = false;
 
@@ -263,6 +268,12 @@ void ReputationMgr::Initialize()
             _factions[newFaction.ReputationListID] = newFaction;
         }
     }
+}
+
+ReputationRank const* ReputationMgr::GetForcedRankIfAny( FactionTemplateEntry const* factionTemplateEntry ) const
+{
+    ForcedReactions::const_iterator forceItr = _forcedReactions.find( factionTemplateEntry->faction );
+    return forceItr != _forcedReactions.end() ? &forceItr->second : NULL;
 }
 
 bool ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental, bool spillOverOnly)
@@ -389,6 +400,15 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     return false;
 }
 
+bool ReputationMgr::ModifyReputation( uint32 faction_id, int32 standing, bool spillOverOnly /*= false */ )
+{
+    FactionEntry const* factionEntry = sFactionStore.LookupEntry( faction_id );
+    if ( !factionEntry )
+        return false;
+
+    return ModifyReputation( factionEntry, standing, spillOverOnly );
+}
+
 void ReputationMgr::SetVisible(FactionTemplateEntry const*factionTemplateEntry)
 {
     if (!factionTemplateEntry->faction)
@@ -396,7 +416,7 @@ void ReputationMgr::SetVisible(FactionTemplateEntry const*factionTemplateEntry)
 
     if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
         // Never show factions of the opposing team
-        if (!(factionEntry->BaseRepRaceMask[1] & _player->getRaceMask() && factionEntry->BaseRepValue[1] == Reputation_Bottom))
+        if (!(factionEntry->BaseRepRaceMask[1] & _player->getRaceMask(false) && factionEntry->BaseRepValue[1] == Reputation_Bottom))
             SetVisible(factionEntry);
 }
 

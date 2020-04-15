@@ -56,7 +56,7 @@ bool OutdoorPvPSI::Update(uint32 /*diff*/)
 
 void OutdoorPvPSI::HandlePlayerEnterZone(Player* player, uint32 zone)
 {
-    if (player->GetTeamId() == m_LastController)
+    if (player->GetTeam() == m_LastController)
         player->CastSpell(player, SI_CENARION_FAVOR, true);
     OutdoorPvP::HandlePlayerEnterZone(player, zone);
 }
@@ -75,7 +75,7 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 trigger)
     switch (trigger)
     {
     case SI_AREATRIGGER_A:
-        if (player->GetTeamId() == TEAM_ALLIANCE && player->HasAura(SI_SILITHYST_FLAG))
+        if (player->GetTeam() == TEAM_ALLIANCE && player->HasAura(SI_SILITHYST_FLAG))
         {
             // remove aura
             player->RemoveAurasDueToSpell(SI_SILITHYST_FLAG);
@@ -95,13 +95,13 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 trigger)
             // add 19 honor
             player->RewardHonor(NULL, 1, 19);
             // add 20 cenarion circle repu
-            player->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609), 20);
+            player->GetReputationMgr().ModifyReputation( 609, 20);
             // complete quest
             player->KilledMonsterCredit(SI_TURNIN_QUEST_CM_A, 0);
         }
         return true;
     case SI_AREATRIGGER_H:
-        if (player->GetTeamId() == TEAM_HORDE && player->HasAura(SI_SILITHYST_FLAG))
+        if (player->GetTeam() == TEAM_HORDE && player->HasAura(SI_SILITHYST_FLAG))
         {
             // remove aura
             player->RemoveAurasDueToSpell(SI_SILITHYST_FLAG);
@@ -121,7 +121,7 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 trigger)
             // add 19 honor
             player->RewardHonor(NULL, 1, 19);
             // add 20 cenarion circle repu
-            player->GetReputationMgr().ModifyReputation(sFactionStore.LookupEntry(609), 20);
+            player->GetReputationMgr().ModifyReputation( 609, 20);
             // complete quest
             player->KilledMonsterCredit(SI_TURNIN_QUEST_CM_H, 0);
         }
@@ -135,7 +135,7 @@ bool OutdoorPvPSI::HandleDropFlag(Player* player, uint32 spellId)
     if (spellId == SI_SILITHYST_FLAG)
     {
         // if it was dropped away from the player's turn-in point, then create a silithyst mound, if it was dropped near the areatrigger, then it was dispelled by the outdoorpvp, so do nothing
-        switch (player->GetTeamId())
+        switch (player->GetTeam())
         {
         case TEAM_ALLIANCE:
             {

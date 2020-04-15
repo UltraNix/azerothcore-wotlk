@@ -98,8 +98,8 @@ struct boss_devourer_of_soulsAI : public BossAI
             if (!player)
                 return;
 
-            if ((player->GetTeamId() == TEAM_ALLIANCE && player->GetQuestStatus(QUEST_TEMPERING_THE_BLADE_A) == QUEST_STATUS_INCOMPLETE) ||
-                (player->GetTeamId() == TEAM_HORDE && player->GetQuestStatus(QUEST_TEMPERING_THE_BLADE_H) == QUEST_STATUS_INCOMPLETE))
+            if ((player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE && player->GetQuestStatus(QUEST_TEMPERING_THE_BLADE_A) == QUEST_STATUS_INCOMPLETE) ||
+                (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE && player->GetQuestStatus(QUEST_TEMPERING_THE_BLADE_H) == QUEST_STATUS_INCOMPLETE))
             {
                 if (!me->FindNearestCreature(NPC_CRUCIBLE_OF_SOULS, 100.0f))
                     me->SummonCreature(NPC_CRUCIBLE_OF_SOULS, 5672.29f, 2520.69f, 713.44f, 0.96f);
