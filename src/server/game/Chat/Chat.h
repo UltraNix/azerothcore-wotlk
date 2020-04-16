@@ -41,22 +41,6 @@ class ChatCommand
         std::vector<ChatCommand> ChildCommands;
 };
 
-struct TextBuilderResult
-{
-    void SetLanguage( WorldPacket * packet, Language language )
-    {
-        packet->put<int32>(receiverOffset, language);
-    }
-
-    void SetReceiverGuid( WorldPacket * packet, uint64 guid )
-    {
-        packet->put<uint64>(receiverOffset, guid);
-    }
-
-    size_t languageOffset   = 0u;
-    size_t receiverOffset   = 0u;
-};
-
 class ChatHandler
 {
     public:
@@ -65,12 +49,12 @@ class ChatHandler
         virtual ~ChatHandler() { }
 
         // Builds chat packet and returns receiver guid position in the packet to substitute in whisper builders
-        static TextBuilderResult BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, uint64 senderGUID, uint64 receiverGUID, std::string const& message, uint8 chatTag,
+        static size_t BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, uint64 senderGUID, uint64 receiverGUID, std::string const& message, uint8 chatTag,
                                     std::string const& senderName = "", std::string const& receiverName = "",
                                     uint32 achievementId = 0, bool gmMessage = false, std::string const& channelName = "");
 
         // Builds chat packet and returns receiver guid position in the packet to substitute in whisper builders
-        static TextBuilderResult BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, WorldObject const* sender, WorldObject const* receiver, std::string const& message, uint32 achievementId = 0, std::string const& channelName = "", LocaleConstant locale = DEFAULT_LOCALE);
+        static size_t BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, WorldObject const* sender, WorldObject const* receiver, std::string const& message, uint32 achievementId = 0, std::string const& channelName = "", LocaleConstant locale = DEFAULT_LOCALE);
 
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = NULL; return start; }
 

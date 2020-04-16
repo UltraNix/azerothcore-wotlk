@@ -1210,9 +1210,6 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder* holder)
     sScriptMgr->OnPlayerLogin(pCurrChar);
 
     delete holder;
-
-    auto bgData = pCurrChar->GetBgData();
-    pCurrChar->SetBattlegroundId( bgData->bgInstanceID, bgData->bgTypeID, bgData->bgQueueSlot, bgData->isInvited, bgData->bgIsRandom, bgData->bgTeamId, true );
 }
 
 void WorldSession::HandlePlayerLoginToCharInWorld(Player* pCurrChar)

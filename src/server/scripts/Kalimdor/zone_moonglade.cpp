@@ -53,7 +53,7 @@ public:
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 player->CLOSE_GOSSIP_MENU();
-                if (player->getClass() == CLASS_DRUID && player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
+                if (player->getClass() == CLASS_DRUID && player->GetTeamId() == TEAM_HORDE)
                     player->ActivateTaxiPathTo(TAXI_PATH_ID_HORDE);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 2:
@@ -70,14 +70,14 @@ public:
     {
         if (player->getClass() != CLASS_DRUID)
             player->SEND_GOSSIP_MENU(4916, creature->GetGUID());
-        else if (player->GetTeam(CrossFactionTeam::Discard) != TEAM_HORDE)
+        else if (player->GetTeamId() != TEAM_HORDE)
         {
             if (player->GetQuestStatus(QUEST_SEA_LION_ALLY) == QUEST_STATUS_INCOMPLETE)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_AQ_END, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
             player->SEND_GOSSIP_MENU(4917, creature->GetGUID());
         }
-        else if (player->getClass() == CLASS_DRUID && player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
+        else if (player->getClass() == CLASS_DRUID && player->GetTeamId() == TEAM_HORDE)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_THUNDER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
@@ -168,7 +168,7 @@ public:
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
                 player->CLOSE_GOSSIP_MENU();
-                if (player->getClass() == CLASS_DRUID && player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+                if (player->getClass() == CLASS_DRUID && player->GetTeamId() == TEAM_ALLIANCE)
                     player->ActivateTaxiPathTo(TAXI_PATH_ID_ALLY);
                 break;
             case GOSSIP_ACTION_INFO_DEF + 2:
@@ -185,14 +185,14 @@ public:
     {
         if (player->getClass() != CLASS_DRUID)
             player->SEND_GOSSIP_MENU(4913, creature->GetGUID());
-        else if (player->GetTeam(CrossFactionTeam::Discard) != TEAM_ALLIANCE)
+        else if (player->GetTeamId() != TEAM_ALLIANCE)
         {
             if (player->GetQuestStatus(QUEST_SEA_LION_HORDE) == QUEST_STATUS_INCOMPLETE)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_AQ_AGI, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
             player->SEND_GOSSIP_MENU(4915, creature->GetGUID());
         }
-        else if (player->getClass() == CLASS_DRUID && player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+        else if (player->getClass() == CLASS_DRUID && player->GetTeamId() == TEAM_ALLIANCE)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_RUTHERAN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 

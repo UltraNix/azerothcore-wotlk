@@ -677,7 +677,7 @@ struct npc_bragok : public ScriptedAI
     {
         if (Player* pl = who->ToPlayer())
         {
-            uint32 creatureEntry = pl->GetTeam() == TEAM_ALLIANCE ? NPC_WYVERN : NPC_GRYPHON;
+            uint32 creatureEntry = pl->GetTeamId() == TEAM_ALLIANCE ? NPC_WYVERN : NPC_GRYPHON;
             if (Creature* spawn = me->SummonCreature(creatureEntry, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 30000))
             {
                 if (spawn->IsAIEnabled)

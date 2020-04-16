@@ -238,7 +238,7 @@ void CustomEventMgr::teleportHungerGamesPlayersToAzshara()
         {
             if (Group *group = p->GetGroup()) 
                 group->RemoveMember(p->GetGUID());
-            if (p->GetTeam() == TEAM_ALLIANCE)
+            if (p->GetTeamId() == TEAM_ALLIANCE)
                 p->TeleportTo(37, 1038.33f, 293.55f, 335.30f, 3.39f);
             else
                 p->TeleportTo(37, 26.89f, 904.84f, 339.39f, 5.34f);

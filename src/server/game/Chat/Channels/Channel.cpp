@@ -598,7 +598,7 @@ void Channel::SetMode(Player const* player, std::string const& p2n, bool mod, bo
     if (!victim || !IsOn(victim) ||
         // allow make moderator from another team only if both is GMs
         // at this moment this only way to show channel post for GM from another team
-        ((!AccountMgr::IsGMAccount(sec) || !AccountMgr::IsGMAccount(newp->GetSession()->GetSecurity())) && player->GetTeam() != newp->GetTeam()))
+        ((!AccountMgr::IsGMAccount(sec) || !AccountMgr::IsGMAccount(newp->GetSession()->GetSecurity())) && player->GetTeamId() != newp->GetTeamId()))
     {
         WorldPacket data;
         MakePlayerNotFound(&data, p2n);
@@ -663,7 +663,7 @@ void Channel::SetOwner(Player const* player, std::string const& newname)
     Player* newp = ObjectAccessor::FindPlayerByName(newname, false);
     uint64 victim = newp ? newp->GetGUID() : 0;
 
-    if (!victim || !IsOn(victim) || newp->GetTeam() != player->GetTeam())
+    if (!victim || !IsOn(victim) || newp->GetTeamId() != player->GetTeamId())
     {
         WorldPacket data;
         MakePlayerNotFound(&data, newname);
@@ -871,7 +871,7 @@ void Channel::Invite(Player const* player, std::string const& newname)
         return;
     }
 
-    if (newp->GetTeam() != player->GetTeam())
+    if (newp->GetTeamId() != player->GetTeamId())
     {
         WorldPacket data;
         MakeInviteWrongFaction(&data);

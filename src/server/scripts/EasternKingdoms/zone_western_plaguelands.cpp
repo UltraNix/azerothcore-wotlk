@@ -289,7 +289,7 @@ public:
             if (!summoner)
                 return;
             if (summoner->IsPlayer())
-                if (summoner->ToPlayer()->GetTeam() == TEAM_HORDE)
+                if (summoner->ToPlayer()->GetTeamId() == TEAM_HORDE)
                     events.ScheduleEvent(EVENT_SAY_0, 2s);
         }
 

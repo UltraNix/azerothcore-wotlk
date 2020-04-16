@@ -658,9 +658,9 @@ public:
                     break;
                 case 29:
                     Talk(SAY_PROGRESS_4, player);
-                    if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+                    if (player->GetTeamId() == TEAM_ALLIANCE)
                         player->GroupEventHappens(QUEST_EFTW_A, me);
-                    else if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
+                    else if (player->GetTeamId() == TEAM_HORDE)
                         player->GroupEventHappens(QUEST_EFTW_H, me);
                     me->SetInFront(player);
                     break;
@@ -683,9 +683,9 @@ public:
         {
             if (Player* player = GetPlayerForEscort())
             {
-                if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+                if (player->GetTeamId() == TEAM_ALLIANCE)
                     player->FailQuest(QUEST_EFTW_A);
-                else if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
+                else if (player->GetTeamId() == TEAM_HORDE)
                     player->FailQuest(QUEST_EFTW_H);
             }
         }

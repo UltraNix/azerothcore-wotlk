@@ -169,7 +169,7 @@ class spell_pal_divine_intervention : public SpellScriptLoader
             void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 if (!GetTarget()->IsInCombat() && GetTarget()->GetTypeId() == TYPEID_PLAYER)
-                    GetTarget()->RemoveAurasDueToSpell(GetTarget()->ToPlayer()->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? 57723 : 57724);
+                    GetTarget()->RemoveAurasDueToSpell(GetTarget()->ToPlayer()->GetTeamId() == TEAM_ALLIANCE ? 57723 : 57724);
             }
 
             void Register()

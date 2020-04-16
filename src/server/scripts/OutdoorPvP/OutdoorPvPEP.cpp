@@ -645,7 +645,7 @@ bool OutdoorPvPEP::Update(uint32 diff)
 void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, uint32 zone)
 {
     // add buffs
-    if (player->GetTeam() == TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE)
     {
         if (m_AllianceTowersControlled && m_AllianceTowersControlled < 5)
             player->CastSpell(player, EP_AllianceBuffs[m_AllianceTowersControlled-1], true);
@@ -661,7 +661,7 @@ void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, uint32 zone)
 void OutdoorPvPEP::HandlePlayerResurrects(Player* player, uint32 zone)
 {
     // add buffs
-    if (player->GetTeam() == TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE)
     {
         if (m_AllianceTowersControlled && m_AllianceTowersControlled < 5)
             player->CastSpell(player, EP_AllianceBuffs[m_AllianceTowersControlled - 1], true);
@@ -676,7 +676,7 @@ void OutdoorPvPEP::HandlePlayerResurrects(Player* player, uint32 zone)
 void OutdoorPvPEP::HandlePlayerLeaveZone(Player* player, uint32 zone)
 {
     // remove buffs
-    if (player->GetTeam() == TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE)
     {
         for (int i = 0; i < 4; ++i)
             player->RemoveAurasDueToSpell(EP_AllianceBuffs[i]);

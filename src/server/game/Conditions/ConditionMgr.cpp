@@ -77,7 +77,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
             if (Player* player = object->ToPlayer())
             {
                 // Xinef: DB Data compatibility...
-                uint32 teamOld = player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? ALLIANCE : HORDE;
+                uint32 teamOld = player->GetTeamId() == TEAM_ALLIANCE ? ALLIANCE : HORDE;
                 condMeets = teamOld == ConditionValue1;
             }
             break;
@@ -91,7 +91,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_RACE:
         {
             if (Unit* unit = object->ToUnit())
-                condMeets = unit->getRaceMask(false) & ConditionValue1;
+                condMeets = unit->getRaceMask() & ConditionValue1;
             break;
         }
         case CONDITION_GENDER:

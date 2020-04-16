@@ -1311,7 +1311,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     case 5:
                     // Transform
                     {
-                        if (m_caster->ToPlayer()->GetTeam() == TEAM_ALLIANCE)
+                        if (m_caster->ToPlayer()->GetTeamId() == TEAM_ALLIANCE)
                             m_caster->CastSpell(m_caster, 36897, true);
                         else
                             m_caster->CastSpell(m_caster, 36899, true);
@@ -1352,7 +1352,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
                     case 4:
                         // Transform
                     {
-                        if (m_caster->ToPlayer()->GetTeam() == TEAM_ALLIANCE)
+                        if (m_caster->ToPlayer()->GetTeamId() == TEAM_ALLIANCE)
                             m_caster->CastSpell(m_caster, 36897, true);
                         else
                             m_caster->CastSpell(m_caster, 36899, true);
@@ -3808,7 +3808,7 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
     if (pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)
         if (Player* player = m_caster->ToPlayer())
             if (Battleground* bg = player->GetBattleground())
-                bg->SetDroppedFlagGUID(pGameObj->GetGUID(), player->GetTeam() == TEAM_ALLIANCE ? TEAM_HORDE: TEAM_ALLIANCE);
+                bg->SetDroppedFlagGUID(pGameObj->GetGUID(), player->GetTeamId() == TEAM_ALLIANCE ? TEAM_HORDE: TEAM_ALLIANCE);
 
     if (uint32 linkedEntry = pGameObj->GetGOInfo()->GetLinkedGameObjectEntry())
     {
@@ -4843,7 +4843,7 @@ void Spell::EffectReputation(SpellEffIndex effIndex)
 
     int32  repChange = damage;
 
-    uint32 factionId = player->ConvertFactionForReputationReward( m_spellInfo->Effects[effIndex].MiscValue );
+    uint32 factionId = m_spellInfo->Effects[effIndex].MiscValue;
 
     FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionId);
     if (!factionEntry)

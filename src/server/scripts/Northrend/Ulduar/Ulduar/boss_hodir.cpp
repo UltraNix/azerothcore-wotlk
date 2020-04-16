@@ -280,7 +280,7 @@ public:
 
                     //! break the loop at first valid source
                     //! if its alliance then team in instance is not horde else just leave it as true and break the loop
-                    if (iter.GetSource()->GetTeam() == TEAM_ALLIANCE)
+                    if (iter.GetSource()->GetTeamId() == TEAM_ALLIANCE)
                     {
                         IsTeamHorde = false;
                         break;

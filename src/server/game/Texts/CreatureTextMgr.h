@@ -8,7 +8,6 @@
 #include "ObjectAccessor.h"
 #include "SharedDefines.h"
 #include "Opcodes.h"
-#include "Chat.h"
 
 enum CreatureTextRange
 {
@@ -124,31 +123,28 @@ class CreatureTextLocalizer
         {
             LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
             WorldPacket* messageTemplate;
-
-            TextBuilderResult customizer;
+            size_t whisperGUIDpos;
 
             // create if not cached yet
             if (!_packetCache[loc_idx])
             {
                 messageTemplate = new WorldPacket();
-                customizer = _builder(messageTemplate, loc_idx);
+                whisperGUIDpos = _builder(messageTemplate, loc_idx);
                 ASSERT(messageTemplate->GetOpcode() != MSG_NULL_ACTION);
-                _packetCache[loc_idx] = new std::pair<WorldPacket*, TextBuilderResult>(messageTemplate, customizer);
+                _packetCache[loc_idx] = new std::pair<WorldPacket*, size_t>(messageTemplate, whisperGUIDpos);
             }
             else
             {
                 messageTemplate = _packetCache[loc_idx]->first;
-                customizer = _packetCache[loc_idx]->second;
+                whisperGUIDpos = _packetCache[loc_idx]->second;
             }
 
             WorldPacket data(*messageTemplate);
-            customizer.SetLanguage( &data, player->ConvertLanguage( Language( _builder._language ) ) );
-
             switch (_msgType)
             {
                 case CHAT_MSG_MONSTER_WHISPER:
                 case CHAT_MSG_RAID_BOSS_WHISPER:
-                    customizer.SetReceiverGuid( &data, player->GetGUID() );
+                    data.put<uint64>(whisperGUIDpos, player->GetGUID());
                     break;
                 default:
                     break;
@@ -158,7 +154,7 @@ class CreatureTextLocalizer
         }
 
     private:
-        std::vector<std::pair<WorldPacket*, TextBuilderResult>* > _packetCache;
+        std::vector<std::pair<WorldPacket*, size_t>* > _packetCache;
         Builder const& _builder;
         ChatMsg _msgType;
 };
@@ -197,7 +193,7 @@ void CreatureTextMgr::SendChatPacket(WorldObject* source, Builder const& builder
             uint32 areaId = source->GetAreaId();
             Map::PlayerList const& players = source->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                if (itr->GetSource()->GetAreaId() == areaId && (teamId == TEAM_NEUTRAL || itr->GetSource()->GetTeam() == teamId) && (!gmOnly || itr->GetSource()->IsGameMaster()))
+                if (itr->GetSource()->GetAreaId() == areaId && (teamId == TEAM_NEUTRAL || itr->GetSource()->GetTeamId() == teamId) && (!gmOnly || itr->GetSource()->IsGameMaster()))
                     localizer(itr->GetSource());
             return;
         }
@@ -206,7 +202,7 @@ void CreatureTextMgr::SendChatPacket(WorldObject* source, Builder const& builder
             uint32 zoneId = source->GetZoneId();
             Map::PlayerList const& players = source->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                if (itr->GetSource()->GetZoneId() == zoneId && (teamId == TEAM_NEUTRAL || itr->GetSource()->GetTeam() == teamId) && (!gmOnly || itr->GetSource()->IsGameMaster()))
+                if (itr->GetSource()->GetZoneId() == zoneId && (teamId == TEAM_NEUTRAL || itr->GetSource()->GetTeamId() == teamId) && (!gmOnly || itr->GetSource()->IsGameMaster()))
                     localizer(itr->GetSource());
             return;
         }
@@ -214,7 +210,7 @@ void CreatureTextMgr::SendChatPacket(WorldObject* source, Builder const& builder
         {
             Map::PlayerList const& players = source->GetMap()->GetPlayers();
             for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                if ((teamId == TEAM_NEUTRAL || itr->GetSource()->GetTeam() == teamId) && (!gmOnly || itr->GetSource()->IsGameMaster()))
+                if ((teamId == TEAM_NEUTRAL || itr->GetSource()->GetTeamId() == teamId) && (!gmOnly || itr->GetSource()->IsGameMaster()))
                     localizer(itr->GetSource());
             return;
         }
@@ -223,7 +219,7 @@ void CreatureTextMgr::SendChatPacket(WorldObject* source, Builder const& builder
             SessionMap const& smap = sWorld->GetAllSessions();
             for (SessionMap::const_iterator itr = smap.begin(); itr != smap.end(); ++itr)
                 if (Player* player = itr->second->GetPlayer())
-                    if ((teamId == TEAM_NEUTRAL || player->GetTeam(CrossFactionTeam::Discard) == teamId) && (!gmOnly || player->IsGameMaster()))
+                    if ((teamId == TEAM_NEUTRAL || player->GetTeamId() == teamId) && (!gmOnly || player->IsGameMaster()))
                         localizer(player);
             return;
         }

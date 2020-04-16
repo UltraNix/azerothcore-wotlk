@@ -157,7 +157,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_TRAIL_OF_FIRE)
         {
-            creature->setFaction(player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
+            creature->setFaction(player->GetTeamId() == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
             CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
         }
         return true;

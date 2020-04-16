@@ -419,7 +419,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recvData)
         return;
 
     // not let enemies sign guild charter
-    if (GetPlayer()->GetTeam(CrossFactionTeam::Discard) != sObjectMgr->GetPlayerTeamIdByGUID(ownerGuid))
+    if (GetPlayer()->GetTeamId() != sObjectMgr->GetPlayerTeamIdByGUID(ownerGuid))
     {
         if (type != GUILD_CHARTER_TYPE)
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_NOT_ALLIED);
@@ -575,7 +575,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recvData)
         return;
     }
 
-    if (GetPlayer()->GetTeam(CrossFactionTeam::Discard) != player->GetTeam(CrossFactionTeam::Discard))
+    if (GetPlayer()->GetTeamId() != player->GetTeamId())
     {
         if (petition->petitionType != GUILD_CHARTER_TYPE)
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_NOT_ALLIED);

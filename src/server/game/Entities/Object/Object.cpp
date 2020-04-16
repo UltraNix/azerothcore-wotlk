@@ -1534,7 +1534,7 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
         {
             if (Player const* objPlayer = obj->ToPlayer())
             {
-                if (thisPlayer->GetTeam() != objPlayer->GetTeam() || !thisPlayer->IsGroupVisibleFor(objPlayer))
+                if (thisPlayer->GetTeamId() != objPlayer->GetTeamId() || !thisPlayer->IsGroupVisibleFor(objPlayer))
                     return false;
             }
             else

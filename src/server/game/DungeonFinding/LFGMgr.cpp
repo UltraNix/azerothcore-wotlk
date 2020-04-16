@@ -402,9 +402,9 @@ void LFGMgr::InitializeLockedDungeons(Player* player, uint8 level /* = 0 */)
                 lockData = LFG_LOCKSTATUS_MISSING_ACHIEVEMENT;
             else if (ar->reqItemLevel && (float)ar->reqItemLevel > avgItemLevel)
                 lockData = LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
-            else if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE && ar->quest_A && !player->GetQuestRewardStatus(ar->quest_A))
+            else if (player->GetTeamId() == TEAM_ALLIANCE && ar->quest_A && !player->GetQuestRewardStatus(ar->quest_A))
                 lockData = LFG_LOCKSTATUS_QUEST_NOT_COMPLETED;
-            else if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE && ar->quest_H && !player->GetQuestRewardStatus(ar->quest_H))
+            else if (player->GetTeamId() == TEAM_HORDE && ar->quest_H && !player->GetQuestRewardStatus(ar->quest_H))
                 lockData = LFG_LOCKSTATUS_QUEST_NOT_COMPLETED;
             else
                 if (ar->item)
@@ -792,8 +792,8 @@ void LFGMgr::JoinRaidBrowser(Player* player, uint8 roles, LfgDungeonSet& dungeon
     for (LfgDungeonSet::const_iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
         if (GetLFGDungeon(*itr)) // ensure dungeon data exists for such dungeon id
         {
-            RaidBrowserStore[player->GetTeam()][*itr][player->GetGUIDLow()] = entry;
-            RBUsedDungeonsStore[player->GetTeam()].insert(*itr);
+            RaidBrowserStore[player->GetTeamId()][*itr][player->GetGUIDLow()] = entry;
+            RBUsedDungeonsStore[player->GetTeamId()].insert(*itr);
         }
 }
 
@@ -810,7 +810,7 @@ void LFGMgr::SendRaidBrowserJoinedPacket(Player* p, LfgDungeonSet& dungeons, std
     if (dungeons.empty())
     {
         RBEntryInfoMap::iterator iter;
-        uint8 team = p->GetTeam();
+        uint8 team = p->GetTeamId();
         bool setComment = true;
         for (RBStoreMap::iterator itr = RaidBrowserStore[team].begin(); itr != RaidBrowserStore[team].end(); ++itr)
             if ((iter = itr->second.find(p->GetGUIDLow())) != itr->second.end())
@@ -834,18 +834,18 @@ void LFGMgr::SendRaidBrowserJoinedPacket(Player* p, LfgDungeonSet& dungeons, std
 
 void LFGMgr::LfrSearchAdd(Player* p, uint32 dungeonId)
 {
-    RBSearchersStore[p->GetTeam()][p->GetGUIDLow()] = dungeonId;
+    RBSearchersStore[p->GetTeamId()][p->GetGUIDLow()] = dungeonId;
 }
 
 void LFGMgr::LfrSearchRemove(Player* p)
 {
-    RBSearchersStore[p->GetTeam()].erase(p->GetGUIDLow());
+    RBSearchersStore[p->GetTeamId()].erase(p->GetGUIDLow());
 }
 
 void LFGMgr::SendRaidBrowserCachedList(Player* player, uint32 dungeonId)
 {
-    RBCacheMap::iterator itr = RBCacheStore[player->GetTeam()].find(dungeonId);
-    if (itr != RBCacheStore[player->GetTeam()].end())
+    RBCacheMap::iterator itr = RBCacheStore[player->GetTeamId()].find(dungeonId);
+    if (itr != RBCacheStore[player->GetTeamId()].end())
     {
         player->GetSession()->SendPacket(&(itr->second));
         return;
@@ -2364,7 +2364,7 @@ void LFGMgr::LfrSetComment(Player* p, std::string comment)
     if (comment.size() > 64)
         comment = comment.substr(0, 64);
 
-    uint8 teamId = p->GetTeam();
+    uint8 teamId = p->GetTeamId();
     RBEntryInfoMap::iterator iter;
     for (RBStoreMap::iterator itr = RaidBrowserStore[teamId].begin(); itr != RaidBrowserStore[teamId].end(); ++itr)
         if ((iter = itr->second.find(p->GetGUIDLow())) != itr->second.end())

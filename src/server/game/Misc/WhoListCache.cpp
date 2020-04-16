@@ -41,6 +41,6 @@ void WhoListCacheMgr::Update()
         if (itr->second->IsSpectator() || itr->second->IsInDodgeMode())
             aname = "Dalaran";
 
-        m_whoOpcodeList.push_back( WhoListPlayerInfo(itr->second->GetTeam(CrossFactionTeam::Discard), itr->second->GetSession()->GetSecurity(), itr->second->getLevel(), itr->second->getClass(), itr->second->getRace(), ((itr->second->IsSpectator() || itr->second->IsInDodgeMode()) ? 4395 /*Dalaran*/ : itr->second->GetZoneId()), itr->second->getGender(), wpname, wgname, aname, pname, gname) );
+        m_whoOpcodeList.push_back( WhoListPlayerInfo(itr->second->GetTeamId(), itr->second->GetSession()->GetSecurity(), itr->second->getLevel(), itr->second->getClass(), itr->second->getRace(), ((itr->second->IsSpectator() || itr->second->IsInDodgeMode()) ? 4395 /*Dalaran*/ : itr->second->GetZoneId()), itr->second->getGender(), wpname, wgname, aname, pname, gname) );
     }
 }

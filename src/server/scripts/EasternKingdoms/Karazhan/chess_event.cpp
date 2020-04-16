@@ -552,7 +552,7 @@ void npc_chesspieceAI::DamageTaken(Unit* attacker, uint32& damage, DamageEffectT
     if (!attacker)
         return;
     if (Player* tmpPl = attacker->GetCharmerOrOwnerPlayerOrPlayerItself())
-        if (attacker->GetTypeId() == TYPEID_UNIT && tmpPl->GetTeam() == pInstance->GetData(DATA_CHESS_EVENT_TEAM))
+        if (attacker->GetTypeId() == TYPEID_UNIT && tmpPl->GetTeamId() == pInstance->GetData(DATA_CHESS_EVENT_TEAM))
             pInstance->SetData(DATA_CHESS_DAMAGE, pInstance->GetData(DATA_CHESS_DAMAGE) + damage);
 
     if (Player * tmpPl = me->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -800,7 +800,7 @@ public:
 
             ((boss_MedivhAI*)_Creature->AI())->StartMiniEvent();
 
-            pInstance->SetData(DATA_CHESS_EVENT_TEAM, player->GetTeam());
+            pInstance->SetData(DATA_CHESS_EVENT_TEAM, player->GetTeamId());
             _Creature->GetMotionMaster()->MoveRandom(5.f);
         }
 

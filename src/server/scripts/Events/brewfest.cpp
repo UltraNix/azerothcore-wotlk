@@ -472,7 +472,7 @@ class npc_brewfest_keg_reciver : public CreatureScript
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (!player->HasSpellCooldown(SPELL_COOLDOWN_CHECKER) && player->GetQuestRewardStatus(player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? QUEST_THERE_AND_BACK_AGAIN_A : QUEST_THERE_AND_BACK_AGAIN_H))
+        if (!player->HasSpellCooldown(SPELL_COOLDOWN_CHECKER) && player->GetQuestRewardStatus(player->GetTeamId() == TEAM_ALLIANCE ? QUEST_THERE_AND_BACK_AGAIN_A : QUEST_THERE_AND_BACK_AGAIN_H))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Do you have additional work?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
         player->SEND_GOSSIP_MENU((creature->GetEntry() == NPC_NEILL_RAMSTEIN ? 8934 : 8976), creature->GetGUID());

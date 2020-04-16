@@ -1060,11 +1060,6 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     uint32 RaceClassGender = (createInfo->Race) | (createInfo->Class << 8) | (createInfo->Gender << 16);
 
     SetUInt32Value(UNIT_FIELD_BYTES_0, (RaceClassGender | (powertype << 24)));
-
-    m_race = GetByteValue(UNIT_FIELD_BYTES_0, 0);
-    m_team = TeamIdForRace(m_race);
-    setFactionForRace(m_race);
-
     InitDisplayIds();
     if (sWorld->getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_PVP || sWorld->getIntConfig(CONFIG_GAME_TYPE) == REALM_TYPE_RPPVP)
     {
@@ -1149,7 +1144,7 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
         GetReputationMgr().SetReputation(sFactionStore.LookupEntry(1077), 42999);
 
         // Factions depending on team, like cities and some more stuff
-        switch (GetTeam())
+        switch (GetTeamId())
         {
         case TEAM_ALLIANCE:
             GetReputationMgr().SetReputation(sFactionStore.LookupEntry(72), 42999);
@@ -3248,7 +3243,7 @@ bool Player::IsGroupVisibleFor(Player const* p) const
     {
         default: return IsInSameGroupWith(p);
         case 1:  return IsInSameRaidWith(p);
-        case 2:  return GetTeam() == p->GetTeam();
+        case 2:  return GetTeamId() == p->GetTeamId();
     }
 }
 
@@ -3417,7 +3412,7 @@ void Player::GiveLevel(uint8 level)
         guild->UpdateMemberData(this, GUILD_MEMBER_DATA_LEVEL, level);
 
     PlayerLevelInfo info;
-    sObjectMgr->GetPlayerLevelInfo(getRace(false), getClass(), level, &info);
+    sObjectMgr->GetPlayerLevelInfo(getRace(), getClass(), level, &info);
 
     PlayerClassLevelInfo classInfo;
     sObjectMgr->GetPlayerClassLevelInfo(getClass(), level, &classInfo);
@@ -3483,7 +3478,7 @@ void Player::GiveLevel(uint8 level)
     if (Pet* pet = GetPet())
         pet->SynchronizeLevelWithOwner();
 
-    if (MailLevelReward const* mailReward = sObjectMgr->GetMailLevelReward(level, getRaceMask(false)))
+    if (MailLevelReward const* mailReward = sObjectMgr->GetMailLevelReward(level, getRaceMask()))
     {
         //- TODO: Poor design of mail system
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
@@ -3532,7 +3527,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     sObjectMgr->GetPlayerClassLevelInfo(getClass(), getLevel(), &classInfo);
 
     PlayerLevelInfo info;
-    sObjectMgr->GetPlayerLevelInfo(getRace(false), getClass(), getLevel(), &info);
+    sObjectMgr->GetPlayerLevelInfo(getRace(), getClass(), getLevel(), &info);
 
     SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr->GetXPForLevel(getLevel()));
@@ -5514,7 +5509,7 @@ void Player::CreateCorpse()
         return;
     }
 
-    _uf = getRace(false);
+    _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
     _pb = GetUInt32Value(PLAYER_BYTES);
     _pb2 = GetUInt32Value(PLAYER_BYTES_2);
 
@@ -5862,7 +5857,7 @@ void Player::RepopAtGraveyard()
         if (sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId()))
             ClosestGrave = sBattlefieldMgr->GetBattlefieldToZoneId(GetZoneId())->GetClosestGraveyard(this);
         else
-            ClosestGrave = sObjectMgr->GetClosestGraveyard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
+            ClosestGrave = sObjectMgr->GetClosestGraveyard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeamId());
     }
 
     // stop countdown until repop
@@ -5951,7 +5946,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
     if (!current_zone)
         return;
 
-    ChannelMgr* cMgr = ChannelMgr::forTeam(GetTeam());
+    ChannelMgr* cMgr = ChannelMgr::forTeam(GetTeamId());
     if (!cMgr)
         return;
 
@@ -6576,7 +6571,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     int32 Roll = irand(1, 1000);
 
     bool extra_chance = false;
-    if (sWorld->getBoolConfig(CONFIG_EXTRA_CHANCE_EVENT) && GetTeam() == TEAM_ALLIANCE)
+    if (sWorld->getBoolConfig(CONFIG_EXTRA_CHANCE_EVENT) && GetTeamId() == TEAM_ALLIANCE)
         switch (urand(0, 1))
         {
         case 0:
@@ -7267,8 +7262,9 @@ TeamId Player::TeamIdForRace(uint8 race)
 
 void Player::setFactionForRace(uint8 race)
 {
+    m_team = TeamIdForRace(race);
     ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
-    setFaction(rEntry ? rEntry->FactionID : getFaction());
+    setFaction(rEntry ? rEntry->FactionID : 0);
 }
 
 ReputationRank Player::GetReputationRank(uint32 faction) const
@@ -7354,7 +7350,7 @@ int32 Player::CalculateReputationGain(ReputationSource source, uint32 creatureOr
     if (source != REPUTATION_SOURCE_SPELL && GetsRecruitAFriendBonus(false))
         percent *= 1.0f + sWorld->getRate(RATE_REPUTATION_RECRUIT_A_FRIEND_BONUS);
 
-    if (sWorld->getIntConfig(CONFIG_REPUTATION_BOOST_FACTION_MASK) & ( 1 << GetTeam(CrossFactionTeam::Discard) ))
+    if (sWorld->getIntConfig(CONFIG_REPUTATION_BOOST_FACTION_MASK) & ( 1 << GetTeamId() ))
         percent += sWorld->getIntConfig(CONFIG_REPUTATION_BOOST_PERCENT);
 
     return CalculatePct(rep, percent);
@@ -7373,9 +7369,6 @@ void Player::RewardReputation(Unit* victim, float rate)
     if (!Rep)
         return;
 
-    uint32 repfaction1 = Rep->RepFaction1;
-    uint32 repfaction2 = Rep->RepFaction2;
-    
     uint32 ChampioningFaction = 0;
 
     if (GetChampioningFaction())
@@ -7388,25 +7381,25 @@ void Player::RewardReputation(Unit* victim, float rate)
                     ChampioningFaction = GetChampioningFaction();
     }
 
-    TeamId teamId = GetTeam();
+    TeamId teamId = GetTeamId();
 
-    if (repfaction1 && (!Rep->TeamDependent || teamId == TEAM_ALLIANCE))
+    if (Rep->RepFaction1 && (!Rep->TeamDependent || teamId == TEAM_ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue1, ChampioningFaction ? ChampioningFaction : repfaction1);
+        int32 donerep1 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue1, ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
         donerep1 = int32(donerep1 * rate);
 
-        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : repfaction1);
+        FactionEntry const* factionEntry1 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction1);
         uint32 current_reputation_rank1 = GetReputationMgr().GetRank(factionEntry1);
         if (factionEntry1)
             GetReputationMgr().ModifyReputation(factionEntry1, donerep1, bool(current_reputation_rank1 > Rep->ReputationMaxCap1));
     }
 
-    if (repfaction2 && (!Rep->TeamDependent || teamId == TEAM_HORDE))
+    if (Rep->RepFaction2 && (!Rep->TeamDependent || teamId == TEAM_HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue2, ChampioningFaction ? ChampioningFaction : repfaction2);
+        int32 donerep2 = CalculateReputationGain(REPUTATION_SOURCE_KILL, victim->getLevel(), Rep->RepValue2, ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
         donerep2 = int32(donerep2 * rate);
 
-        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : repfaction2);
+        FactionEntry const* factionEntry2 = sFactionStore.LookupEntry(ChampioningFaction ? ChampioningFaction : Rep->RepFaction2);
         uint32 current_reputation_rank2 = GetReputationMgr().GetRank(factionEntry2);
         if (factionEntry2)
             GetReputationMgr().ModifyReputation(factionEntry2, donerep2, bool(current_reputation_rank2 > Rep->ReputationMaxCap2));
@@ -7418,8 +7411,7 @@ void Player::RewardReputation(Quest const* quest)
 {
     for (uint8 i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
     {
-        uint32 faction_id = quest->RewardFactionId[ i ];
-        if (!faction_id)
+        if (!quest->RewardFactionId[i])
             continue;
 
         int32 rep = 0;
@@ -7444,17 +7436,17 @@ void Player::RewardReputation(Quest const* quest)
             continue;
 
         if (quest->IsDaily())
-            rep = CalculateReputationGain(REPUTATION_SOURCE_DAILY_QUEST, GetQuestLevel(quest), rep, faction_id, noQuestBonus);
+            rep = CalculateReputationGain(REPUTATION_SOURCE_DAILY_QUEST, GetQuestLevel(quest), rep, quest->RewardFactionId[i], noQuestBonus);
         else if (quest->IsWeekly())
-            rep = CalculateReputationGain(REPUTATION_SOURCE_WEEKLY_QUEST, GetQuestLevel(quest), rep, faction_id, noQuestBonus);
+            rep = CalculateReputationGain(REPUTATION_SOURCE_WEEKLY_QUEST, GetQuestLevel(quest), rep, quest->RewardFactionId[i], noQuestBonus);
         else if (quest->IsMonthly())
-            rep = CalculateReputationGain(REPUTATION_SOURCE_MONTHLY_QUEST, GetQuestLevel(quest), rep, faction_id, noQuestBonus);
+            rep = CalculateReputationGain(REPUTATION_SOURCE_MONTHLY_QUEST, GetQuestLevel(quest), rep, quest->RewardFactionId[i], noQuestBonus);
         else if (quest->IsRepeatable())
-            rep = CalculateReputationGain(REPUTATION_SOURCE_REPEATABLE_QUEST, GetQuestLevel(quest), rep, faction_id, noQuestBonus);
+            rep = CalculateReputationGain(REPUTATION_SOURCE_REPEATABLE_QUEST, GetQuestLevel(quest), rep, quest->RewardFactionId[i], noQuestBonus);
         else
-            rep = CalculateReputationGain(REPUTATION_SOURCE_QUEST, GetQuestLevel(quest), rep, faction_id, noQuestBonus);
+            rep = CalculateReputationGain(REPUTATION_SOURCE_QUEST, GetQuestLevel(quest), rep, quest->RewardFactionId[i], noQuestBonus);
 
-        if (FactionEntry const* factionEntry = sFactionStore.LookupEntry( faction_id ))
+        if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(quest->RewardFactionId[i]))
             GetReputationMgr().ModifyReputation(factionEntry, rep);
     }
 }
@@ -7502,7 +7494,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
         if (!uVictim || uVictim == this || uVictim->GetTypeId() != TYPEID_PLAYER)
             return false;
 
-        if (GetTeam() == uVictim->ToPlayer()->GetTeam())
+        if (GetBgTeamId() == uVictim->ToPlayer()->GetBgTeamId())
             return false;
 
         return true;
@@ -7544,7 +7536,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
         {
             Player* victim = uVictim->ToPlayer();
 
-            if (GetTeam() == victim->GetTeam() && !sWorld->IsFFAPvPRealm())
+            if (GetTeamId() == victim->GetTeamId() && !sWorld->IsFFAPvPRealm())
                 return false;
 
             AddConsecutiveKill(victim_guid);
@@ -7577,7 +7569,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
 
             if (PLAYER_TITLE_MASK_ALL_PVP & ktitle)
             {
-                for (int i = ((GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE) ? 1 : HKRANKMAX); i != ((GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE) ? HKRANKMAX : (2 * HKRANKMAX - 1)); i++)
+                for (int i = ((GetTeamId() == TEAM_ALLIANCE) ? 1 : HKRANKMAX); i != ((GetTeamId() == TEAM_ALLIANCE) ? HKRANKMAX : (2 * HKRANKMAX - 1)); i++)
                 {
                     if (ktitle & (1 << i))
                         killer_title = i;
@@ -7585,7 +7577,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
             }
             if (PLAYER_TITLE_MASK_ALL_PVP & vtitle)
             {
-                for (int i = ((uVictim->ToPlayer()->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE) ? 1 : HKRANKMAX); i != ((uVictim->ToPlayer()->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE) ? HKRANKMAX : (2 * HKRANKMAX - 1)); i++)
+                for (int i = ((uVictim->ToPlayer()->GetTeamId() == TEAM_ALLIANCE) ? 1 : HKRANKMAX); i != ((uVictim->ToPlayer()->GetTeamId() == TEAM_ALLIANCE) ? HKRANKMAX : (2 * HKRANKMAX - 1)); i++)
                 {
                     if (vtitle & (1 << i))
                         victim_title = i;
@@ -7624,7 +7616,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
             ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS, victim->getClass());
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, victim->getRace(false));
+            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HK_RACE, victim->getRace());
             UpdateKnownTitles();
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, GetAreaId());
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, 1, 0, victim);
@@ -7651,9 +7643,9 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, int32 honor, bool awar
 
     honor_f *= sWorld->getRate(RATE_HONOR);
 
-    if (GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE && sWorld->getBoolConfig(CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE))
+    if (GetTeamId() == TEAM_ALLIANCE && sWorld->getBoolConfig(CONFIG_ENABLE_HONOR_BOOST_FOR_ALLIANCE))
         honor_f *= sWorld->getFloatConfig(CONFIG_BONUS_HONOR_FOR_FACTION_RATE);
-    else if (GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE && sWorld->getBoolConfig(CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE))
+    else if (GetTeamId() == TEAM_HORDE && sWorld->getBoolConfig(CONFIG_ENABLE_HONOR_BOOST_FOR_HORDE))
         honor_f *= sWorld->getFloatConfig(CONFIG_BONUS_HONOR_FOR_FACTION_RATE);
 
     // Back to int now
@@ -7736,7 +7728,7 @@ void Player::UpdateKnownTitles()
         {
             new_title = ((max_rank) ? (HKRANKMAX - 1) : (i - 1));
             if (new_title > 0)
-                new_title += ((GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE) ? 0 : (HKRANKMAX - 1));
+                new_title += ((GetTeamId() == TEAM_ALLIANCE) ? 0 : (HKRANKMAX - 1));
             break;
         }
     }
@@ -7972,7 +7964,7 @@ void Player::UpdateArea(uint32 newArea)
     AreaTableEntry const* zone = sAreaTableStore.LookupEntry(area->zone);
     uint32 areaFlags = area->flags;
     bool isSanctuary = area->IsSanctuary();
-    bool isInn = area->IsInn(GetTeam());
+    bool isInn = area->IsInn(GetTeamId());
     // @schody
     bool isEvent = (sWorld->getBoolConfig(CONFIG_CUSTOM_EVENTS_FEATURES_ENABLE) && area->ID == 616 /* Hyjal */ || area->ID == 2037 /* Quel'Thalas */) ? true : false;
     bool IsNaxxramasSanctuaryEnabled = sWorld->getBoolConfig(CONFIG_NAXXRAMAS_MEETING_STONE_SANCTUARY) && area->ID == 4234 /* meeting stone naxxramas */;
@@ -7981,7 +7973,7 @@ void Player::UpdateArea(uint32 newArea)
     {
         areaFlags |= zone->flags;
         isSanctuary |= zone->IsSanctuary();
-        isInn |= zone->IsInn(GetTeam());
+        isInn |= zone->IsInn(GetTeamId());
         isEvent |= zone->IsSanctuary();
     }
 
@@ -8093,10 +8085,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     switch (zone->team)
     {
         case AREATEAM_ALLY:
-            pvpInfo.IsInHostileArea = GetTeam() != TEAM_ALLIANCE && (sWorld->IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            pvpInfo.IsInHostileArea = GetTeamId() != TEAM_ALLIANCE && (sWorld->IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
             break;
         case AREATEAM_HORDE:
-            pvpInfo.IsInHostileArea = GetTeam() != TEAM_HORDE && (sWorld->IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
+            pvpInfo.IsInHostileArea = GetTeamId() != TEAM_HORDE && (sWorld->IsPvPRealm() || zone->flags & AREA_FLAG_CAPITAL);
             break;
         case AREATEAM_NONE:
             // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
@@ -8204,7 +8196,7 @@ void Player::DuelComplete(DuelCompleteType type)
         case DUEL_FLED:
             // if initiator and opponent are on the same team
             // or initiator and opponent are not PvP enabled, forcibly stop attacking
-            if (duel->initiator->GetTeam() == duel->opponent->GetTeam())
+            if (duel->initiator->GetTeamId() == duel->opponent->GetTeamId())
             {
                 duel->initiator->AttackStop();
                 duel->opponent->AttackStop();
@@ -9446,7 +9438,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if ((go->GetEntry() == BG_AV_OBJECTID_MINE_N || go->GetEntry() == BG_AV_OBJECTID_MINE_S))
                 if (Battleground* bg = GetBattleground())
                     if (bg->GetBgTypeID() == BATTLEGROUND_AV)
-                        if (!bg->ToBattlegroundAV()->PlayerCanDoMineQuest(go->GetEntry(), GetTeam()))
+                        if (!bg->ToBattlegroundAV()->PlayerCanDoMineQuest(go->GetEntry(), GetTeamId()))
                         {
                             go->ForceValuesUpdateAtIndex(GAMEOBJECT_BYTES_1);
                             SendLootRelease(guid);
@@ -10439,7 +10431,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
         case 1497:  // Undercity
         {
             bool getScript = false;
-            if (GetTeam() == TEAM_ALLIANCE)
+            if (GetTeamId() == TEAM_ALLIANCE)
                 getScript = (GetQuestStatus(12499) == QUEST_STATUS_REWARDED && GetQuestStatus(13377) != QUEST_STATUS_REWARDED);
             else
                 getScript = (GetQuestStatus(12500) == QUEST_STATUS_REWARDED && GetQuestStatus(13267) != QUEST_STATUS_REWARDED);
@@ -12827,13 +12819,13 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
 
     if (proto)
     {
-        if ((proto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY) && GetTeam(CrossFactionTeam::Discard) != TEAM_HORDE)
+        if ((proto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY) && GetTeamId() != TEAM_HORDE)
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
 
-        if ((proto->Flags2 & ITEM_FLAGS_EXTRA_ALLIANCE_ONLY) && GetTeam(CrossFactionTeam::Discard) != TEAM_ALLIANCE)
+        if ((proto->Flags2 & ITEM_FLAGS_EXTRA_ALLIANCE_ONLY) && GetTeamId() != TEAM_ALLIANCE)
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
 
-        if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask(false)) == 0)
+        if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
             return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
 
         if (proto->RequiredSkill != 0)
@@ -12883,7 +12875,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         SKILL_FISHING
     }; //Copy from function Item::GetSkill()
 
-    if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask(false)) == 0)
+    if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
         return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
 
     if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
@@ -16704,7 +16696,7 @@ bool Player::SatisfyQuestRace(Quest const* qInfo, bool msg) const
     uint32 reqraces = qInfo->GetRequiredRaces();
     if (reqraces == 0)
         return true;
-    if ((reqraces & getRaceMask(false)) == 0)
+    if ((reqraces & getRaceMask()) == 0)
     {
         if (msg)
             SendCanTakeQuestResponse(INVALIDREASON_QUEST_FAILED_WRONG_RACE);
@@ -18211,9 +18203,6 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     bytes0 |= fields[4].GetUInt8() << 8;                    // class
     bytes0 |= Gender << 16;                                 // gender
     SetUInt32Value(UNIT_FIELD_BYTES_0, bytes0);
-    m_race = GetByteValue(UNIT_FIELD_BYTES_0, 0);
-    m_team = TeamIdForRace(m_race);
-    setFactionForRace(m_race); // Need to call it to initialize m_team (m_team can be calculated from race)
 
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[6].GetUInt8());
     SetUInt32Value(PLAYER_XP, fields[7].GetUInt32());
@@ -18259,6 +18248,10 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     ;//sLog->outDebug(LOG_FILTER_PLAYER_LOADING, "Load Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
+
+    //Need to call it to initialize m_team (m_team can be calculated from race)
+    //Other way is to saves m_team into characters table.
+    setFactionForRace(getRace());
 
     // pussywizard: create empty instance bind containers if necessary
     sInstanceSaveMgr->PlayerCreateBoundInstancesMaps(guid);
@@ -18425,7 +18418,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
     else if (!taxi_nodes.empty())
     {
         instanceId = 0;
-        if (!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes, GetTeam()))
+        if (!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes, GetTeamId()))
         {
             // xinef: could no load valid data for taxi, relocate to homebind and clear
             m_taxi.ClearTaxiDestinations();
@@ -18516,7 +18509,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     if ( !map )
     {
-        PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(false), getClass());
+        PlayerInfo const* info = sObjectMgr->GetPlayerInfo( getRace(), getClass() );
         mapId = info->mapId;
         Relocate( info->positionX, info->positionY, info->positionZ, 0.0f );
         map = sMapMgr->CreateMap( mapId, this );
@@ -20084,9 +20077,9 @@ bool Player::Satisfy(AccessRequirement const* ar, uint32 target_map, bool report
         }
 
         uint32 missingQuest = 0;
-        if (GetTeam() == TEAM_ALLIANCE && ar->quest_A && !GetQuestRewardStatus(ar->quest_A))
+        if (GetTeamId() == TEAM_ALLIANCE && ar->quest_A && !GetQuestRewardStatus(ar->quest_A))
             missingQuest = ar->quest_A;
-        else if (GetTeam() == TEAM_HORDE && ar->quest_H && !GetQuestRewardStatus(ar->quest_H))
+        else if (GetTeamId() == TEAM_HORDE && ar->quest_H && !GetQuestRewardStatus(ar->quest_H))
             missingQuest = ar->quest_H;
 
         uint32 missingAchievement = 0;
@@ -20155,7 +20148,7 @@ bool Player::CheckInstanceCount(uint32 instanceId) const
 
 bool Player::_LoadHomeBind(PreparedQueryResult result)
 {
-    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(false), getClass());
+    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     if (!info)
     {
         sLog->outError("Player (Name %s) has incorrect race/class pair. Can't be loaded.", GetName().c_str());
@@ -21589,18 +21582,6 @@ void Player::StopCastingCharm()
     }
 }
 
-void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language) const
-{
-    *data << uint8(msgtype);
-    *data << uint32(language);
-    *data << uint64(GetGUID());
-    *data << uint32(0);                     // constant unknown time
-    *data << uint64(GetGUID());
-    *data << uint32(text.length() + 1);
-    *data << text;
-    *data << uint8(GetChatTag());
-}
-
 void Player::Say(const std::string& text, const uint32 language)
 {
     WorldPacket data;
@@ -22406,7 +22387,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // only one mount ID for both sides. Probably not good to use 315 in case DBC nodes
     // change but I couldn't find a suitable alternative. OK to use class because only DK
     // can use this taxi.
-    uint32 mount_display_id = sObjectMgr->GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == NULL || (sourcenode == 315 && getClass() == CLASS_DEATH_KNIGHT));
+    uint32 mount_display_id = sObjectMgr->GetTaxiMountDisplayId(sourcenode, GetTeamId(), npc == NULL || (sourcenode == 315 && getClass() == CLASS_DEATH_KNIGHT));
 
     // in spell case allow 0 model
     if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
@@ -22484,7 +22465,7 @@ void Player::ContinueTaxiFlight()
 
     ;//sLog->outDebug(LOG_FILTER_UNITS, "WORLD: Restart character %u taxi flight", GetGUIDLow());
 
-    uint32 mountDisplayId = sObjectMgr->GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
+    uint32 mountDisplayId = sObjectMgr->GetTaxiMountDisplayId(sourceNode, GetTeamId(), true);
     if (!mountDisplayId)
         return;
 
@@ -22725,7 +22706,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         return false;
     }
 
-    if (!IsGameMaster() && ((pProto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && GetTeam() == TEAM_ALLIANCE) || (pProto->Flags2 == ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && GetTeam() == TEAM_HORDE)))
+    if (!IsGameMaster() && ((pProto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY && GetTeamId() == TEAM_ALLIANCE) || (pProto->Flags2 == ITEM_FLAGS_EXTRA_ALLIANCE_ONLY && GetTeamId() == TEAM_HORDE)))
         return false;
 
     Creature* creature = GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
@@ -23355,7 +23336,7 @@ void Player::SetEntryPoint()
 
         if (GetMap()->IsDungeon())
         {
-            if (const WorldSafeLocsEntry* entry = sObjectMgr->GetClosestGraveyard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
+            if (const WorldSafeLocsEntry* entry = sObjectMgr->GetClosestGraveyard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeamId()))
                 m_entryPointData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
         }
         else if (!GetMap()->IsBattlegroundOrArena())
@@ -23406,7 +23387,7 @@ void Player::ReportedAfkBy(Player* reporter)
 {
     Battleground* bg = GetBattleground();
     // Battleground also must be in progress!
-    if (!bg || bg != reporter->GetBattleground() || GetTeam() != reporter->GetTeam() || bg->GetStatus() != STATUS_IN_PROGRESS)
+    if (!bg || bg != reporter->GetBattleground() || GetTeamId() != reporter->GetTeamId() || bg->GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     if (bg->GetStartTime() < BATTLEGROUND_REPORT_AVAILABILITY_TIMER)
@@ -23428,7 +23409,7 @@ void Player::ReportedAfkBy(Player* reporter)
 
 WorldLocation Player::GetStartPosition() const
 {
-    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(false), getClass());
+    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     uint32 mapId = info->mapId;
     if (getClass() == CLASS_DEATH_KNIGHT && HasSpell(50977))
         return WorldLocation(0, 2352.0f, -5709.0f, 154.5f, 0.0f);
@@ -24180,7 +24161,7 @@ void Player::resetSpells()
 void Player::learnDefaultSpells()
 {
     // xinef: learn default race/class spells
-    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(false), getClass());
+    PlayerInfo const* info = sObjectMgr->GetPlayerInfo(getRace(), getClass());
     for (PlayerCreateInfoSpells::const_iterator itr = info->spell.begin(); itr != info->spell.end(); ++itr)
         _addSpell(*itr, SPEC_MASK_ALL, true);
 }
@@ -24232,7 +24213,7 @@ void Player::learnQuestRewardedSpells()
 
 void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 {
-    uint32 raceMask  = getRaceMask(false);
+    uint32 raceMask  = getRaceMask();
     uint32 classMask = getClassMask();
     for (uint32 j=0; j<sSkillLineAbilityStore.GetNumRows(); ++j)
     {
@@ -24412,23 +24393,17 @@ bool Player::InArena() const
     return true;
 }
 
-void Player::SetBattlegroundId(uint32 id, BattlegroundTypeId bgTypeId, uint32 queueSlot, bool invited, bool isRandom, TeamId teamId, bool loadFromDB )
+void Player::SetBattlegroundId(uint32 id, BattlegroundTypeId bgTypeId, uint32 queueSlot, bool invited, bool isRandom, TeamId teamId)
 {
-    Battleground* currentBG = sBattlegroundMgr->GetBattleground( m_bgData.bgInstanceID );
-    Battleground* nextBG = sBattlegroundMgr->GetBattleground( id );
+    // if leaving current bg (and was invited) - decrease invited count for current one
+    if (m_bgData.bgInstanceID && m_bgData.isInvited)
+        if (Battleground* bg = sBattlegroundMgr->GetBattleground(m_bgData.bgInstanceID))
+            bg->DecreaseInvitedCount(m_bgData.bgTeamId);
 
-    if ( !loadFromDB )
-    {
-        // if leaving current bg (and was invited) - decrease invited count for current one
-        if ( m_bgData.bgInstanceID && m_bgData.isInvited )
-            if ( currentBG != nullptr )
-                currentBG->DecreaseInvitedCount( m_bgData.bgTeamId );
-
-        // if entering new bg (and is invited) - increase invited count for new one
-        if ( id && invited )
-            if ( nextBG != nullptr )
-                nextBG->IncreaseInvitedCount( teamId );
-    }
+    // if entering new bg (and is invited) - increase invited count for new one
+    if (id && invited)
+        if (Battleground* bg = sBattlegroundMgr->GetBattleground(id))
+            bg->IncreaseInvitedCount(teamId);
 
     m_bgData.bgInstanceID = id;
     m_bgData.bgTypeID = bgTypeId;
@@ -24437,9 +24412,7 @@ void Player::SetBattlegroundId(uint32 id, BattlegroundTypeId bgTypeId, uint32 qu
     m_bgData.bgIsRandom = isRandom;
 
     m_bgData.bgTeamId = teamId;
-
-    bool apply = m_bgData.bgInstanceID != 0;
-    FitPlayerInTeam( apply, nextBG ? nextBG : currentBG );
+    SetByteValue(PLAYER_BYTES_3, 3, uint8(teamId == TEAM_ALLIANCE ? 1 : 0));
 }
 
 bool Player::GetBGAccessByLevel(BattlegroundTypeId bgTypeId) const
@@ -24475,7 +24448,7 @@ float Player::GetReputationPriceDiscount(Creature const* creature) const
 
 bool Player::IsSpellFitByClassAndRace(uint32 spell_id) const
 {
-    uint32 racemask  = getRaceMask(false);
+    uint32 racemask  = getRaceMask();
     uint32 classmask = getClassMask();
 
     SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spell_id);
@@ -27112,7 +27085,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         stmt->setUInt32(index++, GetGUIDLow());
         stmt->setUInt32(index++, GetSession()->GetAccountId());
         stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, getRace(false));
+        stmt->setUInt8(index++, getRace());
         stmt->setUInt8(index++, getClass());
         stmt->setUInt8(index++, getGender());
         stmt->setUInt8(index++, getLevel());
@@ -27222,7 +27195,7 @@ void Player::_SaveCharacter(bool create, SQLTransaction& trans)
         // Update query
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER);
         stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, getRace(false));
+        stmt->setUInt8(index++, getRace());
         stmt->setUInt8(index++, getClass());
         stmt->setUInt8(index++, getGender());
         stmt->setUInt8(index++, getLevel());
@@ -27755,6 +27728,15 @@ void Player::SendTimeSync()
     // Schedule next sync in 10 sec
     m_timeSyncTimer = 10000;
     m_timeSyncServer = World::GetGameTimeMS();
+}
+
+void Player::SetReputation(uint32 factionentry, uint32 value)
+{
+    GetReputationMgr().SetReputation(sFactionStore.LookupEntry(factionentry), value);
+}
+uint32 Player::GetReputation(uint32 factionentry) const
+{
+    return GetReputationMgr().GetReputation(sFactionStore.LookupEntry(factionentry));
 }
 
 std::string const& Player::GetGuildName()

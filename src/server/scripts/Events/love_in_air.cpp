@@ -52,7 +52,7 @@ class npc_love_in_air_supply_sentry : public CreatureScript
                     else
                         me->MonsterSay("That crate won't deliver itself, friend. Get a move on!", LANG_UNIVERSAL, who->ToPlayer());
 
-                    if (who->ToPlayer()->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+                    if (who->ToPlayer()->GetTeamId() == TEAM_ALLIANCE)
                         who->CastSpell(who, SPELL_GOBLIN_ALLY_COMPLETE, true);
                     else
                         who->CastSpell(who, SPELL_GOBLIN_HORDE_COMPLETE, true);
@@ -109,11 +109,11 @@ class npc_love_in_air_snivel : public CreatureScript
 
             bool AllowAction(Player* player)
             {
-                uint16 slot = player->FindQuestSlot(player->GetTeam() == TEAM_ALLIANCE ? QUEST_HOT_ON_TRAIL_ALLY : QUEST_HOT_ON_TRAIL_HORDE);
+                uint16 slot = player->FindQuestSlot(player->GetTeamId() == TEAM_ALLIANCE ? QUEST_HOT_ON_TRAIL_ALLY : QUEST_HOT_ON_TRAIL_HORDE);
                 if (slot >= MAX_QUEST_LOG_SIZE)
                     return false;
 
-                QuestStatusData& qData = player->getQuestStatusMap()[(player->GetTeam() == TEAM_ALLIANCE ? QUEST_HOT_ON_TRAIL_ALLY : QUEST_HOT_ON_TRAIL_HORDE)];
+                QuestStatusData& qData = player->getQuestStatusMap()[(player->GetTeamId() == TEAM_ALLIANCE ? QUEST_HOT_ON_TRAIL_ALLY : QUEST_HOT_ON_TRAIL_HORDE)];
                 if (qData.CreatureOrGOCount[me->GetEntry() - NPC_SNIVEL_COUNTER] == 0)
                     return true;
 
@@ -128,7 +128,7 @@ class npc_love_in_air_snivel : public CreatureScript
                     if (AllowAction(plr))
                     {
                         delay = 25000;
-                        uint8 index = plr->GetTeam()*3 + (me->GetEntry() - NPC_SNIVEL_COUNTER);
+                        uint8 index = plr->GetTeamId()*3 + (me->GetEntry() - NPC_SNIVEL_COUNTER);
                         plr->CastSpell(plr, spellTable[index], true);
                     }
                 }

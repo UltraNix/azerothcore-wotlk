@@ -43,7 +43,7 @@ struct instance_forge_of_souls_InstanceScript : public InstanceScript
             if (!players.isEmpty())
                 if (Player* player = players.begin()->GetSource())
                     if (!player->IsGameMaster())
-                        _teamInInstance = player->GetTeam(CrossFactionTeam::Discard);
+                        _teamInInstance = player->GetTeamId();
         }
 
         switch (creature->GetEntry())

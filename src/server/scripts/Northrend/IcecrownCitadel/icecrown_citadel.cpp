@@ -3103,7 +3103,7 @@ public:
 
                 if (Player* p = SelectTargetFromPlayerList(100.0f))
                 {
-                    Talk(p->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE ? 1 : 2);
+                    Talk(p->GetTeamId() == TEAM_HORDE ? 1 : 2);
                     AttackStart(p);
                 }
             }

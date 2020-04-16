@@ -689,8 +689,7 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_CROSSFACTION_RDF_MAXLVL]             = sConfigMgr->GetIntDefault("CrossFactionRDF.MaxLVL", 70);
     m_bool_configs[CONFIG_CROSSFACTION_RDF]                   = sConfigMgr->GetBoolDefault("CrossFactionRDF.Enable", false);
     m_bool_configs[CONFIG_CROSSFACTION_BG]                    = sConfigMgr->GetBoolDefault("CrossFactionBG.Enable", false);
-    m_int_configs[CONFIG_CROSSFACTION_BG_MINLVL]              = sConfigMgr->GetIntDefault( "CrossFactionBG.MinLVL", 80 );
-    m_int_configs[CONFIG_CROSSFACTION_BG_MAXLVL]              = sConfigMgr->GetIntDefault( "CrossFactionBG.MaxLVL", 200 );
+    m_bool_configs[CONFIG_CROSSFACTION_BG_TWINK_ONLY]         = sConfigMgr->GetBoolDefault("CrossFactionBG.Twink", false);
     m_bool_configs[CONFIG_CROSSFACTION_MAIL]                  = sConfigMgr->GetBoolDefault("CrossFactionMail.Enable", false);
     m_bool_configs[CONFIG_WHO_OPPOSITE]                       = sConfigMgr->GetBoolDefault("CrossFactionWHO.Enable", false);
 
@@ -2506,7 +2505,7 @@ void World::SendGlobalMessage(WorldPacket* packet, WorldSession* self, TeamId te
             itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second != self &&
-            (teamId == TEAM_NEUTRAL || itr->second->GetPlayer()->GetTeam(CrossFactionTeam::Discard) == teamId))
+            (teamId == TEAM_NEUTRAL || itr->second->GetPlayer()->GetTeamId() == teamId))
         {
             itr->second->SendPacket(packet);
         }
@@ -2524,7 +2523,7 @@ void World::SendGlobalGMMessage(WorldPacket* packet, WorldSession* self, TeamId 
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second != self &&
             !AccountMgr::IsPlayerAccount(itr->second->GetSecurity()) &&
-            (teamId == TEAM_NEUTRAL || itr->second->GetPlayer()->GetTeam(CrossFactionTeam::Discard) == teamId))
+            (teamId == TEAM_NEUTRAL || itr->second->GetPlayer()->GetTeamId() == teamId))
         {
             itr->second->SendPacket(packet);
         }
@@ -2692,7 +2691,7 @@ bool World::SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second->GetPlayer()->GetZoneId() == zone &&
             itr->second != self &&
-            (teamId == TEAM_NEUTRAL || itr->second->GetPlayer()->GetTeam() == teamId))
+            (teamId == TEAM_NEUTRAL || itr->second->GetPlayer()->GetTeamId() == teamId))
         {
             itr->second->SendPacket(packet);
             foundPlayerToSend = true;

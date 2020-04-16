@@ -60,7 +60,7 @@ struct instance_pit_of_saron_InstanceMapScript : public InstanceScript
                 if (Player* player = itr->GetSource())
                     if (!player->IsGameMaster())
                     {
-                        _teamInInstance = player->GetTeam(CrossFactionTeam::Discard);
+                        _teamInInstance = player->GetTeamId();
                         break;
                     }
     }

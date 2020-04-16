@@ -331,7 +331,7 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
                 if (const Player* player = target->ToPlayer())
                     if (player->GetDeathTimer() != 0)
                         // flag set == must be same team, not set == different team
-                        return (player->GetTeam() == source->GetTeam()) == (player_dead.own_team_flag != 0);
+                        return (player->GetTeamId() == source->GetTeamId()) == (player_dead.own_team_flag != 0);
             return false;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AURA:
             return source->HasAuraEffect(aura.spell_id, aura.effect_idx);
@@ -368,7 +368,7 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
                 return false;
 
             // DB data compatibility...
-            uint32 teamOld = target->ToPlayer()->GetTeam() == TEAM_ALLIANCE ? ALLIANCE : HORDE;
+            uint32 teamOld = target->ToPlayer()->GetTeamId() == TEAM_ALLIANCE ? ALLIANCE : HORDE;
             return teamOld == team.team;
         }
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_DRUNK:
@@ -381,7 +381,7 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
             if (!bg)
                 return false;
 
-            uint32 score = bg->GetTeamScore(source->GetTeam() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE);
+            uint32 score = bg->GetTeamScore(source->GetTeamId() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE);
             return score >= bg_loss_team_score.min_score && score <= bg_loss_team_score.max_score;
         }
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_INSTANCE_SCRIPT:
@@ -1094,7 +1094,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 // if team check required: must kill by opposition faction
-                if (achievement->ID == 318 && miscValue2 == GetPlayer()->GetTeam())
+                if (achievement->ID == 318 && miscValue2 == GetPlayer()->GetTeamId())
                     continue;
 
                 SetCriteriaProgress(achievementCriteria, 1, PROGRESS_ACCUMULATE);
@@ -2169,7 +2169,7 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     //! Since no common attributes were found, (not even in titleRewardFlags field)
     //! we explicitly check by ID. Maybe in the future we could move the achievement_reward
     //! condition fields to the condition system.
-    if (uint32 titleId = reward->titleId[achievement->ID == 1793 ? GetPlayer()->getGender() : GetPlayer()->GetTeam(CrossFactionTeam::Discard)])
+    if (uint32 titleId = reward->titleId[achievement->ID == 1793 ? GetPlayer()->getGender() : GetPlayer()->GetTeamId()])
         if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(titleId))
             GetPlayer()->SetTitle(titleEntry);
 
@@ -2272,8 +2272,8 @@ bool AchievementMgr::CanUpdateCriteria(AchievementCriteriaEntry const* criteria,
     if (achievement->mapID != -1 && GetPlayer()->GetMapId() != uint32(achievement->mapID))
         return false;
 
-    if ((achievement->requiredFaction == ACHIEVEMENT_FACTION_HORDE    && GetPlayer()->GetTeam(CrossFactionTeam::Discard) != TEAM_HORDE) ||
-        (achievement->requiredFaction == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeam(CrossFactionTeam::Discard) != TEAM_ALLIANCE))
+    if ((achievement->requiredFaction == ACHIEVEMENT_FACTION_HORDE    && GetPlayer()->GetTeamId() != TEAM_HORDE) ||
+        (achievement->requiredFaction == ACHIEVEMENT_FACTION_ALLIANCE && GetPlayer()->GetTeamId() != TEAM_ALLIANCE))
         return false;
 
     for (uint32 i = 0; i < MAX_CRITERIA_REQUIREMENTS; ++i)

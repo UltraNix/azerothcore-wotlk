@@ -1974,7 +1974,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
         return ERR_BATTLEGROUND_JOIN_FAILED;
 
     uint32 arenaTeamId = reference->GetArenaTeamId(arenaSlot);
-    TeamId teamId = reference->GetTeam();
+    TeamId teamId = reference->GetTeamId();
 
     // check every member of the group to be able to join
     uint32 memberscount = 0;
@@ -1987,7 +1987,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
             return ERR_BATTLEGROUND_JOIN_FAILED;
 
         // don't allow cross-faction groups to join queue
-        if (member->GetTeam() != teamId)
+        if (member->GetTeamId() != teamId)
             return ERR_BATTLEGROUND_JOIN_TIMED_OUT;
 
         // don't let join rated matches if the arena team id doesn't match

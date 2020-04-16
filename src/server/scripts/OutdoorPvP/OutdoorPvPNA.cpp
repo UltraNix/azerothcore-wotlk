@@ -17,10 +17,10 @@ OutdoorPvPNA::OutdoorPvPNA()
 
 void OutdoorPvPNA::HandleKillImpl(Player* player, Unit* killed)
 {
-    if (killed->GetTypeId() == TYPEID_PLAYER && player->GetTeam() != killed->ToPlayer()->GetTeam())
+    if (killed->GetTypeId() == TYPEID_PLAYER && player->GetTeamId() != killed->ToPlayer()->GetTeamId())
     {
         player->KilledMonsterCredit(NA_CREDIT_MARKER, 0); // 0 guid, btw it isn't even used in killedmonster function :S
-        player->CastSpell(player, player->GetTeam() == TEAM_ALLIANCE ? NA_KILL_TOKEN_ALLIANCE : NA_KILL_TOKEN_HORDE, true);
+        player->CastSpell(player, player->GetTeamId() == TEAM_ALLIANCE ? NA_KILL_TOKEN_ALLIANCE : NA_KILL_TOKEN_HORDE, true);
     }
 }
 
@@ -207,7 +207,7 @@ bool OutdoorPvPNA::SetupOutdoorPvP()
 void OutdoorPvPNA::HandlePlayerEnterZone(Player* player, uint32 zone)
 {
     // add buffs
-    if (player->GetTeam() == m_obj->GetControllingFaction())
+    if (player->GetTeamId() == m_obj->GetControllingFaction())
         player->CastSpell(player, NA_CAPTURE_BUFF, true);
     OutdoorPvP::HandlePlayerEnterZone(player, zone);
 }

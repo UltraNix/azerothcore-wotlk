@@ -351,9 +351,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 return;
             }
 
-            if ( !GetPlayer()->IsGameMaster() && GetPlayer()->SendBattleGroundChat( type, msg ) )
-                return;
-
             if (type == CHAT_MSG_SAY)
                 sender->Say(msg, lang);
             else if (type == CHAT_MSG_EMOTE)
@@ -398,7 +395,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             }
 
             if (senderIsPlayer && receiverIsPlayer)
-                if (GetPlayer()->GetTeam() != receiver->GetTeam())
+                if (GetPlayer()->GetTeamId() != receiver->GetTeamId())
                 {
                     SendWrongFactionNotice();
                     return;
@@ -504,11 +501,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             if (!group || !group->isBGGroup())
                 return;
 
-            if ( lang != LANG_ADDON && sWorld->getBoolConfig( CONFIG_CROSSFACTION_BG ) )
-            {
-                lang = LANG_UNIVERSAL;
-            }
-
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, CHAT_MSG_BATTLEGROUND, Language(lang), sender, NULL, msg);
             group->BroadcastPacket(&data, false);
@@ -519,11 +511,6 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
             Group* group = GetPlayer()->GetGroup();
             if (!group || !group->isBGGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
                 return;
-
-            if ( lang != LANG_ADDON && sWorld->getBoolConfig( CONFIG_CROSSFACTION_BG ) )
-            {
-                lang = LANG_UNIVERSAL;
-            }
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, CHAT_MSG_BATTLEGROUND_LEADER, Language(lang), sender, NULL, msg);
@@ -543,7 +530,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket & recvData)
                 LookForGoldMessage(sender, msg, lang);
             }
 
-            if (ChannelMgr* cMgr = ChannelMgr::forTeam(sender->GetTeam()))
+            if (ChannelMgr* cMgr = ChannelMgr::forTeam(sender->GetTeamId()))
             {
                 if (Channel* chn = cMgr->GetChannel(channel, sender))
                 {

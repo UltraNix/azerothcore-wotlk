@@ -1486,7 +1486,7 @@ public:
             if (who->HasAura(SPELL_TRESPASSER_H) || who->HasAura(SPELL_TRESPASSER_A))
                 return;
 
-            if (who->ToPlayer()->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+            if (who->ToPlayer()->GetTeamId() == TEAM_ALLIANCE)
                 who->CastSpell(who, SPELL_TRESPASSER_H, true);
             else
                 who->CastSpell(who, SPELL_TRESPASSER_A, true);

@@ -38,7 +38,7 @@ class instance_shattered_halls : public InstanceMapScript
             void OnPlayerEnter(Player* player)
             {
                 if (TeamIdInInstance == TEAM_NEUTRAL)
-                    TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
+                    TeamIdInInstance = player->GetTeamId();
             }
 
             void OnGameObjectCreate(GameObject* go)
@@ -65,7 +65,7 @@ class instance_shattered_halls : public InstanceMapScript
                     Map::PlayerList const &players = instance->GetPlayers();
                     if (!players.isEmpty())
                         if (Player* player = players.begin()->GetSource())
-                            TeamIdInInstance = player->GetTeam(CrossFactionTeam::Discard);
+                            TeamIdInInstance = player->GetTeamId();
                 }
 
                 switch (creature->GetEntry())

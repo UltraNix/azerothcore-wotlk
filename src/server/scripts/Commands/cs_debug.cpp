@@ -53,7 +53,6 @@ public:
         };
         static std::vector<ChatCommand> debugCommandTable =
         {
-            { "cfbg",           SEC_GAMEMASTER,     CMD_INGAME, &HandleDebugCfbgCommand,            "" },
             { "setbit",         SEC_ADMINISTRATOR,  CMD_INGAME, &HandleDebugSet32BitCommand,        "" },
             { "threat",         SEC_ADMINISTRATOR,  CMD_INGAME, &HandleDebugThreatListCommand,      "" },
             { "hostile",        SEC_ADMINISTRATOR,  CMD_INGAME, &HandleDebugHostileRefListCommand,  "" },
@@ -775,25 +774,6 @@ public:
     static bool HandleDebugBattlegroundCommand(ChatHandler* /*handler*/, char const* /*args*/)
     {
         sBattlegroundMgr->ToggleTesting();
-        return true;
-    }
-
-    static bool HandleDebugCfbgCommand( ChatHandler* handler, char const* /*args*/ )
-    {
-        Player* target = handler->getSelectedPlayer();
-        if ( !target )
-            return false;
-
-        Battleground * bg = target->GetBattleground();
-        if ( bg == nullptr )
-            return false;
-
-        handler->PSendSysMessage( "Player cfbg data:" );
-        handler->PSendSysMessage( " - team: %u / %u", target->GetTeam(), target->GetTeam(CrossFactionTeam::Discard) );
-        handler->PSendSysMessage( " - faction: %u", target->getFaction() );
-        handler->PSendSysMessage( " - race:  %u / %u", target->getRace(), target->getRace( false ) );
-
-        target->RequestDirtyDataForBgPlayers( bg->GetPlayers() );
         return true;
     }
 

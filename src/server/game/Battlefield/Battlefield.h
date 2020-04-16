@@ -99,7 +99,7 @@ class BfCapturePoint
         GameObject* GetCapturePointGo() { return ObjectAccessor::GetObjectInWorld(m_capturePoint, (GameObject*)NULL); }
         GameObject* GetCapturePointGo(WorldObject* obj) { return ObjectAccessor::GetGameObject(*obj, m_capturePoint); }
 
-        TeamId GetTeam() { return m_team; }
+        TeamId GetTeamId() { return m_team; }
     protected:
         bool DelCapturePoint();
 
@@ -275,7 +275,7 @@ class Battlefield : public ZoneScript
         // Group methods
         /**
          * \brief Find a not full battlefield group, if there is no, create one
-         * \param TeamId : Id of player team for who we search a group (player->GetTeam())
+         * \param TeamId : Id of player team for who we search a group (player->GetTeamId())
          */
         Group* GetFreeBfRaid(TeamId TeamId);
         /// Return battlefield group where player is.

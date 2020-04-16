@@ -194,7 +194,7 @@ bool OutdoorPvPTF::Update(uint32 diff)
 
 void OutdoorPvPTF::HandlePlayerEnterZone(Player* player, uint32 zone)
 {
-    if (player->GetTeam() == TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE)
     {
         if (m_AllianceTowersControlled >= TF_TOWER_NUM)
             player->CastSpell(player, TF_CAPTURE_BUFF, true);

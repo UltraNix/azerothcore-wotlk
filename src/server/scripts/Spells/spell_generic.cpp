@@ -1697,7 +1697,7 @@ class spell_gen_create_lance : public SpellScriptLoader
 
                 if (Player* target = GetHitPlayer())
                 {
-                    if (target->GetTeam() == TEAM_ALLIANCE)
+                    if (target->GetTeamId() == TEAM_ALLIANCE)
                         GetCaster()->CastSpell(target, SPELL_CREATE_LANCE_ALLIANCE, true);
                     else
                         GetCaster()->CastSpell(target, SPELL_CREATE_LANCE_HORDE, true);
@@ -2166,7 +2166,7 @@ class spell_pvp_trinket_wotf_shared_cd : public SpellScriptLoader
                 // Spell::SendSpellCooldown() skips all spells with TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD
                 player->AddSpellAndCategoryCooldowns(GetSpellInfo(), GetCastItem() ? GetCastItem()->GetEntry() : 0, GetSpell());
 
-                if (player->GetTeam() == TEAM_HORDE)
+                if (player->GetTeamId() == TEAM_HORDE)
                     if (GetSpellInfo()->Id == SPELL_WILL_OF_THE_FORSAKEN_COOLDOWN_TRIGGER)
                     {
                         WorldPacket data;

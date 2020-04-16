@@ -50,7 +50,7 @@ void BattlegroundAV::HandleKillPlayer(Player* player, Player* killer)
         return;
 
     Battleground::HandleKillPlayer(player, killer);
-    UpdateScore(player->GetTeam(), -1);
+    UpdateScore(player->GetTeamId(), -1);
 }
 
 void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
@@ -96,12 +96,12 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
 
         if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
         {
-            TeamId team = killer->GetTeam();
+            TeamId team = killer->GetTeamId();
             const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
-                if (itr->second->GetTeam() == team)
-                    itr->second->GiveXP(0.015 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+                if (itr->second->GetTeamId() == team)
+                    itr->second->GiveXP(0.015 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
             }
         }
 
@@ -130,8 +130,8 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
             const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
             for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
             {
-                if (itr->second->GetTeam() == killer->GetTeam())
-                    itr->second->GiveXP(0.015 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+                if (itr->second->GetTeamId() == killer->GetTeamId())
+                    itr->second->GiveXP(0.015 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
             }
         }
 
@@ -148,17 +148,16 @@ void BattlegroundAV::HandleKillUnit(Creature* unit, Player* killer)
         DelCreature(AV_CPLACE_TRIGGER18);
     }
     else if (entry == BG_AV_CreatureInfo[AV_NPC_N_MINE_N_4] || entry == BG_AV_CreatureInfo[AV_NPC_N_MINE_A_4] || entry == BG_AV_CreatureInfo[AV_NPC_N_MINE_H_4])
-        ChangeMineOwner(AV_NORTH_MINE, killer->GetTeam());
+        ChangeMineOwner(AV_NORTH_MINE, killer->GetTeamId());
     else if (entry == BG_AV_CreatureInfo[AV_NPC_S_MINE_N_4] || entry == BG_AV_CreatureInfo[AV_NPC_S_MINE_A_4] || entry == BG_AV_CreatureInfo[AV_NPC_S_MINE_H_4])
-        ChangeMineOwner(AV_SOUTH_MINE, killer->GetTeam());
+        ChangeMineOwner(AV_SOUTH_MINE, killer->GetTeamId());
 }
 
 void BattlegroundAV::HandleQuestComplete(uint32 questid, Player* player)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;//maybe we should log this, cause this must be a cheater or a big bug
-    TeamId teamId = player->GetTeam();
-    TeamId oteam = GetOtherTeamId(player->GetTeam());
+    TeamId teamId = player->GetTeamId();
     //TODO add reputation, events (including quest not available anymore, next quest availabe, go/npc de/spawning)and maybe honor
     ;//sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV Quest %i completed", questid);
     switch (questid)
@@ -172,7 +171,7 @@ void BattlegroundAV::HandleQuestComplete(uint32 questid, Player* player)
             {
                 ;//sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV Quest %i completed starting with unit upgrading..", questid);
                 for (BG_AV_Nodes i = BG_AV_NODES_FIRSTAID_STATION; i <= BG_AV_NODES_FROSTWOLF_HUT; ++i)
-                    if (m_Nodes[i].OwnerId == player->GetTeam() && m_Nodes[i].State == POINT_CONTROLED)
+                    if (m_Nodes[i].OwnerId == player->GetTeamId() && m_Nodes[i].State == POINT_CONTROLED)
                     {
                         DePopulateNode(i);
                         PopulateNode(i);
@@ -183,21 +182,21 @@ void BattlegroundAV::HandleQuestComplete(uint32 questid, Player* player)
         case AV_QUEST_A_COMMANDER1:
         case AV_QUEST_H_COMMANDER1:
             m_Team_QuestStatus[teamId][1]++;
-            RewardReputationToTeam( teamId == TEAM_ALLIANCE ? teamId : oteam, 1, teamId);
+            RewardReputationToTeam(teamId, 1, teamId);
             //if (m_Team_QuestStatus[team][1] == 30)
                 ;//sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV Quest %i completed (need to implement some events here", questid);
             break;
         case AV_QUEST_A_COMMANDER2:
         case AV_QUEST_H_COMMANDER2:
             m_Team_QuestStatus[teamId][2]++;
-            RewardReputationToTeam(teamId == TEAM_ALLIANCE ? teamId : oteam, 1, teamId);
+            RewardReputationToTeam(teamId, 1, teamId);
             //if (m_Team_QuestStatus[team][2] == 60)
                 ;//sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV Quest %i completed (need to implement some events here", questid);
             break;
         case AV_QUEST_A_COMMANDER3:
         case AV_QUEST_H_COMMANDER3:
             m_Team_QuestStatus[teamId][3]++;
-            RewardReputationToTeam( teamId == TEAM_ALLIANCE ? teamId : oteam, 1, teamId);
+            RewardReputationToTeam(teamId, 1, teamId);
             //if (m_Team_QuestStatus[team][3] == 120)
                 ;//sLog->outDebug(LOG_FILTER_BATTLEGROUND, "BG_AV Quest %i completed (need to implement some events here", questid);
             break;
@@ -490,10 +489,10 @@ void BattlegroundAV::EndBattleground(TeamId winnerTeamId)
             rep[iTeamId]   += BG_AV_REP_SURVIVING_CAPTAIN;
         }
         if (rep[iTeamId] != 0)
-            RewardReputationToTeam( iTeamId == TEAM_ALLIANCE ? 730 : 729, rep[ iTeamId ], iTeamId );
+            RewardReputationToTeam(iTeamId == TEAM_ALLIANCE ? 730 : 729, rep[iTeamId], iTeamId);
         if (kills[iTeamId] != 0)
-            RewardHonorToTeam( GetBonusHonorFromKill( kills[ iTeamId ] ), iTeamId );
-        }
+            RewardHonorToTeam(GetBonusHonorFromKill(kills[iTeamId]), iTeamId);
+    }
 
     //TODO add enterevademode for all attacking creatures
     Battleground::EndBattleground(winnerTeamId);
@@ -517,13 +516,13 @@ void BattlegroundAV::HandleAreaTrigger(Player* player, uint32 trigger)
     {
         case 95:
         case 2608:
-            if (player->GetTeam() != TEAM_ALLIANCE)
+            if (player->GetTeamId() != TEAM_ALLIANCE)
                 player->GetSession()->SendAreaTriggerMessage("Only The Alliance can use that portal");
             else
                 player->LeaveBattleground();
             break;
         case 2606:
-            if (player->GetTeam() != TEAM_HORDE)
+            if (player->GetTeamId() != TEAM_HORDE)
                 player->GetSession()->SendAreaTriggerMessage("Only The Horde can use that portal");
             else
                 player->LeaveBattleground();
@@ -596,13 +595,13 @@ void BattlegroundAV::EventPlayerDestroyedPoint(BG_AV_Nodes node)
         if (BgCreatures[AV_CPLACE_A_MARSHAL_SOUTH + tmp])
             DelCreature(AV_CPLACE_A_MARSHAL_SOUTH + tmp);
         else
-            sLog->outError("BG_AV: player destroyed point: marshal %i doesn't exist", AV_CPLACE_A_MARSHAL_SOUTH + tmp);
+            sLog->outError("BG_AV: playerdestroyedpoint: marshal %i doesn't exist", AV_CPLACE_A_MARSHAL_SOUTH + tmp);
         //spawn destroyed aura
         for (uint8 i=0; i <= 9; i++)
             SpawnBGObject(BG_AV_OBJECT_BURN_DUNBALDAR_SOUTH + i + (tmp * 10), RESPAWN_IMMEDIATELY);
 
         UpdateScore((ownerId == TEAM_ALLIANCE) ? TEAM_HORDE : TEAM_ALLIANCE, -1 * BG_AV_RES_TOWER);
-        RewardReputationToTeam( ownerId == TEAM_ALLIANCE ? 730 : 729, BG_AV_REP_TOWER, ownerId);
+        RewardReputationToTeam(ownerId == TEAM_ALLIANCE ? 730 : 729, BG_AV_REP_TOWER, ownerId);
         RewardHonorToTeam(GetBonusHonorFromKill(BG_AV_KILL_TOWER), ownerId);
 
         SpawnBGObject(BG_AV_OBJECT_TAURA_A_DUNBALDAR_SOUTH+ownerId+(2*tmp), RESPAWN_ONE_DAY);
@@ -898,9 +897,9 @@ void BattlegroundAV::EventPlayerDefendsPoint(Player* player, uint32 object)
     BG_AV_Nodes node = GetNodeThroughObject(object);
 
     TeamId ownerId = m_Nodes[node].OwnerId; //maybe should name it prevowner
-    TeamId teamId = player->GetTeam();
+    TeamId teamId = player->GetTeamId();
 
-    if (ownerId == player->GetTeam() || m_Nodes[node].State != POINT_ASSAULTED)
+    if (ownerId == player->GetTeamId() || m_Nodes[node].State != POINT_ASSAULTED)
         return;
     if (m_Nodes[node].TotalOwnerId == TEAM_NEUTRAL)
     { //until snowfall doesn't belong to anyone it is better handled in assault-code
@@ -969,7 +968,7 @@ void BattlegroundAV::EventPlayerAssaultsPoint(Player* player, uint32 object)
 
     BG_AV_Nodes node = GetNodeThroughObject(object);
     TeamId prevOwnerId = m_Nodes[node].OwnerId;
-    TeamId teamId  = player->GetTeam();
+    TeamId teamId  = player->GetTeamId();
     ;//sLog->outDebug(LOG_FILTER_BATTLEGROUND, "bg_av: player assaults point object %i node %i", object, node);
     if (prevOwnerId == teamId || teamId == m_Nodes[node].TotalOwnerId)
         return; //surely a gm used this object
@@ -1158,11 +1157,11 @@ WorldSafeLocsEntry const* BattlegroundAV::GetClosestGraveyard(Player* player)
 
     player->GetPosition(x, y);
 
-    pGraveyard = sWorldSafeLocsStore.LookupEntry(BG_AV_GraveyardIds[player->GetTeam()+7]);
+    pGraveyard = sWorldSafeLocsStore.LookupEntry(BG_AV_GraveyardIds[player->GetTeamId()+7]);
     minDist = (pGraveyard->x - x)*(pGraveyard->x - x)+(pGraveyard->y - y)*(pGraveyard->y - y);
 
     for (uint8 i = BG_AV_NODES_FIRSTAID_STATION; i <= BG_AV_NODES_FROSTWOLF_HUT; ++i)
-        if (m_Nodes[i].OwnerId == player->GetTeam() && m_Nodes[i].State == POINT_CONTROLED)
+        if (m_Nodes[i].OwnerId == player->GetTeamId() && m_Nodes[i].State == POINT_CONTROLED)
         {
             entry = sWorldSafeLocsStore.LookupEntry(BG_AV_GraveyardIds[i]);
             if (entry)
@@ -1467,8 +1466,8 @@ void BattlegroundAV::DestroyNode(BG_AV_Nodes node)
         const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
         for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
         {
-            if ((itr->second->GetTeam() == m_Nodes[node].OwnerId) && m_Nodes[node].Tower)
-                itr->second->GiveXP(0.005 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+            if ((itr->second->GetTeamId() == m_Nodes[node].OwnerId) && m_Nodes[node].Tower)
+                itr->second->GiveXP(0.005 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
         }
     }
 }

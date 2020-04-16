@@ -132,7 +132,7 @@ bool OutdoorPvPZM::Update(uint32 diff)
 
 void OutdoorPvPZM::HandlePlayerEnterZone(Player* player, uint32 zone)
 {
-    if (player->GetTeam() == TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE)
     {
         if (m_GraveYard->GetGraveYardState() & ZM_GRAVEYARD_A)
             player->CastSpell(player, ZM_CAPTURE_BUFF, true);
@@ -185,9 +185,9 @@ void OutdoorPvPZM::HandleKillImpl(Player* player, Unit* killed)
     if (killed->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (player->GetTeam() == TEAM_ALLIANCE && killed->ToPlayer()->GetTeam() != TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE && killed->ToPlayer()->GetTeamId() != TEAM_ALLIANCE)
         player->CastSpell(player, ZM_AlliancePlayerKillReward, true);
-    else if (player->GetTeam() == TEAM_HORDE && killed->ToPlayer()->GetTeam() != TEAM_HORDE)
+    else if (player->GetTeamId() == TEAM_HORDE && killed->ToPlayer()->GetTeamId() != TEAM_HORDE)
         player->CastSpell(player, ZM_HordePlayerKillReward, true);
 }
 
@@ -322,9 +322,9 @@ bool OPvPCapturePointZM_GraveYard::CanTalkTo(Player* player, Creature* c, Gossip
     std::map<uint64, uint32>::iterator itr = m_CreatureTypes.find(guid);
     if (itr != m_CreatureTypes.end())
     {
-        if (itr->second == ZM_ALLIANCE_FIELD_SCOUT && player->GetTeam() == TEAM_ALLIANCE && m_BothControllingFactionId == TEAM_ALLIANCE && !m_FlagCarrierGUID && m_GraveYardState != ZM_GRAVEYARD_A)
+        if (itr->second == ZM_ALLIANCE_FIELD_SCOUT && player->GetTeamId() == TEAM_ALLIANCE && m_BothControllingFactionId == TEAM_ALLIANCE && !m_FlagCarrierGUID && m_GraveYardState != ZM_GRAVEYARD_A)
             return true;
-        else if (itr->second == ZM_HORDE_FIELD_SCOUT && player->GetTeam() == TEAM_HORDE && m_BothControllingFactionId == TEAM_HORDE && !m_FlagCarrierGUID && m_GraveYardState != ZM_GRAVEYARD_H)
+        else if (itr->second == ZM_HORDE_FIELD_SCOUT && player->GetTeamId() == TEAM_HORDE && m_BothControllingFactionId == TEAM_HORDE && !m_FlagCarrierGUID && m_GraveYardState != ZM_GRAVEYARD_H)
             return true;
     }
     return false;

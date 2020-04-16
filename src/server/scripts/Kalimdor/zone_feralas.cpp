@@ -89,10 +89,10 @@ public:
             //change that the npc is not lying dead on the ground
             creature->SetStandState(UNIT_STAND_STATE_STAND);
 
-            if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE)
+            if (player->GetTeamId() == TEAM_ALLIANCE)
                 creature->setFaction(FACTION_ESCORTEE_A);
 
-            if (player->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
+            if (player->GetTeamId() == TEAM_HORDE)
                 creature->setFaction(FACTION_ESCORTEE_H);
 
             if (npc_escortAI* pEscortAI = CAST_AI(npc_oox22fe::npc_oox22feAI, creature->AI()))

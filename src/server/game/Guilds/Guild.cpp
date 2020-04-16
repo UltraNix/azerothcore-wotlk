@@ -1493,7 +1493,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
     if (pInvitee->GetSocial()->HasIgnore(player->GetGUIDLow()))
         return;
 
-    if (pInvitee->GetTeam() != player->GetTeam())
+    if (pInvitee->GetTeamId() != player->GetTeamId())
     {
         SendCommandResult(session, GUILD_COMMAND_INVITE, ERR_GUILD_NOT_ALLIED, name);
         return;
@@ -1534,7 +1534,7 @@ void Guild::HandleInviteMember(WorldSession* session, std::string const& name)
 void Guild::HandleAcceptMember(WorldSession* session)
 {
     Player* player = session->GetPlayer();
-    if (player->GetTeam() != sObjectMgr->GetPlayerTeamIdByGUID(GetLeaderGUID()))
+    if (player->GetTeamId() != sObjectMgr->GetPlayerTeamIdByGUID(GetLeaderGUID()))
         return;
 
     AddMember(player->GetGUID());

@@ -132,7 +132,7 @@ void BattlegroundEY::UpdatePointsState()
                     UpdateWorldStateForPlayer(PROGRESS_BAR_SHOW, BG_EY_PROGRESS_BAR_SHOW, itr->second);
                     UpdateWorldStateForPlayer(PROGRESS_BAR_PERCENT_GREY, BG_EY_PROGRESS_BAR_PERCENT_GREY, itr->second);
                     UpdateWorldStateForPlayer(PROGRESS_BAR_STATUS, _capturePointInfo[point]._barStatus, itr->second);
-                    ++_capturePointInfo[point]._playersCount[itr->second->GetTeam()];
+                    ++_capturePointInfo[point]._playersCount[itr->second->GetTeamId()];
 
                     // Xinef: ugly hax... area trigger is no longer called by client...
                     if (pointObject->GetEntry() == BG_OBJECT_FR_TOWER_CAP_EY_ENTRY && itr->second->GetDistance2d(2043.96f, 1729.68f) < 3.0f)
@@ -212,22 +212,22 @@ void BattlegroundEY::HandleAreaTrigger(Player* player, uint32 trigger)
     switch (trigger)
     {
         case AT_BLOOD_ELF_POINT:
-            if (_capturePointInfo[POINT_BLOOD_ELF].IsUnderControl(player->GetTeam()))
+            if (_capturePointInfo[POINT_BLOOD_ELF].IsUnderControl(player->GetTeamId()))
                 if (_flagState == BG_EY_FLAG_STATE_ON_PLAYER && GetFlagPickerGUID() == player->GetGUID())
                     EventPlayerCapturedFlag(player, BG_EY_OBJECT_FLAG_BLOOD_ELF);
             break;
         case AT_FEL_REAVER_POINT:
-            if (_capturePointInfo[POINT_FEL_REAVER].IsUnderControl(player->GetTeam()))
+            if (_capturePointInfo[POINT_FEL_REAVER].IsUnderControl(player->GetTeamId()))
                 if (_flagState == BG_EY_FLAG_STATE_ON_PLAYER && GetFlagPickerGUID() == player->GetGUID())
                     EventPlayerCapturedFlag(player, BG_EY_OBJECT_FLAG_FEL_REAVER);
             break;
         case AT_MAGE_TOWER_POINT:
-            if (_capturePointInfo[POINT_MAGE_TOWER].IsUnderControl(player->GetTeam()))
+            if (_capturePointInfo[POINT_MAGE_TOWER].IsUnderControl(player->GetTeamId()))
                 if (_flagState == BG_EY_FLAG_STATE_ON_PLAYER && GetFlagPickerGUID() == player->GetGUID())
                     EventPlayerCapturedFlag(player, BG_EY_OBJECT_FLAG_MAGE_TOWER);
             break;
         case AT_DRAENEI_RUINS_POINT:
-            if (_capturePointInfo[POINT_DRAENEI_RUINS].IsUnderControl(player->GetTeam()))
+            if (_capturePointInfo[POINT_DRAENEI_RUINS].IsUnderControl(player->GetTeamId()))
                 if (_flagState == BG_EY_FLAG_STATE_ON_PLAYER && GetFlagPickerGUID() == player->GetGUID())
                     EventPlayerCapturedFlag(player, BG_EY_OBJECT_FLAG_DRAENEI_RUINS);
             break;
@@ -402,7 +402,7 @@ void BattlegroundEY::EventPlayerDroppedFlag(Player* player)
     player->CastSpell(player, SPELL_RECENTLY_DROPPED_FLAG, true);
     player->CastSpell(player, BG_EY_PLAYER_DROPPED_FLAG_SPELL, true);
 
-    SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, player->GetTeam() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE);
+    SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, player->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE);
 }
 
 void BattlegroundEY::EventPlayerClickedOnFlag(Player* player, GameObject* gameObject)
@@ -418,8 +418,8 @@ void BattlegroundEY::EventPlayerClickedOnFlag(Player* player, GameObject* gameOb
     player->CastSpell(player, BG_EY_NETHERSTORM_FLAG_SPELL, true);
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 
-    PSendMessageToAll(LANG_BG_EY_HAS_TAKEN_FLAG, player->GetTeam() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, NULL, player->GetName().c_str());
-    PlaySoundToAll(player->GetTeam() == TEAM_ALLIANCE ? BG_EY_SOUND_FLAG_PICKED_UP_ALLIANCE : BG_EY_SOUND_FLAG_PICKED_UP_HORDE);
+    PSendMessageToAll(LANG_BG_EY_HAS_TAKEN_FLAG, player->GetTeamId() == TEAM_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, NULL, player->GetName().c_str());
+    PlaySoundToAll(player->GetTeamId() == TEAM_ALLIANCE ? BG_EY_SOUND_FLAG_PICKED_UP_ALLIANCE : BG_EY_SOUND_FLAG_PICKED_UP_HORDE);
     UpdateWorldState(NETHERSTORM_FLAG, 0);
 }
 
@@ -506,14 +506,14 @@ void BattlegroundEY::EventPlayerCapturedFlag(Player* player, uint32 BgObjectType
     //! award exp for capturing flag if there is enough players for proper bg
     if (GetPlayersCountByTeam(TEAM_ALLIANCE) >= GetMinPlayersPerTeam() && GetPlayersCountByTeam(TEAM_HORDE) >= GetMinPlayersPerTeam())
     {
-        TeamId team = player->GetTeam();
+        TeamId team = player->GetTeamId();
         const BattlegroundPlayerMap& bgPlayerMap = GetPlayers();
         for (BattlegroundPlayerMap::const_iterator itr = bgPlayerMap.begin(); itr != bgPlayerMap.end(); ++itr)
         {
             if (player)
             {
-                if (itr->second->GetTeam() == team)
-                    itr->second->GiveXP(0.0015 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f, true);
+                if (itr->second->GetTeamId() == team)
+                    itr->second->GiveXP(0.0015 * itr->second->GetUInt32Value(PLAYER_NEXT_LEVEL_XP), nullptr, 1.0f);
             }
         }
     }
@@ -527,7 +527,7 @@ void BattlegroundEY::EventPlayerCapturedFlag(Player* player, uint32 BgObjectType
     _bgEvents.RescheduleEvent(BG_EY_EVENT_RESPAWN_FLAG, BG_EY_FLAG_RESPAWN_TIME);
     _flagCapturedObject = BgObjectType;
 
-    if (player->GetTeam() == TEAM_ALLIANCE)
+    if (player->GetTeamId() == TEAM_ALLIANCE)
     {
         PlaySoundToAll(BG_EY_SOUND_FLAG_CAPTURED_ALLIANCE);
         SendMessageToAll(LANG_BG_EY_CAPTURED_FLAG_A, CHAT_MSG_BG_SYSTEM_ALLIANCE, player);
@@ -539,8 +539,8 @@ void BattlegroundEY::EventPlayerCapturedFlag(Player* player, uint32 BgObjectType
     }
 
     UpdatePlayerScore(player, SCORE_FLAG_CAPTURES, 1);
-    if (_ownedPointsCount[player->GetTeam()] > 0)
-        AddPoints(player->GetTeam(), BG_EY_FlagPoints[_ownedPointsCount[player->GetTeam()] - 1]);
+    if (_ownedPointsCount[player->GetTeamId()] > 0)
+        AddPoints(player->GetTeamId(), BG_EY_FlagPoints[_ownedPointsCount[player->GetTeamId()] - 1]);
 }
 
 void BattlegroundEY::UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor)
@@ -585,7 +585,7 @@ void BattlegroundEY::FillInitialWorldStates(WorldPacket& data)
 
 WorldSafeLocsEntry const* BattlegroundEY::GetClosestGraveyard(Player* player)
 {
-    WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(BG_EY_GRAVEYARD_MAIN_ALLIANCE + player->GetTeam());
+    WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(BG_EY_GRAVEYARD_MAIN_ALLIANCE + player->GetTeamId());
     WorldSafeLocsEntry const* nearestEntry = entry;
 
     float pX = player->GetPositionX();
@@ -595,7 +595,7 @@ WorldSafeLocsEntry const* BattlegroundEY::GetClosestGraveyard(Player* player)
     float minDist = dist;
 
     for (uint8 i = 0; i < EY_POINTS_MAX; ++i)
-        if (_capturePointInfo[i].IsUnderControl(player->GetTeam()))
+        if (_capturePointInfo[i].IsUnderControl(player->GetTeamId()))
         {
             entry = sWorldSafeLocsStore.LookupEntry(m_CapturingPointTypes[i].GraveYardId);
             dist = (entry->x - pX)*(entry->x - pX) + (entry->y - pY)*(entry->y - pY) + (entry->z - pZ)*(entry->z - pZ);

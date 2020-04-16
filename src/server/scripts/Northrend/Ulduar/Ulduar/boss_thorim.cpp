@@ -552,9 +552,9 @@ struct boss_thorim : public ScriptedAI
         _hitByLightning = false;
         _summonsInformed = false;
 
-            if (Player *t = SelectTargetFromPlayerList(1000))
-                if (t->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
-                    _isAlly = false;
+        if (Player* t = SelectTargetFromPlayerList(1000))
+            if (t->GetTeamId() == TEAM_HORDE)
+                _isAlly = false;
 
         SpawnAllNPCs();
 

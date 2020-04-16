@@ -245,7 +245,7 @@ public:
             //! teamId 3, never set before, assign a proper value now
             if (_teamInInstance == 3)
             {
-                TeamId _team = player->GetTeam();
+                TeamId _team = player->GetTeamId();
 
                 if (_team == TEAM_ALLIANCE)
                     _teamInInstance = 0;

@@ -2820,23 +2820,10 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                 creatureEntry = 15665;
         }
 
-        if ( Player * player = target->ToPlayer() )
-        {
-            //! Replace mount entry for Traveler's Tundra Mammoth when playing crossfaction
-            if ( player->InBattleground() && !player->IsPlayingNative() )
-            {
-                if ( creatureEntry == 32633 )
-                    creatureEntry = 32640;
-
-                else if ( creatureEntry == 32640 )
-                    creatureEntry = 32633;
-            }
-        }
-
         CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(creatureEntry);
         if (!ci)
         {
-            sLog->outErrorDb("AuraMounted: `creature_template`='%u' not found in database (only need its modelid)", creatureEntry);
+            sLog->outErrorDb("AuraMounted: `creature_template`='%u' not found in database (only need its modelid)", GetMiscValue());
             return;
         }
 
@@ -2849,7 +2836,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                 && GetSpellInfo()->Effects[i].MiscValue == GetMiscValue())
                 displayID = 0;
 
-        target->Mount(displayID, ci->VehicleId, ci->Entry);
+        target->Mount(displayID, ci->VehicleId, GetMiscValue());
     }
     else
     {

@@ -31,7 +31,7 @@ class TrinityStringTextBuilder
         {
         }
 
-        TextBuilderResult operator()(WorldPacket* data, LocaleConstant locale) const
+        size_t operator()(WorldPacket* data, LocaleConstant locale) const
         {
             std::string text = sObjectMgr->GetTrinityString(_textId, locale);
             return ChatHandler::BuildChatPacket(*data, _msgType, Language(_language), _source, _target, text, 0, "", locale);

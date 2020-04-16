@@ -534,7 +534,7 @@ public:
             if (npc_escortAI* pEscortAI = CAST_AI(npc_lurgglbr::npc_lurgglbrAI, creature->AI()))
                 pEscortAI->Start(true, false, player->GetGUID());
 
-            creature->setFaction(player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
+            creature->setFaction(player->GetTeamId() == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
             return true;
         }
         return false;
@@ -763,7 +763,7 @@ public:
     {
         if (quest->GetQuestId() == QUEST_ESCAPING_THE_MIST)
         {
-            creature->setFaction(player->GetTeam(CrossFactionTeam::Discard) == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
+            creature->setFaction(player->GetTeamId() == TEAM_ALLIANCE ? FACTION_ESCORTEE_A : FACTION_ESCORTEE_H);
             creature->SetStandState(UNIT_STAND_STATE_STAND);
             creature->AI()->Talk(SAY_1, player);
             CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());

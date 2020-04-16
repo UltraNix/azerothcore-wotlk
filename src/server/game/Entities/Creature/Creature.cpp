@@ -2408,7 +2408,7 @@ void Creature::SendZoneUnderAttackMessage(Player* attacker)
 {
     WorldPacket data(SMSG_ZONE_UNDER_ATTACK, 4);
     data << (uint32)GetAreaId();
-    sWorld->SendGlobalMessage(&data, NULL, (attacker->GetTeam() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE));
+    sWorld->SendGlobalMessage(&data, NULL, (attacker->GetTeamId() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE));
 }
 
 void Creature::SetInCombatWithZone()

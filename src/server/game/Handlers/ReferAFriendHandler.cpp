@@ -24,7 +24,7 @@ void WorldSession::HandleGrantLevel(WorldPacket& recvData)
         error = ERR_REFER_A_FRIEND_INSUFFICIENT_GRANTABLE_LEVELS;
     else if (GetRecruiterId() != target->GetSession()->GetAccountId())
         error = ERR_REFER_A_FRIEND_NOT_REFERRED_BY;
-    else if (target->GetTeam(CrossFactionTeam::Discard) != _player->GetTeam(CrossFactionTeam::Discard))
+    else if (target->GetTeamId() != _player->GetTeamId())
         error = ERR_REFER_A_FRIEND_DIFFERENT_FACTION;
     else if (target->getLevel() >= _player->getLevel())
         error = ERR_REFER_A_FRIEND_TARGET_TOO_HIGH;

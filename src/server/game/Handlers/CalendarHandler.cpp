@@ -530,7 +530,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
     {
         // Invitee is online
         inviteeGuid = player->GetGUID();
-        inviteeTeamId = player->GetTeam();
+        inviteeTeamId = player->GetTeamId();
         inviteeGuildId = player->GetGuildId();
     }
     else
@@ -553,7 +553,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recvData)
         return;
     }
 
-    if (_player->GetTeam() != inviteeTeamId)
+    if (_player->GetTeamId() != inviteeTeamId)
     {
         sCalendarMgr->SendCalendarCommandResult(playerGuid, CALENDAR_ERROR_NOT_ALLIED);
         return;

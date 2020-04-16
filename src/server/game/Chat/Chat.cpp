@@ -586,15 +586,13 @@ bool ChatHandler::ShowHelpForCommand(std::vector<ChatCommand> const& table, cons
     return ShowHelpForSubCommands(table, "", cmd);
 }
 
-TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, uint64 senderGUID, uint64 receiverGUID, std::string const& message, uint8 chatTag,
+size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, uint64 senderGUID, uint64 receiverGUID, std::string const& message, uint8 chatTag,
                                   std::string const& senderName /*= ""*/, std::string const& receiverName /*= ""*/,
                                   uint32 achievementId /*= 0*/, bool gmMessage /*= false*/, std::string const& channelName /*= ""*/)
 {
-    TextBuilderResult result = {};
-
+    size_t receiverGUIDPos = 0;
     data.Initialize(!gmMessage ? SMSG_MESSAGECHAT : SMSG_GM_MESSAGECHAT);
     data << uint8(chatType);
-    result.languageOffset = data.wpos();
     data << int32(language);
     data << uint64(senderGUID);
     data << uint32(0);  // some flags
@@ -610,7 +608,7 @@ TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatTy
         case CHAT_MSG_BATTLENET:
             data << uint32(senderName.length() + 1);
             data << senderName;
-            result.receiverOffset = data.wpos();
+            receiverGUIDPos = data.wpos();
             data << uint64(receiverGUID);
             if (receiverGUID && !IS_PLAYER_GUID(receiverGUID) && !IS_PET_GUID(receiverGUID))
             {
@@ -621,13 +619,13 @@ TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatTy
         case CHAT_MSG_WHISPER_FOREIGN:
             data << uint32(senderName.length() + 1);
             data << senderName;
-            result.receiverOffset = data.wpos();
+            receiverGUIDPos = data.wpos();
             data << uint64(receiverGUID);
             break;
         case CHAT_MSG_BG_SYSTEM_NEUTRAL:
         case CHAT_MSG_BG_SYSTEM_ALLIANCE:
         case CHAT_MSG_BG_SYSTEM_HORDE:
-            result.receiverOffset = data.wpos();
+            receiverGUIDPos = data.wpos();
             data << uint64(receiverGUID);
             if (receiverGUID && !IS_PLAYER_GUID(receiverGUID))
             {
@@ -637,7 +635,7 @@ TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatTy
             break;
         case CHAT_MSG_ACHIEVEMENT:
         case CHAT_MSG_GUILD_ACHIEVEMENT:
-            result.receiverOffset = data.wpos();
+            receiverGUIDPos = data.wpos();
             data << uint64(receiverGUID);
             break;
         default:
@@ -653,7 +651,7 @@ TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatTy
                 data << channelName;
             }
 
-            result.receiverOffset = data.wpos();
+            receiverGUIDPos = data.wpos();
             data << uint64(receiverGUID);
             break;
     }
@@ -665,10 +663,10 @@ TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatTy
     if (chatType == CHAT_MSG_ACHIEVEMENT || chatType == CHAT_MSG_GUILD_ACHIEVEMENT)
         data << uint32(achievementId);
 
-    return result;
+    return receiverGUIDPos;
 }
 
-TextBuilderResult ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, WorldObject const* sender, WorldObject const* receiver, std::string const& message,
+size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Language language, WorldObject const* sender, WorldObject const* receiver, std::string const& message,
                                   uint32 achievementId /*= 0*/, std::string const& channelName /*= ""*/, LocaleConstant locale /*= DEFAULT_LOCALE*/)
 {
     uint64 senderGUID = 0;

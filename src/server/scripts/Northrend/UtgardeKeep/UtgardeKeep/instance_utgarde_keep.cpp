@@ -75,7 +75,7 @@ public:
             {
                 c->SetReactState(REACT_PASSIVE);
                 c->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                if (plr && plr->GetTeam(CrossFactionTeam::Discard) == TEAM_HORDE)
+                if (plr && plr->GetTeamId() == TEAM_HORDE)
                 {
                     if (!c->IsVisible())
                         c->SetVisible(true);
