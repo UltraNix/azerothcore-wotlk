@@ -6313,11 +6313,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
     if (caster->IsPlayer() && damage && GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
     {
-        int32 dmg = damage;
         uint32 targetAmount = GetBase()->GetEffectApplicationSet(GetEffIndex()).size();
         if (targetAmount > 10)
-            dmg = dmg * 10 / targetAmount;
-        damage = dmg;
+            damage = damage * 10 / targetAmount;
     }
 
     int32 overkill = damage - target->GetHealth();
