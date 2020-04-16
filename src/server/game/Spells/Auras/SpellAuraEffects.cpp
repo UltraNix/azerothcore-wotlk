@@ -1005,6 +1005,7 @@ void AuraEffect::UpdatePeriodic(Unit* caster)
        default:
            break;
     }
+
     GetBase()->CallScriptEffectUpdatePeriodicHandlers(this);
 }
 
@@ -6230,6 +6231,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         // xinef: leave only target depending bonuses, rest is handled in calculate amount
         if (GetBase()->GetType() == DYNOBJ_AURA_TYPE)
             damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, 0.0f, GetBase()->GetStackAmount());
+
         damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
 
         // Calculate armor mitigation
@@ -6308,6 +6310,15 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
     if (damage)
         procVictim |= PROC_FLAG_TAKEN_DAMAGE;
+
+    if (caster->IsPlayer() && damage && GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+    {
+        int32 dmg = damage;
+        uint32 targetAmount = GetBase()->GetEffectApplicationSet(GetEffIndex()).size();
+        if (targetAmount > 10)
+            dmg = dmg * 10 / targetAmount;
+        damage = dmg;
+    }
 
     int32 overkill = damage - target->GetHealth();
     if (overkill < 0)
