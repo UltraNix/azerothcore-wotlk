@@ -3743,6 +3743,14 @@ Wintergrasp.Reminder = 0
 NinjaList.Enable = 0
 
 #
+#     SmartAI.SmartCastCombatMoveInterval
+#     Description: Sets interval (milliseconds) for periodic SMARTCAST_COMBAT_MOVE spells update, lower means faster response after interrupt or silence for creatures with SmartAI
+#     Default:     1000
+#
+
+SmartAI.SmartCastCombatMoveInterval = 1000
+
+#
 ###################################################################################################
 
 ###################################################################################################

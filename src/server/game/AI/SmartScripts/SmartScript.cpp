@@ -72,6 +72,7 @@ SmartScript::SmartScript()
     smartCasterPowerType = POWER_MANA;
 
     _allowPhaseReset = true;
+    _smartCombatMoveUpdateTimer = sWorld->getIntConfig(CONFIG_UPDATE_SMARTCAST_COMBAT_MOVE_SPELLS_INTERVAL);
 }
 
 SmartScript::~SmartScript()
@@ -536,17 +537,11 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     // Xinef: flag usable only if caster has max dist set
                     if ((e.action.cast.flags & SMARTCAST_COMBAT_MOVE) && GetCasterMaxDist() > 0.0f && me->GetMaxPower(GetCasterPowerType()) > 0)
                     {
-                        // Xinef: check mana case only and operate movement accordingly, LoS and range is checked in targeted movement generator
-                        if (me->GetPowerPct(GetCasterPowerType()) < 15.0f || me->HasAuraType(SPELL_AURA_MOD_SILENCE) || me->HasAuraType(SPELL_AURA_MOD_PACIFY_SILENCE) ||
-                            me->IsSpellProhibited(spellInfo->GetSchoolMask()))
+                        if (_smartCombatMoveSpells.find(e.action.cast.spell) == std::end(_smartCombatMoveSpells))
                         {
-                            SetCasterActualDist(0);
-                            CAST_AI(SmartAI, me->AI())->SetForcedCombatMove(0);
-                        }
-                        else if (GetCasterActualDist() == 0.0f && me->GetPowerPct(GetCasterPowerType()) > 30.0f)
-                        {
-                            RestoreCasterMaxDist();
-                            CAST_AI(SmartAI, me->AI())->SetForcedCombatMove(GetCasterActualDist());
+                            // schedule next update immediately to set proper state as fast as possible
+                            _smartCombatMoveUpdateTimer = 0;
+                            InsertNewCombatMoveSpell(e.action.cast.spell, CanCastCombatMoveSpell(sSpellMgr->GetSpellInfo(e.action.cast.spell)) && !me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED));
                         }
                     }
 
@@ -3906,6 +3901,8 @@ void SmartScript::UpdateTimer(SmartScriptHolder& e, uint32 const diff)
     if (e.GetEventType() == SMART_EVENT_UPDATE_OOC && (me && me->IsInCombat()))//can be used with me=NULL (go script)
         return;
 
+    UpdateSmartCombatMoveSpells(diff);
+
     if (e.timer < diff)
     {
         // delay spell cast event if another spell is being casted
@@ -4310,4 +4307,64 @@ Unit* SmartScript::GetLastInvoker(Unit* invoker)
     else if (invoker)
         return ObjectAccessor::GetUnit(*invoker, mLastInvoker);
     return NULL;
+}
+
+void SmartScript::InsertNewCombatMoveSpell(uint32 spellId, bool enabled)
+{
+    _smartCombatMoveSpells.emplace(spellId, enabled);
+}
+
+void SmartScript::UpdateSmartCombatMoveSpells(uint32 diff)
+{
+    if (_smartCombatMoveSpells.empty())
+        return;
+
+    if (_smartCombatMoveUpdateTimer <= diff)
+    {
+        for (auto&& pair : _smartCombatMoveSpells)
+        {
+            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pair.first);
+            bool canCast = CanCastCombatMoveSpell(spellInfo);
+            bool isSilenced = me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
+
+            if (!pair.second)
+            {
+                if (canCast && !isSilenced)
+                {
+                    pair.second = true;
+                    RestoreCasterMaxDist();
+                    CAST_AI(SmartAI, me->AI())->SetForcedCombatMove(GetCasterActualDist());
+                }
+            }
+            else
+            {
+                if (!canCast || isSilenced)
+                {
+                    pair.second = false;
+                    SetCasterActualDist(0);
+                    CAST_AI(SmartAI, me->AI())->SetForcedCombatMove(0);
+                }
+            }
+        }
+
+        _smartCombatMoveUpdateTimer = sWorld->getIntConfig(CONFIG_UPDATE_SMARTCAST_COMBAT_MOVE_SPELLS_INTERVAL);
+    }
+    else _smartCombatMoveUpdateTimer -= diff;
+}
+
+bool SmartScript::CanCastCombatMoveSpell(SpellInfo const* spellInfo)
+{
+    if (spellInfo)
+    {
+        uint32 currentPowerAmount = me->GetPower(Powers(spellInfo->PowerType));
+        if (currentPowerAmount < spellInfo->CalcPowerCost(me, spellInfo->GetSchoolMask()))
+            return false;
+
+        if (me->IsSpellProhibited(spellInfo->GetSchoolMask()))
+            return false;
+
+        return true;
+    }
+
+    return false;
 }

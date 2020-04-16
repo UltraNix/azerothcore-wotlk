@@ -230,25 +230,33 @@ class SmartScript
         float GetCasterActualDist() const { return smartCasterActualDist; }
         float GetCasterMaxDist() const { return smartCasterMaxDist; }
 
+        // SMARTCAST_COMBAT_MOVE handlers
+        void InsertNewCombatMoveSpell(uint32 spellId, bool enabled);
+        void UpdateSmartCombatMoveSpells(uint32 diff);
+        bool CanCastCombatMoveSpell(SpellInfo const* spellInfo);
+
         bool AllowPhaseReset() const { return _allowPhaseReset; }
         void SetPhaseReset(bool allow) { _allowPhaseReset = allow; }
 
     private:
+        std::unordered_map<uint32, bool> _smartCombatMoveSpells;
+        uint32 _smartCombatMoveUpdateTimer;
+
         void IncPhase(uint32 p)
         {
             // Xinef: protect phase from overflowing
             mEventPhase = std::min<uint32>(SMART_EVENT_PHASE_12, mEventPhase + p);
         }
 
-        void DecPhase(uint32 p) 
+        void DecPhase(uint32 p)
         {
             if (p >= mEventPhase)
                 mEventPhase = 0;
             else
                 mEventPhase -= p;
         }
-        bool IsInPhase(uint32 p) const 
-        { 
+        bool IsInPhase(uint32 p) const
+        {
             if (mEventPhase == 0)
                 return false;
             return (1 << (mEventPhase - 1)) & p;

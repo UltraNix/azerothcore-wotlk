@@ -1488,6 +1488,7 @@ void World::LoadConfigSettings(bool reload)
     m_bool_configs[CONFIG_BOOL_PREMIUM_SKIPQUEUE] = sConfigMgr->GetBoolDefault("Premium.SkipQueue", false);
     m_bool_configs[CONFIG_CREATURE_FULL_HEALTH_AT_EVADE] = sConfigMgr->GetBoolDefault("Creature.Misc.FullHealthAtEvadeForBosses", false);
     m_bool_configs[CONFIG_UPDATE_INSTANCE_BATTLEGROUNDS_EVERY_UPDATE] = sConfigMgr->GetBoolDefault("MapUpdates.UpdateInstancesEachCycle", false);
+    m_int_configs[CONFIG_UPDATE_SMARTCAST_COMBAT_MOVE_SPELLS_INTERVAL] = sConfigMgr->GetIntDefault("SmartAI.SmartCastCombatMoveInterval", 1000);
     // call ScriptMgr if we're reloading the configuration
     if (reload)
         sScriptMgr->OnConfigLoad(reload);
