@@ -80,7 +80,7 @@ enum TrinityStrings
     LANG_HELP_COMMAND_INFO              = 70,
     LANG_HELP_COMMAND_PREMIUM           = 71,
     LANG_HELP_COMMAND_PVPINFO           = 72,
-    LANG_HELP_COMMAND_BLIZZLIKE         = 73,
+    LANG_HELP_COMMAND_XP                = 73,
     LANG_HELP_COMMAND_DODGE             = 74,
     LANG_HELP_CHANNEL_BLOCK             = 75,
     LANG_IS_NOT_YOUR_FRIEND             = 76,

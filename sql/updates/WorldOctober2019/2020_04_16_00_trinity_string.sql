@@ -1,0 +1,1 @@
+UPDATE `trinity_string` SET `content_default`='|cffff9933.xp|cFFFFD700 - changes experience multiplier.|r' WHERE  `entry`=73;

@@ -960,7 +960,7 @@ public:
         handler->PSendSysMessage(LANG_HELP_COMMAND_INFO);
         handler->PSendSysMessage(LANG_HELP_COMMAND_PREMIUM);
         handler->PSendSysMessage(LANG_HELP_COMMAND_PVPINFO);
-        handler->PSendSysMessage(LANG_HELP_COMMAND_BLIZZLIKE);
+        handler->PSendSysMessage(LANG_HELP_COMMAND_XP);
         handler->PSendSysMessage(LANG_HELP_COMMAND_DODGE);
         handler->PSendSysMessage(LANG_HELP_CHANNEL_BLOCK);
         return true;
