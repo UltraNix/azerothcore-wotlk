@@ -6311,7 +6311,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     if (damage)
         procVictim |= PROC_FLAG_TAKEN_DAMAGE;
 
-    if (caster->IsPlayer() && damage && GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+    if (caster && caster->IsPlayer() && damage && GetSpellInfo()->Effects[GetEffIndex()].Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
     {
         uint32 targetAmount = GetBase()->GetEffectApplicationSet(GetEffIndex()).size();
         if (targetAmount > 10)
