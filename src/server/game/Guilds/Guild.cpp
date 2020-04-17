@@ -1182,8 +1182,8 @@ bool Guild::Create(Player* pLeader, std::string const& name)
     trans->Append(stmt);
 
     _CreateDefaultGuildRanks(pLeaderSession->GetSessionDbLocaleIndex(), trans); // Create default ranks
+    bool ret = AddMember(m_leaderGuid, GR_GUILDMASTER, trans);                  // Add guildmaster
     CharacterDatabase.CommitTransaction(trans);
-    bool ret = AddMember(m_leaderGuid, GR_GUILDMASTER);                  // Add guildmaster
 
     if (ret)
         sScriptMgr->OnGuildCreate(this, pLeader, name);
@@ -2188,7 +2188,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
 }
 
 // Members handling
-bool Guild::AddMember(uint64 guid, uint8 rankId)
+bool Guild::AddMember(uint64 guid, uint8 rankId, SQLTransaction trans)
 {
     Player* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid);
     // Player cannot be in guild
@@ -2253,7 +2253,8 @@ bool Guild::AddMember(uint64 guid, uint8 rankId)
         sWorld->UpdateGlobalPlayerGuild(lowguid, m_id);
     }
 
-    SQLTransaction trans(NULL);
+    if (!trans)
+        trans = SQLTransaction(nullptr);
     member->SaveToDB(trans);
 
     _UpdateAccountsNumber();
