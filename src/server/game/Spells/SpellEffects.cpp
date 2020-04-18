@@ -2247,6 +2247,11 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
                 player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue);
             }
         }
+
+        if (skillId == SKILL_HERBALISM)
+            sWorldCache.AddOrUpdateHerbalismList(player->GetGUID());
+        else if (skillId == SKILL_MINING)
+            sWorldCache.AddOrUpdateMiningList(player->GetGUID());
     }
 
     ExecuteLogEffectOpenLock(effIndex, gameObjTarget ? (Object*)gameObjTarget : (Object*)*itemTarget);

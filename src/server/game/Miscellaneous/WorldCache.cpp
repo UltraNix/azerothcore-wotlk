@@ -19,15 +19,19 @@ WorldCache& WorldCache::GetInstance()
 WorldCache::WorldCache()
 {
     _playersCurrentlyFishing.clear();
+    _playersCurrentlyHerbing.clear();
+    _playersCurrentlyMining.clear();
+
     scheduler.ClearValidator();
 
     scheduler.Schedule(2min, [this](TaskContext func)
     {
-        UpdateFishingList();
+        UpdateGatherers();
         func.Repeat(2min);
     });
 
     _isWintergraspWarActive = false;
+    _isGathererListLocked = false;
 }
 
 void WorldCache::OnWorldUpdate(uint32 diff)
@@ -233,79 +237,115 @@ void WorldCache::ReloadDisabledLuaChecks()
     sLog->outString();
 }
 
-void WorldCache::AddOrUpdateFishingList(uint64 guid)
+void WorldCache::AddOrUpdateGatheringList(uint64 guid, PlayersGatheringStore& store)
 {
-    if (_isFisherListLocked)
+    if (_isGathererListLocked)
         return;
 
-    auto result = _playersCurrentlyFishing.find(guid);
-    FishingPlayerEntry fishEntry;
-    if (result == _playersCurrentlyFishing.end())
+    auto result = store.find(guid);
+    GatheringPlayerEntry gatheringEntry;
+    if (result == store.end())
     {
-        fishEntry.firstCaughtFishTime = FishingClock::now();
-        fishEntry.lastCaughtFishTime = FishingClock::now();
+        gatheringEntry.firstGatheredItemTime = GatheringClock::now();
+        gatheringEntry.lastGatheredItemTime = GatheringClock::now();
     }
     else
     {
         //! we're already in the map, get fish caught so far. We will increment it by one at the end of the function
-        fishEntry.SetFishCaughtSoFar(result->second.GetTotalFishCaught());
-        fishEntry.firstCaughtFishTime = result->second.firstCaughtFishTime;
-        fishEntry.lastCaughtFishTime = FishingClock::now();
+        gatheringEntry.SetGatheredItemsSoFar(result->second.GetTotalGatheredItems());
+        gatheringEntry.firstGatheredItemTime = result->second.firstGatheredItemTime;
+        gatheringEntry.lastGatheredItemTime = GatheringClock::now();
     }
 
-    fishEntry.IncrementFishCaught();
-    _playersCurrentlyFishing[guid] = fishEntry;
+    gatheringEntry.IncrementGatheredItems();
+    store[guid] = gatheringEntry;
 };
 
-void WorldCache::ListCurrentFishers(ChatHandler* handler)
+void WorldCache::AddOrUpdateFishingList(uint64 guid)
+{
+    AddOrUpdateGatheringList(guid, _playersCurrentlyFishing);
+}
+
+void WorldCache::ListCurrentGatherers(ChatHandler* handler, PlayersGatheringStore& store, std::string gathererName, std::string itemName, std::string verb)
 {
     if (!handler)
         return;
 
-    if (_isFisherListLocked)
+    if (_isGathererListLocked)
     {
-        handler->PSendSysMessage("Fisher list is currently being modified, try again in a few seconds.");
+        handler->PSendSysMessage("Gathering list is currently being modified, try again in a few seconds.");
         return;
     }
 
-    handler->PSendSysMessage("=== Listing currently fishing players ===");
-    handler->PSendSysMessage("There is currently %zu fishers, listing players that caught at least %u fishes.", _playersCurrentlyFishing.size(), MIN_FISH_CAUGHT_REQUIRED);
+    handler->PSendSysMessage("=== Listing currently %s players ===", verb.c_str());
+    handler->PSendSysMessage("There is currently %zu %s, listing players that caught at least %u %s.", store.size(), gathererName.c_str(), MIN_ITEMS_GATHERED_REQUIRED, itemName.c_str());
 
-    for (auto const& i : _playersCurrentlyFishing)
+    for (auto const& i : store)
     {
-        auto fishCaught = i.second.GetTotalFishCaught();
-        if (fishCaught >= MIN_FISH_CAUGHT_REQUIRED)
+        auto gatheredItems = i.second.GetTotalGatheredItems();
+        if (gatheredItems >= MIN_ITEMS_GATHERED_REQUIRED)
         {
-            Player* fisher = ObjectAccessor::FindPlayer(i.first);
-            if (fisher)
+            Player* gatherer = ObjectAccessor::FindPlayer(i.first);
+            if (gatherer)
             {
-                FishingTimeStamp now = FishingClock::now();
-                uint64 timeCount = std::chrono::duration_cast<Seconds>(now - i.second.firstCaughtFishTime).count();
+                GatheringTimeStamp now = GatheringClock::now();
+                uint64 timeCount = std::chrono::duration_cast<Seconds>(now - i.second.firstGatheredItemTime).count();
                 std::string _timeString = secsToTimeString(timeCount);
-                std::string _fisherString = fmt::format("|cffC93400 {} |rhas been fishing for {} and has caught {} fishes so far.", fisher->GetName(), _timeString, fishCaught);
+                std::string _fisherString = fmt::format("|cffC93400 |Hplayer:{}|h[{}]|h |rhas been {} for {} and has caught {} {} so far.", gatherer->GetName(), gatherer->GetName(), verb, _timeString, gatheredItems, itemName);
                 handler->PSendSysMessage(_fisherString.c_str());
             }
         }
     }
 }
 
-void WorldCache::UpdateFishingList()
+void WorldCache::ListCurrentFishers(ChatHandler* handler)
 {
-    _isFisherListLocked = true;
+    ListCurrentGatherers(handler, _playersCurrentlyFishing, "fishers", "fishes", "fishing");
+}
 
+void WorldCache::AddOrUpdateHerbalismList(uint64 guid)
+{
+    AddOrUpdateGatheringList(guid, _playersCurrentlyHerbing);
+}
+
+void WorldCache::ListCurrentHerbalists(ChatHandler* handler)
+{
+    ListCurrentGatherers(handler, _playersCurrentlyHerbing, "herbalists", "herbs", "herbing");
+}
+
+void WorldCache::AddOrUpdateMiningList(uint64 guid)
+{
+    AddOrUpdateGatheringList(guid, _playersCurrentlyMining);
+}
+
+void WorldCache::ListCurrentMiners(ChatHandler* handler)
+{
+    ListCurrentGatherers(handler, _playersCurrentlyMining, "miners", "ores", "mining");
+}
+
+void WorldCache::UpdateGatherers()
+{
+    _isGathererListLocked = true;
+
+    UpdateGatherersList(_playersCurrentlyFishing);
+    UpdateGatherersList(_playersCurrentlyHerbing);
+
+    _isGathererListLocked = false;
+}
+
+void WorldCache::UpdateGatherersList(PlayersGatheringStore& store)
+{
     std::vector<uint64> eraser;
-    FishingTimeStamp now = FishingClock::now();
-    for (auto const& i : _playersCurrentlyFishing)
+    GatheringTimeStamp now = GatheringClock::now();
+    for (auto const& i : store)
     {
-        uint32 timeCount = std::chrono::duration_cast<Milliseconds>(now - i.second.lastCaughtFishTime).count();
+        uint32 timeCount = std::chrono::duration_cast<Milliseconds>(now - i.second.lastGatheredItemTime).count();
         if (timeCount >= 2 * MINUTE * IN_MILLISECONDS)
             eraser.push_back(i.first);
     }
 
-    for (auto && guid : eraser)
-        _playersCurrentlyFishing.erase(guid);
-
-    _isFisherListLocked = false;
+    for (auto&& guid : eraser)
+        store.erase(guid);
 }
 
 void WorldCache::LoadBossRecordAllowedMaps()

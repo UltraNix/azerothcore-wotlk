@@ -23,12 +23,14 @@ public:
     {
         static std::vector<ChatCommand> listCommandTable =
         {
-            { "creature",       SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListCreatureCommand, "" },
-            { "item",           SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListItemCommand,     "" },
-            { "object",         SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListObjectCommand,   "" },
-            { "auras",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleListAurasCommand,    "" },
-            { "premium",        SEC_MODERATOR,      CMD_CLI,    &HandleListPremiumCommand,  ""},
-            { "fishers",        SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListFishersCommand,  "" }
+            { "creature",       SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListCreatureCommand,   "" },
+            { "item",           SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListItemCommand,       "" },
+            { "object",         SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListObjectCommand,     "" },
+            { "auras",          SEC_ADMINISTRATOR,  CMD_INGAME, &HandleListAurasCommand,      "" },
+            { "premium",        SEC_MODERATOR,      CMD_CLI,    &HandleListPremiumCommand,    ""},
+            { "fishers",        SEC_ADMINISTRATOR,  CMD_CLI,    &HandleListFishersCommand,    "" },
+            { "herbalists",     SEC_MODERATOR,      CMD_CLI,    &HandleListHerbalistsCommand, ""},
+            { "miners",         SEC_MODERATOR,      CMD_CLI,    &HandleListMinersCommand,     ""},
         };
         static std::vector<ChatCommand> commandTable =
         {
@@ -536,6 +538,18 @@ public:
     static bool HandleListFishersCommand(ChatHandler* handler, char const* /*args*/)
     {
         sWorldCache.ListCurrentFishers(handler);
+        return true;
+    }
+
+    static bool HandleListHerbalistsCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        sWorldCache.ListCurrentHerbalists(handler);
+        return true;
+    }
+
+    static bool HandleListMinersCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        sWorldCache.ListCurrentMiners(handler);
         return true;
     }
 };

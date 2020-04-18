@@ -12,21 +12,21 @@ struct HellforgeStatValues
 };
 using HellforgeStats = std::unordered_map<uint32, HellforgeStatValues>;
 
-constexpr uint32 MIN_FISH_CAUGHT_REQUIRED{ 20 };
-using FishingTimeStamp = std::chrono::time_point<std::chrono::steady_clock>;
-using FishingClock = std::chrono::steady_clock;
-struct FishingPlayerEntry
+constexpr uint32 MIN_ITEMS_GATHERED_REQUIRED{ 20 };
+using GatheringTimeStamp = std::chrono::time_point<std::chrono::steady_clock>;
+using GatheringClock = std::chrono::steady_clock;
+struct GatheringPlayerEntry
 {
 private:
-    uint32 fishCaughtSoFar = 0;
+    uint32 gatheredItemsSoFar = 0;
 public:
-    FishingTimeStamp firstCaughtFishTime;
-    FishingTimeStamp lastCaughtFishTime;
-    void IncrementFishCaught() { ++fishCaughtSoFar; }
-    uint32 GetTotalFishCaught() const { return fishCaughtSoFar; }
-    void SetFishCaughtSoFar(uint32 val) { fishCaughtSoFar = val; }
+    GatheringTimeStamp firstGatheredItemTime;
+    GatheringTimeStamp lastGatheredItemTime;
+    void IncrementGatheredItems() { ++gatheredItemsSoFar; }
+    uint32 GetTotalGatheredItems() const { return gatheredItemsSoFar; }
+    void SetGatheredItemsSoFar(uint32 val) { gatheredItemsSoFar = val; }
 };
-using PlayersFishingStore = std::unordered_map<uint64, FishingPlayerEntry>;
+using PlayersGatheringStore = std::unordered_map<uint64, GatheringPlayerEntry>;
 
 class WorldCache
 {
@@ -54,9 +54,15 @@ public:
     bool IsLuaCheckDisabled(uint32 checkId) const;
     void ReloadDisabledLuaChecks();
 
-    /** Currently fishing listing **/
-    void AddOrUpdateFishingList(uint64 guid);
-    void ListCurrentFishers(ChatHandler* /*hadnler*/);
+    /** Currently gathering listing **/
+    void AddOrUpdateFishingList(uint64 /*guid*/);
+    void ListCurrentFishers(ChatHandler* /*handler*/);
+
+    void AddOrUpdateHerbalismList(uint64 /*guid*/);
+    void ListCurrentHerbalists(ChatHandler* /*handler*/);
+
+    void AddOrUpdateMiningList(uint64 /*guid*/);
+    void ListCurrentMiners(ChatHandler* /*handler*/);
 
     /** Generic **/
     void OnWorldUpdate(uint32 diff);
@@ -71,8 +77,16 @@ private:
     //! Misc
     std::vector<uint32> _duelResetSpellIDs;
     HellforgeStats _hellforgeStatValues;
-    PlayersFishingStore _playersCurrentlyFishing;
-    void UpdateFishingList();
+
+    //! Gatherers list stuff
+    PlayersGatheringStore _playersCurrentlyFishing;
+    PlayersGatheringStore _playersCurrentlyHerbing;
+    PlayersGatheringStore _playersCurrentlyMining;
+
+    void AddOrUpdateGatheringList(uint64 /*guid*/, PlayersGatheringStore& /*store*/);
+    void ListCurrentGatherers(ChatHandler* /*handler*/, PlayersGatheringStore& /*store*/, std::string /*gathererName*/, std::string /*itemName*/, std::string /*verb*/);
+    void UpdateGatherers();
+    void UpdateGatherersList(PlayersGatheringStore& /*store*/);
 
     //! Warden lua
     WardenLuaStore _wardenLuaChecksPool;
@@ -83,7 +97,7 @@ private:
     std::set<uint32>    _bossRecordsAllowedMaps;
 
     TaskScheduler scheduler;
-    bool _isFisherListLocked;
+    bool _isGathererListLocked;
     bool _isWintergraspWarActive;
 
 protected:
