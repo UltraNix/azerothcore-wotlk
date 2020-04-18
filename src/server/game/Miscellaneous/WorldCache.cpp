@@ -329,6 +329,7 @@ void WorldCache::UpdateGatherers()
 
     UpdateGatherersList(_playersCurrentlyFishing);
     UpdateGatherersList(_playersCurrentlyHerbing);
+    UpdateGatherersList(_playersCurrentlyMining);
 
     _isGathererListLocked = false;
 }
