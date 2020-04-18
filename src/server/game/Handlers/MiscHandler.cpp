@@ -1788,7 +1788,12 @@ void WorldSession::HandleHearthAndResurrect(WorldPacket& /*recv_data*/)
     {
         if (_player->IsInCombat())
         {
-            ChatHandler(_player->GetSession()).PSendSysMessage("You can't leave Wintergrasp when in combat!");
+            ChatHandler(_player->GetSession()).PSendSysMessage("You can't leave Wintergrasp right now (currently in combat)");
+            return;
+        }
+        else if (_player->WasRecentlyInCombat(5000))
+        {
+            ChatHandler(_player->GetSession()).PSendSysMessage("You can't leave Wintergrasp right now (recently in Combat)");
             return;
         }
 

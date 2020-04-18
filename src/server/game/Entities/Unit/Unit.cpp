@@ -12951,6 +12951,7 @@ void Unit::ClearInCombat()
     }
     else if (Player* player = ToPlayer())
     {
+        player->UpdateLastCombatTimer();
         player->UpdatePotionCooldown();
         if (player->getClass() == CLASS_DEATH_KNIGHT)
             for (uint8 i = 0; i < MAX_RUNES; ++i)

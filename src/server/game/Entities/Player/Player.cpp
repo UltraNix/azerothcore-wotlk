@@ -950,6 +950,8 @@ Player::Player(WorldSession* session): Unit(true), m_mover(this)
     m_playerActionCounterSaved = false;
 
     m_canSendArenaAnnounce = true;
+
+    _lastCombatTimer = 0;
 }
 
 Player::~Player()

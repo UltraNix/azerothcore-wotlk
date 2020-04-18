@@ -1845,6 +1845,9 @@ class Player : public Unit, public GridObject<Player>
         void DropModCharge(SpellModifier* mod, Spell* spell);
         void SetSpellModTakingSpell(Spell* spell, bool apply);
 
+        void UpdateLastCombatTimer() { _lastCombatTimer = World::GetGameTimeMS(); }
+        bool WasRecentlyInCombat(uint32 timeTreshold) const { return GetMSTimeDiffToNow(_lastCombatTimer) <= timeTreshold; }
+
         static uint32 const infinityCooldownDelay = 0x9A7EC800;  // used for set "infinity cooldowns" for spells and check, MONTH*IN_MILLISECONDS
         static uint32 const infinityCooldownDelayCheck = 0x4D3F6400; //MONTH*IN_MILLISECONDS/2;
         virtual bool HasSpellCooldown(uint32 spell_id) const
@@ -3115,6 +3118,8 @@ class Player : public Unit, public GridObject<Player>
 
         TaskScheduler m_taskScheduler;
         bool m_canSendArenaAnnounce;
+
+        uint32 _lastCombatTimer;
 };
 
 void AddItemsSetItem(Player*player, ItemRef const& item);
