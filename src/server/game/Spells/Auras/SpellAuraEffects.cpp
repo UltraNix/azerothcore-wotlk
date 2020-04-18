@@ -1865,6 +1865,19 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
 
     modelid = target->GetModelForForm(form);
 
+    if (target->getClass() == CLASS_ROGUE && form == FORM_STEALTH && !apply)
+    {
+        uint32 miscValue = 0;
+        for (auto&& aura : target->GetAuraEffectsByType(SPELL_AURA_MOD_SHAPESHIFT))
+        {
+            miscValue = aura->GetMiscValue();
+            break;
+        }
+
+        if (miscValue)
+            target->SetShapeshiftForm(ShapeshiftForm(miscValue));
+    }
+
     if (apply)
     {
         // remove polymorph before changing display id to keep new display id
