@@ -25,7 +25,7 @@
 
 TempSummon::TempSummon(SummonPropertiesEntry const* properties, ObjectGuid owner, bool isWorldObject) :
     Creature(isWorldObject), m_Properties(properties), m_type(TEMPSUMMON_MANUAL_DESPAWN),
-    m_timer(0), m_lifetime(0)
+    m_timer(0), m_lifetime(0), _visibleBySummonerOnly(false)
 {
     if (owner)
     {
@@ -216,7 +216,7 @@ void TempSummon::InitStats(uint32 duration)
         if (IsTrigger() && m_spells[0])
         {
             SetFaction(owner->GetFaction());
-            SetLevel(owner->getLevel());
+            SetLevel(owner->GetLevel());
             if (owner->GetTypeId() == TYPEID_PLAYER)
                 m_ControlledByPlayer = true;
         }
@@ -320,6 +320,15 @@ void TempSummon::RemoveFromWorld()
     Creature::RemoveFromWorld();
 }
 
+std::string TempSummon::GetDebugInfo() const
+{
+    std::stringstream sstr;
+    sstr << Creature::GetDebugInfo() << "\n"
+        << std::boolalpha
+        << "TempSummonType : " << std::to_string(GetSummonType()) << " Summoner: " << GetSummonerGUID().ToString();
+    return sstr.str();
+}
+
 Minion::Minion(SummonPropertiesEntry const* properties, ObjectGuid owner, bool isWorldObject) : TempSummon(properties, owner, isWorldObject)
     , m_owner(owner)
 {
@@ -378,6 +387,15 @@ void Minion::setDeathState(DeathState s, bool despawn)
                     }
 }
 
+std::string Minion::GetDebugInfo() const
+{
+    std::stringstream sstr;
+    sstr << TempSummon::GetDebugInfo() << "\n"
+        << std::boolalpha
+        << "Owner: " << (GetOwner() ? GetOwner()->GetGUID().ToString() : "");
+    return sstr.str();
+}
+
 Guardian::Guardian(SummonPropertiesEntry const* properties, ObjectGuid owner, bool isWorldObject) : Minion(properties, owner, isWorldObject)
 {
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
@@ -394,7 +412,7 @@ void Guardian::InitStats(uint32 duration)
 
     if (Unit* m_owner = GetOwner())
     {
-        InitStatsForLevel(m_owner->getLevel());
+        InitStatsForLevel(m_owner->GetLevel());
 
         if (m_owner->GetTypeId() == TYPEID_PLAYER && HasUnitTypeMask(UNIT_MASK_CONTROLABLE_GUARDIAN))
             m_charmInfo->InitCharmCreateSpells();
@@ -416,6 +434,13 @@ void Guardian::InitSummon()
     }
 }
 
+std::string Guardian::GetDebugInfo() const
+{
+    std::stringstream sstr;
+    sstr << Minion::GetDebugInfo();
+    return sstr.str();
+}
+
 Puppet::Puppet(SummonPropertiesEntry const* properties, ObjectGuid owner) : Minion(properties, owner, false), m_owner(owner) //maybe true?
 {
     ASSERT(owner.IsPlayer());
@@ -425,7 +450,7 @@ Puppet::Puppet(SummonPropertiesEntry const* properties, ObjectGuid owner) : Mini
 void Puppet::InitStats(uint32 duration)
 {
     Minion::InitStats(duration);
-    SetLevel(GetOwner()->getLevel());
+    SetLevel(GetOwner()->GetLevel());
     SetReactState(REACT_PASSIVE);
 }
 

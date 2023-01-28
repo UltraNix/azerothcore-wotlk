@@ -1073,7 +1073,11 @@ public:
         //player->CastSpell(player, SPELL_SUMMON_RIZZLE, false);
 
         if (Creature* creature = player->SummonCreature(NPC_RIZZLE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSUMMON_DEAD_DESPAWN, 0))
-            creature->CastSpell(player, SPELL_BLACKJACK, false);
+        {
+            // no need casting spell blackjack, it's casted by script npc_rizzle_sprysprocket.
+            //creature->CastSpell(player, SPELL_BLACKJACK, false);
+            creature->AI()->AttackStart(player);
+        }
 
         return false;
     }
@@ -1876,6 +1880,12 @@ public:
                     tm local_tm = Acore::Time::TimeBreakdown();
                     uint8 _rings = (local_tm.tm_hour) % 12;
                     _rings = (_rings == 0) ? 12 : _rings; // 00:00 and 12:00
+
+                    // Dwarf hourly horn should only play a single time, each time the next hour begins.
+                    if (_soundId == BELLTOLLDWARFGNOME)
+                    {
+                        _rings = 1;
+                    }
 
                     // Schedule ring event
                     for (auto i = 0; i < _rings; ++i)

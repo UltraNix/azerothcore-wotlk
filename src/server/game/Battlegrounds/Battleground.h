@@ -99,6 +99,7 @@ enum BattlegroundMarks
 {
     SPELL_WS_MARK_LOSER             = 24950,
     SPELL_WS_MARK_WINNER            = 24951,
+    SPELL_WS_MARK_TIE               = 66126,
     SPELL_AB_MARK_LOSER             = 24952,
     SPELL_AB_MARK_WINNER            = 24953,
     SPELL_AV_MARK_LOSER             = 24954,
@@ -453,7 +454,7 @@ public:
 
     void EndBattleground(PvPTeamId winnerTeamId);
 
-    // deprecated, need delete
+    /// @deprecated need delete
     virtual void EndBattleground(TeamId winnerTeamId)
     {
         EndBattleground(GetPvPTeamId(winnerTeamId));

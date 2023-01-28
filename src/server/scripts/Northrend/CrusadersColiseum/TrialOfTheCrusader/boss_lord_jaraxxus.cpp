@@ -118,11 +118,11 @@ public:
             if( pInstance )
                 pInstance->SetData(TYPE_JARAXXUS, NOT_STARTED);
 
-            // checked for safety
-            while( Creature* c = me->FindNearestCreature(NPC_INFERNAL_VOLCANO, 500.0f, true) )
-                c->DespawnOrUnsummon();
-            while( Creature* c = me->FindNearestCreature(NPC_NETHER_PORTAL, 500.0f, true) )
-                c->DespawnOrUnsummon();
+            std::list<Creature*> creatures;
+            me->GetCreatureListWithEntryInGrid(creatures, NPC_INFERNAL_VOLCANO, 500.f);
+            me->GetCreatureListWithEntryInGrid(creatures, NPC_NETHER_PORTAL, 500.f);
+            for (Creature* creature : creatures)
+                creature->DespawnOrUnsummon();
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -211,12 +211,12 @@ public:
                     events.RepeatEvent(urand(10000, 15000));
                     break;
                 case EVENT_SPELL_FEL_LIGHTNING:
-                    if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true) )
+                    if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true, true) )
                         me->CastSpell(target, SPELL_FEL_LIGHTNING, false);
                     events.RepeatEvent(urand(10000, 15000));
                     break;
                 case EVENT_SPELL_INCINERATE_FLESH:
-                    if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true) )
+                    if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true, true) )
                     {
                         Talk(EMOTE_INCINERATE, target);
                         Talk(SAY_INCINERATE);
@@ -230,7 +230,7 @@ public:
                     events.RepeatEvent(urand(25000, 45000));
                     break;
                 case EVENT_SPELL_LEGION_FLAME:
-                    if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true) )
+                    if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true, true) )
                     {
                         Talk(EMOTE_LEGION_FLAME, target);
                         me->CastSpell(target, SPELL_LEGION_FLAME, false);
@@ -336,7 +336,7 @@ public:
                 case EVENT_SPELL_FEL_STEAK:
                     if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 44.0f, true) )
                     {
-                        DoResetThreat();
+                        DoResetThreatList();
                         me->AddThreat(target, 50000.0f);
                         me->CastSpell(target, SPELL_FEL_STEAK_MORPH, true);
                         me->CastSpell(target, SPELL_FEL_STEAK, true);
